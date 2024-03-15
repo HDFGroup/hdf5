@@ -125,6 +125,8 @@ H5_DLL herr_t H5TS_cond_destroy(H5TS_cond_t *cond);
 /* Thread-specific keys */
 H5_DLL herr_t H5TS_key_create(H5TS_key_t *key, H5TS_key_destructor_func_t dtor);
 H5_DLL herr_t H5TS_key_set_value(H5TS_key_t key, const void *value);
+H5_DLL herr_t H5TS_key_get_value(H5TS_key_t key, void **value);
+H5_DLL herr_t H5TS_key_delete(H5TS_key_t key);
 
 #else /* H5_HAVE_THREADSAFE */
 

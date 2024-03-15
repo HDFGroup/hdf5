@@ -517,7 +517,7 @@ H5TS__rw_lock_destroy(H5TS_rw_lock_t *rw_lock)
     if (H5_UNLIKELY(H5TS_cond_destroy(&rw_lock->writers_cv)))
         ret_value = FAIL;
     if (rw_lock->is_key_registered)
-        if (H5_UNLIKELY(H5TS__key_delete(rw_lock->rec_read_lock_count_key)))
+        if (H5_UNLIKELY(H5TS_key_delete(rw_lock->rec_read_lock_count_key) < 0))
             ret_value = FAIL;
 
 done:
@@ -560,18 +560,19 @@ H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock)
 
     /* If there is no thread-specific data for this thread, set it up */
     if (!rw_lock->is_key_registered) {
-        if (H5_UNLIKELY(pthread_key_create(&rw_lock->rec_read_lock_count_key, H5TS__key_destructor)))
+        if (H5_UNLIKELY(H5TS_key_create(&rw_lock->rec_read_lock_count_key, H5TS__key_destructor)))
             HGOTO_DONE(FAIL);
         rw_lock->is_key_registered = true;
         count                      = NULL;
     }
     else
-        count = (H5TS_rec_entry_count_t *)H5TS__get_thread_local_value(rw_lock->rec_read_lock_count_key);
+	if (H5_UNLIKELY(H5TS_key_get_value(rw_lock->rec_read_lock_count_key, &count) < 0))
+	    HGOTO_DONE(FAIL);
     if (NULL == count) {
         if (H5_UNLIKELY(NULL == (count = calloc(1, sizeof(*count)))))
             HGOTO_DONE(FAIL);
 
-        if (H5_UNLIKELY(H5TS__set_thread_local_value(rw_lock->rec_read_lock_count_key, (void *)count)))
+        if (H5_UNLIKELY(H5TS_key_set_value(rw_lock->rec_read_lock_count_key, (void *)count)))
             HGOTO_DONE(FAIL);
     }
 
@@ -651,7 +652,8 @@ H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock)
             assert(rw_lock->is_key_registered);
 
             /* Fail if read lock count for this thread is > 0 */
-            count = (H5TS_rec_entry_count_t *)H5TS__get_thread_local_value(rw_lock->rec_read_lock_count_key);
+	    if (H5_UNLIKELY(H5TS_key_get_value(rw_lock->rec_read_lock_count_key, &count) < 0))
+		HGOTO_DONE(FAIL);
             if (H5_UNLIKELY(NULL != count && count->rec_lock_count > 0))
                 HGOTO_DONE(FAIL);
         }
@@ -743,7 +745,8 @@ H5TS__rw_unlock(H5TS_rw_lock_t *rw_lock)
         assert(rw_lock->is_key_registered);
         assert(rw_lock->active_reader_threads > 0);
         assert(0 == rw_lock->rec_write_lock_count);
-        count = (H5TS_rec_entry_count_t *)H5TS__get_thread_local_value(rw_lock->rec_read_lock_count_key);
+	if (H5_UNLIKELY(H5TS_key_get_value(rw_lock->rec_read_lock_count_key, &count) < 0))
+	    HGOTO_DONE(FAIL);
         if (H5_UNLIKELY(NULL == count))
             HGOTO_DONE(FAIL);
         assert(count->rec_lock_count > 0);

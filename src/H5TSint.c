@@ -275,10 +275,10 @@ H5TS__tinfo_init(void)
 
     /* Initialize key for thread-specific API contexts */
 #ifdef H5_HAVE_WIN_THREADS
-    if (H5_UNLIKELY(TLS_OUT_OF_INDEXES == (H5TS_thrd_info_key_g = TlsAlloc())))
+    if (H5_UNLIKELY(H5TS_key_create(&H5TS_thrd_info_key_g, NULL) < 0))
         ret_value = FAIL;
 #else
-    if (H5_UNLIKELY(pthread_key_create(&H5TS_thrd_info_key_g, H5TS__tinfo_destroy)))
+    if (H5_UNLIKELY(H5TS_key_create(&H5TS_thrd_info_key_g, H5TS__tinfo_destroy) < 0))
         ret_value = FAIL;
 #endif
 
@@ -338,7 +338,7 @@ H5TS__tinfo_create(void)
     H5E__set_default_auto(&tinfo_node->info.err_stack); /* Error stack */
 
     /* Set a thread-local pointer to the thread's info record */
-    if (H5_UNLIKELY(H5TS__set_thread_local_value(H5TS_thrd_info_key_g, tinfo_node))) {
+    if (H5_UNLIKELY(H5TS_key_set_value(H5TS_thrd_info_key_g, tinfo_node))) {
         H5TS__tinfo_destroy(tinfo_node);
         HGOTO_DONE(NULL);
     }
@@ -377,7 +377,9 @@ H5TS_thread_id(void)
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Check if info for thread has been created */
-    if (NULL == (tinfo_node = H5TS__get_thread_local_value(H5TS_thrd_info_key_g)))
+    if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, &tinfo_node) < 0))
+        HGOTO_DONE(0);
+    if (NULL == tinfo_node)
         /* Create thread info for this thread */
         if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
             HGOTO_DONE(0);
@@ -409,7 +411,9 @@ H5TS_get_api_ctx_ptr(void)
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Check if info for thread has been created */
-    if (NULL == (tinfo_node = H5TS__get_thread_local_value(H5TS_thrd_info_key_g)))
+    if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, &tinfo_node) < 0))
+        HGOTO_DONE(NULL);
+    if (NULL == tinfo_node)
         /* Create thread info for this thread */
         if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
             HGOTO_DONE(NULL);
@@ -441,7 +445,9 @@ H5TS_get_err_stack(void)
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Check if info for thread has been created */
-    if (NULL == (tinfo_node = H5TS__get_thread_local_value(H5TS_thrd_info_key_g)))
+    if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, &tinfo_node) < 0))
+        HGOTO_DONE(NULL);
+    if (NULL == tinfo_node)
         /* Create thread info for this thread */
         if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
             HGOTO_DONE(NULL);
@@ -513,14 +519,8 @@ H5TS__tinfo_term(void)
     H5TS_mutex_destroy(&H5TS_tinfo_mtx_s);
 
     /* Release key for thread-specific API contexts */
-#ifdef H5_HAVE_WIN_THREADS
-    if (H5TS_thrd_info_key_g != TLS_OUT_OF_INDEXES)
-        if (H5_UNLIKELY(H5TS__key_delete(H5TS_thrd_info_key_g) == 0))
-            ret_value = FAIL;
-#else
-    if (H5_UNLIKELY(H5TS__key_delete(H5TS_thrd_info_key_g)))
+    if (H5_UNLIKELY(H5TS_key_delete(H5TS_thrd_info_key_g) < 0))
         ret_value = FAIL;
-#endif
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__tinfo_term() */

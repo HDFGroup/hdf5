@@ -39,9 +39,6 @@
 #define H5TS_SCOPE_PROCESS 0
 
 /* Portability function aliases */
-#define H5TS__get_thread_local_value(key)        TlsGetValue(key)
-#define H5TS__set_thread_local_value(key, value) TlsSetValue(key, value)
-#define H5TS__key_delete(key)                    TlsFree(key)
 #define H5TS__attr_init(attr)                    0
 #define H5TS__attr_setscope(attr, scope)         0
 #define H5TS__attr_destroy(attr)                 0
@@ -54,9 +51,6 @@
 #define H5TS_SCOPE_PROCESS                       PTHREAD_SCOPE_PROCESS
 
 /* Portability function aliases */
-#define H5TS__get_thread_local_value(key)        pthread_getspecific(key)
-#define H5TS__set_thread_local_value(key, value) pthread_setspecific(key, value)
-#define H5TS__key_delete(key)                    pthread_key_delete(key)
 #define H5TS__attr_init(attr)                    pthread_attr_init(attr)
 #define H5TS__attr_setscope(attr, scope)         pthread_attr_setscope(attr, scope)
 #define H5TS__attr_destroy(attr)                 pthread_attr_destroy(attr)

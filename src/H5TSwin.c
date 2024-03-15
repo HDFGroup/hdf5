@@ -104,17 +104,20 @@ H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS_win32_thread_enter(void){FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+H5TS_win32_thread_enter(void)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-                                  /* Currently a placeholder function.  TLS setup is performed
-                                   * elsewhere in the library.
-                                   *
-                                   * WARNING: Do NOT use C standard library functions here.
-                                   * CRT functions are not allowed in DllMain, which is where this code
-                                   * is used.
-                                   */
+    /* Currently a placeholder function.  TLS setup is performed
+     * elsewhere in the library.
+     *
+     * WARNING: Do NOT use C standard library functions here.
+     * CRT functions are not allowed in DllMain, which is where this code
+     * is used.
+     */
 
-                                  FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)} /* H5TS_win32_thread_enter() */
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+} /* H5TS_win32_thread_enter() */
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS_win32_thread_exit
@@ -125,8 +128,11 @@ H5TS_win32_thread_enter(void){FUNC_ENTER_NOAPI_NAMECHECK_ONLY
  *
  *--------------------------------------------------------------------------
  */
-herr_t H5TS_win32_thread_exit(void)
+herr_t
+H5TS_win32_thread_exit(void)
 {
+    herr_t ret_value = SUCCEED;
+
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Windows uses a different thread local storage mechanism which does
@@ -139,12 +145,16 @@ herr_t H5TS_win32_thread_exit(void)
 
     /* Clean up per-thread thread local storage */
     if (H5TS_thrd_info_key_g != TLS_OUT_OF_INDEXES) {
-        LPVOID lpvData = H5TS__get_thread_local_value(H5TS_thrd_info_key_g);
+        LPVOID lpvData;
+
+        if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, &lpvData) < 0))
+            HGOTO_DONE(FAIL);
         if (lpvData)
             H5TS__tinfo_destroy(lpvData);
     }
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_win32_thread_exit() */
 
 #endif /* H5_HAVE_WIN_THREADS */
