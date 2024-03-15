@@ -3237,6 +3237,43 @@ main(int argc, char **argv)
         SKIPPED();
 #endif
 
+    if (MAINPROCESS)
+        printf("\nRe-running tests with environment variables set to the empty string\n");
+
+    char* subfiling_subfile_prefix_saved = getenv("H5FD_SUBFILING_SUBFILE_PREFIX");
+    char* subfiling_ioc_selection_criteria_saved = getenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA");
+    char* subfiling_ioc_per_node_saved = getenv("H5FD_SUBFILING_IOC_PER_NODE");
+    char* subfiling_stripe_size_saved = getenv("H5FD_SUBFILING_STRIPE_SIZE");
+    char* subfiling_config_file_prefix_saved = getenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX");
+
+    HDsetenv("H5FD_SUBFILING_SUBFILE_PREFIX", "", 1);
+    HDsetenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA", "", 1);
+    HDsetenv("H5FD_SUBFILING_IOC_PER_NODE", "", 1);
+    HDsetenv("H5FD_SUBFILING_STRIPE_SIZE", "", 1);
+    HDsetenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX", "", 1);
+
+    for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
+        if (MPI_SUCCESS == (mpi_code_g = MPI_Barrier(comm_g))) {
+            (*tests[i])();
+        }
+        else {
+            if (MAINPROCESS)
+                MESG("MPI_Barrier failed");
+            nerrors++;
+        }
+    }
+
+    HDunsetenv("H5FD_SUBFILING_SUBFILE_PREFIX");
+    HDunsetenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA");
+    HDunsetenv("H5FD_SUBFILING_IOC_PER_NODE");
+    HDunsetenv("H5FD_SUBFILING_STRIPE_SIZE");
+    HDunsetenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX");
+    HDsetenv("H5FD_SUBFILING_SUBFILE_PREFIX", subfiling_subfile_prefix_saved, 1);
+    HDsetenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA", subfiling_ioc_selection_criteria_saved, 1);
+    HDsetenv("H5FD_SUBFILING_IOC_PER_NODE", subfiling_ioc_per_node_saved, 1);
+    HDsetenv("H5FD_SUBFILING_STRIPE_SIZE", subfiling_stripe_size_saved, 1);
+    HDsetenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX", subfiling_config_file_prefix_saved, 1);
+
     if (nerrors)
         goto exit;
 
