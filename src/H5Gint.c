@@ -30,6 +30,7 @@
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5FOprivate.h" /* File objects                             */
 #include "H5Gpkg.h"      /* Groups                                   */
 #include "H5Iprivate.h"  /* IDs                                      */

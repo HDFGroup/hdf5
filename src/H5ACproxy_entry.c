@@ -32,6 +32,7 @@
 #include "H5private.h"   /* Generic Functions                    */
 #include "H5ACpkg.h"     /* Metadata cache                       */
 #include "H5Eprivate.h"  /* Error handling                       */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5MFprivate.h" /* File memory management		*/
 
 /****************/

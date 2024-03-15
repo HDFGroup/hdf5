@@ -34,6 +34,7 @@
 #include "H5CXprivate.h" /* API Contexts                 */
 #include "H5Eprivate.h"  /* Error handling               */
 #include "H5Fpkg.h"      /* Files                        */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5MFprivate.h" /* File memory management       */
 #include "H5MMprivate.h" /* Memory management            */
 
