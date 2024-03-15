@@ -15795,7 +15795,7 @@ test_downsize_vlen_scalar_dataset(hid_t file)
         TEST_ERROR;
 
     /* Create the scalar dataset of this data type */
-    if ((scalar_did = H5Dcreate(file, VLEN_DS_NAME, vlen_compound_file_tid, scalar_sid, H5P_DEFAULT,
+    if ((scalar_did = H5Dcreate2(file, VLEN_DS_NAME, vlen_compound_file_tid, scalar_sid, H5P_DEFAULT,
                                 H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
