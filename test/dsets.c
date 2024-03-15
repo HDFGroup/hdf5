@@ -15796,7 +15796,7 @@ test_downsize_vlen_scalar_dataset(hid_t file)
 
     /* Create the scalar dataset of this data type */
     if ((scalar_did = H5Dcreate2(file, VLEN_DS_NAME, vlen_compound_file_tid, scalar_sid, H5P_DEFAULT,
-                                H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                                 H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Setup the variable-length data. Note that if the double "value" field is set to 0.0, the bug will NOT
