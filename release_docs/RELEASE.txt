@@ -281,6 +281,13 @@ Bug Fixes since HDF5-1.14.3 release
 
     Library
     -------
+    - Fixed error when overwriting certain nested variable length types
+
+      Previously, when using a datatype that included a variable length type
+      within a compound or array within another variable length type, and
+      overwriting data with a shorter (top level) variable length sequence, an
+      error could occur. This has been fixed.
+
     - Fixed asserts raised by large values of H5Pset_est_link_info() parameters
 
       If large values for est_num_entries and/or est_name_len were passed
@@ -679,6 +686,9 @@ Known Problems
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
     help@hdfgroup.org.
+
+    File space may not be released when overwriting or deleting certain nested
+    variable length or reference types.
 
 
 CMake vs. Autotools installations

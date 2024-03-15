@@ -3149,6 +3149,67 @@ done:
 } /* end H5T__conv_enum_numeric() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5T__conv_vlen_nested_free
+ *
+ * Purpose:     Recursively locates and frees any nested VLEN components of
+ *              complex data types (including COMPOUND).
+ *
+ * Return:      Non-negative on success/Negative on failure.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5T__conv_vlen_nested_free(uint8_t *buf, H5T_t *dt)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    switch (dt->shared->type) {
+        case H5T_VLEN:
+            /* Pointer buf refers to VLEN data; free it (always reset tmp) */
+            if ((*(dt->shared->u.vlen.cls->del))(dt->shared->u.vlen.file, buf) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't free nested vlen");
+            break;
+
+        case H5T_COMPOUND:
+            /* Pointer buf refers to COMPOUND data; recurse for each member. */
+            for (unsigned i = 0; i < dt->shared->u.compnd.nmembs; ++i)
+                if (H5T__conv_vlen_nested_free(buf + dt->shared->u.compnd.memb[i].offset,
+                                               dt->shared->u.compnd.memb[i].type) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't free compound member");
+            break;
+
+        case H5T_ARRAY:
+            /* Pointer buf refers to ARRAY data; recurse for each element. */
+            for (unsigned i = 0; i < dt->shared->u.array.nelem; ++i)
+                if (H5T__conv_vlen_nested_free(buf + i * dt->shared->parent->shared->size,
+                                               dt->shared->parent) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't free array data");
+            break;
+
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_STRING:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_REFERENCE:
+        case H5T_ENUM:
+            /* These types cannot contain vl data */
+            break;
+
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "invalid datatype class");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5T__conv_vlen_nested_free() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5T__conv_vlen
  *
  * Purpose:    Converts between VL datatypes in memory and on disk.
@@ -3506,8 +3567,8 @@ H5T__conv_vlen(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t 
 
                                 tmp = (uint8_t *)tmp_buf + seq_len * dst_base_size;
                                 for (u = seq_len; u < bg_seq_len; u++, tmp += dst_base_size) {
-                                    /* Delete sequence in destination location */
-                                    if ((*(dst->shared->u.vlen.cls->del))(dst->shared->u.vlen.file, tmp) < 0)
+                                    /* Recursively free destination data */
+                                    if (H5T__conv_vlen_nested_free(tmp, dst->shared->parent) < 0)
                                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL,
                                                     "unable to remove heap object");
                                 } /* end for */
