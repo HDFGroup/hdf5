@@ -20,11 +20,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Opkg.h"      /* Object Headers                       */
-#include "H5SMpkg.h"     /* Shared object header messages        */
+#include "H5private.h"  /* Generic Functions			*/
+#include "H5Eprivate.h" /* Error handling		  	*/
+#include "H5Opkg.h"     /* Object Headers                       */
+#include "H5SMpkg.h"    /* Shared object header messages        */
 
 /****************/
 /* Local Macros */

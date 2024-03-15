@@ -34,7 +34,6 @@
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5Fpkg.h"      /* File access				*/
 #include "H5FSpkg.h"     /* File free space                      */
-#include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5MFpkg.h"     /* File memory management		*/
 #include "H5VMprivate.h" /* Vectors and arrays 			*/
 

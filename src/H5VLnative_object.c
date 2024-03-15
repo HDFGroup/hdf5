@@ -31,7 +31,6 @@
 #include "H5Gprivate.h"  /* Groups                                   */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Opkg.h"      /* Object headers                           */
-#include "H5Pprivate.h"  /* Property lists                           */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */

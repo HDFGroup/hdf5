@@ -21,10 +21,8 @@
 #include "H5Dpkg.h"      /* Dataset functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5FLprivate.h" /* Free Lists                               */
-#include "H5MFprivate.h" /* File space management                    */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Opkg.h"      /* Object headers                           */
-#include "H5Pprivate.h"  /* Property lists                           */
 
 /* Local macros */
 

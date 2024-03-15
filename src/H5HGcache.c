@@ -32,7 +32,6 @@
 #include "H5Eprivate.h"  /* Error handling              */
 #include "H5Fprivate.h"  /* File access                 */
 #include "H5HGpkg.h"     /* Global heaps                */
-#include "H5MFprivate.h" /* File memory management      */
 #include "H5MMprivate.h" /* Memory management           */
 
 /****************/

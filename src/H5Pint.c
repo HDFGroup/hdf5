@@ -23,12 +23,8 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h" /* Generic Functions			*/
-#ifdef H5_HAVE_PARALLEL
-#include "H5ACprivate.h" /* Metadata cache                       */
-#endif                   /* H5_HAVE_PARALLEL */
+#include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fprivate.h"  /* File access				*/
 #include "H5FLprivate.h" /* Free lists                           */
 #include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5MMprivate.h" /* Memory management			*/

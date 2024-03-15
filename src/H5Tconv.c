@@ -30,7 +30,6 @@
 #include "H5FLprivate.h" /* Free Lists                           */
 #include "H5Iprivate.h"  /* IDs                      */
 #include "H5MMprivate.h" /* Memory management            */
-#include "H5Pprivate.h"  /* Property lists            */
 #include "H5Tpkg.h"      /* Datatypes                */
 
 /****************/

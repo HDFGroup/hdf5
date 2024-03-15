@@ -31,7 +31,6 @@
 #include "H5private.h"  /* Generic Functions                        */
 #include "H5Mprivate.h" /* Maps                                     */
 #include "H5Eprivate.h" /* Error handling                           */
-#include "H5Iprivate.h" /* IDs                                      */
 #include "H5Ppkg.h"     /* Property lists                           */
 
 /****************/

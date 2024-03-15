@@ -29,11 +29,9 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions			*/
-#include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Dpkg.h"      /* Dataset functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free Lists                           */
-#include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5VMprivate.h" /* Vector and array functions		*/
 #include "H5WBprivate.h" /* Wrapped Buffers                      */

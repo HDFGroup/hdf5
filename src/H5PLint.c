@@ -24,11 +24,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions            */
-#include "H5Eprivate.h"  /* Error handling               */
-#include "H5MMprivate.h" /* Memory management            */
-#include "H5PLpkg.h"     /* Plugin                       */
-#include "H5Zprivate.h"  /* Filter pipeline              */
+#include "H5private.h"  /* Generic Functions            */
+#include "H5Eprivate.h" /* Error handling               */
+#include "H5PLpkg.h"    /* Plugin                       */
+#include "H5Zprivate.h" /* Filter pipeline              */
 
 /****************/
 /* Local Macros */

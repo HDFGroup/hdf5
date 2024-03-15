@@ -14,15 +14,11 @@
 
 /* Packages needed by this file... */
 #include "H5private.h"   /* Generic Functions                        */
-#include "H5ACprivate.h" /* Metadata cache                           */
-#include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fpkg.h"      /* File access                              */
 #include "H5Gprivate.h"  /* Groups                                   */
-#include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Pprivate.h"  /* Property lists                           */
-#include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 /* PRIVATE PROTOTYPES */
 static void H5F__mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);
