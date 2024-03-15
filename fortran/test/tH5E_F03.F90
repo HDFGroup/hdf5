@@ -255,7 +255,7 @@ SUBROUTINE test_error_stack(total_error)
   CHARACTER(LEN=18) :: file
   CHARACTER(LEN=18) :: func
   INTEGER(C_INT)    :: line
-  TYPE(C_PTR) :: ptr1, ptr2, ptr3, ptr4
+  TYPE(C_PTR) :: ptr1
 
   INTEGER :: msg_type
   CHARACTER(LEN=9) :: maj_mesg = "MAJOR MSG"
@@ -417,10 +417,10 @@ SUBROUTINE test_error_stack(total_error)
   ENDIF
 
   stderr = "** Print error stack in customized way **"//C_NULL_CHAR
-  ptr4 = C_LOC(stderr(1:1))
+  ptr1 = C_LOC(stderr(1:1))
   func_ptr = C_FUNLOC(custom_print_cb)
 
-  CALL h5ewalk_f(estack_id, H5E_WALK_UPWARD_F, func_ptr, ptr4, error)
+  CALL h5ewalk_f(estack_id, H5E_WALK_UPWARD_F, func_ptr, ptr1, error)
   CALL check("h5ewalk_f", error, total_error)
 
   CALL h5eget_num_f(estack_id, count, error)
