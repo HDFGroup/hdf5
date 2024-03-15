@@ -2150,14 +2150,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O__are_mdc_flushes_disabled
  *
- * Purpose:     Private version of cork status getter.
+ * Purpose:     Private version of cork status getter
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O__are_mdc_flushes_disabled(const H5O_loc_t *oloc, hbool_t *are_disabled)
+H5O__are_mdc_flushes_disabled(const H5O_loc_t *oloc, bool *are_disabled)
 {
     herr_t ret_value = SUCCEED;
 
