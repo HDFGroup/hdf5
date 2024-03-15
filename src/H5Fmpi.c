@@ -284,7 +284,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__get_mpi_atomicity(const H5F_t *file, hbool_t *flag)
+H5F__get_mpi_atomicity(const H5F_t *file, bool *flag)
 {
     herr_t ret_value = SUCCEED;
 
