@@ -27,6 +27,7 @@
 
 /* Other private headers needed by this file */
 #include "H5FLprivate.h" /* Free Lists                           */
+#include "H5VMprivate.h" /* Vectors and arrays 			*/
 
 /**************************/
 /* Package Private Macros */

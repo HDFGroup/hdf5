@@ -37,7 +37,6 @@
 #include "H5Eprivate.h"  /* Error Handling                           */
 #include "H5Fpkg.h"      /* Files                                    */
 #include "H5FLprivate.h" /* Free Lists                               */
-#include "H5MMprivate.h" /* Memory management                        */
 
 /****************/
 /* Local Macros */

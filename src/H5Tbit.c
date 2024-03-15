@@ -19,7 +19,6 @@
 
 #include "H5private.h"   /*generic functions			  */
 #include "H5Eprivate.h"  /*error handling			  */
-#include "H5MMprivate.h" /* Memory management			*/
 #include "H5Tpkg.h"      /*data-type functions			  */
 #include "H5WBprivate.h" /* Wrapped Buffers                      */
 

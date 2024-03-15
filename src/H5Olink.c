@@ -19,14 +19,12 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5G_FRIEND     /*suppress error about including H5Gpkg   */
 #define H5L_FRIEND     /*suppress error about including H5Lpkg	  */
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free lists                           */
-#include "H5Gpkg.h"      /* Groups		  		*/
 #include "H5Iprivate.h"  /* IDs                                  */
 #include "H5Lpkg.h"      /* Links                                */
 #include "H5MMprivate.h" /* Memory management			*/

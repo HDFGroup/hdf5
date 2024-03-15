@@ -34,8 +34,6 @@
 #include "H5HFpkg.h"     /* Fractal heaps			*/
 #include "H5MFprivate.h" /* File memory management		*/
 #include "H5MMprivate.h" /* Memory management			*/
-#include "H5VMprivate.h" /* Vectors and arrays 			*/
-#include "H5WBprivate.h" /* Wrapped Buffers                      */
 
 /****************/
 /* Local Macros */

@@ -27,7 +27,6 @@
 #include "H5ACprivate.h" /* Metadata cache			*/
 #include "H5Eprivate.h"  /* Error handling		        */
 #include "H5HGpkg.h"     /* Global heaps				*/
-#include "H5Iprivate.h"  /* ID Functions		                */
 
 /****************/
 /* Local Macros */

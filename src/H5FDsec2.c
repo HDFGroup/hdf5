@@ -28,7 +28,6 @@
 #include "H5FDsec2.h"    /* Sec2 file driver         */
 #include "H5FLprivate.h" /* Free Lists               */
 #include "H5Iprivate.h"  /* IDs                      */
-#include "H5MMprivate.h" /* Memory management        */
 #include "H5Pprivate.h"  /* Property lists           */
 
 /* The driver identification number, initialized at runtime */
