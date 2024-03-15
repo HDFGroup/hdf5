@@ -506,7 +506,7 @@ H5TS__rw_lock_destroy(H5TS_rw_lock_t *rw_lock)
     if (H5_UNLIKELY(NULL == rw_lock))
         HGOTO_DONE(FAIL);
 
-    /* Call the appropriate pthread destroy routines.  We are committed
+    /* Call the appropriate destroy routines.  We are committed
      * to the destroy at this point, so call them all, even if one fails
      * along the way.
      */
@@ -538,9 +538,9 @@ herr_t
 H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock)
 {
     H5TS_rec_entry_count_t *count;
-    H5TS_thread_t           my_thread_id = H5TS_thread_self();
-    bool                    have_mutex   = false;
-    herr_t                  ret_value    = SUCCEED;
+    H5TS_thread_t           my_thread  = H5TS_thread_self();
+    bool                    have_mutex = false;
+    herr_t                  ret_value  = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
@@ -555,7 +555,7 @@ H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock)
     /* Fail if attempting to acquire a read lock on a thread that holds
      * a write lock
      */
-    if (H5_UNLIKELY(WRITE == rw_lock->lock_type && pthread_equal(my_thread_id, rw_lock->write_thread)))
+    if (H5_UNLIKELY(WRITE == rw_lock->lock_type && H5TS_thread_equal(my_thread, rw_lock->write_thread)))
         HGOTO_DONE(FAIL);
 
     /* If there is no thread-specific data for this thread, set it up */
@@ -566,7 +566,7 @@ H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock)
         count                      = NULL;
     }
     else
-	if (H5_UNLIKELY(H5TS_key_get_value(rw_lock->rec_read_lock_count_key, &count) < 0))
+	if (H5_UNLIKELY(H5TS_key_get_value(rw_lock->rec_read_lock_count_key, (void **)&count) < 0))
 	    HGOTO_DONE(FAIL);
     if (NULL == count) {
         if (H5_UNLIKELY(NULL == (count = calloc(1, sizeof(*count)))))
@@ -626,9 +626,9 @@ done:
 herr_t
 H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock)
 {
-    H5TS_thread_t my_thread_id = H5TS_thread_self();
-    bool          have_mutex   = false;
-    herr_t        ret_value    = SUCCEED;
+    H5TS_thread_t my_thread  = H5TS_thread_self();
+    bool          have_mutex = false;
+    herr_t        ret_value  = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -641,7 +641,7 @@ H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock)
     have_mutex = true;
 
     /* Check for initial write lock request on this thread */
-    if (WRITE != rw_lock->lock_type || !pthread_equal(my_thread_id, rw_lock->write_thread)) {
+    if (WRITE != rw_lock->lock_type || !H5TS_thread_equal(my_thread, rw_lock->write_thread)) {
         /* Fail if attempting to acquire a write lock on a thread that holds
          * a read lock
          */
@@ -652,7 +652,7 @@ H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock)
             assert(rw_lock->is_key_registered);
 
             /* Fail if read lock count for this thread is > 0 */
-	    if (H5_UNLIKELY(H5TS_key_get_value(rw_lock->rec_read_lock_count_key, &count) < 0))
+	    if (H5_UNLIKELY(H5TS_key_get_value(rw_lock->rec_read_lock_count_key, (void **)&count) < 0))
 		HGOTO_DONE(FAIL);
             if (H5_UNLIKELY(NULL != count && count->rec_lock_count > 0))
                 HGOTO_DONE(FAIL);
@@ -677,7 +677,7 @@ H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock)
 
         /* Set lock type & owner thread */
         rw_lock->lock_type    = WRITE;
-        rw_lock->write_thread = my_thread_id;
+        rw_lock->write_thread = my_thread;
     }
 
     /* Increment write lock count for this thread */
@@ -745,7 +745,7 @@ H5TS__rw_unlock(H5TS_rw_lock_t *rw_lock)
         assert(rw_lock->is_key_registered);
         assert(rw_lock->active_reader_threads > 0);
         assert(0 == rw_lock->rec_write_lock_count);
-	if (H5_UNLIKELY(H5TS_key_get_value(rw_lock->rec_read_lock_count_key, &count) < 0))
+	if (H5_UNLIKELY(H5TS_key_get_value(rw_lock->rec_read_lock_count_key, (void **)&count) < 0))
 	    HGOTO_DONE(FAIL);
         if (H5_UNLIKELY(NULL == count))
             HGOTO_DONE(FAIL);

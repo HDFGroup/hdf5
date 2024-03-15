@@ -377,7 +377,7 @@ H5TS_thread_id(void)
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Check if info for thread has been created */
-    if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, &tinfo_node) < 0))
+    if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, (void **)&tinfo_node) < 0))
         HGOTO_DONE(0);
     if (NULL == tinfo_node)
         /* Create thread info for this thread */
@@ -411,7 +411,7 @@ H5TS_get_api_ctx_ptr(void)
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Check if info for thread has been created */
-    if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, &tinfo_node) < 0))
+    if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, (void **)&tinfo_node) < 0))
         HGOTO_DONE(NULL);
     if (NULL == tinfo_node)
         /* Create thread info for this thread */
@@ -445,7 +445,7 @@ H5TS_get_err_stack(void)
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Check if info for thread has been created */
-    if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, &tinfo_node) < 0))
+    if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, (void **)&tinfo_node) < 0))
         HGOTO_DONE(NULL);
     if (NULL == tinfo_node)
         /* Create thread info for this thread */

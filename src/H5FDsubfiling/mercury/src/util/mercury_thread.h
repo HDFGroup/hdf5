@@ -20,14 +20,12 @@ typedef HANDLE                 hg_thread_t;
 typedef LPTHREAD_START_ROUTINE hg_thread_func_t;
 typedef DWORD                  hg_thread_ret_t;
 #define HG_THREAD_RETURN_TYPE hg_thread_ret_t WINAPI
-typedef DWORD hg_thread_key_t;
 #else
 #include <pthread.h>
 typedef pthread_t hg_thread_t;
 typedef void *(*hg_thread_func_t)(void *);
 typedef void         *hg_thread_ret_t;
 #define HG_THREAD_RETURN_TYPE hg_thread_ret_t
-typedef pthread_key_t hg_thread_key_t;
 #endif
 
 #ifdef __cplusplus
@@ -69,115 +67,6 @@ void hg_thread_exit(hg_thread_ret_t ret);
  * \return Non-negative on success or negative on failure
  */
 int hg_thread_join(hg_thread_t thread);
-
-/**
- * Terminate the thread.
- *
- * \param thread [IN]           thread object
- *
- * \return Non-negative on success or negative on failure
- */
-int hg_thread_cancel(hg_thread_t thread);
-
-/**
- * Obtain handle of the calling thread.
- *
- * \return
- */
-static inline hg_thread_t hg_thread_self(void);
-
-/**
- * Compare thread IDs.
- *
- * \return Non-zero if equal, zero if not equal
- */
-static inline int hg_thread_equal(hg_thread_t t1, hg_thread_t t2);
-
-/**
- * Create a thread-specific data key visible to all threads in the process.
- *
- * \param key [OUT]             pointer to thread key object
- *
- * \return Non-negative on success or negative on failure
- */
-int hg_thread_key_create(hg_thread_key_t *key);
-
-/**
- * Delete a thread-specific data key previously returned by
- * hg_thread_key_create().
- *
- * \param key [IN]              thread key object
- *
- * \return Non-negative on success or negative on failure
- */
-int hg_thread_key_delete(hg_thread_key_t key);
-
-/**
- * Get value from specified key.
- *
- * \param key [IN]              thread key object
- *
- * \return Pointer to data associated to the key
- */
-static inline void *hg_thread_getspecific(hg_thread_key_t key);
-
-/**
- * Set value to specified key.
- *
- * \param key [IN]              thread key object
- * \param value [IN]            pointer to data that will be associated
- *
- * \return Non-negative on success or negative on failure
- */
-static inline int hg_thread_setspecific(hg_thread_key_t key, const void *value);
-
-/*---------------------------------------------------------------------------*/
-static inline hg_thread_t
-hg_thread_self(void)
-{
-#ifdef _WIN32
-    return GetCurrentThread();
-#else
-    return pthread_self();
-#endif
-}
-
-/*---------------------------------------------------------------------------*/
-static inline int
-hg_thread_equal(hg_thread_t t1, hg_thread_t t2)
-{
-#ifdef _WIN32
-    return GetThreadId(t1) == GetThreadId(t2);
-#else
-    return pthread_equal(t1, t2);
-#endif
-}
-
-/*---------------------------------------------------------------------------*/
-static inline void *
-hg_thread_getspecific(hg_thread_key_t key)
-{
-#ifdef _WIN32
-    return TlsGetValue(key);
-#else
-    return pthread_getspecific(key);
-#endif
-}
-
-/*---------------------------------------------------------------------------*/
-static inline int
-hg_thread_setspecific(hg_thread_key_t key, const void *value)
-{
-#ifdef _WIN32
-    if (!TlsSetValue(key, (LPVOID)value))
-        return HG_UTIL_FAIL;
-#else
-    if (pthread_setspecific(key, value))
-        return HG_UTIL_FAIL;
-#endif
-
-    return HG_UTIL_SUCCESS;
-}
 
 #ifdef __cplusplus
 }

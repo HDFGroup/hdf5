@@ -320,11 +320,6 @@ H5_DLL void H5TS__pthread_first_thread_init(void);
 
 #endif /* H5_HAVE_WIN_THREADS */
 
-/* Thread-specific key routines */
-#ifdef H5_HAVE_WIN_THREADS
-H5_DLL herr_t H5TS__win_kwd_init(void);
-#endif
-
 /* Recursive R/W lock related function declarations */
 H5_DLL herr_t H5TS__rw_lock_init(H5TS_rw_lock_t *rw_lock);
 H5_DLL herr_t H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock);
