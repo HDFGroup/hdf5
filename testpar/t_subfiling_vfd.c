@@ -3282,7 +3282,7 @@ main(int argc, char **argv)
     if (subfiling_stripe_size_saved) {
         HDsetenv("H5FD_SUBFILING_STRIPE_SIZE", subfiling_stripe_size_saved, 1);
     }
-    if(subfiling_config_file_prefix_saved) {
+    if (subfiling_config_file_prefix_saved) {
         HDsetenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX", subfiling_config_file_prefix_saved, 1);
     }
 
