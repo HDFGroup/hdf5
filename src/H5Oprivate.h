@@ -36,10 +36,13 @@ typedef struct H5O_fill_t H5O_fill_t;
 /* Private headers needed by this file */
 #include "H5private.h"   /* Generic Functions                   */
 #include "H5ACprivate.h" /* Metadata cache                      */
+#include "H5Bprivate.h"
+#include "H5B2private.h"
 #include "H5Fprivate.h"  /* File access				*/
 #include "H5HGprivate.h" /* Global Heaps                        */
 #include "H5SLprivate.h" /* Skip lists				*/
 #include "H5Tprivate.h"  /* Datatype functions			*/
+#include "H5UCprivate.h"
 #include "H5VLprivate.h" /* Virtual Object Layer                */
 #include "H5Zprivate.h"  /* I/O pipeline filters		*/
 

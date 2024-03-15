@@ -20,10 +20,8 @@
 #include "H5Dpublic.h"
 
 /* Private headers needed by this file */
-#include "H5FDprivate.h" /* File drivers                */
-#include "H5Oprivate.h"  /* Object headers              */
-#include "H5Sprivate.h"  /* Dataspaces                  */
-#include "H5Zprivate.h"  /* Data filters                */
+#include "H5Oprivate.h" /* Object headers              */
+#include "H5Sprivate.h" /* Dataspaces                  */
 
 /**************************/
 /* Library Private Macros */

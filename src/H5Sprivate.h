@@ -25,8 +25,6 @@
 /* Private headers needed by this file */
 #include "H5private.h"  /* Generic Functions			*/
 #include "H5Fprivate.h" /* Files				*/
-#include "H5Gprivate.h" /* Groups				*/
-#include "H5Pprivate.h" /* Property lists			*/
 #include "H5Tprivate.h" /* Datatypes				*/
 
 /* Forward references of package typedefs */

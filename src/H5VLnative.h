@@ -18,7 +18,8 @@
 #define H5VLnative_H
 
 /* Public headers needed by this file */
-#include "H5Apublic.h"  /* Attributes                           */
+#include "H5Apublic.h" /* Attributes                           */
+#include "H5Gpublic.h"
 #include "H5VLpublic.h" /* Virtual Object Layer                 */
 
 /*****************/

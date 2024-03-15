@@ -22,9 +22,8 @@
 #define H5HLprivate_H
 
 /* Private headers needed by this file. */
-#include "H5private.h"   /* Generic Functions                */
-#include "H5ACprivate.h" /* Metadata cache                   */
-#include "H5Fprivate.h"  /* File access                      */
+#include "H5private.h"  /* Generic Functions                */
+#include "H5Fprivate.h" /* File access                      */
 
 #define H5HL_ALIGN(X) ((((unsigned)X) + 7) & (unsigned)(~0x07)) /* align on 8-byte boundary   */
 

@@ -29,7 +29,6 @@
 #include "H5private.h"   /* Generic Functions            */
 #include "H5Cprivate.h"  /* Cache                */
 #include "H5Fprivate.h"  /* File access                */
-#include "H5Pprivate.h"  /* Property lists            */
 #include "H5SLprivate.h" /* Skip lists                 */
 
 /* Global metadata tag values */

@@ -23,10 +23,10 @@
 #include "H5Dpublic.h"  /* Datasets                             */
 #include "H5ESpublic.h" /* Event Stack                          */
 #include "H5Fpublic.h"  /* Files                                */
+#include "H5Gpublic.h"
 #include "H5Ipublic.h"  /* IDs                                  */
 #include "H5Lpublic.h"  /* Links                                */
 #include "H5Opublic.h"  /* Objects                              */
-#include "H5Rpublic.h"  /* References                           */
 #include "H5VLpublic.h" /* Virtual Object Layer                 */
 
 /*****************/

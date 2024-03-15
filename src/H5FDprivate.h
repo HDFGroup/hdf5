@@ -18,7 +18,6 @@
 #include "H5FDdevelop.h"
 
 /* Private headers needed by this file */
-#include "H5Pprivate.h" /* Property lists            */
 #include "H5Sprivate.h" /* Dataspaces                */
 
 /*

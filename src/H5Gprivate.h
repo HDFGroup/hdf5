@@ -27,7 +27,6 @@
 
 /* Private headers needed by this file */
 #include "H5private.h"   /* Generic Functions            */
-#include "H5Bprivate.h"  /* B-trees                */
 #include "H5Fprivate.h"  /* File access                */
 #include "H5RSprivate.h" /* Reference-counted strings            */
 

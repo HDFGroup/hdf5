@@ -22,7 +22,6 @@
 /* Private headers needed by this file */
 #include "H5Gprivate.h" /* Groups				*/
 #include "H5Oprivate.h" /* Object headers                       */
-#include "H5Sprivate.h" /* Dataspace                            */
 #include "H5Tprivate.h" /* Datatypes                            */
 
 /**************************/

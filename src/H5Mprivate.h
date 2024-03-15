@@ -19,11 +19,6 @@
 /* Include package's public header */
 #include "H5Mpublic.h"
 
-/* Private headers needed by this file */
-#include "H5Oprivate.h" /* Object headers              */
-#include "H5Sprivate.h" /* Dataspaces                  */
-#include "H5Zprivate.h" /* Data filters                */
-
 /**************************/
 /* Library Private Macros */
 /**************************/
