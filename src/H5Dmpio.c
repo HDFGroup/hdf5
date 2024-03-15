@@ -34,6 +34,7 @@
 #include "H5Oprivate.h"  /* Object headers    */
 #include "H5Pprivate.h"  /* Property lists    */
 #include "H5Sprivate.h"  /* Dataspaces        */
+#include "H5SLprivate.h" /* Skip Lists                               */
 #include "H5VMprivate.h" /* Vector            */
 
 #ifdef H5_HAVE_PARALLEL

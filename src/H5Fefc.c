@@ -32,6 +32,7 @@
 #include "H5Iprivate.h"  /* IDs                                  */
 #include "H5MMprivate.h" /* Memory management                    */
 #include "H5Pprivate.h"  /* Property lists                       */
+#include "H5SLprivate.h" /* Skip Lists                               */
 
 /* Special values for the "tag" field below */
 #define H5F_EFC_TAG_DEFAULT   (-1)
