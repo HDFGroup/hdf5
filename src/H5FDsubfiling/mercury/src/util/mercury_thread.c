@@ -63,4 +63,3 @@ hg_thread_join(hg_thread_t thread)
 
     return HG_UTIL_SUCCESS;
 }
-

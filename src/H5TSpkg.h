@@ -39,22 +39,22 @@
 #define H5TS_SCOPE_PROCESS 0
 
 /* Portability function aliases */
-#define H5TS__attr_init(attr)                    0
-#define H5TS__attr_setscope(attr, scope)         0
-#define H5TS__attr_destroy(attr)                 0
-#define H5TS__wait_for_thread(thread)            WaitForSingleObject(thread, INFINITE)
+#define H5TS__attr_init(attr)            0
+#define H5TS__attr_setscope(attr, scope) 0
+#define H5TS__attr_destroy(attr)         0
+#define H5TS__wait_for_thread(thread)    WaitForSingleObject(thread, INFINITE)
 
 #else /* H5_HAVE_WIN_THREADS */
 
 /* Scope Definitions (Pthreads only) */
-#define H5TS_SCOPE_SYSTEM                        PTHREAD_SCOPE_SYSTEM
-#define H5TS_SCOPE_PROCESS                       PTHREAD_SCOPE_PROCESS
+#define H5TS_SCOPE_SYSTEM                PTHREAD_SCOPE_SYSTEM
+#define H5TS_SCOPE_PROCESS               PTHREAD_SCOPE_PROCESS
 
 /* Portability function aliases */
-#define H5TS__attr_init(attr)                    pthread_attr_init(attr)
-#define H5TS__attr_setscope(attr, scope)         pthread_attr_setscope(attr, scope)
-#define H5TS__attr_destroy(attr)                 pthread_attr_destroy(attr)
-#define H5TS__wait_for_thread(thread)            pthread_join(thread, NULL)
+#define H5TS__attr_init(attr)            pthread_attr_init(attr)
+#define H5TS__attr_setscope(attr, scope) pthread_attr_setscope(attr, scope)
+#define H5TS__attr_destroy(attr)         pthread_attr_destroy(attr)
+#define H5TS__wait_for_thread(thread)    pthread_join(thread, NULL)
 
 #endif /* H5_HAVE_WIN_THREADS */
 

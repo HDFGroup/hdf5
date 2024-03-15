@@ -85,7 +85,6 @@ static herr_t H5TS__set_kwd(H5TS_key_t key, const void *value);
 /* Local Variables */
 /*******************/
 
-
 #ifdef H5_HAVE_WIN_THREADS
 /*-------------------------------------------------------------------------
  * Function: H5TS_key_create
