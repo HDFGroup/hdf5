@@ -1104,7 +1104,7 @@ Using individual command presets (where <compiler-type> is  GNUC or MSVC or Clan
     cpack --preset ci-StdShar-<compiler-type>
 
 
-Using the workflow preset to configure, build, test and package the standard configuration is:
+Using the workflow preset to configure, build, test and package the standard configuration:
     change directory to the hdf5 source folder
     execute "cmake --workflow --preset ci-StdShar-<compiler-type> --fresh"
           where <compiler-type> is  GNUC or MSVC or Clang
