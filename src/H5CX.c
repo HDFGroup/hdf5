@@ -300,9 +300,9 @@ typedef struct H5CX_t {
     bool no_selection_io_cause_valid; /* Whether reason for not performing selection I/O is valid */
 
     uint32_t
-            actual_selection_io_mode; /* Actual selection I/O mode used (H5D_ACTUAL_SELECTION_IO_MODE_NAME) */
-    hbool_t actual_selection_io_mode_set;   /* Whether actual selection I/O mode is set */
-    hbool_t actual_selection_io_mode_valid; /* Whether actual selection I/O mode is valid */
+         actual_selection_io_mode; /* Actual selection I/O mode used (H5D_ACTUAL_SELECTION_IO_MODE_NAME) */
+    bool actual_selection_io_mode_set;   /* Whether actual selection I/O mode is set */
+    bool actual_selection_io_mode_valid; /* Whether actual selection I/O mode is valid */
 
     /* Cached LCPL properties */
     H5T_cset_t encoding;                 /* Link name character encoding */
