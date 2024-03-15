@@ -832,11 +832,15 @@ H5_DLL herr_t H5Smodify_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_i
  *          \p space_id. The offset array must be the same number of
  *          elements as the number of dimensions for the dataspace. If the
  *          \p offset array is set to NULL, the offset for the dataspace is
- *          reset to 0.
+ *          reset to 0 in all dimensions.
  *
  *          This function allows the same shaped selection to be moved to
  *          different locations within a dataspace without requiring it to
  *          be redefined.
+ *
+ * \note    Until 1.14.4, setting the offset parameter to NULL was considered
+ *          an error, despite the reference manual stating that it had the
+ *          behavior described above.
  *
  * \version 1.4.0 Fortran subroutine was introduced.
  * \since 1.0.0
