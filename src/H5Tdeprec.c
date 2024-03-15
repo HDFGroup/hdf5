@@ -35,7 +35,6 @@
 #include "H5ACprivate.h" /* Metadata cache                       */
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FOprivate.h" /* File objects				*/
 #include "H5Iprivate.h"  /* IDs					*/
 #include "H5Ppublic.h"   /* Property Lists			*/
 #include "H5Tpkg.h"      /* Datatypes				*/

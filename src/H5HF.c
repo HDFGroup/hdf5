@@ -35,7 +35,6 @@
 /***********/
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FOprivate.h" /* File objects                         */
 #include "H5HFpkg.h"     /* Fractal heaps			*/
 #include "H5MFprivate.h" /* File memory management		*/
 #include "H5MMprivate.h" /* Memory management			*/
