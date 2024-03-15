@@ -277,34 +277,34 @@ CONTAINS
 !!
 !! \param err_stack Error stack identifier. If the identifier is H5E_DEFAULT_F, the error
 !!                  record will be pushed to the current stack.
+!! \param file   Name of the file in which the error was detected
+!! \param func   Name of the function in which the error was detected
+!! \param line   Line number in the file where the error was detected
 !! \param cls_id Error class identifier
 !! \param maj_id Major error identifier
 !! \param min_id Minor error identifier
-!! \param msg Error description string
+!! \param msg    Error description string
 !! \param hdferr \fortran_error
-!! \param file Name of the file in which the error was detected
-!! \param func Name of the function in which the error was detected
-!! \param line Line number in the file where the error was detected
-!! \param arg1 C style format control strings
-!! \param arg2 C style format control strings
-!! \param arg3 C style format control strings
-!! \param arg4 C style format control strings
-!! \param arg5 C style format control strings
-!! \param arg6 C style format control strings
-!! \param arg7 C style format control strings
-!! \param arg8 C style format control strings
-!! \param arg9 C style format control strings
-!! \param arg10 C style format control strings
-!! \param arg11 C style format control strings
-!! \param arg12 C style format control strings
-!! \param arg13 C style format control strings
-!! \param arg14 C style format control strings
-!! \param arg15 C style format control strings
-!! \param arg16 C style format control strings
-!! \param arg17 C style format control strings
-!! \param arg18 C style format control strings
-!! \param arg19 C style format control strings
-!! \param arg20 C style format control strings
+!! \param arg1   C style format control strings
+!! \param arg2   C style format control strings
+!! \param arg3   C style format control strings
+!! \param arg4   C style format control strings
+!! \param arg5   C style format control strings
+!! \param arg6   C style format control strings
+!! \param arg7   C style format control strings
+!! \param arg8   C style format control strings
+!! \param arg9   C style format control strings
+!! \param arg10  C style format control strings
+!! \param arg11  C style format control strings
+!! \param arg12  C style format control strings
+!! \param arg13  C style format control strings
+!! \param arg14  C style format control strings
+!! \param arg15  C style format control strings
+!! \param arg16  C style format control strings
+!! \param arg17  C style format control strings
+!! \param arg18  C style format control strings
+!! \param arg19  C style format control strings
+!! \param arg20  C style format control strings
 !!
 !! \note \p arg[1-20] expects C-style format strings, similar to the
 !!       system and C functions printf() and fprintf().
@@ -375,11 +375,10 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: msg
          INTEGER :: msg_len
 
-         TYPE(C_PTR), VALUE :: arg1, arg2, arg3, arg4, &
-         arg5, arg6, arg7, arg8, &
-         arg9, arg10, arg11, arg12, &
-         arg13, arg14, arg15, arg16, &
-         arg17, arg18, arg19, arg20
+         TYPE(C_PTR), VALUE :: arg1, arg2, arg3, arg4, arg5, &
+              arg6, arg7, arg8, arg9, arg10, &
+              arg11, arg12, arg13, arg14, arg15, &
+              arg16, arg17, arg18, arg19, arg20
 
        END FUNCTION h5epush_c
     END INTERFACE
@@ -413,6 +412,7 @@ CONTAINS
          arg16_def, arg17_def, arg18_def, arg19_def, arg20_def)
 
   END SUBROUTINE h5epush_f
+
 !>
 !! \ingroup FH5E
 !!
