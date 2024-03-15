@@ -27,13 +27,12 @@
 /* Headers */
 /***********/
 
-#include "H5private.h"   /* Generic Functions                    */
-#include "H5CXprivate.h" /* API Contexts                         */
-#include "H5Eprivate.h"  /* Error handling                       */
-#include "H5Iprivate.h"  /* IDs                                  */
-#include "H5Pprivate.h"  /* Property lists                       */
-#include "H5Tprivate.h"  /* Datatypes                            */
-#include "H5VLpkg.h"     /* Virtual Object Layer                 */
+#include "H5private.h"  /* Generic Functions                    */
+#include "H5Eprivate.h" /* Error handling                       */
+#include "H5Iprivate.h" /* IDs                                  */
+#include "H5Pprivate.h" /* Property lists                       */
+#include "H5Tprivate.h" /* Datatypes                            */
+#include "H5VLpkg.h"    /* Virtual Object Layer                 */
 
 /* VOL connectors */
 #include "H5VLnative.h" /* Native VOL connector                 */

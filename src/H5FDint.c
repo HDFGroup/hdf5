@@ -376,7 +376,7 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
     size_t     size      = 0;
     H5FD_mem_t type      = H5FD_MEM_DEFAULT;
     hid_t      dxpl_id   = H5I_INVALID_HID; /* DXPL for operation */
-    hbool_t    is_raw    = FALSE;           /* Does this include raw data */
+    bool       is_raw    = false;           /* Does this include raw data */
     herr_t     ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -461,7 +461,7 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
 
                     /* Check for raw data operation */
                     if (type == H5FD_MEM_DRAW)
-                        is_raw = TRUE;
+                        is_raw = true;
                 }
             }
 
@@ -618,7 +618,7 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
     H5FD_mem_t type = H5FD_MEM_DEFAULT;
     hid_t      dxpl_id;                 /* DXPL for operation */
     haddr_t    eoa       = HADDR_UNDEF; /* EOA for file */
-    hbool_t    is_raw    = FALSE;       /* Does this include raw data */
+    bool       is_raw    = false;       /* Does this include raw data */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)

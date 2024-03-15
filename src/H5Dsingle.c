@@ -30,9 +30,7 @@
 #include "H5private.h"   /* Generic Functions                    */
 #include "H5Dpkg.h"      /* Datasets                             */
 #include "H5Eprivate.h"  /* Error handling                       */
-#include "H5FLprivate.h" /* Free Lists                           */
 #include "H5MFprivate.h" /* File space management                */
-#include "H5VMprivate.h" /* Vector functions                     */
 
 /****************/
 /* Local Macros */

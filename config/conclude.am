@@ -294,10 +294,12 @@ if MIRROR_VFD_CONDITIONAL
   # VFD_LIST += mirror
 endif
 if ROS3_VFD_CONDITIONAL
-  VFD_LIST += ros3
+  # This would require a custom test suite
+  # VFD_LIST += ros3
 endif
 if HDFS_VFD_CONDITIONAL
-  VFD_LIST += hdfs
+  # This would require a custom test suite
+  # VFD_LIST += hdfs
 endif
 if SUBFILING_VFD_CONDITIONAL
   # Several VFD tests fail with Subfiling since it

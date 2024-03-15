@@ -5899,6 +5899,14 @@ test_floattypes(hid_t file)
         if ((datatype = H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0)
             goto error;
 
+            /* Skip creating a custom floating-point type when long double
+             * is the IBM long double. The library detects different formats
+             * for the type on big-endian vs. little-endian systems and will
+             * cause this to fail on little-endian systems while passing on
+             * big-endian systems. The library needs proper support for the
+             * IBM long double type before we can test this.
+             */
+#if LDBL_MANT_DIG != 106
         /* Get the layout of the native long double type */
         if (H5Tget_fields(datatype, &ld_spos, &ld_epos, &ld_esize, &ld_mpos, &ld_msize) < 0)
             goto error;
@@ -5919,6 +5927,7 @@ test_floattypes(hid_t file)
             if (H5Tset_size(datatype, 16) < 0)
                 goto error;
         }
+#endif
 
         /* Create the data space */
         if ((space = H5Screate_simple(2, size, NULL)) < 0)

@@ -32,7 +32,6 @@
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5ESprivate.h" /* Event Sets                               */
-#include "H5Fprivate.h"  /* File access                              */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Lprivate.h"  /* Links                                    */
 #include "H5Opkg.h"      /* Object headers                           */
@@ -2150,14 +2149,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O__are_mdc_flushes_disabled
  *
- * Purpose:     Private version of cork status getter.
+ * Purpose:     Private version of cork status getter
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O__are_mdc_flushes_disabled(const H5O_loc_t *oloc, hbool_t *are_disabled)
+H5O__are_mdc_flushes_disabled(const H5O_loc_t *oloc, bool *are_disabled)
 {
     herr_t ret_value = SUCCEED;
 

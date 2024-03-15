@@ -188,6 +188,7 @@ SUBROUTINE test_error(total_error)
   TYPE(C_FUNPTR) :: func
   CHARACTER(LEN=180) :: chr180
   INTEGER :: idx
+  INTEGER(HID_T) :: fapl
 
   LOGICAL :: status
 
@@ -209,8 +210,14 @@ SUBROUTINE test_error(total_error)
   CALL H5Eset_auto_f(1, error, H5E_DEFAULT_F, func, f_ptr)
   CALL check("H5Eset_auto_f", error, total_error)
 
-  CALL h5fopen_f("DOESNOTEXIST", H5F_ACC_RDONLY_F, file, error)
+  ! If a fapl is not created, then the test will fail when using
+  ! check-passthrough-vol because the callback function is called twice, gh #4137.
+  CALL h5pcreate_f(H5P_DATASET_ACCESS_F, fapl, error)
+  CALL check("h5pcreate_f", error, total_error)
+  CALL h5fopen_f("DOESNOTEXIST", H5F_ACC_RDONLY_F, file, error, fapl)
   CALL VERIFY("h5fopen_f", error, -1, total_error)
+  CALL h5pclose_f(fapl,error)
+  CALL check("h5pclose_f", error, total_error)
 
   CLOSE(iunit)
 
@@ -247,7 +254,7 @@ SUBROUTINE test_error_stack(total_error)
   INTEGER(HID_T) :: cls_id, major, minor, estack_id, estack_id1, estack_id2
   CHARACTER(LEN=18), TARGET :: file
   CHARACTER(LEN=18), TARGET :: func
-  INTEGER          , TARGET :: line
+  INTEGER(C_INT)   , TARGET :: line
   TYPE(C_PTR) :: ptr1, ptr2, ptr3, ptr4
 
   INTEGER :: msg_type
@@ -288,9 +295,9 @@ SUBROUTINE test_error_stack(total_error)
   CALL check("h5ecreate_stack_f", error, total_error)
 
   ! push a custom error message onto the stack
-  CALL H5Epush_f(estack_id, cls_id, major, minor, "%s ERROR TEXT %s"//C_NEW_LINE, error, &
+  CALL H5Epush_f(estack_id, cls_id, major, minor, "%s ERROR TEXT %s %s", error, &
        ptr1, ptr2, ptr3, &
-       arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m" )
+       arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m", arg3=ACHAR(10) )
   CALL check("H5Epush_f", error, total_error)
 
   CALL h5eget_num_f(estack_id, count, error)
@@ -374,6 +381,12 @@ SUBROUTINE test_error_stack(total_error)
   IF(.NOT.status)THEN
      CALL check("h5eprint_f", -1, total_error)
   ELSE
+!    The contents of the file should be:
+!       Custom error class-DIAG: Error detected in H5E_F03 (0.1) thread 0:
+!         #000: FILE line 99 in FUNC():  ERROR TEXT
+!
+!           major: MAJOR MSG
+!           minor: MIN MSG
      OPEN(UNIT=12, FILE="H5Etest.txt", status='old')
 
      READ(12,'(A)') chr180
@@ -461,7 +474,7 @@ SUBROUTINE test_error_stack(total_error)
   CALL check("h5eget_num_f", error, total_error)
   CALL VERIFY("h5eget_num_f", count, 1_SIZE_T, total_error)
 
-  CALL h5epop_f(H5E_DEFAULT_F, 1_size_t, total_error)
+  CALL h5epop_f(H5E_DEFAULT_F, 1_size_t, error)
   CALL check("h5epop_f", error, total_error)
 
   CALL h5eget_num_f(H5E_DEFAULT_F, count, error)
