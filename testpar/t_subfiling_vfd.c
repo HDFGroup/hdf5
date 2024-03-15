@@ -3240,11 +3240,11 @@ main(int argc, char **argv)
     if (MAINPROCESS)
         printf("\nRe-running tests with environment variables set to the empty string\n");
 
-    char* subfiling_subfile_prefix_saved = getenv("H5FD_SUBFILING_SUBFILE_PREFIX");
-    char* subfiling_ioc_selection_criteria_saved = getenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA");
-    char* subfiling_ioc_per_node_saved = getenv("H5FD_SUBFILING_IOC_PER_NODE");
-    char* subfiling_stripe_size_saved = getenv("H5FD_SUBFILING_STRIPE_SIZE");
-    char* subfiling_config_file_prefix_saved = getenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX");
+    char *subfiling_subfile_prefix_saved         = getenv("H5FD_SUBFILING_SUBFILE_PREFIX");
+    char *subfiling_ioc_selection_criteria_saved = getenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA");
+    char *subfiling_ioc_per_node_saved           = getenv("H5FD_SUBFILING_IOC_PER_NODE");
+    char *subfiling_stripe_size_saved            = getenv("H5FD_SUBFILING_STRIPE_SIZE");
+    char *subfiling_config_file_prefix_saved     = getenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX");
 
     HDsetenv("H5FD_SUBFILING_SUBFILE_PREFIX", "", 1);
     HDsetenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA", "", 1);
