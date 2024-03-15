@@ -15770,7 +15770,7 @@ test_downsize_vlen_scalar_dataset(hid_t file)
     if (H5Tset_size(string_tid, H5T_VARIABLE) < 0)
         TEST_ERROR;
 
-    if ((string_array_tid = H5Tarray_create(string_tid, 2, array_dims)) < 0)
+    if ((string_array_tid = H5Tarray_create2(string_tid, 2, array_dims)) < 0)
         TEST_ERROR;
 
     if ((compound_file_tid = H5Tcreate(H5T_COMPOUND, sizeof(vlen_ds_compound_file_t))) < 0)
