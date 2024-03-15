@@ -20,7 +20,6 @@
 /****************/
 
 #include "H5Tmodule.h" /* This source code file is part of the H5T module */
-#define H5F_FRIEND     /*suppress error about including H5Fpkg   */
 
 /***********/
 /* Headers */
@@ -28,7 +27,6 @@
 #include "H5private.h"   /* Generic Functions    */
 #include "H5CXprivate.h" /* API Contexts         */
 #include "H5Eprivate.h"  /* Error handling       */
-#include "H5Fpkg.h"      /* File                 */
 #include "H5Iprivate.h"  /* IDs                  */
 #include "H5MMprivate.h" /* Memory management    */
 #include "H5Tpkg.h"      /* Datatypes            */
