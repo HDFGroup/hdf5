@@ -6187,11 +6187,11 @@ main(int argc, char **argv)
 #ifdef H5_HAVE_SUBFILING_VFD
     int   required                               = MPI_THREAD_MULTIPLE;
     int   provided                               = 0;
-    char *subfiling_subfile_prefix_saved         = getenv("H5FD_SUBFILING_SUBFILE_PREFIX");
-    char *subfiling_ioc_selection_criteria_saved = getenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA");
-    char *subfiling_ioc_per_node_saved           = getenv("H5FD_SUBFILING_IOC_PER_NODE");
-    char *subfiling_stripe_size_saved            = getenv("H5FD_SUBFILING_STRIPE_SIZE");
-    char *subfiling_config_file_prefix_saved     = getenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX");
+    char *subfiling_subfile_prefix_saved;
+    char *subfiling_ioc_selection_criteria_saved;
+    char *subfiling_ioc_per_node_saved;
+    char *subfiling_stripe_size_saved;
+    char *subfiling_config_file_prefix_saved;
 #endif
     int mpi_size;
     int mpi_rank = 0;
@@ -6255,8 +6255,16 @@ main(int argc, char **argv)
 
     test_vector_io(mpi_rank, mpi_size);
 
+#ifdef H5_HAVE_SUBFILING_VFD
+
     if (mpi_rank == 0)
         printf("\n --- TESTING SUBFILING VFD: environment variables set to empty --- \n");
+
+    subfiling_subfile_prefix_saved         = getenv("H5FD_SUBFILING_SUBFILE_PREFIX");
+    subfiling_ioc_selection_criteria_saved = getenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA");
+    subfiling_ioc_per_node_saved           = getenv("H5FD_SUBFILING_IOC_PER_NODE");
+    subfiling_stripe_size_saved            = getenv("H5FD_SUBFILING_STRIPE_SIZE");
+    subfiling_config_file_prefix_saved     = getenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX");
 
     HDsetenv("H5FD_SUBFILING_SUBFILE_PREFIX", "", 1);
     HDsetenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA", "", 1);
@@ -6306,6 +6314,8 @@ main(int argc, char **argv)
     if (subfiling_config_file_prefix_saved) {
         HDsetenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX", subfiling_config_file_prefix_saved, 1);
     }
+
+#endif
 
 finish:
     /* make sure all processes are finished before final report, cleanup
