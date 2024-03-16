@@ -397,7 +397,7 @@ endif ()
 #
 CHECK_SYMBOL_EXISTS (alarm             "" ${HDF_PREFIX}_HAVE_ALARM)
 CHECK_SYMBOL_EXISTS (fcntl             "" ${HDF_PREFIX}_HAVE_FCNTL)
-CHECK_SYMBOL_EXISTS (flock             "" ${HDF_PREFIX}_HAVE_FLOCK)
+CHECK_SYMBOL_EXISTS (flock   "sys/file.h" ${HDF_PREFIX}_HAVE_FLOCK)
 CHECK_SYMBOL_EXISTS (fork              "" ${HDF_PREFIX}_HAVE_FORK)
 
 CHECK_SYMBOL_EXISTS (gethostname       "" ${HDF_PREFIX}_HAVE_GETHOSTNAME)
