@@ -24,7 +24,6 @@
 #include "H5ACprivate.h" /* Metadata cache			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5Fprivate.h"  /* File access                          */
-#include "H5FLprivate.h" /* Free Lists                           */
 #include "H5SMpkg.h"     /* Shared object header messages        */
 
 /****************/

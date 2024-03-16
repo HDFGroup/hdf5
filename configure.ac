@@ -194,12 +194,25 @@ saved_user_LDFLAGS="$LDFLAGS"
 saved_user_CPPFLAGS="$CPPFLAGS"
 
 ## Strip out -Werror from CFLAGS since that can cause checks to fail when
-## compiling the test program fails due to warnings
-CFLAGS="`echo $CFLAGS | sed -e 's/-Werror//g'`"
-CXXFLAGS="`echo $CXXFLAGS | sed -e 's/-Werror//g'`"
-FCFLAGS="`echo $FCFLAGS | sed -e 's/-Werror//g'`"
-JAVACFLAGS="`echo $JAVACFLAGS | sed -e 's/-Werror//g'`"
-CPPFLAGS="`echo $CPPFLAGS | sed -e 's/-Werror//g'`"
+## compiling test programs fails due to warnings
+##
+##  Regex:
+##
+##      -Werror         Literal -Werror
+##      \(              Start optional capturing group
+##      =               Literal equals sign
+##      [^[:space:]-]   Non-space characters
+##      \+              1 or more of the above
+##      \)              End optional capturing group
+##      \?              0 or 1 capturing group matches
+##
+WERROR_SED= "sed -e 's/-Werror\(=[^[:space:]]\+\)\?//g'"
+
+CFLAGS="`echo $CFLAGS | $WERROR_SED`"
+CXXFLAGS="`echo $CXXFLAGS | $WERROR_SED`"
+FCFLAGS="`echo $FCFLAGS | $WERROR_SED`"
+JAVACFLAGS="`echo $JAVACFLAGS | $WERROR_SED`"
+CPPFLAGS="`echo $CPPFLAGS | $WERROR_SED`"
 
 ## Support F9X variable to define Fortran compiler if FC variable is
 ## not used.  This should be deprecated in the future.
@@ -1604,6 +1617,10 @@ case "$host_cpu-$host_vendor-$host_os" in
     AC_DEFINE([HAVE_WIN32_API], [1], [Define if on the Windows platform using the Win32 API])
     AC_DEFINE([HAVE_MINGW], [1], [Define if using MinGW])
     H5_CPPFLAGS="-D_GNU_SOURCE -D__USE_MINGW_ANSI_STDIO $H5_CPPFLAGS"
+    ;;
+  *cygwin*)
+    AC_DEFINE([HAVE_CYGWIN], [1], [Define if using Cygwin])
+    H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
 esac
 

@@ -12,13 +12,9 @@
 
 #include "H5private.h"   /* Generic Functions        */
 #include "H5Eprivate.h"  /* Error handling           */
-#include "H5Fprivate.h"  /* File access              */
 #include "H5FDprivate.h" /* File drivers             */
 #include "H5FDwindows.h" /* Windows file driver      */
 #include "H5FDsec2.h"    /* Windows file driver      */
-#include "H5FLprivate.h" /* Free Lists               */
-#include "H5Iprivate.h"  /* IDs                      */
-#include "H5MMprivate.h" /* Memory management        */
 #include "H5Pprivate.h"  /* Property lists           */
 
 #ifdef H5_HAVE_WINDOWS

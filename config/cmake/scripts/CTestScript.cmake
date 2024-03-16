@@ -117,37 +117,6 @@ else ()
         set (CTEST_GIT_options "pull")
       endif ()
       set (CTEST_UPDATE_COMMAND "${CTEST_GIT_COMMAND}")
-    else ()
-      ## --------------------------
-      ## use subversion to get source
-      #-----------------------------------------------------------------------------
-      ## cygwin does not handle the find_package() call
-      ## --------------------------
-      set (CTEST_UPDATE_COMMAND "SVNCommand")
-      if (NOT SITE_CYGWIN})
-        find_package (Subversion)
-        set (CTEST_SVN_COMMAND "${Subversion_SVN_EXECUTABLE}")
-        set (CTEST_UPDATE_COMMAND "${Subversion_SVN_EXECUTABLE}")
-      else ()
-        set (CTEST_SVN_COMMAND "/usr/bin/svn")
-        set (CTEST_UPDATE_COMMAND "/usr/bin/svn")
-      endif ()
-
-      if (NOT EXISTS "${CTEST_SOURCE_DIRECTORY}")
-        set (NEED_REPOSITORY_CHECKOUT 1)
-      endif ()
-
-      if (NOT CTEST_REPO_VERSION)
-        set (CTEST_REPO_VERSION "HEAD")
-      endif ()
-      if (${NEED_REPOSITORY_CHECKOUT})
-        set (CTEST_CHECKOUT_COMMAND
-            "\"${CTEST_SVN_COMMAND}\" co ${REPOSITORY_URL} \"${CTEST_SOURCE_DIRECTORY}\" -r ${CTEST_REPO_VERSION}")
-      else ()
-        if (CTEST_REPO_VERSION)
-          set (CTEST_SVN_UPDATE_OPTIONS "-r ${CTEST_REPO_VERSION}")
-        endif ()
-      endif ()
     endif ()
   endif ()
 endif ()

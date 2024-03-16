@@ -5899,6 +5899,14 @@ test_floattypes(hid_t file)
         if ((datatype = H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0)
             goto error;
 
+            /* Skip creating a custom floating-point type when long double
+             * is the IBM long double. The library detects different formats
+             * for the type on big-endian vs. little-endian systems and will
+             * cause this to fail on little-endian systems while passing on
+             * big-endian systems. The library needs proper support for the
+             * IBM long double type before we can test this.
+             */
+#if LDBL_MANT_DIG != 106
         /* Get the layout of the native long double type */
         if (H5Tget_fields(datatype, &ld_spos, &ld_epos, &ld_esize, &ld_mpos, &ld_msize) < 0)
             goto error;
@@ -5919,6 +5927,7 @@ test_floattypes(hid_t file)
             if (H5Tset_size(datatype, 16) < 0)
                 goto error;
         }
+#endif
 
         /* Create the data space */
         if ((space = H5Screate_simple(2, size, NULL)) < 0)
@@ -15708,6 +15717,174 @@ error:
 } /* end test_0sized_dset_metadata_alloc() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_downsize_vlen_scalar_dataset
+ *
+ * Purpose:     Tests H5Dwrite on a scalar dataset containing a VLEN array
+ *              of { double, C-string }. This causes special code to free
+ *              the nested VLEN (in this case, C-string) allocations.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+#define VLEN_DS_NAME       "test_downsize_vlen_scalar_dataset"
+#define VLEN_DS_DIM        100
+#define VLEN_DS_STRLEN     20
+#define VLEN_DS_STRING     "vlen test string"
+#define VLEN_DS_VALUE      0.12345678901234567890
+#define VLEN_DS_ARRAY_DIM1 3
+#define VLEN_DS_ARRAY_DIM2 5
+
+typedef struct {
+    double value;
+    char  *string[VLEN_DS_ARRAY_DIM1][VLEN_DS_ARRAY_DIM2];
+} vlen_ds_compound_file_t;
+
+typedef struct {
+    int    padding1;
+    double value;
+    int    padding2;
+    char  *string[VLEN_DS_ARRAY_DIM1][VLEN_DS_ARRAY_DIM2];
+    int    padding3;
+} vlen_ds_compound_memory_t;
+
+static herr_t
+test_downsize_vlen_scalar_dataset(hid_t file)
+{
+    hid_t                      scalar_sid               = -1; /* Scalar dataspace ID */
+    hid_t                      string_tid               = -1; /* VARIABLE string datatype ID */
+    hid_t                      string_array_tid         = -1; /* VARIABLE string array datatype ID */
+    hid_t                      compound_file_tid        = -1; /* COMPOUND datatype ID */
+    hid_t                      compound_memory_tid      = -1; /* COMPOUND datatype ID */
+    hid_t                      vlen_compound_file_tid   = -1; /* VARIABLE COMPOUND datatype ID */
+    hid_t                      vlen_compound_memory_tid = -1; /* VARIABLE COMPOUND datatype ID */
+    hid_t                      scalar_did               = -1; /* SCALAR dataset ID */
+    hvl_t                      vlen_compound_data;            /* Top-level VLEN data */
+    vlen_ds_compound_memory_t *compound_data = NULL;          /* Contents of VLEN data */
+    char                       common_string[VLEN_DS_STRLEN]; /* Common string contents */
+    hsize_t                    array_dims[2] = {VLEN_DS_ARRAY_DIM1, VLEN_DS_ARRAY_DIM2};
+    int                        i, dim1, dim2; /* Local index variables */
+
+    TESTING("H5Dwrite() on down-sized VLEN contents");
+
+    /* Allocate space for compound data */
+    if (NULL == (compound_data =
+                     (vlen_ds_compound_memory_t *)malloc(VLEN_DS_DIM * sizeof(vlen_ds_compound_memory_t))))
+        TEST_ERROR;
+
+    /* Create scalar dataspace */
+    if ((scalar_sid = H5Screate(H5S_SCALAR)) < 0)
+        TEST_ERROR;
+
+    /* Create datatype VLEN{COMPOUND{"value":H5T_NATIVE_DOUBLE, "string":H5T_C_S1|H5T_VARIABLE}} */
+    /* Note: the memory and file structures must be different to invoke the bug @ H5Tconv.c:3323 */
+    if ((string_tid = H5Tcopy(H5T_C_S1)) < 0)
+        TEST_ERROR;
+    if (H5Tset_size(string_tid, H5T_VARIABLE) < 0)
+        TEST_ERROR;
+
+    if ((string_array_tid = H5Tarray_create2(string_tid, 2, array_dims)) < 0)
+        TEST_ERROR;
+
+    if ((compound_file_tid = H5Tcreate(H5T_COMPOUND, sizeof(vlen_ds_compound_file_t))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_file_tid, "value", HOFFSET(vlen_ds_compound_file_t, value), H5T_NATIVE_DOUBLE) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_file_tid, "string", HOFFSET(vlen_ds_compound_file_t, string), string_array_tid) <
+        0)
+        TEST_ERROR;
+    if ((vlen_compound_file_tid = H5Tvlen_create(compound_file_tid)) < 0)
+        TEST_ERROR;
+
+    if ((compound_memory_tid = H5Tcreate(H5T_COMPOUND, sizeof(vlen_ds_compound_memory_t))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_memory_tid, "value", HOFFSET(vlen_ds_compound_memory_t, value),
+                  H5T_NATIVE_DOUBLE) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_memory_tid, "string", HOFFSET(vlen_ds_compound_memory_t, string),
+                  string_array_tid) < 0)
+        TEST_ERROR;
+    if ((vlen_compound_memory_tid = H5Tvlen_create(compound_memory_tid)) < 0)
+        TEST_ERROR;
+
+    /* Create the scalar dataset of this data type */
+    if ((scalar_did = H5Dcreate2(file, VLEN_DS_NAME, vlen_compound_file_tid, scalar_sid, H5P_DEFAULT,
+                                 H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Setup the variable-length data. Note that if the double "value" field is set to 0.0, the bug will NOT
+     */
+    /* occur because this is the data at offset zero of the element, and it then looks like a NULL VLEN data
+     */
+    strcpy(common_string, VLEN_DS_STRING);
+
+    for (i = 0; i < VLEN_DS_DIM; ++i) {
+        compound_data[i].value = VLEN_DS_VALUE;
+        for (dim1 = 0; dim1 < VLEN_DS_ARRAY_DIM1; ++dim1) {
+            for (dim2 = 0; dim2 < VLEN_DS_ARRAY_DIM2; ++dim2) {
+                compound_data[i].string[dim1][dim2] = common_string;
+            }
+        }
+        compound_data[i].padding1 = 0;
+        compound_data[i].padding2 = 0;
+        compound_data[i].padding3 = 0;
+    }
+
+    /* Starting with the maximum size, progressively over-write the content of the dataset with smaller
+     * arrays. */
+    /* Note: the bug in v1.8.14 is tripped on the second iteration, when 100 elements are over-written
+     * with 99. */
+    for (i = VLEN_DS_DIM; i > 0; --i) {
+        vlen_compound_data.len = (size_t)i;
+        vlen_compound_data.p   = compound_data;
+        if (H5Dwrite(scalar_did, vlen_compound_memory_tid, scalar_sid, scalar_sid, H5P_DEFAULT,
+                     &vlen_compound_data) < 0)
+            TEST_ERROR;
+    }
+
+    /* Close everything */
+    if (H5Sclose(scalar_sid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(string_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(string_array_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(compound_file_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(vlen_compound_file_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(compound_memory_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(vlen_compound_memory_tid) < 0)
+        TEST_ERROR;
+    if (H5Dclose(scalar_did) < 0)
+        TEST_ERROR;
+    free(compound_data);
+    compound_data = NULL;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(scalar_sid);
+        H5Tclose(string_tid);
+        H5Tclose(string_array_tid);
+        H5Tclose(compound_file_tid);
+        H5Tclose(vlen_compound_file_tid);
+        H5Tclose(compound_memory_tid);
+        H5Tclose(vlen_compound_memory_tid);
+        H5Dclose(scalar_did);
+        free(compound_data);
+        compound_data = NULL;
+    }
+    H5E_END_TRY;
+    return -1;
+} /* end test_downsize_vlen_scalar_dataset() */
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the dataset interface (H5D)
@@ -15948,6 +16125,8 @@ main(void)
                 nerrors += (test_earray_hdr_fd(envval, my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_farray_hdr_fd(envval, my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_bt2_hdr_fd(envval, my_fapl) < 0 ? 1 : 0);
+
+                nerrors += (test_downsize_vlen_scalar_dataset(file) < 0 ? 1 : 0);
 
                 if (H5Fclose(file) < 0)
                     goto error;

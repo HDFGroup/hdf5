@@ -75,7 +75,14 @@ jobs:
             build_mode: "Release"
 
     call-release-cmake-aocc:
-        name: "CMake nvhpc Workflows"
-        uses: ./.github/workflows/aocc-ompi-cmake.yml
+        name: "CMake aocc Workflows"
+        uses: ./.github/workflows/aocc-cmake.yml
         with:
             build_mode: "Release"
+
+    call-release-cmake-cygwin:
+        name: "CMake Cygwin Workflows"
+        uses: ./.github/workflows/cygwin-cmake.yml
+        with:
+            build_mode: "Release"
+            

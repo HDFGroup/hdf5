@@ -38,7 +38,7 @@ static hid_t H5FD_MPIO_g = 0;
 
 /* Whether to allow collective I/O operations */
 /* (Can be changed by setting "HDF5_MPI_OPT_TYPES" environment variable to '0' or '1') */
-hbool_t H5FD_mpi_opt_types_g = true;
+bool H5FD_mpi_opt_types_g = true;
 
 /* Whether the driver initialized MPI on its own */
 static bool H5FD_mpi_self_initialized = false;

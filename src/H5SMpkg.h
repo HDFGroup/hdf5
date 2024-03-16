@@ -29,6 +29,7 @@
 #include "H5ACprivate.h" /* Metadata Cache		  	*/
 #include "H5B2private.h" /* B-trees                              */
 #include "H5HFprivate.h" /* Fractal heaps		  	*/
+#include "H5FLprivate.h" /* Free Lists                           */
 
 /****************************/
 /* Package Macros           */
