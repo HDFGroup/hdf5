@@ -1358,6 +1358,9 @@ done:
     H5MM_free(file_ptr->file_dir);
     file_ptr->file_dir = NULL;
 
+    if (file_ptr->context_id >= 0 && H5_free_subfiling_object(file_ptr->context_id) < 0)
+        H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free subfiling context object");
+
     /* Release the file info */
     file_ptr = H5FL_FREE(H5FD_subfiling_t, file_ptr);
 
