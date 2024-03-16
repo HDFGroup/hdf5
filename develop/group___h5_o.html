@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.112f445</span>
+   &#160;<span id="projectnumber">1.15.0.6d85ea2</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -2331,14 +2331,12 @@ This function is dangerous if called on an invalid address. The risk can be safe
 <td>0 </td><td><code>token1</code> = <code>token2</code>   </td></tr>
 </table>
 <dl class="section user"><dt>Example</dt><dd>An example snippet from test/links.c: <div class="fragment"><div class="line"> </div>
-<div class="line">    <span class="comment">/* Hard link */</span></div>
-<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="#gabb69c962999e027cef0079bbb1282199">H5Oget_info_by_name3</a>(file, <span class="stringliteral">&quot;d1&quot;</span>, &amp;oinfo1, <a class="code hl_define" href="_h5_opublic_8h.html#addd3f3f27f124a16a52c390b8431a878">H5O_INFO_BASIC</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &lt; 0)</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="#gaeb8da4fbe62f8a3cd9146a7ac1093562">H5Otoken_cmp</a>(file, &amp;oinfo1.<a class="code hl_variable" href="struct_h5_o__info2__t.html#aec1bc6735ca478c420f5ff729bcb3888">token</a>, &amp;oinfo2.<a class="code hl_variable" href="struct_h5_o__info2__t.html#aec1bc6735ca478c420f5ff729bcb3888">token</a>, &amp;token_cmp) &lt; 0)</div>
 <div class="line">        FAIL_STACK_ERROR;</div>
-<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="#gabb69c962999e027cef0079bbb1282199">H5Oget_info_by_name3</a>(file, <span class="stringliteral">&quot;grp1/hard&quot;</span>, &amp;oinfo2, <a class="code hl_define" href="_h5_opublic_8h.html#addd3f3f27f124a16a52c390b8431a878">H5O_INFO_BASIC</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &lt; 0)</div>
-<div class="line">        FAIL_STACK_ERROR;</div>
-<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_enumvalue" href="_h5_opublic_8h.html#a929ff459574495f461657f6be804cdeca5ca744a77f8cd2b28dda90c37807ae31">H5O_TYPE_DATASET</a> != oinfo2.<a class="code hl_variable" href="struct_h5_o__info2__t.html#a6e12ef8203e400ee995a41a24e981539">type</a>) {</div>
+<div class="line">    <span class="keywordflow">if</span> (token_cmp) {</div>
 <div class="line">        H5_FAILED();</div>
-<div class="line">        printf(<span class="stringliteral">&quot;    %d: Unexpected object type should have been a dataset\n&quot;</span>, __LINE__);</div>
+<div class="line">        puts(<span class="stringliteral">&quot;    Hard link test failed. Link seems not to point to the &quot;</span>);</div>
+<div class="line">        puts(<span class="stringliteral">&quot;    expected file location.&quot;</span>);</div>
 <div class="line">        TEST_ERROR;</div>
 <div class="line">    } <span class="comment">/* end if */</span></div>
 <div class="line"> </div>
