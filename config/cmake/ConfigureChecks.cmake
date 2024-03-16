@@ -261,6 +261,13 @@ endif ()
 #
 # https://docs.oracle.com/cd/E23824_01/html/821-1474/lfcompile-5.html
 
+# MinGW and Cygwin
+if (MINGW OR CYGWIN)
+  set (CMAKE_REQUIRED_DEFINITIONS
+    "${CURRENT_TEST_DEFINITIONS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE"
+  )
+endif ()
+
 #-----------------------------------------------------------------------------
 #  Check the size in bytes of all the int and float types
 #-----------------------------------------------------------------------------
@@ -326,7 +333,7 @@ if (MINGW OR NOT WINDOWS)
 endif ()
 
 HDF_CHECK_TYPE_SIZE (off_t          ${HDF_PREFIX}_SIZEOF_OFF_T)
-HDF_CHECK_TYPE_SIZE (time_t          ${HDF_PREFIX}_SIZEOF_TIME_T)
+HDF_CHECK_TYPE_SIZE (time_t         ${HDF_PREFIX}_SIZEOF_TIME_T)
 
 #-----------------------------------------------------------------------------
 # Extra C99 types
@@ -437,62 +444,6 @@ if (MINGW OR NOT WINDOWS)
   )
     HDF_FUNCTION_TEST (${other_test})
   endforeach ()
-endif ()
-
-#-----------------------------------------------------------------------------
-# Check if InitOnceExecuteOnce is available
-#-----------------------------------------------------------------------------
-if (WINDOWS)
-  if (NOT HDF_NO_IOEO_TEST)
-    message (VERBOSE "Checking for InitOnceExecuteOnce:")
-  if (NOT DEFINED ${HDF_PREFIX}_HAVE_IOEO)
-    if (LARGEFILE)
-      set (CMAKE_REQUIRED_DEFINITIONS
-          "${CURRENT_TEST_DEFINITIONS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE"
-      )
-    endif ()
-    set (MACRO_CHECK_FUNCTION_DEFINITIONS "-DHAVE_IOEO ${CMAKE_REQUIRED_FLAGS}")
-    if (CMAKE_REQUIRED_INCLUDES)
-      set (CHECK_C_SOURCE_COMPILES_ADD_INCLUDES "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}")
-    else ()
-      set (CHECK_C_SOURCE_COMPILES_ADD_INCLUDES)
-    endif ()
-
-    TRY_RUN(HAVE_IOEO_EXITCODE HAVE_IOEO_COMPILED
-        ${CMAKE_BINARY_DIR}
-        ${HDF_RESOURCES_DIR}/HDFTests.c
-        COMPILE_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} ${MACRO_CHECK_FUNCTION_DEFINITIONS}"
-        LINK_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}"
-        CMAKE_FLAGS "${CHECK_C_SOURCE_COMPILES_ADD_INCLUDES} -DCMAKE_SKIP_RPATH:BOOL=${CMAKE_SKIP_RPATH}"
-        COMPILE_OUTPUT_VARIABLE OUTPUT
-    )
-    # if it did not compile make the return value fail code of 1
-    if (NOT HAVE_IOEO_COMPILED)
-      set (HAVE_IOEO_EXITCODE 1)
-    endif ()
-    # if the return value was 0 then it worked
-    if ("${HAVE_IOEO_EXITCODE}" EQUAL 0)
-      set (${HDF_PREFIX}_HAVE_IOEO 1 CACHE INTERNAL "Test InitOnceExecuteOnce")
-      message (VERBOSE "Performing Test InitOnceExecuteOnce - Success")
-      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Performing C SOURCE FILE Test InitOnceExecuteOnce succeeded with the following output:\n"
-        "${OUTPUT}\n"
-        "Return value: ${HAVE_IOEO}\n")
-    else ()
-      if (CMAKE_CROSSCOMPILING AND "${HAVE_IOEO_EXITCODE}" MATCHES  "FAILED_TO_RUN")
-        set (${HDF_PREFIX}_HAVE_IOEO "${HAVE_IOEO_EXITCODE}")
-      else ()
-        set (${HDF_PREFIX}_HAVE_IOEO "" CACHE INTERNAL "Test InitOnceExecuteOnce")
-      endif ()
-
-      message (VERBOSE "Performing Test InitOnceExecuteOnce - Failed")
-      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Performing InitOnceExecuteOnce Test  failed with the following output:\n"
-        "${OUTPUT}\n"
-        "Return value: ${HAVE_IOEO_EXITCODE}\n")
-    endif ()
-  endif ()
-  endif ()
 endif ()
 
 # ----------------------------------------------------------------------
