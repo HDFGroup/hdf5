@@ -359,7 +359,7 @@ if (MINGW OR NOT WINDOWS)
   else ()
     CHECK_STRUCT_HAS_MEMBER("struct tm" tz_minuteswest "sys/types.h;time.h" ${HDF_PREFIX}_HAVE_STRUCT_TIMEZONE)
   endif ()
-  CHECK_SYMBOL_EXISTS (gettimeofday      ${HDF_PREFIX}_HAVE_GETTIMEOFDAY)
+  CHECK_SYMBOL_EXISTS (gettimeofday "" ${HDF_PREFIX}_HAVE_GETTIMEOFDAY)
   foreach (time_test
 #      HAVE_TIMEZONE
       HAVE_TM_ZONE
@@ -379,14 +379,14 @@ if (MINGW OR NOT WINDOWS)
   # ----------------------------------------------------------------------
   # How do we figure out the width of a tty in characters?
   #
-  CHECK_SYMBOL_EXISTS (ioctl             ${HDF_PREFIX}_HAVE_IOCTL)
+  CHECK_SYMBOL_EXISTS (ioctl           "" ${HDF_PREFIX}_HAVE_IOCTL)
   CHECK_STRUCT_HAS_MEMBER ("struct videoconfig" numtextcols "" ${HDF_PREFIX}_HAVE_STRUCT_VIDEOCONFIG)
   CHECK_STRUCT_HAS_MEMBER ("struct text_info" screenwidth "" ${HDF_PREFIX}_HAVE_STRUCT_TEXT_INFO)
-  CHECK_SYMBOL_EXISTS (_getvideoconfig   ${HDF_PREFIX}_HAVE__GETVIDEOCONFIG)
-  CHECK_SYMBOL_EXISTS (gettextinfo       ${HDF_PREFIX}_HAVE_GETTEXTINFO)
-  CHECK_SYMBOL_EXISTS (_scrsize          ${HDF_PREFIX}_HAVE__SCRSIZE)
+  CHECK_SYMBOL_EXISTS (_getvideoconfig "" ${HDF_PREFIX}_HAVE__GETVIDEOCONFIG)
+  CHECK_SYMBOL_EXISTS (gettextinfo     "" ${HDF_PREFIX}_HAVE_GETTEXTINFO)
+  CHECK_SYMBOL_EXISTS (_scrsize        "" ${HDF_PREFIX}_HAVE__SCRSIZE)
   if (NOT CYGWIN)
-    CHECK_SYMBOL_EXISTS (GetConsoleScreenBufferInfo    ${HDF_PREFIX}_HAVE_GETCONSOLESCREENBUFFERINFO)
+    CHECK_SYMBOL_EXISTS (GetConsoleScreenBufferInfo "" ${HDF_PREFIX}_HAVE_GETCONSOLESCREENBUFFERINFO)
   endif ()
   CHECK_SYMBOL_EXISTS (TIOCGWINSZ "sys/ioctl.h" ${HDF_PREFIX}_HAVE_TIOCGWINSZ)
   CHECK_SYMBOL_EXISTS (TIOCGETD   "sys/ioctl.h" ${HDF_PREFIX}_HAVE_TIOCGETD)
@@ -395,27 +395,27 @@ endif ()
 #-----------------------------------------------------------------------------
 # Check for some functions that are used
 #
-CHECK_SYMBOL_EXISTS (alarm             ${HDF_PREFIX}_HAVE_ALARM)
-CHECK_SYMBOL_EXISTS (fcntl             ${HDF_PREFIX}_HAVE_FCNTL)
-CHECK_SYMBOL_EXISTS (flock             ${HDF_PREFIX}_HAVE_FLOCK)
-CHECK_SYMBOL_EXISTS (fork              ${HDF_PREFIX}_HAVE_FORK)
+CHECK_SYMBOL_EXISTS (alarm             "" ${HDF_PREFIX}_HAVE_ALARM)
+CHECK_SYMBOL_EXISTS (fcntl             "" ${HDF_PREFIX}_HAVE_FCNTL)
+CHECK_SYMBOL_EXISTS (flock             "" ${HDF_PREFIX}_HAVE_FLOCK)
+CHECK_SYMBOL_EXISTS (fork              "" ${HDF_PREFIX}_HAVE_FORK)
 
-CHECK_SYMBOL_EXISTS (gethostname       ${HDF_PREFIX}_HAVE_GETHOSTNAME)
-CHECK_SYMBOL_EXISTS (getrusage         ${HDF_PREFIX}_HAVE_GETRUSAGE)
+CHECK_SYMBOL_EXISTS (gethostname       "" ${HDF_PREFIX}_HAVE_GETHOSTNAME)
+CHECK_SYMBOL_EXISTS (getrusage         "" ${HDF_PREFIX}_HAVE_GETRUSAGE)
 
-CHECK_SYMBOL_EXISTS (pread             ${HDF_PREFIX}_HAVE_PREAD)
-CHECK_SYMBOL_EXISTS (pwrite            ${HDF_PREFIX}_HAVE_PWRITE)
-CHECK_SYMBOL_EXISTS (rand_r            ${HDF_PREFIX}_HAVE_RAND_R)
-CHECK_SYMBOL_EXISTS (random            ${HDF_PREFIX}_HAVE_RANDOM)
+CHECK_SYMBOL_EXISTS (pread             "" ${HDF_PREFIX}_HAVE_PREAD)
+CHECK_SYMBOL_EXISTS (pwrite            "" ${HDF_PREFIX}_HAVE_PWRITE)
+CHECK_SYMBOL_EXISTS (rand_r            "" ${HDF_PREFIX}_HAVE_RAND_R)
+CHECK_SYMBOL_EXISTS (random            "" ${HDF_PREFIX}_HAVE_RANDOM)
 
-CHECK_SYMBOL_EXISTS (strcasestr        ${HDF_PREFIX}_HAVE_STRCASESTR)
-CHECK_SYMBOL_EXISTS (strdup            ${HDF_PREFIX}_HAVE_STRDUP)
-CHECK_SYMBOL_EXISTS (symlink           ${HDF_PREFIX}_HAVE_SYMLINK)
+CHECK_SYMBOL_EXISTS (strcasestr        "" ${HDF_PREFIX}_HAVE_STRCASESTR)
+CHECK_SYMBOL_EXISTS (strdup            "" ${HDF_PREFIX}_HAVE_STRDUP)
+CHECK_SYMBOL_EXISTS (symlink           "" ${HDF_PREFIX}_HAVE_SYMLINK)
 
-CHECK_SYMBOL_EXISTS (tmpfile           ${HDF_PREFIX}_HAVE_TMPFILE)
-CHECK_SYMBOL_EXISTS (asprintf          ${HDF_PREFIX}_HAVE_ASPRINTF)
-CHECK_SYMBOL_EXISTS (vasprintf         ${HDF_PREFIX}_HAVE_VASPRINTF)
-CHECK_SYMBOL_EXISTS (waitpid           ${HDF_PREFIX}_HAVE_WAITPID)
+CHECK_SYMBOL_EXISTS (tmpfile           "" ${HDF_PREFIX}_HAVE_TMPFILE)
+CHECK_SYMBOL_EXISTS (asprintf          "" ${HDF_PREFIX}_HAVE_ASPRINTF)
+CHECK_SYMBOL_EXISTS (vasprintf         "" ${HDF_PREFIX}_HAVE_VASPRINTF)
+CHECK_SYMBOL_EXISTS (waitpid           "" ${HDF_PREFIX}_HAVE_WAITPID)
 
 #-----------------------------------------------------------------------------
 # sigsetjmp is special; may actually be a macro
@@ -628,7 +628,7 @@ endif ()
 
 # Find the library containing clock_gettime()
 if (MINGW OR NOT WINDOWS)
-  CHECK_SYMBOL_EXISTS (clock_gettime CLOCK_GETTIME_IN_LIBC)
+  CHECK_SYMBOL_EXISTS (clock_gettime "" CLOCK_GETTIME_IN_LIBC)
   CHECK_LIBRARY_EXISTS (rt clock_gettime "" CLOCK_GETTIME_IN_LIBRT)
   CHECK_LIBRARY_EXISTS (posix4 clock_gettime "" CLOCK_GETTIME_IN_LIBPOSIX4)
   if (CLOCK_GETTIME_IN_LIBC)

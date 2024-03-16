@@ -20,8 +20,8 @@ endif ()
 # Check for unistd.h
 #
 CHECK_INCLUDE_FILE (unistd.h Z_HAVE_UNISTD_H)
-CHECK_SYMBOL_EXISTS (memcpy            HAVE_MEMCPY)
-CHECK_SYMBOL_EXISTS (vsnprintf         HAVE_VSNPRINTF)
+CHECK_SYMBOL_EXISTS (memcpy    "" HAVE_MEMCPY)
+CHECK_SYMBOL_EXISTS (vsnprintf "" HAVE_VSNPRINTF)
 
 #-----------------------------------------------------------------------------
 # Define some CMake variables for use later in the project
