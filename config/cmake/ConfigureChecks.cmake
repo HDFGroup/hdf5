@@ -666,7 +666,7 @@ if (HDF5_ENABLE_DIRECT_VFD)
   if (HAVE_O_DIRECT AND HAVE_POSIX_MEMALIGN)
     set (${HDF_PREFIX}_HAVE_DIRECT 1)
   else ()
-      message (FATAL_ERROR "The direct VFD was requested but cannot be built.\nIt requires O_DIRECT flag support and posix_memalign()")
+    message (FATAL_ERROR "The direct VFD was requested but cannot be built.\nIt requires O_DIRECT flag support and posix_memalign()")
   endif ()
 endif ()
 
