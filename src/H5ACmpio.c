@@ -35,8 +35,10 @@
 #include "H5Cprivate.h"  /* Cache                                */
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Fpkg.h"      /* Files				*/
 #include "H5MMprivate.h" /* Memory management                    */
+#include "H5SLprivate.h" /* Skip Lists                               */
 
 #ifdef H5_HAVE_PARALLEL
 

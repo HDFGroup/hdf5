@@ -56,6 +56,7 @@
 #include "H5MMprivate.h" /* Memory management            */
 #include "H5MFprivate.h" /* File memory management               */
 #include "H5PBprivate.h" /* Page Buffer	                         */
+#include "H5SLprivate.h" /* Skip Lists                               */
 #include "H5VMprivate.h" /* Vector and array functions        */
 
 /****************/

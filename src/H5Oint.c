@@ -39,6 +39,7 @@
 #include "H5MFprivate.h" /* File memory management                   */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Opkg.h"      /* Object headers                           */
+#include "H5SLprivate.h" /* Skip Lists                               */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
