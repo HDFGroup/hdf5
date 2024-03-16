@@ -216,9 +216,6 @@
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine H5_HAVE_LIBZ @H5_HAVE_LIBZ@
 
-/* Define to 1 if you have the `lseek64' function. */
-#cmakedefine H5_HAVE_LSEEK64 @H5_HAVE_LSEEK64@
-
 /* Define if the map API (H5M) should be compiled */
 #cmakedefine H5_HAVE_MAP_API @H5_HAVE_MAP_API@
 
@@ -282,9 +279,6 @@
 /* Define whether the Read-Only S3 virtual file driver (VFD) should be
    compiled */
 #cmakedefine H5_HAVE_ROS3_VFD @H5_HAVE_ROS3_VFD@
-
-/* Define to 1 if you have the `stat64' function. */
-#cmakedefine H5_HAVE_STAT64 @H5_HAVE_STAT64@
 
 /* Define if struct stat has the st_blocks field */
 #cmakedefine H5_HAVE_STAT_ST_BLOCKS @H5_HAVE_STAT_ST_BLOCKS@
