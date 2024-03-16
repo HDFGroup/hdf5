@@ -143,7 +143,6 @@ else ()
 endif ()
 
 if (CYGWIN)
-  set (${HDF_PREFIX}_HAVE_LSEEK64 0)
   set (CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_GNU_SOURCE")
   add_definitions ("-D_GNU_SOURCE")
 endif ()
