@@ -661,7 +661,7 @@ if (HDF5_ENABLE_DIRECT_VFD)
   # flag. No other form of direct I/O is supported. This feature also
   # requires posix_memalign().
   CHECK_SYMBOL_EXISTS (O_DIRECT "fcntl.h" HAVE_O_DIRECT)
-  CHECK_FUNCTION_EXISTS (posix_memalign "stdlib.h" HAVE_POSIX_MEMALIGN)
+  CHECK_SYMBOL_EXISTS (posix_memalign "stdlib.h" HAVE_POSIX_MEMALIGN)
 
   if (HAVE_O_DIRECT AND HAVE_POSIX_MEMALIGN)
     set (${HDF_PREFIX}_HAVE_DIRECT 1)
