@@ -660,8 +660,8 @@ if (HDF5_ENABLE_DIRECT_VFD)
   # The direct VFD is tied to POSIX direct I/O as enabled by the O_DIRECT
   # flag. No other form of direct I/O is supported. This feature also
   # requires posix_memalign().
-  check_symbol_exists(O_DIRECT "fcntl.h" HAVE_O_DIRECT)
-  check_symbol_exists(posix_memalign "stdlib.h" HAVE_POSIX_MEMALIGN)
+  CHECK_SYMBOL_EXISTS (O_DIRECT "fcntl.h" HAVE_O_DIRECT)
+  CHECK_FUNCTION_EXISTS (posix_memalign "stdlib.h" HAVE_POSIX_MEMALIGN)
 
   if (HAVE_O_DIRECT AND HAVE_POSIX_MEMALIGN)
     set (${HDF_PREFIX}_HAVE_DIRECT 1)
