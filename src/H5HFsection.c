@@ -27,7 +27,6 @@
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5HFpkg.h"     /* Fractal heaps			*/
 #include "H5MMprivate.h" /* Memory management			*/
-#include "H5VMprivate.h" /* Vectors and arrays 			*/
 
 /****************/
 /* Local Macros */

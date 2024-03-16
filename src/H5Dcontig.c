@@ -36,9 +36,7 @@
 #include "H5Iprivate.h"  /* IDs                          */
 #include "H5MFprivate.h" /* File memory management       */
 #include "H5MMprivate.h" /* Memory management			*/
-#include "H5FOprivate.h" /* File objects                 */
 #include "H5Oprivate.h"  /* Object headers               */
-#include "H5Pprivate.h"  /* Property lists               */
 #include "H5PBprivate.h" /* Page Buffer	                 */
 #include "H5VMprivate.h" /* Vector and array functions   */
 

@@ -36,7 +36,6 @@
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5EApkg.h"     /* Extensible Arrays			*/
 #include "H5FLprivate.h" /* Free Lists                           */
-#include "H5VMprivate.h" /* Vectors and arrays 			*/
 
 /****************/
 /* Local Macros */

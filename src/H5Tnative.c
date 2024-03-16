@@ -18,10 +18,8 @@
 #include "H5Tmodule.h" /* This source code file is part of the H5T module */
 
 #include "H5private.h"   /* Generic Functions            */
-#include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling              */
 #include "H5Iprivate.h"  /* IDs                      */
-#include "H5Pprivate.h"  /* Property lists            */
 #include "H5MMprivate.h" /* Memory management            */
 #include "H5Tpkg.h"      /* Datatypes                */
 

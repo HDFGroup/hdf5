@@ -17,8 +17,6 @@
 #include "H5Dprivate.h"  /* Datasets				*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free lists                           */
-#include "H5Gprivate.h"  /* Groups			  	*/
-#include "H5MMprivate.h" /* Memory management			*/
 #include "H5Opkg.h"      /* Object headers		  	*/
 #include "H5Spkg.h"      /* Dataspaces 				*/
 

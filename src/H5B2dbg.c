@@ -28,10 +28,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5B2pkg.h"     /* v2 B-trees				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FLprivate.h" /* Free Lists                           */
+#include "H5private.h"  /* Generic Functions			*/
+#include "H5B2pkg.h"    /* v2 B-trees				*/
+#include "H5Eprivate.h" /* Error handling		  	*/
 
 /****************/
 /* Local Macros */

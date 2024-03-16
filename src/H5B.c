@@ -101,10 +101,8 @@
 #include "H5Bpkg.h"      /* B-link trees				*/
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5MFprivate.h" /* File memory management		*/
 #include "H5MMprivate.h" /* Memory management			*/
-#include "H5Pprivate.h"  /* Property lists                       */
 
 /****************/
 /* Local Macros */

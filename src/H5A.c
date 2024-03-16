@@ -15,7 +15,6 @@
 /****************/
 
 #include "H5Amodule.h" /* This source code file is part of the H5A module */
-#define H5O_FRIEND     /* Suppress error about including H5Opkg */
 
 /***********/
 /* Headers */
@@ -25,10 +24,7 @@
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5ESprivate.h" /* Event Sets                               */
-#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
-#include "H5MMprivate.h" /* Memory management                        */
-#include "H5Opkg.h"      /* Object headers                           */
 #include "H5Sprivate.h"  /* Dataspace functions                      */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
