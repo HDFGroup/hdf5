@@ -1,0 +1,77 @@
+name: Test HDF5 Subfiling VFD
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "CMake Build type"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_test:
+    strategy:
+      matrix:
+        name:
+          - "Test HDF5 Subfiling VFD with OpenMPI"
+          - "Test HDF5 Subfiling VFD with MPICH"
+        mpi_lib: ["OpenMPI", "MPICH"]
+        exclude:
+          - name: "Test HDF5 Subfiling VFD with OpenMPI"
+            mpi_lib: "MPICH"
+
+          - name: "Test HDF5 Subfiling VFD with MPICH"
+            mpi_lib: "OpenMPI"
+
+    runs-on: ubuntu-latest
+    steps:
+      # For now, just install OpenMPI or MPICH with the package
+      # manager. Eventually, we should pick one or 2 release
+      # versions of each, then build and cache those installations
+      - name: Install OpenMPI
+        run: |
+          sudo apt update
+          sudo apt-get install libopenmpi-dev
+        if: matrix.mpi_lib == 'OpenMPI'
+
+      - name: Install MPICH
+        run: |
+          sudo apt update
+          sudo apt-get install libmpich-dev
+        if: matrix.mpi_lib == 'MPICH'
+
+      - name: Checkout HDF5
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: HDFGroup/hdf5
+          path: hdf5
+
+      - name: Configure HDF5 with Subfiling VFD
+        shell: bash
+        run: |
+          mkdir ${{ github.workspace }}/hdf5/build
+          cd ${{ github.workspace }}/hdf5/build
+          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+            -DBUILD_STATIC_LIBS=OFF \
+            -DHDF5_TEST_VFD:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DHDF5_ENABLE_SUBFILING_VFD:BOOL=ON \
+            -DMPIEXEC_MAX_NUMPROCS=2 \
+            ${{ github.workspace }}/hdf5
+          cat src/libhdf5.settings
+
+      - name: Build HDF5
+        shell: bash
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          echo "LD_LIBRARY_PATH=${{ github.workspace }}/hdf5/build/bin" >> $GITHUB_ENV
+
+      - name: Test HDF5 Subfiling VFD
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "subfiling"
