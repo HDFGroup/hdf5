@@ -29,8 +29,10 @@
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5Fpkg.h"      /* File access                          */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5FSpkg.h"     /* File free space			*/
 #include "H5MFprivate.h" /* File memory management		*/
+#include "H5SLprivate.h" /* Skip Lists                               */
 #include "H5VMprivate.h" /* Vectors and arrays 			*/
 
 /****************/
