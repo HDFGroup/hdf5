@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 #if !defined(WIN32) && !defined(__MINGW32__)
@@ -184,13 +185,28 @@ main(int argc, char *argv[])
 
         /* Write the series of integers to the file */
         for (n = 0; n < num; n++) {
+            size_t seek_pos;
 
             /* Set up data to be written */
             for (u = 0; u < num; u++)
                 buf[u] = n;
 
+            seek_pos = n * sizeof(unsigned int);
+            if (sizeof(off_t) < 8) {
+                if (seek_pos > INT32_MAX) {
+                    printf("WRITER: seek past range for lseek\n");
+                    goto error;
+                }
+            }
+            else {
+                if (seek_pos > INT64_MAX) {
+                    printf("WRITER: seek past range for lseek\n");
+                    goto error;
+                }
+            }
+
             /* Position the file to the proper location */
-            if (lseek(fd, (n * sizeof(unsigned int)), SEEK_SET) < 0) {
+            if (lseek(fd, (off_t)seek_pos, SEEK_SET) < 0) {
                 printf("WRITER: error from lseek\n");
                 goto error;
             } /* end if */
