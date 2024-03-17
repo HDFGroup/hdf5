@@ -28,6 +28,7 @@
 #include "H5CSprivate.h" /* Function stack			*/
 #include "H5CXprivate.h" /* API Contexts                        */
 #include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5MMprivate.h" /* Memory management                        */
 
 #ifdef H5_HAVE_CODESTACK
 

@@ -5891,8 +5891,10 @@ test_floattypes(hid_t file)
              (long double)1.0711093225222612990711093225222612,
              (long double)-9.8971679387636870998971679387636870e-1}};
         long double new_data[2][5];
-        size_t      ld_spos, ld_epos, ld_esize, ld_mpos, ld_msize;
-        size_t      tgt_precision = 128;
+#if LDBL_MANT_DIG != 106
+        size_t ld_spos, ld_epos, ld_esize, ld_mpos, ld_msize;
+        size_t tgt_precision = 128;
+#endif
 
         TESTING("    long double (setup)");
 

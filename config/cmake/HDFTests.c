@@ -139,21 +139,3 @@ main(void)
 #endif
 }
 #endif
-
-#ifdef HAVE_IOEO
-
-#include <windows.h>
-typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
-int main ()
-{
-    PGNSI pGNSI;
-
-    pGNSI = (PGNSI) GetProcAddress(GetModuleHandle(TEXT("kernel32.dll")), "InitOnceExecuteOnce");
-
-    if (NULL == pGNSI)
-        return 1;
-    else
-        return 0;
-}
-
-#endif /* HAVE_IOEO */
