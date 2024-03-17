@@ -35,7 +35,7 @@
 #define H5FD_MIRROR_CURR_FAPL_T_VERSION 1
 
 /** Max size of the remote_ip array in H5FD_mirror_fapl_t */
-#define H5FD_MIRROR_MAX_IP_LEN 32
+#define H5FD_MIRROR_MAX_IP_LEN 45 /* Max size of an IPv4-mapped IPv6 address */
 
 /**
  *\struct H5FD_mirror_fapl_t
