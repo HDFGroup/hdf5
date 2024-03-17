@@ -2003,7 +2003,8 @@ H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv
     int               *src2dst = NULL;
     unsigned           src_nmembs, dst_nmembs;
     unsigned           i, j;
-    herr_t             ret_value = SUCCEED; /* Return value */
+    bool               empty_source_subset = false;
+    herr_t             ret_value           = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2114,10 +2115,13 @@ H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv
         (priv->memb_path = (H5T_path_t **)H5MM_malloc(src->shared->u.compnd.nmembs * sizeof(H5T_path_t *))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
+    empty_source_subset = true;
     for (i = 0; i < src_nmembs; i++) {
         if (src2dst[i] >= 0) {
             H5T_path_t *tpath = H5T_path_find(src->shared->u.compnd.memb[i].type,
                                               dst->shared->u.compnd.memb[src2dst[i]].type);
+
+            empty_source_subset = false;
 
             if (NULL == (priv->memb_path[i] = tpath)) {
                 H5T__conv_struct_free(priv);
@@ -2126,6 +2130,13 @@ H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv
             } /* end if */
         }     /* end if */
     }         /* end for */
+
+    if (empty_source_subset) {
+        H5T__conv_struct_free(priv);
+        cdata->priv = NULL;
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
+                    "no members in source compound type appear in destination compound type");
+    }
 
     /* The compound conversion functions need a background buffer */
     cdata->need_bkg = H5T_BKG_YES;

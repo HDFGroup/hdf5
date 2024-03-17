@@ -198,7 +198,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 mdset.h5 compact_dataset.h5 dataset.h5 d
     dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 \
     tmp tmp_links tmp2_links tmp_links_env tmp_vds tmp_vds_env \
     big.data big[0-9][0-9][0-9][0-9][0-9].h5 \
-    stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
+    stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0-1].h5 dt_arith[1-2].h5 tattr.h5 \
     tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
     fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 ttime.h5 \
     trefer[1-3].h5 trefer_*.h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 twriteorder.dat \

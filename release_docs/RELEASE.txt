@@ -591,6 +591,17 @@ Bug Fixes since HDF5-1.14.0 release
 
     Library
     -------
+    - Fixed an issue where certain invalid compound datatype conversions would
+      cause I/O calls to incorrectly succeed
+
+      When performing I/O on a dataset or attribute with an in-memory compound
+      datatype where data conversion is required, but none of the members of
+      the datatype appear in the object's compound datatype in the file, the
+      library would perform no-op I/O rather than returning an error about not
+      finding a valid path for the data conversion. This would result in the
+      I/O call succeeding while not actually writing or reading any data. The
+      library now correctly returns an error in this case.
+
     - Fixed error when overwriting certain nested variable length types
 
       Previously, when using a datatype that included a variable length type

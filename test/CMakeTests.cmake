@@ -251,6 +251,7 @@ set (test_CLEANFILES
     dtransform.h5
     dtypes3.h5
     dtypes4.h5
+    dtypes11.h5
     min_dset_ohdr_testfile.h5
     ohdr_min_a.h5
     sec2_file.h5

@@ -73,8 +73,9 @@
         }                                                                                                    \
     } while (0)
 
-static const char *FILENAME[] = {"dtypes0", "dtypes1", "dtypes2", "dtypes3", "dtypes4",  "dtypes5",
-                                 "dtypes6", "dtypes7", "dtypes8", "dtypes9", "dtypes10", NULL};
+static const char *FILENAME[] = {"dtypes0",  "dtypes1",  "dtypes2", "dtypes3", "dtypes4",
+                                 "dtypes5",  "dtypes6",  "dtypes7", "dtypes8", "dtypes9",
+                                 "dtypes10", "dtypes11", NULL};
 
 #define TESTFILE "bad_compound.h5"
 
@@ -128,6 +129,8 @@ typedef enum { E1_RED, E1_GREEN, E1_BLUE, E1_ORANGE, E1_YELLOW } color_t;
 #define UTF8_DATASET2  "2nd_utf8"
 #define ASCII_DATASET  "ascii"
 #define ASCII_DATASET2 "2nd_ascii"
+
+#define COMPOUND19_NUMELEMS 10
 
 /* Count opaque conversions */
 static int num_opaque_conversions_g = 0;
@@ -3818,6 +3821,193 @@ test_compound_18(void)
 error:
     return 1;
 } /* end test_compound_18() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_compound_19
+ *
+ * Purpose:     Tests that the library fails correctly when trying to
+ *              convert between compounds where none of the members in the
+ *              source compound appear in the destination compound.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_19(void)
+{
+#if H5_SIZEOF_INT32_T != 0
+    H5T_order_t byte_order;
+    hsize_t     dset_dims[]  = {COMPOUND19_NUMELEMS};
+    hid_t       fid          = H5I_INVALID_HID;
+    hid_t       did          = H5I_INVALID_HID;
+    hid_t       space_id     = H5I_INVALID_HID;
+    hid_t       dst_compound = H5I_INVALID_HID;
+    herr_t      status;
+    char        filename[512];
+#if H5_SIZEOF_INT16_T != 0
+    hid_t compound_i16 = H5I_INVALID_HID;
+#endif
+#if H5_SIZEOF_INT32_T != 0
+    hid_t compound_i32 = H5I_INVALID_HID;
+#endif
+#if H5_SIZEOF_INT64_T != 0
+    hid_t compound_i64 = H5I_INVALID_HID;
+#endif
+#endif
+
+    TESTING("compound conversions where destination compound has no members from source compound");
+
+#if H5_SIZEOF_INT32_T != 0
+    if ((byte_order = H5Tget_order(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+
+    if ((dst_compound = H5Tcreate(H5T_COMPOUND, H5Tget_size(H5T_STD_I32LE))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(dst_compound, "different_mem", 0, H5T_STD_I32LE) < 0)
+        TEST_ERROR;
+    if (H5Tset_order(dst_compound, byte_order) < 0)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[11], H5P_DEFAULT, filename, sizeof filename);
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((space_id = H5Screate_simple(1, dset_dims, NULL)) < 0)
+        TEST_ERROR;
+
+    if ((did = H5Dcreate2(fid, "/dset", dst_compound, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+#if H5_SIZEOF_INT16_T != 0
+    {
+        int16_t int16_data[COMPOUND19_NUMELEMS];
+
+        for (size_t i = 0; i < COMPOUND19_NUMELEMS; i++)
+            int16_data[i] = (int16_t)(rand() % INT16_MAX);
+
+        /* Test with a smaller source compound type */
+        if ((compound_i16 = H5Tcreate(H5T_COMPOUND, H5Tget_size(H5T_STD_I16LE))) < 0)
+            TEST_ERROR;
+        if (H5Tinsert(compound_i16, "i16_mem", 0, H5T_STD_I16LE) < 0)
+            TEST_ERROR;
+        if (H5Tset_order(dst_compound, byte_order) < 0)
+            TEST_ERROR;
+
+        H5E_BEGIN_TRY
+        {
+            /* Should fail with "no appropriate function for conversion path" */
+            status = H5Dwrite(did, compound_i16, H5S_ALL, H5S_ALL, H5P_DEFAULT, int16_data);
+        }
+        H5E_END_TRY
+
+        if (status >= 0)
+            TEST_ERROR;
+
+        if (H5Tclose(compound_i16) < 0)
+            TEST_ERROR;
+    }
+#endif
+
+    {
+        int32_t int32_data[COMPOUND19_NUMELEMS];
+
+        for (size_t i = 0; i < COMPOUND19_NUMELEMS; i++)
+            int32_data[i] = (int32_t)(rand() % INT32_MAX);
+
+        /* Test with an equal-sized source compound type */
+        if ((compound_i32 = H5Tcreate(H5T_COMPOUND, H5Tget_size(H5T_STD_I32LE))) < 0)
+            TEST_ERROR;
+        if (H5Tinsert(compound_i32, "i32_mem", 0, H5T_STD_I32LE) < 0)
+            TEST_ERROR;
+        if (H5Tset_order(dst_compound, byte_order) < 0)
+            TEST_ERROR;
+
+        H5E_BEGIN_TRY
+        {
+            /* Should fail with "no appropriate function for conversion path" */
+            status = H5Dwrite(did, compound_i32, H5S_ALL, H5S_ALL, H5P_DEFAULT, int32_data);
+        }
+        H5E_END_TRY
+
+        if (status >= 0)
+            TEST_ERROR;
+
+        if (H5Tclose(compound_i32) < 0)
+            TEST_ERROR;
+    }
+
+#if H5_SIZEOF_INT64_T != 0
+    {
+        int64_t int64_data[COMPOUND19_NUMELEMS];
+
+        for (size_t i = 0; i < COMPOUND19_NUMELEMS; i++)
+            int64_data[i] = (int64_t)(rand() % INT64_MAX);
+
+        /* Test with a larger source compound type */
+        if ((compound_i64 = H5Tcreate(H5T_COMPOUND, H5Tget_size(H5T_STD_I64LE))) < 0)
+            TEST_ERROR;
+        if (H5Tinsert(compound_i64, "i64_mem", 0, H5T_STD_I64LE) < 0)
+            TEST_ERROR;
+        if (H5Tset_order(dst_compound, byte_order) < 0)
+            TEST_ERROR;
+
+        H5E_BEGIN_TRY
+        {
+            /* Should fail with "no appropriate function for conversion path" */
+            status = H5Dwrite(did, compound_i64, H5S_ALL, H5S_ALL, H5P_DEFAULT, int64_data);
+        }
+        H5E_END_TRY
+
+        if (status >= 0)
+            TEST_ERROR;
+
+        if (H5Tclose(compound_i64) < 0)
+            TEST_ERROR;
+    }
+#endif
+
+    if (H5Tclose(dst_compound) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space_id) < 0)
+        TEST_ERROR;
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    H5Fdelete(filename, H5P_DEFAULT);
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+#if H5_SIZEOF_INT16_T != 0
+        H5Tclose(compound_i16);
+#endif
+#if H5_SIZEOF_INT32_T != 0
+        H5Tclose(compound_i32);
+#endif
+#if H5_SIZEOF_INT64_T != 0
+        H5Tclose(compound_i64);
+#endif
+        H5Tclose(dst_compound);
+        H5Sclose(space_id);
+        H5Dclose(did);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    return 1;
+#else
+    SKIPPED();
+    return 0;
+#endif
+} /* end test_compound_19() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_user_compound_conversion
@@ -9163,6 +9353,7 @@ main(void)
     nerrors += test_compound_16();
     nerrors += test_compound_17();
     nerrors += test_compound_18();
+    nerrors += test_compound_19();
     nerrors += test_user_compound_conversion();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_enum_2();
