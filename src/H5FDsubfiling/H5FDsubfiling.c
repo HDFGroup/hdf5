@@ -2940,7 +2940,6 @@ translate_io_req_to_iovec(subfiling_context_t *sf_context, size_t iovec_idx, siz
     int64_t row_offset           = 0;
     int64_t row_stripe_idx_start = 0;
     int64_t row_stripe_idx_final = 0;
-    int64_t cur_stripe_idx       = 0;
     int64_t max_iovec_depth      = 0;
     int64_t mem_offset           = 0;
     size_t  total_bytes          = 0;
@@ -3100,7 +3099,6 @@ translate_io_req_to_iovec(subfiling_context_t *sf_context, size_t iovec_idx, siz
      * vector components for each. Subfiles whose data size is
      * zero will not have I/O requests passed to them.
      */
-    cur_stripe_idx = stripe_idx;
     for (int i = 0, subfile_idx = (int)first_subfile_idx; i < num_subfiles; i++) {
         H5_flexible_const_ptr_t *_io_bufs_ptr;
         H5FD_mem_t              *_io_types_ptr;
@@ -3295,7 +3293,6 @@ translate_io_req_to_iovec(subfiling_context_t *sf_context, size_t iovec_idx, siz
         offset_in_block += (int64_t)*_io_sizes_ptr;
 
         subfile_idx++;
-        cur_stripe_idx++;
 
         if (subfile_idx == num_subfiles) {
             subfile_idx     = 0;
