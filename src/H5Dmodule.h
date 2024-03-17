@@ -815,17 +815,8 @@
  * <table>
  * <caption>Data pipeline filters</caption>
  * <tr>
- * <th>Filter</th>
+ * <th>Built-in Filter</th>
  * <th>Description</th>
- * </tr>
- * <tr>
- * <td>gzip compression</td>
- * <td>Data compression using zlib.</td>
- * </tr>
- * <tr>
- * <td>Szip compression</td>
- * <td>Data compression using the Szip library. See The HDF Group website for more information
- * regarding the Szip filter.</td>
  * </tr>
  * <tr>
  * <td>N-bit compression</td>
@@ -845,6 +836,18 @@
  * <td>Fletcher32</td>
  * <td>Fletcher32 checksum for error-detection.</td>
  * </tr>
+ * <tr>
+ * <th>Optional Built-in Filter</th>
+ * <th>Description</th>
+ * </tr>
+ * <tr>
+ * <td>gzip compression</td>
+ * <td>Data compression using zlib.</td>
+ * </tr>
+ * <tr>
+ * <td>szip compression</td>
+ * <td>Data compression using the szip library. The HDF Group now uses the libaec library for the szip filter.</td>
+ * </tr>
  * </table>
  *
  * Filters may be used only for chunked data and are applied to chunks of data between the file
@@ -860,6 +863,42 @@
  * For more information,
  * \li @see @ref subsubsec_dataset_filters_nbit
  * \li @see @ref subsubsec_dataset_filters_scale
+ *
+ * \subsubsection subsubsec_dataset_transfer_dyn_filter Data Pipeline Dynamically Loaded Filters
+ * While the HDF5 “internal” compression methods work reasonably well on users’
+ * datasets, there are certain drawbacks to this implementation. First, the “internal” compression
+ * methods may not provide the optimal compression ratio, as do some newly developed or specialized
+ * compression methods. Secondly, if a data provider wants to use a “non-internal” compression for
+ * storing the data in HDF5, they have to write a filter function that uses the new compression method
+ * and then register it with the library. Data consumers of such HDF5 files will need to have the new filter
+ * function and use it with their applications to read the data, or they will need a modified version of the
+ * HDF5 Library that has the new filter as a part of the library.
+ *
+ * If a user of such data does not have a modified HDF5 Library installed on his system, command-line tools
+ * such as h5dump or h5ls will not be able to display the compressed data. Furthermore, it would be
+ * practically impossible to determine the compression method used, making the data stored in HDF5
+ * useless.
+ *
+ * It is clear that the internal HDF5 filter mechanism, while extensible, does not work well with third-party
+ * filters. It would be a maintenance nightmare to keep adding and supporting new compression methods
+ * in HDF5. For any set of HDF5 “internal” filters, there always will be data with which the “internal” filters
+ * will not achieve the optimal performance needed to address data I/O and storage problems. Thus the
+ * internal HDF5 filter mechanism is enhanced to address the issues discussed above.
+ *
+ * We have a feature of HDF5 called “dynamically loaded filters in HDF5.” This feature
+ * makes the HDF5 third-party filters available to an application at runtime. The third-party HDF5 filter
+ * function has to be a part of the HDF5 filter plugin installed on the system as a shared library or DLL.
+ *
+ * To use a third-party filter an HDF5 application should call the #H5Pset_filter function when setting the
+ * filter pipeline for a dataset creation property. The HDF5 Library will register the filter with the library
+ * and the filter will be applied when data is written to the file.
+ *
+ * When an application reads data compressed with a third-party HDF5 filter, the HDF5 Library will search
+ * for the required filter plugin, register the filter with the library (if the filter function is not registered) and
+ * apply it to the data on the read operation.
+ *
+ * For more information,
+ * \li @see @ref sec_filter_plugins
  *
  * \subsubsection subsubsec_dataset_transfer_drive File Drivers
  * I/O is performed by the HDF5 virtual file layer. The file driver interface writes and reads blocks
@@ -2685,8 +2724,25 @@ allocated if necessary.
  * and minimum values, and they will get a much larger minimum-bits (poor compression)
  * </li></ol>
  *
- * \subsubsection subsubsec_dataset_filters_szip Using the Szip Filter
- * See The HDF Group website for further information regarding the Szip filter.
+ * \subsubsection subsubsec_dataset_filters_szip Using the SZip Filter
+ * See The HDF Group website for further information regarding the SZip filter.
+ *
+ * \subsubsection subsubsec_dataset_filters_dyn Using Dynamically-Loadable Filters
+ * \see \ref sec_filter_plugins for further information regarding the dynamically-loadable filters.
+ *
+ * HDF has a filter plugin repository of useful third-party plugins that can used
+ * <table>
+ * <tr><th>Filter</th><th>SetFilter Params</th></tr>
+ * <tr><td>BLOSC</td><td>UD=32001,0,0</td></tr>
+ * <tr><td>BSHUF</td><td>UD=32004,0,0</td></tr>
+ * <tr><td>BZIP2</td><td>UD=307,0,1,9</td></tr>
+ * <tr><td>JPEG</td><td>UD=32019,0,4,q,c,r,t</td></tr>
+ * <tr><td>LZ4 </td><td>UD=32004,0,1,3</td></tr>
+ * <tr><td>LZF</td><td>UD=32000,1,3,0,0,0</td></tr>
+ * <tr><td>SZ</td><td>UD=32017,1,5,2,7,20,40,0</td></tr>
+ * <tr><td>ZFP</td><td>UD=32013,1,0,0</td></tr>
+ * <tr><td>ZSTD</td><td>UD=32015,0,0</td></tr>
+ * </table>
  *
  * Previous Chapter \ref sec_group - Next Chapter \ref sec_datatype
  *
