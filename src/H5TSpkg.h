@@ -34,27 +34,13 @@
 
 #ifdef H5_HAVE_WIN_THREADS
 
-/* Scope Definitions (Pthreads only) */
-#define H5TS_SCOPE_SYSTEM  0
-#define H5TS_SCOPE_PROCESS 0
-
 /* Portability function aliases */
-#define H5TS__attr_init(attr)            0
-#define H5TS__attr_setscope(attr, scope) 0
-#define H5TS__attr_destroy(attr)         0
-#define H5TS__wait_for_thread(thread)    WaitForSingleObject(thread, INFINITE)
+#define H5TS__wait_for_thread(thread)            WaitForSingleObject(thread, INFINITE)
 
 #else /* H5_HAVE_WIN_THREADS */
 
-/* Scope Definitions (Pthreads only) */
-#define H5TS_SCOPE_SYSTEM                PTHREAD_SCOPE_SYSTEM
-#define H5TS_SCOPE_PROCESS               PTHREAD_SCOPE_PROCESS
-
 /* Portability function aliases */
-#define H5TS__attr_init(attr)            pthread_attr_init(attr)
-#define H5TS__attr_setscope(attr, scope) pthread_attr_setscope(attr, scope)
-#define H5TS__attr_destroy(attr)         pthread_attr_destroy(attr)
-#define H5TS__wait_for_thread(thread)    pthread_join(thread, NULL)
+#define H5TS__wait_for_thread(thread)            pthread_join(thread, NULL)
 
 #endif /* H5_HAVE_WIN_THREADS */
 
@@ -65,12 +51,10 @@
 /* Portability wrappers */
 #ifdef H5_HAVE_WIN_THREADS
 
-typedef HANDLE    H5TS_attr_t;
 typedef INIT_ONCE H5TS_once_t;
 
 #else
 
-typedef pthread_attr_t H5TS_attr_t;
 typedef pthread_once_t H5TS_once_t;
 
 #endif /* H5_HAVE_WIN_THREADS */
@@ -348,7 +332,7 @@ H5_DLL herr_t H5TS__rw_lock_print_stats(const char *header_str, H5TS_rw_lock_sta
 #endif
 
 /* Testing routines */
-H5_DLL H5TS_thread_t H5TS__create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata);
+H5_DLL H5TS_thread_t H5TS__create_thread(void *(*func)(void *), void *udata);
 
 #endif /* H5TS_TESTING */
 

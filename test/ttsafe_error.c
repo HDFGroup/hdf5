@@ -62,7 +62,6 @@ tts_error(void)
     hid_t         vol_id   = H5I_INVALID_HID;
     hid_t         dataset  = H5I_INVALID_HID;
     H5TS_thread_t threads[NUM_THREAD];
-    H5TS_attr_t   attribute;
     int           value, i;
     herr_t        status;
 
@@ -103,14 +102,6 @@ tts_error(void)
     /* set up mutex for global count of errors */
     H5TS_mutex_init(&error_mutex_g);
 
-    /* make thread scheduling global */
-    H5TS__attr_init(&attribute);
-
-#ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
-    /* set thread scope to system */
-    H5TS__attr_setscope(&attribute, H5TS_SCOPE_SYSTEM);
-#endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
-
     def_fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(def_fapl, H5I_INVALID_HID, "H5Pcreate");
 
@@ -125,7 +116,7 @@ tts_error(void)
         CHECK(error_file_g, H5I_INVALID_HID, "H5Fcreate");
 
         for (i = 0; i < NUM_THREAD; i++)
-            threads[i] = H5TS__create_thread(tts_error_thread, &attribute, NULL);
+            threads[i] = H5TS__create_thread(tts_error_thread, NULL);
 
         for (i = 0; i < NUM_THREAD; i++)
             H5TS__wait_for_thread(threads[i]);
@@ -160,7 +151,6 @@ tts_error(void)
     status = H5Idec_ref(vol_id);
     CHECK(status, FAIL, "H5Idec_ref");
 
-    H5TS__attr_destroy(&attribute);
     H5TS_mutex_destroy(&error_mutex_g);
 } /* end tts_error() */
 

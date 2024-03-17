@@ -116,7 +116,7 @@ tts_thread_id(void)
     memset(used, 0, sizeof(used));
     for (times = 0; times < CYCLE_COUNT; times++) {
         for (i = 0; i < NTHREADS; i++)
-            threads[i] = H5TS__create_thread(thread_main, NULL, NULL);
+            threads[i] = H5TS__create_thread(thread_main, NULL);
 
         for (i = 0; i < NTHREADS; i++)
             H5TS__wait_for_thread(threads[i]);

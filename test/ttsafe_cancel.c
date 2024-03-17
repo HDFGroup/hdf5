@@ -54,18 +54,9 @@ pthread_cond_t  cond;
 void
 tts_cancel(void)
 {
-    pthread_attr_t            attribute;
     hid_t                     dataset;
     int                       buffer;
     int H5_ATTR_NDEBUG_UNUSED ret;
-
-    /* make thread scheduling global */
-    ret = pthread_attr_init(&attribute);
-    assert(ret == 0);
-#ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
-    ret = pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-    assert(ret == 0);
-#endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
 
     /* Initialize mutex & condition variables */
     ret = pthread_mutex_init(&mutex, NULL);
@@ -79,7 +70,7 @@ tts_cancel(void)
      */
     cancel_file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     assert(cancel_file >= 0);
-    ret = pthread_create(&childthread, &attribute, tts_cancel_thread, NULL);
+    ret = pthread_create(&childthread, NULL, tts_cancel_thread, NULL);
     assert(ret == 0);
     tts_cancel_barrier();
     ret = pthread_cancel(childthread);
@@ -97,10 +88,6 @@ tts_cancel(void)
     assert(ret >= 0);
     ret = H5Fclose(cancel_file);
     assert(ret >= 0);
-
-    /* Destroy the thread attribute */
-    ret = pthread_attr_destroy(&attribute);
-    assert(ret == 0);
 } /* end tts_cancel() */
 
 void *

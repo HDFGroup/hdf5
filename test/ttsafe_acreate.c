@@ -102,7 +102,7 @@ tts_acreate(void)
         attrib_data->datatype      = datatype;
         attrib_data->dataspace     = dataspace;
         attrib_data->current_index = i;
-        threads[i]                 = H5TS__create_thread(tts_acreate_thread, NULL, attrib_data);
+        threads[i]                 = H5TS__create_thread(tts_acreate_thread, attrib_data);
     }
 
     for (i = 0; i < NUM_THREADS; i++)

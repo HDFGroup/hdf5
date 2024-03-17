@@ -105,9 +105,8 @@ tts_attr_vlen(void)
     CHECK(ret, H5I_INVALID_HID, "H5Tclose");
 
     /* Start multiple threads and execute tts_attr_vlen_thread() for each thread */
-    for (i = 0; i < NUM_THREADS; i++) {
-        threads[i] = H5TS__create_thread(tts_attr_vlen_thread, NULL, NULL);
-    }
+    for (i = 0; i < NUM_THREADS; i++)
+        threads[i] = H5TS__create_thread(tts_attr_vlen_thread, NULL);
 
     /* Wait for the threads to end */
     for (i = 0; i < NUM_THREADS; i++)

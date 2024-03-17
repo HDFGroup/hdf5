@@ -74,7 +74,7 @@ typedef void *(*H5TS_thread_cb_t)(void *);
  *--------------------------------------------------------------------------
  */
 H5TS_thread_t
-H5TS__create_thread(H5TS_thread_cb_t func, H5TS_attr_t *attr, void *udata)
+H5TS__create_thread(H5TS_thread_cb_t func, void *udata)
 {
     H5TS_thread_t ret_value;
 
@@ -95,7 +95,7 @@ H5TS__create_thread(H5TS_thread_cb_t func, H5TS_attr_t *attr, void *udata)
 
 #else /* H5_HAVE_WIN_THREADS */
 
-    pthread_create(&ret_value, attr, (void *(*)(void *))func, udata);
+    pthread_create(&ret_value, NULL, (void *(*)(void *))func, udata);
 
 #endif /* H5_HAVE_WIN_THREADS */
 

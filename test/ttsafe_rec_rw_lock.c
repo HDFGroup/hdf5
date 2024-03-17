@@ -610,7 +610,7 @@ tts_rec_rw_lock_smoke_check_2(void)
     uint64_t start_time = H5_now_usec();
     /* 3) Create the reader threads, each with its own user data. */
     for (i = 0; i < num_threads; i++)
-        threads[i] = H5TS__create_thread(tts_rw_lock_smoke_check_test_thread, NULL, &udata[i]);
+        threads[i] = H5TS__create_thread(tts_rw_lock_smoke_check_test_thread, &udata[i]);
 
     /* 4) Wait for all threads to complete. */
     for (i = 0; i < num_threads; i++)
@@ -809,7 +809,7 @@ tts_rec_rw_lock_smoke_check_3(void)
     uint64_t start_time = H5_now_usec();
     /* 3) Create the writer threads, each with its own user data. */
     for (i = 0; i < num_threads; i++)
-        threads[i] = H5TS__create_thread(tts_rw_lock_smoke_check_test_thread, NULL, &(udata[i]));
+        threads[i] = H5TS__create_thread(tts_rw_lock_smoke_check_test_thread, &udata[i]);
 
     /* 4) Wait for all threads to complete. */
     for (i = 0; i < num_threads; i++)
@@ -1009,7 +1009,7 @@ tts_rec_rw_lock_smoke_check_4(void)
     uint64_t start_time = H5_now_usec();
     /* 3) Create the reader threads, each with its own user data. */
     for (i = 0; i < num_threads; i++)
-        threads[i] = H5TS__create_thread(tts_rw_lock_smoke_check_test_thread, NULL, &(udata[i]));
+        threads[i] = H5TS__create_thread(tts_rw_lock_smoke_check_test_thread, &udata[i]);
 
     /* 4) Wait for all threads to complete. */
     for (i = 0; i < num_threads; i++)

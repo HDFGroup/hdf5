@@ -63,16 +63,7 @@ tts_dcreate(void)
     hid_t       file    = H5I_INVALID_HID;
     hid_t       dataset = H5I_INVALID_HID;
     int         datavalue, i;
-    H5TS_attr_t attribute;
     herr_t      status;
-
-    /* set pthread attribute to perform global scheduling */
-    H5TS__attr_init(&attribute);
-
-    /* set thread scope to system */
-#ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
-    H5TS__attr_setscope(&attribute, H5TS_SCOPE_SYSTEM);
-#endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
 
     /*
      * Create a hdf5 file using H5F_ACC_TRUNC access, default file
@@ -86,7 +77,7 @@ tts_dcreate(void)
         thread_out[i].id       = i;
         thread_out[i].file     = file;
         thread_out[i].dsetname = dsetname[i];
-        threads[i]             = H5TS__create_thread(tts_dcreate_creator, NULL, &thread_out[i]);
+        threads[i]             = H5TS__create_thread(tts_dcreate_creator, &thread_out[i]);
     }
 
     for (i = 0; i < NUM_THREAD; i++)
@@ -122,9 +113,6 @@ tts_dcreate(void)
     /* close remaining resources */
     status = H5Fclose(file);
     CHECK(status, FAIL, "H5Fclose");
-
-    /* Destroy the thread attribute */
-    H5TS__attr_destroy(&attribute);
 } /* end tts_dcreate() */
 
 void *
