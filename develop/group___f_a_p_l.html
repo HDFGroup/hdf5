@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.6d85ea2</span>
+   &#160;<span id="projectnumber">1.15.0.68e8c0e</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -210,7 +210,7 @@ $(function(){initNavTree('group___f_a_p_l.html',''); initResizable(); });
 <tr>
 <td><a class="el" href="#ga4e03be2fe83ed02b32266a6c81427beb" title="Sets up the logging virtual file driver (H5FD_LOG) for use.">H5Pset_fapl_log</a> </td><td>The logging driver is a clone of the standard SEC2 (<a class="el" href="_h5_f_dsec2_8h.html#a15ae1f958e1cf11cb239916d76b10606">H5FD_SEC2</a>) driver with additional facilities for logging metrics and activity to a file.  </td></tr>
 <tr>
-<td><a class="el" href="#ga8491676811ccc7ba582e30fb63da6563">H5Pset_fapl_mirror</a>/<a class="el" href="#ga2c0636d9bb9c50d381afbd0d3140e593">H5Pget_fapl_mirror</a> </td><td>Modifies/queries the file driver properties of the mirror driver.  </td></tr>
+<td><a class="el" href="#ga8491676811ccc7ba582e30fb63da6563" title="Modifies the file access property list to use the H5FD_MIRROR driver.">H5Pset_fapl_mirror</a>/<a class="el" href="#ga2c0636d9bb9c50d381afbd0d3140e593" title="Queries a File Access Property List for H5FD_MIRROR file driver properties.">H5Pget_fapl_mirror</a> </td><td>Modifies/queries the file driver properties of the mirror driver.  </td></tr>
 <tr>
 <td><a class="el" href="#gaa0204810c1fea1667d62cf7c176416ff" title="Stores MPI IO communicator information to the file access property list.">H5Pset_fapl_mpio</a>/<a class="el" href="#ga5d9e4b9f27791ccf19484a898f3fd6fa" title="Returns MPI IO communicator information.">H5Pget_fapl_mpio</a> </td><td>Sets driver for files on parallel file systems (MPI I/O) or retrieves information regarding the driver.  </td></tr>
 <tr>
@@ -269,8 +269,10 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga4e03be2fe83ed02b32266a6c81427beb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the logging virtual file driver (<a class="el" href="_h5_f_dlog_8h.html#a027aaf28f5104c77c4f51ecd29a5f7f4">H5FD_LOG</a>) for use.  <br /></td></tr>
 <tr class="separator:ga4e03be2fe83ed02b32266a6c81427beb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2c0636d9bb9c50d381afbd0d3140e593" id="r_ga2c0636d9bb9c50d381afbd0d3140e593"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga2c0636d9bb9c50d381afbd0d3140e593">H5Pget_fapl_mirror</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__mirror__fapl__t.html">H5FD_mirror_fapl_t</a> *fa_out)</td></tr>
+<tr class="memdesc:ga2c0636d9bb9c50d381afbd0d3140e593"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries a File Access Property List for <a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> file driver properties.  <br /></td></tr>
 <tr class="separator:ga2c0636d9bb9c50d381afbd0d3140e593"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga8491676811ccc7ba582e30fb63da6563" id="r_ga8491676811ccc7ba582e30fb63da6563"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8491676811ccc7ba582e30fb63da6563">H5Pset_fapl_mirror</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__mirror__fapl__t.html">H5FD_mirror_fapl_t</a> *fa)</td></tr>
+<tr class="memdesc:ga8491676811ccc7ba582e30fb63da6563"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the file access property list to use the <a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> driver.  <br /></td></tr>
 <tr class="separator:ga8491676811ccc7ba582e30fb63da6563"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa0204810c1fea1667d62cf7c176416ff" id="r_gaa0204810c1fea1667d62cf7c176416ff"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaa0204810c1fea1667d62cf7c176416ff">H5Pset_fapl_mpio</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, MPI_Comm comm, MPI_Info info)</td></tr>
 <tr class="memdesc:gaa0204810c1fea1667d62cf7c176416ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores MPI IO communicator information to the file access property list.  <br /></td></tr>
@@ -737,7 +739,7 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
 <tr>
 <td>Direct </td><td><a class="el" href="_h5_f_ddirect_8h.html#a99213f218f9ab0c51f9c679228a1e436">H5FD_DIRECT</a> </td><td>This is the <a class="el" href="_h5_f_dsec2_8h.html#a15ae1f958e1cf11cb239916d76b10606">H5FD_SEC2</a> driver except data is written to or read from the file synchronously without being cached by the system. </td><td><a class="el" href="#ga2839252e149484ef30fb214ae7b44ac7" title="Sets up use of the direct I/O driver.">H5Pset_fapl_direct</a>  </td></tr>
 <tr>
-<td>Mirror </td><td><a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> </td><td>Serial I/O to file using Unix “stdio” functions. </td><td><a class="el" href="#ga8491676811ccc7ba582e30fb63da6563">H5Pset_fapl_mirror</a>  </td></tr>
+<td>Mirror </td><td><a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> </td><td>Serial I/O to file using Unix “stdio” functions. </td><td><a class="el" href="#ga8491676811ccc7ba582e30fb63da6563" title="Modifies the file access property list to use the H5FD_MIRROR driver.">H5Pset_fapl_mirror</a>  </td></tr>
 <tr>
 <td>HDFS </td><td><a class="el" href="_h5_f_dhdfs_8h.html#ac3868cc2fa0e9aec4bcb52830906d584">H5FD_HDFS</a> </td><td>Read-Only access to Hadoop Distributed File System (HDFS). </td><td><a class="el" href="#ga970d077c8e712a4692f43fa4f38dde14" title="Modifies the file access property list to use the H5FD_HDFS driver.">H5Pset_fapl_hdfs</a>  </td></tr>
 <tr>
@@ -1147,7 +1149,18 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo</a></b></dt><dd>Add missing documentation </dd></dl>
+
+<p>Queries a File Access Property List for <a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> file driver properties. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>File access property list identifier </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">fa_out</td><td>Pointer to <a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> driver configuration structure </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="#ga2c0636d9bb9c50d381afbd0d3140e593" title="Queries a File Access Property List for H5FD_MIRROR file driver properties.">H5Pget_fapl_mirror()</a> queries the <a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> driver properties as set by <a class="el" href="#ga8491676811ccc7ba582e30fb63da6563" title="Modifies the file access property list to use the H5FD_MIRROR driver.">H5Pset_fapl_mirror()</a>.</p>
+<dl class="section since"><dt>Since</dt><dd>1.10.7 </dd></dl>
 
 </div>
 </div>
@@ -3308,7 +3321,18 @@ Flavor of allocation   </td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000015">Todo</a></b></dt><dd>Add missing documentation </dd></dl>
+
+<p>Modifies the file access property list to use the <a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> driver. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>File access property list identifier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">fa</td><td>Pointer to <a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> driver configuration structure</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="#ga8491676811ccc7ba582e30fb63da6563" title="Modifies the file access property list to use the H5FD_MIRROR driver.">H5Pset_fapl_mirror()</a> modifies the file access property list to use the <a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> driver.</p>
+<dl class="section since"><dt>Since</dt><dd>1.10.7 </dd></dl>
 
 </div>
 </div>

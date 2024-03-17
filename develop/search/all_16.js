@@ -16,7 +16,7 @@ var searchData=
   ['manual_20entry_13',['Creating a New Reference Manual Entry',['../_about.html#new_rm_entry',1,'']]],
   ['manual_20rm_20page_20template_14',['Reference Manual (RM) Page Template',['../_r_m_t.html',1,'']]],
   ['map_15',['map',['../union_h5_v_l__map__args__t.html#a898c4c6895378c852f8593d302c8d3d7',1,'H5VL_map_args_t']]],
-  ['map_20object_16',['Map Object',['../_h5_m__u_g.html#sec_map',1,'The HDF5 Map Object'],['../todo.html#_todo000020',1,'The HDF5 Map Object'],['../todo.html#_todo000021',1,'The HDF5 Map Object']]],
+  ['map_20object_16',['Map Object',['../_h5_m__u_g.html#sec_map',1,'The HDF5 Map Object'],['../todo.html#_todo000018',1,'The HDF5 Map Object'],['../todo.html#_todo000019',1,'The HDF5 Map Object']]],
   ['map_20storage_20to_20hdf5_20file_20objects_17',['Map Storage to HDF5 File Objects',['../_v_o_l__connector.html#subsecVOLMap',1,'']]],
   ['mapl_5fid_18',['mapl_id',['../union_h5_v_l__map__args__t.html#a7c872dfd6394d05d24593f1b5fbb6609',1,'H5VL_map_args_t']]],
   ['mapping_19',['The HDF5 VOL Data Mapping',['../_h5_m__u_g.html',1,'']]],
