@@ -42,28 +42,22 @@
  * available on the system in a default location. The HDF5 filter plugin is discussed in detail in the
  * \ref subsec_filter_plugins_prog section.
  *
- * \subsubsection subsubsec_filter_plugins_model_apply Applying a Third-party Filter When Creating and Writing a Dataset
- * A third-party filter can be added to the HDF5 filter pipeline by using the H5Pset_filter function, as a
- * user would do in the past. The identification number and the filter parameters should be available to the
- * application. For example, if the application intends to apply the HDF5 bzip2 compression filter that was
- * registered with The HDF Group and has an identification number 307
- * (<a href="https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html">Registered Filters</a>)
- * then the application would follow the steps as outlined below:
- * \code
- *   dcpl = H5Pcreate (H5P_DATASET_CREATE);
- *   status = H5Pset_filter (dcpl, (H5Z_filter_t)307, H5Z_FLAG_MANDATORY, (size_t)6, cd_values);
- *   dset = H5Dcreate (file, DATASET, H5T_STD_I32LE, space, H5P_DEFAULT, dcpl,
- *   status = H5Dwrite (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata[0]);
- * \endcode
+ * \subsubsection subsubsec_filter_plugins_model_apply Applying a Third-party Filter When Creating and Writing
+ * a Dataset A third-party filter can be added to the HDF5 filter pipeline by using the H5Pset_filter
+ * function, as a user would do in the past. The identification number and the filter parameters should be
+ * available to the application. For example, if the application intends to apply the HDF5 bzip2 compression
+ * filter that was registered with The HDF Group and has an identification number 307
+ * (<a href="https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html">Registered
+ * Filters</a>) then the application would follow the steps as outlined below: \code dcpl = H5Pcreate
+ * (H5P_DATASET_CREATE); status = H5Pset_filter (dcpl, (H5Z_filter_t)307, H5Z_FLAG_MANDATORY, (size_t)6,
+ * cd_values); dset = H5Dcreate (file, DATASET, H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, status = H5Dwrite
+ * (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata[0]); \endcode
  *
  * \subsubsection subsubsec_filter_plugins_model_read Reading Data with an Applied Third-party Filter
  * An application does not need to do anything special to read the data with a third-party filter applied. For
- * example, if one wants to read data written in the previous example, the following regular steps should be taken:
- * \code
- *   file = H5Fopen (FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
- *   dset = H5Dopen (file, DATASET, H5P_DEFAULT);
- *   H5Dread (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]);
- * \endcode
+ * example, if one wants to read data written in the previous example, the following regular steps should be
+ * taken: \code file = H5Fopen (FILE, H5F_ACC_RDONLY, H5P_DEFAULT); dset = H5Dopen (file, DATASET,
+ * H5P_DEFAULT); H5Dread (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]); \endcode
  *
  * The command-line utility h5dump, for example, will read and display the data as shown:
  * \code
@@ -111,8 +105,8 @@
  * Data goes through the HDF5 filter pipeline only when it is written to the file or read into application
  * memory space from the file. For example, the I/O operation is triggered with a call to #H5Fflush, or when
  * a data item (HDF5 metadata or a raw data chunk) is evicted from the cache or brought into the cache.
- * Please notice that #H5Dread/#H5Dwrite calls on the chunked datasets do not necessarily trigger I/O since the
- * HDF5 Library uses a separate chunk cache.
+ * Please notice that #H5Dread/#H5Dwrite calls on the chunked datasets do not necessarily trigger I/O since
+ * the HDF5 Library uses a separate chunk cache.
  *
  * A data item may remain in the cache until the HDF5 Library is closed. If the HDF5 plugin that has to be
  * applied to the data item becomes unavailable before the file and all objects in the file are closed, an
@@ -167,11 +161,11 @@
  *
  * \subsubsection subsubsec_filter_plugins_prog_write Writing a Filter Function
  * The HDF5 filter function for the dynamically loaded filter feature should be written as any custom filter
- * described in <a href="http://www.hdfgroup.org/HDF5/doc/H5.user/Filters.html">Custom Filters</a>. See the “Example” section,
- * section 5, of that document to get an idea of the simple filter function, and see the example of the more
- * sophisticated HDF5 bzip2 filter function in the “Building an HDF5 bzip2 Plugin Example” section.
- * The HDF5 bzip2 filter function is also available for download from
- * <a href="https://github.com/HDFGroup/hdf5_plugins">Filter Plugin Repository</a>.
+ * described in <a href="http://www.hdfgroup.org/HDF5/doc/H5.user/Filters.html">Custom Filters</a>. See the
+ * “Example” section, section 5, of that document to get an idea of the simple filter function, and see the
+ * example of the more sophisticated HDF5 bzip2 filter function in the “Building an HDF5 bzip2 Plugin Example”
+ * section. The HDF5 bzip2 filter function is also available for download from <a
+ * href="https://github.com/HDFGroup/hdf5_plugins">Filter Plugin Repository</a>.
  *
  * The user has to remember a few things when writing an HDF5 filter function.
  * <ul><li>1. An HDF5 filter is bidirectional.
@@ -188,7 +182,8 @@
  * \subsubsection subsubsec_filter_plugins_prog_reg Registering a Filter with The HDF Group
  * If you are writing a filter that will be used by others, it would be a good idea to request a filter
  * identification number and register it with The HDF Group. Please follow the procedure described at
- * <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html">Registered Filters</a>.
+ * <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html">Registered
+ * Filters</a>.
  *
  * The HDF Group anticipates that developers of HDF5 filter plugins will not only register new filters, but
  * will also provide links to the source code and/or binaries for the corresponding HDF5 filter plugins.
@@ -213,8 +208,8 @@
  * use the H5Pget_filter<*> functions to retrieve information about the filters.
  *
  * Using the example of the structure above, the h5dump tool will print the string “HDF5 bzip2
- * filter found at …” pointing users to the applied filter (see the example in the \ref subsubsec_filter_plugins_model_read
- * section) thus solving the problem of the filter’s origin.
+ * filter found at …” pointing users to the applied filter (see the example in the \ref
+ * subsubsec_filter_plugins_model_read section) thus solving the problem of the filter’s origin.
  *
  * \subsubsection subsubsec_filter_plugins_prog_create Creating an HDF5 Filter Plugin
  * The HDF5 filter plugin source should include:
@@ -278,8 +273,9 @@
  *   GIT_BRANCH: "master"
  * \endcode
  *
- * See the documentation at <aref="https://github.com/HDFGroup/hdf5_plugins/tree/master/docs">hdf5_plugins/docs</a> folder
- * In particular:
+ * See the documentation at
+ * <aref="https://github.com/HDFGroup/hdf5_plugins/tree/master/docs">hdf5_plugins/docs</a> folder In
+ * particular:
  * <aref="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/INSTALL_With_CMake.txt">INSTALL_With_CMake</a>
  * <aref="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/USING_HDF5_AND_CMake.txt">USING_HDF5_AND_CMake</a>
  */
