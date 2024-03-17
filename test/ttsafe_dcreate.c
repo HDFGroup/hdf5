@@ -60,10 +60,10 @@ tts_dcreate(void)
     H5TS_thread_t threads[NUM_THREAD];
 
     /* HDF5 data definitions */
-    hid_t       file    = H5I_INVALID_HID;
-    hid_t       dataset = H5I_INVALID_HID;
-    int         datavalue, i;
-    herr_t      status;
+    hid_t  file    = H5I_INVALID_HID;
+    hid_t  dataset = H5I_INVALID_HID;
+    int    datavalue, i;
+    herr_t status;
 
     /*
      * Create a hdf5 file using H5F_ACC_TRUNC access, default file

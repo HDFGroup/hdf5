@@ -35,12 +35,12 @@
 #ifdef H5_HAVE_WIN_THREADS
 
 /* Portability function aliases */
-#define H5TS__wait_for_thread(thread)            WaitForSingleObject(thread, INFINITE)
+#define H5TS__wait_for_thread(thread) WaitForSingleObject(thread, INFINITE)
 
 #else /* H5_HAVE_WIN_THREADS */
 
 /* Portability function aliases */
-#define H5TS__wait_for_thread(thread)            pthread_join(thread, NULL)
+#define H5TS__wait_for_thread(thread) pthread_join(thread, NULL)
 
 #endif /* H5_HAVE_WIN_THREADS */
 
