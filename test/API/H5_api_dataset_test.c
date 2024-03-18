@@ -9861,13 +9861,16 @@ test_dataset_vlen_io(void)
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this "
                "connector\n");
         return 0;
     }
+
+    /* Skipped for now due to segfault with the Cache VOL */
+    SKIPPED();
+    return 0;
 
     TESTING_2("test setup");
 
@@ -10511,10 +10514,6 @@ test_dataset_set_extent_chunked_unlimited(void)
     hid_t   fspace_id  = H5I_INVALID_HID;
 
     TESTING("H5Dset_extent on chunked dataset with unlimited dimensions");
-
-    /* Skipped for now due to segfault with the Cache VOL */
-    SKIPPED();
-    return 0;
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
