@@ -144,7 +144,7 @@ main(void)
      * Output the data to the screen.
      */
     for (i = 0; i < dims[0]; i++) {
-        printf("%s[%llu]:\n", DATASET, i);
+        printf("%s[%" PRIuHSIZE "]:\n", DATASET, i);
         for (j = 0; j < adims[0]; j++) {
             printf(" [");
             for (k = 0; k < adims[1]; k++)

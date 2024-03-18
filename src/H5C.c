@@ -66,6 +66,7 @@
 #include "H5FLprivate.h" /* Free Lists                   */
 #include "H5MFprivate.h" /* File memory management       */
 #include "H5MMprivate.h" /* Memory management            */
+#include "H5SLprivate.h" /* Skip Lists                               */
 
 /****************/
 /* Local Macros */

@@ -28,9 +28,11 @@
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling                       */
 #include "H5Fpkg.h"      /* File access                          */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Iprivate.h"  /* IDs                                  */
 #include "H5MMprivate.h" /* Memory management                    */
 #include "H5Pprivate.h"  /* Property lists                       */
+#include "H5SLprivate.h" /* Skip Lists                               */
 
 /* Special values for the "tag" field below */
 #define H5F_EFC_TAG_DEFAULT   (-1)

@@ -41,14 +41,14 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-
-
 RUN_DIR=mirror_vfd_test
 MIRROR_UTILS=../utils/mirror_vfd # TODO: presupposes from test/
 
-if [[ ! -d $RUN_DIR ]] ; then
-    mkdir $RUN_DIR
+# Start clean
+if test -d $RUN_DIR ; then
+    rm -rf $RUN_DIR
 fi
+mkdir $RUN_DIR
 
 # Copy program files into dedicated test directory
 for FILE in $MIRROR_UTILS/mirror_* ; do
@@ -65,7 +65,7 @@ cp mirror_vfd $RUN_DIR
 if [ -f $MIRROR_UTILS/.libs/mirror_server ] ; then
     RUN_LIBS=$RUN_DIR/.libs
     # Delete previous .libs directory, to remove any generated libtool files
-    if [[ -d $RUN_LIBS ]] ; then
+    if test -d $RUN_LIBS ; then
         rm -rf $RUN_LIBS
     fi
     mkdir $RUN_LIBS

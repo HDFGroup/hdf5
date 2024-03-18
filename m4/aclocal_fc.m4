@@ -159,7 +159,7 @@ dnl disable Fortran 2003 if it does not.
 
 AC_DEFUN([PAC_PROG_FC_HAVE_F2003_REQUIREMENTS],[
    HAVE_F2003_REQUIREMENTS="no"
-   AC_MSG_CHECKING([if Fortran compiler version compatible with Fortran 2003 HDF])
+   AC_MSG_CHECKING([if Fortran compiler version compatible with Fortran 2003])
    TEST_SRC="`sed -n '/PROG_FC_HAVE_F2003_REQUIREMENTS/,/END PROGRAM PROG_FC_HAVE_F2003_REQUIREMENTS/p' $srcdir/m4/aclocal_fc.f90`"
    AC_COMPILE_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
             HAVE_F2003_REQUIREMENTS="yes"],

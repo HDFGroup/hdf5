@@ -30,6 +30,7 @@
 /***********/
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5HFpkg.h"     /* Fractal heaps			*/
 #include "H5VMprivate.h" /* Vectors and arrays 			*/
 
