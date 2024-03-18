@@ -47,7 +47,7 @@ CONTAINS
 !**
 !***************************************************************
 
-    INTEGER FUNCTION my_hdf5_error_handler(estack_id, data_inout) bind(C)
+    INTEGER(C_INT) FUNCTION my_hdf5_error_handler(estack_id, data_inout) bind(C)
 
     ! This error function handle works with only version 2 error stack
 
