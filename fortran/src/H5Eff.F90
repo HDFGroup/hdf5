@@ -627,7 +627,7 @@ CONTAINS
        RETURN
     ENDIF
     f_ptr = C_LOC(c_msg(1)(1:1))
-    c_msg_size = H5Eget_msg(msg_id, c_msg_type, f_ptr, msg_cp_sz+1)
+    c_msg_size = H5Eget_msg(msg_id, c_msg_type, f_ptr, msg_cp_sz+1_SIZE_T)
 
     CALL HD5c2fstring(msg, c_msg, msg_cp_sz, msg_cp_sz+1_SIZE_T)
 
