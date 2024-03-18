@@ -592,7 +592,7 @@ Wremove(const char *path)
     wchar_t *wpath = NULL; /* UTF-16 version of the path */
     int      ret   = -1;
 
-    /* First try opening the file with the normal POSIX open() call.
+    /* First try removing the file with the normal POSIX remove() call.
      * This will handle ASCII without additional processing as well as
      * systems where code pages are being used instead of true Unicode.
      */
