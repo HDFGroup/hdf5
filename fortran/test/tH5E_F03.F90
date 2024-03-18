@@ -89,7 +89,7 @@ CONTAINS
 
     INTEGER(SIZE_T), PARAMETER :: MSG_SIZE = 64
 
-    INTEGER(C_INT)    :: n
+    INTEGER(C_INT), VALUE :: n
     TYPE(h5e_error_t) :: err_desc
     TYPE(C_PTR)       :: op_data
 
@@ -100,6 +100,11 @@ CONTAINS
     INTEGER :: msg_type
 
     INTEGER :: error
+
+    IF(n.NE.0_C_INT)THEN
+       custom_print_cb = -1
+       RETURN
+    ENDIF
 
     CALL H5Eget_class_name_f(err_desc%cls_id, cls, error)
     IF(error .LT.0)THEN
