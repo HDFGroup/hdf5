@@ -341,11 +341,6 @@ done:
  DESCRIPTION
     Check the states of internal data structures of the hyperslab, and see
     whether they are consistent or not
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
- EXAMPLES
- REVISION LOG
 --------------------------------------------------------------------------*/
 htri_t
 H5S__internal_consistency_test(hid_t space_id)
@@ -367,3 +362,40 @@ H5S__internal_consistency_test(hid_t space_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5S__internal_consistency_test() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S__verify_offsets
+ PURPOSE
+    Verify that internal offsets match an array of offsets
+ USAGE
+    herr_t H5S__verify_offsets(hid_t space_id)
+        hid_t space_id;          IN:  dataspace id
+        const hssize_t *offset;  IN: Offset to position the selection at
+ RETURNS
+    Non-negative true/false on success, negative on failure
+ DESCRIPTION
+    This function is necessary because there is no public API call
+    that lets you get the offsets
+--------------------------------------------------------------------------*/
+herr_t
+H5S__verify_offsets(hid_t space_id, const hssize_t *offset)
+{
+    H5S_t *space;               /* Dataspace to modify */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADID, FAIL, "not a dataspace");
+    if (space->extent.rank == 0 ||
+        (H5S_GET_EXTENT_TYPE(space) == H5S_SCALAR || H5S_GET_EXTENT_TYPE(space) == H5S_NULL))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "can't set offset on scalar or null dataspace");
+
+    /* Check that the internal and passed-in offset data are the same */
+    if (0 != memcmp(space->select.offset, offset, sizeof(hssize_t) * space->extent.rank))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "internal offsets don't match parameters");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S__verify_offsets() */
