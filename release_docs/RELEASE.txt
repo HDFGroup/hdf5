@@ -281,6 +281,21 @@ Bug Fixes since HDF5-1.14.3 release
 
     Library
     -------
+    - Fixed an issue where the Subfiling VFD's context object cache could
+      grow too large
+
+      The Subfiling VFD keeps a cache of its internal context objects to
+      speed up access to a context object for a particular file, as well
+      as access to that object across multiple opens of the same file.
+      However, opening a large amount of files with the Subfiling VFD over
+      the course of an application's lifetime could cause this cache to grow
+      too large and result in the application running out of available MPI
+      communicator objects. On file close, the Subfiling VFD now simply
+      evicts context objects out of its cache and frees them. It is assumed
+      that multiple opens of a file will be a less common use case for the
+      Subfiling VFD, but this can be revisited if it proves to be an issue
+      for performance.
+
     - Fixed error when overwriting certain nested variable length types
 
       Previously, when using a datatype that included a variable length type
