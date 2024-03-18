@@ -90,6 +90,15 @@ typedef struct {
     size_t name_len; /* Length of full name */
 } H5L_trav_gnbi_t;
 
+/* User data for path traversal callback to creating a link */
+struct H5L_trav_cr_t {
+    H5F_t            *file;      /* Pointer to the file */
+    H5P_genplist_t   *lc_plist;  /* Link creation property list */
+    H5G_name_t       *path;      /* Path to object being linked */
+    H5O_obj_create_t *ocrt_info; /* Pointer to object creation info */
+    H5O_link_t       *lnk;       /* Pointer to link information to insert */
+};
+
 /* User data for path traversal routine for moving and renaming a link */
 typedef struct {
     const char      *dst_name;         /* Destination name for moving object */
@@ -696,6 +705,9 @@ H5L__create_real(const H5G_loc_t *link_loc, const char *link_name, H5G_name_t *o
         if (crt_intmd_group > 0)
             target_flags |= H5G_CRT_INTMD_GROUP;
     } /* end if */
+
+    if (ocrt_info != NULL)
+        target_flags   |= H5G_CRT_OBJ;
 
     /* Set up user data
      * FILE is used to make sure that hard links don't cross files, and
@@ -2143,3 +2155,22 @@ H5L_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_iterate() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5L_get_ocrt_info
+ *
+ * Purpose:  Quick and dirty routine to retrieve the link's object_creation info
+ *
+ * Return:   'ocrt_info' on success/abort on failure (shouldn't fail)
+ *-------------------------------------------------------------------------
+ */
+H5O_obj_create_t *
+H5L_get_ocrt_info(const H5L_trav_cr_t *l)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(l);
+
+    FUNC_LEAVE_NOAPI(l->ocrt_info);
+} /* end H5L_get_ocrt_info() */

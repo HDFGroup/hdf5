@@ -24,7 +24,6 @@
 /****************/
 
 #include "H5Gmodule.h" /* This source code file is part of the H5G module */
-#define H5D_FRIEND     /*suppress error about including H5Dpkg       */
 
 /***********/
 /* Headers */
@@ -35,7 +34,6 @@
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fprivate.h"  /* File access                              */
 #include "H5Gpkg.h"      /* Groups                                   */
-#include "H5Dpkg.h"      /* Dataset functions                        */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Lprivate.h"  /* Links                                    */
 #include "H5MMprivate.h" /* Memory management                        */
@@ -670,11 +668,12 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
 
                 /* Create the intermediate group */
                 gcrt_info.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
-                if ((ocrt_info = ((H5L_trav_cr_t *)op_data)->ocrt_info) != NULL) {
+                /* Propagate the object creation properties when creating intermedidate groups */
+                if ((target & H5G_CRT_OBJ) && (ocrt_info = H5L_OCRT_INFO(op_data)) != NULL) {
                     if (ocrt_info->obj_type == H5O_TYPE_GROUP)
-                        gcrt_info.gcpl_id = ((H5G_obj_create_t *)ocrt_info->crt_info)->gcpl_id;
+                       gcrt_info.gcpl_id = H5G_OBJ_ID(ocrt_info->crt_info);
                     else if (ocrt_info->obj_type == H5O_TYPE_DATASET)
-                        gcrt_info.gcpl_id = ((H5D_obj_create_t *)ocrt_info->crt_info)->dcpl_id;
+                        gcrt_info.gcpl_id = H5D_OBJ_ID(ocrt_info->crt_info);
                 }
 
                 gcrt_info.cache_type = H5G_NOTHING_CACHED;

@@ -6663,7 +6663,7 @@ test_misc40(void)
     hid_t    sid         = H5I_INVALID_HID;
     hsize_t  dims[1]     = {10};
     unsigned cr_order    = 0;
-    hbool_t  track_times = false;
+    bool     track_times = false;
     herr_t   status;
 
     /* Output message about test being performed */
