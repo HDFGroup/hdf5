@@ -1121,6 +1121,15 @@ Bug Fixes since HDF5-1.14.0 release
 
       The overflow was found by OSS-Fuzz https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=58658
 
+    - Fixed a segfault when using a user-defined conversion function between compound datatypes
+
+      During type info initialization for compound datatype conversion, the library checked if the
+      datatypes are subsets of one another in order to perform special conversion handling. 
+      This check uses information that is only defined if a library conversion function is in use. 
+      The library now skips this check for user-defined conversion functions.
+
+      Fixes Github issue #3840
+
     Java Library
     ------------
     - Fixed switch case 'L' block missing a break statement.
