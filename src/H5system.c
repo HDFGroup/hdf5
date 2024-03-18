@@ -516,13 +516,10 @@ error:
 /*-------------------------------------------------------------------------
  * Function:     Wopen_utf8
  *
- * Purpose:      UTF-8 equivalent of open(2) for use on Windows.
- *               Converts a UTF-8 input path to UTF-16 and then opens the
- *               file via _wopen() under the hood
+ * Purpose:      UTF-8 equivalent of open(2) for use on Windows
  *
  * Return:       Success:    A POSIX file descriptor
  *               Failure:    -1
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -531,10 +528,6 @@ Wopen_utf8(const char *path, int oflag, ...)
     int      fd    = -1;   /* POSIX file descriptor to be returned */
     wchar_t *wpath = NULL; /* UTF-16 version of the path */
     int      pmode = 0;    /* mode (optionally set via variable args) */
-
-    /* Convert the input UTF-8 path to UTF-16 */
-    if (NULL == (wpath = H5_get_utf16_str(path)))
-        goto done;
 
     /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
      * transformations when performing I/O. Note that this will
@@ -551,12 +544,33 @@ Wopen_utf8(const char *path, int oflag, ...)
         va_end(vl);
     }
 
-    /* Open the file */
+    /* First try opening the file with the normal POSIX open() call.
+     * This will handle ASCII without additional processing as well as
+     * systems where code pages are being used instead of true Unicode.
+     */
+    if ((fd = open(path, oflag, pmode)) >= 0) {
+        /* If this succeeds, we're done */
+        goto done;
+    }
+
+    if (errno == ENOENT) {
+        /* Not found, reset errno and try with UTF-16 */
+        errno = 0;
+    }
+    else {
+        /* Some other error (like permissions), so just exit */
+        goto done;
+    }
+
+    /* Convert the input UTF-8 path to UTF-16 */
+    if (NULL == (wpath = H5_get_utf16_str(path)))
+        goto done;
+
+    /* Open the file using a UTF-16 path */
     fd = _wopen(wpath, oflag, pmode);
 
 done:
-    if (wpath)
-        H5MM_xfree((void *)wpath);
+    H5MM_xfree(wpath);
 
     return fd;
 } /* end Wopen_utf8() */
@@ -565,12 +579,9 @@ done:
  * Function:     Wremove_utf8
  *
  * Purpose:      UTF-8 equivalent of remove(3) for use on Windows.
- *               Converts a UTF-8 input path to UTF-16 and then opens the
- *               file via _wremove() under the hood
  *
  * Return:       Success:    0
  *               Failure:    -1
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -579,16 +590,33 @@ Wremove_utf8(const char *path)
     wchar_t *wpath = NULL; /* UTF-16 version of the path */
     int      ret   = -1;
 
+    /* First try opening the file with the normal POSIX open() call.
+     * This will handle ASCII without additional processing as well as
+     * systems where code pages are being used instead of true Unicode.
+     */
+    if ((ret = remove(path)) >= 0) {
+        /* If this succeeds, we're done */
+        goto done;
+    }
+
+    if (errno == ENOENT) {
+        /* Not found, reset errno and try with UTF-16 */
+        errno = 0;
+    }
+    else {
+        /* Some other error (like permissions), so just exit */
+        goto done;
+    }
+
     /* Convert the input UTF-8 path to UTF-16 */
     if (NULL == (wpath = H5_get_utf16_str(path)))
         goto done;
 
-    /* Open the file */
+    /* Remove the file using a UTF-16 path */
     ret = _wremove(wpath);
 
 done:
-    if (wpath)
-        H5MM_xfree((void *)wpath);
+    H5MM_xfree(wpath);
 
     return ret;
 } /* end Wremove_utf8() */
