@@ -254,7 +254,7 @@ SUBROUTINE test_error_stack(total_error)
   INTEGER(HID_T) :: cls_id, major, minor, estack_id, estack_id1, estack_id2
   CHARACTER(LEN=18) :: file
   CHARACTER(LEN=18) :: func
-  INTEGER(C_INT)    :: line
+  INTEGER           :: line
   TYPE(C_PTR) :: ptr1
 
   INTEGER :: msg_type
