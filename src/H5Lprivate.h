@@ -48,9 +48,9 @@
 #define H5L_ACS_ELINK_CB_NAME "external link callback"
 
 #ifdef H5L_MODULE
-#define H5L_OCRT_INFO(L)                 (((H5L_trav_cr_t *)(L))->ocrt_info)
+#define H5L_OCRT_INFO(L) (((H5L_trav_cr_t *)(L))->ocrt_info)
 #else /* H5L_MODULE */
-#define H5L_OCRT_INFO(L)              (H5L_get_ocrt_info(L))
+#define H5L_OCRT_INFO(L) (H5L_get_ocrt_info(L))
 #endif
 
 /****************************/
@@ -64,7 +64,6 @@ typedef struct H5L_elink_cb_t {
 } H5L_elink_cb_t;
 
 typedef struct H5L_trav_cr_t H5L_trav_cr_t;
-
 
 /*****************************/
 /* Library Private Variables */

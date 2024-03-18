@@ -707,7 +707,7 @@ H5L__create_real(const H5G_loc_t *link_loc, const char *link_name, H5G_name_t *o
     } /* end if */
 
     if (ocrt_info != NULL)
-        target_flags   |= H5G_CRT_OBJ;
+        target_flags |= H5G_CRT_OBJ;
 
     /* Set up user data
      * FILE is used to make sure that hard links don't cross files, and

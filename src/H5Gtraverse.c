@@ -671,7 +671,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
                 /* Propagate the object creation properties when creating intermedidate groups */
                 if ((target & H5G_CRT_OBJ) && (ocrt_info = H5L_OCRT_INFO(op_data)) != NULL) {
                     if (ocrt_info->obj_type == H5O_TYPE_GROUP)
-                       gcrt_info.gcpl_id = H5G_OBJ_ID(ocrt_info->crt_info);
+                        gcrt_info.gcpl_id = H5G_OBJ_ID(ocrt_info->crt_info);
                     else if (ocrt_info->obj_type == H5O_TYPE_DATASET)
                         gcrt_info.gcpl_id = H5D_OBJ_ID(ocrt_info->crt_info);
                 }

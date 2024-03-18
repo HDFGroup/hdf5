@@ -3979,8 +3979,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5D_get_dcpl_id
  *
- * Purpose:  Quick and dirty routine to retrieve the 
- *           dcpl_id (dataset creation property list) from the 
+ * Purpose:  Quick and dirty routine to retrieve the
+ *           dcpl_id (dataset creation property list) from the
  *           dataset creation operation struct
  *
  * Return:   'dcpl_id' on success/abort on failure (shouldn't fail)

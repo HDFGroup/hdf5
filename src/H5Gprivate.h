@@ -94,10 +94,10 @@
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5G_MODULE
 #define H5G_MOUNTED(G) ((G)->shared->mounted)
-#define H5G_OBJ_ID(G)                 (((H5G_obj_create_t *)(G))->gcpl_id)
+#define H5G_OBJ_ID(G)  (((H5G_obj_create_t *)(G))->gcpl_id)
 #else /* H5G_MODULE */
 #define H5G_MOUNTED(G) (H5G_mounted(G))
-#define H5G_OBJ_ID(G)              (H5G_get_gcpl_id(G))
+#define H5G_OBJ_ID(G)  (H5G_get_gcpl_id(G))
 #endif /* H5G_MODULE */
 
 /*

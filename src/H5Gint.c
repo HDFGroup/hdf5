@@ -1380,8 +1380,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5G_get_gcpl_id
  *
- * Purpose:  Quick and dirty routine to retrieve the 
- *           gcpl_id (group creation property list) from the 
+ * Purpose:  Quick and dirty routine to retrieve the
+ *           gcpl_id (group creation property list) from the
  *           group creation operation struct
  *
  * Return:   'gcpl_id' on success/abort on failure (shouldn't fail)
