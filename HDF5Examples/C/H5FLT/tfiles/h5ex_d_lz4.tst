@@ -5,7 +5,7 @@ lz4 filter is available for encoding and decoding.
 Filter info is available from the dataset creation property 
    Filter identifier is 32004
    Number of parameters is 1 with the value 3
-   To find more about the filter check HDF5 lz4 filter; see http://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html
+   To find more about the filter check HDF5 lz4 filter; see https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html
 ....Reading lz4 compressed data ................
 Maximum value in DS1 is 1890
 lz4 filter is available now since H5Dread triggered loading of the filter.

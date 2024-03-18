@@ -166,7 +166,7 @@ chosen chunk size becomes a very important factor when compression
 is involved, as data chunks have to be completely read and
 re-written to perform partial writes to the chunk.
 
-[Improving I/O performance with HDF5 compressed datasets](http://portal.hdfgroup.org/display/HDF5/Improving+IO+Performance+When+Working+with+HDF5+Compressed+Datasets)
+[Improving I/O performance with HDF5 compressed datasets](https://portal.hdfgroup.org/display/HDF5/Improving+IO+Performance+When+Working+with+HDF5+Compressed+Datasets)
 is a useful reference for more information on getting good
 performance when using a chunked dataset layout.
 

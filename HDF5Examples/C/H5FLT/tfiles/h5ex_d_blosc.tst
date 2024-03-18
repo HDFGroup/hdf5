@@ -5,7 +5,7 @@ blosc filter is available for encoding and decoding.
 Filter info is available from the dataset creation property
    Filter identifier is 32001
    Number of parameters is 7 with the value 4 1 2
-   To find more about the filter check HDF5 blosc filter; see http://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html
+   To find more about the filter check HDF5 blosc filter; see https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html
 ....Reading blosc compressed data ................
 Maximum value in DS1 is 1890
 blosc filter is available now since H5Dread triggered loading of the filter.

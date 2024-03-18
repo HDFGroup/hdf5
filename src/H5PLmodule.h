@@ -73,8 +73,13 @@
  *         FILTERS {
  *            USER_DEFINED_FILTER {
  *               FILTER_ID 307
+<<<<<<< Upstream, based on branch 'develop-filter-url' of https://github.com/byrnHDF/hdf5.git
  *               COMMENT HDF5 bzip2 filter; see
  * http://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html PARAMS { 2 }
+=======
+ *               COMMENT HDF5 bzip2 filter; see https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html
+ *               PARAMS { 2 }
+>>>>>>> c330a3b Correct URL
  *            }
  *         }
  *         FILLVALUE {
@@ -196,8 +201,12 @@
  *     (H5Z_filter_t)H5Z_FILTER_BZIP2,      // Filter id number
  *     1,                                   // encoder_present flag (set to true)
  *     1,                                   // decoder_present flag (set to true)
+<<<<<<< Upstream, based on branch 'develop-filter-url' of https://github.com/byrnHDF/hdf5.git
  *     "HDF5 bzip2 filter; see
  * http://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html",
+=======
+ *     "HDF5 bzip2 filter; see https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html",
+>>>>>>> c330a3b Correct URL
  *                                          // Filter name for debugging
  *     NULL,                                // The "can apply" callback
  *     NULL,                                // The "set local" callback
