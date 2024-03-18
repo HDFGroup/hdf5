@@ -35,8 +35,6 @@ DIRNAME='dirname'
 LS='ls'
 AWK='awk'
 
-WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
-
 nerrors=0
 verbose=yes
 h5haveexitcode=yes      # default is yes
