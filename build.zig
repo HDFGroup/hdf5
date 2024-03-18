@@ -24,6 +24,7 @@ const Allocator = std.mem.Allocator;
     });
     const config_out = run_config.captureStdOut();
     config_step.dependOn(&b.addInstallFile(config_out, "config_log.txt").step);
+    b.getInstallStep().dependOn(config_step);
 
     // Compile hdf5
     const hdf5 = b.addStaticLibrary(.{
@@ -31,7 +32,7 @@ const Allocator = std.mem.Allocator;
         .target = target,
         .optimize = optimize
     });
-    hdf5.step.dependOn(config_step);
+    // hdf5.step.dependOn(config_step);
 
     // Add headers
     hdf5.addIncludePath(.{ .path = "src" });
@@ -66,7 +67,7 @@ const Allocator = std.mem.Allocator;
         .optimize = optimize,
         .target = target
     });
-    hdf5cpp.step.dependOn(config_step);
+    // hdf5cpp.step.dependOn(config_step);
 
     // Add headers
     hdf5cpp.addIncludePath(.{ .path = "src" });
