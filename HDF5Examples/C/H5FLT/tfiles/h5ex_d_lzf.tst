@@ -5,7 +5,7 @@ lzf filter is available for encoding and decoding.
 Filter info is available from the dataset creation property
    Filter identifier is 32000
    Number of parameters is 3 with the value 4
-   To find more about the filter check HDF5 lzf filter; see http://www.hdfgroup.org/services/contributions.html
+   To find more about the filter check HDF5 lzf filter; see http://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html
 ....Reading lzf compressed data ................
 Maximum value in DS1 is 1890
 lzf filter is available now since H5Dread triggered loading of the filter.
