@@ -73,8 +73,8 @@
  *         FILTERS {
  *            USER_DEFINED_FILTER {
  *               FILTER_ID 307
- *               COMMENT HDF5 bzip2 filter; see http://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html
- *               PARAMS { 2 }
+ *               COMMENT HDF5 bzip2 filter; see
+ * http://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html PARAMS { 2 }
  *            }
  *         }
  *         FILLVALUE {
@@ -196,7 +196,8 @@
  *     (H5Z_filter_t)H5Z_FILTER_BZIP2,      // Filter id number
  *     1,                                   // encoder_present flag (set to true)
  *     1,                                   // decoder_present flag (set to true)
- *     "HDF5 bzip2 filter; see http://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html",
+ *     "HDF5 bzip2 filter; see
+ * http://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html",
  *                                          // Filter name for debugging
  *     NULL,                                // The "can apply" callback
  *     NULL,                                // The "set local" callback
