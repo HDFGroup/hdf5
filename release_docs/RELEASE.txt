@@ -591,6 +591,17 @@ Bug Fixes since HDF5-1.14.0 release
 
     Library
     -------
+    - Corrected H5Soffset_simple() when offset is NULL
+
+      The reference manual states that the offset parameter of H5Soffset_simple()
+      can be set to NULL to reset the offset of a simple dataspace to 0. This
+      has never been true, and passing NULL was regarded as an error.
+
+      The library will now accept NULL for the offset parameter and will
+      correctly set the offset to zero.
+
+      Fixes HDFFV-9299
+
     - Fixed an issue where the Subfiling VFD's context object cache could
       grow too large
 
