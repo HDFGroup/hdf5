@@ -77,7 +77,8 @@
  *               COMMENT HDF5 bzip2 filter; see
  * http://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html PARAMS { 2 }
 =======
- *               COMMENT HDF5 bzip2 filter; see https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html
+ *               COMMENT HDF5 bzip2 filter; see
+https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html
  *               PARAMS { 2 }
 >>>>>>> c330a3b Correct URL
  *            }
@@ -205,7 +206,8 @@
  *     "HDF5 bzip2 filter; see
  * http://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html",
 =======
- *     "HDF5 bzip2 filter; see https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html",
+ *     "HDF5 bzip2 filter; see
+https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html",
 >>>>>>> c330a3b Correct URL
  *                                          // Filter name for debugging
  *     NULL,                                // The "can apply" callback
