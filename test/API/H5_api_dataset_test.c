@@ -10467,7 +10467,7 @@ error:
         H5Dclose(dset_string);
         H5Sclose(space_id);
         /* In case of memory allocation error, not all hvl_t buffers in array may be allocated.
-        * Free one-by-one */
+         * Free one-by-one */
         for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
             if (wbuf[i].p) {
                 free(wbuf[i].p);
