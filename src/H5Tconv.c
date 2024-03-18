@@ -2810,9 +2810,6 @@ H5T__conv_enum_init(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, cons
     if (!priv) {
         if (NULL == (priv = (H5T_conv_enum_t *)(cdata->priv = calloc(1, sizeof(*priv)))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        if (0 == src->shared->u.enumer.nmembs)
-            HGOTO_DONE(SUCCEED);
-
         rebuild_cache = true;
     }
     else {
@@ -2901,12 +2898,11 @@ H5T__conv_enum_init(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, cons
          * if the entry is unused.
          *
          * (This optimized algorithm doesn't work when the byte orders are different.
-         * The code such as "n = *((int*)(src->shared->u.enumer.value+i*src->shared->size));"
-         * can change the value significantly. i.g. if the source value is big-endian 0x0000000f,
-         * executing the casting on little-endian machine will get a big number 0x0f000000.
-         * Then it can't meet the condition
-         * "if(src->shared->u.enumer.nmembs<2 || (double)length/src->shared->u.enumer.nmembs<1.2)"
-         * Because this is the optimized code, we won't fix it. It should still work in some
+         * The code such as "n = *((int *)((void *)((uint8_t *)src_sh->u.enumer.value + (i *
+         * src_sh->size))));" can change the value significantly. i.g. if the source value is big-endian
+         * 0x0000000f, executing the casting on little-endian machine will get a big number 0x0f000000. Then
+         * it can't meet the condition "if (src_nmembs < 2 || ((double)length / (double)src_nmembs <
+         * (double)(1.2F)))" Because this is the optimized code, we won't fix it. It should still work in some
          * situations. SLU - 2011/5/24)
          */
         if (1 == src_sh->size || sizeof(short) == src_sh->size || sizeof(int) == src_sh->size) {
@@ -3093,14 +3089,14 @@ H5T__conv_enum(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T
                 d         = buf + (nelmts - 1) * dst_sh->size;
             }
 
-            for (i = 0; i < nelmts; i++, s += src_delta, d += dst_delta) {
-                if (priv->length) {
+            if (priv->length) {
+                for (i = 0; i < nelmts; i++, s += src_delta, d += dst_delta) {
                     /* Use O(1) lookup */
                     /* (The casting won't work when the byte orders are different. i.g. if the source value
-                     * is big-endian 0x0000000f, the direct casting "n = *((int*)s);" will make it a big
-                     * number 0x0f000000 on little-endian machine. But we won't fix it because it's an
-                     * optimization code. Please also see the comment in the H5T__conv_enum_init() function.
-                     * SLU - 2011/5/24)
+                     * is big-endian 0x0000000f, the direct casting "n = *((int *)((void *)s));" will make
+                     * it a big number 0x0f000000 on little-endian machine. But we won't fix it because it's
+                     * an optimization code. Please also see the comment in the H5T__conv_enum_init()
+                     * function. SLU - 2011/5/24)
                      */
                     if (1 == src_sh->size)
                         n = *((signed char *)s);
@@ -3129,8 +3125,10 @@ H5T__conv_enum(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T
                                     (uint8_t *)dst_sh->u.enumer.value +
                                         ((unsigned)priv->src2dst[n] * dst_sh->size),
                                     dst_sh->size);
-                } /* end if */
-                else {
+                }
+            }
+            else {
+                for (i = 0; i < nelmts; i++, s += src_delta, d += dst_delta) {
                     /* Use O(log N) lookup */
                     unsigned lt = 0;
                     unsigned rt = src_sh->u.enumer.nmembs;
@@ -3169,7 +3167,7 @@ H5T__conv_enum(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T
                                         ((unsigned)priv->src2dst[md] * dst_sh->size),
                                     dst_sh->size);
                     } /* end else */
-                }     /* end else */
+                }
             }
 
             break;
