@@ -81,11 +81,6 @@ H5FL_SEQ_EXTERN(hsize_t);
     Non-negative on success/Negative on failure
  DESCRIPTION
     Sets the selection offset for the dataspace
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-    Only works for simple dataspaces currently
- EXAMPLES
- REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
 H5S_select_offset(H5S_t *space, const hssize_t *offset)
@@ -95,10 +90,14 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
     /* Check args */
     assert(space);
     assert(0 < space->extent.rank && space->extent.rank <= H5S_MAX_RANK);
-    assert(offset);
 
-    /* Copy the offset over */
-    H5MM_memcpy(space->select.offset, offset, sizeof(hssize_t) * space->extent.rank);
+    /* Copy the offset over. As a special case, when offset is NULL, we
+     * reset all dimensions to zero.
+     */
+    if (offset)
+        H5MM_memcpy(space->select.offset, offset, sizeof(hssize_t) * space->extent.rank);
+    else
+        memset(space->select.offset, 0, sizeof(hssize_t) * space->extent.rank);
 
     /* Indicate that the offset was changed */
     space->select.offset_changed = true;
@@ -133,12 +132,12 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "not a dataspace");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADID, FAIL, "not a dataspace");
     if (space->extent.rank == 0 ||
         (H5S_GET_EXTENT_TYPE(space) == H5S_SCALAR || H5S_GET_EXTENT_TYPE(space) == H5S_NULL))
-        HGOTO_ERROR(H5E_ID, H5E_UNSUPPORTED, FAIL, "can't set offset on scalar or null dataspace");
-    if (offset == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no offset specified");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "can't set offset on scalar or null dataspace");
+
+    /* offset can be NULL (resets all dims to zero) */
 
     /* Set the selection offset */
     if (H5S_select_offset(space, offset) < 0)

@@ -4118,6 +4118,8 @@ test_select_hyper_offset(void)
     CHECK(ret, FAIL, "H5Soffset_simple");
     valid = H5Sselect_valid(sid1);
     VERIFY(valid, true, "H5Sselect_valid");
+    ret = H5S__verify_offsets(sid1, offset);
+    CHECK(ret, FAIL, "H5S__verify_offsets");
 
     /* Check an invalid offset */
     offset[0] = 10;
@@ -4127,6 +4129,8 @@ test_select_hyper_offset(void)
     CHECK(ret, FAIL, "H5Soffset_simple");
     valid = H5Sselect_valid(sid1);
     VERIFY(valid, false, "H5Sselect_valid");
+    ret = H5S__verify_offsets(sid1, offset);
+    CHECK(ret, FAIL, "H5S__verify_offsets");
 
     /* Reset offset */
     offset[0] = 0;
@@ -4136,6 +4140,28 @@ test_select_hyper_offset(void)
     CHECK(ret, FAIL, "H5Soffset_simple");
     valid = H5Sselect_valid(sid1);
     VERIFY(valid, true, "H5Sselect_valid");
+    ret = H5S__verify_offsets(sid1, offset);
+    CHECK(ret, FAIL, "H5S__verify_offsets");
+
+    /* Check behavior of NULL offset parameter */
+
+    /* Set a valid offset */
+    offset[0] = -1;
+    offset[1] = 0;
+    offset[2] = 0;
+    ret       = H5Soffset_simple(sid1, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+    valid = H5Sselect_valid(sid1);
+    VERIFY(valid, true, "H5Sselect_valid");
+    /* Reset using NULL */
+    ret = H5Soffset_simple(sid1, NULL);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+    valid = H5Sselect_valid(sid1);
+    VERIFY(valid, true, "H5Sselect_valid");
+    /* Validate offset */
+    offset[0] = 0;
+    ret       = H5S__verify_offsets(sid1, offset);
+    CHECK(ret, FAIL, "H5S__verify_offsets");
 
     /* Select 15x26 hyperslab for memory dataset */
     start[0]  = 15;

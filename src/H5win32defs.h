@@ -39,7 +39,7 @@ struct timezone {
 };
 #endif
 
-#define HDcreat(S, M)        Wopen_utf8(S, O_CREAT | O_TRUNC | O_RDWR, M)
+#define HDcreat(S, M)        Wopen(S, O_CREAT | O_TRUNC | O_RDWR, M)
 #define HDflock(F, L)        Wflock(F, L)
 #define HDfstat(F, B)        _fstati64(F, B)
 #define HDftell(F)           _ftelli64(F)
@@ -59,13 +59,13 @@ struct timezone {
  */
 #if (defined(_MSC_VER) && !defined(_MSVC_TRADITIONAL)) || _MSVC_TRADITIONAL
 /* Using the MSVC traditional preprocessor */
-#define HDopen(S, F, ...) Wopen_utf8(S, F, __VA_ARGS__)
+#define HDopen(S, F, ...) Wopen(S, F, __VA_ARGS__)
 #else
 /* Using a standards conformant preprocessor */
-#define HDopen(S, F, ...) Wopen_utf8(S, F, ##__VA_ARGS__)
+#define HDopen(S, F, ...) Wopen(S, F, ##__VA_ARGS__)
 #endif
 
-#define HDremove(S)           Wremove_utf8(S)
+#define HDremove(S)           Wremove(S)
 #define HDsetenv(N, V, O)     Wsetenv(N, V, O)
 #define HDsetvbuf(F, S, M, Z) setvbuf(F, S, M, (Z > 1 ? Z : 2))
 #define HDsleep(S)            Sleep(S * 1000)
@@ -89,8 +89,8 @@ H5_DLL int      Wsetenv(const char *name, const char *value, int overwrite);
 H5_DLL int      Wflock(int fd, int operation);
 H5_DLL herr_t   H5_expand_windows_env_vars(char **env_var);
 H5_DLL wchar_t *H5_get_utf16_str(const char *s);
-H5_DLL int      Wopen_utf8(const char *path, int oflag, ...);
-H5_DLL int      Wremove_utf8(const char *path);
+H5_DLL int      Wopen(const char *path, int oflag, ...);
+H5_DLL int      Wremove(const char *path);
 H5_DLL int      H5_get_win32_times(H5_timevals_t *tvs);
 H5_DLL char    *H5_strndup(const char *s, size_t n);
 H5_DLL char    *Wstrcasestr_wrap(const char *haystack, const char *needle);

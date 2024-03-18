@@ -183,7 +183,7 @@ main(void)
      * Output the data to the screen.
      */
     for (i = 0; i < dims[0]; i++) {
-        printf("%s[%llu]:\n  ->", ATTRIBUTE, i);
+        printf("%s[%" PRIuHSIZE "]:\n  ->", ATTRIBUTE, i);
 
         /*
          * Open the referenced object, retrieve its region as a
