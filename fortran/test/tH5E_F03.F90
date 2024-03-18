@@ -54,7 +54,7 @@ CONTAINS
     IMPLICIT NONE
 
     ! estack_id is always passed from C as: H5E_DEFAULT
-    INTEGER(HID_T) :: estack_id
+    INTEGER(HID_T), VALUE :: estack_id
 
     ! data that was registered with H5Eset_auto_f
     ! INTEGER :: data_inout ! another option
