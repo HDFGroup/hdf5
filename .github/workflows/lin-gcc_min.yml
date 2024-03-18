@@ -1,0 +1,25 @@
+name: lin gcc_min
+
+on: [push, pull_request]
+
+jobs:
+  gcc_min:
+    name: lin gcc_min
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y mingw-w64 mingw-w64-tools wine64
+      - name: Get Source
+        uses: actions/checkout@v4.1.1
+      - name: Test HDF5
+        run: |
+          mkdir build
+          cd build
+          cmake --toolchain ../config/toolchain/mingw64.cmake \
+          -DBUILDNAME:STRING=gcc_min \
+          -DCTEST_DROP_SITE_INIT:STRING="my.cdash.org" \
+          -DSITE:STRING=lin \
+           ..
+          ctest -D Experimental
