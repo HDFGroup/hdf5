@@ -134,6 +134,7 @@ HDF5 Release 1.14
         <li> \ref subsubsec_dataset_transfer_props
         <li> \ref subsubsec_dataset_transfer_store
         <li> \ref subsubsec_dataset_transfer_partial
+        <li> \ref subsubsec_dataset_transfer_dyn_filter
     </ul>
 \li \ref subsec_dataset_allocation
     <ul>
@@ -147,6 +148,7 @@ HDF5 Release 1.14
         <li> \ref subsubsec_dataset_filters_nbit
         <li> \ref subsubsec_dataset_filters_scale
         <li> \ref subsubsec_dataset_filters_szip
+        <li> \ref subsubsec_dataset_filters_dyn
     </ul>
 
 \ref sec_datatype

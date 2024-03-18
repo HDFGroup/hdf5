@@ -15,12 +15,9 @@
  */
 
 #include "H5private.h"   /* Generic Functions			*/
-#include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fprivate.h"  /* File access				*/
 #include "H5FDprivate.h" /* File drivers				*/
 #include "H5FDmpi.h"     /* Common MPI file driver		*/
-#include "H5Pprivate.h"  /* Property lists			*/
 
 #ifdef H5_HAVE_PARALLEL
 

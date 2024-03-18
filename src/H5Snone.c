@@ -23,11 +23,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions                        */
-#include "H5Eprivate.h"  /* Error handling                           */
-#include "H5Iprivate.h"  /* ID Functions                             */
-#include "H5Spkg.h"      /* Dataspace functions                      */
-#include "H5VMprivate.h" /* Vector functions                         */
+#include "H5private.h"  /* Generic Functions                        */
+#include "H5Eprivate.h" /* Error handling                           */
+#include "H5Iprivate.h" /* ID Functions                             */
+#include "H5Spkg.h"     /* Dataspace functions                      */
 
 /****************/
 /* Local Macros */

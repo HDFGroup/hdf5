@@ -147,7 +147,7 @@ main(void)
      * Output the data to the screen.
      */
     for (i = 0; i < dims[0]; i++) {
-        printf("%s[%llu]:\n  ->", ATTRIBUTE, i);
+        printf("%s[%" PRIuHSIZE "]:\n  ->", ATTRIBUTE, i);
 
         /*
          * Open the referenced object, get its name and type.
@@ -185,6 +185,9 @@ main(void)
                 break;
             case H5O_TYPE_NAMED_DATATYPE:
                 printf("Named Datatype");
+                break;
+            case H5O_TYPE_MAP:
+                printf("Map Object");
                 break;
             case H5O_TYPE_UNKNOWN:
             case H5O_TYPE_NTYPES:

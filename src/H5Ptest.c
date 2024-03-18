@@ -22,7 +22,6 @@
 #include "H5Eprivate.h" /* Error handling		  	*/
 #include "H5Iprivate.h" /* IDs			  		*/
 #include "H5Ppkg.h"     /* Property lists		  	*/
-#include "H5Dprivate.h" /* Dataset		  		*/
 
 /* Local variables */
 

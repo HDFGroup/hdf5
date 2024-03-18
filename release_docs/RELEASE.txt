@@ -591,6 +591,39 @@ Bug Fixes since HDF5-1.14.0 release
 
     Library
     -------
+    - Corrected H5Soffset_simple() when offset is NULL
+
+      The reference manual states that the offset parameter of H5Soffset_simple()
+      can be set to NULL to reset the offset of a simple dataspace to 0. This
+      has never been true, and passing NULL was regarded as an error.
+
+      The library will now accept NULL for the offset parameter and will
+      correctly set the offset to zero.
+
+      Fixes HDFFV-9299
+
+    - Fixed an issue where the Subfiling VFD's context object cache could
+      grow too large
+
+      The Subfiling VFD keeps a cache of its internal context objects to
+      speed up access to a context object for a particular file, as well
+      as access to that object across multiple opens of the same file.
+      However, opening a large amount of files with the Subfiling VFD over
+      the course of an application's lifetime could cause this cache to grow
+      too large and result in the application running out of available MPI
+      communicator objects. On file close, the Subfiling VFD now simply
+      evicts context objects out of its cache and frees them. It is assumed
+      that multiple opens of a file will be a less common use case for the
+      Subfiling VFD, but this can be revisited if it proves to be an issue
+      for performance.
+
+    - Fixed error when overwriting certain nested variable length types
+
+      Previously, when using a datatype that included a variable length type
+      within a compound or array within another variable length type, and
+      overwriting data with a shorter (top level) variable length sequence, an
+      error could occur. This has been fixed.
+
     - Fixed asserts raised by large values of H5Pset_est_link_info() parameters
 
       If large values for est_num_entries and/or est_name_len were passed
@@ -1542,6 +1575,9 @@ Known Problems
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
     help@hdfgroup.org.
+
+    File space may not be released when overwriting or deleting certain nested
+    variable length or reference types.
 
 
 CMake vs. Autotools installations

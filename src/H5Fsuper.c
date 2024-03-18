@@ -21,10 +21,10 @@
 /***********/
 #include "H5private.h"   /* Generic Functions                    */
 #include "H5ACprivate.h" /* Metadata cache                       */
-#include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling                       */
 #include "H5Fpkg.h"      /* File access                          */
 #include "H5FDprivate.h" /* File drivers                         */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Iprivate.h"  /* IDs                                  */
 #include "H5MFprivate.h" /* File memory management               */
 #include "H5MMprivate.h" /* Memory management                    */

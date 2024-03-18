@@ -40,7 +40,7 @@
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fpkg.h"      /* Files                                    */
-#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Pprivate.h"  /* Property lists                           */
 #include "H5SLprivate.h" /* Skip Lists                               */
 
