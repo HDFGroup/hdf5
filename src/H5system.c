@@ -514,16 +514,17 @@ error:
 } /* end H5_get_utf16_str() */
 
 /*-------------------------------------------------------------------------
- * Function:     Wopen_utf8
+ * Function:     Wopen
  *
- * Purpose:      UTF-8 equivalent of open(2) for use on Windows
+ * Purpose:      Equivalent of open(2) for use on Windows. Necessary to
+ *               handle code pages and Unicode on that platform.
  *
  * Return:       Success:    A POSIX file descriptor
  *               Failure:    -1
  *-------------------------------------------------------------------------
  */
 int
-Wopen_utf8(const char *path, int oflag, ...)
+Wopen(const char *path, int oflag, ...)
 {
     int      fd    = -1;   /* POSIX file descriptor to be returned */
     wchar_t *wpath = NULL; /* UTF-16 version of the path */
@@ -573,19 +574,20 @@ done:
     H5MM_xfree(wpath);
 
     return fd;
-} /* end Wopen_utf8() */
+} /* end Wopen() */
 
 /*-------------------------------------------------------------------------
- * Function:     Wremove_utf8
+ * Function:     Wremove
  *
- * Purpose:      UTF-8 equivalent of remove(3) for use on Windows.
+ * Purpose:      Equivalent of remove(3) for use on Windows. Necessary to
+ *               handle code pages and Unicode on that platform.
  *
  * Return:       Success:    0
  *               Failure:    -1
  *-------------------------------------------------------------------------
  */
 int
-Wremove_utf8(const char *path)
+Wremove(const char *path)
 {
     wchar_t *wpath = NULL; /* UTF-16 version of the path */
     int      ret   = -1;
@@ -619,7 +621,7 @@ done:
     H5MM_xfree(wpath);
 
     return ret;
-} /* end Wremove_utf8() */
+} /* end Wremove() */
 
 #endif /* H5_HAVE_WIN32_API */
 
