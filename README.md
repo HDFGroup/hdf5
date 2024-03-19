@@ -88,7 +88,7 @@ are tentative.
 | Release | New Features |
 | ------- | ------------ |
 | 1.14.4 | native float16 support, cloud-optimized HDF5 improvements |
-| 1.14.5 | TBD |
+| 1.14.5 | Complex number support |
 | TBD | VFD SWMR |
 | 2.0.0 | TBD |
 
