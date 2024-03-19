@@ -1,0 +1,136 @@
+name: Test HDF5 Subfiling VFD
+
+on:
+  workflow_call:
+    inputs:
+      build_sys:
+        description: "build system used"
+        required: true
+        type: string      
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_test:
+    strategy:
+      # Let jobs run to completion even if one fails
+      fail-fast: false
+      matrix:
+        os_name: ["Ubuntu"]
+#        os_name: ["Ubuntu", "MacOS"]
+        mpi_lib: ["OpenMPI"]
+#        mpi_lib: ["OpenMPI", "MPICH"]
+        include:
+          - os_name: "Ubuntu"
+            os: ubuntu-latest
+            mpi_lib: "OpenMPI"
+#          - os_name: "Ubuntu"
+#            os: ubuntu-latest
+#            mpi_lib: "MPICH"
+#          - os_name: "MacOS"
+#            os: macos-latest
+#            mpi_lib: "OpenMPI"
+#          - os_name: "MacOS"
+#            os: macos-latest
+#            mpi_lib: "MPICH"
+
+    # Sets the job's name from the properties
+    name: "Test HDF5 Subfiling VFD (${{ inputs.build_sys }} ${{ inputs.build_mode }}) on ${{ matrix.os_name }} with ${{ matrix.mpi_lib }}"
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Install Linux Dependencies
+        run: |
+          sudo apt update
+          sudo apt-get install automake autoconf libtool libtool-bin
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+
+      # For now, just install OpenMPI or MPICH with the package
+      # manager. Eventually, we should pick one or 2 release
+      # versions of each, then build and cache those installations
+      - name: Install OpenMPI
+        run: |
+          sudo apt update
+          sudo apt-get install libopenmpi-dev
+          echo "CC=mpicc" >> $GITHUB_ENV
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.mpi_lib == 'OpenMPI' }}
+
+      - name: Install MPICH
+        run: |
+          sudo apt update
+          sudo apt-get install libmpich-dev
+          echo "CC=mpicc" >> $GITHUB_ENV
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.mpi_lib == 'MPICH' }}
+
+      - name: Checkout HDF5
+        uses: actions/checkout@v4.1.1
+
+      - name: Configure HDF5 with Subfiling VFD (Autotools)
+        shell: bash
+        run: |
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=${{ inputs.build_mode }} \
+            --enable-shared \
+            --disable-static \
+            --enable-parallel \
+            --enable-subfiling-vfd \
+        if: ${{ inputs.build_sys == 'Autotools' }}
+
+      - name: Configure HDF5 with Subfiling VFD (CMake)
+        shell: bash
+        run: |
+          mkdir ${{ runner.workspace }}/build
+          cd ${{ runner.workspace }}/build
+          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+            -DBUILD_STATIC_LIBS=OFF \
+            -DHDF5_TEST_VFD:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DHDF5_ENABLE_SUBFILING_VFD:BOOL=ON \
+            -DMPIEXEC_MAX_NUMPROCS=2 \
+            $GITHUB_WORKSPACE
+          cat src/libhdf5.settings
+        if: ${{ inputs.build_sys == 'CMake' }}
+
+      - name: Build HDF5 (Autotools)
+        shell: bash
+        working-directory: ${{ runner.workspace }}/build
+        run: make -j3
+        if: ${{ inputs.build_sys == 'Autotools' }}
+
+      - name: Build HDF5 (CMake)
+        shell: bash
+        working-directory: ${{ runner.workspace }}/build
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/build/bin" >> $GITHUB_ENV
+        if: ${{ inputs.build_sys == 'CMake' }}
+
+      - name: Test HDF5 Subfiling VFD (Autotools)
+        working-directory: ${{ runner.workspace }}/build/testpar
+        # For now, just run the tests directly setup for use with the
+        # Subfiling VFD. We can expand on this once the library's tests
+        # are better separated into categories for VFD testing.
+        run: |
+          mpirun -np 2 t_subfiling_vfd
+          mpirun -np 2 t_vfd
+        if: ${{ inputs.build_sys == 'Autotools' }}
+
+      - name: Test HDF5 Subfiling VFD (CMake)
+        working-directory: ${{ runner.workspace }}/build
+        run: |
+          # For now, just run the tests directly setup for use with the
+          # Subfiling VFD. We can expand on this once the library's tests
+          # are better separated into categories for VFD testing.
+          ctest --build-config ${{ inputs.build_mode }} -VV \
+              -R "MPI_TEST_t_subfiling_vfd|MPI_TEST_t_vfd|H5_ph5_subfiling"
+        if: ${{ inputs.build_sys == 'CMake' }}
