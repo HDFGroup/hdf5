@@ -2633,12 +2633,12 @@ done:
  *
  * Purpose:    Register a hard or soft conversion function for a data type
  *        conversion path.  The path is specified by the source and
- *        destination data types SRC_ID and DST_ID (for soft functions
- *        only the class of these types is important). If FUNC is a
- *        hard function then it replaces any previous path; if it's a
- *        soft function then it replaces all existing paths to which it
- *        applies and is used for any new path to which it applies as
- *        long as that path doesn't have a hard function.
+ *        destination data types SRC and DST (for soft functions only the
+ *        class of these types is important). If FUNC is a hard function
+ *        then it replaces any previous path; if it's a soft function then
+ *        it replaces all existing paths to which it applies and is used
+ *        for any new path to which it applies as long as that path doesn't
+ *        have a hard function.
  *
  * Return:    Non-negative on success/Negative on failure
  *
@@ -2728,14 +2728,14 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
                 old_path->dst->shared->type != dst->shared->type)
                 continue;
 
-            if (NULL == (tmp_stype = H5T_copy(old_path->src, H5T_COPY_ALL)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy src datatype");
-            if (NULL == (tmp_dtype = H5T_copy(old_path->dst, H5T_COPY_ALL)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy dst datatype");
-
             memset(&cdata, 0, sizeof cdata);
             cdata.command = H5T_CONV_INIT;
             if (conv->is_app) {
+                if (NULL == (tmp_stype = H5T_copy(old_path->src, H5T_COPY_ALL)))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy src datatype");
+                if (NULL == (tmp_dtype = H5T_copy(old_path->dst, H5T_COPY_ALL)))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy dst datatype");
+
                 if ((tmp_sid = H5I_register(H5I_DATATYPE, tmp_stype, false)) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                                 "unable to register ID for source datatype");
@@ -2757,12 +2757,8 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
                     continue;
                 } /* end if */
             }     /* end if */
-            else if ((conv->u.lib_func)(tmp_stype, tmp_dtype, &cdata, &tmp_ctx, 0, 0, 0, NULL, NULL) < 0) {
-                if (H5T_close(tmp_stype) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close temporary datatype");
-                if (H5T_close(tmp_dtype) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close temporary datatype");
-                tmp_stype = tmp_dtype = NULL;
+            else if ((conv->u.lib_func)(old_path->src, old_path->dst, &cdata, &tmp_ctx, 0, 0, 0, NULL, NULL) <
+                     0) {
                 if (H5E_clear_stack(NULL) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRESET, FAIL, "unable to clear current error stack");
                 continue;
@@ -2799,8 +2795,8 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
 #endif
                 } /* end if */
             }     /* end if */
-            else if ((old_path->conv.u.lib_func)(tmp_stype, tmp_dtype, &(old_path->cdata), NULL, 0, 0, 0,
-                                                 NULL, NULL) < 0) {
+            else if ((old_path->conv.u.lib_func)(old_path->src, old_path->dst, &(old_path->cdata), NULL, 0, 0,
+                                                 0, NULL, NULL) < 0) {
 #ifdef H5T_DEBUG
                 if (H5DEBUG(T))
                     fprintf(H5DEBUG(T),
@@ -2824,20 +2820,10 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
                 tmp_sid   = H5I_INVALID_HID;
                 tmp_stype = NULL;
             }
-            else if (tmp_stype) {
-                if (H5T_close(tmp_stype) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
-                tmp_stype = NULL;
-            }
             if (tmp_did >= 0) {
                 if (H5I_dec_ref(tmp_did) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "can't decrement reference on temporary ID");
                 tmp_did   = H5I_INVALID_HID;
-                tmp_dtype = NULL;
-            }
-            else if (tmp_dtype) {
-                if (H5T_close(tmp_dtype) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
                 tmp_dtype = NULL;
             }
 
@@ -3230,9 +3216,9 @@ done:
 herr_t
 H5Treclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void *buf)
 {
-    H5T_t *type;
-    H5S_t *space;     /* Dataspace for iteration */
-    herr_t ret_value; /* Return value */
+    const H5T_t *type;
+    H5S_t       *space;     /* Dataspace for iteration */
+    herr_t       ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iii*x", type_id, space_id, dxpl_id, buf);
@@ -3240,7 +3226,7 @@ H5Treclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void *buf)
     /* Check args */
     if (buf == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "'buf' pointer is NULL");
-    if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+    if (NULL == (type = (const H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype");
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace");
@@ -5072,11 +5058,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5T_path_find
  *
- * Purpose:    Library-internal wrapper to find the path which converts type
- *              SRC_ID to type DST_ID.
+ * Purpose:    Library-internal wrapper to find the path which converts
+ *             type SRC to type DST.
  *
- *              If SRC and DST are both null pointers then the special no-op
- *              conversion path is used.
+ *             If SRC and DST are both null pointers then the special no-op
+ *             conversion path is used.
  *
  * Return:    Success:    Pointer to the path, valid until the path
  *                        database is modified.
@@ -5115,17 +5101,17 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5T__path_find_real
  *
- * Purpose:    Finds the path which converts type SRC_ID to type DST_ID,
- *        creating a new path if necessary.  If FUNC is non-zero then
- *        it is set as the hard conversion function for that path
- *        regardless of whether the path previously existed. Changing
- *        the conversion function of a path causes statistics to be
- *        reset to zero after printing them.  The NAME is used only
- *        when creating a new path and is just for debugging.
+ * Purpose:    Finds the path which converts type SRC to type DST, creating
+ *             a new path if necessary.  If FUNC is non-zero then it is set
+ *             as the hard conversion function for that path regardless of
+ *             whether the path previously existed. Changing the conversion
+ *             function of a path causes statistics to be reset to zero
+ *             after printing them.  The NAME is used only when creating a
+ *             new path and is just for debugging.
  *
- *        If SRC and DST are both null pointers then the special no-op
- *        conversion path is used.  This path is always stored as the
- *        first path in the path table.
+ *             If SRC and DST are both null pointers then the special no-op
+ *             conversion path is used.  This path is always stored as the
+ *             first path in the path table.
  *
  * Return:    Success:    Pointer to the path, valid until the path
  *                        database is modified.
@@ -5269,13 +5255,18 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
         (!table || (table && conv->is_app) || (table && !table->is_hard && !conv->is_app))) {
         assert(path != table);
         assert(NULL == path->conv.u.app_func);
-        if (path->src && (NULL == (tmp_stype = H5T_copy(path->src, H5T_COPY_ALL))))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy source datatype");
-        if (path->dst && (NULL == (tmp_dtype = H5T_copy(path->dst, H5T_COPY_ALL))))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy destination datatype");
 
         path->cdata.command = H5T_CONV_INIT;
         if (conv->is_app) {
+            /* Copy the conversion path's source and destination datatypes and
+             * register an ID for them so we can pass these to the application
+             * conversion function
+             */
+            if (path->src && (NULL == (tmp_stype = H5T_copy(path->src, H5T_COPY_ALL))))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy source datatype");
+            if (path->dst && (NULL == (tmp_dtype = H5T_copy(path->dst, H5T_COPY_ALL))))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy destination datatype");
+
             if (tmp_stype && ((src_id = H5I_register(H5I_DATATYPE, tmp_stype, false)) < 0))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
                             "unable to register ID for source datatype");
@@ -5286,7 +5277,7 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
             if ((conv->u.app_func)(src_id, dst_id, &(path->cdata), 0, 0, 0, NULL, NULL, H5CX_get_dxpl()) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to initialize conversion function");
         } /* end if */
-        else if ((conv->u.lib_func)(tmp_stype, tmp_dtype, &(path->cdata), &tmp_ctx, 0, 0, 0, NULL, NULL) < 0)
+        else if ((conv->u.lib_func)(path->src, path->dst, &(path->cdata), &tmp_ctx, 0, 0, 0, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to initialize conversion function");
 
         if (src_id >= 0) {
@@ -5295,20 +5286,10 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
             src_id    = H5I_INVALID_HID;
             tmp_stype = NULL;
         }
-        else if (tmp_stype) {
-            if (H5T_close(tmp_stype) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "can't close temporary datatype");
-            tmp_stype = NULL;
-        }
         if (dst_id >= 0) {
             if (H5I_dec_ref(dst_id) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDEC, NULL, "can't decrement reference on temporary ID");
             dst_id    = H5I_INVALID_HID;
-            tmp_dtype = NULL;
-        }
-        else if (tmp_dtype) {
-            if (H5T_close(tmp_dtype) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "can't close temporary datatype");
             tmp_dtype = NULL;
         }
 
@@ -5329,19 +5310,21 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
         if (src->shared->type != H5T_g.soft[i].src || dst->shared->type != H5T_g.soft[i].dst)
             continue;
 
-        assert(tmp_stype == NULL);
-        assert(tmp_dtype == NULL);
-
-        if (NULL == (tmp_stype = H5T_copy(path->src, H5T_COPY_ALL)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy source datatype");
-        if (NULL == (tmp_dtype = H5T_copy(path->dst, H5T_COPY_ALL)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy destination datatype");
-
         path->cdata.command = H5T_CONV_INIT;
         if (H5T_g.soft[i].conv.is_app) {
+            /* Copy the conversion path's source and destination datatypes and
+             * register an ID for them so we can pass these to the application
+             * conversion function
+             */
+            assert(tmp_stype == NULL);
+            assert(tmp_dtype == NULL);
+            if (NULL == (tmp_stype = H5T_copy(path->src, H5T_COPY_ALL)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy source datatype");
+            if (NULL == (tmp_dtype = H5T_copy(path->dst, H5T_COPY_ALL)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy destination datatype");
+
             assert(src_id == H5I_INVALID_HID);
             assert(dst_id == H5I_INVALID_HID);
-
             if ((src_id = H5I_register(H5I_DATATYPE, tmp_stype, false)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
                             "unable to register ID for source datatype");
@@ -5358,7 +5341,7 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
                 path_init_error = true;
             } /* end if */
         }     /* end if */
-        else if ((H5T_g.soft[i].conv.u.lib_func)(tmp_stype, tmp_dtype, &(path->cdata), &tmp_ctx, 0, 0, 0,
+        else if ((H5T_g.soft[i].conv.u.lib_func)(path->src, path->dst, &(path->cdata), &tmp_ctx, 0, 0, 0,
                                                  NULL, NULL) < 0) {
             memset(&(path->cdata), 0, sizeof(H5T_cdata_t));
             /*ignore the error*/
@@ -5381,20 +5364,10 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
             src_id    = H5I_INVALID_HID;
             tmp_stype = NULL;
         }
-        else if (tmp_stype) {
-            if (H5T_close(tmp_stype) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "can't close temporary datatype");
-            tmp_stype = NULL;
-        }
         if (dst_id >= 0) {
             if (H5I_dec_ref(dst_id) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDEC, NULL, "can't decrement reference on temporary ID");
             dst_id    = H5I_INVALID_HID;
-            tmp_dtype = NULL;
-        }
-        else if (tmp_dtype) {
-            if (H5T_close(tmp_dtype) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "can't close temporary datatype");
             tmp_dtype = NULL;
         }
     } /* end for */
@@ -5478,14 +5451,6 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
         H5T_g.path[md] = path;
         table          = path;
     } /* end else-if */
-
-    /* Set the flag to indicate both source and destination types are compound types
-     * for the optimization of data reading (in H5Dio.c).
-     * Make sure that path->are_compounds is only true for compound types.
-     */
-    path->are_compounds = false;
-    if (H5T_COMPOUND == H5T_get_class(src, true) && H5T_COMPOUND == H5T_get_class(dst, true))
-        path->are_compounds = true;
 
     /* Set return value */
     ret_value = path;
@@ -5754,7 +5719,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_convert(H5T_path_t *tpath, H5T_t *src_type, H5T_t *dst_type, size_t nelmts, size_t buf_stride,
+H5T_convert(H5T_path_t *tpath, const H5T_t *src_type, const H5T_t *dst_type, size_t nelmts, size_t buf_stride,
             size_t bkg_stride, void *buf, void *bkg)
 {
     H5T_conv_ctx_t conv_ctx = {0};
@@ -5847,8 +5812,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_convert_with_ctx(H5T_path_t *tpath, H5T_t *src_type, H5T_t *dst_type, const H5T_conv_ctx_t *conv_ctx,
-                     size_t nelmts, size_t buf_stride, size_t bkg_stride, void *buf, void *bkg)
+H5T_convert_with_ctx(H5T_path_t *tpath, const H5T_t *src_type, const H5T_t *dst_type,
+                     const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride, size_t bkg_stride,
+                     void *buf, void *bkg)
 {
     herr_t ret_value = SUCCEED;
 

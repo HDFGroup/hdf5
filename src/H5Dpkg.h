@@ -120,8 +120,8 @@ typedef struct H5D_type_info_t {
     /* Initial values */
     const H5T_t *mem_type;  /* Pointer to memory datatype */
     const H5T_t *dset_type; /* Pointer to dataset datatype */
-    H5T_t       *src_type;  /* Pointer to source datatype */
-    H5T_t       *dst_type;  /* Pointer to destination datatype */
+    const H5T_t *src_type;  /* Pointer to source datatype */
+    const H5T_t *dst_type;  /* Pointer to destination datatype */
     H5T_path_t  *tpath;     /* Datatype conversion path */
 
     /* Computed/derived values */
@@ -278,7 +278,7 @@ typedef struct H5D_dset_io_info_t {
         H5D_piece_info_t       *contig_piece_info; /* Piece info for contiguous dataset */
     } layout_io_info;
 
-    H5T_t          *mem_type; /* memory datatype */
+    const H5T_t    *mem_type; /* memory datatype */
     H5D_type_info_t type_info;
     bool            skip_io; /* Whether to skip I/O for this dataset */
 } H5D_dset_io_info_t;
@@ -602,7 +602,7 @@ typedef struct H5D_fill_buf_info_t {
     void             *bkg_buf;                       /* Background conversion buffer */
     size_t            bkg_buf_size;                  /* Size of background buffer */
     H5T_t            *mem_type;                      /* Pointer to memory datatype */
-    H5T_t            *file_type;                     /* Pointer to file datatype */
+    const H5T_t      *file_type;                     /* Pointer to file datatype */
     size_t            mem_elmt_size, file_elmt_size; /* Size of element in memory and on disk */
     size_t            max_elmt_size;                 /* Max. size of memory or file datatype */
     size_t            elmts_per_buf;                 /* # of elements that fit into a buffer */
@@ -784,7 +784,7 @@ H5_DLL herr_t H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, con
                         H5S_t *space);
 H5_DLL herr_t H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocate_t alloc_func,
                              void *alloc_info, H5MM_free_t free_func, void *free_info, const H5O_fill_t *fill,
-                             H5T_t *dset_type, size_t nelmts, size_t min_buf_size);
+                             const H5T_t *dset_type, size_t nelmts, size_t min_buf_size);
 H5_DLL herr_t H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts);
 H5_DLL herr_t H5D__fill_term(H5D_fill_buf_info_t *fb_info);
 

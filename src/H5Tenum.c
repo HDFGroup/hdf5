@@ -67,15 +67,14 @@ done:
 } /* end H5Tenum_create() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__enum_create
+ * Function:    H5T__enum_create
  *
- * Purpose:	Private function for H5Tenum_create.  Create a new
+ * Purpose:     Private function for H5Tenum_create.  Create a new
  *              enumeration data type based on the specified
- *		TYPE, which must be an integer type.
+ *              TYPE, which must be an integer type.
  *
- * Return:	Success:	new enumeration data type
- *
- *		Failure:        NULL
+ * Return:      Success:    new enumeration data type
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -91,9 +90,11 @@ H5T__enum_create(const H5T_t *parent)
     /* Build new type */
     if (NULL == (ret_value = H5T__alloc()))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    ret_value->shared->type   = H5T_ENUM;
-    ret_value->shared->parent = H5T_copy(parent, H5T_COPY_ALL);
-    assert(ret_value->shared->parent);
+    ret_value->shared->type = H5T_ENUM;
+
+    if (NULL == (ret_value->shared->parent = H5T_copy(parent, H5T_COPY_ALL)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy base datatype for enum");
+
     ret_value->shared->size = ret_value->shared->parent->shared->size;
 
 done:

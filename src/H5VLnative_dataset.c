@@ -119,7 +119,7 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
                         "different files detected in multi dataset I/O request");
 
         /* Set up memory type */
-        if (NULL == (dinfo[i].mem_type = (H5T_t *)H5I_object_verify(mem_type_id[i], H5I_DATATYPE)))
+        if (NULL == (dinfo[i].mem_type = (const H5T_t *)H5I_object_verify(mem_type_id[i], H5I_DATATYPE)))
             HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "invalid datatype");
 
         /* Set up file dataspace */
