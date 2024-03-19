@@ -112,6 +112,14 @@
  *              at least as wide as the destination.  Overflow can occur
  *              when the source magnitude is too large for the destination.
  *
+ * fX:    Floating-point values to integers where the destination is at least
+ *        as wide as the source. This case cannot generate overflows.
+ *
+ * Xf:    Integers to floating-point values where the source is at least as
+ *        wide as the destination. Overflows can occur when the destination is
+ *        narrower than the source.
+ *
+ *
  * The macros take a subset of these arguments in the order listed here:
  *
  * CDATA:    A pointer to the H5T_cdata_t structure that was passed to the
@@ -702,6 +710,99 @@
 #define H5T_CONV_Fx(STYPE, DTYPE, ST, DT, D_MIN, D_MAX)                                                      \
     do {                                                                                                     \
         H5T_CONV(H5T_CONV_Fx, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, Y)                                         \
+    } while (0)
+
+#define H5T_CONV_fX(STYPE, DTYPE, ST, DT, D_MIN, D_MAX)                                                      \
+    do {                                                                                                     \
+        HDcompile_assert(sizeof(ST) <= sizeof(DT));                                                          \
+        H5T_CONV(H5T_CONV_xX, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, N)                                         \
+    } while (0)
+
+#define H5T_CONV_Xf_CORE(STYPE, DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                           \
+    {                                                                                                        \
+        if (*(S) > (ST)(D_MAX) || (sprec < dprec && *(S) == (ST)(D_MAX))) {                                  \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            if (except_ret == H5T_CONV_UNHANDLED)                                                            \
+                /* Let compiler convert if case is ignored by user handler*/                                 \
+                *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _POS_INF_g);                                             \
+            else if (except_ret == H5T_CONV_ABORT)                                                           \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception");       \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */                            \
+        }                                                                                                    \
+        else if (*(S) < (ST)(D_MIN)) {                                                                       \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D, \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            if (except_ret == H5T_CONV_UNHANDLED)                                                            \
+                /* Let compiler convert if case is ignored by user handler*/                                 \
+                *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _NEG_INF_g);                                             \
+            else if (except_ret == H5T_CONV_ABORT)                                                           \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception");       \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */                            \
+        }                                                                                                    \
+        else if (sprec > dprec) {                                                                            \
+            unsigned low_bit_pos, high_bit_pos;                                                              \
+                                                                                                             \
+            /* Detect high & low bits set in source */                                                       \
+            H5T_HI_LO_BIT_SET(ST, *(S), low_bit_pos, high_bit_pos)                                           \
+                                                                                                             \
+            /* Check for more bits of precision in src than available in dst */                              \
+            if ((high_bit_pos - low_bit_pos) >= dprec) {                                                     \
+                H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                               \
+                    H5T_CONV_EXCEPT_PRECISION, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id,   \
+                    S, D, conv_ctx->u.conv.cb_struct.user_data);                                             \
+                if (except_ret == H5T_CONV_UNHANDLED)                                                        \
+                    /* Let compiler convert if case is ignored by user handler*/                             \
+                    *(D) = (DT)(*(S));                                                                       \
+                else if (except_ret == H5T_CONV_ABORT)                                                       \
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception");   \
+                /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */                        \
+            }                                                                                                \
+            else                                                                                             \
+                *(D) = (DT)(*(S));                                                                           \
+        }                                                                                                    \
+        else                                                                                                 \
+            *(D) = (DT)(*(S));                                                                               \
+    }
+#define H5T_CONV_Xf_NOEX_CORE(STYPE, DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                      \
+    {                                                                                                        \
+        if (*(S) > (ST)(D_MAX))                                                                              \
+            *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _POS_INF_g);                                                 \
+        else {                                                                                               \
+            intmax_t s_cast = (intmax_t)(*(S));                                                              \
+            intmax_t d_cast = (intmax_t)(D_MAX);                                                             \
+                                                                                                             \
+            /* Check if source value would underflow destination. Do NOT do this                             \
+             * by comparing against D_MIN casted to type ST here, as this will                               \
+             * generally be undefined behavior (casting negative float value <= 1.0                          \
+             * to integer) for all floating point types and some compilers optimize                          \
+             * this in a way that causes unexpected behavior. Instead, grab the                              \
+             * absolute value of the source value first, then compare it to D_MAX.                           \
+             */                                                                                              \
+            if (s_cast != INTMAX_MIN)                                                                        \
+                s_cast = imaxabs(s_cast);                                                                    \
+            else {                                                                                           \
+                /* Handle two's complement integer representations where abs(INTMAX_MIN)                     \
+                 * can't be represented. Other representations will fall here as well,                       \
+                 * but this should be fine.                                                                  \
+                 */                                                                                          \
+                s_cast = INTMAX_MAX;                                                                         \
+                d_cast -= 1;                                                                                 \
+            }                                                                                                \
+                                                                                                             \
+            if (s_cast > d_cast)                                                                             \
+                *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _NEG_INF_g);                                             \
+            else                                                                                             \
+                *(D) = (DT)(*(S));                                                                           \
+        }                                                                                                    \
+    }
+
+#define H5T_CONV_Xf(STYPE, DTYPE, ST, DT, D_MIN, D_MAX)                                                      \
+    do {                                                                                                     \
+        HDcompile_assert(sizeof(ST) >= sizeof(DT));                                                          \
+        H5T_CONV(H5T_CONV_Xf, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, Y)                                         \
     } while (0)
 
 /* Since all "no exception" cores do the same thing (assign the value in the
@@ -8215,6 +8316,255 @@ H5T__conv_ldouble_ullong(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_con
 }
 #endif /*H5T_CONV_INTERNAL_LDOUBLE_ULLONG*/
 
+/* Conversions for _Float16 type */
+#ifdef H5_HAVE__FLOAT16
+herr_t
+H5T__conv_schar__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                         void H5_ATTR_UNUSED *bkg)
+{
+    H5T_CONV_xF(SCHAR, FLOAT16, signed char, H5__Float16, -, -);
+}
+
+herr_t
+H5T__conv_uchar__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                         void H5_ATTR_UNUSED *bkg)
+{
+    H5T_CONV_xF(UCHAR, FLOAT16, unsigned char, H5__Float16, -, -);
+}
+
+herr_t
+H5T__conv_short__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                         void H5_ATTR_UNUSED *bkg)
+{
+    H5T_CONV_xF(SHORT, FLOAT16, short, H5__Float16, -, -);
+}
+
+herr_t
+H5T__conv_ushort__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                          size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                          void H5_ATTR_UNUSED *bkg)
+{
+    /* Suppress warning about non-standard floating-point literal suffix */
+    H5_GCC_CLANG_DIAG_OFF("pedantic")
+    H5T_CONV_Xf(USHORT, FLOAT16, unsigned short, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_CLANG_DIAG_ON("pedantic")
+}
+
+herr_t
+H5T__conv_int__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                       size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                       void H5_ATTR_UNUSED *bkg)
+{
+    /* Suppress warning about non-standard floating-point literal suffix */
+    H5_GCC_CLANG_DIAG_OFF("pedantic")
+    H5T_CONV_Xf(INT, FLOAT16, int, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_CLANG_DIAG_ON("pedantic")
+}
+
+herr_t
+H5T__conv_uint__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                        size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                        void H5_ATTR_UNUSED *bkg)
+{
+    /* Suppress warning about non-standard floating-point literal suffix */
+    H5_GCC_CLANG_DIAG_OFF("pedantic")
+    H5T_CONV_Xf(UINT, FLOAT16, unsigned int, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_CLANG_DIAG_ON("pedantic")
+}
+
+herr_t
+H5T__conv_long__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                        size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                        void H5_ATTR_UNUSED *bkg)
+{
+    /* Suppress warning about non-standard floating-point literal suffix */
+    H5_GCC_CLANG_DIAG_OFF("pedantic")
+    H5T_CONV_Xf(LONG, FLOAT16, long, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_CLANG_DIAG_ON("pedantic")
+}
+
+herr_t
+H5T__conv_ulong__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                         void H5_ATTR_UNUSED *bkg)
+{
+    /* Suppress warning about non-standard floating-point literal suffix */
+    H5_GCC_CLANG_DIAG_OFF("pedantic")
+    H5T_CONV_Xf(ULONG, FLOAT16, unsigned long, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_CLANG_DIAG_ON("pedantic")
+}
+
+herr_t
+H5T__conv_llong__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                         void H5_ATTR_UNUSED *bkg)
+{
+    /* Suppress warning about non-standard floating-point literal suffix */
+    H5_GCC_CLANG_DIAG_OFF("pedantic")
+    H5T_CONV_Xf(LLONG, FLOAT16, long long, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_CLANG_DIAG_ON("pedantic")
+}
+
+herr_t
+H5T__conv_ullong__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                          size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                          void H5_ATTR_UNUSED *bkg)
+{
+    /* Suppress warning about non-standard floating-point literal suffix */
+    H5_GCC_CLANG_DIAG_OFF("pedantic")
+    H5T_CONV_Xf(ULLONG, FLOAT16, unsigned long long, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_CLANG_DIAG_ON("pedantic")
+}
+
+herr_t
+H5T__conv_float__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                         void H5_ATTR_UNUSED *bkg)
+{
+    /* Suppress warning about non-standard floating-point literal suffix */
+    H5_GCC_CLANG_DIAG_OFF("pedantic")
+    H5T_CONV_Ff(FLOAT, FLOAT16, float, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_CLANG_DIAG_ON("pedantic")
+}
+
+herr_t
+H5T__conv_double__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                          size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                          void H5_ATTR_UNUSED *bkg)
+{
+    /* Suppress warning about non-standard floating-point literal suffix */
+    H5_GCC_CLANG_DIAG_OFF("pedantic")
+    H5T_CONV_Ff(DOUBLE, FLOAT16, double, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_CLANG_DIAG_ON("pedantic")
+}
+
+#ifdef H5T_CONV_INTERNAL_LDOUBLE_FLOAT16
+herr_t
+H5T__conv_ldouble__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                           size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                           void H5_ATTR_UNUSED *bkg)
+{
+    /* Suppress warning about non-standard floating-point literal suffix */
+    H5_GCC_CLANG_DIAG_OFF("pedantic")
+    H5T_CONV_Ff(LDOUBLE, FLOAT16, long double, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_CLANG_DIAG_ON("pedantic")
+}
+#endif
+
+herr_t
+H5T__conv__Float16_schar(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                         void H5_ATTR_UNUSED *bkg)
+{
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5T_CONV_Fx(FLOAT16, SCHAR, H5__Float16, signed char, SCHAR_MIN, SCHAR_MAX);
+    H5_GCC_CLANG_DIAG_ON("float-equal")
+}
+
+herr_t
+H5T__conv__Float16_uchar(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                         void H5_ATTR_UNUSED *bkg)
+{
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5T_CONV_Fx(FLOAT16, UCHAR, H5__Float16, unsigned char, 0, UCHAR_MAX);
+    H5_GCC_CLANG_DIAG_ON("float-equal")
+}
+
+herr_t
+H5T__conv__Float16_short(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                         void H5_ATTR_UNUSED *bkg)
+{
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5T_CONV_Fx(FLOAT16, SHORT, H5__Float16, short, SHRT_MIN, SHRT_MAX);
+    H5_GCC_CLANG_DIAG_ON("float-equal")
+}
+
+herr_t
+H5T__conv__Float16_ushort(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                          size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                          void H5_ATTR_UNUSED *bkg)
+{
+    H5T_CONV_fX(FLOAT16, USHORT, H5__Float16, unsigned short, 0, USHRT_MAX);
+}
+
+herr_t
+H5T__conv__Float16_int(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                       size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                       void H5_ATTR_UNUSED *bkg)
+{
+    H5T_CONV_fX(FLOAT16, INT, H5__Float16, int, INT_MIN, INT_MAX);
+}
+
+herr_t
+H5T__conv__Float16_uint(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                        size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                        void H5_ATTR_UNUSED *bkg)
+{
+    H5T_CONV_fX(FLOAT16, UINT, H5__Float16, unsigned int, 0, UINT_MAX);
+}
+
+herr_t
+H5T__conv__Float16_long(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                        size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                        void H5_ATTR_UNUSED *bkg)
+{
+    H5T_CONV_fX(FLOAT16, LONG, H5__Float16, long, LONG_MIN, LONG_MAX);
+}
+
+herr_t
+H5T__conv__Float16_ulong(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                         void H5_ATTR_UNUSED *bkg)
+{
+    H5T_CONV_fX(FLOAT16, ULONG, H5__Float16, unsigned long, 0, ULONG_MAX);
+}
+
+herr_t
+H5T__conv__Float16_llong(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                         void H5_ATTR_UNUSED *bkg)
+{
+    H5T_CONV_fX(FLOAT16, LLONG, H5__Float16, long long, LLONG_MIN, LLONG_MAX);
+}
+
+herr_t
+H5T__conv__Float16_ullong(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                          size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                          void H5_ATTR_UNUSED *bkg)
+{
+    H5T_CONV_fX(FLOAT16, ULLONG, H5__Float16, unsigned long long, 0, ULLONG_MAX);
+}
+
+herr_t
+H5T__conv__Float16_float(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                         void H5_ATTR_UNUSED *bkg)
+{
+    H5T_CONV_fF(FLOAT16, FLOAT, H5__Float16, float, -, -);
+}
+
+herr_t
+H5T__conv__Float16_double(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                          size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                          void H5_ATTR_UNUSED *bkg)
+{
+    H5T_CONV_fF(FLOAT16, DOUBLE, H5__Float16, double, -, -);
+}
+
+herr_t
+H5T__conv__Float16_ldouble(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                           size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
+                           void H5_ATTR_UNUSED *bkg)
+{
+    H5T_CONV_fF(FLOAT16, LDOUBLE, H5__Float16, long double, -, -);
+}
+#endif
+
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_f_i
  *
@@ -8249,8 +8599,9 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
     uint8_t       *int_buf = NULL;      /*buffer for temporary value    */
     size_t         buf_size;            /*buffer size for temporary value */
     size_t         i;                   /*miscellaneous counters    */
-    size_t         first;               /*first bit(MSB) in an integer  */
-    ssize_t        sfirst;              /*a signed version of `first'    */
+    ssize_t        msb_pos_s;           /*first bit(MSB) in an integer */
+    ssize_t        new_msb_pos;         /*MSB position after shifting mantissa by exponent */
+    hssize_t       shift_val;           /*shift value when shifting mantissa by exponent */
     bool           truncated;           /*if fraction value is dropped  */
     bool           reverse;             /*if reverse order of destination at the end */
     H5T_conv_ret_t except_ret;          /*return of callback function   */
@@ -8314,8 +8665,11 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
             /* Allocate enough space for the buffer holding temporary
              * converted value
              */
-            buf_size = (size_t)(pow(2.0, (double)src.u.f.esize) / 8 + 1);
-            int_buf  = (uint8_t *)H5MM_calloc(buf_size);
+            if (dst.prec / 8 > src_p->shared->size)
+                buf_size = (dst.prec + 7) / 8;
+            else
+                buf_size = src_p->shared->size;
+            int_buf = (uint8_t *)H5MM_calloc(buf_size);
 
             /* Allocate space for order-reversed source buffer */
             src_rev = (uint8_t *)H5MM_calloc(src_p->shared->size);
@@ -8581,35 +8935,46 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                     H5T__bit_inc(int_buf, src.u.f.msize, 8 * buf_size - src.u.f.msize);
 
                 /*
+                 * What is the bit position for the most significant bit(MSB) of S
+                 * which is set?  This is checked before shifting and before possibly
+                 * converting to a negative integer. Note that later use of this value
+                 * assumes that H5T__bit_shift will always shift in 0 during a right
+                 * shift.
+                 */
+                msb_pos_s = H5T__bit_find(int_buf, (size_t)0, src.prec, H5T_BIT_MSB, true);
+
+                /*
+                 * The temporary buffer has no bits set and must therefore be
+                 * zero; nothing to do.
+                 */
+                if (msb_pos_s < 0)
+                    goto padding;
+
+                /*
                  * Shift mantissa part by exponent minus mantissa size(right shift),
                  * or by mantissa size minus exponent(left shift).  Example: Sequence
                  * 10...010111, expo=20, expo-msize=-3.  Right-shift the sequence, we get
                  * 00010...10.  The last three bits were dropped.
                  */
-                H5T__bit_shift(int_buf, expo - (ssize_t)src.u.f.msize, (size_t)0, buf_size * 8);
+                shift_val = expo - (ssize_t)src.u.f.msize;
+                H5T__bit_shift(int_buf, shift_val, (size_t)0, buf_size * 8);
+
+                /* Calculate the new position of the MSB after shifting and
+                 * skip to the padding section if we shifted exactly to 0
+                 * (MSB position is -1)
+                 */
+                new_msb_pos = msb_pos_s + shift_val;
+                if (new_msb_pos == -1)
+                    goto padding;
 
                 /*
-                 * If expo is less than mantissa size, the frantional value is dropped off
+                 * If expo is less than mantissa size, the fractional value is dropped off
                  * during conversion.  Set exception type to be "truncate"
                  */
                 if ((size_t)expo < src.u.f.msize && conv_ctx->u.conv.cb_struct.func)
                     truncated = true;
 
-                /*
-                 * What is the bit position for the most significant bit(MSB) of S
-                 * which is set?  This is checked before converted to negative
-                 * integer.
-                 */
-                sfirst = H5T__bit_find(int_buf, (size_t)0, 8 * buf_size, H5T_BIT_MSB, true);
-                first  = (size_t)sfirst;
-
-                if (sfirst < 0) {
-                    /*
-                     * The source has no bits set and must therefore be zero.
-                     * Set the destination to zero - nothing to do.
-                     */
-                }
-                else if (H5T_SGN_NONE == dst.u.i.sign) { /*destination is unsigned*/
+                if (H5T_SGN_NONE == dst.u.i.sign) { /*destination is unsigned*/
                     /*
                      * Destination is unsigned.  Library's default way: If the source value
                      * is greater than the maximal destination value then it overflows, the
@@ -8639,7 +9004,7 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                         }
                     }
                     else { /*source is positive*/
-                        if (first >= dst.prec) {
+                        if (new_msb_pos >= (ssize_t)dst.prec) {
                             /*overflow*/
                             if (conv_ctx->u.conv.cb_struct
                                     .func) { /*If user's exception handler is present, use it*/
@@ -8663,7 +9028,7 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
                                             "can't handle conversion exception");
                         }
-                        else if (first < dst.prec) {
+                        else {
                             if (truncated && conv_ctx->u.conv.cb_struct
                                                  .func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
@@ -8675,9 +9040,11 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                                     conv_ctx->u.conv.cb_struct.user_data);
                             }
 
-                            if (except_ret == H5T_CONV_UNHANDLED)
+                            if (except_ret == H5T_CONV_UNHANDLED) {
                                 /*copy source value into it if case is ignored by user handler*/
-                                H5T__bit_copy(d, dst.offset, int_buf, (size_t)0, first + 1);
+                                if (new_msb_pos >= 0)
+                                    H5T__bit_copy(d, dst.offset, int_buf, (size_t)0, (size_t)new_msb_pos + 1);
+                            }
                             else if (except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = false;
@@ -8691,7 +9058,7 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                 }
                 else if (H5T_SGN_2 == dst.u.i.sign) { /*Destination is signed*/
                     if (sign) {                       /*source is negative*/
-                        if (first < dst.prec - 1) {
+                        if ((new_msb_pos >= 0) && ((size_t)new_msb_pos < dst.prec - 1)) {
                             if (truncated && conv_ctx->u.conv.cb_struct
                                                  .func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
@@ -8705,8 +9072,8 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
 
                             if (except_ret == H5T_CONV_UNHANDLED) { /*If this case ignored by user handler*/
                                 /*Convert to integer representation.  Equivalent to ~(value - 1).*/
-                                H5T__bit_dec(int_buf, (size_t)0, 8 * buf_size);
-                                H5T__bit_neg(int_buf, (size_t)0, 8 * buf_size);
+                                H5T__bit_dec(int_buf, (size_t)0, dst.prec);
+                                H5T__bit_neg(int_buf, (size_t)0, dst.prec);
 
                                 /*copy source value into destination*/
                                 H5T__bit_copy(d, dst.offset, int_buf, (size_t)0, dst.prec - 1);
@@ -8749,7 +9116,7 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                         }
                     }
                     else { /*source is positive*/
-                        if (first >= dst.prec - 1) {
+                        if (new_msb_pos >= (ssize_t)dst.prec - 1) {
                             /*overflow*/
                             if (conv_ctx->u.conv.cb_struct
                                     .func) { /*If user's exception handler is present, use it*/
@@ -8773,7 +9140,7 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                                 goto next;
                             }
                         }
-                        else if (first < dst.prec - 1) {
+                        else if (new_msb_pos < (ssize_t)dst.prec - 1) {
                             if (truncated && conv_ctx->u.conv.cb_struct
                                                  .func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
@@ -8787,7 +9154,8 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
 
                             if (except_ret == H5T_CONV_UNHANDLED) {
                                 /*copy source value into it if case is ignored by user handler*/
-                                H5T__bit_copy(d, dst.offset, int_buf, (size_t)0, first + 1);
+                                if (new_msb_pos >= 0)
+                                    H5T__bit_copy(d, dst.offset, int_buf, (size_t)0, (size_t)new_msb_pos + 1);
                             }
                             else if (except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
@@ -8963,7 +9331,7 @@ H5T__conv_i_f(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
             /* Allocate enough space for the buffer holding temporary
              * converted value
              */
-            buf_size = (src.prec > dst.u.f.msize ? src.prec : dst.u.f.msize) / 8 + 1;
+            buf_size = ((src.prec > dst.u.f.msize ? src.prec : dst.u.f.msize) + 7) / 8;
             int_buf  = (uint8_t *)H5MM_calloc(buf_size);
 
             /* Allocate space for order-reversed source buffer */
@@ -9189,7 +9557,8 @@ H5T__conv_i_f(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                             goto padding;
                         }
                     }
-                    else {
+
+                    if (!conv_ctx->u.conv.cb_struct.func || (except_ret == H5T_CONV_UNHANDLED)) {
                         /*make destination infinity by setting exponent to maximal number and
                          *mantissa to zero.*/
                         expo = expo_max;

@@ -2082,7 +2082,9 @@ h5str_get_little_endian_type(hid_t tid)
         }
 
         case H5T_FLOAT: {
-            if (size == 4)
+            if (size == 2)
+                p_type = H5Tcopy(H5T_IEEE_F16LE);
+            else if (size == 4)
                 p_type = H5Tcopy(H5T_IEEE_F32LE);
             else if (size == 8)
                 p_type = H5Tcopy(H5T_IEEE_F64LE);
@@ -2176,7 +2178,9 @@ h5str_get_big_endian_type(hid_t tid)
         }
 
         case H5T_FLOAT: {
-            if (size == 4)
+            if (size == 2)
+                p_type = H5Tcopy(H5T_IEEE_F16BE);
+            else if (size == 4)
                 p_type = H5Tcopy(H5T_IEEE_F32BE);
             else if (size == 8)
                 p_type = H5Tcopy(H5T_IEEE_F64BE);

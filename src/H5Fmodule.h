@@ -239,7 +239,7 @@
  * page under
  * <a href="https://portal.hdfgroup.org/display/HDF5/Libraries+and+Tools+Reference">
  * Libraries and Tools Reference</a>.
- * The HDF5 DDL grammar is described in the document \ref DDLBNF110.
+ * The HDF5 DDL grammar is described in the document \ref DDLBNF114.
  *
  * \subsection subsec_file_summary File Function Summaries
  * General library (\ref H5 functions and macros), (\ref H5F functions), file related

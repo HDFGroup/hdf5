@@ -48,6 +48,7 @@ static herr_t H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_siz
  *                      H5T_NATIVE_LONG         H5T_NATIVE_ULONG
  *                      H5T_NATIVE_LLONG        H5T_NATIVE_ULLONG
  *
+ *                      H5T_NATIVE_FLOAT16 (if available)
  *                      H5T_NATIVE_FLOAT
  *                      H5T_NATIVE_DOUBLE
  *                      H5T_NATIVE_LDOUBLE
@@ -693,6 +694,7 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
     size_t align       = 0;    /* Alignment necessary for native datatype */
     size_t native_size = 0;    /* Datatype size of the native type */
     enum match_type {          /* The different kinds of floating point types we can match */
+                      H5T_NATIVE_FLOAT_MATCH_FLOAT16,
                       H5T_NATIVE_FLOAT_MATCH_FLOAT,
                       H5T_NATIVE_FLOAT_MATCH_DOUBLE,
                       H5T_NATIVE_FLOAT_MATCH_LDOUBLE,
@@ -705,7 +707,14 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
     assert(size > 0);
 
     if (direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
-        if (size <= sizeof(float)) {
+#ifdef H5_HAVE__FLOAT16
+        if (size <= sizeof(H5__Float16)) {
+            match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
+            native_size = sizeof(H5__Float16);
+        }
+        else
+#endif
+            if (size <= sizeof(float)) {
             match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
             native_size = sizeof(float);
         }
@@ -731,14 +740,29 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
             match       = H5T_NATIVE_FLOAT_MATCH_DOUBLE;
             native_size = sizeof(double);
         }
-        else {
+        else
+#ifdef H5_HAVE__FLOAT16
+            if (size > sizeof(H5__Float16))
+#endif
+        {
             match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
             native_size = sizeof(float);
         }
+#ifdef H5_HAVE__FLOAT16
+        else {
+            match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
+            native_size = sizeof(H5__Float16);
+        }
+#endif
     }
 
     /* Set the appropriate native floating point information */
     switch (match) {
+        case H5T_NATIVE_FLOAT_MATCH_FLOAT16:
+            tid   = H5T_NATIVE_FLOAT16;
+            align = H5T_NATIVE_FLOAT16_ALIGN_g;
+            break;
+
         case H5T_NATIVE_FLOAT_MATCH_FLOAT:
             tid   = H5T_NATIVE_FLOAT;
             align = H5T_NATIVE_FLOAT_ALIGN_g;

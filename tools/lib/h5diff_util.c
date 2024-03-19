@@ -120,7 +120,11 @@ print_type(hid_t type)
             break;
 
         case H5T_FLOAT:
-            if (H5Tequal(type, H5T_IEEE_F32BE))
+            if (H5Tequal(type, H5T_IEEE_F16BE))
+                parallel_print("H5T_IEEE_F16BE");
+            else if (H5Tequal(type, H5T_IEEE_F16LE))
+                parallel_print("H5T_IEEE_F16LE");
+            else if (H5Tequal(type, H5T_IEEE_F32BE))
                 parallel_print("H5T_IEEE_F32BE");
             else if (H5Tequal(type, H5T_IEEE_F32LE))
                 parallel_print("H5T_IEEE_F32LE");
@@ -128,6 +132,10 @@ print_type(hid_t type)
                 parallel_print("H5T_IEEE_F64BE");
             else if (H5Tequal(type, H5T_IEEE_F64LE))
                 parallel_print("H5T_IEEE_F64LE");
+#ifdef H5_HAVE__FLOAT16
+            else if (H5Tequal(type, H5T_NATIVE_FLOAT16))
+                parallel_print("H5T_NATIVE_FLOAT16");
+#endif
             else if (H5Tequal(type, H5T_NATIVE_FLOAT))
                 parallel_print("H5T_NATIVE_FLOAT");
             else if (H5Tequal(type, H5T_NATIVE_DOUBLE))
