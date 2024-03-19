@@ -24,7 +24,7 @@ The official HDF5 releases can be obtained from:
 Changes from Release to Release and New Features in the HDF5-1.16.x release series
 can be found at:
 
-     https://portal.hdfgroup.org/display/HDF5/Release+Specific+Information
+     https://portal.hdfgroup.org/documentation/hdf5-docs/release_specific_info.html
 
 If you have any questions or comments, please send them to the HDF Help Desk:
 
@@ -368,6 +368,78 @@ New Features
 
     Library:
     --------
+    - Added support for _Float16 16-bit half-precision floating-point datatype
+
+      Support for the _Float16 C datatype has been added on platforms where:
+
+        - The _Float16 datatype and its associated macros (FLT16_MIN, FLT16_MAX,
+          FLT16_EPSILON, etc.) are available
+        - A simple test program that converts between the _Float16 datatype and
+          other datatypes with casts can be successfully compiled and run at
+          configure time. Some compilers appear to be buggy or feature-incomplete
+          in this regard and will generate calls to compiler-internal functions
+          for converting between the _Float16 datatype and other datatypes, but
+          will not link these functions into the build, resulting in build
+          failures.
+
+      The following new macros have been added:
+
+        H5_HAVE__FLOAT16 - This macro is defined in H5pubconf.h and will have
+                           the value 1 if support for the _Float16 datatype is
+                           available. It will not be defined otherwise.
+
+        H5_SIZEOF__FLOAT16 - This macro is defined in H5pubconf.h and will have
+                             a value corresponding to the size of the _Float16
+                             datatype, as computed by sizeof(). It will have the
+                             value 0 if support for the _Float16 datatype is not
+                             available.
+
+        H5_HAVE_FABSF16 - This macro is defined in H5pubconf.h and will have the
+                          value 1 if the fabsf16 function is available for use.
+
+        H5_LDOUBLE_TO_FLOAT16_CORRECT - This macro is defined in H5pubconf.h and
+                                        will have the value 1 if the platform can
+                                        correctly convert long double values to
+                                        _Float16. Some compilers have issues with
+                                        this.
+
+        H5T_NATIVE_FLOAT16 - This macro maps to the ID of an HDF5 datatype representing
+                             the native C _Float16 datatype for the platform. If
+                             support for the _Float16 datatype is not available, the
+                             macro will map to H5I_INVALID_HID and should not be used.
+
+        H5T_IEEE_F16BE - This macro maps to the ID of an HDF5 datatype representing
+                         a big-endian IEEE 754 16-bit floating-point datatype. This
+                         datatype is available regardless of whether _Float16 support
+                         is available or not.
+
+        H5T_IEEE_F16LE - This macro maps to the ID of an HDF5 datatype representing
+                         a little-endian IEEE 754 16-bit floating-point datatype.
+                         This datatype is available regardless of whether _Float16
+                         support is available or not.
+
+      The following new hard datatype conversion paths have been added, but
+      will only be used when _Float16 support is available:
+
+        H5T_NATIVE_SCHAR <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_UCHAR <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_SHORT <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_USHORT <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_INT <-> H5T_NATIVE_FLOAT16   | H5T_NATIVE_UINT <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_LONG <-> H5T_NATIVE_FLOAT16  | H5T_NATIVE_ULONG <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_LLONG <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_ULLONG <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_FLOAT <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_DOUBLE <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_FLOAT16
+
+      The H5T_NATIVE_LDOUBLE -> H5T_NATIVE_FLOAT16 hard conversion path will only
+      be available and used if H5_LDOUBLE_TO_FLOAT16_CORRECT has a value of 1. Otherwise,
+      the conversion will be emulated in software by the library.
+
+      Note that in the absence of any compiler flags for architecture-specific
+      tuning, the generated code for datatype conversions with the _Float16 type
+      may perform conversions by first promoting the type to float. Use of
+      architecture-specific tuning compiler flags may instead allow for the
+      generation of specialized instructions, such as AVX512-FP16 instructions,
+      if available.
+
     - Implemented optimized support for vector I/O in the Subfiling VFD
 
       Previously, the Subfiling VFD would handle vector I/O requests by
@@ -575,8 +647,91 @@ Support for new platforms, languages and compilers
     
 Bug Fixes since HDF5-1.14.0 release
 ===================================
+    Configuration:
+    -------------
+    - Fix Autotools -Werror cleanup
+
+      The Autotools temporarily scrub -Werror(=whatever) from CFLAGS, etc.
+      so configure checks don't trip over warnings generated by configure
+      check programs. The sed line originally only scrubbed -Werror but not
+      -Werror=something, which would cause errors when the '=something' was
+      left behind in CFLAGS.
+
+      The sed line has been updated to handle -Werror=something lines.
+
+      Fixes one issue raised in #3872
+
     Library
     -------
+    - Fixed a bug that causes the library to incorrectly identify
+      the endian-ness of 16-bit and smaller C floating-point datatypes
+
+      When detecting the endian-ness of an in-memory C floating-point
+      datatype, the library previously always assumed that the type
+      was at least 32 bits in size. This resulted in invalid memory
+      accesses and would usually cause the library to identify the
+      datatype as having an endian-ness of H5T_ORDER_VAX. This has
+      now been fixed.
+
+    - Fixed a bug that causes an invalid memory access issue when
+      converting 16-bit floating-point values to integers with the
+      library's software conversion function
+
+      The H5T__conv_f_i function previously always assumed that
+      floating-point values were at least 32 bits in size and would
+      access invalid memory when attempting to convert 16-bit
+      floating-point values to integers. To fix this, parts of the
+      H5T__conv_f_i function had to be rewritten, which also resulted
+      in a significant speedup when converting floating-point values
+      to integers where the library does not have a hard conversion
+      path. This is the case for any floating-point values with a
+      datatype not represented by H5T_NATIVE_FLOAT16 (if _Float16 is
+      supported), H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE or
+      H5T_NATIVE_LDOUBLE.
+
+    - Fixed a bug that can cause incorrect data when overflows occur
+      while converting integer values to floating-point values with
+      the library's software conversion function
+
+      The H5T__conv_i_f function had a bug which previously caused it
+      to return incorrect data when an overflow occurs and an application's
+      conversion exception callback function decides not to handle the
+      overflow. Rather than return positive infinity, the library would
+      return truncated data. This has now been fixed.
+
+    - Corrected H5Soffset_simple() when offset is NULL
+
+      The reference manual states that the offset parameter of H5Soffset_simple()
+      can be set to NULL to reset the offset of a simple dataspace to 0. This
+      has never been true, and passing NULL was regarded as an error.
+
+      The library will now accept NULL for the offset parameter and will
+      correctly set the offset to zero.
+
+      Fixes HDFFV-9299
+
+    - Fixed an issue where the Subfiling VFD's context object cache could
+      grow too large
+
+      The Subfiling VFD keeps a cache of its internal context objects to
+      speed up access to a context object for a particular file, as well
+      as access to that object across multiple opens of the same file.
+      However, opening a large amount of files with the Subfiling VFD over
+      the course of an application's lifetime could cause this cache to grow
+      too large and result in the application running out of available MPI
+      communicator objects. On file close, the Subfiling VFD now simply
+      evicts context objects out of its cache and frees them. It is assumed
+      that multiple opens of a file will be a less common use case for the
+      Subfiling VFD, but this can be revisited if it proves to be an issue
+      for performance.
+
+    - Fixed error when overwriting certain nested variable length types
+
+      Previously, when using a datatype that included a variable length type
+      within a compound or array within another variable length type, and
+      overwriting data with a shorter (top level) variable length sequence, an
+      error could occur. This has been fixed.
+
     - Fixed asserts raised by large values of H5Pset_est_link_info() parameters
 
       If large values for est_num_entries and/or est_name_len were passed
@@ -1074,6 +1229,15 @@ Bug Fixes since HDF5-1.14.0 release
 
       The overflow was found by OSS-Fuzz https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=58658
 
+    - Fixed a segfault when using a user-defined conversion function between compound datatypes
+
+      During type info initialization for compound datatype conversion, the library checked if the
+      datatypes are subsets of one another in order to perform special conversion handling. 
+      This check uses information that is only defined if a library conversion function is in use. 
+      The library now skips this check for user-defined conversion functions.
+
+      Fixes Github issue #3840
+
     Java Library
     ------------
     - Fixed switch case 'L' block missing a break statement.
@@ -1309,6 +1473,17 @@ Bug Fixes since HDF5-1.14.0 release
 
     Testing
     -------
+    - Fixed a bug in the dt_arith test when H5_WANT_DCONV_EXCEPTION is not
+      defined
+
+      The dt_arith test program's test_particular_fp_integer sub-test tries
+      to ensure that the library correctly raises a datatype conversion
+      exception when converting a floating-point value to an integer overflows.
+      However, this test would run even when H5_WANT_DCONV_EXCEPTION isn't
+      defined, causing the test to fail due to the library not raising
+      datatype conversion exceptions. This has now been fixed by not running
+      the test when H5_WANT_DCONV_EXCEPTION is not defined.
+
     - Disabled running of MPI Atomicity tests for OpenMPI major versions < 5
 
       Support for MPI atomicity operations is not implemented for major
@@ -1529,11 +1704,14 @@ Known Problems
     in the HDF5 source. Please report any new problems found to
     help@hdfgroup.org.
 
+    File space may not be released when overwriting or deleting certain nested
+    variable length or reference types.
+
 
 CMake vs. Autotools installations
 =================================
 While both build systems produce similar results, there are differences.
-Each system produces the same set of folders on linux (only CMake works
+Each system produces the same set of folders on Linux (only CMake works
 on standard Windows); bin, include, lib and share. Autotools places the
 COPYING and RELEASE.txt file in the root folder, CMake places them in
 the share folder.

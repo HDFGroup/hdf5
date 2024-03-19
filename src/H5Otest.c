@@ -30,7 +30,6 @@
 #include "H5ACprivate.h" /* Metadata cache			*/
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5Opkg.h"      /* Object headers			*/
 
 /****************/

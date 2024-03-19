@@ -32,7 +32,6 @@
 #include "H5Dprivate.h"  /* Datasets				*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5Fprivate.h"  /* File access				*/
-#include "H5FLprivate.h" /* Free Lists                           */
 #include "H5Gpkg.h"      /* Groups		  		*/
 #include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5Lprivate.h"  /* Links                                */

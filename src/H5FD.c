@@ -30,7 +30,6 @@
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5CXprivate.h" /* API Contexts                             */
-#include "H5Dprivate.h"  /* Datasets                                 */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fpkg.h"      /* File access                              */
 #include "H5FDpkg.h"     /* File Drivers                             */

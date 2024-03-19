@@ -30,6 +30,7 @@
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5FLprivate.h" /* Free lists                               */
+#include "H5MMprivate.h" /* Memory management                        */
 #include "H5RSprivate.h" /* Reference-counted strings                */
 
 /****************/

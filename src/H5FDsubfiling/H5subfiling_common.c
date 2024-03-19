@@ -48,7 +48,6 @@ static int                    sf_file_map_size = 0;
 #define DEFAULT_TOPOLOGY_CACHE_SIZE 4
 #define DEFAULT_FILE_MAP_ENTRIES    8
 
-static herr_t H5_free_subfiling_object(int64_t object_id);
 static herr_t H5_free_subfiling_object_int(subfiling_context_t *sf_context);
 static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
 
@@ -280,18 +279,25 @@ done:
  * Purpose:     Frees the underlying subfiling object for a given subfiling
  *              object ID.
  *
- *              NOTE: Currently we assume that all created subfiling
- *              objects are cached in the (very simple) context/topology
- *              cache until application exit, so the only time a subfiling
- *              object should be freed by this routine is if something
- *              fails right after creating one. Otherwise, the internal
- *              indexing for the relevant cache will be invalid.
+ *              NOTE: Because we want to avoid the potentially large
+ *              overhead of determining the application topology on every
+ *              file open, we currently assume that all created subfiling
+ *              topology objects are cached in the (very simple) topology
+ *              cache until application exit. This allows us to quickly
+ *              find and assign a cached topology object to a subfiling
+ *              context object for a file when opened. Therefore, a
+ *              subfiling topology object should (currently) only ever be
+ *              freed by this routine if a function fails right after
+ *              creating a topology object. Otherwise, the internal
+ *              indexing for the topology cache will be invalid and we will
+ *              either leak memory or assign invalid topology pointers to
+ *              subfiling context objects after that point.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5_free_subfiling_object(int64_t object_id)
 {
     int64_t obj_type  = (object_id >> 32) & 0x0FFFF;
@@ -305,30 +311,31 @@ H5_free_subfiling_object(int64_t object_id)
                                     "couldn't get subfiling context for subfiling object ID");
 
         if (H5_free_subfiling_object_int(sf_context) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling context object");
 
         assert(sf_context_cache_num_entries > 0);
         assert(sf_context == sf_context_cache[sf_context_cache_num_entries - 1]);
         sf_context_cache[sf_context_cache_num_entries - 1] = NULL;
         sf_context_cache_num_entries--;
     }
-    else {
+    else if (obj_type == SF_TOPOLOGY) {
         sf_topology_t *sf_topology;
-
-        assert(obj_type == SF_TOPOLOGY);
 
         if (NULL == (sf_topology = H5_get_subfiling_object(object_id)))
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
                                     "couldn't get subfiling context for subfiling object ID");
 
         if (H5_free_subfiling_topology(sf_topology) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling topology");
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling topology object");
 
         assert(sf_topology_cache_num_entries > 0);
         assert(sf_topology == sf_topology_cache[sf_topology_cache_num_entries - 1]);
         sf_topology_cache[sf_topology_cache_num_entries - 1] = NULL;
         sf_topology_cache_num_entries--;
     }
+    else
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                                "couldn't free subfiling object - invalid object type");
 
 done:
     H5_SUBFILING_FUNC_LEAVE;

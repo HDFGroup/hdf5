@@ -36,9 +36,7 @@
 #include "H5Iprivate.h"  /* IDs                          */
 #include "H5MFprivate.h" /* File memory management       */
 #include "H5MMprivate.h" /* Memory management			*/
-#include "H5FOprivate.h" /* File objects                 */
 #include "H5Oprivate.h"  /* Object headers               */
-#include "H5Pprivate.h"  /* Property lists               */
 #include "H5PBprivate.h" /* Page Buffer	                 */
 #include "H5VMprivate.h" /* Vector and array functions   */
 
@@ -1610,7 +1608,6 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
     void         *bkg         = NULL;                          /* Temporary buffer for copying data */
     void         *reclaim_buf = NULL;                          /* Buffer for reclaiming data */
     H5S_t        *buf_space   = NULL;                          /* Dataspace describing buffer */
-    hid_t         buf_sid     = -1;                            /* ID for buffer dataspace */
     hsize_t       buf_dim[1]  = {0};                           /* Dimension for buffer */
     bool          is_vlen     = false; /* Flag to indicate that VL type conversion should occur */
     bool          fix_ref     = false; /* Flag to indicate that ref values should be fixed */
@@ -1688,12 +1685,6 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
         /* Create the space and set the initial extent */
         if (NULL == (buf_space = H5S_create_simple((unsigned)1, buf_dim, NULL)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
-
-        /* Register */
-        if ((buf_sid = H5I_register(H5I_DATASPACE, buf_space, false)) < 0) {
-            H5S_close(buf_space);
-            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID");
-        } /* end if */
 
         /* Set flag to do type conversion */
         is_vlen = true;
@@ -1819,8 +1810,6 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
     } /* end while */
 
 done:
-    if (buf_sid > 0 && H5I_dec_ref(buf_sid) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't decrement temporary dataspace ID");
     /* Caller expects that source datatype will be freed */
     if (dt_src && (H5T_close(dt_src) < 0))
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
@@ -1828,6 +1817,8 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     if (dt_mem && (H5T_close(dt_mem) < 0))
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
+    if (buf_space && H5S_close(buf_space) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary dataspace");
     if (buf)
         buf = H5FL_BLK_FREE(type_conv, buf);
     if (reclaim_buf)

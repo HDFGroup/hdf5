@@ -42,8 +42,6 @@ const H5Z_class2_t H5Z_DEFLATE[1] = {{
     H5Z__filter_deflate, /* The actual filter function	*/
 }};
 
-#define H5Z_DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s)) * 1.001) + 12)
-
 /*-------------------------------------------------------------------------
  * Function:	H5Z__filter_deflate
  *
@@ -149,7 +147,7 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
          */
         const Bytef *z_src = (const Bytef *)(*buf);
         Bytef       *z_dst; /*destination buffer		*/
-        uLongf       z_dst_nbytes = (uLongf)H5Z_DEFLATE_SIZE_ADJUST(nbytes);
+        uLongf       z_dst_nbytes = (uLongf)compressBound(nbytes);
         uLong        z_src_nbytes = (uLong)nbytes;
         int          aggression; /* Compression aggression setting */
 

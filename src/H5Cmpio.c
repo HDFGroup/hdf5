@@ -38,6 +38,7 @@
 #include "H5Fpkg.h"      /* Files                                */
 #include "H5FDprivate.h" /* File drivers                         */
 #include "H5MMprivate.h" /* Memory management                    */
+#include "H5SLprivate.h" /* Skip Lists                               */
 
 #ifdef H5_HAVE_PARALLEL
 /****************/

@@ -31,6 +31,12 @@ else ()
   set (CMAKE_H5_HAVE_MPI_F08 0)
 endif ()
 
+if (H5_HAVE_DARWIN) # Used in testing
+  set (CMAKE_H5_HAVE_DARWIN 1)
+else ()
+  set (CMAKE_H5_HAVE_DARWIN 0)
+endif ()
+
 # configure for Fortran preprocessor
 
 # Define Parallel variable for passing to H5config_f.inc.cmake

@@ -89,29 +89,6 @@ int main ()
 
 #endif /* DEV_T_IS_SCALAR */
 
-#ifdef TEST_DIRECT_VFD_WORKS
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-int main(void)
-{
-    int fid;
-
-    if ((fid = open("tst_file", O_CREAT | O_TRUNC | O_DIRECT, 0755)) < 0)
-        return 1;
-    close(fid);
-    remove("tst_file");
-
-    return 0;
-}
-#endif
-
-#ifdef HAVE_DIRECT
-       SIMPLE_TEST(posix_memalign());
-#endif
-
 #ifdef HAVE_DEFAULT_SOURCE
 /* Check default source */
 #include <features.h>
@@ -126,21 +103,3 @@ main(void)
 #endif
 }
 #endif
-
-#ifdef HAVE_IOEO
-
-#include <windows.h>
-typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
-int main ()
-{
-    PGNSI pGNSI;
-
-    pGNSI = (PGNSI) GetProcAddress(GetModuleHandle(TEXT("kernel32.dll")), "InitOnceExecuteOnce");
-
-    if (NULL == pGNSI)
-        return 1;
-    else
-        return 0;
-}
-
-#endif /* HAVE_IOEO */

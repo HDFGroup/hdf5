@@ -30,7 +30,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
-#include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Dpkg.h"      /* Datasets                                 */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5FLprivate.h" /* Free Lists                               */
@@ -3085,7 +3084,7 @@ H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value /*out*/
     void       *buf       = NULL;    /*conversion buffer	*/
     void       *bkg       = NULL;    /*conversion buffer	*/
     H5T_t      *src_type  = NULL;    /*source datatype      */
-    H5T_t      *dst_type  = NULL;    /*destination datatype */
+    H5T_t      *tmp_type  = NULL;    /*temporary datatype   */
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3112,10 +3111,14 @@ H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value /*out*/
      */
     if (NULL == (tpath = H5T_path_find(fill.type, type)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to convert between src and dst datatypes");
-    if (NULL == (src_type = H5T_copy(fill.type, H5T_COPY_TRANSIENT)))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy fill value datatype");
-    if (NULL == (dst_type = H5T_copy(type, H5T_COPY_ALL)))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy memory datatype");
+
+    src_type = fill.type;
+    if (H5T_detect_class(src_type, H5T_VLEN, false) > 0 ||
+        H5T_detect_class(src_type, H5T_REFERENCE, false) > 0) {
+        if (NULL == (tmp_type = H5T_copy(src_type, H5T_COPY_TRANSIENT)))
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy fill value datatype");
+        src_type = tmp_type;
+    }
 
     /*
      * Data type conversions are always done in place, so we need a buffer
@@ -3136,7 +3139,7 @@ H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value /*out*/
     H5MM_memcpy(buf, fill.buf, H5T_get_size(fill.type));
 
     /* Do the conversion */
-    if (H5T_convert(tpath, src_type, dst_type, (size_t)1, (size_t)0, (size_t)0, buf, bkg) < 0)
+    if (H5T_convert(tpath, src_type, type, (size_t)1, (size_t)0, (size_t)0, buf, bkg) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "datatype conversion failed");
     if (buf != value)
         H5MM_memcpy(value, buf, H5T_get_size(type));
@@ -3146,9 +3149,7 @@ done:
         H5MM_xfree(buf);
     if (bkg != value)
         H5MM_xfree(bkg);
-    if (src_type && H5T_close(src_type) < 0)
-        HDONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "unable to close temporary datatype");
-    if (dst_type && H5T_close(dst_type) < 0)
+    if (tmp_type && H5T_close(tmp_type) < 0)
         HDONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "unable to close temporary datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)

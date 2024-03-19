@@ -22,7 +22,7 @@
 /***********/
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5MMprivate.h" /* Memory management			*/
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Opkg.h"      /* Object Headers                       */
 #include "H5SMpkg.h"     /* Shared object header messages        */
 

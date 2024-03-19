@@ -29,6 +29,7 @@
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Lprivate.h"  /* Links                                    */
 #include "H5MMprivate.h" /* Memory management                        */
+#include "H5SLprivate.h" /* Skip Lists                               */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 #include "H5VMprivate.h" /* Vector Functions                         */
 
@@ -88,7 +89,7 @@ static herr_t H5D__use_minimized_dset_headers(H5F_t *file, bool *minimize);
 static herr_t H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc);
 static size_t H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr);
 static void  *H5D__vlen_get_buf_size_alloc(size_t size, void *info);
-static herr_t H5D__vlen_get_buf_size_cb(void *elem, H5T_t *type, unsigned ndim, const hsize_t *point,
+static herr_t H5D__vlen_get_buf_size_cb(void *elem, const H5T_t *type, unsigned ndim, const hsize_t *point,
                                         void *op_data);
 static herr_t H5D__vlen_get_buf_size_gen_cb(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point,
                                             void *op_data);
@@ -2624,7 +2625,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, H5T_t *type, unsigned H5_ATTR_UNUSED ndim,
+H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, const H5T_t *type, unsigned H5_ATTR_UNUSED ndim,
                           const hsize_t *point, void *op_data)
 {
     H5D_vlen_bufsize_native_t *vlen_bufsize = (H5D_vlen_bufsize_native_t *)op_data;
@@ -2687,14 +2688,14 @@ H5D__vlen_get_buf_size(H5D_t *dset, hid_t type_id, hid_t space_id, hsize_t *size
     H5S_t                    *mspace       = NULL; /* Memory dataspace */
     char                      bogus;               /* bogus value to pass to H5Diterate() */
     H5S_t                    *space;               /* Dataspace for iteration */
-    H5T_t                    *type;                /* Datatype */
+    const H5T_t              *type;                /* Datatype */
     H5S_sel_iter_op_t         dset_op;             /* Operator for iteration */
     herr_t                    ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    if (NULL == (type = (H5T_t *)H5I_object(type_id)))
+    if (NULL == (type = (const H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
     if (NULL == (space = (H5S_t *)H5I_object(space_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace");
@@ -2828,7 +2829,7 @@ H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id
     H5S_t                  *mspace = NULL;       /* Memory dataspace */
     char                    bogus;               /* Bogus value to pass to H5Diterate() */
     H5S_t                  *space;               /* Dataspace for iteration */
-    H5T_t                  *type;                /* Datatype */
+    const H5T_t            *type;                /* Datatype */
     H5S_sel_iter_op_t       dset_op;             /* Operator for iteration */
     H5VL_dataset_get_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                  ret_value = SUCCEED; /* Return value */
@@ -2836,7 +2837,7 @@ H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    if (NULL == (type = (H5T_t *)H5I_object(type_id)))
+    if (NULL == (type = (const H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not an valid datatype");
     if (NULL == (space = (H5S_t *)H5I_object(space_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "invalid dataspace");
@@ -3560,8 +3561,8 @@ H5D_get_create_plist(const H5D_t *dset)
     H5O_layout_t    copied_layout;     /* Layout to tweak */
     H5O_fill_t      copied_fill = {0}; /* Fill value to tweak */
     H5O_efl_t       copied_efl;        /* External file list to tweak */
-    H5T_t          *src_type    = NULL;
     H5T_t          *dst_type    = NULL;
+    H5T_t          *tmp_type    = NULL;
     hid_t           new_dcpl_id = FAIL;
     hid_t           ret_value   = H5I_INVALID_HID; /* Return value */
 
@@ -3650,10 +3651,13 @@ H5D_get_create_plist(const H5D_t *dset)
             uint8_t *bkg_buf = NULL; /* Background conversion buffer */
             size_t   bkg_size;       /* Size of background buffer */
 
-            if (NULL == (src_type = H5T_copy(dset->shared->type, H5T_COPY_ALL)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy dataset's datatype");
-            if (NULL == (dst_type = H5T_copy(copied_fill.type, H5T_COPY_TRANSIENT)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy fill value datatype");
+            dst_type = copied_fill.type;
+            if (H5T_detect_class(dst_type, H5T_VLEN, false) > 0 ||
+                H5T_detect_class(dst_type, H5T_REFERENCE, false) > 0) {
+                if (NULL == (tmp_type = H5T_copy(dst_type, H5T_COPY_TRANSIENT)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy fill value datatype");
+                dst_type = tmp_type;
+            }
 
             /* Allocate a background buffer */
             bkg_size = MAX(H5T_GET_SIZE(copied_fill.type), H5T_GET_SIZE(dset->shared->type));
@@ -3661,8 +3665,8 @@ H5D_get_create_plist(const H5D_t *dset)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed");
 
             /* Convert fill value */
-            if (H5T_convert(tpath, src_type, dst_type, (size_t)1, (size_t)0, (size_t)0, copied_fill.buf,
-                            bkg_buf) < 0) {
+            if (H5T_convert(tpath, dset->shared->type, dst_type, (size_t)1, (size_t)0, (size_t)0,
+                            copied_fill.buf, bkg_buf) < 0) {
                 if (bkg_buf)
                     bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
@@ -3699,9 +3703,7 @@ H5D_get_create_plist(const H5D_t *dset)
     ret_value = new_dcpl_id;
 
 done:
-    if (src_type && (H5T_close(src_type) < 0))
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close temporary datatype");
-    if (dst_type && (H5T_close(dst_type) < 0))
+    if (tmp_type && (H5T_close(tmp_type) < 0))
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close temporary datatype");
 
     if (ret_value < 0) {
