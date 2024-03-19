@@ -114,10 +114,8 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
     uint8_t         elem_buf[H5T_ELEM_BUF_SIZE];     /* Buffer for element data */
     H5WB_t         *bkg_elem_wb = NULL;              /* Wrapped buffer for background data */
     uint8_t         bkg_elem_buf[H5T_ELEM_BUF_SIZE]; /* Buffer for background data */
-    uint8_t        *bkg_buf  = NULL;                 /* Background conversion buffer */
-    uint8_t        *tmp_buf  = NULL;                 /* Temp conversion buffer */
-    H5T_t          *src_type = NULL;                 /* Source datatype */
-    H5T_t          *dst_type = NULL;                 /* Destination datatype */
+    uint8_t        *bkg_buf = NULL;                  /* Background conversion buffer */
+    uint8_t        *tmp_buf = NULL;                  /* Temp conversion buffer */
     size_t          dst_type_size;                   /* Size of destination type*/
     herr_t          ret_value = SUCCEED;             /* Return value */
 
@@ -168,15 +166,6 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
                         "unable to convert between src and dest datatype");
 
-        /* Construct source & destination datatype IDs, if we will need them */
-        if (!H5T_path_noop(tpath)) {
-            if (NULL == (src_type = H5T_copy(fill_type, H5T_COPY_ALL)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy fill value datatype");
-
-            if (NULL == (dst_type = H5T_copy(buf_type, H5T_COPY_ALL)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy memory datatype");
-        } /* end if */
-
         /* If there's VL type of data, make multiple copies of fill value first,
          * then do conversion on each element so that each of them has a copy
          * of the VL data.
@@ -201,7 +190,7 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
             H5VM_array_fill(tmp_buf, fill, src_type_size, (size_t)nelmts);
 
             /* Convert from file's fill value into memory form */
-            if (H5T_convert(tpath, src_type, dst_type, (size_t)nelmts, (size_t)0, (size_t)0, tmp_buf,
+            if (H5T_convert(tpath, fill_type, buf_type, (size_t)nelmts, (size_t)0, (size_t)0, tmp_buf,
                             bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed");
 
@@ -251,7 +240,7 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
                 } /* end if */
 
                 /* Perform datatype conversion */
-                if (H5T_convert(tpath, src_type, dst_type, (size_t)1, (size_t)0, (size_t)0, elem_ptr,
+                if (H5T_convert(tpath, fill_type, buf_type, (size_t)1, (size_t)0, (size_t)0, elem_ptr,
                                 bkg_ptr) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed");
 
@@ -272,10 +261,6 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
     if (mem_iter)
         mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
-    if (src_type && H5T_close(src_type) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close temporary datatype");
-    if (dst_type && H5T_close(dst_type) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close temporary datatype");
     if (tmp_buf)
         tmp_buf = H5FL_BLK_FREE(type_conv, tmp_buf);
     if (elem_wb && H5WB_unwrap(elem_wb) < 0)
@@ -300,7 +285,7 @@ done:
 herr_t
 H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocate_t alloc_func,
                void *alloc_info, H5MM_free_t free_func, void *free_info, const H5O_fill_t *fill,
-               H5T_t *dset_type, size_t total_nelmts, size_t max_buf_size)
+               const H5T_t *dset_type, size_t total_nelmts, size_t max_buf_size)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

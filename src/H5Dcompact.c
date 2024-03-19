@@ -472,10 +472,10 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
 {
     H5T_t        *dt_mem      = NULL; /* Memory datatype */
     H5T_t        *dt_dst      = NULL; /* Destination datatype */
+    H5S_t        *buf_space   = NULL; /* Dataspace describing buffer */
     void         *buf         = NULL; /* Buffer for copying data */
     void         *bkg         = NULL; /* Temporary buffer for copying data */
     void         *reclaim_buf = NULL; /* Buffer for reclaiming data */
-    hid_t         buf_sid     = -1;   /* ID for buffer dataspace */
     H5D_shared_t *shared_fo =
         (H5D_shared_t *)cpy_info->shared_fo;           /* Pointer to the shared struct for dataset object */
     H5O_storage_compact_t *storage_src = _storage_src; /* Pointer to storage_src */
@@ -498,7 +498,6 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
     /* If there's a VLEN source datatype, do type conversion information */
     if (H5T_detect_class(dt_src, H5T_VLEN, false) > 0) {
         H5T_path_t *tpath_src_mem, *tpath_mem_dst; /* Datatype conversion paths */
-        H5S_t      *buf_space;                     /* Dataspace describing buffer */
         size_t      buf_size;                      /* Size of copy buffer */
         size_t      nelmts;                        /* Number of elements in buffer */
         size_t      src_dt_size;                   /* Source datatype size */
@@ -547,12 +546,6 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
         /* Create the space and set the initial extent */
         if (NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
-
-        /* Register */
-        if ((buf_sid = H5I_register(H5I_DATASPACE, buf_space, false)) < 0) {
-            H5S_close(buf_space);
-            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID");
-        } /* end if */
 
         /* Allocate memory for recclaim buf */
         if (NULL == (reclaim_buf = H5FL_BLK_MALLOC(type_conv, buf_size)))
@@ -613,8 +606,6 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
     storage_dst->dirty = true;
 
 done:
-    if (buf_sid > 0 && H5I_dec_ref(buf_sid) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't decrement temporary dataspace ID");
     /* Caller expects that source datatype will be freed */
     if (dt_src && (H5T_close(dt_src) < 0))
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
@@ -622,6 +613,8 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     if (dt_mem && (H5T_close(dt_mem) < 0))
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
+    if (buf_space && H5S_close(buf_space) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary dataspace");
     if (buf)
         buf = H5FL_BLK_FREE(type_conv, buf);
     if (reclaim_buf)
