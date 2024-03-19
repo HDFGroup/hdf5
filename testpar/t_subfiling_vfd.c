@@ -2892,12 +2892,7 @@ main(int argc, char **argv)
     bool     must_unset_config_dir_env       = false;
     int      required                        = MPI_THREAD_MULTIPLE;
     int      provided                        = 0;
-    char    *subfiling_subfile_prefix_saved;
-    char    *subfiling_ioc_selection_criteria_saved;
-    char    *subfiling_ioc_per_node_saved;
-    char    *subfiling_stripe_size_saved;
-    char    *subfiling_config_file_prefix_saved;
-
+    
     HDcompile_assert(SUBFILING_MIN_STRIPE_SIZE <= H5FD_SUBFILING_DEFAULT_STRIPE_SIZE);
 
     /* Initialize MPI */
@@ -3245,12 +3240,6 @@ main(int argc, char **argv)
     if (MAINPROCESS)
         printf("\nRe-running tests with environment variables set to the empty string\n");
 
-    subfiling_subfile_prefix_saved         = getenv("H5FD_SUBFILING_SUBFILE_PREFIX");
-    subfiling_ioc_selection_criteria_saved = getenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA");
-    subfiling_ioc_per_node_saved           = getenv("H5FD_SUBFILING_IOC_PER_NODE");
-    subfiling_stripe_size_saved            = getenv("H5FD_SUBFILING_STRIPE_SIZE");
-    subfiling_config_file_prefix_saved     = getenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX");
-
     HDsetenv("H5FD_SUBFILING_SUBFILE_PREFIX", "", 1);
     HDsetenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA", "", 1);
     HDsetenv("H5FD_SUBFILING_IOC_PER_NODE", "", 1);
@@ -3285,22 +3274,6 @@ main(int argc, char **argv)
     HDunsetenv("H5FD_SUBFILING_IOC_PER_NODE");
     HDunsetenv("H5FD_SUBFILING_STRIPE_SIZE");
     HDunsetenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX");
-
-    if (subfiling_subfile_prefix_saved) {
-        HDsetenv("H5FD_SUBFILING_SUBFILE_PREFIX", subfiling_subfile_prefix_saved, 1);
-    }
-    if (subfiling_ioc_selection_criteria_saved) {
-        HDsetenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA", subfiling_ioc_selection_criteria_saved, 1);
-    }
-    if (subfiling_ioc_per_node_saved) {
-        HDsetenv("H5FD_SUBFILING_IOC_PER_NODE", subfiling_ioc_per_node_saved, 1);
-    }
-    if (subfiling_stripe_size_saved) {
-        HDsetenv("H5FD_SUBFILING_STRIPE_SIZE", subfiling_stripe_size_saved, 1);
-    }
-    if (subfiling_config_file_prefix_saved) {
-        HDsetenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX", subfiling_config_file_prefix_saved, 1);
-    }
 
     if (nerrors)
         goto exit;
