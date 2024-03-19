@@ -1711,7 +1711,7 @@ Known Problems
 CMake vs. Autotools installations
 =================================
 While both build systems produce similar results, there are differences.
-Each system produces the same set of folders on linux (only CMake works
+Each system produces the same set of folders on Linux (only CMake works
 on standard Windows); bin, include, lib and share. Autotools places the
 COPYING and RELEASE.txt file in the root folder, CMake places them in
 the share folder.
