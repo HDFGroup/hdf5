@@ -6185,8 +6185,8 @@ main(int argc, char **argv)
 {
 
 #ifdef H5_HAVE_SUBFILING_VFD
-    int   required = MPI_THREAD_MULTIPLE;
-    int   provided = 0;
+    int required = MPI_THREAD_MULTIPLE;
+    int provided = 0;
 #endif
     int mpi_size;
     int mpi_rank = 0;
