@@ -25,8 +25,6 @@
 #include "H5Sprivate.h"  /* Dataspaces                  */
 #include "H5Zprivate.h"  /* Data filters                */
 
-typedef struct H5D_obj_create_t H5D_obj_create_t;
-
 /**************************/
 /* Library Private Macros */
 /**************************/
@@ -138,6 +136,7 @@ typedef struct H5D_obj_create_t H5D_obj_create_t;
 
 /* Typedef for dataset in memory (defined in H5Dpkg.h) */
 typedef struct H5D_t H5D_t;
+typedef struct H5D_obj_create_t H5D_obj_create_t;
 
 /* Typedef for cached dataset creation property list information */
 typedef struct H5D_dcpl_cache_t {
