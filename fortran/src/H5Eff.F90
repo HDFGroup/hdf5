@@ -277,34 +277,34 @@ CONTAINS
 !!
 !! \param err_stack Error stack identifier. If the identifier is H5E_DEFAULT_F, the error
 !!                  record will be pushed to the current stack.
+!! \param file   Name of the file in which the error was detected
+!! \param func   Name of the function in which the error was detected
+!! \param line   Line number in the file where the error was detected
 !! \param cls_id Error class identifier
 !! \param maj_id Major error identifier
 !! \param min_id Minor error identifier
-!! \param msg Error description string
+!! \param msg    Error description string
 !! \param hdferr \fortran_error
-!! \param file Name of the file in which the error was detected
-!! \param func Name of the function in which the error was detected
-!! \param line Line number in the file where the error was detected
-!! \param arg1 C style format control strings
-!! \param arg2 C style format control strings
-!! \param arg3 C style format control strings
-!! \param arg4 C style format control strings
-!! \param arg5 C style format control strings
-!! \param arg6 C style format control strings
-!! \param arg7 C style format control strings
-!! \param arg8 C style format control strings
-!! \param arg9 C style format control strings
-!! \param arg10 C style format control strings
-!! \param arg11 C style format control strings
-!! \param arg12 C style format control strings
-!! \param arg13 C style format control strings
-!! \param arg14 C style format control strings
-!! \param arg15 C style format control strings
-!! \param arg16 C style format control strings
-!! \param arg17 C style format control strings
-!! \param arg18 C style format control strings
-!! \param arg19 C style format control strings
-!! \param arg20 C style format control strings
+!! \param arg1   C style format control strings
+!! \param arg2   C style format control strings
+!! \param arg3   C style format control strings
+!! \param arg4   C style format control strings
+!! \param arg5   C style format control strings
+!! \param arg6   C style format control strings
+!! \param arg7   C style format control strings
+!! \param arg8   C style format control strings
+!! \param arg9   C style format control strings
+!! \param arg10  C style format control strings
+!! \param arg11  C style format control strings
+!! \param arg12  C style format control strings
+!! \param arg13  C style format control strings
+!! \param arg14  C style format control strings
+!! \param arg15  C style format control strings
+!! \param arg16  C style format control strings
+!! \param arg17  C style format control strings
+!! \param arg18  C style format control strings
+!! \param arg19  C style format control strings
+!! \param arg20  C style format control strings
 !!
 !! \note \p arg[1-20] expects C-style format strings, similar to the
 !!       system and C functions printf() and fprintf().
@@ -322,28 +322,24 @@ CONTAINS
 !!
 !! See C API: @ref H5Epush2()
 !!
-  SUBROUTINE h5epush_f(err_stack, cls_id, maj_id, min_id, msg, hdferr, &
-       file, func, line, &
+  SUBROUTINE h5epush_f(err_stack, file, func, line, cls_id, maj_id, min_id, msg, hdferr, &
        arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, &
        arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: err_stack
-    INTEGER(HID_T), INTENT(IN) :: cls_id
-    INTEGER(HID_T), INTENT(IN) :: maj_id
-    INTEGER(HID_T), INTENT(IN) :: min_id
-    CHARACTER(LEN=*), INTENT(IN) :: msg
-    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T)  , INTENT(IN)  :: err_stack
+    CHARACTER(LEN=*), INTENT(IN)  :: file
+    CHARACTER(LEN=*), INTENT(IN)  :: func
+    INTEGER         , INTENT(IN)  :: line
+    INTEGER(HID_T)  , INTENT(IN)  :: cls_id
+    INTEGER(HID_T)  , INTENT(IN)  :: maj_id
+    INTEGER(HID_T)  , INTENT(IN)  :: min_id
+    CHARACTER(LEN=*), INTENT(IN)  :: msg
+    INTEGER         , INTENT(OUT) :: hdferr
 
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
-    TYPE(C_PTR), OPTIONAL :: line
     CHARACTER(LEN=*), OPTIONAL, TARGET :: arg1, arg2, arg3, arg4, arg5, &
          arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, &
          arg16, arg17, arg18, arg19, arg20
 
-    TYPE(C_PTR) :: file_def = C_NULL_PTR
-    TYPE(C_PTR) :: func_def = C_NULL_PTR
-    TYPE(C_PTR) :: line_def = C_NULL_PTR
     TYPE(C_PTR) :: arg1_def = C_NULL_PTR, arg2_def = C_NULL_PTR, &
          arg3_def = C_NULL_PTR, arg4_def = C_NULL_PTR, &
          arg5_def = C_NULL_PTR, arg6_def = C_NULL_PTR, &
@@ -356,7 +352,9 @@ CONTAINS
          arg19_def = C_NULL_PTR, arg20_def = C_NULL_PTR
 
     INTERFACE
-       INTEGER FUNCTION h5epush_c(err_stack, cls_id, maj_id, min_id, msg, msg_len, file, func, line, &
+       INTEGER FUNCTION h5epush_c(err_stack, &
+            file, file_len, func, func_len, line, &
+            cls_id, maj_id, min_id, msg, msg_len, &
             arg1, arg2, arg3, arg4, arg5, &
             arg6, arg7, arg8, arg9, arg10, &
             arg11, arg12, arg13, arg14, arg15, &
@@ -366,27 +364,24 @@ CONTAINS
          IMPORT :: HID_T
          IMPLICIT NONE
          INTEGER(HID_T) :: err_stack
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         INTEGER :: file_len
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER :: func_len
+         INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T) :: cls_id
          INTEGER(HID_T) :: maj_id
          INTEGER(HID_T) :: min_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: msg
          INTEGER :: msg_len
 
-         TYPE(C_PTR), VALUE :: file
-         TYPE(C_PTR), VALUE :: func
-         TYPE(C_PTR), VALUE :: line
-         TYPE(C_PTR), VALUE :: arg1, arg2, arg3, arg4, &
-         arg5, arg6, arg7, arg8, &
-         arg9, arg10, arg11, arg12, &
-         arg13, arg14, arg15, arg16, &
-         arg17, arg18, arg19, arg20
+         TYPE(C_PTR), VALUE :: arg1, arg2, arg3, arg4, arg5, &
+              arg6, arg7, arg8, arg9, arg10, &
+              arg11, arg12, arg13, arg14, arg15, &
+              arg16, arg17, arg18, arg19, arg20
 
        END FUNCTION h5epush_c
     END INTERFACE
-
-    IF (PRESENT(file)) file_def = file
-    IF (PRESENT(func)) func_def = func
-    IF (PRESENT(line)) line_def = line
 
     IF (PRESENT(arg1)) arg1_def = C_LOC(arg1(1:1))
     IF (PRESENT(arg2)) arg2_def = C_LOC(arg2(1:1))
@@ -409,14 +404,15 @@ CONTAINS
     IF (PRESENT(arg19)) arg19_def = C_LOC(arg19(1:1))
     IF (PRESENT(arg20)) arg20_def = C_LOC(arg20(1:1))
 
-    hdferr = h5epush_c(err_stack, cls_id, maj_id, min_id, msg, LEN(msg), &
-         file_def, func_def, line_def, &
+    hdferr = h5epush_c(err_stack, file, LEN(file), func, LEN(func), INT(line,C_INT), &
+         cls_id, maj_id, min_id, msg, LEN(msg), &
          arg1_def, arg2_def, arg3_def, arg4_def, arg5_def, &
          arg6_def, arg7_def, arg8_def, arg9_def, arg10_def, &
          arg11_def, arg12_def, arg13_def, arg14_def, arg15_def, &
          arg16_def, arg17_def, arg18_def, arg19_def, arg20_def)
 
   END SUBROUTINE h5epush_f
+
 !>
 !! \ingroup FH5E
 !!
@@ -631,7 +627,7 @@ CONTAINS
        RETURN
     ENDIF
     f_ptr = C_LOC(c_msg(1)(1:1))
-    c_msg_size = H5Eget_msg(msg_id, c_msg_type, f_ptr, msg_cp_sz+1)
+    c_msg_size = H5Eget_msg(msg_id, c_msg_type, f_ptr, msg_cp_sz+1_SIZE_T)
 
     CALL HD5c2fstring(msg, c_msg, msg_cp_sz, msg_cp_sz+1_SIZE_T)
 

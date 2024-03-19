@@ -47,14 +47,14 @@ CONTAINS
 !**
 !***************************************************************
 
-    INTEGER FUNCTION my_hdf5_error_handler(estack_id, data_inout) bind(C)
+    INTEGER(C_INT) FUNCTION my_hdf5_error_handler(estack_id, data_inout) bind(C)
 
     ! This error function handle works with only version 2 error stack
 
     IMPLICIT NONE
 
     ! estack_id is always passed from C as: H5E_DEFAULT
-    INTEGER(HID_T) :: estack_id
+    INTEGER(HID_T), VALUE :: estack_id
 
     ! data that was registered with H5Eset_auto_f
     ! INTEGER :: data_inout ! another option
@@ -89,7 +89,7 @@ CONTAINS
 
     INTEGER(SIZE_T), PARAMETER :: MSG_SIZE = 64
 
-    INTEGER(C_INT)    :: n
+    INTEGER(C_INT), VALUE :: n
     TYPE(h5e_error_t) :: err_desc
     TYPE(C_PTR)       :: op_data
 
@@ -100,6 +100,11 @@ CONTAINS
     INTEGER :: msg_type
 
     INTEGER :: error
+
+    IF(n.NE.0_C_INT)THEN
+       custom_print_cb = -1
+       RETURN
+    ENDIF
 
     CALL H5Eget_class_name_f(err_desc%cls_id, cls, error)
     IF(error .LT.0)THEN
@@ -252,10 +257,10 @@ SUBROUTINE test_error_stack(total_error)
   INTEGER :: total_error
   INTEGER :: error
   INTEGER(HID_T) :: cls_id, major, minor, estack_id, estack_id1, estack_id2
-  CHARACTER(LEN=18), TARGET :: file
-  CHARACTER(LEN=18), TARGET :: func
-  INTEGER(C_INT)   , TARGET :: line
-  TYPE(C_PTR) :: ptr1, ptr2, ptr3, ptr4
+  CHARACTER(LEN=18) :: file
+  CHARACTER(LEN=18) :: func
+  INTEGER           :: line
+  TYPE(C_PTR) :: ptr1
 
   INTEGER :: msg_type
   CHARACTER(LEN=9) :: maj_mesg = "MAJOR MSG"
@@ -283,21 +288,17 @@ SUBROUTINE test_error_stack(total_error)
   CALL H5Ecreate_msg_f(cls_id, H5E_MINOR_F, min_mesg, minor, error)
   CALL check("H5Ecreate_msg_f", error, total_error)
 
-  file = "FILE"//C_NULL_CHAR
-  func = "FUNC"//C_NULL_CHAR
+  file = "FILE"
+  func = "FUNC"
   line = 99
-
-  ptr1 = C_LOC(file(1:1))
-  ptr2 = C_LOC(func(1:1))
-  ptr3 = C_LOC(line)
 
   CALL h5ecreate_stack_f(estack_id, error)
   CALL check("h5ecreate_stack_f", error, total_error)
 
   ! push a custom error message onto the stack
-  CALL H5Epush_f(estack_id, cls_id, major, minor, "%s ERROR TEXT %s %s", error, &
-       ptr1, ptr2, ptr3, &
-       arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m", arg3=ACHAR(10) )
+  CALL H5Epush_f(estack_id, file, func, line, &
+       cls_id, major, minor, "%s ERROR TEXT %s %s %s", error, &
+       arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m", arg3=ACHAR(0), arg4=ACHAR(10) )
   CALL check("H5Epush_f", error, total_error)
 
   CALL h5eget_num_f(estack_id, count, error)
@@ -421,10 +422,10 @@ SUBROUTINE test_error_stack(total_error)
   ENDIF
 
   stderr = "** Print error stack in customized way **"//C_NULL_CHAR
-  ptr4 = C_LOC(stderr(1:1))
+  ptr1 = C_LOC(stderr(1:1))
   func_ptr = C_FUNLOC(custom_print_cb)
 
-  CALL h5ewalk_f(estack_id, H5E_WALK_UPWARD_F, func_ptr, ptr4, error)
+  CALL h5ewalk_f(estack_id, H5E_WALK_UPWARD_F, func_ptr, ptr1, error)
   CALL check("h5ewalk_f", error, total_error)
 
   CALL h5eget_num_f(estack_id, count, error)
@@ -462,9 +463,9 @@ SUBROUTINE test_error_stack(total_error)
   CALL check("h5ecreate_stack_f", error, total_error)
 
   ! push a custom error message onto the stack
-  CALL H5Epush_f(estack_id1, cls_id, major, minor, "%s ERROR TEXT %s"//C_NEW_LINE, error, &
-       ptr1, ptr2, ptr3, &
-       arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m" )
+  CALL H5Epush_f(estack_id1, file, func, line, &
+       cls_id, major, minor, "%s ERROR TEXT %s %s", error, &
+       arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m", arg3=ACHAR(10) )
   CALL check("H5Epush_f", error, total_error)
 
   CALL H5Eset_current_stack_f(estack_id1, error) ! API will also close estack_id1
