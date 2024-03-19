@@ -1,13 +1,13 @@
-/** \page DDLBNF112 DDL in BNF for HDF5 1.12 through HDF5 1.14.3
+/** \page DDLBNF114 DDL in BNF for HDF5 1.14.4 and above
 
 \todo Revise this & break it up!
 
-\section intro112 Introduction
+\section intro114 Introduction
 
 This document contains the data description language (DDL) for an HDF5 file. The
 description is in Backus-Naur Form (BNF).
 
-\section expo112 Explanation of Symbols
+\section expo114 Explanation of Symbols
 
 This section contains a brief explanation of the symbols used in the DDL.
 
@@ -23,7 +23,7 @@ This section contains a brief explanation of the symbols used in the DDL.
  TBD                      To Be Decided
 \endcode
 
-\section ddl112 The DDL
+\section ddl114 The DDL
 
 \code{.unparsed}
 <file> ::= HDF5 <file_name> { <file_super_block>opt <root_group> }
@@ -92,10 +92,11 @@ This section contains a brief explanation of the symbols used in the DDL.
               H5T_NATIVE_LONG  | H5T_NATIVE_ULONG  |
               H5T_NATIVE_LLONG | H5T_NATIVE_ULLONG
 
-<float> ::= H5T_IEEE_F32BE   | H5T_IEEE_F32LE     |
-            H5T_IEEE_F64BE   | H5T_IEEE_F64LE     |
-            H5T_NATIVE_FLOAT |  H5T_NATIVE_DOUBLE |
-            H5T_NATIVE_LDOUBLE
+<float> ::= H5T_IEEE_F16BE     | H5T_IEEE_F16LE     | 
+            H5T_IEEE_F32BE     | H5T_IEEE_F32LE     |
+            H5T_IEEE_F64BE     | H5T_IEEE_F64LE     |
+            H5T_NATIVE_FLOAT16 | H5T_NATIVE_FLOAT   | 
+            H5T_NATIVE_DOUBLE  | H5T_NATIVE_LDOUBLE
 
 <time> ::= H5T_TIME: not yet implemented
 
@@ -512,7 +513,7 @@ This section contains a brief explanation of the symbols used in the DDL.
 <hex_value> ::= 0x[0-F][0-F]+ | [0-F][0-F]+
 \endcode
 
-\section example112 An Example of an HDF5 File in DDL
+\section example114 An Example of an HDF5 File in DDL
 
 \code{.unparsed}
 HDF5 "example.h5" {

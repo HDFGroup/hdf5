@@ -343,7 +343,7 @@
  *
  * h5dump is described on the “HDF5 Tools” page of the \ref RM.
  *
- * The HDF5 DDL grammar is described in the @ref DDLBNF110.
+ * The HDF5 DDL grammar is described in the @ref DDLBNF114.
  *
  * \subsection subsec_group_function Group Function Summaries
  * Functions that can be used with groups (\ref H5G functions) and property list functions that can used

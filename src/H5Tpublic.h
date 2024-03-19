@@ -251,6 +251,16 @@ typedef H5T_conv_ret_t (*H5T_conv_except_func_t)(H5T_conv_except_t except_type, 
  */
 /**
  * \ingroup PDTIEEE
+ * 16-bit big-endian IEEE floating-point numbers
+ */
+#define H5T_IEEE_F16BE (H5OPEN H5T_IEEE_F16BE_g)
+/**
+ * \ingroup PDTIEEE
+ * 16-bit little-endian IEEE floating-point numbers
+ */
+#define H5T_IEEE_F16LE (H5OPEN H5T_IEEE_F16LE_g)
+/**
+ * \ingroup PDTIEEE
  * 32-bit big-endian IEEE floating-point numbers
  */
 #define H5T_IEEE_F32BE (H5OPEN H5T_IEEE_F32BE_g)
@@ -269,6 +279,8 @@ typedef H5T_conv_ret_t (*H5T_conv_except_func_t)(H5T_conv_except_t except_type, 
  * 64-bit little-endian IEEE floating-point numbers
  */
 #define H5T_IEEE_F64LE (H5OPEN H5T_IEEE_F64LE_g)
+H5_DLLVAR hid_t H5T_IEEE_F16BE_g;
+H5_DLLVAR hid_t H5T_IEEE_F16LE_g;
 H5_DLLVAR hid_t H5T_IEEE_F32BE_g;
 H5_DLLVAR hid_t H5T_IEEE_F32LE_g;
 H5_DLLVAR hid_t H5T_IEEE_F64BE_g;
@@ -792,6 +804,11 @@ H5_DLLVAR hid_t H5T_VAX_F64_g;
 #define H5T_NATIVE_ULLONG (H5OPEN H5T_NATIVE_ULLONG_g)
 /**
  * \ingroup PDTNAT
+ * C-style \Code{_Float16}
+ */
+#define H5T_NATIVE_FLOAT16 (H5OPEN H5T_NATIVE_FLOAT16_g)
+/**
+ * \ingroup PDTNAT
  * C-style \Code{float}
  */
 #define H5T_NATIVE_FLOAT (H5OPEN H5T_NATIVE_FLOAT_g)
@@ -865,6 +882,7 @@ H5_DLLVAR hid_t H5T_NATIVE_LONG_g;
 H5_DLLVAR hid_t H5T_NATIVE_ULONG_g;
 H5_DLLVAR hid_t H5T_NATIVE_LLONG_g;
 H5_DLLVAR hid_t H5T_NATIVE_ULLONG_g;
+H5_DLLVAR hid_t H5T_NATIVE_FLOAT16_g;
 H5_DLLVAR hid_t H5T_NATIVE_FLOAT_g;
 H5_DLLVAR hid_t H5T_NATIVE_DOUBLE_g;
 H5_DLLVAR hid_t H5T_NATIVE_LDOUBLE_g;
@@ -2319,6 +2337,7 @@ H5_DLL htri_t H5Tis_variable_str(hid_t type_id);
  *          \li #H5T_NATIVE_ULONG
  *          \li #H5T_NATIVE_ULLONG
  *
+ *          \li #H5T_NATIVE_FLOAT16 (if available)
  *          \li #H5T_NATIVE_FLOAT
  *          \li #H5T_NATIVE_DOUBLE
  *          \li #H5T_NATIVE_LDOUBLE

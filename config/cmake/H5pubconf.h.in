@@ -128,6 +128,9 @@
 /* Define if library information should be embedded in the executables */
 #cmakedefine H5_HAVE_EMBEDDED_LIBINFO @H5_HAVE_EMBEDDED_LIBINFO@
 
+/* Define to 1 if you have the `fabsf16' function. */
+#cmakedefine H5_HAVE_FABSF16 @H5_HAVE_FABSF16@
+
 /* Define to 1 if you have the `fcntl' function. */
 #cmakedefine H5_HAVE_FCNTL @H5_HAVE_FCNTL@
 
@@ -139,6 +142,9 @@
 
 /* Define if support for szip filter is enabled */
 #cmakedefine H5_HAVE_FILTER_SZIP @H5_HAVE_FILTER_SZIP@
+
+/* Determine if _Float16 is available */
+#cmakedefine H5_HAVE__FLOAT16 @H5_HAVE__FLOAT16@
 
 /* Determine if __float128 is available */
 #cmakedefine H5_HAVE_FLOAT128 @H5_HAVE_FLOAT128@
@@ -381,6 +387,9 @@
 /* Define if new-style references should be used with dimension scales */
 #cmakedefine H5_DIMENSION_SCALES_WITH_NEW_REF @H5_DIMENSION_SCALES_WITH_NEW_REF@
 
+/* Define if your system can convert long double to _Float16 values correctly. */
+#cmakedefine H5_LDOUBLE_TO_FLOAT16_CORRECT @H5_LDOUBLE_TO_FLOAT16_CORRECT@
+
 /* Define if your system can convert long double to (unsigned) long long
    values correctly. */
 #cmakedefine H5_LDOUBLE_TO_LLONG_ACCURATE @H5_LDOUBLE_TO_LLONG_ACCURATE@
@@ -582,6 +591,9 @@
 
 /* The size of `_Quad', as computed by sizeof. */
 #define H5_SIZEOF__QUAD @H5_SIZEOF__QUAD@
+
+/* The size of `_Float16', as computed by sizeof. */
+#define H5_SIZEOF__FLOAT16 @H5_SIZEOF__FLOAT16@
 
 /* The size of `__float128', as computed by sizeof. */
 #define H5_SIZEOF___FLOAT128 @H5_SIZEOF___FLOAT128@

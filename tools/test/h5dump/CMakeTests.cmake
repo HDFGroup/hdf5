@@ -103,6 +103,8 @@
       tfletcher32.ddl
       #tfloatsattrs.ddl #native
       #tfloatsattrs.wddl #special for windows
+      tfloat16.ddl
+      tfloat16_be.ddl
       tfpformat.ddl
       tgroup-1.ddl
       tgroup-2.ddl
@@ -291,6 +293,8 @@
       tfcontents2.h5
       tfilters.h5
       tfloatsattrs.h5
+      tfloat16.h5
+      tfloat16_be.h5
       tfpformat.h5
       tfvalues.h5
       tgroup.h5
@@ -1335,6 +1339,10 @@
   ADD_H5_TEST (tfloatsattrs 0 -p --enable-error-stack tfloatsattrs.h5)
   ADD_H5_TEST (tldouble 0 --enable-error-stack tldouble.h5)
   ADD_H5_TEST (tldouble_scalar 0 -p --enable-error-stack tldouble_scalar.h5)
+
+  # Add tests for _Float16 type
+  ADD_H5_TEST (tfloat16 0 --enable-error-stack tfloat16.h5)
+  ADD_H5_TEST (tfloat16_be 0 --enable-error-stack tfloat16_be.h5)
 
   # test for vms
   ADD_H5_TEST (tvms 0 --enable-error-stack tvms.h5)

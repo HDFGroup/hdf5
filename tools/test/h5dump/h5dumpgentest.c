@@ -119,6 +119,10 @@
 #define FILE90     "tst_onion_dset_1d.h5"
 #define FILE91     "tst_onion_objs.h5"
 #define FILE92     "tst_onion_dset_ext.h5"
+#ifdef H5_HAVE__FLOAT16
+#define FILE93 "tfloat16.h5"
+#define FILE94 "tfloat16_be.h5"
+#endif
 
 #define ONION_TEST_FIXNAME_SIZE 1024
 #define ONION_TEST_PAGE_SIZE    (uint32_t)32
@@ -411,6 +415,18 @@ typedef struct s1_t {
 #define F89_YDIM64      64
 #define F89_DATASETF128 "DS128BITS"
 #define F89_YDIM128     128
+
+#ifdef H5_HAVE__FLOAT16
+/* "FILE93" macros */
+#define F93_XDIM    8
+#define F93_YDIM    16
+#define F93_DATASET "DS16BITS"
+
+/* "FILE94" macros */
+#define F94_XDIM    8
+#define F94_YDIM    16
+#define F94_DATASET "DS16BITS"
+#endif
 
 static void
 gent_group(void)
@@ -11993,6 +12009,148 @@ error:
     return -1;
 } /* gent_onion_dset_extension */
 
+#ifdef H5_HAVE__FLOAT16
+static void
+gent_float16(void)
+{
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   tid     = H5I_INVALID_HID;
+    hid_t   attr    = H5I_INVALID_HID;
+    hid_t   dataset = H5I_INVALID_HID;
+    hid_t   space   = H5I_INVALID_HID;
+    hid_t   aspace  = H5I_INVALID_HID;
+    hsize_t dims[2], adims[1];
+
+    struct {
+        H5__Float16 arr[F93_XDIM][F93_YDIM];
+    } * dset16;
+
+    H5__Float16 *aset16 = NULL;
+    H5__Float16  val16bits;
+
+    dset16 = malloc(sizeof(*dset16));
+
+    aset16 = calloc(F93_XDIM * F93_YDIM, sizeof(H5__Float16));
+
+    fid = H5Fcreate(FILE93, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    if ((tid = H5Tcopy(H5T_NATIVE_FLOAT16)) < 0)
+        goto error;
+
+    if (H5Tget_size(tid) == 0)
+        goto error;
+
+    /* Dataset of 16-bit little-endian float */
+    dims[0] = F93_XDIM;
+    dims[1] = F93_YDIM;
+    space   = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F93_DATASET, H5T_IEEE_F16LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    val16bits = (H5__Float16)F93_YDIM;
+    for (size_t i = 0; i < dims[0]; i++) {
+        dset16->arr[i][0]   = val16bits;
+        aset16[i * dims[1]] = dset16->arr[i][0];
+
+        for (size_t j = 1; j < dims[1]; j++) {
+            dset16->arr[i][j]       = (H5__Float16)(j * dims[0] + i) / (H5__Float16)F93_YDIM;
+            aset16[i * dims[1] + j] = dset16->arr[i][j];
+        }
+
+        val16bits -= (H5__Float16)1;
+    }
+
+    H5Dwrite(dataset, H5T_IEEE_F16LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset16);
+
+    /* Attribute of 16-bit little-endian float */
+    adims[0] = F93_XDIM * F93_YDIM;
+    aspace   = H5Screate_simple(1, adims, NULL);
+    attr     = H5Acreate2(dataset, F93_DATASET, H5T_IEEE_F16LE, aspace, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(attr, H5T_IEEE_F16LE, aset16);
+
+    H5Aclose(attr);
+    H5Sclose(aspace);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+error:
+    free(aset16);
+    free(dset16);
+
+    H5Fclose(fid);
+}
+
+static void
+gent_float16_be(void)
+{
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   tid     = H5I_INVALID_HID;
+    hid_t   attr    = H5I_INVALID_HID;
+    hid_t   dataset = H5I_INVALID_HID;
+    hid_t   space   = H5I_INVALID_HID;
+    hid_t   aspace  = H5I_INVALID_HID;
+    hsize_t dims[2], adims[1];
+
+    struct {
+        H5__Float16 arr[F94_XDIM][F94_YDIM];
+    } * dset16;
+
+    H5__Float16 *aset16 = NULL;
+    H5__Float16  val16bits;
+
+    dset16 = malloc(sizeof(*dset16));
+
+    aset16 = calloc(F94_XDIM * F94_YDIM, sizeof(H5__Float16));
+
+    fid = H5Fcreate(FILE94, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    if ((tid = H5Tcopy(H5T_NATIVE_FLOAT16)) < 0)
+        goto error;
+
+    if (H5Tget_size(tid) == 0)
+        goto error;
+
+    /* Dataset of 16-bit big-endian float */
+    dims[0] = F94_XDIM;
+    dims[1] = F94_YDIM;
+    space   = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F94_DATASET, H5T_IEEE_F16BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    val16bits = (H5__Float16)F94_YDIM;
+    for (size_t i = 0; i < dims[0]; i++) {
+        dset16->arr[i][0]   = val16bits;
+        aset16[i * dims[1]] = dset16->arr[i][0];
+
+        for (size_t j = 1; j < dims[1]; j++) {
+            dset16->arr[i][j]       = (H5__Float16)(j * dims[0] + i) / (H5__Float16)F94_YDIM;
+            aset16[i * dims[1] + j] = dset16->arr[i][j];
+        }
+
+        val16bits -= (H5__Float16)1;
+    }
+
+    H5Dwrite(dataset, H5T_IEEE_F16LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset16);
+
+    /* Attribute of 16-bit big-endian float */
+    adims[0] = F94_XDIM * F94_YDIM;
+    aspace   = H5Screate_simple(1, adims, NULL);
+    attr     = H5Acreate2(dataset, F94_DATASET, H5T_IEEE_F16BE, aspace, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(attr, H5T_IEEE_F16LE, aset16);
+
+    H5Aclose(attr);
+    H5Sclose(aspace);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+error:
+    free(aset16);
+    free(dset16);
+
+    H5Fclose(fid);
+}
+#endif
+
 int
 main(void)
 {
@@ -12096,6 +12254,11 @@ main(void)
     gent_onion_1d_dset();
     gent_onion_create_delete_objects();
     gent_onion_dset_extension();
+
+#ifdef H5_HAVE__FLOAT16
+    gent_float16();
+    gent_float16_be();
+#endif
 
     return 0;
 }

@@ -73,8 +73,9 @@
         }                                                                                                    \
     } while (0)
 
-static const char *FILENAME[] = {"dtypes0", "dtypes1", "dtypes2", "dtypes3", "dtypes4",  "dtypes5",
-                                 "dtypes6", "dtypes7", "dtypes8", "dtypes9", "dtypes10", NULL};
+static const char *FILENAME[] = {"dtypes0",  "dtypes1",  "dtypes2", "dtypes3", "dtypes4",
+                                 "dtypes5",  "dtypes6",  "dtypes7", "dtypes8", "dtypes9",
+                                 "dtypes10", "dtypes11", NULL};
 
 #define TESTFILE "bad_compound.h5"
 
@@ -6037,6 +6038,424 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    test__Float16
+ *
+ * Purpose:     Tests the _Float16 datatype.
+ *
+ * Return:      Success:    0
+ *              Failure:    number of errors
+ *-------------------------------------------------------------------------
+ */
+static int
+test__Float16(void)
+{
+#ifdef H5_HAVE__FLOAT16
+    H5T_path_t *path = NULL;
+    hsize_t     dims[1];
+    htri_t      is_little_endian;
+    H5T_t      *native_dtype = NULL;
+    H5T_t      *tmp_dtype    = NULL;
+    hid_t       fid          = H5I_INVALID_HID;
+    hid_t       space_id     = H5I_INVALID_HID;
+    hid_t       dset_id      = H5I_INVALID_HID;
+    hid_t       dcpl_id      = H5I_INVALID_HID;
+    hid_t       native_type  = H5I_INVALID_HID;
+    char        filename[256];
+
+    TESTING("_Float16 datatype");
+
+    /* Check that native macro maps to a valid type */
+    if (0 == H5Tget_size(H5T_NATIVE_FLOAT16)) {
+        H5_FAILED();
+        printf("Invalid size for H5T_NATIVE_FLOAT16 datatype\n");
+        goto error;
+    }
+
+    /* Check that native type for standard 16-bit float type matches */
+    if ((native_type = H5Tget_native_type(H5T_IEEE_F16LE, H5T_DIR_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't get native type for H5T_IEEE_F16LE\n");
+        goto error;
+    }
+
+    if (0 == H5Tequal(native_type, H5T_NATIVE_FLOAT16)) {
+        H5_FAILED();
+        printf("Native _Float16 type for H5T_IEEE_F16LE wasn't equal to H5T_NATIVE_FLOAT16\n");
+        goto error;
+    }
+
+    if (H5Tclose(native_type) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if ((native_type = H5Tget_native_type(H5T_IEEE_F16BE, H5T_DIR_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't get native type for H5T_IEEE_F16BE\n");
+        goto error;
+    }
+
+    if (0 == H5Tequal(native_type, H5T_NATIVE_FLOAT16)) {
+        H5_FAILED();
+        printf("Native _Float16 type for H5T_IEEE_F16BE wasn't equal to H5T_NATIVE_FLOAT16\n");
+        goto error;
+    }
+
+    if (H5Tclose(native_type) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    /*
+     * Ensure that conversion between native _Float16 datatype and
+     * the matching standard datatype is covered by the no-op conversion
+     * function. Ensure that conversion between native _Float16 datatype
+     * and the other standard datatype is covered by the byte-order
+     * conversion function.
+     */
+    if (NULL == (native_dtype = H5I_object_verify(H5T_NATIVE_FLOAT16, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for datatype\n");
+        goto error;
+    }
+
+    if ((is_little_endian = H5Tequal(H5T_NATIVE_FLOAT16, H5T_IEEE_F16LE)) < 0) {
+        H5_FAILED();
+        printf("Can't check if native _Float16 type matches standard little-endian type\n");
+        goto error;
+    }
+
+    if (NULL == (tmp_dtype = H5I_object_verify(H5T_IEEE_F16LE, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for H5T_IEEE_F16LE datatype\n");
+        goto error;
+    }
+
+    if (NULL == (path = H5T_path_find(native_dtype, tmp_dtype))) {
+        H5_FAILED();
+        printf("Can't find datatype conversion path\n");
+        goto error;
+    }
+
+    if (path->is_hard || path->conv.is_app) {
+        H5_FAILED();
+        printf("Invalid conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16LE\n");
+        goto error;
+    }
+
+    if (is_little_endian) {
+        if (path->conv.u.lib_func != H5T__conv_noop) {
+            H5_FAILED();
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16LE was not H5T__conv_noop\n");
+            goto error;
+        }
+    }
+    else {
+        if (path->conv.u.lib_func != H5T__conv_order_opt) {
+            H5_FAILED();
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16LE was not H5T__conv_order\n");
+            goto error;
+        }
+    }
+
+    if (NULL == (tmp_dtype = H5I_object_verify(H5T_IEEE_F16BE, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for H5T_IEEE_F16BE datatype\n");
+        goto error;
+    }
+
+    if (NULL == (path = H5T_path_find(native_dtype, tmp_dtype))) {
+        H5_FAILED();
+        printf("Can't find datatype conversion path\n");
+        goto error;
+    }
+
+    if (path->is_hard || path->conv.is_app) {
+        H5_FAILED();
+        printf("Invalid conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16BE\n");
+        goto error;
+    }
+
+    if (is_little_endian) {
+        if (path->conv.u.lib_func != H5T__conv_order_opt) {
+            H5_FAILED();
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16BE was not H5T__conv_order\n");
+            goto error;
+        }
+    }
+    else {
+        if (path->conv.u.lib_func != H5T__conv_noop) {
+            H5_FAILED();
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16BE was not H5T__conv_noop\n");
+            goto error;
+        }
+    }
+
+    /*
+     * Ensure that conversion between native _Float16 datatype and a
+     * couple of other datatypes are the correct type of conversions.
+     */
+    if (is_little_endian) {
+        /* Check for a native type that matches H5T_STD_I32LE before
+         * checking for a hard conversion path
+         */
+        if (H5Tequal(H5T_NATIVE_SHORT, H5T_STD_I32LE) == true ||
+            H5Tequal(H5T_NATIVE_INT, H5T_STD_I32LE) == true ||
+            H5Tequal(H5T_NATIVE_LONG, H5T_STD_I32LE) == true) {
+            if (H5Tcompiler_conv(H5T_NATIVE_FLOAT16, H5T_STD_I32LE) != true) {
+                H5_FAILED();
+                printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_STD_I32LE was not a hard conversion\n");
+                goto error;
+            }
+        }
+
+        if (H5Tcompiler_conv(H5T_NATIVE_FLOAT16, H5T_STD_I32BE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_STD_I32BE was not a soft conversion\n");
+            goto error;
+        }
+    }
+    else {
+        if (H5Tcompiler_conv(H5T_NATIVE_FLOAT16, H5T_STD_I32LE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_STD_I32LE was not a soft conversion\n");
+            goto error;
+        }
+
+        /* Check for a native type that matches H5T_STD_I32BE before
+         * checking for a hard conversion path
+         */
+        if (H5Tequal(H5T_NATIVE_SHORT, H5T_STD_I32BE) == true ||
+            H5Tequal(H5T_NATIVE_INT, H5T_STD_I32BE) == true ||
+            H5Tequal(H5T_NATIVE_LONG, H5T_STD_I32BE) == true) {
+            if (H5Tcompiler_conv(H5T_NATIVE_FLOAT16, H5T_STD_I32BE) != true) {
+                H5_FAILED();
+                printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_STD_I32BE was not a hard conversion\n");
+                goto error;
+            }
+        }
+    }
+
+    if (H5Tcompiler_conv(H5T_NATIVE_FLOAT16, H5T_NATIVE_SCHAR) != true) {
+        H5_FAILED();
+        printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_NATIVE_SCHAR was not a hard conversion\n");
+        goto error;
+    }
+
+    /*
+     * Ensure that conversion between standard _Float16 datatypes and a
+     * couple of other datatypes are the correct type of conversions.
+     */
+    if (is_little_endian) {
+        if (H5Tcompiler_conv(H5T_IEEE_F16LE, H5T_NATIVE_FLOAT) != true) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16LE -> H5T_NATIVE_FLOAT was not a hard conversion\n");
+            goto error;
+        }
+
+        /* Check for a native type that matches H5T_IEEE_F32LE before
+         * checking for a hard conversion path
+         */
+        if (H5Tequal(H5T_NATIVE_FLOAT, H5T_IEEE_F32LE) == true ||
+            H5Tequal(H5T_NATIVE_DOUBLE, H5T_IEEE_F32LE) == true ||
+            H5Tequal(H5T_NATIVE_LDOUBLE, H5T_IEEE_F32LE) == true) {
+            if (H5Tcompiler_conv(H5T_IEEE_F16LE, H5T_IEEE_F32LE) != true) {
+                H5_FAILED();
+                printf("Conversion path for H5T_IEEE_F16LE -> H5T_IEEE_F32LE was not a hard conversion\n");
+                goto error;
+            }
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16LE, H5T_IEEE_F32BE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16LE -> H5T_IEEE_F32BE was not a soft conversion\n");
+            goto error;
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16BE, H5T_NATIVE_FLOAT) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16BE -> H5T_NATIVE_FLOAT was not a soft conversion\n");
+            goto error;
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16BE, H5T_IEEE_F32BE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16BE -> H5T_IEEE_F32BE was not a soft conversion\n");
+            goto error;
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16BE, H5T_IEEE_F32LE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16BE -> H5T_IEEE_F32LE was not a soft conversion\n");
+            goto error;
+        }
+    }
+    else {
+        /* big-endian */
+        if (H5Tcompiler_conv(H5T_IEEE_F16LE, H5T_NATIVE_FLOAT) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16LE -> H5T_NATIVE_FLOAT was not a soft conversion\n");
+            goto error;
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16LE, H5T_IEEE_F32LE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16LE -> H5T_IEEE_F32LE was not a soft conversion\n");
+            goto error;
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16LE, H5T_IEEE_F32BE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16LE -> H5T_IEEE_F32BE was not a soft conversion\n");
+            goto error;
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16BE, H5T_NATIVE_FLOAT) != true) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16BE -> H5T_NATIVE_FLOAT was not a hard conversion\n");
+            goto error;
+        }
+
+        /* Check for a native type that matches H5T_IEEE_F32BE before
+         * checking for a hard conversion path
+         */
+        if (H5Tequal(H5T_NATIVE_FLOAT, H5T_IEEE_F32LE) == true ||
+            H5Tequal(H5T_NATIVE_DOUBLE, H5T_IEEE_F32LE) == true ||
+            H5Tequal(H5T_NATIVE_LDOUBLE, H5T_IEEE_F32LE) == true) {
+            if (H5Tcompiler_conv(H5T_IEEE_F16BE, H5T_IEEE_F32BE) != true) {
+                H5_FAILED();
+                printf("Conversion path for H5T_IEEE_F16BE -> H5T_IEEE_F32BE was not a hard conversion\n");
+                goto error;
+            }
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16BE, H5T_IEEE_F32LE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16BE -> H5T_IEEE_F32LE was not a soft conversion\n");
+            goto error;
+        }
+    }
+
+    /*
+     * Create a dataset with the datatype and check the dataset raw
+     * data storage size, as well as the file size
+     */
+    h5_fixname(FILENAME[11], H5P_DEFAULT, filename, sizeof filename);
+
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create file!\n");
+        goto error;
+    }
+
+    dims[0] = 10000;
+    if ((space_id = H5Screate_simple(1, dims, NULL)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create dataspace\n");
+        goto error;
+    }
+
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create DCPL\n");
+        goto error;
+    }
+
+    if (H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't set alloc time\n");
+        goto error;
+    }
+
+    if ((dset_id = H5Dcreate2(fid, "Dataset", H5T_NATIVE_FLOAT16, space_id, H5P_DEFAULT, dcpl_id,
+                              H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create dataset\n");
+        goto error;
+    }
+
+    if (H5Dget_storage_size(dset_id) != dims[0] * sizeof(H5__Float16)) {
+        H5_FAILED();
+        AT();
+        printf("Incorrect dataset raw data storage size allocated in file\n");
+        goto error;
+    }
+
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space_id) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    {
+        h5_stat_size_t file_size = h5_get_file_size(filename, H5P_DEFAULT);
+
+        if (file_size < 0)
+            TEST_ERROR;
+        if ((size_t)file_size < dims[0] * sizeof(H5__Float16)) {
+            H5_FAILED();
+            AT();
+            printf("File size value was too small\n");
+            goto error;
+        }
+
+        /* 4096 bytes is arbitrary, but should suffice for now */
+        if ((size_t)file_size > (dims[0] * sizeof(H5__Float16)) + 4096) {
+            H5_FAILED();
+            AT();
+            printf("File size value was too large\n");
+            goto error;
+        }
+    }
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(native_type);
+        H5Pclose(dcpl_id);
+        H5Sclose(space_id);
+        H5Dclose(dset_id);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    return 1;
+#else
+    TESTING("that _Float16 datatype is unavailable");
+
+    /* Make sure H5T_NATIVE_FLOAT16 macro maps to invalid datatype */
+    H5E_BEGIN_TRY
+    {
+        if (0 != H5Tget_size(H5T_NATIVE_FLOAT16)) {
+            H5_FAILED();
+            AT();
+            printf("Valid size was returned for invalid datatype\n");
+            return 1;
+        }
+    }
+    H5E_END_TRY
+
+    PASSED();
+
+    return 0;
+#endif
+}
+
+/*-------------------------------------------------------------------------
  * Function:    test_encode
  *
  * Purpose:     Tests functions of encoding and decoding datatype.
@@ -9170,6 +9589,8 @@ main(void)
     nerrors += test_bitfield_funcs();
     nerrors += test_opaque();
     nerrors += test_set_order();
+
+    nerrors += test__Float16();
 
     if (!driver_is_parallel) {
         nerrors += test_utf_ascii_conv();
