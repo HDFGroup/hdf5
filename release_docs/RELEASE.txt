@@ -1257,6 +1257,8 @@ Bug Fixes since HDF5-1.14.0 release
     Tools
     -----
 
+    - Fixed h5dump to support subfiling VFD via command line options
+    
     - Renamed h5fuse.sh to h5fuse
 
       Addresses Discussion #3791
@@ -1583,7 +1585,7 @@ Known Problems
 CMake vs. Autotools installations
 =================================
 While both build systems produce similar results, there are differences.
-Each system produces the same set of folders on linux (only CMake works
+Each system produces the same set of folders on Linux (only CMake works
 on standard Windows); bin, include, lib and share. Autotools places the
 COPYING and RELEASE.txt file in the root folder, CMake places them in
 the share folder.
