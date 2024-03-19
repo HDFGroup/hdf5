@@ -5,7 +5,7 @@ jpeg filter is available for encoding and decoding.
 Filter info is available from the dataset creation property 
    Filter identifier is 32019
    Number of parameters is 4 with the value 100
-   To find more about the filter check HDF5 jpeg filter; see https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html
+   To find more about the filter check HDF5 jpeg filter; see https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md
 ....Reading jpeg compressed data ................
 JPEG quality=100, percent of differing array elements=0.000000
 jpeg filter is available now since H5Dread triggered loading of the filter.
