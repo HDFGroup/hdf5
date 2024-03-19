@@ -2892,7 +2892,7 @@ main(int argc, char **argv)
     bool     must_unset_config_dir_env       = false;
     int      required                        = MPI_THREAD_MULTIPLE;
     int      provided                        = 0;
-    
+
     HDcompile_assert(SUBFILING_MIN_STRIPE_SIZE <= H5FD_SUBFILING_DEFAULT_STRIPE_SIZE);
 
     /* Initialize MPI */
