@@ -182,7 +182,157 @@ New Features
 
     Library:
     --------
-    -
+    - Added support for _Float16 16-bit half-precision floating-point datatype
+
+      Support for the _Float16 C datatype has been added on platforms where:
+
+        - The _Float16 datatype and its associated macros (FLT16_MIN, FLT16_MAX,
+          FLT16_EPSILON, etc.) are available
+        - A simple test program that converts between the _Float16 datatype and
+          other datatypes with casts can be successfully compiled and run at
+          configure time. Some compilers appear to be buggy or feature-incomplete
+          in this regard and will generate calls to compiler-internal functions
+          for converting between the _Float16 datatype and other datatypes, but
+          will not link these functions into the build, resulting in build
+          failures.
+
+      The following new macros have been added:
+
+        H5_HAVE__FLOAT16 - This macro is defined in H5pubconf.h and will have
+                           the value 1 if support for the _Float16 datatype is
+                           available. It will not be defined otherwise.
+
+        H5_SIZEOF__FLOAT16 - This macro is defined in H5pubconf.h and will have
+                             a value corresponding to the size of the _Float16
+                             datatype, as computed by sizeof(). It will have the
+                             value 0 if support for the _Float16 datatype is not
+                             available.
+
+        H5_HAVE_FABSF16 - This macro is defined in H5pubconf.h and will have the
+                          value 1 if the fabsf16 function is available for use.
+
+        H5_LDOUBLE_TO_FLOAT16_CORRECT - This macro is defined in H5pubconf.h and
+                                        will have the value 1 if the platform can
+                                        correctly convert long double values to
+                                        _Float16. Some compilers have issues with
+                                        this.
+
+        H5T_NATIVE_FLOAT16 - This macro maps to the ID of an HDF5 datatype representing
+                             the native C _Float16 datatype for the platform. If
+                             support for the _Float16 datatype is not available, the
+                             macro will map to H5I_INVALID_HID and should not be used.
+
+        H5T_IEEE_F16BE - This macro maps to the ID of an HDF5 datatype representing
+                         a big-endian IEEE 754 16-bit floating-point datatype. This
+                         datatype is available regardless of whether _Float16 support
+                         is available or not.
+
+        H5T_IEEE_F16LE - This macro maps to the ID of an HDF5 datatype representing
+                         a little-endian IEEE 754 16-bit floating-point datatype.
+                         This datatype is available regardless of whether _Float16
+                         support is available or not.
+
+      The following new hard datatype conversion paths have been added, but
+      will only be used when _Float16 support is available:
+
+        H5T_NATIVE_SCHAR <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_UCHAR <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_SHORT <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_USHORT <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_INT <-> H5T_NATIVE_FLOAT16   | H5T_NATIVE_UINT <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_LONG <-> H5T_NATIVE_FLOAT16  | H5T_NATIVE_ULONG <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_LLONG <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_ULLONG <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_FLOAT <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_DOUBLE <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_FLOAT16
+
+      The H5T_NATIVE_LDOUBLE -> H5T_NATIVE_FLOAT16 hard conversion path will only
+      be available and used if H5_LDOUBLE_TO_FLOAT16_CORRECT has a value of 1. Otherwise,
+      the conversion will be emulated in software by the library.
+
+      Note that in the absence of any compiler flags for architecture-specific
+      tuning, the generated code for datatype conversions with the _Float16 type
+      may perform conversions by first promoting the type to float. Use of
+      architecture-specific tuning compiler flags may instead allow for the
+      generation of specialized instructions, such as AVX512-FP16 instructions,
+      if available.
+
+    - Implemented optimized support for vector I/O in the Subfiling VFD
+
+      Previously, the Subfiling VFD would handle vector I/O requests by
+      breaking them down into individual I/O requests, one for each entry
+      in the I/O vectors provided. This could result in poor I/O performance
+      for features in HDF5 that utilize vector I/O, such as parallel I/O
+      to filtered datasets. The Subfiling VFD now properly handles vector
+      I/O requests in their entirety, resulting in fewer I/O calls, improved
+      vector I/O performance and improved vector I/O memory efficiency.
+    
+    - Added a simple cache to the read-only S3 (ros3) VFD
+
+      The read-only S3 VFD now caches the first N bytes of a file stored
+      in S3 to avoid a lot of small I/O operations when opening files.
+      This cache is per-file and created when the file is opened.
+
+      N is currently 16 MiB or the size of the file, whichever is smaller.
+
+      Addresses GitHub issue #3381
+
+    - Added new API function H5Pget_actual_selection_io_mode()
+
+      This function allows the user to determine if the library performed
+      selection I/O, vector I/O, or scalar (legacy) I/O during the last HDF5
+      operation performed with the provided DXPL.
+
+    - Added support for in-place type conversion in most cases
+
+      In-place type conversion allows the library to perform type conversion
+      without an intermediate type conversion buffer.  This can improve
+      performance by allowing I/O in a single operation over the entire
+      selection instead of being limited by the size of the intermediate buffer.
+      Implemented for I/O on contiguous and chunked datasets when the selection
+      is contiguous in memory and when the memory datatype is not smaller than
+      the file datatype.
+
+    - Changed selection I/O to be on by default when using the MPIO file driver
+
+    - Added support for selection I/O in the MPIO file driver
+
+      Previously, only vector I/O operations were supported.  Support for
+      selection I/O should improve performance and reduce memory uses in some
+      cases.
+
+    - Changed the error handling for a not found path in the find plugin process.
+
+      While attempting to load a plugin the HDF5 library will fail if one of the
+      directories in the plugin paths does not exist, even if there are more paths
+      to check. Instead of exiting the function with an error, just logged the error
+      and continue processing the list of paths to check.
+
+    - Implemented support for temporary security credentials for the Read-Only
+      S3 (ROS3) file driver.
+
+      When using temporary security credentials, one also needs to specify a
+      session/security token next to the access key id and secret access key.
+      This token can be specified by the new API function H5Pset_fapl_ros3_token().
+      The API function H5Pget_fapl_ros3_token() can be used to retrieve
+      the currently set token.
+
+    - Added a Subfiling VFD configuration file prefix environment variable
+
+      The Subfiling VFD now checks for values set in a new environment
+      variable "H5FD_SUBFILING_CONFIG_FILE_PREFIX" to determine if the
+      application has specified a pathname prefix to apply to the file
+      path for its configuration file. For example, this can be useful
+      for cases where the application wishes to write subfiles to a
+      machine's node-local storage while placing the subfiling configuration
+      file on a file system readable by all machine nodes.
+
+    - Added H5Pset_selection_io(), H5Pget_selection_io(), and
+      H5Pget_no_selection_io_cause() API functions to manage the selection I/O
+      feature.  This can be used to enable collective I/O with type conversion,
+      or it can be used with custom VFDs that support vector or selection I/O.
+
+    - Added H5Pset_modify_write_buf() and H5Pget_modify_write_buf() API
+      functions to allow the library to modify the contents of write buffers, in
+      order to avoid malloc/memcpy.  Currently only used for type conversion
+      with selection I/O.
 
 
     Parallel Library:
@@ -281,6 +431,42 @@ Bug Fixes since HDF5-1.14.3 release
 
     Library
     -------
+    - Fixed a bug that causes the library to incorrectly identify
+      the endian-ness of 16-bit and smaller C floating-point datatypes
+
+      When detecting the endian-ness of an in-memory C floating-point
+      datatype, the library previously always assumed that the type
+      was at least 32 bits in size. This resulted in invalid memory
+      accesses and would usually cause the library to identify the
+      datatype as having an endian-ness of H5T_ORDER_VAX. This has
+      now been fixed.
+
+    - Fixed a bug that causes an invalid memory access issue when
+      converting 16-bit floating-point values to integers with the
+      library's software conversion function
+
+      The H5T__conv_f_i function previously always assumed that
+      floating-point values were at least 32 bits in size and would
+      access invalid memory when attempting to convert 16-bit
+      floating-point values to integers. To fix this, parts of the
+      H5T__conv_f_i function had to be rewritten, which also resulted
+      in a significant speedup when converting floating-point values
+      to integers where the library does not have a hard conversion
+      path. This is the case for any floating-point values with a
+      datatype not represented by H5T_NATIVE_FLOAT16 (if _Float16 is
+      supported), H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE or
+      H5T_NATIVE_LDOUBLE.
+
+    - Fixed a bug that can cause incorrect data when overflows occur
+      while converting integer values to floating-point values with
+      the library's software conversion function
+
+      The H5T__conv_i_f function had a bug which previously caused it
+      to return incorrect data when an overflow occurs and an application's
+      conversion exception callback function decides not to handle the
+      overflow. Rather than return positive infinity, the library would
+      return truncated data. This has now been fixed.
+
     - Corrected H5Soffset_simple() when offset is NULL
 
       The reference manual states that the offset parameter of H5Soffset_simple()
@@ -522,7 +708,59 @@ Bug Fixes since HDF5-1.14.3 release
 
     Testing
     -------
-    -
+    - Fixed a bug in the dt_arith test when H5_WANT_DCONV_EXCEPTION is not
+      defined
+
+      The dt_arith test program's test_particular_fp_integer sub-test tries
+      to ensure that the library correctly raises a datatype conversion
+      exception when converting a floating-point value to an integer overflows.
+      However, this test would run even when H5_WANT_DCONV_EXCEPTION isn't
+      defined, causing the test to fail due to the library not raising
+      datatype conversion exceptions. This has now been fixed by not running
+      the test when H5_WANT_DCONV_EXCEPTION is not defined.
+
+    - Disabled running of MPI Atomicity tests for OpenMPI major versions < 5
+
+      Support for MPI atomicity operations is not implemented for major
+      versions of OpenMPI less than version 5. This would cause the MPI
+      atomicity tests for parallel HDF5 to sporadically fail when run
+      with OpenMPI. Testphdf5 now checks if OpenMPI is being used and will
+      skip running the atomicity tests if the major version of OpenMPI is
+      < 5.
+
+    - Fixed a testing failure in testphdf5 on Cray machines
+
+      On some Cray machines, what appears to be a bug in Cray MPICH was causing
+      calls to H5Fis_accessible to create a 0-byte file with strange Unix
+      permissions. This was causing an H5Fdelete file deletion test in the
+      testphdf5 program to fail due to a just-deleted HDF5 file appearing to
+      still be accessible on the file system. The issue in Cray MPICH has been
+      worked around for the time being by resetting the MPI_Info object on the
+      File Access Property List used to MPI_INFO_NULL before passing it to the
+      H5Fis_accessible call.
+
+    - A bug was fixed in the HDF5 API test random datatype generation code
+
+      A bug in the random datatype generation code could cause test failures
+      when trying to generate an enumeration datatype that has duplicated
+      name/value pairs in it. This has now been fixed.
+
+    - A bug was fixed in the HDF5 API test VOL connector registration checking code
+
+      The HDF5 API test code checks to see if the VOL connector specified by the
+      HDF5_VOL_CONNECTOR environment variable (if any) is registered with the library
+      before attempting to run tests with it so that testing can be skipped and an
+      error can be returned when a VOL connector fails to register successfully.
+      Previously, this code didn't account for VOL connectors that specify extra
+      configuration information in the HDF5_VOL_CONNECTOR environment variable and
+      would incorrectly report that the specified VOL connector isn't registered
+      due to including the configuration information as part of the VOL connector
+      name being checked for registration status. This has now been fixed.
+
+   - Fixed Fortran 2003 test with gfortran-v13, optimization levels O2,O3
+
+     Fixes failing Fortran 2003 test with gfortran, optimization level O2,O3
+     with -fdefault-real-16. Fixes GH #2928.
 
 
 Platforms Tested
