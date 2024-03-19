@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.2908dd1</span>
+   &#160;<span id="projectnumber">1.15.0.87fb6ed</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -208,6 +208,8 @@ Array, variable length, and enumeration datatypes are defined in terms of a sing
 <tr>
 <th span="3"><b>Float</b>  </th></tr>
 <tr>
+<td>_Float16 </td><td><a class="el" href="group___p_d_t_n_a_t.html#ga596ee6c1b8226b318eef1bca8ac7d20f">H5T_NATIVE_FLOAT16</a> </td><td><a class="el" href="group___p_d_t_i_e_e_e.html#ga2c910c75e941e9e8a885343fa48d84cb">H5T_IEEE_F16BE</a> or <a class="el" href="group___p_d_t_i_e_e_e.html#gac1735e1dcc978313a6605b62f935282a">H5T_IEEE_F16LE</a>  </td></tr>
+<tr>
 <td>float </td><td><a class="el" href="group___p_d_t_n_a_t.html#gae2523b63144b498f555fa4d04f59ee1c">H5T_NATIVE_FLOAT</a> </td><td><a class="el" href="group___p_d_t_i_e_e_e.html#ga71d24a7d4c373ed9a003d7a0d8133f1e">H5T_IEEE_F32BE</a> or <a class="el" href="group___p_d_t_i_e_e_e.html#ga994ce9ffdd2c77a9352b102a883503ea">H5T_IEEE_F32LE</a>  </td></tr>
 <tr>
 <td>double </td><td><a class="el" href="group___p_d_t_n_a_t.html#ga087f3b793a299e416bd68678c2ef7c09">H5T_NATIVE_DOUBLE</a> </td><td><a class="el" href="group___p_d_t_i_e_e_e.html#gaf5064f4498d92e5992a5a0564d026d35">H5T_IEEE_F64BE</a> or <a class="el" href="group___p_d_t_i_e_e_e.html#ga3f9c2185ec16632fab8c20ec7a63178e">H5T_IEEE_F64LE</a>  </td></tr>
@@ -266,8 +268,8 @@ Array, variable length, and enumeration datatypes are defined in terms of a sing
 <div class="ttc" id="agroup___h5_f_html_gac55cd91d80822e4f8c2a7f04ea71b124"><div class="ttname"><a href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a></div><div class="ttdeci">herr_t H5Fclose(hid_t file_id)</div><div class="ttdoc">Terminates access to an HDF5 file.</div></div>
 <div class="ttc" id="agroup___h5_f_html_gae64b51ee9ac0781bc4ccc599d98387f4"><div class="ttname"><a href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a></div><div class="ttdeci">hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)</div><div class="ttdoc">Creates an HDF5 file.</div></div>
 <div class="ttc" id="agroup___h5_s_html_ga8e35eea5738b4805856eac7d595254ae"><div class="ttname"><a href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a></div><div class="ttdeci">hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[])</div><div class="ttdoc">Creates a new simple dataspace and opens it for access.</div></div>
-<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:767</div></div>
-<div class="ttc" id="agroup___p_d_t_s_t_d_html_ga37e8a6be7ee64587c2a282b965019bb8"><div class="ttname"><a href="group___p_d_t_s_t_d.html#ga37e8a6be7ee64587c2a282b965019bb8">H5T_STD_I32BE</a></div><div class="ttdeci">#define H5T_STD_I32BE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:305</div></div>
+<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:779</div></div>
+<div class="ttc" id="agroup___p_d_t_s_t_d_html_ga37e8a6be7ee64587c2a282b965019bb8"><div class="ttname"><a href="group___p_d_t_s_t_d.html#ga37e8a6be7ee64587c2a282b965019bb8">H5T_STD_I32BE</a></div><div class="ttdeci">#define H5T_STD_I32BE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:317</div></div>
 </div><!-- fragment --><p> By using the native types when reading and writing, the code that reads from or writes to a dataset can be the same for different platforms.</p>
 <p>Can native types also be used when creating a dataset? Yes. However, just be aware that the resulting datatype in the file will be one of the standard pre-defined types and may be different than expected.</p>
 <p>What happens if you do not use the correct native datatype for a standard (file) datatype? Your data may be incorrect or not what you expect.</p>
@@ -350,7 +352,7 @@ Defining compound datatypes</h3>
 <div class="ttc" id="a_h5_tpublic_8h_html_a071841985f647f69516dbe77d93167f2a7a401c61604dc846dbd3f9eb6fcb0fe6"><div class="ttname"><a href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a7a401c61604dc846dbd3f9eb6fcb0fe6">H5T_COMPOUND</a></div><div class="ttdeci">@ H5T_COMPOUND</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:38</div></div>
 <div class="ttc" id="agroup___c_o_m_p_o_u_n_d_html_ga487d8f64a76f48b6eeb7f402d3b8b081"><div class="ttname"><a href="group___c_o_m_p_o_u_n_d.html#ga487d8f64a76f48b6eeb7f402d3b8b081">H5Tinsert</a></div><div class="ttdeci">herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)</div><div class="ttdoc">Adds a new member to a compound datatype.</div></div>
 <div class="ttc" id="agroup___h5_t_html_gaa9afc38e1a7d35e4d0bec24c569b3c65"><div class="ttname"><a href="group___h5_t.html#gaa9afc38e1a7d35e4d0bec24c569b3c65">H5Tcreate</a></div><div class="ttdeci">hid_t H5Tcreate(H5T_class_t type, size_t size)</div><div class="ttdoc">Creates a new datatype.</div></div>
-<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga087f3b793a299e416bd68678c2ef7c09"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga087f3b793a299e416bd68678c2ef7c09">H5T_NATIVE_DOUBLE</a></div><div class="ttdeci">#define H5T_NATIVE_DOUBLE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:802</div></div>
+<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga087f3b793a299e416bd68678c2ef7c09"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga087f3b793a299e416bd68678c2ef7c09">H5T_NATIVE_DOUBLE</a></div><div class="ttdeci">#define H5T_NATIVE_DOUBLE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:819</div></div>
 </div><!-- fragment --><h2><a class="anchor" id="subsecLBDtypeSpecRef"></a>
 Reference</h2>
 <p>There are two types of Reference datatypes in HDF5: </p><ul>
@@ -440,7 +442,7 @@ Fixed Length 5-character String Datatype</h3>
 <div class="line">strtype = <a class="code hl_function" href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a> (<a class="code hl_define" href="group___p_d_t_s.html#ga7f6b6959fefe56d2e871659110936d2d">H5T_C_S1</a>);</div>
 <div class="line">status = <a class="code hl_function" href="group___h5_t.html#gae5f38bfd4a4c557496b3194b5180212c">H5Tset_size</a> (strtype, 5); <span class="comment">/* create string of length 5 */</span></div>
 <div class="ttc" id="agroup___h5_t_html_gae5f38bfd4a4c557496b3194b5180212c"><div class="ttname"><a href="group___h5_t.html#gae5f38bfd4a4c557496b3194b5180212c">H5Tset_size</a></div><div class="ttdeci">herr_t H5Tset_size(hid_t type_id, size_t size)</div><div class="ttdoc">Sets size for a datatype.</div></div>
-<div class="ttc" id="agroup___p_d_t_s_html_ga7f6b6959fefe56d2e871659110936d2d"><div class="ttname"><a href="group___p_d_t_s.html#ga7f6b6959fefe56d2e871659110936d2d">H5T_C_S1</a></div><div class="ttdeci">#define H5T_C_S1</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:476</div></div>
+<div class="ttc" id="agroup___p_d_t_s_html_ga7f6b6959fefe56d2e871659110936d2d"><div class="ttname"><a href="group___p_d_t_s.html#ga7f6b6959fefe56d2e871659110936d2d">H5T_C_S1</a></div><div class="ttdeci">#define H5T_C_S1</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:488</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="subsecLBDtypeSpecStrVar"></a>
 Variable Length String Datatype</h3>
 <div class="fragment"><div class="line">strtype = <a class="code hl_function" href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a> (<a class="code hl_define" href="group___p_d_t_s.html#ga7f6b6959fefe56d2e871659110936d2d">H5T_C_S1</a>);</div>

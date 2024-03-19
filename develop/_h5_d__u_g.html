@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.2908dd1</span>
+   &#160;<span id="projectnumber">1.15.0.87fb6ed</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -411,7 +411,7 @@ Create Dataset</h3>
 <div class="ttc" id="agroup___h5_s_html_ga8e35eea5738b4805856eac7d595254ae"><div class="ttname"><a href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a></div><div class="ttdeci">hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[])</div><div class="ttdoc">Creates a new simple dataspace and opens it for access.</div></div>
 <div class="ttc" id="agroup___h5_t_html_gaec07efbab84f4e5b4ed22f010786be8e"><div class="ttname"><a href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a></div><div class="ttdeci">hid_t H5Tcopy(hid_t type_id)</div><div class="ttdoc">Copies an existing datatype.</div></div>
 <div class="ttc" id="agroup___h5_t_html_gafcba4db244f6a4d71e99c6e72b8678f0"><div class="ttname"><a href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a></div><div class="ttdeci">herr_t H5Tclose(hid_t type_id)</div><div class="ttdoc">Releases a datatype.</div></div>
-<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:767</div></div>
+<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:779</div></div>
 </div><!-- fragment --><p>Example 2, below, shows example code to create a similar dataset with a fill value of ‘-1’. This code has the same steps as in the example above, but uses a non-default property list. A file creation property list is created, and then the fill value is set to the desired value. Then the property list is passed to the <a class="el" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a> call.</p>
 <p><em> Example 2. Create a dataset with fill value set</em> </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist;  <span class="comment">// property list</span></div>
 <div class="line"><a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dataset, datatype, dataspace;</div>
@@ -677,11 +677,7 @@ Data Pipeline Filters</h3>
 <table class="doxtable">
 <caption>Data pipeline filters</caption>
 <tr>
-<th>Filter </th><th>Description  </th></tr>
-<tr>
-<td>gzip compression </td><td>Data compression using zlib.  </td></tr>
-<tr>
-<td>Szip compression </td><td>Data compression using the Szip library. See The HDF Group website for more information regarding the Szip filter.  </td></tr>
+<th>Built-in Filter </th><th>Description  </th></tr>
 <tr>
 <td>N-bit compression </td><td>Data compression using an algorithm specialized for n-bit datatypes.  </td></tr>
 <tr>
@@ -690,6 +686,12 @@ Data Pipeline Filters</h3>
 <td>Shuffling </td><td>To improve compression performance, data is regrouped by its byte position in the data unit. In other words, the 1st, 2nd, 3rd, and 4th bytes of integers are stored together respectively.  </td></tr>
 <tr>
 <td>Fletcher32 </td><td>Fletcher32 checksum for error-detection.  </td></tr>
+<tr>
+<th>Optional Built-in Filter </th><th>Description  </th></tr>
+<tr>
+<td>gzip compression </td><td>Data compression using zlib.  </td></tr>
+<tr>
+<td>szip compression </td><td>Data compression using the szip library. The HDF Group now uses the libaec library for the szip filter.  </td></tr>
 </table>
 <p>Filters may be used only for chunked data and are applied to chunks of data between the file hyperslab stage and the virtual file layer. At this stage in the pipeline, the data is organized as fixed-size blocks of elements, and the filter stage processes each chunk separately.</p>
 <p>Filters are selected by dataset creation properties, and some behavior may be controlled by data transfer properties. The library determines what filters must be applied and applies them in the order in which they were set by the application. That is, if an application calls <a class="el" href="group___d_c_p_l.html#ga31e09cb0bf2da2893eed8a72220e6521" title="Sets up use of the shuffle filter.">H5Pset_shuffle</a> and then <a class="el" href="group___d_c_p_l.html#gaf1f569bfc54552bdb9317d2b63318a0d" title="Sets deflate (GNU gzip) compression method and compression level.">H5Pset_deflate</a> when creating a dataset's creation property list, the library will apply the shuffle filter first and then the deflate filter.</p>
@@ -697,6 +699,18 @@ Data Pipeline Filters</h3>
 <li><dl class="section see"><dt>See also</dt><dd><a class="el" href="#subsubsec_dataset_filters_nbit">Using the N‐bit Filter</a> </dd></dl>
 </li>
 <li><dl class="section see"><dt>See also</dt><dd><a class="el" href="#subsubsec_dataset_filters_scale">Using the Scale‐offset Filter</a></dd></dl>
+</li>
+</ul>
+<h3><a class="anchor" id="subsubsec_dataset_transfer_dyn_filter"></a>
+Data Pipeline Dynamically Loaded Filters</h3>
+<p>While the HDF5 “internal” compression methods work reasonably well on users’ datasets, there are certain drawbacks to this implementation. First, the “internal” compression methods may not provide the optimal compression ratio, as do some newly developed or specialized compression methods. Secondly, if a data provider wants to use a “non-internal” compression for storing the data in HDF5, they have to write a filter function that uses the new compression method and then register it with the library. Data consumers of such HDF5 files will need to have the new filter function and use it with their applications to read the data, or they will need a modified version of the HDF5 Library that has the new filter as a part of the library.</p>
+<p>If a user of such data does not have a modified HDF5 Library installed on his system, command-line tools such as h5dump or h5ls will not be able to display the compressed data. Furthermore, it would be practically impossible to determine the compression method used, making the data stored in HDF5 useless.</p>
+<p>It is clear that the internal HDF5 filter mechanism, while extensible, does not work well with third-party filters. It would be a maintenance nightmare to keep adding and supporting new compression methods in HDF5. For any set of HDF5 “internal” filters, there always will be data with which the “internal” filters will not achieve the optimal performance needed to address data I/O and storage problems. Thus the internal HDF5 filter mechanism is enhanced to address the issues discussed above.</p>
+<p>We have a feature of HDF5 called “dynamically loaded filters in HDF5.” This feature makes the HDF5 third-party filters available to an application at runtime. The third-party HDF5 filter function has to be a part of the HDF5 filter plugin installed on the system as a shared library or DLL.</p>
+<p>To use a third-party filter an HDF5 application should call the <a class="el" href="group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5" title="Adds a filter to the filter pipeline.">H5Pset_filter</a> function when setting the filter pipeline for a dataset creation property. The HDF5 Library will register the filter with the library and the filter will be applied when data is written to the file.</p>
+<p>When an application reads data compressed with a third-party HDF5 filter, the HDF5 Library will search for the required filter plugin, register the filter with the library (if the filter function is not registered) and apply it to the data on the read operation.</p>
+<p>For more information, </p><ul>
+<li><dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_p_l__u_g.html#sec_filter_plugins">HDF5 Filter Plugins</a></dd></dl>
 </li>
 </ul>
 <h3><a class="anchor" id="subsubsec_dataset_transfer_drive"></a>
@@ -1078,7 +1092,7 @@ Using the N‐bit Filter</h3>
 <div class="line"><a class="code hl_function" href="group___a_t_o_m.html#gafd22e4b0aecbe6dad9a899c5bf567e2f">H5Tset_offset</a>(nbit_datatype, 4);</div>
 <div class="ttc" id="agroup___a_t_o_m_html_gab0f4dccfc2fb47bf2c7e06c9bf84c1f7"><div class="ttname"><a href="group___a_t_o_m.html#gab0f4dccfc2fb47bf2c7e06c9bf84c1f7">H5Tset_precision</a></div><div class="ttdeci">herr_t H5Tset_precision(hid_t type_id, size_t prec)</div><div class="ttdoc">Sets the precision of an atomic datatype.</div></div>
 <div class="ttc" id="agroup___a_t_o_m_html_gafd22e4b0aecbe6dad9a899c5bf567e2f"><div class="ttname"><a href="group___a_t_o_m.html#gafd22e4b0aecbe6dad9a899c5bf567e2f">H5Tset_offset</a></div><div class="ttdeci">herr_t H5Tset_offset(hid_t type_id, size_t offset)</div><div class="ttdoc">Sets the bit offset of the first significant bit.</div></div>
-<div class="ttc" id="agroup___p_d_t_s_t_d_html_ga8db8c9c2bcc457f9f8526c8fcb81218b"><div class="ttname"><a href="group___p_d_t_s_t_d.html#ga8db8c9c2bcc457f9f8526c8fcb81218b">H5T_STD_I32LE</a></div><div class="ttdeci">#define H5T_STD_I32LE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:310</div></div>
+<div class="ttc" id="agroup___p_d_t_s_t_d_html_ga8db8c9c2bcc457f9f8526c8fcb81218b"><div class="ttname"><a href="group___p_d_t_s_t_d.html#ga8db8c9c2bcc457f9f8526c8fcb81218b">H5T_STD_I32LE</a></div><div class="ttdeci">#define H5T_STD_I32LE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:322</div></div>
 </div><!-- fragment --><p>In memory, one value of the above example n-bit datatype would be stored on a little-endian machine as follows: </p><table class="doxtable">
 <tr>
 <th>byte 3 </th><th>byte 2 </th><th>byte 1 </th><th>byte 0  </th></tr>
@@ -1576,8 +1590,8 @@ If none of the above, call H5Z__set_parms_noopdatatype</li>
 <div class="ttc" id="agroup___a_t_o_m_html_gad2c4a8f09672f4166f39efe83d44dba2"><div class="ttname"><a href="group___a_t_o_m.html#gad2c4a8f09672f4166f39efe83d44dba2">H5Tset_ebias</a></div><div class="ttdeci">herr_t H5Tset_ebias(hid_t type_id, size_t ebias)</div><div class="ttdoc">Sets the exponent bias of a floating-point type.</div></div>
 <div class="ttc" id="agroup___a_t_o_m_html_gafbdc98b45749e5cfbaf1a8689f3c403d"><div class="ttname"><a href="group___a_t_o_m.html#gafbdc98b45749e5cfbaf1a8689f3c403d">H5Tset_fields</a></div><div class="ttdeci">herr_t H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize, size_t mpos, size_t msize)</div><div class="ttdoc">Sets locations and sizes of floating point bit fields.</div></div>
 <div class="ttc" id="agroup___h5_t_html_gae5f38bfd4a4c557496b3194b5180212c"><div class="ttname"><a href="group___h5_t.html#gae5f38bfd4a4c557496b3194b5180212c">H5Tset_size</a></div><div class="ttdeci">herr_t H5Tset_size(hid_t type_id, size_t size)</div><div class="ttdoc">Sets size for a datatype.</div></div>
-<div class="ttc" id="agroup___p_d_t_i_e_e_e_html_ga71d24a7d4c373ed9a003d7a0d8133f1e"><div class="ttname"><a href="group___p_d_t_i_e_e_e.html#ga71d24a7d4c373ed9a003d7a0d8133f1e">H5T_IEEE_F32BE</a></div><div class="ttdeci">#define H5T_IEEE_F32BE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:256</div></div>
-<div class="ttc" id="agroup___p_d_t_n_a_t_html_gae2523b63144b498f555fa4d04f59ee1c"><div class="ttname"><a href="group___p_d_t_n_a_t.html#gae2523b63144b498f555fa4d04f59ee1c">H5T_NATIVE_FLOAT</a></div><div class="ttdeci">#define H5T_NATIVE_FLOAT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:797</div></div>
+<div class="ttc" id="agroup___p_d_t_i_e_e_e_html_ga71d24a7d4c373ed9a003d7a0d8133f1e"><div class="ttname"><a href="group___p_d_t_i_e_e_e.html#ga71d24a7d4c373ed9a003d7a0d8133f1e">H5T_IEEE_F32BE</a></div><div class="ttdeci">#define H5T_IEEE_F32BE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:266</div></div>
+<div class="ttc" id="agroup___p_d_t_n_a_t_html_gae2523b63144b498f555fa4d04f59ee1c"><div class="ttname"><a href="group___p_d_t_n_a_t.html#gae2523b63144b498f555fa4d04f59ee1c">H5T_NATIVE_FLOAT</a></div><div class="ttdeci">#define H5T_NATIVE_FLOAT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:814</div></div>
 </div><!-- fragment --><h4>Limitations</h4>
 <p>Because the array cd_values[] has to fit into an object header message of 64K, the n-bit filter has an upper limit on the number of n-bit parameters that can be stored in it. To be conservative, a maximum of 4K is allowed for the number of parameters.</p>
 <p>The n-bit filter currently only compresses n-bit datatypes or fields derived from integer or floating-point datatypes. The n-bit filter assumes padding bits of zero. This may not be true since the HDF5 user can set padding bit to be zero, one, or leave the background alone. However, it is expected the n-bit filter will be modified to adjust to such situations.</p>
@@ -1888,8 +1902,33 @@ If data values to be compressed are very near to zero, it is strongly recommende
 Users are not encouraged to use a very large decimal scale factor (for example, 100) for the D-scaling method; this can cause the filter not to ignore the fill value when finding maximum and minimum values, and they will get a much larger minimum-bits (poor compression) </li>
 </ol>
 <h3><a class="anchor" id="subsubsec_dataset_filters_szip"></a>
-Using the Szip Filter</h3>
-<p>See The HDF Group website for further information regarding the Szip filter.</p>
+Using the SZip Filter</h3>
+<p>See The HDF Group website for further information regarding the SZip filter.</p>
+<h3><a class="anchor" id="subsubsec_dataset_filters_dyn"></a>
+Using Dynamically-Loadable Filters</h3>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_p_l__u_g.html#sec_filter_plugins">HDF5 Filter Plugins</a> for further information regarding the dynamically-loadable filters.</dd></dl>
+<p>HDF has a filter plugin repository of useful third-party plugins that can used </p><table class="doxtable">
+<tr>
+<th>Filter</th><th>SetFilter Params </th></tr>
+<tr>
+<td>BLOSC</td><td>UD=32001,0,0 </td></tr>
+<tr>
+<td>BSHUF</td><td>UD=32004,0,0 </td></tr>
+<tr>
+<td>BZIP2</td><td>UD=307,0,1,9 </td></tr>
+<tr>
+<td>JPEG</td><td>UD=32019,0,4,q,c,r,t </td></tr>
+<tr>
+<td>LZ4 </td><td>UD=32004,0,1,3 </td></tr>
+<tr>
+<td>LZF</td><td>UD=32000,1,3,0,0,0 </td></tr>
+<tr>
+<td>SZ</td><td>UD=32017,1,5,2,7,20,40,0 </td></tr>
+<tr>
+<td>ZFP</td><td>UD=32013,1,0,0 </td></tr>
+<tr>
+<td>ZSTD</td><td>UD=32015,0,0 </td></tr>
+</table>
 <p>Previous Chapter <a class="el" href="_h5_g__u_g.html#sec_group">HDF5 Groups</a> - Next Chapter <a class="el" href="_h5_t__u_g.html#sec_datatype">HDF5 Datatypes</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->

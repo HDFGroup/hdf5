@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.2908dd1</span>
+   &#160;<span id="projectnumber">1.15.0.87fb6ed</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -1276,8 +1276,9 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#ga8e31da08f4110c3c7dfb18e9758e180d" title="Sets the offset of a simple dataspace.">H5Soffset_simple()</a> sets the offset of a simple dataspace <code>space_id</code>. The offset array must be the same number of elements as the number of dimensions for the dataspace. If the <code>offset</code> array is set to NULL, the offset for the dataspace is reset to 0.</p>
+<p><a class="el" href="#ga8e31da08f4110c3c7dfb18e9758e180d" title="Sets the offset of a simple dataspace.">H5Soffset_simple()</a> sets the offset of a simple dataspace <code>space_id</code>. The offset array must be the same number of elements as the number of dimensions for the dataspace. If the <code>offset</code> array is set to NULL, the offset for the dataspace is reset to 0 in all dimensions.</p>
 <p>This function allows the same shaped selection to be moved to different locations within a dataspace without requiring it to be redefined.</p>
+<dl class="section note"><dt>Note</dt><dd>Until 1.14.4, setting the offset parameter to NULL was considered an error, despite the reference manual stating that it had the behavior described above.</dd></dl>
 <dl class="section version"><dt>Version</dt><dd>1.4.0 Fortran subroutine was introduced. </dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
