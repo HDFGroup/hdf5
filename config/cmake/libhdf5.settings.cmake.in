@@ -79,7 +79,7 @@ Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@
     With deprecated public symbols: @HDF5_ENABLE_DEPRECATED_SYMBOLS@
             I/O filters (external): @EXTERNAL_FILTERS@
                      Map (H5M) API: @H5_HAVE_MAP_API@
-                        Direct VFD: @H5_HAVE_DIRECT@
+                        Direct VFD: @HDF5_ENABLE_DIRECT_VFD@
                         Mirror VFD: @H5_HAVE_MIRROR_VFD@
                      Subfiling VFD: @H5_HAVE_SUBFILING_VFD@
                 (Read-Only) S3 VFD: @H5_HAVE_ROS3_VFD@

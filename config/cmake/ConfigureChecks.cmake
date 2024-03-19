@@ -599,38 +599,20 @@ unset (CMAKE_EXTRA_INCLUDE_FILES)
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
-#  Check if Direct I/O driver works
+# Check whether we can build the direct VFD
 #-----------------------------------------------------------------------------
-if (NOT WINDOWS)
-  option (HDF5_ENABLE_DIRECT_VFD "Build the Direct I/O Virtual File Driver" OFF)
-  if (HDF5_ENABLE_DIRECT_VFD)
-    set (msg "Performing TEST_DIRECT_VFD_WORKS")
-    set (MACRO_CHECK_FUNCTION_DEFINITIONS "-DTEST_DIRECT_VFD_WORKS -D_GNU_SOURCE ${CMAKE_REQUIRED_FLAGS}")
-    TRY_RUN (TEST_DIRECT_VFD_WORKS_RUN   TEST_DIRECT_VFD_WORKS_COMPILE
-        ${CMAKE_BINARY_DIR}
-        ${HDF_RESOURCES_DIR}/HDFTests.c
-        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
-        OUTPUT_VARIABLE OUTPUT
-    )
-    if (TEST_DIRECT_VFD_WORKS_COMPILE)
-      if (TEST_DIRECT_VFD_WORKS_RUN EQUAL "0")
-        HDF_FUNCTION_TEST (HAVE_DIRECT)
-        set (CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_GNU_SOURCE")
-        add_definitions ("-D_GNU_SOURCE")
-      else ()
-        set (TEST_DIRECT_VFD_WORKS "" CACHE INTERNAL ${msg})
-        message (VERBOSE "${msg}... no")
-        file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
-              "Test TEST_DIRECT_VFD_WORKS Run failed with the following output and exit code:\n ${OUTPUT}\n"
-        )
-      endif ()
-    else ()
-      set (TEST_DIRECT_VFD_WORKS "" CACHE INTERNAL ${msg})
-      message (VERBOSE "${msg}... no")
-      file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
-          "Test TEST_DIRECT_VFD_WORKS Compile failed with the following output:\n ${OUTPUT}\n"
-      )
-    endif ()
+option (HDF5_ENABLE_DIRECT_VFD "Build the Direct I/O Virtual File Driver" OFF)
+if (HDF5_ENABLE_DIRECT_VFD)
+  # The direct VFD is tied to POSIX direct I/O as enabled by the O_DIRECT
+  # flag. No other form of direct I/O is supported. This feature also
+  # requires posix_memalign().
+  CHECK_SYMBOL_EXISTS (O_DIRECT "fcntl.h" HAVE_O_DIRECT)
+  CHECK_SYMBOL_EXISTS (posix_memalign "stdlib.h" HAVE_POSIX_MEMALIGN)
+
+  if (HAVE_O_DIRECT AND HAVE_POSIX_MEMALIGN)
+    set (${HDF_PREFIX}_HAVE_DIRECT 1)
+  else ()
+    message (FATAL_ERROR "The direct VFD was requested but cannot be built.\nIt requires O_DIRECT flag support and posix_memalign()")
   endif ()
 endif ()
 
@@ -651,7 +633,7 @@ option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
 endif ()
 
 # ----------------------------------------------------------------------
-# Check whether we can build the Mirror VFD
+# Check whether we can build the mirror VFD
 # ----------------------------------------------------------------------
 option (HDF5_ENABLE_MIRROR_VFD "Build the Mirror Virtual File Driver" OFF)
 if (HDF5_ENABLE_MIRROR_VFD)
