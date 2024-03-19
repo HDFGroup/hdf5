@@ -7806,6 +7806,107 @@ error:
 } /* end test_set_order_compound() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_enum_member_order
+ *
+ * Purpose:     Tests that datatype conversions don't perturb the ordering
+ *              of members within an enum datatype due to the way they sort
+ *              the members internally during conversion.
+ *
+ * Return:      Success:    0
+ *              Failure:    number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+#define NUM_MEMBERS 3
+static int
+test_enum_member_order(void)
+{
+    typedef enum { SOLID, LIQUID, GAS, PLASMA } phase_t;
+
+    const char *enum_names[4]              = {"SOLID", "LIQUID", "GAS", "PLASMA"};
+    phase_t     enum_int_buf[NUM_MEMBERS]  = {LIQUID, GAS, PLASMA};
+    long        enum_long_buf[NUM_MEMBERS] = {0, 0, 0};
+    hid_t       enum_type1                 = H5I_INVALID_HID;
+    hid_t       enum_type2                 = H5I_INVALID_HID;
+    int         val_int                    = -1;
+    long        val_long                   = -1;
+
+    TESTING("stability of enum member ordering after datatype conversion");
+
+    /* Test enum type */
+
+    if ((enum_type1 = H5Tenum_create(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+    if ((enum_type2 = H5Tenum_create(H5T_NATIVE_LONG)) < 0)
+        TEST_ERROR;
+
+    for (size_t i = 0; i < sizeof(enum_names) / sizeof(enum_names[0]); i++) {
+        val_int  = (int)i;
+        val_long = (long)i;
+
+        /* Insert members into enums in order: SOLID, LIQUID, GAS, PLASMA */
+        if (H5Tenum_insert(enum_type1, enum_names[i], &val_int) < 0)
+            TEST_ERROR;
+        if (H5Tenum_insert(enum_type2, enum_names[i], &val_long) < 0)
+            TEST_ERROR;
+    }
+
+    memcpy(enum_long_buf, enum_int_buf, NUM_MEMBERS * sizeof(int));
+
+    /* Convert from int enum type to long enum type */
+    if (H5Tconvert(enum_type1, enum_type2, NUM_MEMBERS, enum_long_buf, NULL, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Sanity check */
+    for (size_t i = 0; i < NUM_MEMBERS; i++) {
+        if (enum_long_buf[i] != (long)enum_int_buf[i]) {
+            H5_FAILED();
+            printf("long enum buf member %zu mismatch after conversion; expected %ld, got %ld\n", i,
+                   (long)enum_int_buf[i], enum_long_buf[i]);
+            goto error;
+        }
+    }
+
+    /* Check that each enum type's members are in the same order we inserted them in */
+    for (size_t i = 0; i < sizeof(enum_names) / sizeof(enum_names[0]); i++) {
+        if (H5Tget_member_value(enum_type1, (unsigned)i, &val_int) < 0)
+            TEST_ERROR;
+        if (val_int != (int)i) {
+            H5_FAILED();
+            printf("int enum member %zu was out of order; expected %d, got %d\n", i, (int)i, val_int);
+            goto error;
+        }
+
+        if (H5Tget_member_value(enum_type2, (unsigned)i, &val_long) < 0)
+            TEST_ERROR;
+        if (val_long != (long)i) {
+            H5_FAILED();
+            printf("long enum member %zu was out of order; expected %ld, got %ld\n", i, (long)i, val_long);
+            goto error;
+        }
+    }
+
+    if (H5Tclose(enum_type1) < 0)
+        TEST_ERROR;
+    if (H5Tclose(enum_type2) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(enum_type1);
+        H5Tclose(enum_type2);
+    }
+    H5E_END_TRY
+
+    return 1;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    test_named_indirect_reopen
  *
  * Purpose:     Tests that open named datatypes can be reopened indirectly
@@ -9545,6 +9646,7 @@ main(void)
     nerrors += test_delete_obj_named(fapl);
     nerrors += test_delete_obj_named_fileid(fapl);
     nerrors += test_set_order_compound(fapl);
+    nerrors += test_enum_member_order();
     nerrors += test_str_create();
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     nerrors += test_deprec(fapl);
