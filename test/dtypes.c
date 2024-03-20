@@ -6051,6 +6051,7 @@ test__Float16(void)
 {
 #ifdef H5_HAVE__FLOAT16
     H5T_path_t *path = NULL;
+    const char *env_h5_driver;
     hsize_t     dims[1];
     htri_t      is_little_endian;
     H5T_t      *native_dtype = NULL;
@@ -6063,6 +6064,10 @@ test__Float16(void)
     char        filename[256];
 
     TESTING("_Float16 datatype");
+
+    env_h5_driver = getenv(HDF5_DRIVER);
+    if (env_h5_driver == NULL)
+        env_h5_driver = "nomatch";
 
     /* Check that native macro maps to a valid type */
     if (0 == H5Tget_size(H5T_NATIVE_FLOAT16)) {
@@ -6397,24 +6402,30 @@ test__Float16(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    {
-        h5_stat_size_t file_size = h5_get_file_size(filename, H5P_DEFAULT);
+    if (!h5_driver_uses_multiple_files(env_h5_driver, H5_EXCLUDE_NON_MULTIPART_DRIVERS)) {
+        bool is_default_vfd_compat = false;
 
-        if (file_size < 0)
+        if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &is_default_vfd_compat) < 0)
             TEST_ERROR;
-        if ((size_t)file_size < dims[0] * sizeof(H5__Float16)) {
-            H5_FAILED();
-            AT();
-            printf("File size value was too small\n");
-            goto error;
-        }
+        if (is_default_vfd_compat) {
+            h5_stat_size_t file_size = h5_get_file_size(filename, H5P_DEFAULT);
 
-        /* 4096 bytes is arbitrary, but should suffice for now */
-        if ((size_t)file_size > (dims[0] * sizeof(H5__Float16)) + 4096) {
-            H5_FAILED();
-            AT();
-            printf("File size value was too large\n");
-            goto error;
+            if (file_size < 0)
+                TEST_ERROR;
+            if ((size_t)file_size < dims[0] * sizeof(H5__Float16)) {
+                H5_FAILED();
+                AT();
+                printf("File size value was too small\n");
+                goto error;
+            }
+
+            /* 4096 bytes is arbitrary, but should suffice for now */
+            if ((size_t)file_size > (dims[0] * sizeof(H5__Float16)) + 4096) {
+                H5_FAILED();
+                AT();
+                printf("File size value was too large\n");
+                goto error;
+            }
         }
     }
 
