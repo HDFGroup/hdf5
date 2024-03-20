@@ -152,7 +152,7 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
       one group or in both groups. Common objects are then compared recursively.
   2) Datasets
       Array rank and dimensions, datatypes, and data values are compared.
-  3) Datatypes
+  3) Attributes and Datatypes
       The comparison is based on the return value of H5Tequal.
   4) Symbolic links
       The paths to the target objects are compared.
