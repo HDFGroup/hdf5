@@ -270,17 +270,6 @@ herr_t H5TS__tinfo_init(void);
 void   H5TS__tinfo_destroy(void *tinfo_node);
 herr_t H5TS__tinfo_term(void);
 
-#ifdef H5_HAVE_WIN_THREADS
-
-/* Functions called from DllMain */
-H5_DLL BOOL CALLBACK H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex);
-
-#else
-
-H5_DLL void H5TS__pthread_first_thread_init(void);
-
-#endif /* H5_HAVE_WIN_THREADS */
-
 /* Recursive R/W lock related function declarations */
 H5_DLL herr_t H5TS__rw_lock_init(H5TS_rw_lock_t *rw_lock);
 H5_DLL herr_t H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock);
@@ -300,6 +289,13 @@ H5_DLL herr_t H5TS__ex_lock_destroy(H5TS_ex_lock_t *lock);
 H5_DLL herr_t H5TS__barrier_init(H5TS_barrier_t *barrier, uint64_t count);
 H5_DLL herr_t H5TS__barrier_wait(H5TS_barrier_t *barrier);
 H5_DLL herr_t H5TS__barrier_destroy(H5TS_barrier_t *barrier);
+
+/* 'once' callbacks */
+#ifdef H5_HAVE_WIN_THREADS
+H5_DLL BOOL CALLBACK H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex);
+#else
+H5_DLL void H5TS__pthread_first_thread_init(void);
+#endif /* H5_HAVE_WIN_THREADS */
 
 #ifdef H5TS_TESTING
 #if H5TS_ENABLE_REC_RW_LOCK_STATS

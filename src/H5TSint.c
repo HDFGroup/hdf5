@@ -43,6 +43,12 @@
 /* Local Macros */
 /****************/
 
+#ifdef H5_HAVE_WIN_THREADS
+#define H5TS_ONCE_INIT_FUNC H5TS__win32_process_enter
+#else
+#define H5TS_ONCE_INIT_FUNC H5TS__pthread_first_thread_init
+#endif /* H5_HAVE_WIN_THREADS */
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -170,15 +176,10 @@ H5TS_api_lock(void)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-#ifdef H5_HAVE_WIN_THREADS
-    /* Initialize the thread-safety code */
+    /* Initialize the thread-safety code, once */
     if (H5_UNLIKELY(!H5_INIT_GLOBAL))
-        InitOnceExecuteOnce(&H5TS_first_init_s, H5TS__win32_process_enter, NULL, NULL);
-#else
-    /* Initialize the thread-safety code */
-    if (H5_UNLIKELY(!H5_INIT_GLOBAL))
-        pthread_once(&H5TS_first_init_s, H5TS__pthread_first_thread_init);
-#endif /* H5_HAVE_WIN_THREADS */
+        if (H5_UNLIKELY(H5TS_once(&H5TS_first_init_s, H5TS_ONCE_INIT_FUNC) < 0))
+            HGOTO_DONE(FAIL);
 
     /* Acquire the "attempt" mutex, increment the attempt lock count, release the lock */
     if (H5_UNLIKELY(H5TS_mutex_lock(&H5TS_api_info_p.attempt_mutex)))

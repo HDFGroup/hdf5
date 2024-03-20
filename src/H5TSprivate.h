@@ -40,14 +40,8 @@
 
 /* Static initialization values */
 #ifdef H5_HAVE_WIN_THREADS
-#define H5TS_KEY_INITIALIZER                                                                                 \
-    {                                                                                                        \
-        NULL, 0, NULL                                                                                        \
-    }
-#define H5TS_MUTEX_INITIALIZER                                                                               \
-    {                                                                                                        \
-        NULL                                                                                                 \
-    }
+#define H5TS_KEY_INITIALIZER { NULL, 0, NULL }
+#define H5TS_MUTEX_INITIALIZER { NULL }
 #define H5TS_COND_INITIALIZER CONDITION_VARIABLE_INIT
 #define H5TS_ONCE_INITIALIZER INIT_ONCE_STATIC_INIT
 #else
@@ -81,6 +75,7 @@ typedef DWORD                  H5TS_key_t;
 typedef CRITICAL_SECTION       H5TS_CAPABILITY("mutex") H5TS_mutex_t;
 typedef CONDITION_VARIABLE     H5TS_cond_t;
 typedef PINIT_ONCE             H5TS_once_t;
+typedef PINIT_ONCE_FN          H5TS_once_init_func_t
 #else
 typedef pthread_t H5TS_thread_t;
 typedef void *(*H5TS_thread_start_func_t)(void *);
@@ -88,6 +83,7 @@ typedef pthread_key_t   H5TS_key_t;
 typedef pthread_mutex_t H5TS_CAPABILITY("mutex") H5TS_mutex_t;
 typedef pthread_cond_t  H5TS_cond_t;
 typedef pthread_once_t  H5TS_once_t;
+typedef void (*H5TS_once_init_func_t)(void);
 #endif
 
 /*****************************/
@@ -113,6 +109,9 @@ H5_DLL herr_t H5TS_api_unlock(void);
 H5_DLL uint64_t             H5TS_thread_id(void);
 H5_DLL struct H5CX_node_t **H5TS_get_api_ctx_ptr(void);
 H5_DLL struct H5E_t        *H5TS_get_err_stack(void);
+
+/* 'Once' operationss */
+H5_DLL herr_t H5TS_once(H5TS_once_t *once, H5TS_once_init_func_t func);
 
 /* Mutex operations */
 H5_DLL herr_t H5TS_mutex_init(H5TS_mutex_t *mutex);

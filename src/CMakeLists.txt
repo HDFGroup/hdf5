@@ -646,6 +646,7 @@ set (H5TS_SOURCES
     ${HDF5_SRC_DIR}/H5TSint.c
     ${HDF5_SRC_DIR}/H5TSkey.c
     ${HDF5_SRC_DIR}/H5TSmutex.c
+    ${HDF5_SRC_DIR}/H5TSonce.c
     ${HDF5_SRC_DIR}/H5TSpthread.c
     ${HDF5_SRC_DIR}/H5TSrwlock.c
     ${HDF5_SRC_DIR}/H5TStest.c

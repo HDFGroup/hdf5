@@ -104,17 +104,20 @@ H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS_win32_thread_enter(void){FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+H5TS_win32_thread_enter(void)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-                                  /* Currently a placeholder function.  TLS setup is performed
-                                   * elsewhere in the library.
-                                   *
-                                   * WARNING: Do NOT use C standard library functions here.
-                                   * CRT functions are not allowed in DllMain, which is where this code
-                                   * is used.
-                                   */
+    /* Currently a placeholder function.  TLS setup is performed
+     * elsewhere in the library.
+     *
+     * WARNING: Do NOT use C standard library functions here.
+     * CRT functions are not allowed in DllMain, which is where this code
+     * is used.
+     */
 
-                                  FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)} /* H5TS_win32_thread_enter() */
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+} /* H5TS_win32_thread_enter() */
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS_win32_thread_exit
@@ -152,6 +155,61 @@ herr_t H5TS_win32_thread_exit(void)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_win32_thread_exit() */
+
+#if defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_HAVE_WIN32_API)
+/*-------------------------------------------------------------------------
+ * Function:    DllMain
+ *
+ * Purpose:     Handles various conditions in the library on Windows.
+ *
+ *    NOTE:     The main purpose of this is for handling Win32 thread cleanup
+ *              on thread/process detach.
+ *
+ *              Only enabled when the shared Windows library is built with
+ *              thread safety enabled.
+ *
+ * Return:      true on success, false on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+BOOL WINAPI
+DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved)
+{
+    /* Don't add our function enter/leave macros since this function will be
+     * called before the library is initialized.
+     *
+     * NOTE: Do NOT call any CRT functions in DllMain!
+     * This includes any functions that are called by from here!
+     */
+
+    BOOL fOkay = true;
+
+    switch (fdwReason) {
+        case DLL_PROCESS_ATTACH:
+            break;
+
+        case DLL_PROCESS_DETACH:
+            break;
+
+        case DLL_THREAD_ATTACH:
+            if (H5TS_win32_thread_enter() < 0)
+                fOkay = false;
+            break;
+
+        case DLL_THREAD_DETACH:
+            if (H5TS_win32_thread_exit() < 0)
+                fOkay = false;
+            break;
+
+        default:
+            /* Shouldn't get here */
+            fOkay = false;
+            break;
+    }
+
+    return fOkay;
+}
+#endif /* H5_HAVE_WIN32_API && H5_BUILT_AS_DYNAMIC_LIB */
 
 #endif /* H5_HAVE_WIN_THREADS */
 
