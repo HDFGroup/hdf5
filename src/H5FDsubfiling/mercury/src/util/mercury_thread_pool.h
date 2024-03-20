@@ -20,14 +20,14 @@ typedef struct hg_thread_pool hg_thread_pool_t;
 struct hg_thread_pool {
     unsigned int sleeping_worker_count;
     HG_QUEUE_HEAD(hg_thread_work) queue;
-    int               shutdown;
+    int          shutdown;
     H5TS_mutex_t mutex;
     H5TS_cond_t  cond;
 };
 
 struct hg_thread_work {
     H5TS_thread_start_func_t func;
-    void            *args;
+    void                    *args;
     HG_QUEUE_ENTRY(hg_thread_work) entry; /* Internal */
 };
 

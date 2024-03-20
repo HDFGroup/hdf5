@@ -22,7 +22,7 @@
 struct hg_thread_pool_private {
     struct hg_thread_pool pool;
     unsigned int          thread_count;
-    H5TS_thread_t          *threads;
+    H5TS_thread_t        *threads;
 };
 
 /********************/

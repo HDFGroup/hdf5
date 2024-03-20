@@ -81,14 +81,14 @@ H5TS_key_t H5TS_thrd_info_key_g;
 /*******************/
 
 /* Has threadsafety code been initialized? */
-static H5TS_once_t  H5TS_first_init_s = H5TS_ONCE_INITIALIZER;
+static H5TS_once_t H5TS_first_init_s = H5TS_ONCE_INITIALIZER;
 
 /* Pointer to first free thread info record or NULL. */
 static H5TS_tinfo_node_t *H5TS_tinfo_next_free_s = NULL;
 static uint64_t           H5TS_next_thrd_id_s    = 0;
 
 /* Mutex for access to H5TS_tinfo_next_free_s and H5TS_next_thrd_id_s */
-static H5TS_mutex_t H5TS_tinfo_mtx_s  = H5TS_MUTEX_INITIALIZER;
+static H5TS_mutex_t H5TS_tinfo_mtx_s = H5TS_MUTEX_INITIALIZER;
 
 /*-------------------------------------------------------------------------
  * Function: H5TS_term_package

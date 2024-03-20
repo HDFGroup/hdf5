@@ -25,7 +25,7 @@
 #ifdef _WIN32
 #define _WINSOCKAPI_
 #include <windows.h>
-typedef DWORD                  hg_thread_ret_t;
+typedef DWORD hg_thread_ret_t;
 #define HG_THREAD_RETURN_TYPE hg_thread_ret_t WINAPI
 #else
 #include <pthread.h>

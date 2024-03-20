@@ -75,14 +75,14 @@ typedef void (*H5TS_key_destructor_func_t)(void *);
 
 /* Portability aliases */
 #ifdef H5_HAVE_WIN_THREADS
-typedef HANDLE             H5TS_thread_t;
+typedef HANDLE                 H5TS_thread_t;
 typedef LPTHREAD_START_ROUTINE H5TS_thread_start_func_t;
-typedef DWORD              H5TS_key_t;
-typedef CRITICAL_SECTION   H5TS_CAPABILITY("mutex") H5TS_mutex_t;
-typedef CONDITION_VARIABLE H5TS_cond_t;
-typedef PINIT_ONCE         H5TS_once_t;
+typedef DWORD                  H5TS_key_t;
+typedef CRITICAL_SECTION       H5TS_CAPABILITY("mutex") H5TS_mutex_t;
+typedef CONDITION_VARIABLE     H5TS_cond_t;
+typedef PINIT_ONCE             H5TS_once_t;
 #else
-typedef pthread_t       H5TS_thread_t;
+typedef pthread_t H5TS_thread_t;
 typedef void *(*H5TS_thread_start_func_t)(void *);
 typedef pthread_key_t   H5TS_key_t;
 typedef pthread_mutex_t H5TS_CAPABILITY("mutex") H5TS_mutex_t;
@@ -137,7 +137,6 @@ H5_DLL herr_t H5TS_key_delete(H5TS_key_t key);
 /* Threads */
 H5_DLL herr_t H5TS_thread_create(H5TS_thread_t *thread, H5TS_thread_start_func_t func, void *udata);
 H5_DLL herr_t H5TS_thread_join(H5TS_thread_t thread);
-
 
 #else /* H5_HAVE_THREADSAFE */
 
