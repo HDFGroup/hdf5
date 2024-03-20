@@ -82,7 +82,7 @@ tts_dcreate(void)
     }
 
     for (i = 0; i < NUM_THREAD; i++)
-        if (H5TS_thread_join(threads[i]) < 0)
+        if (H5TS_thread_join(threads[i], NULL) < 0)
             TestErrPrintf("thread %d failed to join", i);
 
     /* compare data to see if it is written correctly */

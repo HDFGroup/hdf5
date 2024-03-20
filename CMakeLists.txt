@@ -784,15 +784,7 @@ if (HDF5_ENABLE_SUBFILING_VFD)
   # IOC VFD is currently only built when subfiling is enabled
   set (H5_HAVE_IOC_VFD 1)
 
-  message (STATUS "Setting up to use Mercury components")
-  set (H5FD_SUBFILING_MERCURY_DIR ${H5FD_SUBFILING_DIR}/mercury/src/util)
-  set (HDF5_SRC_INCLUDE_DIRS
-      ${HDF5_SRC_INCLUDE_DIRS}
-      ${H5FD_SUBFILING_MERCURY_DIR}
-  )
-  set (CMAKE_REQUIRED_INCLUDES "${H5FD_SUBFILING_MERCURY_DIR}")
-
-  # Run some configure checks for the Mercury util files
+  # Run some configure checks for threading
   set (CMAKE_EXTRA_INCLUDE_FILES pthread.h)
   set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 

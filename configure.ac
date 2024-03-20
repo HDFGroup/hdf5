@@ -3228,11 +3228,9 @@ fi
 ## Check if Subfiling I/O driver is enabled by --enable-subfiling-vfd
 ##
 AC_SUBST([SUBFILING_VFD])
-AC_SUBST([HAVE_MERCURY])
 
 ## Default is no subfiling VFD
 SUBFILING_VFD=no
-HAVE_MERCURY="no"
 
 ## Always include subfiling directory so public header files are available
 H5_CPPFLAGS="$H5_CPPFLAGS -I$ac_abs_confdir/src/H5FDsubfiling"
@@ -3278,13 +3276,6 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
        ]
     )
 
-    # Set-up mercury
-    HAVE_MERCURY="yes"
-    mercury_dir="$ac_abs_confdir/src/H5FDsubfiling/mercury"
-    mercury_inc="$mercury_dir/src/util"
-
-    H5_CPPFLAGS="$H5_CPPFLAGS -I$mercury_inc"
-
     HAVE_STDATOMIC_H="yes"
     AC_CHECK_HEADERS([stdatomic.h],,[HAVE_STDATOMIC_H="no"])
     if test "x$HAVE_STDATOMIC_H" = "xno"; then
@@ -3302,8 +3293,6 @@ fi
 AM_CONDITIONAL([SUBFILING_VFD_CONDITIONAL], [test "X$SUBFILING_VFD" = "Xyes"])
 # IOC VFD is currently only built when subfiling is enabled
 AM_CONDITIONAL([IOC_VFD_CONDITIONAL], [test "X$SUBFILING_VFD" = "Xyes"])
-# Mercury is currently only needed if  subfiling is enabled
-AM_CONDITIONAL([HAVE_MERCURY_CONDITIONAL], [test "X$HAVE_MERCURY" = "Xyes"])
 
 
 ## ----------------------------------------------------------------------

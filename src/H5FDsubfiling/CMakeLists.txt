@@ -14,14 +14,6 @@ if (HDF5_ENABLE_SUBFILING_VFD)
   if (NOT H5FD_SOURCES)
     message (FATAL_ERROR "internal configure error - H5FD_SOURCES not set")
   endif ()
-  if (NOT H5FD_SUBFILING_MERCURY_DIR)
-    message (FATAL_ERROR "internal configure error - H5FD_SUBFILING_MERCURY_DIR not set")
-  endif ()
-
-  # Add mercury util sources to Subfiling VFD sources
-  set (MERCURY_UTIL_SOURCES
-    ${H5FD_SUBFILING_MERCURY_DIR}/mercury_thread_pool.c
-  )
 
   set (HDF5_H5FD_SUBFILING_SOURCES
     ${H5FD_SUBFILING_DIR}/H5FDioc.c
@@ -30,7 +22,6 @@ if (HDF5_ENABLE_SUBFILING_VFD)
     ${H5FD_SUBFILING_DIR}/H5FDsubfiling.c
     ${H5FD_SUBFILING_DIR}/H5FDsubfile_int.c
     ${H5FD_SUBFILING_DIR}/H5subfiling_common.c
-    ${MERCURY_UTIL_SOURCES}
   )
 
   # Add Subfiling VFD sources to HDF5 library's H5FD sources

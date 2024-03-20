@@ -35,7 +35,7 @@
 
 #ifdef H5_HAVE_THREADSAFE
 
-#ifndef H5_HAVE_WIN_THREADS
+#ifdef H5_HAVE_PTHREAD_H
 
 /****************/
 /* Local Macros */
@@ -90,6 +90,6 @@ H5TS__pthread_first_thread_init(void)
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* end H5TS__pthread_first_thread_init() */
 
-#endif /* H5_HAVE_WIN_THREADS */
+#endif /* H5_HAVE_PTHREAD_H */
 
 #endif /* H5_HAVE_THREADSAFE */

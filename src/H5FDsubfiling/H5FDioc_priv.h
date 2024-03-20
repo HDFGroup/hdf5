@@ -40,8 +40,6 @@
 #include "H5subfiling_common.h"
 #include "H5subfiling_err.h"
 
-#include "mercury_thread_pool.h"
-
 /*
  * Some definitions for debugging the IOC VFD
  */
@@ -212,7 +210,6 @@ typedef struct ioc_io_queue_entry {
     uint32_t                   counter;
 
     sf_work_request_t     wk_req;
-    struct hg_thread_work thread_wk;
     int                   wk_ret;
 
     /* statistics */

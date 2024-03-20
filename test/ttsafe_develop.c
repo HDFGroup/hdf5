@@ -130,9 +130,9 @@ tts_develop_api(void)
     CHECK_I(result, "H5TS_thread_create");
 
     /* Wait for threads to complete. */
-    result = H5TS_thread_join(thread_1);
+    result = H5TS_thread_join(thread_1, NULL);
     CHECK_I(result, "H5TS_thread_join");
-    result = H5TS_thread_join(thread_2);
+    result = H5TS_thread_join(thread_2, NULL);
     CHECK_I(result, "H5TS_thread_join");
 
     result = H5TS__barrier_destroy(&barrier);

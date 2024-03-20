@@ -111,7 +111,7 @@ tts_attr_vlen(void)
 
     /* Wait for the threads to end */
     for (i = 0; i < NUM_THREADS; i++)
-        if (H5TS_thread_join(threads[i]) < 0)
+        if (H5TS_thread_join(threads[i], NULL) < 0)
             TestErrPrintf("thread %d failed to join", i);
 
 } /* end tts_attr_vlen() */

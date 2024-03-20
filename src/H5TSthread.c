@@ -102,7 +102,7 @@ done:
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS_thread_join(H5TS_thread_t thread)
+H5TS_thread_join(H5TS_thread_t thread, H5TS_thread_ret_t *ret_val)
 {
     herr_t ret_value = SUCCEED;
 
@@ -110,12 +110,38 @@ H5TS_thread_join(H5TS_thread_t thread)
 
     if (H5_UNLIKELY(WAIT_OBJECT_0 != WaitForSingleObject(thread, INFINITE)))
         HGOTO_DONE(FAIL);
+    if (ret_val)
+        if (H5_UNLIKELY(0 == GetExitCodeThread(thread, ret_val)))
+            HGOTO_DONE(FAIL);
     if (H5_UNLIKELY(0 == CloseHandle(thread)))
         HGOTO_DONE(FAIL);
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_thread_join */
+
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_detach
+ *
+ * Purpose:  Detach a thread
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_thread_detach(H5TS_thread_t thread)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(0 == CloseHandle(thread)))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* H5TS_thread_detach */
 #else
 /*--------------------------------------------------------------------------
  * Function: H5TS_thread_create
@@ -150,17 +176,40 @@ done:
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS_thread_join(H5TS_thread_t thread)
+H5TS_thread_join(H5TS_thread_t thread, H5TS_thread_ret_t *ret_val)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    if (H5_UNLIKELY(pthread_join(thread, NULL)))
+    if (H5_UNLIKELY(pthread_join(thread, ret_val)))
         HGOTO_DONE(FAIL);
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_thread_join */
+
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_detach
+ *
+ * Purpose:  Detach a thread
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_thread_detach(H5TS_thread_t thread)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(pthread_detach(thread)))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* H5TS_thread_detach */
 #endif
 #endif /* H5_HAVE_THREADSAFE */

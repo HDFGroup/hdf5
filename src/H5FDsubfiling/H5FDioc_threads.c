@@ -30,7 +30,7 @@
 typedef struct ioc_data_t {
     ioc_io_queue_t    io_queue;
     H5TS_thread_t     ioc_main_thread;
-    hg_thread_pool_t *io_thread_pool;
+    H5TS_pool_t      *io_thread_pool;
     int64_t           sf_context_id;
 
     atomic_int sf_ioc_ready;
@@ -46,16 +46,6 @@ typedef struct ioc_data_t {
     atomic_int sf_work_pending;
 } ioc_data_t;
 
-/*
- * NOTES:
- * Rather than re-create the code for creating and managing a thread pool,
- * I'm utilizing a reasonably well tested implementation from the mercury
- * project.  At some point, we should revisit this decision or possibly
- * directly link against the mercury library.  This would make sense if
- * we move away from using MPI as the messaging infrastructure and instead
- * use mercury for that purpose...
- */
-
 static H5TS_mutex_t ioc_thread_mutex = H5TS_MUTEX_INITIALIZER;
 
 #ifdef H5FD_IOC_COLLECT_STATS
@@ -69,7 +59,7 @@ static double sf_queue_delay_time = 0.0;
 #endif
 
 /* Prototypes */
-static HG_THREAD_RETURN_TYPE ioc_thread_main(void *arg);
+static H5TS_THREAD_RETURN_TYPE ioc_thread_main(void *arg);
 static int                   ioc_main(ioc_data_t *ioc_data);
 
 static int ioc_file_queue_write_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_Comm comm,
@@ -175,7 +165,7 @@ initialize_ioc_threads(void *_sf_context)
     }
 
     /* Initialize a thread pool for the I/O concentrator's worker threads */
-    if (hg_thread_pool_init(thread_pool_size, &ioc_data->io_thread_pool) < 0)
+    if (H5TS_pool_create(&ioc_data->io_thread_pool, thread_pool_size) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, (-1), "can't initialize IOC worker thread pool");
 
     /* Create the main IOC thread that will receive and dispatch I/O requests */
@@ -227,12 +217,12 @@ finalize_ioc_threads(void *_sf_context)
 
         /* Tear down IOC worker thread pool */
         assert(0 == atomic_load(&ioc_data->sf_io_ops_pending));
-        hg_thread_pool_destroy(ioc_data->io_thread_pool);
+        H5TS_pool_destroy(ioc_data->io_thread_pool);
 
         H5TS_mutex_destroy(&ioc_data->io_queue.q_mutex);
 
         /* Wait for IOC main thread to exit */
-        H5TS_thread_join(ioc_data->ioc_main_thread);
+        H5TS_thread_join(ioc_data->ioc_main_thread, NULL);
     }
 
     if (ioc_data->io_queue.num_failed > 0)
@@ -258,10 +248,10 @@ finalize_ioc_threads(void *_sf_context)
  *
  *-------------------------------------------------------------------------
  */
-static HG_THREAD_RETURN_TYPE
+static H5TS_THREAD_RETURN_TYPE
 ioc_thread_main(void *arg)
 {
-    hg_thread_ret_t thread_ret = (hg_thread_ret_t)0;
+    H5TS_thread_ret_t thread_ret = (H5TS_thread_ret_t)0;
     ioc_data_t     *ioc_data   = (ioc_data_t *)arg;
 
     /* Pass along the ioc_data_t */
@@ -479,7 +469,7 @@ translate_opcode(io_op_t op)
  *
  *-------------------------------------------------------------------------
  */
-static HG_THREAD_RETURN_TYPE
+static H5TS_THREAD_RETURN_TYPE
 handle_work_request(void *arg)
 {
     ioc_io_queue_entry_t *q_entry_ptr     = (ioc_io_queue_entry_t *)arg;
@@ -488,7 +478,7 @@ handle_work_request(void *arg)
     ioc_data_t           *ioc_data        = NULL;
     int64_t               file_context_id = msg->context_id;
     int                   op_ret;
-    hg_thread_ret_t       ret_value = 0;
+    H5TS_thread_ret_t     ret_value = 0;
 
     assert(q_entry_ptr);
     assert(q_entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
@@ -1230,7 +1220,6 @@ ioc_io_queue_alloc_entry(void)
         q_entry_ptr->counter     = 0;
 
         /* will memcpy the wk_req field, so don't bother to initialize */
-        /* will initialize thread_wk field before use */
 
         q_entry_ptr->wk_ret = 0;
 
@@ -1499,9 +1488,6 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, bool try_lock)
                 assert(ioc_data->io_queue.num_pending + ioc_data->io_queue.num_in_progress ==
                        ioc_data->io_queue.q_len);
 
-                entry_ptr->thread_wk.func = handle_work_request;
-                entry_ptr->thread_wk.args = entry_ptr;
-
 #ifdef H5_SUBFILING_DEBUG
                 H5_subfiling_log(
                     entry_ptr->wk_req.context_id,
@@ -1523,7 +1509,7 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, bool try_lock)
                 entry_ptr->dispatch_time = H5_now_usec();
 #endif
 
-                hg_thread_pool_post(ioc_data->io_thread_pool, &(entry_ptr->thread_wk));
+                H5TS_pool_add_task(ioc_data->io_thread_pool, handle_work_request, entry_ptr);
             }
         }
 

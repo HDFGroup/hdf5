@@ -120,7 +120,7 @@ tts_thread_id(void)
                 TestErrPrintf("thread %d did not start", i);
 
         for (i = 0; i < NTHREADS; i++)
-            if (H5TS_thread_join(threads[i]) < 0)
+            if (H5TS_thread_join(threads[i], NULL) < 0)
                 TestErrPrintf("thread %d failed to join", i);
 
         /* Access synchronized by thread create/join */

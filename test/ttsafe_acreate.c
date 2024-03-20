@@ -107,7 +107,7 @@ tts_acreate(void)
     }
 
     for (i = 0; i < NUM_THREADS; i++)
-        if (H5TS_thread_join(threads[i]) < 0)
+        if (H5TS_thread_join(threads[i], NULL) < 0)
             TestErrPrintf("thread %d failed to join", i);
 
     /* verify the correctness of the test */

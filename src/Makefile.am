@@ -97,8 +97,8 @@ libhdf5_la_SOURCES= H5.c H5build_settings.c H5checksum.c H5dbg.c H5system.c \
         H5Torder.c H5Tref.c H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c \
         H5Tvlen.c \
         H5TS.c H5TSbarrier.c H5TScond.c H5TSexlock.c H5TSint.c H5TSkey.c \
-        H5TSmutex.c H5TSonce.c H5TSpthread.c H5TSrwlock.c H5TStest.c \
-        H5TSthread.c H5TSwin.c \
+        H5TSmutex.c H5TSonce.c H5TSpool.c H5TSpthread.c H5TSrwlock.c \
+        H5TStest.c H5TSthread.c H5TSwin.c \
         H5VL.c H5VLcallback.c H5VLdyn_ops.c H5VLint.c H5VLnative.c \
         H5VLnative_attr.c H5VLnative_blob.c H5VLnative_dataset.c \
         H5VLnative_datatype.c H5VLnative_file.c H5VLnative_group.c \
@@ -164,15 +164,6 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
 # Public component author headers
 include_HEADERS += H5ESdevelop.h H5FDdevelop.h H5Idevelop.h H5Ldevelop.h \
         H5Tdevelop.h H5TSdevelop.h H5Zdevelop.h
-
-if SUBFILING_VFD_CONDITIONAL
-
-# Temporarily use internal Mercury until usage of Mercury is refactored
-if HAVE_MERCURY_CONDITIONAL
-    libhdf5_la_SOURCES += H5FDsubfiling/mercury/src/util/mercury_thread_pool.c
-endif
-
-endif
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)

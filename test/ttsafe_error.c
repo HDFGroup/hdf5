@@ -117,7 +117,7 @@ tts_error(void)
                 TestErrPrintf("thread # %d did not start", i);
 
         for (i = 0; i < NUM_THREAD; i++)
-            if (H5TS_thread_join(threads[i]) < 0)
+            if (H5TS_thread_join(threads[i], NULL) < 0)
                 TestErrPrintf("thread %d failed to join", i);
 
         if (error_flag_g) {

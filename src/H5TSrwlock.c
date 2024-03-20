@@ -41,59 +41,25 @@
 /* Local Macros */
 /****************/
 
-/* R/W lock initialization macro */
-#if H5TS_ENABLE_REC_RW_LOCK_STATS
-#define H5TS_RW_LOCK_INIT                                                                                    \
-    {                                                                                                        \
-        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
-            H5TS_RW_LOCK_UNUSED,   /* lock_type */                                                           \
-            H5TS_COND_INITIALIZER, /* writers_cv */                                                          \
-            0,                     /* write_thread */                                                        \
-            0,                     /* rec_write_lock_count */                                                \
-            0,                     /* waiting_writers_count */                                               \
-            H5TS_COND_INITIALIZER, /* readers_cv */                                                          \
-            0,                     /* reader_thread_count */                                                 \
-            (H5TS_key_t)0,         /* rec_read_lock_count_key */                                             \
-            false,                 /* is_key_registered */                                                   \
-        {                                                                                                    \
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0                                                      \
-        } /* stats */                                                                                        \
-    }
-#else
-#define H5TS_RW_LOCK_INIT                                                                                    \
-    {                                                                                                        \
-        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
-            H5TS_RW_LOCK_UNUSED,   /* lock_type */                                                           \
-            H5TS_COND_INITIALIZER, /* writers_cv */                                                          \
-            0,                     /* write_thread */                                                        \
-            0,                     /* rec_write_lock_count */                                                \
-            0,                     /* waiting_writers_count */                                               \
-            H5TS_COND_INITIALIZER, /* readers_cv */                                                          \
-            0,                     /* reader_thread_count */                                                 \
-            (H5TS_key_t)0          /* rec_read_lock_count_key */                                             \
-            false,                 /* is_key_registered */                                                   \
-    }
-#endif
-
 /******************/
 /* Local Typedefs */
 /******************/
 
 /******************************************************************************
  *
- * Structure H5TS_rec_read_entry_count_t
+ * Structure H5TS_rec_entry_count_t;
  *
  * Structure associated with the rec_read_lock_count_key defined in
  * H5TS_rw_lock_t.
  *
  * This structure maintains a count of recursive read locks so that the lock can
- * be decrements when the thread-specific count drops to zero.
+ * be decremented when the thread-specific count drops to zero.
  *
  * Individual fields are:
  *
- * rec_lock_count: Count of the number of recursive lock calls, less
- *              the number of recursive unlock calls.  The lock in question
- *              is decremented when the count drops to zero.
+ * rec_lock_count: Count of the number of active [recursive] read lock calls
+ *              for a given thread.  The # of readers for the lock in question
+ *              is decremented when the recursive read lock count drops to zero.
  *
  ******************************************************************************/
 

@@ -615,7 +615,7 @@ tts_rec_rw_lock_smoke_check_2(void)
 
     /* 4) Wait for all threads to complete. */
     for (i = 0; i < num_threads; i++)
-        if (H5TS_thread_join(threads[i]) < 0)
+        if (H5TS_thread_join(threads[i], NULL) < 0)
             TestErrPrintf("thread %d failed to join", i);
     uint64_t end_time  = H5_now_usec();
     uint64_t elap_time = (unsigned long long)(end_time - start_time);
@@ -816,7 +816,7 @@ tts_rec_rw_lock_smoke_check_3(void)
 
     /* 4) Wait for all threads to complete. */
     for (i = 0; i < num_threads; i++)
-        if (H5TS_thread_join(threads[i]) < 0)
+        if (H5TS_thread_join(threads[i], NULL) < 0)
             TestErrPrintf("thread %d failed to join", i);
     uint64_t end_time  = H5_now_usec();
     uint64_t elap_time = (unsigned long long)(end_time - start_time);
@@ -1018,7 +1018,7 @@ tts_rec_rw_lock_smoke_check_4(void)
 
     /* 4) Wait for all threads to complete. */
     for (i = 0; i < num_threads; i++)
-        if (H5TS_thread_join(threads[i]) < 0)
+        if (H5TS_thread_join(threads[i], NULL) < 0)
             TestErrPrintf("thread %d failed to join", i);
     uint64_t end_time  = H5_now_usec();
     uint64_t elap_time = (unsigned long long)(end_time - start_time);
