@@ -1544,10 +1544,10 @@ case $host_os in
 esac
 
 ## Windows
-case "`uname`" in
-  MINGW*)
+case "$host_os" in
+  *mingw*)
     # The Winsock library
-    AC_CHECK_LIB([ws2_32], [GetUserName])
+    AC_CHECK_LIB([ws2_32], [htons])
     ;;
 esac
 
@@ -1562,9 +1562,9 @@ AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h])
 ##
 if test "X${enable_shared}" = "Xyes"; then
   AC_MSG_CHECKING([if libtool needs -no-undefined flag to build shared libraries])
-  case "`uname`" in
-    CYGWIN*|MINGW*|AIX*)
-      ## Add in the -no-undefined flag to LDFLAGS for libtool.
+  case "$host_os" in
+    *cygwin*|*mingw*|*aix*)
+      ## Add in the -no-undefined flag to LDFLAGS for libtool
       AC_MSG_RESULT([yes])
       H5_LDFLAGS="$H5_LDFLAGS -no-undefined"
       ;;
@@ -1583,7 +1583,7 @@ AC_SYS_LARGEFILE
 ## ----------------------------------------------------------------------
 ## Add necessary defines for Linux Systems.
 ##
-case "$host_cpu-$host_vendor-$host_os" in
+case "$host_os" in
   *linux*)
     ## Add POSIX support on Linux systems, so <features.h> defines
     ## __USE_POSIX, which is required to get the prototype for fdopen
@@ -1613,6 +1613,7 @@ case "$host_cpu-$host_vendor-$host_os" in
     H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
   *mingw*)
+    HDF_MINGW="yes"
     AC_DEFINE([HAVE_WINDOWS], [1], [Define if this is a Windows machine])
     AC_DEFINE([HAVE_WIN32_API], [1], [Define if on the Windows platform using the Win32 API])
     AC_DEFINE([HAVE_MINGW], [1], [Define if using MinGW])
@@ -2031,74 +2032,91 @@ if test "X$THREADSAFE" = "Xyes"; then
     ## and/or a library path.  If the library path is specified then it must
     ## be preceded by a comma.
     ##
-    ## Thread-safety in HDF5 only uses Pthreads via configure, so the
-    ## default is "check", though this only has an effect when
-    ## --enable-threadsafe is specified.
+    ## The default is to use Pthreads when building with the Autotools, unless
+    ## we're building w/ MinGW.
     AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
     AC_ARG_WITH([pthread],
                 [AS_HELP_STRING([--with-pthread=DIR],
                                 [Specify alternative path to Pthreads library when
-                                thread-safe capability is built.])],,
-                [withval=check])
+                                thread-safe capability is built. Set this to
+                                'yes' or the location of Pthreads when building
+                                with MinGW and you would rather use Pthreads
+                                than Win32 threads.])],,
+                [withval=default])
 
-    case "$withval" in
-      check | yes)
-        AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
-        if test "x$HAVE_PTHREAD" = "xyes"; then
-          AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+    ## If we're on MinGW, we want to use Win32 threads unless the builder
+    ## explicitly specifies --with-pthreads=(yes | path(s))
+    mingw_use_win32_threads="no"
+    if test -n "$HDF_MINGW" -a "$HDF_MINGW" = "yes" ; then
+        # Default or no --> Win32 threads
+        if test "$withval" = "default" -o "$withval" = "no" ; then
+            mingw_use_win32_threads="yes"
+            unset HAVE_PTHREAD
+            AC_DEFINE([HAVE_WIN_THREADS], [1], [Define to 1 if you have win32 threads])
         fi
-        ;;
-      no)
-        AC_MSG_ERROR([Must use Pthreads with thread safety])
-        ;;
-      *)
+    fi
+
+    if test "$mingw_use_win32_threads" = "no" ; then
         case "$withval" in
-          *,*)
-            pthread_inc="`echo $withval | cut -f1 -d,`"
-            pthread_lib="`echo $withval | cut -f2 -d, -s`"
-            ;;
-          *)
-            if test -n "$withval"; then
-              pthread_inc="$withval/include"
-              pthread_lib="$withval/lib"
-            fi
-            ;;
+            default | yes)
+                AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
+                if test "x$HAVE_PTHREAD" = "xyes"; then
+                    AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+                fi
+                ;;
+            no)
+                AC_MSG_ERROR([Must use Pthreads with thread safety on non-Windows systems])
+                ;;
+            *)
+                case "$withval" in
+                    *,*)
+                        pthread_inc="`echo $withval | cut -f1 -d,`"
+                        pthread_lib="`echo $withval | cut -f2 -d, -s`"
+                        ;;
+                    *)
+                        if test -n "$withval"; then
+                            pthread_inc="$withval/include"
+                            pthread_lib="$withval/lib"
+                        fi
+                        ;;
+                esac
+
+                if test -n "$pthread_inc"; then
+                    saved_CPPFLAGS="$CPPFLAGS"
+                    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+                    CPPFLAGS="$CPPFLAGS -I$pthread_inc"
+                    AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
+                    AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset HAVE_PTHREAD])
+                else
+                    AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
+                fi
+
+                if test "x$HAVE_PTHREAD" = "xyes"; then
+                    if test -n "$pthread_lib"; then
+                        saved_LDFLAGS="$LDFLAGS"
+                        saved_AM_LDFLAGS="$AM_LDFLAGS"
+                        LDFLAGS="$LDFLAGS -L$pthread_lib"
+                        AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
+                        AC_CHECK_LIB([pthread], [pthread_self],,
+                                     [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD])
+                    else
+                        AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+                    fi
+                fi
+                ;;
         esac
 
-        if test -n "$pthread_inc"; then
-          saved_CPPFLAGS="$CPPFLAGS"
-          saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-          CPPFLAGS="$CPPFLAGS -I$pthread_inc"
-          AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
-          AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset HAVE_PTHREAD])
-        else
-          AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
-        fi
-
+        ## If using Pthreads, check for barrier routines
         if test "x$HAVE_PTHREAD" = "xyes"; then
-          if test -n "$pthread_lib"; then
-            saved_LDFLAGS="$LDFLAGS"
-            saved_AM_LDFLAGS="$AM_LDFLAGS"
-            LDFLAGS="$LDFLAGS -L$pthread_lib"
-            AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
-            AC_CHECK_LIB([pthread], [pthread_self],,
-                         [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD])
-          else
-            AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
-          fi
+            AC_CHECK_DECL([pthread_barrier_init],
+                          [AC_DEFINE([HAVE_PTHREAD_BARRIER], [1],
+                              [Define if has pthread_barrier_*() routines])],
+                          [],
+                          [[#include <pthread.h>]])
         fi
-        ;;
-    esac
 
-    ## If using Pthreads, check for barrier routines
-    if test "x$HAVE_PTHREAD" = "xyes"; then
-        AC_CHECK_DECL([pthread_barrier_init],
-                      [AC_DEFINE([HAVE_PTHREAD_BARRIER], [1],
-                          [Define if has pthread_barrier_*() routines])],
-                      [],
-                      [[#include <pthread.h>]])
-    fi
-fi
+    fi # end of Pthreads checks
+fi # end of threadsafe processing
 
 ## ----------------------------------------------------------------------
 ## Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
@@ -2125,8 +2143,8 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 ## Check whether the global variable `timezone' is defined.
 AC_MSG_CHECKING([for global timezone variable])
 
-case "`uname`" in
-  CYGWIN*)
+case "$host_os" in
+  *cygwin*)
     AC_MSG_RESULT([disabled in CYGWIN])
     ;;
   *)
@@ -2156,8 +2174,8 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 ## How do we figure out the width of a tty in characters?
 ##
 AC_CHECK_FUNCS([_getvideoconfig gettextinfo])
-case "`uname`" in
-  CYGWIN*)
+case "$host_os" in
+  *cygwin*)
     ;;
   *)
     AC_CHECK_FUNCS([GetConsoleScreenBufferInfo])
@@ -2204,11 +2222,22 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 ## NOTE: clock_gettime may require linking to the rt or posix4 library
 ##       so we'll search for it before calling AC_CHECK_FUNCS.
 AC_SEARCH_LIBS([clock_gettime], [rt posix4])
-AC_CHECK_FUNCS([alarm asprintf clock_gettime fcntl flock fork])
+AC_CHECK_FUNCS([asprintf clock_gettime fcntl flock fork])
 AC_CHECK_FUNCS([gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([rand_r random])
 AC_CHECK_FUNCS([strcasestr strdup symlink])
 AC_CHECK_FUNCS([tmpfile vasprintf waitpid])
+
+case "$host_os" in
+  *mingw*)
+    # alarm(2) support is spotty in MinGW, so assume it doesn't exist
+    #
+    # https://lists.gnu.org/archive/html/bug-gnulib/2013-03/msg00040.html
+    ;;
+  *)
+    AC_CHECK_FUNCS([alarm])
+    ;;
+esac
 
 ## ----------------------------------------------------------------------
 ## Check compiler characteristics
@@ -3607,10 +3636,10 @@ fi
 ##
 AC_MSG_CHECKING([if the machine has window style path name])
 
-case "`uname`" in
-  MINGW*)
+case "$host_os" in
+  *mingw*)
     AC_DEFINE([HAVE_WINDOW_PATH], [1],
-              [Define if your system has window style path name.])
+              [Define if your system has Windows-style path name.])
     AC_MSG_RESULT([yes])
     ;;
   *)

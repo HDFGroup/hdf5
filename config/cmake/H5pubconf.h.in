@@ -363,10 +363,10 @@
 /* Define to 1 if you have the `waitpid' function. */
 #cmakedefine H5_HAVE_WAITPID @H5_HAVE_WAITPID@
 
-/* Define to 1 if you have the 'InitOnceExecuteOnce' function. */
+/* Define to 1 if you have Win32 threads */
 #cmakedefine H5_HAVE_WIN_THREADS @H5_HAVE_WIN_THREADS@
 
-/* Define if your system has window style path name. */
+/* Define if your system has Windows-style path name. */
 #cmakedefine H5_HAVE_WINDOW_PATH @H5_HAVE_WINDOW_PATH@
 
 /* Define to 1 if you have the <zlib.h> header file. */

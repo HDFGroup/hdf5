@@ -813,7 +813,7 @@ usage(void)
                    "      specified group) and generates a report of objects that appear in only\n");
     PRINTVALSTREAM(rawoutstream,
                    "      one group or in both groups. Common objects are then compared recursively.\n");
-    PRINTVALSTREAM(rawoutstream, "  2) Datasets\n");
+    PRINTVALSTREAM(rawoutstream, "  2) Attributes and Datasets\n");
     PRINTVALSTREAM(rawoutstream,
                    "      Array rank and dimensions, datatypes, and data values are compared.\n");
     PRINTVALSTREAM(rawoutstream, "  3) Datatypes\n");
