@@ -1,0 +1,10 @@
+* Added support for _Float16 16-bit floating-point datatype
+
+  Support for the 16-bit floating-point _Float16 C type has been added to
+  HDF5. On platforms where this type is available, this can enable more
+  efficient storage of floating-point data when an application doesn't
+  need the precision of larger floating-point datatypes. It can also allow
+  for improved performance when converting between 16-bit floating-point
+  data and data of another HDF5 datatype.
+
+  (GitHub #4065, #2154)
