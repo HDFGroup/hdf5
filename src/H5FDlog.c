@@ -514,7 +514,7 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     /* Get the file stats */
     if (HDfstat(fd, &sb) < 0)
-        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
+        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
 
     /* Stop timer for stat() call */
     if (fa->flags & H5FD_LOG_TIME_STAT)
@@ -661,7 +661,7 @@ H5FD__log_close(H5FD_t *_file)
 
     /* Close the underlying file */
     if (HDclose(file->fd) < 0)
-        HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+        HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
     /* Stop timer for close() call */
     if (file->fa.flags & H5FD_LOG_TIME_CLOSE)
@@ -1163,7 +1163,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             H5_timer_start(&seek_timer);
 
         if (HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
-            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
 
         /* Stop timer for seek() call */
         if (file->fa.flags & H5FD_LOG_TIME_SEEK)
@@ -1382,7 +1382,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
             H5_timer_start(&seek_timer);
 
         if (HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
-            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
 
         /* Stop timer for seek() call */
         if (file->fa.flags & H5FD_LOG_TIME_SEEK)
@@ -1587,7 +1587,7 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNU
 #else  /* H5_HAVE_WIN32_API */
         /* Truncate/extend the file */
         if (-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
-            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
 #endif /* H5_HAVE_WIN32_API */
 
         /* Stop timer for truncate operation */
@@ -1664,7 +1664,7 @@ H5FD__log_lock(H5FD_t *_file, bool rw)
             errno = 0;
         }
         else
-            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "unable to lock file")
+            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "unable to lock file");
     }
 
 done:
@@ -1698,7 +1698,7 @@ H5FD__log_unlock(H5FD_t *_file)
             errno = 0;
         }
         else
-            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock file")
+            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock file");
     }
 
 done:
@@ -1724,7 +1724,7 @@ H5FD__log_delete(const char *filename, hid_t H5_ATTR_UNUSED fapl_id)
     assert(filename);
 
     if (HDremove(filename) < 0)
-        HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file")
+        HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
