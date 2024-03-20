@@ -132,7 +132,7 @@ jobs:
         shell: bash
 
       - name: Create snapshot file base name
-        id: create-file-base
+        id: create-snap-base
         if: ${{ (inputs.use_tag == 'snapshot') && (inputs.use_environ == 'release') }}
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
