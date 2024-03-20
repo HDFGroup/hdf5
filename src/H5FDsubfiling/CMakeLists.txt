@@ -20,10 +20,7 @@ if (HDF5_ENABLE_SUBFILING_VFD)
 
   # Add mercury util sources to Subfiling VFD sources
   set (MERCURY_UTIL_SOURCES
-    ${H5FD_SUBFILING_MERCURY_DIR}/mercury_thread.c
-    ${H5FD_SUBFILING_MERCURY_DIR}/mercury_thread_condition.c
     ${H5FD_SUBFILING_MERCURY_DIR}/mercury_thread_pool.c
-    ${H5FD_SUBFILING_MERCURY_DIR}/mercury_thread_mutex.c
   )
 
   set (HDF5_H5FD_SUBFILING_SOURCES

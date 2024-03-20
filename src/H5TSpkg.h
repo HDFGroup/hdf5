@@ -32,32 +32,10 @@
 /* Package Private Macros */
 /**************************/
 
-#ifdef H5_HAVE_WIN_THREADS
-
-/* Portability function aliases */
-#define H5TS__wait_for_thread(thread) WaitForSingleObject(thread, INFINITE)
-
-#else /* H5_HAVE_WIN_THREADS */
-
-/* Portability function aliases */
-#define H5TS__wait_for_thread(thread) pthread_join(thread, NULL)
-
-#endif /* H5_HAVE_WIN_THREADS */
 
 /****************************/
 /* Package Private Typedefs */
 /****************************/
-
-/* Portability wrappers */
-#ifdef H5_HAVE_WIN_THREADS
-
-typedef INIT_ONCE H5TS_once_t;
-
-#else
-
-typedef pthread_once_t H5TS_once_t;
-
-#endif /* H5_HAVE_WIN_THREADS */
 
 /* Recursive exclusive locks */
 typedef struct H5TS_ex_lock_t {
@@ -330,10 +308,6 @@ H5_DLL herr_t H5TS__rw_lock_get_stats(H5TS_rw_lock_t *rw_lock, H5TS_rw_lock_stat
 H5_DLL herr_t H5TS__rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock);
 H5_DLL herr_t H5TS__rw_lock_print_stats(const char *header_str, H5TS_rw_lock_stats_t *stats);
 #endif
-
-/* Testing routines */
-H5_DLL H5TS_thread_t H5TS__create_thread(void *(*func)(void *), void *udata);
-
 #endif /* H5TS_TESTING */
 
 #endif /* H5_HAVE_THREADSAFE */

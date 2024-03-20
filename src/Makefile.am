@@ -169,10 +169,7 @@ if SUBFILING_VFD_CONDITIONAL
 
 # Temporarily use internal Mercury until usage of Mercury is refactored
 if HAVE_MERCURY_CONDITIONAL
-    libhdf5_la_SOURCES += H5FDsubfiling/mercury/src/util/mercury_thread.c \
-    H5FDsubfiling/mercury/src/util/mercury_thread_condition.c \
-    H5FDsubfiling/mercury/src/util/mercury_thread_pool.c \
-    H5FDsubfiling/mercury/src/util/mercury_thread_mutex.c
+    libhdf5_la_SOURCES += H5FDsubfiling/mercury/src/util/mercury_thread_pool.c
 endif
 
 endif

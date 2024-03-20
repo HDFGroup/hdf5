@@ -48,7 +48,7 @@ hid_t        error_file_g  = H5I_INVALID_HID;
 int          error_flag_g  = 0;
 int          error_count_g = 0;
 err_num_t    expected_g[EXPECTED_ERROR_DEPTH];
-H5TS_mutex_t error_mutex_g;
+H5TS_mutex_t error_mutex_g = H5TS_MUTEX_INITIALIZER;
 
 /* Prototypes */
 static herr_t error_callback(hid_t, void *);
@@ -99,9 +99,6 @@ tts_error(void)
     expected_g[10].maj_num = H5E_LINK;
     expected_g[10].min_num = H5E_EXISTS;
 
-    /* set up mutex for global count of errors */
-    H5TS_mutex_init(&error_mutex_g);
-
     def_fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(def_fapl, H5I_INVALID_HID, "H5Pcreate");
 
@@ -116,10 +113,12 @@ tts_error(void)
         CHECK(error_file_g, H5I_INVALID_HID, "H5Fcreate");
 
         for (i = 0; i < NUM_THREAD; i++)
-            threads[i] = H5TS__create_thread(tts_error_thread, NULL);
+            if (H5TS_thread_create(&threads[i], tts_error_thread, NULL) < 0)
+                TestErrPrintf("thread # %d did not start", i);
 
         for (i = 0; i < NUM_THREAD; i++)
-            H5TS__wait_for_thread(threads[i]);
+            if (H5TS_thread_join(threads[i]) < 0)
+                TestErrPrintf("thread %d failed to join", i);
 
         if (error_flag_g) {
             TestErrPrintf(

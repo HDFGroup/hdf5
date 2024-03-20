@@ -102,11 +102,13 @@ tts_acreate(void)
         attrib_data->datatype      = datatype;
         attrib_data->dataspace     = dataspace;
         attrib_data->current_index = i;
-        threads[i]                 = H5TS__create_thread(tts_acreate_thread, attrib_data);
+        if (H5TS_thread_create(&threads[i], tts_acreate_thread, attrib_data) < 0)
+            TestErrPrintf("thread # %d did not start", i);
     }
 
     for (i = 0; i < NUM_THREADS; i++)
-        H5TS__wait_for_thread(threads[i]);
+        if (H5TS_thread_join(threads[i]) < 0)
+            TestErrPrintf("thread %d failed to join", i);
 
     /* verify the correctness of the test */
     for (i = 0; i < NUM_THREADS; i++) {

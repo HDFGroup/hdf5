@@ -77,11 +77,13 @@ tts_dcreate(void)
         thread_out[i].id       = i;
         thread_out[i].file     = file;
         thread_out[i].dsetname = dsetname[i];
-        threads[i]             = H5TS__create_thread(tts_dcreate_creator, &thread_out[i]);
+        if (H5TS_thread_create(&threads[i], tts_dcreate_creator, &thread_out[i]) < 0)
+            TestErrPrintf("thread # %d did not start", i);
     }
 
     for (i = 0; i < NUM_THREAD; i++)
-        H5TS__wait_for_thread(threads[i]);
+        if (H5TS_thread_join(threads[i]) < 0)
+            TestErrPrintf("thread %d failed to join", i);
 
     /* compare data to see if it is written correctly */
 

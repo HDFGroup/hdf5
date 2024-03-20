@@ -22,7 +22,7 @@
 struct hg_thread_pool_private {
     struct hg_thread_pool pool;
     unsigned int          thread_count;
-    hg_thread_t          *threads;
+    H5TS_thread_t          *threads;
 };
 
 /********************/
@@ -47,7 +47,7 @@ hg_thread_pool_worker(void *args)
     struct hg_thread_work *work;
 
     while (1) {
-        hg_thread_mutex_lock(&pool->mutex);
+        H5TS_mutex_lock(&pool->mutex);
 
         /* If not shutting down and nothing to do, worker sleeps */
         while (!pool->shutdown && HG_QUEUE_IS_EMPTY(&pool->queue)) {
@@ -55,7 +55,7 @@ hg_thread_pool_worker(void *args)
 
             pool->sleeping_worker_count++;
 
-            rc = hg_thread_cond_wait(&pool->cond, &pool->mutex);
+            rc = H5TS_cond_wait(&pool->cond, &pool->mutex);
             HG_UTIL_CHECK_ERROR_NORET(rc != HG_UTIL_SUCCESS, unlock,
                                       "Thread cannot wait on condition variable");
 
@@ -70,14 +70,14 @@ hg_thread_pool_worker(void *args)
         HG_QUEUE_POP_HEAD(&pool->queue, entry);
 
         /* Unlock */
-        hg_thread_mutex_unlock(&pool->mutex);
+        H5TS_mutex_unlock(&pool->mutex);
 
         /* Get to work */
         (*work->func)(work->args);
     }
 
 unlock:
-    hg_thread_mutex_unlock(&pool->mutex);
+    H5TS_mutex_unlock(&pool->mutex);
 
     return ret;
 }
@@ -101,20 +101,20 @@ hg_thread_pool_init(unsigned int thread_count, hg_thread_pool_t **pool_ptr)
     HG_QUEUE_INIT(&priv_pool->pool.queue);
     priv_pool->pool.shutdown = 0;
 
-    rc = hg_thread_mutex_init(&priv_pool->pool.mutex);
+    rc = H5TS_mutex_init(&priv_pool->pool.mutex);
     HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, error, ret, HG_UTIL_FAIL, "Could not initialize mutex");
 
-    rc = hg_thread_cond_init(&priv_pool->pool.cond);
+    rc = H5TS_cond_init(&priv_pool->pool.cond);
     HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, error, ret, HG_UTIL_FAIL,
                         "Could not initialize thread condition");
 
-    priv_pool->threads = (hg_thread_t *)malloc(thread_count * sizeof(hg_thread_t));
+    priv_pool->threads = (H5TS_thread_t *)malloc(thread_count * sizeof(H5TS_thread_t));
     HG_UTIL_CHECK_ERROR(!priv_pool->threads, error, ret, HG_UTIL_FAIL,
                         "Could not allocate thread pool array");
 
     /* Start worker threads */
     for (i = 0; i < thread_count; i++) {
-        rc = hg_thread_create(&priv_pool->threads[i], hg_thread_pool_worker, (void *)priv_pool);
+        rc = H5TS_thread_create(&priv_pool->threads[i], hg_thread_pool_worker, (void *)priv_pool);
         HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, error, ret, HG_UTIL_FAIL, "Could not create thread");
     }
 
@@ -141,26 +141,26 @@ hg_thread_pool_destroy(hg_thread_pool_t *pool)
         goto done;
 
     if (priv_pool->threads) {
-        hg_thread_mutex_lock(&priv_pool->pool.mutex);
+        H5TS_mutex_lock(&priv_pool->pool.mutex);
 
         priv_pool->pool.shutdown = 1;
 
-        rc = hg_thread_cond_broadcast(&priv_pool->pool.cond);
+        rc = H5TS_cond_broadcast(&priv_pool->pool.cond);
         HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, error, ret, HG_UTIL_FAIL,
                             "Could not broadcast condition signal");
 
-        hg_thread_mutex_unlock(&priv_pool->pool.mutex);
+        H5TS_mutex_unlock(&priv_pool->pool.mutex);
 
         for (i = 0; i < priv_pool->thread_count; i++) {
-            rc = hg_thread_join(priv_pool->threads[i]);
+            rc = H5TS_thread_join(priv_pool->threads[i]);
             HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, done, ret, HG_UTIL_FAIL, "Could not join thread");
         }
     }
 
-    rc = hg_thread_mutex_destroy(&priv_pool->pool.mutex);
+    rc = H5TS_mutex_destroy(&priv_pool->pool.mutex);
     HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, done, ret, HG_UTIL_FAIL, "Could not destroy mutex");
 
-    rc = hg_thread_cond_destroy(&priv_pool->pool.cond);
+    rc = H5TS_cond_destroy(&priv_pool->pool.cond);
     HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, done, ret, HG_UTIL_FAIL, "Could not destroy thread condition");
 
     free(priv_pool->threads);
@@ -170,7 +170,7 @@ done:
     return ret;
 
 error:
-    hg_thread_mutex_unlock(&priv_pool->pool.mutex);
+    H5TS_mutex_unlock(&priv_pool->pool.mutex);
 
     return ret;
 }

@@ -45,7 +45,9 @@ static size_t sf_topology_cache_num_entries = 0;
 static file_map_to_context_t *sf_open_file_map = NULL;
 static int                    sf_file_map_size = 0;
 
+#ifdef H5_SUBFILING_DEBUG
 static H5TS_mutex_t subfiling_log_mutex = H5TS_MUTEX_INITIALIZER;
+#endif
 
 #define DEFAULT_CONTEXT_CACHE_SIZE  16
 #define DEFAULT_TOPOLOGY_CACHE_SIZE 4

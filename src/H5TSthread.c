@@ -59,4 +59,108 @@
 /* Local Variables */
 /*******************/
 
+#ifdef H5_HAVE_WIN_THREADS
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_create
+ *
+ * Purpose:  Spawn off a new thread calling function 'func' with input 'udata'.
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_thread_create(H5TS_thread_t *thread, H5TS_thread_start_func_t func, void *udata)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* When calling C runtime functions, you should use _beginthread or
+     * _beginthreadex instead of CreateThread.  Threads created with
+     * CreateThread risk being killed in low-memory situations, but
+     * we'll use the easier-to-deal-with CreateThread for now.
+     *
+     * NOTE: _beginthread() auto-recycles its handle when execution completes
+     *       so you can't wait on it, making it unsuitable for the existing
+     *       test code.
+     */
+    if (H5_UNLIKELY(NULL == (*thread = CreateThread(NULL, 0, func, udata, 0, NULL)))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* H5TS_thread_create */
+
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_join
+ *
+ * Purpose:  Wait for thread termination
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_thread_join(H5TS_thread_t thread)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(WAIT_OBJECT_0 != WaitForSingleObject(thread, INFINITE)))
+        HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(0 == CloseHandle(thread)))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* H5TS_thread_join */
+#else
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_create
+ *
+ * Purpose:  Spawn off a new thread calling function 'func' with input 'udata'.
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_thread_create(H5TS_thread_t *thread, H5TS_thread_start_func_t func, void *udata)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(pthread_create(thread, NULL, func, udata)))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* H5TS_thread_create */
+
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_join
+ *
+ * Purpose:  Wait for thread termination
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_thread_join(H5TS_thread_t thread)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(pthread_join(thread, NULL)))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* H5TS_thread_join */
+#endif
 #endif /* H5_HAVE_THREADSAFE */

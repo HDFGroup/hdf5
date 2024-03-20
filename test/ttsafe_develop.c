@@ -124,12 +124,16 @@ tts_develop_api(void)
 
     /* Create the threads */
     udata.barrier = &barrier;
-    thread_1      = H5TS__create_thread(tts_develop_api_thr_1, &udata);
-    thread_2      = H5TS__create_thread(tts_develop_api_thr_2, &udata);
+    result = H5TS_thread_create(&thread_1, tts_develop_api_thr_1, &udata);
+    CHECK_I(result, "H5TS_thread_create");
+    result = H5TS_thread_create(&thread_2, tts_develop_api_thr_2, &udata);
+    CHECK_I(result, "H5TS_thread_create");
 
     /* Wait for threads to complete. */
-    H5TS__wait_for_thread(thread_1);
-    H5TS__wait_for_thread(thread_2);
+    result = H5TS_thread_join(thread_1);
+    CHECK_I(result, "H5TS_thread_join");
+    result = H5TS_thread_join(thread_2);
+    CHECK_I(result, "H5TS_thread_join");
 
     result = H5TS__barrier_destroy(&barrier);
     CHECK_I(result, "H5TS__barrier_destroy");

@@ -27,7 +27,7 @@ static volatile bool  failed = false;
 static H5TS_barrier_t barrier;
 static int            times;
 static bool           used[NTHREADS * CYCLE_COUNT];
-static H5TS_mutex_t   used_lock = PTHREAD_MUTEX_INITIALIZER;
+static H5TS_mutex_t   used_lock = H5TS_MUTEX_INITIALIZER;
 
 /* Each thread runs this routine.  The routine fetches the current
  * thread's ID, makes sure that it is in the expected range, makes
@@ -116,10 +116,12 @@ tts_thread_id(void)
     memset(used, 0, sizeof(used));
     for (times = 0; times < CYCLE_COUNT; times++) {
         for (i = 0; i < NTHREADS; i++)
-            threads[i] = H5TS__create_thread(thread_main, NULL);
+            if (H5TS_thread_create(&threads[i], thread_main, NULL) < 0)
+                TestErrPrintf("thread %d did not start", i);
 
         for (i = 0; i < NTHREADS; i++)
-            H5TS__wait_for_thread(threads[i]);
+            if (H5TS_thread_join(threads[i]) < 0)
+                TestErrPrintf("thread %d failed to join", i);
 
         /* Access synchronized by thread create/join */
         for (i = 0; i < NTHREADS; i++) {

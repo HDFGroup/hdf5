@@ -29,7 +29,7 @@
  */
 typedef struct ioc_data_t {
     ioc_io_queue_t    io_queue;
-    hg_thread_t       ioc_main_thread;
+    H5TS_thread_t     ioc_main_thread;
     hg_thread_pool_t *io_thread_pool;
     int64_t           sf_context_id;
 
@@ -179,7 +179,7 @@ initialize_ioc_threads(void *_sf_context)
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, (-1), "can't initialize IOC worker thread pool");
 
     /* Create the main IOC thread that will receive and dispatch I/O requests */
-    if (hg_thread_create(&ioc_data->ioc_main_thread, ioc_thread_main, ioc_data) < 0)
+    if (H5TS_thread_create(&ioc_data->ioc_main_thread, ioc_thread_main, ioc_data) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, (-1), "can't create IOC main thread");
 
     /* Wait until ioc_main() reports that it is ready */
@@ -232,7 +232,7 @@ finalize_ioc_threads(void *_sf_context)
         H5TS_mutex_destroy(&ioc_data->io_queue.q_mutex);
 
         /* Wait for IOC main thread to exit */
-        hg_thread_join(ioc_data->ioc_main_thread);
+        H5TS_thread_join(ioc_data->ioc_main_thread);
     }
 
     if (ioc_data->io_queue.num_failed > 0)

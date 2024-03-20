@@ -40,8 +40,6 @@
 #include "H5subfiling_common.h"
 #include "H5subfiling_err.h"
 
-#include "mercury_thread.h"
-#include "mercury_thread_mutex.h"
 #include "mercury_thread_pool.h"
 
 /*
