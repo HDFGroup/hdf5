@@ -92,17 +92,16 @@ typedef pthread_once_t  H5TS_once_t;
 typedef void (*H5TS_once_init_func_t)(void);
 #endif
 
-    /*****************************/
-    /* Library-private Variables */
-    /*****************************/
+/*****************************/
+/* Library-private Variables */
+/*****************************/
 
-    /***************************************/
-    /* Library-private Function Prototypes */
-    /***************************************/
+/***************************************/
+/* Library-private Function Prototypes */
+/***************************************/
 
-    /* Library/thread init/term operations */
-    H5_DLL void
-    H5TS_term_package(void);
+/* Library/thread init/term operations */
+H5_DLL void H5TS_term_package(void);
 
 /* API locking */
 H5_DLL herr_t H5TS_api_lock(void);

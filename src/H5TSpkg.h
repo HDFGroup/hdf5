@@ -74,10 +74,6 @@ typedef struct H5TS_api_info_t {
     unsigned     attempt_lock_count;
 } H5TS_api_info_t;
 
-#ifdef H5_HAVE_WIN_THREADS
-
-#else
-
 /* Enable statistics when H5TS debugging is enabled */
 #ifdef H5TS_DEBUG
 #define H5TS_ENABLE_REC_RW_LOCK_STATS 1
@@ -90,15 +86,11 @@ typedef struct H5TS_api_info_t {
  *
  * Structure H5TS_rw_lock_stats_t
  *
- * Catchall structure for statistics on the recursive p-threads based
- * recursive R/W lock (see declaration of H5TS_rw_lock_t below).
+ * Statistics for the recursive R/W lock.
  *
- * Since the mutex must be held when reading a consistent set of statistics
- * from the recursibe R/W lock, it simplifies matters to bundle them into
- * a single structure.  This structure exists for that purpose.
- *
- * If you modify this structure, be sure to make equivalent changes to
- * the reset_stats code in H5TS__rw_lock_reset_stats().
+ * Since a mutex must be held to read a consistent set of statistics from a
+ * recursive R/W lock, it simplifies matters to bundle them into a single
+ * structure.
  *
  * Individual fields are:
  *
@@ -173,11 +165,7 @@ typedef struct H5TS_rw_lock_stats_t {
  *
  * Structure H5TS_rw_lock_t
  *
- * A readers / writer (R/W) lock is a lock that allows either an arbitrary
- * number of readers, or a single writer into a critical region.  A recursive
- * lock is one that allows a thread that already holds a lock (read or
- * write) to successfully request the lock again, only dropping the lock
- * when the number of unlock calls equals the number of lock calls.
+ * A recursive readers / writer (R/W) lock.
  *
  * This structure holds the fields needed to implement a recursive R/W lock
  * that allows recursive write locks, and for the associated statistics
@@ -185,10 +173,6 @@ typedef struct H5TS_rw_lock_stats_t {
  *
  * Note that we can't use the pthreads or Win32 R/W locks: they permit
  * recursive read locks, but disallow recursive write locks.
- *
- * This recursive R/W lock implementation is an extension of the R/W lock
- * implementation given in "UNIX network programming" Volume 2, Chapter 8
- * by w. Richard Stevens, 2nd edition.
  *
  * Individual fields are:
  *
@@ -209,11 +193,14 @@ typedef struct H5TS_rw_lock_stats_t {
  *
  * readers_cv:  Condition variable used for waiting readers.
  *
- * active_reader_threads: The # of threads holding a read lock.
+ * reader_thread_count: The # of threads holding a read lock.
  *
  * rec_read_lock_count_key: Instance of thread-local key used to maintain
  *              a thread-specific recursive lock count for each thread
  *              holding a read lock.
+ *
+ * is_key_registered: Flag to track if the rec_read_lock_count_key has been
+ *              registered yet for a lock.
  *
  * stats:       Instance of H5TS_rw_lock_stats_t used to track
  *              statistics on the recursive R/W lock.
@@ -221,9 +208,9 @@ typedef struct H5TS_rw_lock_stats_t {
  ******************************************************************************/
 
 typedef enum {
-    UNUSED = 0, /* Lock is currently unused */
-    WRITE,      /* Lock is a recursive write lock */
-    READ        /* Lock is a recursive read lock */
+    H5TS_RW_LOCK_UNUSED = 0, /* Lock is currently unused */
+    H5TS_RW_LOCK_WRITE,      /* Lock is a recursive write lock */
+    H5TS_RW_LOCK_READ        /* Lock is a recursive read lock */
 } H5TS_rw_lock_type_t;
 
 typedef struct H5TS_rw_lock_t {
@@ -238,18 +225,16 @@ typedef struct H5TS_rw_lock_t {
     int32_t       waiting_writers_count;
 
     /* Reader fields */
-    bool        is_key_registered;
     H5TS_cond_t readers_cv;
-    int32_t     active_reader_threads;
+    int32_t     reader_thread_count;
     H5TS_key_t  rec_read_lock_count_key;
+    bool        is_key_registered;
 
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
     /* Stats */
     H5TS_rw_lock_stats_t stats;
 #endif
 } H5TS_rw_lock_t;
-
-#endif /* H5_HAVE_WIN_THREADS */
 
 /*****************************/
 /* Package Private Variables */
