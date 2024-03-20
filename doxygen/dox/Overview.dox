@@ -35,7 +35,7 @@ documents cover a mix of tasks, concepts, and reference, to help a specific
      \link FTS full-text search\endlink.
 
 \par Offline reading
-     You can <a href="hdf5-doc.tgz">download</a> it as a tgz archive for offline reading.
+     You can <a href="https://github.com/HDFGroup/hdf5/releases/download/snapshot/snapshot.doxygen.zip">download</a> it as an archive for offline reading.
 
 \par ToDo List
      There is plenty of <a href="./todo.html">unfinished business</a>.
