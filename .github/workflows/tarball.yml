@@ -125,10 +125,18 @@ jobs:
 
       - name: Create release file base name
         id: create-rel-base
-        if: ${{ (inputs.use_environ == 'release') }}
+        if: ${{ (inputs.use_environ == 'release') && (inputs.use_tag != 'snapshot') }}
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
-          bin/release -d $GITHUB_WORKSPACE gzip zip cmake-tgz cmake-zip 
+          bin/release -d $GITHUB_WORKSPACE gzip zip 
+        shell: bash
+
+      - name: Create snapshot file base name
+        id: create-file-base
+        if: ${{ (inputs.use_tag == 'snapshot') && (inputs.use_environ == 'release') }}
+        run: |
+          cd "$GITHUB_WORKSPACE/hdfsrc"
+          bin/release -d $GITHUB_WORKSPACE --branch ${{ inputs.use_tag }} gzip zip
         shell: bash
 
       - name: List files in the repository
