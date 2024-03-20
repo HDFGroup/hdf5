@@ -6250,6 +6250,46 @@ main(int argc, char **argv)
 
     test_vector_io(mpi_rank, mpi_size);
 
+#ifdef H5_HAVE_SUBFILING_VFD
+
+    if (mpi_rank == 0)
+        printf("\n --- TESTING SUBFILING VFD: environment variables set to empty --- \n");
+
+    HDsetenv("H5FD_SUBFILING_SUBFILE_PREFIX", "", 1);
+    HDsetenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA", "", 1);
+    HDsetenv("H5FD_SUBFILING_IOC_PER_NODE", "", 1);
+    HDsetenv("H5FD_SUBFILING_STRIPE_SIZE", "", 1);
+    HDsetenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX", "", 1);
+
+    MPI_Barrier(comm);
+
+    if (mpi_rank == 0)
+        printf("\n --- TESTING MPIO VFD: selection I/O --- \n");
+
+    test_selection_io(mpi_rank, mpi_size);
+
+    if (mpi_rank == 0)
+        printf("\n --- TESTING MPIO VFD: vector I/O --- \n");
+
+    if (mpi_size < 2) {
+        if (mpi_rank == 0) {
+            printf("     Need at least 2 processes to run tests for vector I/O.");
+            SKIPPED();
+        }
+        printf("\n");
+        goto finish;
+    }
+
+    test_vector_io(mpi_rank, mpi_size);
+
+    HDunsetenv("H5FD_SUBFILING_SUBFILE_PREFIX");
+    HDunsetenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA");
+    HDunsetenv("H5FD_SUBFILING_IOC_PER_NODE");
+    HDunsetenv("H5FD_SUBFILING_STRIPE_SIZE");
+    HDunsetenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX");
+
+#endif
+
 finish:
     /* make sure all processes are finished before final report, cleanup
      * and exit.
