@@ -254,6 +254,36 @@ New Features
       generation of specialized instructions, such as AVX512-FP16 instructions,
       if available.
 
+    - Made several improvements to the datatype conversion code
+
+      * The datatype conversion code was refactored to use pointers to
+        H5T_t datatype structures internally rather than IDs wrapping
+        the pointers to those structures. These IDs are needed if an
+        application-registered conversion function or conversion exception
+        function are involved during the conversion process. For simplicity,
+        the conversion code simply passed these IDs down and let the internal
+        code unwrap the IDs as necessary when needing to access the wrapped
+        H5T_t structures. However, this could cause a significant amount of
+        repeated ID lookups for compound datatypes and other container-like
+        datatypes. The code now passes down pointers to the datatype
+        structures and only creates IDs to wrap those pointers as necessary.
+        Quick testing showed an average ~3x to ~10x improvement in performance
+        of conversions on container-like datatypes, depending on the
+        complexity of the datatype.
+
+      * A conversion "context" structure was added to hold information about
+        the current conversion being performed. This allows conversions on
+        container-like datatypes to be optimized better by skipping certain
+        portions of the conversion process that remain relatively constant
+        when multiple elements of the container-like datatype are being
+        converted.
+
+      * After refactoring the datatype conversion code to use pointers
+        internally rather than IDs, several copies of datatypes that were
+        made by higher levels of the library were able to be removed. The
+        internal IDs that were previously registered to wrap those copied
+        datatypes were also able to be removed.
+
     - Implemented optimized support for vector I/O in the Subfiling VFD
 
       Previously, the Subfiling VFD would handle vector I/O requests by
