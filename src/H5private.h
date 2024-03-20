@@ -121,6 +121,14 @@
 #define WIN32_LEAN_AND_MEAN /* Exclude rarely-used stuff from Windows headers */
 #define NOGDI               /* Exclude Graphic Display Interface macros */
 
+/* InitOnceExecuteOnce() requires 0x0600 to work on MinGW w/ Win32 threads */
+#if defined(H5_HAVE_MINGW) && defined(H5_HAVE_THREADSAFE)
+#if !defined(_WIN32_WINNT) || (_WIN32_WINNT < 0x0600)
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0600
+#endif
+#endif
+
 #include <windows.h>
 
 #include <direct.h>   /* For _getcwd() */
