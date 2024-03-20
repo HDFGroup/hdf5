@@ -28,10 +28,10 @@
  * file's subfiling context object
  */
 typedef struct ioc_data_t {
-    ioc_io_queue_t    io_queue;
-    H5TS_thread_t     ioc_main_thread;
-    H5TS_pool_t      *io_thread_pool;
-    int64_t           sf_context_id;
+    ioc_io_queue_t io_queue;
+    H5TS_thread_t  ioc_main_thread;
+    H5TS_pool_t   *io_thread_pool;
+    int64_t        sf_context_id;
 
     atomic_int sf_ioc_ready;
     atomic_int sf_shutdown_flag;
@@ -60,7 +60,7 @@ static double sf_queue_delay_time = 0.0;
 
 /* Prototypes */
 static H5TS_THREAD_RETURN_TYPE ioc_thread_main(void *arg);
-static int                   ioc_main(ioc_data_t *ioc_data);
+static int                     ioc_main(ioc_data_t *ioc_data);
 
 static int ioc_file_queue_write_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_Comm comm,
                                       uint32_t counter);
@@ -252,7 +252,7 @@ static H5TS_THREAD_RETURN_TYPE
 ioc_thread_main(void *arg)
 {
     H5TS_thread_ret_t thread_ret = (H5TS_thread_ret_t)0;
-    ioc_data_t     *ioc_data   = (ioc_data_t *)arg;
+    ioc_data_t       *ioc_data   = (ioc_data_t *)arg;
 
     /* Pass along the ioc_data_t */
     ioc_main(ioc_data);

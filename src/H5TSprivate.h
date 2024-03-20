@@ -57,10 +57,10 @@
 #define H5TS_THREAD_RETURN_TYPE   H5TS_thread_ret_t WINAPI
 #else
 /* Static initialization values */
-#define H5TS_KEY_INITIALIZER   (pthread_key_t)0
-#define H5TS_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
-#define H5TS_COND_INITIALIZER  PTHREAD_COND_INITIALIZER
-#define H5TS_ONCE_INITIALIZER  PTHREAD_ONCE_INIT
+#define H5TS_KEY_INITIALIZER      (pthread_key_t)0
+#define H5TS_MUTEX_INITIALIZER    PTHREAD_MUTEX_INITIALIZER
+#define H5TS_COND_INITIALIZER     PTHREAD_COND_INITIALIZER
+#define H5TS_ONCE_INITIALIZER     PTHREAD_ONCE_INIT
 
 /* Thread macros */
 #define H5TS_thread_self()        pthread_self()
@@ -88,7 +88,7 @@ typedef PINIT_ONCE_FN H5TS_once_init_func_t
 #else
 typedef pthread_t H5TS_thread_t;
 typedef void *(*H5TS_thread_start_func_t)(void *);
-typedef void *H5TS_thread_ret_t;
+typedef void           *H5TS_thread_ret_t;
 typedef pthread_key_t   H5TS_key_t;
 typedef pthread_mutex_t H5TS_CAPABILITY("mutex") H5TS_mutex_t;
 typedef pthread_cond_t  H5TS_cond_t;
@@ -96,13 +96,12 @@ typedef pthread_once_t  H5TS_once_t;
 typedef void (*H5TS_once_init_func_t)(void);
 #endif
 
-/* Thread pool */
-typedef struct H5TS_pool_t H5TS_pool_t;
+    /* Thread pool */
+    typedef struct H5TS_pool_t H5TS_pool_t;
 
 /*****************************/
 /* Library-private Variables */
 /*****************************/
-
 
 /***************************************/
 /* Library-private Function Prototypes */

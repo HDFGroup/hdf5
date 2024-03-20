@@ -40,16 +40,16 @@
 /* Local Macros */
 /****************/
 
-#define H5TS_POOL_INIT                                                                                    \
+#define H5TS_POOL_INIT                                                                                       \
     {                                                                                                        \
         H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
-        H5TS_COND_INITIALIZER,     /* cond */                                                          \
-        false,                     /* active */                                                           \
-        false,                     /* shutdown */                                                           \
-        0,                         /* num_threads */                                                          \
-        NULL,                      /* threads */                                                \
-        NULL,                      /* head (queue) */                                                \
-        NULL                       /* tail (queue) */                                                \
+            H5TS_COND_INITIALIZER, /* cond */                                                                \
+            false,                 /* active */                                                              \
+            false,                 /* shutdown */                                                            \
+            0,                     /* num_threads */                                                         \
+            NULL,                  /* threads */                                                             \
+            NULL,                  /* head (queue) */                                                        \
+            NULL                   /* tail (queue) */                                                        \
     }
 
 /******************/
@@ -58,28 +58,28 @@
 
 /* Thread pool task */
 typedef struct H5TS_pool_task_t {
-    H5TS_thread_start_func_t func;      /* Function to invoke with thread */
-    void                    *ctx;       /* Context for task's function */
-    struct H5TS_pool_task_t *next;      /* Pointer to next task */
+    H5TS_thread_start_func_t func; /* Function to invoke with thread */
+    void                    *ctx;  /* Context for task's function */
+    struct H5TS_pool_task_t *next; /* Pointer to next task */
 } H5TS_pool_task_t;
 
 /* Thread pool */
 struct H5TS_pool_t {
-    H5TS_mutex_t mutex;                 /* Mutex to control access to pool struct */
+    H5TS_mutex_t mutex; /* Mutex to control access to pool struct */
     H5TS_cond_t  cond;
 
-    bool active;                        /* Pool is active */
-    bool shutdown;                      /* Pool is shutting down */
-    unsigned num_threads;               /* # of threads in pool */
-    H5TS_thread_t *threads;             /* Array of worker threads in pool */
+    bool           active;      /* Pool is active */
+    bool           shutdown;    /* Pool is shutting down */
+    unsigned       num_threads; /* # of threads in pool */
+    H5TS_thread_t *threads;     /* Array of worker threads in pool */
 
-    H5TS_pool_task_t *head, *tail;      /* Task queue */
+    H5TS_pool_task_t *head, *tail; /* Task queue */
 };
 
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5TS__pool_free(H5TS_pool_t *pool);
+static herr_t                  H5TS__pool_free(H5TS_pool_t *pool);
 static H5TS_THREAD_RETURN_TYPE H5TS__pool_do(void *_pool);
 
 /*********************/
@@ -157,9 +157,9 @@ done:
 static H5TS_THREAD_RETURN_TYPE
 H5TS__pool_do(void *_pool)
 {
-    H5TS_pool_t *pool = (H5TS_pool_t *)_pool;   /* Pool for threads */
-    bool have_mutex = false;                    /* Whether we're holding the mutex */
-    H5TS_thread_ret_t ret_value = (H5TS_thread_ret_t)0;
+    H5TS_pool_t      *pool       = (H5TS_pool_t *)_pool; /* Pool for threads */
+    bool              have_mutex = false;                /* Whether we're holding the mutex */
+    H5TS_thread_ret_t ret_value  = (H5TS_thread_ret_t)0;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
@@ -181,7 +181,7 @@ H5TS__pool_do(void *_pool)
 
         /* If there's a task, invoke it, else we're shutting down */
         if (NULL != pool->head) {
-            H5TS_pool_task_t *task;     /* Task to invoke */
+            H5TS_pool_task_t *task; /* Task to invoke */
 
             /* Grab our task */
             task = pool->head;
@@ -228,8 +228,8 @@ done:
 herr_t
 H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads)
 {
-    H5TS_pool_t *new_pool = NULL;       /* Newly created pool */
-    herr_t ret_value = SUCCEED;
+    H5TS_pool_t *new_pool  = NULL; /* Newly created pool */
+    herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
@@ -294,9 +294,9 @@ done:
 herr_t
 H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
 {
-    H5TS_pool_task_t *task = NULL;  /* Task for function to invoke */
-    bool have_mutex = false;        /* Whether we're holding the mutex */
-    herr_t ret_value = SUCCEED;
+    H5TS_pool_task_t *task       = NULL;  /* Task for function to invoke */
+    bool              have_mutex = false; /* Whether we're holding the mutex */
+    herr_t            ret_value  = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
@@ -310,7 +310,7 @@ H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
     if (H5_UNLIKELY(NULL == (task = H5FL_MALLOC(H5TS_pool_task_t))))
         HGOTO_DONE(FAIL);
     task->func = func;
-    task->ctx = ctx;
+    task->ctx  = ctx;
     task->next = NULL;
 
     /* Acquire the mutex for the pool */
@@ -325,7 +325,7 @@ H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
     /* Add task to pool's queue */
     if (NULL != pool->tail) {
         pool->tail->next = task;
-        pool->tail = task;
+        pool->tail       = task;
     }
     else
         pool->head = pool->tail = task;
@@ -359,8 +359,8 @@ done:
 herr_t
 H5TS_pool_destroy(H5TS_pool_t *pool)
 {
-    bool have_mutex = false;    /* Whether we're holding the mutex */
-    herr_t ret_value = SUCCEED;
+    bool   have_mutex = false; /* Whether we're holding the mutex */
+    herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
@@ -399,4 +399,3 @@ done:
 } /* end H5TS_pool_destroy() */
 
 #endif /* H5_HAVE_THREADSAFE */
-

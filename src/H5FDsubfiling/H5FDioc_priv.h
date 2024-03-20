@@ -209,8 +209,8 @@ typedef struct ioc_io_queue_entry {
     bool                       in_progress;
     uint32_t                   counter;
 
-    sf_work_request_t     wk_req;
-    int                   wk_ret;
+    sf_work_request_t wk_req;
+    int               wk_ret;
 
     /* statistics */
 #ifdef H5FD_IOC_COLLECT_STATS
