@@ -35,7 +35,7 @@ jobs:
   call-workflow-tarball:
     uses: ./.github/workflows/tarball.yml
     with:
-      #use_tag: snapshot
+      use_tag: snapshot
       use_environ: snapshots
 
   call-workflow-ctest:
