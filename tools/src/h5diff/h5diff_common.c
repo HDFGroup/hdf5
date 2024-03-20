@@ -813,10 +813,10 @@ usage(void)
                    "      specified group) and generates a report of objects that appear in only\n");
     PRINTVALSTREAM(rawoutstream,
                    "      one group or in both groups. Common objects are then compared recursively.\n");
-    PRINTVALSTREAM(rawoutstream, "  2) Datasets\n");
+    PRINTVALSTREAM(rawoutstream, "  2) Attributes and Datasets\n");
     PRINTVALSTREAM(rawoutstream,
                    "      Array rank and dimensions, datatypes, and data values are compared.\n");
-    PRINTVALSTREAM(rawoutstream, "  3) Attributes and Datatypes\n");
+    PRINTVALSTREAM(rawoutstream, "  3) Datatypes\n");
     PRINTVALSTREAM(rawoutstream, "      The comparison is based on the return value of H5Tequal.\n");
     PRINTVALSTREAM(rawoutstream, "  4) Symbolic links\n");
     PRINTVALSTREAM(rawoutstream, "      The paths to the target objects are compared.\n");
