@@ -646,6 +646,7 @@ H5_open_subfiles(const char *base_filename, uint64_t file_id, H5FD_subfiling_par
     int64_t              context_id   = -1;
     bool                 recorded_fid = false;
     int                  mpi_code;
+    herr_t               status;
     herr_t               ret_value = SUCCEED;
 
     if (!base_filename)
@@ -660,12 +661,12 @@ H5_open_subfiles(const char *base_filename, uint64_t file_id, H5FD_subfiling_par
     /* Check if this file is already open */
     H5E_BEGIN_TRY
     {
-        context_id = H5_subfile_fid_to_context(file_id);
+        status = H5_subfile_fid_to_context(file_id, &context_id);
     }
     H5E_END_TRY
 
-    if (context_id >= 0) {
-        /* Retrieve the subfiling object for the newly-created context ID */
+    if (status >= 0 && context_id >= 0) {
+        /* Retrieve the subfiling object for the cached context ID */
         if (NULL == (sf_context = H5_get_subfiling_object(context_id)))
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
                                     "couldn't get subfiling object from context ID");
@@ -3019,27 +3020,29 @@ done:
  * Function:    H5_subfile_fid_to_context
  *
  * Purpose:     This is a basic lookup function which returns the subfiling
- *              context id associated with the specified file ID.
+ *              context ID associated with the specified file ID. If no
+ *              such context ID exists, `context_id_out` will be set to a
+ *              negative value.
  *
- * Return:      Non-negative subfiling context ID if the context exists
- *              Negative on failure or if the subfiling context doesn't
- *                exist
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-int64_t
-H5_subfile_fid_to_context(uint64_t file_id)
+herr_t
+H5_subfile_fid_to_context(uint64_t file_id, int64_t *context_id_out)
 {
-    int64_t ret_value = -1;
+    herr_t ret_value = SUCCEED;
+
+    assert(context_id_out);
+
+    *context_id_out = -1;
 
     if (!sf_open_file_map)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, -1, "open file map is NULL");
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "open file map is NULL");
 
-    for (int i = 0; i < sf_file_map_size; i++) {
-        if (sf_open_file_map[i].file_id == file_id) {
-            return sf_open_file_map[i].sf_context_id;
-        }
-    }
+    for (int i = 0; i < sf_file_map_size; i++)
+        if (sf_open_file_map[i].file_id == file_id)
+            *context_id_out = sf_open_file_map[i].sf_context_id;
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
