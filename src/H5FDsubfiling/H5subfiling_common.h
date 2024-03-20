@@ -208,29 +208,31 @@ typedef struct topology {
 } sf_topology_t;
 
 typedef struct {
-    int64_t        sf_context_id;           /* Generated context ID which embeds the cache index */
-    uint64_t       h5_file_id;              /* GUID (basically the inode value)                  */
-    int           *sf_fids;                 /* Array of file IDs for subfiles this rank owns     */
-    int            sf_num_fids;             /* Number of subfiles this rank owns                 */
-    int            sf_num_subfiles;         /* Total number of subfiles for logical HDF5 file    */
-    size_t         sf_write_count;          /* Statistics: write_count                           */
-    size_t         sf_read_count;           /* Statistics: read_count                            */
-    haddr_t        sf_eof;                  /* File eof                                          */
-    int64_t        sf_stripe_size;          /* Stripe-depth                                      */
-    int64_t        sf_blocksize_per_stripe; /* Stripe-depth X n_IOCs                             */
-    int64_t        sf_base_addr;            /* For an IOC, our base address                      */
-    MPI_Comm       sf_msg_comm;             /* MPI comm used to send RPC msg                     */
-    MPI_Comm       sf_data_comm;            /* MPI comm used to move data                        */
-    MPI_Comm       sf_eof_comm;             /* MPI comm used to communicate EOF                  */
-    MPI_Comm       sf_node_comm;            /* MPI comm used for intra-node comms                */
-    MPI_Comm       sf_group_comm;           /* Not used: for IOC collectives                     */
-    int            sf_group_size;           /* IOC count (in sf_group_comm)                      */
-    int            sf_group_rank;           /* IOC rank  (in sf_group_comm)                      */
-    char          *subfile_prefix;          /* If subfiles are node-local                        */
-    char          *config_file_prefix;      /* Prefix added to config file name                  */
-    char          *h5_filename;             /* The user supplied file name                       */
-    void          *ioc_data;                /* Private data for underlying IOC                   */
-    sf_topology_t *topology;                /* Pointer to our topology                           */
+    int64_t        sf_context_id;           /* Generated context ID which embeds the cache index     */
+    uint64_t       h5_file_id;              /* GUID (basically the inode value)                      */
+    bool           threads_inited;          /* Whether the IOC threads for this context were started */
+    int            file_ref;                /* Reference count held by files using this context      */
+    int           *sf_fids;                 /* Array of file IDs for subfiles this rank owns         */
+    int            sf_num_fids;             /* Number of subfiles this rank owns                     */
+    int            sf_num_subfiles;         /* Total number of subfiles for logical HDF5 file        */
+    size_t         sf_write_count;          /* Statistics: write_count                               */
+    size_t         sf_read_count;           /* Statistics: read_count                                */
+    haddr_t        sf_eof;                  /* File eof                                              */
+    int64_t        sf_stripe_size;          /* Stripe-depth                                          */
+    int64_t        sf_blocksize_per_stripe; /* Stripe-depth X n_IOCs                                 */
+    int64_t        sf_base_addr;            /* For an IOC, our base address                          */
+    MPI_Comm       sf_msg_comm;             /* MPI comm used to send RPC msg                         */
+    MPI_Comm       sf_data_comm;            /* MPI comm used to move data                            */
+    MPI_Comm       sf_eof_comm;             /* MPI comm used to communicate EOF                      */
+    MPI_Comm       sf_node_comm;            /* MPI comm used for intra-node comms                    */
+    MPI_Comm       sf_group_comm;           /* Not used: for IOC collectives                         */
+    int            sf_group_size;           /* IOC count (in sf_group_comm)                          */
+    int            sf_group_rank;           /* IOC rank  (in sf_group_comm)                          */
+    char          *subfile_prefix;          /* If subfiles are node-local                            */
+    char          *config_file_prefix;      /* Prefix added to config file name                      */
+    char          *h5_filename;             /* The user supplied file name                           */
+    void          *ioc_data;                /* Private data for underlying IOC                       */
+    sf_topology_t *topology;                /* Pointer to our topology                               */
 
 #ifdef H5_SUBFILING_DEBUG
     char  sf_logfile_name[PATH_MAX];

@@ -663,6 +663,16 @@ Bug Fixes since HDF5-1.14.0 release
 
     Library
     -------
+    - Fixed an issue with the Subfiling VFD and multiple opens of a
+      file
+
+      An issue with the way the Subfiling VFD handles multiple opens
+      of the same file caused the file structures for the extra opens
+      to occasionally get mapped to an incorrect subfiling context
+      object. The VFD now correctly maps the file structures for
+      additional opens of an already open file to the same context
+      object.
+
     - Fixed a bug that causes the library to incorrectly identify
       the endian-ness of 16-bit and smaller C floating-point datatypes
 

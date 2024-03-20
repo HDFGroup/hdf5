@@ -38,7 +38,7 @@ static sf_topology_t       **sf_topology_cache = NULL;
 
 static size_t sf_context_cache_size         = 0;
 static size_t sf_topology_cache_size        = 0;
-static size_t sf_context_cache_num_entries  = 0;
+static size_t sf_context_cache_next_index   = 0;
 static size_t sf_topology_cache_num_entries = 0;
 
 static file_map_to_context_t *sf_open_file_map = NULL;
@@ -67,9 +67,8 @@ static herr_t identify_ioc_ranks(int64_t sf_context_id, sf_topology_t *app_topol
 static herr_t init_subfiling_context(subfiling_context_t *sf_context, const char *base_filename,
                                      uint64_t file_id, H5FD_subfiling_params_t *subfiling_config,
                                      sf_topology_t *app_topology, MPI_Comm file_comm);
-static herr_t open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags);
 static herr_t record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id, int *next_index);
-static void   clear_fid_map_entry(uint64_t file_id, int64_t sf_context_id);
+static herr_t clear_fid_map_entry(uint64_t file_id, int64_t sf_context_id);
 static herr_t ioc_open_files(int64_t file_context_id, int file_acc_flags);
 static herr_t create_config_file(subfiling_context_t *sf_context, const char *base_filename,
                                  const char *config_dir, const char *subfile_dir, bool truncate_if_exists);
@@ -92,7 +91,7 @@ H5_new_subfiling_object_id(sf_obj_type_t obj_type)
     int64_t index_val = 0;
 
     if (obj_type == SF_CONTEXT) {
-        index_val = (int64_t)sf_context_cache_num_entries;
+        index_val = (int64_t)sf_context_cache_next_index;
     }
     else if (obj_type == SF_TOPOLOGY) {
         index_val = (int64_t)sf_topology_cache_num_entries;
@@ -156,8 +155,8 @@ H5_get_subfiling_object(int64_t object_id)
             if (NULL == (sf_context_cache = calloc(DEFAULT_CONTEXT_CACHE_SIZE, sizeof(*sf_context_cache))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                         "couldn't allocate space for subfiling context cache");
-            sf_context_cache_size        = DEFAULT_CONTEXT_CACHE_SIZE;
-            sf_context_cache_num_entries = 0;
+            sf_context_cache_size       = DEFAULT_CONTEXT_CACHE_SIZE;
+            sf_context_cache_next_index = 0;
         }
 
         /* Make more space in context cache if needed */
@@ -166,7 +165,7 @@ H5_get_subfiling_object(int64_t object_id)
             size_t new_size;
             void  *tmp_realloc;
 
-            old_num_entries = sf_context_cache_num_entries;
+            old_num_entries = sf_context_cache_size;
 
             new_size = (sf_context_cache_size * 3) / 2;
 
@@ -188,23 +187,27 @@ H5_get_subfiling_object(int64_t object_id)
             assert((size_t)obj_index < sf_context_cache_size);
         }
 
-        /*
-         * Since this cache currently just keeps all entries until
-         * application exit, context entry indices should just be
-         * consecutive
-         */
-        assert((size_t)obj_index <= sf_context_cache_num_entries);
-        if ((size_t)obj_index < sf_context_cache_num_entries)
-            ret_value = sf_context_cache[obj_index];
-        else {
-            assert(!sf_context_cache[sf_context_cache_num_entries]);
+        ret_value = sf_context_cache[obj_index];
+        if (!ret_value) {
+            size_t next_idx;
 
             /* Allocate a new subfiling context object */
-            if (NULL == (ret_value = calloc(1, sizeof(subfiling_context_t))))
+            if (NULL == (sf_context_cache[obj_index] = calloc(1, sizeof(subfiling_context_t))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                         "couldn't allocate subfiling context object");
 
-            sf_context_cache[sf_context_cache_num_entries++] = ret_value;
+            ret_value = sf_context_cache[obj_index];
+
+            /* Set index for next available cache entry. If all available
+             * slots are filled, the index will be set to sf_context_cache_size
+             * and cause a reallocation of the cache the next time a new
+             * cache entry is created.
+             */
+            next_idx = (size_t)obj_index + 1;
+            while (next_idx < sf_context_cache_size && sf_context_cache[next_idx])
+                next_idx++;
+
+            sf_context_cache_next_index = next_idx;
         }
     }
     else if (obj_type == SF_TOPOLOGY) {
@@ -310,13 +313,21 @@ H5_free_subfiling_object(int64_t object_id)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
                                     "couldn't get subfiling context for subfiling object ID");
 
-        if (H5_free_subfiling_object_int(sf_context) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling context object");
+        if (sf_context->file_ref == 0 || --sf_context->file_ref == 0) {
+            if (H5_free_subfiling_object_int(sf_context) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
+                                        "couldn't free subfiling context object");
 
-        assert(sf_context_cache_num_entries > 0);
-        assert(sf_context == sf_context_cache[sf_context_cache_num_entries - 1]);
-        sf_context_cache[sf_context_cache_num_entries - 1] = NULL;
-        sf_context_cache_num_entries--;
+            for (size_t idx = 0; idx < sf_context_cache_size; idx++) {
+                if (sf_context != sf_context_cache[idx])
+                    continue;
+
+                if (idx < sf_context_cache_next_index)
+                    sf_context_cache_next_index = idx;
+
+                sf_context_cache[idx] = NULL;
+            }
+        }
     }
     else if (obj_type == SF_TOPOLOGY) {
         sf_topology_t *sf_topology;
@@ -358,6 +369,8 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
 
     sf_context->sf_context_id           = -1;
     sf_context->h5_file_id              = UINT64_MAX;
+    sf_context->threads_inited          = false;
+    sf_context->file_ref                = 0;
     sf_context->sf_num_fids             = 0;
     sf_context->sf_num_subfiles         = -1;
     sf_context->sf_write_count          = 0;
@@ -610,23 +623,18 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5_open_subfiles
  *
- * Purpose:     Wrapper for the internal 'open__subfiles' function
- *              Similar to the other public wrapper functions, we
- *              discover (via the sf_context) the number of io concentrators
- *              and pass that to the internal function so that vector
- *              storage arrays can be stack based rather than explicitly
- *              allocated and freed.
+ * Purpose:     Initializes a subfiling context object for a file with the
+ *              given filename and file ID (inode) and opens the associated
+ *              subfiles. As part of this process, information about the
+ *              application topology will be gathered and stored in the
+ *              context object for future use. This includes identifying
+ *              which MPI ranks will act as I/O concentrators and "own"
+ *              one or more of the opened subfiles. The process of
+ *              initializing the subfiling context object also involves
+ *              creating MPI communicators that facilitate messaging
+ *              between HDF5 clients and the I/O concentrators.
  *
- *              The Internal function is responsible for sending all IOC
- *              instances, the (sub)file open requests.
- *
- *              Prior to calling the internal open function, we initialize
- *              a new subfiling context that contains topology info and
- *              new MPI communicators that facilitate messaging between
- *              HDF5 clients and the IOCs.
- *
- * Return:      Success (0) or Failure (non-zero)
- * Errors:      If MPI operations fail for some reason.
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -634,8 +642,9 @@ herr_t
 H5_open_subfiles(const char *base_filename, uint64_t file_id, H5FD_subfiling_params_t *subfiling_config,
                  int file_acc_flags, MPI_Comm file_comm, int64_t *context_id_out)
 {
-    subfiling_context_t *sf_context = NULL;
-    int64_t              context_id = -1;
+    subfiling_context_t *sf_context   = NULL;
+    int64_t              context_id   = -1;
+    bool                 recorded_fid = false;
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
@@ -648,21 +657,40 @@ H5_open_subfiles(const char *base_filename, uint64_t file_id, H5FD_subfiling_par
     if (!context_id_out)
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "invalid subfiling context ID pointer");
 
-    /* Initialize new subfiling context ID based on configuration information */
-    if (init_subfiling(base_filename, file_id, subfiling_config, file_acc_flags, file_comm, &context_id) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't initialize subfiling context");
+    /* Check if this file is already open */
+    H5E_BEGIN_TRY
+    {
+        context_id = H5_subfile_fid_to_context(file_id);
+    }
+    H5E_END_TRY
 
-    /* Retrieve the subfiling object for the newly-created context ID */
-    if (NULL == (sf_context = H5_get_subfiling_object(context_id)))
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't get subfiling object from context ID");
+    if (context_id >= 0) {
+        /* Retrieve the subfiling object for the newly-created context ID */
+        if (NULL == (sf_context = H5_get_subfiling_object(context_id)))
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+                                    "couldn't get subfiling object from context ID");
+    }
+    else {
+        /* Initialize new subfiling context ID based on configuration information */
+        if (init_subfiling(base_filename, file_id, subfiling_config, file_acc_flags, file_comm, &context_id) <
+            0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't initialize subfiling context");
 
-    /*
-     * If we're actually using the IOCs, we will
-     * start the service threads on the identified
-     * ranks as part of the subfile opening.
-     */
-    if (open_subfile_with_context(sf_context, file_acc_flags) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "couldn't open subfiling subfiles");
+        /* Retrieve the subfiling object for the newly-created context ID */
+        if (NULL == (sf_context = H5_get_subfiling_object(context_id)))
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+                                    "couldn't get subfiling object from context ID");
+
+        /*
+         * If this rank is an I/O concentrator, actually open
+         * the subfiles belonging to this IOC rank and start
+         * the I/O service threads
+         */
+        if (sf_context->topology->rank_is_ioc) {
+            if (ioc_open_files(sf_context->sf_context_id, file_acc_flags) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "IOC couldn't open subfile");
+        }
+    }
 
 #ifdef H5_SUBFILING_DEBUG
     {
@@ -687,6 +715,16 @@ H5_open_subfiles(const char *base_filename, uint64_t file_id, H5FD_subfiling_par
         H5_subfiling_log(context_id, "-- LOGGING BEGIN - %s", asctime(tm));
     }
 #endif
+
+    /*
+     * Save the HDF5 file ID (e.g., inode) to subfile context mapping.
+     * There shouldn't be any issue, but check the status and
+     * return if there was a problem.
+     */
+    if (record_fid_to_subfile(sf_context->h5_file_id, sf_context->sf_context_id, NULL) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+                                "couldn't record HDF5 file ID to subfile context mapping");
+    recorded_fid = true;
 
     *context_id_out = context_id;
 
@@ -714,7 +752,9 @@ done:
     }
 
     if (ret_value < 0) {
-        clear_fid_map_entry(file_id, context_id);
+        if (recorded_fid && clear_fid_map_entry(file_id, context_id) < 0)
+            H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
+                                    "unable to clear entry from file ID to context mapping");
 
         if (context_id >= 0 && H5_free_subfiling_object(context_id) < 0)
             H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
@@ -1799,6 +1839,8 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
     assert(MPI_COMM_NULL != file_comm);
 
     sf_context->h5_file_id      = file_id;
+    sf_context->threads_inited  = false;
+    sf_context->file_ref        = 0;
     sf_context->sf_fids         = NULL;
     sf_context->sf_num_fids     = 0;
     sf_context->sf_num_subfiles = subfiling_config->stripe_count;
@@ -1934,70 +1976,6 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    open_subfile_with_context
- *
- * Purpose:     While we cannot know a priori, whether an HDF client will
- *              need to access data across the entirety of a file, e.g.
- *              an individual MPI rank may read or write only small
- *              segments of the entire file space; this function sends
- *              a file OPEN_OP to every IO concentrator.
- *
- *              Prior to opening any subfiles, the H5FDopen will have
- *              created an HDF5 file with the user specified naming.
- *              A path prefix will be selected and is available as
- *              an input argument.
- *
- *              The opened HDF5 file handle will contain device and
- *              inode values, these being constant for all processes
- *              opening the shared file.  The inode value is utilized
- *              as a key value and is associated with the sf_context
- *              which we receive as one of the input arguments.
- *
- *              IO Concentrator threads will be initialized on MPI ranks
- *              which have been identified via application toplogy
- *              discovery.  The number and mapping of IOC to MPI_rank
- *              is part of the sf_context->topology structure.
- *
- * Return:      Success (0) or Failure (non-zero)
- * Errors:      If MPI operations fail for some reason.
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
-{
-    herr_t ret_value = SUCCEED;
-
-    assert(sf_context);
-    assert(sf_context->h5_file_id != UINT64_MAX);
-
-    /*
-     * Save the HDF5 file ID (e.g., inode) to subfile context mapping.
-     * There shouldn't be any issue, but check the status and
-     * return if there was a problem.
-     */
-    if (record_fid_to_subfile(sf_context->h5_file_id, sf_context->sf_context_id, NULL) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
-                                "couldn't record HDF5 file ID to subfile context mapping");
-
-    /*
-     * If this rank is an I/O concentrator, actually open
-     * the subfiles belonging to this IOC rank
-     */
-    if (sf_context->topology->rank_is_ioc) {
-        if (ioc_open_files(sf_context->sf_context_id, file_acc_flags) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "IOC couldn't open subfile");
-    }
-
-done:
-    if (ret_value < 0) {
-        clear_fid_map_entry(sf_context->h5_file_id, sf_context->sf_context_id);
-    }
-
-    H5_SUBFILING_FUNC_LEAVE;
-}
-
-/*-------------------------------------------------------------------------
  * Function:    record_fid_to_subfile
  *
  * Purpose:     Every opened HDF5 file will have (if utilizing subfiling)
@@ -2025,8 +2003,9 @@ done:
 static herr_t
 record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id, int *next_index)
 {
-    int    index;
-    herr_t ret_value = SUCCEED;
+    subfiling_context_t *sf_context = NULL;
+    int                  index;
+    herr_t               ret_value = SUCCEED;
 
     if (!sf_open_file_map) {
         if (NULL == (sf_open_file_map = malloc((size_t)DEFAULT_FILE_MAP_ENTRIES * sizeof(*sf_open_file_map))))
@@ -2040,12 +2019,22 @@ record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id, int *next_in
     }
 
     for (index = 0; index < sf_file_map_size; index++) {
-        if (sf_open_file_map[index].file_id == file_id)
+        if (sf_open_file_map[index].file_id == file_id) {
+            /* Increment file ref. count for this context */
+            if (NULL == (sf_context = H5_get_subfiling_object(sf_open_file_map[index].sf_context_id)))
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't get subfiling context");
+            sf_context->file_ref++;
             goto done;
+        }
 
         if (sf_open_file_map[index].file_id == UINT64_MAX) {
             sf_open_file_map[index].file_id       = file_id;
             sf_open_file_map[index].sf_context_id = subfile_context_id;
+
+            /* First open of this file - set file ref. count to 1 for this context */
+            if (NULL == (sf_context = H5_get_subfiling_object(subfile_context_id)))
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't get subfiling context");
+            sf_context->file_ref = 1;
 
             if (next_index) {
                 *next_index = index;
@@ -2074,8 +2063,13 @@ record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id, int *next_in
             *next_index = index;
         }
 
-        sf_open_file_map[index].file_id         = file_id;
-        sf_open_file_map[index++].sf_context_id = subfile_context_id;
+        sf_open_file_map[index].file_id       = file_id;
+        sf_open_file_map[index].sf_context_id = subfile_context_id;
+
+        /* First open of this file - set file ref. count to 1 for this context */
+        if (NULL == (sf_context = H5_get_subfiling_object(subfile_context_id)))
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't get subfiling context");
+        sf_context->file_ref = 1;
     }
 
 done:
@@ -2088,24 +2082,40 @@ done:
  * Purpose:     Remove the map entry associated with the file->inode.
  *              This is done at file close.
  *
- * Return:      None
- * Errors:      Cannot fail.
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-static void
+static herr_t
 clear_fid_map_entry(uint64_t file_id, int64_t sf_context_id)
 {
-    if (sf_open_file_map) {
-        for (int i = 0; i < sf_file_map_size; i++) {
-            if ((sf_open_file_map[i].file_id == file_id) &&
-                (sf_open_file_map[i].sf_context_id == sf_context_id)) {
-                sf_open_file_map[i].file_id       = UINT64_MAX;
-                sf_open_file_map[i].sf_context_id = -1;
-                return;
-            }
+    herr_t ret_value = SUCCEED;
+
+    if (!sf_open_file_map)
+        H5_SUBFILING_GOTO_DONE(SUCCEED);
+
+    for (int i = 0; i < sf_file_map_size; i++) {
+        subfiling_context_t *sf_context = NULL;
+
+        if ((sf_open_file_map[i].file_id != file_id) || (sf_open_file_map[i].sf_context_id != sf_context_id))
+            continue;
+
+        /* Only clear map entry if this is the last file
+         * holding a reference to the context
+         */
+        if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id)))
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't get subfiling context object");
+
+        if (sf_context->file_ref == 0 || sf_context->file_ref == 1) {
+            sf_open_file_map[i].file_id       = UINT64_MAX;
+            sf_open_file_map[i].sf_context_id = -1;
         }
+
+        break;
     }
+
+done:
+    return ret_value;
 } /* end clear_fid_map_entry() */
 
 /*-------------------------------------------------------------------------
@@ -3091,15 +3101,17 @@ H5_subfiling_terminate(void)
 
     /* Clean up subfiling context and topology caches */
     if (sf_context_cache) {
-        for (size_t i = 0; i < sf_context_cache_num_entries; i++) {
-            if (H5_free_subfiling_object_int(sf_context_cache[i]) < 0)
-                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
-                                        "couldn't free subfiling context object");
-            sf_context_cache[i] = NULL;
+        for (size_t i = 0; i < sf_context_cache_size; i++) {
+            if (sf_context_cache[i]) {
+                if (H5_free_subfiling_object_int(sf_context_cache[i]) < 0)
+                    H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
+                                            "couldn't free subfiling context object");
+                sf_context_cache[i] = NULL;
+            }
         }
 
-        sf_context_cache_size        = 0;
-        sf_context_cache_num_entries = 0;
+        sf_context_cache_size       = 0;
+        sf_context_cache_next_index = 0;
 
         free(sf_context_cache);
         sf_context_cache = NULL;
