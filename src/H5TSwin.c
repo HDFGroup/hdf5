@@ -47,6 +47,10 @@
 /********************/
 /* Local Prototypes */
 /********************/
+#if defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_HAVE_WIN32_API)
+static herr_t H5TS__win32_thread_enter(void);
+static herr_t H5TS__win32_thread_exit(void);
+#endif
 
 /*********************/
 /* Package Variables */
@@ -94,8 +98,9 @@ H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS__win32_process_enter() */
 
+#if defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_HAVE_WIN32_API)
 /*--------------------------------------------------------------------------
- * Function:    H5TS_win32_thread_enter
+ * Function:    H5TS__win32_thread_enter
  *
  * Purpose:     Per-thread setup on Windows when using Win32 threads.
  *
@@ -103,21 +108,24 @@ H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
  *
  *--------------------------------------------------------------------------
  */
-herr_t
-H5TS_win32_thread_enter(void){FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+static herr_t
+H5TS__win32_thread_enter(void)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-                                  /* Currently a placeholder function.  TLS setup is performed
-                                   * elsewhere in the library.
-                                   *
-                                   * WARNING: Do NOT use C standard library functions here.
-                                   * CRT functions are not allowed in DllMain, which is where this code
-                                   * is used.
-                                   */
+    /* Currently a placeholder function.  TLS setup is performed
+     * elsewhere in the library.
+     *
+     * WARNING: Do NOT use C standard library functions here.
+     * CRT functions are not allowed in DllMain, which is where this code
+     * is used.
+     */
 
-                                  FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)} /* H5TS_win32_thread_enter() */
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+} /* H5TS__win32_thread_enter() */
 
 /*--------------------------------------------------------------------------
- * Function:    H5TS_win32_thread_exit
+ * Function:    H5TS__win32_thread_exit
  *
  * Purpose:     Per-thread cleanup on Windows when using Win32 threads.
  *
@@ -125,7 +133,8 @@ H5TS_win32_thread_enter(void){FUNC_ENTER_NOAPI_NAMECHECK_ONLY
  *
  *--------------------------------------------------------------------------
  */
-herr_t H5TS_win32_thread_exit(void)
+static herr_t
+H5TS__win32_thread_exit(void)
 {
     herr_t ret_value = SUCCEED;
 
@@ -151,9 +160,8 @@ herr_t H5TS_win32_thread_exit(void)
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* H5TS_win32_thread_exit() */
+} /* H5TS__win32_thread_exit() */
 
-#if defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_HAVE_WIN32_API)
 /*-------------------------------------------------------------------------
  * Function:    DllMain
  *
@@ -189,12 +197,12 @@ DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved)
             break;
 
         case DLL_THREAD_ATTACH:
-            if (H5TS_win32_thread_enter() < 0)
+            if (H5TS__win32_thread_enter() < 0)
                 fOkay = false;
             break;
 
         case DLL_THREAD_DETACH:
-            if (H5TS_win32_thread_exit() < 0)
+            if (H5TS__win32_thread_exit() < 0)
                 fOkay = false;
             break;
 

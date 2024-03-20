@@ -63,7 +63,7 @@
 #define H5TS_thread_equal(t1, t2) (GetThreadId(t1) == GetThreadId(t2))
 #else
 #define H5TS_thread_self()        pthread_self()
-#define H5TS_thread_equal(t1, t2) pthread_equal(t1, t2)
+#define H5TS_thread_equal(t1, t2) pthread_equal((t1), (t2))
 #endif
 
 /****************************/
@@ -92,21 +92,16 @@ typedef pthread_once_t  H5TS_once_t;
 typedef void (*H5TS_once_init_func_t)(void);
 #endif
 
-    /*****************************/
-    /* Library-private Variables */
-    /*****************************/
+/*****************************/
+/* Library-private Variables */
+/*****************************/
 
-    /***************************************/
-    /* Library-private Function Prototypes */
-    /***************************************/
+/***************************************/
+/* Library-private Function Prototypes */
+/***************************************/
 
-    /* Library/thread init/term operations */
-    H5_DLL void
-    H5TS_term_package(void);
-#ifdef H5_HAVE_WIN_THREADS
-H5_DLL herr_t H5TS_win32_thread_enter(void);
-H5_DLL herr_t H5TS_win32_thread_exit(void);
-#endif /* H5_HAVE_WIN_THREADS */
+/* Library/thread init/term operations */
+H5_DLL void H5TS_term_package(void);
 
 /* API locking */
 H5_DLL herr_t H5TS_api_lock(void);

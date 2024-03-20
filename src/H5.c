@@ -215,7 +215,7 @@ H5_init_library(void)
          * executed in LIFO order (i.e., last).
          */
         (void)atexit(H5TS_term_package);
-#endif /* H5_HAVE_THREADSAFE && H5_HAVE_WIN_THREADS */
+#endif /* H5_HAVE_THREADSAFE */
 
         /* Normal library termination code */
         (void)atexit(H5_term_library);
