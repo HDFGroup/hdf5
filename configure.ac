@@ -1562,7 +1562,7 @@ AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h])
 ##
 if test "X${enable_shared}" = "Xyes"; then
   AC_MSG_CHECKING([if libtool needs -no-undefined flag to build shared libraries])
-  case "$$host_os" in
+  case "$host_os" in
     *cygwin*|*mingw*|*aix*)
       ## Add in the -no-undefined flag to LDFLAGS for libtool
       AC_MSG_RESULT([yes])
@@ -2165,7 +2165,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 ## Check whether the global variable `timezone' is defined.
 AC_MSG_CHECKING([for global timezone variable])
 
-case "$host_cpu-$host_vendor-$host_os" in
+case "$host_os" in
   *cygwin*)
     AC_MSG_RESULT([disabled in CYGWIN])
     ;;
@@ -2196,7 +2196,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 ## How do we figure out the width of a tty in characters?
 ##
 AC_CHECK_FUNCS([_getvideoconfig gettextinfo])
-case "$host_cpu-$host_vendor-$host_os" in
+case "$host_os" in
   *cygwin*)
     ;;
   *)
