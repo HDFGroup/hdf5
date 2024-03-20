@@ -118,4 +118,3 @@ done:
 #endif
 
 #endif /* H5_HAVE_THREADSAFE */
-

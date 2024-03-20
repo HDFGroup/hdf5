@@ -1257,4 +1257,3 @@ H5is_library_terminating(bool *is_terminating /*out*/)
 
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5is_library_terminating() */
-
