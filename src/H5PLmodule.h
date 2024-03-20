@@ -47,7 +47,7 @@
  * function, as a user would do in the past. The identification number and the filter parameters should be
  * available to the application. For example, if the application intends to apply the HDF5 bzip2 compression
  * filter that was registered with The HDF Group and has an identification number 307
- * (<a href="https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html">Registered
+ * (<a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">Registered
  * Filters</a>) then the application would follow the steps as outlined below: \code dcpl = H5Pcreate
  * (H5P_DATASET_CREATE); status = H5Pset_filter (dcpl, (H5Z_filter_t)307, H5Z_FLAG_MANDATORY, (size_t)6,
  * cd_values); dset = H5Dcreate (file, DATASET, H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, status = H5Dwrite
@@ -73,7 +73,8 @@
  *         FILTERS {
  *            USER_DEFINED_FILTER {
  *               FILTER_ID 307
- *               COMMENT HDF5 bzip2 filter; see http://www.hdfgroup.org/services/contributions.html
+ *               COMMENT HDF5 bzip2 filter; see
+ *   https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md
  *               PARAMS { 2 }
  *            }
  *         }
@@ -182,7 +183,7 @@
  * \subsubsection subsubsec_filter_plugins_prog_reg Registering a Filter with The HDF Group
  * If you are writing a filter that will be used by others, it would be a good idea to request a filter
  * identification number and register it with The HDF Group. Please follow the procedure described at
- * <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/registered_filter_plugins.html">Registered
+ * <a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">Registered
  * Filters</a>.
  *
  * The HDF Group anticipates that developers of HDF5 filter plugins will not only register new filters, but
@@ -196,7 +197,8 @@
  *     (H5Z_filter_t)H5Z_FILTER_BZIP2,      // Filter id number
  *     1,                                   // encoder_present flag (set to true)
  *     1,                                   // decoder_present flag (set to true)
- *     "HDF5 bzip2 filter; see http://www.hdfgroup.org/services/contributions.html",
+ *     "HDF5 bzip2 filter; see
+ *     https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md",
  *                                          // Filter name for debugging
  *     NULL,                                // The "can apply" callback
  *     NULL,                                // The "set local" callback
@@ -274,7 +276,7 @@
  * \endcode
  *
  * See the documentation at
- * <aref="https://github.com/HDFGroup/hdf5_plugins/tree/master/docs">hdf5_plugins/docs</a> folder In
+ * <aref="https://github.com/HDFGroup/hdf5_plugins/tree/master/docs">hdf5_plugins/docs</a> folder. In
  * particular:
  * <aref="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/INSTALL_With_CMake.txt">INSTALL_With_CMake</a>
  * <aref="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/USING_HDF5_AND_CMake.txt">USING_HDF5_AND_CMake</a>

@@ -44,7 +44,7 @@ main(void)
     herr_t       status;
     htri_t       avail;
     H5Z_filter_t filter_id = 0;
-    char         filter_name[80];
+    char         filter_name[128];
     hsize_t      dims[3] = {NUM_IMAGES, DIM0, DIM1}, chunk[3] = {CHUNK0, CHUNK1, CHUNK2};
     size_t       nelmts = 1; /* number of elements in cd_values */
     unsigned int flags;
