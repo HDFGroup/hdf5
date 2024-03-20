@@ -45,16 +45,16 @@
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
 #define H5TS_RW_LOCK_INIT                                                                                    \
     {                                                                                                        \
-        H5TS_MUTEX_INITIALIZER,  /* mutex */                                                         \
-	H5TS_RW_LOCK_UNUSED, 	 /* lock_type */                                                     \
-	H5TS_COND_INITIALIZER,   /* writers_cv */                                                    \
-	0,                       /* write_thread */                                                  \
-	0,                       /* rec_write_lock_count */                                          \
-	0,                       /* waiting_writers_count */                                         \
-	H5TS_COND_INITIALIZER,   /* readers_cv */                                                    \
-	0,                       /* reader_thread_count */                                         \
-	(H5TS_key_t)0,           /* rec_read_lock_count_key */                                       \
-	false,                   /* is_key_registered */                                             \
+        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
+            H5TS_RW_LOCK_UNUSED,   /* lock_type */                                                           \
+            H5TS_COND_INITIALIZER, /* writers_cv */                                                          \
+            0,                     /* write_thread */                                                        \
+            0,                     /* rec_write_lock_count */                                                \
+            0,                     /* waiting_writers_count */                                               \
+            H5TS_COND_INITIALIZER, /* readers_cv */                                                          \
+            0,                     /* reader_thread_count */                                                 \
+            (H5TS_key_t)0,         /* rec_read_lock_count_key */                                             \
+            false,                 /* is_key_registered */                                                   \
         {                                                                                                    \
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0                                                      \
         } /* stats */                                                                                        \
@@ -62,16 +62,16 @@
 #else
 #define H5TS_RW_LOCK_INIT                                                                                    \
     {                                                                                                        \
-        H5TS_MUTEX_INITIALIZER,  /* mutex */                                                         \
-	H5TS_RW_LOCK_UNUSED, 	 /* lock_type */                                                     \
-	H5TS_COND_INITIALIZER,   /* writers_cv */                                                    \
-	0,                       /* write_thread */                                                  \
-	0,                       /* rec_write_lock_count */                                          \
-	0,                       /* waiting_writers_count */                                         \
-	H5TS_COND_INITIALIZER,   /* readers_cv */                                                    \
-	0,                       /* reader_thread_count */                                         \
-	(H5TS_key_t)0            /* rec_read_lock_count_key */                                       \
-	false,                   /* is_key_registered */                                             \
+        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
+            H5TS_RW_LOCK_UNUSED,   /* lock_type */                                                           \
+            H5TS_COND_INITIALIZER, /* writers_cv */                                                          \
+            0,                     /* write_thread */                                                        \
+            0,                     /* rec_write_lock_count */                                                \
+            0,                     /* waiting_writers_count */                                               \
+            H5TS_COND_INITIALIZER, /* readers_cv */                                                          \
+            0,                     /* reader_thread_count */                                                 \
+            (H5TS_key_t)0          /* rec_read_lock_count_key */                                             \
+            false,                 /* is_key_registered */                                                   \
     }
 #endif
 
@@ -532,7 +532,8 @@ H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock)
     /* Fail if attempting to acquire a read lock on a thread that holds
      * a write lock
      */
-    if (H5_UNLIKELY(H5TS_RW_LOCK_WRITE == rw_lock->lock_type && H5TS_thread_equal(my_thread, rw_lock->write_thread)))
+    if (H5_UNLIKELY(H5TS_RW_LOCK_WRITE == rw_lock->lock_type &&
+                    H5TS_thread_equal(my_thread, rw_lock->write_thread)))
         HGOTO_DONE(FAIL);
 
     /* If there is no thread-specific data for this thread, set it up */
