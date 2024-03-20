@@ -784,7 +784,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
 
     /* Check if a prefix has been set for the configuration file name */
     prefix_env = getenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
-    if (prefix_env) {
+    if (prefix_env && (strlen(prefix_env) > 0)) {
         if (NULL == (new_context->config_file_prefix = strdup(prefix_env)))
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "couldn't copy config file prefix string");
     }
@@ -858,7 +858,8 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
         char *env_value = NULL;
 
         /* Check for a subfiling stripe size setting from the environment */
-        if ((env_value = getenv(H5FD_SUBFILING_STRIPE_SIZE))) {
+        env_value = getenv(H5FD_SUBFILING_STRIPE_SIZE);
+        if (env_value && (strlen(env_value) > 0)) {
             long long stripe_size = -1;
 
             errno = 0;
@@ -988,7 +989,8 @@ init_app_topology(int64_t sf_context_id, H5FD_subfiling_params_t *subfiling_conf
         case SELECT_IOC_ONE_PER_NODE: {
             if (comm_size > 1) {
                 /* Check for an IOC-per-node value set in the environment */
-                if ((env_value = getenv(H5FD_SUBFILING_IOC_PER_NODE))) {
+                env_value = getenv(H5FD_SUBFILING_IOC_PER_NODE);
+                if (env_value && (strlen(env_value) > 0)) {
                     errno          = 0;
                     ioc_select_val = strtol(env_value, NULL, 0);
                     if ((ERANGE == errno)) {
@@ -1193,7 +1195,7 @@ get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_t
 
     *ioc_sel_info_str = NULL;
 
-    if (env_value) {
+    if (env_value && (strlen(env_value) > 0)) {
         /*
          * Parse I/O Concentrator selection strategy criteria as
          * either a single value or two colon-separated values of
@@ -1828,7 +1830,8 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
                                 "couldn't allocate space for subfiling filename");
 
     /* Check for a subfile name prefix setting in the environment */
-    if ((env_value = getenv(H5FD_SUBFILING_SUBFILE_PREFIX))) {
+    env_value = getenv(H5FD_SUBFILING_SUBFILE_PREFIX);
+    if (env_value && (strlen(env_value) > 0)) {
         if (NULL == (sf_context->subfile_prefix = strdup(env_value)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix value");
     }
