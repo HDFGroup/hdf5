@@ -231,7 +231,7 @@ H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads)
     H5TS_pool_t *new_pool  = NULL; /* Newly created pool */
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Sanity checks */
     if (H5_UNLIKELY(NULL == pool))
@@ -298,7 +298,7 @@ H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
     bool              have_mutex = false; /* Whether we're holding the mutex */
     herr_t            ret_value  = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Sanity checks */
     if (H5_UNLIKELY(NULL == pool))
@@ -362,7 +362,7 @@ H5TS_pool_destroy(H5TS_pool_t *pool)
     bool   have_mutex = false; /* Whether we're holding the mutex */
     herr_t ret_value  = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Sanity checks */
     if (H5_UNLIKELY(NULL == pool))
