@@ -166,7 +166,7 @@ created the dataset layout cannot be changed. The h5repack utility can be used t
 to a new with a new layout.
 
 \section secLBDsetLayoutSource Sources of Information
-<a href="https://confluence.hdfgroup.org/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a>
+<a href="https://portal.hdfgroup.org/documentation/hdf5-docs/chunking_in_hdf5.html">Chunking in HDF5</a>
 (See the documentation on <a href="https://confluence.hdfgroup.org/display/HDF5/Advanced+Topics+in+HDF5">Advanced Topics in HDF5</a>)
 \see \ref sec_plist in the HDF5 \ref UG.
 
@@ -184,7 +184,7 @@ certain initial dimensions, then to later increase the size of any of the initia
 
 HDF5 requires you to use chunking to define extendible datasets. This makes it possible to extend
 datasets efficiently without having to excessively reorganize storage. (To use chunking efficiently,
-be sure to see the advanced topic, <a href="https://confluence.hdfgroup.org/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a>.)
+be sure to see the advanced topic, <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/chunking_in_hdf5.html">Chunking in HDF5</a>.)
 
 The following operations are required in order to extend a dataset:
 \li Declare the dataspace of the dataset to have unlimited dimensions for all dimensions that might eventually be extended.
@@ -224,7 +224,7 @@ Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 \section secLBComDsetCreate Creating a Compressed Dataset
 HDF5 requires you to use chunking to create a compressed dataset. (To use chunking efficiently,
-be sure to see the advanced topic, <a href="https://confluence.hdfgroup.org/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a>.)
+be sure to see the advanced topic, <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/chunking_in_hdf5.html">Chunking in HDF5</a>.)
 
 The following operations are required in order to create a compressed dataset:
 \li Create a dataset creation property list.
