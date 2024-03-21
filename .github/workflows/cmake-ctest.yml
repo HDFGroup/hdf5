@@ -88,9 +88,9 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build114"
           mkdir "${{ runner.workspace }}/build114/hdf5"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING -Destination ${{ runner.workspace }}/build114/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build114/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/README.md -Destination ${{ runner.workspace }}/build114/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build114/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build114/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-MSVC/README.md -Destination ${{ runner.workspace }}/build114/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace}}/build114/hdf5/ -Include *.zip
           cd "${{ runner.workspace }}/build114"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip hdf5
@@ -163,8 +163,8 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build114"
           mkdir "${{ runner.workspace }}/build114/hdf5"
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build114/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build114/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build114/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC/*.tar.gz ${{ runner.workspace }}/build114/hdf5
           cd "${{ runner.workspace }}/build114"
@@ -178,8 +178,8 @@ jobs:
           mkdir "${{ runner.workspace }}/builddeb/hdf5"
           cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/builddeb/hdf5
           cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/builddeb/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/builddeb/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.deb ${{ runner.workspace }}/builddeb/hdf5
+          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/builddeb/hdf5
+          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC/*.deb ${{ runner.workspace }}/builddeb/hdf5
           cd "${{ runner.workspace }}/builddeb"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb hdf5
         shell: bash
@@ -296,8 +296,8 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build114"
           mkdir "${{ runner.workspace }}/build114/hdf5"
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build114/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build114/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build114/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Clang/*.tar.gz ${{ runner.workspace }}/build114/hdf5
           cd "${{ runner.workspace }}/build114"
@@ -367,8 +367,8 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build114"
           mkdir "${{ runner.workspace }}/build114/hdf5"
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build114/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build114/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build114/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC-S3/README.md ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC-S3/*.tar.gz ${{ runner.workspace }}/build114/hdf5
           cd "${{ runner.workspace }}/build114"
@@ -459,8 +459,8 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build114"
           mkdir "${{ runner.workspace }}/build114/hdf5"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING -Destination ${{ runner.workspace }}/build114/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build114/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build114/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build114/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/build114/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/build114/hdf5/ -Include *.zip
           cd "${{ runner.workspace }}/build114"
@@ -545,8 +545,8 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build114"
           mkdir "${{ runner.workspace }}/build114/hdf5"
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build114/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build114/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build114/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Intel/README.md ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Intel/*.tar.gz ${{ runner.workspace }}/build114/hdf5
           cd "${{ runner.workspace }}/build114"
