@@ -178,7 +178,7 @@ H5TS__pool_do(void *_pool)
 
         /* If there's a task, invoke it, else we're shutting down */
         if (NULL != pool->head) {
-            H5TS_pool_task_t *task;         /* Task to invoke */
+            H5TS_pool_task_t *task; /* Task to invoke */
 
             /* Grab our task */
             task = pool->head;

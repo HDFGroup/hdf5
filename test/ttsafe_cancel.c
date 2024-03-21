@@ -47,15 +47,15 @@ typedef struct cleanup_struct {
     hid_t dataspace;
 } cancel_cleanup_t;
 
-pthread_t       childthread;
+pthread_t             childthread;
 static H5TS_barrier_t barrier;
 
 void
 tts_cancel(void)
 {
-    hid_t                     dataset;
-    int                       buffer;
-    int ret;
+    hid_t dataset;
+    int   buffer;
+    int   ret;
 
     /* Initialize barrier */
     ret = H5TS__barrier_init(&barrier, 2);
