@@ -645,6 +645,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
             snprintf(path, len, "%s/%s", plugin_path, dp->d_name);
 
             /* Get info for directory entry */
+            memset(&my_stat, 0, sizeof(h5_stat_t));
             if (HDstat(path, &my_stat) == -1)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5_ITER_ERROR, "can't stat file %s -- error was: %s", path,
                             strerror(errno));
@@ -882,6 +883,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, bool *found
             snprintf(path, len, "%s/%s", dir, dp->d_name);
 
             /* Get info for directory entry */
+            memset(&my_stat, 0, sizeof(h5_stat_t));
             if (HDstat(path, &my_stat) == -1)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't stat file %s -- error was: %s", path,
                             strerror(errno));
