@@ -1479,6 +1479,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         char   *prefix_env      = NULL;
         int     num_digits      = 0;
 
+        memset(&st, 0, sizeof(h5_stat_t));
         if (HDstat(name, &st) < 0)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SYSERRSTR, FAIL, "HDstat failed");
 
