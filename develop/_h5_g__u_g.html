@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.8e78cfe</span>
+   &#160;<span id="projectnumber">1.15.0.8ecc984</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -203,11 +203,11 @@ The Hierarchy of Data Objects</h3>
 HDF5 Path Names</h3>
 <p>The structure of the HDF5 file constitutes the name space for the objects in the file. A path name is a string of components separated by slashes (/). Each component is the name of a hard or soft link which points to an object in the file. The slash not only separates the components, but indicates their hierarchical relationship; the component indicated by the link name following a slash is a always a member of the component indicated by the link name preceding that slash.</p>
 <p>The first component in the path name may be any of the following: </p><ul>
-<li>The special character dot (., a period), indicating the current group </li>
+<li>The special character dot (., a single period), indicating the current group </li>
 <li>The special character slash (/), indicating the root group </li>
 <li>Any member of the current group</li>
 </ul>
-<p>Component link names may be any string of ASCII characters not containing a slash or a dot (/ and ., which are reserved as noted above). However, users are advised to avoid the use of punctuation and non-printing characters, as they may create problems for other software. The figure below provides a BNF grammar for HDF5 path names.</p>
+<p>Component link names may be any string of ASCII characters not containing a slash or a single dot (/ and ., which are reserved as noted above). However, users are advised to avoid the use of punctuation and non-printing characters, as they may create problems for other software. The figure below provides a BNF grammar for HDF5 path names.</p>
 <p><em>A BNF grammar for HDF5 path names</em> </p><div class="fragment"><div class="line">PathName ::= AbsolutePathName | RelativePathName</div>
 <div class="line">Separator ::= <span class="stringliteral">&quot;/&quot;</span> [<span class="stringliteral">&quot;/&quot;</span>]*</div>
 <div class="line">AbsolutePathName ::= Separator [ RelativePathName ]</div>
