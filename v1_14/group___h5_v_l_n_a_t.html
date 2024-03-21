@@ -114,8 +114,10 @@ $(function(){initNavTree('group___h5_v_l_n_a_t.html',''); initResizable(); });
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga09ca3912386a8c8c66edbcbbe2c10c1f" id="r_ga09ca3912386a8c8c66edbcbbe2c10c1f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga09ca3912386a8c8c66edbcbbe2c10c1f">H5VLnative_addr_to_token</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> addr, <a class="el" href="struct_h5_o__token__t.html">H5O_token_t</a> *token)</td></tr>
+<tr class="memdesc:ga09ca3912386a8c8c66edbcbbe2c10c1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a haddr_t address to a native VOL connector token.  <br /></td></tr>
 <tr class="separator:ga09ca3912386a8c8c66edbcbbe2c10c1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7136f48f79f4b88d87002d5c218ceb40" id="r_ga7136f48f79f4b88d87002d5c218ceb40"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga7136f48f79f4b88d87002d5c218ceb40">H5VLnative_token_to_addr</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, <a class="el" href="struct_h5_o__token__t.html">H5O_token_t</a> token, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> *addr)</td></tr>
+<tr class="memdesc:ga7136f48f79f4b88d87002d5c218ceb40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a native VOL connector token to a haddr_t address.  <br /></td></tr>
 <tr class="separator:ga7136f48f79f4b88d87002d5c218ceb40"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
@@ -143,6 +145,19 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Convert a haddr_t address to a native VOL connector token. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">loc_id</td><td>Location identifier of object. The identifier may be that of a file, group, dataset, named datatype, or attribute. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">addr</td><td>Object address </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">token</td><td>Object token</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p>This API call maps pre-VOL haddr_t native file format addresses to the more generic <a class="el" href="struct_h5_o__token__t.html">H5O_token_t</a> tokens used by the VOL.</p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
+
 </div>
 </div>
 <a id="ga7136f48f79f4b88d87002d5c218ceb40" name="ga7136f48f79f4b88d87002d5c218ceb40"></a>
@@ -168,6 +183,19 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Convert a native VOL connector token to a haddr_t address. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">loc_id</td><td>Location identifier of object. The identifier may be that of a file, group, dataset, named datatype, or attribute. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">token</td><td>Object token </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">addr</td><td>Object address</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p>This API call maps generic <a class="el" href="struct_h5_o__token__t.html">H5O_token_t</a> tokens used by the VOL to pre-VOL haddr_t native file format addresses.</p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>

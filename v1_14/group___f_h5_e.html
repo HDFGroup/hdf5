@@ -139,6 +139,51 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:gae085627dd12406d957a1a200aed188e6" id="r_gae085627dd12406d957a1a200aed188e6"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gae085627dd12406d957a1a200aed188e6">h5eset_auto_f</a> (printflag, hdferr, estack_id, func, client_data)</td></tr>
 <tr class="memdesc:gae085627dd12406d957a1a200aed188e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns settings for automatic error stack traversal function and its data.  <br /></td></tr>
 <tr class="separator:gae085627dd12406d957a1a200aed188e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafaad7da9e85a05fb031b56685d042dae" id="r_gafaad7da9e85a05fb031b56685d042dae"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gafaad7da9e85a05fb031b56685d042dae">h5epush_f</a> (err_stack, file, func, line, cls_id, maj_id, min_id, msg, hdferr, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20)</td></tr>
+<tr class="memdesc:gafaad7da9e85a05fb031b56685d042dae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pushes a new error record onto an error stack.  <br /></td></tr>
+<tr class="separator:gafaad7da9e85a05fb031b56685d042dae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3cd53ec69d1429128ab726ca1843469e" id="r_ga3cd53ec69d1429128ab726ca1843469e"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga3cd53ec69d1429128ab726ca1843469e">h5eregister_class_f</a> (cls_name, lib_name, version, class_id, hdferr)</td></tr>
+<tr class="memdesc:ga3cd53ec69d1429128ab726ca1843469e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers a client library or application program to the HDF5 error API.  <br /></td></tr>
+<tr class="separator:ga3cd53ec69d1429128ab726ca1843469e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5cb5cd838eb47e948182ec6236ca4328" id="r_ga5cb5cd838eb47e948182ec6236ca4328"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga5cb5cd838eb47e948182ec6236ca4328">h5eunregister_class_f</a> (class_id, hdferr)</td></tr>
+<tr class="memdesc:ga5cb5cd838eb47e948182ec6236ca4328"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes an error class.  <br /></td></tr>
+<tr class="separator:ga5cb5cd838eb47e948182ec6236ca4328"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae2f2d8e3e645de9528db020ec89a3cf7" id="r_gae2f2d8e3e645de9528db020ec89a3cf7"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gae2f2d8e3e645de9528db020ec89a3cf7">h5ecreate_msg_f</a> (class_id, msg_type, msg, err_id, hdferr)</td></tr>
+<tr class="memdesc:gae2f2d8e3e645de9528db020ec89a3cf7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a major or minor error message to an error class.  <br /></td></tr>
+<tr class="separator:gae2f2d8e3e645de9528db020ec89a3cf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac3bae705baa78fd6478bb381fe25d6b7" id="r_gac3bae705baa78fd6478bb381fe25d6b7"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gac3bae705baa78fd6478bb381fe25d6b7">h5eclose_msg_f</a> (err_id, hdferr)</td></tr>
+<tr class="memdesc:gac3bae705baa78fd6478bb381fe25d6b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes an error message.  <br /></td></tr>
+<tr class="separator:gac3bae705baa78fd6478bb381fe25d6b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0a9f36ee4fae4f4d18c642b9e57aab28" id="r_ga0a9f36ee4fae4f4d18c642b9e57aab28"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga0a9f36ee4fae4f4d18c642b9e57aab28">h5eget_msg_f</a> (msg_id, msg_type, msg, hdferr, msg_size)</td></tr>
+<tr class="memdesc:ga0a9f36ee4fae4f4d18c642b9e57aab28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves an error message.  <br /></td></tr>
+<tr class="separator:ga0a9f36ee4fae4f4d18c642b9e57aab28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3be426dd59c6c2d732835b28e761fa12" id="r_ga3be426dd59c6c2d732835b28e761fa12"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga3be426dd59c6c2d732835b28e761fa12">h5eget_num_f</a> (error_stack_id, count, hdferr)</td></tr>
+<tr class="memdesc:ga3be426dd59c6c2d732835b28e761fa12"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the number of error messages in an error stack.  <br /></td></tr>
+<tr class="separator:ga3be426dd59c6c2d732835b28e761fa12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafddb4d9b7e06be6e6ffe2a5cb3aec220" id="r_gafddb4d9b7e06be6e6ffe2a5cb3aec220"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gafddb4d9b7e06be6e6ffe2a5cb3aec220">h5ewalk_f</a> (err_stack, direction, op, op_data, hdferr)</td></tr>
+<tr class="memdesc:gafddb4d9b7e06be6e6ffe2a5cb3aec220"><td class="mdescLeft">&#160;</td><td class="mdescRight">Walks the specified error stack, calling the specified function.  <br /></td></tr>
+<tr class="separator:gafddb4d9b7e06be6e6ffe2a5cb3aec220"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga2cb8993658c13d191742e8ecc1cc1e3e" id="r_ga2cb8993658c13d191742e8ecc1cc1e3e"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga2cb8993658c13d191742e8ecc1cc1e3e">h5eget_class_name_f</a> (class_id, name, hdferr, size)</td></tr>
+<tr class="memdesc:ga2cb8993658c13d191742e8ecc1cc1e3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves an error message.  <br /></td></tr>
+<tr class="separator:ga2cb8993658c13d191742e8ecc1cc1e3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8b2c03c433fe313d61f522d968a35e3a" id="r_ga8b2c03c433fe313d61f522d968a35e3a"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8b2c03c433fe313d61f522d968a35e3a">h5eappend_stack_f</a> (dst_stack_id, src_stack_id, close_source_stack, hdferr)</td></tr>
+<tr class="memdesc:ga8b2c03c433fe313d61f522d968a35e3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Appends one error stack to another, optionally closing the source stack.  <br /></td></tr>
+<tr class="separator:ga8b2c03c433fe313d61f522d968a35e3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae4cc331fdce8f34ee44fbea7de5ef4f5" id="r_gae4cc331fdce8f34ee44fbea7de5ef4f5"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gae4cc331fdce8f34ee44fbea7de5ef4f5">h5eget_current_stack_f</a> (err_stack_id, hdferr)</td></tr>
+<tr class="memdesc:gae4cc331fdce8f34ee44fbea7de5ef4f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a copy of the current error stack.  <br /></td></tr>
+<tr class="separator:gae4cc331fdce8f34ee44fbea7de5ef4f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9de97a6d5bfcb6717fef5584ec0a3b4e" id="r_ga9de97a6d5bfcb6717fef5584ec0a3b4e"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga9de97a6d5bfcb6717fef5584ec0a3b4e">h5eset_current_stack_f</a> (err_stack_id, hdferr)</td></tr>
+<tr class="memdesc:ga9de97a6d5bfcb6717fef5584ec0a3b4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replaces the current error stack.  <br /></td></tr>
+<tr class="separator:ga9de97a6d5bfcb6717fef5584ec0a3b4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6801f92b4a6fd829e9d697c25b801fd1" id="r_ga6801f92b4a6fd829e9d697c25b801fd1"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga6801f92b4a6fd829e9d697c25b801fd1">h5eclose_stack_f</a> (err_stack_id, hdferr)</td></tr>
+<tr class="memdesc:ga6801f92b4a6fd829e9d697c25b801fd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes an error stack handle.  <br /></td></tr>
+<tr class="separator:ga6801f92b4a6fd829e9d697c25b801fd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabeeb009169dc4cda1b828ae2b228e216" id="r_gabeeb009169dc4cda1b828ae2b228e216"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gabeeb009169dc4cda1b828ae2b228e216">h5ecreate_stack_f</a> (err_stack_id, hdferr)</td></tr>
+<tr class="memdesc:gabeeb009169dc4cda1b828ae2b228e216"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new, empty error stack.  <br /></td></tr>
+<tr class="separator:gabeeb009169dc4cda1b828ae2b228e216"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gadf5d9e2ac00fe7d7ddcb4db65e499655" id="r_gadf5d9e2ac00fe7d7ddcb4db65e499655"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gadf5d9e2ac00fe7d7ddcb4db65e499655">h5epop_f</a> (err_stack_id, count, hdferr)</td></tr>
+<tr class="memdesc:gadf5d9e2ac00fe7d7ddcb4db65e499655"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deletes specified number of error messages from the error stack.  <br /></td></tr>
+<tr class="separator:gadf5d9e2ac00fe7d7ddcb4db65e499655"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -159,6 +204,49 @@ Variables</h2></td></tr>
 <tr class="separator:ga964689229b425ac4b40138dba97aa630"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function/Subroutine Documentation</h2>
+<a id="ga8b2c03c433fe313d61f522d968a35e3a" name="ga8b2c03c433fe313d61f522d968a35e3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8b2c03c433fe313d61f522d968a35e3a">&#9670;&#160;</a></span>h5eappend_stack_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5eappend_stack_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>dst_stack_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>src_stack_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">logical, intent(in)</td>          <td class="paramname"><span class="paramname"><em>close_source_stack</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Appends one error stack to another, optionally closing the source stack. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dst_stack_id</td><td>Error stack identifier </td></tr>
+    <tr><td class="paramname">src_stack_id</td><td>Error stack identifier </td></tr>
+    <tr><td class="paramname">close_source_stack</td><td>Flag to indicate whether to close the source stack </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_e.html#gaa35a1b27d704a90f2a933f9d41df35ec">H5Eappend_stack()</a> </p>
+
+</div>
+</div>
 <a id="ga5fe81257a3e9f1b6e2c2bd10040e7633" name="ga5fe81257a3e9f1b6e2c2bd10040e7633"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga5fe81257a3e9f1b6e2c2bd10040e7633">&#9670;&#160;</a></span>h5eclear_f()</h2>
 
@@ -190,6 +278,223 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="gac3bae705baa78fd6478bb381fe25d6b7" name="gac3bae705baa78fd6478bb381fe25d6b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac3bae705baa78fd6478bb381fe25d6b7">&#9670;&#160;</a></span>h5eclose_msg_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5eclose_msg_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>err_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Closes an error message. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">err_id</td><td>An error message identifier </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_e.html#ga65b660eb16b25cc008585ba8990e8b15">H5Eclose_msg()</a> </p>
+
+</div>
+</div>
+<a id="ga6801f92b4a6fd829e9d697c25b801fd1" name="ga6801f92b4a6fd829e9d697c25b801fd1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6801f92b4a6fd829e9d697c25b801fd1">&#9670;&#160;</a></span>h5eclose_stack_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5eclose_stack_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>err_stack_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Closes an error stack handle. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">err_stack_id</td><td>Error stack identifier </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_e.html#ga41c2ed13fd6aac6e413fe7383b9090fa">H5Eclose_stack()</a> </p>
+
+</div>
+</div>
+<a id="gae2f2d8e3e645de9528db020ec89a3cf7" name="gae2f2d8e3e645de9528db020ec89a3cf7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae2f2d8e3e645de9528db020ec89a3cf7">&#9670;&#160;</a></span>h5ecreate_msg_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5ecreate_msg_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>class_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(in)</td>          <td class="paramname"><span class="paramname"><em>msg_type</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in)</td>          <td class="paramname"><span class="paramname"><em>msg</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(out)</td>          <td class="paramname"><span class="paramname"><em>err_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Adds a major or minor error message to an error class. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">class_id</td><td>An error class identifier </td></tr>
+    <tr><td class="paramname">msg_type</td><td>The type of the error message </td></tr>
+    <tr><td class="paramname">msg</td><td>Error message </td></tr>
+    <tr><td class="paramname">err_id</td><td>Error identifier </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_e.html#ga99a705d98873dcdd1bb6f9d5eebc5afd">H5Ecreate_msg()</a> </p>
+
+</div>
+</div>
+<a id="gabeeb009169dc4cda1b828ae2b228e216" name="gabeeb009169dc4cda1b828ae2b228e216"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gabeeb009169dc4cda1b828ae2b228e216">&#9670;&#160;</a></span>h5ecreate_stack_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5ecreate_stack_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(out)</td>          <td class="paramname"><span class="paramname"><em>err_stack_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a new, empty error stack. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">err_stack_id</td><td>Error stack identifier </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_e.html#ga8bfca811dc01e97b4ab0736dd8775b39">H5Ecreate_stack()</a> </p>
+
+</div>
+</div>
+<a id="ga2cb8993658c13d191742e8ecc1cc1e3e" name="ga2cb8993658c13d191742e8ecc1cc1e3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga2cb8993658c13d191742e8ecc1cc1e3e">&#9670;&#160;</a></span>h5eget_class_name_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5eget_class_name_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>class_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*)</td>          <td class="paramname"><span class="paramname"><em>name</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(size_t), intent(inout), optional</td>          <td class="paramname"><span class="paramname"><em>size</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves an error message. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">class_id</td><td>Error class identifier </td></tr>
+    <tr><td class="paramname">name</td><td>Buffer for the error class name </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">size</td><td>The maximum number of characters of the class name to be returned by this function in <code>name</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>If <code>size</code> is omitted, the API will copy up to the length of <code>name</code>, and it is the application's responsibility to provide a large enough buffer. If <code>size</code> is zero, the required buffer size will be returned, and <code>name</code> is not accessed. If <code>size</code> is greater than zero, the function will copy up to the length of <code>size</code> info <code>name</code>.</p>
+<p>See C API: <a class="el" href="group___h5_e.html#gaf360b8e61728b421ee78438e4f57a001">H5Eget_class_name()</a> </p>
+
+</div>
+</div>
+<a id="gae4cc331fdce8f34ee44fbea7de5ef4f5" name="gae4cc331fdce8f34ee44fbea7de5ef4f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae4cc331fdce8f34ee44fbea7de5ef4f5">&#9670;&#160;</a></span>h5eget_current_stack_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5eget_current_stack_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(out)</td>          <td class="paramname"><span class="paramname"><em>err_stack_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns a copy of the current error stack. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">err_stack_id</td><td>Error stack identifier </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_e.html#gac66c0955a6d821a472a3a408cdc95ae6">H5Eget_current_stack()</a> </p>
+
+</div>
+</div>
 <a id="gaf1717e66b301b9bc467ac1f534021e42" name="gaf1717e66b301b9bc467ac1f534021e42"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gaf1717e66b301b9bc467ac1f534021e42">&#9670;&#160;</a></span>h5eget_major_f()</h2>
 
@@ -199,7 +504,7 @@ Variables</h2></td></tr>
         <tr>
           <td class="memname">subroutine h5eget_major_f </td>
           <td>(</td>
-          <td class="paramtype">integer, intent(in)</td>          <td class="paramname"><span class="paramname"><em>error_no</em>, </span></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>error_no</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -209,7 +514,7 @@ Variables</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">integer(size_t), intent(in)</td>          <td class="paramname"><span class="paramname"><em>namelen</em>, </span></td>
+          <td class="paramtype">integer(size_t), intent(inout)</td>          <td class="paramname"><span class="paramname"><em>namelen</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -229,6 +534,7 @@ Variables</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section attention"><dt>Attention</dt><dd>Deprecated: use H5Eget_msg_f() instead.</dd></dl>
 <p>See C API: <a class="el" href="group___h5_e.html#ga91fa7fb56da6f08f9c293a6ce89c7819">H5Eget_major()</a> </p>
 
 </div>
@@ -242,7 +548,7 @@ Variables</h2></td></tr>
         <tr>
           <td class="memname">subroutine h5eget_minor_f </td>
           <td>(</td>
-          <td class="paramtype">integer, intent(in)</td>          <td class="paramname"><span class="paramname"><em>error_no</em>, </span></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>error_no</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -266,7 +572,132 @@ Variables</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section attention"><dt>Attention</dt><dd>Deprecated: use H5Eget_msg_f() instead.</dd></dl>
 <p>See C API: <a class="el" href="group___h5_e.html#ga4975325db13bc5cf44d72d4ef0394034">H5Eget_minor()</a> </p>
+
+</div>
+</div>
+<a id="ga0a9f36ee4fae4f4d18c642b9e57aab28" name="ga0a9f36ee4fae4f4d18c642b9e57aab28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0a9f36ee4fae4f4d18c642b9e57aab28">&#9670;&#160;</a></span>h5eget_msg_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5eget_msg_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>msg_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>msg_type</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*)</td>          <td class="paramname"><span class="paramname"><em>msg</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(size_t), intent(inout), optional</td>          <td class="paramname"><span class="paramname"><em>msg_size</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves an error message. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">msg_id</td><td>Error message identifier </td></tr>
+    <tr><td class="paramname">msg_type</td><td>The type of the error message. Valid values are H5E_MAJOR_F and H5E_MINOR_F. </td></tr>
+    <tr><td class="paramname">msg</td><td>Error message buffer </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">msg_size</td><td>The length of error message to be returned by this function</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>If <code>msg_size</code> is omitted, the API will copy up to the length of <code>msg</code>, and it is the application's responsibility to provide a large enough buffer. If <code>msg_size</code> is zero, the required buffer size will be returned, and <code>msg</code> is not accessed. If <code>msg_size</code> is greater than zero, the function will copy up to the length of <code>msg_size</code> info <code>msg</code>.</p>
+<p>See C API: <a class="el" href="group___h5_e.html#ga64714effca13c23c4f95529256621fa0">H5Eget_msg()</a> </p>
+
+</div>
+</div>
+<a id="ga3be426dd59c6c2d732835b28e761fa12" name="ga3be426dd59c6c2d732835b28e761fa12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3be426dd59c6c2d732835b28e761fa12">&#9670;&#160;</a></span>h5eget_num_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5eget_num_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>error_stack_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(size_t), intent(out)</td>          <td class="paramname"><span class="paramname"><em>count</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the number of error messages in an error stack. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">error_stack_id</td><td>An error message identifier </td></tr>
+    <tr><td class="paramname">count</td><td>Number of error messages in <code>err_id</code> </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_e.html#ga5c42673e2059c385a95ce3c597e0756d">H5Eget_num()</a> </p>
+
+</div>
+</div>
+<a id="gadf5d9e2ac00fe7d7ddcb4db65e499655" name="gadf5d9e2ac00fe7d7ddcb4db65e499655"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gadf5d9e2ac00fe7d7ddcb4db65e499655">&#9670;&#160;</a></span>h5epop_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5epop_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>err_stack_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(size_t), intent(in)</td>          <td class="paramname"><span class="paramname"><em>count</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Deletes specified number of error messages from the error stack. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">err_stack_id</td><td>Error stack identifier </td></tr>
+    <tr><td class="paramname">count</td><td>The number of error messages to be deleted from the top of error stack </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_e.html#ga818569ac92695fb1a7836c2389faa2ba">H5Epop()</a> </p>
 
 </div>
 </div>
@@ -297,7 +728,256 @@ Variables</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p>See C API: <a class="el" href="group___h5_e.html#gae86ab32e85028412c731cf0f2b8d1f56">H5Eprint2()</a> </p>
+<dl class="section note"><dt>Note</dt><dd>If <code>name</code> is not specified, the output will be sent to the standard error (stderr).</dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>Deprecated.</dd></dl>
+<p>See C API: <a class="el" href="group___h5_e.html#ga9c71eb8e5b7261668e2e8926f1822365">H5Eprint1()</a> </p>
+
+</div>
+</div>
+<a id="gafaad7da9e85a05fb031b56685d042dae" name="gafaad7da9e85a05fb031b56685d042dae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafaad7da9e85a05fb031b56685d042dae">&#9670;&#160;</a></span>h5epush_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5epush_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>err_stack</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in)</td>          <td class="paramname"><span class="paramname"><em>file</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in)</td>          <td class="paramname"><span class="paramname"><em>func</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(in)</td>          <td class="paramname"><span class="paramname"><em>line</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>cls_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>maj_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>min_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in)</td>          <td class="paramname"><span class="paramname"><em>msg</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg1</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg2</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg3</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg4</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg5</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg6</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg7</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg8</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg9</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg10</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg11</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg12</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg13</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg14</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg15</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg16</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg17</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg18</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg19</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), optional, target</td>          <td class="paramname"><span class="paramname"><em>arg20</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Pushes a new error record onto an error stack. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">err_stack</td><td>Error stack identifier. If the identifier is H5E_DEFAULT_F, the error record will be pushed to the current stack. </td></tr>
+    <tr><td class="paramname">file</td><td>Name of the file in which the error was detected </td></tr>
+    <tr><td class="paramname">func</td><td>Name of the function in which the error was detected </td></tr>
+    <tr><td class="paramname">line</td><td>Line number in the file where the error was detected </td></tr>
+    <tr><td class="paramname">cls_id</td><td>Error class identifier </td></tr>
+    <tr><td class="paramname">maj_id</td><td>Major error identifier </td></tr>
+    <tr><td class="paramname">min_id</td><td>Minor error identifier </td></tr>
+    <tr><td class="paramname">msg</td><td>Error description string </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">arg1</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg2</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg3</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg4</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg5</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg6</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg7</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg8</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg9</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg10</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg11</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg12</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg13</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg14</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg15</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg16</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg17</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg18</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg19</td><td>C style format control strings </td></tr>
+    <tr><td class="paramname">arg20</td><td>C style format control strings</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd><code>arg</code>[1-20] expects C-style format strings, similar to the system and C functions printf() and fprintf(). Furthermore, special characters, such as ANSI escapes, will only be interpreted correctly if the Fortran equivalent is used. For example, to print <code>msg</code> "TEXT" in red and has a space after the text would be: <br  />
+<br  />
+ <div class="fragment"><div class="line">(..., <span class="stringliteral">&quot;%s TEXT %s&quot;</span>//c_new_line, hdferr, ..., arg1=achar(27)//<span class="stringliteral">&quot;[31m&quot;</span>, arg2=achar(27)//<span class="stringliteral">&quot;[0m&quot;</span> )</div>
+</div><!-- fragment --> <br  />
+Using "\n" instead of C_NEW_LINE will not be interpereted correctly, and similarly, using "\x1B" instead of ACHAR(27)</dd></dl>
+<p>See C API: <a class="el" href="group___h5_e.html#ga17c2790837a1c1ea7e56b65d3c00a920">H5Epush2()</a> </p>
+
+</div>
+</div>
+<a id="ga3cd53ec69d1429128ab726ca1843469e" name="ga3cd53ec69d1429128ab726ca1843469e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3cd53ec69d1429128ab726ca1843469e">&#9670;&#160;</a></span>h5eregister_class_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5eregister_class_f </td>
+          <td>(</td>
+          <td class="paramtype">character(len=*), intent(in)</td>          <td class="paramname"><span class="paramname"><em>cls_name</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in)</td>          <td class="paramname"><span class="paramname"><em>lib_name</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in)</td>          <td class="paramname"><span class="paramname"><em>version</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(out)</td>          <td class="paramname"><span class="paramname"><em>class_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Registers a client library or application program to the HDF5 error API. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cls_name</td><td>Name of the error class </td></tr>
+    <tr><td class="paramname">lib_name</td><td>Name of the client library or application to which the error class belongs </td></tr>
+    <tr><td class="paramname">version</td><td>Version of the client library or application to which the error class belongs. It can be NULL. </td></tr>
+    <tr><td class="paramname">class_id</td><td>Class identifier </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_e.html#ga70ecfb35ab871ddb1cd2dfa0ac5f740c">H5Eregister_class()</a> </p>
 
 </div>
 </div>
@@ -351,6 +1031,117 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <p>See C API: <a class="el" href="group___h5_e.html#gaf0d6b18cd5160517fe5165b9a8443c69">H5Eset_auto2()</a> </p>
+
+</div>
+</div>
+<a id="ga9de97a6d5bfcb6717fef5584ec0a3b4e" name="ga9de97a6d5bfcb6717fef5584ec0a3b4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9de97a6d5bfcb6717fef5584ec0a3b4e">&#9670;&#160;</a></span>h5eset_current_stack_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5eset_current_stack_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>err_stack_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Replaces the current error stack. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">err_stack_id</td><td>Error stack identifier </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_e.html#ga155715dd456c2b62a0b567e970af3473">H5Eset_current_stack()</a> </p>
+
+</div>
+</div>
+<a id="ga5cb5cd838eb47e948182ec6236ca4328" name="ga5cb5cd838eb47e948182ec6236ca4328"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5cb5cd838eb47e948182ec6236ca4328">&#9670;&#160;</a></span>h5eunregister_class_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5eunregister_class_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>class_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Removes an error class. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">class_id</td><td>Class identifier </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_e.html#ga0383710d3984d19d3d2006d1151b88a2">H5Eunregister_class()</a> </p>
+
+</div>
+</div>
+<a id="gafddb4d9b7e06be6e6ffe2a5cb3aec220" name="gafddb4d9b7e06be6e6ffe2a5cb3aec220"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafddb4d9b7e06be6e6ffe2a5cb3aec220">&#9670;&#160;</a></span>h5ewalk_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5ewalk_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>err_stack</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(in)</td>          <td class="paramname"><span class="paramname"><em>direction</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">type(c_funptr), intent(in)</td>          <td class="paramname"><span class="paramname"><em>op</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">type(c_ptr), intent(inout)</td>          <td class="paramname"><span class="paramname"><em>op_data</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Walks the specified error stack, calling the specified function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">err_stack</td><td>Error stack identifier </td></tr>
+    <tr><td class="paramname">direction</td><td>Direction in which the error stack is to be walked </td></tr>
+    <tr><td class="paramname">op</td><td>Function to be called for each error encountered </td></tr>
+    <tr><td class="paramname">op_data</td><td>Data to be passed to func </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_e.html#ga4ecc0f6a1ea5bb821373a5a7b8070655">H5Ewalk2()</a> </p>
 
 </div>
 </div>

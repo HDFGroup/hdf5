@@ -203,11 +203,11 @@ The Hierarchy of Data Objects</h3>
 HDF5 Path Names</h3>
 <p>The structure of the HDF5 file constitutes the name space for the objects in the file. A path name is a string of components separated by slashes (/). Each component is the name of a hard or soft link which points to an object in the file. The slash not only separates the components, but indicates their hierarchical relationship; the component indicated by the link name following a slash is a always a member of the component indicated by the link name preceding that slash.</p>
 <p>The first component in the path name may be any of the following: </p><ul>
-<li>The special character dot (., a period), indicating the current group </li>
+<li>The special character dot (., a single period), indicating the current group </li>
 <li>The special character slash (/), indicating the root group </li>
 <li>Any member of the current group</li>
 </ul>
-<p>Component link names may be any string of ASCII characters not containing a slash or a dot (/ and ., which are reserved as noted above). However, users are advised to avoid the use of punctuation and non-printing characters, as they may create problems for other software. The figure below provides a BNF grammar for HDF5 path names.</p>
+<p>Component link names may be any string of ASCII characters not containing a slash or a single dot (/ and ., which are reserved as noted above). However, users are advised to avoid the use of punctuation and non-printing characters, as they may create problems for other software. The figure below provides a BNF grammar for HDF5 path names.</p>
 <p><em>A BNF grammar for HDF5 path names</em> </p><div class="fragment"><div class="line">PathName ::= AbsolutePathName | RelativePathName</div>
 <div class="line">Separator ::= <span class="stringliteral">&quot;/&quot;</span> [<span class="stringliteral">&quot;/&quot;</span>]*</div>
 <div class="line">AbsolutePathName ::= Separator [ RelativePathName ]</div>
@@ -278,7 +278,7 @@ Using h5dump</h2>
 <div class="line">}</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>h5dump is described on the “HDF5 Tools” page of the <a class="el" href="_r_m.html">HDF5 Reference Manual</a>.</p>
-<p>The HDF5 DDL grammar is described in the <a class="el" href="_d_d_l_b_n_f110.html">DDL in BNF through HDF5 1.10</a>.</p>
+<p>The HDF5 DDL grammar is described in the <a class="el" href="_d_d_l_b_n_f114.html">DDL in BNF for HDF5 1.14.4 and above</a>.</p>
 <h2><a class="anchor" id="subsec_group_function"></a>
 Group Function Summaries</h2>
 <p>Functions that can be used with groups (<a class="el" href="group___h5_g.html">Groups (H5G)</a> functions) and property list functions that can used with groups (<a class="el" href="group___h5_p.html">Property Lists (H5P)</a> functions) are listed below. A number of group functions have been deprecated. Most of these have become link (<a class="el" href="group___h5_l.html">Links (H5L)</a>) or object (<a class="el" href="group___h5_o.html">Objects (H5O)</a>) functions. These replacement functions are also listed below.</p>
@@ -469,7 +469,7 @@ Creating a Dataset in a Specific Group</h3>
 <div class="line">                     <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
 <div class="ttc" id="agroup___h5_d_html_ga0647ba4bbd26d5230cc07f3a5685b2cf"><div class="ttname"><a href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a></div><div class="ttdeci">#define H5Dcreate</div><div class="ttdef"><b>Definition</b> H5version.h:716</div></div>
 <div class="ttc" id="agroup___h5_s_html_ga8e35eea5738b4805856eac7d595254ae"><div class="ttname"><a href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a></div><div class="ttdeci">hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[])</div><div class="ttdoc">Creates a new simple dataspace and opens it for access.</div></div>
-<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:767</div></div>
+<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:779</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="subsubsec_group_program_close"></a>
 Closing a Group</h3>
 <p>To ensure the integrity of HDF5 objects and to release system resources, an application should always call the appropriate close function when it is through working with an HDF5 object. In the case of groups, H5Gclose ends access to the group and releases any resources the HDF5 library has maintained in support of that access, including the group identifier.</p>

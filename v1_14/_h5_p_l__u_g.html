@@ -107,7 +107,208 @@ $(function(){initNavTree('_h5_p_l__u_g.html',''); initResizable(); });
   <div class="headertitle"><div class="title">The HDF5 Plugins</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000025">Todo</a></b></dt><dd>Under Construction </dd></dl>
+<div class="textblock"><h1><a class="anchor" id="sec_filter_plugins"></a>
+HDF5 Filter Plugins</h1>
+<h2><a class="anchor" id="subsec_filter_plugins_intro"></a>
+Introduction</h2>
+<p>HDF5 supports compression of data using a stackable pipeline of filters which can be implemented for reading and writing datasets, both at runtime and post‐process. These filters are supported as dynamically loadable plugins, and users can even implement custom filters of their own design.</p>
+<h2><a class="anchor" id="subsec_filter_plugins_model"></a>
+Programming Model for Applications</h2>
+<p>This section describes the programming model for an application that uses a third-party HDF5 filter plugin to write or read data. For simplicity of presentation, it is assumed that the HDF5 filter plugin is available on the system in a default location. The HDF5 filter plugin is discussed in detail in the <a class="el" href="#subsec_filter_plugins_prog">Programming Model for HDF5 Filter Plugins</a> section.</p>
+<h3><a class="anchor" id="subsubsec_filter_plugins_model_apply"></a>
+Applying a Third-party Filter When Creating and Writing</h3>
+<p>a Dataset A third-party filter can be added to the HDF5 filter pipeline by using the H5Pset_filter function, as a user would do in the past. The identification number and the filter parameters should be available to the application. For example, if the application intends to apply the HDF5 bzip2 compression filter that was registered with The HDF Group and has an identification number 307 (<a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">Registered Filters</a>) then the application would follow the steps as outlined below: </p><div class="fragment"><div class="line"> dcpl = <a class="code hl_function" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a></div>
+<div class="line">(<a class="code hl_define" href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a>); status = <a class="code hl_function" href="group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5">H5Pset_filter</a> (dcpl, (<a class="code hl_typedef" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237">H5Z_filter_t</a>)307, <a class="code hl_define" href="_h5_zpublic_8h.html#a7c50fa9c17a3e84280b3624e3e2515db">H5Z_FLAG_MANDATORY</a>, (<span class="keywordtype">size_t</span>)6,</div>
+<div class="line">cd_values); dset = <a class="code hl_define" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a> (file, DATASET, <a class="code hl_define" href="group___p_d_t_s_t_d.html#ga8db8c9c2bcc457f9f8526c8fcb81218b">H5T_STD_I32LE</a>, space, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, dcpl, status = <a class="code hl_function" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906">H5Dwrite</a></div>
+<div class="line">(dset, <a class="code hl_define" href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, wdata[0]); </div>
+<div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:102</div></div>
+<div class="ttc" id="a_h5_ppublic_8h_html_afcd7f8186c404f3a1d768632eacba102"><div class="ttname"><a href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a></div><div class="ttdeci">#define H5P_DATASET_CREATE</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:53</div></div>
+<div class="ttc" id="a_h5_spublic_8h_html_a5f96eeee84b987f18470737f85af0484"><div class="ttname"><a href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a></div><div class="ttdeci">#define H5S_ALL</div><div class="ttdef"><b>Definition</b> H5Spublic.h:32</div></div>
+<div class="ttc" id="a_h5_zpublic_8h_html_a7c50fa9c17a3e84280b3624e3e2515db"><div class="ttname"><a href="_h5_zpublic_8h.html#a7c50fa9c17a3e84280b3624e3e2515db">H5Z_FLAG_MANDATORY</a></div><div class="ttdeci">#define H5Z_FLAG_MANDATORY</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:93</div></div>
+<div class="ttc" id="a_h5_zpublic_8h_html_afae8461c70d47e63be2163af23362237"><div class="ttname"><a href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237">H5Z_filter_t</a></div><div class="ttdeci">int H5Z_filter_t</div><div class="ttdoc">Filter identifiers.</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:27</div></div>
+<div class="ttc" id="agroup___h5_d_html_ga0647ba4bbd26d5230cc07f3a5685b2cf"><div class="ttname"><a href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a></div><div class="ttdeci">#define H5Dcreate</div><div class="ttdef"><b>Definition</b> H5version.h:716</div></div>
+<div class="ttc" id="agroup___h5_d_html_ga98f44998b67587662af8b0d8a0a75906"><div class="ttname"><a href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906">H5Dwrite</a></div><div class="ttdeci">herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, const void *buf)</div><div class="ttdoc">Writes raw data from a buffer to a dataset.</div></div>
+<div class="ttc" id="agroup___o_c_p_l_html_ga191c567ee50b2063979cdef156a768c5"><div class="ttname"><a href="group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5">H5Pset_filter</a></div><div class="ttdeci">herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts, const unsigned int c_values[])</div><div class="ttdoc">Adds a filter to the filter pipeline.</div></div>
+<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:779</div></div>
+<div class="ttc" id="agroup___p_d_t_s_t_d_html_ga8db8c9c2bcc457f9f8526c8fcb81218b"><div class="ttname"><a href="group___p_d_t_s_t_d.html#ga8db8c9c2bcc457f9f8526c8fcb81218b">H5T_STD_I32LE</a></div><div class="ttdeci">#define H5T_STD_I32LE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:322</div></div>
+<div class="ttc" id="agroup___p_l_c_r_html_gaf1b11da01d4d45d788c45f8bc5f0cbfa"><div class="ttname"><a href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a></div><div class="ttdeci">hid_t H5Pcreate(hid_t cls_id)</div><div class="ttdoc">Creates a new property list as an instance of a property list class.</div></div>
+</div><!-- fragment --><h3><a class="anchor" id="subsubsec_filter_plugins_model_read"></a>
+Reading Data with an Applied Third-party Filter</h3>
+<p>An application does not need to do anything special to read the data with a third-party filter applied. For example, if one wants to read data written in the previous example, the following regular steps should be taken: </p><div class="fragment"><div class="line"> file = <a class="code hl_function" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a> (FILE, <a class="code hl_define" href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>); dset = <a class="code hl_define" href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a> (file, DATASET,</div>
+<div class="line"><a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>); <a class="code hl_function" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c">H5Dread</a> (dset, <a class="code hl_define" href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, rdata[0]); </div>
+<div class="ttc" id="a_h5_fpublic_8h_html_a1c406ffa89f4acf5a332144a2683d394"><div class="ttname"><a href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a></div><div class="ttdeci">#define H5F_ACC_RDONLY</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:48</div></div>
+<div class="ttc" id="a_h5version_8h_html_a7dba2e5b2045f31c0932123ffb54f7a3"><div class="ttname"><a href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a></div><div class="ttdeci">#define H5Dopen</div><div class="ttdef"><b>Definition</b> H5version.h:727</div></div>
+<div class="ttc" id="agroup___h5_d_html_ga8287d5a7be7b8e55ffeff68f7d26811c"><div class="ttname"><a href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c">H5Dread</a></div><div class="ttdeci">herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, void *buf)</div><div class="ttdoc">Reads raw data from a dataset into a provided buffer.</div></div>
+<div class="ttc" id="agroup___h5_f_html_gaa3f4f877b9bb591f3880423ed2bf44bc"><div class="ttname"><a href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a></div><div class="ttdeci">hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)</div><div class="ttdoc">Opens an existing HDF5 file.</div></div>
+</div><!-- fragment --><p>The command-line utility h5dump, for example, will read and display the data as shown: </p><div class="fragment"><div class="line">HDF5 <span class="stringliteral">&quot;h5ex_d_bzip2.h5&quot;</span> {</div>
+<div class="line">GROUP <span class="stringliteral">&quot;/&quot;</span> {</div>
+<div class="line">   DATASET <span class="stringliteral">&quot;DS1&quot;</span> {</div>
+<div class="line">      DATATYPE  <a class="code hl_define" href="group___p_d_t_s_t_d.html#ga8db8c9c2bcc457f9f8526c8fcb81218b">H5T_STD_I32LE</a></div>
+<div class="line">      DATASPACE  SIMPLE { ( 32, 64 ) / ( 32, 64 ) }</div>
+<div class="line">      STORAGE_LAYOUT {</div>
+<div class="line">         CHUNKED ( 4, 8 )</div>
+<div class="line">         SIZE 6410 (1.278:1 COMPRESSION)</div>
+<div class="line">      }</div>
+<div class="line">      FILTERS {</div>
+<div class="line">         USER_DEFINED_FILTER {</div>
+<div class="line">            FILTER_ID 307</div>
+<div class="line">            COMMENT HDF5 bzip2 filter; see</div>
+<div class="line">https:<span class="comment">//github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md</span></div>
+<div class="line">            PARAMS { 2 }</div>
+<div class="line">         }</div>
+<div class="line">      }</div>
+<div class="line">      FILLVALUE {</div>
+<div class="line">         FILL_TIME <a class="code hl_enumvalue" href="_h5_dpublic_8h.html#aa39293626c4e68dd28b06c0dc84bde4aa85b225308b0a277c4dd6fed7ee465a72">H5D_FILL_TIME_IFSET</a></div>
+<div class="line">         VALUE  <a class="code hl_enumvalue" href="_h5_dpublic_8h.html#a322c8263bd76fa5af8ff7636de5dfa23aa117582dd3ab4b104ce04029f0c7756a">H5D_FILL_VALUE_DEFAULT</a></div>
+<div class="line">      }</div>
+<div class="line">      ALLOCATION_TIME {</div>
+<div class="line">         <a class="code hl_enumvalue" href="_h5_dpublic_8h.html#aab70b464cf3c5fc931dce0c4fe98b3d2ac898a96931fd3402d9e5646690c77636">H5D_ALLOC_TIME_INCR</a></div>
+<div class="line">      }</div>
+<div class="line">      DATA {</div>
+<div class="line">         ...</div>
+<div class="line">      }</div>
+<div class="line">   }</div>
+<div class="line">}</div>
+<div class="line">}</div>
+<div class="ttc" id="a_h5_dpublic_8h_html_a322c8263bd76fa5af8ff7636de5dfa23aa117582dd3ab4b104ce04029f0c7756a"><div class="ttname"><a href="_h5_dpublic_8h.html#a322c8263bd76fa5af8ff7636de5dfa23aa117582dd3ab4b104ce04029f0c7756a">H5D_FILL_VALUE_DEFAULT</a></div><div class="ttdeci">@ H5D_FILL_VALUE_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Dpublic.h:115</div></div>
+<div class="ttc" id="a_h5_dpublic_8h_html_aa39293626c4e68dd28b06c0dc84bde4aa85b225308b0a277c4dd6fed7ee465a72"><div class="ttname"><a href="_h5_dpublic_8h.html#aa39293626c4e68dd28b06c0dc84bde4aa85b225308b0a277c4dd6fed7ee465a72">H5D_FILL_TIME_IFSET</a></div><div class="ttdeci">@ H5D_FILL_TIME_IFSET</div><div class="ttdef"><b>Definition</b> H5Dpublic.h:104</div></div>
+<div class="ttc" id="a_h5_dpublic_8h_html_aab70b464cf3c5fc931dce0c4fe98b3d2ac898a96931fd3402d9e5646690c77636"><div class="ttname"><a href="_h5_dpublic_8h.html#aab70b464cf3c5fc931dce0c4fe98b3d2ac898a96931fd3402d9e5646690c77636">H5D_ALLOC_TIME_INCR</a></div><div class="ttdeci">@ H5D_ALLOC_TIME_INCR</div><div class="ttdef"><b>Definition</b> H5Dpublic.h:79</div></div>
+</div><!-- fragment --><p>If the filter can not be loaded then h5dump will show the following: </p><div class="fragment"><div class="line">   ...</div>
+<div class="line">}</div>
+<div class="line">DATA {h5dump error: unable to print data</div>
+<div class="line">}</div>
+<div class="line">   ...</div>
+</div><!-- fragment --><h3><a class="anchor" id="subsubsec_filter_plugins_model_custom"></a>
+A Word of Caution When Using Custom Filters</h3>
+<p>Data goes through the HDF5 filter pipeline only when it is written to the file or read into application memory space from the file. For example, the I/O operation is triggered with a call to <a class="el" href="group___h5_f.html#gae686870f0a276c4d06bbc667b2c24124" title="Flushes all buffers associated with a file to storage.">H5Fflush</a>, or when a data item (HDF5 metadata or a raw data chunk) is evicted from the cache or brought into the cache. Please notice that <a class="el" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c" title="Reads raw data from a dataset into a provided buffer.">H5Dread</a>/<a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite</a> calls on the chunked datasets do not necessarily trigger I/O since the HDF5 Library uses a separate chunk cache.</p>
+<p>A data item may remain in the cache until the HDF5 Library is closed. If the HDF5 plugin that has to be applied to the data item becomes unavailable before the file and all objects in the file are closed, an error will occur. The following example demonstrates the issue. Please notice the position of the <a class="el" href="group___h5_z.html#ga6b8bcdde70c9256c50c7c62ba66380f8" title="Unregisters a filter.">H5Zunregister</a> call:</p>
+<div class="fragment"><div class="line"><span class="comment">// Create a new group using compression.</span></div>
+<div class="line">gcpl = <a class="code hl_function" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a> (<a class="code hl_define" href="_h5_ppublic_8h.html#a8330a95b257d45d6347a2daa96f261e9">H5P_GROUP_CREATE</a>);</div>
+<div class="line">status = <a class="code hl_function" href="group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5">H5Pset_filter</a>(gcpl,H5Z_FILTER_BZIP2,<a class="code hl_define" href="_h5_zpublic_8h.html#a7c50fa9c17a3e84280b3624e3e2515db">H5Z_FLAG_MANDATORY</a>,(<span class="keywordtype">size_t</span>)1, cd_values);</div>
+<div class="line">group = <a class="code hl_define" href="group___h5_g.html#ga187cee27a9fc4f1a311eb19b0522c7b8">H5Gcreate</a> (file, GNAME, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, gcpl, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
+<div class="line"><span class="keywordflow">for</span> (i=0; i &lt; NGROUPS; i++) {</div>
+<div class="line">    sprintf(name, <span class="stringliteral">&quot;group_%d&quot;</span>, i);</div>
+<div class="line">    tmp_id = <a class="code hl_define" href="group___h5_g.html#ga187cee27a9fc4f1a311eb19b0522c7b8">H5Gcreate</a> (group, name, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
+<div class="line">    status = <a class="code hl_function" href="group___h5_g.html#ga8dbe20b390d2504f0bd3589ed8f4e221">H5Gclose</a>(tmp_id);</div>
+<div class="line"> }</div>
+<div class="line"> </div>
+<div class="line">status = <a class="code hl_function" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a> (gcpl);</div>
+<div class="line">status = <a class="code hl_function" href="group___h5_g.html#ga8dbe20b390d2504f0bd3589ed8f4e221">H5Gclose</a> (group);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Unregister the filter. Call to H5Fclose will fail because the library tries</span></div>
+<div class="line"><span class="comment">// to apply the filter that is not available anymore. This has a cascade effect</span></div>
+<div class="line"><span class="comment">// on H5Fclose.</span></div>
+<div class="line"><a class="code hl_function" href="group___h5_z.html#ga6b8bcdde70c9256c50c7c62ba66380f8">H5Zunregister</a>(H5Z_FILTER_BZIP2);</div>
+<div class="line">status = <a class="code hl_function" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a> (file);</div>
+<div class="ttc" id="a_h5_ppublic_8h_html_a8330a95b257d45d6347a2daa96f261e9"><div class="ttname"><a href="_h5_ppublic_8h.html#a8330a95b257d45d6347a2daa96f261e9">H5P_GROUP_CREATE</a></div><div class="ttdeci">#define H5P_GROUP_CREATE</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:57</div></div>
+<div class="ttc" id="agroup___h5_f_html_gac55cd91d80822e4f8c2a7f04ea71b124"><div class="ttname"><a href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a></div><div class="ttdeci">herr_t H5Fclose(hid_t file_id)</div><div class="ttdoc">Terminates access to an HDF5 file.</div></div>
+<div class="ttc" id="agroup___h5_g_html_ga187cee27a9fc4f1a311eb19b0522c7b8"><div class="ttname"><a href="group___h5_g.html#ga187cee27a9fc4f1a311eb19b0522c7b8">H5Gcreate</a></div><div class="ttdeci">#define H5Gcreate</div><div class="ttdef"><b>Definition</b> H5version.h:821</div></div>
+<div class="ttc" id="agroup___h5_g_html_ga8dbe20b390d2504f0bd3589ed8f4e221"><div class="ttname"><a href="group___h5_g.html#ga8dbe20b390d2504f0bd3589ed8f4e221">H5Gclose</a></div><div class="ttdeci">herr_t H5Gclose(hid_t group_id)</div><div class="ttdoc">Closes the specified group.</div></div>
+<div class="ttc" id="agroup___h5_z_html_ga6b8bcdde70c9256c50c7c62ba66380f8"><div class="ttname"><a href="group___h5_z.html#ga6b8bcdde70c9256c50c7c62ba66380f8">H5Zunregister</a></div><div class="ttdeci">herr_t H5Zunregister(H5Z_filter_t id)</div><div class="ttdoc">Unregisters a filter.</div></div>
+<div class="ttc" id="agroup___p_l_c_r_html_ga5dce61149211d3ef319452aa598887fb"><div class="ttname"><a href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a></div><div class="ttdeci">herr_t H5Pclose(hid_t plist_id)</div><div class="ttdoc">Terminates access to a property list.</div></div>
+</div><!-- fragment --><p>Here is an error stack produced by the program: </p><div class="fragment"><div class="line">HDF5-DIAG: Error detected in HDF5 (xx.yy.zz) thread 0:</div>
+<div class="line">  <span class="preprocessor">#000: H5F.c line **** in H5Fclose(): decrementing file ID failed</span></div>
+<div class="line">    major: Object atom</div>
+<div class="line">    minor: Unable to close file</div>
+<div class="line"><span class="preprocessor">  #001: H5I.c line **** in H5I_dec_app_ref(): can&#39;t decrement ID ref count</span></div>
+<div class="line">    major: Object atom</div>
+<div class="line">    minor: Unable to decrement reference count</div>
+<div class="line"><span class="preprocessor">  #002: H5F.c line **** in H5F_close(): can&#39;t close file</span></div>
+<div class="line">    major: File accessibility</div>
+<div class="line">    minor: Unable to close file</div>
+<div class="line"> ...</div>
+<div class="line">  #026: H5Z.c line **** in H5Z_find(): required filter is not registered</div>
+<div class="line">    major: Data filters</div>
+<div class="line">    minor: Object not found</div>
+</div><!-- fragment --><p>To avoid the problem make sure to close all objects to which the filter is applied and flush them using the H5Fflush call before unregistering the filter.</p>
+<h2><a class="anchor" id="subsec_filter_plugins_prog"></a>
+Programming Model for HDF5 Filter Plugins</h2>
+<p>This section describes how to create an HDF5 filter, an HDF5 filter plugin, and how to install the HDF5 plugin on the system.</p>
+<h3><a class="anchor" id="subsubsec_filter_plugins_prog_write"></a>
+Writing a Filter Function</h3>
+<p>The HDF5 filter function for the dynamically loaded filter feature should be written as any custom filter described in <a href="http://www.hdfgroup.org/HDF5/doc/H5.user/Filters.html">Custom Filters</a>. See the “Example” section, section 5, of that document to get an idea of the simple filter function, and see the example of the more sophisticated HDF5 bzip2 filter function in the “Building an HDF5 bzip2 Plugin Example” section. The HDF5 bzip2 filter function is also available for download from <a href="https://github.com/HDFGroup/hdf5_plugins">Filter Plugin Repository</a>.</p>
+<p>The user has to remember a few things when writing an HDF5 filter function. </p><ul>
+<li>
+1. An HDF5 filter is bidirectional. The filter handles both input and output to the file; a flag is passed to the filter to indicate the direction. </li>
+<li>
+2. An HDF5 filter operates on a buffer. The filter reads data from a buffer, performs some sort of transformation on the data, places the result in the same or new buffer, and returns the buffer pointer and size to the caller. </li>
+<li>
+3. An HDF5 filter should return zero in the case of failure.</li>
+</ul>
+<p>The signature of the HDF5 filter function and the accompanying filter structure (see the section below) are described in the HDF5 Reference Manual <a class="el" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237" title="Filter identifiers.">H5Z_filter_t</a>.</p>
+<h3><a class="anchor" id="subsubsec_filter_plugins_prog_reg"></a>
+Registering a Filter with The HDF Group</h3>
+<p>If you are writing a filter that will be used by others, it would be a good idea to request a filter identification number and register it with The HDF Group. Please follow the procedure described at <a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">Registered Filters</a>.</p>
+<p>The HDF Group anticipates that developers of HDF5 filter plugins will not only register new filters, but will also provide links to the source code and/or binaries for the corresponding HDF5 filter plugins.</p>
+<p>It is very important for the users of the filter that developers provide filter information in the “name” field of the filter structure, for example: </p><div class="fragment"><div class="line"><span class="keyword">const</span> <a class="code hl_struct" href="struct_h5_z__class2__t.html">H5Z_class2_t</a> H5Z_BZIP2[1] = {{</div>
+<div class="line">  <a class="code hl_define" href="_h5_zdevelop_8h.html#acec2c757b38aefdb817ba7c7915778a9">H5Z_CLASS_T_VERS</a>,                    <span class="comment">// H5Z_class_t version</span></div>
+<div class="line">  (<a class="code hl_typedef" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237">H5Z_filter_t</a>)H5Z_FILTER_BZIP2,      <span class="comment">// Filter id number</span></div>
+<div class="line">  1,                                   <span class="comment">// encoder_present flag (set to true)</span></div>
+<div class="line">  1,                                   <span class="comment">// decoder_present flag (set to true)</span></div>
+<div class="line">  <span class="stringliteral">&quot;HDF5 bzip2 filter; see</span></div>
+<div class="line"><span class="stringliteral">  https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md&quot;</span>,</div>
+<div class="line">                                       <span class="comment">// Filter name for debugging</span></div>
+<div class="line">  NULL,                                <span class="comment">// The &quot;can apply&quot; callback</span></div>
+<div class="line">  NULL,                                <span class="comment">// The &quot;set local&quot; callback</span></div>
+<div class="line">  (<a class="code hl_typedef" href="_h5_zdevelop_8h.html#a130d8964a46667029c7d3c14572577c6">H5Z_func_t</a>)H5Z_filter_bzip2,        <span class="comment">// The actual filter function</span></div>
+<div class="line">}};</div>
+<div class="ttc" id="a_h5_zdevelop_8h_html_a130d8964a46667029c7d3c14572577c6"><div class="ttname"><a href="_h5_zdevelop_8h.html#a130d8964a46667029c7d3c14572577c6">H5Z_func_t</a></div><div class="ttdeci">size_t(* H5Z_func_t)(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nbytes, size_t *buf_size, void **buf)</div><div class="ttdoc">The filter operation callback function, defining a filter's operation on data.</div><div class="ttdef"><b>Definition</b> H5Zdevelop.h:153</div></div>
+<div class="ttc" id="a_h5_zdevelop_8h_html_acec2c757b38aefdb817ba7c7915778a9"><div class="ttname"><a href="_h5_zdevelop_8h.html#acec2c757b38aefdb817ba7c7915778a9">H5Z_CLASS_T_VERS</a></div><div class="ttdeci">#define H5Z_CLASS_T_VERS</div><div class="ttdef"><b>Definition</b> H5Zdevelop.h:31</div></div>
+<div class="ttc" id="astruct_h5_z__class2__t_html"><div class="ttname"><a href="struct_h5_z__class2__t.html">H5Z_class2_t</a></div><div class="ttdef"><b>Definition</b> H5Zdevelop.h:162</div></div>
+</div><!-- fragment --><p>The HDF5 Library and command-line tools have access to the “name” field. An application can use the H5Pget_filter&lt;*&gt; functions to retrieve information about the filters.</p>
+<p>Using the example of the structure above, the h5dump tool will print the string “HDF5 bzip2 filter found at …” pointing users to the applied filter (see the example in the <a class="el" href="#subsubsec_filter_plugins_model_read">Reading Data with an Applied Third-party Filter</a> section) thus solving the problem of the filter’s origin.</p>
+<h3><a class="anchor" id="subsubsec_filter_plugins_prog_create"></a>
+Creating an HDF5 Filter Plugin</h3>
+<p>The HDF5 filter plugin source should include: </p><ul>
+<li>
+1. The <a class="el" href="_h5_p_lextern_8h.html">H5PLextern.h</a> header file from the HDF5 distribution. </li>
+<li>
+2. The definition of the filter structure (see the example shown in the section above). </li>
+<li>
+3. The filter function (for example, H5Z_filter_bzip2). </li>
+<li>
+4. The two functions necessary for the HDF5 Library to find the correct type of the plugin library while loading it at runtime and to get information about the filter function: <table class="doxtable">
+<tr>
+<td><code>H5PL_type_t <a class="el" href="_h5_p_lextern_8h.html#a11942aa6c2beef4a76faa83b77feacd5">H5PLget_plugin_type(void)</a>;</code> </td></tr>
+<tr>
+<td><code>const void* <a class="el" href="_h5_p_lextern_8h.html#a12bc51a0ed6df8d85b2fb6c4410cd1cd">H5PLget_plugin_info(void)</a>;</code></td></tr>
+</table>
+Here is an example of the functions above for the HDF5 bzip2 filter: <table class="doxtable">
+<tr>
+<td><code>H5PL_type_t <a class="el" href="_h5_p_lextern_8h.html#a11942aa6c2beef4a76faa83b77feacd5">H5PLget_plugin_type(void)</a> {return H5PL_TYPE_FILTER;}</code> </td></tr>
+<tr>
+<td><code>const void* <a class="el" href="_h5_p_lextern_8h.html#a12bc51a0ed6df8d85b2fb6c4410cd1cd">H5PLget_plugin_info(void)</a> {return H5Z_BZIP2;}</code></td></tr>
+</table>
+</li>
+<li>
+5. Other functions such as the source of the compression library may also be included. </li>
+</ul>
+<p>Build the HDF5 filter plugin as a shared library. The following steps should be taken: </p><ul>
+<li>
+1. When compiling, point to the HDF5 header files. </li>
+<li>
+2. Use the appropriate linking flags. </li>
+<li>
+3. Link with any required external libraries.  </li>
+<li>
+4. For example, if libbz2.so is installed on a Linux system, the HDF5 bzip2 plugin library libH5Zbzip2.so may be linked with libbz2.so instead of including bzip2 source into the plugin library. The complete example of the HDF5 bzip2 plugin library is provided at <a href="https://github.com/HDFGroup/hdf5_plugins/tree/master/BZIP2">BZIP2 Filter Plugin</a> and can be adopted for other plugins.</li>
+</ul>
+<h3><a class="anchor" id="subsubsec_filter_plugins_prog_install"></a>
+Installing an HDF5 Filter Plugin</h3>
+<p>The default directory for an HDF5 filter plugin library is defined on UNIX-like systems as </p><div class="fragment"><div class="line">“/usr/local/<a class="code hl_namespace" href="namespacehdf5.html">hdf5</a>/lib/plugin”</div>
+<div class="ttc" id="anamespacehdf5_html"><div class="ttname"><a href="namespacehdf5.html">hdf5</a></div><div class="ttdef"><b>Definition</b> HDF5.F90:26</div></div>
+</div><!-- fragment --><p> and on Windows systems as </p><div class="fragment"><div class="line"><span class="stringliteral">&quot;%ALLUSERSPROFILE%/hdf5/lib/plugin&quot;</span>.</div>
+</div><!-- fragment --><p>The default path can be overwritten by a user with the <a class="el" href="_h5public_8h.html#a020d112b3c3251e7518461466777611d">HDF5_PLUGIN_PATH</a> environment variable. Several directories can be specified for the search path using “:” as a path separator for UNIX-like systems and “;” for Windows.</p>
+<p>Readers are encouraged to try the example in the “Building an HDF5 bzip2 Plugin Example” section.</p>
+<h2><a class="anchor" id="subsec_filter_plugins_design"></a>
+Design</h2>
+<p>Dynamic loading of the HDF5 filter plugin (or filter library) is triggered only by two events: when an application calls the <a class="el" href="group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5" title="Adds a filter to the filter pipeline.">H5Pset_filter</a> function to set the filter for the first time, or when the data to which the filter is applied is read for the first time.</p>
+<h2><a class="anchor" id="subsec_filter_plugins_build"></a>
+Building an HDF5 bzip2 Plugin Example</h2>
+<p>The HDF Group provides an repository of the HDF5 filter plugin that can be checked out from <a href="https://github.com/HDFGroup/hdf5_plugins/tree/master/BZIP2">BZIP2 Filter Plugin</a>.</p>
+<p>It contains the source code for the bzip2 plugin library and an example that uses the plugin. It requires the HDF5 Library with the dynamically loaded feature and the bzip2 library being available on the system. The plugin and the example can be built using configure or CMake commands. For instructions on how to build with CMake, see the README.txt file in the source code distribution. The bzip2 library that can be built with CMake is available from: </p><div class="fragment"><div class="line">GIT_URL: <span class="stringliteral">&quot;https://github.com/libarchive/bzip2.git&quot;</span></div>
+<div class="line">GIT_BRANCH: <span class="stringliteral">&quot;master&quot;</span></div>
+</div><!-- fragment --><p>See the documentation at &lt;aref="https://github.com/HDFGroup/hdf5_plugins/tree/master/docs"&gt;hdf5_plugins/docs folder. In particular: &lt;aref="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/INSTALL_With_CMake.txt"&gt;INSTALL_With_CMake &lt;aref="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/USING_HDF5_AND_CMake.txt"&gt;USING_HDF5_AND_CMake </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

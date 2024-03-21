@@ -111,48 +111,53 @@ $(function(){initNavTree('struct_h5_f_d__hdfs__fapl__t.html',''); initResizable(
 <div class="contents">
 
 <p><code>#include &lt;src/H5FDhdfs.h&gt;</code></p>
-<table class="memberdecls">
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Configuration structure for <a class="el" href="group___f_a_p_l.html#ga970d077c8e712a4692f43fa4f38dde14" title="Modifies the file access property list to use the H5FD_HDFS driver.">H5Pset_fapl_hdfs()</a> / <a class="el" href="group___f_a_p_l.html#gae59e7d8e0e8823e6dd6034b66418ed00" title="Queries a File Access Property List for H5FD_HDFS file driver properties.">H5Pget_fapl_hdfs()</a> </p>
+<p><a class="el" href="struct_h5_f_d__hdfs__fapl__t.html" title="Configuration structure for H5Pset_fapl_hdfs() / H5Pget_fapl_hdfs()">H5FD_hdfs_fapl_t</a> is a public structure that is used to pass configuration data to the <a class="el" href="_h5_f_dhdfs_8h.html#ac3868cc2fa0e9aec4bcb52830906d584">H5FD_HDFS</a> driver via a File Access Property List. A pointer to an instance of this structure is a parameter to <a class="el" href="group___f_a_p_l.html#ga970d077c8e712a4692f43fa4f38dde14" title="Modifies the file access property list to use the H5FD_HDFS driver.">H5Pset_fapl_hdfs()</a> and <a class="el" href="group___f_a_p_l.html#gae59e7d8e0e8823e6dd6034b66418ed00" title="Queries a File Access Property List for H5FD_HDFS file driver properties.">H5Pget_fapl_hdfs()</a>. </p>
+</div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Data Fields</h2></td></tr>
 <tr class="memitem:a67fae7dd1de9edce3656ed214d20377f" id="r_a67fae7dd1de9edce3656ed214d20377f"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a67fae7dd1de9edce3656ed214d20377f">version</a></td></tr>
 <tr class="separator:a67fae7dd1de9edce3656ed214d20377f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8c5af13cce151d02531b7a7d14e73685" id="r_a8c5af13cce151d02531b7a7d14e73685"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8c5af13cce151d02531b7a7d14e73685">namenode_name</a> [128+1]</td></tr>
-<tr class="separator:a8c5af13cce151d02531b7a7d14e73685"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad487771c3e8323d3d004f3aa7ae3c93b" id="r_ad487771c3e8323d3d004f3aa7ae3c93b"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad487771c3e8323d3d004f3aa7ae3c93b">namenode_name</a> [128+1]</td></tr>
+<tr class="separator:ad487771c3e8323d3d004f3aa7ae3c93b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb1d5208ca0d259bda5b6dff4588e448" id="r_aeb1d5208ca0d259bda5b6dff4588e448"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb1d5208ca0d259bda5b6dff4588e448">namenode_port</a></td></tr>
 <tr class="separator:aeb1d5208ca0d259bda5b6dff4588e448"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d1d8da4da4f3dcf872e4ff82502ad96" id="r_a8d1d8da4da4f3dcf872e4ff82502ad96"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8d1d8da4da4f3dcf872e4ff82502ad96">user_name</a> [128+1]</td></tr>
-<tr class="separator:a8d1d8da4da4f3dcf872e4ff82502ad96"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a88e93747dc0a212fc97525a78002df7b" id="r_a88e93747dc0a212fc97525a78002df7b"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a88e93747dc0a212fc97525a78002df7b">kerberos_ticket_cache</a> [128+1]</td></tr>
-<tr class="separator:a88e93747dc0a212fc97525a78002df7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0beed8cf9ebd61a404cd9851546ee3b1" id="r_a0beed8cf9ebd61a404cd9851546ee3b1"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0beed8cf9ebd61a404cd9851546ee3b1">user_name</a> [128+1]</td></tr>
+<tr class="separator:a0beed8cf9ebd61a404cd9851546ee3b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5b1a6a063110c92aac47f66edd18a3d" id="r_af5b1a6a063110c92aac47f66edd18a3d"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af5b1a6a063110c92aac47f66edd18a3d">kerberos_ticket_cache</a> [128+1]</td></tr>
+<tr class="separator:af5b1a6a063110c92aac47f66edd18a3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46abc77f8f735df1509af96e74120fdf" id="r_a46abc77f8f735df1509af96e74120fdf"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a46abc77f8f735df1509af96e74120fdf">stream_buffer_size</a></td></tr>
 <tr class="separator:a46abc77f8f735df1509af96e74120fdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Field Documentation</h2>
-<a id="a88e93747dc0a212fc97525a78002df7b" name="a88e93747dc0a212fc97525a78002df7b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a88e93747dc0a212fc97525a78002df7b">&#9670;&#160;</a></span>kerberos_ticket_cache</h2>
+<a id="af5b1a6a063110c92aac47f66edd18a3d" name="af5b1a6a063110c92aac47f66edd18a3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5b1a6a063110c92aac47f66edd18a3d">&#9670;&#160;</a></span>kerberos_ticket_cache</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char kerberos_ticket_cache[128+1]</td>
+          <td class="memname">char kerberos_ticket_cache[<a class="el" href="_h5_f_dhdfs_8h.html#a6250cdaee6a7de597350f77ac7f519af">H5FD__HDFS_KERB_CACHE_PATH_SPACE</a>+1]</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Path to the location of the Kerberos authentication cache </p>
 
 </div>
 </div>
-<a id="a8c5af13cce151d02531b7a7d14e73685" name="a8c5af13cce151d02531b7a7d14e73685"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8c5af13cce151d02531b7a7d14e73685">&#9670;&#160;</a></span>namenode_name</h2>
+<a id="ad487771c3e8323d3d004f3aa7ae3c93b" name="ad487771c3e8323d3d004f3aa7ae3c93b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad487771c3e8323d3d004f3aa7ae3c93b">&#9670;&#160;</a></span>namenode_name</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char namenode_name[128+1]</td>
+          <td class="memname">char namenode_name[<a class="el" href="_h5_f_dhdfs_8h.html#ab12143da32df036a6134516b22994e69">H5FD__HDFS_NODE_NAME_SPACE</a>+1]</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Name of "Name Node" to access as the HDFS server </p>
 
 </div>
 </div>
@@ -167,6 +172,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Port number to use to connect with Name Node </p>
 
 </div>
 </div>
@@ -181,20 +187,22 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Size (in bytes) of the file read stream buffer </p>
 
 </div>
 </div>
-<a id="a8d1d8da4da4f3dcf872e4ff82502ad96" name="a8d1d8da4da4f3dcf872e4ff82502ad96"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8d1d8da4da4f3dcf872e4ff82502ad96">&#9670;&#160;</a></span>user_name</h2>
+<a id="a0beed8cf9ebd61a404cd9851546ee3b1" name="a0beed8cf9ebd61a404cd9851546ee3b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0beed8cf9ebd61a404cd9851546ee3b1">&#9670;&#160;</a></span>user_name</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char user_name[128+1]</td>
+          <td class="memname">char user_name[<a class="el" href="_h5_f_dhdfs_8h.html#a1b8c5c4e12e06f03e41d42017e3b481a">H5FD__HDFS_USER_NAME_SPACE</a>+1]</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Username to use when accessing file </p>
 
 </div>
 </div>
@@ -209,6 +217,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Version number of the <a class="el" href="struct_h5_f_d__hdfs__fapl__t.html" title="Configuration structure for H5Pset_fapl_hdfs() / H5Pget_fapl_hdfs()">H5FD_hdfs_fapl_t</a> structure. Any instance passed to <a class="el" href="group___f_a_p_l.html#ga970d077c8e712a4692f43fa4f38dde14" title="Modifies the file access property list to use the H5FD_HDFS driver.">H5Pset_fapl_hdfs()</a> / <a class="el" href="group___f_a_p_l.html#gae59e7d8e0e8823e6dd6034b66418ed00" title="Queries a File Access Property List for H5FD_HDFS file driver properties.">H5Pget_fapl_hdfs()</a> must have a recognized version number or an error will be raised. Currently, this field should be set to <a class="el" href="_h5_f_dhdfs_8h.html#af0f0f4be810d8a828ad1bce776bb96c6">H5FD__CURR_HDFS_FAPL_T_VERSION</a>. </p>
 
 </div>
 </div>

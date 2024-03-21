@@ -105,6 +105,7 @@ $(function(){initNavTree('namespaceh5e.html',''); initResizable(); });
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Data Types</a> &#124;
 <a href="#func-members">Functions/Subroutines</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">h5e Module Reference<div class="ingroups"><a class="el" href="group___f_h5_e.html">Fortran Error (H5E) Interface</a></div></div></div>
@@ -114,6 +115,16 @@ $(function(){initNavTree('namespaceh5e.html',''); initResizable(); });
 <p>This module contains Fortran interfaces for H5E functions.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Data Types</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">type &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structh5e_1_1h5e__error__t.html">h5e_error_t</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structh5e_1_1h5e__error__t.html" title="h5e_error_t derived type">h5e_error_t</a> derived type  <a href="structh5e_1_1h5e__error__t.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfaceh5e_1_1h5eprint__c.html">h5eprint_c</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfaceh5e_1_1h5eprint__f.html">h5eprint_f</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions/Subroutines</h2></td></tr>
 <tr class="memitem:ga5fe81257a3e9f1b6e2c2bd10040e7633" id="r_ga5fe81257a3e9f1b6e2c2bd10040e7633"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#ga5fe81257a3e9f1b6e2c2bd10040e7633">h5eclear_f</a> (hdferr, estack_id)</td></tr>
@@ -122,6 +133,8 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:ga4b6701c07c4bd23da6b7e3e97efb8d09" id="r_ga4b6701c07c4bd23da6b7e3e97efb8d09"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#ga4b6701c07c4bd23da6b7e3e97efb8d09">h5eprint_f</a> (hdferr, name)</td></tr>
 <tr class="memdesc:ga4b6701c07c4bd23da6b7e3e97efb8d09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prints the error stack in a default manner.  <br /></td></tr>
 <tr class="separator:ga4b6701c07c4bd23da6b7e3e97efb8d09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a432bed54136e7b873d39bd593e4ecb0a" id="r_a432bed54136e7b873d39bd593e4ecb0a"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a432bed54136e7b873d39bd593e4ecb0a">h5eprint_f</a> (err_stack, hdferr, name)</td></tr>
+<tr class="separator:a432bed54136e7b873d39bd593e4ecb0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf1717e66b301b9bc467ac1f534021e42" id="r_gaf1717e66b301b9bc467ac1f534021e42"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#gaf1717e66b301b9bc467ac1f534021e42">h5eget_major_f</a> (error_no, name, namelen, hdferr)</td></tr>
 <tr class="memdesc:gaf1717e66b301b9bc467ac1f534021e42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a character string describing an error specified by a major error number.  <br /></td></tr>
 <tr class="separator:gaf1717e66b301b9bc467ac1f534021e42"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -131,6 +144,51 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:gae085627dd12406d957a1a200aed188e6" id="r_gae085627dd12406d957a1a200aed188e6"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#gae085627dd12406d957a1a200aed188e6">h5eset_auto_f</a> (printflag, hdferr, estack_id, func, client_data)</td></tr>
 <tr class="memdesc:gae085627dd12406d957a1a200aed188e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns settings for automatic error stack traversal function and its data.  <br /></td></tr>
 <tr class="separator:gae085627dd12406d957a1a200aed188e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafaad7da9e85a05fb031b56685d042dae" id="r_gafaad7da9e85a05fb031b56685d042dae"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#gafaad7da9e85a05fb031b56685d042dae">h5epush_f</a> (err_stack, file, func, line, cls_id, maj_id, min_id, msg, hdferr, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20)</td></tr>
+<tr class="memdesc:gafaad7da9e85a05fb031b56685d042dae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pushes a new error record onto an error stack.  <br /></td></tr>
+<tr class="separator:gafaad7da9e85a05fb031b56685d042dae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3cd53ec69d1429128ab726ca1843469e" id="r_ga3cd53ec69d1429128ab726ca1843469e"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#ga3cd53ec69d1429128ab726ca1843469e">h5eregister_class_f</a> (cls_name, lib_name, version, class_id, hdferr)</td></tr>
+<tr class="memdesc:ga3cd53ec69d1429128ab726ca1843469e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers a client library or application program to the HDF5 error API.  <br /></td></tr>
+<tr class="separator:ga3cd53ec69d1429128ab726ca1843469e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5cb5cd838eb47e948182ec6236ca4328" id="r_ga5cb5cd838eb47e948182ec6236ca4328"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#ga5cb5cd838eb47e948182ec6236ca4328">h5eunregister_class_f</a> (class_id, hdferr)</td></tr>
+<tr class="memdesc:ga5cb5cd838eb47e948182ec6236ca4328"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes an error class.  <br /></td></tr>
+<tr class="separator:ga5cb5cd838eb47e948182ec6236ca4328"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae2f2d8e3e645de9528db020ec89a3cf7" id="r_gae2f2d8e3e645de9528db020ec89a3cf7"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#gae2f2d8e3e645de9528db020ec89a3cf7">h5ecreate_msg_f</a> (class_id, msg_type, msg, err_id, hdferr)</td></tr>
+<tr class="memdesc:gae2f2d8e3e645de9528db020ec89a3cf7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a major or minor error message to an error class.  <br /></td></tr>
+<tr class="separator:gae2f2d8e3e645de9528db020ec89a3cf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac3bae705baa78fd6478bb381fe25d6b7" id="r_gac3bae705baa78fd6478bb381fe25d6b7"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#gac3bae705baa78fd6478bb381fe25d6b7">h5eclose_msg_f</a> (err_id, hdferr)</td></tr>
+<tr class="memdesc:gac3bae705baa78fd6478bb381fe25d6b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes an error message.  <br /></td></tr>
+<tr class="separator:gac3bae705baa78fd6478bb381fe25d6b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0a9f36ee4fae4f4d18c642b9e57aab28" id="r_ga0a9f36ee4fae4f4d18c642b9e57aab28"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#ga0a9f36ee4fae4f4d18c642b9e57aab28">h5eget_msg_f</a> (msg_id, msg_type, msg, hdferr, msg_size)</td></tr>
+<tr class="memdesc:ga0a9f36ee4fae4f4d18c642b9e57aab28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves an error message.  <br /></td></tr>
+<tr class="separator:ga0a9f36ee4fae4f4d18c642b9e57aab28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3be426dd59c6c2d732835b28e761fa12" id="r_ga3be426dd59c6c2d732835b28e761fa12"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#ga3be426dd59c6c2d732835b28e761fa12">h5eget_num_f</a> (error_stack_id, count, hdferr)</td></tr>
+<tr class="memdesc:ga3be426dd59c6c2d732835b28e761fa12"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the number of error messages in an error stack.  <br /></td></tr>
+<tr class="separator:ga3be426dd59c6c2d732835b28e761fa12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafddb4d9b7e06be6e6ffe2a5cb3aec220" id="r_gafddb4d9b7e06be6e6ffe2a5cb3aec220"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#gafddb4d9b7e06be6e6ffe2a5cb3aec220">h5ewalk_f</a> (err_stack, direction, op, op_data, hdferr)</td></tr>
+<tr class="memdesc:gafddb4d9b7e06be6e6ffe2a5cb3aec220"><td class="mdescLeft">&#160;</td><td class="mdescRight">Walks the specified error stack, calling the specified function.  <br /></td></tr>
+<tr class="separator:gafddb4d9b7e06be6e6ffe2a5cb3aec220"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga2cb8993658c13d191742e8ecc1cc1e3e" id="r_ga2cb8993658c13d191742e8ecc1cc1e3e"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#ga2cb8993658c13d191742e8ecc1cc1e3e">h5eget_class_name_f</a> (class_id, name, hdferr, size)</td></tr>
+<tr class="memdesc:ga2cb8993658c13d191742e8ecc1cc1e3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves an error message.  <br /></td></tr>
+<tr class="separator:ga2cb8993658c13d191742e8ecc1cc1e3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8b2c03c433fe313d61f522d968a35e3a" id="r_ga8b2c03c433fe313d61f522d968a35e3a"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#ga8b2c03c433fe313d61f522d968a35e3a">h5eappend_stack_f</a> (dst_stack_id, src_stack_id, close_source_stack, hdferr)</td></tr>
+<tr class="memdesc:ga8b2c03c433fe313d61f522d968a35e3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Appends one error stack to another, optionally closing the source stack.  <br /></td></tr>
+<tr class="separator:ga8b2c03c433fe313d61f522d968a35e3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae4cc331fdce8f34ee44fbea7de5ef4f5" id="r_gae4cc331fdce8f34ee44fbea7de5ef4f5"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#gae4cc331fdce8f34ee44fbea7de5ef4f5">h5eget_current_stack_f</a> (err_stack_id, hdferr)</td></tr>
+<tr class="memdesc:gae4cc331fdce8f34ee44fbea7de5ef4f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a copy of the current error stack.  <br /></td></tr>
+<tr class="separator:gae4cc331fdce8f34ee44fbea7de5ef4f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9de97a6d5bfcb6717fef5584ec0a3b4e" id="r_ga9de97a6d5bfcb6717fef5584ec0a3b4e"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#ga9de97a6d5bfcb6717fef5584ec0a3b4e">h5eset_current_stack_f</a> (err_stack_id, hdferr)</td></tr>
+<tr class="memdesc:ga9de97a6d5bfcb6717fef5584ec0a3b4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replaces the current error stack.  <br /></td></tr>
+<tr class="separator:ga9de97a6d5bfcb6717fef5584ec0a3b4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6801f92b4a6fd829e9d697c25b801fd1" id="r_ga6801f92b4a6fd829e9d697c25b801fd1"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#ga6801f92b4a6fd829e9d697c25b801fd1">h5eclose_stack_f</a> (err_stack_id, hdferr)</td></tr>
+<tr class="memdesc:ga6801f92b4a6fd829e9d697c25b801fd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes an error stack handle.  <br /></td></tr>
+<tr class="separator:ga6801f92b4a6fd829e9d697c25b801fd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabeeb009169dc4cda1b828ae2b228e216" id="r_gabeeb009169dc4cda1b828ae2b228e216"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#gabeeb009169dc4cda1b828ae2b228e216">h5ecreate_stack_f</a> (err_stack_id, hdferr)</td></tr>
+<tr class="memdesc:gabeeb009169dc4cda1b828ae2b228e216"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new, empty error stack.  <br /></td></tr>
+<tr class="separator:gabeeb009169dc4cda1b828ae2b228e216"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gadf5d9e2ac00fe7d7ddcb4db65e499655" id="r_gadf5d9e2ac00fe7d7ddcb4db65e499655"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_e.html#gadf5d9e2ac00fe7d7ddcb4db65e499655">h5epop_f</a> (err_stack_id, count, hdferr)</td></tr>
+<tr class="memdesc:gadf5d9e2ac00fe7d7ddcb4db65e499655"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deletes specified number of error messages from the error stack.  <br /></td></tr>
+<tr class="separator:gadf5d9e2ac00fe7d7ddcb4db65e499655"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -143,7 +201,34 @@ Variables</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This module contains Fortran interfaces for H5E functions. </p>
-</div><h2 class="groupheader">Variable Documentation</h2>
+</div><h2 class="groupheader">Function/Subroutine Documentation</h2>
+<a id="a432bed54136e7b873d39bd593e4ecb0a" name="a432bed54136e7b873d39bd593e4ecb0a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a432bed54136e7b873d39bd593e4ecb0a">&#9670;&#160;</a></span>h5eprint_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5eprint_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>err_stack</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in), optional</td>          <td class="paramname"><span class="paramname"><em>name</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Variable Documentation</h2>
 <a id="a5106ae64a9e7c1101ea1617538461788" name="a5106ae64a9e7c1101ea1617538461788"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5106ae64a9e7c1101ea1617538461788">&#9670;&#160;</a></span>printoff</h2>
 

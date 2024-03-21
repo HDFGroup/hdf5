@@ -137,7 +137,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga65b660eb16b25cc008585ba8990e8b15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes an error message.  <br /></td></tr>
 <tr class="separator:ga65b660eb16b25cc008585ba8990e8b15"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga99a705d98873dcdd1bb6f9d5eebc5afd" id="r_ga99a705d98873dcdd1bb6f9d5eebc5afd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga99a705d98873dcdd1bb6f9d5eebc5afd">H5Ecreate_msg</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> cls, <a class="el" href="_h5_epublic_8h.html#a415162f1ce9b31241977d0a5857caa3c">H5E_type_t</a> msg_type, const char *msg)</td></tr>
-<tr class="memdesc:ga99a705d98873dcdd1bb6f9d5eebc5afd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a major error message to an error class.  <br /></td></tr>
+<tr class="memdesc:ga99a705d98873dcdd1bb6f9d5eebc5afd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a major or minor error message to an error class.  <br /></td></tr>
 <tr class="separator:ga99a705d98873dcdd1bb6f9d5eebc5afd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga8bfca811dc01e97b4ab0736dd8775b39" id="r_ga8bfca811dc01e97b4ab0736dd8775b39"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8bfca811dc01e97b4ab0736dd8775b39">H5Ecreate_stack</a> (void)</td></tr>
 <tr class="memdesc:ga8bfca811dc01e97b4ab0736dd8775b39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new, empty error stack.  <br /></td></tr>
@@ -507,18 +507,18 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Adds a major error message to an error class. </p>
+<p>Adds a major or minor error message to an error class. </p>
 <hr  />
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">cls</td><td>An error class identifier </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">msg_type</td><td>The type of the error message </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">msg</td><td>Major error message </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">msg</td><td>Error message </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#ga99a705d98873dcdd1bb6f9d5eebc5afd" title="Adds a major error message to an error class.">H5Ecreate_msg()</a> adds an error message to an error class defined by client library or application program. The error message can be either major or minor as indicated by the parameter <code>msg_type</code>.</p>
+<dl class="section return"><dt>Returns</dt><dd>An error ID (success), H5I_INVALID_HID (failure)</dd></dl>
+<p><a class="el" href="#ga99a705d98873dcdd1bb6f9d5eebc5afd" title="Adds a major or minor error message to an error class.">H5Ecreate_msg()</a> adds an error message to an error class defined by client library or application program. The error message can be either major or minor as indicated by the parameter <code>msg_type</code>.</p>
 <p>Use <a class="el" href="#ga65b660eb16b25cc008585ba8990e8b15" title="Closes an error message.">H5Eclose_msg()</a> to close the message identifier returned by this function.</p>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
@@ -713,7 +713,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the message (success), or NULL (failure)</dd></dl>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000025">Deprecated</a></b></dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
 <p><a class="el" href="#ga91fa7fb56da6f08f9c293a6ce89c7819" title="Returns a character string describing an error specified by a major error number.">H5Eget_major()</a> returns a constant character string that describes the error, given a major error number.</p>
 <dl class="section attention"><dt>Attention</dt><dd>This function returns a dynamically allocated string (<code>char</code> array). An application calling this function must free the memory associated with the return value to prevent a memory leak.</dd></dl>
@@ -744,7 +744,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the message (success), or NULL (failure)</dd></dl>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000026">Deprecated</a></b></dt><dd>1.8.0 Function deprecated and return type changed in this release.</dd></dl>
 <p><a class="el" href="#ga4975325db13bc5cf44d72d4ef0394034" title="Returns a character string describing an error specified by a minor error number.">H5Eget_minor()</a> returns a constant character string that describes the error, given a minor error number.</p>
 <dl class="section attention"><dt>Attention</dt><dd>In the Release 1.8.x series, <a class="el" href="#ga4975325db13bc5cf44d72d4ef0394034" title="Returns a character string describing an error specified by a minor error number.">H5Eget_minor()</a> returns a string of dynamic allocated <code>char</code> array. An application calling this function from an HDF5 library of Release 1.8.0 or later must free the memory associated with the return value to prevent a memory leak. This is a change from the 1.6.x release series.</dd></dl>
@@ -786,7 +786,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">msg_id</td><td>Error message identifier </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">type</td><td>The type of the error message Valid values are <a class="el" href="_h5_epublic_8h.html#a415162f1ce9b31241977d0a5857caa3cab0e1bfd4dab03f69f9a884e9079d3acc">H5E_MAJOR</a> and <a class="el" href="_h5_epublic_8h.html#a415162f1ce9b31241977d0a5857caa3caabc45a68c0f04871387677c099abb338">H5E_MINOR</a>. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">type</td><td>The type of the error message. Valid values are <a class="el" href="_h5_epublic_8h.html#a415162f1ce9b31241977d0a5857caa3cab0e1bfd4dab03f69f9a884e9079d3acc">H5E_MAJOR</a> and <a class="el" href="_h5_epublic_8h.html#a415162f1ce9b31241977d0a5857caa3caabc45a68c0f04871387677c099abb338">H5E_MINOR</a>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">msg</td><td>Error message buffer </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>The length of error message to be returned by this function </td></tr>
   </table>
@@ -821,7 +821,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value on success; otherwise returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns number of error messages in an error stack on success; otherwise returns a negative value.</dd></dl>
 <p><a class="el" href="#ga5c42673e2059c385a95ce3c597e0756d" title="Retrieves the number of error messages in an error stack.">H5Eget_num()</a> retrieves the number of error records in the error stack specified by <code>error_stack_id</code> (including major, minor messages and description).</p>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 

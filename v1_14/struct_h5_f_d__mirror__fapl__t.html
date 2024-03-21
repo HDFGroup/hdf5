@@ -111,7 +111,10 @@ $(function(){initNavTree('struct_h5_f_d__mirror__fapl__t.html',''); initResizabl
 <div class="contents">
 
 <p><code>#include &lt;src/H5FDmirror.h&gt;</code></p>
-<table class="memberdecls">
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Configuration structure for <a class="el" href="group___f_a_p_l.html#ga8491676811ccc7ba582e30fb63da6563" title="Modifies the file access property list to use the H5FD_MIRROR driver.">H5Pset_fapl_mirror()</a> / <a class="el" href="group___f_a_p_l.html#ga2c0636d9bb9c50d381afbd0d3140e593" title="Queries a File Access Property List for H5FD_MIRROR file driver properties.">H5Pget_fapl_mirror()</a> </p>
+<p><a class="el" href="struct_h5_f_d__mirror__fapl__t.html" title="Configuration structure for H5Pset_fapl_mirror() / H5Pget_fapl_mirror()">H5FD_mirror_fapl_t</a> is a public structure that is used to pass configuration data to the <a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> driver via a File Access Property List. A pointer to an instance of this structure is a parameter to <a class="el" href="group___f_a_p_l.html#ga8491676811ccc7ba582e30fb63da6563" title="Modifies the file access property list to use the H5FD_MIRROR driver.">H5Pset_fapl_mirror()</a> and <a class="el" href="group___f_a_p_l.html#ga2c0636d9bb9c50d381afbd0d3140e593" title="Queries a File Access Property List for H5FD_MIRROR file driver properties.">H5Pget_fapl_mirror()</a>. </p>
+</div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Data Fields</h2></td></tr>
 <tr class="memitem:a57f54349f4fd1cbbb52058812e146af2" id="r_a57f54349f4fd1cbbb52058812e146af2"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a57f54349f4fd1cbbb52058812e146af2">magic</a></td></tr>
@@ -120,8 +123,8 @@ Data Fields</h2></td></tr>
 <tr class="separator:acd99bb05ca015e7d74448acb1deba7ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4134753d5788dc641ce8a3e3a924881c" id="r_a4134753d5788dc641ce8a3e3a924881c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4134753d5788dc641ce8a3e3a924881c">handshake_port</a></td></tr>
 <tr class="separator:a4134753d5788dc641ce8a3e3a924881c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acdb1ebff2a0d80f9b0c20a490c18a3b1" id="r_acdb1ebff2a0d80f9b0c20a490c18a3b1"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acdb1ebff2a0d80f9b0c20a490c18a3b1">remote_ip</a> [32+1]</td></tr>
-<tr class="separator:acdb1ebff2a0d80f9b0c20a490c18a3b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31bac44a59bc8e2533a5a44821e361a4" id="r_a31bac44a59bc8e2533a5a44821e361a4"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a31bac44a59bc8e2533a5a44821e361a4">remote_ip</a> [45+1]</td></tr>
+<tr class="separator:a31bac44a59bc8e2533a5a44821e361a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Field Documentation</h2>
 <a id="a4134753d5788dc641ce8a3e3a924881c" name="a4134753d5788dc641ce8a3e3a924881c"></a>
@@ -135,6 +138,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Port number on the remote host. </p>
 
 </div>
 </div>
@@ -149,20 +153,22 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Semi-unique number to sanity-check pointers to this structure type. Must equal H5FD_MIRROR_FAPL_MAGIC to be considered valid. </p>
 
 </div>
 </div>
-<a id="acdb1ebff2a0d80f9b0c20a490c18a3b1" name="acdb1ebff2a0d80f9b0c20a490c18a3b1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acdb1ebff2a0d80f9b0c20a490c18a3b1">&#9670;&#160;</a></span>remote_ip</h2>
+<a id="a31bac44a59bc8e2533a5a44821e361a4" name="a31bac44a59bc8e2533a5a44821e361a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31bac44a59bc8e2533a5a44821e361a4">&#9670;&#160;</a></span>remote_ip</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char remote_ip[32+1]</td>
+          <td class="memname">char remote_ip[<a class="el" href="_h5_f_dmirror_8h.html#a177e28c121e8c29397ee7fe66e62ab56">H5FD_MIRROR_MAX_IP_LEN</a>+1]</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>IP address string of the remote host. </p>
 
 </div>
 </div>
@@ -177,6 +183,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Version number of the <a class="el" href="struct_h5_f_d__mirror__fapl__t.html" title="Configuration structure for H5Pset_fapl_mirror() / H5Pget_fapl_mirror()">H5FD_mirror_fapl_t</a> structure. Any instance passed to <a class="el" href="group___f_a_p_l.html#ga8491676811ccc7ba582e30fb63da6563" title="Modifies the file access property list to use the H5FD_MIRROR driver.">H5Pset_fapl_mirror()</a> / <a class="el" href="group___f_a_p_l.html#ga2c0636d9bb9c50d381afbd0d3140e593" title="Queries a File Access Property List for H5FD_MIRROR file driver properties.">H5Pget_fapl_mirror()</a> must have a recognized version number or an error will be raised. Currently, this field should be set to <a class="el" href="_h5_f_dmirror_8h.html#ab7fd09353683690e7104e6b38a612f8a">H5FD_MIRROR_CURR_FAPL_T_VERSION</a>. </p>
 
 </div>
 </div>
