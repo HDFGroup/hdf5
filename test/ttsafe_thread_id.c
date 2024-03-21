@@ -23,7 +23,6 @@
 #define CYCLE_COUNT 2
 #define NTHREADS    5
 
-static volatile bool  failed = false;
 static H5TS_barrier_t barrier;
 static int            times;
 static bool           used[NTHREADS * CYCLE_COUNT];
@@ -130,7 +129,7 @@ tts_thread_id(void)
         }
     }
     result = H5TS__barrier_destroy(&barrier);
-    CHECK_I(result, "H5TS__barrier_init");
+    CHECK_I(result, "H5TS__barrier_destroy");
 
 } /* end tts_thread_id() */
 

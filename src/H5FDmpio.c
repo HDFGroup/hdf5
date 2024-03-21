@@ -1959,7 +1959,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
 done:
     /* free sorted vectors if they exist */
-    if (!vector_was_sorted)
+    if (!*vector_was_sorted)
         if (s_types) {
             free(s_types);
             s_types = NULL;

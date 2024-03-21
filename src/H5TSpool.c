@@ -100,9 +100,6 @@ static const H5TS_pool_t H5TS_pool_def = H5TS_POOL_INIT;
 /* Declare a free list to manage H5TS_pool_t structs */
 H5FL_DEFINE_STATIC(H5TS_pool_t);
 
-/* Declare a free list to manage H5TS_pool_task_t structs */
-H5FL_DEFINE_STATIC(H5TS_pool_task_t);
-
 /* Declare a free list to manage sequences of H5TS_thread_t structs */
 H5FL_SEQ_DEFINE_STATIC(H5TS_thread_t);
 
@@ -181,7 +178,7 @@ H5TS__pool_do(void *_pool)
 
         /* If there's a task, invoke it, else we're shutting down */
         if (NULL != pool->head) {
-            H5TS_pool_task_t *task; /* Task to invoke */
+            H5TS_pool_task_t *task;         /* Task to invoke */
 
             /* Grab our task */
             task = pool->head;
@@ -199,7 +196,7 @@ H5TS__pool_do(void *_pool)
             (*task->func)(task->ctx);
 
             /* Free the task node */
-            H5FL_FREE(H5TS_pool_task_t, task);
+            free(task);
         }
         else {
             assert(pool->shutdown);
@@ -209,7 +206,7 @@ H5TS__pool_do(void *_pool)
 
 done:
     /* Release the pool's mutex, if we're holding it */
-    if (have_mutex)
+    if (H5_UNLIKELY(have_mutex))
         if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex)))
             ret_value = (H5TS_thread_ret_t)1;
 
@@ -252,10 +249,8 @@ H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads)
 
     /* Start worker threads */
     for (unsigned u = 0; u < num_threads; u++) {
-        /* Create & detach thread */
+        /* Create thread, which waits to process tasks until the pool is active */
         if (H5_UNLIKELY(H5TS_thread_create(&new_pool->threads[u], H5TS__pool_do, (void *)new_pool) < 0))
-            HGOTO_DONE(FAIL);
-        if (H5_UNLIKELY(H5TS_thread_detach(new_pool->threads[u]) < 0))
             HGOTO_DONE(FAIL);
 
         /* Increment # of threads successfully created */
@@ -263,7 +258,7 @@ H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads)
     }
     assert(num_threads == new_pool->num_threads);
 
-    /* Mark pool as active */
+    /* Mark pool as active, so that threads start processing tasks */
     new_pool->active = true;
 
     /* Set return value */
@@ -307,7 +302,7 @@ H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
         HGOTO_DONE(FAIL);
 
     /* Allocate & initialize new task */
-    if (H5_UNLIKELY(NULL == (task = H5FL_MALLOC(H5TS_pool_task_t))))
+    if (H5_UNLIKELY(NULL == (task = malloc(sizeof(H5TS_pool_task_t)))))
         HGOTO_DONE(FAIL);
     task->func = func;
     task->ctx  = ctx;
@@ -330,19 +325,22 @@ H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
     else
         pool->head = pool->tail = task;
 
+    /* Avoid freeing the task on error, now */
+    task = NULL;
+
     /* Wake up any sleeping worker */
     if (H5_UNLIKELY(H5TS_cond_signal(&pool->cond)))
         HGOTO_DONE(FAIL);
 
 done:
-    if (H5_UNLIKELY(ret_value < 0))
-        if (task)
-            H5FL_FREE(H5TS_pool_task_t, task);
-
     /* Release the pool's mutex, if we're holding it */
-    if (have_mutex)
+    if (H5_LIKELY(have_mutex))
         if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex)))
             ret_value = FAIL;
+
+    if (H5_UNLIKELY(ret_value < 0))
+        if (task)
+            free(task);
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_pool_add_task() */
@@ -391,7 +389,7 @@ H5TS_pool_destroy(H5TS_pool_t *pool)
 
 done:
     /* Release the pool's mutex, if we're holding it */
-    if (have_mutex)
+    if (H5_UNLIKELY(have_mutex))
         if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex)))
             ret_value = FAIL;
 

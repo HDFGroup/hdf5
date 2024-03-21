@@ -4994,6 +4994,9 @@ test_vector_io(int mpi_rank, int mpi_size)
                                  H5FD_SUBFILING_NAME);
 #endif
 
+    /* discard the file image buffers */
+    free_file_images();
+
     nerrors += (int)nerrs;
 
     /* return(nerrs);*/
@@ -5047,6 +5050,11 @@ test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t
     if (H5FDread_selection(lf, type, dxpl, count, mem_spaces, file_spaces, offsets, element_sizes,
                            (void **)rbufs) < 0)
         goto error;
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     /* Verify result */
     for (i = 0; i < (int)rbufcount; i++) {
@@ -5126,6 +5134,11 @@ test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count,
     /* Issue write call */
     if (H5FDwrite_selection(lf, type, dxpl, count, mem_spaces, file_spaces, offsets, element_sizes, bufs) < 0)
         goto error;
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     if (bufs)
         free(bufs);
@@ -6459,18 +6472,30 @@ test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
     }
 
     /* Free the buffers */
-    if (wbuf1)
+    if (wbuf1) {
         free(wbuf1);
-    if (wbuf2)
+        wbuf1 = NULL;
+    }
+    if (wbuf2) {
         free(wbuf2);
-    if (fbuf1)
+        wbuf2 = NULL;
+    }
+    if (fbuf1) {
         free(fbuf1);
-    if (fbuf2)
+        fbuf1 = NULL;
+    }
+    if (fbuf2) {
         free(fbuf2);
-    if (erbuf1)
+        fbuf2 = NULL;
+    }
+    if (erbuf1) {
         free(erbuf1);
-    if (erbuf2)
+        erbuf1 = NULL;
+    }
+    if (erbuf2) {
         free(erbuf2);
+        erbuf2 = NULL;
+    }
 
     CHECK_PASSED();
 
@@ -6730,9 +6755,6 @@ finish:
             printf("Parallel vfd tests finished with no errors\n");
         printf("===================================\n");
     }
-
-    /* discard the file image buffers */
-    free_file_images();
 
     /* close HDF5 library */
     H5close();
