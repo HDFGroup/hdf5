@@ -67,7 +67,8 @@ static herr_t identify_ioc_ranks(int64_t sf_context_id, sf_topology_t *app_topol
 static herr_t init_subfiling_context(subfiling_context_t *sf_context, const char *base_filename,
                                      uint64_t file_id, H5FD_subfiling_params_t *subfiling_config,
                                      sf_topology_t *app_topology, MPI_Comm file_comm);
-static herr_t record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id, int *next_index);
+static herr_t init_open_file_map(void);
+static herr_t record_fid_map_entry(uint64_t file_id, int64_t subfile_context_id, int *next_index);
 static herr_t clear_fid_map_entry(uint64_t file_id, int64_t sf_context_id);
 static herr_t ioc_open_files(int64_t file_context_id, int file_acc_flags);
 static herr_t create_config_file(subfiling_context_t *sf_context, const char *base_filename,
@@ -646,7 +647,6 @@ H5_open_subfiles(const char *base_filename, uint64_t file_id, H5FD_subfiling_par
     int64_t              context_id   = -1;
     bool                 recorded_fid = false;
     int                  mpi_code;
-    herr_t               status;
     herr_t               ret_value = SUCCEED;
 
     if (!base_filename)
@@ -658,17 +658,21 @@ H5_open_subfiles(const char *base_filename, uint64_t file_id, H5FD_subfiling_par
     if (!context_id_out)
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "invalid subfiling context ID pointer");
 
-    /* Check if this file is already open */
-    H5E_BEGIN_TRY
-    {
-        status = H5_subfile_fid_to_context(file_id, &context_id);
-    }
-    H5E_END_TRY
+    /* Make sure open file mapping is initialized in case this
+     * is the first file open call with the VFD
+     */
+    if (init_open_file_map() < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't initialize open file mapping");
 
-    if (status >= 0 && context_id >= 0) {
+    /* Check if this file is already open */
+    if (H5_subfile_fid_to_context(file_id, &context_id) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                                "couldn't retrieve context ID from open file mapping");
+
+    if (context_id >= 0) {
         /* Retrieve the subfiling object for the cached context ID */
         if (NULL == (sf_context = H5_get_subfiling_object(context_id)))
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
                                     "couldn't get subfiling object from context ID");
     }
     else {
@@ -679,7 +683,7 @@ H5_open_subfiles(const char *base_filename, uint64_t file_id, H5FD_subfiling_par
 
         /* Retrieve the subfiling object for the newly-created context ID */
         if (NULL == (sf_context = H5_get_subfiling_object(context_id)))
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
                                     "couldn't get subfiling object from context ID");
 
         /*
@@ -722,7 +726,7 @@ H5_open_subfiles(const char *base_filename, uint64_t file_id, H5FD_subfiling_par
      * There shouldn't be any issue, but check the status and
      * return if there was a problem.
      */
-    if (record_fid_to_subfile(sf_context->h5_file_id, sf_context->sf_context_id, NULL) < 0)
+    if (record_fid_map_entry(sf_context->h5_file_id, sf_context->sf_context_id, NULL) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
                                 "couldn't record HDF5 file ID to subfile context mapping");
     recorded_fid = true;
@@ -1977,7 +1981,38 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    record_fid_to_subfile
+ * Function:    init_open_file_map
+ *
+ * Purpose:     Allocates and initializes an array that keeps a mapping
+ *              between a file's inode value (__ino_t st_ino) and the ID
+ *              of the context object associated with it.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+init_open_file_map(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    if (!sf_open_file_map) {
+        if (NULL == (sf_open_file_map = malloc((size_t)DEFAULT_FILE_MAP_ENTRIES * sizeof(*sf_open_file_map))))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate open file mapping");
+
+        sf_file_map_size = DEFAULT_FILE_MAP_ENTRIES;
+        for (int i = 0; i < sf_file_map_size; i++) {
+            sf_open_file_map[i].file_id       = UINT64_MAX;
+            sf_open_file_map[i].sf_context_id = -1;
+        }
+    }
+
+done:
+    H5_SUBFILING_FUNC_LEAVE;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    record_fid_map_entry
  *
  * Purpose:     Every opened HDF5 file will have (if utilizing subfiling)
  *              a subfiling context associated with it. It is important that
@@ -1995,29 +2030,16 @@ done:
  *              This function simply records the filesystem handle to
  *              subfiling context mapping.
  *
- * Return:      SUCCEED or FAIL.
- * Errors:      FAILs ONLY if storage for the mapping entry cannot
- *              be allocated.
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id, int *next_index)
+record_fid_map_entry(uint64_t file_id, int64_t subfile_context_id, int *next_index)
 {
     subfiling_context_t *sf_context = NULL;
     int                  index;
     herr_t               ret_value = SUCCEED;
-
-    if (!sf_open_file_map) {
-        if (NULL == (sf_open_file_map = malloc((size_t)DEFAULT_FILE_MAP_ENTRIES * sizeof(*sf_open_file_map))))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate open file mapping");
-
-        sf_file_map_size = DEFAULT_FILE_MAP_ENTRIES;
-        for (int i = 0; i < sf_file_map_size; i++) {
-            sf_open_file_map[i].file_id       = UINT64_MAX;
-            sf_open_file_map[i].sf_context_id = -1;
-        }
-    }
 
     for (index = 0; index < sf_file_map_size; index++) {
         if (sf_open_file_map[index].file_id == file_id) {
@@ -3037,8 +3059,8 @@ H5_subfile_fid_to_context(uint64_t file_id, int64_t *context_id_out)
 
     *context_id_out = -1;
 
-    if (!sf_open_file_map)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "open file map is NULL");
+    if (init_open_file_map() < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't initialize open file mapping");
 
     for (int i = 0; i < sf_file_map_size; i++)
         if (sf_open_file_map[i].file_id == file_id)
