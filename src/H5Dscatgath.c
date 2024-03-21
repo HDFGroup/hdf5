@@ -24,7 +24,6 @@
 #include "H5Dpkg.h"      /* Dataset functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free Lists                           */
-#include "H5Iprivate.h"  /* IDs                                  */
 #include "H5MMprivate.h" /* Memory management			*/
 
 /****************/
@@ -576,8 +575,8 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
             /*
              * Perform datatype conversion.
              */
-            if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
-                            dset_info->type_info.dst_type_id, smine_nelmts, (size_t)0, (size_t)0, tmp_buf,
+            if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type,
+                            dset_info->type_info.dst_type, smine_nelmts, (size_t)0, (size_t)0, tmp_buf,
                             io_info->bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
 
@@ -772,8 +771,8 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
             /*
              * Perform datatype conversion.
              */
-            if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
-                            dset_info->type_info.dst_type_id, smine_nelmts, (size_t)0, (size_t)0, tmp_buf,
+            if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type,
+                            dset_info->type_info.dst_type, smine_nelmts, (size_t)0, (size_t)0, tmp_buf,
                             io_info->bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
         } /* end else */
@@ -975,10 +974,9 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
                 /*
                  * Perform datatype conversion.
                  */
-                if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
-                                dset_info->type_info.dst_type_id,
-                                (size_t)io_info->sel_pieces[i]->piece_points, (size_t)0, (size_t)0,
-                                tmp_bufs[i], tmp_bkg_buf) < 0)
+                if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type,
+                                dset_info->type_info.dst_type, (size_t)io_info->sel_pieces[i]->piece_points,
+                                (size_t)0, (size_t)0, tmp_bufs[i], tmp_bkg_buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
 
                 /* Do the data transform after the conversion (since we're using type mem_type) */
@@ -1232,8 +1230,8 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                     /*
                      * Perform datatype conversion.
                      */
-                    if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
-                                    dset_info->type_info.dst_type_id,
+                    if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type,
+                                    dset_info->type_info.dst_type,
                                     (size_t)io_info->sel_pieces[i]->piece_points, (size_t)0, (size_t)0,
                                     tmp_write_buf, tmp_bkg_buf) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
@@ -1292,10 +1290,9 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                  * Perform datatype conversion.
                  */
                 assert(j < bkg_pieces);
-                if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
-                                dset_info->type_info.dst_type_id,
-                                (size_t)io_info->sel_pieces[i]->piece_points, (size_t)0, (size_t)0,
-                                tmp_write_buf, bkg_bufs[j]) < 0)
+                if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type,
+                                dset_info->type_info.dst_type, (size_t)io_info->sel_pieces[i]->piece_points,
+                                (size_t)0, (size_t)0, tmp_write_buf, bkg_bufs[j]) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
 
                 /* Advance to next background buffer */

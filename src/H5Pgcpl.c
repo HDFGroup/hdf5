@@ -31,7 +31,6 @@
 #include "H5private.h"  /* Generic Functions                        */
 #include "H5Eprivate.h" /* Error handling                           */
 #include "H5Gprivate.h" /* Groups                                   */
-#include "H5Iprivate.h" /* IDs                                      */
 #include "H5Oprivate.h" /* Object headers                           */
 #include "H5Ppkg.h"     /* Property lists                           */
 
@@ -187,7 +186,7 @@ H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint /*out*/)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, size_hint);
+    H5TRACE2("e", "i*z", plist_id, size_hint);
 
     if (size_hint) {
         H5P_genplist_t *plist; /* Property list pointer */
@@ -282,7 +281,7 @@ H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", plist_id, max_compact, min_dense);
+    H5TRACE3("e", "i*Iu*Iu", plist_id, max_compact, min_dense);
 
     /* Get values */
     if (max_compact || min_dense) {
@@ -380,7 +379,7 @@ H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /*out*/, unsigned
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", plist_id, est_num_entries, est_name_len);
+    H5TRACE3("e", "i*Iu*Iu", plist_id, est_num_entries, est_name_len);
 
     /* Get values */
     if (est_num_entries || est_name_len) {
@@ -464,7 +463,7 @@ H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags /*out*/)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, crt_order_flags);
+    H5TRACE2("e", "i*Iu", plist_id, crt_order_flags);
 
     /* Get values */
     if (crt_order_flags) {

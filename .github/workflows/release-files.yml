@@ -44,9 +44,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - run: |
-          git checkout ${{ inputs.file_sha }}
-
       - uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
         id: "tag_create"
         with:
@@ -178,8 +175,6 @@ jobs:
       - name: Create description file
         run: |
           cat ${{ github.workspace }}/NEWSLETTER.txt > description.txt
-          echo "SHA256 sums:" >> description.txt
-          cat sha256sums.txt >> description.txt
 
       - name: PreRelease tag
         id: create_prerelease

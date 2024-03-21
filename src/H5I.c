@@ -908,7 +908,7 @@ H5Iget_name(hid_t id, char *name /*out*/, size_t size)
     ssize_t                ret_value    = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "ixz", id, name, size);
+    H5TRACE3("Zs", "i*sz", id, name, size);
 
     /* Get the object pointer */
     if (NULL == (vol_obj = H5VL_vol_object(id)))

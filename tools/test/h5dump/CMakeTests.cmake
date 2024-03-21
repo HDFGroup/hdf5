@@ -103,6 +103,8 @@
       tfletcher32.ddl
       #tfloatsattrs.ddl #native
       #tfloatsattrs.wddl #special for windows
+      tfloat16.ddl
+      tfloat16_be.ddl
       tfpformat.ddl
       tgroup-1.ddl
       tgroup-2.ddl
@@ -291,6 +293,8 @@
       tfcontents2.h5
       tfilters.h5
       tfloatsattrs.h5
+      tfloat16.h5
+      tfloat16_be.h5
       tfpformat.h5
       tfvalues.h5
       tgroup.h5
@@ -500,6 +504,40 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+    endif ()
+    set_tests_properties (H5DUMP-${resultfile} PROPERTIES
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
+    )
+    if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_COMP_TEST resultfile resultcode resultvalue)
+    # If using memchecker add tests without using scripts
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
+      if (${resultcode})
+        set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
+      endif ()
+      set_tests_properties (H5DUMP-${resultfile} PROPERTIES
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
+      )
+    else ()
+      add_test (
+          NAME H5DUMP-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_FILTER:STRING=SIZE [0-9]* \\(${resultvalue}\\\.[0-9][0-9][0-9]:1 COMPRESSION\\)"
+              -D "TEST_FILTER_REPLACE:STRING=SIZE XXXX (${resultvalue}.XXX:1 COMPRESSION)"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
@@ -1235,25 +1273,25 @@
 
   # tests for filters
   # SZIP
-  ADD_H5_TEST (tszip 0 --enable-error-stack -H -p -d szip tfilters.h5)
+  ADD_H5_COMP_TEST (tszip 0 2 --enable-error-stack -H -p -d szip tfilters.h5)
 
   # deflate
-  ADD_H5_TEST (tdeflate 0 --enable-error-stack -H -p -d deflate tfilters.h5)
+  ADD_H5_COMP_TEST (tdeflate 0 2 --enable-error-stack -H -p -d deflate tfilters.h5)
 
   # shuffle
   ADD_H5_TEST (tshuffle 0 --enable-error-stack -H -p -d shuffle tfilters.h5)
 
   # fletcher32
-  ADD_H5_TEST (tfletcher32 0 --enable-error-stack -H -p -d fletcher32  tfilters.h5)
+  ADD_H5_COMP_TEST (tfletcher32 0 0 --enable-error-stack -H -p -d fletcher32  tfilters.h5)
 
   # nbit
-  ADD_H5_TEST (tnbit 0 --enable-error-stack -H -p -d nbit  tfilters.h5)
+  ADD_H5_COMP_TEST (tnbit 0 10 --enable-error-stack -H -p -d nbit  tfilters.h5)
 
   # scaleoffset
-  ADD_H5_TEST (tscaleoffset 0 --enable-error-stack -H -p -d scaleoffset  tfilters.h5)
+  ADD_H5_COMP_TEST (tscaleoffset 0 4 --enable-error-stack -H -p -d scaleoffset  tfilters.h5)
 
   # all
-  ADD_H5_TEST (tallfilters 0 --enable-error-stack -H -p -d all  tfilters.h5)
+  ADD_H5_COMP_TEST (tallfilters 0 1 --enable-error-stack -H -p -d all  tfilters.h5)
 
   # user defined
   ADD_H5_TEST (tuserfilter 0 --enable-error-stack -H  -p -d myfilter  tfilters.h5)
@@ -1301,6 +1339,10 @@
   ADD_H5_TEST (tfloatsattrs 0 -p --enable-error-stack tfloatsattrs.h5)
   ADD_H5_TEST (tldouble 0 --enable-error-stack tldouble.h5)
   ADD_H5_TEST (tldouble_scalar 0 -p --enable-error-stack tldouble_scalar.h5)
+
+  # Add tests for _Float16 type
+  ADD_H5_TEST (tfloat16 0 --enable-error-stack tfloat16.h5)
+  ADD_H5_TEST (tfloat16_be 0 --enable-error-stack tfloat16_be.h5)
 
   # test for vms
   ADD_H5_TEST (tvms 0 --enable-error-stack tvms.h5)

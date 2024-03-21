@@ -5,7 +5,7 @@ bzip2 filter is available for encoding and decoding.
 Filter info is available from the dataset creation property 
    Filter identifier is 307
    Number of parameters is 1 with the value 2
-   To find more about the filter check HDF5 bzip2 filter; see http://www.hdfgroup.org/services/contributions.html
+   To find more about the filter check HDF5 bzip2 filter; see https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md
 ....Reading bzip2 compressed data ................
 Maximum value in DS1 is 1890
 bzip2 filter is available now since H5Dread triggered loading of the filter.

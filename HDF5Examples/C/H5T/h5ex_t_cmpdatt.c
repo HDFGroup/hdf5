@@ -146,7 +146,7 @@ main(void)
      * Output the data to the screen.
      */
     for (i = 0; i < dims[0]; i++) {
-        printf("%s[%llu]:\n", ATTRIBUTE, i);
+        printf("%s[%" PRIuHSIZE "]:\n", ATTRIBUTE, i);
         printf("Serial number   : %d\n", rdata[i].serial_no);
         printf("Location        : %s\n", rdata[i].location);
         printf("Temperature (F) : %f\n", rdata[i].temperature);

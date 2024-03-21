@@ -28,14 +28,13 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fprivate.h"  /* File access				*/
-#include "H5Gpkg.h"      /* Groups		  		*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5Lprivate.h"  /* Links			  	*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Pprivate.h"  /* Property Lists			*/
+#include "H5private.h"  /* Generic Functions			*/
+#include "H5Eprivate.h" /* Error handling		  	*/
+#include "H5Fprivate.h" /* File access				*/
+#include "H5Gpkg.h"     /* Groups		  		*/
+#include "H5Iprivate.h" /* IDs			  		*/
+#include "H5Lprivate.h" /* Links			  	*/
+#include "H5Pprivate.h" /* Property Lists			*/
 
 /****************/
 /* Local Macros */
@@ -218,7 +217,25 @@ H5G__obj_create_real(H5F_t *f, const H5O_ginfo_t *ginfo, const H5O_linfo_t *linf
         assert(link_size);
 
         /* Compute size of header to use for creation */
-        hdr_size = linfo_size + ginfo_size + pline_size + (ginfo->est_num_entries * link_size);
+
+        /* Basic header size */
+        hdr_size = linfo_size + ginfo_size + pline_size;
+
+        /* If this is likely to be a compact group, add space for the link
+         * messages, unless the size of the link messages is greater than
+         * the largest allowable object header message size, since the size
+         * of the link messages is the size of the NIL spacer message that
+         * would have to be written out to reserve enough space to hold the
+         * links if the group were left empty.
+         */
+        bool compact = ginfo->est_num_entries <= ginfo->max_compact;
+        if (compact) {
+
+            size_t size_of_links = ginfo->est_num_entries * link_size;
+
+            if (size_of_links < H5O_MESG_MAX_SIZE)
+                hdr_size += size_of_links;
+        }
     } /* end if */
     else
         hdr_size = (size_t)(4 + 2 * H5F_SIZEOF_ADDR(f));

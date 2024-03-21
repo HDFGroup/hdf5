@@ -61,39 +61,47 @@ main(int argc, char *argv[])
     /* Try opening the file */
     if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, false, NULL, (size_t)0)) < 0) {
         fprintf(stderr, "h5fc_chk_idx: unable to open the file\n");
-        exit(EXIT_FAILURE);
+        goto error;
     } /* end if */
 
     /* Open the dataset */
     if ((did = H5Dopen2(fid, dname, H5P_DEFAULT)) < 0) {
         fprintf(stderr, "h5fc_chk_idx: unable to open the dataset\n");
-        exit(EXIT_FAILURE);
+        goto error;
     } /* end if */
 
     /* Get the dataset's chunk indexing type */
     if (H5Dget_chunk_index_type(did, &idx_type) < 0) {
         fprintf(stderr, "h5fc_chk_idx: unable to get chunk index type for the dataset\n");
-        exit(EXIT_FAILURE);
+        goto error;
     } /* end if */
 
     /* Close the dataset */
     if (H5Dclose(did) < 0) {
         fprintf(stderr, "h5fc_chk_idx: unable to close the dataset\n");
-        exit(EXIT_FAILURE);
+        goto error;
     } /* end if */
 
     /* Close the file */
     if (H5Fclose(fid) < 0) {
         fprintf(stderr, "h5fc_chk_idx_type: cannot close the file\n");
-        exit(EXIT_FAILURE);
+        goto error;
     } /* end if */
 
     /* Return success when the chunk indexing type is version 1 B-tree */
-    if (idx_type == H5D_CHUNK_IDX_BTREE)
-        exit(EXIT_SUCCESS);
-    else {
+    if (idx_type != H5D_CHUNK_IDX_BTREE) {
         fprintf(stderr, "Error: chunk indexing type is %d\n", idx_type);
-        exit(EXIT_FAILURE);
+        goto error;
     } /* end if */
 
+    free(fname);
+    free(dname);
+
+    exit(EXIT_SUCCESS);
+
+error:
+    free(fname);
+    free(dname);
+
+    exit(EXIT_FAILURE);
 } /* main() */

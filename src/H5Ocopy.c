@@ -30,18 +30,16 @@
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Aprivate.h"  /* Attributes                               */
-#include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5FLprivate.h" /* Free lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
-#include "H5HGprivate.h" /* Global Heaps                             */
 #include "H5FOprivate.h" /* File objects                             */
 #include "H5Lprivate.h"  /* Links                                    */
 #include "H5MFprivate.h" /* File memory management                   */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Opkg.h"      /* Object headers                           */
 #include "H5Pprivate.h"  /* Property lists                           */
-#include "H5VLprivate.h" /* Virtual Object Layer                     */
+#include "H5SLprivate.h" /* Skip Lists                               */
 
 /****************/
 /* Local Macros */

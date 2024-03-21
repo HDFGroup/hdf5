@@ -38,7 +38,7 @@ static hid_t H5FD_MPIO_g = 0;
 
 /* Whether to allow collective I/O operations */
 /* (Can be changed by setting "HDF5_MPI_OPT_TYPES" environment variable to '0' or '1') */
-hbool_t H5FD_mpi_opt_types_g = true;
+bool H5FD_mpi_opt_types_g = true;
 
 /* Whether the driver initialized MPI on its own */
 static bool H5FD_mpi_self_initialized = false;
@@ -439,7 +439,7 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm /*out*/, MPI_Info *info /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", fapl_id, comm, info);
+    H5TRACE3("e", "i*Mc*Mi", fapl_id, comm, info);
 
     /* Set comm and info in case we have problems */
     if (comm)
@@ -541,7 +541,7 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", dxpl_id, xfer_mode);
+    H5TRACE2("e", "i*Dt", dxpl_id, xfer_mode);
 
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))

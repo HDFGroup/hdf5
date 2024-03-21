@@ -3114,6 +3114,48 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 7;
     }
+    else if (!strcmp(buffer, "H5T_IEEE_F16BE")) {
+        in->inputSize                      = 16;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
+            (void)fprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void)fprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+#ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+#endif
+
+        kindex = 3;
+    }
+    else if (!strcmp(buffer, "H5T_IEEE_F16LE")) {
+        in->inputSize                      = 16;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
+            (void)fprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void)fprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+#ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+#endif
+
+        kindex = 3;
+    }
     else if (!strcmp(buffer, "H5T_IEEE_F32BE")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
@@ -3210,6 +3252,20 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
+#ifdef H5_HAVE__FLOAT16
+    else if (!strcmp(buffer, "H5T_NATIVE_FLOAT16")) {
+        in->inputSize                      = 16;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void)fprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 3;
+    }
+#endif
     else if (!strcmp(buffer, "H5T_NATIVE_FLOAT")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
@@ -3936,6 +3992,12 @@ createOutputDataType(struct Input *in)
             switch (in->outputArchitecture) {
                 case 0:
                     switch (in->outputSize) {
+#ifdef H5_HAVE__FLOAT16
+                        case 16:
+                            new_type = H5Tcopy(H5T_NATIVE_FLOAT16);
+                            break;
+#endif
+
                         case 32:
                             new_type = H5Tcopy(H5T_NATIVE_FLOAT);
                             break;
@@ -3971,6 +4033,23 @@ createOutputDataType(struct Input *in)
 
                 case 2:
                     switch (in->outputSize) {
+                        case 16:
+                            switch (in->outputByteOrder) {
+                                case -1:
+                                case 0:
+                                    new_type = H5Tcopy(H5T_IEEE_F16BE);
+                                    break;
+
+                                case 1:
+                                    new_type = H5Tcopy(H5T_IEEE_F16LE);
+                                    break;
+
+                                default:
+                                    (void)fprintf(stderr, "%s", err3);
+                                    return (-1);
+                            }
+                            break;
+
                         case 32:
                             switch (in->outputByteOrder) {
                                 case -1:
@@ -4291,6 +4370,12 @@ createInputDataType(struct Input *in)
                 switch (in->inputArchitecture) {
                     case 0:
                         switch (in->inputSize) {
+#ifdef H5_HAVE__FLOAT16
+                            case 16:
+                                new_type = H5Tcopy(H5T_NATIVE_FLOAT16);
+                                break;
+#endif
+
                             case 32:
                                 new_type = H5Tcopy(H5T_NATIVE_FLOAT);
                                 break;
@@ -4326,6 +4411,23 @@ createInputDataType(struct Input *in)
 
                     case 2:
                         switch (in->inputSize) {
+                            case 16:
+                                switch (in->inputByteOrder) {
+                                    case -1:
+                                    case 0:
+                                        new_type = H5Tcopy(H5T_IEEE_F16BE);
+                                        break;
+
+                                    case 1:
+                                        new_type = H5Tcopy(H5T_IEEE_F16LE);
+                                        break;
+
+                                    default:
+                                        (void)fprintf(stderr, "%s", err3);
+                                        return (-1);
+                                }
+                                break;
+
                             case 32:
                                 switch (in->inputByteOrder) {
                                     case -1:
@@ -4535,6 +4637,12 @@ createInputDataType(struct Input *in)
             case 2:
             case 3:
                 switch (in->inputSize) {
+#ifdef H5_HAVE__FLOAT16
+                    case 16:
+                        new_type = H5Tcopy(H5T_NATIVE_FLOAT16);
+                        break;
+#endif
+
                     case 32:
                         new_type = H5Tcopy(H5T_NATIVE_FLOAT);
                         break;
@@ -4702,8 +4810,7 @@ process(struct Options *opt)
                     return (-1);
                 }
                 fclose(extfile);
-                H5Pset_external(proplist, in->externFilename, (off_t)0,
-                                numOfElements * (hsize_t)in->inputSize / 8);
+                H5Pset_external(proplist, in->externFilename, 0, numOfElements * (hsize_t)in->inputSize / 8);
             }
 
             /* create dataspace */

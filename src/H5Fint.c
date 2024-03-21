@@ -27,9 +27,9 @@
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fpkg.h"      /* File access                              */
 #include "H5FDprivate.h" /* File drivers                             */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Gprivate.h"  /* Groups                                   */
 #include "H5Iprivate.h"  /* IDs                                      */
-#include "H5Lprivate.h"  /* Links                                    */
 #include "H5MFprivate.h" /* File memory management                   */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Pprivate.h"  /* Property lists                           */
@@ -1300,7 +1300,8 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
                 if (NULL == (f->shared->mdc_log_location = (char *)H5MM_calloc((len + 1) * sizeof(char))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                 "can't allocate memory for mdc log file name");
-                strncpy(f->shared->mdc_log_location, mdc_log_location, len);
+                strncpy(f->shared->mdc_log_location, mdc_log_location, len + 1);
+                f->shared->mdc_log_location[len] = '\0';
             }
             else
                 f->shared->mdc_log_location = NULL;
@@ -2825,11 +2826,11 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
 
             /* Stat the filename we're resolving */
             if (HDstat(name, &st) < 0)
-                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to stat file")
+                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to stat file");
 
             /* Stat the file we opened */
             if (HDfstat(*fd, &fst) < 0)
-                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to fstat file")
+                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to fstat file");
 
             /* Verify that the files are really the same */
             if (st.st_mode != fst.st_mode || st.st_ino != fst.st_ino || st.st_dev != fst.st_dev)

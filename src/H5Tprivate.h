@@ -135,9 +135,9 @@ H5_DLL H5T_bkg_t          H5T_path_bkg(const H5T_path_t *p);
 H5_DLL H5T_subset_info_t *H5T_path_compound_subset(const H5T_path_t *p);
 H5_DLL herr_t             H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
                                          H5VL_object_t *owned_vol_obj, H5T_conv_t func);
-H5_DLL herr_t H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t nelmts, size_t buf_stride,
-                          size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T_reclaim(hid_t type_id, struct H5S_t *space, void *buf);
+H5_DLL herr_t H5T_convert(H5T_path_t *tpath, const H5T_t *src_type, const H5T_t *dst_type, size_t nelmts,
+                          size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T_reclaim(const H5T_t *type, struct H5S_t *space, void *buf);
 H5_DLL herr_t H5T_reclaim_cb(void *elem, const H5T_t *dt, unsigned ndim, const hsize_t *point, void *op_data);
 H5_DLL herr_t H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt);
 H5_DLL htri_t H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);

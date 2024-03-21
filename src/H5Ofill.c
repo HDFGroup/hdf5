@@ -21,7 +21,6 @@
 #include "H5Dprivate.h"  /* Datasets                */
 #include "H5Eprivate.h"  /* Error handling       */
 #include "H5FLprivate.h" /* Free Lists           */
-#include "H5Iprivate.h"  /* IDs                  */
 #include "H5MMprivate.h" /* Memory management    */
 #include "H5Opkg.h"      /* Object headers       */
 #include "H5Pprivate.h"  /* Property lists       */
@@ -533,6 +532,8 @@ H5O__fill_copy(const void *_src, void *_dst)
 {
     const H5O_fill_t *src       = (const H5O_fill_t *)_src;
     H5O_fill_t       *dst       = (H5O_fill_t *)_dst;
+    H5T_t            *dst_type  = NULL;
+    H5T_t            *tmp_type  = NULL;
     void             *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -571,41 +572,31 @@ H5O__fill_copy(const void *_src, void *_dst)
 
             /* If necessary, convert fill value datatypes (which copies VL components, etc.) */
             if (!H5T_path_noop(tpath)) {
-                hid_t    dst_id, src_id; /* Source & destination datatypes for type conversion */
                 uint8_t *bkg_buf = NULL; /* Background conversion buffer */
                 size_t   bkg_size;       /* Size of background buffer */
 
-                /* Wrap copies of types to convert */
-                dst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->type, H5T_COPY_TRANSIENT), false);
-                if (dst_id < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy/register datatype");
-                src_id = H5I_register(H5I_DATATYPE, H5T_copy(src->type, H5T_COPY_ALL), false);
-                if (src_id < 0) {
-                    H5I_dec_ref(dst_id);
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy/register datatype");
-                } /* end if */
+                dst_type = dst->type;
+                if (H5T_detect_class(dst_type, H5T_VLEN, false) > 0 ||
+                    H5T_detect_class(dst_type, H5T_REFERENCE, false) > 0) {
+                    if (NULL == (tmp_type = H5T_copy(dst_type, H5T_COPY_TRANSIENT)))
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy destination datatype");
+                    dst_type = tmp_type;
+                }
 
                 /* Allocate a background buffer */
                 bkg_size = MAX(H5T_get_size(dst->type), H5T_get_size(src->type));
-                if (H5T_path_bkg(tpath) && NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size))) {
-                    H5I_dec_ref(src_id);
-                    H5I_dec_ref(dst_id);
+                if (H5T_path_bkg(tpath) && NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-                } /* end if */
 
                 /* Convert fill value */
-                if (H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, dst->buf, bkg_buf) <
-                    0) {
-                    H5I_dec_ref(src_id);
-                    H5I_dec_ref(dst_id);
+                if (H5T_convert(tpath, src->type, dst_type, (size_t)1, (size_t)0, (size_t)0, dst->buf,
+                                bkg_buf) < 0) {
                     if (bkg_buf)
                         bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCONVERT, NULL, "datatype conversion failed");
                 } /* end if */
 
                 /* Release the background buffer */
-                H5I_dec_ref(src_id);
-                H5I_dec_ref(dst_id);
                 if (bkg_buf)
                     bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
             } /* end if */
@@ -618,6 +609,9 @@ H5O__fill_copy(const void *_src, void *_dst)
     ret_value = dst;
 
 done:
+    if (tmp_type && (H5T_close(tmp_type) < 0))
+        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, NULL, "unable to close temporary datatype");
+
     if (!ret_value && dst) {
         if (dst->buf)
             H5MM_xfree(dst->buf);
@@ -712,8 +706,7 @@ H5O__fill_old_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
 herr_t
 H5O_fill_reset_dyn(H5O_fill_t *fill)
 {
-    hid_t  fill_type_id = -1;      /* Datatype ID for fill value datatype when reclaiming VL fill values */
-    herr_t ret_value    = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -721,23 +714,14 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
 
     if (fill->buf) {
         if (fill->type && H5T_detect_class(fill->type, H5T_VLEN, false) > 0) {
-            H5T_t *fill_type;  /* Copy of fill value datatype */
             H5S_t *fill_space; /* Scalar dataspace for fill value element */
-
-            /* Copy the fill value datatype and get an ID for it */
-            if (NULL == (fill_type = H5T_copy(fill->type, H5T_COPY_TRANSIENT)))
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy fill value datatype");
-            if ((fill_type_id = H5I_register(H5I_DATATYPE, fill_type, false)) < 0) {
-                (void)H5T_close_real(fill_type);
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to register fill value datatype");
-            } /* end if */
 
             /* Create a scalar dataspace for the fill value element */
             if (NULL == (fill_space = H5S_create(H5S_SCALAR)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create scalar dataspace");
 
             /* Reclaim any variable length components of the fill value */
-            if (H5T_reclaim(fill_type_id, fill_space, fill->buf) < 0) {
+            if (H5T_reclaim(fill->type, fill_space, fill->buf) < 0) {
                 H5S_close(fill_space);
                 HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to reclaim variable-length fill value data");
             } /* end if */
@@ -756,9 +740,6 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
     } /* end if */
 
 done:
-    if (fill_type_id > 0 && H5I_dec_ref(fill_type_id) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for temp ID");
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_fill_reset_dyn() */
 
@@ -956,10 +937,9 @@ H5O__fill_debug(H5F_t H5_ATTR_UNUSED *f, const void *_fill, FILE *stream, int in
 herr_t
 H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, bool *fill_changed)
 {
-    H5T_path_t *tpath;                    /* Type conversion info    */
-    void       *buf = NULL, *bkg = NULL;  /* Conversion buffers    */
-    hid_t       src_id = -1, dst_id = -1; /* Datatype identifiers    */
-    herr_t      ret_value = SUCCEED;      /* Return value */
+    H5T_path_t *tpath;                   /* Type conversion info    */
+    void       *buf = NULL, *bkg = NULL; /* Conversion buffers    */
+    herr_t      ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -990,10 +970,6 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, bool *fill_changed)
     if (!H5T_path_noop(tpath)) {
         size_t fill_type_size;
 
-        if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill->type, H5T_COPY_ALL), false)) < 0 ||
-            (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(dset_type, H5T_COPY_ALL), false)) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy/register data type");
-
         /*
          * Datatype conversions are always done in place, so we need a buffer
          * that is large enough for both source and destination.
@@ -1010,7 +986,7 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, bool *fill_changed)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
 
         /* Do the conversion */
-        if (H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, buf, bkg) < 0)
+        if (H5T_convert(tpath, fill->type, dset_type, (size_t)1, (size_t)0, (size_t)0, buf, bkg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "datatype conversion failed");
 
         /* Update the fill message */
@@ -1027,10 +1003,6 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, bool *fill_changed)
     } /* end if */
 
 done:
-    if (src_id >= 0 && H5I_dec_ref(src_id) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for temp ID");
-    if (dst_id >= 0 && H5I_dec_ref(dst_id) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for temp ID");
     if (bkg)
         H5MM_xfree(bkg);
 

@@ -36,7 +36,6 @@
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fpkg.h"      /* File access                              */
 #include "H5Iprivate.h"  /* IDs                                      */
-#include "H5SMprivate.h" /* Shared object header messages            */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
@@ -94,7 +93,7 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo /*out*/)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", obj_id, finfo);
+    H5TRACE2("e", "i*!", obj_id, finfo);
 
     /* Check args */
     if (!finfo)

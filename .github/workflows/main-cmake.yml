@@ -49,7 +49,6 @@ jobs:
           # No Fortran, parallel, or VFDs that rely on POSIX things
           - name: "Windows MSVC"
             os: windows-latest
-            toolchain: ""
             cpp: ON
             fortran: OFF
             java: ON
@@ -83,7 +82,6 @@ jobs:
             mirror_vfd: ON
             direct_vfd: ON
             ros3_vfd: ON
-            toolchain: "-DCMAKE_TOOLCHAIN_FILE=config/toolchain/gcc.cmake"
             generator: "-G Ninja"
             run_tests: true
 
@@ -106,11 +104,8 @@ jobs:
             mirror_vfd: ON
             direct_vfd: OFF
             ros3_vfd: OFF
-            toolchain: "-DCMAKE_TOOLCHAIN_FILE=config/toolchain/clang.cmake"
             generator: "-G Ninja"
             run_tests: true
-
-
 
     # Sets the job's name from the properties
     name: "${{ matrix.name }}-${{ inputs.build_mode }}-${{ inputs.thread_safety }}"
@@ -123,18 +118,11 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-
-      #
-      # SETUP
-      #
-
       #Useful for debugging
       - name: Dump matrix context
         run: echo '${{ toJSON(matrix) }}'
 
-      # Only CMake need ninja-build, but we just install it unilaterally
-      # libssl, etc. are needed for the ros3 VFD
-      - name: Install Linux Dependencies
+      - name: Install CMake Dependencies (Linux)
         run: |
            sudo apt update
            sudo apt-get install ninja-build graphviz
@@ -174,15 +162,14 @@ jobs:
       #
       # CMAKE CONFIGURE
       #
-
       - name: CMake Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             ${{ matrix.generator }} \
+            --log-level=VERBOSE \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            ${{ matrix.toolchain }} \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_DOXY_WARNINGS=ON \
@@ -202,7 +189,6 @@ jobs:
         shell: bash
         if: ${{ inputs.thread_safety != 'TS' }}
 
-
       - name: CMake Configure (Thread-Safe)
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -210,7 +196,6 @@ jobs:
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             ${{ matrix.generator }} \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            ${{ matrix.toolchain }} \
             -DBUILD_SHARED_LIBS=ON \
             -DBUILD_STATIC_LIBS=${{ (matrix.os != 'windows-latest') }} \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
@@ -234,7 +219,6 @@ jobs:
       #
       # BUILD
       #
-
       - name: CMake Build
         run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
@@ -242,24 +226,16 @@ jobs:
       #
       # RUN TESTS
       #
-
-      # NORMAL
-
       - name: CMake Run Tests
         run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
         if: ${{ matrix.run_tests && (inputs.thread_safety != 'TS') }}
 
       # THREAD-SAFE
-
       - name: CMake Run Thread-Safe Tests
         run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R ttsafe
         working-directory: ${{ runner.workspace }}/build
         if: ${{ matrix.run_tests && (inputs.thread_safety == 'TS') }}
-
-      #
-      # INSTALL (note that this runs even when we don't run the tests)
-      #
 
       - name: CMake Run Package
         run: cpack -C ${{ inputs.build_mode }} -V

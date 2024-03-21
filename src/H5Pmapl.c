@@ -29,7 +29,6 @@
 #include "H5private.h"  /* Generic Functions                        */
 #include "H5Mprivate.h" /* Maps                                     */
 #include "H5Eprivate.h" /* Error handling                           */
-#include "H5Iprivate.h" /* IDs                                      */
 #include "H5Ppkg.h"     /* Property lists                           */
 
 /****************/
@@ -187,7 +186,7 @@ H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size /*out*/, size_
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", mapl_id, key_prefetch_size, key_alloc_size);
+    H5TRACE3("e", "i*z*z", mapl_id, key_prefetch_size, key_alloc_size);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(mapl_id, H5P_MAP_ACCESS)))

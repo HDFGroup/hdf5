@@ -106,6 +106,18 @@ AC_DEFUN([PAC_PROG_FC_STORAGE_SIZE],[
 
 ])
 
+dnl See if the fortran compiler supports allocatable character
+
+AC_DEFUN([PAC_HAVE_CHAR_ALLOC],[
+  HAVE_CHAR_ALLOC_FORTRAN="no"
+  AC_MSG_CHECKING([if Fortran compiler supports allocatable character])
+  TEST_SRC="`sed -ne '/PROGRAM PROG_CHAR_ALLOC/,/END PROGRAM PROG_CHAR_ALLOC/p' $srcdir/m4/aclocal_fc.f90`"
+  AC_LINK_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
+        HAVE_CHAR_ALLOC_FORTRAN="yes"],
+     [AC_MSG_RESULT([no])])
+
+])
+
 dnl Check to see C_LONG_DOUBLE is available
 
 AC_DEFUN([PAC_PROG_FC_HAVE_C_LONG_DOUBLE],[
@@ -147,7 +159,7 @@ dnl disable Fortran 2003 if it does not.
 
 AC_DEFUN([PAC_PROG_FC_HAVE_F2003_REQUIREMENTS],[
    HAVE_F2003_REQUIREMENTS="no"
-   AC_MSG_CHECKING([if Fortran compiler version compatible with Fortran 2003 HDF])
+   AC_MSG_CHECKING([if Fortran compiler version compatible with Fortran 2003])
    TEST_SRC="`sed -n '/PROG_FC_HAVE_F2003_REQUIREMENTS/,/END PROGRAM PROG_FC_HAVE_F2003_REQUIREMENTS/p' $srcdir/m4/aclocal_fc.f90`"
    AC_COMPILE_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
             HAVE_F2003_REQUIREMENTS="yes"],

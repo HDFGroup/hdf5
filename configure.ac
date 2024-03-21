@@ -194,12 +194,25 @@ saved_user_LDFLAGS="$LDFLAGS"
 saved_user_CPPFLAGS="$CPPFLAGS"
 
 ## Strip out -Werror from CFLAGS since that can cause checks to fail when
-## compiling the test program fails due to warnings
-CFLAGS="`echo $CFLAGS | sed -e 's/-Werror//g'`"
-CXXFLAGS="`echo $CXXFLAGS | sed -e 's/-Werror//g'`"
-FCFLAGS="`echo $FCFLAGS | sed -e 's/-Werror//g'`"
-JAVACFLAGS="`echo $JAVACFLAGS | sed -e 's/-Werror//g'`"
-CPPFLAGS="`echo $CPPFLAGS | sed -e 's/-Werror//g'`"
+## compiling test programs fails due to warnings
+##
+##  Regex:
+##
+##      -Werror         Literal -Werror
+##      \(              Start optional capturing group
+##      =               Literal equals sign
+##      [^[:space:]-]   Non-space characters
+##      \+              1 or more of the above
+##      \)              End optional capturing group
+##      \?              0 or 1 capturing group matches
+##
+WERROR_SED= "sed -e 's/-Werror\(=[^[:space:]]\+\)\?//g'"
+
+CFLAGS="`echo $CFLAGS | $WERROR_SED`"
+CXXFLAGS="`echo $CXXFLAGS | $WERROR_SED`"
+FCFLAGS="`echo $FCFLAGS | $WERROR_SED`"
+JAVACFLAGS="`echo $JAVACFLAGS | $WERROR_SED`"
+CPPFLAGS="`echo $CPPFLAGS | $WERROR_SED`"
 
 ## Support F9X variable to define Fortran compiler if FC variable is
 ## not used.  This should be deprecated in the future.
@@ -547,6 +560,109 @@ AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
 
 ## ----------------------------------------------------------------------
+## Check if _Float16 support is available
+##
+AC_MSG_NOTICE([checking if _Float16 support is available])
+HAVE__FLOAT16="no"
+AC_CHECK_SIZEOF([_Float16])
+if test "$ac_cv_sizeof__Float16" != 0; then
+  # Some compilers expose the _Float16 datatype, but not the macros and
+  # functions used with the datatype. We need the macros for proper
+  # datatype conversion support. Check for these here.
+  AC_CHECK_DECL([FLT16_EPSILON], [], [], [[
+                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                 #include <float.h>]])
+  AC_CHECK_DECL([FLT16_MIN], [], [], [[
+                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                 #include <float.h>]])
+  AC_CHECK_DECL([FLT16_MAX], [], [], [[
+                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                 #include <float.h>]])
+  AC_CHECK_DECL([FLT16_MIN_10_EXP], [], [], [[
+                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                 #include <float.h>]])
+  AC_CHECK_DECL([FLT16_MAX_10_EXP], [], [], [[
+                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                 #include <float.h>]])
+  AC_CHECK_DECL([FLT16_MANT_DIG], [], [], [[
+                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                 #include <float.h>]])
+
+  if test "X$ac_cv_have_decl_FLT16_EPSILON" = "Xyes" &&
+     test "X$ac_cv_have_decl_FLT16_MIN" = "Xyes" &&
+     test "X$ac_cv_have_decl_FLT16_MAX" = "Xyes" &&
+     test "X$ac_cv_have_decl_FLT16_MIN_10_EXP" = "Xyes" &&
+     test "X$ac_cv_have_decl_FLT16_MAX_10_EXP" = "Xyes" &&
+     test "X$ac_cv_have_decl_FLT16_MANT_DIG" = "Xyes" ; then
+    # Some compilers like OneAPI on Windows appear to detect _Float16 support
+    # properly up to this point, and, in the absence of any architecture-specific
+    # tuning compiler flags, will generate code for H5Tconv.c that performs
+    # software conversions on _Float16 variables with compiler-internal functions
+    # such as __extendhfsf2, __truncsfhf2, or __truncdfhf2. However, these
+    # compilers will fail to link these functions into the build for currently
+    # unknown reasons and cause the build to fail. Since these are compiler-internal
+    # functions that we don't appear to have much control over, let's try to
+    # compile a program that will generate these functions to check for _Float16
+    # support. If we fail to compile this program, we will simply disable
+    # _Float16 support for the time being.
+    AC_MSG_CHECKING([if compiler can correctly compile and run a test program which converts _Float16 to other types with casts])
+    TEST_SRC="`(echo \"#define H5_FLOAT16_CONVERSION_FUNCS_LINK_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+    AC_CACHE_VAL([hdf5_cv_float16_conversion_funcs_link],
+    [AC_RUN_IFELSE(
+        [AC_LANG_SOURCE([$TEST_SRC])],
+        [hdf5_cv_float16_conversion_funcs_link=yes], [hdf5_cv_float16_conversion_funcs_link=no], [hdf5_cv_float16_conversion_funcs_link=no])])
+
+    if test ${hdf5_cv_float16_conversion_funcs_link} = "yes"; then
+      AC_MSG_RESULT([yes])
+
+      # Finally, MacOS 13 appears to have a bug specifically when converting
+      # long double values to _Float16. Release builds of the dt_arith test
+      # would cause any assignments to a _Float16 variable to be elided,
+      # whereas Debug builds would perform incorrect hardware conversions by
+      # simply chopping off all the bytes of the value except for the first 2.
+      # These tests pass on MacOS 14, so let's perform a quick test to check
+      # if the hardware conversion is done correctly.
+      AC_MSG_CHECKING([if compiler can correctly convert long double values to _Float16])
+      TEST_SRC="`(echo \"#define H5_LDOUBLE_TO_FLOAT16_CORRECT_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+      if test ${ac_cv_sizeof_long_double} = 0; then
+        hdf5_cv_ldouble_to_float16_correct=${hdf5_cv_ldouble_to_float16_correct=no}
+      else
+        AC_CACHE_VAL([hdf5_cv_ldouble_to_float16_correct],
+        [AC_RUN_IFELSE(
+            [AC_LANG_SOURCE([$TEST_SRC])],
+            [hdf5_cv_ldouble_to_float16_correct=yes], [hdf5_cv_ldouble_to_float16_correct=no], [hdf5_cv_ldouble_to_float16_correct=yes])])
+      fi
+
+      if test ${hdf5_cv_ldouble_to_float16_correct} = "yes"; then
+        AC_DEFINE([LDOUBLE_TO_FLOAT16_CORRECT], [1],
+          [Define if your system can convert long double to _Float16 values correctly.])
+        AC_MSG_RESULT([yes])
+      else
+        AC_MSG_RESULT([no])
+        AC_MSG_NOTICE([Conversions from long double to _Float16 appear to be incorrect. These will be emulated through a soft conversion function.])
+      fi
+
+      HAVE__FLOAT16="yes"
+
+      # Check if we can use fabsf16
+      AC_CHECK_FUNC([fabsf16], [AC_DEFINE([HAVE_FABSF16], [1],
+                        [Define if has fabsf16 function])], [])
+
+      # Define HAVE__FLOAT16 macro for H5pubconf.h if _Float16 is available.
+      AC_DEFINE([HAVE__FLOAT16], [1], [Determine if _Float16 is available])
+    else
+      AC_MSG_RESULT([no])
+    fi
+  fi
+
+  AC_MSG_CHECKING([if _Float16 support is enabled])
+  AC_MSG_RESULT([$HAVE__FLOAT16])
+fi
+
+# Define HAVE__FLOAT16 value to substitute into other files for conditional testing
+AC_SUBST([HAVE__FLOAT16])
+
+## ----------------------------------------------------------------------
 ## Check if the Fortran interface should be enabled
 ##
 
@@ -652,6 +768,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
     AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran])
   fi
+  ## Checking if the compiler supports fortran character being allocatable
+  PAC_HAVE_CHAR_ALLOC
 
   ## --------------------------------------------------------------------
   ## Define wrappers for the C compiler to use Fortran function names
@@ -739,6 +857,10 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   if test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
+  fi
+
+  if test "X$HAVE_CHAR_ALLOC_FORTRAN" = "Xyes"; then
+    AC_DEFINE([FORTRAN_HAVE_CHAR_ALLOC], [1], [Define if Fortran supports allocatable character])
   fi
 
   ## See if C_LONG_DOUBLE is available
@@ -1422,10 +1544,10 @@ case $host_os in
 esac
 
 ## Windows
-case "`uname`" in
-  MINGW*)
+case "$host_os" in
+  *mingw*)
     # The Winsock library
-    AC_CHECK_LIB([ws2_32], [GetUserName])
+    AC_CHECK_LIB([ws2_32], [htons])
     ;;
 esac
 
@@ -1440,9 +1562,9 @@ AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h])
 ##
 if test "X${enable_shared}" = "Xyes"; then
   AC_MSG_CHECKING([if libtool needs -no-undefined flag to build shared libraries])
-  case "`uname`" in
-    CYGWIN*|MINGW*|AIX*)
-      ## Add in the -no-undefined flag to LDFLAGS for libtool.
+  case "$host_os" in
+    *cygwin*|*mingw*|*aix*)
+      ## Add in the -no-undefined flag to LDFLAGS for libtool
       AC_MSG_RESULT([yes])
       H5_LDFLAGS="$H5_LDFLAGS -no-undefined"
       ;;
@@ -1454,31 +1576,14 @@ if test "X${enable_shared}" = "Xyes"; then
 fi
 
 ## ----------------------------------------------------------------------
-## Use the macro _AC_SYS_LARGEFILE_MACRO_VALUE to test defines
-## that might need to be set for largefile support to behave
-## correctly. This macro is defined in acsite.m4 and overrides
-## the version provided by Autoconf (as of v2.65). The custom
-## macro additionally adds the appropriate defines to AM_CPPFLAGS
-## so that later configure checks have them visible.
+## Set up large file support
 
-## Check for _FILE_OFFSET_BITS
-_AC_SYS_LARGEFILE_MACRO_VALUE([_FILE_OFFSET_BITS], [64],
-  [ac_cv_sys_file_offset_bits],
-  [Number of bits in a file offset, on hosts where this is settable.],
-  [_AC_SYS_LARGEFILE_TEST_INCLUDES])
-
-## Check for _LARGE_FILES
-if test "$ac_cv_sys_file_offset_bits" = unknown; then
-  _AC_SYS_LARGEFILE_MACRO_VALUE([_LARGE_FILES], [1],
-    [ac_cv_sys_large_files],
-    [Define for large files, on AIX-style hosts.],
-    [_AC_SYS_LARGEFILE_TEST_INCLUDES])
-fi
+AC_SYS_LARGEFILE
 
 ## ----------------------------------------------------------------------
 ## Add necessary defines for Linux Systems.
 ##
-case "$host_cpu-$host_vendor-$host_os" in
+case "$host_os" in
   *linux*)
     ## Add POSIX support on Linux systems, so <features.h> defines
     ## __USE_POSIX, which is required to get the prototype for fdopen
@@ -1508,10 +1613,15 @@ case "$host_cpu-$host_vendor-$host_os" in
     H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
   *mingw*)
+    HDF_MINGW="yes"
     AC_DEFINE([HAVE_WINDOWS], [1], [Define if this is a Windows machine])
     AC_DEFINE([HAVE_WIN32_API], [1], [Define if on the Windows platform using the Win32 API])
     AC_DEFINE([HAVE_MINGW], [1], [Define if using MinGW])
     H5_CPPFLAGS="-D_GNU_SOURCE -D__USE_MINGW_ANSI_STDIO $H5_CPPFLAGS"
+    ;;
+  *cygwin*)
+    AC_DEFINE([HAVE_CYGWIN], [1], [Define if using Cygwin])
+    H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
 esac
 
@@ -1917,101 +2027,118 @@ if test "X$THREADSAFE" = "Xyes"; then
     ## and/or a library path.  If the library path is specified then it must
     ## be preceded by a comma.
     ##
-    ## Thread-safety in HDF5 only uses Pthreads via configure, so the
-    ## default is "check", though this only has an effect when
-    ## --enable-threadsafe is specified.
+    ## The default is to use Pthreads when building with the Autotools, unless
+    ## we're building w/ MinGW.
     AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
     AC_ARG_WITH([pthread],
                 [AS_HELP_STRING([--with-pthread=DIR],
                                 [Specify alternative path to Pthreads library when
-                                thread-safe capability is built.])],,
-                [withval=check])
+                                thread-safe capability is built. Set this to
+                                'yes' or the location of Pthreads when building
+                                with MinGW and you would rather use Pthreads
+                                than Win32 threads.])],,
+                [withval=default])
 
-    case "$withval" in
-      check | yes)
-        AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
-        if test "x$HAVE_PTHREAD" = "xyes"; then
-          AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+    ## If we're on MinGW, we want to use Win32 threads unless the builder
+    ## explicitly specifies --with-pthreads=(yes | path(s))
+    mingw_use_win32_threads="no"
+    if test -n "$HDF_MINGW" -a "$HDF_MINGW" = "yes" ; then
+        # Default or no --> Win32 threads
+        if test "$withval" = "default" -o "$withval" = "no" ; then
+            mingw_use_win32_threads="yes"
+            unset HAVE_PTHREAD
+            AC_DEFINE([HAVE_WIN_THREADS], [1], [Define to 1 if you have win32 threads])
         fi
-        ;;
-      no)
-        AC_MSG_ERROR([Must use Pthreads with thread safety])
-        ;;
-      *)
+    fi
+
+    if test "$mingw_use_win32_threads" = "no" ; then
         case "$withval" in
-          *,*)
-            pthread_inc="`echo $withval | cut -f1 -d,`"
-            pthread_lib="`echo $withval | cut -f2 -d, -s`"
-            ;;
-          *)
-            if test -n "$withval"; then
-              pthread_inc="$withval/include"
-              pthread_lib="$withval/lib"
-            fi
-            ;;
+            default | yes)
+                AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
+                if test "x$HAVE_PTHREAD" = "xyes"; then
+                    AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+                fi
+                ;;
+            no)
+                AC_MSG_ERROR([Must use Pthreads with thread safety on non-Windows systems])
+                ;;
+            *)
+                case "$withval" in
+                    *,*)
+                        pthread_inc="`echo $withval | cut -f1 -d,`"
+                        pthread_lib="`echo $withval | cut -f2 -d, -s`"
+                        ;;
+                    *)
+                        if test -n "$withval"; then
+                            pthread_inc="$withval/include"
+                            pthread_lib="$withval/lib"
+                        fi
+                        ;;
+                esac
+
+                if test -n "$pthread_inc"; then
+                    saved_CPPFLAGS="$CPPFLAGS"
+                    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+                    CPPFLAGS="$CPPFLAGS -I$pthread_inc"
+                    AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
+                    AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset HAVE_PTHREAD])
+                else
+                    AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
+                fi
+
+                if test "x$HAVE_PTHREAD" = "xyes"; then
+                    if test -n "$pthread_lib"; then
+                        saved_LDFLAGS="$LDFLAGS"
+                        saved_AM_LDFLAGS="$AM_LDFLAGS"
+                        LDFLAGS="$LDFLAGS -L$pthread_lib"
+                        AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
+                        AC_CHECK_LIB([pthread], [pthread_self],,
+                                     [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD])
+                    else
+                        AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+                    fi
+                fi
+                ;;
         esac
 
-        if test -n "$pthread_inc"; then
-          saved_CPPFLAGS="$CPPFLAGS"
-          saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-          CPPFLAGS="$CPPFLAGS -I$pthread_inc"
-          AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
-          AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset HAVE_PTHREAD])
+        ## ----------------------------------------------------------------------
+        ## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
+        ## is supported on this system
+        ##
+        ## Unfortunately, this probably needs to be an AC_RUN_IFELSE since
+        ## it's impossible to determine if PTHREAD_SCOPE_SYSTEM is
+        ## supported a priori. POSIX.1-2001 requires that a conformant
+        ## system need only support one of SYSTEM or PROCESS scopes.
+        ##
+        ## CROSS-COMPILING: Use a pessimistic 'no'. You can hand-hack the config
+        ##                  file if you know otherwise.
+        AC_MSG_CHECKING([Pthreads supports system scope])
+        AC_CACHE_VAL([hdf5_cv_system_scope_threads],
+            [AC_RUN_IFELSE(
+            [AC_LANG_PROGRAM([
+                #include <stdlib.h>
+                #include <pthread.h>
+            ],[
+                pthread_attr_t attribute;
+                int ret;
+
+                pthread_attr_init(&attribute);
+                ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
+                exit(ret==0 ? 0 : 1);
+            ])]
+            , [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no], [hdf5_cv_system_scope_threads=no])])
+
+        if test ${hdf5_cv_system_scope_threads} = "yes"; then
+            AC_DEFINE([SYSTEM_SCOPE_THREADS], [1],
+                      [Define if your system supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM) call.])
+            AC_MSG_RESULT([yes])
         else
-          AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
+            AC_MSG_RESULT([no])
+            AC_MSG_NOTICE([Always 'no' if cross-compiling. Edit the config file if your platform supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM).])
         fi
 
-        if test "x$HAVE_PTHREAD" = "xyes"; then
-          if test -n "$pthread_lib"; then
-            saved_LDFLAGS="$LDFLAGS"
-            saved_AM_LDFLAGS="$AM_LDFLAGS"
-            LDFLAGS="$LDFLAGS -L$pthread_lib"
-            AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
-            AC_CHECK_LIB([pthread], [pthread_self],,
-                         [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD])
-          else
-            AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
-          fi
-        fi
-        ;;
-    esac
-
-    ## ----------------------------------------------------------------------
-    ## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
-    ## is supported on this system
-    ##
-    ## Unfortunately, this probably needs to be an AC_RUN_IFELSE since
-    ## it's impossible to determine if PTHREAD_SCOPE_SYSTEM is
-    ## supported a priori. POSIX.1-2001 requires that a conformant
-    ## system need only support one of SYSTEM or PROCESS scopes.
-    ##
-    ## CROSS-COMPILING: Use a pessimistic 'no'. You can hand-hack the config
-    ##                  file if you know otherwise.
-    AC_MSG_CHECKING([Pthreads supports system scope])
-    AC_CACHE_VAL([hdf5_cv_system_scope_threads],
-      [AC_RUN_IFELSE(
-        [AC_LANG_PROGRAM([
-            #include <stdlib.h>
-            #include <pthread.h>
-        ],[
-              pthread_attr_t attribute;
-              int ret;
-
-              pthread_attr_init(&attribute);
-              ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-              exit(ret==0 ? 0 : 1);
-        ])]
-      , [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no], [hdf5_cv_system_scope_threads=no])])
-
-    if test ${hdf5_cv_system_scope_threads} = "yes"; then
-      AC_DEFINE([SYSTEM_SCOPE_THREADS], [1],
-                [Define if your system supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM) call.])
-      AC_MSG_RESULT([yes])
-    else
-      AC_MSG_RESULT([no])
-      AC_MSG_NOTICE([Always 'no' if cross-compiling. Edit the config file if your platform supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM).])
-    fi
-fi
+    fi # end of Pthreads checks
+fi # end of threadsafe processing
 
 ## ----------------------------------------------------------------------
 ## Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
@@ -2038,8 +2165,8 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 ## Check whether the global variable `timezone' is defined.
 AC_MSG_CHECKING([for global timezone variable])
 
-case "`uname`" in
-  CYGWIN*)
+case "$host_os" in
+  *cygwin*)
     AC_MSG_RESULT([disabled in CYGWIN])
     ;;
   *)
@@ -2069,8 +2196,8 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 ## How do we figure out the width of a tty in characters?
 ##
 AC_CHECK_FUNCS([_getvideoconfig gettextinfo])
-case "`uname`" in
-  CYGWIN*)
+case "$host_os" in
+  *cygwin*)
     ;;
   *)
     AC_CHECK_FUNCS([GetConsoleScreenBufferInfo])
@@ -2117,11 +2244,22 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 ## NOTE: clock_gettime may require linking to the rt or posix4 library
 ##       so we'll search for it before calling AC_CHECK_FUNCS.
 AC_SEARCH_LIBS([clock_gettime], [rt posix4])
-AC_CHECK_FUNCS([alarm asprintf clock_gettime fcntl flock fork])
+AC_CHECK_FUNCS([asprintf clock_gettime fcntl flock fork])
 AC_CHECK_FUNCS([gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([rand_r random])
 AC_CHECK_FUNCS([strcasestr strdup symlink])
 AC_CHECK_FUNCS([tmpfile vasprintf waitpid])
+
+case "$host_os" in
+  *mingw*)
+    # alarm(2) support is spotty in MinGW, so assume it doesn't exist
+    #
+    # https://lists.gnu.org/archive/html/bug-gnulib/2013-03/msg00040.html
+    ;;
+  *)
+    AC_CHECK_FUNCS([alarm])
+    ;;
+esac
 
 ## ----------------------------------------------------------------------
 ## Check compiler characteristics
@@ -2566,8 +2704,8 @@ AC_SUBST([INTERNAL_DEBUG_OUTPUT])
 ## too specialized or have huge performance hits. These
 ## are not listed in the "all" packages list.
 ##
-## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,MM,O,S,T,Z"
-all_packages="AC,B2,CX,D,F,HL,I,MM,O,S,T,Z"
+## all_packages="AC,B2,CX,D,F,FA,FL,FS,MM,O,T,Z"
+all_packages="AC,B2,CX,D,F,MM,O,T,Z"
 
 case "X-$INTERNAL_DEBUG_OUTPUT" in
   X-yes|X-all)
@@ -3541,10 +3679,10 @@ fi
 ##
 AC_MSG_CHECKING([if the machine has window style path name])
 
-case "`uname`" in
-  MINGW*)
+case "$host_os" in
+  *mingw*)
     AC_DEFINE([HAVE_WINDOW_PATH], [1],
-              [Define if your system has window style path name.])
+              [Define if your system has Windows-style path name.])
     AC_MSG_RESULT([yes])
     ;;
   *)

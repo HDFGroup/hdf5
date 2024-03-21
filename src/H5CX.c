@@ -300,9 +300,9 @@ typedef struct H5CX_t {
     bool no_selection_io_cause_valid; /* Whether reason for not performing selection I/O is valid */
 
     uint32_t
-            actual_selection_io_mode; /* Actual selection I/O mode used (H5D_ACTUAL_SELECTION_IO_MODE_NAME) */
-    hbool_t actual_selection_io_mode_set;   /* Whether actual selection I/O mode is set */
-    hbool_t actual_selection_io_mode_valid; /* Whether actual selection I/O mode is valid */
+         actual_selection_io_mode; /* Actual selection I/O mode used (H5D_ACTUAL_SELECTION_IO_MODE_NAME) */
+    bool actual_selection_io_mode_set;   /* Whether actual selection I/O mode is set */
+    bool actual_selection_io_mode_valid; /* Whether actual selection I/O mode is valid */
 
     /* Cached LCPL properties */
     H5T_cset_t encoding;                 /* Link name character encoding */
@@ -758,6 +758,28 @@ H5CX__get_context(void)
     FUNC_LEAVE_NOAPI(ctx)
 } /* end H5CX__get_context() */
 #endif /* H5_HAVE_THREADSAFE */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_pushed
+ *
+ * Purpose:     Returns whether or not an API context has been pushed.
+ *
+ * Return:      true/false
+ *
+ *-------------------------------------------------------------------------
+ */
+bool
+H5CX_pushed(void)
+{
+    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    assert(head);
+
+    FUNC_LEAVE_NOAPI(*head != NULL);
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX__push_common

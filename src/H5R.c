@@ -28,7 +28,6 @@
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5ESprivate.h" /* Event Sets                               */
 #include "H5Iprivate.h"  /* IDs                                      */
-#include "H5MMprivate.h" /* Memory management                        */
 #include "H5Rpkg.h"      /* References                               */
 #include "H5Sprivate.h"  /* Dataspaces                               */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
@@ -980,7 +979,7 @@ H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type /*out*/
     herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*Rrix", ref_ptr, rapl_id, obj_type);
+    H5TRACE3("e", "*Rri*Ot", ref_ptr, rapl_id, obj_type);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -1039,7 +1038,7 @@ H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf /*out*/, size_t size)
     ssize_t ret_value; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "*Rrxz", ref_ptr, buf, size);
+    H5TRACE3("Zs", "*Rr*sz", ref_ptr, buf, size);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -1105,7 +1104,7 @@ H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf /*out*/, size_t siz
     ssize_t                ret_value    = 0;   /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE4("Zs", "*Rrixz", ref_ptr, rapl_id, buf, size);
+    H5TRACE4("Zs", "*Rri*sz", ref_ptr, rapl_id, buf, size);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -1167,7 +1166,7 @@ H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *buf /*out*/, size_t size)
     ssize_t ret_value; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "*Rrxz", ref_ptr, buf, size);
+    H5TRACE3("Zs", "*Rr*sz", ref_ptr, buf, size);
 
     /* Check args */
     if (ref_ptr == NULL)

@@ -27,6 +27,7 @@
 #include "H5Eprivate.h"  /* Error handling                   */
 #include "H5FLprivate.h" /* Free Lists                       */
 #include "H5Iprivate.h"  /* IDs                              */
+#include "H5MMprivate.h" /* Memory management                        */
 #include "H5Tpkg.h"      /* Datatypes                        */
 
 /****************/
@@ -53,8 +54,8 @@
  * Purpose:     This macro takes a floating point type like `double' and
  *              detects byte order, mantissa location, exponent location,
  *              sign bit location, presence or absence of implicit mantissa
- *              bit, and exponent bias and initializes a detected_t structure
- *              with those properties.
+ *              bit, and exponent bias and initializes a H5T_fpoint_det_t
+ *              structure with those properties.
  *
  *              Note that these operations can raise floating-point
  *              exceptions and building with some compiler options
@@ -306,14 +307,17 @@ H5T__fix_order(int n, int last, int *perm, H5T_order_t *order)
     if (last <= 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failed to detect byte order");
 
-    /* We have at least three points to consider */
-    if (perm[last] < perm[last - 1] && perm[last - 1] < perm[last - 2]) {
+    if (perm[last] < perm[last - 1] &&
+        /* Only check perm[last - 2] if we have more than 2 points to consider */
+        ((last < 2) || (perm[last - 1] < perm[last - 2]))) {
         /* Little endian */
         *order = H5T_ORDER_LE;
         for (int i = 0; i < n; i++)
             perm[i] = i;
     }
-    else if (perm[last] > perm[last - 1] && perm[last - 1] > perm[last - 2]) {
+    else if (perm[last] > perm[last - 1] &&
+             /* Only check perm[last - 2] if we have more than 2 points to consider */
+             ((last < 2) || (perm[last - 1] > perm[last - 2]))) {
         /* Big endian */
         *order = H5T_ORDER_BE;
         for (int i = 0; i < n; i++)
@@ -358,7 +362,7 @@ done:
  * Return:      imp_bit will be set to 1 if the most significant bit
  *              of the mantissa is discarded (ie, the mantissa has an
  *              implicit `one' as the most significant bit). Otherwise,
- *              imp_bit will be set to zero zero.
+ *              imp_bit will be set to zero.
  *
  *              SUCCEED/FAIL
  *-------------------------------------------------------------------------
@@ -569,6 +573,39 @@ H5T__init_native_float_types(void)
      * is true for all types)
      */
     H5T_native_order_g = det.order;
+
+#ifdef H5_HAVE__FLOAT16
+    /* H5T_NATIVE_FLOAT16 */
+
+    /* Get the type's characteristics */
+    memset(&det, 0, sizeof(H5T_fpoint_det_t));
+    DETECT_F(H5__Float16, det);
+
+    /* Allocate and fill type structure */
+    if (NULL == (dt = H5T__alloc()))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "datatype allocation failed");
+    dt->shared->state              = H5T_STATE_IMMUTABLE;
+    dt->shared->type               = H5T_FLOAT;
+    dt->shared->size               = det.size;
+    dt->shared->u.atomic.order     = det.order;
+    dt->shared->u.atomic.offset    = det.offset;
+    dt->shared->u.atomic.prec      = det.prec;
+    dt->shared->u.atomic.lsb_pad   = H5T_PAD_ZERO;
+    dt->shared->u.atomic.msb_pad   = H5T_PAD_ZERO;
+    dt->shared->u.atomic.u.f.sign  = det.sign;
+    dt->shared->u.atomic.u.f.epos  = det.epos;
+    dt->shared->u.atomic.u.f.esize = det.esize;
+    dt->shared->u.atomic.u.f.ebias = det.ebias;
+    dt->shared->u.atomic.u.f.mpos  = det.mpos;
+    dt->shared->u.atomic.u.f.msize = det.msize;
+    dt->shared->u.atomic.u.f.norm  = det.norm;
+    dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;
+
+    /* Register the type and set global variables */
+    if ((H5T_NATIVE_FLOAT16_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype");
+    H5T_NATIVE_FLOAT16_ALIGN_g = det.comp_align;
+#endif
 
 done:
     /* Clear any FE_INVALID exceptions from NaN handling */

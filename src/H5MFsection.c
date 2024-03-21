@@ -25,10 +25,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions			*/
-#include "H5Eprivate.h" /* Error handling		  	*/
-#include "H5Fpkg.h"     /* File access				*/
-#include "H5MFpkg.h"    /* File memory management		*/
+#include "H5private.h"   /* Generic Functions			*/
+#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5Fpkg.h"      /* File access				*/
+#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5MFpkg.h"     /* File memory management		*/
 
 /****************/
 /* Local Macros */

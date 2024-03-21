@@ -17,7 +17,6 @@
 #include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5Ppublic.h"   /* Property lists			*/
-#include "H5Oprivate.h"  /* Object headers                       */
 #include "H5Sprivate.h"  /* Dataspaces         			*/
 #include "H5Tprivate.h"  /* Datatypes         			*/
 #include "H5Zpkg.h"      /* Data filters				*/

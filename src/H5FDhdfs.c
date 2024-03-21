@@ -600,7 +600,7 @@ H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_dst /*out*/)
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", fapl_id, fa_dst);
+    H5TRACE2("e", "i*#", fapl_id, fa_dst);
 
 #if HDFS_DEBUG
     fprintf(stdout, "called %s.\n", __func__);

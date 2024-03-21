@@ -3237,6 +3237,44 @@ main(int argc, char **argv)
         SKIPPED();
 #endif
 
+    if (MAINPROCESS)
+        printf("\nRe-running tests with environment variables set to the empty string\n");
+
+    HDsetenv("H5FD_SUBFILING_SUBFILE_PREFIX", "", 1);
+    HDsetenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA", "", 1);
+    HDsetenv("H5FD_SUBFILING_IOC_PER_NODE", "", 1);
+    HDsetenv("H5FD_SUBFILING_STRIPE_SIZE", "", 1);
+    HDsetenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX", "", 1);
+
+    /* Grab values from environment variables if set */
+    parse_subfiling_env_vars();
+
+    /*
+     * Assume that we use the "one IOC per node" selection
+     * strategy by default, with a possibly modified
+     * number of IOCs per node value
+     */
+    num_iocs_g = (ioc_per_node_g > 0) ? (int)ioc_per_node_g * num_nodes_g : num_nodes_g;
+    if (num_iocs_g > mpi_size)
+        num_iocs_g = mpi_size;
+
+    for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
+        if (MPI_SUCCESS == (mpi_code_g = MPI_Barrier(comm_g))) {
+            (*tests[i])();
+        }
+        else {
+            if (MAINPROCESS)
+                MESG("MPI_Barrier failed");
+            nerrors++;
+        }
+    }
+
+    HDunsetenv("H5FD_SUBFILING_SUBFILE_PREFIX");
+    HDunsetenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA");
+    HDunsetenv("H5FD_SUBFILING_IOC_PER_NODE");
+    HDunsetenv("H5FD_SUBFILING_STRIPE_SIZE");
+    HDunsetenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX");
+
     if (nerrors)
         goto exit;
 

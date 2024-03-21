@@ -106,7 +106,7 @@ test_non_extendible(hid_t file)
     /* Create the dataset and close */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int))) < 0)
+    if (H5Pset_external(dcpl, "ext1.data", 0, (hsize_t)(max_size[0] * sizeof(int))) < 0)
         FAIL_STACK_ERROR;
     if ((space = H5Screate_simple(1, cur_size, max_size)) < 0)
         FAIL_STACK_ERROR;
@@ -203,8 +203,7 @@ test_too_small(hid_t file)
 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) - 1)) <
-        0) /* note -1 */
+    if (H5Pset_external(dcpl, "ext1.data", 0, (hsize_t)(max_size[0] * sizeof(int) - 1)) < 0) /* note -1 */
         FAIL_STACK_ERROR;
     if ((space = H5Screate_simple(1, cur_size, max_size)) < 0)
         FAIL_STACK_ERROR;
@@ -260,7 +259,7 @@ test_large_enough_current_eventual(hid_t file)
 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int))) < 0)
+    if (H5Pset_external(dcpl, "ext1.data", 0, (hsize_t)(max_size[0] * sizeof(int))) < 0)
         FAIL_STACK_ERROR;
     if ((space = H5Screate_simple(1, cur_size, max_size)) < 0)
         FAIL_STACK_ERROR;
@@ -312,8 +311,7 @@ test_large_enough_current_not_eventual(hid_t file)
 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) - 1)) <
-        0) /* note -1 */
+    if (H5Pset_external(dcpl, "ext1.data", 0, (hsize_t)(max_size[0] * sizeof(int) - 1)) < 0) /* note -1 */
         FAIL_STACK_ERROR;
     if ((space = H5Screate_simple(1, cur_size, max_size)) < 0)
         FAIL_STACK_ERROR;
@@ -373,7 +371,7 @@ test_unlimited(hid_t file)
     /* Create dataset */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, H5F_UNLIMITED) < 0)
+    if (H5Pset_external(dcpl, "ext1.data", 0, H5F_UNLIMITED) < 0)
         FAIL_STACK_ERROR;
     if ((space = H5Screate_simple(1, cur_size, max_size)) < 0)
         FAIL_STACK_ERROR;
@@ -576,12 +574,12 @@ test_add_to_unlimited(void)
 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, H5F_UNLIMITED) < 0)
+    if (H5Pset_external(dcpl, "ext1.data", 0, H5F_UNLIMITED) < 0)
         FAIL_STACK_ERROR;
 
     H5E_BEGIN_TRY
     {
-        status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100);
+        status = H5Pset_external(dcpl, "ext2.data", 0, 100);
     }
     H5E_END_TRY
     if (status >= 0)
@@ -627,12 +625,12 @@ test_overflow(void)
 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, H5F_UNLIMITED - 1) < 0)
+    if (H5Pset_external(dcpl, "ext1.data", 0, H5F_UNLIMITED - 1) < 0)
         FAIL_STACK_ERROR;
 
     H5E_BEGIN_TRY
     {
-        status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100);
+        status = H5Pset_external(dcpl, "ext2.data", 0, 100);
     }
     H5E_END_TRY
     if (status >= 0)
@@ -1286,7 +1284,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
     /* Create the dcpl and set external storage */
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl_id, "extern_1r.raw", (off_t)0, (hsize_t)0) < 0)
+    if (H5Pset_external(dcpl_id, "extern_1r.raw", 0, 0) < 0)
         FAIL_STACK_ERROR;
 
     /* Create the dapl and set the prefix */

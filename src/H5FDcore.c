@@ -393,7 +393,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
             int    myerrno = errno;
             time_t mytime  = HDtime(NULL);
 
-            offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+            offset = HDlseek(file->fd, 0, SEEK_CUR);
 
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                         "write to backing store failed: time = %s, filename = '%s', file descriptor = %d, "
@@ -565,7 +565,7 @@ H5Pget_core_write_tracking(hid_t plist_id, hbool_t *is_enabled /*out*/, size_t *
     herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", plist_id, is_enabled, page_size);
+    H5TRACE3("e", "i*b*z", plist_id, is_enabled, page_size);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
@@ -642,7 +642,7 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, hbool_t *backing_stor
     herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", fapl_id, increment, backing_store);
+    H5TRACE3("e", "i*z*b", fapl_id, increment, backing_store);
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
@@ -767,7 +767,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
             if ((fd = HDopen(name, o_flags | O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file");
             if (HDfstat(fd, &sb) < 0)
-                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
+                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
         } /* end if */
     }     /* end if */
     /* Open backing store, and get stat() from file.  The only case that backing
@@ -777,7 +777,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         if ((fd = HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");
         if (HDfstat(fd, &sb) < 0)
-            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
     } /* end if */
 
     /* Create the new file struct */
@@ -871,8 +871,8 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                  * partial results, and the end of the file.
                  */
 
-                uint8_t *mem    = file->mem;  /* memory pointer for writes */
-                HDoff_t  offset = (HDoff_t)0; /* offset for reading */
+                uint8_t *mem    = file->mem; /* memory pointer for writes */
+                HDoff_t  offset = 0;         /* offset for reading */
 
                 while (size > 0) {
                     h5_posix_io_t     bytes_in   = 0;  /* # of bytes to read       */
@@ -900,7 +900,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                         int    myerrno = errno;
                         time_t mytime  = HDtime(NULL);
 
-                        offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+                        offset = HDlseek(file->fd, 0, SEEK_CUR);
 
                         HGOTO_ERROR(
                             H5E_IO, H5E_READERROR, NULL,
@@ -1567,7 +1567,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
                     HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
 #else  /* H5_HAVE_WIN32_API */
                 if (-1 == HDftruncate(file->fd, (HDoff_t)new_eof))
-                    HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+                    HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
 #endif /* H5_HAVE_WIN32_API */
 
             } /* end if */
@@ -1620,7 +1620,7 @@ H5FD__core_lock(H5FD_t *_file, bool rw)
                 errno = 0;
             }
             else
-                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file")
+                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file");
         } /* end if */
     }     /* end if */
 
@@ -1656,7 +1656,7 @@ H5FD__core_unlock(H5FD_t *_file)
                 errno = 0;
             }
             else
-                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to unlock file")
+                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to unlock file");
         }
 
 done:
@@ -1690,7 +1690,7 @@ H5FD__core_delete(const char *filename, hid_t fapl_id)
 
     if (fa->backing_store)
         if (HDremove(filename) < 0)
-            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file")
+            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -12,9 +12,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:         H5B.c
+ * Created: H5B.c
  *
- * Purpose:		Implements balanced, sibling-linked, N-ary trees
+ * Purpose: Implements balanced, sibling-linked, N-ary trees
  *			capable of storing any type of data with unique key
  *			values.
  *
@@ -101,10 +101,9 @@
 #include "H5Bpkg.h"      /* B-link trees				*/
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Iprivate.h"  /* IDs			  		*/
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5MFprivate.h" /* File memory management		*/
 #include "H5MMprivate.h" /* Memory management			*/
-#include "H5Pprivate.h"  /* Property lists                       */
 
 /****************/
 /* Local Macros */
@@ -236,9 +235,6 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *addr_p /*out
      */
     if (H5AC_insert_entry(f, H5AC_BT, *addr_p, bt, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't add B-tree root node to cache");
-#ifdef H5B_DEBUG
-    H5B__assert(f, *addr_p, shared->type, udata);
-#endif
 
 done:
     if (ret_value < 0) {
@@ -253,7 +249,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B_create() */ /*lint !e818 Can't make udata a pointer to const */
+} /* end H5B_create() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5B_find
@@ -399,23 +395,6 @@ H5B__split(H5F_t *f, H5B_ins_ud_t *bt_ud, unsigned idx, void *udata, H5B_ins_ud_
     if (H5CX_get_btree_split_ratios(split_ratios) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree split ratios");
 
-#ifdef H5B_DEBUG
-    if (H5DEBUG(B)) {
-        const char *side;
-
-        if (!H5_addr_defined(bt_ud->bt->left) && !H5_addr_defined(bt_ud->bt->right))
-            side = "ONLY";
-        else if (!H5_addr_defined(bt_ud->bt->right))
-            side = "RIGHT";
-        else if (!H5_addr_defined(bt_ud->bt->left))
-            side = "LEFT";
-        else
-            side = "MIDDLE";
-        fprintf(H5DEBUG(B), "H5B__split: %3u {%5.3f,%5.3f,%5.3f} %6s", shared->two_k, split_ratios[0],
-                split_ratios[1], split_ratios[2], side);
-    }
-#endif
-
     /*
      * Decide how to split the children of the old node among the old node
      * and the new node.
@@ -437,10 +416,6 @@ H5B__split(H5F_t *f, H5B_ins_ud_t *bt_ud, unsigned idx, void *udata, H5B_ins_ud_
     else if (idx >= nleft && 0 == nleft)
         nleft++;
     nright = shared->two_k - nleft;
-#ifdef H5B_DEBUG
-    if (H5DEBUG(B))
-        fprintf(H5DEBUG(B), " split %3d/%-3d\n", nleft, nright);
-#endif
 
     /*
      * Create the new B-tree node.
@@ -648,11 +623,6 @@ done:
     if (split_bt_ud.bt)
         if (H5AC_unprotect(f, H5AC_BT, split_bt_ud.addr, split_bt_ud.bt, split_bt_ud.cache_flags) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to unprotect new child");
-
-#ifdef H5B_DEBUG
-    if (ret_value >= 0)
-        H5B__assert(f, addr, type, udata);
-#endif
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_insert() */
@@ -944,14 +914,9 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
 #endif /* H5_STRICT_FORMAT_CHECKS */
     }
     else if (cmp) {
-        /*
-         * We couldn't figure out which branch to follow out of this node. THIS
-         * IS A MAJOR PROBLEM THAT NEEDS TO BE FIXED --rpm.
-         */
-        assert("INTERNAL HDF5 ERROR (contact rpm)" && 0);
-#ifdef NDEBUG
-        HDabort();
-#endif /* NDEBUG */
+        /* We couldn't figure out which branch to follow out of this node */
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
+                    "internal error: could not determine which branch to follow out of this node");
     }
     else if (bt->level > 0) {
         /*
@@ -1054,15 +1019,7 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
     if (split_bt_ud->bt) {
         H5MM_memcpy(md_key, H5B_NKEY(split_bt_ud->bt, shared, 0), type->sizeof_nkey);
         ret_value = H5B_INS_RIGHT;
-#ifdef H5B_DEBUG
-        /*
-         * The max key in the original left node must be equal to the min key
-         * in the new node.
-         */
-        cmp = (type->cmp2)(H5B_NKEY(bt, shared, bt->nchildren), udata, H5B_NKEY(split_bt_ud->bt, shared, 0));
-        assert(0 == cmp);
-#endif
-    } /* end if */
+    }
     else
         ret_value = H5B_INS_NOOP;
 
@@ -1544,9 +1501,6 @@ H5B_remove(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
         H5B__remove_helper(f, addr, type, 0, lt_key, &lt_key_changed, udata, rt_key, &rt_key_changed))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to remove entry from B-tree");
 
-#ifdef H5B_DEBUG
-    H5B__assert(f, addr, type, udata);
-#endif
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_remove() */

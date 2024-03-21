@@ -48,7 +48,6 @@ static int                    sf_file_map_size = 0;
 #define DEFAULT_TOPOLOGY_CACHE_SIZE 4
 #define DEFAULT_FILE_MAP_ENTRIES    8
 
-static herr_t H5_free_subfiling_object(int64_t object_id);
 static herr_t H5_free_subfiling_object_int(subfiling_context_t *sf_context);
 static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
 
@@ -280,18 +279,25 @@ done:
  * Purpose:     Frees the underlying subfiling object for a given subfiling
  *              object ID.
  *
- *              NOTE: Currently we assume that all created subfiling
- *              objects are cached in the (very simple) context/topology
- *              cache until application exit, so the only time a subfiling
- *              object should be freed by this routine is if something
- *              fails right after creating one. Otherwise, the internal
- *              indexing for the relevant cache will be invalid.
+ *              NOTE: Because we want to avoid the potentially large
+ *              overhead of determining the application topology on every
+ *              file open, we currently assume that all created subfiling
+ *              topology objects are cached in the (very simple) topology
+ *              cache until application exit. This allows us to quickly
+ *              find and assign a cached topology object to a subfiling
+ *              context object for a file when opened. Therefore, a
+ *              subfiling topology object should (currently) only ever be
+ *              freed by this routine if a function fails right after
+ *              creating a topology object. Otherwise, the internal
+ *              indexing for the topology cache will be invalid and we will
+ *              either leak memory or assign invalid topology pointers to
+ *              subfiling context objects after that point.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5_free_subfiling_object(int64_t object_id)
 {
     int64_t obj_type  = (object_id >> 32) & 0x0FFFF;
@@ -305,30 +311,31 @@ H5_free_subfiling_object(int64_t object_id)
                                     "couldn't get subfiling context for subfiling object ID");
 
         if (H5_free_subfiling_object_int(sf_context) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling context object");
 
         assert(sf_context_cache_num_entries > 0);
         assert(sf_context == sf_context_cache[sf_context_cache_num_entries - 1]);
         sf_context_cache[sf_context_cache_num_entries - 1] = NULL;
         sf_context_cache_num_entries--;
     }
-    else {
+    else if (obj_type == SF_TOPOLOGY) {
         sf_topology_t *sf_topology;
-
-        assert(obj_type == SF_TOPOLOGY);
 
         if (NULL == (sf_topology = H5_get_subfiling_object(object_id)))
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
                                     "couldn't get subfiling context for subfiling object ID");
 
         if (H5_free_subfiling_topology(sf_topology) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling topology");
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling topology object");
 
         assert(sf_topology_cache_num_entries > 0);
         assert(sf_topology == sf_topology_cache[sf_topology_cache_num_entries - 1]);
         sf_topology_cache[sf_topology_cache_num_entries - 1] = NULL;
         sf_topology_cache_num_entries--;
     }
+    else
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                                "couldn't free subfiling object - invalid object type");
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -777,7 +784,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
 
     /* Check if a prefix has been set for the configuration file name */
     prefix_env = getenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
-    if (prefix_env) {
+    if (prefix_env && (strlen(prefix_env) > 0)) {
         if (NULL == (new_context->config_file_prefix = strdup(prefix_env)))
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "couldn't copy config file prefix string");
     }
@@ -851,7 +858,8 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
         char *env_value = NULL;
 
         /* Check for a subfiling stripe size setting from the environment */
-        if ((env_value = getenv(H5FD_SUBFILING_STRIPE_SIZE))) {
+        env_value = getenv(H5FD_SUBFILING_STRIPE_SIZE);
+        if (env_value && (strlen(env_value) > 0)) {
             long long stripe_size = -1;
 
             errno = 0;
@@ -981,7 +989,8 @@ init_app_topology(int64_t sf_context_id, H5FD_subfiling_params_t *subfiling_conf
         case SELECT_IOC_ONE_PER_NODE: {
             if (comm_size > 1) {
                 /* Check for an IOC-per-node value set in the environment */
-                if ((env_value = getenv(H5FD_SUBFILING_IOC_PER_NODE))) {
+                env_value = getenv(H5FD_SUBFILING_IOC_PER_NODE);
+                if (env_value && (strlen(env_value) > 0)) {
                     errno          = 0;
                     ioc_select_val = strtol(env_value, NULL, 0);
                     if ((ERANGE == errno)) {
@@ -1186,7 +1195,7 @@ get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_t
 
     *ioc_sel_info_str = NULL;
 
-    if (env_value) {
+    if (env_value && (strlen(env_value) > 0)) {
         /*
          * Parse I/O Concentrator selection strategy criteria as
          * either a single value or two colon-separated values of
@@ -1821,7 +1830,8 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
                                 "couldn't allocate space for subfiling filename");
 
     /* Check for a subfile name prefix setting in the environment */
-    if ((env_value = getenv(H5FD_SUBFILING_SUBFILE_PREFIX))) {
+    env_value = getenv(H5FD_SUBFILING_SUBFILE_PREFIX);
+    if (env_value && (strlen(env_value) > 0)) {
         if (NULL == (sf_context->subfile_prefix = strdup(env_value)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix value");
     }

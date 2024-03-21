@@ -24,11 +24,8 @@
 #include "H5Dpkg.h"      /* Dataset functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5FLprivate.h" /* Free Lists                               */
-#include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Sprivate.h"  /* Dataspace                                */
-
-#include "H5VLnative_private.h" /* Native VOL connector                     */
 
 /****************/
 /* Local Macros */
@@ -46,7 +43,8 @@
 static herr_t H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_io_info_t *dset_info,
                                H5D_io_info_t *io_info);
 static herr_t H5D__dset_ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t *store);
-static herr_t H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t mem_type_id);
+static herr_t H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info,
+                                 const H5T_t *mem_type);
 static herr_t H5D__typeinfo_init_phase2(H5D_io_info_t *io_info);
 static herr_t H5D__typeinfo_init_phase3(H5D_io_info_t *io_info);
 #ifdef H5_HAVE_PARALLEL
@@ -157,7 +155,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
         H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
 
         /* Set up datatype info for operation */
-        if (H5D__typeinfo_init(&io_info, &(dset_info[i]), dset_info[i].mem_type_id) < 0)
+        if (H5D__typeinfo_init(&io_info, &(dset_info[i]), dset_info[i].mem_type) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info");
 
         /* Make certain that the number of elements in each selection is the same, and cache nelmts in
@@ -577,7 +575,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file");
 
         /* Set up datatype info for operation */
-        if (H5D__typeinfo_init(&io_info, &(dset_info[i]), dset_info[i].mem_type_id) < 0)
+        if (H5D__typeinfo_init(&io_info, &(dset_info[i]), dset_info[i].mem_type) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info");
 
             /* Various MPI based checks */
@@ -1040,12 +1038,10 @@ H5D__dset_ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t 
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t mem_type_id)
+H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, const H5T_t *mem_type)
 {
     H5D_type_info_t  *type_info;
     const H5D_t      *dset;
-    const H5T_t      *src_type;            /* Source datatype */
-    const H5T_t      *dst_type;            /* Destination datatype */
     H5Z_data_xform_t *data_transform;      /* Data transform info */
     herr_t            ret_value = SUCCEED; /* Return value	*/
 
@@ -1054,6 +1050,7 @@ H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t 
     /* Check args */
     assert(io_info);
     assert(dset_info);
+    assert(mem_type);
 
     /* Set convenience pointers */
     type_info = &dset_info->type_info;
@@ -1068,21 +1065,16 @@ H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t 
     memset(type_info, 0, sizeof(*type_info));
 
     /* Get the memory & dataset datatypes */
-    if (NULL == (type_info->mem_type = (const H5T_t *)H5I_object_verify(mem_type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+    type_info->mem_type  = mem_type;
     type_info->dset_type = dset->shared->type;
 
     if (io_info->op_type == H5D_IO_OP_WRITE) {
-        src_type               = type_info->mem_type;
-        dst_type               = dset->shared->type;
-        type_info->src_type_id = mem_type_id;
-        type_info->dst_type_id = dset->shared->type_id;
+        type_info->src_type = mem_type;
+        type_info->dst_type = dset->shared->type;
     } /* end if */
     else {
-        src_type               = dset->shared->type;
-        dst_type               = type_info->mem_type;
-        type_info->src_type_id = dset->shared->type_id;
-        type_info->dst_type_id = mem_type_id;
+        type_info->src_type = dset->shared->type;
+        type_info->dst_type = mem_type;
     } /* end else */
 
     /* Locate the type conversion function and dataspace conversion
@@ -1092,7 +1084,7 @@ H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t 
      * enough value in xfer_parms since turning off datatype conversion also
      * turns off background preservation.
      */
-    if (NULL == (type_info->tpath = H5T_path_find(src_type, dst_type)))
+    if (NULL == (type_info->tpath = H5T_path_find(type_info->src_type, type_info->dst_type)))
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype");
 
     /* Retrieve info from API context */
@@ -1100,8 +1092,8 @@ H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t 
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info");
 
     /* Precompute some useful information */
-    type_info->src_type_size = H5T_get_size(src_type);
-    type_info->dst_type_size = H5T_get_size(dst_type);
+    type_info->src_type_size = H5T_get_size(type_info->src_type);
+    type_info->dst_type_size = H5T_get_size(type_info->dst_type);
     type_info->is_conv_noop  = H5T_path_noop(type_info->tpath);
     type_info->is_xform_noop = H5Z_xform_noop(data_transform);
     if (type_info->is_xform_noop && type_info->is_conv_noop) {

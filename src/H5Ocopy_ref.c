@@ -32,6 +32,7 @@
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fprivate.h"  /* File                                     */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Lprivate.h"  /* Links                                    */
 #include "H5MMprivate.h" /* Memory management                        */
@@ -64,10 +65,9 @@ static herr_t H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_
 static herr_t H5O__copy_expand_ref_region1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t *dst_oloc,
                                            H5G_loc_t *dst_root_loc, void *buf_dst, size_t ref_count,
                                            H5O_copy_t *cpy_info);
-static herr_t H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt_src,
-                                           const void *buf_src, size_t nbytes_src, H5O_loc_t *dst_oloc,
-                                           H5G_loc_t *dst_root_loc, void *buf_dst, size_t ref_count,
-                                           H5O_copy_t *cpy_info);
+static herr_t H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, const H5T_t *dt_src, const void *buf_src,
+                                           size_t nbytes_src, H5O_loc_t *dst_oloc, H5G_loc_t *dst_root_loc,
+                                           void *buf_dst, size_t ref_count, H5O_copy_t *cpy_info);
 
 /*********************/
 /* Package Variables */
@@ -285,17 +285,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt_src, const void *buf_src,
-                             size_t nbytes_src, H5O_loc_t *dst_oloc, H5G_loc_t *dst_root_loc, void *buf_dst,
-                             size_t ref_count, H5O_copy_t *cpy_info)
+H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, const H5T_t *dt_src, const void *buf_src, size_t nbytes_src,
+                             H5O_loc_t *dst_oloc, H5G_loc_t *dst_root_loc, void *buf_dst, size_t ref_count,
+                             H5O_copy_t *cpy_info)
 {
     H5T_t              *dt_mem        = NULL;                        /* Memory datatype */
     H5T_t              *dt_dst        = NULL;                        /* Destination datatype */
-    hid_t               tid_mem       = H5I_INVALID_HID;             /* Datatype ID for memory datatype */
-    hid_t               tid_dst       = H5I_INVALID_HID;             /* Datatype ID for memory datatype */
     H5T_path_t         *tpath_src_mem = NULL, *tpath_mem_dst = NULL; /* Datatype conversion paths */
     size_t              i;                                           /* Local index variable */
-    bool                reg_tid_src             = (tid_src == H5I_INVALID_HID);
     hid_t               dst_loc_id              = H5I_INVALID_HID;
     void               *conv_buf                = NULL;        /* Buffer for converting data */
     size_t              conv_buf_size           = 0;           /* Buffer size */
@@ -308,17 +305,9 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
 
     FUNC_ENTER_PACKAGE
 
-    /* Create datatype ID for src datatype. */
-    if ((tid_src == H5I_INVALID_HID) && (tid_src = H5I_register(H5I_DATATYPE, dt_src, false)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to register source file datatype");
-
     /* create a memory copy of the reference datatype */
     if (NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy");
-    if ((tid_mem = H5I_register(H5I_DATATYPE, dt_mem, false)) < 0) {
-        (void)H5T_close_real(dt_mem);
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to register memory datatype");
-    } /* end if */
 
     /* create reference datatype at the destination file */
     if (NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
@@ -326,10 +315,6 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
     if (H5T_set_loc(dt_dst, H5F_VOL_OBJ(dst_oloc->file), H5T_LOC_DISK) < 0) {
         (void)H5T_close_real(dt_dst);
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "cannot mark datatype on disk");
-    } /* end if */
-    if ((tid_dst = H5I_register(H5I_DATATYPE, dt_dst, false)) < 0) {
-        (void)H5T_close_real(dt_dst);
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to register destination file datatype");
     } /* end if */
 
     /* Set up the conversion functions */
@@ -346,7 +331,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
     H5MM_memcpy(conv_buf, buf_src, nbytes_src);
 
     /* Convert from source file to memory */
-    if (H5T_convert(tpath_src_mem, tid_src, tid_mem, ref_count, (size_t)0, (size_t)0, conv_buf, NULL) < 0)
+    if (H5T_convert(tpath_src_mem, dt_src, dt_mem, ref_count, (size_t)0, (size_t)0, conv_buf, NULL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
 
     /* Retrieve loc ID */
@@ -392,24 +377,21 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
 
     /* Convert from memory to destination file */
-    if (H5T_convert(tpath_mem_dst, tid_mem, tid_dst, ref_count, (size_t)0, (size_t)0, conv_buf, NULL) < 0)
+    if (H5T_convert(tpath_mem_dst, dt_mem, dt_dst, ref_count, (size_t)0, (size_t)0, conv_buf, NULL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
     H5MM_memcpy(buf_dst, conv_buf, nbytes_src);
 
     /* Reclaim space from reference data */
-    if (H5T_reclaim(tid_mem, buf_space, reclaim_buf) < 0)
+    if (H5T_reclaim(dt_mem, buf_space, reclaim_buf) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to reclaim reference data");
 
 done:
     if (buf_space && (H5S_close(buf_space) < 0))
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't close dataspace");
-    /* Don't decrement ID, we want to keep underlying datatype */
-    if (reg_tid_src && (tid_src > 0) && (NULL == H5I_remove(tid_src)))
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
-    if ((tid_mem > 0) && H5I_dec_ref(tid_mem) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
-    if ((tid_dst > 0) && H5I_dec_ref(tid_dst) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
+        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "can't close dataspace");
+    if (dt_mem && (H5T_close(dt_mem) < 0))
+        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
+    if (dt_dst && (H5T_close(dt_dst) < 0))
+        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     if (reclaim_buf)
         reclaim_buf = H5FL_BLK_FREE(type_conv, reclaim_buf);
     if (conv_buf)
@@ -430,8 +412,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_copy_expand_ref(H5F_t *file_src, hid_t tid_src, const H5T_t *dt_src, void *buf_src, size_t nbytes_src,
-                    H5F_t *file_dst, void *buf_dst, H5O_copy_t *cpy_info)
+H5O_copy_expand_ref(H5F_t *file_src, const H5T_t *dt_src, void *buf_src, size_t nbytes_src, H5F_t *file_dst,
+                    void *buf_dst, H5O_copy_t *cpy_info)
 {
     H5O_loc_t dst_oloc;     /* Copied object object location */
     H5O_loc_t src_oloc;     /* Temporary object location for source object */
@@ -479,8 +461,8 @@ H5O_copy_expand_ref(H5F_t *file_src, hid_t tid_src, const H5T_t *dt_src, void *b
         case H5R_DATASET_REGION2:
         case H5R_ATTR:
         case H5R_OBJECT2:
-            if (H5O__copy_expand_ref_object2(&src_oloc, tid_src, dt_src, buf_src, nbytes_src, &dst_oloc,
-                                             &dst_root_loc, buf_dst, ref_count, cpy_info) < 0)
+            if (H5O__copy_expand_ref_object2(&src_oloc, dt_src, buf_src, nbytes_src, &dst_oloc, &dst_root_loc,
+                                             buf_dst, ref_count, cpy_info) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unable to expand reference");
             break;
         case H5R_BADTYPE:

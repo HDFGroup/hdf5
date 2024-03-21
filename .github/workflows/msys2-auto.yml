@@ -1,0 +1,66 @@
+name: hdf5 1.14 Autotools MSys2
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+      build_option:
+        description: "--enable-production or --disable-production"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  msys2_build_and_test:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - { icon: '⬛', sys: mingw32 }
+          - { icon: '🟦', sys: mingw64 }
+          - { icon: '🟨', sys: ucrt64  }
+          - { icon: '🟧', sys: clang64 }
+    name: ${{ matrix.icon }} msys2-${{ matrix.sys }}-${{ inputs.build_mode }}
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Get Sources
+        uses: actions/checkout@v4.1.1
+
+      - name: '${{ matrix.icon }} Setup MSYS2'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{matrix.sys}}
+          update: true
+          install: >-
+            git
+            autotools
+          pacboy: >-
+            toolchain:p
+            libjpeg-turbo:p
+
+      - name: Autotools Configure
+        run: |
+          sh ./autogen.sh
+          mkdir "$GITHUB_WORKSPACE/build"
+          cd "$GITHUB_WORKSPACE/build"
+          LDFLAGS="-lws2_32" $GITHUB_WORKSPACE/configure \
+            ${{ inputs.build_option }} \
+            --disable-netcdf \
+            --enable-static-exec
+
+      - name: Autotools Build
+        run: |
+          make -j3
+        working-directory: $GITHUB_WORKSPACE/build
+
+      - name: Autotools Run Tests
+        run: |
+          make check -j
+        working-directory: $GITHUB_WORKSPACE/build

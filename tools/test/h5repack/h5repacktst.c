@@ -3714,7 +3714,7 @@ make_external(hid_t loc_id)
     /* create */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto out;
-    if (H5Pset_external(dcpl, H5REPACK_EXTFILE, (off_t)0, size) < 0)
+    if (H5Pset_external(dcpl, H5REPACK_EXTFILE, 0, size) < 0)
         goto out;
     if ((sid = H5Screate_simple(1, cur_size, max_size)) < 0)
         goto out;

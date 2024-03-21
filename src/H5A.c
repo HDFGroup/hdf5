@@ -15,7 +15,6 @@
 /****************/
 
 #include "H5Amodule.h" /* This source code file is part of the H5A module */
-#define H5O_FRIEND     /* Suppress error about including H5Opkg */
 
 /***********/
 /* Headers */
@@ -25,10 +24,7 @@
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5ESprivate.h" /* Event Sets                               */
-#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
-#include "H5MMprivate.h" /* Memory management                        */
-#include "H5Opkg.h"      /* Object headers                           */
 #include "H5Sprivate.h"  /* Dataspace functions                      */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
@@ -1036,7 +1032,7 @@ H5Aread(hid_t attr_id, hid_t dtype_id, void *buf /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iix", attr_id, dtype_id, buf);
+    H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
     /* Synchronously read the data */
     if (H5A__read_api_common(attr_id, dtype_id, buf, NULL, NULL) < 0)
@@ -1064,7 +1060,7 @@ H5Aread_async(const char *app_file, const char *app_func, unsigned app_line, hid
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*s*sIuiixi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id);
+    H5TRACE7("e", "*s*sIuii*xi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -1078,7 +1074,7 @@ H5Aread_async(const char *app_file, const char *app_func, unsigned app_line, hid
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(__func__, "*s*sIuiixi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id)) < 0)
+                        H5ARG_TRACE7(__func__, "*s*sIuii*xi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 
@@ -1257,7 +1253,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf /*out*/)
     ssize_t              ret_value     = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "izx", attr_id, buf_size, buf);
+    H5TRACE3("Zs", "iz*s", attr_id, buf_size, buf);
 
     /* check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -1308,7 +1304,7 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
     ssize_t              ret_value;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("Zs", "i*sIiIohxzi", loc_id, obj_name, idx_type, order, n, name, size, lapl_id);
+    H5TRACE8("Zs", "i*sIiIoh*szi", loc_id, obj_name, idx_type, order, n, name, size, lapl_id);
 
     /* Check args */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -1416,7 +1412,7 @@ H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/)
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", attr_id, ainfo);
+    H5TRACE2("e", "i*Ai", attr_id, ainfo);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -1458,7 +1454,7 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, H
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*s*sxi", loc_id, obj_name, attr_name, ainfo, lapl_id);
+    H5TRACE5("e", "i*s*s*Aii", loc_id, obj_name, attr_name, ainfo, lapl_id);
 
     /* Check args */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -1515,7 +1511,7 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIohxi", loc_id, obj_name, idx_type, order, n, ainfo, lapl_id);
+    H5TRACE7("e", "i*sIiIoh*Aii", loc_id, obj_name, idx_type, order, n, ainfo, lapl_id);
 
     /* Check args */
     if (H5I_ATTR == H5I_get_type(loc_id))

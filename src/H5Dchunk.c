@@ -56,6 +56,7 @@
 #include "H5MMprivate.h" /* Memory management            */
 #include "H5MFprivate.h" /* File memory management               */
 #include "H5PBprivate.h" /* Page Buffer	                         */
+#include "H5SLprivate.h" /* Skip Lists                               */
 #include "H5VMprivate.h" /* Vector and array functions        */
 
 /****************/
@@ -179,10 +180,9 @@ typedef struct H5D_chunk_it_ud3_t {
     bool                  do_convert;   /* Whether to perform type conversions */
 
     /* needed for converting variable-length data */
-    hid_t        tid_src;          /* Datatype ID for source datatype */
-    hid_t        tid_dst;          /* Datatype ID for destination datatype */
-    hid_t        tid_mem;          /* Datatype ID for memory datatype */
     const H5T_t *dt_src;           /* Source datatype */
+    const H5T_t *dt_dst;           /* Destination datatype */
+    const H5T_t *dt_mem;           /* Memory datatype */
     H5T_path_t  *tpath_src_mem;    /* Datatype conversion path from source file to memory */
     H5T_path_t  *tpath_mem_dst;    /* Datatype conversion path from memory to dest. file */
     void        *reclaim_buf;      /* Buffer for reclaiming data */
@@ -1061,6 +1061,10 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     fm->single_space      = NULL;
     fm->single_piece_info = NULL;
 
+    /* Initialize selection type in memory and file */
+    fm->msel_type = H5S_SEL_ERROR;
+    fm->fsel_type = H5S_SEL_ERROR;
+
     /* Check if the memory space is scalar & make equivalent memory space */
     if ((sm_ndims = H5S_GET_EXTENT_NDIMS(dinfo->mem_space)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number");
@@ -1178,7 +1182,6 @@ H5D__chunk_io_init_selections(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     const H5D_t       *dataset;            /* Local pointer to dataset info */
     const H5T_t       *mem_type;           /* Local pointer to memory datatype */
     H5S_t             *tmp_mspace = NULL;  /* Temporary memory dataspace */
-    H5T_t             *file_type  = NULL;  /* Temporary copy of file datatype for iteration */
     bool               iter_init  = false; /* Selection iteration info has been initialized */
     char               bogus;              /* "bogus" buffer to pass to selection iterator */
     H5D_io_info_wrap_t io_info_wrap;
@@ -1281,10 +1284,6 @@ H5D__chunk_io_init_selections(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         else {
             H5S_sel_iter_op_t iter_op; /* Operator for iteration */
 
-            /* Create temporary datatypes for selection iteration */
-            if (NULL == (file_type = H5T_copy(dataset->shared->type, H5T_COPY_ALL)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy file datatype");
-
             /* set opdata for H5D__piece_mem_cb */
             io_info_wrap.io_info = io_info;
             io_info_wrap.dinfo   = dinfo;
@@ -1292,7 +1291,8 @@ H5D__chunk_io_init_selections(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
             iter_op.u.lib_op     = H5D__piece_file_cb;
 
             /* Spaces might not be the same shape, iterate over the file selection directly */
-            if (H5S_select_iterate(&bogus, file_type, dinfo->file_space, &iter_op, &io_info_wrap) < 0)
+            if (H5S_select_iterate(&bogus, dataset->shared->type, dinfo->file_space, &iter_op,
+                                   &io_info_wrap) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections");
 
             /* Reset "last piece" info */
@@ -1331,11 +1331,6 @@ H5D__chunk_io_init_selections(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
             /* Save chunk template information */
             fm->mchunk_tmpl = tmp_mspace;
 
-            /* Create temporary datatypes for selection iteration */
-            if (!file_type)
-                if (NULL == (file_type = H5T_copy(dataset->shared->type, H5T_COPY_ALL)))
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy file datatype");
-
             /* Create selection iterator for memory selection */
             if (0 == (elmt_size = H5T_get_size(mem_type)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "datatype size invalid");
@@ -1350,7 +1345,8 @@ H5D__chunk_io_init_selections(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
             iter_op.u.lib_op     = H5D__piece_mem_cb;
 
             /* Spaces aren't the same shape, iterate over the memory selection directly */
-            if (H5S_select_iterate(&bogus, file_type, dinfo->file_space, &iter_op, &io_info_wrap) < 0)
+            if (H5S_select_iterate(&bogus, dataset->shared->type, dinfo->file_space, &iter_op,
+                                   &io_info_wrap) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create memory chunk selections");
         } /* end else */
     }     /* end else */
@@ -1368,8 +1364,6 @@ done:
 
     if (iter_init && H5S_SELECT_ITER_RELEASE(&(fm->mem_iter)) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
-    if (file_type && (H5T_close_real(file_type) < 0))
-        HDONE_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "Can't free temporary datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_io_init_selections() */
@@ -1977,9 +1971,8 @@ H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, H5D_io_info_t *io_in
             do {
                 /* Reset current dimension's location to 0 */
                 scaled[curr_dim] = start_scaled[curr_dim];
-                coords[curr_dim] =
-                    start_coords[curr_dim]; /*lint !e771 The start_coords will always be initialized */
-                end[curr_dim] = (coords[curr_dim] + fm->chunk_dim[curr_dim]) - 1;
+                coords[curr_dim] = start_coords[curr_dim];
+                end[curr_dim]    = (coords[curr_dim] + fm->chunk_dim[curr_dim]) - 1;
 
                 /* Decrement current dimension */
                 curr_dim--;
@@ -4590,8 +4583,8 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                     /* Initialize the fill value buffer */
                     /* (use the compact dataset storage buffer as the fill value buffer) */
                     if (H5D__fill_init(&fb_info, chunk, NULL, NULL, NULL, NULL,
-                                       &dset->shared->dcpl_cache.fill, dset->shared->type,
-                                       dset->shared->type_id, (size_t)0, chunk_size) < 0)
+                                       &dset->shared->dcpl_cache.fill, dset->shared->type, (size_t)0,
+                                       chunk_size) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't initialize fill buffer info");
                     fb_info_init = true;
 
@@ -5020,8 +5013,8 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
         /* Initialize the fill value buffer */
         /* (delay allocating fill buffer for VL datatypes until refilling) */
         if (H5D__fill_init(&fb_info, NULL, H5D__chunk_mem_alloc, pline, H5D__chunk_mem_free, pline,
-                           &dset->shared->dcpl_cache.fill, dset->shared->type, dset->shared->type_id,
-                           (size_t)0, orig_chunk_size) < 0)
+                           &dset->shared->dcpl_cache.fill, dset->shared->type, (size_t)0,
+                           orig_chunk_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info");
         fb_info_init = true;
 
@@ -5793,8 +5786,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, bool new_unfilt_chunk)
     if (!udata->fb_info_init) {
         H5_CHECK_OVERFLOW(udata->elmts_per_chunk, uint32_t, size_t);
         if (H5D__fill_init(&udata->fb_info, NULL, NULL, NULL, NULL, NULL, &dset->shared->dcpl_cache.fill,
-                           dset->shared->type, dset->shared->type_id, (size_t)udata->elmts_per_chunk,
-                           chunk_size) < 0)
+                           dset->shared->type, (size_t)udata->elmts_per_chunk, chunk_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info");
         udata->fb_info_init = true;
     } /* end if */
@@ -6576,6 +6568,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     bool                need_insert = false; /* Whether the chunk needs to be inserted into the index */
 
     /* General information about chunk copy */
+    const H5T_t       *dt_src   = udata->dt_src;
     void              *bkg      = udata->bkg;      /* Background buffer for datatype conversion */
     void              *buf      = udata->buf;      /* Chunk buffer for I/O & datatype conversions */
     size_t             buf_size = udata->buf_size; /* Size of chunk buffer */
@@ -6608,9 +6601,9 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     /* Check parameter for type conversion */
     if (udata->do_convert) {
-        if (H5T_detect_class(udata->dt_src, H5T_VLEN, false) > 0)
+        if (H5T_detect_class(dt_src, H5T_VLEN, false) > 0)
             is_vlen = true;
-        else if ((H5T_get_class(udata->dt_src, false) == H5T_REFERENCE) &&
+        else if ((H5T_get_class(dt_src, false) == H5T_REFERENCE) &&
                  (udata->file_src != udata->idx_info_dst->f))
             fix_ref = true;
         else
@@ -6702,20 +6695,19 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     /* Perform datatype conversion, if necessary */
     if (is_vlen) {
-        H5T_path_t *tpath_src_mem    = udata->tpath_src_mem;
-        H5T_path_t *tpath_mem_dst    = udata->tpath_mem_dst;
-        H5S_t      *buf_space        = udata->buf_space;
-        hid_t       tid_src          = udata->tid_src;
-        hid_t       tid_dst          = udata->tid_dst;
-        hid_t       tid_mem          = udata->tid_mem;
-        void       *reclaim_buf      = udata->reclaim_buf;
-        size_t      reclaim_buf_size = udata->reclaim_buf_size;
+        H5T_path_t  *tpath_src_mem    = udata->tpath_src_mem;
+        H5T_path_t  *tpath_mem_dst    = udata->tpath_mem_dst;
+        const H5T_t *dt_dst           = udata->dt_dst;
+        const H5T_t *dt_mem           = udata->dt_mem;
+        H5S_t       *buf_space        = udata->buf_space;
+        void        *reclaim_buf      = udata->reclaim_buf;
+        size_t       reclaim_buf_size = udata->reclaim_buf_size;
 
         /* Convert from source file to memory */
         H5_CHECK_OVERFLOW(udata->nelmts, uint32_t, size_t);
-        if (H5T_convert(tpath_src_mem, tid_src, tid_mem, (size_t)udata->nelmts, (size_t)0, (size_t)0, buf,
+        if (H5T_convert(tpath_src_mem, dt_src, dt_mem, (size_t)udata->nelmts, (size_t)0, (size_t)0, buf,
                         bkg) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "datatype conversion failed");
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, H5_ITER_ERROR, "datatype conversion failed");
 
         /* Copy into another buffer, to reclaim memory later */
         H5MM_memcpy(reclaim_buf, buf, reclaim_buf_size);
@@ -6724,20 +6716,20 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         memset(bkg, 0, buf_size);
 
         /* Convert from memory to destination file */
-        if (H5T_convert(tpath_mem_dst, tid_mem, tid_dst, udata->nelmts, (size_t)0, (size_t)0, buf, bkg) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "datatype conversion failed");
+        if (H5T_convert(tpath_mem_dst, dt_mem, dt_dst, udata->nelmts, (size_t)0, (size_t)0, buf, bkg) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, H5_ITER_ERROR, "datatype conversion failed");
 
         /* Reclaim space from variable length data */
-        if (H5T_reclaim(tid_mem, buf_space, reclaim_buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADITER, H5_ITER_ERROR, "unable to reclaim variable-length data");
+        if (H5T_reclaim(dt_mem, buf_space, reclaim_buf) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, H5_ITER_ERROR, "unable to reclaim variable-length data");
     } /* end if */
     else if (fix_ref) {
         /* Check for expanding references */
         /* (background buffer has already been zeroed out, if not expanding) */
         if (udata->cpy_info->expand_ref) {
             /* Copy the reference elements */
-            if (H5O_copy_expand_ref(udata->file_src, udata->tid_src, udata->dt_src, buf, nbytes,
-                                    udata->idx_info_dst->f, bkg, udata->cpy_info) < 0)
+            if (H5O_copy_expand_ref(udata->file_src, dt_src, buf, nbytes, udata->idx_info_dst->f, bkg,
+                                    udata->cpy_info) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy reference attribute");
         } /* end if */
 
@@ -6813,32 +6805,31 @@ done:
  */
 herr_t
 H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk_t *layout_src, H5F_t *f_dst,
-                H5O_storage_chunk_t *storage_dst, const H5S_extent_t *ds_extent_src, const H5T_t *dt_src,
+                H5O_storage_chunk_t *storage_dst, const H5S_extent_t *ds_extent_src, H5T_t *dt_src,
                 const H5O_pline_t *pline_src, H5O_copy_t *cpy_info)
 {
-    H5D_chunk_it_ud3_t udata;                                       /* User data for iteration callback */
-    H5D_chk_idx_info_t idx_info_dst;                                /* Dest. chunked index info */
-    H5D_chk_idx_info_t idx_info_src;                                /* Source chunked index info */
-    int                sndims;                                      /* Rank of dataspace */
-    hsize_t            curr_dims[H5O_LAYOUT_NDIMS];                 /* Curr. size of dataset dimensions */
-    hsize_t            max_dims[H5O_LAYOUT_NDIMS];                  /* Curr. size of dataset dimensions */
-    H5O_pline_t        _pline;                                      /* Temporary pipeline info */
-    const H5O_pline_t *pline;                                       /* Pointer to pipeline info to use */
-    H5T_path_t        *tpath_src_mem = NULL, *tpath_mem_dst = NULL; /* Datatype conversion paths */
-    hid_t              tid_src = -1;                                /* Datatype ID for source datatype */
-    hid_t              tid_dst = -1;                                /* Datatype ID for destination datatype */
-    hid_t              tid_mem = -1;                                /* Datatype ID for memory datatype */
-    size_t             buf_size;                                    /* Size of copy buffer */
-    size_t             reclaim_buf_size;                            /* Size of reclaim buffer */
-    void              *buf             = NULL;                      /* Buffer for copying data */
-    void              *bkg             = NULL;    /* Buffer for background during type conversion */
-    void              *reclaim_buf     = NULL;    /* Buffer for reclaiming data */
-    H5S_t             *buf_space       = NULL;    /* Dataspace describing buffer */
-    hid_t              sid_buf         = -1;      /* ID for buffer dataspace */
-    uint32_t           nelmts          = 0;       /* Number of elements in buffer */
-    bool               do_convert      = false;   /* Indicate that type conversions should be performed */
-    bool               copy_setup_done = false;   /* Indicate that 'copy setup' is done */
-    herr_t             ret_value       = SUCCEED; /* Return value */
+    H5D_chunk_it_ud3_t udata;                       /* User data for iteration callback */
+    H5D_chk_idx_info_t idx_info_dst;                /* Dest. chunked index info */
+    H5D_chk_idx_info_t idx_info_src;                /* Source chunked index info */
+    int                sndims;                      /* Rank of dataspace */
+    hsize_t            curr_dims[H5O_LAYOUT_NDIMS]; /* Curr. size of dataset dimensions */
+    hsize_t            max_dims[H5O_LAYOUT_NDIMS];  /* Curr. size of dataset dimensions */
+    H5O_pline_t        _pline;                      /* Temporary pipeline info */
+    const H5O_pline_t *pline;                       /* Pointer to pipeline info to use */
+    H5T_path_t        *tpath_src_mem = NULL;        /* Source datatype conversion path */
+    H5T_path_t        *tpath_mem_dst = NULL;        /* Memory datatype conversion path */
+    H5T_t             *dt_dst        = NULL;        /* Destination datatype */
+    H5T_t             *dt_mem        = NULL;        /* Memory datatype */
+    size_t             buf_size;                    /* Size of copy buffer */
+    size_t             reclaim_buf_size;            /* Size of reclaim buffer */
+    void              *buf             = NULL;      /* Buffer for copying data */
+    void              *bkg             = NULL;      /* Buffer for background during type conversion */
+    void              *reclaim_buf     = NULL;      /* Buffer for reclaiming data */
+    H5S_t             *buf_space       = NULL;      /* Dataspace describing buffer */
+    uint32_t           nelmts          = 0;         /* Number of elements in buffer */
+    bool               do_convert      = false;     /* Indicate that type conversions should be performed */
+    bool               copy_setup_done = false;     /* Indicate that 'copy setup' is done */
+    herr_t             ret_value       = SUCCEED;   /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -6896,14 +6887,8 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
                     "unable to set up index-specific chunk copying information");
     copy_setup_done = true;
 
-    /* Create datatype ID for src datatype */
-    if ((tid_src = H5I_register(H5I_DATATYPE, dt_src, false)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype");
-
     /* If there's a VLEN source datatype, set up type conversion information */
     if (H5T_detect_class(dt_src, H5T_VLEN, false) > 0) {
-        H5T_t   *dt_dst;      /* Destination datatype */
-        H5T_t   *dt_mem;      /* Memory datatype */
         size_t   mem_dt_size; /* Memory datatype size */
         size_t   tmp_dt_size; /* Temp. datatype size */
         size_t   max_dt_size; /* Max atatype size */
@@ -6913,10 +6898,6 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
         /* create a memory copy of the variable-length datatype */
         if (NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy");
-        if ((tid_mem = H5I_register(H5I_DATATYPE, dt_mem, false)) < 0) {
-            (void)H5T_close_real(dt_mem);
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype");
-        } /* end if */
 
         /* create variable-length datatype at the destination file */
         if (NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
@@ -6924,10 +6905,6 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
         if (H5T_set_loc(dt_dst, H5F_VOL_OBJ(f_dst), H5T_LOC_DISK) < 0) {
             (void)H5T_close_real(dt_dst);
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk");
-        } /* end if */
-        if ((tid_dst = H5I_register(H5I_DATATYPE, dt_dst, false)) < 0) {
-            (void)H5T_close_real(dt_dst);
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register destination file datatype");
         } /* end if */
 
         /* Set up the conversion functions */
@@ -6955,12 +6932,6 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
         buf_dim = nelmts;
         if (NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
-
-        /* Register */
-        if ((sid_buf = H5I_register(H5I_DATASPACE, buf_space, false)) < 0) {
-            (void)H5S_close(buf_space);
-            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID");
-        } /* end if */
 
         /* Set initial buffer sizes */
         buf_size         = nelmts * max_dt_size;
@@ -7008,10 +6979,9 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
     udata.buf              = buf;
     udata.bkg              = bkg;
     udata.buf_size         = buf_size;
-    udata.tid_src          = tid_src;
-    udata.tid_mem          = tid_mem;
-    udata.tid_dst          = tid_dst;
     udata.dt_src           = dt_src;
+    udata.dt_dst           = dt_dst;
+    udata.dt_mem           = dt_mem;
     udata.do_convert       = do_convert;
     udata.tpath_src_mem    = tpath_src_mem;
     udata.tpath_mem_dst    = tpath_mem_dst;
@@ -7057,14 +7027,15 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
     bkg = udata.bkg;
 
 done:
-    if (sid_buf > 0 && H5I_dec_ref(sid_buf) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't decrement temporary dataspace ID");
-    if (tid_src > 0 && H5I_dec_ref(tid_src) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
-    if (tid_dst > 0 && H5I_dec_ref(tid_dst) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
-    if (tid_mem > 0 && H5I_dec_ref(tid_mem) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
+    /* Caller expects that source datatype will be freed */
+    if (dt_src && (H5T_close(dt_src) < 0))
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
+    if (dt_dst && (H5T_close(dt_dst) < 0))
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
+    if (dt_mem && (H5T_close(dt_mem) < 0))
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
+    if (buf_space && H5S_close(buf_space) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary dataspace");
     if (buf)
         H5MM_xfree(buf);
     if (bkg)
@@ -7342,8 +7313,7 @@ H5D__nonexistent_readvv_cb(hsize_t H5_ATTR_UNUSED dst_off, hsize_t src_off, size
 
     /* Initialize the fill value buffer */
     if (H5D__fill_init(&fb_info, (udata->rbuf + src_off), NULL, NULL, NULL, NULL,
-                       &udata->dset->shared->dcpl_cache.fill, udata->dset->shared->type,
-                       udata->dset->shared->type_id, (size_t)0, len) < 0)
+                       &udata->dset->shared->dcpl_cache.fill, udata->dset->shared->type, (size_t)0, len) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info");
     fb_info_init = true;
 

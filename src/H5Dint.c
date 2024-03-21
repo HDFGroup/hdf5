@@ -29,6 +29,7 @@
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Lprivate.h"  /* Links                                    */
 #include "H5MMprivate.h" /* Memory management                        */
+#include "H5SLprivate.h" /* Skip Lists                               */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 #include "H5VMprivate.h" /* Vector Functions                         */
 
@@ -88,7 +89,7 @@ static herr_t H5D__use_minimized_dset_headers(H5F_t *file, bool *minimize);
 static herr_t H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc);
 static size_t H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr);
 static void  *H5D__vlen_get_buf_size_alloc(size_t size, void *info);
-static herr_t H5D__vlen_get_buf_size_cb(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point,
+static herr_t H5D__vlen_get_buf_size_cb(void *elem, const H5T_t *type, unsigned ndim, const hsize_t *point,
                                         void *op_data);
 static herr_t H5D__vlen_get_buf_size_gen_cb(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point,
                                             void *op_data);
@@ -1787,8 +1788,8 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
                 case H5D_NLAYOUTS:
                 default:
                     HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "not implemented yet");
-            } /* end switch */ /*lint !e788 All appropriate cases are covered */
-        }                      /* end else */
+            } /* end switch */
+        }     /* end else */
 
         /* If "old" fill value size is 0 (undefined), map it to -1 */
         if (fill_prop->size == 0)
@@ -1972,8 +1973,8 @@ H5D_close(H5D_t *dataset)
                 assert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
-#endif                     /* NDEBUG */
-        } /* end switch */ /*lint !e788 All appropriate cases are covered */
+#endif
+        } /* end switch */
 
         /* Destroy any cached layout information for the dataset */
         if (dataset->shared->layout.ops->dest && (dataset->shared->layout.ops->dest)(dataset) < 0)
@@ -2136,8 +2137,8 @@ H5D_mult_refresh_close(hid_t dset_id)
                 assert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
-#endif                     /* NDEBUG */
-        } /* end switch */ /*lint !e788 All appropriate cases are covered */
+#endif
+        } /* end switch */
 
         /* Destroy any cached layout information for the dataset */
         if (dataset->shared->layout.ops->dest && (dataset->shared->layout.ops->dest)(dataset) < 0)
@@ -2346,8 +2347,8 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, bool full_overwrite
                 assert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
-#endif                     /* NDEBUG */
-        } /* end switch */ /*lint !e788 All appropriate cases are covered */
+#endif
+        } /* end switch */
 
         /* Check if we need to initialize the space */
         if (must_init_space) {
@@ -2467,8 +2468,8 @@ H5D__init_storage(H5D_t *dset, bool full_overwrite, hsize_t old_dim[])
             assert("not implemented yet" && 0);
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
-#endif                 /* NDEBUG */
-    } /* end switch */ /*lint !e788 All appropriate cases are covered */
+#endif
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2523,7 +2524,7 @@ H5D__get_storage_size(const H5D_t *dset, hsize_t *storage_size)
         case H5D_NLAYOUTS:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset type");
-    } /*lint !e788 All appropriate cases are covered */
+    }
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
@@ -2624,7 +2625,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_ATTR_UNUSED ndim,
+H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, const H5T_t *type, unsigned H5_ATTR_UNUSED ndim,
                           const hsize_t *point, void *op_data)
 {
     H5D_vlen_bufsize_native_t *vlen_bufsize = (H5D_vlen_bufsize_native_t *)op_data;
@@ -2634,7 +2635,7 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    assert(H5I_DATATYPE == H5I_get_type(type_id));
+    assert(type);
     assert(point);
     assert(op_data);
 
@@ -2643,11 +2644,11 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, H5_ITER_ERROR, "can't select point");
 
     {
-        dset_info.dset        = vlen_bufsize->dset;
-        dset_info.mem_space   = vlen_bufsize->mspace;
-        dset_info.file_space  = vlen_bufsize->fspace;
-        dset_info.buf.vp      = vlen_bufsize->common.fl_tbuf;
-        dset_info.mem_type_id = type_id;
+        dset_info.dset       = vlen_bufsize->dset;
+        dset_info.mem_space  = vlen_bufsize->mspace;
+        dset_info.file_space = vlen_bufsize->fspace;
+        dset_info.buf.vp     = vlen_bufsize->common.fl_tbuf;
+        dset_info.mem_type   = type;
 
         /* Read in the point (with the custom VL memory allocator) */
         if (H5D__read(1, &dset_info) < 0)
@@ -2687,14 +2688,14 @@ H5D__vlen_get_buf_size(H5D_t *dset, hid_t type_id, hid_t space_id, hsize_t *size
     H5S_t                    *mspace       = NULL; /* Memory dataspace */
     char                      bogus;               /* bogus value to pass to H5Diterate() */
     H5S_t                    *space;               /* Dataspace for iteration */
-    H5T_t                    *type;                /* Datatype */
+    const H5T_t              *type;                /* Datatype */
     H5S_sel_iter_op_t         dset_op;             /* Operator for iteration */
     herr_t                    ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    if (NULL == (type = (H5T_t *)H5I_object(type_id)))
+    if (NULL == (type = (const H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
     if (NULL == (space = (H5S_t *)H5I_object(space_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace");
@@ -2729,9 +2730,8 @@ H5D__vlen_get_buf_size(H5D_t *dset, hid_t type_id, hid_t space_id, hsize_t *size
     vlen_bufsize.common.size = 0;
 
     /* Call H5S_select_iterate with args, etc. */
-    dset_op.op_type          = H5S_SEL_ITER_OP_APP;
-    dset_op.u.app_op.op      = H5D__vlen_get_buf_size_cb;
-    dset_op.u.app_op.type_id = type_id;
+    dset_op.op_type  = H5S_SEL_ITER_OP_LIB;
+    dset_op.u.lib_op = H5D__vlen_get_buf_size_cb;
 
     ret_value = H5S_select_iterate(&bogus, type, space, &dset_op, &vlen_bufsize);
 
@@ -2829,7 +2829,7 @@ H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id
     H5S_t                  *mspace = NULL;       /* Memory dataspace */
     char                    bogus;               /* Bogus value to pass to H5Diterate() */
     H5S_t                  *space;               /* Dataspace for iteration */
-    H5T_t                  *type;                /* Datatype */
+    const H5T_t            *type;                /* Datatype */
     H5S_sel_iter_op_t       dset_op;             /* Operator for iteration */
     H5VL_dataset_get_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                  ret_value = SUCCEED; /* Return value */
@@ -2837,7 +2837,7 @@ H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    if (NULL == (type = (H5T_t *)H5I_object(type_id)))
+    if (NULL == (type = (const H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not an valid datatype");
     if (NULL == (space = (H5S_t *)H5I_object(space_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "invalid dataspace");
@@ -3561,6 +3561,8 @@ H5D_get_create_plist(const H5D_t *dset)
     H5O_layout_t    copied_layout;     /* Layout to tweak */
     H5O_fill_t      copied_fill = {0}; /* Fill value to tweak */
     H5O_efl_t       copied_efl;        /* External file list to tweak */
+    H5T_t          *dst_type    = NULL;
+    H5T_t          *tmp_type    = NULL;
     hid_t           new_dcpl_id = FAIL;
     hid_t           ret_value   = H5I_INVALID_HID; /* Return value */
 
@@ -3646,43 +3648,31 @@ H5D_get_create_plist(const H5D_t *dset)
 
         /* Convert disk form of fill value into memory form */
         if (!H5T_path_noop(tpath)) {
-            hid_t    dst_id, src_id; /* Source & destination datatypes for type conversion */
             uint8_t *bkg_buf = NULL; /* Background conversion buffer */
             size_t   bkg_size;       /* Size of background buffer */
 
-            /* Wrap copies of types to convert */
-            dst_id = H5I_register(H5I_DATATYPE, H5T_copy(copied_fill.type, H5T_COPY_TRANSIENT), false);
-            if (dst_id < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy/register datatype");
-            src_id = H5I_register(H5I_DATATYPE, H5T_copy(dset->shared->type, H5T_COPY_ALL), false);
-            if (src_id < 0) {
-                H5I_dec_ref(dst_id);
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy/register datatype");
-            } /* end if */
+            dst_type = copied_fill.type;
+            if (H5T_detect_class(dst_type, H5T_VLEN, false) > 0 ||
+                H5T_detect_class(dst_type, H5T_REFERENCE, false) > 0) {
+                if (NULL == (tmp_type = H5T_copy(dst_type, H5T_COPY_TRANSIENT)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy fill value datatype");
+                dst_type = tmp_type;
+            }
 
             /* Allocate a background buffer */
             bkg_size = MAX(H5T_GET_SIZE(copied_fill.type), H5T_GET_SIZE(dset->shared->type));
-            if (H5T_path_bkg(tpath) && NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size))) {
-                H5I_dec_ref(src_id);
-                H5I_dec_ref(dst_id);
+            if (H5T_path_bkg(tpath) && NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed");
-            } /* end if */
 
             /* Convert fill value */
-            if (H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, copied_fill.buf,
-                            bkg_buf) < 0) {
-                H5I_dec_ref(src_id);
-                H5I_dec_ref(dst_id);
+            if (H5T_convert(tpath, dset->shared->type, dst_type, (size_t)1, (size_t)0, (size_t)0,
+                            copied_fill.buf, bkg_buf) < 0) {
                 if (bkg_buf)
                     bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
             } /* end if */
 
             /* Release local resources */
-            if (H5I_dec_ref(src_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to close temporary object");
-            if (H5I_dec_ref(dst_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to close temporary object");
             if (bkg_buf)
                 bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
         } /* end if */
@@ -3713,6 +3703,9 @@ H5D_get_create_plist(const H5D_t *dset)
     ret_value = new_dcpl_id;
 
 done:
+    if (tmp_type && (H5T_close(tmp_type) < 0))
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close temporary datatype");
+
     if (ret_value < 0) {
         if (new_dcpl_id > 0)
             if (H5I_dec_app_ref(new_dcpl_id) < 0)

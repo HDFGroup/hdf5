@@ -31,7 +31,6 @@
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free Lists                           */
-#include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5MMprivate.h" /* Memory management                    */
 #include "H5Oprivate.h"  /* Object headers		  	*/
 #include "H5Ppkg.h"      /* Property lists		  	*/
@@ -646,7 +645,7 @@ H5Pget_copy_object(hid_t plist_id, unsigned *cpy_option /*out*/)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, cpy_option);
+    H5TRACE2("e", "i*Iu", plist_id, cpy_option);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
@@ -839,7 +838,7 @@ H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func /*out*/, void *
     herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", plist_id, func, op_data);
+    H5TRACE3("e", "i*Os**x", plist_id, func, op_data);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))

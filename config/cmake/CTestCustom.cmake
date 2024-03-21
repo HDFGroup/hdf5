@@ -52,6 +52,9 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5TEST-error_test       #uses runTest.cmake
     H5TEST-err_compat       #uses runTest.cmake
     H5TEST-testlibinfo      #uses grepTest.cmake
+    H5SHELL-test_flush_refresh #uses shell script
+    H5SHELL-test_flush_refresh #uses shell script
+    H5SHELL-test_vds_swmr      #uses shell script
     #########
     H5TEST-clear-objects
     H5TEST-cache-clear-objects

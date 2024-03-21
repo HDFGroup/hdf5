@@ -51,7 +51,6 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.1
 
-      # AUTOTOOLS CONFIGURE
       - name: Autotools Configure
         run: |
           sh ./autogen.sh
@@ -92,13 +91,10 @@ jobs:
         shell: bash
         if: ${{ inputs.thread_safety == 'enable' }}
 
-      # BUILD
       - name: Autotools Build
         run: make -j3
         working-directory: ${{ runner.workspace }}/build
 
-      # RUN TESTS
-      # NORMAL
       - name: Autotools Run Tests
         run: make check -j2
         working-directory: ${{ runner.workspace }}/build

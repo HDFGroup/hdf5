@@ -199,11 +199,11 @@
  * slash is a always a member of the component indicated by the link name preceding that slash.
  *
  * The first component in the path name may be any of the following:
- * \li The special character dot (., a period), indicating the current group
+ * \li The special character dot (., a single period), indicating the current group
  * \li The special character slash (/), indicating the root group
  * \li Any member of the current group
  *
- * Component link names may be any string of ASCII characters not containing a slash or a dot
+ * Component link names may be any string of ASCII characters not containing a slash or a single dot
  * (/ and ., which are reserved as noted above). However, users are advised to avoid the use of
  * punctuation and non-printing characters, as they may create problems for other software. The
  * figure below provides a BNF grammar for HDF5 path names.
@@ -343,7 +343,7 @@
  *
  * h5dump is described on the “HDF5 Tools” page of the \ref RM.
  *
- * The HDF5 DDL grammar is described in the @ref DDLBNF110.
+ * The HDF5 DDL grammar is described in the @ref DDLBNF114.
  *
  * \subsection subsec_group_function Group Function Summaries
  * Functions that can be used with groups (\ref H5G functions) and property list functions that can used

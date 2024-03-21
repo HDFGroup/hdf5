@@ -29,11 +29,9 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions			*/
-#include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Dpkg.h"      /* Dataset functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free Lists                           */
-#include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5VMprivate.h" /* Vector and array functions		*/
 #include "H5WBprivate.h" /* Wrapped Buffers                      */
@@ -118,7 +116,6 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
     uint8_t         bkg_elem_buf[H5T_ELEM_BUF_SIZE]; /* Buffer for background data */
     uint8_t        *bkg_buf = NULL;                  /* Background conversion buffer */
     uint8_t        *tmp_buf = NULL;                  /* Temp conversion buffer */
-    hid_t           src_id = -1, dst_id = -1;        /* Temporary type IDs */
     size_t          dst_type_size;                   /* Size of destination type*/
     herr_t          ret_value = SUCCEED;             /* Return value */
 
@@ -169,15 +166,6 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
                         "unable to convert between src and dest datatype");
 
-        /* Construct source & destination datatype IDs, if we will need them */
-        if (!H5T_path_noop(tpath)) {
-            if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill_type, H5T_COPY_ALL), false)) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
-
-            if ((dst_id = H5I_register(H5I_DATATYPE, H5T_copy(buf_type, H5T_COPY_ALL), false)) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
-        } /* end if */
-
         /* If there's VL type of data, make multiple copies of fill value first,
          * then do conversion on each element so that each of them has a copy
          * of the VL data.
@@ -202,8 +190,8 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
             H5VM_array_fill(tmp_buf, fill, src_type_size, (size_t)nelmts);
 
             /* Convert from file's fill value into memory form */
-            if (H5T_convert(tpath, src_id, dst_id, (size_t)nelmts, (size_t)0, (size_t)0, tmp_buf, bkg_buf) <
-                0)
+            if (H5T_convert(tpath, fill_type, buf_type, (size_t)nelmts, (size_t)0, (size_t)0, tmp_buf,
+                            bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed");
 
             /* Allocate the chunk selection iterator */
@@ -252,8 +240,8 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
                 } /* end if */
 
                 /* Perform datatype conversion */
-                if (H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, elem_ptr, bkg_ptr) <
-                    0)
+                if (H5T_convert(tpath, fill_type, buf_type, (size_t)1, (size_t)0, (size_t)0, elem_ptr,
+                                bkg_ptr) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed");
 
                 /* Point at element buffer */
@@ -273,10 +261,6 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
     if (mem_iter)
         mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
-    if (src_id != (-1) && H5I_dec_ref(src_id) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
-    if (dst_id != (-1) && H5I_dec_ref(dst_id) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if (tmp_buf)
         tmp_buf = H5FL_BLK_FREE(type_conv, tmp_buf);
     if (elem_wb && H5WB_unwrap(elem_wb) < 0)
@@ -301,7 +285,7 @@ done:
 herr_t
 H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocate_t alloc_func,
                void *alloc_info, H5MM_free_t free_func, void *free_info, const H5O_fill_t *fill,
-               const H5T_t *dset_type, hid_t dset_type_id, size_t total_nelmts, size_t max_buf_size)
+               const H5T_t *dset_type, size_t total_nelmts, size_t max_buf_size)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -311,7 +295,6 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
     assert(fb_info);
     assert(fill);
     assert(dset_type);
-    assert(dset_type_id > 0);
 
     /* Reset fill buffer information */
     memset(fb_info, 0, sizeof(*fb_info));
@@ -319,7 +302,6 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
     /* Cache constant information from the dataset */
     fb_info->fill            = fill;
     fb_info->file_type       = dset_type;
-    fb_info->file_tid        = dset_type_id;
     fb_info->fill_alloc_func = alloc_func;
     fb_info->fill_alloc_info = alloc_info;
     fb_info->fill_free_func  = free_func;
@@ -339,8 +321,6 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
             /* Create temporary datatype for conversion operation */
             if (NULL == (fb_info->mem_type = H5T_copy(dset_type, H5T_COPY_TRANSIENT)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy file datatype");
-            if ((fb_info->mem_tid = H5I_register(H5I_DATATYPE, fb_info->mem_type, false)) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype");
 
             /* Retrieve sizes of memory & file datatypes */
             fb_info->mem_elmt_size = H5T_get_size(fb_info->mem_type);
@@ -516,7 +496,7 @@ H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts)
         memset(fb_info->bkg_buf, 0, fb_info->max_elmt_size);
 
     /* Type convert the dataset buffer, to copy any VL components */
-    if (H5T_convert(fb_info->fill_to_mem_tpath, fb_info->file_tid, fb_info->mem_tid, (size_t)1, (size_t)0,
+    if (H5T_convert(fb_info->fill_to_mem_tpath, fb_info->file_type, fb_info->mem_type, (size_t)1, (size_t)0,
                     (size_t)0, fb_info->fill_buf, fb_info->bkg_buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed");
 
@@ -540,7 +520,7 @@ H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts)
     H5MM_memcpy(buf, fb_info->fill_buf, fb_info->fill_buf_size);
 
     /* Type convert the dataset buffer, to copy any VL components */
-    if (H5T_convert(fb_info->mem_to_dset_tpath, fb_info->mem_tid, fb_info->file_tid, nelmts, (size_t)0,
+    if (H5T_convert(fb_info->mem_to_dset_tpath, fb_info->mem_type, fb_info->file_type, nelmts, (size_t)0,
                     (size_t)0, fb_info->fill_buf, fb_info->bkg_buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed");
 
@@ -622,9 +602,7 @@ H5D__fill_term(H5D_fill_buf_info_t *fb_info)
 
     /* Free other resources for vlen fill values */
     if (fb_info->has_vlen_fill_type) {
-        if (fb_info->mem_tid > 0)
-            H5I_dec_ref(fb_info->mem_tid);
-        else if (fb_info->mem_type)
+        if (fb_info->mem_type)
             (void)H5T_close_real(fb_info->mem_type);
         if (fb_info->bkg_buf)
             fb_info->bkg_buf = H5FL_BLK_FREE(type_conv, fb_info->bkg_buf);

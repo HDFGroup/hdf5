@@ -135,7 +135,7 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
         case H5D_NLAYOUTS:
         default:
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unknown storage method");
-    } /* end switch */ /*lint !e788 All appropriate cases are covered */
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

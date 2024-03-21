@@ -1,0 +1,102 @@
+name: hdf5 1.14 PAR autotools aocc ompi
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  aocc_build_and_test:
+    name: "aocc ${{ inputs.build_mode }}"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Sources
+        uses: actions/checkout@v4.1.1
+
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          sudo apt update
+          sudo apt install -y autoconf automake libtool libtool-bin libaec-dev
+          sudo apt install -y doxygen libncurses-dev libquadmath0 libstdc++6 libxml2
+          sudo apt install -y zlib1g-dev libcurl4-openssl-dev libjpeg-dev wget curl bzip2
+          sudo apt install -y m4 flex bison cmake libzip-dev openssl build-essential
+
+      - name: Install AOCC 4.1.0
+        shell: bash
+        run: |
+          wget https://download.amd.com/developer/eula/aocc/aocc-4-1/aocc-compiler-4.1.0.tar
+          tar -xvf aocc-compiler-4.1.0.tar
+          cd aocc-compiler-4.1.0
+          bash install.sh
+          source /home/runner/work/hdf5/hdf5/setenv_AOCC.sh
+          which clang
+          which flang
+          clang -v
+
+      - name: Cache OpenMPI 4.1.5 installation
+        id: cache-openmpi-4_1_5
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/work/hdf5/hdf5/openmpi-4.1.5-install
+          key: ${{ runner.os }}-${{ runner.arch }}-openmpi-4_1_5-cache
+
+      - name: Install OpenMPI 4.1.5
+        if: ${{ steps.cache-openmpi-4_1_5.outputs.cache-hit != 'true' }}
+        run: |
+          export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/lib:/usr/local/lib
+          wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.5.tar.gz
+          tar zxvf openmpi-4.1.5.tar.gz
+          cd openmpi-4.1.5
+          ./configure CC=/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/bin/clang FC=/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/bin/flang --prefix=/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install
+          make
+          make install
+
+      - name: Autotools Configure
+        env:
+          NPROCS: 2
+        run: |
+          export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/lib:/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install/lib:/usr/local/lib
+          export LD_RUN_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/lib:/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install/lib:/usr/local/lib
+          export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install/bin:/usr/local/bin:$PATH
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          CC=mpicc $GITHUB_WORKSPACE/configure \
+            --prefix=/tmp \
+            --enable-build-mode=${{ inputs.build_mode }} \
+            --enable-shared \
+            --enable-parallel \
+            LDFLAGS="-L/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/lib \
+            -L/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install/lib"
+
+      - name: Autotools Build
+        shell: bash
+        env:
+          NPROCS: 2
+        run: |
+          export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install/bin:/usr/local/bin:$PATH
+          make -j3
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Run Tests
+        env:
+          NPROCS: 2
+        run: |
+          export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install/bin:/usr/local/bin:$PATH
+          make check -j
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Install
+        env:
+          NPROCS: 2
+        run: |
+          export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install/bin:/usr/local/bin:$PATH
+          make install
+        working-directory: ${{ runner.workspace }}/build

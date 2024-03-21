@@ -29,7 +29,7 @@
 #include "H5Cprivate.h"  /* Cache                                    */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fpkg.h"      /* Files                                    */
-#include "H5Gprivate.h"  /* Groups                                   */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MFprivate.h" /* File memory management                   */
 #include "H5Pprivate.h"  /* Property lists                           */

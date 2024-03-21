@@ -29,7 +29,6 @@
 #include "H5Gprivate.h"  /* Groups                                   */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Oprivate.h"  /* Object headers                           */
-#include "H5Pprivate.h"  /* Property lists                           */
 #include "H5Tpkg.h"      /* Datatypes                                */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 

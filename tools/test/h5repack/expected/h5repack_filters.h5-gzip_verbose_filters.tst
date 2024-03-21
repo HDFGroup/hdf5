@@ -8,7 +8,7 @@ Making new file ...
 -----------------------------------------
  group                       /
  dset                        /dset_all
- dset     GZIP   (0.995:1)   /dset_deflate
+ dset     GZIP   (0.XXX:1)   /dset_deflate
  dset                        /dset_fletcher32
  dset                        /dset_nbit
  dset                        /dset_shuffle

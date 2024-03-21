@@ -1615,6 +1615,9 @@ CONTAINS
 !! \param bytes  Size of the external file data.
 !! \param hdferr \fortran_error
 !!
+!! \note On Windows, off_t is typically a 32-bit signed long value, which
+!!       limits the valid offset that can be set to 2 GiB.
+!!
 !! See C API: @ref H5Pset_external()
 !!
   SUBROUTINE h5pset_external_f(prp_id, name, offset, bytes, hdferr)
@@ -1686,9 +1689,12 @@ CONTAINS
 !! \param bytes     Size of the external file data.
 !! \param hdferr    \fortran_error
 !!
+!! \note On Windows, off_t is typically a 32-bit signed long value, which
+!!       limits the valid offset that can be returned to 2 GiB.
+!!
 !! See C API: @ref H5Pget_external()
 !!
-  SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr)
+  SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset, bytes, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(IN) :: idx
@@ -6250,7 +6256,7 @@ SUBROUTINE h5pget_virtual_filename_f(dcpl_id, index, name, hdferr, name_len)
      IF(INT(h5pget_virtual_filename(dcpl_id, index, f_ptr, INT(LEN(name)+1,SIZE_T)), SIZE_T).LT.0)THEN
         hdferr = -1
      ELSE
-        CALL HD5c2fstring(name,c_name,LEN(name))
+        CALL HD5c2fstring(name, c_name, LEN(name,KIND=SIZE_T), LEN(name,KIND=SIZE_T)+1_SIZE_T )
      ENDIF
 
   ENDIF
@@ -6304,7 +6310,7 @@ SUBROUTINE h5pget_virtual_dsetname_f(dcpl_id, index, name, hdferr, name_len)
      IF(INT(h5pget_virtual_dsetname(dcpl_id, index, f_ptr, INT(LEN(name)+1,SIZE_T)), SIZE_T).LT.0)THEN
         hdferr = -1
      ELSE
-        CALL HD5c2fstring(name,c_name,LEN(name))
+        CALL HD5c2fstring(name, c_name, LEN(name,KIND=SIZE_T), LEN(name,KIND=SIZE_T)+1_SIZE_T )
      ENDIF
   ENDIF
 

@@ -277,7 +277,7 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=./testfiles/${testname}.out"
               -D "TEST_ERRREF=${result_errcheck}"
-              -D "TEST_MASK=true"
+              -D "TEST_MASK_STORE=true"
               -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
     endif ()

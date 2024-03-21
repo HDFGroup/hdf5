@@ -31,16 +31,6 @@
 /* Library Private Macros */
 /**************************/
 
-/*
- * Feature: Define this constant if you want to check B-tree consistency
- *	    after each B-tree operation.  Note that this slows down the
- *	    library considerably! Debugging the B-tree depends on assert()
- *	    being enabled.
- */
-#ifdef NDEBUG
-#undef H5B_DEBUG
-#endif
-
 /****************************/
 /* Library Private Typedefs */
 /****************************/

@@ -13,9 +13,9 @@ HDF5 source.
 Note that documentation in the links below will be updated at the time of each
 final release.
 
-Links to HDF5 documentation can be found on The HDF5 web page:
+Links to HDF5 documentation can be found on:
 
-     https://portal.hdfgroup.org/display/HDF5/HDF5
+     https://portal.hdfgroup.org/documentation/
 
 The official HDF5 releases can be obtained from:
 
@@ -24,7 +24,7 @@ The official HDF5 releases can be obtained from:
 Changes from release to release and new features in the HDF5-1.14.x release series
 can be found at:
 
-     https://portal.hdfgroup.org/display/HDF5/Release+Specific+Information
+     https://portal.hdfgroup.org/documentation/hdf5-docs/release_specific_info.html
 
 If you have any questions or comments, please send them to the HDF Help Desk:
 
@@ -47,6 +47,78 @@ New Features
 
     Configuration:
     -------------
+    - Deprecate bin/cmakehdf5 script
+
+      With the improvements made in CMake since version 3.23 and the addition
+      of CMake preset files, this script is no longer necessary.
+
+      See INSTALL_CMake.txt file, Section X: Using CMakePresets.json for compiling
+
+    - Overhauled LFS support checks
+
+      In 2024, we can assume that Large File Support (LFS) exists on all
+      systems we support, though it may require flags to enable it,
+      particularly when building 32-bit binaries. The HDF5 source does
+      not use any of the 64-bit specific API calls (e.g., ftello64)
+      or explicit 64-bit offsets via off64_t.
+
+      Autotools
+
+      * We now use AC_SYS_LARGEFILE to determine how to support LFS. We
+        previously used a custom m4 script for this.
+
+      CMake
+
+      * The HDF_ENABLE_LARGE_FILE option (advanced) has been removed
+      * We no longer run a test program to determine if LFS works, which
+        will help with cross-compiling
+      * On Linux we now unilaterally set -D_LARGEFILE_SOURCE and
+        -D_FILE_OFFSET_BITS=64, regardless of 32/64 bit system. CMake
+        doesn't offer a nice equivalent to AC_SYS_LARGEFILE and since
+        those options do nothing on 64-bit systems, this seems safe and
+        covers all our bases. We don't set -D_LARGEFILE64_SOURCE since
+        we don't use any of the POSIX 64-bit specific API calls like
+        ftello64, as noted above.
+      * We didn't test for LFS support on non-Linux platforms. We've added
+        comments for how LFS should probably be supported on AIX and Solaris,
+        which seem to be alive, though uncommon. PRs would be appreciated if
+        anyone wishes to test this.
+
+      This overhaul also fixes GitHub #2395, which points out that the LFS flags
+      used when building with CMake differ based on whether CMake has been
+      run before. The LFS check program that caused this problem no longer exists.
+
+    - The CMake HDF5_ENABLE_DEBUG_H5B option has been removed
+
+      This enabled some additional version-1 B-tree checks. These have been
+      removed so the option is no longer necessary.
+
+      This option was CMake-only and marked as advanced.
+
+    - New option for building with static CRT in Windows
+
+      The following option has been added:
+        HDF5_BUILD_STATIC_CRT_LIBS    "Build With Static Windows CRT Libraries"          OFF
+      Because our minimum CMake is 3.18, the macro to change runtime flags no longer
+      works as CMake changed the default behavior in CMake 3.15.
+
+      Fixes GitHub issue #3984
+
+    - Added support for the new MSVC preprocessor
+
+      Microsoft added support for a new, standards-conformant preprocessor
+      to MSVC, which can be enabled with the /Zc:preprocessor option. This
+      preprocessor would trip over our HDopen() variadic function-like
+      macro, which uses a feature that only works with the legacy preprocessor.
+
+      ifdefs have been added that select the correct HDopen() form and
+      allow building HDF5 with the /Zc:preprocessor option.
+
+      The HDopen() macro is located in an internal header file and only
+      affects building the HDF5 library from source.
+
+      Fixes GitHub #2515
+
     - Renamed HDF5_ENABLE_USING_MEMCHECKER to HDF5_USING_ANALYSIS_TOOL
 
       The HDF5_USING_ANALYSIS_TOOL is used to indicate to test macros that
@@ -110,7 +182,187 @@ New Features
 
     Library:
     --------
-    -
+    - Added support for _Float16 16-bit half-precision floating-point datatype
+
+      Support for the _Float16 C datatype has been added on platforms where:
+
+        - The _Float16 datatype and its associated macros (FLT16_MIN, FLT16_MAX,
+          FLT16_EPSILON, etc.) are available
+        - A simple test program that converts between the _Float16 datatype and
+          other datatypes with casts can be successfully compiled and run at
+          configure time. Some compilers appear to be buggy or feature-incomplete
+          in this regard and will generate calls to compiler-internal functions
+          for converting between the _Float16 datatype and other datatypes, but
+          will not link these functions into the build, resulting in build
+          failures.
+
+      The following new macros have been added:
+
+        H5_HAVE__FLOAT16 - This macro is defined in H5pubconf.h and will have
+                           the value 1 if support for the _Float16 datatype is
+                           available. It will not be defined otherwise.
+
+        H5_SIZEOF__FLOAT16 - This macro is defined in H5pubconf.h and will have
+                             a value corresponding to the size of the _Float16
+                             datatype, as computed by sizeof(). It will have the
+                             value 0 if support for the _Float16 datatype is not
+                             available.
+
+        H5_HAVE_FABSF16 - This macro is defined in H5pubconf.h and will have the
+                          value 1 if the fabsf16 function is available for use.
+
+        H5_LDOUBLE_TO_FLOAT16_CORRECT - This macro is defined in H5pubconf.h and
+                                        will have the value 1 if the platform can
+                                        correctly convert long double values to
+                                        _Float16. Some compilers have issues with
+                                        this.
+
+        H5T_NATIVE_FLOAT16 - This macro maps to the ID of an HDF5 datatype representing
+                             the native C _Float16 datatype for the platform. If
+                             support for the _Float16 datatype is not available, the
+                             macro will map to H5I_INVALID_HID and should not be used.
+
+        H5T_IEEE_F16BE - This macro maps to the ID of an HDF5 datatype representing
+                         a big-endian IEEE 754 16-bit floating-point datatype. This
+                         datatype is available regardless of whether _Float16 support
+                         is available or not.
+
+        H5T_IEEE_F16LE - This macro maps to the ID of an HDF5 datatype representing
+                         a little-endian IEEE 754 16-bit floating-point datatype.
+                         This datatype is available regardless of whether _Float16
+                         support is available or not.
+
+      The following new hard datatype conversion paths have been added, but
+      will only be used when _Float16 support is available:
+
+        H5T_NATIVE_SCHAR <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_UCHAR <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_SHORT <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_USHORT <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_INT <-> H5T_NATIVE_FLOAT16   | H5T_NATIVE_UINT <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_LONG <-> H5T_NATIVE_FLOAT16  | H5T_NATIVE_ULONG <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_LLONG <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_ULLONG <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_FLOAT <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_DOUBLE <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_FLOAT16
+
+      The H5T_NATIVE_LDOUBLE -> H5T_NATIVE_FLOAT16 hard conversion path will only
+      be available and used if H5_LDOUBLE_TO_FLOAT16_CORRECT has a value of 1. Otherwise,
+      the conversion will be emulated in software by the library.
+
+      Note that in the absence of any compiler flags for architecture-specific
+      tuning, the generated code for datatype conversions with the _Float16 type
+      may perform conversions by first promoting the type to float. Use of
+      architecture-specific tuning compiler flags may instead allow for the
+      generation of specialized instructions, such as AVX512-FP16 instructions,
+      if available.
+
+    - Made several improvements to the datatype conversion code
+
+      * The datatype conversion code was refactored to use pointers to
+        H5T_t datatype structures internally rather than IDs wrapping
+        the pointers to those structures. These IDs are needed if an
+        application-registered conversion function or conversion exception
+        function are involved during the conversion process. For simplicity,
+        the conversion code simply passed these IDs down and let the internal
+        code unwrap the IDs as necessary when needing to access the wrapped
+        H5T_t structures. However, this could cause a significant amount of
+        repeated ID lookups for compound datatypes and other container-like
+        datatypes. The code now passes down pointers to the datatype
+        structures and only creates IDs to wrap those pointers as necessary.
+        Quick testing showed an average ~3x to ~10x improvement in performance
+        of conversions on container-like datatypes, depending on the
+        complexity of the datatype.
+
+      * A conversion "context" structure was added to hold information about
+        the current conversion being performed. This allows conversions on
+        container-like datatypes to be optimized better by skipping certain
+        portions of the conversion process that remain relatively constant
+        when multiple elements of the container-like datatype are being
+        converted.
+
+      * After refactoring the datatype conversion code to use pointers
+        internally rather than IDs, several copies of datatypes that were
+        made by higher levels of the library were able to be removed. The
+        internal IDs that were previously registered to wrap those copied
+        datatypes were also able to be removed.
+
+    - Implemented optimized support for vector I/O in the Subfiling VFD
+
+      Previously, the Subfiling VFD would handle vector I/O requests by
+      breaking them down into individual I/O requests, one for each entry
+      in the I/O vectors provided. This could result in poor I/O performance
+      for features in HDF5 that utilize vector I/O, such as parallel I/O
+      to filtered datasets. The Subfiling VFD now properly handles vector
+      I/O requests in their entirety, resulting in fewer I/O calls, improved
+      vector I/O performance and improved vector I/O memory efficiency.
+    
+    - Added a simple cache to the read-only S3 (ros3) VFD
+
+      The read-only S3 VFD now caches the first N bytes of a file stored
+      in S3 to avoid a lot of small I/O operations when opening files.
+      This cache is per-file and created when the file is opened.
+
+      N is currently 16 MiB or the size of the file, whichever is smaller.
+
+      Addresses GitHub issue #3381
+
+    - Added new API function H5Pget_actual_selection_io_mode()
+
+      This function allows the user to determine if the library performed
+      selection I/O, vector I/O, or scalar (legacy) I/O during the last HDF5
+      operation performed with the provided DXPL.
+
+    - Added support for in-place type conversion in most cases
+
+      In-place type conversion allows the library to perform type conversion
+      without an intermediate type conversion buffer.  This can improve
+      performance by allowing I/O in a single operation over the entire
+      selection instead of being limited by the size of the intermediate buffer.
+      Implemented for I/O on contiguous and chunked datasets when the selection
+      is contiguous in memory and when the memory datatype is not smaller than
+      the file datatype.
+
+    - Changed selection I/O to be on by default when using the MPIO file driver
+
+    - Added support for selection I/O in the MPIO file driver
+
+      Previously, only vector I/O operations were supported.  Support for
+      selection I/O should improve performance and reduce memory uses in some
+      cases.
+
+    - Changed the error handling for a not found path in the find plugin process.
+
+      While attempting to load a plugin the HDF5 library will fail if one of the
+      directories in the plugin paths does not exist, even if there are more paths
+      to check. Instead of exiting the function with an error, just logged the error
+      and continue processing the list of paths to check.
+
+    - Implemented support for temporary security credentials for the Read-Only
+      S3 (ROS3) file driver.
+
+      When using temporary security credentials, one also needs to specify a
+      session/security token next to the access key id and secret access key.
+      This token can be specified by the new API function H5Pset_fapl_ros3_token().
+      The API function H5Pget_fapl_ros3_token() can be used to retrieve
+      the currently set token.
+
+    - Added a Subfiling VFD configuration file prefix environment variable
+
+      The Subfiling VFD now checks for values set in a new environment
+      variable "H5FD_SUBFILING_CONFIG_FILE_PREFIX" to determine if the
+      application has specified a pathname prefix to apply to the file
+      path for its configuration file. For example, this can be useful
+      for cases where the application wishes to write subfiles to a
+      machine's node-local storage while placing the subfiling configuration
+      file on a file system readable by all machine nodes.
+
+    - Added H5Pset_selection_io(), H5Pget_selection_io(), and
+      H5Pget_no_selection_io_cause() API functions to manage the selection I/O
+      feature.  This can be used to enable collective I/O with type conversion,
+      or it can be used with custom VFDs that support vector or selection I/O.
+
+    - Added H5Pset_modify_write_buf() and H5Pget_modify_write_buf() API
+      functions to allow the library to modify the contents of write buffers, in
+      order to avoid malloc/memcpy.  Currently only used for type conversion
+      with selection I/O.
 
 
     Parallel Library:
@@ -120,7 +372,13 @@ New Features
 
     Fortran Library:
     ----------------
-    - Add API support for Fortran MPI_F08 module definitions:
+    - Added Fortran H5E APIs:
+      h5eregister_class_f, h5eunregister_class_f, h5ecreate_msg_f, h5eclose_msg_f
+      h5eget_msg_f, h5epush_f, h5eget_num_f, h5ewalk_f, h5eget_class_name_f,
+      h5eappend_stack_f, h5eget_current_stack_f, h5eset_current_stack_f, h5ecreate_stack_f,
+      h5eclose_stack_f, h5epop_f, h5eprint_f (C h5eprint v2 signature)
+
+    - Added API support for Fortran MPI_F08 module definitions:
       Adds support for MPI's MPI_F08 module datatypes: type(MPI_COMM) and type(MPI_INFO) for HDF5 APIs:
       H5PSET_FAPL_MPIO_F, H5PGET_FAPL_MPIO_F, H5PSET_MPI_PARAMS_F, H5PGET_MPI_PARAMS_F
       Ref. #3951
@@ -187,8 +445,111 @@ Support for new platforms, languages and compilers
 
 Bug Fixes since HDF5-1.14.3 release
 ===================================
+    Configuration:
+    -------------
+    - Fix Autotools -Werror cleanup
+
+      The Autotools temporarily scrub -Werror(=whatever) from CFLAGS, etc.
+      so configure checks don't trip over warnings generated by configure
+      check programs. The sed line originally only scrubbed -Werror but not
+      -Werror=something, which would cause errors when the '=something' was
+      left behind in CFLAGS.
+
+      The sed line has been updated to handle -Werror=something lines.
+
+      Fixes one issue raised in #3872
+
     Library
     -------
+    - Fixed a bug that causes the library to incorrectly identify
+      the endian-ness of 16-bit and smaller C floating-point datatypes
+
+      When detecting the endian-ness of an in-memory C floating-point
+      datatype, the library previously always assumed that the type
+      was at least 32 bits in size. This resulted in invalid memory
+      accesses and would usually cause the library to identify the
+      datatype as having an endian-ness of H5T_ORDER_VAX. This has
+      now been fixed.
+
+    - Fixed a bug that causes an invalid memory access issue when
+      converting 16-bit floating-point values to integers with the
+      library's software conversion function
+
+      The H5T__conv_f_i function previously always assumed that
+      floating-point values were at least 32 bits in size and would
+      access invalid memory when attempting to convert 16-bit
+      floating-point values to integers. To fix this, parts of the
+      H5T__conv_f_i function had to be rewritten, which also resulted
+      in a significant speedup when converting floating-point values
+      to integers where the library does not have a hard conversion
+      path. This is the case for any floating-point values with a
+      datatype not represented by H5T_NATIVE_FLOAT16 (if _Float16 is
+      supported), H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE or
+      H5T_NATIVE_LDOUBLE.
+
+    - Fixed a bug that can cause incorrect data when overflows occur
+      while converting integer values to floating-point values with
+      the library's software conversion function
+
+      The H5T__conv_i_f function had a bug which previously caused it
+      to return incorrect data when an overflow occurs and an application's
+      conversion exception callback function decides not to handle the
+      overflow. Rather than return positive infinity, the library would
+      return truncated data. This has now been fixed.
+
+    - Corrected H5Soffset_simple() when offset is NULL
+
+      The reference manual states that the offset parameter of H5Soffset_simple()
+      can be set to NULL to reset the offset of a simple dataspace to 0. This
+      has never been true, and passing NULL was regarded as an error.
+
+      The library will now accept NULL for the offset parameter and will
+      correctly set the offset to zero.
+
+      Fixes HDFFV-9299
+
+    - Fixed an issue where the Subfiling VFD's context object cache could
+      grow too large
+
+      The Subfiling VFD keeps a cache of its internal context objects to
+      speed up access to a context object for a particular file, as well
+      as access to that object across multiple opens of the same file.
+      However, opening a large amount of files with the Subfiling VFD over
+      the course of an application's lifetime could cause this cache to grow
+      too large and result in the application running out of available MPI
+      communicator objects. On file close, the Subfiling VFD now simply
+      evicts context objects out of its cache and frees them. It is assumed
+      that multiple opens of a file will be a less common use case for the
+      Subfiling VFD, but this can be revisited if it proves to be an issue
+      for performance.
+
+    - Fixed error when overwriting certain nested variable length types
+
+      Previously, when using a datatype that included a variable length type
+      within a compound or array within another variable length type, and
+      overwriting data with a shorter (top level) variable length sequence, an
+      error could occur. This has been fixed.
+
+    - Fixed asserts raised by large values of H5Pset_est_link_info() parameters
+
+      If large values for est_num_entries and/or est_name_len were passed
+      to H5Pset_est_link_info(), the library would attempt to create an
+      object header NIL message to reserve enough space to hold the links in
+      compact form (i.e., concatenated), which could exceed allowable object
+      header message size limits and trip asserts in the library.
+
+      This bug only occurred when using the HDF5 1.8 file format or later and
+      required the product of the two values to be ~64k more than the size
+      of any links written to the group, which would cause the library to
+      write out a too-large NIL spacer message to reserve the space for the
+      unwritten links.
+
+      The library now inspects the phase change values to see if the dataset
+      is likely to be compact and checks the size to ensure any NIL spacer
+      messages won't be larger than the library allows.
+
+      Fixes GitHub #1632
+
     - Fixed a bug where H5Tset_fields does not account for any offset
       set for a floating-point datatype when determining if values set
       for spos, epos, esize, mpos and msize make sense for the datatype
@@ -283,6 +644,15 @@ Bug Fixes since HDF5-1.14.3 release
       of MPI-2 maintenance and testing since version HDF5 1.12.
 
 
+    - Fixed a segfault when using a user-defined conversion function between compound datatypes
+
+      During type info initialization for compound datatype conversion, the library checked if the
+      datatypes are subsets of one another in order to perform special conversion handling. 
+      This check uses information that is only defined if a library conversion function is in use. 
+      The library now skips this check for user-defined conversion functions.
+
+      Fixes Github issue #3840
+
     Java Library
     ------------
     -
@@ -334,7 +704,11 @@ Bug Fixes since HDF5-1.14.3 release
 
     Fortran API
     -----------
-    -
+    - Fixed: HDF5 fails to compile with -Werror=lto-type-mismatch
+
+      Removed the use of the offending C stub wrapper.
+
+      Fixes GitHub issue #3987
 
 
     High-Level Library
@@ -373,22 +747,80 @@ Bug Fixes since HDF5-1.14.3 release
 
     Testing
     -------
-    -
+    - Fixed a bug in the dt_arith test when H5_WANT_DCONV_EXCEPTION is not
+      defined
+
+      The dt_arith test program's test_particular_fp_integer sub-test tries
+      to ensure that the library correctly raises a datatype conversion
+      exception when converting a floating-point value to an integer overflows.
+      However, this test would run even when H5_WANT_DCONV_EXCEPTION isn't
+      defined, causing the test to fail due to the library not raising
+      datatype conversion exceptions. This has now been fixed by not running
+      the test when H5_WANT_DCONV_EXCEPTION is not defined.
+
+    - Disabled running of MPI Atomicity tests for OpenMPI major versions < 5
+
+      Support for MPI atomicity operations is not implemented for major
+      versions of OpenMPI less than version 5. This would cause the MPI
+      atomicity tests for parallel HDF5 to sporadically fail when run
+      with OpenMPI. Testphdf5 now checks if OpenMPI is being used and will
+      skip running the atomicity tests if the major version of OpenMPI is
+      < 5.
+
+    - Fixed a testing failure in testphdf5 on Cray machines
+
+      On some Cray machines, what appears to be a bug in Cray MPICH was causing
+      calls to H5Fis_accessible to create a 0-byte file with strange Unix
+      permissions. This was causing an H5Fdelete file deletion test in the
+      testphdf5 program to fail due to a just-deleted HDF5 file appearing to
+      still be accessible on the file system. The issue in Cray MPICH has been
+      worked around for the time being by resetting the MPI_Info object on the
+      File Access Property List used to MPI_INFO_NULL before passing it to the
+      H5Fis_accessible call.
+
+    - A bug was fixed in the HDF5 API test random datatype generation code
+
+      A bug in the random datatype generation code could cause test failures
+      when trying to generate an enumeration datatype that has duplicated
+      name/value pairs in it. This has now been fixed.
+
+    - A bug was fixed in the HDF5 API test VOL connector registration checking code
+
+      The HDF5 API test code checks to see if the VOL connector specified by the
+      HDF5_VOL_CONNECTOR environment variable (if any) is registered with the library
+      before attempting to run tests with it so that testing can be skipped and an
+      error can be returned when a VOL connector fails to register successfully.
+      Previously, this code didn't account for VOL connectors that specify extra
+      configuration information in the HDF5_VOL_CONNECTOR environment variable and
+      would incorrectly report that the specified VOL connector isn't registered
+      due to including the configuration information as part of the VOL connector
+      name being checked for registration status. This has now been fixed.
+
+   - Fixed Fortran 2003 test with gfortran-v13, optimization levels O2,O3
+
+     Fixes failing Fortran 2003 test with gfortran, optimization level O2,O3
+     with -fdefault-real-16. Fixes GH #2928.
 
 
 Platforms Tested
 ===================
+
+    - HDF5 supports the latest macOS versions, including the current and two
+      preceding releases. As new major macOS versions become available, HDF5
+      will discontinue  support for the  oldest  version and add  the latest
+      version to its list of compatible systems, along with the previous two
+      releases.
+
+    Linux 5.16.14-200.fc35           GNU gcc (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
+    #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
+    Fedora35                         clang version 13.0.0 (Fedora 13.0.0-3.fc35)
+                                     (cmake and autotools)
 
     Linux 5.19.0-1023-aws            GNU gcc, gfortran, g++
     #24-Ubuntu SMP x86_64 GNU/Linux  (Ubuntu 11.3.0-1ubuntu1~22.04) 11.3.0
     Ubuntu 22.04                     Ubuntu clang version 14.0.0-1ubuntu1
                                      Intel(R) oneAPI DPC++/C++ Compiler 2023.1.0
                                      ifort (IFORT) 2021.9.0 20230302
-                                     (cmake and autotools)
-
-    Linux 5.16.14-200.fc35           GNU gcc (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
-    #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
-    Fedora35                         clang version 13.0.0 (Fedora 13.0.0-3.fc35)
                                      (cmake and autotools)
 
     Linux 5.14.21-cray_shasta_c      cray-mpich/8.1.23
@@ -542,6 +974,10 @@ Known Problems
     The subsetting option in ph5diff currently will fail and should be avoided.
     The subsetting option works correctly in serial h5diff.
 
+    Flang Fortran compilation will fail (last check version 17) due to not yet
+    implemented: (1) derived type argument passed by value (H5VLff.F90),
+    and (2) support for REAL with KIND = 2 in intrinsic SPACING used in testing.
+
     Several tests currently fail on certain platforms:
         MPI_TEST-t_bigio fails with spectrum-mpi on ppc64le platforms.
 
@@ -554,11 +990,14 @@ Known Problems
     in the HDF5 source. Please report any new problems found to
     help@hdfgroup.org.
 
+    File space may not be released when overwriting or deleting certain nested
+    variable length or reference types.
+
 
 CMake vs. Autotools installations
 =================================
 While both build systems produce similar results, there are differences.
-Each system produces the same set of folders on linux (only CMake works
+Each system produces the same set of folders on Linux (only CMake works
 on standard Windows); bin, include, lib and share. Autotools places the
 COPYING and RELEASE.txt file in the root folder, CMake places them in
 the share folder.
