@@ -184,6 +184,10 @@ die "unable to read file: $README\n" unless -r $file;
 my $RELEASE = $file;
 $RELEASE =~ s/[^\/]*$/..\/release_docs\/RELEASE.txt/;
 die "unable to read file: $RELEASE\n" unless -r $file;
+# release_docs/NEWSLETTER.txt
+my $NEWS = $file;
+$NEWS =~ s/[^\/]*$/..\/release_docs\/NEWSLETTER.txt/;
+die "unable to read file: $NEWS\n" unless -r $file;
 # configure.ac
 my $CONFIGURE = $file;
 $CONFIGURE =~ s/[^\/]*$/..\/configure.ac/;
@@ -247,6 +251,7 @@ if ($set) {
   # Nothing to do but print result
   $README = "";
   $RELEASE = "";
+  $NEWS = "";
   $CONFIGURE = "";
   $CPP_DOC_CONFIG = "";
   $LT_VERS = "";       
@@ -325,6 +330,20 @@ if ($RELEASE) {
 			 $newver[3] eq "" ? "" : "-".$newver[3],
 			 "currently under development\n");
   open FILE, ">$RELEASE" or die "$RELEASE: $!\n";
+  print FILE @contents;
+  close FILE;
+}
+
+# Update the release_docs/NEWSLETTER.txt file
+if ($NEWS) {
+  open FILE, $NEWS or die "$NEWS: $!\n";
+  my @contents = <FILE>;
+  close FILE;
+  $contents[0] = sprintf("HDF5 version %d.%d.%d%s %s",
+             @newver[0,1,2],
+             $newver[3] eq "" ? "" : "-".$newver[3],
+             "currently under development\n");
+  open FILE, ">$NEWS" or die "$NEWS: $!\n";
   print FILE @contents;
   close FILE;
 }
