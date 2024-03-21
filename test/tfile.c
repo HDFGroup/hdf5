@@ -3262,6 +3262,7 @@ cal_chksum(const char *file, uint32_t *chksum)
     CHECK(fdes, FAIL, "HDopen");
 
     /* Retrieve the file's size */
+    memset(&sb, 0, sizeof(h5_stat_t));
     ret = HDfstat(fdes, &sb);
     CHECK(fdes, FAIL, "HDfstat");
 

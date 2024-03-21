@@ -570,6 +570,7 @@ H5_open_subfiling_stub_file(const char *name, unsigned flags, MPI_Comm file_comm
         HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
 
         /* Retrieve Inode value for stub file */
+        memset(&st, 0, sizeof(h5_stat_t));
         if (HDstat(name, &st) < 0) {
             stub_file_id = UINT64_MAX;
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,

@@ -241,6 +241,7 @@ main(int argc, char *argv[])
         goto done;
     }
 
+    memset(&sbuf, 0, sizeof(h5_stat_t));
     res = HDfstat(HDfileno(rawinstream), &sbuf);
     if (res < 0) {
         error_msg("Can't stat file \"%s\"\n", input_file);

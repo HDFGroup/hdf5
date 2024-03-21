@@ -231,6 +231,7 @@ test(fill_t fill_style, const double splits[], bool verbose, bool use_rdcc)
         if (verbose) {
             if (H5Fflush(file, H5F_SCOPE_LOCAL) < 0)
                 goto error;
+            memset(&sb, 0, sizeof(h5_stat_t));
             if (HDfstat(fd, &sb) < 0)
                 goto error;
             printf("%4lu %8.3f ***\n", (unsigned long)i,
@@ -276,6 +277,7 @@ test(fill_t fill_style, const double splits[], bool verbose, bool use_rdcc)
                 break;
         }
 
+        memset(&sb, 0, sizeof(h5_stat_t));
         if (HDfstat(fd, &sb) < 0)
             goto error;
         printf("%-7s %8.3f\n", sname,

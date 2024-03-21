@@ -149,6 +149,7 @@ is_sparse(void)
         return 0;
     if (HDclose(fd) < 0)
         return 0;
+    memset(&sb, 0, sizeof(h5_stat_t));
     if (HDstat("x.h5", &sb) < 0)
         return 0;
     if (HDremove("x.h5") < 0)

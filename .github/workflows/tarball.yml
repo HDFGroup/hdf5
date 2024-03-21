@@ -4,11 +4,11 @@ name: hdf5 dev tarball
 on:
   workflow_call:
     inputs:
-#      use_tag:
-#        description: 'Release version tag'
-#        type: string
-#        required: false
-#        default: snapshot
+      use_tag:
+        description: 'Release version tag'
+        type: string
+        required: false
+        default: snapshot
       use_environ:
         description: 'Environment to locate files'
         type: string
@@ -105,7 +105,12 @@ jobs:
           then
             FILE_NAME_BASE=$(echo "hdf5-${{ needs.check_commits.outputs.branch_ref }}-${{ needs.check_commits.outputs.branch_sha }}")
           else
-            FILE_NAME_BASE=$(echo "hdf5-${{ steps.version.outputs.TAG_VERSION }}")
+            if [[ '${{ inputs.use_tag }}' == 'snapshot' ]]
+            then
+              FILE_NAME_BASE=$(echo "${{ inputs.use_tag }}")
+            else
+              FILE_NAME_BASE=$(echo "hdf5-${{ steps.version.outputs.TAG_VERSION }}")
+            fi
           fi
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash
@@ -120,10 +125,18 @@ jobs:
 
       - name: Create release file base name
         id: create-rel-base
-        if: ${{ (inputs.use_environ == 'release') }}
+        if: ${{ (inputs.use_environ == 'release') && (inputs.use_tag != 'snapshot') }}
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
-          bin/release -d $GITHUB_WORKSPACE gzip zip cmake-tgz cmake-zip 
+          bin/release -d $GITHUB_WORKSPACE gzip zip 
+        shell: bash
+
+      - name: Create snapshot file base name
+        id: create-snap-base
+        if: ${{ (inputs.use_tag == 'snapshot') && (inputs.use_environ == 'release') }}
+        run: |
+          cd "$GITHUB_WORKSPACE/hdfsrc"
+          bin/release -d $GITHUB_WORKSPACE --branch ${{ inputs.use_tag }} gzip zip
         shell: bash
 
       - name: List files in the repository

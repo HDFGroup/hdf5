@@ -325,6 +325,7 @@ H5FD__sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
             name, myerrno, strerror(myerrno), flags, (unsigned)o_flags);
     } /* end if */
 
+    memset(&sb, 0, sizeof(h5_stat_t));
     if (HDfstat(fd, &sb) < 0)
         HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
 
