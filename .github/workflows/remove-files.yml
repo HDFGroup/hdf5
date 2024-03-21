@@ -1,4 +1,4 @@
-name: hdf5 dev remove-files
+name: hdf5 1.14 remove-files
 
 # Controls when the action will run. Triggers the workflow on a schedule
 on:

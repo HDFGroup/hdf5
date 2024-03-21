@@ -1,4 +1,4 @@
-name: hdf5 dev Autotools MSys2
+name: hdf5 1.14 Autotools MSys2
 
 on:
   workflow_call:

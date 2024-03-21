@@ -464,15 +464,6 @@ jobs:
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/build114/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/build114/hdf5/ -Include *.zip
           cd "${{ runner.workspace }}/build114"
-=======
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
-          cd "${{ runner.workspace }}/build"
->>>>>>> f87725c... Merge HDF4 release workflow changes to hdf5 (#4093)
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip hdf5
         shell: pwsh
 

@@ -1,4 +1,4 @@
-name: hdf5 dev PAR CMake aocc ompi
+name: hdf5 1.14 PAR CMake aocc ompi
 
 on:
   workflow_call:

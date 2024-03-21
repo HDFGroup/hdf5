@@ -1,4 +1,4 @@
-name: hdf5 dev CMake cygwin
+name: hdf5 1.14 CMake cygwin
 
 on:
   workflow_call:

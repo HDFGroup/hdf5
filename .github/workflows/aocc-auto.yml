@@ -1,4 +1,4 @@
-name: hdf5 dev PAR autotools aocc ompi
+name: hdf5 1.14 PAR autotools aocc ompi
 
 on:
   workflow_call:

@@ -1,4 +1,4 @@
-name: hdf5 dev CMake MinGW
+name: hdf5 1.14 CMake MinGW
 
 on:
   workflow_call:
