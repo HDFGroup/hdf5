@@ -1,5 +1,4 @@
-Release of HDF5 1.14.4 Library and Tools
-The HDF5 Library and Tools 1.14.4 release is now available from the Download HDF5 page.
+Release of HDF5 1.14.4 Library and Tools is now available from the HDF5 Releases page.
 
 This is a maintenance release with a few changes and updates:
 ----------------------------------------------------------------------------
@@ -16,4 +15,5 @@ This is a maintenance release with a few changes and updates:
   (GitHub #4065, #2154)
 
 ----------------------------------------------------------------------------
-Please see the full release notes for detailed information regarding this release, including a detailed list of changes.
+Please see the full release notes for detailed information regarding this release,
+including a detailed list of changes.
