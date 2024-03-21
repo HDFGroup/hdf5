@@ -7460,8 +7460,8 @@ H5_DLL herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_
  *          that uses external storage:
  *
  *          \li The default behavior of the library is to search for the
- *              dataset's external storage raw data files in the same
- *              directory as the HDF5 file which contains the dataset.
+ *              dataset's external storage raw data files in the current
+ *              working directory of the program.
  *          \li If the prefix is set to an absolute path, the target
  *              directory will be searched for the dataset's external
  *              storage raw data files.
