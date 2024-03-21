@@ -1,3 +1,9 @@
+Release of HDF5 1.14.4 Library and Tools
+The HDF5 Library and Tools 1.14.4 release is now available from the Download HDF5 page.
+
+This is a maintenance release with a few changes and updates:
+----------------------------------------------------------------------------
+
 * Added support for _Float16 16-bit floating-point datatype
 
   Support for the 16-bit floating-point _Float16 C type has been added to
@@ -8,3 +14,6 @@
   data and data of another HDF5 datatype.
 
   (GitHub #4065, #2154)
+
+----------------------------------------------------------------------------
+Please see the full release notes for detailed information regarding this release, including a detailed list of changes.
