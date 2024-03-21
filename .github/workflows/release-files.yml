@@ -160,7 +160,7 @@ jobs:
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip >> sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz >> sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz >> sha256sums.txt
 
       - name: Store snapshot name
         run: |
@@ -197,7 +197,7 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz
               sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
@@ -221,7 +221,7 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz
               sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
