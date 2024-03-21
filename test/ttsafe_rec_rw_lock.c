@@ -624,7 +624,7 @@ tts_rec_rw_lock_smoke_check_2(void)
     uint64_t elap_time = (unsigned long long)(end_time - start_time);
     if (verbose)
         fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
-            (elap_time / (uint64_t)lock_cycles));
+                (elap_time / (uint64_t)lock_cycles));
 #endif
 
     /* 5) Examine the user data from the threads, to determine the
@@ -830,7 +830,7 @@ tts_rec_rw_lock_smoke_check_3(void)
     uint64_t elap_time = (unsigned long long)(end_time - start_time);
     if (verbose)
         fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
-            (elap_time / (uint64_t)lock_cycles));
+                (elap_time / (uint64_t)lock_cycles));
 #endif
 
     /* 5) Examine the user data from the threads, to determine the
@@ -1037,7 +1037,7 @@ tts_rec_rw_lock_smoke_check_4(void)
     uint64_t elap_time = (unsigned long long)(end_time - start_time);
     if (verbose)
         fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
-            (elap_time / (uint64_t)lock_cycles));
+                (elap_time / (uint64_t)lock_cycles));
 #endif
 
     /* 5) Examine the user data from the threads, to determine the

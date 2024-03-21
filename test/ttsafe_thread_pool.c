@@ -24,7 +24,7 @@
 
 typedef struct {
     H5TS_mutex_t mutex;
-    int val;
+    int          val;
 } atomic_counter_t;
 
 atomic_counter_t counter_g = {H5TS_MUTEX_INITIALIZER, 0};
@@ -33,8 +33,8 @@ static H5TS_THREAD_RETURN_TYPE
 noop_task(void *_counter)
 {
     atomic_counter_t *counter = (atomic_counter_t *)_counter;
-    herr_t result;
-    H5TS_thread_ret_t     ret_value = 0;
+    herr_t            result;
+    H5TS_thread_ret_t ret_value = 0;
 
     result = H5TS_mutex_lock(&counter->mutex);
     CHECK_I(result, "H5TS_mutex_lock");
@@ -51,8 +51,8 @@ static H5TS_THREAD_RETURN_TYPE
 incr_task(void *_counter)
 {
     atomic_counter_t *counter = (atomic_counter_t *)_counter;
-    herr_t result;
-    H5TS_thread_ret_t     ret_value = 0;
+    herr_t            result;
+    H5TS_thread_ret_t ret_value = 0;
 
     result = H5TS_mutex_lock(&counter->mutex);
     CHECK_I(result, "H5TS_mutex_lock");
@@ -70,8 +70,8 @@ static H5TS_THREAD_RETURN_TYPE
 decr_task(void *_counter)
 {
     atomic_counter_t *counter = (atomic_counter_t *)_counter;
-    herr_t result;
-    H5TS_thread_ret_t     ret_value = 0;
+    herr_t            result;
+    H5TS_thread_ret_t ret_value = 0;
 
     result = H5TS_mutex_lock(&counter->mutex);
     CHECK_I(result, "H5TS_mutex_lock");
@@ -95,7 +95,7 @@ void
 tts_thread_pool(void)
 {
     H5TS_pool_t *pool = NULL;
-    herr_t result;
+    herr_t       result;
 
     /* Sanity checks on bad input */
     result = H5TS_pool_create(NULL, NUM_THREADS);
@@ -116,7 +116,6 @@ tts_thread_pool(void)
     result = H5TS_pool_destroy(pool);
     CHECK_I(result, "H5TS_pool_destroy");
 
-
     /* Create pool, add single 'noop' task, destroy pool */
     result = H5TS_pool_create(&pool, NUM_THREADS);
     CHECK_I(result, "H5TS_pool_create");
@@ -128,7 +127,6 @@ tts_thread_pool(void)
     CHECK_I(result, "H5TS_pool_destroy");
 
     VERIFY(counter_g.val, 0, "noop");
-
 
     /* Create pool, add single 'incr' task, destroy pool */
     result = H5TS_pool_create(&pool, NUM_THREADS);
@@ -142,10 +140,9 @@ tts_thread_pool(void)
 
     VERIFY(counter_g.val, 1, "single incr");
 
-
     /* Create pool, add pair of 'incr' & 'decr' tasks, destroy pool */
     counter_g.val = 10;
-    result = H5TS_pool_create(&pool, NUM_THREADS);
+    result        = H5TS_pool_create(&pool, NUM_THREADS);
     CHECK_I(result, "H5TS_pool_create");
 
     result = H5TS_pool_add_task(pool, incr_task, &counter_g);
@@ -159,18 +156,17 @@ tts_thread_pool(void)
 
     VERIFY(counter_g.val, 10, "incr + decr");
 
-
     /* Create pool, add many 'incr' & 'decr' tasks, destroy pool */
     counter_g.val = 3;
-    result = H5TS_pool_create(&pool, NUM_THREADS);
+    result        = H5TS_pool_create(&pool, NUM_THREADS);
     CHECK_I(result, "H5TS_pool_create");
 
-    for(unsigned u = 0; u < 200; u++) {
+    for (unsigned u = 0; u < 200; u++) {
         result = H5TS_pool_add_task(pool, incr_task, &counter_g);
         CHECK_I(result, "H5TS_pool_add_task");
     }
 
-    for(unsigned u = 0; u < 100; u++) {
+    for (unsigned u = 0; u < 100; u++) {
         result = H5TS_pool_add_task(pool, decr_task, &counter_g);
         CHECK_I(result, "H5TS_pool_add_task");
     }
@@ -180,18 +176,17 @@ tts_thread_pool(void)
 
     VERIFY(counter_g.val, 103, "200 incr + 100 decr");
 
-
     /* Create pool, add *lots* of 'incr' & 'decr' tasks, destroy pool */
     counter_g.val = 5;
-    result = H5TS_pool_create(&pool, NUM_THREADS);
+    result        = H5TS_pool_create(&pool, NUM_THREADS);
     CHECK_I(result, "H5TS_pool_create");
 
-    for(unsigned u = 0; u < 2 * 1000 * 1000; u++) {
+    for (unsigned u = 0; u < 2 * 1000 * 1000; u++) {
         result = H5TS_pool_add_task(pool, incr_task, &counter_g);
         CHECK_I(result, "H5TS_pool_add_task");
     }
 
-    for(unsigned u = 0; u < 1 * 1000 * 1000; u++) {
+    for (unsigned u = 0; u < 1 * 1000 * 1000; u++) {
         result = H5TS_pool_add_task(pool, decr_task, &counter_g);
         CHECK_I(result, "H5TS_pool_add_task");
     }
@@ -201,7 +196,6 @@ tts_thread_pool(void)
 
     VERIFY(counter_g.val, 5 + (1000 * 1000), "2,000,000 incr + 1,000,000 decr");
 
-
     /* Destroy the counter's mutex */
     result = H5TS_mutex_destroy(&counter_g.mutex);
     CHECK_I(result, "H5TS_mutex_destroy");
@@ -209,5 +203,3 @@ tts_thread_pool(void)
 } /* end tts_thread_pool() */
 
 #endif /*H5_HAVE_THREADSAFE*/
-
-
