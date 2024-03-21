@@ -191,8 +191,8 @@ jobs:
           mkdir "${{ runner.workspace }}/buildrpm/hdf5"
           cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/buildrpm/hdf5
           cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/buildrpm/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/buildrpm/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.rpm ${{ runner.workspace }}/buildrpm/hdf5
+          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/buildrpm/hdf5
+          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC/*.rpm ${{ runner.workspace }}/buildrpm/hdf5
           cd "${{ runner.workspace }}/buildrpm"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm hdf5
         shell: bash
