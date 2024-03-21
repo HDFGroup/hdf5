@@ -176,20 +176,20 @@ error:
 int
 main(void)
 {
-    char *driver = NULL;             /* name of current VFD (from env var)       */
-    bool  vfd_supports_swmr;         /* whether the current VFD supports SWMR    */
-    hid_t fid     = H5I_INVALID_HID; /* file ID                                  */
-    hid_t fapl_id = H5I_INVALID_HID; /* file access proplist ID                  */
-    char  filename[1024];            /* filename                                 */
-    bool  use_swmr;                  /* whether or not to use SWMR I/O           */
+    const char *driver_name;               /* name of current VFD (from env var)       */
+    bool        vfd_supports_swmr;         /* whether the current VFD supports SWMR    */
+    hid_t       fid     = H5I_INVALID_HID; /* file ID                                  */
+    hid_t       fapl_id = H5I_INVALID_HID; /* file access proplist ID                  */
+    char        filename[1024];            /* filename                                 */
+    bool        use_swmr;                  /* whether or not to use SWMR I/O           */
 
     h5_reset();
     if ((fapl_id = h5_fileaccess()) < 0)
         TEST_ERROR;
 
     /* Check if the current VFD supports SWMR */
-    driver            = getenv(HDF5_DRIVER);
-    vfd_supports_swmr = H5FD__supports_swmr_test(driver);
+    driver_name       = h5_get_test_driver_name();
+    vfd_supports_swmr = H5FD__supports_swmr_test(driver_name);
 
     /*************************************************/
     /* NOTE: Not closing the file ID is intentional! */

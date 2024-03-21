@@ -3592,15 +3592,13 @@ void
 test_reference(void)
 {
     H5F_libver_t low, high;   /* Low and high bounds */
-    const char  *env_h5_drvr; /* File Driver value from environment */
+    const char  *driver_name; /* File Driver value from environment */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing References\n"));
 
     /* Get the VFD to use */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     test_reference_params();    /* Test for correct parameter checking */
     test_reference_obj();       /* Test basic H5R object reference code */
@@ -3622,7 +3620,7 @@ test_reference(void)
     }     /* end low bound */
 
     /* The following test is currently broken with the Direct VFD */
-    if (strcmp(env_h5_drvr, "direct") != 0) {
+    if (strcmp(driver_name, "direct") != 0) {
         test_reference_obj_deleted(); /* Test H5R object reference code for deleted objects */
     }
 

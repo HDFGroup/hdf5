@@ -67,9 +67,9 @@
  * Purpose:	    Determines if a VFD supports SWMR.
  *
  *              The function determines SWMR support by inspecting the
- *              HDF5_DRIVER environment variable, not by checking the
- *              VFD feature flags (which do not exist until the driver
- *              is instantiated).
+ *              HDF5_DRIVER and HDF5_TEST_DRIVER environment variables, not
+ *              by checking the VFD feature flags (which do not exist until
+ *              the driver is instantiated).
  *
  *              This function is only intended for use in the test code.
  *
@@ -89,7 +89,10 @@ H5FD__supports_swmr_test(const char *vfd_name)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (!vfd_name || !strcmp(vfd_name, "") || !strcmp(vfd_name, "nomatch"))
+    if (!vfd_name)
+        vfd_name = getenv("HDF5_TEST_DRIVER");
+
+    if (!vfd_name || !strcmp(vfd_name, ""))
         ret_value = true;
     else
         ret_value = !strcmp(vfd_name, "log") || !strcmp(vfd_name, "sec2");

@@ -726,7 +726,7 @@ are others in `h5test.h` if you want to emit custom text, dump the HDF5 error
 stack when it would not normally be triggered, etc.
 
 Most tests will be set up to run with arbitrary VFDs. To do this, you set the
-fapl ID using the `h5_fileaccess()` function, which will check the `HDF5_DRIVER`
+fapl ID using the `h5_fileaccess()` function, which will check the `HDF5_TEST_DRIVER`
 environment variable and set the fapl's VFD accordingly. The `h5_fixname()`
 call can then be used to get a VFD-appropriate filename for the `H5Fcreate()`,
 etc. call.

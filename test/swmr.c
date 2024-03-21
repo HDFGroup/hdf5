@@ -7729,12 +7729,12 @@ error:
 int
 main(void)
 {
-    int   nerrors      = 0;               /* The # of errors */
-    hid_t fapl         = H5I_INVALID_HID; /* File access property list ID */
-    char *driver       = NULL;            /* VFD string (from env variable) */
-    char *lock_env_var = NULL;            /* file locking env var pointer */
-    bool  use_file_locking;               /* read from env var */
-    bool  file_locking_enabled = false;   /* Checks if the file system supports locks */
+    const char *driver_name  = NULL;            /* VFD string (from env variable) */
+    int         nerrors      = 0;               /* The # of errors */
+    hid_t       fapl         = H5I_INVALID_HID; /* File access property list ID */
+    char       *lock_env_var = NULL;            /* file locking env var pointer */
+    bool        use_file_locking;               /* read from env var */
+    bool        file_locking_enabled = false;   /* Checks if the file system supports locks */
 
     /* Testing setup */
     h5_reset();
@@ -7742,8 +7742,8 @@ main(void)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    driver = getenv(HDF5_DRIVER);
-    if (!H5FD__supports_swmr_test(driver)) {
+    driver_name = h5_get_test_driver_name();
+    if (!H5FD__supports_swmr_test(driver_name)) {
         printf("This VFD does not support SWMR I/O\n");
         return EXIT_SUCCESS;
     }
@@ -7828,7 +7828,7 @@ main(void)
     /* Tests SWMR VFD compatibility flag.
      * Only needs to run when the VFD is the default (sec2).
      */
-    if (NULL == driver || !strcmp(driver, "") || !strcmp(driver, "sec2"))
+    if (NULL == driver_name || !strcmp(driver_name, "") || !strcmp(driver_name, "sec2"))
         nerrors += test_swmr_vfd_flag();
 
     /* Test multiple opens via different locking flags */
