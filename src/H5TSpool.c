@@ -128,9 +128,9 @@ H5TS__pool_free(H5TS_pool_t *pool)
             HGOTO_DONE(FAIL);
 
     /* Destroy the pool's mutex and condition variable */
-    if (H5_UNLIKELY(H5TS_mutex_destroy(&pool->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_destroy(&pool->mutex) < 0))
         HGOTO_DONE(FAIL);
-    if (H5_UNLIKELY(H5TS_cond_destroy(&pool->cond)))
+    if (H5_UNLIKELY(H5TS_cond_destroy(&pool->cond) < 0))
         HGOTO_DONE(FAIL);
 
     /* Release memory */
@@ -167,13 +167,13 @@ H5TS__pool_do(void *_pool)
     /* Acquire tasks and invoke them, until pool is shut down */
     while (1) {
         /* Acquire the mutex for the pool */
-        if (H5_UNLIKELY(H5TS_mutex_lock(&pool->mutex)))
+        if (H5_UNLIKELY(H5TS_mutex_lock(&pool->mutex) < 0))
             HGOTO_DONE((H5TS_thread_ret_t)1);
         have_mutex = true;
 
         /* If queue is empty and pool is not shutting down, wait for a task */
         while (NULL == pool->head && !pool->shutdown)
-            if (H5_UNLIKELY(H5TS_cond_wait(&pool->cond, &pool->mutex)))
+            if (H5_UNLIKELY(H5TS_cond_wait(&pool->cond, &pool->mutex) < 0))
                 HGOTO_DONE((H5TS_thread_ret_t)1);
 
         /* If there's a task, invoke it, else we're shutting down */
@@ -188,7 +188,7 @@ H5TS__pool_do(void *_pool)
                 pool->head = pool->tail = NULL;
 
             /* Release the pool's mutex */
-            if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex)))
+            if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
                 HGOTO_DONE((H5TS_thread_ret_t)1);
             have_mutex = false;
 
@@ -207,7 +207,7 @@ H5TS__pool_do(void *_pool)
 done:
     /* Release the pool's mutex, if we're holding it */
     if (H5_UNLIKELY(have_mutex))
-        if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex)))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
             ret_value = (H5TS_thread_ret_t)1;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -309,7 +309,7 @@ H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
     task->next = NULL;
 
     /* Acquire the mutex for the pool */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&pool->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_lock(&pool->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = true;
 
@@ -329,13 +329,13 @@ H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
     task = NULL;
 
     /* Wake up any sleeping worker */
-    if (H5_UNLIKELY(H5TS_cond_signal(&pool->cond)))
+    if (H5_UNLIKELY(H5TS_cond_signal(&pool->cond) < 0))
         HGOTO_DONE(FAIL);
 
 done:
     /* Release the pool's mutex, if we're holding it */
     if (H5_LIKELY(have_mutex))
-        if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex)))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
             ret_value = FAIL;
 
     if (H5_UNLIKELY(ret_value < 0))
@@ -367,7 +367,7 @@ H5TS_pool_destroy(H5TS_pool_t *pool)
         HGOTO_DONE(FAIL);
 
     /* Acquire the mutex for the pool */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&pool->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_lock(&pool->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = true;
 
@@ -375,11 +375,11 @@ H5TS_pool_destroy(H5TS_pool_t *pool)
     pool->shutdown = true;
 
     /* Wake all the worker threads up */
-    if (H5_UNLIKELY(H5TS_cond_broadcast(&pool->cond)))
+    if (H5_UNLIKELY(H5TS_cond_broadcast(&pool->cond) < 0))
         HGOTO_DONE(FAIL);
 
     /* Release the pool's mutex */
-    if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = false;
 
@@ -390,7 +390,7 @@ H5TS_pool_destroy(H5TS_pool_t *pool)
 done:
     /* Release the pool's mutex, if we're holding it */
     if (H5_UNLIKELY(have_mutex))
-        if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex)))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)

@@ -103,6 +103,7 @@ main(int argc, char *argv[])
     AddTest("is_threadsafe", tts_is_threadsafe, NULL, "library threadsafe status", NULL);
 #ifdef H5_HAVE_THREADSAFE
     AddTest("thread_id", tts_thread_id, NULL, "thread IDs", NULL);
+    AddTest("thread_pool", tts_thread_pool, NULL, "thread pools", NULL);
 
     AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
     AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);

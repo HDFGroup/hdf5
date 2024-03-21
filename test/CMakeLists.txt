@@ -351,6 +351,7 @@ set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_error.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_rec_rw_lock.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_thread_id.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_thread_pool.c
 )
 
 set (H5_TESTS
@@ -423,7 +424,6 @@ set (H5_TESTS
     cache_logging
     cork
     swmr
-    thread_id # special link
     vol
     timer
     cmpd_dtransform
@@ -462,7 +462,6 @@ set (H5_TESTS_MULTIPLE
     testhdf5
     cache_image
     ttsafe
-    thread_id # special link
     mirror_vfd
 )
 # Only build single source tests here
@@ -583,13 +582,6 @@ set_target_properties (ttsafe PROPERTIES FOLDER test)
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_TEST_ttsafe_FORMAT ttsafe)
-endif ()
-
-#-----------------------------------------------------------------------------
-# Add Target to clang-format
-#-----------------------------------------------------------------------------
-if (HDF5_ENABLE_FORMATTERS)
-  clang_format (HDF5_TEST_thread_id_FORMAT thread_id)
 endif ()
 
 if (HDF5_BUILD_UTILS) # requires mirror server

@@ -75,6 +75,9 @@
 /* Key destructor callback */
 typedef void (*H5TS_key_destructor_func_t)(void *);
 
+/* Thread pool */
+typedef struct H5TS_pool_t H5TS_pool_t;
+
 /* Portability aliases */
 #ifdef H5_HAVE_WIN_THREADS
 typedef HANDLE                 H5TS_thread_t;
@@ -95,9 +98,6 @@ typedef pthread_cond_t  H5TS_cond_t;
 typedef pthread_once_t  H5TS_once_t;
 typedef void (*H5TS_once_init_func_t)(void);
 #endif
-
-    /* Thread pool */
-    typedef struct H5TS_pool_t H5TS_pool_t;
 
 /*****************************/
 /* Library-private Variables */

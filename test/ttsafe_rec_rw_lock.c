@@ -607,7 +607,9 @@ tts_rec_rw_lock_smoke_check_2(void)
         udata[i].max_recursive_lock_depth = 10;
     }
 
+#if H5TS_ENABLE_REC_RW_LOCK_STATS
     uint64_t start_time = H5_now_usec();
+#endif
     /* 3) Create the reader threads, each with its own user data. */
     for (i = 0; i < num_threads; i++)
         if (H5TS_thread_create(&threads[i], tts_rw_lock_smoke_check_test_thread, &udata[i]) < 0)
@@ -617,10 +619,13 @@ tts_rec_rw_lock_smoke_check_2(void)
     for (i = 0; i < num_threads; i++)
         if (H5TS_thread_join(threads[i], NULL) < 0)
             TestErrPrintf("thread %d failed to join", i);
+#if H5TS_ENABLE_REC_RW_LOCK_STATS
     uint64_t end_time  = H5_now_usec();
     uint64_t elap_time = (unsigned long long)(end_time - start_time);
-    fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
+    if (verbose)
+        fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
             (elap_time / (uint64_t)lock_cycles));
+#endif
 
     /* 5) Examine the user data from the threads, to determine the
      *    total number of real and recursive read locks and unlocks.
@@ -808,7 +813,9 @@ tts_rec_rw_lock_smoke_check_3(void)
         udata[i].max_recursive_lock_depth = 10;
     }
 
+#if H5TS_ENABLE_REC_RW_LOCK_STATS
     uint64_t start_time = H5_now_usec();
+#endif
     /* 3) Create the writer threads, each with its own user data. */
     for (i = 0; i < num_threads; i++)
         if (H5TS_thread_create(&threads[i], tts_rw_lock_smoke_check_test_thread, &udata[i]) < 0)
@@ -818,10 +825,13 @@ tts_rec_rw_lock_smoke_check_3(void)
     for (i = 0; i < num_threads; i++)
         if (H5TS_thread_join(threads[i], NULL) < 0)
             TestErrPrintf("thread %d failed to join", i);
+#if H5TS_ENABLE_REC_RW_LOCK_STATS
     uint64_t end_time  = H5_now_usec();
     uint64_t elap_time = (unsigned long long)(end_time - start_time);
-    fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
+    if (verbose)
+        fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
             (elap_time / (uint64_t)lock_cycles));
+#endif
 
     /* 5) Examine the user data from the threads, to determine the
      *    total number of real and recursive read locks and unlock.
@@ -1010,7 +1020,9 @@ tts_rec_rw_lock_smoke_check_4(void)
         udata[i].max_recursive_lock_depth = 10;
     }
 
+#if H5TS_ENABLE_REC_RW_LOCK_STATS
     uint64_t start_time = H5_now_usec();
+#endif
     /* 3) Create the reader threads, each with its own user data. */
     for (i = 0; i < num_threads; i++)
         if (H5TS_thread_create(&threads[i], tts_rw_lock_smoke_check_test_thread, &udata[i]) < 0)
@@ -1020,10 +1032,13 @@ tts_rec_rw_lock_smoke_check_4(void)
     for (i = 0; i < num_threads; i++)
         if (H5TS_thread_join(threads[i], NULL) < 0)
             TestErrPrintf("thread %d failed to join", i);
+#if H5TS_ENABLE_REC_RW_LOCK_STATS
     uint64_t end_time  = H5_now_usec();
     uint64_t elap_time = (unsigned long long)(end_time - start_time);
-    fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
+    if (verbose)
+        fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
             (elap_time / (uint64_t)lock_cycles));
+#endif
 
     /* 5) Examine the user data from the threads, to determine the
      *    total number of real and recursive read locks and unlock.
