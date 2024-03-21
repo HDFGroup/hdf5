@@ -31,7 +31,7 @@ jobs:
     needs: log-the-inputs
     uses: ./.github/workflows/tarball.yml
     with:
-#      use_tag: ${{ inputs.use_tag }}
+      use_tag: ${{ inputs.use_tag }}
       use_environ: release
 
   call-workflow-ctest:
