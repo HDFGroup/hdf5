@@ -12,7 +12,7 @@
 
 /*
  *  For details of the HDF libraries, see the HDF Documentation at:
- *    http://hdfgroup.org/HDF5/doc/
+ *    https://portal.hdfgroup.org/documentation/index.html
  *
  */
 /*
