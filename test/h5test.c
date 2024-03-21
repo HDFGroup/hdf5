@@ -628,6 +628,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                  */
                 h5_stat_t buf;
 
+                memset(&buf, 0, sizeof(h5_stat_t));
                 if (HDstat(fullname, &buf) < 0)
                     /* The directory doesn't exist just yet */
                     if (HDmkdir(fullname, (mode_t)0755) < 0 && errno != EEXIST)
@@ -1067,6 +1068,8 @@ h5_get_file_size(const char *filename, hid_t fapl)
     char      temp[2048]; /* Temporary buffer for file names */
     h5_stat_t sb;         /* Structure for querying file info */
     int       j = 0;
+
+    memset(&sb, 0, sizeof(h5_stat_t));
 
     if (fapl == H5P_DEFAULT) {
         /* Get the file's statistics */

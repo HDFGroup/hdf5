@@ -327,6 +327,7 @@ main(int argc, char *argv[])
         haddr_t   eoa; /* The EOA value */
 
         /* Get the file's EOA and EOF */
+        memset(&st, 0, sizeof(h5_stat_t));
         if (H5Fget_eoa(fid, &eoa) < 0 || HDstat(fname, &st) < 0) {
             error_msg("H5Fget_eoa or HDstat\n");
             h5tools_setstatus(EXIT_FAILURE);
