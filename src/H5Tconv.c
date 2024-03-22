@@ -1183,7 +1183,7 @@ typedef struct H5T_conv_enum_t {
     int     *src2dst;  /*map from src to dst index         */
 } H5T_conv_enum_t;
 
-/* Cnversion data fot H5T__conv_array() */
+/* Cnversion data for H5T__conv_array() */
 typedef struct H5T_conv_array_t {
     H5T_path_t *tpath; /* Conversion path for parent types */
 } H5T_conv_array_t;
