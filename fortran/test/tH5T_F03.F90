@@ -709,8 +709,8 @@ END SUBROUTINE test_array_compound_atomic
     DO i = 1, LENGTH
        DO j = 1, ALEN
           cf(i)%a(j) = 100*(i+1) + j
-          cf(i)%b(j) = (100.*(i+1) + 0.01*j)
-          cf(i)%c(j) = 100.*(i+1) + 0.02*j
+          cf(i)%b(j) = (100._sp*REAL(i+1,sp) + 0.01_sp*REAL(j,sp))
+          cf(i)%c(j) = 100._dp*REAL(i+1,dp) + 0.02_dp*REAL(j,dp)
        ENDDO
     ENDDO
 
@@ -855,7 +855,7 @@ END SUBROUTINE test_array_compound_atomic
     ! --------------------------------
     DO i = 1, LENGTH
        DO j = 1, ALEN
-          fld(i)%b(j) = 1.313
+          fld(i)%b(j) = 1.313_sp
           cf(i)%b(j) = fld(i)%b(j)
        ENDDO
     ENDDO
@@ -2930,8 +2930,8 @@ SUBROUTINE test_nbit(total_error )
   ! dataset datatype (no precision loss during datatype conversion)
   !
   REAL(kind=wp), DIMENSION(1:2,1:5), TARGET :: orig_data = &
-       RESHAPE( (/188384.00, 19.103516, -1.0831790e9, -84.242188, &
-       5.2045898, -49140.000, 2350.2500, -3.2110596e-1, 6.4998865e-5, -0.0000000/) , (/2,5/) )
+       RESHAPE( (/188384.00_wp, 19.103516_wp, -1.0831790e9_wp, -84.242188_wp, &
+       5.2045898_wp, -49140.000_wp, 2350.2500_wp, -3.2110596e-1_wp, 6.4998865e-5_wp, -0.0000000_wp/) , (/2,5/) )
   REAL(kind=wp), DIMENSION(1:2,1:5), TARGET :: new_data
   INTEGER(size_t) :: PRECISION, offset
   INTEGER :: error
