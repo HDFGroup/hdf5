@@ -40,7 +40,7 @@ jobs:
     with:
       preset_name: ci-StdShar
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
-      snap_name: hdf5-${{ needs.call-workflow-tarball.outputs.file_ref }}-${{ needs.call-workflow-tarball.outputs.file_sha }}
+      snap_name: hdf5-${{ needs.call-workflow-tarball.outputs.file_branch }}-${{ needs.call-workflow-tarball.outputs.file_sha }}
       use_environ: release
 
   call-workflow-abi:
