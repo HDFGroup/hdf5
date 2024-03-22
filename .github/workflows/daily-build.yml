@@ -42,10 +42,10 @@ jobs:
     needs: call-workflow-tarball
     uses: ./.github/workflows/cmake-ctest.yml
     with:
-      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       preset_name: ci-StdShar
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      use_tag: snapshot
       use_environ: snapshots
-      #use_tag: snapshot
     if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
 
   call-workflow-abi:
