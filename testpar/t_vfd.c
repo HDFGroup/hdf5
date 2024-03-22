@@ -25,9 +25,9 @@
  * This file needs to access private information from the H5FD package.
  * This file also needs to access the file testing code.
  */
-#define H5FD_FRIEND     /*suppress error about including H5FDpkg   */
+#define H5FD_FRIEND /*suppress error about including H5FDpkg   */
 #define H5FD_TESTING
-#include "H5FDpkg.h"    /* File Drivers         */
+#include "H5FDpkg.h" /* File Drivers         */
 
 /* Must be a power of 2.  Reducing it below 1024 may cause problems */
 #define INTS_PER_RANK 1024
@@ -358,12 +358,12 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 {
     const char *fcn_name = "setup_vfd_test_file()";
     char        filename[512];
-    int         cp             = 0;
-    bool        show_progress  = false;
-    hid_t       fapl_id        = H5I_INVALID_HID; /* file access property list ID */
-    hid_t       dxpl_id        = H5I_INVALID_HID; /* data access property list ID */
-    unsigned    flags          = 0;               /* file open flags              */
-    H5FD_t     *lf             = NULL;            /* VFD struct ptr               */
+    int         cp            = 0;
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    unsigned    flags         = 0;               /* file open flags              */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
 
     assert(vfd_name);
     assert(lf_ptr);
@@ -621,9 +621,9 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 static void
 takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fapl_id_ptr, hid_t *dxpl_id_ptr)
 {
-    const char *fcn_name       = "takedown_vfd_test_file()";
-    int         cp             = 0;
-    bool        show_progress  = false;
+    const char *fcn_name      = "takedown_vfd_test_file()";
+    int         cp            = 0;
+    bool        show_progress = false;
 
     assert(lf_ptr);
     assert(fapl_id_ptr);
@@ -805,8 +805,8 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (mpi_rank == 0) {
 
-            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)increasing_fi_buf) <
-                0) {
+            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size,
+                               (void *)increasing_fi_buf) < 0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
@@ -1035,8 +1035,8 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (mpi_rank == 0) {
 
-            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)decreasing_fi_buf) <
-                0) {
+            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size,
+                               (void *)decreasing_fi_buf) < 0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
@@ -1336,8 +1336,8 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (mpi_rank == 0) {
 
-            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)negative_fi_buf) <
-                0) {
+            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size,
+                               (void *)negative_fi_buf) < 0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
@@ -1689,8 +1689,8 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (mpi_rank == 0) {
 
-            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)increasing_fi_buf) <
-                0) {
+            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size,
+                               (void *)increasing_fi_buf) < 0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
@@ -2116,8 +2116,8 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (mpi_rank == 0) {
 
-            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)increasing_fi_buf) <
-                0) {
+            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size,
+                               (void *)increasing_fi_buf) < 0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
@@ -3783,7 +3783,8 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (mpi_rank == 0) {
 
-            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)zero_fi_buf) < 0) {
+            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)zero_fi_buf) <
+                0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
@@ -4239,8 +4240,8 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     uint32_t     count = 0;
     size_t       sizes[4];
     H5FD_mem_t   types[2];
-    haddr_t     *tt_addrs       = NULL;  /* For storing addrs */
-    const void **tt_bufs        = NULL;  /* For storing buf pointers */
+    haddr_t     *tt_addrs = NULL; /* For storing addrs */
+    const void **tt_bufs  = NULL; /* For storing buf pointers */
 
     pass = true;
 
@@ -4304,7 +4305,8 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (mpi_rank == 0) {
 
-            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)zero_fi_buf) < 0) {
+            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)zero_fi_buf) <
+                0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
@@ -4683,7 +4685,7 @@ test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t
 
     /* Issue read call */
     if (H5FDread_selection_test(lf, type, dxpl, count, mem_spaces, file_spaces, offsets, element_sizes,
-                           (void **)rbufs) < 0)
+                                (void **)rbufs) < 0)
         goto error;
 
     /* Verify result */
@@ -4750,7 +4752,8 @@ test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count,
     }
 
     /* Issue write call */
-    if (H5FDwrite_selection_test(lf, type, dxpl, count, mem_spaces, file_spaces, offsets, element_sizes, bufs) < 0)
+    if (H5FDwrite_selection_test(lf, type, dxpl, count, mem_spaces, file_spaces, offsets, element_sizes,
+                                 bufs) < 0)
         goto error;
 
     if (bufs)
@@ -6045,8 +6048,10 @@ test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
     /* Loop over memory types */
     for (type = 1; type < H5FD_MEM_NTYPES; type++) {
 
-        addrs[0] = H5FDalloc_test(lf, type, H5P_DEFAULT, (sizeof(int) * (hsize_t)sel_dim0 * (hsize_t)sel_dim1));
-        addrs[1] = H5FDalloc_test(lf, type, H5P_DEFAULT, (sizeof(int) * (hsize_t)sel_dim0 * (hsize_t)sel_dim1));
+        addrs[0] =
+            H5FDalloc_test(lf, type, H5P_DEFAULT, (sizeof(int) * (hsize_t)sel_dim0 * (hsize_t)sel_dim1));
+        addrs[1] =
+            H5FDalloc_test(lf, type, H5P_DEFAULT, (sizeof(int) * (hsize_t)sel_dim0 * (hsize_t)sel_dim1));
 
         test_selection_io_types_1d(mpi_rank, mpi_size, lf, dxpl, type, addrs, element_sizes, mem_spaces,
                                    file_spaces, dims1);
@@ -6106,15 +6111,15 @@ test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
 static void
 test_selection_io(int mpi_rank, int mpi_size)
 {
-    H5FD_t  *lf   = NULL;                      /* VFD struct ptr */
-    hid_t    fapl = H5I_INVALID_HID;           /* File access property list */
-    char     filename[1024];                   /* Test file name */
-    unsigned flags = 0;                        /* File access flags */
-    unsigned collective;                       /* Types of I/O for testing */
-    hid_t    dxpl           = H5I_INVALID_HID; /* Dataset transfer property list */
-    hid_t    def_dxpl       = H5I_INVALID_HID; /* dxpl: independent access */
-    hid_t    col_xfer_dxpl  = H5I_INVALID_HID; /* dxpl: collective access with collective I/O */
-    hid_t    ind_io_dxpl    = H5I_INVALID_HID; /* dxpl: collective access with individual I/O */
+    H5FD_t  *lf   = NULL;                     /* VFD struct ptr */
+    hid_t    fapl = H5I_INVALID_HID;          /* File access property list */
+    char     filename[1024];                  /* Test file name */
+    unsigned flags = 0;                       /* File access flags */
+    unsigned collective;                      /* Types of I/O for testing */
+    hid_t    dxpl          = H5I_INVALID_HID; /* Dataset transfer property list */
+    hid_t    def_dxpl      = H5I_INVALID_HID; /* dxpl: independent access */
+    hid_t    col_xfer_dxpl = H5I_INVALID_HID; /* dxpl: collective access with collective I/O */
+    hid_t    ind_io_dxpl   = H5I_INVALID_HID; /* dxpl: collective access with individual I/O */
 
     /* If I use fapl in this call, I got an environment printout */
     h5_fixname(SELECT_FNAME, H5P_DEFAULT, filename, sizeof(filename));

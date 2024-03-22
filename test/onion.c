@@ -35,9 +35,9 @@
  * This file needs to access private information from the H5FD package.
  * This file also needs to access the file testing code.
  */
-#define H5FD_FRIEND     /*suppress error about including H5FDpkg   */
+#define H5FD_FRIEND /*suppress error about including H5FDpkg   */
 #define H5FD_TESTING
-#include "H5FDpkg.h"    /* File Drivers         */
+#include "H5FDpkg.h" /* File Drivers         */
 
 /* 2^n for uint64_t types -- H5_EXP2 unsafe past 32 bits */
 #define U64_EXP2(n) ((uint64_t)1 << (n))
@@ -1542,9 +1542,9 @@ error:
 static int
 compare_file_bytes_exactly(const char *filepath, hid_t fapl_id, size_t nbytes, const unsigned char *exp)
 {
-    H5FD_t        *raw_vfile      = NULL; /* virtual file to look at raw file contents */
-    unsigned char *act_buf        = NULL; /* allocated area for actual file bytes */
-    uint64_t       filesize       = 0;
+    H5FD_t        *raw_vfile = NULL; /* virtual file to look at raw file contents */
+    unsigned char *act_buf   = NULL; /* allocated area for actual file bytes */
+    uint64_t       filesize  = 0;
 
     if (NULL == (raw_vfile = H5FDopen_test(filepath, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
@@ -1603,10 +1603,10 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     H5FD_onion_header_t          hdr_out;
     H5FD_onion_history_t         history_out;
     H5FD_onion_revision_record_t rev_out;
-    uint64_t                     filesize       = 0;
-    uint64_t                     readsize       = 0;
-    uint8_t                     *ui8p           = NULL;
-    uint32_t                     buf_checksum   = 0;
+    uint64_t                     filesize     = 0;
+    uint64_t                     readsize     = 0;
+    uint8_t                     *ui8p         = NULL;
+    uint32_t                     buf_checksum = 0;
 
     /* memset to avoid bad frees on errors */
     memset(&rev_out, 0, sizeof(H5FD_onion_revision_record_t));
@@ -1834,8 +1834,8 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     unsigned char history_exp_bytes[]    = {
         'O', 'W', 'H', 'S', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 /* checksum encoded below */
     };
-    unsigned char *ptr            = NULL;
-    uint32_t       checksum       = 0;
+    unsigned char *ptr      = NULL;
+    uint32_t       checksum = 0;
 
     /* Finish populating expected header bytes */
     ptr = hdr_exp_bytes + 8; /* WARNING: must match format */
@@ -1935,7 +1935,7 @@ test_create_oniontarget(bool truncate_canonical, bool with_initial_data)
     H5FD_t                 *vfile_rw  = NULL; /* Onion virtual file for read/write */
     H5FD_t                 *vfile_ro  = NULL; /* Onion virtual file for read-only */
     struct expected_history filter;
-    char                   *buf            = NULL;
+    char                   *buf = NULL;
 
     if (true == truncate_canonical && true == with_initial_data)
         TESTING("onion creation; truncate extant canonical; w/ initial data");
@@ -2379,7 +2379,8 @@ test_several_revisions_with_logical_gaps(void)
     /* Repeat read at page offset; test possible read offset error */
     if (NULL == (buf = malloc(ONION_TEST_PAGE_SIZE_5 * sizeof(unsigned char))))
         TEST_ERROR;
-    if (H5FDread_test(file, H5FD_MEM_DRAW, H5P_DEFAULT, ONION_TEST_PAGE_SIZE_5, ONION_TEST_PAGE_SIZE_5, buf) < 0)
+    if (H5FDread_test(file, H5FD_MEM_DRAW, H5P_DEFAULT, ONION_TEST_PAGE_SIZE_5, ONION_TEST_PAGE_SIZE_5, buf) <
+        0)
         TEST_ERROR;
     size = a_off - ONION_TEST_PAGE_SIZE_5;
     for (i = 0; i < size; i++) {
@@ -2574,10 +2575,10 @@ static int
 do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_info_p, size_t n_ops,
                          struct revise_revision *about)
 {
-    hid_t          fapl_id        = H5I_INVALID_HID;
-    H5FD_t        *file           = NULL; /* Onion virtual file for read/write */
-    unsigned char *buf_vfy        = NULL;
-    size_t         i              = 0;
+    hid_t          fapl_id = H5I_INVALID_HID;
+    H5FD_t        *file    = NULL; /* Onion virtual file for read/write */
+    unsigned char *buf_vfy = NULL;
+    size_t         i       = 0;
 
     for (i = 0; i < n_ops; i++) {
         size_t       j     = 0;
@@ -2689,8 +2690,8 @@ test_page_aligned_history_create(void)
     struct revise_revision about[2];
     H5FD_onion_header_t    hdr_out;
     H5FD_onion_history_t   history_out;
-    size_t                 i              = 0;
-    uint64_t               a_off          = b_list_size_s - a_list_size_s;
+    size_t                 i     = 0;
+    uint64_t               a_off = b_list_size_s - a_list_size_s;
 
     TESTING("page-aligned history on onion-created file");
 

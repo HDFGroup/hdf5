@@ -238,8 +238,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDread_test(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
-                size_t size, void *buf)
+H5FDread_test(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, void *buf)
 {
     herr_t ret_value;
 
@@ -266,8 +265,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDwrite_test(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
-            size_t size, const void *buf)
+H5FDwrite_test(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void *buf)
 {
     herr_t ret_value;
 
@@ -294,8 +292,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDread_vector_test(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
-                               haddr_t addrs[], size_t sizes[], void *bufs[])
+H5FDread_vector_test(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                     size_t sizes[], void *bufs[])
 {
     herr_t ret_value;
 
@@ -322,8 +320,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDwrite_vector_test(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
-                            haddr_t addrs[], size_t sizes[], const void *bufs[])
+H5FDwrite_vector_test(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                      size_t sizes[], const void *bufs[])
 {
     herr_t ret_value;
 
@@ -350,16 +348,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDread_selection_test(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                                  hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[],
-                                  size_t element_sizes[], void *bufs[])
+H5FDread_selection_test(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[],
+                        hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
 {
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
 
     /* Call developer routine */
-    ret_value = H5FDread_selection(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets, element_sizes, bufs);
+    ret_value =
+        H5FDread_selection(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets, element_sizes, bufs);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -379,16 +377,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDwrite_selection_test(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                                   hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[],
-                                   size_t element_sizes[], const void *bufs[])
+H5FDwrite_selection_test(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[],
+                         hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
 {
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
 
     /* Call developer routine */
-    ret_value = H5FDwrite_selection(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets, element_sizes, bufs);
+    ret_value = H5FDwrite_selection(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
+                                    element_sizes, bufs);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -418,7 +416,7 @@ H5FDtruncate_test(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
     ret_value = H5FDtruncate(file, dxpl_id, closing);
 
 done:
-    FUNC_LEAVE_API(ret_value)                                                             \
+    FUNC_LEAVE_API(ret_value)
 } /* end H5FDtruncate_test() */
 
 /*-------------------------------------------------------------------------
@@ -445,7 +443,7 @@ H5FDctl_test(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, 
     ret_value = H5FDctl(file, op_code, flags, input, output);
 
 done:
-    FUNC_LEAVE_API(ret_value)                                                             \
+    FUNC_LEAVE_API(ret_value)
 } /* end H5FDctl_test() */
 
 /*-------------------------------------------------------------------------

@@ -20,9 +20,9 @@
  * This file needs to access private information from the H5FD package.
  * This file also needs to access the file testing code.
  */
-#define H5FD_FRIEND     /*suppress error about including H5FDpkg   */
+#define H5FD_FRIEND /*suppress error about including H5FDpkg   */
 #define H5FD_TESTING
-#include "H5FDpkg.h"    /* File Drivers         */
+#include "H5FDpkg.h" /* File Drivers         */
 
 #define KB            1024U
 #define FAMILY_NUMBER 4
@@ -4247,8 +4247,8 @@ test_vector_io__read_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], had
     bool       result     = true; /* will set to false on failure */
     bool       verbose    = false;
     uint32_t   i;
-    size_t     size           = SIZE_MAX;
-    H5FD_mem_t type           = H5FD_MEM_NTYPES;
+    size_t     size = SIZE_MAX;
+    H5FD_mem_t type = H5FD_MEM_NTYPES;
 
     for (i = 0; i < count; i++) {
         SET_SIZE(size_fixed, sizes, size, i);
@@ -4288,8 +4288,8 @@ test_vector_io__write_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], ha
     bool       result     = true; /* will set to false on failure */
     bool       verbose    = false;
     uint32_t   i;
-    size_t     size           = SIZE_MAX;
-    H5FD_mem_t type           = H5FD_MEM_NTYPES;
+    size_t     size = SIZE_MAX;
+    H5FD_mem_t type = H5FD_MEM_NTYPES;
 
     for (i = 0; i < count; i++) {
         SET_SIZE(size_fixed, sizes, size, i);
@@ -4611,27 +4611,27 @@ test_vector_io(const char *vfd_name)
      * of length 1, then of length 2, then remainder of vector
      */
     if (H5FDwrite_vector_test(lf, H5P_DEFAULT, 1, &(types_0[0]), &(addrs_0[0]), &(sizes_0[0]),
-                         &(write_bufs_0[0])) < 0)
+                              &(write_bufs_0[0])) < 0)
         TEST_ERROR;
 
-    if (H5FDread_vector_test(lf, H5P_DEFAULT, 1, &(types_0[0]), &(addrs_0[0]), &(sizes_0[0]), &(read_bufs_0[0])) <
-        0)
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, 1, &(types_0[0]), &(addrs_0[0]), &(sizes_0[0]),
+                             &(read_bufs_0[0])) < 0)
         TEST_ERROR;
 
     if (H5FDwrite_vector_test(lf, H5P_DEFAULT, 2, &(types_0[1]), &(addrs_0[1]), &(sizes_0[1]),
-                         &(write_bufs_0[1])) < 0)
+                              &(write_bufs_0[1])) < 0)
         TEST_ERROR;
 
-    if (H5FDread_vector_test(lf, H5P_DEFAULT, 2, &(types_0[1]), &(addrs_0[1]), &(sizes_0[1]), &(read_bufs_0[1])) <
-        0)
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, 2, &(types_0[1]), &(addrs_0[1]), &(sizes_0[1]),
+                             &(read_bufs_0[1])) < 0)
         TEST_ERROR;
 
     if (H5FDwrite_vector_test(lf, H5P_DEFAULT, count - 3, &(types_0[3]), &(addrs_0[3]), &(sizes_0[3]),
-                         &(write_bufs_0[3])) < 0)
+                              &(write_bufs_0[3])) < 0)
         TEST_ERROR;
 
     if (H5FDread_vector_test(lf, H5P_DEFAULT, count - 3, &(types_0[3]), &(addrs_0[3]), &(sizes_0[3]),
-                        &(read_bufs_0[3])) < 0)
+                             &(read_bufs_0[3])) < 0)
         TEST_ERROR;
 
     /* for fixed size / type vector, just write and read as single operations */
@@ -4654,16 +4654,16 @@ test_vector_io(const char *vfd_name)
     if (!test_vector_io__write_v_indiv(lf, count, types_1, addrs_1, sizes_1, write_bufs_1))
         TEST_ERROR;
 
-    if (H5FDread_vector_test(lf, H5P_DEFAULT, 1, &(types_1[0]), &(addrs_1[0]), &(sizes_1[0]), &(read_bufs_1[0])) <
-        0)
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, 1, &(types_1[0]), &(addrs_1[0]), &(sizes_1[0]),
+                             &(read_bufs_1[0])) < 0)
         TEST_ERROR;
 
-    if (H5FDread_vector_test(lf, H5P_DEFAULT, 2, &(types_1[1]), &(addrs_1[1]), &(sizes_1[1]), &(read_bufs_1[1])) <
-        0)
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, 2, &(types_1[1]), &(addrs_1[1]), &(sizes_1[1]),
+                             &(read_bufs_1[1])) < 0)
         TEST_ERROR;
 
     if (H5FDread_vector_test(lf, H5P_DEFAULT, count - 3, &(types_1[3]), &(addrs_1[3]), &(sizes_1[3]),
-                        &(read_bufs_1[3])) < 0)
+                             &(read_bufs_1[3])) < 0)
         TEST_ERROR;
 
     /* for fixed size, write individually, and the read back in a single call */
@@ -4684,15 +4684,15 @@ test_vector_io(const char *vfd_name)
      * read it back in individual reads.
      */
     if (H5FDwrite_vector_test(lf, H5P_DEFAULT, 1, &(types_2[0]), &(addrs_2[0]), &(sizes_2[0]),
-                         &(write_bufs_2[0])) < 0)
+                              &(write_bufs_2[0])) < 0)
         TEST_ERROR;
 
     if (H5FDwrite_vector_test(lf, H5P_DEFAULT, 2, &(types_2[1]), &(addrs_2[1]), &(sizes_2[1]),
-                         &(write_bufs_2[1])) < 0)
+                              &(write_bufs_2[1])) < 0)
         TEST_ERROR;
 
     if (H5FDwrite_vector_test(lf, H5P_DEFAULT, count - 3, &(types_2[3]), &(addrs_2[3]), &(sizes_2[3]),
-                         &(write_bufs_2[3])) < 0)
+                              &(write_bufs_2[3])) < 0)
         TEST_ERROR;
 
     if (!test_vector_io__read_v_indiv(lf, count, types_2, addrs_2, sizes_2, read_bufs_2))
@@ -4915,8 +4915,8 @@ test_selection_io_write(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_s
     }
 
     /* Issue write call */
-    if (H5FDwrite_selection_test(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets, element_sizes,
-                            bufs) < 0)
+    if (H5FDwrite_selection_test(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets,
+                                 element_sizes, bufs) < 0)
         TEST_ERROR;
 
     free(bufs);
@@ -4966,7 +4966,7 @@ test_selection_io_read_verify(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t
 
     /* Issue read call */
     if (H5FDread_selection_test(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets, element_sizes,
-                           (void **)rbufs) < 0)
+                                (void **)rbufs) < 0)
         TEST_ERROR;
 
     /* Verify result */
@@ -5044,7 +5044,7 @@ test_selection_io(const char *vfd_name)
     int        erbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];                   /* 1D expected read buffer */
     int        erbuf2[SEL_IO_DIM0][SEL_IO_DIM1];                    /* 2D expected read buffer */
     int       *erbufs[2] = {erbuf1, erbuf2[0]};                     /* Array of expected read buffers */
-    int        shorten_element_sizes;  /* Whether to shorten the element sizes array */
+    int        shorten_element_sizes; /* Whether to shorten the element sizes array */
 
     snprintf(test_title, sizeof(test_title), "selection I/O with %s VFD", vfd_name);
 

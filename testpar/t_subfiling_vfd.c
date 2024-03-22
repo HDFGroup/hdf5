@@ -34,9 +34,9 @@
  * This file needs to access private information from the H5FD package.
  * This file also needs to access the file testing code.
  */
-#define H5FD_FRIEND     /*suppress error about including H5FDpkg   */
+#define H5FD_FRIEND /*suppress error about including H5FDpkg   */
 #define H5FD_TESTING
-#include "H5FDpkg.h"    /* File Drivers         */
+#include "H5FDpkg.h" /* File Drivers         */
 
 /* The smallest Subfiling stripe size used for testing */
 #define SUBFILING_MIN_STRIPE_SIZE 128
@@ -1023,7 +1023,8 @@ test_iovec_translation(void)
         write_addr = 0;
 
         /* Set EOA for following write call */
-        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0),
+             "H5FDset_eoa succeeded");
 
         /* Write according to the above pattern */
         status = H5FDwrite_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
@@ -1038,7 +1039,8 @@ test_iovec_translation(void)
          * Set EOA for following read call (since we wrote over any
          * superblock information in the file)
          */
-        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0),
+             "H5FDset_eoa succeeded");
 
         /* Read the written bytes and verify */
         status = H5FDread_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
@@ -1131,7 +1133,8 @@ test_iovec_translation(void)
         write_addr = (haddr_t)stripe_size;
 
         /* Set EOA for following write call */
-        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0),
+             "H5FDset_eoa succeeded");
 
         /* Write according to the above pattern */
         status = H5FDwrite_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
@@ -1146,7 +1149,8 @@ test_iovec_translation(void)
          * Set EOA for following read call (since we wrote over any
          * superblock information in the file)
          */
-        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0),
+             "H5FDset_eoa succeeded");
 
         /* Read the written bytes and verify */
         status = H5FDread_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
@@ -1229,7 +1233,8 @@ test_iovec_translation(void)
         write_addr = (haddr_t)(2 * stripe_size);
 
         /* Set EOA for following write call */
-        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0),
+             "H5FDset_eoa succeeded");
 
         /* Write according to the above pattern */
         status = H5FDwrite_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
@@ -1244,7 +1249,8 @@ test_iovec_translation(void)
          * Set EOA for following read call (since we wrote over any
          * superblock information in the file)
          */
-        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0),
+             "H5FDset_eoa succeeded");
 
         /* Read the written bytes and verify */
         status = H5FDread_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
@@ -1319,7 +1325,8 @@ test_iovec_translation(void)
         write_addr = (haddr_t)1;
 
         /* Set EOA for following write call */
-        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0),
+             "H5FDset_eoa succeeded");
 
         /* Write according to the above pattern */
         status = H5FDwrite_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
@@ -1334,7 +1341,8 @@ test_iovec_translation(void)
          * Set EOA for following read call (since we wrote over any
          * superblock information in the file)
          */
-        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0),
+             "H5FDset_eoa succeeded");
 
         /* Read the written bytes and verify */
         status = H5FDread_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
@@ -1415,7 +1423,8 @@ test_iovec_translation(void)
         write_addr = (haddr_t)(stripe_size - 1);
 
         /* Set EOA for following write call */
-        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0),
+             "H5FDset_eoa succeeded");
 
         /* Write according to the above pattern */
         status = H5FDwrite_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
@@ -1430,7 +1439,8 @@ test_iovec_translation(void)
          * Set EOA for following read call (since we wrote over any
          * superblock information in the file)
          */
-        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0),
+             "H5FDset_eoa succeeded");
 
         /* Read the written bytes and verify */
         status = H5FDread_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
@@ -1510,7 +1520,8 @@ test_iovec_translation(void)
         write_addr = (haddr_t)0;
 
         /* Set EOA for following write call */
-        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0),
+             "H5FDset_eoa succeeded");
 
         /* Write according to the above pattern */
         status = H5FDwrite_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
@@ -1525,7 +1536,8 @@ test_iovec_translation(void)
          * Set EOA for following read call (since we wrote over any
          * superblock information in the file)
          */
-        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0),
+             "H5FDset_eoa succeeded");
 
         /* Read the written bytes and verify */
         status = H5FDread_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
