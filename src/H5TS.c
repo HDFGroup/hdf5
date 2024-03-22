@@ -79,7 +79,7 @@ H5TS_api_info_t H5TS_api_info_p = {H5TS_EX_LOCK_INIT, H5TS_MUTEX_INITIALIZER, 0}
 herr_t
 H5TSmutex_acquire(unsigned lock_count, bool *acquired)
 {
-    herr_t ret_value  = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API_NAMECHECK_ONLY
 
@@ -103,7 +103,8 @@ done:
  *
  *--------------------------------------------------------------------------
  */
-herr_t H5TSmutex_get_attempt_count(unsigned *count)
+herr_t
+H5TSmutex_get_attempt_count(unsigned *count)
 {
     bool   have_mutex = false;
     herr_t ret_value  = SUCCEED;

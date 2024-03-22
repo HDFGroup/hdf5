@@ -85,7 +85,7 @@
             0                      /* previous_state */                                                      \
     }
 #else
-#define H5TS_EX_LOCK_INIT                                                                                   \
+#define H5TS_EX_LOCK_INIT                                                                                    \
     {                                                                                                        \
         H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
             H5TS_COND_INITIALIZER, /* cond_var */                                                            \
