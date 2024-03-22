@@ -42,7 +42,7 @@ Parallel HDF5, and the HDF5-1.10 VDS and SWMR new features:
 <table>
 <tr>
 <td style="background-color:#F5F5F5">
-<a href="https://portal.hdfgroup.org/display/HDF5/Introduction+to+the+HDF5+High+Level+APIs">Using the High Level APIs</a>
+<a href="https://docs.hdfgroup.org/hdf5/develop/high_level.html">Using the High Level APIs</a>
 </td>
 <td>
 \ref H5LT    \ref H5IM    \ref H5TB    \ref H5PT    \ref H5DS
@@ -72,7 +72,7 @@ HDF5-1.10 New Features
 </td>
 <td>
 \li <a href="https://portal.hdfgroup.org/display/HDF5/Introduction+to+the+Virtual+Dataset++-+VDS">Introduction to the Virtual Dataset - VDS</a>
-\li <a href="https://portal.hdfgroup.org/pages/viewpage.action?pageId=48812567">Introduction to Single-Writer/Multiple-Reader (SWMR)</a>
+\li <a href="https://docs.hdfgroup.org/hdf5/v1_14/group___s_w_m_r.html">Introduction to Single-Writer/Multiple-Reader (SWMR)</a>
 </td>
 </tr>
 <tr>

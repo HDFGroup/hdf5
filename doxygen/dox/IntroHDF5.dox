@@ -608,7 +608,7 @@ on the <a href="http://hdfeos.org/">HDF-EOS Tools and Information Center</a> pag
 \section secHDF5Examples Examples
 \li \ref LBExamples
 \li \ref ExAPI
-\li <a href="https://portal.hdfgroup.org/display/HDF5/Examples+in+the+Source+Code">Examples in the Source Code</a>
+\li <a href="https://github.com/HDFGroup/hdf5/tree/develop/examples">Examples in the Source Code</a>
 \li <a href="https://portal.hdfgroup.org/display/HDF5/Other+Examples">Other Examples</a>
 
 \section secHDF5ExamplesCompile How To Compile

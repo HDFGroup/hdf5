@@ -48,7 +48,7 @@ Navigate back: \ref index "Main" / \ref GettingStarted
 
 \section secViewToolsCommandObtain Obtain Tools and Files (Optional)
 Pre-built binaries for Linux and Windows are distributed within the respective HDF5 binary release
-packages, which can be obtained from the <a href="https://portal.hdfgroup.org/display/support/Download+HDF5">Download HDF5</a> page.
+packages, which can be obtained from the <a href="https://portal.hdfgroup.org/downloads/index.html">Download HDF5</a> page.
 
 HDF5 files can be obtained from various places such as \ref HDF5Examples and <a href="http://www.hdfeos.org/">HDF-EOS and Tools and
 Information Center</a>. Specifically, the following examples are used in this tutorial topic:
