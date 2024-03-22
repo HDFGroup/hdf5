@@ -783,8 +783,8 @@ error:
  * Function:    h5_get_vfd_fapl
  *
  * Purpose:     Sets the file driver for a FAPL according to the value
- *              specified in the constant "HDF5_DRIVER" or environment
- *              variable "HDF5_DRIVER" or "HDF5_TEST_DRIVER".
+ *              specified in the environment variable "HDF5_DRIVER" or
+ *              "HDF5_TEST_DRIVER".
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2457,7 +2457,7 @@ h5_get_test_driver_name(void)
     else if ((envval = getenv("HDF5_TEST_DRIVER")))
         return envval;
     else
-        return "sec2";
+        return H5_DEFAULT_VFD_NAME;
 }
 
 /*-------------------------------------------------------------------------
@@ -2483,7 +2483,7 @@ h5_using_default_driver(const char *drv_name)
         drv_name = h5_get_test_driver_name();
 
     if (drv_name)
-        return !strcmp(drv_name, "sec2");
+        return !strcmp(drv_name, H5_DEFAULT_VFD_NAME);
 
     return ret_val;
 }

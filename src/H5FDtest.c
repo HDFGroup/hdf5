@@ -74,7 +74,8 @@
  *              This function is only intended for use in the test code.
  *
  * Return:	    true (1) if the VFD supports SWMR I/O or vfd_name is
- *              NULL or the empty string (which implies the default VFD).
+ *              NULL or the empty string (which implies the default VFD) or
+ *              compares equal to the default VFD's name.
  *
  *              false (0) if it does not
  *
@@ -92,7 +93,7 @@ H5FD__supports_swmr_test(const char *vfd_name)
     if (!vfd_name)
         vfd_name = getenv("HDF5_TEST_DRIVER");
 
-    if (!vfd_name || !strcmp(vfd_name, ""))
+    if (!vfd_name || !strcmp(vfd_name, "") || !strcmp(vfd_name, H5_DEFAULT_VFD_NAME))
         ret_value = true;
     else
         ret_value = !strcmp(vfd_name, "log") || !strcmp(vfd_name, "sec2");

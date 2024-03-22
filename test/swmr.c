@@ -7828,7 +7828,7 @@ main(void)
     /* Tests SWMR VFD compatibility flag.
      * Only needs to run when the VFD is the default (sec2).
      */
-    if (NULL == driver_name || !strcmp(driver_name, "") || !strcmp(driver_name, "sec2"))
+    if (NULL == driver_name || !strcmp(driver_name, "") || !strcmp(driver_name, H5_DEFAULT_VFD_NAME))
         nerrors += test_swmr_vfd_flag();
 
     /* Test multiple opens via different locking flags */
