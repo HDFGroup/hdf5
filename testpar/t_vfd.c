@@ -29,9 +29,9 @@
 static MPI_Comm comm = MPI_COMM_WORLD;
 static MPI_Info info = MPI_INFO_NULL;
 
-bool        pass               = true; /* set to false on error */
-bool        disp_failure_mssgs = true; /* global force display of failure messages */
-const char *failure_mssg       = NULL;
+static bool        pass               = true; /* set to false on error */
+static bool        disp_failure_mssgs = true; /* global force display of failure messages */
+static const char *failure_mssg       = NULL;
 
 const char *FILENAMES[] = {"mpio_vfd_test_file_0",      /*0*/
                            "mpio_vfd_test_file_1",      /*1*/
