@@ -66,7 +66,6 @@ const Allocator = std.mem.Allocator;
         .optimize = optimize,
         .target = target
     });
-    // hdf5cpp.step.dependOn(config_step);
 
     // Add headers
     hdf5cpp.addIncludePath(.{ .path = "src" });
