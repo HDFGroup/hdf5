@@ -131,6 +131,15 @@ jobs:
           bin/release -d $GITHUB_WORKSPACE gzip zip 
         shell: bash
 
+
+      - name: Rename release file base name
+        id: ren-basename
+        if: ${{ (inputs.use_environ == 'release') && (inputs.use_tag  == 'snapshot') }}
+        run: |
+          mv hdf5-${{ steps.version.outputs.TAG_VERSION }}.tar.gz ${{ inputs.use_tag }}.tar.gz
+          mv hdf5-${{ steps.version.outputs.TAG_VERSION }}.zip ${{ inputs.use_tag }}.zip
+        shell: bash
+
       - name: List files in the repository
         run: |
               ls -l ${{ github.workspace }}
