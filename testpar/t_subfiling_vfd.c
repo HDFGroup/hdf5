@@ -30,6 +30,14 @@
 #include "H5FDsubfiling.h"
 #include "H5FDioc.h"
 
+/*
+ * This file needs to access private information from the H5FD package.
+ * This file also needs to access the file testing code.
+ */
+#define H5FD_FRIEND     /*suppress error about including H5FDpkg   */
+#define H5FD_TESTING
+#include "H5FDpkg.h"    /* File Drivers         */
+
 /* The smallest Subfiling stripe size used for testing */
 #define SUBFILING_MIN_STRIPE_SIZE 128
 
@@ -580,7 +588,7 @@ test_stripe_sizes(void)
             VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
 
             /* Re-open file through H5FDopen for direct writes */
-            file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+            file_ptr = H5FDopen_test(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
             VRFY(file_ptr, "H5FDopen succeeded");
 
             /*
@@ -598,7 +606,7 @@ test_stripe_sizes(void)
             VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) >= 0), "H5Pset_dxpl_mpio succeeded");
 
             /* Set EOA for following write call */
-            VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + nbytes) >= 0),
+            VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + nbytes) >= 0),
                  "H5FDset_eoa succeeded");
 
             /*
@@ -608,12 +616,12 @@ test_stripe_sizes(void)
              * (few) subfile(s) may be a bit larger due to file metadata.
              */
             write_addr   = file_end_addr;
-            write_status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
+            write_status = H5FDwrite_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
             VRFY((write_status >= 0), "H5FDwrite succeeded");
 
             file_end_addr += nbytes;
 
-            VRFY((H5FDtruncate(file_ptr, dxpl_id, 0) >= 0), "H5FDtruncate succeeded");
+            VRFY((H5FDtruncate_test(file_ptr, dxpl_id, 0) >= 0), "H5FDtruncate succeeded");
 
             for (int j = 0; j < num_subfiles; j++) {
                 h5_stat_size_t subfile_size;
@@ -644,7 +652,7 @@ test_stripe_sizes(void)
             VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
 
             /* Set EOA for following write call */
-            VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + nbytes) >= 0),
+            VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + nbytes) >= 0),
                  "H5FDset_eoa succeeded");
 
             /*
@@ -657,10 +665,10 @@ test_stripe_sizes(void)
             H5FD_mem_t write_type = H5FD_MEM_DRAW;
             write_addr            = file_end_addr;
             write_status =
-                H5FDwrite_vector(file_ptr, dxpl_id, 1, &write_type, &write_addr, &nbytes, &c_write_buf);
+                H5FDwrite_vector_test(file_ptr, dxpl_id, 1, &write_type, &write_addr, &nbytes, &c_write_buf);
             VRFY((write_status >= 0), "H5FDwrite_vector succeeded");
 
-            VRFY((H5FDtruncate(file_ptr, dxpl_id, 0) >= 0), "H5FDtruncate succeeded");
+            VRFY((H5FDtruncate_test(file_ptr, dxpl_id, 0) >= 0), "H5FDtruncate succeeded");
 
             for (int j = 0; j < num_subfiles; j++) {
                 h5_stat_size_t subfile_size;
@@ -693,7 +701,7 @@ test_stripe_sizes(void)
             free(write_buf);
             write_buf = NULL;
 
-            VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+            VRFY((H5FDclose_test(file_ptr) >= 0), "H5FDclose succeeded");
 
             H5E_BEGIN_TRY
             {
@@ -720,7 +728,7 @@ test_stripe_sizes(void)
         VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
 
         /* Re-open file through H5FDopen for direct writes */
-        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        file_ptr = H5FDopen_test(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
         num_subfiles = num_iocs_g;
@@ -760,7 +768,7 @@ test_stripe_sizes(void)
         VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) >= 0), "H5Pset_dxpl_mpio succeeded");
 
         /* Set EOA for following write call */
-        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + ((size_t)mpi_size * nbytes)) >= 0),
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + ((size_t)mpi_size * nbytes)) >= 0),
              "H5FDset_eoa succeeded");
 
         /*
@@ -771,12 +779,12 @@ test_stripe_sizes(void)
          * due to file metadata.
          */
         write_addr   = file_end_addr + ((size_t)mpi_rank * nbytes);
-        write_status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
+        write_status = H5FDwrite_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
         VRFY((write_status >= 0), "H5FDwrite succeeded");
 
         file_end_addr += ((size_t)mpi_size * nbytes);
 
-        VRFY((H5FDtruncate(file_ptr, dxpl_id, 0) >= 0), "H5FDtruncate succeeded");
+        VRFY((H5FDtruncate_test(file_ptr, dxpl_id, 0) >= 0), "H5FDtruncate succeeded");
 
         mpi_code_g = MPI_Barrier(comm_g);
         VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
@@ -817,7 +825,7 @@ test_stripe_sizes(void)
         VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
 
         /* Set EOA for following write call */
-        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + ((size_t)mpi_size * nbytes)) >= 0),
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + ((size_t)mpi_size * nbytes)) >= 0),
              "H5FDset_eoa succeeded");
 
         /*
@@ -831,10 +839,10 @@ test_stripe_sizes(void)
         H5FD_mem_t write_type = H5FD_MEM_DRAW;
         write_addr            = file_end_addr + ((size_t)mpi_rank * nbytes);
         write_status =
-            H5FDwrite_vector(file_ptr, dxpl_id, 1, &write_type, &write_addr, &nbytes, &c_write_buf);
+            H5FDwrite_vector_test(file_ptr, dxpl_id, 1, &write_type, &write_addr, &nbytes, &c_write_buf);
         VRFY((write_status >= 0), "H5FDwrite_vector succeeded");
 
-        VRFY((H5FDtruncate(file_ptr, dxpl_id, 0) >= 0), "H5FDtruncate succeeded");
+        VRFY((H5FDtruncate_test(file_ptr, dxpl_id, 0) >= 0), "H5FDtruncate succeeded");
 
         mpi_code_g = MPI_Barrier(comm_g);
         VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
@@ -871,7 +879,7 @@ test_stripe_sizes(void)
             VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
         }
 
-        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+        VRFY((H5FDclose_test(file_ptr) >= 0), "H5FDclose succeeded");
 
         mpi_code_g = MPI_Barrier(comm_g);
         VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
@@ -1005,7 +1013,7 @@ test_iovec_translation(void)
         VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
         /* Re-open file through H5FDopen for direct writes */
-        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        file_ptr = H5FDopen_test(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
         nbytes = (size_t)(6 * stripe_size);
@@ -1015,25 +1023,25 @@ test_iovec_translation(void)
         write_addr = 0;
 
         /* Set EOA for following write call */
-        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
 
         /* Write according to the above pattern */
-        status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
+        status = H5FDwrite_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
         VRFY((status >= 0), "H5FDwrite succeeded");
 
         /* Close and re-open the file */
-        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
-        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY((H5FDclose_test(file_ptr) >= 0), "H5FDclose succeeded");
+        file_ptr = H5FDopen_test(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
         /*
          * Set EOA for following read call (since we wrote over any
          * superblock information in the file)
          */
-        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
 
         /* Read the written bytes and verify */
-        status = H5FDread(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
+        status = H5FDread_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
         VRFY((status >= 0), "H5FDwrite succeeded");
 
         VRFY((0 == memcmp(write_buf, read_buf, nbytes)), "memcmp succeeded");
@@ -1080,7 +1088,7 @@ test_iovec_translation(void)
         subfile_ptr = fopen(tmp_filename, "r");
         VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
 
-        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+        VRFY((H5FDclose_test(file_ptr) >= 0), "H5FDclose succeeded");
 
         /*
          * Test the case where the index value of the last subfile
@@ -1113,7 +1121,7 @@ test_iovec_translation(void)
         VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
         /* Re-open file through H5FDopen for direct writes */
-        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        file_ptr = H5FDopen_test(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
         nbytes = (size_t)(7 * stripe_size);
@@ -1123,25 +1131,25 @@ test_iovec_translation(void)
         write_addr = (haddr_t)stripe_size;
 
         /* Set EOA for following write call */
-        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
 
         /* Write according to the above pattern */
-        status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
+        status = H5FDwrite_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
         VRFY((status >= 0), "H5FDwrite succeeded");
 
         /* Close and re-open the file */
-        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
-        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY((H5FDclose_test(file_ptr) >= 0), "H5FDclose succeeded");
+        file_ptr = H5FDopen_test(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
         /*
          * Set EOA for following read call (since we wrote over any
          * superblock information in the file)
          */
-        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
 
         /* Read the written bytes and verify */
-        status = H5FDread(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
+        status = H5FDread_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
         VRFY((status >= 0), "H5FDwrite succeeded");
 
         VRFY((0 == memcmp(write_buf, read_buf, nbytes)), "memcmp succeeded");
@@ -1179,7 +1187,7 @@ test_iovec_translation(void)
         subfile_ptr = fopen(tmp_filename, "r");
         VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
 
-        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+        VRFY((H5FDclose_test(file_ptr) >= 0), "H5FDclose succeeded");
 
         /*
          * Test the case where the index value of the last subfile
@@ -1211,7 +1219,7 @@ test_iovec_translation(void)
         VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
         /* Re-open file through H5FDopen for direct writes */
-        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        file_ptr = H5FDopen_test(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
         nbytes = (size_t)(7 * stripe_size);
@@ -1221,25 +1229,25 @@ test_iovec_translation(void)
         write_addr = (haddr_t)(2 * stripe_size);
 
         /* Set EOA for following write call */
-        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
 
         /* Write according to the above pattern */
-        status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
+        status = H5FDwrite_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
         VRFY((status >= 0), "H5FDwrite succeeded");
 
         /* Close and re-open the file */
-        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
-        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY((H5FDclose_test(file_ptr) >= 0), "H5FDclose succeeded");
+        file_ptr = H5FDopen_test(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
         /*
          * Set EOA for following read call (since we wrote over any
          * superblock information in the file)
          */
-        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
 
         /* Read the written bytes and verify */
-        status = H5FDread(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
+        status = H5FDread_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
         VRFY((status >= 0), "H5FDwrite succeeded");
 
         VRFY((0 == memcmp(write_buf, read_buf, nbytes)), "memcmp succeeded");
@@ -1283,7 +1291,7 @@ test_iovec_translation(void)
         subfile_ptr = fopen(tmp_filename, "r");
         VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
 
-        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+        VRFY((H5FDclose_test(file_ptr) >= 0), "H5FDclose succeeded");
 
         /*
          * Test the case where I/O is 2 stripe sizes in total, but
@@ -1301,7 +1309,7 @@ test_iovec_translation(void)
         VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
         /* Re-open file through H5FDopen for direct writes */
-        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        file_ptr = H5FDopen_test(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
         nbytes = (size_t)(2 * stripe_size);
@@ -1311,25 +1319,25 @@ test_iovec_translation(void)
         write_addr = (haddr_t)1;
 
         /* Set EOA for following write call */
-        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
 
         /* Write according to the above pattern */
-        status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
+        status = H5FDwrite_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
         VRFY((status >= 0), "H5FDwrite succeeded");
 
         /* Close and re-open the file */
-        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
-        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY((H5FDclose_test(file_ptr) >= 0), "H5FDclose succeeded");
+        file_ptr = H5FDopen_test(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
         /*
          * Set EOA for following read call (since we wrote over any
          * superblock information in the file)
          */
-        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
 
         /* Read the written bytes and verify */
-        status = H5FDread(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
+        status = H5FDread_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
         VRFY((status >= 0), "H5FDwrite succeeded");
 
         VRFY((0 == memcmp(write_buf, read_buf, nbytes)), "memcmp succeeded");
@@ -1378,7 +1386,7 @@ test_iovec_translation(void)
         subfile_ptr = fopen(tmp_filename, "r");
         VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
 
-        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+        VRFY((H5FDclose_test(file_ptr) >= 0), "H5FDclose succeeded");
 
         /*
          * Test the case where I/O is 2 stripe sizes in total, but
@@ -1397,7 +1405,7 @@ test_iovec_translation(void)
         VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
         /* Re-open file through H5FDopen for direct writes */
-        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        file_ptr = H5FDopen_test(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
         nbytes = (size_t)(2 * stripe_size);
@@ -1407,25 +1415,25 @@ test_iovec_translation(void)
         write_addr = (haddr_t)(stripe_size - 1);
 
         /* Set EOA for following write call */
-        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
 
         /* Write according to the above pattern */
-        status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
+        status = H5FDwrite_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
         VRFY((status >= 0), "H5FDwrite succeeded");
 
         /* Close and re-open the file */
-        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
-        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY((H5FDclose_test(file_ptr) >= 0), "H5FDclose succeeded");
+        file_ptr = H5FDopen_test(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
         /*
          * Set EOA for following read call (since we wrote over any
          * superblock information in the file)
          */
-        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
 
         /* Read the written bytes and verify */
-        status = H5FDread(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
+        status = H5FDread_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
         VRFY((status >= 0), "H5FDwrite succeeded");
 
         VRFY((0 == memcmp(write_buf, read_buf, nbytes)), "memcmp succeeded");
@@ -1474,7 +1482,7 @@ test_iovec_translation(void)
         subfile_ptr = fopen(tmp_filename, "r");
         VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
 
-        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+        VRFY((H5FDclose_test(file_ptr) >= 0), "H5FDclose succeeded");
 
         /*
          * Test the case where I/O is 2 stripe sizes + 1 byte in total
@@ -1492,7 +1500,7 @@ test_iovec_translation(void)
         VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
         /* Re-open file through H5FDopen for direct writes */
-        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        file_ptr = H5FDopen_test(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
         nbytes = (size_t)((2 * stripe_size) + 1);
@@ -1502,25 +1510,25 @@ test_iovec_translation(void)
         write_addr = (haddr_t)0;
 
         /* Set EOA for following write call */
-        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
 
         /* Write according to the above pattern */
-        status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
+        status = H5FDwrite_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
         VRFY((status >= 0), "H5FDwrite succeeded");
 
         /* Close and re-open the file */
-        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
-        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY((H5FDclose_test(file_ptr) >= 0), "H5FDclose succeeded");
+        file_ptr = H5FDopen_test(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
         /*
          * Set EOA for following read call (since we wrote over any
          * superblock information in the file)
          */
-        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+        VRFY((H5FDset_eoa_test(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
 
         /* Read the written bytes and verify */
-        status = H5FDread(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
+        status = H5FDread_test(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
         VRFY((status >= 0), "H5FDwrite succeeded");
 
         VRFY((0 == memcmp(write_buf, read_buf, nbytes)), "memcmp succeeded");
@@ -1567,7 +1575,7 @@ test_iovec_translation(void)
         subfile_ptr = fopen(tmp_filename, "r");
         VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
 
-        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+        VRFY((H5FDclose_test(file_ptr) >= 0), "H5FDclose succeeded");
 
         free(write_buf);
         write_buf = NULL;

@@ -31,6 +31,14 @@
  */
 #include "H5MMprivate.h" /* Memory management */
 
+/*
+ * This file needs to access private information from the H5FD package.
+ * This file also needs to access the file testing code.
+ */
+#define H5FD_FRIEND     /*suppress error about including H5FDpkg   */
+#define H5FD_TESTING
+#include "H5FDpkg.h"    /* File Drivers         */
+
 /* 2^n for uint64_t types -- H5_EXP2 unsafe past 32 bits */
 #define U64_EXP2(n) ((uint64_t)1 << (n))
 
@@ -1537,18 +1545,12 @@ compare_file_bytes_exactly(const char *filepath, hid_t fapl_id, size_t nbytes, c
     H5FD_t        *raw_vfile      = NULL; /* virtual file to look at raw file contents */
     unsigned char *act_buf        = NULL; /* allocated area for actual file bytes */
     uint64_t       filesize       = 0;
-    bool           api_ctx_pushed = false; /* Whether API context pushed   */
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
-    if (NULL == (raw_vfile = H5FDopen(filepath, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
+    if (NULL == (raw_vfile = H5FDopen_test(filepath, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
 
     /* filesize is wrong w/ stdio - it's zero instead of 40 or whatnot */
-    filesize = (uint64_t)H5FDget_eof(raw_vfile, H5FD_MEM_DRAW);
+    filesize = (uint64_t)H5FDget_eof_test(raw_vfile, H5FD_MEM_DRAW);
     if ((uint64_t)nbytes != filesize) {
         fprintf(stderr, "\nSizes not the same - nbytes: %zu, filesize: %" PRIu64 "\n", nbytes, filesize);
         TEST_ERROR;
@@ -1559,9 +1561,9 @@ compare_file_bytes_exactly(const char *filepath, hid_t fapl_id, size_t nbytes, c
     /* Fill buffer with bogus UCHAR_MAX values */
     for (size_t i = 0; i < nbytes; i++)
         act_buf[i] = UCHAR_MAX;
-    if (H5FDset_eoa(raw_vfile, H5FD_MEM_DRAW, nbytes) < 0)
+    if (H5FDset_eoa_test(raw_vfile, H5FD_MEM_DRAW, nbytes) < 0)
         TEST_ERROR;
-    if (H5FDread(raw_vfile, H5FD_MEM_DRAW, H5P_DEFAULT, 0, nbytes, act_buf) < 0)
+    if (H5FDread_test(raw_vfile, H5FD_MEM_DRAW, H5P_DEFAULT, 0, nbytes, act_buf) < 0)
         TEST_ERROR;
 
     /* Compare raw bytes data */
@@ -1572,23 +1574,15 @@ compare_file_bytes_exactly(const char *filepath, hid_t fapl_id, size_t nbytes, c
         }
     }
 
-    if (H5FDclose(raw_vfile) < 0)
+    if (H5FDclose_test(raw_vfile) < 0)
         TEST_ERROR;
     free(act_buf);
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     return 0;
 
 error:
-    if (api_ctx_pushed)
-        H5CX_pop(false);
-
     if (raw_vfile != NULL)
-        H5FDclose(raw_vfile);
+        H5FDclose_test(raw_vfile);
     free(act_buf);
 
     return -1;
@@ -1613,7 +1607,6 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     uint64_t                     readsize       = 0;
     uint8_t                     *ui8p           = NULL;
     uint32_t                     buf_checksum   = 0;
-    bool                         api_ctx_pushed = false; /* Whether API context pushed   */
 
     /* memset to avoid bad frees on errors */
     memset(&rev_out, 0, sizeof(H5FD_onion_revision_record_t));
@@ -1628,13 +1621,8 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     rev_out.version                = H5FD_ONION_REVISION_RECORD_VERSION_CURR;
     rev_out.archival_index.version = H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
-    filesize = (uint64_t)H5FDget_eof(raw_file, H5FD_MEM_DRAW);
-    if (H5FDset_eoa(raw_file, H5FD_MEM_DRAW, filesize) < 0)
+    filesize = (uint64_t)H5FDget_eof_test(raw_file, H5FD_MEM_DRAW);
+    if (H5FDset_eoa_test(raw_file, H5FD_MEM_DRAW, filesize) < 0)
         TEST_ERROR;
 
     /* Ingest onion header */
@@ -1642,7 +1630,7 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     readsize = MIN(filesize, H5FD_ONION_ENCODED_SIZE_HEADER);
     if (NULL == (buf = malloc(readsize * sizeof(unsigned char))))
         TEST_ERROR;
-    if (H5FDread(raw_file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, readsize, buf) < 0)
+    if (H5FDread_test(raw_file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, readsize, buf) < 0)
         TEST_ERROR;
 
     readsize = H5FD__onion_header_decode(buf, &hdr_out);
@@ -1672,7 +1660,7 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     readsize = hdr_out.history_size;
     if (NULL == (buf = malloc(readsize * sizeof(unsigned char))))
         TEST_ERROR;
-    if (H5FDread(raw_file, H5FD_MEM_DRAW, H5P_DEFAULT, hdr_out.history_addr, readsize, buf) < 0)
+    if (H5FDread_test(raw_file, H5FD_MEM_DRAW, H5P_DEFAULT, hdr_out.history_addr, readsize, buf) < 0)
         TEST_ERROR;
 
     /* Initial read, get count of revisions */
@@ -1743,7 +1731,7 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
         readsize = rpp->record_size;
         if (NULL == (buf = malloc((size_t)rpp->record_size)))
             TEST_ERROR;
-        if (H5FDread(raw_file, H5FD_MEM_DRAW, H5P_DEFAULT, rpp->phys_addr, rpp->record_size, buf) < 0)
+        if (H5FDread_test(raw_file, H5FD_MEM_DRAW, H5P_DEFAULT, rpp->phys_addr, rpp->record_size, buf) < 0)
             TEST_ERROR;
 
         /* Initial revision read -- get fixed components */
@@ -1800,20 +1788,12 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
         free(rev_out.archival_index.list);
     }
 
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
-
     free(history_out.record_locs);
     history_out.record_locs = NULL;
 
     return 0;
 
 error:
-    if (api_ctx_pushed)
-        H5CX_pop(false);
-
     free(buf);
     free(rev_out.comment);
     free(rev_out.archival_index.list);
@@ -1856,7 +1836,6 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     };
     unsigned char *ptr            = NULL;
     uint32_t       checksum       = 0;
-    bool           api_ctx_pushed = false; /* Whether API context pushed   */
 
     /* Finish populating expected header bytes */
     ptr = hdr_exp_bytes + 8; /* WARNING: must match format */
@@ -1872,14 +1851,9 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     UINT32ENCODE(ptr, checksum);
     ptr = NULL;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
     /* Look at h5 file: should have zero bytes */
 
-    file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+    file = H5FDopen_test(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
         TEST_ERROR;
 
@@ -1890,7 +1864,7 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     /* Should fail when reading from an empty file */
     H5E_BEGIN_TRY
     {
-        err_ret = H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 1, act_buf);
+        err_ret = H5FDread_test(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 1, act_buf);
     }
     H5E_END_TRY
     if (err_ret != FAIL)
@@ -1899,14 +1873,9 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     free(act_buf);
     act_buf = NULL;
 
-    if (H5FDclose(file) < 0)
+    if (H5FDclose_test(file) < 0)
         TEST_ERROR;
     file = NULL;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     /* Look at onion file: should have header */
     if (compare_file_bytes_exactly(paths->onion, fapl_id, H5FD_ONION_ENCODED_SIZE_HEADER, hdr_exp_bytes) < 0)
@@ -1923,11 +1892,8 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     return 0;
 
 error:
-    if (api_ctx_pushed)
-        H5CX_pop(false);
-
     if (file != NULL)
-        (void)H5FDclose(file);
+        (void)H5FDclose_test(file);
     free(act_buf);
 
     return -1;
@@ -1970,7 +1936,6 @@ test_create_oniontarget(bool truncate_canonical, bool with_initial_data)
     H5FD_t                 *vfile_ro  = NULL; /* Onion virtual file for read-only */
     struct expected_history filter;
     char                   *buf            = NULL;
-    bool                    api_ctx_pushed = false; /* Whether API context pushed   */
 
     if (true == truncate_canonical && true == with_initial_data)
         TESTING("onion creation; truncate extant canonical; w/ initial data");
@@ -1997,28 +1962,23 @@ test_create_oniontarget(bool truncate_canonical, bool with_initial_data)
     HDremove(paths->onion);
     HDremove(paths->recovery);
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
     /* Create canonical file to be truncated */
     if (true == truncate_canonical) {
         /* Create canonical file. */
-        vfile_raw = H5FDopen(paths->canon, flags_create_s, onion_info.backing_fapl_id, HADDR_UNDEF);
+        vfile_raw = H5FDopen_test(paths->canon, flags_create_s, onion_info.backing_fapl_id, HADDR_UNDEF);
         if (NULL == vfile_raw)
             TEST_ERROR;
-        if (H5FDset_eoa(vfile_raw, H5FD_MEM_DRAW, b_list_size_s) < 0)
+        if (H5FDset_eoa_test(vfile_raw, H5FD_MEM_DRAW, b_list_size_s) < 0)
             TEST_ERROR;
-        if (H5FDwrite(vfile_raw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, b_list_size_s, b_list_s) < 0)
+        if (H5FDwrite_test(vfile_raw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, b_list_size_s, b_list_s) < 0)
             TEST_ERROR;
-        if (H5FDclose(vfile_raw) < 0)
+        if (H5FDclose_test(vfile_raw) < 0)
             TEST_ERROR;
 
         vfile_raw = NULL;
         H5E_BEGIN_TRY
         {
-            vfile_raw = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+            vfile_raw = H5FDopen_test(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
         }
         H5E_END_TRY
 
@@ -2027,14 +1987,14 @@ test_create_oniontarget(bool truncate_canonical, bool with_initial_data)
             TEST_ERROR;
 
         /* Create "existing onion file". */
-        vfile_raw = H5FDopen(paths->onion, flags_create_s, onion_info.backing_fapl_id, HADDR_UNDEF);
+        vfile_raw = H5FDopen_test(paths->onion, flags_create_s, onion_info.backing_fapl_id, HADDR_UNDEF);
         if (NULL == vfile_raw)
             TEST_ERROR;
-        if (H5FDset_eoa(vfile_raw, H5FD_MEM_DRAW, b_list_size_s) < 0)
+        if (H5FDset_eoa_test(vfile_raw, H5FD_MEM_DRAW, b_list_size_s) < 0)
             TEST_ERROR;
-        if (H5FDwrite(vfile_raw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 23, "prior history stand-in") < 0)
+        if (H5FDwrite_test(vfile_raw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 23, "prior history stand-in") < 0)
             TEST_ERROR;
-        if (H5FDclose(vfile_raw) < 0)
+        if (H5FDclose_test(vfile_raw) < 0)
             TEST_ERROR;
         vfile_raw = NULL;
     } /* end if to create canonical file for truncation */
@@ -2045,26 +2005,16 @@ test_create_oniontarget(bool truncate_canonical, bool with_initial_data)
 
     /* Begin creation of onionized file from nothing */
 
-    vfile_rw = H5FDopen(paths->canon, flags_create_s, fapl_id, HADDR_UNDEF);
+    vfile_rw = H5FDopen_test(paths->canon, flags_create_s, fapl_id, HADDR_UNDEF);
     if (NULL == vfile_rw)
         TEST_ERROR;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     if (verify_stored_onion_create_0_open(paths, &onion_info) < 0)
         TEST_ERROR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
     H5E_BEGIN_TRY
     {
-        vfile_ro = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+        vfile_ro = H5FDopen_test(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     }
     H5E_END_TRY
     /* check if onionization (creation) not complete; nothing to open */
@@ -2082,16 +2032,16 @@ test_create_oniontarget(bool truncate_canonical, bool with_initial_data)
         /* Write the sub-page entry at addr 0 */
         if (4 >= onion_info.page_size)
             TEST_ERROR;
-        if (H5FDset_eoa(vfile_rw, H5FD_MEM_DRAW, 4) < 0)
+        if (H5FDset_eoa_test(vfile_rw, H5FD_MEM_DRAW, 4) < 0)
             TEST_ERROR;
-        if (H5FDwrite(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 4, a_list_s) < 0) {
+        if (H5FDwrite_test(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 4, a_list_s) < 0) {
             TEST_ERROR;
         }
 
         /* Verify logical file contents. */
         if (NULL == (buf = malloc(4 * sizeof(char))))
             TEST_ERROR;
-        if (H5FDread(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 4, buf) < 0)
+        if (H5FDread_test(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 4, buf) < 0)
             TEST_ERROR;
         if (memcmp(a_list_s, buf, 4) != 0)
             TEST_ERROR;
@@ -2103,15 +2053,15 @@ test_create_oniontarget(bool truncate_canonical, bool with_initial_data)
         buf_size  = a_list_size_s - half_size;
         if (buf_size <= onion_info.page_size)
             TEST_ERROR;
-        if (H5FDset_eoa(vfile_rw, H5FD_MEM_DRAW, buf_size) < 0)
+        if (H5FDset_eoa_test(vfile_rw, H5FD_MEM_DRAW, buf_size) < 0)
             TEST_ERROR;
-        if (H5FDwrite(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, buf_size, a_list_s + half_size) < 0)
+        if (H5FDwrite_test(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, buf_size, a_list_s + half_size) < 0)
             TEST_ERROR;
 
         /* Verify logical file contents. */
         if (NULL == (buf = malloc(buf_size * sizeof(char))))
             TEST_ERROR;
-        if (H5FDread(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, buf_size, buf) < 0)
+        if (H5FDread_test(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, buf_size, buf) < 0)
             TEST_ERROR;
         if (memcmp(a_list_s + half_size, buf, buf_size) != 0)
             TEST_ERROR;
@@ -2119,15 +2069,15 @@ test_create_oniontarget(bool truncate_canonical, bool with_initial_data)
         buf = NULL;
 
         /* Overwrite existing data with entire buffer at addr 0 */
-        if (H5FDset_eoa(vfile_rw, H5FD_MEM_DRAW, a_list_size_s) < 0)
+        if (H5FDset_eoa_test(vfile_rw, H5FD_MEM_DRAW, a_list_size_s) < 0)
             TEST_ERROR;
-        if (H5FDwrite(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, a_list_size_s, a_list_s) < 0)
+        if (H5FDwrite_test(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, a_list_size_s, a_list_s) < 0)
             TEST_ERROR;
 
         /* Verify logical file contents. */
         if (NULL == (buf = malloc(a_list_size_s * sizeof(char))))
             TEST_ERROR;
-        if (H5FDread(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, a_list_size_s, buf) < 0)
+        if (H5FDread_test(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, a_list_size_s, buf) < 0)
             TEST_ERROR;
         if (memcmp(a_list_s, buf, a_list_size_s) != 0)
             TEST_ERROR;
@@ -2139,43 +2089,28 @@ test_create_oniontarget(bool truncate_canonical, bool with_initial_data)
      * CLOSED
      */
 
-    if (H5FDclose(vfile_rw) < 0)
+    if (H5FDclose_test(vfile_rw) < 0)
         TEST_ERROR;
     vfile_rw = NULL;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     /* Look at h5 file: should be known-empty */
     if (compare_file_bytes_exactly(paths->canon, onion_info.backing_fapl_id, 8,
                                    (const unsigned char *)"ONIONEOF") < 0)
         TEST_ERROR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
     /* Look at recovery file: should be gone */
     H5E_BEGIN_TRY
     {
-        vfile_raw = H5FDopen(paths->recovery, H5F_ACC_RDONLY, onion_info.backing_fapl_id, HADDR_UNDEF);
+        vfile_raw = H5FDopen_test(paths->recovery, H5F_ACC_RDONLY, onion_info.backing_fapl_id, HADDR_UNDEF);
     }
     H5E_END_TRY
     if (NULL != vfile_raw)
         TEST_ERROR;
 
     /* Inspect onion file */
-    vfile_raw = H5FDopen(paths->onion, H5F_ACC_RDONLY, onion_info.backing_fapl_id, HADDR_UNDEF);
+    vfile_raw = H5FDopen_test(paths->onion, H5F_ACC_RDONLY, onion_info.backing_fapl_id, HADDR_UNDEF);
     if (NULL == vfile_raw)
         TEST_ERROR;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     filter.page_size                        = onion_info.page_size;
     filter.n_revisions                      = 1;
@@ -2189,32 +2124,27 @@ test_create_oniontarget(bool truncate_canonical, bool with_initial_data)
     if (verify_history_as_expected_onion(vfile_raw, &filter) < 0)
         TEST_ERROR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
-    if (H5FDclose(vfile_raw) < 0)
+    if (H5FDclose_test(vfile_raw) < 0)
         TEST_ERROR;
     vfile_raw = NULL;
 
     /* R/O open the file with Onion VFD; inspect logical file */
 
-    vfile_ro = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+    vfile_ro = H5FDopen_test(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == vfile_ro)
         TEST_ERROR;
 
     if (true == with_initial_data) {
         /* Initial revision contains data */
-        if (H5FDget_eof(vfile_ro, H5FD_MEM_DRAW) != a_list_size_s)
+        if (H5FDget_eof_test(vfile_ro, H5FD_MEM_DRAW) != a_list_size_s)
             TEST_ERROR;
-        if (H5FDget_eoa(vfile_ro, H5FD_MEM_DRAW) != 0)
+        if (H5FDget_eoa_test(vfile_ro, H5FD_MEM_DRAW) != 0)
             TEST_ERROR;
-        if (H5FDset_eoa(vfile_ro, H5FD_MEM_DRAW, a_list_size_s) < 0)
+        if (H5FDset_eoa_test(vfile_ro, H5FD_MEM_DRAW, a_list_size_s) < 0)
             TEST_ERROR;
         if (NULL == (buf = malloc(a_list_size_s * 64 * sizeof(char))))
             TEST_ERROR;
-        if (H5FDread(vfile_ro, H5FD_MEM_DRAW, H5P_DEFAULT, 0, a_list_size_s, buf) < 0)
+        if (H5FDread_test(vfile_ro, H5FD_MEM_DRAW, H5P_DEFAULT, 0, a_list_size_s, buf) < 0)
             TEST_ERROR;
         if (memcmp(a_list_s, buf, a_list_size_s) != 0)
             TEST_ERROR;
@@ -2223,20 +2153,15 @@ test_create_oniontarget(bool truncate_canonical, bool with_initial_data)
     }
     else {
         /* Initial revision has no data */
-        if (H5FDget_eoa(vfile_ro, H5FD_MEM_DRAW) != 0)
+        if (H5FDget_eoa_test(vfile_ro, H5FD_MEM_DRAW) != 0)
             TEST_ERROR;
-        if (H5FDget_eof(vfile_ro, H5FD_MEM_DRAW) != 0)
+        if (H5FDget_eof_test(vfile_ro, H5FD_MEM_DRAW) != 0)
             TEST_ERROR;
     }
 
-    if (H5FDclose(vfile_ro) < 0)
+    if (H5FDclose_test(vfile_ro) < 0)
         TEST_ERROR;
     vfile_ro = NULL;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     /*
      * CLEANUP
@@ -2254,9 +2179,6 @@ test_create_oniontarget(bool truncate_canonical, bool with_initial_data)
     return 0;
 
 error:
-    if (api_ctx_pushed)
-        H5CX_pop(false);
-
     if (paths != NULL) {
         HDremove(paths->canon);
         HDremove(paths->onion);
@@ -2267,11 +2189,11 @@ error:
     free(buf);
 
     if (vfile_raw != NULL)
-        (void)H5FDclose(vfile_raw);
+        (void)H5FDclose_test(vfile_raw);
     if (vfile_rw != NULL)
-        (void)H5FDclose(vfile_rw);
+        (void)H5FDclose_test(vfile_rw);
     if (vfile_ro != NULL)
-        (void)H5FDclose(vfile_ro);
+        (void)H5FDclose_test(vfile_ro);
 
     H5E_BEGIN_TRY
     {
@@ -2326,7 +2248,6 @@ test_several_revisions_with_logical_gaps(void)
     uint64_t                a_off = ONION_TEST_PAGE_SIZE_5 + 7; /* 39 */
     uint64_t                b_off = (((a_off + a_list_size_s + ONION_TEST_PAGE_SIZE_5 - 1) >> 5) << 5) +
                      ONION_TEST_PAGE_SIZE_5 + 7; /* full page between */
-    bool api_ctx_pushed = false;                 /* Whether API context pushed   */
 
     TESTING("multiple revisions with gaps and overlap");
 
@@ -2381,11 +2302,6 @@ test_several_revisions_with_logical_gaps(void)
     if (do_onion_open_and_writes(paths->canon, &onion_info, 4, about) < 0)
         TEST_ERROR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
     /* Inspect logical file */
 
     /* THIS IS THE INITIAL FILE, SHOULD ONLY HAVE 8 BYTES */
@@ -2395,14 +2311,14 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
-    file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+    file = H5FDopen_test(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
         TEST_ERROR;
-    if (8 != H5FDget_eof(file, H5FD_MEM_DRAW)) {
-        printf("\nEOF is not zero, it is: %" PRIuHADDR "\n", H5FDget_eof(file, H5FD_MEM_DRAW));
+    if (8 != H5FDget_eof_test(file, H5FD_MEM_DRAW)) {
+        printf("\nEOF is not zero, it is: %" PRIuHADDR "\n", H5FDget_eof_test(file, H5FD_MEM_DRAW));
         TEST_ERROR;
     }
-    if (H5FDclose(file) < 0)
+    if (H5FDclose_test(file) < 0)
         TEST_ERROR;
     file = NULL;
     if (H5Pclose(fapl_id) < 0)
@@ -2416,14 +2332,14 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
-    file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+    file = H5FDopen_test(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
         TEST_ERROR;
-    if (0 != H5FDget_eof(file, H5FD_MEM_DRAW)) {
-        printf("\nEOF is not zero, it is: %" PRIuHADDR "\n", H5FDget_eof(file, H5FD_MEM_DRAW));
+    if (0 != H5FDget_eof_test(file, H5FD_MEM_DRAW)) {
+        printf("\nEOF is not zero, it is: %" PRIuHADDR "\n", H5FDget_eof_test(file, H5FD_MEM_DRAW));
         TEST_ERROR;
     }
-    if (H5FDclose(file) < 0)
+    if (H5FDclose_test(file) < 0)
         TEST_ERROR;
     file = NULL;
     if (H5Pclose(fapl_id) < 0)
@@ -2437,20 +2353,20 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
-    file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+    file = H5FDopen_test(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
         TEST_ERROR;
     size = a_off + a_list_size_s;
-    if (size != H5FDget_eof(file, H5FD_MEM_DRAW)) {
+    if (size != H5FDget_eof_test(file, H5FD_MEM_DRAW)) {
         printf("\nEOF is not %" PRIuHADDR ", it is: %" PRIuHADDR "\n", size,
-               H5FDget_eof(file, H5FD_MEM_DRAW));
+               H5FDget_eof_test(file, H5FD_MEM_DRAW));
         TEST_ERROR;
     }
     if (NULL == (buf = malloc(size * sizeof(unsigned char))))
         TEST_ERROR;
-    if (H5FDset_eoa(file, H5FD_MEM_DRAW, size) < 0)
+    if (H5FDset_eoa_test(file, H5FD_MEM_DRAW, size) < 0)
         TEST_ERROR;
-    if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0)
+    if (H5FDread_test(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0)
         TEST_ERROR;
     for (i = 0; i < a_off; i++) {
         if (0 != buf[i])
@@ -2463,7 +2379,7 @@ test_several_revisions_with_logical_gaps(void)
     /* Repeat read at page offset; test possible read offset error */
     if (NULL == (buf = malloc(ONION_TEST_PAGE_SIZE_5 * sizeof(unsigned char))))
         TEST_ERROR;
-    if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, ONION_TEST_PAGE_SIZE_5, ONION_TEST_PAGE_SIZE_5, buf) < 0)
+    if (H5FDread_test(file, H5FD_MEM_DRAW, H5P_DEFAULT, ONION_TEST_PAGE_SIZE_5, ONION_TEST_PAGE_SIZE_5, buf) < 0)
         TEST_ERROR;
     size = a_off - ONION_TEST_PAGE_SIZE_5;
     for (i = 0; i < size; i++) {
@@ -2474,7 +2390,7 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     free(buf);
     buf = NULL;
-    if (H5FDclose(file) < 0)
+    if (H5FDclose_test(file) < 0)
         TEST_ERROR;
     file = NULL;
     if (H5Pclose(fapl_id) < 0)
@@ -2488,17 +2404,17 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
-    file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+    file = H5FDopen_test(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
         TEST_ERROR;
     size = b_off + b_list_size_s;
-    if (size != H5FDget_eof(file, H5FD_MEM_DRAW))
+    if (size != H5FDget_eof_test(file, H5FD_MEM_DRAW))
         TEST_ERROR;
     if (NULL == (buf = malloc(size * sizeof(unsigned char))))
         TEST_ERROR;
-    if (H5FDset_eoa(file, H5FD_MEM_DRAW, size) < 0)
+    if (H5FDset_eoa_test(file, H5FD_MEM_DRAW, size) < 0)
         TEST_ERROR;
-    if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0)
+    if (H5FDread_test(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0)
         TEST_ERROR;
     for (i = 0; i < a_off; i++) {
         if (0 != buf[i])
@@ -2514,7 +2430,7 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     free(buf);
     buf = NULL;
-    if (H5FDclose(file) < 0)
+    if (H5FDclose_test(file) < 0)
         TEST_ERROR;
     file = NULL;
     if (H5Pclose(fapl_id) < 0)
@@ -2528,18 +2444,18 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
-    file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+    file = H5FDopen_test(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
         TEST_ERROR;
     size = b_off + b_list_size_s;
-    if (size != H5FDget_eof(file, H5FD_MEM_DRAW))
+    if (size != H5FDget_eof_test(file, H5FD_MEM_DRAW))
         TEST_ERROR;
     buf = (unsigned char *)malloc(sizeof(unsigned char) * size);
     if (NULL == buf)
         TEST_ERROR;
-    if (H5FDset_eoa(file, H5FD_MEM_DRAW, size) < 0)
+    if (H5FDset_eoa_test(file, H5FD_MEM_DRAW, size) < 0)
         TEST_ERROR;
-    if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0)
+    if (H5FDread_test(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0)
         TEST_ERROR;
     if (memcmp(buf, a_list_s, a_list_size_s) != 0)
         TEST_ERROR;
@@ -2553,7 +2469,7 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     free(buf);
     buf = NULL;
-    if (H5FDclose(file) < 0)
+    if (H5FDclose_test(file) < 0)
         TEST_ERROR;
     file = NULL;
     if (H5Pclose(fapl_id) < 0)
@@ -2564,14 +2480,9 @@ test_several_revisions_with_logical_gaps(void)
 
     /* Inspect history construction */
 
-    file = H5FDopen(paths->onion, H5F_ACC_RDONLY, onion_info.backing_fapl_id, HADDR_UNDEF);
+    file = H5FDopen_test(paths->onion, H5F_ACC_RDONLY, onion_info.backing_fapl_id, HADDR_UNDEF);
     if (NULL == file)
         TEST_ERROR;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     filter.page_size   = onion_info.page_size;
     filter.n_revisions = 4;
@@ -2605,19 +2516,9 @@ test_several_revisions_with_logical_gaps(void)
     if (verify_history_as_expected_onion(file, &filter) < 0)
         TEST_ERROR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
-    if (H5FDclose(file) < 0)
+    if (H5FDclose_test(file) < 0)
         TEST_ERROR;
     file = NULL;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     /* CLEANUP */
 
@@ -2633,9 +2534,6 @@ test_several_revisions_with_logical_gaps(void)
     return 0;
 
 error:
-    if (api_ctx_pushed)
-        H5CX_pop(false);
-
     if (paths != NULL) {
         HDremove(paths->canon);
         HDremove(paths->onion);
@@ -2647,7 +2545,7 @@ error:
     free(buf);
 
     if (file != NULL)
-        (void)H5FDclose(file);
+        (void)H5FDclose_test(file);
 
     H5E_BEGIN_TRY
     {
@@ -2680,12 +2578,6 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
     H5FD_t        *file           = NULL; /* Onion virtual file for read/write */
     unsigned char *buf_vfy        = NULL;
     size_t         i              = 0;
-    bool           api_ctx_pushed = false; /* Whether API context pushed   */
-
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
 
     for (i = 0; i < n_ops; i++) {
         size_t       j     = 0;
@@ -2708,7 +2600,7 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
             goto error;
         if (H5Pset_fapl_onion(fapl_id, onion_info_p) < 0)
             goto error;
-        file = H5FDopen(filename, flags, fapl_id, HADDR_UNDEF);
+        file = H5FDopen_test(filename, flags, fapl_id, HADDR_UNDEF);
         if (NULL == file)
             goto error;
 
@@ -2716,15 +2608,15 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
             struct write_info *wi = &about[i].writes[j];
 
             /* Write to file */
-            if (H5FDget_eoa(file, H5FD_MEM_DRAW) < wi->offset + wi->size &&
-                H5FDset_eoa(file, H5FD_MEM_DRAW, wi->offset + wi->size) < 0)
+            if (H5FDget_eoa_test(file, H5FD_MEM_DRAW) < wi->offset + wi->size &&
+                H5FDset_eoa_test(file, H5FD_MEM_DRAW, wi->offset + wi->size) < 0)
                 TEST_ERROR;
-            if (H5FDwrite(file, H5FD_MEM_DRAW, H5P_DEFAULT, wi->offset, wi->size, wi->buf) < 0)
+            if (H5FDwrite_test(file, H5FD_MEM_DRAW, H5P_DEFAULT, wi->offset, wi->size, wi->buf) < 0)
                 TEST_ERROR;
             /* Verify write as expected */
             if (NULL == (buf_vfy = malloc(wi->size * sizeof(unsigned char))))
                 TEST_ERROR;
-            if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, wi->offset, wi->size, buf_vfy) < 0)
+            if (H5FDread_test(file, H5FD_MEM_DRAW, H5P_DEFAULT, wi->offset, wi->size, buf_vfy) < 0)
                 TEST_ERROR;
             if (memcmp(buf_vfy, wi->buf, wi->size) != 0) {
                 const unsigned char *_buf = wi->buf;
@@ -2739,7 +2631,7 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
             buf_vfy = NULL;
         } /* end for each write */
 
-        if (H5FDclose(file) < 0)
+        if (H5FDclose_test(file) < 0)
             goto error;
         file = NULL;
         if (H5Pclose(fapl_id) < 0)
@@ -2747,19 +2639,11 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
         fapl_id = H5I_INVALID_HID;
     } /* end for each open-close cycle */
 
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
-
     return 0;
 
 error:
-    if (api_ctx_pushed)
-        H5CX_pop(false);
-
     if (file != NULL)
-        (void)H5FDclose(file);
+        (void)H5FDclose_test(file);
 
     H5E_BEGIN_TRY
     {
@@ -2807,7 +2691,6 @@ test_page_aligned_history_create(void)
     H5FD_onion_history_t   history_out;
     size_t                 i              = 0;
     uint64_t               a_off          = b_list_size_s - a_list_size_s;
-    bool                   api_ctx_pushed = false; /* Whether API context pushed   */
 
     TESTING("page-aligned history on onion-created file");
 
@@ -2854,22 +2737,17 @@ test_page_aligned_history_create(void)
     if (do_onion_open_and_writes(paths->canon, &onion_info, 2, about) < 0)
         TEST_ERROR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
     /* Inspect logical file */
     if (NULL == (buf = malloc(b_list_size_s * sizeof(unsigned char))))
         TEST_ERROR;
-    file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+    file = H5FDopen_test(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
         TEST_ERROR;
-    if (b_list_size_s != H5FDget_eof(file, H5FD_MEM_DRAW))
+    if (b_list_size_s != H5FDget_eof_test(file, H5FD_MEM_DRAW))
         TEST_ERROR;
-    if (H5FDset_eoa(file, H5FD_MEM_DRAW, b_list_size_s) < 0)
+    if (H5FDset_eoa_test(file, H5FD_MEM_DRAW, b_list_size_s) < 0)
         TEST_ERROR;
-    if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, b_list_size_s, buf) < 0)
+    if (H5FDread_test(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, b_list_size_s, buf) < 0)
         TEST_ERROR;
     if (memcmp(a_list_s, buf + a_off, a_list_size_s) != 0) {
         size_t k;
@@ -2891,7 +2769,7 @@ test_page_aligned_history_create(void)
         fflush(stdout);
         TEST_ERROR;
     }
-    if (H5FDclose(file) < 0)
+    if (H5FDclose_test(file) < 0)
         TEST_ERROR;
     file = NULL;
     free(buf);
@@ -2899,14 +2777,14 @@ test_page_aligned_history_create(void)
 
     /* Inspect history construction */
 
-    if (NULL == (file = H5FDopen(paths->onion, H5F_ACC_RDONLY, onion_info.backing_fapl_id, HADDR_UNDEF)))
+    if (NULL == (file = H5FDopen_test(paths->onion, H5F_ACC_RDONLY, onion_info.backing_fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
-    if (H5FDset_eoa(file, H5FD_MEM_DRAW, H5FDget_eof(file, H5FD_MEM_DRAW)) < 0)
+    if (H5FDset_eoa_test(file, H5FD_MEM_DRAW, H5FDget_eof_test(file, H5FD_MEM_DRAW)) < 0)
         TEST_ERROR;
 
     if (NULL == (buf = malloc(H5FD_ONION_ENCODED_SIZE_HEADER)))
         TEST_ERROR;
-    if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, H5FD_ONION_ENCODED_SIZE_HEADER, buf) < 0)
+    if (H5FDread_test(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, H5FD_ONION_ENCODED_SIZE_HEADER, buf) < 0)
         TEST_ERROR;
     if (H5FD__onion_header_decode(buf, &hdr_out) != H5FD_ONION_ENCODED_SIZE_HEADER)
         TEST_ERROR;
@@ -2917,7 +2795,7 @@ test_page_aligned_history_create(void)
 
     if (NULL == (buf = malloc(hdr_out.history_size)))
         TEST_ERROR;
-    if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, hdr_out.history_addr, hdr_out.history_size, buf) < 0)
+    if (H5FDread_test(file, H5FD_MEM_DRAW, H5P_DEFAULT, hdr_out.history_addr, hdr_out.history_size, buf) < 0)
         TEST_ERROR;
     if (H5FD__onion_history_decode(buf, &history_out) != hdr_out.history_size)
         TEST_ERROR;
@@ -2941,14 +2819,9 @@ test_page_aligned_history_create(void)
     free(history_out.record_locs);
     history_out.record_locs = NULL;
 
-    if (H5FDclose(file) < 0)
+    if (H5FDclose_test(file) < 0)
         TEST_ERROR;
     file = NULL;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     /* CLEANUP */
 
@@ -2968,9 +2841,6 @@ test_page_aligned_history_create(void)
     return 0;
 
 error:
-    if (api_ctx_pushed)
-        H5CX_pop(false);
-
     if (paths != NULL) {
         HDremove(paths->canon);
         HDremove(paths->onion);
@@ -2982,7 +2852,7 @@ error:
     free(buf);
 
     if (file != NULL)
-        (void)H5FDclose(file);
+        (void)H5FDclose_test(file);
 
     H5E_BEGIN_TRY
     {

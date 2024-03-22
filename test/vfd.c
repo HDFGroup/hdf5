@@ -16,6 +16,14 @@
 
 #include "h5test.h"
 
+/*
+ * This file needs to access private information from the H5FD package.
+ * This file also needs to access the file testing code.
+ */
+#define H5FD_FRIEND     /*suppress error about including H5FDpkg   */
+#define H5FD_TESTING
+#include "H5FDpkg.h"    /* File Drivers         */
+
 #define KB            1024U
 #define FAMILY_NUMBER 4
 #define FAMILY_SIZE   (1 * KB)
@@ -3633,7 +3641,7 @@ run_ctl_test(uint64_t op_code, uint64_t flags, ctl_test_opc_type opc_type, hid_t
      * give us a pointer to a H5FD_t structure.
      */
     h5_fixname(FILENAME[14], fapl_id, filename, sizeof(filename));
-    if (NULL == (file_drv_ptr = H5FDopen(filename, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF)))
+    if (NULL == (file_drv_ptr = H5FDopen_test(filename, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF)))
         PUTS_ERROR("couldn't get pointer to H5FD_t structure");
 
     /* Determine whether the H5FDctl call is expected to fail */
@@ -3651,12 +3659,12 @@ run_ctl_test(uint64_t op_code, uint64_t flags, ctl_test_opc_type opc_type, hid_t
     if (expect_fail) {
         H5E_BEGIN_TRY
         {
-            ctl_result = H5FDctl(file_drv_ptr, op_code, flags, NULL, NULL);
+            ctl_result = H5FDctl_test(file_drv_ptr, op_code, flags, NULL, NULL);
         }
         H5E_END_TRY
     }
     else
-        ctl_result = H5FDctl(file_drv_ptr, op_code, flags, NULL, NULL);
+        ctl_result = H5FDctl_test(file_drv_ptr, op_code, flags, NULL, NULL);
 
     /* Verify result of H5FDctl call */
     if (expect_fail) {
@@ -3669,7 +3677,7 @@ run_ctl_test(uint64_t op_code, uint64_t flags, ctl_test_opc_type opc_type, hid_t
     }
 
     /* Close H5FD_t structure pointer */
-    if (H5FDclose(file_drv_ptr) < 0)
+    if (H5FDclose_test(file_drv_ptr) < 0)
         PUTS_ERROR("couldn't close H5FD_t structure pointer");
     file_drv_ptr = NULL;
 
@@ -3678,7 +3686,7 @@ run_ctl_test(uint64_t op_code, uint64_t flags, ctl_test_opc_type opc_type, hid_t
 error:
     H5E_BEGIN_TRY
     {
-        H5FDclose(file_drv_ptr);
+        H5FDclose_test(file_drv_ptr);
     }
     H5E_END_TRY
 
@@ -4241,32 +4249,17 @@ test_vector_io__read_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], had
     uint32_t   i;
     size_t     size           = SIZE_MAX;
     H5FD_mem_t type           = H5FD_MEM_NTYPES;
-    bool       api_ctx_pushed = false; /* Whether API context pushed   */
-
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
 
     for (i = 0; i < count; i++) {
         SET_SIZE(size_fixed, sizes, size, i);
         SET_TYPE(type_fixed, types, type, i);
-        if (H5FDread(lf, type, H5P_DEFAULT, addrs[i], size, read_bufs[i]) < 0) {
+        if (H5FDread_test(lf, type, H5P_DEFAULT, addrs[i], size, read_bufs[i]) < 0) {
             if (verbose)
                 fprintf(stdout, "%s: H5FDread() failed on entry %d.\n", __func__, i);
             result = false;
             break;
         }
     }
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
-
-error:
-    if (api_ctx_pushed)
-        H5CX_pop(false);
 
     return (result);
 } /* end test_vector_io__read_v_indiv() */
@@ -4297,17 +4290,11 @@ test_vector_io__write_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], ha
     uint32_t   i;
     size_t     size           = SIZE_MAX;
     H5FD_mem_t type           = H5FD_MEM_NTYPES;
-    bool       api_ctx_pushed = false; /* Whether API context pushed   */
-
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
 
     for (i = 0; i < count; i++) {
         SET_SIZE(size_fixed, sizes, size, i);
         SET_TYPE(type_fixed, types, type, i);
-        if (H5FDwrite(lf, type, H5P_DEFAULT, addrs[i], size, write_bufs[i]) < 0) {
+        if (H5FDwrite_test(lf, type, H5P_DEFAULT, addrs[i], size, write_bufs[i]) < 0) {
             if (verbose)
                 fprintf(stdout, "%s: HDwrite() failed on entry %d.\n", __func__, i);
             result = false;
@@ -4315,12 +4302,6 @@ test_vector_io__write_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], ha
         }
     }
 
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
-
-error:
     return (result);
 } /* end test_vector_io__write_v_indiv() */
 
@@ -4531,7 +4512,6 @@ test_vector_io(const char *vfd_name)
     void       *f_read_bufs_0[VECTOR_LEN];      /* fixed read bufs vector       */
     void       *f_read_bufs_1[VECTOR_LEN];      /* fixed read bufs vector       */
     void       *f_read_bufs_2[VECTOR_LEN];      /* fixed read bufs vector       */
-    bool        api_ctx_pushed = false;         /* Whether API context pushed   */
 
     snprintf(test_title, sizeof(test_title), "vector I/O with %s VFD", vfd_name);
 
@@ -4578,22 +4558,17 @@ test_vector_io(const char *vfd_name)
                                              f_read_bufs_2, 'B')))
         TEST_ERROR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
     flags = H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC;
 
-    if (NULL == (lf = H5FDopen(filename, flags, fapl_id, HADDR_UNDEF)))
+    if (NULL == (lf = H5FDopen_test(filename, flags, fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
 
     /* allocate space for the data in the test vectors */
     for (i = 0; i < count; i++) {
 
-        addrs_0[i] = H5FDalloc(lf, types_0[i], H5P_DEFAULT, (hsize_t)(sizes_0[i]));
-        addrs_1[i] = H5FDalloc(lf, types_1[i], H5P_DEFAULT, (hsize_t)(sizes_1[i]));
-        addrs_2[i] = H5FDalloc(lf, types_2[i], H5P_DEFAULT, (hsize_t)(sizes_2[i]));
+        addrs_0[i] = H5FDalloc_test(lf, types_0[i], H5P_DEFAULT, (hsize_t)(sizes_0[i]));
+        addrs_1[i] = H5FDalloc_test(lf, types_1[i], H5P_DEFAULT, (hsize_t)(sizes_1[i]));
+        addrs_2[i] = H5FDalloc_test(lf, types_2[i], H5P_DEFAULT, (hsize_t)(sizes_2[i]));
 
         if ((addrs_0[i] == HADDR_UNDEF) || (addrs_1[i] == HADDR_UNDEF) || (addrs_2[i] == HADDR_UNDEF))
             TEST_ERROR;
@@ -4606,9 +4581,9 @@ test_vector_io(const char *vfd_name)
         SET_TYPE(type_fixed_1, f_types_1, f_type_1, i);
         SET_TYPE(type_fixed_2, f_types_2, f_type_2, i);
 
-        f_addrs_0[i] = H5FDalloc(lf, f_type_0, H5P_DEFAULT, (hsize_t)(f_size_0));
-        f_addrs_1[i] = H5FDalloc(lf, f_type_1, H5P_DEFAULT, (hsize_t)(f_size_1));
-        f_addrs_2[i] = H5FDalloc(lf, f_type_2, H5P_DEFAULT, (hsize_t)(f_size_2));
+        f_addrs_0[i] = H5FDalloc_test(lf, f_type_0, H5P_DEFAULT, (hsize_t)(f_size_0));
+        f_addrs_1[i] = H5FDalloc_test(lf, f_type_1, H5P_DEFAULT, (hsize_t)(f_size_1));
+        f_addrs_2[i] = H5FDalloc_test(lf, f_type_2, H5P_DEFAULT, (hsize_t)(f_size_2));
 
         if ((f_addrs_0[i] == HADDR_UNDEF) || (f_addrs_1[i] == HADDR_UNDEF) || (f_addrs_2[i] == HADDR_UNDEF))
             TEST_ERROR;
@@ -4635,41 +4610,36 @@ test_vector_io(const char *vfd_name)
     /* write and then read using vector I/O.  First, read/write vector
      * of length 1, then of length 2, then remainder of vector
      */
-    if (H5FDwrite_vector(lf, H5P_DEFAULT, 1, &(types_0[0]), &(addrs_0[0]), &(sizes_0[0]),
+    if (H5FDwrite_vector_test(lf, H5P_DEFAULT, 1, &(types_0[0]), &(addrs_0[0]), &(sizes_0[0]),
                          &(write_bufs_0[0])) < 0)
         TEST_ERROR;
 
-    if (H5FDread_vector(lf, H5P_DEFAULT, 1, &(types_0[0]), &(addrs_0[0]), &(sizes_0[0]), &(read_bufs_0[0])) <
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, 1, &(types_0[0]), &(addrs_0[0]), &(sizes_0[0]), &(read_bufs_0[0])) <
         0)
         TEST_ERROR;
 
-    if (H5FDwrite_vector(lf, H5P_DEFAULT, 2, &(types_0[1]), &(addrs_0[1]), &(sizes_0[1]),
+    if (H5FDwrite_vector_test(lf, H5P_DEFAULT, 2, &(types_0[1]), &(addrs_0[1]), &(sizes_0[1]),
                          &(write_bufs_0[1])) < 0)
         TEST_ERROR;
 
-    if (H5FDread_vector(lf, H5P_DEFAULT, 2, &(types_0[1]), &(addrs_0[1]), &(sizes_0[1]), &(read_bufs_0[1])) <
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, 2, &(types_0[1]), &(addrs_0[1]), &(sizes_0[1]), &(read_bufs_0[1])) <
         0)
         TEST_ERROR;
 
-    if (H5FDwrite_vector(lf, H5P_DEFAULT, count - 3, &(types_0[3]), &(addrs_0[3]), &(sizes_0[3]),
+    if (H5FDwrite_vector_test(lf, H5P_DEFAULT, count - 3, &(types_0[3]), &(addrs_0[3]), &(sizes_0[3]),
                          &(write_bufs_0[3])) < 0)
         TEST_ERROR;
 
-    if (H5FDread_vector(lf, H5P_DEFAULT, count - 3, &(types_0[3]), &(addrs_0[3]), &(sizes_0[3]),
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, count - 3, &(types_0[3]), &(addrs_0[3]), &(sizes_0[3]),
                         &(read_bufs_0[3])) < 0)
         TEST_ERROR;
 
     /* for fixed size / type vector, just write and read as single operations */
-    if (H5FDwrite_vector(lf, H5P_DEFAULT, count, f_types_0, f_addrs_0, f_sizes_0, f_write_bufs_0) < 0)
+    if (H5FDwrite_vector_test(lf, H5P_DEFAULT, count, f_types_0, f_addrs_0, f_sizes_0, f_write_bufs_0) < 0)
         TEST_ERROR;
 
-    if (H5FDread_vector(lf, H5P_DEFAULT, count, f_types_0, f_addrs_0, f_sizes_0, f_read_bufs_0) < 0)
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, count, f_types_0, f_addrs_0, f_sizes_0, f_read_bufs_0) < 0)
         TEST_ERROR;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     /* verify that the expected data is read */
     if (!test_vector_io__verify_v(count, types_0, sizes_0, write_bufs_0, read_bufs_0, "zero"))
@@ -4684,44 +4654,24 @@ test_vector_io(const char *vfd_name)
     if (!test_vector_io__write_v_indiv(lf, count, types_1, addrs_1, sizes_1, write_bufs_1))
         TEST_ERROR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
-    if (H5FDread_vector(lf, H5P_DEFAULT, 1, &(types_1[0]), &(addrs_1[0]), &(sizes_1[0]), &(read_bufs_1[0])) <
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, 1, &(types_1[0]), &(addrs_1[0]), &(sizes_1[0]), &(read_bufs_1[0])) <
         0)
         TEST_ERROR;
 
-    if (H5FDread_vector(lf, H5P_DEFAULT, 2, &(types_1[1]), &(addrs_1[1]), &(sizes_1[1]), &(read_bufs_1[1])) <
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, 2, &(types_1[1]), &(addrs_1[1]), &(sizes_1[1]), &(read_bufs_1[1])) <
         0)
         TEST_ERROR;
 
-    if (H5FDread_vector(lf, H5P_DEFAULT, count - 3, &(types_1[3]), &(addrs_1[3]), &(sizes_1[3]),
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, count - 3, &(types_1[3]), &(addrs_1[3]), &(sizes_1[3]),
                         &(read_bufs_1[3])) < 0)
         TEST_ERROR;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     /* for fixed size, write individually, and the read back in a single call */
     if (!test_vector_io__write_v_indiv(lf, count, f_types_1, f_addrs_1, f_sizes_1, f_write_bufs_1))
         TEST_ERROR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
-    if (H5FDread_vector(lf, H5P_DEFAULT, count, f_types_1, f_addrs_1, f_sizes_1, f_read_bufs_1) < 0)
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, count, f_types_1, f_addrs_1, f_sizes_1, f_read_bufs_1) < 0)
         TEST_ERROR;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     /* verify that the expected data is read */
     if (!test_vector_io__verify_v(count, types_1, sizes_1, write_bufs_1, read_bufs_1, "one"))
@@ -4730,47 +4680,27 @@ test_vector_io(const char *vfd_name)
     if (!test_vector_io__verify_v(count, f_types_1, f_sizes_1, f_write_bufs_1, f_read_bufs_1, "fixed one"))
         TEST_ERROR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
     /* Write the contents of a vector as several vector writes, then
      * read it back in individual reads.
      */
-    if (H5FDwrite_vector(lf, H5P_DEFAULT, 1, &(types_2[0]), &(addrs_2[0]), &(sizes_2[0]),
+    if (H5FDwrite_vector_test(lf, H5P_DEFAULT, 1, &(types_2[0]), &(addrs_2[0]), &(sizes_2[0]),
                          &(write_bufs_2[0])) < 0)
         TEST_ERROR;
 
-    if (H5FDwrite_vector(lf, H5P_DEFAULT, 2, &(types_2[1]), &(addrs_2[1]), &(sizes_2[1]),
+    if (H5FDwrite_vector_test(lf, H5P_DEFAULT, 2, &(types_2[1]), &(addrs_2[1]), &(sizes_2[1]),
                          &(write_bufs_2[1])) < 0)
         TEST_ERROR;
 
-    if (H5FDwrite_vector(lf, H5P_DEFAULT, count - 3, &(types_2[3]), &(addrs_2[3]), &(sizes_2[3]),
+    if (H5FDwrite_vector_test(lf, H5P_DEFAULT, count - 3, &(types_2[3]), &(addrs_2[3]), &(sizes_2[3]),
                          &(write_bufs_2[3])) < 0)
         TEST_ERROR;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     if (!test_vector_io__read_v_indiv(lf, count, types_2, addrs_2, sizes_2, read_bufs_2))
         TEST_ERROR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
     /* for fixed size, write as a single vector, read back individually */
-    if (H5FDwrite_vector(lf, H5P_DEFAULT, count, f_types_2, f_addrs_2, f_sizes_2, f_write_bufs_2) < 0)
+    if (H5FDwrite_vector_test(lf, H5P_DEFAULT, count, f_types_2, f_addrs_2, f_sizes_2, f_write_bufs_2) < 0)
         TEST_ERROR;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     if (!test_vector_io__read_v_indiv(lf, count, f_types_2, f_addrs_2, f_sizes_2, f_read_bufs_2))
         TEST_ERROR;
@@ -4782,22 +4712,17 @@ test_vector_io(const char *vfd_name)
     if (!test_vector_io__verify_v(count, f_types_2, f_sizes_2, f_write_bufs_2, f_read_bufs_2, "fixed two"))
         TEST_ERROR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
     /* make note of eoa -- needed after we re-open the file */
-    if (HADDR_UNDEF == (eoa = H5FDget_eoa(lf, H5FD_MEM_DEFAULT)))
+    if (HADDR_UNDEF == (eoa = H5FDget_eoa_test(lf, H5FD_MEM_DEFAULT)))
         TEST_ERROR;
 
     /* close the file and then re-open it */
-    if (H5FDclose(lf) < 0)
+    if (H5FDclose_test(lf) < 0)
         TEST_ERROR;
 
     flags = H5F_ACC_RDWR;
 
-    if (NULL == (lf = H5FDopen(filename, flags, fapl_id, HADDR_UNDEF)))
+    if (NULL == (lf = H5FDopen_test(filename, flags, fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
 
     /* The EOA is set to 0 on open.  To avoid errors, we must set it
@@ -4808,7 +4733,7 @@ test_vector_io(const char *vfd_name)
      *        adding an open flag that sets the EOA to the current file
      *        size.
      */
-    if (H5FDset_eoa(lf, H5FD_MEM_DEFAULT, eoa) < 0)
+    if (H5FDset_eoa_test(lf, H5FD_MEM_DEFAULT, eoa) < 0)
         TEST_ERROR;
 
     /* Null the read vectors */
@@ -4855,28 +4780,23 @@ test_vector_io(const char *vfd_name)
     }
 
     /* read the contents of the file */
-    if (H5FDread_vector(lf, H5P_DEFAULT, count, types_0, addrs_0, sizes_0, read_bufs_0) < 0)
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, count, types_0, addrs_0, sizes_0, read_bufs_0) < 0)
         TEST_ERROR;
 
-    if (H5FDread_vector(lf, H5P_DEFAULT, count, types_1, addrs_1, sizes_1, read_bufs_1) < 0)
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, count, types_1, addrs_1, sizes_1, read_bufs_1) < 0)
         TEST_ERROR;
 
-    if (H5FDread_vector(lf, H5P_DEFAULT, count, types_2, addrs_2, sizes_2, read_bufs_2) < 0)
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, count, types_2, addrs_2, sizes_2, read_bufs_2) < 0)
         TEST_ERROR;
 
-    if (H5FDread_vector(lf, H5P_DEFAULT, count, f_types_0, f_addrs_0, f_sizes_0, f_read_bufs_0) < 0)
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, count, f_types_0, f_addrs_0, f_sizes_0, f_read_bufs_0) < 0)
         TEST_ERROR;
 
-    if (H5FDread_vector(lf, H5P_DEFAULT, count, f_types_1, f_addrs_1, f_sizes_1, f_read_bufs_1) < 0)
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, count, f_types_1, f_addrs_1, f_sizes_1, f_read_bufs_1) < 0)
         TEST_ERROR;
 
-    if (H5FDread_vector(lf, H5P_DEFAULT, count, f_types_2, f_addrs_2, f_sizes_2, f_read_bufs_2) < 0)
+    if (H5FDread_vector_test(lf, H5P_DEFAULT, count, f_types_2, f_addrs_2, f_sizes_2, f_read_bufs_2) < 0)
         TEST_ERROR;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     /* verify the contents. */
     if (!test_vector_io__verify_v(count, types_0, sizes_0, write_bufs_0, read_bufs_0, "zero-"))
@@ -4897,18 +4817,8 @@ test_vector_io(const char *vfd_name)
     if (!test_vector_io__verify_v(count, f_types_2, f_sizes_2, f_write_bufs_2, f_read_bufs_2, "fixed two-"))
         TEST_ERROR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
-    if (H5FDclose(lf) < 0)
+    if (H5FDclose_test(lf) < 0)
         TEST_ERROR;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     h5_delete_test_file(FILENAME[0], fapl_id);
 
@@ -4961,13 +4871,10 @@ test_vector_io(const char *vfd_name)
     return 0;
 
 error:
-    if (api_ctx_pushed)
-        H5CX_pop(false);
-
     H5E_BEGIN_TRY
     {
         H5Pclose(fapl_id);
-        H5FDclose(lf);
+        H5FDclose_test(lf);
     }
     H5E_END_TRY
     return -1;
@@ -4995,7 +4902,6 @@ test_selection_io_write(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_s
     const void **bufs; /* Avoids cast/const warnings */
     int          i;
     int          j;
-    bool         api_ctx_pushed = false; /* Whether API context pushed   */
 
     if (NULL == (bufs = calloc(count, sizeof(void *))))
         TEST_ERROR;
@@ -5008,29 +4914,16 @@ test_selection_io_write(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_s
         bufs[i] = wbufs[i];
     }
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
     /* Issue write call */
-    if (H5FDwrite_selection(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets, element_sizes,
+    if (H5FDwrite_selection_test(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets, element_sizes,
                             bufs) < 0)
         TEST_ERROR;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     free(bufs);
 
     return 0;
 
 error:
-    if (api_ctx_pushed)
-        H5CX_pop(false);
-
     free(bufs);
     return -1;
 } /* end test_selection_io_write() */
@@ -5058,7 +4951,6 @@ test_selection_io_read_verify(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t
     int *rbufs[2] = {rbuf1, rbuf2};
     int  i;
     int  j;
-    bool api_ctx_pushed = false; /* Whether API context pushed   */
 
     /* Initialize read buffer */
     for (i = 0; i < (int)rbufcount; i++)
@@ -5072,20 +4964,10 @@ test_selection_io_read_verify(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t
         else
             rbufs[i] = rbufs[rbufcount - 1];
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
     /* Issue read call */
-    if (H5FDread_selection(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets, element_sizes,
+    if (H5FDread_selection_test(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets, element_sizes,
                            (void **)rbufs) < 0)
         TEST_ERROR;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     /* Verify result */
     for (i = 0; i < (int)rbufcount; i++)
@@ -5113,9 +4995,6 @@ test_selection_io_read_verify(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t
     return 0;
 
 error:
-    if (api_ctx_pushed)
-        H5CX_pop(false);
-
     return -1;
 } /* end test_selection_io_read_verify() */
 
@@ -5166,7 +5045,6 @@ test_selection_io(const char *vfd_name)
     int        erbuf2[SEL_IO_DIM0][SEL_IO_DIM1];                    /* 2D expected read buffer */
     int       *erbufs[2] = {erbuf1, erbuf2[0]};                     /* Array of expected read buffers */
     int        shorten_element_sizes;  /* Whether to shorten the element sizes array */
-    bool       api_ctx_pushed = false; /* Whether API context pushed   */
 
     snprintf(test_title, sizeof(test_title), "selection I/O with %s VFD", vfd_name);
 
@@ -5214,37 +5092,17 @@ test_selection_io(const char *vfd_name)
     if ((file_spaces[1] = H5Screate_simple(2, dims2, NULL)) < 0)
         TEST_ERROR;
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
     /* Create file */
     flags = H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC;
 
-    if (NULL == (lf = H5FDopen(filename, flags, fapl_id, HADDR_UNDEF)))
+    if (NULL == (lf = H5FDopen_test(filename, flags, fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     /* Loop over memory types */
     for (type = 1; type < H5FD_MEM_NTYPES; type++) {
-        /* Push API context */
-        if (H5CX_push() < 0)
-            FAIL_STACK_ERROR;
-        api_ctx_pushed = true;
-
         /* Allocate space for I/O */
-        addrs[0] = H5FDalloc(lf, type, H5P_DEFAULT, (hsize_t)(sizeof(int) * SEL_IO_DIM0 * SEL_IO_DIM1));
-        addrs[1] = H5FDalloc(lf, type, H5P_DEFAULT, (hsize_t)(sizeof(int) * SEL_IO_DIM0 * SEL_IO_DIM1));
-
-        /* Pop API context */
-        if (api_ctx_pushed && H5CX_pop(false) < 0)
-            FAIL_STACK_ERROR;
-        api_ctx_pushed = false;
+        addrs[0] = H5FDalloc_test(lf, type, H5P_DEFAULT, (hsize_t)(sizeof(int) * SEL_IO_DIM0 * SEL_IO_DIM1));
+        addrs[1] = H5FDalloc_test(lf, type, H5P_DEFAULT, (hsize_t)(sizeof(int) * SEL_IO_DIM0 * SEL_IO_DIM1));
 
         /*
          * Test 1: Simple 1D contiguous I/O
@@ -5959,22 +5817,12 @@ test_selection_io(const char *vfd_name)
         element_sizes[1] = element_sizes[0];
     }
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = true;
-
     /*
      * Cleanup
      */
     /* Close file */
-    if (H5FDclose(lf) < 0)
+    if (H5FDclose_test(lf) < 0)
         TEST_ERROR;
-
-    /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
-        FAIL_STACK_ERROR;
-    api_ctx_pushed = false;
 
     h5_delete_test_file(FILENAME[0], fapl_id);
 
@@ -5994,13 +5842,10 @@ test_selection_io(const char *vfd_name)
     return 0;
 
 error:
-    if (api_ctx_pushed)
-        H5CX_pop(false);
-
     H5E_BEGIN_TRY
     {
         H5Pclose(fapl_id);
-        H5FDclose(lf);
+        H5FDclose_test(lf);
         for (i = 0; i < 2; i++) {
             H5Sclose(mem_spaces[i]);
             H5Sclose(file_spaces[i]);
