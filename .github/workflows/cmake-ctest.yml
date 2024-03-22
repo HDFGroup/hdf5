@@ -53,9 +53,9 @@ jobs:
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
           if [[ '${{ inputs.use_environ }}' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
-          else
             SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash
