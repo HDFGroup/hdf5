@@ -10,12 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- *  For details of the HDF libraries, see the HDF Documentation at:
- *    http://hdfgroup.org/HDF5/doc/
- *
- */
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -28,7 +22,7 @@ extern "C" {
  *  analogous arguments and return codes.
  *
  *  For details of the HDF libraries, see the HDF Documentation at:
- *   http://www.hdfgroup.org/HDF5/doc/
+ *    https://portal.hdfgroup.org/documentation/index.html
  *
  */
 
