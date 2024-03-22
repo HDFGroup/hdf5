@@ -24,18 +24,20 @@ SUBROUTINE mpi_param_03(nerrors)
   USE TH5_MISC_GEN
 
   IMPLICIT NONE
+
   INTEGER, INTENT(inout) :: nerrors                 ! number of errors
 
+  INTEGER, PARAMETER :: logical_kind = MPI_INTEGER_KIND
   INTEGER :: hdferror                               ! HDF hdferror flag
   INTEGER(hid_t) :: fapl_id                         ! file access identifier
-  INTEGER :: mpi_size, mpi_size_ret ! number of processes in the group of communicator
-  INTEGER :: mpierror               ! MPI hdferror flag
-  INTEGER :: mpi_rank               ! rank of the calling process in the communicator
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_size_ret ! number of processes in the group of communicator
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror               ! MPI hdferror flag
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_rank               ! rank of the calling process in the communicator
 
-  INTEGER :: info, info_ret
-  INTEGER :: comm, comm_ret
-  INTEGER :: nkeys
-  LOGICAL :: flag
+  INTEGER(KIND=MPI_INTEGER_KIND) :: info, info_ret
+  INTEGER(KIND=MPI_INTEGER_KIND) :: comm, comm_ret
+  INTEGER(KIND=MPI_INTEGER_KIND) :: nkeys
+  LOGICAL(KIND=logical_kind)     :: flag
   INTEGER :: iconfig
   CHARACTER(LEN=4) , PARAMETER :: in_key="host"
   CHARACTER(LEN=10), PARAMETER :: in_value="myhost.org"
@@ -62,13 +64,13 @@ SUBROUTINE mpi_param_03(nerrors)
 
      ! Split the communicator
      IF(mpi_rank.EQ.0)THEN
-        CALL MPI_Comm_split(MPI_COMM_WORLD, 1, mpi_rank, comm, mpierror)
+        CALL MPI_Comm_split(MPI_COMM_WORLD, 1_MPI_INTEGER_KIND, mpi_rank, comm, mpierror)
         IF (mpierror .NE. MPI_SUCCESS) THEN
            WRITE(*,*) "MPI_COMM_SPLIT *FAILED* Process = ", mpi_rank
            nerrors = nerrors + 1
         ENDIF
      ELSE
-        CALL MPI_Comm_split(MPI_COMM_WORLD, 0, mpi_rank, comm, mpierror)
+        CALL MPI_Comm_split(MPI_COMM_WORLD, 0_MPI_INTEGER_KIND, mpi_rank, comm, mpierror)
         IF (mpierror .NE. MPI_SUCCESS) THEN
            WRITE(*,*) "MPI_COMM_SPLIT *FAILED* Process = ", mpi_rank
            nerrors = nerrors + 1
@@ -111,9 +113,9 @@ SUBROUTINE mpi_param_03(nerrors)
         nerrors = nerrors + 1
      ENDIF
      IF (mpi_rank.EQ.0)THEN
-        CALL VERIFY("h5pget_fapl_mpio_f", mpi_size_ret, 1, hdferror)
+        CALL VERIFY("h5pget_fapl_mpio_f", mpi_size_ret, 1_MPI_INTEGER_KIND, hdferror)
      ELSE
-        CALL VERIFY("h5pget_fapl_mpio_f", mpi_size_ret, mpi_size-1, hdferror)
+        CALL VERIFY("h5pget_fapl_mpio_f", mpi_size_ret, INT(mpi_size-1,MPI_INTEGER_KIND), hdferror)
      ENDIF
 
      ! Check info returned
@@ -122,9 +124,9 @@ SUBROUTINE mpi_param_03(nerrors)
         WRITE(*,*) "MPI_INFO_GET_NKEYS *FAILED* Process = ", mpi_rank
         nerrors = nerrors + 1
      ENDIF
-     CALL VERIFY("h5pget_fapl_mpio_f", nkeys, 1, hdferror)
+     CALL VERIFY("h5pget_fapl_mpio_f", nkeys, 1_MPI_INTEGER_KIND, hdferror)
 
-     CALL MPI_Info_get_nthkey(info_ret, 0, key, mpierror)
+     CALL MPI_Info_get_nthkey(info_ret, 0_MPI_INTEGER_KIND, key, mpierror)
      IF (mpierror .NE. MPI_SUCCESS) THEN
         WRITE(*,*) "MPI_INFO_GET_NTHKEY *FAILED* Process = ", mpi_rank
         nerrors = nerrors + 1
@@ -136,7 +138,7 @@ SUBROUTINE mpi_param_03(nerrors)
         WRITE(*,*) "MPI_INFO_GET *FAILED* Process = ", mpi_rank
         nerrors = nerrors + 1
      ENDIF
-     CALL VERIFY("h5pget_fapl_mpio_f", flag, .TRUE., hdferror)
+     CALL VERIFY("h5pget_fapl_mpio_f", LOGICAL(flag), .TRUE., hdferror)
      CALL VERIFY("h5pget_fapl_mpio_f", TRIM(value), in_value, hdferror)
 
      ! Free the MPI resources
@@ -179,16 +181,17 @@ SUBROUTINE mpi_param_08(nerrors)
   IMPLICIT NONE
   INTEGER, INTENT(inout) :: nerrors                 ! number of errors
 
+  INTEGER, PARAMETER :: logical_kind = MPI_INTEGER_KIND
   INTEGER :: hdferror                               ! HDF hdferror flag
   INTEGER(hid_t) :: fapl_id                         ! file access identifier
-  INTEGER :: mpi_size, mpi_size_ret ! number of processes in the group of communicator
-  INTEGER :: mpierror               ! MPI hdferror flag
-  INTEGER :: mpi_rank               ! rank of the calling process in the communicator
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_size_ret ! number of processes in the group of communicator
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror               ! MPI hdferror flag
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_rank               ! rank of the calling process in the communicator
 
   TYPE(MPI_INFO) :: info, info_ret
   TYPE(MPI_COMM) :: comm, comm_ret
-  INTEGER :: nkeys
-  LOGICAL :: flag
+  INTEGER(KIND=MPI_INTEGER_KIND) :: nkeys
+  LOGICAL(KIND=logical_kind) :: flag
   INTEGER :: iconfig
   CHARACTER(LEN=4) , PARAMETER :: in_key="host"
   CHARACTER(LEN=10), PARAMETER :: in_value="myhost.org"
@@ -215,13 +218,13 @@ SUBROUTINE mpi_param_08(nerrors)
 
      ! Split the communicator
      IF(mpi_rank.EQ.0)THEN
-        CALL MPI_Comm_split(MPI_COMM_WORLD, 1, mpi_rank, comm, mpierror)
+        CALL MPI_Comm_split(MPI_COMM_WORLD, 1_MPI_INTEGER_KIND, mpi_rank, comm, mpierror)
         IF (mpierror .NE. MPI_SUCCESS) THEN
            WRITE(*,*) "MPI_COMM_SPLIT *FAILED* Process = ", mpi_rank
            nerrors = nerrors + 1
         ENDIF
      ELSE
-        CALL MPI_Comm_split(MPI_COMM_WORLD, 0, mpi_rank, comm, mpierror)
+        CALL MPI_Comm_split(MPI_COMM_WORLD, 0_MPI_INTEGER_KIND, mpi_rank, comm, mpierror)
         IF (mpierror .NE. MPI_SUCCESS) THEN
            WRITE(*,*) "MPI_COMM_SPLIT *FAILED* Process = ", mpi_rank
            nerrors = nerrors + 1
@@ -264,9 +267,9 @@ SUBROUTINE mpi_param_08(nerrors)
         nerrors = nerrors + 1
      ENDIF
      IF (mpi_rank.EQ.0)THEN
-        CALL VERIFY("h5pget_fapl_mpio_f", mpi_size_ret, 1, hdferror)
+        CALL VERIFY("h5pget_fapl_mpio_f", mpi_size_ret, 1_MPI_INTEGER_KIND, hdferror)
      ELSE
-        CALL VERIFY("h5pget_fapl_mpio_f", mpi_size_ret, mpi_size-1, hdferror)
+        CALL VERIFY("h5pget_fapl_mpio_f", mpi_size_ret, INT(mpi_size-1,MPI_INTEGER_KIND), hdferror)
      ENDIF
 
      ! Check info returned
@@ -275,9 +278,9 @@ SUBROUTINE mpi_param_08(nerrors)
         WRITE(*,*) "MPI_INFO_GET_NKEYS *FAILED* Process = ", mpi_rank
         nerrors = nerrors + 1
      ENDIF
-     CALL VERIFY("h5pget_fapl_mpio_f", nkeys, 1, hdferror)
+     CALL VERIFY("h5pget_fapl_mpio_f", nkeys, 1_MPI_INTEGER_KIND, hdferror)
 
-     CALL MPI_Info_get_nthkey(info_ret, 0, key, mpierror)
+     CALL MPI_Info_get_nthkey(info_ret, 0_MPI_INTEGER_KIND, key, mpierror)
      IF (mpierror .NE. MPI_SUCCESS) THEN
         WRITE(*,*) "MPI_INFO_GET_NTHKEY *FAILED* Process = ", mpi_rank
         nerrors = nerrors + 1
@@ -289,7 +292,7 @@ SUBROUTINE mpi_param_08(nerrors)
         WRITE(*,*) "MPI_INFO_GET *FAILED* Process = ", mpi_rank
         nerrors = nerrors + 1
      ENDIF
-     CALL VERIFY("h5pget_fapl_mpio_f", flag, .TRUE., hdferror)
+     CALL VERIFY("h5pget_fapl_mpio_f", LOGICAL(flag), .TRUE., hdferror)
      CALL VERIFY("h5pget_fapl_mpio_f", TRIM(value), in_value, hdferror)
 
      ! Free the MPI resources

@@ -391,6 +391,8 @@ AC_DEFUN([PAC_FC_NATIVE_INTEGER],[
 AC_REQUIRE([PAC_FC_AVAIL_KINDS])
 AC_MSG_CHECKING([sizeof of native KINDS])
 AC_LANG_PUSH([Fortran])
+saved_FCFLAGS=$FCFLAGS
+FCFLAGS=$saved_user_FCFLAGS
 pack_int_sizeof=""
 rm -f pac_fconftest.out
   AC_LANG_CONFTEST([
@@ -424,6 +426,7 @@ rm -f pac_fconftest.out
             pack_int_sizeof="$2"
         ])
 AC_MSG_RESULT([$pack_int_sizeof])
+FCFLAGS=$saved_FCFLAGS
 AC_LANG_POP([Fortran])
 ])
 
