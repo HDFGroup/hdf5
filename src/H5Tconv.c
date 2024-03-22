@@ -1183,6 +1183,11 @@ typedef struct H5T_conv_enum_t {
     int     *src2dst;  /*map from src to dst index         */
 } H5T_conv_enum_t;
 
+/* Cnversion data fot H5T__conv_array() */
+typedef struct H5T_conv_array_t {
+    H5T_path_t *tpath; /* Conversion path for parent types */
+} H5T_conv_array_t;
+
 /* Conversion data for the hardware conversion functions */
 typedef struct H5T_conv_hw_t {
     size_t s_aligned; /*number source elements aligned     */
@@ -1217,9 +1222,6 @@ static herr_t H5T__reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_orde
 
 /* Declare a free list to manage pieces of vlen data */
 H5FL_BLK_DEFINE_STATIC(vlen_seq);
-
-/* Declare a free list to manage pieces of array data */
-H5FL_BLK_DEFINE_STATIC(array_seq);
 
 /* Declare a free list to manage pieces of reference data */
 H5FL_BLK_DEFINE_STATIC(ref_seq);
@@ -3844,19 +3846,18 @@ done:
 herr_t
 H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                 const H5T_conv_ctx_t H5_ATTR_UNUSED *conv_ctx, size_t nelmts, size_t buf_stride,
-                size_t bkg_stride, void *_buf, void H5_ATTR_UNUSED *_bkg)
+                size_t bkg_stride, void *_buf, void *_bkg)
 {
+    H5T_conv_array_t *priv = NULL; /* Private conversion data */
     H5T_conv_ctx_t tmp_conv_ctx = {0};         /* Temporary conversion context */
-    H5T_path_t    *tpath;                      /* Type conversion path             */
     H5T_t         *tsrc_cpy = NULL;            /*temporary copy of source base datatype */
     H5T_t         *tdst_cpy = NULL;            /*temporary copy of destination base datatype */
     hid_t          tsrc_id  = H5I_INVALID_HID; /*temporary type atom */
     hid_t          tdst_id  = H5I_INVALID_HID; /*temporary type atom */
-    uint8_t       *sp, *dp;                    /*source and dest traversal ptrs     */
+    uint8_t       *sp, *dp, *bp;               /*source, dest, and bkg traversal ptrs     */
     ssize_t        src_delta, dst_delta;       /*source & destination stride         */
     int            direction;                  /*direction of traversal         */
     bool           need_ids  = false;          /*whether we need IDs for the datatypes */
-    void          *bkg_buf   = NULL;           /*temporary background buffer          */
     herr_t         ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3884,13 +3885,32 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
                                 "array datatypes do not have the same sizes of dimensions");
 
-            /* Array datatypes don't need a background buffer */
-            cdata->need_bkg = H5T_BKG_NO;
+            /* Initialize parent type conversion if necessary. We need to do this here because we need to report whether we need a background buffer or not. */
+            if (!cdata->priv) {
+                /* Allocate private data */
+                if (NULL == (priv = (H5T_conv_array_t *)(cdata->priv = calloc(1, sizeof(*priv)))))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                /* Find conversion path between parent types */
+                if (NULL == (priv->tpath = H5T_path_find(src->shared->parent, dst->shared->parent))) {
+                    free(priv);
+                    cdata->priv = NULL;
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype");
+                }
+
+                /* Array datatypes don't need a background buffer by themselves, but the parent type might. Pass the need_bkg field through to the upper layer. */
+                cdata->need_bkg = priv->tpath->cdata.need_bkg;
+            }
 
             break;
 
         case H5T_CONV_FREE:
-            /* QAK - Nothing to do currently */
+            /*
+             * Free private data
+             */
+            free(cdata->priv);
+            cdata->priv = NULL;
+
             break;
 
         case H5T_CONV_CONV:
@@ -3901,6 +3921,7 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
             if (NULL == conv_ctx)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid datatype conversion context pointer");
+            priv = (H5T_conv_array_t *)cdata->priv;
 
             /* Initialize temporary conversion context */
             tmp_conv_ctx = *conv_ctx;
@@ -3913,12 +3934,14 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
              * destination areas overlapping?
              */
             if (src->shared->size >= dst->shared->size || buf_stride > 0) {
-                sp = dp   = (uint8_t *)_buf;
+                sp = dp = (uint8_t *)_buf;
+                bp = _bkg;
                 direction = 1;
             }
             else {
                 sp        = (uint8_t *)_buf + (nelmts - 1) * (buf_stride ? buf_stride : src->shared->size);
                 dp        = (uint8_t *)_buf + (nelmts - 1) * (buf_stride ? buf_stride : dst->shared->size);
+                bp        = (uint8_t *)_bkg + (nelmts - 1) * (bkg_stride ? bkg_stride : dst->shared->size);
                 direction = -1;
             }
 
@@ -3932,11 +3955,7 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
             dst_delta = (ssize_t)direction * (ssize_t)(buf_stride ? buf_stride : dst->shared->size);
 
             /* Set up conversion path for base elements */
-            if (NULL == (tpath = H5T_path_find(src->shared->parent, dst->shared->parent))) {
-                HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                            "unable to convert between src and dest datatypes");
-            }
-            else if (!H5T_path_noop(tpath)) {
+            if (!H5T_path_noop(priv->tpath)) {
                 if (NULL == (tsrc_cpy = H5T_copy(src->shared->parent, H5T_COPY_ALL)))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
                                 "unable to copy src base type for conversion");
@@ -3959,17 +3978,6 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                 tmp_conv_ctx.u.conv.dst_type_id = tdst_id;
             }
 
-            /* Check if we need a background buffer for this conversion */
-            if (tpath->cdata.need_bkg) {
-                size_t bkg_buf_size; /*size of background buffer in bytes */
-
-                /* Allocate background buffer */
-                bkg_buf_size = src->shared->u.array.nelem * MAX(src->shared->size, dst->shared->size);
-                if (NULL == (bkg_buf = H5FL_BLK_CALLOC(array_seq, bkg_buf_size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                "memory allocation failed for type conversion");
-            } /* end if */
-
             /* Perform the actual conversion */
             tmp_conv_ctx.u.conv.recursive = true;
             for (size_t elmtno = 0; elmtno < nelmts; elmtno++) {
@@ -3977,13 +3985,15 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                 memmove(dp, sp, src->shared->size);
 
                 /* Convert array */
-                if (H5T_convert_with_ctx(tpath, tsrc_cpy, tdst_cpy, &tmp_conv_ctx, src->shared->u.array.nelem,
-                                         (size_t)0, bkg_stride, dp, bkg_buf) < 0)
+                if (H5T_convert_with_ctx(priv->tpath, tsrc_cpy, tdst_cpy, &tmp_conv_ctx, src->shared->u.array.nelem,
+                                         (size_t)0, (size_t)0, dp, bp) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
 
-                /* Advance the source & destination pointers */
+                /* Advance the source, destination, and background pointers */
                 sp += src_delta;
                 dp += dst_delta;
+                if (bp)
+                    bp += dst_delta;
             } /* end for */
             tmp_conv_ctx.u.conv.recursive = false;
 
@@ -4010,10 +4020,6 @@ done:
         if (H5T_close(tdst_cpy) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     }
-
-    /* Release the background buffer, if we have one */
-    if (bkg_buf)
-        bkg_buf = H5FL_BLK_FREE(array_seq, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__conv_array() */
