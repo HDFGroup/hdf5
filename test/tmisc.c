@@ -6698,26 +6698,26 @@ test_misc40(void)
 
     /* Default is true */
     status = H5Pget_obj_track_times(def_gcpl, &track_times);
-    CHECK(status, FAIL, "H5Gclose");
+    CHECK(status, FAIL, "H5Pget_obj_track_times");
     VERIFY(track_times, true, "H5Pget_obj_track_times");
 
     /* Default is false */
     status = H5Pget_attr_creation_order(def_gcpl, &cr_order);
-    CHECK(status, FAIL, "H5Gclose");
-    VERIFY(cr_order, 0, "H5Pget_attr_creation_order");
+    CHECK(status, FAIL, "H5Pget_attr_creation_order");
+    VERIFY(cr_order, false, "H5Pget_attr_creation_order");
 
     status = H5Gclose(def_gid);
     CHECK(status, FAIL, "H5Gclose");
 
     status = H5Pclose(def_gcpl);
-    CHECK(status, FAIL, "H5Gclose");
+    CHECK(status, FAIL, "H5Pclose");
 
     /*
      * Verify non-default creation properties when creating
      * group with intermediate groups
      */
     gcpl = H5Pcreate(H5P_GROUP_CREATE);
-    CHECK(gcpl, FAIL, "H5Fcreate");
+    CHECK(gcpl, FAIL, "H5Pcreate");
 
     status = H5Pset_attr_creation_order(gcpl, H5P_CRT_ORDER_TRACKED);
     CHECK(status, FAIL, "H5Pset_attr_creation_order");
@@ -6744,7 +6744,7 @@ test_misc40(void)
     VERIFY(track_times, false, "H5Pget_obj_track_times");
 
     status = H5Gclose(gid);
-    CHECK(status, FAIL, "H5Pclose");
+    CHECK(status, FAIL, "H5Gclose");
     status = H5Pclose(gcpl);
     CHECK(status, FAIL, "H5Pclose");
 
@@ -6784,7 +6784,7 @@ test_misc40(void)
     CHECK(status, FAIL, "H5Pclose");
 
     status = H5Gclose(gid);
-    CHECK(status, FAIL, "H5Pclose");
+    CHECK(status, FAIL, "H5Gclose");
     status = H5Pclose(gcpl);
     CHECK(status, FAIL, "H5Pclose");
 
@@ -6793,7 +6793,7 @@ test_misc40(void)
      * dataset with intermediate group
      */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(dcpl, FAIL, "H5Fcreate");
+    CHECK(dcpl, FAIL, "H5Pcreate");
 
     status = H5Pset_attr_creation_order(dcpl, H5P_CRT_ORDER_TRACKED);
     CHECK(status, FAIL, "H5Pset_attr_creation_order");
@@ -6828,7 +6828,7 @@ test_misc40(void)
 
     /* Verify dname */
     did = H5Dopen2(gid, "dname", H5P_DEFAULT);
-    CHECK(did, FAIL, "H5Gopen2");
+    CHECK(did, FAIL, "H5Dopen2");
 
     dcpl = H5Dget_create_plist(did);
     CHECK(dcpl, FAIL, "H5Dget_create_plist");
@@ -6841,12 +6841,12 @@ test_misc40(void)
     VERIFY(track_times, true, "H5Pget_obj_track_times");
 
     status = H5Dclose(did);
-    CHECK(status, FAIL, "H5Pclose");
+    CHECK(status, FAIL, "H5Dclose");
     status = H5Pclose(dcpl);
     CHECK(status, FAIL, "H5Pclose");
 
     status = H5Gclose(gid);
-    CHECK(status, FAIL, "H5Pclose");
+    CHECK(status, FAIL, "H5Gclose");
     status = H5Pclose(gcpl);
     CHECK(status, FAIL, "H5Pclose");
 
