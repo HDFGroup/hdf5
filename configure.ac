@@ -1576,9 +1576,33 @@ if test "X${enable_shared}" = "Xyes"; then
 fi
 
 ## ----------------------------------------------------------------------
-## Set up large file support
+## Use the macro _AC_SYS_LARGEFILE_MACRO_VALUE to test defines
+## that might need to be set for largefile support to behave
+## correctly. This macro is defined in acsite.m4 and overrides
+## the version provided by Autoconf (as of v2.65). The custom
+## macro additionally adds the appropriate defines to AM_CPPFLAGS
+## so that later configure checks have them visible.
+##
+## NOTE: AC_SYS_LARGEFILE is buggy on some platforms and will
+##       NOT set the defines, even though it correctly detects
+##       the necessary values. These macro hacks are annoying
+##       but unfortunately will be necessary until we decide
+##       to drop support for platforms that don't have 64-bit
+##       off_t defaults.
 
-AC_SYS_LARGEFILE
+## Check for _FILE_OFFSET_BITS
+_AC_SYS_LARGEFILE_MACRO_VALUE([_FILE_OFFSET_BITS], [64],
+  [ac_cv_sys_file_offset_bits],
+  [Number of bits in a file offset, on hosts where this is settable.],
+  [_AC_SYS_LARGEFILE_TEST_INCLUDES])
+
+## Check for _LARGE_FILES
+if test "$ac_cv_sys_file_offset_bits" = unknown; then
+  _AC_SYS_LARGEFILE_MACRO_VALUE([_LARGE_FILES], [1],
+    [ac_cv_sys_large_files],
+    [Define for large files, on AIX-style hosts.],
+    [_AC_SYS_LARGEFILE_TEST_INCLUDES])
+fi
 
 ## ----------------------------------------------------------------------
 ## Add necessary defines for Linux Systems.
