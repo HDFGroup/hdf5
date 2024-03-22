@@ -272,6 +272,41 @@ H5P__encode_double(const void *value, void **_pp, size_t *size)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__encode_double() */
 
+/*-------------------------------------------------------------------------
+ * Function:       H5P__encode_uint64_t
+ *
+ * Purpose:        Generic encoding callback routine for 'uint64_t' properties.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P__encode_uint64_t(const void *value, void **_pp, size_t *size)
+{
+    uint8_t **pp = (uint8_t **)_pp;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    assert(value);
+    assert(size);
+
+    if (NULL != *pp) {
+        /* Encode the size */
+        *(*pp)++ = (uint8_t)sizeof(uint64_t);
+
+        /* Encode the value */
+        UINT64ENCODE(*pp, *(const unsigned *)value);
+    } /* end if */
+
+    /* Set size needed for encoding */
+    *size += (1 + sizeof(uint64_t));
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__encode_uint64_t() */
+
 /*--------------------------------------------------------------------------
  NAME
     H5P__encode_cb
@@ -610,6 +645,42 @@ H5P__decode_double(const void **_pp, void *_value)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__decode_double() */
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__decode_uint64_t
+ *
+ * Purpose:        Generic decoding callback routine for 'uint64_t' properties.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P__decode_uint64_t(const void **_pp, void *_value)
+{
+    uint64_t       *value = (uint64_t *)_value; /* Property value to return */
+    const uint8_t **pp    = (const uint8_t **)_pp;
+    unsigned        enc_size;            /* Size of encoded property */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    assert(pp);
+    assert(*pp);
+    assert(value);
+
+    /* Decode the size */
+    enc_size = *(*pp)++;
+    if (enc_size != sizeof(uint64_t))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "uint64_t value can't be decoded");
+
+    UINT64DECODE(*pp, *value);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__decode_uint64_t() */
 
 /*-------------------------------------------------------------------------
  NAME
