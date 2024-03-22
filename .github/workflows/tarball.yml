@@ -131,7 +131,6 @@ jobs:
           bin/release -d $GITHUB_WORKSPACE gzip zip 
         shell: bash
 
-
       - name: Rename release file base name
         id: ren-basename
         if: ${{ (inputs.use_environ == 'release') && (inputs.use_tag  == 'snapshot') }}
