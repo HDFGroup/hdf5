@@ -956,10 +956,10 @@ H5R__decode(const unsigned char *buf, size_t *nbytes, H5R_ref_priv_t *ref)
     const uint8_t *p        = (const uint8_t *)buf;
     size_t         buf_size = 0, decode_size = 0;
     uint8_t        flags;
-    bool           decoded_filename = false;  /* Whether filename was decoded, for error handling */
-    bool           decoded_attrname = false;  /* Whether attribute name was decoded, for error handling */
+    bool           decoded_filename  = false; /* Whether filename was decoded, for error handling */
+    bool           decoded_attrname  = false; /* Whether attribute name was decoded, for error handling */
     bool           decoded_dataspace = false; /* Whether dataspace was decoded, for error handling */
-    herr_t         ret_value = SUCCEED;
+    herr_t         ret_value         = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1201,7 +1201,7 @@ H5R__decode_region(const unsigned char *buf, size_t *nbytes, H5S_t **space_ptr)
     const uint8_t *p_end    = p + *nbytes - 1;
     size_t         buf_size = 0;
     unsigned       rank;
-    H5S_t         *space = NULL;
+    H5S_t         *space     = NULL;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
