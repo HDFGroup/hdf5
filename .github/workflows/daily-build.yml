@@ -44,7 +44,7 @@ jobs:
     with:
       preset_name: ci-StdShar
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
-      use_tag: snapshot
+#      use_tag: snapshot
       use_environ: snapshots
     if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
 

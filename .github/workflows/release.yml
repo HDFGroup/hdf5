@@ -40,7 +40,7 @@ jobs:
     with:
       preset_name: ci-StdShar
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
-      use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
+#      use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
       use_environ: release
 
   call-workflow-abi:
