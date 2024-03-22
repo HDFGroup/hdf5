@@ -69,7 +69,8 @@ tts_cancel(void)
     assert(cancel_file >= 0);
     ret = pthread_create(&childthread, NULL, tts_cancel_thread, NULL);
     assert(ret == 0);
-    H5TS__barrier_wait(&barrier);
+    ret = H5TS__barrier_wait(&barrier);
+    assert(ret == 0);
     ret = pthread_cancel(childthread);
     assert(ret == 0);
 
@@ -164,7 +165,9 @@ tts_cancel_callback(void *elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_ATTR_U
     int    value   = *(int *)elem;
     herr_t status;
 
-    H5TS__barrier_wait(&barrier);
+    status = H5TS__barrier_wait(&barrier);
+    CHECK_I(status, "H5TS__barrier_wait");
+
     HDsleep(3);
 
     if (value != 1) {

@@ -54,7 +54,7 @@
 /*********************/
 
 /* API threadsafety info */
-H5TS_api_info_t H5TS_api_info_p;
+H5TS_api_info_t H5TS_api_info_p = {H5TS_EX_LOCK_INIT, H5TS_MUTEX_INITIALIZER, 0};
 
 /*****************************/
 /* Library Private Variables */
@@ -77,11 +77,19 @@ H5TS_api_info_t H5TS_api_info_p;
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TSmutex_acquire(unsigned lock_count, bool *acquired){
+H5TSmutex_acquire(unsigned lock_count, bool *acquired)
+{
+    herr_t ret_value  = SUCCEED;
+
     FUNC_ENTER_API_NAMECHECK_ONLY
 
-        FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(lock_count, acquired))}
-/* end H5TSmutex_acquire() */
+    /* Acquire the "attempt" lock */
+    if (H5_UNLIKELY(H5TS__mutex_acquire(lock_count, acquired) < 0))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)
+} /* end H5TSmutex_acquire() */
 
 /*--------------------------------------------------------------------------
  * Function:    H5TSmutex_get_attempt_count
@@ -111,7 +119,7 @@ herr_t H5TSmutex_get_attempt_count(unsigned *count)
 
 done:
     /* Release the lock */
-    if (have_mutex)
+    if (H5_LIKELY(have_mutex))
         if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_api_info_p.attempt_mutex) < 0))
             ret_value = FAIL;
 

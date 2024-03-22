@@ -235,11 +235,15 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
                 MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
                 fprintf(stream, "MPI-process %d", mpi_rank);
             } /* end if */
+#ifdef H5_HAVE_THREADSAFE
             else
-                fprintf(stream, "thread 0");
+                fprintf(stream, "thread %" PRIu64, H5TS_thread_id());
+#endif
         } /* end block */
 #else
+#ifdef H5_HAVE_THREADSAFE
         fprintf(stream, "thread %" PRIu64, H5TS_thread_id());
+#endif
 #endif
         fprintf(stream, ":\n");
     } /* end if */

@@ -42,10 +42,7 @@
 
 #ifdef H5_HAVE_THREADSAFE
 /*
- * The per-thread API context. pthread_once() initializes a special
- * key that will be used by all threads to create a stack specific to
- * each thread individually. The association of contexts to threads will
- * be handled by the pthread library.
+ * The per-thread API context.
  *
  * In order for this macro to work, H5CX_get_my_context() must be preceded
  * by "H5CX_node_t *ctx =".

@@ -97,7 +97,7 @@ H5TS__barrier_init(H5TS_barrier_t *barrier, uint64_t count)
 
         /* Initialize the barrier */
 #ifdef H5_HAVE_PTHREAD_BARRIER
-    if (pthread_barrier_init(barrier, NULL, count))
+    if (H5_UNLIKELY(pthread_barrier_init(barrier, NULL, count)))
         HGOTO_DONE(FAIL);
 #else
     memcpy(barrier, &H5TS_barrier_def, sizeof(H5TS_barrier_def));
@@ -136,21 +136,21 @@ H5TS__barrier_wait(H5TS_barrier_t *barrier)
         HGOTO_DONE(FAIL);
 
 #ifdef H5_HAVE_PTHREAD_BARRIER
-    if (0 != pthread_barrier_wait(barrier))
+    if (H5_UNLIKELY(pthread_barrier_wait(barrier)))
         HGOTO_DONE(FAIL);
 #else
     /* Acquire the mutex for the barrier */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&barrier->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_lock(&barrier->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = true;
 
     barrier->entered++;
     if (barrier->entered < barrier->threshold) {
-        if (H5_UNLIKELY(H5TS_cond_wait(&barrier->cv, &barrier->mutex)))
+        if (H5_UNLIKELY(H5TS_cond_wait(&barrier->cv, &barrier->mutex) < 0))
             HGOTO_DONE(FAIL);
     }
     else {
-        if (H5_UNLIKELY(H5TS_cond_broadcast(&barrier->cv)))
+        if (H5_UNLIKELY(H5TS_cond_broadcast(&barrier->cv) < 0))
             HGOTO_DONE(FAIL);
 
         /* Increment threshold count of threads for next barrier */
@@ -160,8 +160,8 @@ H5TS__barrier_wait(H5TS_barrier_t *barrier)
 
 done:
 #ifndef H5_HAVE_PTHREAD_BARRIER
-    if (have_mutex)
-        if (H5_UNLIKELY(H5TS_mutex_unlock(&barrier->mutex)))
+    if (H5_LIKELY(have_mutex))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&barrier->mutex) < 0))
             ret_value = FAIL;
 #endif
 
@@ -189,12 +189,12 @@ H5TS__barrier_destroy(H5TS_barrier_t *barrier)
         HGOTO_DONE(FAIL);
 
 #ifdef H5_HAVE_PTHREAD_BARRIER
-    if (0 != pthread_barrier_destroy(barrier))
+    if (H5_UNLIKELY(pthread_barrier_destroy(barrier)))
         HGOTO_DONE(FAIL);
 #else
 
     /* Acquire the mutex for the barrier */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&barrier->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_lock(&barrier->mutex) < 0))
         HGOTO_DONE(FAIL);
 
     /* Check for barrier still in use */
@@ -204,16 +204,16 @@ H5TS__barrier_destroy(H5TS_barrier_t *barrier)
     }
 
     /* Release the barrier's mutex */
-    if (H5_UNLIKELY(H5TS_mutex_unlock(&barrier->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_unlock(&barrier->mutex) < 0))
         HGOTO_DONE(FAIL);
 
     /* Call the appropriate pthread destroy routines.  We are committed
      * to the destroy at this point, so call them all, even if one fails
      * along the way.
      */
-    if (H5_UNLIKELY(H5TS_mutex_destroy(&barrier->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_destroy(&barrier->mutex) < 0))
         ret_value = FAIL;
-    if (H5_UNLIKELY(H5TS_cond_destroy(&barrier->cv)))
+    if (H5_UNLIKELY(H5TS_cond_destroy(&barrier->cv) < 0))
         ret_value = FAIL;
 #endif
 

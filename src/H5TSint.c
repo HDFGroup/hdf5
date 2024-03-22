@@ -182,10 +182,10 @@ H5TS_api_lock(void)
             HGOTO_DONE(FAIL);
 
     /* Acquire the "attempt" mutex, increment the attempt lock count, release the lock */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&H5TS_api_info_p.attempt_mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_lock(&H5TS_api_info_p.attempt_mutex) < 0))
         HGOTO_DONE(FAIL);
     H5TS_api_info_p.attempt_lock_count++;
-    if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_api_info_p.attempt_mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_api_info_p.attempt_mutex) < 0))
         HGOTO_DONE(FAIL);
 
     /* Acquire the library's exclusive API lock */
@@ -300,7 +300,8 @@ H5TS__tinfo_create(void)
     /* Note: Must use lock here also, since 'destroy' callback can be
      *	invoked asynchronously when a thread is joined.
      */
-    H5TS_mutex_lock(&H5TS_tinfo_mtx_s);
+    if (H5_UNLIKELY(H5TS_mutex_lock(&H5TS_tinfo_mtx_s) < 0))
+        HGOTO_DONE(NULL);
 
     /* Reuse an info struct that's on the free list if possible */
     if (NULL != (tinfo_node = H5TS_tinfo_next_free_s))
@@ -314,7 +315,8 @@ H5TS__tinfo_create(void)
     new_id = ++H5TS_next_thrd_id_s;
 
     /* Release the lock for modifying the thread info globals */
-    H5TS_mutex_unlock(&H5TS_tinfo_mtx_s);
+    if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_tinfo_mtx_s) < 0))
+        HGOTO_DONE(NULL);
 
     /* If a new info record is needed, allocate it */
     if (NULL == tinfo_node) {
@@ -500,21 +502,25 @@ H5TS__tinfo_term(void)
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Release nodes on the free list */
-    H5TS_mutex_lock(&H5TS_tinfo_mtx_s);
+    if (H5_UNLIKELY(H5TS_mutex_lock(&H5TS_tinfo_mtx_s) < 0))
+        HGOTO_DONE(FAIL);
     while (H5TS_tinfo_next_free_s) {
         H5TS_tinfo_node_t *next = H5TS_tinfo_next_free_s->next;
         H5MM_free(H5TS_tinfo_next_free_s);
         H5TS_tinfo_next_free_s = next;
     }
-    H5TS_mutex_unlock(&H5TS_tinfo_mtx_s);
+    if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_tinfo_mtx_s) < 0))
+        HGOTO_DONE(FAIL);
 
     /* Release critical section / mutex for modifying the thread info globals */
-    H5TS_mutex_destroy(&H5TS_tinfo_mtx_s);
+    if (H5_UNLIKELY(H5TS_mutex_destroy(&H5TS_tinfo_mtx_s) < 0))
+        HGOTO_DONE(FAIL);
 
     /* Release key for thread-specific API contexts */
     if (H5_UNLIKELY(H5TS_key_delete(H5TS_thrd_info_key_g) < 0))
-        ret_value = FAIL;
+        HGOTO_DONE(FAIL);
 
+done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__tinfo_term() */
 

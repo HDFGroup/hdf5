@@ -77,12 +77,8 @@ H5TS__pthread_first_thread_init(void)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Initialize global API lock */
+    /* Initialize global API lock, to disable cancels */
     H5TS__ex_lock_init(&H5TS_api_info_p.api_lock, true);
-
-    /* Initialize the "lock acquisition attempt" mutex & counter */
-    H5TS_mutex_init(&H5TS_api_info_p.attempt_mutex);
-    H5TS_api_info_p.attempt_lock_count = 0;
 
     /* Set up thread-local thread-info struct */
     H5TS__tinfo_init();

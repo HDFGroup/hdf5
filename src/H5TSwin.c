@@ -80,21 +80,15 @@ H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Initialize global API lock */
-    H5TS__ex_lock_init(&H5TS_api_info_p.api_lock, true);
-
-    /* Initialize the global "lock acquisition attempt" critical section & counter */
-    H5TS_mutex_init(&H5TS_api_info_p.attempt_mutex);
-    H5TS_api_info_p.attempt_lock_count = 0;
-
-    /* Set up per-thread key infrastructure */
-    if (H5_UNLIKELY(H5TS__win_kwd_init() < 0))
-        ret_value = FALSE;
+    /* Initialize global API lock, to disable cancels */
+    if (H5_UNLIKELY(H5TS__ex_lock_init(&H5TS_api_info_p.api_lock, true) < 0))
+        HGOTO_DONE(FALSE);
 
     /* Initialize per-thread library info */
     if (H5_UNLIKELY(H5TS__tinfo_init() < 0))
-        ret_value = FALSE;
+        HGOTO_DONE(FALSE);
 
+done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS__win32_process_enter() */
 

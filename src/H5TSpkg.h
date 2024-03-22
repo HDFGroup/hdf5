@@ -73,6 +73,27 @@
     }
 #endif
 
+/* Excl lock initialization macro */
+#ifdef H5_HAVE_PTHREAD_H
+#define H5TS_EX_LOCK_INIT                                                                                    \
+    {                                                                                                        \
+        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
+            H5TS_COND_INITIALIZER, /* cond_var */                                                            \
+            0,                     /* owner_thread */                                                        \
+            0,                     /* lock_count */                                                          \
+            false,                 /* disable_cancel */                                                      \
+            0                      /* previous_state */                                                      \
+    }
+#else
+#define H5TS_EX_LOCK_INIT                                                                                   \
+    {                                                                                                        \
+        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
+            H5TS_COND_INITIALIZER, /* cond_var */                                                            \
+            0,                     /* owner_thread */                                                        \
+            0                      /* lock_count */                                                          \
+    }
+#endif
+
 /****************************/
 /* Package Private Typedefs */
 /****************************/
@@ -283,11 +304,11 @@ extern H5TS_key_t H5TS_thrd_info_key_g;
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-herr_t H5TS__mutex_acquire(unsigned lock_count, bool *acquired);
-herr_t H5TS__mutex_release(unsigned *lock_count);
-herr_t H5TS__tinfo_init(void);
-void   H5TS__tinfo_destroy(void *tinfo_node);
-herr_t H5TS__tinfo_term(void);
+H5_DLL herr_t H5TS__mutex_acquire(unsigned lock_count, bool *acquired);
+H5_DLL herr_t H5TS__mutex_release(unsigned *lock_count);
+H5_DLL herr_t H5TS__tinfo_init(void);
+H5_DLL void   H5TS__tinfo_destroy(void *tinfo_node);
+H5_DLL herr_t H5TS__tinfo_term(void);
 
 /* Recursive R/W lock related function declarations */
 H5_DLL herr_t H5TS__rw_lock_init(H5TS_rw_lock_t *rw_lock);

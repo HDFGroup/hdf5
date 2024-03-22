@@ -308,8 +308,9 @@ H5TS__rw_lock_get_stats(H5TS_rw_lock_t *rw_lock, H5TS_rw_lock_stats_t *stats)
     *stats = rw_lock->stats;
 
 done:
-    if (have_mutex)
-        H5TS_mutex_unlock(&rw_lock->mutex);
+    if (H5_LIKELY(have_mutex))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&rw_lock->mutex) < 0))
+            ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__rw_lock_get_stats() */
@@ -339,7 +340,7 @@ H5TS__rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock)
         HGOTO_DONE(FAIL);
 
     /* Acquire the mutex */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&rw_lock->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_lock(&rw_lock->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = true;
 
@@ -347,8 +348,9 @@ H5TS__rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock)
     memset(&rw_lock->stats, 0, sizeof(rw_lock->stats));
 
 done:
-    if (have_mutex)
-        H5TS_mutex_unlock(&rw_lock->mutex);
+    if (H5_LIKELY(have_mutex))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&rw_lock->mutex) < 0))
+            ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__rw_lock_reset_stats() */
@@ -416,7 +418,7 @@ H5TS__rw_lock_init(H5TS_rw_lock_t *rw_lock)
 
 #ifdef H5_HAVE_WIN_THREADS
     /* The current H5TS_rw_lock_t implementation uses H5TS_key_create() with a
-     * key destructor callback , which is not [currently] supported by Windows.
+     * key destructor callback, which is not [currently] supported by Windows.
      */
     HGOTO_DONE(FAIL);
 #else
@@ -453,11 +455,11 @@ H5TS__rw_lock_destroy(H5TS_rw_lock_t *rw_lock)
      * to the destroy at this point, so call them all, even if one fails
      * along the way.
      */
-    if (H5_UNLIKELY(H5TS_mutex_destroy(&rw_lock->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_destroy(&rw_lock->mutex) < 0))
         ret_value = FAIL;
-    if (H5_UNLIKELY(H5TS_cond_destroy(&rw_lock->readers_cv)))
+    if (H5_UNLIKELY(H5TS_cond_destroy(&rw_lock->readers_cv) < 0))
         ret_value = FAIL;
-    if (H5_UNLIKELY(H5TS_cond_destroy(&rw_lock->writers_cv)))
+    if (H5_UNLIKELY(H5TS_cond_destroy(&rw_lock->writers_cv) < 0))
         ret_value = FAIL;
     if (rw_lock->is_key_registered)
         if (H5_UNLIKELY(H5TS_key_delete(rw_lock->rec_read_lock_count_key) < 0))
@@ -491,7 +493,7 @@ H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock)
         HGOTO_DONE(FAIL);
 
     /* Acquire the mutex */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&rw_lock->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_lock(&rw_lock->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = true;
 
@@ -504,7 +506,7 @@ H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock)
 
     /* If there is no thread-specific data for this thread, set it up */
     if (!rw_lock->is_key_registered) {
-        if (H5_UNLIKELY(H5TS_key_create(&rw_lock->rec_read_lock_count_key, H5TS__key_destructor)))
+        if (H5_UNLIKELY(H5TS_key_create(&rw_lock->rec_read_lock_count_key, H5TS__key_destructor) < 0))
             HGOTO_DONE(FAIL);
         rw_lock->is_key_registered = true;
         count                      = NULL;
@@ -514,8 +516,7 @@ H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock)
     if (NULL == count) {
         if (H5_UNLIKELY(NULL == (count = calloc(1, sizeof(*count)))))
             HGOTO_DONE(FAIL);
-
-        if (H5_UNLIKELY(H5TS_key_set_value(rw_lock->rec_read_lock_count_key, (void *)count)))
+        if (H5_UNLIKELY(H5TS_key_set_value(rw_lock->rec_read_lock_count_key, (void *)count) < 0))
             HGOTO_DONE(FAIL);
     }
 
@@ -531,7 +532,7 @@ H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock)
 #endif
 
             do {
-                if (H5_UNLIKELY(H5TS_cond_wait(&rw_lock->readers_cv, &rw_lock->mutex)))
+                if (H5_UNLIKELY(H5TS_cond_wait(&rw_lock->readers_cv, &rw_lock->mutex) < 0))
                     HGOTO_DONE(FAIL);
             } while (H5TS_RW_LOCK_WRITE == rw_lock->lock_type);
         }
@@ -550,8 +551,9 @@ H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock)
 #endif
 
 done:
-    if (have_mutex)
-        H5TS_mutex_unlock(&rw_lock->mutex);
+    if (H5_LIKELY(have_mutex))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&rw_lock->mutex) < 0))
+            ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__rw_rdlock() */
@@ -579,7 +581,7 @@ H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock)
         HGOTO_DONE(FAIL);
 
     /* Acquire the mutex */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&rw_lock->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_lock(&rw_lock->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = true;
 
@@ -630,8 +632,9 @@ H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock)
 #endif
 
 done:
-    if (have_mutex)
-        H5TS_mutex_unlock(&rw_lock->mutex);
+    if (H5_LIKELY(have_mutex))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&rw_lock->mutex) < 0))
+            ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__rw_wrlock() */
@@ -658,7 +661,7 @@ H5TS__rw_unlock(H5TS_rw_lock_t *rw_lock)
         HGOTO_DONE(FAIL);
 
     /* Acquire the mutex */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&rw_lock->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_lock(&rw_lock->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = true;
 
@@ -715,18 +718,19 @@ H5TS__rw_unlock(H5TS_rw_lock_t *rw_lock)
     if (H5TS_RW_LOCK_UNUSED == rw_lock->lock_type) {
         /* Prioritize pending writers if there are any */
         if (rw_lock->waiting_writers_count > 0) {
-            if (H5_UNLIKELY(H5TS_cond_signal(&rw_lock->writers_cv)))
+            if (H5_UNLIKELY(H5TS_cond_signal(&rw_lock->writers_cv) < 0))
                 HGOTO_DONE(FAIL);
         }
         else {
-            if (H5_UNLIKELY(H5TS_cond_broadcast(&rw_lock->readers_cv)))
+            if (H5_UNLIKELY(H5TS_cond_broadcast(&rw_lock->readers_cv) < 0))
                 HGOTO_DONE(FAIL);
         }
     }
 
 done:
-    if (have_mutex)
-        H5TS_mutex_unlock(&rw_lock->mutex);
+    if (H5_LIKELY(have_mutex))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&rw_lock->mutex) < 0))
+            ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__rw_unlock() */

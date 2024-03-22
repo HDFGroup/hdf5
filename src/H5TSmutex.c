@@ -225,10 +225,8 @@ H5TS_mutex_try_lock(H5TS_mutex_t *mutex, bool *acquired) H5TS_NO_THREAD_SAFETY_A
         *acquired = true;
     else if (EBUSY == rc)
         *acquired = false;
-    else {
-        assert(EINVAL == rc);
+    else
         HGOTO_DONE(FAIL);
-    }
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)

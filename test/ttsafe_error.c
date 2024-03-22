@@ -150,7 +150,8 @@ tts_error(void)
     status = H5Idec_ref(vol_id);
     CHECK(status, FAIL, "H5Idec_ref");
 
-    H5TS_mutex_destroy(&error_mutex_g);
+    status = H5TS_mutex_destroy(&error_mutex_g);
+    CHECK_I(status, "H5TS_mutex_destroy");
 } /* end tts_error() */
 
 static void *

@@ -41,26 +41,6 @@
 /* Local Macros */
 /****************/
 
-/* Excl lock initialization macro */
-#ifdef H5_HAVE_PTHREAD_H
-#define H5TS_EX_LOCK_INIT                                                                                    \
-    {                                                                                                        \
-        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
-            H5TS_COND_INITIALIZER, /* cond_var */                                                            \
-            0,                     /* owner_thread */                                                        \
-            0,                     /* lock_count */                                                          \
-            false,                 /* disable_cancel */                                                      \
-            0                      /* previous_state */                                                      \
-    }
-#else
-#define H5TS_EXL_LOCK_INIT                                                                                   \
-    {                                                                                                        \
-        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
-            H5TS_COND_INITIALIZER, /* cond_var */                                                            \
-            0,                     /* owner_thread */                                                        \
-            0                      /* lock_count */                                                          \
-    }
-#endif
 
 /******************/
 /* Local Typedefs */
@@ -137,7 +117,7 @@ H5TS__ex_lock(H5TS_ex_lock_t *lock)
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Acquire the mutex for the lock */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&lock->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_lock(&lock->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = true;
 
@@ -148,7 +128,8 @@ H5TS__ex_lock(H5TS_ex_lock_t *lock)
     else {
         /* Wait until the mutex is released by current owner thread */
         while (lock->lock_count)
-            H5TS_cond_wait(&lock->cond_var, &lock->mutex);
+            if (H5_UNLIKELY(H5TS_cond_wait(&lock->cond_var, &lock->mutex) < 0))
+                HGOTO_DONE(FAIL);
 
         /* After we've received the signal, take ownership of the lock */
         lock->owner_thread = my_thread_id;
@@ -164,8 +145,8 @@ H5TS__ex_lock(H5TS_ex_lock_t *lock)
     }
 
 done:
-    if (have_mutex)
-        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex)))
+    if (H5_LIKELY(have_mutex))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex) < 0))
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -192,7 +173,7 @@ H5TS__ex_acquire(H5TS_ex_lock_t *lock, unsigned lock_count, bool *acquired)
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Attempt to acquire the lock's mutex */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&lock->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_lock(&lock->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = true;
 
@@ -216,8 +197,8 @@ H5TS__ex_acquire(H5TS_ex_lock_t *lock, unsigned lock_count, bool *acquired)
 
 done:
     /* Release the mutex, if acquired */
-    if (have_mutex)
-        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex)))
+    if (H5_LIKELY(have_mutex))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex) < 0))
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -242,7 +223,7 @@ H5TS__ex_release(H5TS_ex_lock_t *lock, unsigned int *lock_count)
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Attempt to acquire the lock's mutex */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&lock->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_lock(&lock->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = true;
 
@@ -251,12 +232,12 @@ H5TS__ex_release(H5TS_ex_lock_t *lock, unsigned int *lock_count)
     lock->lock_count = 0;
 
     /* Signal the condition variable, to wake any thread waiting on the lock */
-    if (H5_UNLIKELY(H5TS_cond_signal(&lock->cond_var)))
+    if (H5_UNLIKELY(H5TS_cond_signal(&lock->cond_var) < 0))
         HGOTO_DONE(FAIL);
 
 done:
-    if (have_mutex)
-        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex)))
+    if (H5_LIKELY(have_mutex))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex) < 0))
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -281,7 +262,7 @@ H5TS__ex_unlock(H5TS_ex_lock_t *lock)
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Acquire the mutex for the lock */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&lock->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_lock(&lock->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = true;
 
@@ -299,13 +280,13 @@ H5TS__ex_unlock(H5TS_ex_lock_t *lock)
         /* If the lock count drops to zero, signal the condition variable, to
          * wake any thread waiting on the lock.
          */
-        if (H5_UNLIKELY(H5TS_cond_signal(&lock->cond_var)))
+        if (H5_UNLIKELY(H5TS_cond_signal(&lock->cond_var) < 0))
             HGOTO_DONE(FAIL);
     }
 
 done:
-    if (have_mutex)
-        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex)))
+    if (H5_LIKELY(have_mutex))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex) < 0))
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -334,7 +315,7 @@ H5TS__ex_lock_destroy(H5TS_ex_lock_t *lock)
         HGOTO_DONE(FAIL);
 
     /* Acquire the mutex for the lock */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&lock->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_lock(&lock->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = true;
 
@@ -343,7 +324,7 @@ H5TS__ex_lock_destroy(H5TS_ex_lock_t *lock)
         HGOTO_DONE(FAIL);
 
     /* Release the mutex for the lock */
-    if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = false;
 
@@ -351,14 +332,14 @@ H5TS__ex_lock_destroy(H5TS_ex_lock_t *lock)
      * to the destroy at this point, so call them all, even if one fails
      * along the way.
      */
-    if (H5_UNLIKELY(H5TS_mutex_destroy(&lock->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_destroy(&lock->mutex) < 0))
         ret_value = FAIL;
-    if (H5_UNLIKELY(H5TS_cond_destroy(&lock->cond_var)))
+    if (H5_UNLIKELY(H5TS_cond_destroy(&lock->cond_var) < 0))
         ret_value = FAIL;
 
 done:
-    if (have_mutex)
-        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex)))
+    if (H5_UNLIKELY(have_mutex))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex) < 0))
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)

@@ -39,10 +39,7 @@
 
 #ifdef H5_HAVE_THREADSAFE
 /*
- * The per-thread error stack. pthread_once() initializes a special
- * key that will be used by all threads to create a stack specific to
- * each thread individually. The association of stacks to threads will
- * be handled by the pthread library.
+ * The per-thread error stack.
  *
  * In order for this macro to work, H5E__get_my_stack() must be preceded
  * by "H5E_t *estack =".

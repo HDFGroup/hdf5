@@ -649,7 +649,6 @@ set (H5TS_SOURCES
     ${HDF5_SRC_DIR}/H5TSpool.c
     ${HDF5_SRC_DIR}/H5TSpthread.c
     ${HDF5_SRC_DIR}/H5TSrwlock.c
-    ${HDF5_SRC_DIR}/H5TStest.c
     ${HDF5_SRC_DIR}/H5TSthread.c
     ${HDF5_SRC_DIR}/H5TSwin.c
 )

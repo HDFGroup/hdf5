@@ -43,11 +43,13 @@ tts_develop_api_thr_1(void *_udata)
     CHECK_I(result, "H5TSmutex_acquire");
     VERIFY(acquired, true, "H5TSmutex_acquire");
 
-    H5TS__barrier_wait(udata->barrier);
+    result = H5TS__barrier_wait(udata->barrier);
+    CHECK_I(result, "H5TS__barrier_wait");
 
     /* Thread #2 will attempt (unsuccessfully) to acquire the API lock */
 
-    H5TS__barrier_wait(udata->barrier);
+    result = H5TS__barrier_wait(udata->barrier);
+    CHECK_I(result, "H5TS__barrier_wait");
 
     /* Release the API lock */
     result = H5TSmutex_release(&lock_count);
@@ -72,14 +74,16 @@ tts_develop_api_thr_2(void *_udata)
 
     /* Thread #1 will acquire the API lock */
 
-    H5TS__barrier_wait(udata->barrier);
+    result = H5TS__barrier_wait(udata->barrier);
+    CHECK_I(result, "H5TS__barrier_wait");
 
     /* Attempt to acquire the API lock - should not acquire it */
     result = H5TSmutex_acquire(1, &acquired);
     CHECK_I(result, "H5TSmutex_acquire");
     VERIFY(acquired, false, "H5TSmutex_acquire");
 
-    H5TS__barrier_wait(udata->barrier);
+    result = H5TS__barrier_wait(udata->barrier);
+    CHECK_I(result, "H5TS__barrier_wait");
 
     /* Thread #1 will release the API lock */
 
