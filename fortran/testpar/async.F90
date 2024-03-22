@@ -17,13 +17,11 @@
 
 MODULE test_async_APIs
 
-#ifdef H5_HAVE_PARALLEL
 #ifdef H5_HAVE_MPI_F08
-!  USE MPI_F08
+  USE MPI_F08
 #else
-#endif
-#endif
   USE MPI
+#endif
   USE HDF5
   USE TH5_MISC
   USE TH5_MISC_GEN
@@ -392,8 +390,12 @@ CONTAINS
 
     INTEGER :: error  ! Error flags
     INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror       ! MPI error flag
-    INTEGER(KIND=MPI_INTEGER_KIND) :: comm
-    INTEGER(KIND=MPI_INTEGER_KIND) :: info
+#ifdef H5_HAVE_MPI_F08
+    TYPE(MPI_COMM) :: comm
+    TYPE(MPI_INFO) :: info
+#else
+    INTEGER(KIND=MPI_INTEGER_KIND) :: comm, info
+#endif
     INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_rank
 
     comm = MPI_COMM_WORLD
@@ -593,8 +595,12 @@ CONTAINS
 
     INTEGER :: error
     INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror       ! MPI error flag
-    INTEGER(KIND=MPI_INTEGER_KIND) :: comm
-    INTEGER(KIND=MPI_INTEGER_KIND) :: info
+#ifdef H5_HAVE_MPI_F08
+    TYPE(MPI_COMM) :: comm
+    TYPE(MPI_INFO) :: info
+#else
+    INTEGER(KIND=MPI_INTEGER_KIND) :: comm, info
+#endif
     INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_rank
 
     comm = MPI_COMM_WORLD
@@ -722,7 +728,12 @@ CONTAINS
 
     INTEGER :: error  ! Error flags
     INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror       ! MPI error flag
+#ifdef H5_HAVE_MPI_F08
+    TYPE(MPI_COMM) :: comm
+    TYPE(MPI_INFO) :: info
+#else
     INTEGER(KIND=MPI_INTEGER_KIND) :: comm, info
+#endif
     INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_rank
 
     comm = MPI_COMM_WORLD
@@ -828,7 +839,11 @@ CONTAINS
 
     INTEGER :: error  ! Error flags
     INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror       ! MPI error flag
+#ifdef H5_HAVE_MPI_F08
+    TYPE(MPI_COMM) :: comm
+#else
     INTEGER(KIND=MPI_INTEGER_KIND) :: comm
+#endif
     INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_rank
 
     INTEGER(SIZE_T) :: count
@@ -1260,7 +1275,11 @@ PROGRAM async_test
   INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size               ! number of processes in the group of communicator
   INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_rank               ! rank of the calling process in the communicator
   INTEGER(KIND=MPI_INTEGER_KIND) :: required, provided
+#ifdef H5_HAVE_MPI_F08
+  TYPE(MPI_DATATYPE) :: mpi_int_type
+#else
   INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_int_type
+#endif
 
   INTEGER(HID_T) :: vol_id
   INTEGER :: hdferror
