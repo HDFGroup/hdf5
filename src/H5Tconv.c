@@ -3848,17 +3848,17 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                 const H5T_conv_ctx_t H5_ATTR_UNUSED *conv_ctx, size_t nelmts, size_t buf_stride,
                 size_t bkg_stride, void *_buf, void *_bkg)
 {
-    H5T_conv_array_t *priv = NULL; /* Private conversion data */
-    H5T_conv_ctx_t tmp_conv_ctx = {0};         /* Temporary conversion context */
-    H5T_t         *tsrc_cpy = NULL;            /*temporary copy of source base datatype */
-    H5T_t         *tdst_cpy = NULL;            /*temporary copy of destination base datatype */
-    hid_t          tsrc_id  = H5I_INVALID_HID; /*temporary type atom */
-    hid_t          tdst_id  = H5I_INVALID_HID; /*temporary type atom */
-    uint8_t       *sp, *dp, *bp;               /*source, dest, and bkg traversal ptrs     */
-    ssize_t        src_delta, dst_delta;       /*source & destination stride         */
-    int            direction;                  /*direction of traversal         */
-    bool           need_ids  = false;          /*whether we need IDs for the datatypes */
-    herr_t         ret_value = SUCCEED;        /* Return value */
+    H5T_conv_array_t *priv         = NULL;            /* Private conversion data */
+    H5T_conv_ctx_t    tmp_conv_ctx = {0};             /* Temporary conversion context */
+    H5T_t            *tsrc_cpy     = NULL;            /*temporary copy of source base datatype */
+    H5T_t            *tdst_cpy     = NULL;            /*temporary copy of destination base datatype */
+    hid_t             tsrc_id      = H5I_INVALID_HID; /*temporary type atom */
+    hid_t             tdst_id      = H5I_INVALID_HID; /*temporary type atom */
+    uint8_t          *sp, *dp, *bp;                   /*source, dest, and bkg traversal ptrs     */
+    ssize_t           src_delta, dst_delta;           /*source & destination stride         */
+    int               direction;                      /*direction of traversal         */
+    bool              need_ids  = false;              /*whether we need IDs for the datatypes */
+    herr_t            ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -3885,7 +3885,8 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
                                 "array datatypes do not have the same sizes of dimensions");
 
-            /* Initialize parent type conversion if necessary. We need to do this here because we need to report whether we need a background buffer or not. */
+            /* Initialize parent type conversion if necessary. We need to do this here because we need to
+             * report whether we need a background buffer or not. */
             if (!cdata->priv) {
                 /* Allocate private data */
                 if (NULL == (priv = (H5T_conv_array_t *)(cdata->priv = calloc(1, sizeof(*priv)))))
@@ -3895,10 +3896,12 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                 if (NULL == (priv->tpath = H5T_path_find(src->shared->parent, dst->shared->parent))) {
                     free(priv);
                     cdata->priv = NULL;
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype");
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+                                "unable to convert between src and dest datatype");
                 }
 
-                /* Array datatypes don't need a background buffer by themselves, but the parent type might. Pass the need_bkg field through to the upper layer. */
+                /* Array datatypes don't need a background buffer by themselves, but the parent type might.
+                 * Pass the need_bkg field through to the upper layer. */
                 cdata->need_bkg = priv->tpath->cdata.need_bkg;
             }
 
@@ -3934,8 +3937,8 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
              * destination areas overlapping?
              */
             if (src->shared->size >= dst->shared->size || buf_stride > 0) {
-                sp = dp = (uint8_t *)_buf;
-                bp = _bkg;
+                sp = dp   = (uint8_t *)_buf;
+                bp        = _bkg;
                 direction = 1;
             }
             else {
@@ -3985,8 +3988,8 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                 memmove(dp, sp, src->shared->size);
 
                 /* Convert array */
-                if (H5T_convert_with_ctx(priv->tpath, tsrc_cpy, tdst_cpy, &tmp_conv_ctx, src->shared->u.array.nelem,
-                                         (size_t)0, (size_t)0, dp, bp) < 0)
+                if (H5T_convert_with_ctx(priv->tpath, tsrc_cpy, tdst_cpy, &tmp_conv_ctx,
+                                         src->shared->u.array.nelem, (size_t)0, (size_t)0, dp, bp) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
 
                 /* Advance the source, destination, and background pointers */
