@@ -242,6 +242,20 @@ typedef struct H5F_retry_info_t {
  */
 typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
 
+/*
+ * These are the bits that can be passed to the `flags' argument of
+ * H5Pset_relax_file_integrity_checks(). Use the bit-wise OR operator (|) to
+ * combine them as needed.
+ */
+#define H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS                                                             \
+    (0x0001u) /**< Suppress errors for numeric datatypes with an unusually                                   \
+               *   high number of unused bits.  See documentation for                                        \
+               *   H5Pset_relax_file_integrity_checks for details. */
+#define H5F_RFIC_ALL                                                                                         \
+    (H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS) /**< Suppress all format integrity check errors.  See         \
+                                                *   documentation for H5Pset_relax_file_integrity_checks     \
+                                                *   for details. */
+
 /*********************/
 /* Public Prototypes */
 /*********************/
