@@ -1104,12 +1104,12 @@ H5A__dense_iterate(H5F_t *f, hid_t loc_id, const H5O_ainfo_t *ainfo, H5_index_t 
                    H5_iter_order_t order, hsize_t skip, hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op,
                    void *op_data)
 {
-    H5HF_t          *fheap        = NULL;      /* Fractal heap handle */
-    H5HF_t          *shared_fheap = NULL;      /* Fractal heap handle for shared header messages */
+    H5HF_t          *fheap        = NULL;         /* Fractal heap handle */
+    H5HF_t          *shared_fheap = NULL;         /* Fractal heap handle for shared header messages */
     H5A_attr_table_t atable       = {0, 0, NULL}; /* Table of attributes */
-    H5B2_t          *bt2          = NULL;      /* v2 B-tree handle for index */
-    haddr_t          bt2_addr;                 /* Address of v2 B-tree to use for lookup */
-    herr_t           ret_value = FAIL;         /* Return value */
+    H5B2_t          *bt2          = NULL;         /* v2 B-tree handle for index */
+    haddr_t          bt2_addr;                    /* Address of v2 B-tree to use for lookup */
+    herr_t           ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1499,12 +1499,12 @@ herr_t
 H5A__dense_remove_by_idx(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, H5_iter_order_t order,
                          hsize_t n)
 {
-    H5HF_t          *fheap        = NULL;      /* Fractal heap handle */
-    H5HF_t          *shared_fheap = NULL;      /* Fractal heap handle for shared header messages */
+    H5HF_t          *fheap        = NULL;         /* Fractal heap handle */
+    H5HF_t          *shared_fheap = NULL;         /* Fractal heap handle for shared header messages */
     H5A_attr_table_t atable       = {0, 0, NULL}; /* Table of attributes */
-    H5B2_t          *bt2          = NULL;      /* v2 B-tree handle for index */
-    haddr_t          bt2_addr;                 /* Address of v2 B-tree to use for operation */
-    herr_t           ret_value = SUCCEED;      /* Return value */
+    H5B2_t          *bt2          = NULL;         /* v2 B-tree handle for index */
+    haddr_t          bt2_addr;                    /* Address of v2 B-tree to use for operation */
+    herr_t           ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 

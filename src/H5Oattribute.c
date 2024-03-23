@@ -213,9 +213,10 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
 
     /* Check for creating attribute with unusual datatype */
     if (H5T_is_numeric_with_unusual_unused_bits(attr->shared->dt) &&
-            !(H5O_has_chksum(oh) ||
-                (H5F_RFIC_FLAGS(loc->file) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "creating attribute with unusual datatype, see documentation for H5Pset_relax_file_integrity_checks for details.");
+        !(H5O_has_chksum(oh) || (H5F_RFIC_FLAGS(loc->file) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL,
+                    "creating attribute with unusual datatype, see documentation for "
+                    "H5Pset_relax_file_integrity_checks for details.");
 
     /* Check if this object already has attribute information */
     if (oh->version > H5O_VERSION_1) {
@@ -1177,10 +1178,10 @@ herr_t
 H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order_t order,
                       hsize_t skip, hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data)
 {
-    H5O_t           *oh = NULL;             /* Pointer to actual object header */
-    H5O_ainfo_t      ainfo;                 /* Attribute information for object */
+    H5O_t           *oh = NULL;                /* Pointer to actual object header */
+    H5O_ainfo_t      ainfo;                    /* Attribute information for object */
     H5A_attr_table_t atable    = {0, 0, NULL}; /* Table of attributes */
-    herr_t           ret_value = FAIL;      /* Return value */
+    herr_t           ret_value = FAIL;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(loc->addr)
 
@@ -1300,7 +1301,7 @@ static herr_t
 H5O__attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo)
 {
     H5A_attr_table_t atable    = {0, 0, NULL}; /* Table of attributes */
-    herr_t           ret_value = SUCCEED;   /* Return value */
+    herr_t           ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1536,11 +1537,11 @@ done:
 herr_t
 H5O__attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order_t order, hsize_t n)
 {
-    H5O_t           *oh = NULL;                /* Pointer to actual object header */
-    H5O_ainfo_t      ainfo;                    /* Attribute information for object */
-    htri_t           ainfo_exists = false;     /* Whether the attribute info exists in the file */
+    H5O_t           *oh = NULL;                   /* Pointer to actual object header */
+    H5O_ainfo_t      ainfo;                       /* Attribute information for object */
+    htri_t           ainfo_exists = false;        /* Whether the attribute info exists in the file */
     H5A_attr_table_t atable       = {0, 0, NULL}; /* Table of attributes */
-    herr_t           ret_value    = SUCCEED;   /* Return value */
+    herr_t           ret_value    = SUCCEED;      /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(loc->addr)
 

@@ -1458,12 +1458,13 @@ H5A__compact_build_table_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "unable to extend attribute table");
 
         /* Update table information in user data */
-        udata->atable->attrs  = new_table;
+        udata->atable->attrs     = new_table;
         udata->atable->max_attrs = new_table_size;
     } /* end if */
 
     /* Copy attribute into table */
-    if (NULL == (udata->atable->attrs[udata->atable->num_attrs] = H5A__copy(NULL, (const H5A_t *)mesg->native)))
+    if (NULL ==
+        (udata->atable->attrs[udata->atable->num_attrs] = H5A__copy(NULL, (const H5A_t *)mesg->native)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute");
 
     /* Assign [somewhat arbitrary] creation order value, if requested */
@@ -1494,10 +1495,10 @@ herr_t
 H5A__compact_build_table(H5F_t *f, H5O_t *oh, H5_index_t idx_type, H5_iter_order_t order,
                          H5A_attr_table_t *atable)
 {
-    H5A_compact_bt_ud_t udata;               /* User data for iteration callback */
-    H5O_mesg_operator_t op;                  /* Wrapper for operator */
-    bool                iter_set_up = false; /* Is everything set up for iteration */
-    herr_t              ret_value = SUCCEED; /* Return value */
+    H5A_compact_bt_ud_t udata;                 /* User data for iteration callback */
+    H5O_mesg_operator_t op;                    /* Wrapper for operator */
+    bool                iter_set_up = false;   /* Is everything set up for iteration */
+    herr_t              ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1507,13 +1508,13 @@ H5A__compact_build_table(H5F_t *f, H5O_t *oh, H5_index_t idx_type, H5_iter_order
     assert(atable);
 
     /* Initialize table */
-    atable->attrs  = NULL;
+    atable->attrs     = NULL;
     atable->num_attrs = 0;
     atable->max_attrs = 0;
 
     /* Set up user data for iteration */
-    udata.f         = f;
-    udata.atable    = atable;
+    udata.f      = f;
+    udata.atable = atable;
     udata.bogus_crt_idx =
         (bool)((oh->version == H5O_VERSION_1 || !(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)) ? true
                                                                                                : false);
@@ -1533,10 +1534,10 @@ H5A__compact_build_table(H5F_t *f, H5O_t *oh, H5_index_t idx_type, H5_iter_order
 
 done:
     if (ret_value < 0)
-       /* Clean up partially built table on error */
-       if (iter_set_up)
-           if (atable->attrs && H5A__attr_release_table(atable) < 0)
-               HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table");
+        /* Clean up partially built table on error */
+        if (iter_set_up)
+            if (atable->attrs && H5A__attr_release_table(atable) < 0)
+                HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__compact_build_table() */
@@ -1555,7 +1556,7 @@ static herr_t
 H5A__dense_build_table_cb(const H5A_t *attr, void *_udata)
 {
     H5A_attr_table_t *atable    = (H5A_attr_table_t *)_udata; /* 'User data' passed in */
-    herr_t            ret_value = H5_ITER_CONT;                /* Return value */
+    herr_t            ret_value = H5_ITER_CONT;               /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1623,8 +1624,8 @@ H5A__dense_build_table(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, 
     if (nrec > 0) {
         H5A_attr_iter_op_t attr_op; /* Attribute operator */
 
-	/* Check for overflow on the downcast */
-	H5_CHECK_OVERFLOW(nrec, /* From: */ hsize_t, /* To: */ size_t);
+        /* Check for overflow on the downcast */
+        H5_CHECK_OVERFLOW(nrec, /* From: */ hsize_t, /* To: */ size_t);
 
         /* Allocate the table to store the attributes */
         if (NULL == (atable->attrs = (H5A_t **)H5FL_SEQ_CALLOC(H5A_t_ptr, (size_t)nrec)))
@@ -1637,7 +1638,8 @@ H5A__dense_build_table(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, 
         attr_op.u.lib_op = H5A__dense_build_table_cb;
 
         /* Iterate over the links in the group, building a table of the link messages */
-        if (H5A__dense_iterate(f, (hid_t)0, ainfo, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op, atable) < 0)
+        if (H5A__dense_iterate(f, (hid_t)0, ainfo, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op,
+                               atable) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table");
 
         /* Sort attribute table in correct iteration order */
@@ -1906,8 +1908,8 @@ H5A__attr_release_table(H5A_attr_table_t *atable)
             if (atable->attrs[u] && H5A__close(atable->attrs[u]) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute");
 
-	/* Release array */
-	atable->attrs = (H5A_t **)H5FL_SEQ_FREE(H5A_t_ptr, atable->attrs);
+        /* Release array */
+        atable->attrs = (H5A_t **)H5FL_SEQ_FREE(H5A_t_ptr, atable->attrs);
     } /* end if */
     else
         assert(atable->attrs == NULL);

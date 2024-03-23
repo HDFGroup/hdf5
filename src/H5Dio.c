@@ -400,7 +400,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                 H5AC_tag(prev_tag, NULL);
 
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
-	    }
+            }
 
             /* Reset metadata tagging */
             H5AC_tag(prev_tag, NULL);
