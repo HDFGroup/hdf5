@@ -13,15 +13,9 @@
 ! Tests async Fortran wrappers. It needs an async VOL. It will skip the tests if
 ! HDF5_VOL_CONNECTOR is not set or is set to a non-supporting async VOL.
 !
-#include <H5config_f.inc>
-
 MODULE test_async_APIs
 
-#ifdef H5_HAVE_MPI_F08
-  USE MPI_F08
-#else
   USE MPI
-#endif
   USE HDF5
   USE TH5_MISC
   USE TH5_MISC_GEN
@@ -46,8 +40,6 @@ MODULE test_async_APIs
   CHARACTER(LEN=10), TARGET :: app_func = "func_name"//C_NULL_CHAR
   INTEGER :: app_line = 42
 
-  INTEGER :: mpi_ikind = MPI_INTEGER_KIND
-
 CONTAINS
 
   INTEGER(KIND=C_INT) FUNCTION liter_cb(group, name, link_info, op_data) bind(C)
@@ -68,7 +60,7 @@ CONTAINS
     CASE(0)
        liter_cb = 0
     CASE(2)
-       liter_cb = op_data%command*10_C_INT
+       liter_cb = op_data%command*10
     END SELECT
     op_data%command = op_data_command
     op_data%type = op_data_type
@@ -389,14 +381,9 @@ CONTAINS
     INTEGER, TARGET :: fillvalue = 99
 
     INTEGER :: error  ! Error flags
-    INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror       ! MPI error flag
-#ifdef H5_HAVE_MPI_F08
-    TYPE(MPI_COMM) :: comm
-    TYPE(MPI_INFO) :: info
-#else
-    INTEGER(KIND=MPI_INTEGER_KIND) :: comm, info
-#endif
-    INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_rank
+    INTEGER :: mpierror       ! MPI error flag
+    INTEGER :: comm, info
+    INTEGER :: mpi_size, mpi_rank
 
     comm = MPI_COMM_WORLD
     info = MPI_INFO_NULL
@@ -412,7 +399,7 @@ CONTAINS
     CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
     CALL check("h5pcreate_f", hdferror, total_error)
 
-    CALL h5pset_fapl_mpio_f(fapl_id, comm, info, hdferror)
+    CALL h5pset_fapl_mpio_f(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL, hdferror)
     CALL check("h5pset_fapl_mpio_f", hdferror, total_error)
 
     CALL h5fcreate_async_f(filename, H5F_ACC_TRUNC_F, file_id, es_id, error, access_prp = fapl_id )
@@ -594,14 +581,9 @@ CONTAINS
     TYPE(H5G_info_t), DIMENSION(1:3) :: ginfo
 
     INTEGER :: error
-    INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror       ! MPI error flag
-#ifdef H5_HAVE_MPI_F08
-    TYPE(MPI_COMM) :: comm
-    TYPE(MPI_INFO) :: info
-#else
-    INTEGER(KIND=MPI_INTEGER_KIND) :: comm, info
-#endif
-    INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_rank
+    INTEGER :: mpierror       ! MPI error flag
+    INTEGER :: comm, info
+    INTEGER :: mpi_size, mpi_rank
 
     comm = MPI_COMM_WORLD
     info = MPI_INFO_NULL
@@ -727,14 +709,9 @@ CONTAINS
     INTEGER(HID_T) :: ret_file_id
 
     INTEGER :: error  ! Error flags
-    INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror       ! MPI error flag
-#ifdef H5_HAVE_MPI_F08
-    TYPE(MPI_COMM) :: comm
-    TYPE(MPI_INFO) :: info
-#else
-    INTEGER(KIND=MPI_INTEGER_KIND) :: comm, info
-#endif
-    INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_rank
+    INTEGER :: mpierror       ! MPI error flag
+    INTEGER :: comm, info
+    INTEGER :: mpi_size, mpi_rank
 
     comm = MPI_COMM_WORLD
     info = MPI_INFO_NULL
@@ -835,16 +812,12 @@ CONTAINS
     TYPE(iter_info), TARGET :: info
     TYPE(C_FUNPTR) :: f1
     TYPE(C_PTR) :: f2
-    INTEGER :: ret_value
+    INTEGER(C_INT) :: ret_value
 
     INTEGER :: error  ! Error flags
-    INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror       ! MPI error flag
-#ifdef H5_HAVE_MPI_F08
-    TYPE(MPI_COMM) :: comm
-#else
-    INTEGER(KIND=MPI_INTEGER_KIND) :: comm
-#endif
-    INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_rank
+    INTEGER :: mpierror       ! MPI error flag
+    INTEGER :: comm
+    INTEGER :: mpi_size, mpi_rank
 
     INTEGER(SIZE_T) :: count
 
@@ -1238,10 +1211,10 @@ CONTAINS
        CALL check("H5Oget_info_by_name_async_f", hdferror, total_error)
     ENDIF
 
-    atime(1:8) = INT(h5gmtime(oinfo_f%atime),C_INT)
-    btime(1:8) = INT(h5gmtime(oinfo_f%btime),C_INT)
-    ctime(1:8) = INT(h5gmtime(oinfo_f%ctime),C_INT)
-    mtime(1:8) = INT(h5gmtime(oinfo_f%mtime),C_INT)
+    atime(1:8) = h5gmtime(oinfo_f%atime)
+    btime(1:8) = h5gmtime(oinfo_f%btime)
+    ctime(1:8) = h5gmtime(oinfo_f%ctime)
+    mtime(1:8) = h5gmtime(oinfo_f%mtime)
 
     IF( atime(1) .LT. 2021 .OR. &
          btime(1).LT. 2021  .OR. &
@@ -1271,15 +1244,10 @@ PROGRAM async_test
   IMPLICIT NONE
 
   INTEGER :: total_error = 0        ! sum of the number of errors
-  INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror               ! MPI hdferror flag
-  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size               ! number of processes in the group of communicator
-  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_rank               ! rank of the calling process in the communicator
-  INTEGER(KIND=MPI_INTEGER_KIND) :: required, provided
-#ifdef H5_HAVE_MPI_F08
-  TYPE(MPI_DATATYPE) :: mpi_int_type
-#else
-  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_int_type
-#endif
+  INTEGER :: mpierror               ! MPI hdferror flag
+  INTEGER :: mpi_size               ! number of processes in the group of communicator
+  INTEGER :: mpi_rank               ! rank of the calling process in the communicator
+  INTEGER :: required, provided
 
   INTEGER(HID_T) :: vol_id
   INTEGER :: hdferror
@@ -1322,7 +1290,7 @@ PROGRAM async_test
      IF(mpi_rank==0) CALL write_test_status(sum, &
           'Testing Initializing mpi_init_thread', total_error)
      CALL MPI_Barrier(MPI_COMM_WORLD, mpierror)
-     CALL mpi_abort(MPI_COMM_WORLD, 1_MPI_INTEGER_KIND, mpierror)
+     CALL mpi_abort(MPI_COMM_WORLD, 1, mpierror)
   ENDIF
 
   IF(mpi_rank==0) CALL write_test_header("ASYNC FORTRAN TESTING")
@@ -1440,13 +1408,7 @@ PROGRAM async_test
   !
   CALL h5close_f(hdferror)
 
-  IF(h5_sizeof(total_error).EQ.8_size_t)THEN
-     mpi_int_type=MPI_INTEGER8
-  ELSE
-     mpi_int_type=MPI_INTEGER4
-  ENDIF
-
-  CALL MPI_ALLREDUCE(total_error, sum, 1_MPI_INTEGER_KIND, mpi_int_type, MPI_SUM, MPI_COMM_WORLD, mpierror)
+  CALL MPI_ALLREDUCE(total_error, sum, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, mpierror)
 
   IF(mpi_rank==0) CALL write_test_footer()
 
@@ -1460,7 +1422,7 @@ PROGRAM async_test
      ENDIF
   ELSE
      WRITE(*,*) 'Errors detected in process ', mpi_rank
-     CALL mpi_abort(MPI_COMM_WORLD, 1_MPI_INTEGER_KIND, mpierror)
+     CALL mpi_abort(MPI_COMM_WORLD, 1, mpierror)
      IF (mpierror .NE. MPI_SUCCESS) THEN
         WRITE(*,*) "MPI_ABORT  *FAILED* Process = ", mpi_rank
      ENDIF

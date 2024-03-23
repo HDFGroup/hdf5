@@ -2931,7 +2931,7 @@ h5pset_fapl_multi_c(hid_t_f *prp_id, int_f *memb_map, hid_t_f *memb_fapl, _fcd m
      *  Check that we got correct values from Fortran for memb_addr array
      */
     for (i = 0; i < H5FD_MEM_NTYPES; i++) {
-        if (memb_addr[i] >= (real_f)1.0)
+        if (memb_addr[i] >= 1.0f)
             return ret_value;
     }
     /*
@@ -4598,7 +4598,7 @@ h5pget_file_image_c(hid_t_f *fapl_id, void **buf_ptr, size_t_f *buf_len_ptr)
  * SOURCE
  */
 int_f
-h5pset_fapl_mpio_c(hid_t_f *prp_id, void *comm, void *info)
+h5pset_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info)
 /******/
 {
     int      ret_value = -1;
@@ -4606,8 +4606,8 @@ h5pset_fapl_mpio_c(hid_t_f *prp_id, void *comm, void *info)
     herr_t   ret;
     MPI_Comm c_comm;
     MPI_Info c_info;
-    c_comm = MPI_Comm_f2c(*((int *)comm));
-    c_info = MPI_Info_f2c(*((int *)info));
+    c_comm = MPI_Comm_f2c(*comm);
+    c_info = MPI_Info_f2c(*info);
 
     /*
      * Call H5Pset_mpi function.
@@ -4633,7 +4633,7 @@ h5pset_fapl_mpio_c(hid_t_f *prp_id, void *comm, void *info)
  * SOURCE
  */
 int_f
-h5pget_fapl_mpio_c(hid_t_f *prp_id, int *comm, int *info)
+h5pget_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info)
 /******/
 {
     int      ret_value = -1;
@@ -4649,8 +4649,8 @@ h5pget_fapl_mpio_c(hid_t_f *prp_id, int *comm, int *info)
     ret      = H5Pget_fapl_mpio(c_prp_id, &c_comm, &c_info);
     if (ret < 0)
         return ret_value;
-    *comm     = (int)MPI_Comm_c2f(c_comm);
-    *info     = (int)MPI_Info_c2f(c_info);
+    *comm     = (int_f)MPI_Comm_c2f(c_comm);
+    *info     = (int_f)MPI_Info_c2f(c_info);
     ret_value = 0;
     return ret_value;
 }
@@ -4669,7 +4669,7 @@ h5pget_fapl_mpio_c(hid_t_f *prp_id, int *comm, int *info)
  * SOURCE
  */
 int_f
-h5pset_mpi_params_c(hid_t_f *prp_id, void *comm, void *info)
+h5pset_mpi_params_c(hid_t_f *prp_id, int_f *comm, int_f *info)
 /******/
 {
     int      ret_value = -1;
@@ -4677,8 +4677,8 @@ h5pset_mpi_params_c(hid_t_f *prp_id, void *comm, void *info)
     herr_t   ret;
     MPI_Comm c_comm;
     MPI_Info c_info;
-    c_comm = MPI_Comm_f2c(*((int *)comm));
-    c_info = MPI_Info_f2c(*((int *)info));
+    c_comm = MPI_Comm_f2c(*comm);
+    c_info = MPI_Info_f2c(*info);
 
     /*
      * Call H5Pset_mpi_params.
@@ -4705,7 +4705,7 @@ h5pset_mpi_params_c(hid_t_f *prp_id, void *comm, void *info)
  * SOURCE
  */
 int_f
-h5pget_mpi_params_c(hid_t_f *prp_id, int *comm, int *info)
+h5pget_mpi_params_c(hid_t_f *prp_id, int_f *comm, int_f *info)
 /******/
 {
     int      ret_value = -1;
@@ -4721,8 +4721,8 @@ h5pget_mpi_params_c(hid_t_f *prp_id, int *comm, int *info)
     ret      = H5Pget_mpi_params(c_prp_id, &c_comm, &c_info);
     if (ret < 0)
         return ret_value;
-    *comm     = (int)MPI_Comm_c2f(c_comm);
-    *info     = (int)MPI_Info_c2f(c_info);
+    *comm     = (int_f)MPI_Comm_c2f(c_comm);
+    *info     = (int_f)MPI_Info_c2f(c_info);
     ret_value = 0;
     return ret_value;
 }

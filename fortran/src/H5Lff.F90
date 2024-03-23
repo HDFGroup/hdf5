@@ -1555,7 +1555,7 @@ CONTAINS
        END FUNCTION H5Lvisit
     END INTERFACE
 
-    return_value_c = H5Lvisit(grp_id, INT(idx_type, C_INT), INT(order, C_INT), op, op_data)
+    return_value_c = INT(H5Lvisit(grp_id, INT(idx_type, C_INT), INT(order, C_INT), op, op_data))
     return_value = INT(return_value_c)
 
     IF(return_value.GE.0)THEN
@@ -1624,7 +1624,7 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    return_value_c = H5Lvisit_by_name(loc_id, c_name, INT(idx_type, C_INT), INT(order, C_INT), op, op_data, lapl_id_default)
+    return_value_c = INT(H5Lvisit_by_name(loc_id, c_name, INT(idx_type, C_INT), INT(order, C_INT), op, op_data, lapl_id_default))
     return_value = INT(return_value_c)
 
     IF(return_value.GE.0)THEN

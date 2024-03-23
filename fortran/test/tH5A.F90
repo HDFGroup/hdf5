@@ -100,10 +100,11 @@ CONTAINS
      CHARACTER(LEN=35), DIMENSION(2) ::  aread_data ! Buffer to put read back
                                                ! string attr data
      CHARACTER ::  attr_character_data = 'A'
-     REAL(KIND=Fortran_DOUBLE),  DIMENSION(1) ::  attr_double_data = 3.459_Fortran_DOUBLE
+     REAL(KIND=Fortran_DOUBLE),  DIMENSION(1) ::  attr_double_data = 3.459D0
      REAL,         DIMENSION(1) ::  attr_real_data = 4.0
      INTEGER,      DIMENSION(1) ::  attr_integer_data = 5
      INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
+
 
      CHARACTER :: aread_character_data ! variable to put read back Character attr data
      INTEGER, DIMENSION(1)  :: aread_integer_data ! variable to put read back integer attr data
@@ -575,6 +576,8 @@ CONTAINS
        WRITE(*,*) "got number of attributes wrong", num_attrs
        total_error = total_error +1
      END IF
+
+
 
      CALL h5sclose_f(attr_space, error)
      CALL check("h5sclose_f",error,total_error)

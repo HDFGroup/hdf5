@@ -27,7 +27,7 @@ MODULE filter
   INTEGER          , PARAMETER :: PATH_MAX = 512
 
   ! Global variables 
-  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_rank, mpi_size
+  INTEGER :: mpi_rank, mpi_size
 
 CONTAINS
   !
@@ -91,11 +91,10 @@ CONTAINS
 
     LOGICAL :: do_cleanup
     INTEGER :: status
-    INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror
 
     CALL get_environment_variable("HDF5_NOCLEANUP", STATUS=status)
     IF(status.EQ.0)THEN
-       CALL MPI_File_delete(filename, MPI_INFO_NULL, mpierror)
+       CALL MPI_File_delete(filename, MPI_INFO_NULL, status)
     ENDIF
 
   END SUBROUTINE cleanup
@@ -242,19 +241,18 @@ CONTAINS
    USE filter
    IMPLICIT NONE
 
-   INTEGER(KIND=MPI_INTEGER_KIND) :: comm = MPI_COMM_WORLD
-   INTEGER(KIND=MPI_INTEGER_KIND) :: info = MPI_INFO_NULL
+   INTEGER :: comm = MPI_COMM_WORLD
+   INTEGER :: info = MPI_INFO_NULL
    INTEGER(hid_t) :: file_id
    INTEGER(hid_t) :: fapl_id
    INTEGER(hid_t) :: dxpl_id
    CHARACTER(LEN=PATH_MAX) :: par_prefix
    CHARACTER(LEN=PATH_MAX) :: filename
    INTEGER :: status
-   INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror
 
-   CALL MPI_Init(mpierror)
-   CALL MPI_Comm_size(comm, mpi_size, mpierror)
-   CALL MPI_Comm_rank(comm, mpi_rank, mpierror)
+   CALL MPI_Init(status)
+   CALL MPI_Comm_size(comm, mpi_size, status)
+   CALL MPI_Comm_rank(comm, mpi_rank, status)
 
   !
   ! Initialize HDF5 library and Fortran interfaces.
@@ -351,6 +349,6 @@ CONTAINS
   ! ------------------------------------
   CALL cleanup(filename)
 
-  CALL MPI_Finalize(mpierror)
+  CALL MPI_Finalize(status)
 
 END PROGRAM main

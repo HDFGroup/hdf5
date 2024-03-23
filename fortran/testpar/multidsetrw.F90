@@ -25,8 +25,8 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
 
   LOGICAL, INTENT(in) :: do_collective              ! use collective IO
   LOGICAL, INTENT(in) :: do_chunk                   ! use chunking
-  INTEGER(KIND=MPI_INTEGER_KIND), INTENT(in) :: mpi_size ! number of processes in the group of communicator
-  INTEGER(KIND=MPI_INTEGER_KIND), INTENT(in) :: mpi_rank ! rank of the calling process in the communicator
+  INTEGER, INTENT(in) :: mpi_size                   ! number of processes in the group of communicator
+  INTEGER, INTENT(in) :: mpi_rank                   ! rank of the calling process in the communicator
   INTEGER, INTENT(inout) :: nerrors                 ! number of errors
   CHARACTER(LEN=80):: dsetname ! Dataset name
   INTEGER(hsize_t), DIMENSION(1:2) :: cdims           ! chunk dimensions
@@ -156,7 +156,6 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   CALL h5dwrite_multi_f(ndsets, dset_id, mem_type_id, mem_space_id, file_space_id, buf_md, error, plist_id)
   CALL check("h5dwrite_multi_f", error, nerrors)
 
-  return
   CALL h5pget_dxpl_mpio_f(plist_id, data_xfer_mode, error)
   CALL check("h5pget_dxpl_mpio_f", error, nerrors)
 
