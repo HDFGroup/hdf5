@@ -857,7 +857,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_file_operation(const char *env_h5_drvr)
+test_basic_file_operation(const char *driver_name)
 {
     hid_t fid        = H5I_INVALID_HID;
     hid_t fid_reopen = H5I_INVALID_HID;
@@ -933,10 +933,10 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for several VFDs */
-    if ((bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
-               strcmp(env_h5_drvr, "family") != 0 && strcmp(env_h5_drvr, "direct") != 0 &&
-               strcmp(env_h5_drvr, "core") != 0 && strcmp(env_h5_drvr, "core_paged") != 0 &&
-               strcmp(env_h5_drvr, "mpio") != 0 && strcmp(env_h5_drvr, "splitter") != 0)) {
+    if ((bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+               strcmp(driver_name, "family") != 0 && strcmp(driver_name, "direct") != 0 &&
+               strcmp(driver_name, "core") != 0 && strcmp(driver_name, "core_paged") != 0 &&
+               strcmp(driver_name, "mpio") != 0 && strcmp(driver_name, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
@@ -957,8 +957,8 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't retrieve VFD handle for split / multi / family VFDs */
-    if ((bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
-               strcmp(env_h5_drvr, "family") != 0)) {
+    if ((bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+               strcmp(driver_name, "family") != 0)) {
         /* H5Fget_vfd_handle */
         if (H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
             TEST_ERROR;
@@ -997,10 +997,10 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for several VFDs */
-    if ((bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
-               strcmp(env_h5_drvr, "family") != 0 && strcmp(env_h5_drvr, "direct") != 0 &&
-               strcmp(env_h5_drvr, "core") != 0 && strcmp(env_h5_drvr, "core_paged") != 0 &&
-               strcmp(env_h5_drvr, "mpio") != 0 && strcmp(env_h5_drvr, "splitter") != 0)) {
+    if ((bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+               strcmp(driver_name, "family") != 0 && strcmp(driver_name, "direct") != 0 &&
+               strcmp(driver_name, "core") != 0 && strcmp(driver_name, "core_paged") != 0 &&
+               strcmp(driver_name, "mpio") != 0 && strcmp(driver_name, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
@@ -1014,10 +1014,10 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for several VFDs */
-    if ((bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
-               strcmp(env_h5_drvr, "family") != 0 && strcmp(env_h5_drvr, "direct") != 0 &&
-               strcmp(env_h5_drvr, "core") != 0 && strcmp(env_h5_drvr, "core_paged") != 0 &&
-               strcmp(env_h5_drvr, "mpio") != 0 && strcmp(env_h5_drvr, "splitter") != 0)) {
+    if ((bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+               strcmp(driver_name, "family") != 0 && strcmp(driver_name, "direct") != 0 &&
+               strcmp(driver_name, "core") != 0 && strcmp(driver_name, "core_paged") != 0 &&
+               strcmp(driver_name, "mpio") != 0 && strcmp(driver_name, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid_reopen)) < 0)
             TEST_ERROR;
@@ -2645,13 +2645,11 @@ error:
 int
 main(void)
 {
-    const char *env_h5_drvr; /* File driver value from environment */
+    const char *driver_name; /* File driver value from environment */
     int         nerrors = 0;
 
     /* Get the VFD to use */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     h5_reset();
 
@@ -2660,7 +2658,7 @@ main(void)
     nerrors += test_vol_registration() < 0 ? 1 : 0;
     nerrors += test_register_opt_operation() < 0 ? 1 : 0;
     nerrors += test_native_vol_init() < 0 ? 1 : 0;
-    nerrors += test_basic_file_operation(env_h5_drvr) < 0 ? 1 : 0;
+    nerrors += test_basic_file_operation(driver_name) < 0 ? 1 : 0;
     nerrors += test_basic_group_operation() < 0 ? 1 : 0;
     nerrors += test_basic_dataset_operation() < 0 ? 1 : 0;
     nerrors += test_basic_attribute_operation() < 0 ? 1 : 0;

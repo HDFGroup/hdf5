@@ -19,8 +19,6 @@
 
 #include "null_vfd_plugin.h"
 
-#define DEFAULT_DRIVER_NAME "sec2"
-
 /*-------------------------------------------------------------------------
  * Function:    test_set_by_name()
  *
@@ -301,7 +299,7 @@ test_get_config_str(void)
         TEST_ERROR;
 
     /* Set a new configuration string on the FAPL and retrieve it */
-    if (H5Pset_driver_by_name(fapl_id, DEFAULT_DRIVER_NAME, config_str) < 0)
+    if (H5Pset_driver_by_name(fapl_id, H5_DEFAULT_VFD_NAME, config_str) < 0)
         TEST_ERROR;
     if ((config_str_len = H5Pget_driver_config_str(fapl_id, config_str_buf, 128)) < 0)
         TEST_ERROR;

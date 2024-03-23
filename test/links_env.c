@@ -144,17 +144,15 @@ error:
 int
 main(void)
 {
-    const char *env_h5_drvr; /* File driver value from environment */
+    const char *driver_name; /* File driver value from environment */
     hid_t       fapl;        /* File access property lists */
     int         nerrors = 0; /* Error from tests */
 
     /* Get the VFD to use */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Splitter VFD has issues with external links */
-    if (!strcmp(env_h5_drvr, "splitter")) {
+    if (!strcmp(driver_name, "splitter")) {
         puts(" -- SKIPPED for incompatible VFD --");
         exit(EXIT_SUCCESS);
     }

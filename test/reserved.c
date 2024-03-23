@@ -462,16 +462,15 @@ main(void)
      * (Also, we should try to make this test work with all the VFDs)
      */
 #ifdef BROKEN
+    const char *driver_name;
     int         num_errs = 0;
     hid_t       fapl;
-    const char *envval = NULL;
 
-    envval = getenv(HDF5_DRIVER);
-    if (envval == NULL)
-        envval = "nomatch";
+    driver_name = h5_get_test_driver_name();
+
     /* QAK: should be able to use the core driver? */
-    if (strcmp(envval, "core") && strcmp(envval, "split") && strcmp(envval, "multi") &&
-        strcmp(envval, "family")) {
+    if (strcmp(driver_name, "core") && strcmp(driver_name, "split") && strcmp(driver_name, "multi") &&
+        strcmp(driver_name, "family")) {
         num_errs += rsrv_ohdr();
         num_errs += rsrv_heap();
         num_errs += rsrv_vlen();

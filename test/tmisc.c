@@ -1828,6 +1828,14 @@ test_misc10(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing using old dataset creation property list\n"));
 
+    /* Check if VFD used is native file format compatible */
+    CHECK(h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible), FAIL,
+          "h5_driver_is_default_vfd_compatible");
+    if (!driver_is_default_compatible) {
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
+
     /*
      * Open the old file and the dataset and get old settings.
      */
@@ -1837,14 +1845,6 @@ test_misc10(void)
     /* Check if native VOL is being used */
     CHECK(h5_using_native_vol(H5P_DEFAULT, file, &vol_is_native), FAIL, "h5_using_native_vol");
     if (!vol_is_native) {
-        CHECK(H5Fclose(file), FAIL, "H5Fclose");
-        MESSAGE(5, (" -- SKIPPED --\n"));
-        return;
-    }
-    /* Check if VFD used is native file format compatible */
-    CHECK(h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible), FAIL,
-          "h5_driver_is_default_vfd_compatible");
-    if (!driver_is_default_compatible) {
         CHECK(H5Fclose(file), FAIL, "H5Fclose");
         MESSAGE(5, (" -- SKIPPED --\n"));
         return;
@@ -6893,7 +6893,11 @@ test_misc(void)
     }
 
     test_misc14(); /* Test that deleted dataset's data is removed from sieve buffer correctly */
-    test_misc15(); /* Test that checking a file's access property list more than once works */
+
+    if (default_driver) {
+        test_misc15(); /* Test that checking a file's access property list more than once works */
+    }
+
     test_misc16(); /* Test array of fixed-length string */
     test_misc17(); /* Test array of ASCII character */
     test_misc18(); /* Test new object header information in H5O_info_t struct */
