@@ -438,6 +438,8 @@ H5F_get_access_plist(H5F_t *f, bool app_ref)
         0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
                     "can't set initial metadata cache resize config.");
+    if (H5P_set(new_plist, H5F_ACS_RFIC_FLAGS_NAME, &(f->shared->rfic_flags)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set RFIC flags value");
 
     /* Prepare the driver property */
     driver_prop.driver_id         = f->shared->lf->driver_id;
@@ -1230,6 +1232,8 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
         if (H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) <
             0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial metadata cache resize config");
+        if (H5P_get(plist, H5F_ACS_RFIC_FLAGS_NAME, &(f->shared->rfic_flags)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get RFIC flags value");
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
