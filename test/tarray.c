@@ -1935,6 +1935,14 @@ test_compat(void)
      *  the tarrold.h5 file.
      */
 
+    /* Check if VFD used is native file format compatible */
+    CHECK(h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible), FAIL,
+          "h5_driver_is_default_vfd_compatible");
+    if (!driver_is_default_compatible) {
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
+
     /* Open the testfile */
     fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK_I(fid1, "H5Fopen");
@@ -1942,14 +1950,6 @@ test_compat(void)
     /* Check if native VOL is being used */
     CHECK(h5_using_native_vol(H5P_DEFAULT, fid1, &vol_is_native), FAIL, "h5_using_native_vol");
     if (!vol_is_native) {
-        CHECK(H5Fclose(fid1), FAIL, "H5Fclose");
-        MESSAGE(5, (" -- SKIPPED --\n"));
-        return;
-    }
-    /* Check if VFD used is native file format compatible */
-    CHECK(h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible), FAIL,
-          "h5_driver_is_default_vfd_compatible");
-    if (!driver_is_default_compatible) {
         CHECK(H5Fclose(fid1), FAIL, "H5Fclose");
         MESSAGE(5, (" -- SKIPPED --\n"));
         return;

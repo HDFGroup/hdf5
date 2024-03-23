@@ -1375,18 +1375,16 @@ main(void)
     hid_t       fapl, fapl2;     /* File access property list IDs */
     hid_t       fcpl, fcpl2;     /* File creation property list ID */
     unsigned    new_format;      /* Whether to use the new format or not */
-    const char *env_h5_drvr;     /* File Driver value from environment */
+    const char *driver_name;     /* File Driver value from environment */
     bool        contig_addr_vfd; /* Whether VFD used has a contiguous address space */
     bool        driver_is_default_compatible;
     int         nerrors = 0;
 
     /* Get the VFD to use */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* VFD that does not support contiguous address space */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     /* Reset library */
     h5_reset();
@@ -1433,8 +1431,8 @@ main(void)
         nerrors += test_large(my_fcpl, my_fapl, new_format);
     } /* end for */
 
-    /* New format group specific tests (require new format features) */
     if (contig_addr_vfd) {
+        /* New format group specific tests (require new format features) */
         nerrors += lifecycle(fcpl2, fapl2);
         nerrors += long_compact(fcpl2, fapl2);
 
@@ -1444,10 +1442,10 @@ main(void)
 
         nerrors += no_compact(fcpl2, fapl2);
         nerrors += gcpl_on_root(fapl2);
-    }
 
-    /* Old group API specific tests */
-    nerrors += old_api(fapl);
+        /* Old group API specific tests */
+        nerrors += old_api(fapl);
+    }
 
     if (driver_is_default_compatible) {
         nerrors += corrupt_stab_msg();

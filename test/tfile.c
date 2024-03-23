@@ -185,8 +185,8 @@ static const char *FILESPACE_NAME[] = {"tfilespace", NULL};
 #define DSET_DS1 "DS1"
 
 /* Local test function declarations for version bounds */
-static void test_libver_bounds_low_high(const char *env_h5_drvr);
-static void test_libver_bounds_super(hid_t fapl, const char *env_h5_drvr);
+static void test_libver_bounds_low_high(const char *driver_name);
+static void test_libver_bounds_super(hid_t fapl, const char *driver_name);
 static void test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non_def_fsm);
 static void test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non_def_fsm);
 static void test_libver_bounds_obj(hid_t fapl);
@@ -533,7 +533,7 @@ test_file_create(void)
 **
 ****************************************************************/
 static void
-test_file_open(const char *env_h5_drvr)
+test_file_open(const char *driver_name)
 {
     hid_t    fid1, fid2; /*HDF5 File IDs            */
     hid_t    did;        /*dataset ID                    */
@@ -553,7 +553,7 @@ test_file_open(const char *env_h5_drvr)
      */
 
     /* Only run this test with sec2/default driver */
-    if (!h5_using_default_driver(env_h5_drvr))
+    if (!h5_using_default_driver(driver_name))
         return;
 
     /* Output message about test being performed */
@@ -1747,7 +1747,7 @@ test_file_perm2(void)
 #define FILE_IS_ACCESSIBLE          "tfile_is_accessible"
 #define FILE_IS_ACCESSIBLE_NON_HDF5 "tfile_is_accessible_non_hdf5"
 static void
-test_file_is_accessible(const char *env_h5_drvr)
+test_file_is_accessible(const char *driver_name)
 {
     hid_t         fid     = H5I_INVALID_HID;          /* File opened with read-write permission */
     hid_t         fcpl_id = H5I_INVALID_HID;          /* File creation property list */
@@ -1832,7 +1832,7 @@ test_file_is_accessible(const char *env_h5_drvr)
     /* This test is not currently working for the family VFD.
      * There are failures when creating files with userblocks.
      */
-    if (0 != strcmp(env_h5_drvr, "family")) {
+    if (0 != strcmp(driver_name, "family")) {
         /* Create a file creation property list with a non-default user block size */
         fcpl_id = H5Pcreate(H5P_FILE_CREATE);
         CHECK(fcpl_id, H5I_INVALID_HID, "H5Pcreate");
@@ -1918,7 +1918,7 @@ test_file_is_accessible(const char *env_h5_drvr)
 *****************************************************************/
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 static void
-test_file_ishdf5(const char *env_h5_drvr)
+test_file_ishdf5(const char *driver_name)
 {
     hid_t         fid     = H5I_INVALID_HID; /* File opened with read-write permission */
     hid_t         fcpl_id = H5I_INVALID_HID; /* File creation property list */
@@ -1934,7 +1934,7 @@ test_file_ishdf5(const char *env_h5_drvr)
     bool          vol_is_native;
     herr_t        ret; /* Return value from HDF5 calls */
 
-    if (!h5_using_default_driver(env_h5_drvr))
+    if (!h5_using_default_driver(driver_name))
         return;
 
     /* Output message about test being performed */
@@ -3055,7 +3055,7 @@ test_file_double_datatype_open(void)
 **
 *****************************************************************/
 static void
-test_userblock_file_size(const char *env_h5_drvr)
+test_userblock_file_size(const char *driver_name)
 {
     hid_t         file1_id, file2_id;
     hid_t         group1_id, group2_id;
@@ -3069,8 +3069,8 @@ test_userblock_file_size(const char *env_h5_drvr)
     herr_t        ret; /* Generic return value */
 
     /* Don't run with multi/split, family or direct drivers */
-    if (!strcmp(env_h5_drvr, "multi") || !strcmp(env_h5_drvr, "split") || !strcmp(env_h5_drvr, "family") ||
-        !strcmp(env_h5_drvr, "direct"))
+    if (!strcmp(driver_name, "multi") || !strcmp(driver_name, "split") || !strcmp(driver_name, "family") ||
+        !strcmp(driver_name, "direct"))
         return;
 
     /* Output message about test being performed */
@@ -3495,7 +3495,7 @@ test_userblock_alignment_helper2(hid_t fapl, bool open_rw)
 **
 *****************************************************************/
 static void
-test_userblock_alignment(const char *env_h5_drvr)
+test_userblock_alignment(const char *driver_name)
 {
     hid_t  fid;  /* File ID */
     hid_t  fcpl; /* File creation property list ID */
@@ -3503,7 +3503,7 @@ test_userblock_alignment(const char *env_h5_drvr)
     herr_t ret;  /* Generic return value */
 
     /* Only run with sec2 driver */
-    if (!h5_using_default_driver(env_h5_drvr))
+    if (!h5_using_default_driver(driver_name))
         return;
 
     /* Output message about test being performed */
@@ -3715,7 +3715,7 @@ test_userblock_alignment(const char *env_h5_drvr)
 **
 *****************************************************************/
 static void
-test_userblock_alignment_paged(const char *env_h5_drvr)
+test_userblock_alignment_paged(const char *driver_name)
 {
     hid_t  fid;  /* File ID */
     hid_t  fcpl; /* File creation property list ID */
@@ -3723,7 +3723,7 @@ test_userblock_alignment_paged(const char *env_h5_drvr)
     herr_t ret;  /* Generic return value */
 
     /* Only run with sec2 driver */
-    if (!h5_using_default_driver(env_h5_drvr))
+    if (!h5_using_default_driver(driver_name))
         return;
 
     /* Output message about test being performed */
@@ -4139,7 +4139,7 @@ test_userblock_alignment_paged(const char *env_h5_drvr)
 **
 ****************************************************************/
 static void
-test_filespace_info(const char *env_h5_drvr)
+test_filespace_info(const char *driver_name)
 {
     hid_t                 fid;                    /* File IDs    */
     hid_t                 fapl, new_fapl;         /* File access property lists */
@@ -4161,7 +4161,7 @@ test_filespace_info(const char *env_h5_drvr)
     MESSAGE(5, ("Testing file creation public routines: H5Pget/set_file_space_strategy & "
                 "H5Pget/set_file_space_page_size\n"));
 
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     fapl = h5_fileaccess();
     h5_fixname(FILESPACE_NAME[0], fapl, filename, sizeof filename);
@@ -4556,7 +4556,7 @@ error:
 **
 *****************************************************************/
 static void
-test_file_freespace(const char *env_h5_drvr)
+test_file_freespace(const char *driver_name)
 {
     hid_t          file;                   /* File opened with read-write permission */
     h5_stat_size_t empty_filesize;         /* Size of file when empty */
@@ -4578,8 +4578,8 @@ test_file_freespace(const char *env_h5_drvr)
     bool           vol_is_native;
     herr_t         ret; /* Return value */
 
-    split_vfd = !strcmp(env_h5_drvr, "split");
-    multi_vfd = !strcmp(env_h5_drvr, "multi");
+    split_vfd = !strcmp(driver_name, "split");
+    multi_vfd = !strcmp(driver_name, "multi");
 
     if (split_vfd || multi_vfd)
         return;
@@ -4731,7 +4731,7 @@ test_file_freespace(const char *env_h5_drvr)
 **
 *****************************************************************/
 static void
-test_sects_freespace(const char *env_h5_drvr, bool new_format)
+test_sects_freespace(const char *driver_name, bool new_format)
 {
     char            filename[FILENAME_LEN]; /* Filename to use */
     hid_t           file;                   /* File ID */
@@ -4762,8 +4762,8 @@ test_sects_freespace(const char *env_h5_drvr, bool new_format)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing H5Fget_free_sections()--free-space section info in the file\n"));
 
-    split_vfd = !strcmp(env_h5_drvr, "split");
-    multi_vfd = !strcmp(env_h5_drvr, "multi");
+    split_vfd = !strcmp(driver_name, "split");
+    multi_vfd = !strcmp(driver_name, "multi");
 
     if (split_vfd || multi_vfd) {
         MESSAGE(5, (" -- SKIPPED --\n"));
@@ -5900,7 +5900,7 @@ test_libver_bounds(void)
 **
 **************************************************************************************/
 static void
-test_libver_bounds_low_high(const char *env_h5_drvr)
+test_libver_bounds_low_high(const char *driver_name)
 {
     hid_t        fapl = H5I_INVALID_HID; /* File access property list */
     H5F_libver_t low, high;              /* Low and high bounds */
@@ -5948,7 +5948,7 @@ test_libver_bounds_low_high(const char *env_h5_drvr)
             VERIFY(ret, SUCCEED, "H5Pset_libver_bounds");
 
             /* Tests to verify version bounds */
-            test_libver_bounds_super(fapl, env_h5_drvr);
+            test_libver_bounds_super(fapl, driver_name);
             test_libver_bounds_obj(fapl);
             test_libver_bounds_dataset(fapl);
             test_libver_bounds_dataspace(fapl);
@@ -5981,7 +5981,7 @@ test_libver_bounds_low_high(const char *env_h5_drvr)
 **
 *************************************************************************/
 static void
-test_libver_bounds_super(hid_t fapl, const char *env_h5_drvr)
+test_libver_bounds_super(hid_t fapl, const char *driver_name)
 {
     hid_t  fcpl = H5I_INVALID_HID; /* File creation property list */
     herr_t ret;                    /* The return value */
@@ -5993,13 +5993,13 @@ test_libver_bounds_super(hid_t fapl, const char *env_h5_drvr)
 
     /* Verify superblock version when creating a file with input fapl,
        fcpl #A and with/without SWMR access */
-    if (H5FD__supports_swmr_test(env_h5_drvr))
+    if (H5FD__supports_swmr_test(driver_name))
         test_libver_bounds_super_create(fapl, fcpl, true, false);
     test_libver_bounds_super_create(fapl, fcpl, false, false);
 
     /* Verify superblock version when opening a file which is created
        with input fapl, fcpl #A and with/without SWMR access */
-    if (H5FD__supports_swmr_test(env_h5_drvr))
+    if (H5FD__supports_swmr_test(driver_name))
         test_libver_bounds_super_open(fapl, fcpl, true, false);
     test_libver_bounds_super_open(fapl, fcpl, false, false);
 
@@ -6016,13 +6016,13 @@ test_libver_bounds_super(hid_t fapl, const char *env_h5_drvr)
 
     /* Verify superblock version when creating a file with input fapl,
        fcpl #B and with/without SWMR access */
-    if (H5FD__supports_swmr_test(env_h5_drvr))
+    if (H5FD__supports_swmr_test(driver_name))
         test_libver_bounds_super_create(fapl, fcpl, true, false);
     test_libver_bounds_super_create(fapl, fcpl, false, false);
 
     /* Verify superblock version when opening a file which is created
        with input fapl, fcpl #B and with/without SWMR access */
-    if (H5FD__supports_swmr_test(env_h5_drvr))
+    if (H5FD__supports_swmr_test(driver_name))
         test_libver_bounds_super_open(fapl, fcpl, true, false);
     test_libver_bounds_super_open(fapl, fcpl, false, false);
 
@@ -6041,13 +6041,13 @@ test_libver_bounds_super(hid_t fapl, const char *env_h5_drvr)
 
     /* Verify superblock version when creating a file with input fapl,
        fcpl #C and with/without SWMR access */
-    if (H5FD__supports_swmr_test(env_h5_drvr))
+    if (H5FD__supports_swmr_test(driver_name))
         test_libver_bounds_super_create(fapl, fcpl, true, false);
     test_libver_bounds_super_create(fapl, fcpl, false, false);
 
     /* Verify superblock version when opening a file which is created
        with input fapl, fcpl #C and with/without SWMR access */
-    if (H5FD__supports_swmr_test(env_h5_drvr))
+    if (H5FD__supports_swmr_test(driver_name))
         test_libver_bounds_super_open(fapl, fcpl, true, false);
     test_libver_bounds_super_open(fapl, fcpl, false, false);
 
@@ -6055,7 +6055,7 @@ test_libver_bounds_super(hid_t fapl, const char *env_h5_drvr)
     ret = H5Pclose(fcpl);
     CHECK(ret, FAIL, "H5Pclose");
 
-    if (h5_using_default_driver(env_h5_drvr)) {
+    if (h5_using_default_driver(driver_name)) {
         /* Create a fcpl with persistent free-space manager enabled: #D */
         /* This will result in superblock version 2 */
         fcpl = H5Pcreate(H5P_FILE_CREATE);
@@ -6065,13 +6065,13 @@ test_libver_bounds_super(hid_t fapl, const char *env_h5_drvr)
 
         /* Verify superblock version when creating a file with input fapl,
            fcpl #D and with/without SWMR access */
-        if (H5FD__supports_swmr_test(env_h5_drvr))
+        if (H5FD__supports_swmr_test(driver_name))
             test_libver_bounds_super_create(fapl, fcpl, true, true);
         test_libver_bounds_super_create(fapl, fcpl, false, true);
 
         /* Verify superblock version when opening a file which is created
            with input fapl, fcpl #D and with/without SWMR access */
-        if (H5FD__supports_swmr_test(env_h5_drvr))
+        if (H5FD__supports_swmr_test(driver_name))
             test_libver_bounds_super_open(fapl, fcpl, true, true);
         test_libver_bounds_super_open(fapl, fcpl, false, true);
 
@@ -8103,7 +8103,7 @@ test_min_dset_ohdr(void)
 ****************************************************************/
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 static void
-test_deprec(const char *env_h5_drvr)
+test_deprec(const char *driver_name)
 {
     hid_t       file; /* File IDs for old & new files */
     hid_t       fcpl; /* File creation property list */
@@ -8166,7 +8166,7 @@ test_deprec(const char *env_h5_drvr)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Only run this part of the test with the sec2/default driver */
-    if (h5_using_default_driver(env_h5_drvr)) {
+    if (h5_using_default_driver(driver_name)) {
         /* Create a file creation property list */
         fcpl = H5Pcreate(H5P_FILE_CREATE);
         CHECK(fcpl, FAIL, "H5Pcreate");
@@ -8341,7 +8341,7 @@ test_deprec(const char *env_h5_drvr)
 void
 test_file(void)
 {
-    const char *env_h5_drvr;               /* File Driver value from environment */
+    const char *driver_name;               /* File Driver value from environment */
     hid_t       fapl_id = H5I_INVALID_HID; /* VFD-dependent fapl ID */
     bool        driver_is_default_compatible;
     herr_t      ret;
@@ -8350,9 +8350,7 @@ test_file(void)
     MESSAGE(5, ("Testing Low-Level File I/O\n"));
 
     /* Get the VFD to use */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Improved version of VFD-dependent checks */
     fapl_id = h5_fileaccess();
@@ -8362,14 +8360,14 @@ test_file(void)
     CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
 
     test_file_create();                   /* Test file creation(also creation templates)*/
-    test_file_open(env_h5_drvr);          /* Test file opening */
+    test_file_open(driver_name);          /* Test file opening */
     test_file_reopen();                   /* Test file reopening */
     test_file_close();                    /* Test file close behavior */
     test_get_file_id();                   /* Test H5Iget_file_id */
     test_get_obj_ids();                   /* Test H5Fget_obj_ids for Jira Issue 8528 */
     test_file_perm();                     /* Test file access permissions */
     test_file_perm2();                    /* Test file access permission again */
-    test_file_is_accessible(env_h5_drvr); /* Test detecting HDF5 files correctly */
+    test_file_is_accessible(driver_name); /* Test detecting HDF5 files correctly */
     test_file_delete(fapl_id);            /* Test H5Fdelete */
     test_file_open_dot();                 /* Test opening objects with "." for a name */
     test_file_open_overlap();             /* Test opening files in an overlapping manner */
@@ -8381,7 +8379,7 @@ test_file(void)
     test_file_double_file_dataset_open(true);
     test_file_double_file_dataset_open(false);
     test_userblock_file_size(
-        env_h5_drvr);        /* Tests that files created with a userblock have the correct size */
+        driver_name);        /* Tests that files created with a userblock have the correct size */
     test_cached_stab_info(); /* Tests that files are created with cached stab info in the superblock */
 
     if (driver_is_default_compatible) {
@@ -8389,20 +8387,20 @@ test_file(void)
     }
 
     test_userblock_alignment(
-        env_h5_drvr); /* Tests that files created with a userblock and alignment interact properly */
-    test_userblock_alignment_paged(env_h5_drvr); /* Tests files created with a userblock and alignment (via
+        driver_name); /* Tests that files created with a userblock and alignment interact properly */
+    test_userblock_alignment_paged(driver_name); /* Tests files created with a userblock and alignment (via
                                                     paged aggregation) interact properly */
-    test_filespace_info(env_h5_drvr);            /* Test file creation public routines: */
+    test_filespace_info(driver_name);            /* Test file creation public routines: */
     /* H5Pget/set_file_space_strategy() & H5Pget/set_file_space_page_size() */
     /* Skipped testing for multi/split drivers */
-    test_file_freespace(env_h5_drvr); /* Test file public routine H5Fget_freespace() */
+    test_file_freespace(driver_name); /* Test file public routine H5Fget_freespace() */
                                       /* Skipped testing for multi/split drivers */
                                       /* Setup for multi/split drivers are there already */
-    test_sects_freespace(env_h5_drvr,
+    test_sects_freespace(driver_name,
                          true); /* Test file public routine H5Fget_free_sections() for new format */
                                 /* Skipped testing for multi/split drivers */
                                 /* Setup for multi/split drivers are there already */
-    test_sects_freespace(env_h5_drvr, false); /* Test file public routine H5Fget_free_sections() */
+    test_sects_freespace(driver_name, false); /* Test file public routine H5Fget_free_sections() */
                                               /* Skipped testing for multi/split drivers */
 
     if (driver_is_default_compatible) {
@@ -8415,14 +8413,14 @@ test_file(void)
     }
 
     test_libver_bounds(); /* Test compatibility for file space management */
-    test_libver_bounds_low_high(env_h5_drvr);
+    test_libver_bounds_low_high(driver_name);
     test_libver_macros();  /* Test the macros for library version comparison */
     test_libver_macros2(); /* Test the macros for library version comparison */
     test_incr_filesize();  /* Test H5Fincrement_filesize() and H5Fget_eoa() */
     test_min_dset_ohdr();  /* Test dataset object header minimization */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    test_file_ishdf5(env_h5_drvr); /* Test detecting HDF5 files correctly */
-    test_deprec(env_h5_drvr);      /* Test deprecated routines */
+    test_file_ishdf5(driver_name); /* Test detecting HDF5 files correctly */
+    test_deprec(driver_name);      /* Test deprecated routines */
 #endif                             /* H5_NO_DEPRECATED_SYMBOLS */
 
     ret = H5Pclose(fapl_id);

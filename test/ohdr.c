@@ -1827,7 +1827,7 @@ main(void)
     hid_t          fapl = H5I_INVALID_HID;
     hid_t          file = H5I_INVALID_HID;
     H5F_t         *f    = NULL;
-    const char    *env_h5_drvr;     /* File driver value from environment */
+    const char    *driver_name;     /* File driver value from environment */
     bool           single_file_vfd; /* Whether VFD used stores data in a single file */
     char           filename[1024];
     H5O_hdr_info_t hdr_info;  /* Object info */
@@ -1839,12 +1839,10 @@ main(void)
     herr_t         ret;                    /* Generic return value */
 
     /* Get the VFD to use */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = !h5_driver_uses_multiple_files(env_h5_drvr, 0);
+    single_file_vfd = !h5_driver_uses_multiple_files(driver_name, 0);
 
     /* Reset library */
     h5_reset();
@@ -2132,7 +2130,7 @@ main(void)
     if (h5_verify_cached_stabs(FILENAME, fapl) < 0)
         TEST_ERROR;
 
-    if (H5FD__supports_swmr_test(env_h5_drvr)) {
+    if (H5FD__supports_swmr_test(driver_name)) {
         /* A test to exercise the re-read of the object header for SWMR access */
         if (test_ohdr_swmr(true) < 0)
             TEST_ERROR;
