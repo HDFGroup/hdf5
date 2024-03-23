@@ -317,6 +317,15 @@
 /* limit the middle value to be within a range (inclusive) */
 #define RANGE(LO, X, HI) MAX(LO, MIN(X, HI))
 
+/* Macro for checking if two ranges overlap one another */
+/*
+ * Check for the inverse of whether the ranges are disjoint.  If they are
+ * disjoint, then the low bound of one of the ranges must be greater than the
+ * high bound of the other.
+ */
+/* (Assumes that low & high bounds are _inclusive_) */
+#define H5_RANGE_OVERLAP(L1, H1, L2, H2) (!((L1) > (H2) || (L2) > (H1)))
+
 /* absolute value */
 #ifndef ABS
 #define ABS(a) (((a) >= 0) ? (a) : -(a))
@@ -450,8 +459,7 @@
                                   (X) >= (Y))
 #define H5_addr_cmp(X,Y)         (H5_addr_eq((X), (Y)) ? 0 :                \
                                  (H5_addr_lt((X), (Y)) ? -1 : 1))
-#define H5_addr_overlap(O1,L1,O2,L2) (((O1) < (O2) && ((O1) + (L1)) > (O2)) || \
-                                      ((O1) >= (O2) && (O1) < ((O2) + (L2))))
+#define H5_addr_overlap(O1,L1,O2,L2) H5_RANGE_OVERLAP(O1, ((O1)+(L1)), O2, ((O2)+(L2)))
 /* clang-format on */
 
 /*
