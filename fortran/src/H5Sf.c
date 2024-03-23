@@ -55,7 +55,7 @@ h5screate_simple_c(int_f *rank, hsize_t_f *dims, hsize_t_f *maxdims, hid_t_f *sp
         c_maxdims[i] = maxdims[*rank - i - 1];
     } /* end for */
 
-    c_space_id = H5Screate_simple((int)*rank, c_dims, c_maxdims);
+    c_space_id = H5Screate_simple(*rank, c_dims, c_maxdims);
     if (c_space_id < 0)
         HGOTO_DONE(FAIL);
 

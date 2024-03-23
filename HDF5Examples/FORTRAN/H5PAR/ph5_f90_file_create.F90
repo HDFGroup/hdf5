@@ -18,9 +18,9 @@
      !
      ! MPI definitions and calls.
      !
-     INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror       ! MPI error flag
-     INTEGER(KIND=MPI_INTEGER_KIND) :: comm, info
-     INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_rank
+     INTEGER :: mpierror       ! MPI error flag
+     INTEGER :: comm, info
+     INTEGER :: mpi_size, mpi_rank
      comm = MPI_COMM_WORLD
      info = MPI_INFO_NULL
 
