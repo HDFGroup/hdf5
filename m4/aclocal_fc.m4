@@ -64,11 +64,11 @@ dnl
 dnl See if the fortran compiler supports the intrinsic module "ISO_FORTRAN_ENV"
 
 AC_DEFUN([PAC_PROG_FC_ISO_FORTRAN_ENV],[
-  HAVE_ISO_FORTRAN_ENV="no"
-  AC_MSG_CHECKING([if Fortran compiler supports intrinsic module ISO_FORTRAN_ENV])
+  CHECK_ISO_FORTRAN_ENV="no"
+  AC_MSG_CHECKING([if Fortran compiler supports intrinsic module ISO_FORTRAN_ENV (F08)])
   TEST_SRC="`sed -n '/PROGRAM PROG_FC_ISO_FORTRAN_ENV/,/END PROGRAM PROG_FC_ISO_FORTRAN_ENV/p' $srcdir/m4/aclocal_fc.f90`"
   AC_LINK_IFELSE([$TEST_SRC],[AC_MSG_RESULT([yes])
-        HAVE_ISO_FORTRAN_ENV="yes"],
+        CHECK_ISO_FORTRAN_ENV="yes"],
       [AC_MSG_RESULT([no])])
 ])
 

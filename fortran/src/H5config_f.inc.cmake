@@ -79,7 +79,7 @@
 ! Define if Fortran C_BOOL is different from default LOGICAL
 #define H5_FORTRAN_C_BOOL_IS_UNIQUE @H5_FORTRAN_C_BOOL_IS_UNIQUE@
 
-! Define if the intrinsic module ISO_FORTRAN_ENV exists
+! Define if Fortran supports ISO_FORTRAN_ENV (F08)
 #define H5_HAVE_ISO_FORTRAN_ENV @H5_HAVE_ISO_FORTRAN_ENV@
 
 ! Define the size of C's double

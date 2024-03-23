@@ -18,6 +18,9 @@
 
 SUBROUTINE mpi_param_03(nerrors)
 
+#ifdef H5_HAVE_ISO_FORTRAN_ENV
+  USE, INTRINSIC :: iso_fortran_env, ONLY : atomic_logical_kind
+#endif
   USE MPI
   USE HDF5
   USE TH5_MISC
@@ -27,7 +30,6 @@ SUBROUTINE mpi_param_03(nerrors)
 
   INTEGER, INTENT(inout) :: nerrors                 ! number of errors
 
-  INTEGER, PARAMETER :: logical_kind = MPI_INTEGER_KIND
   INTEGER :: hdferror                               ! HDF hdferror flag
   INTEGER(hid_t) :: fapl_id                         ! file access identifier
   INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_size_ret ! number of processes in the group of communicator
@@ -37,7 +39,11 @@ SUBROUTINE mpi_param_03(nerrors)
   INTEGER(KIND=MPI_INTEGER_KIND) :: info, info_ret
   INTEGER(KIND=MPI_INTEGER_KIND) :: comm, comm_ret
   INTEGER(KIND=MPI_INTEGER_KIND) :: nkeys
-  LOGICAL(KIND=logical_kind)     :: flag
+#ifdef H5_HAVE_ISO_FORTRAN_ENV
+  LOGICAL(KIND=atomic_logical_kind) :: flag
+#else
+  LOGICAL(KIND=MPI_INTEGER_KIND) :: flag
+#endif
   INTEGER :: iconfig
   CHARACTER(LEN=4) , PARAMETER :: in_key="host"
   CHARACTER(LEN=10), PARAMETER :: in_value="myhost.org"
@@ -173,6 +179,9 @@ SUBROUTINE mpi_param_08(nerrors)
 
 #ifdef H5_HAVE_MPI_F08
 
+#ifdef H5_HAVE_ISO_FORTRAN_ENV
+  USE, INTRINSIC :: iso_fortran_env, ONLY : atomic_logical_kind
+#endif
   USE MPI_F08
   USE HDF5
   USE TH5_MISC
@@ -181,7 +190,6 @@ SUBROUTINE mpi_param_08(nerrors)
   IMPLICIT NONE
   INTEGER, INTENT(inout) :: nerrors                 ! number of errors
 
-  INTEGER, PARAMETER :: logical_kind = MPI_INTEGER_KIND
   INTEGER :: hdferror                               ! HDF hdferror flag
   INTEGER(hid_t) :: fapl_id                         ! file access identifier
   INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_size_ret ! number of processes in the group of communicator
@@ -191,7 +199,11 @@ SUBROUTINE mpi_param_08(nerrors)
   TYPE(MPI_INFO) :: info, info_ret
   TYPE(MPI_COMM) :: comm, comm_ret
   INTEGER(KIND=MPI_INTEGER_KIND) :: nkeys
-  LOGICAL(KIND=logical_kind) :: flag
+#ifdef H5_HAVE_ISO_FORTRAN_ENV
+  LOGICAL(KIND=atomic_logical_kind) :: flag
+#else
+  LOGICAL(KIND=MPI_INTEGER_KIND) :: flag
+#endif
   INTEGER :: iconfig
   CHARACTER(LEN=4) , PARAMETER :: in_key="host"
   CHARACTER(LEN=10), PARAMETER :: in_value="myhost.org"

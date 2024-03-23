@@ -18,6 +18,9 @@
 
 PROGRAM subfiling_test
   USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_INT64_T
+#ifdef H5_HAVE_ISO_FORTRAN_ENV
+  USE, INTRINSIC :: iso_fortran_env, ONLY : atomic_logical_kind
+#endif
   USE HDF5
   USE MPI
   USE TH5_MISC
@@ -30,7 +33,6 @@ PROGRAM subfiling_test
 
 #ifdef H5_HAVE_SUBFILING_VFD
 
-  INTEGER, PARAMETER :: logical_kind = MPI_INTEGER_KIND
   CHARACTER(LEN=7), PARAMETER :: filename = "subf.h5"
 
   INTEGER :: hdferror                                      ! HDF hdferror flag
@@ -48,7 +50,11 @@ PROGRAM subfiling_test
   INTEGER(C_INT64_T) inode
   TYPE(H5FD_subfiling_config_t) :: vfd_config
   TYPE(H5FD_ioc_config_t)       :: vfd_config_ioc
-  LOGICAL(KIND=logical_kind)    :: flag
+#ifdef H5_HAVE_ISO_FORTRAN_ENV
+  LOGICAL(KIND=atomic_logical_kind) :: flag
+#else
+  LOGICAL(KIND=MPI_INTEGER_KIND) :: flag
+#endif
 
   INTEGER :: nerrors = 0
 
@@ -131,7 +137,7 @@ PROGRAM subfiling_test
         ENDIF
 
         CALL mpi_info_get(info_ret,"foo", 3_MPI_INTEGER_KIND, info_val, flag, mpierror)
-        IF(flag .EQV. .TRUE.)THEN
+        IF(LOGICAL(flag) .EQV. .TRUE.)THEN
            IF(info_val.NE."bar")THEN
               IF(mpi_rank.EQ.0) &
                    WRITE(*,*) "Failed H5Pset_mpi_params_f and H5Pget_mpi_params_f sequence"

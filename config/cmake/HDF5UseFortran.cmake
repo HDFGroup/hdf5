@@ -117,6 +117,16 @@ else ()
   set (${HDF_PREFIX}_FORTRAN_C_BOOL_IS_UNIQUE 0)
 endif ()
 
+# Check if the fortran compiler supports the intrinsic module "ISO_FORTRAN_ENV" (F08)
+
+READ_SOURCE("PROGRAM PROG_FC_ISO_FORTRAN_ENV" "END PROGRAM PROG_FC_ISO_FORTRAN_ENV" SOURCE_CODE)
+check_fortran_source_compiles (${SOURCE_CODE} HAVE_ISO_FORTRAN_ENV SRC_EXT f90)
+if (${HAVE_ISO_FORTRAN_ENV})
+  set (${HDF_PREFIX}_HAVE_ISO_FORTRAN_ENV 1)
+else ()
+  set (${HDF_PREFIX}_HAVE_ISO_FORTRAN_ENV 0)
+endif ()
+
 ## Set the sizeof function for use later in the fortran tests
 if (${HDF_PREFIX}_FORTRAN_HAVE_STORAGE_SIZE)
   set (FC_SIZEOF_A "STORAGE_SIZE(a, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)")
