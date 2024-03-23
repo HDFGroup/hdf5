@@ -733,7 +733,7 @@ H5__debug_mask(const char *s)
                         H5_debug_g.pkg[i].stream = clear ? NULL : stream;
                         break;
                     } /* end if */
-                } /* end for */
+                }     /* end for */
                 if (i >= (size_t)H5_NPKGS)
                     fprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
             } /* end if-else */
@@ -761,7 +761,7 @@ H5__debug_mask(const char *s)
         else {
             s++;
         } /* end if-else */
-    } /* end while */
+    }     /* end while */
 } /* end H5__debug_mask() */
 
 #ifdef H5_HAVE_PARALLEL

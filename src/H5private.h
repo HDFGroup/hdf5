@@ -331,7 +331,7 @@
 /* Check if a read of size bytes starting at ptr would overflow past
  * the last valid byte, pointed to by buffer_end.
  */
-#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end) (((ptr) + (size) - 1) > (buffer_end))
+#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end) (((ptr) + (size)-1) > (buffer_end))
 
 /* Variant of H5_IS_BUFFER_OVERFLOW, used with functions such as H5Tdecode()
  * that don't take a size parameter, where we need to skip the bounds checks.
@@ -340,7 +340,7 @@
  * the entire library.
  */
 #define H5_IS_KNOWN_BUFFER_OVERFLOW(skip, ptr, size, buffer_end)                                             \
-    (skip ? false : ((ptr) + (size) - 1) > (buffer_end))
+    (skip ? false : ((ptr) + (size)-1) > (buffer_end))
 
 /*
  * HDF Boolean type.
@@ -903,7 +903,7 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifdef H5_HAVE_VASPRINTF
 #define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
 #else
-H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+H5_DLL int       HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #endif
 
@@ -1356,8 +1356,8 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
             /* Don't check again */                                                                          \
             func_check = true;                                                                               \
         } /* end if */                                                                                       \
-    } /* end scope */
-#else /* NDEBUG */
+    }     /* end scope */
+#else     /* NDEBUG */
 #define FUNC_ENTER_CHECK_NAME(asrt)
 #endif /* NDEBUG */
 

@@ -153,12 +153,14 @@ done:
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS_thread_setcancelstate(int H5_ATTR_UNUSED state, int H5_ATTR_UNUSED *oldstate){
+H5TS_thread_setcancelstate(int H5_ATTR_UNUSED state, int H5_ATTR_UNUSED *oldstate)
+{
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-        /* Windows threads are not cancelable, so this is a noop */
+    /* Windows threads are not cancelable, so this is a noop */
 
-        FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)} /* H5TS_thread_setcancelstate() */
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+} /* H5TS_thread_setcancelstate() */
 #else
 /*--------------------------------------------------------------------------
  * Function: H5TS_thread_create
