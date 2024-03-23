@@ -25,8 +25,8 @@ SUBROUTINE multiple_dset_write(length, do_collective, do_chunk, mpi_size, mpi_ra
   INTEGER, INTENT(in) :: length                     ! array length
   LOGICAL, INTENT(in) :: do_collective              ! use collective I/O
   LOGICAL, INTENT(in) :: do_chunk                   ! use chunking
-  INTEGER(KIND=MPI_INTEGER_KIND), INTENT(in) :: mpi_size ! number of processes in the group of communicator
-  INTEGER(KIND=MPI_INTEGER_KIND), INTENT(in) :: mpi_rank ! rank of the calling process in the communicator
+  INTEGER, INTENT(in) :: mpi_size                   ! number of processes in the group of communicator
+  INTEGER, INTENT(in) :: mpi_rank                   ! rank of the calling process in the communicator
   INTEGER, INTENT(inout) :: nerrors                 ! number of errors
   INTEGER :: hdferror                               ! HDF hdferror flag
   INTEGER(hsize_t), DIMENSION(1) :: dims            ! dataset dimensions

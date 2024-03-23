@@ -162,7 +162,7 @@ CONTAINS
 
     INTEGER :: nlen, i, istart, iend
 
-    op_data%n_obj = op_data%n_obj + 1_C_INT
+    op_data%n_obj = op_data%n_obj + 1
 
     nlen = 1
     DO i = 1, MAX_CHAR_LEN
