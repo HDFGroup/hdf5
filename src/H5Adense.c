@@ -1106,7 +1106,7 @@ H5A__dense_iterate(H5F_t *f, hid_t loc_id, const H5O_ainfo_t *ainfo, H5_index_t 
 {
     H5HF_t          *fheap        = NULL;      /* Fractal heap handle */
     H5HF_t          *shared_fheap = NULL;      /* Fractal heap handle for shared header messages */
-    H5A_attr_table_t atable       = {0, NULL}; /* Table of attributes */
+    H5A_attr_table_t atable       = {0, 0, NULL}; /* Table of attributes */
     H5B2_t          *bt2          = NULL;      /* v2 B-tree handle for index */
     haddr_t          bt2_addr;                 /* Address of v2 B-tree to use for lookup */
     herr_t           ret_value = FAIL;         /* Return value */
@@ -1501,7 +1501,7 @@ H5A__dense_remove_by_idx(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type
 {
     H5HF_t          *fheap        = NULL;      /* Fractal heap handle */
     H5HF_t          *shared_fheap = NULL;      /* Fractal heap handle for shared header messages */
-    H5A_attr_table_t atable       = {0, NULL}; /* Table of attributes */
+    H5A_attr_table_t atable       = {0, 0, NULL}; /* Table of attributes */
     H5B2_t          *bt2          = NULL;      /* v2 B-tree handle for index */
     haddr_t          bt2_addr;                 /* Address of v2 B-tree to use for operation */
     herr_t           ret_value = SUCCEED;      /* Return value */
@@ -1586,7 +1586,7 @@ H5A__dense_remove_by_idx(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "error building table of attributes");
 
         /* Check for skipping too many attributes */
-        if (n >= atable.nattrs)
+        if (n >= atable.num_attrs)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
 
         /* Delete appropriate attribute from dense storage */
