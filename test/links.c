@@ -9537,7 +9537,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, bool new_format)
+external_set_elink_acc_flags(const char *driver_name, hid_t fapl, bool new_format)
 {
     hid_t file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID, group = H5I_INVALID_HID,
           subgroup = H5I_INVALID_HID, gapl = H5I_INVALID_HID;
@@ -9671,7 +9671,7 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, bool new_forma
         TEST_ERROR;
 
     /* Only run this part with VFDs that support SWMR */
-    if (H5FD__supports_swmr_test(env_h5_drvr)) {
+    if (H5FD__supports_swmr_test(driver_name)) {
 
         /* Reopen file1, with read-write and SWMR-write access */
         /* Only supported under the latest file format */
@@ -12663,7 +12663,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-external_symlink(const char *env_h5_drvr, hid_t fapl, bool new_format)
+external_symlink(const char *driver_name, hid_t fapl, bool new_format)
 {
 #ifdef H5_HAVE_SYMLINK
     hid_t file1      = H5I_INVALID_HID;
@@ -12698,8 +12698,7 @@ external_symlink(const char *env_h5_drvr, hid_t fapl, bool new_format)
     /* Skip test when using VFDs that can't provide a POSIX compatible file
      *  descriptor.
      */
-    have_posix_compat_vfd = (bool)(!strcmp(env_h5_drvr, "sec2") || !strcmp(env_h5_drvr, "core") ||
-                                   !strcmp(env_h5_drvr, "nomatch"));
+    have_posix_compat_vfd = (bool)(!strcmp(driver_name, "sec2") || !strcmp(driver_name, "core"));
     if (!have_posix_compat_vfd) {
         SKIPPED();
         puts("    Current VFD doesn't support POSIX I/O calls");
@@ -23108,12 +23107,10 @@ main(void)
     unsigned    new_format; /* Whether to use the new format or not */
     unsigned    minimize_dset_oh;
     unsigned    efc;         /* Whether to use the external file cache */
-    const char *env_h5_drvr; /* File Driver value from environment */
+    const char *driver_name; /* File Driver value from environment */
     bool        driver_is_default_compatible;
 
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     h5_reset();
     fapl = h5_fileaccess();
@@ -23182,7 +23179,7 @@ main(void)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
             /* Skip external link tests for splitter VFD, which has external link-related bugs */
-            if (strcmp(env_h5_drvr, "splitter")) {
+            if (strcmp(driver_name, "splitter")) {
 
                 /* tests for external link */
                 /* Test external file cache first, so it sees the default efc setting on the fapl
@@ -23197,7 +23194,7 @@ main(void)
                 /* This test cannot run with the EFC because the EFC cannot currently
                  * reopen a cached file with a different intent
                  */
-                nerrors += external_set_elink_acc_flags(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_set_elink_acc_flags(driver_name, my_fapl, new_format) < 0 ? 1 : 0;
 
                 /* Try external link tests both with and without the external file cache */
                 for (efc = false; efc <= true; efc++) {
@@ -23269,7 +23266,7 @@ main(void)
                     nerrors += external_link_win8(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_link_win9(my_fapl, new_format) < 0 ? 1 : 0;
 #endif
-                    nerrors += external_symlink(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_symlink(driver_name, my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_copy_invalid_object(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;

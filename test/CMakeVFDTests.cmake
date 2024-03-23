@@ -71,6 +71,9 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
       links_env
       external_env
       vds_env
+      mirror_vfd
+      ros3
+      hdfs
   )
 
   # Skip several tests with subfiling VFD, mostly due

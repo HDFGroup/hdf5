@@ -526,7 +526,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_simple_io(const char *env_h5_drvr, hid_t fapl)
+test_simple_io(const char *driver_name, hid_t fapl)
 {
     char  filename[FILENAME_BUF_SIZE];
     hid_t file = H5I_INVALID_HID, dataset = H5I_INVALID_HID, space = H5I_INVALID_HID, xfer = H5I_INVALID_HID;
@@ -541,8 +541,8 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
     TESTING("simple I/O");
 
     /* Can't run this test with multi-file VFDs because of HDopen/read/seek the file directly */
-    if (strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
-        strcmp(env_h5_drvr, "family") != 0) {
+    if (strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+        strcmp(driver_name, "family") != 0) {
         h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
 
         /* Set up data array */
@@ -688,7 +688,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_userblock_offset(const char *env_h5_drvr, hid_t fapl, bool new_format)
+test_userblock_offset(const char *driver_name, hid_t fapl, bool new_format)
 {
     char  filename[FILENAME_BUF_SIZE];
     hid_t file = H5I_INVALID_HID, fcpl = H5I_INVALID_HID, dataset = H5I_INVALID_HID, space = H5I_INVALID_HID;
@@ -702,8 +702,8 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, bool new_format)
     TESTING("dataset offset with user block");
 
     /* Can't run this test with multi-file VFDs because of HDopen/read/seek the file directly */
-    if (strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
-        strcmp(env_h5_drvr, "family") != 0) {
+    if (strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+        strcmp(driver_name, "family") != 0) {
         h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
         /* Set up data array */
@@ -9630,7 +9630,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_chunk_fast(const char *env_h5_driver, hid_t fapl)
+test_chunk_fast(const char *driver_name, hid_t fapl)
 {
     char         filename[FILENAME_BUF_SIZE];
     hid_t        fid        = H5I_INVALID_HID; /* File ID */
@@ -9693,7 +9693,7 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
         /* Skip this iteration if SWMR I/O is not supported for the VFD specified
          * by the environment variable.
          */
-        if (swmr && !H5FD__supports_swmr_test(env_h5_driver))
+        if (swmr && !H5FD__supports_swmr_test(driver_name))
             continue;
 
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -12200,7 +12200,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_swmr_non_latest(const char *env_h5_driver, hid_t fapl)
+test_swmr_non_latest(const char *driver_name, hid_t fapl)
 {
     char              filename[FILENAME_BUF_SIZE];
     hid_t             fid  = H5I_INVALID_HID;       /* File ID */
@@ -12221,7 +12221,7 @@ test_swmr_non_latest(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if (!H5FD__supports_swmr_test(env_h5_driver)) {
+    if (!H5FD__supports_swmr_test(driver_name)) {
         SKIPPED();
         puts("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
@@ -12470,7 +12470,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
+test_earray_hdr_fd(const char *driver_name, hid_t fapl)
 {
     char              filename[FILENAME_BUF_SIZE];
     hid_t             fid  = H5I_INVALID_HID;
@@ -12491,7 +12491,7 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if (!H5FD__supports_swmr_test(env_h5_driver)) {
+    if (!H5FD__supports_swmr_test(driver_name)) {
         SKIPPED();
         puts("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
@@ -12591,7 +12591,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
+test_farray_hdr_fd(const char *driver_name, hid_t fapl)
 {
     char              filename[FILENAME_BUF_SIZE];
     hid_t             fid  = H5I_INVALID_HID;
@@ -12612,7 +12612,7 @@ test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if (!H5FD__supports_swmr_test(env_h5_driver)) {
+    if (!H5FD__supports_swmr_test(driver_name)) {
         SKIPPED();
         puts("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
@@ -12712,7 +12712,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
+test_bt2_hdr_fd(const char *driver_name, hid_t fapl)
 {
     char              filename[FILENAME_BUF_SIZE];
     hid_t             fid  = H5I_INVALID_HID;
@@ -12739,7 +12739,7 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if (!H5FD__supports_swmr_test(env_h5_driver)) {
+    if (!H5FD__supports_swmr_test(driver_name)) {
         SKIPPED();
         puts("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
@@ -15909,18 +15909,16 @@ main(void)
     size_t      rdcc_nbytes;
     double      rdcc_w0;
     int         nerrors = 0;
-    const char *envval;
+    const char *driver_name;
     bool        contig_addr_vfd; /* Whether VFD used has a contiguous address space */
     bool        driver_is_default_compatible;
     int         i;
 
     /* Don't run this test using certain file drivers */
-    envval = getenv(HDF5_DRIVER);
-    if (envval == NULL)
-        envval = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (bool)(strcmp(envval, "split") != 0 && strcmp(envval, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));
@@ -16049,7 +16047,7 @@ main(void)
                     goto error;
 
                 nerrors += (test_create(file) < 0 ? 1 : 0);
-                nerrors += (test_simple_io(envval, my_fapl) < 0 ? 1 : 0);
+                nerrors += (test_simple_io(driver_name, my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_compact_io(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_max_compact(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_compact_open_close_dirty(my_fapl) < 0 ? 1 : 0);
@@ -16075,7 +16073,7 @@ main(void)
                 nerrors += (test_multiopen(file) < 0 ? 1 : 0);
                 nerrors += (test_types(file) < 0 ? 1 : 0);
                 nerrors += (test_floattypes(file) < 0 ? 1 : 0);
-                nerrors += (test_userblock_offset(envval, my_fapl, new_format) < 0 ? 1 : 0);
+                nerrors += (test_userblock_offset(driver_name, my_fapl, new_format) < 0 ? 1 : 0);
 
                 if (driver_is_default_compatible) {
                     nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
@@ -16105,7 +16103,7 @@ main(void)
                 nerrors += (test_huge_chunks(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_chunk_cache(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_big_chunks_bypass_cache(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_chunk_fast(envval, my_fapl) < 0 ? 1 : 0);
+                nerrors += (test_chunk_fast(driver_name, my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_reopen_chunk_fast(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_chunk_fast_bug1(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_chunk_expand(my_fapl) < 0 ? 1 : 0);
@@ -16123,10 +16121,10 @@ main(void)
                 nerrors += (test_storage_size(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_power2up(my_fapl) < 0 ? 1 : 0);
 
-                nerrors += (test_swmr_non_latest(envval, my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_earray_hdr_fd(envval, my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_farray_hdr_fd(envval, my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_bt2_hdr_fd(envval, my_fapl) < 0 ? 1 : 0);
+                nerrors += (test_swmr_non_latest(driver_name, my_fapl) < 0 ? 1 : 0);
+                nerrors += (test_earray_hdr_fd(driver_name, my_fapl) < 0 ? 1 : 0);
+                nerrors += (test_farray_hdr_fd(driver_name, my_fapl) < 0 ? 1 : 0);
+                nerrors += (test_bt2_hdr_fd(driver_name, my_fapl) < 0 ? 1 : 0);
 
                 nerrors += (test_downsize_vlen_scalar_dataset(file) < 0 ? 1 : 0);
 

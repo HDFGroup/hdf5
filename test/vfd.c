@@ -5867,16 +5867,16 @@ error:
 int
 main(void)
 {
-    char *env_h5_drvr = NULL;
-    int   nerrors     = 0;
+    const char *driver_name;
+    int         nerrors = 0;
 
-    /* Don't run VFD tests when HDF5_DRIVER is set. These tests expect a
-     * specific VFD to be set and HDF5_DRIVER being set can interfere
-     * with that.
+    /* Don't run VFD tests when HDF5_DRIVER or HDF5_TEST_DRIVER is set. These
+     * tests expect a specific VFD to be set and HDF5_DRIVER/HDF5_TEST_DRIVER
+     * being set can interfere with that.
      */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr) {
-        printf(" -- SKIPPED VFD tests because %s is set -- \n", HDF5_DRIVER);
+    driver_name = h5_get_test_driver_name();
+    if (driver_name) {
+        printf(" -- SKIPPED VFD tests because driver environment variable is set -- \n");
         exit(EXIT_SUCCESS);
     }
 
