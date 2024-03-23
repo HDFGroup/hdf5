@@ -81,6 +81,7 @@ H5FDopen_test(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_t *ret_value;
 
     FUNC_ENTER_API(NULL)
+    H5TRACE4("*#", "*sIuia", name, flags, fapl_id, maxaddr);
 
     /* Call developer routine */
     ret_value = H5FDopen(name, flags, fapl_id, maxaddr);
@@ -108,6 +109,7 @@ H5FDclose_test(H5FD_t *file)
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "*#", file);
 
     /* Call developer routine */
     ret_value = H5FDclose(file);
@@ -135,6 +137,7 @@ H5FDalloc_test(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     haddr_t ret_value;
 
     FUNC_ENTER_API(HADDR_UNDEF)
+    H5TRACE4("a", "*#Mtih", file, type, dxpl_id, size);
 
     /* Call developer routine */
     ret_value = H5FDalloc(file, type, dxpl_id, size);
@@ -162,6 +165,7 @@ H5FDget_eoa_test(H5FD_t *file, H5FD_mem_t type)
     haddr_t ret_value;
 
     FUNC_ENTER_API(HADDR_UNDEF)
+    H5TRACE2("a", "*#Mt", file, type);
 
     /* Call developer routine */
     ret_value = H5FDget_eoa(file, type);
@@ -189,6 +193,7 @@ H5FDset_eoa_test(H5FD_t *file, H5FD_mem_t type, haddr_t eoa)
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "*#Mta", file, type, eoa);
 
     /* Call developer routine */
     ret_value = H5FDset_eoa(file, type, eoa);
@@ -216,6 +221,7 @@ H5FDget_eof_test(H5FD_t *file, H5FD_mem_t type)
     haddr_t ret_value;
 
     FUNC_ENTER_API(HADDR_UNDEF)
+    H5TRACE2("a", "*#Mt", file, type);
 
     /* Call developer routine */
     ret_value = H5FDget_eof(file, type);
@@ -243,6 +249,7 @@ H5FDread_test(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "*#Mtiaz*x", file, type, dxpl_id, addr, size, buf);
 
     /* Call developer routine */
     ret_value = H5FDread(file, type, dxpl_id, addr, size, buf);
@@ -270,6 +277,7 @@ H5FDwrite_test(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "*#Mtiaz*x", file, type, dxpl_id, addr, size, buf);
 
     /* Call developer routine */
     ret_value = H5FDwrite(file, type, dxpl_id, addr, size, buf);
@@ -298,6 +306,7 @@ H5FDread_vector_test(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t typ
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*#iIu*Mt*a*z**x", file, dxpl_id, count, types, addrs, sizes, bufs);
 
     /* Call developer routine */
     ret_value = H5FDread_vector(file, dxpl_id, count, types, addrs, sizes, bufs);
@@ -326,6 +335,7 @@ H5FDwrite_vector_test(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t ty
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*#iIu*Mt*a*z**x", file, dxpl_id, count, types, addrs, sizes, bufs);
 
     /* Call developer routine */
     ret_value = H5FDwrite_vector(file, dxpl_id, count, types, addrs, sizes, bufs);
@@ -354,6 +364,8 @@ H5FDread_selection_test(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t c
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*#MtiIu*i*i*a*z**x", file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
+             element_sizes, bufs);
 
     /* Call developer routine */
     ret_value =
@@ -383,6 +395,8 @@ H5FDwrite_selection_test(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t 
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*#MtiIu*i*i*a*z**x", file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
+             element_sizes, bufs);
 
     /* Call developer routine */
     ret_value = H5FDwrite_selection(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
@@ -411,6 +425,7 @@ H5FDtruncate_test(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "*#ib", file, dxpl_id, closing);
 
     /* Call developer routine */
     ret_value = H5FDtruncate(file, dxpl_id, closing);
@@ -438,6 +453,7 @@ H5FDctl_test(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, 
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*#ULUL*x**x", file, op_code, flags, input, output);
 
     /* Call developer routine */
     ret_value = H5FDctl(file, op_code, flags, input, output);

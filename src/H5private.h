@@ -137,10 +137,6 @@
 #include <winsock2.h> /* For GetUserName() */
 #include <shlwapi.h>  /* For StrStrIA */
 
-#ifdef H5_HAVE_THREADSAFE
-#include <process.h> /* For _beginthread() */
-#endif
-
 #endif /*H5_HAVE_WIN32_API*/
 
 #ifndef F_OK
@@ -298,14 +294,6 @@
 #define SUCCEED 0
 #define FAIL    (-1)
 
-/* The HDF5 library uses the symbol `ERR` frequently.  So do
- * header files for libraries such as curses(3), terminfo(3), etc.
- * Remove its definition here to avoid clashes with HDF5.
- */
-#ifdef ERR
-#undef ERR
-#endif
-
 /* number of members in an array */
 #ifndef NELMTS
 #define NELMTS(X) (sizeof(X) / sizeof(X[0]))
@@ -333,11 +321,6 @@
 #define ABS(a) (((a) >= 0) ? (a) : -(a))
 #endif
 
-/* sign of argument */
-#ifndef SIGN
-#define SIGN(a) ((a) > 0 ? 1 : (a) < 0 ? -1 : 0)
-#endif
-
 /* test for number that is a power of 2 */
 /* (from: http://graphics.stanford.edu/~seander/bithacks.html#DetermineIfPowerOf2) */
 #define POWER_OF_TWO(n) (!(n & (n - 1)) && n)
@@ -348,7 +331,7 @@
 /* Check if a read of size bytes starting at ptr would overflow past
  * the last valid byte, pointed to by buffer_end.
  */
-#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end) (((ptr) + (size)-1) > (buffer_end))
+#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end) (((ptr) + (size) - 1) > (buffer_end))
 
 /* Variant of H5_IS_BUFFER_OVERFLOW, used with functions such as H5Tdecode()
  * that don't take a size parameter, where we need to skip the bounds checks.
@@ -357,7 +340,7 @@
  * the entire library.
  */
 #define H5_IS_KNOWN_BUFFER_OVERFLOW(skip, ptr, size, buffer_end)                                             \
-    (skip ? false : ((ptr) + (size)-1) > (buffer_end))
+    (skip ? false : ((ptr) + (size) - 1) > (buffer_end))
 
 /*
  * HDF Boolean type.
@@ -920,7 +903,7 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifdef H5_HAVE_VASPRINTF
 #define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
 #else
-H5_DLL int       HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #endif
 
@@ -1306,11 +1289,27 @@ extern char H5_lib_vers_info_g[];
 
 #ifdef H5_HAVE_THREADSAFE
 
-/* Macros for acquiring & releasing threadsafe API lock */
-#define H5_API_LOCK   H5TS_api_lock();
-#define H5_API_UNLOCK H5TS_api_unlock();
+/* Local variables for saving cancellation state */
+#define H5CANCEL_DECL int oldstate = 0;
 
-#else /* H5_HAVE_THREADSAFE */
+/* Macros for entering & leaving an API routine in a threadsafe manner */
+#define H5_API_LOCK                                                                                          \
+    /* Acquire the API lock */                                                                               \
+    H5TS_api_lock();                                                                                         \
+                                                                                                             \
+    /* Set thread cancellation state to 'disable', and remember previous state */                            \
+    H5TS_thread_setcancelstate(H5TS_THREAD_CANCEL_DISABLE, &oldstate);
+#define H5_API_UNLOCK                                                                                        \
+    /* Release the API lock */                                                                               \
+    H5TS_api_unlock();                                                                                       \
+                                                                                                             \
+    /* Restore previous thread cancellation state */                                                         \
+    H5TS_thread_setcancelstate(oldstate, NULL);
+
+#else                 /* H5_HAVE_THREADSAFE */
+
+/* Local variables for saving cancellation state */
+#define H5CANCEL_DECL /*void*/
 
 /* No locks (non-threadsafe builds) */
 #define H5_API_LOCK
@@ -1357,8 +1356,8 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
             /* Don't check again */                                                                          \
             func_check = true;                                                                               \
         } /* end if */                                                                                       \
-    }     /* end scope */
-#else     /* NDEBUG */
+    } /* end scope */
+#else /* NDEBUG */
 #define FUNC_ENTER_CHECK_NAME(asrt)
 #endif /* NDEBUG */
 
@@ -1370,7 +1369,9 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 #define FUNC_ENTER_COMMON_NOERR(asrt) FUNC_ENTER_CHECK_NAME(asrt);
 
 /* Local variables for API routines */
-#define FUNC_ENTER_API_VARS H5TRACE_DECL
+#define FUNC_ENTER_API_VARS                                                                                  \
+    H5TRACE_DECL                                                                                             \
+    H5CANCEL_DECL
 
 #define FUNC_ENTER_API_COMMON                                                                                \
     FUNC_ENTER_API_VARS                                                                                      \
@@ -1480,6 +1481,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
             {                                                                                                \
                 {                                                                                            \
                     {                                                                                        \
+                        H5CANCEL_DECL                                                                        \
                         FUNC_ENTER_COMMON(H5_IS_API(__func__));                                              \
                         H5_API_LOCK                                                                          \
                         FUNC_ENTER_API_INIT(err);                                                            \

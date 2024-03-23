@@ -74,7 +74,7 @@ static const H5TS_ex_lock_t H5TS_ex_lock_def = H5TS_EX_LOCK_INIT;
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS__ex_lock_init(H5TS_ex_lock_t *lock, bool disable_cancel)
+H5TS__ex_lock_init(H5TS_ex_lock_t *lock)
 {
     herr_t ret_value = SUCCEED;
 
@@ -85,13 +85,6 @@ H5TS__ex_lock_init(H5TS_ex_lock_t *lock, bool disable_cancel)
 
     /* Initialize the lock */
     memcpy(lock, &H5TS_ex_lock_def, sizeof(H5TS_ex_lock_def));
-
-#ifdef H5_HAVE_PTHREAD_H
-    /* Set non-default fields */
-    lock->disable_cancel = disable_cancel;
-#else
-    (void)disable_cancel;
-#endif
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -120,28 +113,28 @@ H5TS__ex_lock(H5TS_ex_lock_t *lock)
         HGOTO_DONE(FAIL);
     have_mutex = true;
 
-    /* Check if this thread already owns the lock */
-    if (lock->lock_count && H5TS_thread_equal(my_thread_id, lock->owner_thread))
-        /* Already owned by self - increment count */
-        lock->lock_count++;
-    else {
-        /* Wait until the mutex is released by current owner thread */
-        while (lock->lock_count)
-            if (H5_UNLIKELY(H5TS_cond_wait(&lock->cond_var, &lock->mutex) < 0))
-                HGOTO_DONE(FAIL);
+    /* Check if the lock is already owned */
+    if (lock->lock_count) {
+        /* Does this thread already own the lock? */
+        if (H5TS_thread_equal(my_thread_id, lock->owner_thread)) {
+            /* Already owned by self - increment count */
+            lock->lock_count++;
 
-        /* After we've received the signal, take ownership of the lock */
-        lock->owner_thread = my_thread_id;
-        lock->lock_count   = 1;
-
-#ifdef H5_HAVE_PTHREAD_H
-        /* Disable cancellation, if requested for this lock */
-        if (lock->disable_cancel)
-            /* Set cancellation state to 'disable', and remember previous state */
-            if (H5_UNLIKELY(pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &lock->previous_state)))
-                HGOTO_DONE(FAIL);
-#endif
+            /* Leave now, we already own this lock */
+            HGOTO_DONE(SUCCEED);
+        }
+        else {
+            /* Wait until the mutex is released by current owner thread */
+            do {
+                if (H5_UNLIKELY(H5TS_cond_wait(&lock->cond_var, &lock->mutex) < 0))
+                    HGOTO_DONE(FAIL);
+            } while (lock->lock_count);
+        }
     }
+
+    /* Take ownership of the lock */
+    lock->owner_thread = my_thread_id;
+    lock->lock_count   = 1;
 
 done:
     if (H5_LIKELY(have_mutex))
@@ -268,15 +261,8 @@ H5TS__ex_unlock(H5TS_ex_lock_t *lock)
     /* Decrement the lock count for this thread */
     lock->lock_count--;
 
-    if (lock->lock_count == 0) {
-#ifdef H5_HAVE_PTHREAD_H
-        /* Restore previous cancellation state, if requested for this lock */
-        if (lock->disable_cancel)
-            if (H5_UNLIKELY(pthread_setcancelstate(lock->previous_state, NULL)))
-                HGOTO_DONE(FAIL);
-#endif
-
-        /* If the lock count drops to zero, signal the condition variable, to
+    if (0 == lock->lock_count) {
+        /* If the lock count drops to zero, signal the condition variable to
          * wake any thread waiting on the lock.
          */
         if (H5_UNLIKELY(H5TS_cond_signal(&lock->cond_var) < 0))

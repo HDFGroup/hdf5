@@ -52,20 +52,22 @@
 #define H5TS_ONCE_INITIALIZER INIT_ONCE_STATIC_INIT
 
 /* Thread macros */
-#define H5TS_thread_self()        GetCurrentThread()
-#define H5TS_thread_equal(t1, t2) (GetThreadId(t1) == GetThreadId(t2))
-#define H5TS_THREAD_RETURN_TYPE   H5TS_thread_ret_t WINAPI
+#define H5TS_thread_self()         GetCurrentThread()
+#define H5TS_thread_equal(t1, t2)  (GetThreadId(t1) == GetThreadId(t2))
+#define H5TS_THREAD_RETURN_TYPE    H5TS_thread_ret_t WINAPI
+#define H5TS_THREAD_CANCEL_DISABLE 0
 #else
 /* Static initialization values */
-#define H5TS_KEY_INITIALIZER      (pthread_key_t)0
-#define H5TS_MUTEX_INITIALIZER    PTHREAD_MUTEX_INITIALIZER
-#define H5TS_COND_INITIALIZER     PTHREAD_COND_INITIALIZER
-#define H5TS_ONCE_INITIALIZER     PTHREAD_ONCE_INIT
+#define H5TS_KEY_INITIALIZER       (pthread_key_t)0
+#define H5TS_MUTEX_INITIALIZER     PTHREAD_MUTEX_INITIALIZER
+#define H5TS_COND_INITIALIZER      PTHREAD_COND_INITIALIZER
+#define H5TS_ONCE_INITIALIZER      PTHREAD_ONCE_INIT
 
 /* Thread macros */
-#define H5TS_thread_self()        pthread_self()
-#define H5TS_thread_equal(t1, t2) pthread_equal((t1), (t2))
-#define H5TS_THREAD_RETURN_TYPE   H5TS_thread_ret_t
+#define H5TS_thread_self()         pthread_self()
+#define H5TS_thread_equal(t1, t2)  pthread_equal((t1), (t2))
+#define H5TS_THREAD_RETURN_TYPE    H5TS_thread_ret_t
+#define H5TS_THREAD_CANCEL_DISABLE PTHREAD_CANCEL_DISABLE
 #endif
 
 /****************************/
@@ -147,6 +149,7 @@ H5_DLL herr_t H5TS_key_delete(H5TS_key_t key);
 H5_DLL herr_t H5TS_thread_create(H5TS_thread_t *thread, H5TS_thread_start_func_t func, void *udata);
 H5_DLL herr_t H5TS_thread_join(H5TS_thread_t thread, H5TS_thread_ret_t *ret_val);
 H5_DLL herr_t H5TS_thread_detach(H5TS_thread_t thread);
+H5_DLL herr_t H5TS_thread_setcancelstate(int state, int *oldstate);
 
 /* Thread pools */
 H5_DLL herr_t H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads);

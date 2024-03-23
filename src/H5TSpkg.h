@@ -74,17 +74,6 @@
 #endif
 
 /* Excl lock initialization macro */
-#ifdef H5_HAVE_PTHREAD_H
-#define H5TS_EX_LOCK_INIT                                                                                    \
-    {                                                                                                        \
-        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
-            H5TS_COND_INITIALIZER, /* cond_var */                                                            \
-            0,                     /* owner_thread */                                                        \
-            0,                     /* lock_count */                                                          \
-            false,                 /* disable_cancel */                                                      \
-            0                      /* previous_state */                                                      \
-    }
-#else
 #define H5TS_EX_LOCK_INIT                                                                                    \
     {                                                                                                        \
         H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
@@ -92,7 +81,6 @@
             0,                     /* owner_thread */                                                        \
             0                      /* lock_count */                                                          \
     }
-#endif
 
 /****************************/
 /* Package Private Typedefs */
@@ -104,13 +92,6 @@ typedef struct H5TS_ex_lock_t {
     H5TS_cond_t   cond_var;
     H5TS_thread_t owner_thread;
     unsigned      lock_count;
-
-/* Thread cancellability only supported with pthreads */
-#ifdef H5_HAVE_PTHREAD_H
-    /* Cancellation control */
-    bool disable_cancel;
-    int  previous_state;
-#endif /* H5_HAVE_PTHREAD_H */
 } H5TS_ex_lock_t;
 
 /* Thread Barrier */
@@ -318,7 +299,7 @@ H5_DLL herr_t H5TS__rw_unlock(H5TS_rw_lock_t *rw_lock);
 H5_DLL herr_t H5TS__rw_lock_destroy(H5TS_rw_lock_t *rw_lock);
 
 /* Recursive exclusive lock related function declarations */
-H5_DLL herr_t H5TS__ex_lock_init(H5TS_ex_lock_t *lock, bool disable_cancel);
+H5_DLL herr_t H5TS__ex_lock_init(H5TS_ex_lock_t *lock);
 H5_DLL herr_t H5TS__ex_lock(H5TS_ex_lock_t *lock);
 H5_DLL herr_t H5TS__ex_acquire(H5TS_ex_lock_t *lock, unsigned lock_count, bool *acquired);
 H5_DLL herr_t H5TS__ex_release(H5TS_ex_lock_t *lock, unsigned int *lock_count);

@@ -298,10 +298,9 @@ H5_term_library(void)
     int         nprinted;
     H5E_auto2_t func;
 
-#ifdef H5_HAVE_THREADSAFE
-    /* explicitly lock the API */
+    /* Acquire the API lock */
+    H5CANCEL_DECL
     H5_API_LOCK
-#endif
 
     /* Don't do anything if the library is already closed */
     if (!H5_INIT_GLOBAL)
@@ -501,9 +500,8 @@ H5_term_library(void)
     /* Don't pop the API context (i.e. H5CX_pop), since it's been shut down already */
 
 done:
-#ifdef H5_HAVE_THREADSAFE
+    /* Release API lock */
     H5_API_UNLOCK
-#endif /* H5_HAVE_THREADSAFE */
 
     return;
 } /* end H5_term_library() */
@@ -735,7 +733,7 @@ H5__debug_mask(const char *s)
                         H5_debug_g.pkg[i].stream = clear ? NULL : stream;
                         break;
                     } /* end if */
-                }     /* end for */
+                } /* end for */
                 if (i >= (size_t)H5_NPKGS)
                     fprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
             } /* end if-else */
@@ -763,7 +761,7 @@ H5__debug_mask(const char *s)
         else {
             s++;
         } /* end if-else */
-    }     /* end while */
+    } /* end while */
 } /* end H5__debug_mask() */
 
 #ifdef H5_HAVE_PARALLEL

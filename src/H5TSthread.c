@@ -90,7 +90,7 @@ H5TS_thread_create(H5TS_thread_t *thread, H5TS_thread_start_func_t func, void *u
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* H5TS_thread_create */
+} /* H5TS_thread_create() */
 
 /*--------------------------------------------------------------------------
  * Function: H5TS_thread_join
@@ -118,7 +118,7 @@ H5TS_thread_join(H5TS_thread_t thread, H5TS_thread_ret_t *ret_val)
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* H5TS_thread_join */
+} /* H5TS_thread_join() */
 
 /*--------------------------------------------------------------------------
  * Function: H5TS_thread_detach
@@ -141,7 +141,24 @@ H5TS_thread_detach(H5TS_thread_t thread)
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* H5TS_thread_detach */
+} /* H5TS_thread_detach() */
+
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_setcancelstate
+ *
+ * Purpose:  Set cancelability state for a thread
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_thread_setcancelstate(int H5_ATTR_UNUSED state, int H5_ATTR_UNUSED *oldstate){
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+        /* Windows threads are not cancelable, so this is a noop */
+
+        FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)} /* H5TS_thread_setcancelstate() */
 #else
 /*--------------------------------------------------------------------------
  * Function: H5TS_thread_create
@@ -164,7 +181,7 @@ H5TS_thread_create(H5TS_thread_t *thread, H5TS_thread_start_func_t func, void *u
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* H5TS_thread_create */
+} /* H5TS_thread_create() */
 
 /*--------------------------------------------------------------------------
  * Function: H5TS_thread_join
@@ -187,7 +204,7 @@ H5TS_thread_join(H5TS_thread_t thread, H5TS_thread_ret_t *ret_val)
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* H5TS_thread_join */
+} /* H5TS_thread_join() */
 
 /*--------------------------------------------------------------------------
  * Function: H5TS_thread_detach
@@ -210,6 +227,30 @@ H5TS_thread_detach(H5TS_thread_t thread)
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* H5TS_thread_detach */
+} /* H5TS_thread_detach() */
+
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_setcancelstate
+ *
+ * Purpose:  Set cancelability state for a thread
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_thread_setcancelstate(int state, int *oldstate)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Set cancellation state, and remember previous state */
+    if (H5_UNLIKELY(pthread_setcancelstate(state, oldstate)))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* H5TS_thread_setcancelstate() */
 #endif
 #endif /* H5_HAVE_THREADSAFE */

@@ -80,10 +80,6 @@ H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Initialize global API lock, to disable cancels */
-    if (H5_UNLIKELY(H5TS__ex_lock_init(&H5TS_api_info_p.api_lock, true) < 0))
-        HGOTO_DONE(FALSE);
-
     /* Initialize per-thread library info */
     if (H5_UNLIKELY(H5TS__tinfo_init() < 0))
         HGOTO_DONE(FALSE);
