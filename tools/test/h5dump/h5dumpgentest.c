@@ -5615,7 +5615,7 @@ gent_filters(void)
     assert(ret >= 0);
 
     tid = H5Tcopy(H5T_NATIVE_INT);
-    H5Tset_precision(tid, H5Tget_size(tid) - 1);
+    H5Tset_precision(tid, (H5Tget_size(tid) * 4) + 1);
     ret = make_dset(fid, "nbit", sid, tid, dcpl, buf1);
     assert(ret >= 0);
 

@@ -801,6 +801,15 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown datatype class found");
     }
 
+    /* Check for numeric type w/unusual # of unused bits */
+    if (H5T_is_numeric_with_unusual_unused_bits(dt))
+        /* Throw an error if the object header is not checksummed, unless the
+         * H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS flag is set with
+         * H5Pset_relax_file_integrity_checks() to suppress it.
+         */
+        if (!(*ioflags & H5O_DECODEIO_RFIC_UNUBNT))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "datatype has unusually large # of unused bits (prec = %zu bits, size = %zu bytes), possibly corrupted file. See documentation for H5Pset_relax_file_integrity_checks for details.", dt->shared->u.atomic.prec, dt->shared->size);
+
 done:
     /* Cleanup on error */
     if (ret_value < 0)
