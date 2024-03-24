@@ -3573,7 +3573,7 @@ H5_DLL herr_t H5Pget_fclose_degree(hid_t fapl_id, H5F_close_degree_t *degree);
  * \see H5LTopen_file_image(), H5Fget_file_image(), H5Pset_file_image(),
  *      H5Pset_file_image_callbacks(), H5Pget_file_image_callbacks(),
  *      \ref H5FD_file_image_callbacks_t, \ref H5FD_file_image_op_t,
- *      <a href="https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations">
+ *      <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html">
  *      HDF5 File Image Operations</a>.
  *
  *
@@ -3613,7 +3613,7 @@ H5_DLL herr_t H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_l
  * \see H5LTopen_file_image(), H5Fget_file_image(), H5Pset_file_image(),
  *      H5Pset_file_image_callbacks(), H5Pget_file_image_callbacks(),
  *      \ref H5FD_file_image_callbacks_t, \ref H5FD_file_image_op_t,
- *      <a href="https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations">
+ *      <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html">
  *      HDF5 File Image Operations</a>.
  *
  * \since 1.8.9
@@ -4557,7 +4557,7 @@ H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);
  *          This function is part of the file image
  *          operations feature set. It is highly recommended to study the guide
  *          [<em>HDF5 File Image Operations</em>]
- *          (https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations
+ *          (https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html
  *          ) before using this feature set. See the “See Also” section below
  *          for links to other elements of HDF5 file image operations.
  *
@@ -4569,9 +4569,9 @@ H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);
  *    \li H5Pget_file_image_callbacks()
  *
  *    \li [HDF5 File Image Operations]
- *        (https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations)
+ *        (https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html)
  *        in [Advanced Topics in HDF5]
- *        (https://portal.hdfgroup.org/display/HDF5/Advanced+Topics+in+HDF5)
+ *        (https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics_list.html)
  *
  *    \li Within H5Pset_file_image_callbacks():
  *    \li Callback #H5FD_file_image_callbacks_t
@@ -4594,7 +4594,7 @@ H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
  *            **Recommended Reading:** This function is part of the file
  *            image operations feature set. It is highly recommended to study
  *            the guide [HDF5 File Image Operations]
- *            (https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations
+ *            (https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html
  *            ) before using this feature set. See the “See Also” section below
  *            for links to other elements of HDF5 file image operations.
  *
@@ -6899,7 +6899,7 @@ H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels
  *          VDS access time. Example code for many source and virtual dataset mappings
  *          is available in the "Examples of Source to Virtual Dataset Mapping"
  *          chapter in the
- *          <a href="https://portal.hdfgroup.org/display/HDF5/RFC+HDF5+Virtual+Dataset">
+ *          <a href="https://docs.hdfgroup.org/hdf5/rfc/HDF5-VDS-requirements-use-cases-2014-12-10.pdf">
  *            RFC: HDF5 Virtual Dataset</a>.
  *      </td>
  *      </tr>
@@ -6972,7 +6972,7 @@ H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels
  *             If that source file does not exist, the new \p src_file_name
  *             after stripping will be \Code{A.h5}
  *
- * \see <a href="https://portal.hdfgroup.org/display/HDF5/Virtual+Dataset++-+VDS">
+ * \see <a href="https://docs.hdfgroup.org/hdf5/rfc/HDF5-VDS-requirements-use-cases-2014-12-10.pdf">
  *        Virtual Dataset Overview</a>
  *
  * \see_virtual
@@ -8823,7 +8823,7 @@ H5_DLL herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, uns
  *      must be created and maintained in the original style. This is HDF5's default
  *      behavior. If backward compatibility with pre-1.8.0 libraries is not a concern,
  *      greater efficiencies can be obtained with the new-format compact and indexed
- *      groups. See <a href="https://portal.hdfgroup.org/display/HDF5/Groups">Group
+ *      groups. See <a href="https://docs.hdfgroup.org/hdf5/develop/group___h5_g.html">Group
  *      implementations in HDF5</a> in the \ref H5G API introduction (at the bottom).\n
  *      H5Pset_local_heap_size_hint() is useful for tuning file size when files
  *      contain original-style groups with either zero members or very large
