@@ -10689,19 +10689,19 @@ gent_compound_complex2(void)
 {
     /* Third-level nested compound */
     typedef struct {
-        short  deep_nested_short[10];
-        int    deep_nested_int[10];
-        long   deep_nested_long[10];
-        double deep_nested_double[10];
-        float  deep_nested_float[10];
+        int16_t deep_nested_short[10];
+        int32_t deep_nested_int[10];
+        int64_t deep_nested_long[10];
+        double  deep_nested_double[10];
+        float   deep_nested_float[10];
     } third_level_compound;
 
     /* Second-level multiply-nested compounds */
     typedef struct {
-        unsigned int  multiple_nested_a[5];
-        int           multiple_nested_b[5];
-        unsigned long multiple_nested_c[5];
-        long          multiple_nested_d[5];
+        uint32_t multiple_nested_a[5];
+        int32_t  multiple_nested_b[5];
+        uint64_t multiple_nested_c[5];
+        int64_t  multiple_nested_d[5];
     } further_nested;
 
     typedef struct {
@@ -10727,8 +10727,8 @@ gent_compound_complex2(void)
     /* Compound datatype with different member types */
     typedef struct {
         /* Arrays nested inside compound */
-        unsigned int             a[4];
-        int                      b[6];
+        uint32_t                 a[4];
+        int32_t                  b[6];
         float                    c[2][4];
         nested_compound          d; /* Compound inside compound */
         multiple_nested_compound e; /* Compound inside compound with further nested compound */
