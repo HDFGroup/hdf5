@@ -7,7 +7,7 @@ This tutorial enables you to get a feel for HDF5 by using the HDFView browser. I
 any programming experience.
 
 \section sec_learn_hv_install HDFView Installation
-\li Download and install HDFView. It can be downloaded from the <a href="https://portal.hdfgroup.org/display/support/Download+HDFView">Download HDFView</a> page.
+\li Download and install HDFView. It can be downloaded from the <a href="https://portal.hdfgroup.org/downloads/hdfview/hdfview3_3_1.html">Download HDFView</a> page.
 \li Obtain the  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> text file, used in the tutorial.
 
 \section sec_learn_hv_begin Begin Tutorial
