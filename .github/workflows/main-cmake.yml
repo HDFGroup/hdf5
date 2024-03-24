@@ -135,10 +135,6 @@ jobs:
 
       # CMake gets libaec from fetchcontent
 
-      - name: Install Dependencies (Windows)
-        run: choco install ninja
-        if: matrix.os == 'windows-latest'
-
       - name: Install Dependencies (macOS)
         run: brew install ninja
         if: matrix.os == 'macos-13'
