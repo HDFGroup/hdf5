@@ -18,6 +18,9 @@ on:
       has_changes:
         description: "Whether there were changes the previous day"
         value: ${{ jobs.check_commits.outputs.has_changes }}
+      source_base:
+        description: "The common base name of the source tarballs"
+        value: ${{ jobs.create_tarball.outputs.source_base }}
       file_base:
         description: "The common base name of the source tarballs"
         value: ${{ jobs.create_tarball.outputs.file_base }}
@@ -80,6 +83,7 @@ jobs:
     if: ${{ ((inputs.use_environ == 'snapshots') && (needs.check_commits.outputs.has_changes == 'true')) || (inputs.use_environ  == 'release') }}
     outputs:
       file_base: ${{ steps.set-file-base.outputs.FILE_BASE }}
+      source_base: ${{ steps.version.outputs.SOURCE_TAG }}
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
@@ -96,7 +100,7 @@ jobs:
         id: version
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
-          echo "TAG_VERSION=$(bin/h5vers)" >> $GITHUB_OUTPUT
+          echo "SOURCE_TAG=$(bin/h5vers)" >> $GITHUB_OUTPUT
 
       - name: Set file base name
         id: set-file-base
@@ -109,7 +113,7 @@ jobs:
             then
               FILE_NAME_BASE=$(echo "snapshot")
             else
-              FILE_NAME_BASE=$(echo "hdf5-${{ steps.version.outputs.TAG_VERSION }}")
+              FILE_NAME_BASE=$(echo "hdf5-${{ steps.version.outputs.SOURCE_TAG }}")
             fi
           fi
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
@@ -135,8 +139,8 @@ jobs:
         id: ren-basename
         if: ${{ (inputs.use_environ == 'release') && (inputs.use_tag  == 'snapshot') }}
         run: |
-          mv hdf5-${{ steps.version.outputs.TAG_VERSION }}.tar.gz ${{ inputs.use_tag }}.tar.gz
-          mv hdf5-${{ steps.version.outputs.TAG_VERSION }}.zip ${{ inputs.use_tag }}.zip
+          mv hdf5-${{ steps.version.outputs.SOURCE_TAG }}.tar.gz ${{ inputs.use_tag }}.tar.gz
+          mv hdf5-${{ steps.version.outputs.SOURCE_TAG }}.zip ${{ inputs.use_tag }}.zip
         shell: bash
 
       - name: List files in the repository
