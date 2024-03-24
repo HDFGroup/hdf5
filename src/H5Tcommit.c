@@ -424,13 +424,13 @@ done:
 herr_t
 H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
 {
-    H5O_t      *oh = NULL;          /* Pointer to actual object header */
-    H5O_loc_t  temp_oloc;           /* Temporary object header location */
-    H5G_name_t temp_path;           /* Temporary path */
-    bool       loc_init = false;    /* Have temp_oloc and temp_path been initialized? */
+    H5O_t     *oh = NULL;            /* Pointer to actual object header */
+    H5O_loc_t  temp_oloc;            /* Temporary object header location */
+    H5G_name_t temp_path;            /* Temporary path */
+    bool       loc_init     = false; /* Have temp_oloc and temp_path been initialized? */
     bool       ohdr_created = false; /* Has the object header been created yet? */
-    size_t     dtype_size;          /* Size of the datatype message */
-    herr_t     ret_value = SUCCEED; /* Return value */
+    size_t     dtype_size;           /* Size of the datatype message */
+    herr_t     ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -491,13 +491,14 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
 
     /* Check for creating committed datatype with unusual datatype */
     if (H5T_is_numeric_with_unusual_unused_bits(type) &&
-            !(H5O_has_chksum(oh) ||
-                (H5F_RFIC_FLAGS(file) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "creating committed datatype with unusual datatype, see documentation for H5Pset_relax_file_integrity_checks for details.");
+        !(H5O_has_chksum(oh) || (H5F_RFIC_FLAGS(file) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                    "creating committed datatype with unusual datatype, see documentation for "
+                    "H5Pset_relax_file_integrity_checks for details.");
 
     /* Insert the datatype message */
     if (H5O_msg_append_oh(file, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE,
-                       H5O_UPDATE_TIME, type) < 0)
+                          H5O_UPDATE_TIME, type) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert type header message");
 
     /* Copy the new object header's location into the datatype, taking ownership of it */
@@ -531,7 +532,7 @@ done:
     if (ret_value < 0) {
         /* Close & delete the object header on failure */
         if (ohdr_created) {
-            H5O_loc_t *oloc_ptr;    /* Pointer to object header location */
+            H5O_loc_t *oloc_ptr; /* Pointer to object header location */
 
             /* Point at correct object header location, depending on state when failure occured */
             if (loc_init)
@@ -555,7 +556,7 @@ done:
 
         /* Reset the shared state for the datatype */
         if ((type->shared->state == H5T_STATE_TRANSIENT || type->shared->state == H5T_STATE_RDONLY) &&
-                (type->sh_loc.type == H5O_SHARE_TYPE_COMMITTED))
+            (type->sh_loc.type == H5O_SHARE_TYPE_COMMITTED))
             type->sh_loc.type = H5O_SHARE_TYPE_UNSHARED;
     }
 

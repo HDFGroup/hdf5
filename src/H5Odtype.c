@@ -236,7 +236,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "exponent size can't be zero");
             if (dt->shared->u.atomic.u.f.epos >= (dt->shared->size * 8))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "exponent starting position out of bounds");
-            if (((dt->shared->u.atomic.u.f.epos + dt->shared->u.atomic.u.f.esize) - 1) >= (dt->shared->size * 8))
+            if (((dt->shared->u.atomic.u.f.epos + dt->shared->u.atomic.u.f.esize) - 1) >=
+                (dt->shared->size * 8))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "exponent range out of bounds");
 
             if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, *pp, 1 + 1, p_end))
@@ -247,7 +248,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "mantissa size can't be zero");
             if (dt->shared->u.atomic.u.f.mpos >= (dt->shared->size * 8))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "mantissa starting position out of bounds");
-            if (((dt->shared->u.atomic.u.f.mpos + dt->shared->u.atomic.u.f.msize) - 1) >= (dt->shared->size * 8))
+            if (((dt->shared->u.atomic.u.f.mpos + dt->shared->u.atomic.u.f.msize) - 1) >=
+                (dt->shared->size * 8))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "mantissa range out of bounds");
 
             if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, *pp, 4, p_end))
@@ -255,11 +257,18 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             UINT32DECODE(*pp, dt->shared->u.atomic.u.f.ebias);
 
             /* Sanity check bits don't overlap */
-            if (H5_RANGE_OVERLAP(dt->shared->u.atomic.u.f.sign, dt->shared->u.atomic.u.f.sign, dt->shared->u.atomic.u.f.epos, ((dt->shared->u.atomic.u.f.epos + dt->shared->u.atomic.u.f.esize) - 1)))
+            if (H5_RANGE_OVERLAP(dt->shared->u.atomic.u.f.sign, dt->shared->u.atomic.u.f.sign,
+                                 dt->shared->u.atomic.u.f.epos,
+                                 ((dt->shared->u.atomic.u.f.epos + dt->shared->u.atomic.u.f.esize) - 1)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "exponent and sign positions overlap");
-            if (H5_RANGE_OVERLAP(dt->shared->u.atomic.u.f.sign, dt->shared->u.atomic.u.f.sign, dt->shared->u.atomic.u.f.mpos, ((dt->shared->u.atomic.u.f.mpos + dt->shared->u.atomic.u.f.msize) - 1)))
+            if (H5_RANGE_OVERLAP(dt->shared->u.atomic.u.f.sign, dt->shared->u.atomic.u.f.sign,
+                                 dt->shared->u.atomic.u.f.mpos,
+                                 ((dt->shared->u.atomic.u.f.mpos + dt->shared->u.atomic.u.f.msize) - 1)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "mantissa and sign positions overlap");
-            if (H5_RANGE_OVERLAP(dt->shared->u.atomic.u.f.epos, ((dt->shared->u.atomic.u.f.epos + dt->shared->u.atomic.u.f.esize) - 1), dt->shared->u.atomic.u.f.mpos, ((dt->shared->u.atomic.u.f.mpos + dt->shared->u.atomic.u.f.msize) - 1)))
+            if (H5_RANGE_OVERLAP(dt->shared->u.atomic.u.f.epos,
+                                 ((dt->shared->u.atomic.u.f.epos + dt->shared->u.atomic.u.f.esize) - 1),
+                                 dt->shared->u.atomic.u.f.mpos,
+                                 ((dt->shared->u.atomic.u.f.mpos + dt->shared->u.atomic.u.f.msize) - 1)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "mantissa and exponent positions overlap");
             break;
 
@@ -478,10 +487,12 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 }
                 if (temp_type->shared->size == 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "type size can't be zero");
-                if ((dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset + temp_type->shared->size) > dt->shared->size) {
+                if ((dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset +
+                     temp_type->shared->size) > dt->shared->size) {
                     if (H5T_close_real(temp_type) < 0)
                         HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype info");
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "member type extends outside its parent compound type");
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL,
+                                "member type extends outside its parent compound type");
                 }
 
                 /* Upgrade the version if we can and it is necessary */
@@ -808,7 +819,11 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
          * H5Pset_relax_file_integrity_checks() to suppress it.
          */
         if (!(*ioflags & H5O_DECODEIO_RFIC_UNUBNT))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "datatype has unusually large # of unused bits (prec = %zu bits, size = %zu bytes), possibly corrupted file. See documentation for H5Pset_relax_file_integrity_checks for details.", dt->shared->u.atomic.prec, dt->shared->size);
+            HGOTO_ERROR(
+                H5E_DATATYPE, H5E_BADVALUE, FAIL,
+                "datatype has unusually large # of unused bits (prec = %zu bits, size = %zu bytes), possibly "
+                "corrupted file. See documentation for H5Pset_relax_file_integrity_checks for details.",
+                dt->shared->u.atomic.prec, dt->shared->size);
 
 done:
     /* Cleanup on error */
@@ -1347,8 +1362,8 @@ done:
         function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O__dtype_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                  unsigned *ioflags /*in,out*/, size_t p_size, const uint8_t *p)
+H5O__dtype_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, unsigned *ioflags /*in,out*/,
+                  size_t p_size, const uint8_t *p)
 {
     bool           skip;
     H5T_t         *dt        = NULL;
@@ -1375,7 +1390,7 @@ H5O__dtype_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
      * H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS flag is set */
     if (open_oh) {
         if (H5O_SIZEOF_CHKSUM_OH(open_oh) > 0 ||
-                (f && (H5F_RFIC_FLAGS(f) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)))
+            (f && (H5F_RFIC_FLAGS(f) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)))
             *ioflags |= H5O_DECODEIO_RFIC_UNUBNT;
     }
     else

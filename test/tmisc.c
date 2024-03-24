@@ -338,14 +338,14 @@ typedef struct {
 #define CVE_2020_10812_FILENAME "cve_2020_10812.h5"
 
 /* Definitions for misc. test #38 */
-#define MISC38A_FILE "tmisc38a.h5"
-#define MISC38A_DSETNAME  "Fletcher_float_data_be"
-#define MISC38B_FILE "tmisc38b.h5"
-#define MISC38B_DSETNAME  "unusual_datatype"
-#define MISC38C_FILE "tmisc38b.h5"
-#define MISC38C_DSETNAME  "dset_unusual_datatype"
-#define MISC38C_TYPENAME  "type_unusual_datatype"
-#define MISC38C_ATTRNAME  "attr_unusual_datatype"
+#define MISC38A_FILE     "tmisc38a.h5"
+#define MISC38A_DSETNAME "Fletcher_float_data_be"
+#define MISC38B_FILE     "tmisc38b.h5"
+#define MISC38B_DSETNAME "unusual_datatype"
+#define MISC38C_FILE     "tmisc38b.h5"
+#define MISC38C_DSETNAME "dset_unusual_datatype"
+#define MISC38C_TYPENAME "type_unusual_datatype"
+#define MISC38C_ATTRNAME "attr_unusual_datatype"
 
 #define MISC39_FILE "type_conversion_path_table_issue.h5"
 #define MISC40_FILE "set_est_link_info.h5"
