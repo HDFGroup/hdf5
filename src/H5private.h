@@ -346,7 +346,10 @@
 /* Check if a read of size bytes starting at ptr would overflow past
  * the last valid byte, pointed to by buffer_end.
  */
-#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end) (((ptr) + (size)-1) > (buffer_end))
+#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end)                                                         \
+    (((ptr) > (buffer_end)) ||                             /* Bad precondition */                            \
+     ((ptrdiff_t)(size) > (((buffer_end) - (ptr)) + 1)) || /* Typical overflow */                            \
+     ((intptr_t)(size) < 0))                               /* Negative 'size' would wrap 'ptr' */
 
 /* Variant of H5_IS_BUFFER_OVERFLOW, used with functions such as H5Tdecode()
  * that don't take a size parameter, where we need to skip the bounds checks.
