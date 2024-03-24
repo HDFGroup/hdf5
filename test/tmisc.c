@@ -4024,6 +4024,7 @@ test_misc21(void)
 static void
 test_misc22(void)
 {
+    hid_t   fapl; /* File access property list */
     hid_t   fid, sid, dcpl, dsid, dcpl2;
     char   *buf;
     hsize_t dims[2]       = {MISC22_SPACE_DIM0, MISC22_SPACE_DIM1},
@@ -4058,9 +4059,21 @@ test_misc22(void)
     buf = (char *)calloc(MISC22_SPACE_DIM0 * MISC22_SPACE_DIM1, 8);
     CHECK(buf, NULL, "calloc");
 
+    /* Create a file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set property to allow unusual datatypes to be created */
+    ret = H5Pset_relax_file_integrity_checks(fapl, H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS);
+    CHECK(ret, FAIL, "H5Pset_relax_file_integrity_checks");
+
     /* Create the file */
-    fid = H5Fcreate(MISC22_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(MISC22_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Close file access property list */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Create the dataspace for the dataset */
     sid = H5Screate_simple(MISC22_SPACE_RANK, dims, NULL);
