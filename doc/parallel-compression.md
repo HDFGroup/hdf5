@@ -154,7 +154,7 @@ optimal performance out of the parallel compression feature.
 
 ### Begin with a good chunking strategy
 
-[Starting with a good chunking strategy](https://portal.hdfgroup.org/display/HDF5/Chunking+in+HDF5)
+[Starting with a good chunking strategy](https://portal.hdfgroup.org/documentation/hdf5-docs/chunking_in_hdf5.html)
 will generally have the largest impact on overall application
 performance. The different chunking parameters can be difficult
 to fine-tune, but it is essential to start with a well-performing
@@ -166,7 +166,7 @@ chosen chunk size becomes a very important factor when compression
 is involved, as data chunks have to be completely read and
 re-written to perform partial writes to the chunk.
 
-[Improving I/O performance with HDF5 compressed datasets](https://portal.hdfgroup.org/display/HDF5/Improving+IO+Performance+When+Working+with+HDF5+Compressed+Datasets)
+[Improving I/O performance with HDF5 compressed datasets](https://support.hdfgroup.org/HDF5/doc/TechNotes/TechNote-HDF5-ImprovingIOPerformanceCompressedDatasets.pdf)
 is a useful reference for more information on getting good
 performance when using a chunked dataset layout.
 
