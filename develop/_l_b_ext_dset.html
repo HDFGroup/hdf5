@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0</span>
+   &#160;<span id="projectnumber">1.15.0.1136ac5</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -111,7 +111,7 @@ $(function(){initNavTree('_l_b_ext_dset.html',''); initResizable(); });
 <h1><a class="anchor" id="secLBExtDsetCreate"></a>
 Creating an Extendible Dataset</h1>
 <p>An extendible dataset is one whose dimensions can grow. HDF5 allows you to define a dataset to have certain initial dimensions, then to later increase the size of any of the initial dimensions.</p>
-<p>HDF5 requires you to use chunking to define extendible datasets. This makes it possible to extend datasets efficiently without having to excessively reorganize storage. (To use chunking efficiently, be sure to see the advanced topic, <a href="https://confluence.hdfgroup.org/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a>.)</p>
+<p>HDF5 requires you to use chunking to define extendible datasets. This makes it possible to extend datasets efficiently without having to excessively reorganize storage. (To use chunking efficiently, be sure to see the advanced topic, <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/chunking_in_hdf5.html">Chunking in HDF5</a>.)</p>
 <p>The following operations are required in order to extend a dataset: </p><ul>
 <li>Declare the dataspace of the dataset to have unlimited dimensions for all dimensions that might eventually be extended. </li>
 <li>Set dataset creation properties to enable chunking. </li>

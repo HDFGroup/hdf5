@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0</span>
+   &#160;<span id="projectnumber">1.15.0.1136ac5</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -589,7 +589,7 @@ VDS Functions: <a class="el" href="group___d_c_p_l.html#ga83dcce1ce110d1ff6eae0f
 <p><a class="el" href="#gad487f84157fd0944cbe1cbd4dea4e1b8" title="Sets the external dataset storage file prefix in the dataset access property list.">H5Pset_efile_prefix()</a> sets the prefix used to locate raw data files for a dataset that uses external storage. This prefix can provide either an absolute path or a relative path to the external files.</p>
 <p><a class="el" href="#gad487f84157fd0944cbe1cbd4dea4e1b8" title="Sets the external dataset storage file prefix in the dataset access property list.">H5Pset_efile_prefix()</a> is used in conjunction with <a class="el" href="group___d_c_p_l.html#ga85ff7c9c827fa524041cd58c199b77b8" title="Adds an external file to the list of external files.">H5Pset_external()</a> to control the behavior of the HDF5 library when searching for the raw data files associated with a dataset that uses external storage:</p>
 <ul>
-<li>The default behavior of the library is to search for the dataset's external storage raw data files in the same directory as the HDF5 file which contains the dataset. </li>
+<li>The default behavior of the library is to search for the dataset's external storage raw data files in the current working directory of the program. </li>
 <li>If the prefix is set to an absolute path, the target directory will be searched for the dataset's external storage raw data files. </li>
 <li>If the prefix is set to a relative path, the target directory, relative to the current working directory, will be searched for the dataset's external storage raw data files. </li>
 <li>If the prefix is set to a relative path that begins with the special token ${ORIGIN}, that directory, relative to the HDF5 file containing the dataset, will be searched for the dataset's external storage raw data files.</li>

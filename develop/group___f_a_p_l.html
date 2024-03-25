@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0</span>
+   &#160;<span id="projectnumber">1.15.0.1136ac5</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -1506,7 +1506,7 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
 <p><a class="el" href="#ga337626cc516d5d1e3303ea6bc350e56b" title="Retrieves a copy of the file image designated as the initial content and structure of a file.">H5Pget_file_image()</a> allows an application to retrieve a copy of the file image designated for a VFD to use as the initial contents of a file.</p>
 <p>If file image callbacks are defined, <a class="el" href="#ga337626cc516d5d1e3303ea6bc350e56b" title="Retrieves a copy of the file image designated as the initial content and structure of a file.">H5Pget_file_image()</a> will use them when allocating and loading the buffer to return to the application (see <a class="el" href="#ga14ea3598215afd078b964b672b40d63c" title="Sets the callbacks for working with file images.">H5Pset_file_image_callbacks()</a>). If file image callbacks are not defined, the function will use <code>malloc</code> and <code>memcpy</code>. When <code>malloc</code> and <code>memcpy</code> are used, it is the caller's responsibility to discard the returned buffer with a call to <code>free</code>.</p>
 <p>It is the responsibility of the calling application to free the buffer whose address is returned in <code>buf_ptr_ptr</code>. This can be accomplished with <code>free</code> if file image callbacks have not been set (see <a class="el" href="#ga14ea3598215afd078b964b672b40d63c" title="Sets the callbacks for working with file images.">H5Pset_file_image_callbacks()</a>) or with the appropriate method if file image callbacks have been set.</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_l_t.html#ga07fcf2af194e87a3e45252544ebe4aa4" title="Opens an HDF5 file image in memory.">H5LTopen_file_image()</a>, <a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image()</a>, <a class="el" href="#ga31d0299f6ad287e013b2a02a8ccc1fa2" title="Sets an initial file image in a memory buffer.">H5Pset_file_image()</a>, <a class="el" href="#ga14ea3598215afd078b964b672b40d63c" title="Sets the callbacks for working with file images.">H5Pset_file_image_callbacks()</a>, <a class="el" href="#gae17e38082dfdbadd75c897f1e6a9096e" title="Retrieves callback routines for working with file images.">H5Pget_file_image_callbacks()</a>, <a class="el" href="struct_h5_f_d__file__image__callbacks__t.html">H5FD_file_image_callbacks_t</a>, <a class="el" href="_h5_f_dpublic_8h.html#aa95ee1806ea4db9f035cd53844c008dd">H5FD_file_image_op_t</a>, <a href="https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations">HDF5 File Image Operations</a>.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_l_t.html#ga07fcf2af194e87a3e45252544ebe4aa4" title="Opens an HDF5 file image in memory.">H5LTopen_file_image()</a>, <a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image()</a>, <a class="el" href="#ga31d0299f6ad287e013b2a02a8ccc1fa2" title="Sets an initial file image in a memory buffer.">H5Pset_file_image()</a>, <a class="el" href="#ga14ea3598215afd078b964b672b40d63c" title="Sets the callbacks for working with file images.">H5Pset_file_image_callbacks()</a>, <a class="el" href="#gae17e38082dfdbadd75c897f1e6a9096e" title="Retrieves callback routines for working with file images.">H5Pget_file_image_callbacks()</a>, <a class="el" href="struct_h5_f_d__file__image__callbacks__t.html">H5FD_file_image_callbacks_t</a>, <a class="el" href="_h5_f_dpublic_8h.html#aa95ee1806ea4db9f035cd53844c008dd">H5FD_file_image_op_t</a>, <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html">HDF5 File Image Operations</a>.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.8.9 </dd></dl>
 
 </div>
@@ -1544,7 +1544,7 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
 <p><a class="el" href="#gae17e38082dfdbadd75c897f1e6a9096e" title="Retrieves callback routines for working with file images.">H5Pget_file_image_callbacks()</a> retrieves the callback routines set for working with file images opened with the file access property list <code>fapl_id</code>.</p>
 <p>The callbacks must have been previously set with <a class="el" href="#ga14ea3598215afd078b964b672b40d63c" title="Sets the callbacks for working with file images.">H5Pset_file_image_callbacks()</a> in the file access property list.</p>
 <p>Upon the successful return of <a class="el" href="#ga14ea3598215afd078b964b672b40d63c" title="Sets the callbacks for working with file images.">H5Pset_file_image_callbacks()</a>, the fields in the instance of the <a class="el" href="struct_h5_f_d__file__image__callbacks__t.html">H5FD_file_image_callbacks_t</a> struct pointed to by <code>callbacks_ptr</code> will contain the same values as were passed in the most recent <a class="el" href="#ga14ea3598215afd078b964b672b40d63c" title="Sets the callbacks for working with file images.">H5Pset_file_image_callbacks()</a> call for the file access property list <code>fapl_id</code>.</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_l_t.html#ga07fcf2af194e87a3e45252544ebe4aa4" title="Opens an HDF5 file image in memory.">H5LTopen_file_image()</a>, <a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image()</a>, <a class="el" href="#ga31d0299f6ad287e013b2a02a8ccc1fa2" title="Sets an initial file image in a memory buffer.">H5Pset_file_image()</a>, <a class="el" href="#ga14ea3598215afd078b964b672b40d63c" title="Sets the callbacks for working with file images.">H5Pset_file_image_callbacks()</a>, <a class="el" href="#gae17e38082dfdbadd75c897f1e6a9096e" title="Retrieves callback routines for working with file images.">H5Pget_file_image_callbacks()</a>, <a class="el" href="struct_h5_f_d__file__image__callbacks__t.html">H5FD_file_image_callbacks_t</a>, <a class="el" href="_h5_f_dpublic_8h.html#aa95ee1806ea4db9f035cd53844c008dd">H5FD_file_image_op_t</a>, <a href="https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations">HDF5 File Image Operations</a>.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_l_t.html#ga07fcf2af194e87a3e45252544ebe4aa4" title="Opens an HDF5 file image in memory.">H5LTopen_file_image()</a>, <a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image()</a>, <a class="el" href="#ga31d0299f6ad287e013b2a02a8ccc1fa2" title="Sets an initial file image in a memory buffer.">H5Pset_file_image()</a>, <a class="el" href="#ga14ea3598215afd078b964b672b40d63c" title="Sets the callbacks for working with file images.">H5Pset_file_image_callbacks()</a>, <a class="el" href="#gae17e38082dfdbadd75c897f1e6a9096e" title="Retrieves callback routines for working with file images.">H5Pget_file_image_callbacks()</a>, <a class="el" href="struct_h5_f_d__file__image__callbacks__t.html">H5FD_file_image_callbacks_t</a>, <a class="el" href="_h5_f_dpublic_8h.html#aa95ee1806ea4db9f035cd53844c008dd">H5FD_file_image_op_t</a>, <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html">HDF5 File Image Operations</a>.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.8.9 </dd></dl>
 
 </div>
@@ -3927,7 +3927,7 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="#ga31d0299f6ad287e013b2a02a8ccc1fa2" title="Sets an initial file image in a memory buffer.">H5Pset_file_image()</a> allows an application to provide a file image to be used as the initial contents of a file. Calling <a class="el" href="#ga31d0299f6ad287e013b2a02a8ccc1fa2" title="Sets an initial file image in a memory buffer.">H5Pset_file_image()</a>makes a copy of the buffer specified in <code>buf_ptr</code> of size <code>buf_len</code>.</p>
 <dl class="section user"><dt>Motivation:</dt><dd><a class="el" href="#ga31d0299f6ad287e013b2a02a8ccc1fa2" title="Sets an initial file image in a memory buffer.">H5Pset_file_image()</a> and other elements of HDF5 are used to load an image of an HDF5 file into system memory and open that image as a regular HDF5 file. An application can then use the file without the overhead of disk I/O.</dd></dl>
-<dl class="section user"><dt>Recommended Reading:</dt><dd>This function is part of the file image operations feature set. It is highly recommended to study the guide [<em>HDF5 File Image Operations</em>] (<a href="https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations">https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations</a> ) before using this feature set. See the “See Also” section below for links to other elements of HDF5 file image operations.</dd></dl>
+<dl class="section user"><dt>Recommended Reading:</dt><dd>This function is part of the file image operations feature set. It is highly recommended to study the guide [<em>HDF5 File Image Operations</em>] (<a href="https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html">https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html</a> ) before using this feature set. See the “See Also” section below for links to other elements of HDF5 file image operations.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><ul>
 <li><a class="el" href="group___h5_l_t.html#ga07fcf2af194e87a3e45252544ebe4aa4" title="Opens an HDF5 file image in memory.">H5LTopen_file_image()</a> </li>
 <li><a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image()</a> </li>
@@ -3936,7 +3936,7 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
 <li><a class="el" href="#gae17e38082dfdbadd75c897f1e6a9096e" title="Retrieves callback routines for working with file images.">H5Pget_file_image_callbacks()</a></li>
 </ul>
 <ul>
-<li>[HDF5 File Image Operations] (<a href="https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations">https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations</a>) in [Advanced Topics in HDF5] (<a href="https://portal.hdfgroup.org/display/HDF5/Advanced+Topics+in+HDF5">https://portal.hdfgroup.org/display/HDF5/Advanced+Topics+in+HDF5</a>)</li>
+<li>[HDF5 File Image Operations] (<a href="https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html">https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html</a>) in [Advanced Topics in HDF5] (<a href="https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics_list.html">https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics_list.html</a>)</li>
 </ul>
 <ul>
 <li>Within <a class="el" href="#ga14ea3598215afd078b964b672b40d63c" title="Sets the callbacks for working with file images.">H5Pset_file_image_callbacks()</a>: </li>
@@ -3970,7 +3970,7 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
 
 <p>Sets the callbacks for working with file images. </p>
 <dl class="section note"><dt>Note</dt><dd><b>Motivation:</b> <a class="el" href="#ga14ea3598215afd078b964b672b40d63c" title="Sets the callbacks for working with file images.">H5Pset_file_image_callbacks()</a> and other elements of HDF5 are used to load an image of an HDF5 file into system memory and open that image as a regular HDF5 file. An application can then use the file without the overhead of disk I/O.<br  />
- <b>Recommended Reading:</b> This function is part of the file image operations feature set. It is highly recommended to study the guide [HDF5 File Image Operations] (<a href="https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations">https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations</a> ) before using this feature set. See the “See Also” section below for links to other elements of HDF5 file image operations.</dd></dl>
+ <b>Recommended Reading:</b> This function is part of the file image operations feature set. It is highly recommended to study the guide [HDF5 File Image Operations] (<a href="https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html">https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html</a> ) before using this feature set. See the “See Also” section below for links to other elements of HDF5 file image operations.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>File access property list identifier </td></tr>
@@ -4167,179 +4167,78 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
 <th>Value of <code>low</code> and <code>high</code>  </th><th>Result  </th></tr>
 <tr>
 <td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a></code>  </td><td><ul>
+ <code>high=&lt;any</code> other version but not <a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a>&gt; </td><td><ul>
 <li>The library will create objects with the earliest possible format versions. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.8.x. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.8.x release will fail.  </li>
+<li>The library will allow objects to be created with the latest format versions available to library release specified in the <code>high</code> value. </li>
+<li>API calls that create objects or features that are available to versions of the library greater than the specified version in <code>high</code> will fail.  </li>
+</ul>
+</td></tr>
+<tr>
+<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a></code> <br  />
+ <code>high=&lt;any</code> version higher than <code>low</code> but not <a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a>&gt; </td><td><ul>
+<li>The library will create objects with the latest format versions available to library release 1.8.x. </li>
+<li>The library will allow objects to be created with the latest format versions available to library release specified in the <code>high</code> value. </li>
+<li>API calls that create objects or features that are available to versions of the library greater than the specified version in <code>high</code> will fail. </li>
+<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
+</ul>
+</td></tr>
+<tr>
+<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3">H5F_LIBVER_V110</a></code> <br  />
+ <code>high=&lt;any</code> version higher than <code>low</code> but not <a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a>&gt; </td><td><ul>
+<li>The library will create objects with the latest format versions available to library release 1.10.x. </li>
+<li>The library will allow objects to be created with the latest format versions available to library release specified in the <code>high</code> value. </li>
+<li>API calls that create objects or features that are available to versions of the library greater than version specified in <code>high</code> will fail. </li>
+<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
+</ul>
+</td></tr>
+<tr>
+<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b">H5F_LIBVER_V112</a></code> <br  />
+ <code>high=&lt;any</code> version higher than <code>low</code> but not <a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a>&gt; </td><td><ul>
+<li>The library will create objects with the latest format versions available to library release 1.12.x. </li>
+<li>The library will allow objects to be created with the latest format versions available to library release specified in the <code>high</code> value. </li>
+<li>API calls that create objects or features that are available to versions of the library greater than version specified in <code>high</code> will fail. </li>
+<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
+</ul>
+</td></tr>
+<tr>
+<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de">H5F_LIBVER_V114</a></code> <br  />
+ <code>high=&lt;any</code> version higher than <code>low</code> but not <a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a>&gt; </td><td><ul>
+<li>The library will create objects with the latest format versions available to library release 1.14.x. </li>
+<li>The library will allow objects to be created with the latest format versions available to library release specified in the <code>high</code> value. </li>
+<li>API calls that create objects or features that are available to versions of the library greater than version specified in <code>high</code> will fail. </li>
+<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
+</ul>
+</td></tr>
+<tr>
+<td><code>low=high</code>  </td><td><ul>
+<li>The library will create objects with the latest format versions available to library release specified. </li>
+<li>The objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
+<li>API calls that create objects or features that are available to versions of the library greater than the specified release will fail. </li>
+<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
 </td></tr>
 <tr>
 <td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3">H5F_LIBVER_V110</a></code>  </td><td><ul>
+ <code>high=<a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a></code>  </td><td><ul>
 <li>The library will create objects with the earliest possible format versions. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.10.x. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.10.x release will fail.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b">H5F_LIBVER_V112</a></code>  </td><td><ul>
-<li>The library will create objects with the earliest possible format versions. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.12.x. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.12.x release will fail.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de">H5F_LIBVER_V114</a></code>  </td><td><ul>
-<li>The library will create objects with the earliest possible format versions. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.14.x. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.14.x release will fail.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac76e4d231ae67f1063472c9e7b55f04d">H5F_LIBVER_V116</a></code>  </td><td><ul>
-<li>The library will create objects with the earliest possible format versions. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. See note <em>H5F_LIBVER_LATEST</em> below the table. </li>
+<li>The library will allow objects to be created with the latest format versions available to the latest release. See note <a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a> below the table. </li>
 <li>This is the library default setting and provides the greatest format compatibility.  </li>
 </ul>
 </td></tr>
 <tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.8.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.8.x. </li>
-<li>The objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.8.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3">H5F_LIBVER_V110</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.8.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.10.x. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.10.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b">H5F_LIBVER_V112</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.8.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.12.x. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.12.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de">H5F_LIBVER_V114</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.8.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.14.x. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.14.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac76e4d231ae67f1063472c9e7b55f04d">H5F_LIBVER_V116</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.8.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. See note <em>H5F_LIBVER_LATEST</em> below the table. </li>
+<td><code>low=&lt;any</code> version lower than <code>high&gt;</code> <br  />
+ <code>high=<a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a></code>  </td><td><ul>
+<li>The library will create objects with the latest format versions available to library release <code>low</code>. </li>
+<li>The library will allow objects to be created with the latest format versions available to the latest release. See note <em>H5F_LIBVER_LATEST</em> below the table. </li>
 <li>This setting allows users to take advantage of the latest features and performance enhancements in the library. </li>
 <li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
 </td></tr>
 <tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3">H5F_LIBVER_V110</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3">H5F_LIBVER_V110</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.10.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.10.x. </li>
-<li>The objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.10.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3">H5F_LIBVER_V110</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b">H5F_LIBVER_V112</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.10.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.12.x. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.12.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3">H5F_LIBVER_V110</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de">H5F_LIBVER_V114</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.10.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.14.x. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.14.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3">H5F_LIBVER_V110</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac76e4d231ae67f1063472c9e7b55f04d">H5F_LIBVER_V116</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.10.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. See note <em>H5F_LIBVER_LATEST</em> below the table. </li>
-<li>This setting allows users to take advantage of the latest features and performance enhancements in the library. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b">H5F_LIBVER_V112</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b">H5F_LIBVER_V112</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.12.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.12.x. </li>
-<li>The objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.12.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b">H5F_LIBVER_V112</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de">H5F_LIBVER_V114</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.12.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.14.x. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.14.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b">H5F_LIBVER_V112</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac76e4d231ae67f1063472c9e7b55f04d">H5F_LIBVER_V116</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.12.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. See note <em>H5F_LIBVER_LATEST</em> below the table. </li>
-<li>This setting allows users to take advantage of the latest features and performance enhancements in the library. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de">H5F_LIBVER_V114</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de">H5F_LIBVER_V114</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.14.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.14.x. </li>
-<li>The objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.14.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de">H5F_LIBVER_V114</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac76e4d231ae67f1063472c9e7b55f04d">H5F_LIBVER_V116</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.14.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. See note <em>H5F_LIBVER_LATEST</em> below the table. </li>
-<li>This setting allows users to take advantage of the latest features and performance enhancements in the library. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
-</ul>
-</td></tr>
-<tr>
-<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac76e4d231ae67f1063472c9e7b55f04d">H5F_LIBVER_V116</a></code> <br  />
- <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac76e4d231ae67f1063472c9e7b55f04d">H5F_LIBVER_V116</a></code>  </td><td><ul>
-<li>The library will create objects with the latest format versions available to library release 1.16.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. See note <em>H5F_LIBVER_LATEST</em> below the table. </li>
+<td><code>low=<a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a></code> <br  />
+ <code>high=<a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a></code>  </td><td><ul>
+<li>The library will create objects with the latest format versions available to the latest release. </li>
+<li>The library will allow objects to be created with the latest format versions available to the latest release. See note <em>H5F_LIBVER_LATEST</em> below the table. </li>
 <li>This setting allows users to take advantage of the latest features and performance enhancements in the library. However, objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
 <li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>

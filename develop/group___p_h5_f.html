@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0</span>
+   &#160;<span id="projectnumber">1.15.0.1136ac5</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -155,7 +155,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="#ga849316b77788799fecb321a87d987ade" title="Retrieves the atomicity mode in use.">H5Fget_mpi_atomicity()</a> retrieves the current consistency semantics mode for data access for the file <code>file_id</code>.</p>
 <p>Upon successful return, <code>flag</code> will be set to <code>1</code> if file access is set to atomic mode and <code>0</code> if file access is set to nonatomic mode.</p>
-<dl class="section see"><dt>See also</dt><dd><a href="https://portal.hdfgroup.org/display/HDF5/Enabling+a+Strict+Consistency+Semantics+Model+in+Parallel+HDF5">Enabling a Strict Consistency Semantics Model in Parallel HDF5</a></dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a href="https://docs.hdfgroup.org/hdf5/rfc/RFC%20PHDF5%20Consistency%20Semantics%20MC%20120328.docx.pdf">Enabling a Strict Consistency Semantics Model in Parallel HDF5</a></dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.8.9 </dd></dl>
 
 </div>
@@ -205,7 +205,7 @@ Functions</h2></td></tr>
 </ul>
 <p>This issue arises because MPI atomicity is a matter of MPI file access operations rather than HDF5 access operations. But the user is normally seeking atomicity at the HDF5 level. To accomplish this, the application must set a barrier after a write, <a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite()</a>, but before the next read, <a class="el" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c" title="Reads raw data from a dataset into a provided buffer.">H5Dread()</a>, in addition to calling <a class="el" href="#ga087dbbf37cb5c451ae8a6f66b227f0fc" title="Sets the MPI atomicity mode.">H5Fset_mpi_atomicity()</a>.The barrier will guarantee that all underlying write operations execute atomically before the read operations starts. This ensures additional ordering semantics and will normally produce the desired behavior. </p>
 </dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a href="https://portal.hdfgroup.org/display/HDF5/Enabling+a+Strict+Consistency+Semantics+Model+in+Parallel+HDF5">Enabling a Strict Consistency Semantics Model in Parallel HDF5</a></dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a href="https://docs.hdfgroup.org/hdf5/rfc/RFC%20PHDF5%20Consistency%20Semantics%20MC%20120328.docx.pdf">Enabling a Strict Consistency Semantics Model in Parallel HDF5</a></dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.8.9 </dd></dl>
 
 </div>

@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0</span>
+   &#160;<span id="projectnumber">1.15.0.1136ac5</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -923,11 +923,11 @@ Variables</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd><code>arg</code>[1-20] expects C-style format strings, similar to the system and C functions printf() and fprintf(). Furthermore, special characters, such as ANSI escapes, will only be interpreted correctly if the Fortran equivalent is used. For example, to print <code>msg</code> "TEXT" in red and has a space after the text would be: <br  />
+<dl class="section note"><dt>Note</dt><dd><code>arg</code>[1-20] expects C-style format strings, similar to the system and C functions printf() and fprintf(). Furthermore, special characters, such as ANSI escapes, will only be interpreted correctly if the Fortran equivalent is used. For example, to print <code>msg</code> "TEXT" in red would be: <br  />
 <br  />
- <div class="fragment"><div class="line">(..., <span class="stringliteral">&quot;%s TEXT %s&quot;</span>//c_new_line, hdferr, ..., arg1=achar(27)//<span class="stringliteral">&quot;[31m&quot;</span>, arg2=achar(27)//<span class="stringliteral">&quot;[0m&quot;</span> )</div>
+ <div class="fragment"><div class="line">(..., <span class="stringliteral">&quot;%s TEXT %s&quot;</span>, hdferr, ..., arg1=achar(27)//<span class="stringliteral">&quot;[31m&quot;</span>//c_null_char, arg2=achar(27)//<span class="stringliteral">&quot;[0m&quot;</span>//c_null_char )</div>
 </div><!-- fragment --> <br  />
-Using "\n" instead of C_NEW_LINE will not be interpereted correctly, and similarly, using "\x1B" instead of ACHAR(27)</dd></dl>
+Using "\n" instead of C_NEW_LINE will not be interpereted correctly, and similarly, using "\x1B" instead of ACHAR(27). Also, all <code>arg</code>[1-20] characters strings must be NULL terminated.</dd></dl>
 <p>See C API: <a class="el" href="group___h5_e.html#ga17c2790837a1c1ea7e56b65d3c00a920">H5Epush2()</a> </p>
 
 </div>

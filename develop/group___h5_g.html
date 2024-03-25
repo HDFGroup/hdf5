@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0</span>
+   &#160;<span id="projectnumber">1.15.0.1136ac5</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -1213,6 +1213,7 @@ Functions</h2></td></tr>
 <p><a class="el" href="#gab1383b8cca3fa99410ad36427059c5a7" title="Returns the type of an object specified by an index.">H5Gget_objtype_by_idx()</a> returns the type of the object specified by the index <code>idx</code> in the group <code>loc_id</code>.</p>
 <p>The group is specified by a group identifier <code>loc_id</code>. If preferred, a file identifier may be passed in <code>loc_id</code>; that file's root group will be assumed.</p>
 <p><code>idx</code> is the transient index used to iterate through the objects in the group. This parameter is described in more detail in the discussion of <a class="el" href="#ga80180e7b819d3c9b3b3f1895e9baaf5b" title="Returns the name of an object specified by an index.">H5Gget_objname_by_idx()</a>.</p>
+<dl class="section note"><dt>Note</dt><dd>As of 1.12.0, <a class="el" href="#gab1383b8cca3fa99410ad36427059c5a7" title="Returns the type of an object specified by an index.">H5Gget_objtype_by_idx()</a> returns the type of the object that the link points to, but it has been deprecated for <a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info()</a>. Previous behavior for this function returned H5G_LINK for any link type. To get the link type, an application may use <a class="el" href="group___h5_l.html#ga4db00b8b944eae68233438165c784b67">H5Lget_info_by_idx()</a> instead.</dd></dl>
 <dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release. </dd>
 <dd>
 1.6.0 The function return type changed from <code>int</code> to the enumerated type <a class="el" href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6">H5G_obj_t</a>. </dd></dl>
