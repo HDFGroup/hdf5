@@ -120,14 +120,15 @@ static const char *FILENAME[] = {"tchunk_info_earliest",
 void reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size);
 
 /* Helper function containing common code that verifies indexing type
-   and number of chunks */
-static int         verify_idx_nchunks(hid_t dset, hid_t dspace, H5D_chunk_index_t exp_idx_type,
+ * and number of chunks
+ */
+static herr_t      verify_idx_nchunks(hid_t dset, hid_t dspace, H5D_chunk_index_t exp_idx_type,
                                       hsize_t exp_num_chunks);
-static int         verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size,
+static herr_t      verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size,
                                          const hsize_t *exp_offset, unsigned exp_flt_msk);
-static int         verify_get_chunk_info_by_coord(hid_t dset, hsize_t *offset, hsize_t exp_chk_size,
+static herr_t      verify_get_chunk_info_by_coord(hid_t dset, hsize_t *offset, hsize_t exp_chk_size,
                                                   unsigned exp_flt_msk);
-static int         verify_empty_chunk_info(hid_t dset, hsize_t *offset);
+static herr_t      verify_empty_chunk_info(hid_t dset, hsize_t *offset);
 static const char *index_type_str(H5D_chunk_index_t idx_type);
 
 /*-------------------------------------------------------------------------
@@ -135,10 +136,7 @@ static const char *index_type_str(H5D_chunk_index_t idx_type);
  *
  * Purpose:     Wipes out variables for the next use, used in various tests.
  *
- * Return:      Won't fail
- *
- * Date:        September 2018
- *
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 void
@@ -158,14 +156,10 @@ reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size)
  * Purpose:     Verifies that H5Dget_chunk_info returns correct
  *              values for a chunk.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
- *
- * Date:        August 2019
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
-static int
+static herr_t
 verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size,
                       const hsize_t *exp_offset, unsigned exp_flt_msk)
 {
@@ -200,14 +194,10 @@ error:
  * Purpose:     Verifies that H5Dget_chunk_info_by_coord returns correct
  *              values for a chunk.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
- *
- * Date:        August 2019
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
-static int
+static herr_t
 verify_get_chunk_info_by_coord(hid_t dset, hsize_t *offset, hsize_t exp_chk_size, unsigned exp_flt_msk)
 {
     uint32_t read_flt_msk = 0; /* Read filter mask */
@@ -237,14 +227,10 @@ error:
  * Purpose:     Verifies that H5Dget_chunk_info_by_coord returns correct
  *              values for an empty chunk.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
- *
- * Date:        August 2018
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
-static int
+static herr_t
 verify_empty_chunk_info(hid_t dset, hsize_t *offset)
 {
     uint32_t read_flt_msk = 0; /* Read filter mask */
@@ -274,9 +260,6 @@ error:
  *
  * Return:      Success:    a valid indexing scheme string
  *              Failure:    a note indicating the indexing type is invalid
- *
- * Date:        August 2019
- *
  *-------------------------------------------------------------------------
  */
 static const char *
@@ -297,7 +280,7 @@ index_type_str(H5D_chunk_index_t idx_type)
             return ("Version 1 B-tree index type (default)");
         case H5D_CHUNK_IDX_NTYPES:
         default:
-            return ("invalid index type");
+            return "invalid index type";
     }
 } /* index_type_str */
 
@@ -307,14 +290,10 @@ index_type_str(H5D_chunk_index_t idx_type)
  * Purpose:     Reads the chunks within the boundary {start,end} and verify
  *              the values against the populated data.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
- *
- * Date:        August 2019
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
-static int
+static herr_t
 verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsize_t *end)
 {
     int      read_buf[CHUNK_NX][CHUNK_NY];
@@ -328,14 +307,16 @@ verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsiz
     memset(&read_buf, 0, sizeof(read_buf));
 
     /* Initialize the array of chunk data for all NUM_CHUNKS chunks, this is
-       the same as the written data and will be used to verify the read data */
+     * the same as the written data and will be used to verify the read data
+     */
     for (n = 0; n < NUM_CHUNKS; n++)
         for (ii = 0; ii < CHUNK_NX; ii++)
             for (jj = 0; jj < CHUNK_NY; jj++)
                 expected_buf[n][ii][jj] = (int)(ii * jj) + 1;
 
     /* Read each chunk within the boundary of {start,end} and verify the
-       values against the expected data */
+     * values against the expected data
+     */
     chk_index = 0;
     for (ii = start[0]; ii < end[0]; ii++)
         for (jj = start[1]; jj < end[1]; jj++, chk_index++) {
@@ -369,14 +350,10 @@ error:
  *              a subset of chunks.  This function opens the dataset then
  *              closes it after writing.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
- *
- * Date:        August 2019
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
-static int
+static herr_t
 write_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsize_t *end, unsigned flt_msk)
 {
     int     direct_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY]; /* Data in chunks */
@@ -392,7 +369,8 @@ write_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsize
                 direct_buf[n][ii][jj] = (int)(ii * jj) + 1;
 
     /* Write NUM_CHUNKS_WRITTEN chunks at the following logical coords:
-       (0,2) (0,3) (1,2) (1,3) */
+     * (0,2) (0,3) (1,2) (1,3)
+     */
     chk_index = 0;
     for (ii = start[0]; ii < end[0]; ii++)
         for (jj = start[1]; jj < end[1]; jj++, chk_index++) {
@@ -414,14 +392,10 @@ error:
  * Purpose:     Verifies that chunk indexing scheme and number of chunks of
  *              the dataset match the expected values.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
- *
- * Date:        August 2019
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
-static int
+static herr_t
 verify_idx_nchunks(hid_t dset, hid_t dspace, H5D_chunk_index_t exp_idx_type, hsize_t exp_num_chunks)
 {
     H5D_chunk_index_t idx_type;    /* Dataset chunk index type */
@@ -461,8 +435,7 @@ error:
  *
  * Purpose:     Test getting various chunk information
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      # of errors
  *
  * Note:        Note that the dataspace argument in these new functions is
  *              currently not used.  The functionality involved the dataspace
@@ -472,12 +445,9 @@ error:
  *              This function tests the new API functions added for EED-343:
  *              H5Dget_num_chunks, H5Dget_chunk_info, and
  *              H5Dget_chunk_info_by_coord for high bound up to 1.8.
- *
- * Date:        September 2018
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_get_chunk_info_highest_v18(hid_t fapl)
 {
     char     filename[FILENAME_BUF_SIZE];                 /* File name */
@@ -517,7 +487,8 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     h5_fixname(FILENAME[H5F_LIBVER_V18], fapl, filename, sizeof filename);
 
     /* Set version bounds for creating the file.  High bound to V18 to test
-       chunked dataset that use B-tree v1 structures to index chunks. */
+     * chunked dataset that use B-tree v1 structures to index chunks.
+     */
     if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_V18) < 0)
         TEST_ERROR;
 
@@ -589,7 +560,8 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 #endif /* end H5_HAVE_FILTER_DEFLATE */
 
     /* Write only NUM_CHUNKS_WRITTEN chunks at the following logical coords:
-       (0,2) (0,3) (1,2) (1,3) */
+     * (0,2) (0,3) (1,2) (1,3)
+     */
     n = 0;
     for (ii = START_CHK_X; ii < END_CHK_X; ii++)
         for (jj = START_CHK_Y; jj < END_CHK_Y; jj++, n++) {
@@ -622,7 +594,8 @@ test_get_chunk_info_highest_v18(hid_t fapl)
         FAIL_PUTS_ERROR("unexpected number of chunks");
 
     /* Get and verify info of the last written chunk again, passing in H5S_ALL
-       this time */
+     * this time
+     */
     offset[0] = 6;
     offset[1] = 12;
     if (verify_get_chunk_info(dset, H5S_ALL, NUM_CHUNKS_WRITTEN - 1, chunk_size, offset, flt_msk) == FAIL)
@@ -696,7 +669,8 @@ test_get_chunk_info_highest_v18(hid_t fapl)
         FAIL_PUTS_ERROR("    Attempt to get info of a non-existing chunk.");
 
     /* Attempt to get info of a chunk given its coords from an empty dataset,
-       should succeed with the returned address as HADDR_UNDEF and size as 0 */
+     * should succeed with the returned address as HADDR_UNDEF and size as 0
+     */
     offset[0] = EMPTY_CHK_X;
     offset[1] = EMPTY_CHK_Y;
     if (verify_empty_chunk_info(dset, offset) == FAIL)
@@ -710,7 +684,8 @@ test_get_chunk_info_highest_v18(hid_t fapl)
      ************************************************************************/
 
     /* Set space allocation to early so that chunk query functions will
-       retrieve chunk information even though the dataset is empty */
+     * retrieve chunk information even though the dataset is empty
+     */
     if (H5Pset_alloc_time(cparms, H5D_ALLOC_TIME_EARLY) < 0)
         TEST_ERROR;
 
@@ -733,7 +708,8 @@ test_get_chunk_info_highest_v18(hid_t fapl)
         TEST_ERROR;
 
     /* Attempt to get info of a chunk from an empty dataset, verify the
-       returned address and size in the case of H5D_ALLOC_TIME_EARLY */
+     * returned address and size in the case of H5D_ALLOC_TIME_EARLY
+     */
     chk_index = NONEXIST_CHK_INDEX;
     reinit_vars(&read_flt_msk, &addr, &size);
     ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
@@ -758,7 +734,8 @@ test_get_chunk_info_highest_v18(hid_t fapl)
         TEST_ERROR;
 
     /* Attempt to get info of a chunk given its coords from an empty dataset,
-       verify the returned address and size */
+     * verify the returned address and size
+     */
     offset[0] = 0;
     offset[1] = 0;
     if (H5Dget_chunk_info_by_coord(dset, offset, &read_flt_msk, &addr, &size) < 0)
@@ -781,7 +758,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
         TEST_ERROR;
 
     PASSED();
-    return SUCCEED;
+    return 0;
 
 error:
     H5E_BEGIN_TRY
@@ -793,8 +770,7 @@ error:
     }
     H5E_END_TRY
 
-    H5_FAILED();
-    return FAIL;
+    return 1;
 } /* test_get_chunk_info_highest_v18() */
 
 /*-------------------------------------------------------------------------
@@ -803,18 +779,14 @@ error:
  * Purpose:     Test getting various chunk information when Single Chunk
  *              index type is used
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      # of errors
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
  *              will be implemented in the next version.
- *
- * Date:        November 2018
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_chunk_info_single_chunk(const char *filename, hid_t fapl)
 {
     hid_t             chunkfile     = H5I_INVALID_HID; /* File ID */
@@ -863,8 +835,7 @@ test_chunk_info_single_chunk(const char *filename, hid_t fapl)
     if (H5Dclose(dset) < 0)
         TEST_ERROR;
 
-    /* ...open it again to test the chunk query functions on a single empty
-       chunk */
+    /* ...open it again to test the chunk query functions on a single empty chunk */
     if ((dset = H5Dopen2(chunkfile, SINGLE_CHUNK_DSET_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -908,7 +879,8 @@ test_chunk_info_single_chunk(const char *filename, hid_t fapl)
         FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
 
     /* Attempt to get chunk info given an invalid chunk index and verify
-     * that failure occurs */
+     * that failure occurs
+     */
     chk_index = INVALID_CHK_INDEX;
     reinit_vars(&read_flt_msk, &addr, &size);
     H5E_BEGIN_TRY
@@ -928,7 +900,7 @@ test_chunk_info_single_chunk(const char *filename, hid_t fapl)
         TEST_ERROR;
 
     PASSED();
-    return SUCCEED;
+    return 0;
 
 error:
     H5E_BEGIN_TRY
@@ -940,8 +912,7 @@ error:
     }
     H5E_END_TRY
 
-    H5_FAILED();
-    return FAIL;
+    return 1;
 } /* test_chunk_info_single_chunk() */
 
 /*-------------------------------------------------------------------------
@@ -950,18 +921,14 @@ error:
  * Purpose:     Test getting various chunk information when Implicit
  *              index type is used
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      # of errors
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
  *              will be implemented in the next version.
- *
- * Date:        November 2018
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_chunk_info_implicit(char *filename, hid_t fapl)
 {
     hid_t    chunkfile     = H5I_INVALID_HID;       /* File ID */
@@ -1016,7 +983,8 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
         FAIL_PUTS_ERROR("Verification and write failed\n");
 
     /* Write NUM_CHUNKS_WRITTEN chunks at the following logical coords:
-       (0,2) (0,3) (1,2) (1,3) */
+     * (0,2) (0,3) (1,2) (1,3)
+     */
     if (write_selected_chunks(dset, H5P_DEFAULT, start, end, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Writing to selected chunks failed\n");
 
@@ -1030,8 +998,9 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
                 FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info failed\n");
 
             /* Get info of a chunk and verify its information.  Note that
-               all chunks in this dataset are allocated because of the property
-               H5D_ALLOC_TIME_EARLY */
+             * all chunks in this dataset are allocated because of the property
+             * H5D_ALLOC_TIME_EARLY
+             */
             if (verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
                 FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
         }
@@ -1047,7 +1016,7 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
         TEST_ERROR;
 
     PASSED();
-    return SUCCEED;
+    return 0;
 
 error:
     H5E_BEGIN_TRY
@@ -1059,8 +1028,7 @@ error:
     }
     H5E_END_TRY
 
-    H5_FAILED();
-    return FAIL;
+    return 1;
 } /* test_chunk_info_implicit() */
 
 /*-------------------------------------------------------------------------
@@ -1069,18 +1037,14 @@ error:
  * Purpose:     Test getting various chunk information when Fixed Array
  *              index type is used
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      # of errors
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
  *              will be implemented in the next version.
- *
- * Date:        November 2018
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_chunk_info_fixed_array(const char *filename, hid_t fapl)
 {
     hid_t    chunkfile     = H5I_INVALID_HID;            /* File ID */
@@ -1138,7 +1102,8 @@ test_chunk_info_fixed_array(const char *filename, hid_t fapl)
         FAIL_PUTS_ERROR("Verification and write failed\n");
 
     /* Write NUM_CHUNKS_WRITTEN chunks at the following logical coords:
-       (0,2) (0,3) (1,2) (1,3) */
+     * (0,2) (0,3) (1,2) (1,3)
+     */
     if (write_selected_chunks(dset, H5P_DEFAULT, start, end, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Writing to selected chunks failed\n");
 
@@ -1180,17 +1145,18 @@ test_chunk_info_fixed_array(const char *filename, hid_t fapl)
 
     /* Read and verify values of selected chunks */
     if (verify_selected_chunks(dset, H5P_DEFAULT, start, end) < 0)
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on selected chunks failed\n");
 
-        /* Release resource */
-        if (H5Dclose(dset) < 0)
-            TEST_ERROR;
+    /* Release resource */
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
     if (H5Sclose(dspace) < 0)
         TEST_ERROR;
     if (H5Fclose(chunkfile) < 0)
         TEST_ERROR;
 
     PASSED();
-    return SUCCEED;
+    return 0;
 
 error:
     H5E_BEGIN_TRY
@@ -1202,8 +1168,7 @@ error:
     }
     H5E_END_TRY
 
-    H5_FAILED();
-    return FAIL;
+    return 1;
 } /* test_chunk_info_fixed_array() */
 
 /*-------------------------------------------------------------------------
@@ -1212,18 +1177,14 @@ error:
  * Purpose:     Test getting various chunk information when Extensible Array
  *              index type is used
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      # of errors
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
  *              will be implemented in the next version.
- *
- * Date:        November 2018
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_chunk_info_extensible_array(const char *filename, hid_t fapl)
 {
     hid_t    chunkfile     = H5I_INVALID_HID;            /* File ID */
@@ -1282,7 +1243,8 @@ test_chunk_info_extensible_array(const char *filename, hid_t fapl)
         FAIL_PUTS_ERROR("Verification and write failed\n");
 
     /* Write NUM_CHUNKS_WRITTEN chunks at the following logical coords:
-       (0,2) (0,3) (1,2) (1,3) */
+     * (0,2) (0,3) (1,2) (1,3)
+     */
     if (write_selected_chunks(dset, H5P_DEFAULT, start, end, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Writing to selected chunks failed\n");
 
@@ -1339,7 +1301,7 @@ test_chunk_info_extensible_array(const char *filename, hid_t fapl)
         TEST_ERROR;
 
     PASSED();
-    return SUCCEED;
+    return 0;
 
 error:
     H5E_BEGIN_TRY
@@ -1351,8 +1313,7 @@ error:
     }
     H5E_END_TRY
 
-    H5_FAILED();
-    return FAIL;
+    return 1;
 } /* test_chunk_info_extensible_array() */
 
 /*-------------------------------------------------------------------------
@@ -1361,18 +1322,14 @@ error:
  * Purpose:     Test getting various chunk information when Version 2 B-trees
  *              index type is used
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      # of errors
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
  *              will be implemented in the next version.
- *
- * Date:        November 2018
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_chunk_info_version2_btrees(const char *filename, hid_t fapl)
 {
     hid_t    chunkfile     = H5I_INVALID_HID;                /* File ID */
@@ -1431,7 +1388,8 @@ test_chunk_info_version2_btrees(const char *filename, hid_t fapl)
         FAIL_PUTS_ERROR("Verification and write failed\n");
 
     /* Write NUM_CHUNKS_WRITTEN chunks at the following logical coords:
-       (0,2) (0,3) (1,2) (1,3) */
+     * (0,2) (0,3) (1,2) (1,3)
+     */
     if (write_selected_chunks(dset, H5P_DEFAULT, start, end, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Writing to selected chunks failed\n");
 
@@ -1488,7 +1446,7 @@ test_chunk_info_version2_btrees(const char *filename, hid_t fapl)
         TEST_ERROR;
 
     PASSED();
-    return SUCCEED;
+    return 0;
 
 error:
     H5E_BEGIN_TRY
@@ -1500,8 +1458,7 @@ error:
     }
     H5E_END_TRY
 
-    H5_FAILED();
-    return FAIL;
+    return 1;
 } /* test_chunk_info_version2_btrees() */
 
 typedef struct chunk_iter_info_t {
@@ -1557,18 +1514,14 @@ iter_cb_fail(const hsize_t H5_ATTR_UNUSED *offset, unsigned H5_ATTR_UNUSED filte
  * Purpose:     Tests basic operations to ensure the chunk query functions
  *              work properly.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      # of errors
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
  *              will be implemented in the next version.
- *
- * Date:        August 2019
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_basic_query(hid_t fapl)
 {
     char               filename[FILENAME_BUF_SIZE];          /* File name */
@@ -1757,7 +1710,7 @@ test_basic_query(hid_t fapl)
     HDremove(filename);
 
     PASSED();
-    return SUCCEED;
+    return 0;
 
 error:
     H5E_BEGIN_TRY
@@ -1769,8 +1722,7 @@ error:
     }
     H5E_END_TRY
 
-    H5_FAILED();
-    return FAIL;
+    return 1;
 } /* test_basic_query() */
 
 /*-------------------------------------------------------------------------
@@ -1778,18 +1730,14 @@ error:
  *
  * Purpose:     Test attempting to use chunk query functions incorrectly.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      # of errors
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
  *              will be implemented in the next version.
- *
- * Date:        August 2019
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_failed_attempts(const char *filename, hid_t fapl)
 {
     hid_t    chunkfile = H5I_INVALID_HID; /* File ID */
@@ -1881,7 +1829,7 @@ test_failed_attempts(const char *filename, hid_t fapl)
         TEST_ERROR;
 
     PASSED();
-    return SUCCEED;
+    return 0;
 
 error:
     H5E_BEGIN_TRY
@@ -1892,8 +1840,7 @@ error:
     }
     H5E_END_TRY
 
-    H5_FAILED();
-    return FAIL;
+    return 1;
 } /* test_failed_attempts() */
 
 /*-------------------------------------------------------------------------
@@ -1901,8 +1848,7 @@ error:
  *
  * Purpose:     Test getting various chunk information in version 1.10.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      # of errors
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
@@ -1912,12 +1858,9 @@ error:
  *              This function tests the new API functions added for HDFFV-10677:
  *              H5Dget_num_chunks, H5Dget_chunk_info, and
  *              H5Dget_chunk_info_by_coord for low bound beyond 1.8.
- *
- * Date:        October 2018
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_get_chunk_info_v110(hid_t fapl)
 {
     char         filename[FILENAME_BUF_SIZE]; /* File name */
@@ -1973,26 +1916,21 @@ test_get_chunk_info_v110(hid_t fapl)
 
     } /* for low libver bound */
 
-    return SUCCEED;
+    return 0;
 
 error:
-    H5_FAILED();
-    return FAIL;
+    return 1;
 } /* test_get_chunk_info_v110() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_flt_msk_with_skip_compress
  *
- * Purpose:     Test getting chunk info when compression filter is skipped.
+ * Purpose:     Test getting chunk info when compression filter is skipped
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
- *
- * Date:        August 2019 (based on direct_chunk.c/test_skip_compress_write1)
- *
+ * Return:      # of errors
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_flt_msk_with_skip_compress(hid_t fapl)
 {
     char     filename[FILENAME_BUF_SIZE];                    /* File name */
@@ -2166,7 +2104,7 @@ test_flt_msk_with_skip_compress(hid_t fapl)
     HDremove(filename);
 
     PASSED();
-    return SUCCEED;
+    return 0;
 
 error:
     H5E_BEGIN_TRY
@@ -2180,9 +2118,305 @@ error:
     }
     H5E_END_TRY
 
-    H5_FAILED();
-    return FAIL;
+    return 1;
 } /* test_flt_msk_with_skip_compress() */
+
+#define UBLOCK_FILE_NAME    "file_with_userblock.h5"
+#define NO_UBLOCK_FILE_NAME "file_without_userblock.h5"
+#define UBLOCK_DSET_NAME    "ublock_dset"
+#define UBLOCK_SIZE         2048
+
+/* Helper function to create userblock files and datasets */
+static herr_t
+create_userblock_file(const char *filename, hid_t fcpl_id, hid_t fapl_id)
+{
+    hid_t fid     = H5I_INVALID_HID;
+    hid_t did     = H5I_INVALID_HID;
+    hid_t sid     = H5I_INVALID_HID;
+    hid_t dcpl_id = H5I_INVALID_HID;
+
+    /* The chunk size is set to 1 so we get a lot of chunks without
+     * writing a lot of data.
+     */
+    int     rank       = 1;
+    hsize_t dims       = {256};
+    hsize_t chunk_dims = {1};
+
+    int *data = NULL;
+
+    /* Create a new file */
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id)) < 0)
+        TEST_ERROR;
+
+    /* Create file data space for the dataset */
+    if ((sid = H5Screate_simple(rank, &dims, &dims)) < 0)
+        TEST_ERROR;
+
+    /* Create dataset create property list with chunking */
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl_id, rank, &chunk_dims) < 0)
+        TEST_ERROR;
+
+    /* Create a new dataset */
+    if ((did = H5Dcreate2(fid, UBLOCK_DSET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Create some arbitrary data */
+    if (NULL == (data = (int *)malloc(256 * sizeof(int))))
+        TEST_ERROR;
+    for (int i = 0; i < 256; i++)
+        data[i] = i;
+
+    /* Write the data to the dataset */
+    if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+        TEST_ERROR;
+
+    /* Close everything */
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    free(data);
+
+    return SUCCEED;
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl_id);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    free(data);
+
+    return FAIL;
+}
+
+/* op_data for the userblock iterator */
+struct ub_op_data {
+    haddr_t *addresses;
+    hsize_t  i;
+    hsize_t  max;
+};
+
+/* Callback function for iterating over dataset chunks is files both with
+ * and without a userblock
+ */
+static int
+ublock_iter_cb(const hsize_t H5_ATTR_UNUSED *offset, unsigned H5_ATTR_UNUSED filter_mask, haddr_t addr,
+               hsize_t H5_ATTR_UNUSED size, void *op_data)
+{
+    struct ub_op_data *od = (struct ub_op_data *)op_data;
+
+    /* Error if we try to iterate over too many chunks */
+    if (od->i == od->max)
+        return H5_ITER_ERROR;
+
+    /* Store the address for later comparison */
+    od->addresses[od->i] = addr;
+    od->i += 1;
+
+    return H5_ITER_CONT;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_chunk_address_with_userblock
+ *
+ * Purpose:     Test that chunk addresses are correct when a file has
+ *              a userblock
+ *
+ * Return:      # of errors
+ *-------------------------------------------------------------------------
+ */
+static int
+test_chunk_address_with_userblock(hid_t fapl_id)
+{
+    hid_t fid     = H5I_INVALID_HID;
+    hid_t fid_ub  = H5I_INVALID_HID;
+    hid_t did     = H5I_INVALID_HID;
+    hid_t did_ub  = H5I_INVALID_HID;
+    hid_t fcpl_id = H5I_INVALID_HID;
+
+    hsize_t num_chunks    = HSIZE_UNDEF;
+    hsize_t num_chunks_ub = 0;
+
+    haddr_t *addresses    = NULL;
+    haddr_t *addresses_ub = NULL;
+
+    struct ub_op_data od;
+    struct ub_op_data od_ub;
+
+    int fd    = -1;
+    int fd_ub = -1;
+
+    TESTING("if chunk addresses are correct when a file has a userblock");
+
+    /* Create files with and without a userblock */
+    if (create_userblock_file(NO_UBLOCK_FILE_NAME, H5P_DEFAULT, fapl_id) < 0)
+        TEST_ERROR;
+
+    if ((fcpl_id = H5Pcreate(H5P_FILE_CREATE)) == H5I_INVALID_HID)
+        TEST_ERROR;
+    if (H5Pset_userblock(fcpl_id, UBLOCK_SIZE) < 0)
+        TEST_ERROR;
+
+    if (create_userblock_file(UBLOCK_FILE_NAME, fcpl_id, fapl_id) < 0)
+        TEST_ERROR;
+
+    /* Open both files and datasets */
+    if ((fid = H5Fopen(NO_UBLOCK_FILE_NAME, H5F_ACC_RDONLY, fapl_id)) == H5I_INVALID_HID)
+        TEST_ERROR;
+    if ((did = H5Dopen2(fid, UBLOCK_DSET_NAME, H5P_DEFAULT)) == H5I_INVALID_HID)
+        TEST_ERROR;
+    if ((fid_ub = H5Fopen(UBLOCK_FILE_NAME, H5F_ACC_RDONLY, fapl_id)) == H5I_INVALID_HID)
+        TEST_ERROR;
+    if ((did_ub = H5Dopen2(fid_ub, UBLOCK_DSET_NAME, H5P_DEFAULT)) == H5I_INVALID_HID)
+        TEST_ERROR;
+
+    /* Get the number of chunks */
+    if (H5Dget_num_chunks(did, H5S_ALL, &num_chunks) < 0)
+        TEST_ERROR;
+    if (H5Dget_num_chunks(did_ub, H5S_ALL, &num_chunks_ub) < 0)
+        TEST_ERROR;
+
+    if (num_chunks != num_chunks_ub)
+        TEST_ERROR;
+
+    /* Check the chunk information to make sure that the userblock file takes
+     * the block's size into account.
+     */
+    for (hsize_t i = 0; i < num_chunks; i++) {
+        haddr_t addr    = HADDR_UNDEF;
+        haddr_t addr_ub = 0;
+
+        /* H5Dget_chunk_info() */
+        if (H5Dget_chunk_info(did, H5S_ALL, i, NULL, NULL, &addr, NULL) < 0)
+            TEST_ERROR;
+        if (H5Dget_chunk_info(did_ub, H5S_ALL, i, NULL, NULL, &addr_ub, NULL) < 0)
+            TEST_ERROR;
+
+        if (addr + UBLOCK_SIZE != addr_ub)
+            TEST_ERROR;
+
+        addr    = HADDR_UNDEF;
+        addr_ub = 0;
+
+        /* H5Dget_chunk_info_by_coord() */
+        if (H5Dget_chunk_info_by_coord(did, &i, NULL, &addr, NULL) < 0)
+            TEST_ERROR;
+        if (H5Dget_chunk_info_by_coord(did_ub, &i, NULL, &addr_ub, NULL) < 0)
+            TEST_ERROR;
+
+        if (addr + UBLOCK_SIZE != addr_ub)
+            TEST_ERROR;
+    }
+
+    /* Allocate arrays to hold the chunk addresses */
+    if (NULL == (addresses = (haddr_t *)calloc(num_chunks, sizeof(haddr_t))))
+        TEST_ERROR;
+    if (NULL == (addresses_ub = (haddr_t *)calloc(num_chunks, sizeof(haddr_t))))
+        TEST_ERROR;
+
+    od.addresses = addresses;
+    od.i         = 0;
+    od.max       = num_chunks;
+
+    od_ub.addresses = addresses_ub;
+    od_ub.i         = 0;
+    od_ub.max       = num_chunks;
+
+    /* Iterate over the chunks, storing the chunk addresses */
+    if (H5Dchunk_iter(did, H5P_DEFAULT, ublock_iter_cb, &od) < 0)
+        TEST_ERROR;
+    if (H5Dchunk_iter(did_ub, H5P_DEFAULT, ublock_iter_cb, &od_ub) < 0)
+        TEST_ERROR;
+
+    /* Compare the chunk addresses to ensure the userblock file takes the
+     * chunk's size into account.
+     */
+    if (od.i != od_ub.i)
+        TEST_ERROR;
+    for (hsize_t i = 0; i < num_chunks; i++)
+        if (od.addresses[i] + UBLOCK_SIZE != od_ub.addresses[i])
+            TEST_ERROR;
+
+    /* Compare the raw chunk data */
+    if ((fd = HDopen(NO_UBLOCK_FILE_NAME, O_RDONLY)) < 0)
+        TEST_ERROR;
+    if ((fd_ub = HDopen(UBLOCK_FILE_NAME, O_RDONLY)) < 0)
+        TEST_ERROR;
+
+    for (hsize_t i = 0; i < num_chunks; i++) {
+        int data    = -1;
+        int data_ub = -1;
+
+        if (HDlseek(fd, (off_t)(od.addresses[i]), SEEK_SET) < 0)
+            TEST_ERROR;
+        if (HDlseek(fd_ub, (off_t)(od_ub.addresses[i]), SEEK_SET) < 0)
+            TEST_ERROR;
+
+        if (HDread(fd, &data, sizeof(int)) != sizeof(int))
+            TEST_ERROR;
+        if (HDread(fd_ub, &data_ub, sizeof(int)) != sizeof(int))
+            TEST_ERROR;
+
+        if (data != data_ub)
+            TEST_ERROR;
+    }
+
+    HDclose(fd);
+    HDclose(fd_ub);
+
+    /* Close everything */
+    if (H5Pclose(fcpl_id) < 0)
+        TEST_ERROR;
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+    if (H5Dclose(did_ub) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid_ub) < 0)
+        TEST_ERROR;
+
+    free(addresses);
+    free(addresses_ub);
+
+    HDremove(UBLOCK_FILE_NAME);
+    HDremove(NO_UBLOCK_FILE_NAME);
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fcpl_id);
+        H5Dclose(did);
+        H5Dclose(did_ub);
+        H5Fclose(fid);
+        H5Fclose(fid_ub);
+    }
+    H5E_END_TRY
+
+    if (fd >= 0)
+        HDclose(fd);
+    if (fd_ub >= 0)
+        HDclose(fd_ub);
+
+    free(addresses);
+    free(addresses_ub);
+
+    return 1;
+} /* test_chunk_address_with_userblock() */
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -2190,7 +2424,6 @@ error:
  * Purpose:     Tests functions related to chunk information
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -2203,19 +2436,22 @@ main(void)
 
     /* Create a copy of file access property list */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        TEST_ERROR;
+        goto error;
 
     /* Test basic operations on the chunk query functions */
-    nerrors += test_basic_query(fapl) < 0 ? 1 : 0;
+    nerrors += test_basic_query(fapl);
 
     /* Tests getting chunk information of version 1.8 and prior */
-    nerrors += test_get_chunk_info_highest_v18(fapl) < 0 ? 1 : 0;
+    nerrors += test_get_chunk_info_highest_v18(fapl);
 
     /* Tests getting chunk information of version 1.10 */
-    nerrors += test_get_chunk_info_v110(fapl) < 0 ? 1 : 0;
+    nerrors += test_get_chunk_info_v110(fapl);
 
     /* Tests getting filter mask when compression filter is skipped */
-    nerrors += test_flt_msk_with_skip_compress(fapl) < 0 ? 1 : 0;
+    nerrors += test_flt_msk_with_skip_compress(fapl);
+
+    /* Test that chunk addresses are correct when files have a userblock */
+    nerrors += test_chunk_address_with_userblock(fapl);
 
     if (nerrors)
         goto error;
@@ -2227,14 +2463,13 @@ main(void)
     return EXIT_SUCCESS;
 
 error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+    }
+    H5E_END_TRY
+
     nerrors = MAX(1, nerrors);
     printf("***** %d QUERY CHUNK INFO TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 }
-
-/****************************************************************************
- Additional tests to be added:
-- do the query when extending the dataset (shrink or expand)
-- verify that invalid input parameters are handled properly
-
-****************************************************************************/
