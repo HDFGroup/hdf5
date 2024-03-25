@@ -534,7 +534,7 @@ done:
         if (ohdr_created) {
             H5O_loc_t *oloc_ptr; /* Pointer to object header location */
 
-            /* Point at correct object header location, depending on state when failure occured */
+            /* Point at correct object header location, depending on state when failure occurred */
             if (loc_init)
                 oloc_ptr = &temp_oloc;
             else
