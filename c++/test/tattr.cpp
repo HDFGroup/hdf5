@@ -1406,7 +1406,7 @@ test_attr_dtype_shared(FileAccPropList &fapl)
     SUBTEST("Shared Datatypes with Attributes");
 
     try {
-        h5_stat_size_t empty_filesize; // Size of empty file
+        h5_stat_size_t empty_filesize        = 0; // Size of empty file
         bool           is_default_vfd_compat = false;
 
         // Create a file
