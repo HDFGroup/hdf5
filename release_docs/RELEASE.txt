@@ -461,6 +461,18 @@ Bug Fixes since HDF5-1.14.3 release
 
     Library
     -------
+    - Fixed a cache assert with too-large metadata objects
+
+      If the library tries to load a metadata object that is above the
+      library's hard-coded limits, the size will trip an assert in debug
+      builds. In HDF5 1.14.4, this can happen if you create a very large
+      number of links in an old-style group that uses local heaps.
+
+      The library will now emit a normal error when it tries to load a
+      metadata object that is too large.
+
+      Partially addresses GitHub #3762
+
     - Fixed an issue with the Subfiling VFD and multiple opens of a
       file
 
