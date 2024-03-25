@@ -4,6 +4,11 @@ name: hdf5 1.14 ctest runs
 on:
   workflow_call:
     inputs:
+      snap_name:
+        description: 'The name in the source tarballs'
+        type: string
+        required: false
+        default: hdfsrc
       file_base:
         description: "The common base name of the source tarballs"
         required: true
@@ -46,11 +51,11 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "hdfsrc")
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
           else
-            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash
@@ -129,11 +134,11 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "hdfsrc")
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
           else
-            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 
@@ -253,11 +258,11 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "hdfsrc")
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
           else
-            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 
@@ -333,11 +338,11 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "hdfsrc")
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
           else
-            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 
@@ -413,11 +418,11 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "hdfsrc")
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
           else
-            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash
@@ -507,11 +512,11 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "hdfsrc")
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
           else
-            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 

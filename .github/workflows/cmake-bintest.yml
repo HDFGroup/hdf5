@@ -129,12 +129,6 @@ jobs:
         run: |
             ls -l ${{ github.workspace }}/HDF_Group/HDF5
 
-      - name: Set file base name (Linux)
-        id: set-file-base
-        run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
-          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-
       - name: List files for the space (Linux)
         run: |
               ls -l ${{ github.workspace }}
@@ -186,12 +180,6 @@ jobs:
       - name: List files for the binaries (MacOS)
         run: |
             ls -l ${{ github.workspace }}/HDF_Group/HDF5
-
-      - name: Set file base name (MacOS)
-        id: set-file-base
-        run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
-          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
 
       - name: List files for the space (MacOS)
         run: |
