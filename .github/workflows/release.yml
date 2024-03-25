@@ -31,15 +31,16 @@ jobs:
     needs: log-the-inputs
     uses: ./.github/workflows/tarball.yml
     with:
-      use_tag: ${{ inputs.use_tag }}
+      use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
       use_environ: release
 
   call-workflow-ctest:
     needs: call-workflow-tarball
     uses: ./.github/workflows/cmake-ctest.yml
     with:
-      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       preset_name: ci-StdShar
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      snap_name: hdf5-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
 
   call-workflow-abi:
@@ -58,8 +59,8 @@ jobs:
     uses: ./.github/workflows/release-files.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
-      file_branch: ${{ needs.log-the-inputs.outputs.rel_tag }}
-      file_sha: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
+      file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
       use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
       use_environ: release
 

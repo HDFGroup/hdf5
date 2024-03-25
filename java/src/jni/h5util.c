@@ -12,7 +12,7 @@
 
 /*
  *  For details of the HDF libraries, see the HDF Documentation at:
- *    http://hdfgroup.org/HDF5/doc/
+ *    https://portal.hdfgroup.org/documentation/index.html
  *
  */
 
@@ -82,10 +82,10 @@ void          translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_
                                     void *raw_buf);
 
 /* Strings for output */
-#define H5_TOOLS_GROUP     "GROUP"
-#define H5_TOOLS_DATASET   "DATASET"
-#define H5_TOOLS_DATATYPE  "DATATYPE"
-#define H5_TOOLS_ATTRIBUTE "ATTRIBUTE"
+#define H5_TOOLS_GROUP    "GROUP"
+#define H5_TOOLS_DATASET  "DATASET"
+#define H5_TOOLS_DATATYPE "DATATYPE"
+#define H5_TOOLS_MAP      "MAP"
 
 /** frees memory held by array of strings */
 void
@@ -241,7 +241,7 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
                 }
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
                 case sizeof(long double): {
-                    long double tmp_ldouble = 0.0;
+                    long double tmp_ldouble = 0.0L;
 
                     sscanf(token, "%Lg", &tmp_ldouble);
                     memcpy(cptr, &tmp_ldouble, sizeof(long double));
@@ -892,7 +892,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                 }
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
                 case sizeof(long double): {
-                    long double tmp_ldouble = 0.0;
+                    long double tmp_ldouble = 0.0L;
 
                     memcpy(&tmp_ldouble, cptr, sizeof(long double));
 
@@ -1221,6 +1221,11 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: snprintf failure");
                         break;
 
+                    case H5O_TYPE_MAP:
+                        if (snprintf(this_str, size, "%s %s", H5_TOOLS_MAP, obj_tok_str) < 0)
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: snprintf failure");
+                        break;
+
                     case H5O_TYPE_UNKNOWN:
                     case H5O_TYPE_NTYPES:
                     default:
@@ -1299,6 +1304,12 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                             case H5O_TYPE_NAMED_DATATYPE:
                                                 if (snprintf(this_str, this_len, "%s ", H5_TOOLS_DATATYPE) <
                                                     0)
+                                                    H5_JNI_FATAL_ERROR(ENVONLY,
+                                                                       "h5str_sprintf: snprintf failure");
+                                                break;
+
+                                            case H5O_TYPE_MAP:
+                                                if (snprintf(this_str, this_len, "%s ", H5_TOOLS_MAP) < 0)
                                                     H5_JNI_FATAL_ERROR(ENVONLY,
                                                                        "h5str_sprintf: snprintf failure");
                                                 break;
@@ -4222,6 +4233,9 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                     break;
                 }
+                default:
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                          "translate_atomic_rbuf: no matching JNI type for integer type");
             }
             break;
         } /* H5T_INTEGER */
@@ -4246,6 +4260,9 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                     break;
                 }
+                default:
+                    H5_BAD_ARGUMENT_ERROR(
+                        ENVONLY, "translate_atomic_rbuf: no matching JNI type for floating-point type");
             }
             break;
         } /* H5T_FLOAT */
@@ -4295,6 +4312,9 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
 
             break;
         } /* H5T_STRING */
+        case H5T_TIME:
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
         default:
             H5_UNIMPLEMENTED(ENVONLY, "translate_atomic_rbuf: invalid class type");
             break;
@@ -4456,6 +4476,9 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
                     memcpy(char_buf, ((char *)&longValue), typeSize);
                     break;
                 }
+                default:
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                          "translate_atomic_wbuf: no matching JNI type for integer type");
             }
             break;
         } /* H5T_INTEGER */
@@ -4472,6 +4495,9 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
                     memcpy(char_buf, ((char *)&doubleValue), typeSize);
                     break;
                 }
+                default:
+                    H5_BAD_ARGUMENT_ERROR(
+                        ENVONLY, "translate_atomic_wbuf: no matching JNI type for floating-point type");
             }
             break;
         } /* H5T_FLOAT */
@@ -4510,6 +4536,9 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
             }
             break;
         } /* H5T_STRING */
+        case H5T_TIME:
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
         default:
             H5_UNIMPLEMENTED(ENVONLY, "translate_atomic_wbuf: invalid class type");
             break;
@@ -4729,6 +4758,9 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
             }
             break;
         }
+        case H5T_TIME:
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
         default:
             H5_UNIMPLEMENTED(ENVONLY, "translate_rbuf: invalid class type");
             break;
@@ -4888,6 +4920,9 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
             }
             break;
         }
+        case H5T_TIME:
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
         default:
             H5_UNIMPLEMENTED(ENVONLY, "translate_wbuf: invalid class type");
             break;

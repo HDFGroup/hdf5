@@ -39,17 +39,17 @@
 
 /* test routines */
 #ifdef H5_HAVE_PARALLEL
-static unsigned verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr);
+static unsigned verify_page_buffering_disabled(hid_t orig_fapl, const char *driver_name);
 #else
 #define NUM_DSETS 5
 #define NX        100
 #define NY        50
 
-static unsigned test_args(hid_t fapl, const char *env_h5_drvr);
-static unsigned test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr);
-static unsigned test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr);
-static unsigned test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr);
-static unsigned test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr);
+static unsigned test_args(hid_t fapl, const char *driver_name);
+static unsigned test_raw_data_handling(hid_t orig_fapl, const char *driver_name);
+static unsigned test_lru_processing(hid_t orig_fapl, const char *driver_name);
+static unsigned test_min_threshold(hid_t orig_fapl, const char *driver_name);
+static unsigned test_stats_collection(hid_t orig_fapl, const char *driver_name);
 
 /* helper routines */
 static unsigned create_file(char *filename, hid_t fcpl, hid_t fapl);
@@ -299,7 +299,7 @@ error:
  *
  */
 static unsigned
-set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
+set_multi_split(const char *driver_name, hid_t fapl, hsize_t pagesize)
 {
     bool       split = false;
     bool       multi = false;
@@ -311,9 +311,9 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
     H5FD_mem_t mt;
 
     /* Check for split or multi driver */
-    if (!strcmp(env_h5_drvr, "split"))
+    if (!strcmp(driver_name, "split"))
         split = true;
-    else if (!strcmp(env_h5_drvr, "multi"))
+    else if (!strcmp(driver_name, "multi"))
         multi = true;
 
     if (split || multi) {
@@ -374,7 +374,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_args(hid_t orig_fapl, const char *env_h5_drvr)
+test_args(hid_t orig_fapl, const char *driver_name)
 {
     char   filename[FILENAME_LEN];    /* Filename to use */
     hid_t  file_id = H5I_INVALID_HID; /* File ID */
@@ -440,7 +440,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     if (ret >= 0)
         TEST_ERROR;
 
-    if (set_multi_split(env_h5_drvr, fapl, 512) != 0)
+    if (set_multi_split(driver_name, fapl, 512) != 0)
         TEST_ERROR;
 
     /* Test setting a page buffer with a size equal to a single page size */
@@ -477,7 +477,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     if (open_file(filename, fapl, 512, 512) != 0)
         TEST_ERROR;
 
-    if (set_multi_split(env_h5_drvr, fapl, 4194304) != 0)
+    if (set_multi_split(driver_name, fapl, 4194304) != 0)
         TEST_ERROR;
 
     /* Test setting a large page buffer size and page size */
@@ -496,7 +496,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     if (open_file(filename, fapl, 4194304, 16777216) != 0)
         TEST_ERROR;
 
-    if (set_multi_split(env_h5_drvr, fapl, 1) != 0)
+    if (set_multi_split(driver_name, fapl, 1) != 0)
         TEST_ERROR;
 
     /* Test setting a 512 byte page buffer size and page size */
@@ -545,7 +545,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
+test_raw_data_handling(hid_t orig_fapl, const char *driver_name)
 {
     char    filename[FILENAME_LEN];    /* Filename to use */
     hid_t   file_id = H5I_INVALID_HID; /* File ID */
@@ -565,7 +565,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
         TEST_ERROR;
 
-    if (set_multi_split(env_h5_drvr, fapl, sizeof(int) * 200) != 0)
+    if (set_multi_split(driver_name, fapl, sizeof(int) * 200) != 0)
         TEST_ERROR;
 
     if ((data = (int *)calloc((size_t)num_elements, sizeof(int))) == NULL)
@@ -808,7 +808,7 @@ error:
  */
 
 static unsigned
-test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
+test_lru_processing(hid_t orig_fapl, const char *driver_name)
 {
     char    filename[FILENAME_LEN];    /* Filename to use */
     hid_t   file_id = H5I_INVALID_HID; /* File ID */
@@ -830,7 +830,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
         FAIL_STACK_ERROR;
 
-    if (set_multi_split(env_h5_drvr, fapl, sizeof(int) * 200) != 0)
+    if (set_multi_split(driver_name, fapl, sizeof(int) * 200) != 0)
         TEST_ERROR;
 
     if ((data = (int *)calloc((size_t)num_elements, sizeof(int))) == NULL)
@@ -1047,7 +1047,7 @@ error:
  */
 
 static unsigned
-test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
+test_min_threshold(hid_t orig_fapl, const char *driver_name)
 {
     char    filename[FILENAME_LEN];          /* Filename to use */
     hid_t   file_id       = H5I_INVALID_HID; /* File ID */
@@ -1071,7 +1071,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
         TEST_ERROR;
 
-    if (set_multi_split(env_h5_drvr, fapl, sizeof(int) * 200) != 0)
+    if (set_multi_split(driver_name, fapl, sizeof(int) * 200) != 0)
         TEST_ERROR;
 
     if ((data = (int *)calloc((size_t)num_elements, sizeof(int))) == NULL)
@@ -1665,7 +1665,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
+test_stats_collection(hid_t orig_fapl, const char *driver_name)
 {
     char    filename[FILENAME_LEN];    /* Filename to use */
     hid_t   file_id = H5I_INVALID_HID; /* File ID */
@@ -1687,7 +1687,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
         TEST_ERROR;
 
-    if (set_multi_split(env_h5_drvr, fapl, sizeof(int) * 200) != 0)
+    if (set_multi_split(driver_name, fapl, sizeof(int) * 200) != 0)
         TEST_ERROR;
 
     if ((data = (int *)calloc((size_t)num_elements, sizeof(int))) == NULL)
@@ -1954,7 +1954,7 @@ error:
 
 #ifdef H5_HAVE_PARALLEL
 static unsigned
-verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
+verify_page_buffering_disabled(hid_t orig_fapl, const char *driver_name)
 {
     char  filename[FILENAME_LEN];    /* Filename to use */
     hid_t file_id = H5I_INVALID_HID; /* File ID */
@@ -1969,7 +1969,7 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
         TEST_ERROR;
 
-    if (set_multi_split(env_h5_drvr, fapl, 4096) != 0)
+    if (set_multi_split(driver_name, fapl, 4096) != 0)
         TEST_ERROR;
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -2066,21 +2066,19 @@ main(void)
 {
     hid_t       fapl           = H5I_INVALID_HID; /* File access property list for data files */
     unsigned    nerrors        = 0;               /* Cumulative error count */
-    const char *env_h5_drvr    = NULL;            /* File Driver value from environment */
+    const char *driver_name    = NULL;            /* File Driver value from environment */
     bool        api_ctx_pushed = false;           /* Whether API context pushed */
 
     h5_reset();
 
     /* Get the VFD to use */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Temporary skip testing with multi/split drivers:
      * Page buffering depends on paged aggregation which is
      * currently disabled for multi/split drivers.
      */
-    if ((0 == strcmp(env_h5_drvr, "multi")) || (0 == strcmp(env_h5_drvr, "split"))) {
+    if ((0 == strcmp(driver_name, "multi")) || (0 == strcmp(driver_name, "split"))) {
 
         SKIPPED();
         puts("Skip page buffering test because paged aggregation is disabled for multi/split drivers");
@@ -2100,15 +2098,15 @@ main(void)
 #ifdef H5_HAVE_PARALLEL
 
     puts("Page Buffering is disabled for parallel.");
-    nerrors += verify_page_buffering_disabled(fapl, env_h5_drvr);
+    nerrors += verify_page_buffering_disabled(fapl, driver_name);
 
 #else /* H5_HAVE_PARALLEL */
 
-    nerrors += test_args(fapl, env_h5_drvr);
-    nerrors += test_raw_data_handling(fapl, env_h5_drvr);
-    nerrors += test_lru_processing(fapl, env_h5_drvr);
-    nerrors += test_min_threshold(fapl, env_h5_drvr);
-    nerrors += test_stats_collection(fapl, env_h5_drvr);
+    nerrors += test_args(fapl, driver_name);
+    nerrors += test_raw_data_handling(fapl, driver_name);
+    nerrors += test_lru_processing(fapl, driver_name);
+    nerrors += test_min_threshold(fapl, driver_name);
+    nerrors += test_stats_collection(fapl, driver_name);
 
 #endif /* H5_HAVE_PARALLEL */
 

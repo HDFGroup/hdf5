@@ -15958,17 +15958,15 @@ main(void)
     unsigned          nerrors = 0;                            /* Cumulative error count */
     unsigned    num_pb_fs = 1; /* The number of settings to test for page buffering and file space handling */
     int         ExpressMode;   /* Express testing level */
-    const char *envval;        /* Environment variable */
+    const char *driver_name;   /* Environment variable */
     bool        contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
     bool        api_ctx_pushed = false; /* Whether API context pushed */
 
     /* Don't run this test using certain file drivers */
-    envval = getenv(HDF5_DRIVER);
-    if (envval == NULL)
-        envval = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (bool)(strcmp(envval, "split") != 0 && strcmp(envval, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     /* Reset library */
     h5_reset();

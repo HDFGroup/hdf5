@@ -1377,3 +1377,24 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_info_by_idx() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5G_get_gcpl_id
+ *
+ * Purpose:  Quick and dirty routine to retrieve the
+ *           gcpl_id (group creation property list) from the
+ *           group creation operation struct
+ *
+ * Return:   'gcpl_id' on success/abort on failure (shouldn't fail)
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5G_get_gcpl_id(const H5G_obj_create_t *g)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(g);
+
+    FUNC_LEAVE_NOAPI(g->gcpl_id);
+} /* end H5G_get_gcpl_id() */

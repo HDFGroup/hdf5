@@ -110,7 +110,8 @@
  * H5_init_library(); also, make sure that the initializer for default
  * VFD does *not* call H5_init_library().
  */
-#define H5_DEFAULT_VFD H5FD_SEC2
+#define H5_DEFAULT_VFD      H5FD_SEC2
+#define H5_DEFAULT_VFD_NAME "sec2"
 
 /* Define the default VOL driver */
 #define H5_DEFAULT_VOL H5VL_NATIVE
