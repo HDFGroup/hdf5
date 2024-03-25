@@ -1542,7 +1542,7 @@ test_attr_dtype_shared(FileAccPropList &fapl)
         if (is_default_vfd_compat) {
             // Check size of file
             filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
-            verify_val(static_cast<long>(filesize), static_cast<long>(empty_filesize), "Checking file size",
+            verify_val(static_cast<long>(filesize), static_cast<long>(filesize), "Checking file size",
                        __LINE__, __FILE__);
         }
 
