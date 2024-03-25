@@ -234,7 +234,7 @@ adjust the forward slash to double backslashes, except for the HDF_DIR
 environment variable.
 
 NOTE: this file is available in the HDF5 repository, for more information see:
-    https://github.com/HDFGroup/hdf5/blob/v1_14/release_docs/USING_CMake_Examples.txt
+    https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs/USING_CMake_Examples.txt
 
            ctest -S HDF5_Examples.cmake -C Release -V -O test.log
 
