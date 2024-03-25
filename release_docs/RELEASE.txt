@@ -800,7 +800,7 @@ Bug Fixes since HDF5-1.14.0 release
       to directly access the chunks.
 
       The listed functions now correctly take the user block into account,
-      so they will emit phyiscal addresses that can be used to directly
+      so they will emit physical addresses that can be used to directly
       access the chunks.
 
       Fixes #3003
