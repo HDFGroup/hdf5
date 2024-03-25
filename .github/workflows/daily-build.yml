@@ -63,7 +63,7 @@ jobs:
     permissions:
       contents: write # In order to allow tag creation
     uses: ./.github/workflows/release-files.yml
-    thub/workflows/daily-build.ymlwith:
+    with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
