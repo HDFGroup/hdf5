@@ -81,7 +81,7 @@ as a general reference.
 
 All custom commands for this project are located in the
 <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/doxygen/aliases"><tt>aliases</tt></a>
-file in the <a href="https://github.com/HDFGroup/hdf5/tree/develop/doxygen"><tt>doxygen</tt></a>
+file in the <a href="https://github.com/HDFGroup/hdf5/tree/hdf5_1_14/doxygen"><tt>doxygen</tt></a>
 subdirectory of the <a href="https://github.com/HDFGroup/hdf5">main HDF5 repo</a>.
 
 The custom commands are grouped in sections. Find a suitable section for your command or
