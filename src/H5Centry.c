@@ -1216,10 +1216,9 @@ H5C__load_entry(H5F_t *f,
 
     assert((dirty == false) || (type->id == 5 || type->id == 6));
 
-    entry->cache_ptr = f->shared->cache;
-    entry->addr      = addr;
-    entry->size      = len;
-    assert(entry->size < H5C_MAX_ENTRY_SIZE);
+    entry->cache_ptr        = f->shared->cache;
+    entry->addr             = addr;
+    entry->size             = len;
     entry->image_ptr        = image;
     entry->image_up_to_date = !dirty;
     entry->type             = type;
@@ -1288,6 +1287,14 @@ H5C__load_entry(H5F_t *f,
     entry->tag_info = NULL;
 
     H5C__RESET_CACHE_ENTRY_STATS(entry);
+
+    /* This is a temporary fix for a problem identified in GitHub #3762, where
+     * it looks like a local heap entry can grow to a size that is larger
+     * than the metadata cache will allow. This doesn't fix the underlying
+     * problem, but it at least prevents the library from crashing.
+     */
+    if (entry->size >= H5C_MAX_ENTRY_SIZE)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "cache entry size is too large");
 
     ret_value = thing;
 
