@@ -48,7 +48,7 @@ HDF5 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
 Full Documentation and Programming Resources for this HDF5 can be found at
 
-   https://portal.hdfgroup.org/display/HDF5
+   https://portal.hdfgroup.org/documentation/index.html
 
 Periodically development code snapshots are provided at the following URL:
     
