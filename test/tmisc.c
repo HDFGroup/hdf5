@@ -6294,17 +6294,16 @@ test_misc37(void)
 static void
 test_misc38(void)
 {
-#if 0
-    const char *testfile = H5_get_srcdir_filename(MISC38A_FILE); /* Corrected test file name */
+    const char *testfile  = H5_get_srcdir_filename(MISC38A_FILE); /* Corrected test file name */
     const char *testfile2 = H5_get_srcdir_filename(MISC38B_FILE); /* Corrected test file name */
     bool        driver_is_default_compatible;
-    hid_t       fapl; /* File access property list */
-    hid_t       fid;  /* File ID */
-    hid_t       did;  /* Dataset ID */
-    hid_t       sid;  /* Dataspace ID */
-    hid_t       tid;  /* Datatype ID */
-    hid_t       gid;  /* Group ID */
-    hid_t       aid;  /* Attribute ID */
+    hid_t       fapl;       /* File access property list */
+    hid_t       fid;        /* File ID */
+    hid_t       did;        /* Dataset ID */
+    hid_t       sid;        /* Dataspace ID */
+    hid_t       tid;        /* Datatype ID */
+    hid_t       gid;        /* Group ID */
+    hid_t       aid;        /* Attribute ID */
     size_t      type_size;  /* Size of dataset's datatype */
     uint64_t    rfic_flags; /* Value of RFIC flags property for FAPL & file */
     unsigned    u;
@@ -6339,14 +6338,13 @@ test_misc38(void)
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-
     /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
     /* Get property to allow unusual datatypes to be opened */
     rfic_flags = H5F_RFIC_ALL;
-    ret = H5Pget_relax_file_integrity_checks(fapl, &rfic_flags);
+    ret        = H5Pget_relax_file_integrity_checks(fapl, &rfic_flags);
     CHECK(ret, FAIL, "H5Pget_relax_file_integrity_checks");
     VERIFY(rfic_flags, 0, "H5Pget_relax_file_integrity_checks");
 
@@ -6356,7 +6354,7 @@ test_misc38(void)
 
     /* Get property to allow unusual datatypes to be opened */
     rfic_flags = 0;
-    ret = H5Pget_relax_file_integrity_checks(fapl, &rfic_flags);
+    ret        = H5Pget_relax_file_integrity_checks(fapl, &rfic_flags);
     CHECK(ret, FAIL, "H5Pget_relax_file_integrity_checks");
     VERIFY(rfic_flags, H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS, "H5Pget_relax_file_integrity_checks");
 
@@ -6394,7 +6392,7 @@ test_misc38(void)
 
     /* Get property to allow unusual datatypes to be opened */
     rfic_flags = 0;
-    ret = H5Pget_relax_file_integrity_checks(fapl, &rfic_flags);
+    ret        = H5Pget_relax_file_integrity_checks(fapl, &rfic_flags);
     CHECK(ret, FAIL, "H5Pget_relax_file_integrity_checks");
     VERIFY(rfic_flags, H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS, "H5Pget_relax_file_integrity_checks");
 
@@ -6405,7 +6403,6 @@ test_misc38(void)
     /* Close file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
-
 
     /* Create objects with unusual datatypes and verify correct behavior */
     for (u = 0; u < 3; u++) {
@@ -6442,13 +6439,18 @@ test_misc38(void)
         CHECK(ret, FAIL, "H5Tset_size");
 
         /* Create a dataset with the unusual datatype */
-        did = H5Dcreate2(fid, MISC38C_DSETNAME, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        H5E_BEGIN_TRY
+        {
+            did = H5Dcreate2(fid, MISC38C_DSETNAME, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY
         if (u > 0) {
             CHECK(did, FAIL, "H5Dcreate2");
 
             ret = H5Dclose(did);
             CHECK(ret, FAIL, "H5Dclose");
-        } else {
+        }
+        else {
             VERIFY(did, FAIL, "H5Dcreate2");
         }
 
@@ -6456,13 +6458,18 @@ test_misc38(void)
         CHECK(gid, FAIL, "H5Gopen2");
 
         /* Create an attribute with the unusual datatype */
-        aid = H5Acreate2(gid, MISC38C_ATTRNAME, tid, sid, H5P_DEFAULT, H5P_DEFAULT);
+        H5E_BEGIN_TRY
+        {
+            aid = H5Acreate2(gid, MISC38C_ATTRNAME, tid, sid, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY
         if (u > 0) {
             CHECK(aid, FAIL, "H5Acreate2");
 
             ret = H5Aclose(aid);
             CHECK(ret, FAIL, "H5Aclose");
-        } else {
+        }
+        else {
             VERIFY(aid, FAIL, "H5Acreate2");
         }
 
@@ -6473,20 +6480,24 @@ test_misc38(void)
         CHECK(ret, FAIL, "H5Sclose");
 
         /* Create a committed datatype with the unusual datatype */
-        ret = H5Tcommit2(fid, MISC38C_TYPENAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        H5E_BEGIN_TRY
+        {
+            ret = H5Tcommit2(fid, MISC38C_TYPENAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY
         if (u > 0) {
             CHECK(ret, FAIL, "H5Tcommit2");
 
             ret = H5Tclose(tid);
             CHECK(ret, FAIL, "H5Tclose");
-        } else {
+        }
+        else {
             VERIFY(ret, FAIL, "H5Tcommit2");
         }
 
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
     }
-#endif
 } /* end test_misc38() */
 
 /****************************************************************
