@@ -279,11 +279,11 @@ typedef struct H5G_bt2_ud_ins_t {
 } H5G_bt2_ud_ins_t;
 
 /* Typedef for group creation operation */
-typedef struct H5G_obj_create_t {
+struct H5G_obj_create_t {
     hid_t            gcpl_id;    /* Group creation property list */
     H5G_cache_type_t cache_type; /* Type of symbol table entry cache */
     H5G_cache_t      cache;      /* Cached data for symbol table entry */
-} H5G_obj_create_t;
+};
 
 /* Callback information for copying groups */
 typedef struct H5G_copy_file_ud_t {

@@ -166,7 +166,7 @@ created the dataset layout cannot be changed. The h5repack utility can be used t
 to a new with a new layout.
 
 \section secLBDsetLayoutSource Sources of Information
-<a href="https://confluence.hdfgroup.org/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a>
+<a href="https://portal.hdfgroup.org/documentation/hdf5-docs/chunking_in_hdf5.html">Chunking in HDF5</a>
 (See the documentation on <a href="https://confluence.hdfgroup.org/display/HDF5/Advanced+Topics+in+HDF5">Advanced Topics in HDF5</a>)
 \see \ref sec_plist in the HDF5 \ref UG.
 
@@ -184,7 +184,7 @@ certain initial dimensions, then to later increase the size of any of the initia
 
 HDF5 requires you to use chunking to define extendible datasets. This makes it possible to extend
 datasets efficiently without having to excessively reorganize storage. (To use chunking efficiently,
-be sure to see the advanced topic, <a href="https://confluence.hdfgroup.org/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a>.)
+be sure to see the advanced topic, <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/chunking_in_hdf5.html">Chunking in HDF5</a>.)
 
 The following operations are required in order to extend a dataset:
 \li Declare the dataspace of the dataset to have unlimited dimensions for all dimensions that might eventually be extended.
@@ -224,7 +224,7 @@ Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 \section secLBComDsetCreate Creating a Compressed Dataset
 HDF5 requires you to use chunking to create a compressed dataset. (To use chunking efficiently,
-be sure to see the advanced topic, <a href="https://confluence.hdfgroup.org/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a>.)
+be sure to see the advanced topic, <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/chunking_in_hdf5.html">Chunking in HDF5</a>.)
 
 The following operations are required in order to create a compressed dataset:
 \li Create a dataset creation property list.
@@ -294,12 +294,12 @@ Specifically look at the \ref ExAPI.
 There are examples for different languages, where examples of using #H5Literate and #H5Ovisit/#H5Lvisit are included.
 
 The h5ex_g_traverse example traverses a file using H5Literate:
-\li C: <a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/C/H5G/h5ex_g_traverse.c">h5ex_g_traverse.c</a>
-\li F90: <a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/FORTRAN/H5G/h5ex_g_traverse_F03.f90">h5ex_g_traverse_F03.f90</a>
+\li C: <a href="https://github.com/HDFGroup/hdf5/blob/v1_14/HDF5Examples/C/H5G/h5ex_g_traverse.c">h5ex_g_traverse.c</a>
+\li F90: <a href="https://github.com/HDFGroup/hdf5/blob/v1_14/HDF5Examples/FORTRAN/H5G/h5ex_g_traverse.F90">h5ex_g_traverse_F03.f90</a>
 
 The h5ex_g_visit example traverses a file using H5Ovisit and H5Lvisit:
-\li C: <a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/C/H5G/h5ex_g_visit.c">h5ex_g_visit.c</a>
-\li F90:  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/FORTRAN/H5G/h5ex_g_visit_F03.f90">h5ex_g_visit_F03.f90</a>
+\li C: <a href="https://github.com/HDFGroup/hdf5/blob/v1_14/HDF5Examples/C/H5G/h5ex_g_visit.c">h5ex_g_visit.c</a>
+\li F90:  <a href="https://github.com/HDFGroup/hdf5/blob/v1_14/HDF5Examples/FORTRAN/H5G/h5ex_g_visit.F90">h5ex_g_visit_F03.f90</a>
 
 <hr>
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics

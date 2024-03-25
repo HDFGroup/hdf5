@@ -298,7 +298,8 @@ SUBROUTINE test_error_stack(total_error)
   ! push a custom error message onto the stack
   CALL H5Epush_f(estack_id, file, func, line, &
        cls_id, major, minor, "%s ERROR TEXT %s %s %s", error, &
-       arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m", arg3=ACHAR(0), arg4=ACHAR(10) )
+       arg1=ACHAR(27)//"[31m"//C_NULL_CHAR, arg2=ACHAR(27)//"[0m"//C_NULL_CHAR, &
+       arg3=ACHAR(0)//C_NULL_CHAR, arg4=ACHAR(10)//C_NULL_CHAR )
   CALL check("H5Epush_f", error, total_error)
 
   CALL h5eget_num_f(estack_id, count, error)

@@ -306,19 +306,16 @@ CONTAINS
 !! \param arg19  C style format control strings
 !! \param arg20  C style format control strings
 !!
-!! \note \p arg[1-20] expects C-style format strings, similar to the
-!!       system and C functions printf() and fprintf().
-!!       Furthermore, special characters, such as ANSI escapes,
-!!       will only be interpreted correctly if the Fortran equivalent
-!!       is used. For example, to print \p msg "TEXT" in red and has
-!!       a space after the text would be:
+!! \note \p arg[1-20] expects C-style format strings, similar to the system and C functions printf() and fprintf().
+!!       Furthermore, special characters, such as ANSI escapes, will only be interpreted correctly if the Fortran
+!!       equivalent is used. For example, to print \p msg "TEXT" in red would be:
 !!       <br /><br />
 !!       \code
-!!       (..., "%s TEXT %s"//C_NEW_LINE, hdferr, ..., arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m" )
+!!       (..., "%s TEXT %s", hdferr, ..., arg1=ACHAR(27)//"[31m"//C_NULL_CHAR, arg2=ACHAR(27)//"[0m"//C_NULL_CHAR )
 !!       \endcode
 !!       <br />Using "\n" instead of C_NEW_LINE will not be interpereted correctly, and similarly,
-!!             using "\x1B" instead of ACHAR(27)
-!!
+!!             using "\x1B" instead of ACHAR(27). Also, all \p arg[1-20] characters strings must be
+!!             NULL terminated.
 !!
 !! See C API: @ref H5Epush2()
 !!

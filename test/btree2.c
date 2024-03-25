@@ -8598,7 +8598,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_lots(const char *env_h5_drvr, hid_t fapl, const H5B2_create_t *cparam)
+test_remove_lots(const char *driver_name, hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t     file = H5I_INVALID_HID; /* File ID */
     char      filename[1024];         /* Filename to use */
@@ -8656,7 +8656,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         TEST_ERROR;
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = !h5_driver_uses_multiple_files(env_h5_drvr, H5_EXCLUDE_NON_MULTIPART_DRIVERS);
+    single_file_vfd = !h5_driver_uses_multiple_files(driver_name, H5_EXCLUDE_NON_MULTIPART_DRIVERS);
     if (single_file_vfd) {
         /* Make a copy of the file in memory, in order to speed up deletion testing */
 
@@ -8665,6 +8665,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
             TEST_ERROR;
 
         /* Retrieve the file's size */
+        memset(&sb, 0, sizeof(h5_stat_t));
         if (HDfstat(fd, &sb) < 0)
             TEST_ERROR;
 
@@ -9915,12 +9916,10 @@ main(void)
     unsigned         nerrors = 0;               /* Cumulative error count */
     unsigned         reopen;                    /* Whether to reopen B-tree during tests */
     int              ExpressMode;
-    const char      *envval         = NULL;
+    const char      *driver_name;
     bool             api_ctx_pushed = false; /* Whether API context pushed */
 
-    envval = getenv(HDF5_DRIVER);
-    if (envval == NULL)
-        envval = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Reset library */
     h5_reset();
@@ -9928,7 +9927,7 @@ main(void)
     ExpressMode = GetTestExpress();
 
     /* For the Direct I/O driver, skip intensive tests due to poor performance */
-    if (!strcmp(envval, "direct"))
+    if (!strcmp(driver_name, "direct"))
         ExpressMode = 2;
 
     if (ExpressMode > 1)
@@ -10012,7 +10011,7 @@ main(void)
         if (ExpressMode > 1)
             printf("***Express test mode on.  test_remove_lots skipped\n");
         else
-            nerrors += test_remove_lots(envval, fapl, &cparam);
+            nerrors += test_remove_lots(driver_name, fapl, &cparam);
 
         /* Test more complex B-tree queries */
         nerrors += test_find_neighbor(fapl, &cparam, &tparam);

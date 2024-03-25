@@ -120,10 +120,10 @@ CONTAINS
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Fcreate(name, access_flags, &
             creation_prp_default, access_prp_default) BIND(C,NAME='H5Fcreate')
-         IMPORT :: C_CHAR
+         IMPORT :: C_CHAR, C_INT
          IMPORT :: HID_T
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
-         INTEGER, VALUE :: access_flags
+         INTEGER(C_INT), VALUE :: access_flags
          INTEGER(HID_T), VALUE :: creation_prp_default
          INTEGER(HID_T), VALUE :: access_prp_default
        END FUNCTION H5Fcreate
@@ -137,7 +137,7 @@ CONTAINS
     IF (PRESENT(creation_prp)) creation_prp_default = creation_prp
     IF (PRESENT(access_prp))   access_prp_default   = access_prp
 
-    file_id = h5fcreate(c_name, access_flags, &
+    file_id = h5fcreate(c_name, INT(access_flags, C_INT), &
          creation_prp_default, access_prp_default)
 
     hdferr = 0

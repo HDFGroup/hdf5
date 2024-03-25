@@ -170,7 +170,7 @@ jobs:
           cp ${{ inputs.file_base }}-hdf5_cpp_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
           cp ${{ inputs.file_base }}-java_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
           cd "${{ runner.workspace }}/buildabi"
-          tar -zcvf ${{ inputs.file_base }}.html.abi.reports hdf5
+          tar -zcvf ${{ inputs.file_base }}.html.abi.reports.tar.gz hdf5
         shell: bash
 
       - name: Save output as artifact
@@ -178,4 +178,4 @@ jobs:
         with:
           name: abi-reports
           path: |
-            ${{ runner.workspace }}/buildabi/${{ inputs.file_base }}.html.abi.reports
+            ${{ runner.workspace }}/buildabi/${{ inputs.file_base }}.html.abi.reports.tar.gz

@@ -119,10 +119,7 @@ CHECK_INCLUDE_FILE_CONCAT ("features.h"      ${HDF_PREFIX}_HAVE_FEATURES_H)
 CHECK_INCLUDE_FILE_CONCAT ("dirent.h"        ${HDF_PREFIX}_HAVE_DIRENT_H)
 CHECK_INCLUDE_FILE_CONCAT ("unistd.h"        ${HDF_PREFIX}_HAVE_UNISTD_H)
 CHECK_INCLUDE_FILE_CONCAT ("pwd.h"           ${HDF_PREFIX}_HAVE_PWD_H)
-CHECK_INCLUDE_FILE_CONCAT ("globus/common.h" ${HDF_PREFIX}_HAVE_GLOBUS_COMMON_H)
-CHECK_INCLUDE_FILE_CONCAT ("pdb.h"           ${HDF_PREFIX}_HAVE_PDB_H)
 CHECK_INCLUDE_FILE_CONCAT ("pthread.h"       ${HDF_PREFIX}_HAVE_PTHREAD_H)
-CHECK_INCLUDE_FILE_CONCAT ("srbclient.h"     ${HDF_PREFIX}_HAVE_SRBCLIENT_H)
 CHECK_INCLUDE_FILE_CONCAT ("dlfcn.h"         ${HDF_PREFIX}_HAVE_DLFCN_H)
 CHECK_INCLUDE_FILE_CONCAT ("netinet/in.h"    ${HDF_PREFIX}_HAVE_NETINET_IN_H)
 CHECK_INCLUDE_FILE_CONCAT ("netdb.h"         ${HDF_PREFIX}_HAVE_NETDB_H)
@@ -908,11 +905,23 @@ if (${HDF_PREFIX}_SIZEOF__FLOAT16)
     # compile a program that will generate these functions to check for _Float16
     # support. If we fail to compile this program, we will simply disable
     # _Float16 support for the time being.
+
+    # Some compilers, notably AppleClang on MacOS 12, will succeed in the
+    # configure check below when optimization flags like -O3 are manually
+    # passed in CMAKE_C_FLAGS. However, the build will then fail when it
+    # reaches compilation of H5Tconv.c because of the issue mentioned above.
+    # MacOS 13 appears to have fixed this, but, just to be sure, backup and
+    # clear CMAKE_C_FLAGS before performing these configure checks.
+    set (cmake_c_flags_backup "${CMAKE_C_FLAGS}")
+    set (CMAKE_C_FLAGS "")
+
     H5ConversionTests (
         ${HDF_PREFIX}_FLOAT16_CONVERSION_FUNCS_LINK
         FALSE
         "Checking if compiler can convert _Float16 type with casts"
     )
+
+    set (CMAKE_C_FLAGS "${cmake_c_flags_backup}")
 
     if (${${HDF_PREFIX}_FLOAT16_CONVERSION_FUNCS_LINK})
       # Finally, MacOS 13 appears to have a bug specifically when converting
@@ -922,11 +931,18 @@ if (${HDF_PREFIX}_SIZEOF__FLOAT16)
       # simply chopping off all the bytes of the value except for the first 2.
       # These tests pass on MacOS 14, so let's perform a quick test to check
       # if the hardware conversion is done correctly.
+
+      # Backup and clear CMAKE_C_FLAGS before performing configure checks
+      set (cmake_c_flags_backup "${CMAKE_C_FLAGS}")
+      set (CMAKE_C_FLAGS "")
+
       H5ConversionTests (
           ${HDF_PREFIX}_LDOUBLE_TO_FLOAT16_CORRECT
           TRUE
           "Checking if correctly converting long double to _Float16 values"
       )
+
+      set (CMAKE_C_FLAGS "${cmake_c_flags_backup}")
 
       if (NOT ${${HDF_PREFIX}_LDOUBLE_TO_FLOAT16_CORRECT})
         message (VERBOSE "Conversions from long double to _Float16 appear to be incorrect. These will be emulated through a soft conversion function.")

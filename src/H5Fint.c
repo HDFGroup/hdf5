@@ -2783,6 +2783,7 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
         h5_stat_t lst; /* Stat info from lstat() call */
 
         /* Call lstat() on the file's name */
+        memset(&lst, 0, sizeof(h5_stat_t));
         if (HDlstat(name, &lst) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve stat info for file");
 
@@ -2825,10 +2826,12 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve POSIX file descriptor");
 
             /* Stat the filename we're resolving */
+            memset(&st, 0, sizeof(h5_stat_t));
             if (HDstat(name, &st) < 0)
                 HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to stat file");
 
             /* Stat the file we opened */
+            memset(&fst, 0, sizeof(h5_stat_t));
             if (HDfstat(*fd, &fst) < 0)
                 HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to fstat file");
 

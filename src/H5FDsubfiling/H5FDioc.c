@@ -843,12 +843,17 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiles for file '%s'",
                                 name);
 
-    /* Initialize I/O concentrator threads if this MPI rank is an I/O concentrator */
+    /*
+     * Initialize I/O concentrator threads if this MPI rank is an I/O
+     * concentrator and the threads haven't already been initialized by
+     * a different open of this file
+     */
     sf_context = H5_get_subfiling_object(file_ptr->context_id);
-    if (sf_context && sf_context->topology->rank_is_ioc) {
+    if (sf_context && sf_context->topology->rank_is_ioc && !sf_context->threads_inited) {
         if (initialize_ioc_threads(sf_context) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL,
                                     "unable to initialize I/O concentrator threads");
+        sf_context->threads_inited = true;
     }
 
     ret_value = (H5FD_t *)file_ptr;
@@ -917,14 +922,22 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
             if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file_ptr->comm)))
                 H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 
-        if (sf_context && sf_context->topology->rank_is_ioc) {
-            if (finalize_ioc_threads(sf_context) < 0)
-                /* Note that closing of subfiles is collective */
-                H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to finalize IOC threads");
+        /* Only finalize IOC threads and close subfiles if this is
+         * the last file holding a reference to the context
+         */
+        if (sf_context && sf_context->file_ref == 1) {
+            if (sf_context->topology->rank_is_ioc && sf_context->threads_inited) {
+                if (finalize_ioc_threads(sf_context) < 0)
+                    /* Note that closing of subfiles is collective */
+                    H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL,
+                                            "unable to finalize IOC threads");
+            }
+
+            if (H5_close_subfiles(file_ptr->context_id, file_ptr->comm) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL,
+                                        "unable to close subfiling file(s)");
         }
 
-        if (H5_close_subfiles(file_ptr->context_id, file_ptr->comm) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfiling file(s)");
         file_ptr->context_id = -1;
     }
 
@@ -1479,6 +1492,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         char   *prefix_env      = NULL;
         int     num_digits      = 0;
 
+        memset(&st, 0, sizeof(h5_stat_t));
         if (HDstat(name, &st) < 0)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SYSERRSTR, FAIL, "HDstat failed");
 

@@ -60,8 +60,8 @@ CONTAINS
 
     IMPLICIT NONE
     INTEGER(HID_T) :: fapl_id
-    INTEGER :: mpi_size
-    INTEGER :: mpi_rank
+    INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size
+    INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_rank
 
     INTEGER, DIMENSION(:), ALLOCATABLE, TARGET  :: wdata
     INTEGER(hsize_t), DIMENSION(1:EXAMPLE_DSET_DIMS) :: dset_dims
@@ -171,8 +171,8 @@ CONTAINS
 
     IMPLICIT NONE
     INTEGER(HID_T) :: fapl_id
-    INTEGER :: mpi_size
-    INTEGER :: mpi_rank
+    INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size
+    INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_rank
 
     INTEGER, DIMENSION(:), ALLOCATABLE, TARGET  :: wdata
 
@@ -304,8 +304,8 @@ CONTAINS
 
     IMPLICIT NONE
     INTEGER(HID_T) :: fapl_id
-    INTEGER :: mpi_size
-    INTEGER :: mpi_rank
+    INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size
+    INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_rank
 
     INTEGER, DIMENSION(:), ALLOCATABLE, TARGET  :: wdata
     TYPE(H5FD_subfiling_config_t) :: subf_config
@@ -320,6 +320,7 @@ CONTAINS
     INTEGER :: status
     INTEGER(SIZE_T) :: i
     TYPE(C_PTR) :: f_ptr
+    INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror
 
     ! Make a copy of the FAPL so we don't disturb
     ! it for the other examples
@@ -413,7 +414,7 @@ CONTAINS
        CALL H5Fclose_f(file_id, status)
     ENDIF
 
-    CALL MPI_Barrier(MPI_COMM_WORLD, status)
+    CALL MPI_Barrier(MPI_COMM_WORLD, mpierror)
 
     !
     ! Use all MPI ranks to re-open the file and
@@ -467,26 +468,27 @@ PROGRAM main
   USE SUBF
   IMPLICIT NONE
 
-  INTEGER :: comm = MPI_COMM_WORLD
-  INTEGER :: info = MPI_INFO_NULL
+  INTEGER(KIND=MPI_INTEGER_KIND) :: comm = MPI_COMM_WORLD
+  INTEGER(KIND=MPI_INTEGER_KIND) :: info = MPI_INFO_NULL
   INTEGER(HID_T) :: fapl_id
-  INTEGER :: mpi_size
-  INTEGER :: mpi_rank
-  INTEGER :: required
-  INTEGER :: provided
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_rank
+  INTEGER(KIND=MPI_INTEGER_KIND) :: required
+  INTEGER(KIND=MPI_INTEGER_KIND) :: provided
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror
   INTEGER :: status
 
   ! HDF5 Subfiling VFD requires MPI_Init_thread with MPI_THREAD_MULTIPLE
   required = MPI_THREAD_MULTIPLE
   provided = 0
-  CALL mpi_init_thread(required, provided, status)
+  CALL mpi_init_thread(required, provided, mpierror)
   IF (provided .NE. required) THEN
      WRITE(*,*) "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE *FAILED*"
-     CALL MPI_Abort(comm, -1, status)
+     CALL MPI_Abort(comm, -1_MPI_INTEGER_KIND, mpierror)
   ENDIF
 
-  CALL MPI_Comm_size(comm, mpi_size, status)
-  CALL MPI_Comm_rank(comm, mpi_rank, status)
+  CALL MPI_Comm_size(comm, mpi_size, mpierror)
+  CALL MPI_Comm_rank(comm, mpi_rank, mpierror)
 
   !
   ! Initialize HDF5 library and Fortran interfaces.
@@ -516,6 +518,6 @@ PROGRAM main
 
   IF(mpi_rank .EQ. 0) WRITE(*,"(A)") "PHDF5 example finished with no errors"
 
-  CALL MPI_Finalize(status)
+  CALL MPI_Finalize(mpierror)
 
 END PROGRAM main

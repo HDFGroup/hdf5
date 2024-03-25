@@ -1244,7 +1244,9 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
 
     if (driver->value == H5_VFD_IOC) {
         /* Get a copy of the context ID for later use */
-        file_ptr->context_id     = H5_subfile_fid_to_context(file_ptr->file_id);
+        if (H5_subfile_fid_to_context(file_ptr->file_id, &file_ptr->context_id) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL,
+                                    "unable to retrieve subfiling context ID for this file");
         file_ptr->fa.require_ioc = true;
     }
     else if (driver->value == H5_VFD_SEC2) {

@@ -50,9 +50,15 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
     else ()
       set (_RUN_OUTPUT_VARIABLE  "RUN_OUTPUT_STDOUT_VARIABLE")
     endif()
+    if (${FUNCTION_NAME} STREQUAL "SIZEOF NATIVE KINDs")
+        set(TMP_CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}")
+    else ()
+        set(TMP_CMAKE_Fortran_FLAGS "")
+    endif ()
     TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
         ${CMAKE_BINARY_DIR}
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
+        CMAKE_FLAGS "${TMP_CMAKE_Fortran_FLAGS}"
         LINK_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}"
         ${_RUN_OUTPUT_VARIABLE} OUTPUT_VAR
     )
@@ -109,6 +115,16 @@ if (${FORTRAN_C_BOOL_IS_UNIQUE})
   set (${HDF_PREFIX}_FORTRAN_C_BOOL_IS_UNIQUE 1)
 else ()
   set (${HDF_PREFIX}_FORTRAN_C_BOOL_IS_UNIQUE 0)
+endif ()
+
+# Check if the fortran compiler supports the intrinsic module "ISO_FORTRAN_ENV" (F08)
+
+READ_SOURCE("PROGRAM PROG_FC_ISO_FORTRAN_ENV" "END PROGRAM PROG_FC_ISO_FORTRAN_ENV" SOURCE_CODE)
+check_fortran_source_compiles (${SOURCE_CODE} HAVE_ISO_FORTRAN_ENV SRC_EXT f90)
+if (${HAVE_ISO_FORTRAN_ENV})
+  set (${HDF_PREFIX}_HAVE_ISO_FORTRAN_ENV 1)
+else ()
+  set (${HDF_PREFIX}_HAVE_ISO_FORTRAN_ENV 0)
 endif ()
 
 ## Set the sizeof function for use later in the fortran tests

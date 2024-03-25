@@ -1,7 +1,7 @@
 # HDF5 API Tests
 
 This directory contains several test applications that exercise HDF5's
-public API and serve as regression tests for HDF5 [VOL Connectors](https://portal.hdfgroup.org/display/HDF5/Virtual+Object+Layer).
+public API and serve as regression tests for HDF5 [VOL Connectors](https://docs.hdfgroup.org/hdf5/v1_14/_h5_v_l__u_g.html).
 
 ## Build Process and options
 

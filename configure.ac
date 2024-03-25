@@ -198,21 +198,36 @@ saved_user_CPPFLAGS="$CPPFLAGS"
 ##
 ##  Regex:
 ##
-##      -Werror         Literal -Werror
-##      \(              Start optional capturing group
-##      =               Literal equals sign
-##      [^[:space:]-]   Non-space characters
-##      \+              1 or more of the above
-##      \)              End optional capturing group
-##      \?              0 or 1 capturing group matches
+##      -Werror        Literal -Werror
+##      \(             Start optional capturing group
+##      =              Literal equals sign
+##      [^[:space:]]   Non-space characters
+##      \+             1 or more of the above
+##      \)             End optional capturing group
+##      \?             0 or 1 capturing group matches
 ##
-WERROR_SED= "sed -e 's/-Werror\(=[^[:space:]]\+\)\?//g'"
-
-CFLAGS="`echo $CFLAGS | $WERROR_SED`"
-CXXFLAGS="`echo $CXXFLAGS | $WERROR_SED`"
-FCFLAGS="`echo $FCFLAGS | $WERROR_SED`"
-JAVACFLAGS="`echo $JAVACFLAGS | $WERROR_SED`"
-CPPFLAGS="`echo $CPPFLAGS | $WERROR_SED`"
+## Note that the outer pair of '[]' ends up getting removed
+WERROR_SED='s/-Werror\(=[[^[:space:]]]\+\)\?//g'
+CFLAGS_SED="`echo $CFLAGS | sed -e $WERROR_SED`"
+if test $? -eq 0; then
+  CFLAGS="$CFLAGS_SED"
+fi
+CXXFLAGS_SED="`echo $CXXFLAGS | sed -e $WERROR_SED`"
+if test $? -eq 0; then
+  CXXFLAGS="$CXXFLAGS_SED"
+fi
+FCFLAGS_SED="`echo $FCFLAGS | sed -e $WERROR_SED`"
+if test $? -eq 0; then
+  FCFLAGS="$FCFLAGS_SED"
+fi
+JAVACFLAGS_SED="`echo $JAVACFLAGS | sed -e $WERROR_SED`"
+if test $? -eq 0; then
+  JAVACFLAGS="$JAVACFLAGS_SED"
+fi
+CPPFLAGS_SED="`echo $CPPFLAGS | sed -e $WERROR_SED`"
+if test $? -eq 0; then
+  CPPFLAGS="$CPPFLAGS_SED"
+fi
 
 ## Support F9X variable to define Fortran compiler if FC variable is
 ## not used.  This should be deprecated in the future.
@@ -786,6 +801,15 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
   PAC_PROG_FC_STORAGE_SIZE
 
+  ## --------------------------------------------------------------------
+  ## Checking if the fortran compiler supports ISO_FORTRAN_ENV (Fortran 2008)
+  HAVE_ISO_FORTRAN_ENV="0"
+  PAC_PROG_FC_ISO_FORTRAN_ENV
+  if test "X$CHECK_ISO_FORTRAN_ENV" = "Xyes"; then
+    HAVE_ISO_FORTRAN_ENV="1"
+    AC_DEFINE([HAVE_ISO_FORTRAN_ENV], [1], [Define if Fortran supports ISO_FORTRAN_ENV (F08)])
+  fi
+
   ## Set the sizeof function for use later in the fortran tests
   if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes";then
     FC_SIZEOF_A="STORAGE_SIZE(a, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)"
@@ -802,8 +826,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     fi
   fi
 
-  ## See if the fortran compiler supports the intrinsic module "ISO_FORTRAN_ENV"
-  PAC_PROG_FC_ISO_FORTRAN_ENV
   ## Check KIND and size of native integer
   PAC_FC_NATIVE_INTEGER
 
@@ -829,6 +851,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([FORTRAN_HAVE_C_LONG_DOUBLE])
   AC_SUBST([FORTRAN_C_LONG_DOUBLE_IS_UNIQUE])
   AC_SUBST([FORTRAN_C_BOOL_IS_UNIQUE])
+  AC_SUBST([HAVE_ISO_FORTRAN_ENV])
   AC_SUBST([H5CONFIG_F_NUM_RKIND])
   AC_SUBST([H5CONFIG_F_RKIND])
   AC_SUBST([H5CONFIG_F_RKIND_SIZEOF])
@@ -1576,9 +1599,33 @@ if test "X${enable_shared}" = "Xyes"; then
 fi
 
 ## ----------------------------------------------------------------------
-## Set up large file support
+## Use the macro _AC_SYS_LARGEFILE_MACRO_VALUE to test defines
+## that might need to be set for largefile support to behave
+## correctly. This macro is defined in acsite.m4 and overrides
+## the version provided by Autoconf (as of v2.65). The custom
+## macro additionally adds the appropriate defines to AM_CPPFLAGS
+## so that later configure checks have them visible.
+##
+## NOTE: AC_SYS_LARGEFILE is buggy on some platforms and will
+##       NOT set the defines, even though it correctly detects
+##       the necessary values. These macro hacks are annoying
+##       but unfortunately will be necessary until we decide
+##       to drop support for platforms that don't have 64-bit
+##       off_t defaults.
 
-AC_SYS_LARGEFILE
+## Check for _FILE_OFFSET_BITS
+_AC_SYS_LARGEFILE_MACRO_VALUE([_FILE_OFFSET_BITS], [64],
+  [ac_cv_sys_file_offset_bits],
+  [Number of bits in a file offset, on hosts where this is settable.],
+  [_AC_SYS_LARGEFILE_TEST_INCLUDES])
+
+## Check for _LARGE_FILES
+if test "$ac_cv_sys_file_offset_bits" = unknown; then
+  _AC_SYS_LARGEFILE_MACRO_VALUE([_LARGE_FILES], [1],
+    [ac_cv_sys_large_files],
+    [Define for large files, on AIX-style hosts.],
+    [_AC_SYS_LARGEFILE_TEST_INCLUDES])
+fi
 
 ## ----------------------------------------------------------------------
 ## Add necessary defines for Linux Systems.

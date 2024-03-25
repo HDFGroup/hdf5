@@ -45,7 +45,8 @@ jobs:
           token: ${{ github.token }}
           tag: "${{ inputs.use_tag }}"
           assets: |
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip

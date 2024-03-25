@@ -19,7 +19,7 @@ HELP AND SUPPORT
 ----------------
 Information regarding Help Desk and Support services is available at
 
-   https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk
+   https://hdfgroup.atlassian.net/servicedesk/customer/portals
 
 
 
@@ -48,7 +48,7 @@ HDF5 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
 Full Documentation and Programming Resources for this HDF5 can be found at
 
-   https://portal.hdfgroup.org/display/HDF5
+   https://portal.hdfgroup.org/documentation/index.html
 
 Periodically development code snapshots are provided at the following URL:
     
@@ -56,7 +56,7 @@ Periodically development code snapshots are provided at the following URL:
 
 Source packages for current and previous releases are located at:
     
-   https://portal.hdfgroup.org/display/support/Downloads
+   https://portal.hdfgroup.org/downloads/
 
 Development code is available at our Github location:
     

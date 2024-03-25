@@ -80,7 +80,8 @@ set (CHAR_ALLOC
 set (ISO_FORTRAN_ENV_CODE
   "
        PROGRAM main
-         USE, INTRINSIC :: ISO_FORTRAN_ENV
+         USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : atomic_logical_kind
+         LOGICAL(KIND=atomic_logical_kind) :: state
        END PROGRAM
   "
 )

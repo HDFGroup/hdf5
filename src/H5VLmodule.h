@@ -83,7 +83,7 @@
  * to be much more common than internal implementations.
  *
  * A list of VOL connectors can be found here:
- * <a href="https://portal.hdfgroup.org/display/support/Registered+VOL+Connectors">
+ * <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/registered_vol_connectors.html">
  * Registered VOL Connectors</a>
  *
  * This list is incomplete and only includes the VOL connectors that have been registered with

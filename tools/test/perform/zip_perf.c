@@ -308,6 +308,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
     unsigned  u;
     h5_stat_t stat_buf;
 
+    memset(&stat_buf, 0, sizeof(h5_stat_t));
     if (HDstat("/dev/urandom", &stat_buf) == 0) {
         uLongf len = src_len;
         Bytef *buf = src;
