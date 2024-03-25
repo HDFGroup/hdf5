@@ -185,7 +185,7 @@ Java_hdf_hdf5lib_H5_H5Dread(JNIEnv *env, jclass clss, jlong dataset_id, jlong me
     jbyte      *readBuf = NULL;
     size_t      typeSize;
     H5T_class_t type_class;
-    jsize       vl_array_len; // Only used by vl_data_class types
+    jsize       vl_array_len = 0; // Only used by vl_data_class types
     htri_t      vl_data_class;
     herr_t      status = FAIL;
 
@@ -266,7 +266,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite(JNIEnv *env, jclass clss, jlong dataset_id, jlong m
     jbyte      *writeBuf = NULL;
     size_t      typeSize;
     H5T_class_t type_class;
-    jsize       vl_array_len; // Only used by vl_data_class types
+    jsize       vl_array_len = 0; // Only used by vl_data_class types
     htri_t      vl_data_class;
     herr_t      status = FAIL;
 
@@ -1134,7 +1134,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id,
                               jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
-    jbyte      *readBuf = NULL;
+    void       *readBuf = NULL;
     size_t      typeSize;
     H5T_class_t type_class;
     jsize       vl_array_len;
@@ -1164,7 +1164,7 @@ Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong 
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5DreadVL: failed to allocate raw VL read buffer");
 
     if ((status = H5Dread((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
-                          (hid_t)xfer_plist_id, (void *)readBuf)) < 0)
+                          (hid_t)xfer_plist_id, readBuf)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1194,7 +1194,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id,
                                jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
-    jbyte      *writeBuf = NULL;
+    void       *writeBuf = NULL;
     size_t      typeSize;
     H5T_class_t type_class;
     jsize       vl_array_len; // Only used by vl_data_class types
