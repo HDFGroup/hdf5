@@ -50,6 +50,9 @@
 ! Define if Fortran supports ISO_FORTRAN_ENV (F08)
 #undef HAVE_ISO_FORTRAN_ENV
 
+! Define MPI Fortran KIND of LOGICAL
+#undef MPI_LOGICAL_KIND
+
 ! Define the size of C's double
 #undef SIZEOF_DOUBLE
 
