@@ -399,7 +399,8 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                                 "ran off end of input buffer while decoding");
 
                                 H5F_DECODE_LENGTH(f, p, nbytes);
-                                H5_CHECKED_ASSIGN(mesg->storage.u.chunk.u.single.nbytes, uint32_t, nbytes, uint64_t);
+                                H5_CHECKED_ASSIGN(mesg->storage.u.chunk.u.single.nbytes, uint32_t, nbytes,
+                                                  uint64_t);
 
                                 UINT32DECODE(p, mesg->storage.u.chunk.u.single.filter_mask);
                             }

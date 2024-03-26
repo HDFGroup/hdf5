@@ -352,10 +352,12 @@
  * For the time being, these can be suppressed with
  * H5_GCC_CLANG_DIAG_OFF("type-limits")/H5_GCC_CLANG_DIAG_ON("type-limits")
  */
-#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end)                                                                           \
-    (((ptr) > (buffer_end)) ||                                        /* Bad precondition */                                   \
-     (((size_t)(size) <= PTRDIFF_MAX) && ((ptrdiff_t)(size) < 0)) ||  /* Account for (likely unintentional) negative 'size' */ \
-     ((size_t)(size) > (size_t)((((const uint8_t *)buffer_end) - ((const uint8_t *)ptr)) + 1))) /* Typical overflow */
+#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end)                                                         \
+    (((ptr) > (buffer_end)) || /* Bad precondition */                                                        \
+     (((size_t)(size) <= PTRDIFF_MAX) &&                                                                     \
+      ((ptrdiff_t)(size) < 0)) || /* Account for (likely unintentional) negative 'size' */                   \
+     ((size_t)(size) >                                                                                       \
+      (size_t)((((const uint8_t *)buffer_end) - ((const uint8_t *)ptr)) + 1))) /* Typical overflow */
 
 /* Variant of H5_IS_BUFFER_OVERFLOW, used with functions such as H5Tdecode()
  * that don't take a size parameter, where we need to skip the bounds checks.

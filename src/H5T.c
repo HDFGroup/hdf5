@@ -6664,11 +6664,12 @@ H5T_is_numeric_with_unusual_unused_bits(const H5T_t *dt)
     assert(dt->shared);
 
     /* Is the correct type? */
-    if (H5T_INTEGER == dt->shared->type || H5T_FLOAT == dt->shared->type || H5T_BITFIELD == dt->shared->type) {
+    if (H5T_INTEGER == dt->shared->type || H5T_FLOAT == dt->shared->type ||
+        H5T_BITFIELD == dt->shared->type) {
 #if LDBL_MANT_DIG == 106
         /* This currently won't work for the IBM long double type */
         if (H5T_FLOAT == dt->shared->type && dt->shared->size == 16 &&
-                (dt->shared->u.atomic.prec == 64 || dt->shared->u.atomic.prec == 128))
+            (dt->shared->u.atomic.prec == 64 || dt->shared->u.atomic.prec == 128))
             HGOTO_DONE(false);
 #endif
 
