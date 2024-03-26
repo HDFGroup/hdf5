@@ -23,7 +23,7 @@
 #define H5_ZLIB_HEADER "zlib.h"
 #endif
 #if defined(H5_ZLIB_HEADER)
-#include H5_ZLIB_HEADER /* "zlib.h" */
+#include H5_ZLIB_HEADER "zlib.h"
 #endif
 
 /* Local function prototypes */
