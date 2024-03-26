@@ -87,6 +87,7 @@ CONTAINS
     INTEGER :: ret_val_func
 
     ret_val_func = 0
+    ret_val = 0
     
     name_string(1:10) = " "
     len = 0
@@ -142,7 +143,7 @@ CONTAINS
           funptr = C_FUNLOC(op_func)
           CALL h5literate_by_name_f(loc_id, name_string, H5_INDEX_NAME_F, H5_ITER_NATIVE_F, idx, &
                funptr, ptr2, ret_val_func, status)
-
+          ret_val = INT(ret_val_func,C_INT)
        ENDIF
        WRITE(*,'(A)') space(1:spaces)//"}"
        RETURN

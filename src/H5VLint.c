@@ -2249,7 +2249,7 @@ H5VL_set_vol_wrapper(const H5VL_object_t *vol_obj)
         vol_wrap_ctx->obj_wrap_ctx = obj_wrap_ctx;
     } /* end if */
     else
-        /* Incremeent ref count on existing wrapper context */
+        /* Increment ref count on existing wrapper context */
         vol_wrap_ctx->rc++;
 
     /* Save the wrapper context */

@@ -447,8 +447,13 @@ Java_hdf_hdf5lib_H5_H5Tget_1fields_1int(JNIEnv *env, jclass clss, jlong type_id,
 {
     jboolean isCopy;
     jsize    arrLen;
-    jint    *P      = NULL;
-    herr_t   status = FAIL;
+    size_t   spos;
+    size_t   epos;
+    size_t   esize;
+    size_t   mpos;
+    size_t   msize;
+    jint    *pinned_arr = NULL;
+    herr_t   status     = FAIL;
 
     UNUSED(clss);
 
@@ -462,15 +467,20 @@ Java_hdf_hdf5lib_H5_H5Tget_1fields_1int(JNIEnv *env, jclass clss, jlong type_id,
     if (arrLen < 5)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Tget_fields_int: fields input array < order 5");
 
-    PIN_INT_ARRAY(ENVONLY, fields, P, &isCopy, "H5Tget_fields_int: fields not pinned");
+    PIN_INT_ARRAY(ENVONLY, fields, pinned_arr, &isCopy, "H5Tget_fields_int: fields not pinned");
 
-    if ((status = H5Tget_fields((hid_t)type_id, (size_t *)&(P[0]), (size_t *)&(P[1]), (size_t *)&(P[2]),
-                                (size_t *)&(P[3]), (size_t *)&(P[4]))) < 0)
+    if ((status = H5Tget_fields((hid_t)type_id, &spos, &epos, &esize, &mpos, &msize)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
+    pinned_arr[0] = (jint)spos;
+    pinned_arr[1] = (jint)epos;
+    pinned_arr[2] = (jint)esize;
+    pinned_arr[3] = (jint)mpos;
+    pinned_arr[4] = (jint)msize;
+
 done:
-    if (P)
-        UNPIN_INT_ARRAY(ENVONLY, fields, P, (status < 0) ? JNI_ABORT : 0);
+    if (pinned_arr)
+        UNPIN_INT_ARRAY(ENVONLY, fields, pinned_arr, (status < 0) ? JNI_ABORT : 0);
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Tget_1fields_1int */

@@ -1107,12 +1107,12 @@ done:
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
 {
-    jbyte      *readBuf = NULL;
+    void       *readBuf = NULL;
     hsize_t     dims[H5S_MAX_RANK];
     hid_t       sid = H5I_INVALID_HID;
     size_t      typeSize;
     H5T_class_t type_class;
-    jsize       vl_array_len;
+    jsize       vl_array_len = 0;
     htri_t      vl_data_class;
     herr_t      status      = FAIL;
     htri_t      is_variable = 0;
@@ -1136,7 +1136,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
     if (NULL == (readBuf = calloc((size_t)vl_array_len, typeSize)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aread: failed to allocate raw VL read buffer");
 
-    if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, (void *)readBuf)) < 0)
+    if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, readBuf)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1173,12 +1173,12 @@ done:
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
 {
-    jbyte      *writeBuf = NULL;
+    void       *writeBuf = NULL;
     hsize_t     dims[H5S_MAX_RANK];
     hid_t       sid = H5I_INVALID_HID;
     size_t      typeSize;
     H5T_class_t type_class;
-    jsize       vl_array_len;
+    jsize       vl_array_len = 0;
     htri_t      vl_data_class;
     herr_t      status      = FAIL;
     htri_t      is_variable = 0;
