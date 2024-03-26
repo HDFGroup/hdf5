@@ -28,7 +28,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: HDFGroup/hdf5
           path: hdf5
       - name: Install HDF5
         run: |
