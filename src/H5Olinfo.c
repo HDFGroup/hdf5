@@ -141,8 +141,8 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         INT64DECODE(p, linfo->max_corder);
         if (linfo->max_corder < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid max creation order value for message: %lld",
-                        (long long)linfo->max_corder);
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                        "invalid max creation order value for message: %" PRId64, linfo->max_corder);
     }
     else
         linfo->max_corder = 0;
