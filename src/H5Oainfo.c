@@ -138,25 +138,25 @@ H5O__ainfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
         ainfo->max_crt_idx = H5O_MAX_CRT_ORDER_IDX;
 
     /* Address of fractal heap to store "dense" attributes */
-    H5_GCC_DIAG_OFF("type-limits")
+    H5_GCC_CLANG_DIAG_OFF("type-limits")
     if (H5_IS_BUFFER_OVERFLOW(p, sizeof_addr, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    H5_GCC_DIAG_ON("type-limits")
+    H5_GCC_CLANG_DIAG_ON("type-limits")
     H5F_addr_decode(f, &p, &(ainfo->fheap_addr));
 
     /* Address of v2 B-tree to index names of attributes (names are always indexed) */
-    H5_GCC_DIAG_OFF("type-limits")
+    H5_GCC_CLANG_DIAG_OFF("type-limits")
     if (H5_IS_BUFFER_OVERFLOW(p, sizeof_addr, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    H5_GCC_DIAG_ON("type-limits")
+    H5_GCC_CLANG_DIAG_ON("type-limits")
     H5F_addr_decode(f, &p, &(ainfo->name_bt2_addr));
 
     /* Address of v2 B-tree to index creation order of links, if there is one */
     if (ainfo->index_corder) {
-        H5_GCC_DIAG_OFF("type-limits")
+        H5_GCC_CLANG_DIAG_OFF("type-limits")
         if (H5_IS_BUFFER_OVERFLOW(p, sizeof_addr, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-        H5_GCC_DIAG_ON("type-limits")
+        H5_GCC_CLANG_DIAG_ON("type-limits")
         H5F_addr_decode(f, &p, &(ainfo->corder_bt2_addr));
     }
     else
