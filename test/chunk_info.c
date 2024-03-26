@@ -2257,7 +2257,16 @@ test_chunk_address_with_userblock(hid_t fapl_id)
     int fd    = -1;
     int fd_ub = -1;
 
+    bool default_vfd_compatible;
+
     TESTING("if chunk addresses are correct when a file has a userblock");
+
+    if (h5_driver_is_default_vfd_compatible(fapl_id, &default_vfd_compatible) < 0)
+        TEST_ERROR;
+    if (!default_vfd_compatible) {
+        puts(" -- SKIPPED for incompatible VFD --");
+        return 0;
+    }
 
     /* Create files with and without a userblock */
     if (create_userblock_file(NO_UBLOCK_FILE_NAME, H5P_DEFAULT, fapl_id) < 0)
