@@ -115,7 +115,7 @@ if (HDF5_BUILD_TOOLS)
     if (NOT ${example_name} STREQUAL "h5ex_t_convert")
         if (${example_name} STREQUAL "h5ex_t_vlen" OR ${example_name} STREQUAL "h5ex_t_vlenatt")
           if (HDF5_VERSION_STRING VERSION_GREATER_EQUAL "1.14.3")
-            if (${H5_LIBVER_DIR} EQUAL 16 AND ${example_name} STREQUAL "h5ex_t_vlenatt")
+            if ((${EXAMPLE_VARNAME}_USE_16_API OR ${H5_LIBVER_DIR} EQUAL 16) AND ${example_name} STREQUAL "h5ex_t_vlenatt")
               add_custom_command (
                   TARGET     ${EXAMPLE_VARNAME}_${example_name}
                   POST_BUILD
@@ -130,7 +130,7 @@ if (HDF5_BUILD_TOOLS)
                   ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/114/${example_name}.ddl ${example_name}.ddl
               )
             endif ()
-          elseif (${H5_LIBVER_DIR} EQUAL 16)
+          elseif (${EXAMPLE_VARNAME}_USE_16_API OR ${H5_LIBVER_DIR} EQUAL 16)
             add_custom_command (
                 TARGET     ${EXAMPLE_VARNAME}_${example_name}
                 POST_BUILD
@@ -180,7 +180,7 @@ if (HDF5_BUILD_TOOLS)
                 )
               endif ()
             elseif (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.12")
-              if (${H5_LIBVER_DIR} EQUAL 16)
+              if (${EXAMPLE_VARNAME}_USE_16_API OR ${H5_LIBVER_DIR} EQUAL 16)
                 add_custom_command (
                     TARGET     ${EXAMPLE_VARNAME}_${example_name}
                     POST_BUILD
@@ -196,12 +196,21 @@ if (HDF5_BUILD_TOOLS)
                 )
               endif ()
             else ()
-              add_custom_command (
-                  TARGET     ${EXAMPLE_VARNAME}_${example_name}
-                  POST_BUILD
-                  COMMAND    ${CMAKE_COMMAND}
-                  ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${example_name}.ddl
-              )
+              if (${EXAMPLE_VARNAME}_USE_16_API OR ${H5_LIBVER_DIR} EQUAL 16)
+                add_custom_command (
+                    TARGET     ${EXAMPLE_VARNAME}_${example_name}
+                    POST_BUILD
+                    COMMAND    ${CMAKE_COMMAND}
+                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/16/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
+                )
+              else ()
+                add_custom_command (
+                    TARGET     ${EXAMPLE_VARNAME}_${example_name}
+                    POST_BUILD
+                    COMMAND    ${CMAKE_COMMAND}
+                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
+                )
+              endif ()
             endif ()
           else ()
             if (HDF5_VERSION_MAJOR VERSION_EQUAL "1.8")
@@ -260,12 +269,21 @@ if (HDF5_BUILD_TOOLS)
               ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/16/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
           )
         else ()
-          add_custom_command (
-              TARGET     ${EXAMPLE_VARNAME}_${example_name}
-              POST_BUILD
-              COMMAND    ${CMAKE_COMMAND}
-              ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${example_name}.ddl
-          )
+          if (${EXAMPLE_VARNAME}_USE_16_API)
+            add_custom_command (
+                TARGET     ${EXAMPLE_VARNAME}_${example_name}
+                POST_BUILD
+                COMMAND    ${CMAKE_COMMAND}
+                ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/16/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
+            )
+          else ()
+            add_custom_command (
+                TARGET     ${EXAMPLE_VARNAME}_${example_name}
+                POST_BUILD
+                COMMAND    ${CMAKE_COMMAND}
+                ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
+            )
+          endif ()
         endif ()
       endif ()
   endforeach ()
