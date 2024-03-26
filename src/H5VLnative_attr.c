@@ -26,6 +26,7 @@
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Apkg.h"      /* Attributes                               */
+#include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fprivate.h"  /* Files                                    */
 #include "H5Gprivate.h"  /* Groups                                   */
@@ -195,8 +196,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t H5_ATTR_UNUSED dxpl_id,
-                       void H5_ATTR_UNUSED **req)
+H5VL__native_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5T_t *mem_type;  /* Memory datatype */
     herr_t ret_value; /* Return value */
@@ -205,6 +205,9 @@ H5VL__native_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t H5_ATTR_UNUS
 
     if (NULL == (mem_type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* Go write the actual data to the attribute */
     if ((ret_value = H5A__read((H5A_t *)attr, mem_type, buf)) < 0)
@@ -224,8 +227,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t H5_ATTR_UNUSED dxpl_id,
-                        void H5_ATTR_UNUSED **req)
+H5VL__native_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5T_t *mem_type;  /* Memory datatype */
     herr_t ret_value; /* Return value */
@@ -234,6 +236,9 @@ H5VL__native_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t H5_AT
 
     if (NULL == (mem_type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* Go write the actual data to the attribute */
     if ((ret_value = H5A__write((H5A_t *)attr, mem_type, buf)) < 0)

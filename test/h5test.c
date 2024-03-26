@@ -216,11 +216,8 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
 void
 h5_delete_all_test_files(const char *base_name[], hid_t fapl)
 {
-    int i; /* iterator                             */
-
-    for (i = 0; base_name[i]; i++) {
+    for (int i = 0; base_name[i]; i++)
         h5_delete_test_file(base_name[i], fapl);
-    } /* end for */
 
 } /* end h5_delete_all_test_files() */
 
@@ -847,13 +844,13 @@ h5_get_vfd_fapl(hid_t fapl)
     }
     else if (!strcmp(tok, "multi")) {
         /* Multi-file driver, general case of the split driver */
-        H5FD_mem_t  memb_map[H5FD_MEM_NTYPES];
-        hid_t       memb_fapl[H5FD_MEM_NTYPES];
-        const char *memb_name[H5FD_MEM_NTYPES];
-        char       *sv[H5FD_MEM_NTYPES];
-        haddr_t     memb_addr[H5FD_MEM_NTYPES];
-        H5FD_mem_t  mt;
-        const int   multi_memname_maxlen = 1024;
+        H5FD_mem_t   memb_map[H5FD_MEM_NTYPES];
+        hid_t        memb_fapl[H5FD_MEM_NTYPES];
+        const char  *memb_name[H5FD_MEM_NTYPES];
+        char        *sv[H5FD_MEM_NTYPES];
+        haddr_t      memb_addr[H5FD_MEM_NTYPES];
+        H5FD_mem_t   mt;
+        const size_t multi_memname_maxlen = 1024;
 
         memset(memb_map, 0, sizeof(memb_map));
         memset(memb_fapl, 0, sizeof(memb_fapl));
@@ -2201,13 +2198,13 @@ H5_get_srcdir(void)
 int
 h5_duplicate_file_by_bytes(const char *orig, const char *dest)
 {
-    FILE   *orig_ptr  = NULL;
-    FILE   *dest_ptr  = NULL;
-    hsize_t fsize     = 0;
-    hsize_t read_size = 0;
-    hsize_t max_buf   = 0;
-    void   *dup_buf   = NULL;
-    int     ret_value = 0;
+    FILE  *orig_ptr  = NULL;
+    FILE  *dest_ptr  = NULL;
+    size_t fsize     = 0;
+    size_t read_size = 0;
+    size_t max_buf   = 0;
+    void  *dup_buf   = NULL;
+    int    ret_value = 0;
 
     max_buf = 4096 * sizeof(char);
 
@@ -2218,7 +2215,7 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
     }
 
     HDfseek(orig_ptr, 0, SEEK_END);
-    fsize = (hsize_t)HDftell(orig_ptr);
+    fsize = (size_t)HDftell(orig_ptr);
     HDrewind(orig_ptr);
 
     dest_ptr = fopen(dest, "wb");

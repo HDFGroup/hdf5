@@ -250,9 +250,10 @@ typedef struct H5D_chunk_coll_fill_info_t {
 #endif /* H5_HAVE_PARALLEL */
 
 typedef struct H5D_chunk_iter_ud_t {
-    H5D_chunk_iter_op_t op;      /* User defined callback */
-    void               *op_data; /* User data for user defined callback */
-    H5O_layout_chunk_t *chunk;   /* Chunk layout */
+    H5D_chunk_iter_op_t op;        /* User defined callback */
+    void               *op_data;   /* User data for user defined callback */
+    H5O_layout_chunk_t *chunk;     /* Chunk layout */
+    haddr_t             base_addr; /* Base address of the file, taking user block into account */
 } H5D_chunk_iter_ud_t;
 
 /********************/
@@ -7850,7 +7851,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__get_chunk_info_cb
  *
- * Purpose:     Get the chunk info of the queried chunk, given by its index.
+ * Purpose:     Get the chunk info of the queried chunk, given by its index
  *
  * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
  *                          H5_ITER_STOP indicates the queried chunk is found
@@ -7901,21 +7902,18 @@ H5D__get_chunk_info_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
  * Note:        Currently, the domain of the index in this function is of all
  *              the written chunks, regardless the dataspace.
  *
- * Return:      Success: SUCCEED
- *              Failure: FAIL
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 herr_t
 H5D__get_chunk_info(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_t chk_index, hsize_t *offset,
                     unsigned *filter_mask, haddr_t *addr, hsize_t *size)
 {
-    H5D_chk_idx_info_t       idx_info;            /* Chunked index info */
-    H5D_chunk_info_iter_ud_t udata;               /* User data for callback */
-    const H5D_rdcc_t        *rdcc = NULL;         /* Raw data chunk cache */
-    H5D_rdcc_ent_t          *ent;                 /* Cache entry index */
-    hsize_t                  ii        = 0;       /* Dimension index */
-    herr_t                   ret_value = SUCCEED; /* Return value */
+    H5D_chk_idx_info_t idx_info;            /* Chunked index info */
+    const H5D_rdcc_t  *rdcc = NULL;         /* Raw data chunk cache */
+    H5D_rdcc_ent_t    *ent;                 /* Cache entry index */
+    hsize_t            ii        = 0;       /* Dimension index */
+    herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
@@ -7947,6 +7945,9 @@ H5D__get_chunk_info(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
 
     /* If the chunk is written, get its info, otherwise, return without error */
     if (H5_addr_defined(idx_info.storage->idx_addr)) {
+
+        H5D_chunk_info_iter_ud_t udata;
+
         /* Initialize before iteration */
         udata.chunk_idx   = chk_index;
         udata.curr_idx    = 0;
@@ -7967,14 +7968,14 @@ H5D__get_chunk_info(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
             if (filter_mask)
                 *filter_mask = udata.filter_mask;
             if (addr)
-                *addr = udata.chunk_addr;
+                *addr = udata.chunk_addr + H5F_BASE_ADDR(dset->oloc.file);
             if (size)
                 *size = udata.nbytes;
             if (offset)
                 for (ii = 0; ii < udata.ndims; ii++)
                     offset[ii] = udata.scaled[ii] * dset->shared->layout.u.chunk.dim[ii];
-        } /* end if */
-    }     /* end if H5_addr_defined */
+        }
+    }
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
@@ -8039,12 +8040,11 @@ herr_t
 H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *offset, unsigned *filter_mask, haddr_t *addr,
                              hsize_t *size)
 {
-    const H5O_layout_t      *layout = NULL;       /* Dataset layout */
-    const H5D_rdcc_t        *rdcc   = NULL;       /* Raw data chunk cache */
-    H5D_rdcc_ent_t          *ent;                 /* Cache entry index */
-    H5D_chk_idx_info_t       idx_info;            /* Chunked index info */
-    H5D_chunk_info_iter_ud_t udata;               /* User data for callback */
-    herr_t                   ret_value = SUCCEED; /* Return value */
+    const H5O_layout_t *layout = NULL;       /* Dataset layout */
+    const H5D_rdcc_t   *rdcc   = NULL;       /* Raw data chunk cache */
+    H5D_rdcc_ent_t     *ent;                 /* Cache entry index */
+    H5D_chk_idx_info_t  idx_info;            /* Chunked index info */
+    herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
@@ -8080,6 +8080,9 @@ H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *offset, unsigned 
 
     /* If the dataset is not written, return without errors */
     if (H5_addr_defined(idx_info.storage->idx_addr)) {
+
+        H5D_chunk_info_iter_ud_t udata;
+
         /* Calculate the scaled of this chunk */
         H5VM_chunk_scaled(dset->shared->ndims, offset, layout->u.chunk.dim, udata.scaled);
         udata.scaled[dset->shared->ndims] = 0;
@@ -8102,11 +8105,11 @@ H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *offset, unsigned 
             if (filter_mask)
                 *filter_mask = udata.filter_mask;
             if (addr)
-                *addr = udata.chunk_addr;
+                *addr = udata.chunk_addr + H5F_BASE_ADDR(dset->oloc.file);
             if (size)
                 *size = udata.nbytes;
-        } /* end if */
-    }     /* end if H5_addr_defined */
+        }
+    }
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
@@ -8115,33 +8118,32 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_iter_cb
  *
- * Purpose:     Call the user-defined function with the chunk data. The iterator continues if
- *              the user-defined function returns H5_ITER_CONT, and stops if H5_ITER_STOP is
- *              returned.
+ * Purpose:     Call the user-defined function with the chunk data. The
+ *              iterator continues if the user-defined function returns
+ *              H5_ITER_CONT, and stops if H5_ITER_STOP is returned.
  *
  * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
  *              Failure:    Negative (H5_ITER_ERROR)
- *
  *-------------------------------------------------------------------------
  */
 static int
 H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
 {
-    const H5D_chunk_iter_ud_t *data      = (H5D_chunk_iter_ud_t *)udata;
-    const H5O_layout_chunk_t  *chunk     = data->chunk;
-    int                        ret_value = H5_ITER_CONT;
+    const H5D_chunk_iter_ud_t *data  = (H5D_chunk_iter_ud_t *)udata;
+    const H5O_layout_chunk_t  *chunk = data->chunk;
     hsize_t                    offset[H5O_LAYOUT_NDIMS];
-    unsigned                   ii; /* Match H5O_layout_chunk_t.ndims */
+    int                        ret_value = H5_ITER_CONT;
 
     /* Similar to H5D__get_chunk_info */
-    for (ii = 0; ii < chunk->ndims; ii++)
-        offset[ii] = chunk_rec->scaled[ii] * chunk->dim[ii];
+    for (unsigned i = 0; i < chunk->ndims; i++)
+        offset[i] = chunk_rec->scaled[i] * chunk->dim[i];
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check for callback failure and pass along return value */
-    if ((ret_value = (data->op)(offset, (unsigned)chunk_rec->filter_mask, chunk_rec->chunk_addr,
-                                (hsize_t)chunk_rec->nbytes, data->op_data)) < 0)
+    if ((ret_value =
+             (data->op)(offset, (unsigned)chunk_rec->filter_mask, data->base_addr + chunk_rec->chunk_addr,
+                        (hsize_t)chunk_rec->nbytes, data->op_data)) < 0)
         HERROR(H5E_DATASET, H5E_CANTNEXT, "iteration operator failed");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8150,11 +8152,9 @@ H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_iter
  *
- * Purpose:     Iterate over all the chunks in the dataset with given callback.
+ * Purpose:     Iterate over all the chunks in the dataset with given callback
  *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -8196,14 +8196,15 @@ H5D__chunk_iter(H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
         H5D_chunk_iter_ud_t ud;
 
         /* Set up info for iteration callback */
-        ud.op      = op;
-        ud.op_data = op_data;
-        ud.chunk   = &dset->shared->layout.u.chunk;
+        ud.op        = op;
+        ud.op_data   = op_data;
+        ud.chunk     = &dset->shared->layout.u.chunk;
+        ud.base_addr = H5F_BASE_ADDR(dset->oloc.file);
 
         /* Iterate over the allocated chunks calling the iterator callback */
         if ((ret_value = (layout->storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_iter_cb, &ud)) < 0)
             HERROR(H5E_DATASET, H5E_CANTNEXT, "chunk iteration failed");
-    } /* end if H5_addr_defined */
+    }
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
