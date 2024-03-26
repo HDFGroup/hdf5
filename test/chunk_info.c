@@ -2373,7 +2373,9 @@ test_chunk_address_with_userblock(hid_t fapl_id)
     }
 
     HDclose(fd);
+    fd = -1;
     HDclose(fd_ub);
+    fd_ub = -1;
 
     /* Close everything */
     if (H5Pclose(fcpl_id) < 0)
@@ -2390,8 +2392,10 @@ test_chunk_address_with_userblock(hid_t fapl_id)
     free(addresses);
     free(addresses_ub);
 
-    HDremove(UBLOCK_FILE_NAME);
-    HDremove(NO_UBLOCK_FILE_NAME);
+    if (H5Fdelete(UBLOCK_FILE_NAME, fapl_id) < 0)
+        TEST_ERROR;
+    if (H5Fdelete(NO_UBLOCK_FILE_NAME, fapl_id) < 0)
+        TEST_ERROR;
 
     PASSED();
     return 0;
