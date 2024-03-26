@@ -392,7 +392,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
                         case H5D_CHUNK_IDX_SINGLE: /* Single Chunk Index */
                             if (mesg->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
-                                uint64_t nbytes;
+                                uint64_t nbytes = 0;
 
                                 if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f) + 4, p_end))
                                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
