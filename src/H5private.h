@@ -345,12 +345,17 @@
 #define H5_EXP2(n) (1 << (n))
 
 /* Check if a read of size bytes starting at ptr would overflow past
- * the last valid byte, pointed to by buffer_end.
+ * the last valid byte, pointed to by buffer_end. Note that 'size'
+ * is expected to be of type size_t. Providing values of other
+ * datatypes may cause warnings due to the comparison against
+ * PTRDIFF_MAX and comparison of < 0 after conversion to ptrdiff_t.
+ * For the time being, these can be suppressed with
+ * H5_GCC_CLANG_DIAG_OFF("type-limits")/H5_GCC_CLANG_DIAG_ON("type-limits")
  */
-#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end)                                                         \
-    (((ptr) > (buffer_end)) ||                             /* Bad precondition */                            \
-     ((ptrdiff_t)(size) > (((buffer_end) - (ptr)) + 1)) || /* Typical overflow */                            \
-     ((intptr_t)(size) < 0))                               /* Negative 'size' would wrap 'ptr' */
+#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end)                                                                           \
+    (((ptr) > (buffer_end)) ||                                        /* Bad precondition */                                   \
+     (((size_t)(size) <= PTRDIFF_MAX) && ((ptrdiff_t)(size) < 0)) ||  /* Account for (likely unintentional) negative 'size' */ \
+     ((size_t)(size) > (size_t)((((const uint8_t *)buffer_end) - ((const uint8_t *)ptr)) + 1))) /* Typical overflow */
 
 /* Variant of H5_IS_BUFFER_OVERFLOW, used with functions such as H5Tdecode()
  * that don't take a size parameter, where we need to skip the bounds checks.
@@ -359,7 +364,7 @@
  * the entire library.
  */
 #define H5_IS_KNOWN_BUFFER_OVERFLOW(skip, ptr, size, buffer_end)                                             \
-    (skip ? false : ((ptr) + (size)-1) > (buffer_end))
+    (skip ? false : H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end))
 
 /*
  * HDF Boolean type.
