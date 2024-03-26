@@ -223,7 +223,6 @@ if (${HAVE_ISO_FORTRAN_ENV})
   set (PAC_FC_ALL_LOGICAL_KINDS "\{${pac_validLogicalKinds}\}")
   message (STATUS "....LOGICAL KINDS FOUND ${PAC_FC_ALL_LOGICAL_KINDS}")
 
-
 # ********************
 # LOGICAL KIND FOR MPI
 # ********************
@@ -247,7 +246,7 @@ if (${HAVE_ISO_FORTRAN_ENV})
       )
       check_fortran_source_compiles (${PROG_SRC} MPI_LOGICAL_KIND SRC_EXT f90)
 
-      if (${MPI_LOGICAL_KIND} MATCHES "1")
+      if (MPI_LOGICAL_KIND)
         set (${HDF_PREFIX}_MPI_LOGICAL_KIND ${KIND})
         message (STATUS "....FORTRAN LOGICAL KIND for MPI is ${KIND}")
       endif ()
@@ -406,7 +405,6 @@ endif ()
 if (NOT PAC_FORTRAN_NATIVE_DOUBLE_KIND)
    message (FATAL_ERROR "Failed to find KIND of NATIVE DOUBLE for Fortran")
 endif ()
-
 
 set (${HDF_PREFIX}_FORTRAN_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
 
