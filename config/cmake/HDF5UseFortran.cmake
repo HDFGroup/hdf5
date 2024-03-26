@@ -14,26 +14,14 @@
 # This file provides functions for HDF5 specific Fortran support.
 #
 #-------------------------------------------------------------------------------
-enable_language (Fortran)
+include (${HDF_RESOURCES_DIR}/HDFUseFortran.cmake)
 
-set (HDF_PREFIX "H5")
+include (CheckFortranFunctionExists)
 
 # Force lowercase Fortran module file names
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "Cray")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ef")
 endif ()
-
-include (CheckFortranFunctionExists)
-
-include (CheckFortranSourceRuns)
-include (CheckFortranSourceCompiles)
-
-# Read source line beginning at the line matching Input:"START" and ending at the line matching Input:"END"
-macro (READ_SOURCE SOURCE_START SOURCE_END RETURN_VAR)
-  file (READ "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90" SOURCE_MASTER)
-  string (REGEX MATCH "${SOURCE_START}[\\\t\\\n\\\r[].+]*${SOURCE_END}" SOURCE_CODE ${SOURCE_MASTER})
-  set (RETURN_VAR "${SOURCE_CODE}")
-endmacro ()
 
 set (RUN_OUTPUT_PATH_DEFAULT ${CMAKE_BINARY_DIR})
 # The provided CMake Fortran macros don't provide a general compile/run function
