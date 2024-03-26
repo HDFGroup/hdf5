@@ -109,7 +109,7 @@ jobs:
           then
             FILE_NAME_BASE=$(echo "hdf5-${{ needs.check_commits.outputs.branch_ref }}-${{ needs.check_commits.outputs.branch_sha }}")
           else
-            if [[ '${{ inputs.use_tag }}' == 'snapshot' ]]
+            if [[ '${{ inputs.use_tag }}' == 'snapshot-1.14' ]]
             then
               FILE_NAME_BASE=$(echo "snapshot")
             else
