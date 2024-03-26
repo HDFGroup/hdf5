@@ -5684,7 +5684,7 @@ H5_DLL herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned 
  *          metadata, allowing accidental data corruption to be correctly
  *          detected and errors correctly issued without ambiguity.
  *
- * \since 1.14.3
+ * \since 1.14.4
  *
  */
 H5_DLL herr_t H5Pset_relax_file_integrity_checks(hid_t plist_id, uint64_t flags);
@@ -5702,7 +5702,7 @@ H5_DLL herr_t H5Pset_relax_file_integrity_checks(hid_t plist_id, uint64_t flags)
  *          integrity check value into \p flags for the file access property
  *          list specified in \p plist_id.
  *
- * \since 1.14.3
+ * \since 1.14.4
  *
  */
 H5_DLL herr_t H5Pget_relax_file_integrity_checks(hid_t plist_id, uint64_t *flags);
