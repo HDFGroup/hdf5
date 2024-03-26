@@ -6333,6 +6333,9 @@ H5Pget_relax_file_integrity_checks(hid_t plist_id, uint64_t *flags /*out*/)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*UL", plist_id, flags);
 
+    if (H5P_DEFAULT == plist_id)
+        plist_id = H5P_FILE_ACCESS_DEFAULT;
+
     /* Get the property list structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plist_id is not a file access property list");
