@@ -224,7 +224,7 @@ typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_us
  *
  * \param[in]     offset      Logical position of the chunk's first element in units of dataset elements
  * \param[in]     filter_mask Bitmask indicating the filters used when the chunk was written
- * \param[in]     addr        Chunk address in the file
+ * \param[in]     addr        Chunk address in the file, taking the user block (if any) into account
  * \param[in]     size        Chunk size in bytes, 0 if the chunk does not exist
  * \param[in,out] op_data     Pointer to any user-defined data associated with
  *                            the operation.
@@ -669,7 +669,7 @@ H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks
  * \dset_id
  * \param[in]  offset      Logical position of the chunk's first element in units of dataset elements
  * \param[out] filter_mask Bitmask indicating the filters used when the chunk was written
- * \param[out] addr        Chunk address in the file
+ * \param[out] addr        Chunk address in the file, taking the user block (if any) into account
  * \param[out] size        Chunk size in bytes, 0 if the chunk does not exist
  *
  * \return \herr_t
@@ -685,6 +685,9 @@ H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks
  *          \p offset is a pointer to a one-dimensional array with a size
  *          equal to the dataset's rank. Each element is the logical
  *          position of the chunk's first element in a dimension.
+ *
+ * \note    Prior to HDF5 1.14.4, the reported address did not take the
+ *          user block into account.
  *
  * \since 1.10.5
  *
@@ -709,6 +712,9 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  *          user supplied callback with the details of the chunk and the supplied
  *          context \p op_data.
  *
+ * \note    Prior to HDF5 1.14.4, the address passed to the callback did not take
+ *          the user block into account.
+ *
  * \par Example
  * For each chunk, print the allocated chunk size (0 for unallocated chunks).
  * \snippet H5D_examples.c H5Dchunk_iter_cb
@@ -731,7 +737,7 @@ H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t cb
  * \param[in]  chk_idx   Index of the chunk
  * \param[out] offset    Logical position of the chunk's first element in units of dataset elements
  * \param[out] filter_mask Bitmask indicating the filters used when the chunk was written
- * \param[out] addr      Chunk address in the file
+ * \param[out] addr      Chunk address in the file, taking the user block (if any) into account
  * \param[out] size      Chunk size in bytes, 0 if the chunk does not exist
  *
  * \return \herr_t
@@ -744,6 +750,9 @@ H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t cb
  *          chunk does not exist in the file, the size will be set to 0 and
  *          address to #HADDR_UNDEF. The value pointed to by filter_mask will
  *          not be modified. \c NULL can be passed in for any \p out parameters.
+ *
+ * \note    Prior to HDF5 1.14.4, the reported address did not take the
+ *          user block into account.
  *
  *          \p chk_idx is the chunk index in the selection. The index value
  *          may have a value of 0 up to the number of chunks stored in
