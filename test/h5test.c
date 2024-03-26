@@ -844,13 +844,13 @@ h5_get_vfd_fapl(hid_t fapl)
     }
     else if (!strcmp(tok, "multi")) {
         /* Multi-file driver, general case of the split driver */
-        H5FD_mem_t  memb_map[H5FD_MEM_NTYPES];
-        hid_t       memb_fapl[H5FD_MEM_NTYPES];
-        const char *memb_name[H5FD_MEM_NTYPES];
-        char       *sv[H5FD_MEM_NTYPES];
-        haddr_t     memb_addr[H5FD_MEM_NTYPES];
-        H5FD_mem_t  mt;
-        const int   multi_memname_maxlen = 1024;
+        H5FD_mem_t   memb_map[H5FD_MEM_NTYPES];
+        hid_t        memb_fapl[H5FD_MEM_NTYPES];
+        const char  *memb_name[H5FD_MEM_NTYPES];
+        char        *sv[H5FD_MEM_NTYPES];
+        haddr_t      memb_addr[H5FD_MEM_NTYPES];
+        H5FD_mem_t   mt;
+        const size_t multi_memname_maxlen = 1024;
 
         memset(memb_map, 0, sizeof(memb_map));
         memset(memb_fapl, 0, sizeof(memb_fapl));
