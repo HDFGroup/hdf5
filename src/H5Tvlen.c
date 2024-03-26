@@ -1053,7 +1053,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt)
+H5T_vlen_reclaim_elmt(void *elem, const H5T_t *dt)
 {
     H5T_vlen_alloc_info_t vl_alloc_info;       /* VL allocation info */
     herr_t                ret_value = SUCCEED; /* return value */

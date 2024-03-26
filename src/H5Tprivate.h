@@ -139,7 +139,7 @@ H5_DLL herr_t H5T_convert(H5T_path_t *tpath, const H5T_t *src_type, const H5T_t 
                           size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
 H5_DLL herr_t H5T_reclaim(const H5T_t *type, struct H5S_t *space, void *buf);
 H5_DLL herr_t H5T_reclaim_cb(void *elem, const H5T_t *dt, unsigned ndim, const hsize_t *point, void *op_data);
-H5_DLL herr_t H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt);
+H5_DLL herr_t H5T_vlen_reclaim_elmt(void *elem, const H5T_t *dt);
 H5_DLL htri_t H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 H5_DLL htri_t H5T_is_sensible(const H5T_t *dt);
 H5_DLL uint32_t       H5T_hash(H5F_t *file, const H5T_t *dt);

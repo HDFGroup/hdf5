@@ -3836,11 +3836,7 @@ done:
 
             /* Destroy references that have already been converted */
             while (dest_count > 0) {
-                H5_GCC_DIAG_OFF("discarded-qualifiers")
-                H5_CLANG_DIAG_OFF("incompatible-pointer-types-discards-qualifiers")
                 H5T_vlen_reclaim_elmt(d, dst); /* Ignore errors at this point */
-                H5_GCC_DIAG_ON("discarded-qualifiers")
-                H5_CLANG_DIAG_ON("incompatible-pointer-types-discards-qualifiers")
                 d += orig_d_stride;
                 dest_count--;
             }
@@ -3858,11 +3854,7 @@ done:
 
             /* Destroy references that have already been converted */
             while (dest_count > 0) {
-                H5_GCC_DIAG_OFF("discarded-qualifiers")
-                H5_CLANG_DIAG_OFF("incompatible-pointer-types-discards-qualifiers")
                 H5T_vlen_reclaim_elmt(d, dst); /* Ignore errors at this point */
-                H5_GCC_DIAG_ON("discarded-qualifiers")
-                H5_CLANG_DIAG_ON("incompatible-pointer-types-discards-qualifiers")
                 d += orig_d_stride;
                 dest_count--;
             }
