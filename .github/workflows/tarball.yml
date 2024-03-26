@@ -137,7 +137,7 @@ jobs:
 
       - name: Rename release file base name
         id: ren-basename
-        if: ${{ (inputs.use_environ == 'release') && (inputs.use_tag  == 'snapshot') }}
+        if: ${{ (inputs.use_environ == 'release') && (inputs.use_tag  == 'snapshot-1.14') }}
         run: |
           mv hdf5-${{ steps.version.outputs.SOURCE_TAG }}.tar.gz ${{ inputs.use_tag }}.tar.gz
           mv hdf5-${{ steps.version.outputs.SOURCE_TAG }}.zip ${{ inputs.use_tag }}.zip
