@@ -1146,16 +1146,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
 endif ()
 
 #-----------------------------------------------------------------------------
-# Check if Fortran's default real is double precision. If it is and HL is
-# being built then configure should fail due to bug HDFFV-889.
-#-----------------------------------------------------------------------------
-if (HDF5_BUILD_FORTRAN AND HDF5_BUILD_HL_LIB)
-  if (NOT H5_FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
-    message (FATAL_ERROR " **** Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use HDF5_BUILD_HL_LIB:BOOL=OFF **** ")
-  endif ()
-endif ()
-
-#-----------------------------------------------------------------------------
 # Option to build HDF5 Java Library
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")

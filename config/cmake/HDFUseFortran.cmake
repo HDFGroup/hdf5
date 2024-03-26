@@ -63,32 +63,6 @@ check_fortran_source_compiles (${SOURCE_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_C_SIZEO
 READ_SOURCE("PROGRAM PROG_FC_STORAGE_SIZE" "END PROGRAM PROG_FC_STORAGE_SIZE" SOURCE_CODE)
 check_fortran_source_compiles (${SOURCE_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_STORAGE_SIZE SRC_EXT f90)
 
-set (REALISNOTDOUBLE_CODE
-  "
-       MODULE type_mod
-         INTERFACE h5t
-           MODULE PROCEDURE h5t_real
-           MODULE PROCEDURE h5t_dble
-         END INTERFACE
-       CONTAINS
-         SUBROUTINE h5t_real(r)
-           REAL :: r
-         END SUBROUTINE h5t_real
-         SUBROUTINE h5t_dble(d)
-           DOUBLE PRECISION :: d
-         END SUBROUTINE h5t_dble
-       END MODULE type_mod
-       PROGRAM main
-         USE type_mod
-         REAL :: r
-         DOUBLE PRECISION :: d
-         CALL h5t(r)
-         CALL h5t(d)
-       END PROGRAM main
-  "
-)
-check_fortran_source_compiles (${REALISNOTDOUBLE_CODE} ${HDF_PREFIX}_FORTRAN_DEFAULT_REAL_NOT_DOUBLE SRC_EXT f90)
-
 set (ISO_C_BINDING_CODE
   "
        PROGRAM main
