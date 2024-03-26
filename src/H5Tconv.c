@@ -4297,7 +4297,8 @@ H5T__conv_ref(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
 done:
     /* Release converted elements on error */
     if (ret_value < 0 && conversions_made) {
-        size_t dest_count;
+        H5R_ref_priv_t ref_priv;
+        size_t         dest_count;
 
         /* Set up for first pass to destroy references */
         if (nelmts < orig_nelmts || (convert_forward && elmtno < safe)) {
@@ -4313,7 +4314,8 @@ done:
 
             /* Destroy references that have already been converted */
             while (dest_count > 0) {
-                H5R__destroy((H5R_ref_priv_t *)d); /* Ignore errors at this point */
+                memcpy(&ref_priv, d, sizeof(H5R_ref_priv_t));
+                H5R__destroy(&ref_priv); /* Ignore errors at this point */
                 d += orig_d_stride;
                 dest_count--;
             }
@@ -4331,7 +4333,8 @@ done:
 
             /* Destroy references that have already been converted */
             while (dest_count > 0) {
-                H5R__destroy((H5R_ref_priv_t *)d); /* Ignore errors at this point */
+                memcpy(&ref_priv, d, sizeof(H5R_ref_priv_t));
+                H5R__destroy(&ref_priv); /* Ignore errors at this point */
                 d += orig_d_stride;
                 dest_count--;
             }
