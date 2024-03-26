@@ -552,6 +552,27 @@ Bug Fixes since HDF5-1.14.3 release
       overwriting data with a shorter (top level) variable length sequence, an
       error could occur. This has been fixed.
 
+    - Take user block into account in H5Dchunk_iter() and H5Dget_chunk_info()
+
+      The address reported by the following functions did not correctly
+      take the user block into account:
+
+        * H5Dchunk_iter()              <-- addr passed to callback
+        * H5Dget_chunk_info()          <-- addr parameter
+        * H5Dget_chunk_info_by_coord() <-- addr parameter
+
+      This means that these functions reported logical HDF5 file addresses,
+      which would only be equal to the physical addresses when there is no
+      user block prepended to the HDF5 file. This is unfortunate, as the
+      primary use of these functions is to get physical addresses in order
+      to directly access the chunks.
+
+      The listed functions now correctly take the user block into account,
+      so they will emit physical addresses that can be used to directly
+      access the chunks.
+
+      Fixes #3003
+
     - Fixed asserts raised by large values of H5Pset_est_link_info() parameters
 
       If large values for est_num_entries and/or est_name_len were passed
