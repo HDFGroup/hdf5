@@ -111,7 +111,7 @@ jobs:
           else
             if [[ '${{ inputs.use_tag }}' == 'snapshot-1.14' ]]
             then
-              FILE_NAME_BASE=$(echo "snapshot")
+              FILE_NAME_BASE=$(echo "snapshot-1.14")
             else
               FILE_NAME_BASE=$(echo "hdf5-${{ steps.version.outputs.SOURCE_TAG }}")
             fi

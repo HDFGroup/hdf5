@@ -7,7 +7,7 @@ on:
         description: 'Release version tag'
         type: string
         required: false
-        default: snapshot
+        default: snapshot-1.14
       use_environ:
         description: 'Environment to locate files'
         type: string
