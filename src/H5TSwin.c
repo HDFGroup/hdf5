@@ -80,8 +80,8 @@ H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Initialize per-thread library info */
-    if (H5_UNLIKELY(H5TS__tinfo_init() < 0))
+    /* Initialize H5TS package */
+    if (H5_UNLIKELY(H5TS__init() < 0))
         HGOTO_DONE(FALSE);
 
 done:

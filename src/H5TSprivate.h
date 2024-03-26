@@ -38,17 +38,18 @@
 #define H5TS_TRY_ACQUIRE(...)        H5_ATTR_THREAD_ANNOT(try_acquire_capability(__VA_ARGS__))
 #define H5TS_TRY_ACQUIRE_SHARED(...) H5_ATTR_THREAD_ANNOT(try_acquire_shared_capability(__VA_ARGS__))
 
+#ifdef H5_HAVE_C11_THREADS
+/* Static initialization values */
+#define H5TS_ONCE_INITIALIZER      ONCE_FLAG_INIT
+
+/* Thread macros */
+#define H5TS_thread_self()         thrd_current()
+#define H5TS_thread_equal(t1, t2)  thrd_equal((t1), (t2))
+#define H5TS_THREAD_RETURN_TYPE    H5TS_thread_ret_t
+#define H5TS_THREAD_CANCEL_DISABLE 0
+#else
 #ifdef H5_HAVE_WIN_THREADS
 /* Static initialization values */
-#define H5TS_KEY_INITIALIZER                                                                                 \
-    {                                                                                                        \
-        NULL, 0, NULL                                                                                        \
-    }
-#define H5TS_MUTEX_INITIALIZER                                                                               \
-    {                                                                                                        \
-        NULL                                                                                                 \
-    }
-#define H5TS_COND_INITIALIZER CONDITION_VARIABLE_INIT
 #define H5TS_ONCE_INITIALIZER INIT_ONCE_STATIC_INIT
 
 /* Thread macros */
@@ -58,9 +59,6 @@
 #define H5TS_THREAD_CANCEL_DISABLE 0
 #else
 /* Static initialization values */
-#define H5TS_KEY_INITIALIZER       (pthread_key_t)0
-#define H5TS_MUTEX_INITIALIZER     PTHREAD_MUTEX_INITIALIZER
-#define H5TS_COND_INITIALIZER      PTHREAD_COND_INITIALIZER
 #define H5TS_ONCE_INITIALIZER      PTHREAD_ONCE_INIT
 
 /* Thread macros */
@@ -68,6 +66,7 @@
 #define H5TS_thread_equal(t1, t2)  pthread_equal((t1), (t2))
 #define H5TS_THREAD_RETURN_TYPE    H5TS_thread_ret_t
 #define H5TS_THREAD_CANCEL_DISABLE PTHREAD_CANCEL_DISABLE
+#endif
 #endif
 
 /****************************/
@@ -81,6 +80,16 @@ typedef void (*H5TS_key_destructor_func_t)(void *);
 typedef struct H5TS_pool_t H5TS_pool_t;
 
 /* Portability aliases */
+#ifdef H5_HAVE_C11_THREADS
+typedef thrd_t          H5TS_thread_t;
+typedef int (*H5TS_thread_start_func_t)(void *);
+typedef int             H5TS_thread_ret_t;
+typedef tss_t           H5TS_key_t;
+typedef mtx_t           H5TS_CAPABILITY("mutex") H5TS_mutex_t;
+typedef cnd_t           H5TS_cond_t;
+typedef once_flag       H5TS_once_t;
+typedef void (*H5TS_once_init_func_t)(void);
+#else
 #ifdef H5_HAVE_WIN_THREADS
 typedef HANDLE                 H5TS_thread_t;
 typedef LPTHREAD_START_ROUTINE H5TS_thread_start_func_t;
@@ -99,6 +108,7 @@ typedef pthread_mutex_t H5TS_CAPABILITY("mutex") H5TS_mutex_t;
 typedef pthread_cond_t  H5TS_cond_t;
 typedef pthread_once_t  H5TS_once_t;
 typedef void (*H5TS_once_init_func_t)(void);
+#endif
 #endif
 
     /*****************************/

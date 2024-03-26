@@ -46,8 +46,6 @@ typedef struct ioc_data_t {
     atomic_int sf_work_pending;
 } ioc_data_t;
 
-static H5TS_mutex_t ioc_thread_mutex = H5TS_MUTEX_INITIALIZER;
-
 #ifdef H5FD_IOC_COLLECT_STATS
 static int    sf_write_ops        = 0;
 static int    sf_read_ops         = 0;
@@ -753,13 +751,13 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_
     sf_queue_delay_time += t_queue_delay;
 #endif
 
-    H5TS_mutex_lock(&ioc_thread_mutex);
+    H5TS_mutex_lock(&sf_context->mutex);
 
     /* Adjust EOF if necessary */
     if (sf_eof > sf_context->sf_eof)
         sf_context->sf_eof = sf_eof;
 
-    H5TS_mutex_unlock(&ioc_thread_mutex);
+    H5TS_mutex_unlock(&sf_context->mutex);
 
     /*
      * Send a message back to the client that the I/O call has

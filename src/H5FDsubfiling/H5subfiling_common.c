@@ -45,10 +45,6 @@ static size_t sf_topology_cache_num_entries = 0;
 static file_map_to_context_t *sf_open_file_map = NULL;
 static int                    sf_file_map_size = 0;
 
-#ifdef H5_SUBFILING_DEBUG
-static H5TS_mutex_t subfiling_log_mutex = H5TS_MUTEX_INITIALIZER;
-#endif
-
 #define DEFAULT_CONTEXT_CACHE_SIZE  16
 #define DEFAULT_TOPOLOGY_CACHE_SIZE 4
 #define DEFAULT_FILE_MAP_ENTRIES    8
@@ -376,6 +372,8 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
     sf_context->sf_context_id           = -1;
     sf_context->h5_file_id              = UINT64_MAX;
     sf_context->threads_inited          = false;
+    if (H5TS_mutex_destroy(&sf_context->mutex) < 0)
+        return FAIL;
     sf_context->file_ref                = 0;
     sf_context->sf_num_fids             = 0;
     sf_context->sf_num_subfiles         = -1;
@@ -1853,6 +1851,8 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
 
     sf_context->h5_file_id      = file_id;
     sf_context->threads_inited  = false;
+    if (H5TS_mutex_init(&sf_context->mutex) < 0)
+        return FAIL;
     sf_context->file_ref        = 0;
     sf_context->sf_fids         = NULL;
     sf_context->sf_num_fids     = 0;
@@ -3189,7 +3189,7 @@ H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
         goto done;
     }
 
-    H5TS_mutex_lock(&subfiling_log_mutex);
+    H5TS_mutex_lock(&sf_context->mutex);
 
     if (sf_context->sf_logfile) {
         vfprintf(sf_context->sf_logfile, fmt, log_args);
@@ -3202,7 +3202,7 @@ H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
         fflush(stdout);
     }
 
-    H5TS_mutex_unlock(&subfiling_log_mutex);
+    H5TS_mutex_unlock(&sf_context->mutex);
 
 done:
     va_end(log_args);
@@ -3224,7 +3224,7 @@ H5_subfiling_log_nonewline(int64_t sf_context_id, const char *fmt, ...)
         goto done;
     }
 
-    H5TS_mutex_lock(&subfiling_log_mutex);
+    H5TS_mutex_lock(&sf_context->mutex);
 
     if (sf_context->sf_logfile) {
         vfprintf(sf_context->sf_logfile, fmt, log_args);
@@ -3235,7 +3235,7 @@ H5_subfiling_log_nonewline(int64_t sf_context_id, const char *fmt, ...)
         fflush(stdout);
     }
 
-    H5TS_mutex_unlock(&subfiling_log_mutex);
+    H5TS_mutex_unlock(&sf_context->mutex);
 
 done:
     va_end(log_args);

@@ -39,48 +39,6 @@
 #define H5TS_ENABLE_REC_RW_LOCK_STATS 0
 #endif
 
-/* R/W lock initialization macro */
-#if H5TS_ENABLE_REC_RW_LOCK_STATS
-#define H5TS_RW_LOCK_INIT                                                                                    \
-    {                                                                                                        \
-        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
-            H5TS_RW_LOCK_UNUSED,   /* lock_type */                                                           \
-            H5TS_COND_INITIALIZER, /* writers_cv */                                                          \
-            0,                     /* write_thread */                                                        \
-            0,                     /* rec_write_lock_count */                                                \
-            0,                     /* waiting_writers_count */                                               \
-            H5TS_COND_INITIALIZER, /* readers_cv */                                                          \
-            0,                     /* reader_thread_count */                                                 \
-            (H5TS_key_t)0,         /* rec_read_lock_count_key */                                             \
-            false,                 /* is_key_registered */                                                   \
-        {                                                                                                    \
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0                                                      \
-        } /* stats */                                                                                        \
-    }
-#else
-#define H5TS_RW_LOCK_INIT                                                                                    \
-    {                                                                                                        \
-        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
-            H5TS_RW_LOCK_UNUSED,   /* lock_type */                                                           \
-            H5TS_COND_INITIALIZER, /* writers_cv */                                                          \
-            0,                     /* write_thread */                                                        \
-            0,                     /* rec_write_lock_count */                                                \
-            0,                     /* waiting_writers_count */                                               \
-            H5TS_COND_INITIALIZER, /* readers_cv */                                                          \
-            0,                     /* reader_thread_count */                                                 \
-            (H5TS_key_t)0,         /* rec_read_lock_count_key */                                             \
-            false                  /* is_key_registered */                                                   \
-    }
-#endif
-
-/* Excl lock initialization macro */
-#define H5TS_EX_LOCK_INIT                                                                                    \
-    {                                                                                                        \
-        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
-            H5TS_COND_INITIALIZER, /* cond_var */                                                            \
-            0,                     /* owner_thread */                                                        \
-            0                      /* lock_count */                                                          \
-    }
 
 /****************************/
 /* Package Private Typedefs */
@@ -285,6 +243,7 @@ extern H5TS_key_t H5TS_thrd_info_key_g;
 /******************************/
 /* Package Private Prototypes */
 /******************************/
+H5_DLL herr_t H5TS__init(void);
 H5_DLL herr_t H5TS__mutex_acquire(unsigned lock_count, bool *acquired);
 H5_DLL herr_t H5TS__mutex_release(unsigned *lock_count);
 H5_DLL herr_t H5TS__tinfo_init(void);
@@ -312,11 +271,15 @@ H5_DLL herr_t H5TS__barrier_wait(H5TS_barrier_t *barrier);
 H5_DLL herr_t H5TS__barrier_destroy(H5TS_barrier_t *barrier);
 
 /* 'once' callbacks */
+#ifdef H5_HAVE_C11_THREADS
+H5_DLL void H5TS__c11_first_thread_init(void);
+#else
 #ifdef H5_HAVE_WIN_THREADS
 H5_DLL BOOL CALLBACK H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex);
 #else
 H5_DLL void H5TS__pthread_first_thread_init(void);
 #endif /* H5_HAVE_WIN_THREADS */
+#endif
 
 #ifdef H5TS_TESTING
 #if H5TS_ENABLE_REC_RW_LOCK_STATS

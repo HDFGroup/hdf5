@@ -35,7 +35,7 @@
 #define DATASETNAME "IntData"
 #define NUM_THREADS 16
 
-void *tts_acreate_thread(void *);
+H5TS_THREAD_RETURN_TYPE tts_acreate_thread(void *);
 
 typedef struct acreate_data_struct {
     hid_t dataset;
@@ -138,7 +138,7 @@ tts_acreate(void)
     CHECK(status, FAIL, "H5Fclose");
 } /* end tts_acreate() */
 
-void *
+H5TS_THREAD_RETURN_TYPE
 tts_acreate_thread(void *client_data)
 {
     hid_t  attribute = H5I_INVALID_HID;
@@ -163,7 +163,8 @@ tts_acreate_thread(void *client_data)
     CHECK(status, FAIL, "H5Awrite");
     status = H5Aclose(attribute);
     CHECK(status, FAIL, "H5Aclose");
-    return NULL;
+
+    return (H5TS_thread_ret_t)0;
 } /* end tts_acreate_thread() */
 
 void

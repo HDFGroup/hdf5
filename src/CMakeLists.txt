@@ -640,6 +640,7 @@ IDE_GENERATED_PROPERTIES ("H5T" "${H5T_HDRS}" "${H5T_SOURCES}" )
 set (H5TS_SOURCES
     ${HDF5_SRC_DIR}/H5TS.c
     ${HDF5_SRC_DIR}/H5TSbarrier.c
+    ${HDF5_SRC_DIR}/H5TSc11.c
     ${HDF5_SRC_DIR}/H5TScond.c
     ${HDF5_SRC_DIR}/H5TSexlock.c
     ${HDF5_SRC_DIR}/H5TSint.c

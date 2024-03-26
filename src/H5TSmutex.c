@@ -60,6 +60,125 @@
 /* Local Variables */
 /*******************/
 
+#ifdef H5_HAVE_C11_THREADS
+/*-------------------------------------------------------------------------
+ * Function: H5TS_mutex_init
+ *
+ * Purpose:  Initialize a H5TS_mutex_t (does not allocate it)
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_mutex_init(H5TS_mutex_t *mutex)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(mtx_init(mutex, mtx_plain) != thrd_success))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_mutex_init() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_mutex_lock
+ *
+ * Purpose:  Lock a H5TS_mutex_t
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_mutex_lock(H5TS_mutex_t *mutex) H5TS_NO_THREAD_SAFETY_ANALYSIS
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(mtx_lock(mutex) != thrd_success))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_mutex_lock() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_mutex_try_lock
+ *
+ * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to TRUE if so
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_mutex_try_lock(H5TS_mutex_t *mutex, bool *acquired) H5TS_NO_THREAD_SAFETY_ANALYSIS
+{
+    int    rc;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    rc = mtx_trylock(mutex);
+    if (thrd_success == rc)
+        *acquired = true;
+    else if (thrd_busy == rc)
+        *acquired = false;
+    else
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_mutex_try_lock() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_mutex_unlock
+ *
+ * Purpose:  Unlock a H5TS_mutex_t
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_mutex_unlock(H5TS_mutex_t *mutex) H5TS_NO_THREAD_SAFETY_ANALYSIS
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(mtx_unlock(mutex) != thrd_success))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_mutex_unlock() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_mutex_destroy
+ *
+ * Purpose:  Destroy a H5TS_mutex_t (does not free it)
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_mutex_destroy(H5TS_mutex_t *mutex)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* NOTE: mtx_destroy() can't fail */
+    mtx_destroy(mutex);
+
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+} /* end H5TS_mutex_destroy() */
+#else
 #ifdef H5_HAVE_WIN_THREADS
 /*-------------------------------------------------------------------------
  * Function: H5TS_mutex_init
@@ -278,6 +397,7 @@ done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_mutex_destroy() */
 
+#endif
 #endif
 
 #endif /* H5_HAVE_THREADSAFE */

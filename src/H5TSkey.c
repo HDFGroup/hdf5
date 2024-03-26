@@ -42,36 +42,10 @@
 /******************/
 /* Local Typedefs */
 /******************/
-#ifdef H5_HAVE_WIN_THREADS
-
-/* Forward declarations of kwd node structs */
-struct _H5TS_win_kwd_tid_node_t;
-struct _H5TS_win_kwd_node_t;
-
-/* Global list of all kwd's */
-typedef struct _H5TS_win_kwd_node_t {
-    struct _H5TS_win_kwd_node_t     *next;
-    H5TS_key_t                       key;
-    H5TS_key_destructor_func_t       dtor;
-    struct _H5TS_win_kwd_tid_node_t *head_tid_node;
-} H5TS_win_kwd_node_t;
-
-/* Sub-list of all threads that have set a value for a kwd */
-typedef struct _H5TS_win_kwd_tid_node_t {
-    struct _H5TS_win_kwd_tid_node_t *next;
-    struct _H5TS_win_kwd_tid_node_t *prev;
-    uint64_t                         tid;
-    H5TS_win_kwd_node_t             *kwd_node;
-} H5TS_win_kwd_tid_node_t;
-#endif
 
 /********************/
 /* Local Prototypes */
 /********************/
-#ifdef H5_HAVE_WIN_THREADS
-static herr_t H5TS__add_kwd(H5TS_key_t key, H5TS_key_destructor_func_t dtor);
-static herr_t H5TS__set_kwd(H5TS_key_t key, const void *value);
-#endif
 
 /*********************/
 /* Package Variables */
@@ -85,6 +59,102 @@ static herr_t H5TS__set_kwd(H5TS_key_t key, const void *value);
 /* Local Variables */
 /*******************/
 
+#ifdef H5_HAVE_C11_THREADS
+/*-------------------------------------------------------------------------
+ * Function: H5TS_key_create
+ *
+ * Purpose:  Thread-local key creation
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_key_create(H5TS_key_t *key, H5TS_key_destructor_func_t dtor)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Sanity check */
+    if (H5_UNLIKELY(NULL == key))
+        HGOTO_DONE(FAIL);
+
+    /* Create the key */
+    if (H5_UNLIKELY(tss_create(key, dtor) != thrd_success))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_key_create() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_key_set_value
+ *
+ * Purpose:  Set a thread-specific value for a thread-local key
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_key_set_value(H5TS_key_t key, const void *value)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Set the value for this thread */
+    if (H5_UNLIKELY(tss_set(key, value) != thrd_success))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_key_set_value() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_key_get_value
+ *
+ * Purpose:  Get a thread-specific value for a thread-local key
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_key_get_value(H5TS_key_t key, void **value)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Get the value for this thread */
+    /* NOTE: tss_get() can't fail */
+    *value = tss_get(key);
+
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+} /* end H5TS_key_get_value() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_key_delete
+ *
+ * Purpose:  Thread-local key deletion
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_key_delete(H5TS_key_t key)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Delete the key */
+    /* NOTE: tss_delete() can't fail */
+    tss_delete(key);
+
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+} /* end H5TS_key_delete() */
+
+#else
 #ifdef H5_HAVE_WIN_THREADS
 /*-------------------------------------------------------------------------
  * Function: H5TS_key_create
@@ -291,6 +361,7 @@ done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_key_delete() */
 
+#endif
 #endif
 
 #endif /* H5_HAVE_THREADSAFE */

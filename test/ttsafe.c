@@ -114,6 +114,7 @@ main(int argc, char *argv[])
     AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation", NULL);
     AddTest("attr_vlen", tts_attr_vlen, cleanup_attr_vlen, "multi-file-attribute-vlen read", NULL);
 
+#ifndef H5_HAVE_WIN_THREADS
     /* Recursive R/W locks */
     AddTest("rec_rwlock_1", tts_rec_rw_lock_smoke_check_1, NULL, "recursive R/W lock smoke check 1 -- basic",
             NULL);
@@ -123,6 +124,7 @@ main(int argc, char *argv[])
             "recursive R/W lock smoke check 3 -- mob of writers", NULL);
     AddTest("rec_rwlock_4", tts_rec_rw_lock_smoke_check_4, NULL,
             "recursive R/W lock smoke check 4 -- mixed mob", NULL);
+#endif /* !H5_HAVE_WIN_THREADS */
 
     /* Developer API routine tests */
     AddTest("developer", tts_develop_api, NULL, "developer API routines", NULL);

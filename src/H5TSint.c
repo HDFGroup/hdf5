@@ -43,11 +43,15 @@
 /* Local Macros */
 /****************/
 
+#ifdef H5_HAVE_C11_THREADS
+#define H5TS_ONCE_INIT_FUNC H5TS__c11_first_thread_init
+#else
 #ifdef H5_HAVE_WIN_THREADS
 #define H5TS_ONCE_INIT_FUNC H5TS__win32_process_enter
 #else
 #define H5TS_ONCE_INIT_FUNC H5TS__pthread_first_thread_init
 #endif /* H5_HAVE_WIN_THREADS */
+#endif
 
 /******************/
 /* Local Typedefs */
@@ -94,7 +98,38 @@ static H5TS_tinfo_node_t *H5TS_tinfo_next_free_s = NULL;
 static uint64_t           H5TS_next_thrd_id_s    = 0;
 
 /* Mutex for access to H5TS_tinfo_next_free_s and H5TS_next_thrd_id_s */
-static H5TS_mutex_t H5TS_tinfo_mtx_s = H5TS_MUTEX_INITIALIZER;
+static H5TS_mutex_t H5TS_tinfo_mtx_s;
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS__init
+ *
+ * Purpose:  Initialize the H5TS interface
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS__init(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
+
+    /* Initialize the global API lock */
+    memset(&H5TS_api_info_p, 0, sizeof(H5TS_api_info_p));
+    if (H5_UNLIKELY(H5TS__ex_lock_init(&H5TS_api_info_p.api_lock) < 0))
+        HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_api_info_p.attempt_mutex) < 0))
+        HGOTO_DONE(FAIL);
+
+    /* Initialize per-thread library info */
+    if (H5_UNLIKELY(H5TS__tinfo_init() < 0))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS__init() */
 
 /*-------------------------------------------------------------------------
  * Function: H5TS_term_package

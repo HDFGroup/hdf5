@@ -54,7 +54,7 @@
 /*********************/
 
 /* API threadsafety info */
-H5TS_api_info_t H5TS_api_info_p = {H5TS_EX_LOCK_INIT, H5TS_MUTEX_INITIALIZER, 0};
+H5TS_api_info_t H5TS_api_info_p;
 
 /*****************************/
 /* Library Private Variables */

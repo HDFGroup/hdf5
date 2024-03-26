@@ -30,7 +30,7 @@ typedef struct {
  *
  **********************************************************************
  */
-static void *
+static H5TS_THREAD_RETURN_TYPE
 tts_develop_api_thr_1(void *_udata)
 {
     tts_develop_api_udata_t *udata      = (tts_develop_api_udata_t *)_udata;
@@ -56,7 +56,7 @@ tts_develop_api_thr_1(void *_udata)
     CHECK_I(result, "H5TSmutex_release");
     VERIFY(lock_count, 1, "H5TSmutex_release");
 
-    return NULL;
+    return (H5TS_thread_ret_t)0;
 } /* end tts_develop_api_thr_1() */
 
 /*
@@ -65,7 +65,7 @@ tts_develop_api_thr_1(void *_udata)
  *
  **********************************************************************
  */
-static void *
+static H5TS_THREAD_RETURN_TYPE
 tts_develop_api_thr_2(void *_udata)
 {
     tts_develop_api_udata_t *udata    = (tts_develop_api_udata_t *)_udata;
@@ -87,7 +87,7 @@ tts_develop_api_thr_2(void *_udata)
 
     /* Thread #1 will release the API lock */
 
-    return NULL;
+    return (H5TS_thread_ret_t)0;
 } /* end tts_develop_api_thr_2() */
 
 /*

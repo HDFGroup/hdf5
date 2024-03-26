@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose: Pthread threadsafety routines
+ * Purpose: C11 threads threadsafety routines
  *
  * Note:  Because this threadsafety framework operates outside the library,
  *        it does not use the error stack (although it does use error macros
@@ -35,7 +35,7 @@
 
 #ifdef H5_HAVE_THREADSAFE
 
-#ifdef H5_HAVE_PTHREAD_H
+#ifdef H5_HAVE_THREADS_H
 
 /****************/
 /* Local Macros */
@@ -62,7 +62,7 @@
 /*******************/
 
 /*--------------------------------------------------------------------------
- * Function:    H5TS__pthread_first_thread_init
+ * Function:    H5TS__c11_first_thread_init
  *
  * Purpose:     Initialize global API lock, keys for per-thread error stacks
  *              and cancallability information. Called by the first thread
@@ -73,7 +73,7 @@
  *--------------------------------------------------------------------------
  */
 void
-H5TS__pthread_first_thread_init(void)
+H5TS__c11_first_thread_init(void)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -81,8 +81,9 @@ H5TS__pthread_first_thread_init(void)
     H5TS__init();
 
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
-} /* end H5TS__pthread_first_thread_init() */
+} /* end H5TS__c11_first_thread_init() */
 
-#endif /* H5_HAVE_PTHREAD_H */
+#endif /* H5_HAVE_THREADS_H */
 
 #endif /* H5_HAVE_THREADSAFE */
+

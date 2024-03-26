@@ -59,6 +59,95 @@
 /* Local Variables */
 /*******************/
 
+#ifdef H5_HAVE_C11_THREADS
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_create
+ *
+ * Purpose:  Spawn off a new thread calling function 'func' with input 'udata'.
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_thread_create(H5TS_thread_t *thread, H5TS_thread_start_func_t func, void *udata)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(thrd_create(thread, func, udata) != thrd_success))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* H5TS_thread_create() */
+
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_join
+ *
+ * Purpose:  Wait for thread termination
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_thread_join(H5TS_thread_t thread, H5TS_thread_ret_t *ret_val)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(thrd_join(thread, ret_val) != thrd_success))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* H5TS_thread_join() */
+
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_detach
+ *
+ * Purpose:  Detach a thread
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_thread_detach(H5TS_thread_t thread)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(thrd_detach(thread) != thrd_success))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* H5TS_thread_detach() */
+
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_setcancelstate
+ *
+ * Purpose:  Set cancelability state for a thread
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_thread_setcancelstate(int state, int *oldstate)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* C11 threads are not cancelable, so this is a noop */
+
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+} /* H5TS_thread_setcancelstate() */
+#else
 #ifdef H5_HAVE_WIN_THREADS
 /*--------------------------------------------------------------------------
  * Function: H5TS_thread_create
@@ -254,5 +343,6 @@ H5TS_thread_setcancelstate(int state, int *oldstate)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_thread_setcancelstate() */
+#endif
 #endif
 #endif /* H5_HAVE_THREADSAFE */

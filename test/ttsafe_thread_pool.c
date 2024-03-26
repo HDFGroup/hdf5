@@ -27,7 +27,7 @@ typedef struct {
     int          val;
 } atomic_counter_t;
 
-atomic_counter_t counter_g = {H5TS_MUTEX_INITIALIZER, 0};
+atomic_counter_t counter_g;
 
 static H5TS_THREAD_RETURN_TYPE
 noop_task(void *_counter)
@@ -96,6 +96,11 @@ tts_thread_pool(void)
 {
     H5TS_pool_t *pool = NULL;
     herr_t       result;
+
+    /* Initialize the counter */
+    result = H5TS_mutex_init(&counter_g.mutex);
+    CHECK_I(result, "H5TS_mutex_init");
+    counter_g.val = 0;
 
     /* Sanity checks on bad input */
     result = H5TS_pool_create(NULL, NUM_THREADS);

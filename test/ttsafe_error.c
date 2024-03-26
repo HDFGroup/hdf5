@@ -48,12 +48,12 @@ hid_t        error_file_g  = H5I_INVALID_HID;
 int          error_flag_g  = 0;
 int          error_count_g = 0;
 err_num_t    expected_g[EXPECTED_ERROR_DEPTH];
-H5TS_mutex_t error_mutex_g = H5TS_MUTEX_INITIALIZER;
+H5TS_mutex_t error_mutex_g;
 
 /* Prototypes */
 static herr_t error_callback(hid_t, void *);
 static herr_t walk_error_callback(unsigned, const H5E_error2_t *, void *);
-static void  *tts_error_thread(void *);
+static H5TS_THREAD_RETURN_TYPE tts_error_thread(void *);
 
 void
 tts_error(void)
@@ -98,6 +98,9 @@ tts_error(void)
 
     expected_g[10].maj_num = H5E_LINK;
     expected_g[10].min_num = H5E_EXISTS;
+
+    status = H5TS_mutex_init(&error_mutex_g);
+    CHECK_I(status, "H5TS_mutex_init");
 
     def_fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(def_fapl, H5I_INVALID_HID, "H5Pcreate");
@@ -154,7 +157,7 @@ tts_error(void)
     CHECK_I(status, "H5TS_mutex_destroy");
 } /* end tts_error() */
 
-static void *
+static H5TS_THREAD_RETURN_TYPE
 tts_error_thread(void H5_ATTR_UNUSED *arg)
 {
     hid_t       dataspace = H5I_INVALID_HID;
@@ -206,7 +209,7 @@ tts_error_thread(void H5_ATTR_UNUSED *arg)
     status = H5Eset_auto2(H5E_DEFAULT, old_error_cb, old_error_client_data);
     CHECK(status, FAIL, "H5Eset_auto2");
 
-    return NULL;
+    return (H5TS_thread_ret_t)0;
 } /* end tts_error_thread() */
 
 static herr_t

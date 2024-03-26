@@ -59,6 +59,121 @@
 /* Local Variables */
 /*******************/
 
+#ifdef H5_HAVE_C11_THREADS
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_cond_init
+ *
+ * Purpose:  Initialize a H5TS_cond_t (does not allocate it)
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_cond_init(H5TS_cond_t *cond)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(cnd_init(cond) != thrd_success))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_cond_init() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_cond_wait
+ *
+ * Purpose:  Wait on a condition variable
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_cond_wait(H5TS_cond_t *cond, H5TS_mutex_t *mutex)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(cnd_wait(cond, mutex) != thrd_success))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_cond_wait() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_cond_signal
+ *
+ * Purpose:  Unblock a thread waiting for a condition variable
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_cond_signal(H5TS_cond_t *cond)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(cnd_signal(cond) != thrd_success))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_cond_signal() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_cond_broadcast
+ *
+ * Purpose:  Unblock all threads waiting for a condition variable
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_cond_broadcast(H5TS_cond_t *cond)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(cnd_broadcast(cond) != thrd_success))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_cond_broadcast() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_cond_destroy
+ *
+ * Purpose:  Destroy a H5TS_cond_t (does not free it)
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_cond_destroy(H5TS_cond_t *cond)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* NOTE: cnd_destroy() can't fail */
+    cnd_destroy(cond);
+
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+} /* end H5TS_cond_destroy() */
+
+#else
 #ifdef H5_HAVE_WIN_THREADS
 /*-------------------------------------------------------------------------
  * Function: H5TS_cond_init
@@ -276,6 +391,7 @@ done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_cond_destroy() */
 
+#endif
 #endif
 
 #endif /* H5_HAVE_THREADSAFE */

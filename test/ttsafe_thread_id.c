@@ -26,7 +26,7 @@
 static H5TS_barrier_t barrier;
 static int            times;
 static bool           used[NTHREADS * CYCLE_COUNT];
-static H5TS_mutex_t   used_lock = H5TS_MUTEX_INITIALIZER;
+static H5TS_mutex_t   used_lock;
 
 /* Each thread runs this routine.  The routine fetches the current
  * thread's ID, makes sure that it is in the expected range, makes
@@ -44,7 +44,7 @@ static H5TS_mutex_t   used_lock = H5TS_MUTEX_INITIALIZER;
  * least ID has to be (times * NTHREADS) + 2 and the greatest,
  * (times * NTHREADS) + NTHREADS + 1.
  */
-static void *
+static H5TS_THREAD_RETURN_TYPE
 thread_main(void H5_ATTR_UNUSED *arg)
 {
     int      min_id, max_id;
@@ -78,12 +78,12 @@ thread_main(void H5_ATTR_UNUSED *arg)
     if (ntid != tid)
         TestErrPrintf("tid changed from %" PRIu64 " to %" PRIu64 " FAIL\n", tid, ntid);
 
-    return NULL;
+    return (H5TS_thread_ret_t)0;
 
 pre_barrier_error:
     H5TS__barrier_wait(&barrier);
 
-    return NULL;
+    return (H5TS_thread_ret_t)0;
 }
 
 /*
@@ -100,6 +100,8 @@ tts_thread_id(void)
     int           i;
     herr_t        result;
 
+    result = H5TS_mutex_init(&used_lock);
+    CHECK_I(result, "H5TS_mutex_lock");
     result = H5TS__barrier_init(&barrier, NTHREADS);
     CHECK_I(result, "H5TS__barrier_init");
 

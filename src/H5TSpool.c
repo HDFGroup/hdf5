@@ -40,17 +40,6 @@
 /* Local Macros */
 /****************/
 
-#define H5TS_POOL_INIT                                                                                       \
-    {                                                                                                        \
-        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
-            H5TS_COND_INITIALIZER, /* cond */                                                                \
-            false,                 /* active */                                                              \
-            false,                 /* shutdown */                                                            \
-            0,                     /* num_threads */                                                         \
-            NULL,                  /* threads */                                                             \
-            NULL,                  /* head (queue) */                                                        \
-            NULL                   /* tail (queue) */                                                        \
-    }
 
 /******************/
 /* Local Typedefs */
@@ -93,9 +82,6 @@ static H5TS_THREAD_RETURN_TYPE H5TS__pool_do(void *_pool);
 /*******************/
 /* Local Variables */
 /*******************/
-
-/* Default value to initialize R/W locks */
-static const H5TS_pool_t H5TS_pool_def = H5TS_POOL_INIT;
 
 /* Declare a free list to manage H5TS_pool_t structs */
 H5FL_DEFINE_STATIC(H5TS_pool_t);
@@ -241,7 +227,11 @@ H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads)
         HGOTO_DONE(FAIL);
 
     /* Initialize pool fields to defaults */
-    memcpy(new_pool, &H5TS_pool_def, sizeof(H5TS_pool_def));
+    memset(new_pool, 0, sizeof(*new_pool));
+    if (H5_UNLIKELY(H5TS_mutex_init(&new_pool->mutex) < 0))
+        HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(H5TS_cond_init(&new_pool->cond) < 0))
+        HGOTO_DONE(FAIL);
 
     /* Allocate array of threads */
     if (H5_UNLIKELY(NULL == (new_pool->threads = H5FL_SEQ_MALLOC(H5TS_thread_t, num_threads))))

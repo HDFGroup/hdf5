@@ -84,8 +84,6 @@ static void H5TS__key_destructor(void *key_val);
 /* Local Variables */
 /*******************/
 
-/* Default value to initialize R/W locks */
-static const H5TS_rw_lock_t H5TS_rw_lock_def = H5TS_RW_LOCK_INIT;
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS__key_destructor
@@ -423,7 +421,14 @@ H5TS__rw_lock_init(H5TS_rw_lock_t *rw_lock)
     HGOTO_DONE(FAIL);
 #else
     /* Initialize the lock */
-    memcpy(rw_lock, &H5TS_rw_lock_def, sizeof(H5TS_rw_lock_def));
+    memset(rw_lock, 0, sizeof(*rw_lock));
+    HDcompile_assert(H5TS_RW_LOCK_UNUSED == 0);
+    if (H5_UNLIKELY(H5TS_mutex_init(&rw_lock->mutex) < 0))
+        HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(H5TS_cond_init(&rw_lock->writers_cv) < 0))
+        HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(H5TS_cond_init(&rw_lock->readers_cv) < 0))
+        HGOTO_DONE(FAIL);
 #endif
 
 done:

@@ -211,6 +211,7 @@ typedef struct {
     int64_t        sf_context_id;           /* Generated context ID which embeds the cache index     */
     uint64_t       h5_file_id;              /* GUID (basically the inode value)                      */
     bool           threads_inited;          /* Whether the IOC threads for this context were started */
+    H5TS_mutex_t   mutex;                   /* Mutex for protecting context */
     int            file_ref;                /* Reference count held by files using this context      */
     int           *sf_fids;                 /* Array of file IDs for subfiles this rank owns         */
     int            sf_num_fids;             /* Number of subfiles this rank owns                     */

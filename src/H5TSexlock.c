@@ -61,8 +61,6 @@
 /* Local Variables */
 /*******************/
 
-/* Default value to initialize exclusive locks */
-static const H5TS_ex_lock_t H5TS_ex_lock_def = H5TS_EX_LOCK_INIT;
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS__ex_lock_init
@@ -84,7 +82,11 @@ H5TS__ex_lock_init(H5TS_ex_lock_t *lock)
         HGOTO_DONE(FAIL);
 
     /* Initialize the lock */
-    memcpy(lock, &H5TS_ex_lock_def, sizeof(H5TS_ex_lock_def));
+    memset(lock, 0, sizeof(*lock));
+    if (H5_UNLIKELY(H5TS_mutex_init(&lock->mutex) < 0))
+        HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(H5TS_cond_init(&lock->cond_var) < 0))
+        HGOTO_DONE(FAIL);
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)

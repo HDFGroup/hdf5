@@ -2049,6 +2049,9 @@ esac
 if test "X$THREADSAFE" = "Xyes"; then
     AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
 
+    ## Allow other thread packages instead of Pthreads
+    allow_pthreads="yes"
+
     ## ----------------------------------------------------------------------
     ## Is the Pthreads library present?  It has a header file `pthread.h' and
     ## a library `-lpthread' and their locations might be specified with the
@@ -2057,30 +2060,45 @@ if test "X$THREADSAFE" = "Xyes"; then
     ## be preceded by a comma.
     ##
     ## The default is to use Pthreads when building with the Autotools, unless
-    ## we're building w/ MinGW.
+    ## the compiler has C11 threads or we're building w/ MinGW.
+    ##
+    ## Currrently C11 threads will take priority over Pthreads and Win32 threads
+    ##
     AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
     AC_ARG_WITH([pthread],
                 [AS_HELP_STRING([--with-pthread=DIR],
                                 [Specify alternative path to Pthreads library when
                                 thread-safe capability is built. Set this to
                                 'yes' or the location of Pthreads when building
+                                with a compiler that has C11 threads or
                                 with MinGW and you would rather use Pthreads
-                                than Win32 threads.])],,
+                                than C11 or Win32 threads.])],,
                 [withval=default])
+
+    ## Check for C11 threads, we want to use C11 threads unless the builder
+    ## explicitly specifies --with-pthreads=(yes | path(s))
+    AC_CHECK_HEADERS([threads.h],[HAVE_THREADS_H="yes"],[HAVE_THREADS_H="no"])
+    if test "x$HAVE_THREADS_H" = "xyes"; then
+        # Default or no --> C11 threads
+        if test "$withval" = "default" -o "$withval" = "no" ; then
+            allow_pthreads="no"
+            unset HAVE_PTHREAD
+            AC_DEFINE([HAVE_C11_THREADS], [1], [Define to 1 if you have C11 threads])
+        fi
+    fi
 
     ## If we're on MinGW, we want to use Win32 threads unless the builder
     ## explicitly specifies --with-pthreads=(yes | path(s))
-    mingw_use_win32_threads="no"
     if test -n "$HDF_MINGW" -a "$HDF_MINGW" = "yes" ; then
         # Default or no --> Win32 threads
         if test "$withval" = "default" -o "$withval" = "no" ; then
-            mingw_use_win32_threads="yes"
+            allow_pthreads="no"
             unset HAVE_PTHREAD
             AC_DEFINE([HAVE_WIN_THREADS], [1], [Define to 1 if you have win32 threads])
         fi
     fi
 
-    if test "$mingw_use_win32_threads" = "no" ; then
+    if test "$allow_pthreads" = "yes" ; then
         case "$withval" in
             default | yes)
                 AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
@@ -3335,8 +3353,10 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
       AC_MSG_ERROR([Subfiling VFD requires atomic operations support. C11 stdatomic.h NOT available.])
     fi
 
-    # Checks for libraries.
-    AC_CHECK_LIB([pthread], [pthread_self],[], [echo "Error: Required library pthread not found." && exit 1])
+    # Checks for threadsafe operation
+    if test "x$HAVE_THREADSAFE" = "xno"; then
+      AC_MSG_ERROR([Subfiling VFD requires thread operations support.])
+    fi
 
 else
     AC_MSG_RESULT([no])
