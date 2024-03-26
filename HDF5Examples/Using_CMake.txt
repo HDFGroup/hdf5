@@ -90,11 +90,11 @@ These steps are described in more detail below.
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles
-            * Visual Studio 15
-            * Visual Studio 15 Win64
-            * Visual Studio 17
-            * Visual Studio 17 Win64
-            * Visual Studio 19
+            * Visual Studio 15 2017
+            * Visual Studio 15 2017 Win64
+            * Visual Studio 16 2019
+            * Visual Studio 17 2022
+
 
         <options> is:
             * H5EX_BUILD_TESTING:BOOL=ON
