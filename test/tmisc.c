@@ -342,7 +342,7 @@ typedef struct {
 #define MISC38A_DSETNAME "Fletcher_float_data_be"
 #define MISC38B_FILE     "tmisc38b.h5"
 #define MISC38B_DSETNAME "unusual_datatype"
-#define MISC38C_FILE     "tmisc38b.h5"
+#define MISC38C_FILE     "tmisc38c.h5"
 #define MISC38C_DSETNAME "dset_unusual_datatype"
 #define MISC38C_TYPENAME "type_unusual_datatype"
 #define MISC38C_ATTRNAME "attr_unusual_datatype"
