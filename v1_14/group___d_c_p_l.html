@@ -1788,7 +1788,7 @@ HDF5 always modifies the options mask provided by the user to set up usage of RA
 <tr>
 <td><code>"%%"</code> </td><td>Replaced with a single <code>"%"</code> (percent) character.  </td></tr>
 <tr>
-<td><code>"%&lt;d&gt;b"</code> </td><td>Where <code>"&lt;d&gt;"</code> is the virtual dataset dimension axis (0-based) and <code>"b"</code> indicates that the block count of the selection in that dimension should be used. The full expression (for example, <code>"%0b"</code>) is replaced with a single numeric value when the mapping is evaluated at VDS access time. Example code for many source and virtual dataset mappings is available in the "Examples of Source to Virtual Dataset Mapping" chapter in the <a href="https://portal.hdfgroup.org/display/HDF5/RFC+HDF5+Virtual+Dataset">RFC: HDF5 Virtual Dataset</a>.   </td></tr>
+<td><code>"%&lt;d&gt;b"</code> </td><td>Where <code>"&lt;d&gt;"</code> is the virtual dataset dimension axis (0-based) and <code>"b"</code> indicates that the block count of the selection in that dimension should be used. The full expression (for example, <code>"%0b"</code>) is replaced with a single numeric value when the mapping is evaluated at VDS access time. Example code for many source and virtual dataset mappings is available in the "Examples of Source to Virtual Dataset Mapping" chapter in the <a href="https://docs.hdfgroup.org/hdf5/rfc/HDF5-VDS-requirements-use-cases-2014-12-10.pdf">RFC: HDF5 Virtual Dataset</a>.   </td></tr>
 </table>
 If the printf form is used for the source file or dataset names, the selection in the source dataset's dataspace must be fixed-size.</dd></dl>
 <dl class="section user"><dt>Source File Resolutions:</dt><dd>When a source dataset residing in a different file is accessed, the library will search for the source file <code>src_file_name</code> as described below: <ul>
@@ -1821,7 +1821,7 @@ If the printf form is used for the source file or dataset names, the selection i
 </li>
 </ul>
 </dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a href="https://portal.hdfgroup.org/display/HDF5/Virtual+Dataset++-+VDS">Virtual Dataset Overview</a></dd>
+<dl class="section see"><dt>See also</dt><dd><a href="https://docs.hdfgroup.org/hdf5/rfc/HDF5-VDS-requirements-use-cases-2014-12-10.pdf">Virtual Dataset Overview</a></dd>
 <dd>
 Supporting Functions: <a class="el" href="#ga655530b0f40990507fedeef6b3068db3" title="Returns the layout of the raw data for a dataset.">H5Pget_layout()</a>, <a class="el" href="#ga75d80991a8f467e0d454c53a383ae7f9" title="Sets the type of storage used to store the raw data for a dataset.">H5Pset_layout()</a>, <a class="el" href="group___h5_s.html#gabc974bbc041538a1d3032729df2ddfc0" title="Retrieves a regular hyperslab selection.">H5Sget_regular_hyperslab()</a>, <a class="el" href="group___h5_s.html#ga8a5bc33fae4be442093329f2cfec3f49" title="Determines if a hyperslab selection is regular.">H5Sis_regular_hyperslab()</a>, <a class="el" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d" title="Selects a hyperslab region to add to the current selected region.">H5Sselect_hyperslab()</a> </dd>
 <dd>

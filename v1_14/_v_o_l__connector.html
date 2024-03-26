@@ -148,7 +148,7 @@ VOL-Related HDF5 Header Files</h2>
 <tr>
 <td><a class="el" href="_h5_p_lextern_8h.html">H5PLextern.h</a>  </td><td>Needed if your connector will be built as a plugin.   </td></tr>
 </table>
-<p>Many VOL connectors are listed on The HDF Group's VOL plugin registration page, located at: <a href="https://portal.hdfgroup.org/display/support/Registered+VOL+Connectors">Registered VOL Connectors</a>. Not all of these VOL connectors are supported by The HDF Group and the level of completeness varies, but the connectors found there can serve as examples of working implementations</p>
+<p>Many VOL connectors are listed on The HDF Group's VOL plugin registration page, located at: <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/registered_vol_connectors.html">Registered VOL Connectors</a>. Not all of these VOL connectors are supported by The HDF Group and the level of completeness varies, but the connectors found there can serve as examples of working implementations</p>
 <h2><a class="anchor" id="subsecVOLLPI"></a>
 Library vs Plugin vs Internal</h2>
 <p>When building a VOL connector, you have several options:</p>
@@ -192,7 +192,7 @@ H5VL_class_t Boilerplate</h2>
 <p>Every connector needs a <em>name</em> and <em>value</em>. The library will use these when loading and registering the connector (as described in the <a class="el" href="_h5_v_l__u_g.html">The HDF5 Virtual Object Layer (VOL)</a>), so they should be unique in your ecosystem.</p>
 <p>VOL connector values are integers, with a maximum value of 65535. Values from 0 to 255 are reserved for internal use by The HDF Group. The native VOL connector has a value of 0. Values of 256 to 511 are for connector testing and should not be found in the wild. Values of 512 to 65535 are for external connectors.</p>
 <p>As is the case with HDF5 filters, The HDF Group can assign you an official VOL connector value. Please contact <a href="help@hdfgroup.org">help@hdfgroup.org</a> for help with this. We currently do not register connector names, though the name you've chosen will appear on the registered VOL connectors page.</p>
-<p>As noted above, registered VOL connectors will be listed at: <a href="https://portal.hdfgroup.org/display/support/Registered+VOL+Connectors">Registered VOL Connectors</a></p>
+<p>As noted above, registered VOL connectors will be listed at: <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/registered_vol_connectors.html">Registered VOL Connectors</a></p>
 <p>A new <b>conn_version</b> field has been added to the class struct for 1.13. This field is currently not used by the library so its use is determined by the connector author. Best practices for this field will be determined in the near future and this part of the guide will be updated.</p>
 <p>The <b>cap_flags</b> field is used to determine the capabilities of the VOL connector. At this time, the use of this field is limited to indicating thread-safety, asynchronous capabilities, and ability to produce native HDF5 files. Supported flags can be found in <a class="el" href="_h5_v_lconnector_8h.html">H5VLconnector.h</a>. </p><div class="fragment"><div class="line"><span class="comment">// Capability flags for connector</span></div>
 <div class="line"><span class="preprocessor">#define H5VL_CAP_FLAG_NONE     0        </span><span class="comment">// No special connector capabilities</span></div>
