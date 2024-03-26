@@ -700,10 +700,7 @@ Bug Fixes since HDF5-1.14.0 release
       builds. In HDF5 1.14.4, this can happen if you create a very large
       number of links in an old-style group that uses local heaps.
 
-      The library will now emit a normal error when it tries to load a
-      metadata object that is too large.
-
-      Partially addresses GitHub #3762
+      Fixes GitHub #3762
 
     - Fixed an issue with the Subfiling VFD and multiple opens of a
       file
