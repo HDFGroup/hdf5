@@ -3834,7 +3834,7 @@ done:
             else
                 d = (uint8_t *)buf + (nelmts * orig_d_stride);
 
-            /* Destroy references that have already been converted */
+            /* Destroy vlen elements that have already been converted */
             while (dest_count > 0) {
                 H5T_vlen_reclaim_elmt(d, dst); /* Ignore errors at this point */
                 d += orig_d_stride;
