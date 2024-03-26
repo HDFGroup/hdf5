@@ -1430,7 +1430,7 @@ TOOLTEST tshuffle.ddl --enable-error-stack -H -p -d shuffle tfilters.h5
 # fletcher32
 TOOLTESTC 0 tfletcher32.ddl --enable-error-stack -H -p -d fletcher32  tfilters.h5
 # nbit
-TOOLTESTC 10 tnbit.ddl --enable-error-stack -H -p -d nbit  tfilters.h5
+TOOLTESTC 1 tnbit.ddl --enable-error-stack -H -p -d nbit  tfilters.h5
 # scaleoffset
 TOOLTESTC 4 tscaleoffset.ddl --enable-error-stack -H -p -d scaleoffset  tfilters.h5
 # all
