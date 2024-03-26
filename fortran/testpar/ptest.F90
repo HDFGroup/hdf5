@@ -37,6 +37,52 @@ PROGRAM parallel_test
   CHARACTER(LEN=10), DIMENSION(1:2) :: chr_chunk =(/"contiguous", "chunk     "/)
   INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_int_type
 
+  INTERFACE
+
+    SUBROUTINE mpi_param_03(ret_total_error)
+      IMPLICIT NONE
+      INTEGER, INTENT(inout) :: ret_total_error
+    END SUBROUTINE mpi_param_03
+
+    SUBROUTINE mpi_param_08(ret_total_error)
+      IMPLICIT NONE
+      INTEGER, INTENT(inout) :: ret_total_error
+    END SUBROUTINE mpi_param_08
+
+    SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
+       USE MPI
+       IMPLICIT NONE
+       INTEGER, INTENT(in) :: length
+       LOGICAL, INTENT(in) :: do_collective
+       LOGICAL, INTENT(in) :: do_chunk
+       INTEGER(KIND=MPI_INTEGER_KIND), INTENT(in) :: mpi_size
+       INTEGER(KIND=MPI_INTEGER_KIND), INTENT(in) :: mpi_rank
+       INTEGER, INTENT(inout) :: nerrors
+     END SUBROUTINE hyper
+
+     SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, nerrors)
+       USE MPI
+       IMPLICIT NONE
+       LOGICAL, INTENT(in) :: do_collective
+       LOGICAL, INTENT(in) :: do_chunk
+       INTEGER(KIND=MPI_INTEGER_KIND), INTENT(in) :: mpi_size
+       INTEGER(KIND=MPI_INTEGER_KIND), INTENT(in) :: mpi_rank
+       INTEGER, INTENT(inout) :: nerrors
+     END SUBROUTINE pmultiple_dset_hyper_rw
+
+     SUBROUTINE multiple_dset_write(length, do_collective, do_chunk, mpi_size, mpi_rank, nerrors)
+       USE MPI
+       IMPLICIT NONE
+       INTEGER, INTENT(in) :: length
+       LOGICAL, INTENT(in) :: do_collective
+       LOGICAL, INTENT(in) :: do_chunk
+       INTEGER(KIND=MPI_INTEGER_KIND), INTENT(in) :: mpi_size
+       INTEGER(KIND=MPI_INTEGER_KIND), INTENT(in) :: mpi_rank
+       INTEGER, INTENT(inout) :: nerrors
+     END SUBROUTINE multiple_dset_write
+
+  END INTERFACE
+
   !
   ! initialize MPI
   !

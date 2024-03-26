@@ -152,8 +152,12 @@ endif ()
 #-----------------------------------------------------------------------------
 # Determine the available KINDs for REALs and INTEGERs
 #-----------------------------------------------------------------------------
+if (${HAVE_ISO_FORTRAN_ENV})
+  READ_SOURCE ("PROGRAM FC08_AVAIL_KINDS" "END PROGRAM FC08_AVAIL_KINDS" SOURCE_CODE)
+else ()
+  READ_SOURCE ("PROGRAM FC_AVAIL_KINDS" "END PROGRAM FC_AVAIL_KINDS" SOURCE_CODE)
+endif ()
 
-READ_SOURCE ("PROGRAM FC_AVAIL_KINDS" "END PROGRAM FC_AVAIL_KINDS" SOURCE_CODE)
 FORTRAN_RUN ("REAL and INTEGER KINDs"
     "${SOURCE_CODE}"
     XX
@@ -167,6 +171,9 @@ FORTRAN_RUN ("REAL and INTEGER KINDs"
 # dnl    -- LINE 3 --  max decimal precision for reals
 # dnl    -- LINE 4 --  number of valid integer kinds
 # dnl    -- LINE 5 --  number of valid real kinds
+# dnl    -- LINE 6 --  number of valid logical kinds
+# dnl    -- LINE 7 --  valid logical kinds (comma separated list)
+
 #
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
 string (REGEX REPLACE "[\r\n]+" ";" PROG_OUTPUT "${PROG_OUTPUT}")
@@ -201,6 +208,56 @@ message (STATUS "....NUMBER OF INTEGER KINDS FOUND ${PAC_FORTRAN_NUM_INTEGER_KIN
 message (STATUS "....REAL KINDS FOUND ${PAC_FC_ALL_REAL_KINDS}")
 message (STATUS "....INTEGER KINDS FOUND ${PAC_FC_ALL_INTEGER_KINDS}")
 message (STATUS "....MAX DECIMAL PRECISION ${${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION}")
+
+if (${HAVE_ISO_FORTRAN_ENV})
+
+  list (GET PROG_OUTPUT 5 NUM_LKIND)
+  set (PAC_FORTRAN_NUM_LOGICAL_KINDS "${NUM_LKIND}")
+
+  list (GET PROG_OUTPUT 6 pac_validLogicalKinds)
+  # If the list is empty then something went wrong.
+  if (NOT pac_validLogicalKinds)
+      message (FATAL_ERROR "Failed to find available LOGICAL KINDs for Fortran")
+  endif ()
+
+  set (PAC_FC_ALL_LOGICAL_KINDS "\{${pac_validLogicalKinds}\}")
+  message (STATUS "....LOGICAL KINDS FOUND ${PAC_FC_ALL_LOGICAL_KINDS}")
+
+
+# ********************
+# LOGICAL KIND FOR MPI
+# ********************
+  if (HDF5_ENABLE_PARALLEL AND BUILD_TESTING)
+    string (REGEX REPLACE "," ";" VAR "${pac_validLogicalKinds}")
+
+    set(CMAKE_REQUIRED_QUIET TRUE)
+    foreach (KIND ${VAR})
+      unset(MPI_LOGICAL_KIND CACHE)
+      set (PROG_SRC
+      "
+          PROGRAM main
+             USE MPI
+             IMPLICIT NONE
+             LOGICAL(KIND=${KIND}) :: flag
+             INTEGER(KIND=MPI_INTEGER_KIND) :: info_ret, mpierror
+             CHARACTER(LEN=3) :: info_val
+             CALL mpi_info_get(info_ret,\"foo\", 3_MPI_INTEGER_KIND, info_val, flag, mpierror)
+          END
+       "
+      )
+      check_fortran_source_compiles (${PROG_SRC} MPI_LOGICAL_KIND SRC_EXT f90)
+
+      if (${MPI_LOGICAL_KIND} MATCHES "1")
+        set (${HDF_PREFIX}_MPI_LOGICAL_KIND ${KIND})
+        message (STATUS "....FORTRAN LOGICAL KIND for MPI is ${KIND}")
+      endif ()
+    endforeach ()
+    if (${HDF_PREFIX}_MPI_LOGICAL_KIND STREQUAL "")
+       message (FATAL_ERROR "Failed to determine LOGICAL KIND for MPI")
+    endif ()
+    set(CMAKE_REQUIRED_QUIET FALSE)
+  endif()
+endif()
 
 #-----------------------------------------------------------------------------
 # Determine the available KINDs for REALs and INTEGERs
