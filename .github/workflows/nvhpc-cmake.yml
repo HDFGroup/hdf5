@@ -33,20 +33,20 @@ jobs:
           curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg
           echo 'deb [signed-by=/usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' | sudo tee /etc/apt/sources.list.d/nvhpc.list
           sudo apt-get update -y
-          sudo apt-get install -y nvhpc-23-9
+          sudo apt-get install -y nvhpc-24-3
           echo "NVHPCSDK=/opt/nvidia/hpc_sdk" >> $GITHUB_ENV
-          echo "OMPI_CXX=/opt/nvidia/hpc_sdk/Linux_x86_64/23.9/compilers/bin/nvc++" >> $GITHUB_ENV
-          echo "OMPI_CC=/opt/nvidia/hpc_sdk/Linux_x86_64/23.9/compilers/bin/nvc" >> $GITHUB_ENV
-          echo "OMPI_FC=/opt/nvidia/hpc_sdk/Linux_x86_64/23.9/compilers/bin/nvfortran" >> $GITHUB_ENV
-          echo "CC=/opt/nvidia/hpc_sdk/Linux_x86_64/23.9/comm_libs/openmpi4/bin/mpicc" >> $GITHUB_ENV
-          echo "FC=/opt/nvidia/hpc_sdk/Linux_x86_64/23.9/comm_libs/openmpi4/bin/mpifort" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/23.9/cuda/12.2/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/23.9/compilers/lib" >> $GITHUB_ENV
+          echo "OMPI_CXX=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/compilers/bin/nvc++" >> $GITHUB_ENV
+          echo "OMPI_CC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/compilers/bin/nvc" >> $GITHUB_ENV
+          echo "OMPI_FC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/compilers/bin/nvfortran" >> $GITHUB_ENV
+          echo "CC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/comm_libs/openmpi4/bin/mpicc" >> $GITHUB_ENV
+          echo "FC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/comm_libs/openmpi4/bin/mpifort" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/12.3/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/compilers/lib" >> $GITHUB_ENV
           echo "DESTDIR=/tmp" >> $GITHUB_ENV
 
       - name: CMake Configure
         shell: bash
         run: |
-          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/23.9/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/23.9/compilers/bin:$PATH
+          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/compilers/bin:$PATH
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
