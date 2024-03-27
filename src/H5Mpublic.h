@@ -156,11 +156,11 @@ typedef union H5VL_map_args_t {
     /** H5VL_MAP_SPECIFIC */
     struct {
         H5VL_map_specific_t specific_type;
-        /**< 'specific' operation to perform, which are 'iterate' and 'del' currently */
+        /**< 'specific' operation to perform */
 
         /** Parameters for each operation */
         union {
-            /* H5VL_MAP_ITER */
+            /* H5VL_MAP_ITER specific operation */
             struct {
                 H5VL_loc_params_t loc_params;      /**< Location parameters for object */
                 hsize_t           idx;             /**< Start/end iteration index (IN/OUT) */
@@ -169,7 +169,7 @@ typedef union H5VL_map_args_t {
                 void             *op_data;         /**< Pointer to callback context */
             } iterate;
 
-            /* H5VL_MAP_DELETE */
+            /* H5VL_MAP_DELETE specific operation */
             struct {
                 H5VL_loc_params_t loc_params;      /**< Location parameters for object */
                 hid_t             key_mem_type_id; /**< Memory datatype for key */
