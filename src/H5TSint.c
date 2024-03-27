@@ -117,11 +117,9 @@ H5TS__init(void)
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Initialize the global API lock */
-    memset(&H5TS_api_info_p, 0, sizeof(H5TS_api_info_p));
     if (H5_UNLIKELY(H5TS__ex_lock_init(&H5TS_api_info_p.api_lock) < 0))
         HGOTO_DONE(FAIL);
-    if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_api_info_p.attempt_mutex) < 0))
-        HGOTO_DONE(FAIL);
+    H5TS_atomic_init_uint(&H5TS_api_info_p.attempt_lock_count, 0);
 
     /* Initialize per-thread library info */
     if (H5_UNLIKELY(H5TS__tinfo_init() < 0))
@@ -151,8 +149,8 @@ H5TS_term_package(void)
     /* Destroy global API lock */
     H5TS__ex_lock_destroy(&H5TS_api_info_p.api_lock);
 
-    /* Destroy the "lock acquisition attempt" mutex */
-    H5TS_mutex_destroy(&H5TS_api_info_p.attempt_mutex);
+    /* Destroy the "lock acquisition attempt" atomic */
+    H5TS_atomic_destroy_uint(&H5TS_api_info_p.attempt_lock_count);
 
     /* Clean up per-process thread local storage */
     H5TS__tinfo_term();
@@ -216,12 +214,8 @@ H5TS_api_lock(void)
         if (H5_UNLIKELY(H5TS_once(&H5TS_first_init_s, H5TS_ONCE_INIT_FUNC) < 0))
             HGOTO_DONE(FAIL);
 
-    /* Acquire the "attempt" mutex, increment the attempt lock count, release the lock */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&H5TS_api_info_p.attempt_mutex) < 0))
-        HGOTO_DONE(FAIL);
-    H5TS_api_info_p.attempt_lock_count++;
-    if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_api_info_p.attempt_mutex) < 0))
-        HGOTO_DONE(FAIL);
+    /* Increment the attempt lock count */
+    H5TS_atomic_fetch_add_uint(&H5TS_api_info_p.attempt_lock_count, 1);
 
     /* Acquire the library's exclusive API lock */
     if (H5_UNLIKELY(H5TS__ex_lock(&H5TS_api_info_p.api_lock) < 0))

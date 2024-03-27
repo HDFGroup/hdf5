@@ -70,8 +70,7 @@ typedef struct H5TS_api_info_t {
     H5TS_ex_lock_t api_lock;
 
     /* Count of # of attempts to acquire API lock */
-    H5TS_mutex_t attempt_mutex; /* mutex for attempt_lock_count */
-    unsigned     attempt_lock_count;
+    H5TS_atomic_uint_t attempt_lock_count;
 } H5TS_api_info_t;
 
 #if H5TS_ENABLE_REC_RW_LOCK_STATS

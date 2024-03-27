@@ -106,23 +106,11 @@ done:
 herr_t
 H5TSmutex_get_attempt_count(unsigned *count)
 {
-    bool   have_mutex = false;
     herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_API_NAMECHECK_ONLY
 
-    /* Acquire the "attempt" lock, retrieve the attempt lock count, release the lock */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&H5TS_api_info_p.attempt_mutex) < 0))
-        HGOTO_DONE(FAIL);
-    have_mutex = true;
-
-    *count = H5TS_api_info_p.attempt_lock_count;
-
-done:
-    /* Release the lock */
-    if (H5_LIKELY(have_mutex))
-        if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_api_info_p.attempt_mutex) < 0))
-            ret_value = FAIL;
+    *count = H5TS_atomic_load_uint(&H5TS_api_info_p.attempt_lock_count);
 
     FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)
 } /* end H5TSmutex_get_attempt_count() */

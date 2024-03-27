@@ -63,7 +63,7 @@
 /*--------------------------------------------------------------------------
  * Function:    H5TS_atomic_init_int
  *
- * Purpose:     Initializes an atomic variable object with a value.
+ * Purpose:     Initializes an atomic 'int' variable object with a value.
  *
  * Note:        Per the C11 standard, this function is not atomic and
  *              concurrent execution from multiple threads is a data race.
@@ -89,7 +89,7 @@ H5TS_atomic_init_int(H5TS_atomic_int_t *obj, int desired)
 /*--------------------------------------------------------------------------
  * Function:    H5TS_atomic_load_int
  *
- * Purpose:     Retrives the value of atomic variable object.
+ * Purpose:     Retrieves the value of atomic 'int' variable object.
  *
  * Return:      None
  *
@@ -112,12 +112,12 @@ H5TS_atomic_load_int(H5TS_atomic_int_t *obj)
     H5TS_mutex_unlock(&obj->mutex);
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_atomic_init_int() */
+} /* end H5TS_atomic_load_int() */
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS_atomic_store_int
  *
- * Purpose:     Atomically replaces the value of the atomic variable
+ * Purpose:     Atomically replaces the value of the atomic 'int' variable
  *
  * Return:      None
  *
@@ -143,7 +143,7 @@ H5TS_atomic_store_int(H5TS_atomic_int_t *obj, int desired)
 /*--------------------------------------------------------------------------
  * Function:    H5TS_atomic_fetch_add_int
  *
- * Purpose:     Atomically replaces the value of an atomic variable with the
+ * Purpose:     Atomically replaces the value of an atomic 'int' variable with the
  *              result of addition of the 'arg' to the old value of the
  *              atomic variable.
  *
@@ -176,7 +176,7 @@ H5TS_atomic_fetch_add_int(H5TS_atomic_int_t *obj, int arg)
 /*--------------------------------------------------------------------------
  * Function:    H5TS_atomic_fetch_sub_int
  *
- * Purpose:     Atomically replaces the value of an atomic variable with the
+ * Purpose:     Atomically replaces the value of an atomic 'int' variable with the
  *              result of subtracting the 'arg' from the old value of the
  *              atomic variable.
  *
@@ -209,7 +209,7 @@ H5TS_atomic_fetch_sub_int(H5TS_atomic_int_t *obj, int arg)
 /*--------------------------------------------------------------------------
  * Function:    H5TS_atomic_destroy_int
  *
- * Purpose:     Destroys / releases resources for an atomic variable
+ * Purpose:     Destroys / releases resources for an atomic 'int' variable
  *
  * Note:        No equivalent in the C11 atomics, but needed here, to destroy
  *              the mutex used to protect the atomic value.
@@ -229,6 +229,175 @@ H5TS_atomic_destroy_int(H5TS_atomic_int_t *obj)
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* end H5TS_atomic_destroy_int() */
 
-#endif /* H5_HAVE_THREADS_H */
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_atomic_init_uint
+ *
+ * Purpose:     Initializes an atomic 'unsigned' variable object with a value.
+ *
+ * Note:        Per the C11 standard, this function is not atomic and
+ *              concurrent execution from multiple threads is a data race.
+ *
+ * Return:      None
+ *
+ *--------------------------------------------------------------------------
+ */
+void
+H5TS_atomic_init_uint(H5TS_atomic_uint_t *obj, unsigned desired)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Initialize mutex that protects the "atomic" value */
+    (void) H5TS_mutex_init(&obj->mutex);
+
+    /* Set the value */
+    obj->value = desired;
+
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
+} /* end H5TS_atomic_init_uint() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_atomic_load_uint
+ *
+ * Purpose:     Retrieves the value of atomic 'unsigned' variable object.
+ *
+ * Return:      None
+ *
+ *--------------------------------------------------------------------------
+ */
+unsigned
+H5TS_atomic_load_uint(H5TS_atomic_uint_t *obj)
+{
+    unsigned ret_value;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Lock mutex that protects the "atomic" value */
+    (void) H5TS_mutex_lock(&obj->mutex);
+
+    /* Get the value */
+    ret_value = obj->value;
+
+    /* Release the object's mutex */
+    H5TS_mutex_unlock(&obj->mutex);
+
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_atomic_load_uint() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_atomic_store_uint
+ *
+ * Purpose:     Atomically replaces the value of the atomic 'unsigned' variable
+ *
+ * Return:      None
+ *
+ *--------------------------------------------------------------------------
+ */
+void
+H5TS_atomic_store_uint(H5TS_atomic_uint_t *obj, unsigned desired)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Lock mutex that protects the "atomic" value */
+    (void) H5TS_mutex_lock(&obj->mutex);
+
+    /* Set the value */
+    obj->value = desired;
+
+    /* Release the object's mutex */
+    H5TS_mutex_unlock(&obj->mutex);
+
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
+} /* end H5TS_atomic_store_uint() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_atomic_fetch_add_uint
+ *
+ * Purpose:     Atomically replaces the value of an atomic 'unsigned' variable with the
+ *              result of addition of the 'arg' to the old value of the
+ *              atomic variable.
+ *
+ * Return:      Returns the value of the atomic variable held previously
+ *
+ *--------------------------------------------------------------------------
+ */
+unsigned
+H5TS_atomic_fetch_add_uint(H5TS_atomic_uint_t *obj, unsigned arg)
+{
+    unsigned ret_value;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Lock mutex that protects the "atomic" value */
+    (void) H5TS_mutex_lock(&obj->mutex);
+
+    /* Get the current value */
+    ret_value = obj->value;
+
+    /* Increment the value */
+    obj->value += arg;
+
+    /* Release the object's mutex */
+    H5TS_mutex_unlock(&obj->mutex);
+
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_atomic_fetch_add_uint() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_atomic_fetch_sub_uint
+ *
+ * Purpose:     Atomically replaces the value of an atomic 'unsigned' variable with the
+ *              result of subtracting the 'arg' from the old value of the
+ *              atomic variable.
+ *
+ * Return:      Returns the value of the atomic variable held previously
+ *
+ *--------------------------------------------------------------------------
+ */
+unsigned
+H5TS_atomic_fetch_sub_uint(H5TS_atomic_uint_t *obj, unsigned arg)
+{
+    unsigned ret_value;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Lock mutex that protects the "atomic" value */
+    (void) H5TS_mutex_lock(&obj->mutex);
+
+    /* Get the current value */
+    ret_value = obj->value;
+
+    /* Decrement the value */
+    obj->value -= arg;
+
+    /* Release the object's mutex */
+    H5TS_mutex_unlock(&obj->mutex);
+
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_atomic_fetch_sub_uint() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_atomic_destroy_uint
+ *
+ * Purpose:     Destroys / releases resources for an atomic 'unsigned' variable
+ *
+ * Note:        No equivalent in the C11 atomics, but needed here, to destroy
+ *              the mutex used to protect the atomic value.
+ *
+ * Return:      None
+ *
+ *--------------------------------------------------------------------------
+ */
+void
+H5TS_atomic_destroy_uint(H5TS_atomic_uint_t *obj)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Destroy mutex that protects the "atomic" value */
+    (void) H5TS_mutex_destroy(&obj->mutex);
+
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
+} /* end H5TS_atomic_destroy_uint() */
+
+#endif /* H5_HAVE_STDATOMIC_H */
 
 #endif /* H5_HAVE_THREADSAFE */
