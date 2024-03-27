@@ -134,10 +134,6 @@ typedef atomic_int H5TS_atomic_int_t;
 /* Library-private Variables */
 /*****************************/
 
-/*****************************/
-/* Library-private Variables */
-/*****************************/
-
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
