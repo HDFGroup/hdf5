@@ -293,7 +293,7 @@ H5TS__tinfo_init(void)
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Initialize the critical section for modifying the thread info globals */
-    H5TS_mutex_init(&H5TS_tinfo_mtx_s);
+    H5TS_mutex_init(&H5TS_tinfo_mtx_s, H5TS_MUTEX_TYPE_PLAIN);
 
     /* Initialize key for thread-specific API contexts */
 #ifdef H5_HAVE_WIN_THREADS

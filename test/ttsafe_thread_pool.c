@@ -98,7 +98,7 @@ tts_thread_pool(void)
     herr_t       result;
 
     /* Initialize the counter */
-    result = H5TS_mutex_init(&counter_g.mutex);
+    result = H5TS_mutex_init(&counter_g.mutex, H5TS_MUTEX_TYPE_PLAIN);
     CHECK_I(result, "H5TS_mutex_init");
     counter_g.val = 0;
 

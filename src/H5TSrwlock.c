@@ -422,7 +422,7 @@ H5TS__rw_lock_init(H5TS_rw_lock_t *rw_lock)
     /* Initialize the lock */
     memset(rw_lock, 0, sizeof(*rw_lock));
     HDcompile_assert(H5TS_RW_LOCK_UNUSED == 0);
-    if (H5_UNLIKELY(H5TS_mutex_init(&rw_lock->mutex) < 0))
+    if (H5_UNLIKELY(H5TS_mutex_init(&rw_lock->mutex, H5TS_MUTEX_TYPE_PLAIN) < 0))
         HGOTO_DONE(FAIL);
     if (H5_UNLIKELY(H5TS_cond_init(&rw_lock->writers_cv) < 0))
         HGOTO_DONE(FAIL);

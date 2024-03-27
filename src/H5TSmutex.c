@@ -71,13 +71,13 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_init(H5TS_mutex_t *mutex)
+H5TS_mutex_init(H5TS_mutex_t *mutex, int type)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    if (H5_UNLIKELY(mtx_init(mutex, mtx_plain) != thrd_success))
+    if (H5_UNLIKELY(mtx_init(mutex, type) != thrd_success))
         HGOTO_DONE(FAIL);
 
 done:
@@ -185,12 +185,14 @@ H5TS_mutex_destroy(H5TS_mutex_t *mutex)
  *
  * Purpose:  Initialize a H5TS_mutex_t (does not allocate it)
  *
+ * Note:     All Windows CriticalSections are recursive
+ *
  * Return:   Non-negative on success / Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_init(H5TS_mutex_t *mutex)
+H5TS_mutex_init(H5TS_mutex_t *mutex, int H5_ATTR_UNUSED type)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -286,16 +288,32 @@ H5TS_mutex_destroy(H5TS_mutex_t *mutex)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_init(H5TS_mutex_t *mutex)
+H5TS_mutex_init(H5TS_mutex_t *mutex, int type)
 {
+    pthread_mutexattr_t _attr;
+    pthread_mutexattr_t *attr = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    if (H5_UNLIKELY(pthread_mutex_init(mutex, NULL)))
+    /* Set up recursive mutex, if requested */
+    if (H5TS_MUTEX_TYPE_RECURSIVE == type) {
+        if (H5_UNLIKELY(pthread_mutexattr_init(&_attr)))
+            HGOTO_DONE(FAIL);
+        attr = &_attr;
+
+        if (H5_UNLIKELY(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_RECURSIVE)))
+            HGOTO_DONE(FAIL);
+    }
+
+    if (H5_UNLIKELY(pthread_mutex_init(mutex, attr)))
         HGOTO_DONE(FAIL);
 
 done:
+    if (NULL != attr)
+        if (H5_UNLIKELY(pthread_mutexattr_destroy(attr)))
+            ret_value = FAIL;
+
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_mutex_init() */
 

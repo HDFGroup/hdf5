@@ -82,7 +82,7 @@ H5TS__ex_lock_init(H5TS_ex_lock_t *lock)
 
     /* Initialize the lock */
     memset(lock, 0, sizeof(*lock));
-    if (H5_UNLIKELY(H5TS_mutex_init(&lock->mutex) < 0))
+    if (H5_UNLIKELY(H5TS_mutex_init(&lock->mutex, H5TS_MUTEX_TYPE_PLAIN) < 0))
         HGOTO_DONE(FAIL);
     if (H5_UNLIKELY(H5TS_cond_init(&lock->cond_var) < 0))
         HGOTO_DONE(FAIL);

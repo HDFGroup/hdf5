@@ -47,6 +47,10 @@
 #define H5TS_thread_equal(t1, t2)  thrd_equal((t1), (t2))
 #define H5TS_THREAD_RETURN_TYPE    H5TS_thread_ret_t
 #define H5TS_THREAD_CANCEL_DISABLE 0
+
+/* Mutex macros */
+#define H5TS_MUTEX_TYPE_PLAIN      mtx_plain
+#define H5TS_MUTEX_TYPE_RECURSIVE  (mtx_plain | mtx_recursive)
 #else
 #ifdef H5_HAVE_WIN_THREADS
 /* Static initialization values */
@@ -57,6 +61,10 @@
 #define H5TS_thread_equal(t1, t2)  (GetThreadId(t1) == GetThreadId(t2))
 #define H5TS_THREAD_RETURN_TYPE    H5TS_thread_ret_t WINAPI
 #define H5TS_THREAD_CANCEL_DISABLE 0
+
+/* Mutex macros */
+#define H5TS_MUTEX_TYPE_PLAIN      0
+#define H5TS_MUTEX_TYPE_RECURSIVE  1
 #else
 /* Static initialization values */
 #define H5TS_ONCE_INITIALIZER      PTHREAD_ONCE_INIT
@@ -66,6 +74,10 @@
 #define H5TS_thread_equal(t1, t2)  pthread_equal((t1), (t2))
 #define H5TS_THREAD_RETURN_TYPE    H5TS_thread_ret_t
 #define H5TS_THREAD_CANCEL_DISABLE PTHREAD_CANCEL_DISABLE
+
+/* Mutex macros */
+#define H5TS_MUTEX_TYPE_PLAIN      0
+#define H5TS_MUTEX_TYPE_RECURSIVE  1
 #endif
 #endif
 
@@ -169,7 +181,7 @@ H5_DLL struct H5E_t        *H5TS_get_err_stack(void);
 H5_DLL herr_t H5TS_once(H5TS_once_t *once, H5TS_once_init_func_t func);
 
 /* Mutex operations */
-H5_DLL herr_t H5TS_mutex_init(H5TS_mutex_t *mutex);
+H5_DLL herr_t H5TS_mutex_init(H5TS_mutex_t *mutex, int type);
 H5_DLL herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex) H5TS_ACQUIRE(*mutex);
 H5_DLL herr_t H5TS_mutex_try_lock(H5TS_mutex_t *mutex, bool *acquired) H5TS_TRY_ACQUIRE(SUCCEED, *mutex);
 H5_DLL herr_t H5TS_mutex_unlock(H5TS_mutex_t *mutex) H5TS_RELEASE(*mutex);

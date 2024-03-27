@@ -1851,7 +1851,7 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
 
     sf_context->h5_file_id     = file_id;
     sf_context->threads_inited = false;
-    if (H5TS_mutex_init(&sf_context->mutex) < 0)
+    if (H5TS_mutex_init(&sf_context->mutex, H5TS_MUTEX_TYPE_PLAIN) < 0)
         return FAIL;
     sf_context->file_ref        = 0;
     sf_context->sf_fids         = NULL;

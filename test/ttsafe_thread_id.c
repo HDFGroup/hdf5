@@ -100,7 +100,7 @@ tts_thread_id(void)
     int           i;
     herr_t        result;
 
-    result = H5TS_mutex_init(&used_lock);
+    result = H5TS_mutex_init(&used_lock, H5TS_MUTEX_TYPE_PLAIN);
     CHECK_I(result, "H5TS_mutex_lock");
     result = H5TS__barrier_init(&barrier, NTHREADS);
     CHECK_I(result, "H5TS__barrier_init");

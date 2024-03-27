@@ -151,7 +151,7 @@ initialize_ioc_threads(void *_sf_context)
     t_start = MPI_Wtime();
 #endif
 
-    if (H5TS_mutex_init(&ioc_data->io_queue.q_mutex) < 0)
+    if (H5TS_mutex_init(&ioc_data->io_queue.q_mutex, H5TS_MUTEX_TYPE_PLAIN) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, (-1), "can't initialize IOC thread queue mutex");
 
     /* Allow experimentation with the number of helper threads */

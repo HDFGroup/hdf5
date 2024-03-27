@@ -99,7 +99,7 @@ tts_error(void)
     expected_g[10].maj_num = H5E_LINK;
     expected_g[10].min_num = H5E_EXISTS;
 
-    status = H5TS_mutex_init(&error_mutex_g);
+    status = H5TS_mutex_init(&error_mutex_g, H5TS_MUTEX_TYPE_PLAIN);
     CHECK_I(status, "H5TS_mutex_init");
 
     def_fapl = H5Pcreate(H5P_FILE_ACCESS);

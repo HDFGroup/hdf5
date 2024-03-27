@@ -227,7 +227,7 @@ H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads)
 
     /* Initialize pool fields to defaults */
     memset(new_pool, 0, sizeof(*new_pool));
-    if (H5_UNLIKELY(H5TS_mutex_init(&new_pool->mutex) < 0))
+    if (H5_UNLIKELY(H5TS_mutex_init(&new_pool->mutex, H5TS_MUTEX_TYPE_PLAIN) < 0))
         HGOTO_DONE(FAIL);
     if (H5_UNLIKELY(H5TS_cond_init(&new_pool->cond) < 0))
         HGOTO_DONE(FAIL);
