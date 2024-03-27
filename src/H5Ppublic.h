@@ -5634,6 +5634,79 @@ H5_DLL herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t 
 H5_DLL herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned min_meta_per,
                                       unsigned min_raw_per);
 
+/**
+ * \ingroup FAPL
+ *
+ * \brief Relax file integrity checks that may issue errors for some valid files
+ *
+ * \fapl_id{plist_id}
+ * \param[in] flags Relaxed integrity checks flag. Valid values are:
+ *                 \li #H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS
+ *                     suppresses integrity checks for detecting
+ *                     unusually high values for the number of unused bits in
+ *                     numeric datatype classes (H5T_INTEGER, H5T_FLOAT, and
+ *                     H5T_BITFIELD).  Integrity checks are triggered when
+ *                     the precision for a datatype (i.e. the number of bits
+ *                     containing actual data) is less than half of the
+ *                     datatype's size and the datatype is greater than
+ *                     1 byte in size.   For example, a datatype with a
+ *                     precision of 15 bits and a size of 4 bytes (i.e. 32 bits)
+ *                     will issue an error, but a datatype with 17 bits of
+ *                     precision and a size of 4 bytes will not issue an
+ *                     error, nor will a datatype with a precision of 1, 2, or
+ *                     3 bits and a size of 1 byte issue an error.
+ *                 \li #H5F_RFIC_ALL relaxes all integrity checks above.
+ *
+ * \return \herr_t
+ *
+ * \details Incorrectly encoded or corrupted metadata in a native HDF5
+ *          format file can cause incorrect library behavior when the metadata
+ *          has no checksum.  Integrity checks within the library detect these
+ *          circumstances and issue errors when incorrect metadata is found.
+ *          Unfortunately, some of the integrity checks for detecting these
+ *          circumstances may incorrectly issue an error for a valid HDF5 file
+ *          that was intentionally created with these configurations.
+ *          Setting the appropriate flag(s) with this routine will relax the
+ *          file integrity checks for these valid files and suppress errors
+ *          when accessing objects with these configurations.
+ *
+ *          The library will also issue errors when these configurations are
+ *          used to create objects, preventing applications from unintentionally
+ *          creating them.  Setting the appropriate flag with this routine will
+ *          also suppress those errors on creation, although using this routine
+ *          and the appropriate flag(s) will still be required when accessing
+ *          files created with these configurations.
+ *
+ *          A more complete solution that avoids errors on both object creation
+ *          and access is to use the H5Pset_libver_bounds routine with a low
+ *          bound of at least #H5F_LIBVER_V18 when creating objects with these
+ *          configurations.  This will cause the library to checksum a file's
+ *          metadata, allowing accidental data corruption to be correctly
+ *          detected and errors correctly issued without ambiguity.
+ *
+ * \since 1.14.4
+ *
+ */
+H5_DLL herr_t H5Pset_relax_file_integrity_checks(hid_t plist_id, uint64_t flags);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Retrieve relaxed file integrity check flags
+ *
+ * \fapl_id{plist_id}
+ * \param[out] flags  Relaxed file integrity check flags
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_relax_file_integrity_checks() retrieves the relaxed file
+ *          integrity check value into \p flags for the file access property
+ *          list specified in \p plist_id.
+ *
+ * \since 1.14.4
+ *
+ */
+H5_DLL herr_t H5Pget_relax_file_integrity_checks(hid_t plist_id, uint64_t *flags);
+
 /* Dataset creation property list (DCPL) routines */
 /**
  * \ingroup DCPL

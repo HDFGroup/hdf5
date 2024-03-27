@@ -41,6 +41,7 @@
 #include "H5Pprivate.h"  /* Property lists                           */
 #include "H5Tpkg.h"      /* Datatypes                                */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
+#include "H5VMprivate.h" /* Vectors and arrays                       */
 
 /****************/
 /* Local Macros */
@@ -6691,3 +6692,51 @@ H5T__get_path_table_npaths(void)
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_is_numeric_with_unusual_unused_bits
+ *
+ * Purpose:     Detect if a datatype is a numeric datatype (int, float, or
+ *              bitfield) with an unusual # of unused bits.  This means
+ *              that the precision (i.e. the # of bits used) is less than
+ *              the size of the datatype, at power-of-two boundaries.
+ *
+ * Return:      true/false on success, can't fail
+ *
+ *-------------------------------------------------------------------------
+ */
+bool
+H5T_is_numeric_with_unusual_unused_bits(const H5T_t *dt)
+{
+    bool ret_value = false;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    assert(dt);
+    assert(dt->shared);
+
+    /* Is the correct type? */
+    if (H5T_INTEGER == dt->shared->type || H5T_FLOAT == dt->shared->type ||
+        H5T_BITFIELD == dt->shared->type) {
+#if LDBL_MANT_DIG == 106
+        /* This currently won't work for the IBM long double type */
+        if (H5T_FLOAT == dt->shared->type && dt->shared->size == 16 &&
+            (dt->shared->u.atomic.prec == 64 || dt->shared->u.atomic.prec == 128))
+            HGOTO_DONE(false);
+#endif
+
+        /* Has unused bits? */
+        if (dt->shared->u.atomic.prec < (dt->shared->size * 8)) {
+            unsigned surround_bits =
+                1U << (1 + H5VM_log2_gen((dt->shared->u.atomic.prec + dt->shared->u.atomic.offset) - 1));
+
+            /* Unused bits are unusually large? */
+            if (dt->shared->size > 1 && ((dt->shared->size * 8) > surround_bits))
+                HGOTO_DONE(true);
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_is_numeric_with_unusual_unused_bits() */

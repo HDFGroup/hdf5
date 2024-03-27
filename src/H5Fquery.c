@@ -1356,16 +1356,16 @@ done:
 } /* end H5F_get_cont_info */
 
 /*-------------------------------------------------------------------------
- * Function: H5F_get_file_locking
+ * Function: H5F_get_use_file_locking
  *
- * Purpose:  Get the file locking flag for the file
+ * Purpose:  Get the 'use file locking' flag for the file
  *
  * Return:   true/false
  *
  *-------------------------------------------------------------------------
  */
 bool
-H5F_get_file_locking(const H5F_t *f)
+H5F_get_use_file_locking(const H5F_t *f)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1373,7 +1373,7 @@ H5F_get_file_locking(const H5F_t *f)
     assert(f->shared);
 
     FUNC_LEAVE_NOAPI(f->shared->use_file_locking)
-} /* end H5F_get_file_locking */
+} /* end H5F_get_use_file_locking */
 
 /*-------------------------------------------------------------------------
  * Function: H5F_has_vector_select_io
@@ -1401,3 +1401,23 @@ H5F_has_vector_select_io(const H5F_t *f, bool is_write)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_has_vector_select_io */
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_get_rfic_flags
+ *
+ * Purpose:  Get the relaxed file integrity checks (RFIC) flags for the file
+ *
+ * Return:   RFIC flags for a file on success (which can be 0), can't fail
+ *
+ *-------------------------------------------------------------------------
+ */
+uint64_t
+H5F_get_rfic_flags(const H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(f);
+    assert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->rfic_flags)
+} /* end H5F_get_rfic_flags */

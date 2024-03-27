@@ -614,6 +614,10 @@ H5S__extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src, bool copy_max)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy shared information");
 
 done:
+    if (ret_value < 0)
+        if (dst->size)
+            dst->size = H5FL_ARR_FREE(hsize_t, dst->size);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__extent_copy_real() */
 

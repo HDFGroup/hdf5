@@ -150,6 +150,8 @@
 /* Input/output flags for decode functions */
 #define H5O_DECODEIO_NOCHANGE 0x01u /* IN: do not modify values */
 #define H5O_DECODEIO_DIRTY    0x02u /* OUT: message has been changed */
+#define H5O_DECODEIO_RFIC_UNUBNT                                                                             \
+    0x04u /* IN: Relax file integrity checks for unusual numbers of unused bits in numeric datatypes */
 
 /* Macro to incremend ndecode_dirtied (only if we are debugging) */
 #ifndef NDEBUG
