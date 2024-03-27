@@ -49,63 +49,63 @@
 /**
  * Property list class root, is not user-accessible
  */
-#define H5P_ROOT             (H5OPEN H5P_CLS_ROOT_ID_g)
+#define H5P_ROOT (H5OPEN H5P_CLS_ROOT_ID_g)
 /**
  * Object creation property list class, is not user-accessible
  */
-#define H5P_OBJECT_CREATE    (H5OPEN H5P_CLS_OBJECT_CREATE_ID_g)
+#define H5P_OBJECT_CREATE (H5OPEN H5P_CLS_OBJECT_CREATE_ID_g)
 /**
  * File creation property list class
  */
-#define H5P_FILE_CREATE      (H5OPEN H5P_CLS_FILE_CREATE_ID_g)
+#define H5P_FILE_CREATE (H5OPEN H5P_CLS_FILE_CREATE_ID_g)
 /**
  * File access property list class
  */
-#define H5P_FILE_ACCESS      (H5OPEN H5P_CLS_FILE_ACCESS_ID_g)
+#define H5P_FILE_ACCESS (H5OPEN H5P_CLS_FILE_ACCESS_ID_g)
 /**
  * Dataset creation property list class
  */
-#define H5P_DATASET_CREATE   (H5OPEN H5P_CLS_DATASET_CREATE_ID_g)
+#define H5P_DATASET_CREATE (H5OPEN H5P_CLS_DATASET_CREATE_ID_g)
 /**
  * Dataset access property list class
  */
-#define H5P_DATASET_ACCESS   (H5OPEN H5P_CLS_DATASET_ACCESS_ID_g)
+#define H5P_DATASET_ACCESS (H5OPEN H5P_CLS_DATASET_ACCESS_ID_g)
 /**
  * Dataset transfer property list class
  */
-#define H5P_DATASET_XFER     (H5OPEN H5P_CLS_DATASET_XFER_ID_g)
+#define H5P_DATASET_XFER (H5OPEN H5P_CLS_DATASET_XFER_ID_g)
 /**
  * File mount property list class
  */
-#define H5P_FILE_MOUNT       (H5OPEN H5P_CLS_FILE_MOUNT_ID_g)
+#define H5P_FILE_MOUNT (H5OPEN H5P_CLS_FILE_MOUNT_ID_g)
 /**
  * Group creation property list class
  */
-#define H5P_GROUP_CREATE     (H5OPEN H5P_CLS_GROUP_CREATE_ID_g)
+#define H5P_GROUP_CREATE (H5OPEN H5P_CLS_GROUP_CREATE_ID_g)
 /**
  * Group access property list class
  */
-#define H5P_GROUP_ACCESS     (H5OPEN H5P_CLS_GROUP_ACCESS_ID_g)
+#define H5P_GROUP_ACCESS (H5OPEN H5P_CLS_GROUP_ACCESS_ID_g)
 /**
  * Datatype creation property list class
  */
-#define H5P_DATATYPE_CREATE  (H5OPEN H5P_CLS_DATATYPE_CREATE_ID_g)
+#define H5P_DATATYPE_CREATE (H5OPEN H5P_CLS_DATATYPE_CREATE_ID_g)
 /**
  * Datatype access property list class
  */
-#define H5P_DATATYPE_ACCESS  (H5OPEN H5P_CLS_DATATYPE_ACCESS_ID_g)
+#define H5P_DATATYPE_ACCESS (H5OPEN H5P_CLS_DATATYPE_ACCESS_ID_g)
 /**
  * Map creation property list class
  */
-#define H5P_MAP_CREATE       (H5OPEN H5P_CLS_MAP_CREATE_ID_g)
+#define H5P_MAP_CREATE (H5OPEN H5P_CLS_MAP_CREATE_ID_g)
 /**
  * Map access property list class
  */
-#define H5P_MAP_ACCESS       (H5OPEN H5P_CLS_MAP_ACCESS_ID_g)
+#define H5P_MAP_ACCESS (H5OPEN H5P_CLS_MAP_ACCESS_ID_g)
 /**
  * String creation property list class, is not user-accessible
  */
-#define H5P_STRING_CREATE    (H5OPEN H5P_CLS_STRING_CREATE_ID_g)
+#define H5P_STRING_CREATE (H5OPEN H5P_CLS_STRING_CREATE_ID_g)
 /**
  * Attribute creation property list class
  */
@@ -117,19 +117,19 @@
 /**
  * Object copy property list class
  */
-#define H5P_OBJECT_COPY      (H5OPEN H5P_CLS_OBJECT_COPY_ID_g)
+#define H5P_OBJECT_COPY (H5OPEN H5P_CLS_OBJECT_COPY_ID_g)
 /**
  * Link creation property list class
  */
-#define H5P_LINK_CREATE      (H5OPEN H5P_CLS_LINK_CREATE_ID_g)
+#define H5P_LINK_CREATE (H5OPEN H5P_CLS_LINK_CREATE_ID_g)
 /**
  * Link access property list class
  */
-#define H5P_LINK_ACCESS      (H5OPEN H5P_CLS_LINK_ACCESS_ID_g)
+#define H5P_LINK_ACCESS (H5OPEN H5P_CLS_LINK_ACCESS_ID_g)
 /**
  * VOL initialization property list class
  */
-#define H5P_VOL_INITIALIZE   (H5OPEN H5P_CLS_VOL_INITIALIZE_ID_g)
+#define H5P_VOL_INITIALIZE (H5OPEN H5P_CLS_VOL_INITIALIZE_ID_g)
 /**
  * Reference access property list class
  */
@@ -141,51 +141,51 @@
 /**
  * File creation default property list
  */
-#define H5P_FILE_CREATE_DEFAULT      (H5OPEN H5P_LST_FILE_CREATE_ID_g)
+#define H5P_FILE_CREATE_DEFAULT (H5OPEN H5P_LST_FILE_CREATE_ID_g)
 /**
  * File access default property list
  */
-#define H5P_FILE_ACCESS_DEFAULT      (H5OPEN H5P_LST_FILE_ACCESS_ID_g)
+#define H5P_FILE_ACCESS_DEFAULT (H5OPEN H5P_LST_FILE_ACCESS_ID_g)
 /**
  * Dataset creation default property list
  */
-#define H5P_DATASET_CREATE_DEFAULT   (H5OPEN H5P_LST_DATASET_CREATE_ID_g)
+#define H5P_DATASET_CREATE_DEFAULT (H5OPEN H5P_LST_DATASET_CREATE_ID_g)
 /**
  * Dataset access default property list
  */
-#define H5P_DATASET_ACCESS_DEFAULT   (H5OPEN H5P_LST_DATASET_ACCESS_ID_g)
+#define H5P_DATASET_ACCESS_DEFAULT (H5OPEN H5P_LST_DATASET_ACCESS_ID_g)
 /**
  * Dataset transfer default property list
  */
-#define H5P_DATASET_XFER_DEFAULT     (H5OPEN H5P_LST_DATASET_XFER_ID_g)
+#define H5P_DATASET_XFER_DEFAULT (H5OPEN H5P_LST_DATASET_XFER_ID_g)
 /**
  * File mount default property list
  */
-#define H5P_FILE_MOUNT_DEFAULT       (H5OPEN H5P_LST_FILE_MOUNT_ID_g)
+#define H5P_FILE_MOUNT_DEFAULT (H5OPEN H5P_LST_FILE_MOUNT_ID_g)
 /**
  * Group creation default property list
  */
-#define H5P_GROUP_CREATE_DEFAULT     (H5OPEN H5P_LST_GROUP_CREATE_ID_g)
+#define H5P_GROUP_CREATE_DEFAULT (H5OPEN H5P_LST_GROUP_CREATE_ID_g)
 /**
  * Group access default property list
  */
-#define H5P_GROUP_ACCESS_DEFAULT     (H5OPEN H5P_LST_GROUP_ACCESS_ID_g)
+#define H5P_GROUP_ACCESS_DEFAULT (H5OPEN H5P_LST_GROUP_ACCESS_ID_g)
 /**
  * Datytype creation default property list
  */
-#define H5P_DATATYPE_CREATE_DEFAULT  (H5OPEN H5P_LST_DATATYPE_CREATE_ID_g)
+#define H5P_DATATYPE_CREATE_DEFAULT (H5OPEN H5P_LST_DATATYPE_CREATE_ID_g)
 /**
  * Datytype access default property list
  */
-#define H5P_DATATYPE_ACCESS_DEFAULT  (H5OPEN H5P_LST_DATATYPE_ACCESS_ID_g)
+#define H5P_DATATYPE_ACCESS_DEFAULT (H5OPEN H5P_LST_DATATYPE_ACCESS_ID_g)
 /**
  * Map creation default property list
  */
-#define H5P_MAP_CREATE_DEFAULT       (H5OPEN H5P_LST_MAP_CREATE_ID_g)
+#define H5P_MAP_CREATE_DEFAULT (H5OPEN H5P_LST_MAP_CREATE_ID_g)
 /**
  * Map access default property list
  */
-#define H5P_MAP_ACCESS_DEFAULT       (H5OPEN H5P_LST_MAP_ACCESS_ID_g)
+#define H5P_MAP_ACCESS_DEFAULT (H5OPEN H5P_LST_MAP_ACCESS_ID_g)
 /**
  * Attribute creation default property list
  */
@@ -197,19 +197,19 @@
 /**
  * Object copy default property list
  */
-#define H5P_OBJECT_COPY_DEFAULT      (H5OPEN H5P_LST_OBJECT_COPY_ID_g)
+#define H5P_OBJECT_COPY_DEFAULT (H5OPEN H5P_LST_OBJECT_COPY_ID_g)
 /**
  * Link creation default property list
  */
-#define H5P_LINK_CREATE_DEFAULT      (H5OPEN H5P_LST_LINK_CREATE_ID_g)
+#define H5P_LINK_CREATE_DEFAULT (H5OPEN H5P_LST_LINK_CREATE_ID_g)
 /**
  * Link access default property list
  */
-#define H5P_LINK_ACCESS_DEFAULT      (H5OPEN H5P_LST_LINK_ACCESS_ID_g)
+#define H5P_LINK_ACCESS_DEFAULT (H5OPEN H5P_LST_LINK_ACCESS_ID_g)
 /**
  * VOL initialization default property list
  */
-#define H5P_VOL_INITIALIZE_DEFAULT   (H5OPEN H5P_LST_VOL_INITIALIZE_ID_g)
+#define H5P_VOL_INITIALIZE_DEFAULT (H5OPEN H5P_LST_VOL_INITIALIZE_ID_g)
 /**
  * Reference access default property list
  */
