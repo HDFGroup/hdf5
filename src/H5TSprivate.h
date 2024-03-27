@@ -25,6 +25,7 @@
 /* Include package's public headers */
 #include "H5TSdevelop.h"
 
+
 /**************************/
 /* Library Private Macros */
 /**************************/
@@ -69,6 +70,15 @@
 #endif
 #endif
 
+/* Atomics macros */
+#ifdef H5_HAVE_STDATOMIC_H
+#define H5TS_atomic_init_int(obj, desired)      atomic_init((obj), (desired))
+#define H5TS_atomic_load_int(obj)               atomic_load(obj)
+#define H5TS_atomic_store_int(obj, desired)     atomic_store((obj), (desired))
+#define H5TS_atomic_fetch_add_int(obj, arg)     atomic_fetch_add((obj), (arg))
+#define H5TS_atomic_fetch_sub_int(obj, arg)     atomic_fetch_sub((obj), (arg))
+#endif /* H5_HAVE_STDATOMIC_H */
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/
@@ -110,6 +120,20 @@ typedef pthread_once_t  H5TS_once_t;
 typedef void (*H5TS_once_init_func_t)(void);
 #endif
 #endif
+
+/* Atomics */
+#ifdef H5_HAVE_STDATOMIC_H
+typedef atomic_int H5TS_atomic_int_t;
+#else
+typedef struct {
+    H5TS_mutex_t mutex;
+    int value;
+} H5TS_atomic_int_t;
+#endif
+
+/*****************************/
+/* Library-private Variables */
+/*****************************/
 
 /*****************************/
 /* Library-private Variables */
@@ -164,6 +188,15 @@ H5_DLL herr_t H5TS_thread_setcancelstate(int state, int *oldstate);
 H5_DLL herr_t H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads);
 H5_DLL herr_t H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx);
 H5_DLL herr_t H5TS_pool_destroy(H5TS_pool_t *pool);
+
+/* Emulated C11 atomics */
+#ifndef H5_HAVE_STDATOMIC_H
+H5_DLL void H5TS_atomic_init_int(H5TS_atomic_int_t *obj, int desired);
+H5_DLL int H5TS_atomic_load_int(H5TS_atomic_int_t *obj);
+H5_DLL void H5TS_atomic_store_int(H5TS_atomic_int_t *obj, int desired);
+H5_DLL int H5TS_atomic_fetch_add_int(H5TS_atomic_int_t *obj, int arg);
+H5_DLL int H5TS_atomic_fetch_sub_int(H5TS_atomic_int_t *obj, int arg);
+#endif /* H5_HAVE_STDATOMIC_H */
 
 #else /* H5_HAVE_THREADSAFE */
 

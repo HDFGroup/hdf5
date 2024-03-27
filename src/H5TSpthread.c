@@ -24,7 +24,6 @@
 /****************/
 
 #include "H5TSmodule.h" /* This source code file is part of the H5TS module */
-#define H5TS_TESTING    /* Suppress warning about H5TS testing funcs */
 
 /***********/
 /* Headers */

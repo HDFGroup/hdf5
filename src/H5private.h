@@ -66,6 +66,11 @@
 #endif
 #endif
 
+/* C11 atomics */
+#ifdef H5_HAVE_STDATOMIC_H
+#include <stdatomic.h>
+#endif
+
 /*
  * The `struct stat' data type for stat() and fstat(). This is a POSIX file
  * but often appears on non-POSIX systems also.  The `struct stat' is required

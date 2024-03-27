@@ -772,13 +772,6 @@ if (HDF5_ENABLE_SUBFILING_VFD)
     message (FATAL_ERROR "Subfiling requires thread operations support")
   endif ()
 
-  CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
-  if (NOT HAVE_STDATOMIC_H)
-    message (FATAL_ERROR "Subfiling VFD requires atomic operations support. C11 stdatomic.h NOT available.")
-  else()
-    set (H5_HAVE_STDATOMIC_H 1)
-  endif()
-
   set (H5_HAVE_SUBFILING_VFD 1)
   # IOC VFD is currently only built when subfiling is enabled
   set (H5_HAVE_IOC_VFD 1)
@@ -915,6 +908,10 @@ if (HDF5_ENABLE_THREADSAFE)
   if (Threads_FOUND)
     set (H5_HAVE_THREADSAFE 1)
   endif ()
+  CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
+  if (HAVE_STDATOMIC_H)
+    set (H5_HAVE_STDATOMIC_H 1)
+  endif()
 endif ()
 
 #-----------------------------------------------------------------------------

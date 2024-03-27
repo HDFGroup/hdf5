@@ -2186,6 +2186,10 @@ if test "X$THREADSAFE" = "Xyes"; then
         fi
 
     fi # end of Pthreads checks
+
+    ## Check for C11 atomics
+    AC_CHECK_HEADERS([stdatomic.h],[HAVE_STDATOMIC_H="yes"],[HAVE_STDATOMIC_H="no"])
+
 fi # end of threadsafe processing
 
 ## ----------------------------------------------------------------------
@@ -3384,12 +3388,6 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
        AC_MSG_ERROR([unable to link MPI program that uses MPI_Comm_split_type])
        ]
     )
-
-    HAVE_STDATOMIC_H="yes"
-    AC_CHECK_HEADERS([stdatomic.h],,[HAVE_STDATOMIC_H="no"])
-    if test "x$HAVE_STDATOMIC_H" = "xno"; then
-      AC_MSG_ERROR([Subfiling VFD requires atomic operations support. C11 stdatomic.h NOT available.])
-    fi
 
     # Checks for threadsafe operation
     if test "x$HAVE_THREADSAFE" = "xno"; then

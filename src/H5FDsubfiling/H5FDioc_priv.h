@@ -17,12 +17,6 @@
 #ifndef H5FDioc_priv_H
 #define H5FDioc_priv_H
 
-/********************/
-/* Standard Headers */
-/********************/
-
-#include <stdatomic.h>
-
 /**************/
 /* H5 Headers */
 /**************/

@@ -17,8 +17,6 @@
 #ifndef H5_SUBFILING_COMMON_H
 #define H5_SUBFILING_COMMON_H
 
-#include <stdatomic.h>
-
 #include "H5private.h"
 #include "H5FDprivate.h"
 #include "H5Iprivate.h"

@@ -17,12 +17,6 @@
 #ifndef H5FDsubfiling_priv_H
 #define H5FDsubfiling_priv_H
 
-/********************/
-/* Standard Headers */
-/********************/
-
-#include <stdatomic.h>
-
 /**************/
 /* H5 Headers */
 /**************/

@@ -49,6 +49,7 @@ void tts_rec_rw_lock_smoke_check_3(void);
 void tts_rec_rw_lock_smoke_check_4(void);
 void tts_develop_api(void);
 void tts_thread_pool(void);
+void tts_atomics(void);
 
 /* Prototypes for the cleanup routines */
 void cleanup_dcreate(void);

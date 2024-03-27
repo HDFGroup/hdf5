@@ -344,6 +344,7 @@ set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe.h
     ${HDF5_TEST_SOURCE_DIR}/ttsafe.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_acreate.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_atomic.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_attr_vlen.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_cancel.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_dcreate.c

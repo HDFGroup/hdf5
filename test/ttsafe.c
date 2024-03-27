@@ -104,6 +104,10 @@ main(int argc, char *argv[])
 #ifdef H5_HAVE_THREADSAFE
     AddTest("thread_id", tts_thread_id, NULL, "thread IDs", NULL);
     AddTest("thread_pool", tts_thread_pool, NULL, "thread pools", NULL);
+#ifndef H5_HAVE_STDATOMIC_H
+    /* C11 atomics only tested when emulated */
+    AddTest("atomics", tts_atomics, NULL, "emulation of C11 atomics", NULL);
+#endif /* H5_HAVE_PTHREAD_H */
 
     AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
     AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
