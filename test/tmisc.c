@@ -337,9 +337,19 @@ typedef struct {
    See https://nvd.nist.gov/vuln/detail/CVE-2020-10812 */
 #define CVE_2020_10812_FILENAME "cve_2020_10812.h5"
 
-#define MISC38_FILE "type_conversion_path_table_issue.h5"
-#define MISC39_FILE "set_est_link_info.h5"
-#define MISC40_FILE "obj_props_intermediate.h5"
+/* Definitions for misc. test #38 */
+#define MISC38A_FILE     "tmisc38a.h5"
+#define MISC38A_DSETNAME "Fletcher_float_data_be"
+#define MISC38B_FILE     "tmisc38b.h5"
+#define MISC38B_DSETNAME "unusual_datatype"
+#define MISC38C_FILE     "tmisc38c.h5"
+#define MISC38C_DSETNAME "dset_unusual_datatype"
+#define MISC38C_TYPENAME "type_unusual_datatype"
+#define MISC38C_ATTRNAME "attr_unusual_datatype"
+
+#define MISC39_FILE "type_conversion_path_table_issue.h5"
+#define MISC40_FILE "set_est_link_info.h5"
+#define MISC41_FILE "obj_props_intermediate.h5"
 
 /****************************************************************
 **
@@ -4025,6 +4035,7 @@ test_misc21(void)
 static void
 test_misc22(void)
 {
+    hid_t   fapl; /* File access property list */
     hid_t   fid, sid, dcpl, dsid, dcpl2;
     char   *buf;
     hsize_t dims[2]       = {MISC22_SPACE_DIM0, MISC22_SPACE_DIM1},
@@ -4059,9 +4070,21 @@ test_misc22(void)
     buf = (char *)calloc(MISC22_SPACE_DIM0 * MISC22_SPACE_DIM1, 8);
     CHECK(buf, NULL, "calloc");
 
+    /* Create a file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set property to allow unusual datatypes to be created */
+    ret = H5Pset_relax_file_integrity_checks(fapl, H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS);
+    CHECK(ret, FAIL, "H5Pset_relax_file_integrity_checks");
+
     /* Create the file */
-    fid = H5Fcreate(MISC22_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(MISC22_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Close file access property list */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Create the dataspace for the dataset */
     sid = H5Screate_simple(MISC22_SPACE_RANK, dims, NULL);
@@ -6264,6 +6287,223 @@ test_misc37(void)
 /****************************************************************
 **
 **  test_misc38():
+**      Test for seg fault issue when opening dataset with corrupted
+**      object header.
+**
+****************************************************************/
+static void
+test_misc38(void)
+{
+    const char *testfile  = H5_get_srcdir_filename(MISC38A_FILE); /* Corrected test file name */
+    const char *testfile2 = H5_get_srcdir_filename(MISC38B_FILE); /* Corrected test file name */
+    bool        driver_is_default_compatible;
+    hid_t       fapl = H5I_INVALID_HID; /* File access property list */
+    hid_t       fid  = H5I_INVALID_HID; /* File ID */
+    hid_t       did  = H5I_INVALID_HID; /* Dataset ID */
+    hid_t       sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t       tid  = H5I_INVALID_HID; /* Datatype ID */
+    hid_t       gid  = H5I_INVALID_HID; /* Group ID */
+    hid_t       aid  = H5I_INVALID_HID; /* Attribute ID */
+    size_t      type_size;              /* Size of dataset's datatype */
+    uint64_t    rfic_flags;             /* Value of RFIC flags property for FAPL & file */
+    herr_t      ret;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Fix for detecting numeric datatypes with unusually large numbers of unused bits"));
+
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
+
+    if (!driver_is_default_compatible) {
+        printf("-- SKIPPED --\n");
+        return;
+    }
+
+    fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* This should fail due to the illegal datatype encoding in the corrupted
+     * object header.
+     * It should fail gracefully and not seg fault
+     */
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(fid, MISC38A_DSETNAME, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    VERIFY(did, H5I_INVALID_HID, "H5Dopen2");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Create a file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, H5I_INVALID_HID, "H5Pcreate");
+
+    /* Get property to allow unusual datatypes to be opened */
+    rfic_flags = H5F_RFIC_ALL;
+    ret        = H5Pget_relax_file_integrity_checks(fapl, &rfic_flags);
+    CHECK(ret, FAIL, "H5Pget_relax_file_integrity_checks");
+    VERIFY(rfic_flags, 0, "H5Pget_relax_file_integrity_checks");
+
+    /* Set property to allow unusual datatypes to be opened */
+    ret = H5Pset_relax_file_integrity_checks(fapl, H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS);
+    CHECK(ret, FAIL, "H5Pset_relax_file_integrity_checks");
+
+    /* Get property to allow unusual datatypes to be opened */
+    rfic_flags = 0;
+    ret        = H5Pget_relax_file_integrity_checks(fapl, &rfic_flags);
+    CHECK(ret, FAIL, "H5Pget_relax_file_integrity_checks");
+    VERIFY(rfic_flags, H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS, "H5Pget_relax_file_integrity_checks");
+
+    /* Open valid file */
+    fid = H5Fopen(testfile2, H5F_ACC_RDONLY, fapl);
+    CHECK(fid, H5I_INVALID_HID, "H5Fopen");
+
+    /* Close file access property list */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Open dataset w/unusual datatype
+     * It should succeed and not return an error or seg fault
+     */
+    did = H5Dopen2(fid, MISC38B_DSETNAME, H5P_DEFAULT);
+    CHECK(did, H5I_INVALID_HID, "H5Dopen2");
+
+    /* Get the dataset's datatype */
+    tid = H5Dget_type(did);
+    CHECK(tid, H5I_INVALID_HID, "H5Dget_type");
+
+    type_size = H5Tget_size(tid);
+    CHECK(type_size, 0, "H5Tget_size");
+    VERIFY(type_size, 1000, "H5Tget_size");
+
+    ret = H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Check that property is handled correctly */
+    fapl = H5Fget_access_plist(fid);
+    CHECK(fapl, H5I_INVALID_HID, "H5Fget_access_plist");
+
+    /* Get property to allow unusual datatypes to be opened */
+    rfic_flags = 0;
+    ret        = H5Pget_relax_file_integrity_checks(fapl, &rfic_flags);
+    CHECK(ret, FAIL, "H5Pget_relax_file_integrity_checks");
+    VERIFY(rfic_flags, H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS, "H5Pget_relax_file_integrity_checks");
+
+    /* Close file access property list */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Create objects with unusual datatypes and verify correct behavior */
+    for (unsigned u = 0; u < 3; u++) {
+        /* Create a file access property list */
+        fapl = H5Pcreate(H5P_FILE_ACCESS);
+        CHECK(fapl, H5I_INVALID_HID, "H5Pcreate");
+
+        if (1 == u) {
+            /* Set property to allow unusual datatypes to be opened */
+            ret = H5Pset_relax_file_integrity_checks(fapl, H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS);
+            CHECK(ret, FAIL, "H5Pset_relax_file_integrity_checks");
+        }
+        else if (2 == u) {
+            /* Use a later version of the file format, with checksummed object headers */
+            ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+            CHECK(ret, FAIL, "H5Pset_libver_bounds");
+        }
+
+        fid = H5Fcreate(MISC38C_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+        CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+        /* Close file access property list */
+        ret = H5Pclose(fapl);
+        CHECK(ret, FAIL, "H5Pclose");
+
+        sid = H5Screate(H5S_SCALAR);
+        CHECK(sid, H5I_INVALID_HID, "H5Screate");
+
+        tid = H5Tcopy(H5T_NATIVE_INT);
+        CHECK(tid, H5I_INVALID_HID, "H5Tcopy");
+
+        /* Set type to have unusual size, for precision */
+        ret = H5Tset_size(tid, 1000);
+        CHECK(ret, FAIL, "H5Tset_size");
+
+        /* Create a dataset with the unusual datatype */
+        H5E_BEGIN_TRY
+        {
+            did = H5Dcreate2(fid, MISC38C_DSETNAME, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY
+        if (u > 0) {
+            CHECK(did, H5I_INVALID_HID, "H5Dcreate2");
+
+            ret = H5Dclose(did);
+            CHECK(ret, FAIL, "H5Dclose");
+        }
+        else {
+            VERIFY(did, H5I_INVALID_HID, "H5Dcreate2");
+        }
+
+        gid = H5Gopen2(fid, "/", H5P_DEFAULT);
+        CHECK(gid, H5I_INVALID_HID, "H5Gopen2");
+
+        /* Create an attribute with the unusual datatype */
+        H5E_BEGIN_TRY
+        {
+            aid = H5Acreate2(gid, MISC38C_ATTRNAME, tid, sid, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY
+        if (u > 0) {
+            CHECK(aid, H5I_INVALID_HID, "H5Acreate2");
+
+            ret = H5Aclose(aid);
+            CHECK(ret, FAIL, "H5Aclose");
+        }
+        else {
+            VERIFY(aid, H5I_INVALID_HID, "H5Acreate2");
+        }
+
+        ret = H5Gclose(gid);
+        CHECK(ret, FAIL, "H5Gclose");
+
+        ret = H5Sclose(sid);
+        CHECK(ret, FAIL, "H5Sclose");
+
+        /* Create a committed datatype with the unusual datatype */
+        H5E_BEGIN_TRY
+        {
+            ret = H5Tcommit2(fid, MISC38C_TYPENAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY
+        if (u > 0) {
+            CHECK(ret, FAIL, "H5Tcommit2");
+        }
+        else {
+            VERIFY(ret, FAIL, "H5Tcommit2");
+        }
+
+        if (tid != H5I_INVALID_HID) {
+            ret = H5Tclose(tid);
+            CHECK(ret, FAIL, "H5Tclose");
+        }
+
+        ret = H5Fclose(fid);
+        CHECK(ret, FAIL, "H5Fclose");
+    }
+} /* end test_misc38() */
+
+/****************************************************************
+**
+**  test_misc39():
 **      Test for issue where the type conversion path table cache
 **      would grow continuously when variable-length datatypes
 **      are involved due to file VOL object comparisons causing
@@ -6271,7 +6511,7 @@ test_misc37(void)
 **
 ****************************************************************/
 static void
-test_misc38(void)
+test_misc39(void)
 {
     H5VL_object_t *file_vol_obj  = NULL;
     const char    *buf[]         = {"attr_value"};
@@ -6309,7 +6549,7 @@ test_misc38(void)
      */
     init_npaths = H5T__get_path_table_npaths();
 
-    file_id = H5Fcreate(MISC38_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(MISC39_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file_id, H5I_INVALID_HID, "H5Fcreate");
 
     /* Check if native VOL is being used */
@@ -6444,7 +6684,7 @@ test_misc38(void)
     CHECK_PTR(vlen_rbuf, "vlen varstr read buf allocation");
 
     for (size_t i = 0; i < 10; i++) {
-        file_id = H5Fopen(MISC38_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+        file_id = H5Fopen(MISC39_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
         CHECK(file_id, H5I_INVALID_HID, "H5Fopen");
 
         /* Retrieve file's VOL object field for further use */
@@ -6546,7 +6786,7 @@ test_misc38(void)
 
 /****************************************************************
 **
-**  test_misc39(): Ensure H5Pset_est_link_info() handles large
+**  test_misc40(): Ensure H5Pset_est_link_info() handles large
 **                 values
 **
 **  H5Pset_est_link_info() values can be set to large values,
@@ -6560,7 +6800,7 @@ test_misc38(void)
 **
 ****************************************************************/
 static void
-test_misc39(void)
+test_misc40(void)
 {
     hid_t  fid  = H5I_INVALID_HID; /* File ID */
     hid_t  gid  = H5I_INVALID_HID; /* Group ID */
@@ -6581,7 +6821,7 @@ test_misc39(void)
     CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     /* Create the file */
-    fid = H5Fcreate(MISC39_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(MISC40_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Compose group creation property list */
@@ -6639,16 +6879,16 @@ test_misc39(void)
     ret = H5Pclose(gcpl);
     CHECK(ret, FAIL, "H5Pclose");
 
-} /* end test_misc39() */
+} /* end test_misc40() */
 
 /****************************************************************
 **
-**  test_misc40(): Test that object creation properties are propagated
+**  test_misc41(): Test that object creation properties are propagated
 **  to intermediate groups.
 **
 ****************************************************************/
 static void
-test_misc40(void)
+test_misc41(void)
 {
     hid_t    lcpl        = H5I_INVALID_HID;
     hid_t    gcpl        = H5I_INVALID_HID;
@@ -6675,7 +6915,7 @@ test_misc40(void)
     status = H5Pset_create_intermediate_group(lcpl, 1);
     CHECK(status, FAIL, "H5Pset_create_intermediate_group");
 
-    fid = H5Fcreate(MISC40_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(MISC41_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /*
@@ -6856,7 +7096,7 @@ test_misc40(void)
     status = H5Pclose(lcpl);
     CHECK(status, FAIL, "H5Pclose");
 
-} /* end test_misc40() */
+} /* end test_misc41() */
 
 /****************************************************************
 **
@@ -6930,9 +7170,10 @@ test_misc(void)
     test_misc35(); /* Test behavior of free-list & allocation statistics API calls */
     test_misc36(); /* Exercise H5atclose and H5is_library_terminating */
     test_misc37(); /* Test for seg fault failure at file close */
-    test_misc38(); /* Test for type conversion path table issue */
-    test_misc39(); /* Ensure H5Pset_est_link_info() handles large values */
-    test_misc40(); /* Test object properties propagated to intermediate groups */
+    test_misc38(); /* Test for seg fault when opening corrupted object header */
+    test_misc39(); /* Test for type conversion path table issue */
+    test_misc40(); /* Ensure H5Pset_est_link_info() handles large values */
+    test_misc41(); /* Test object properties propagated to intermediate groups */
 
 } /* test_misc() */
 
@@ -6988,9 +7229,10 @@ cleanup_misc(void)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         H5Fdelete(MISC31_FILE, H5P_DEFAULT);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-        H5Fdelete(MISC38_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC38C_FILE, H5P_DEFAULT);
         H5Fdelete(MISC39_FILE, H5P_DEFAULT);
         H5Fdelete(MISC40_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC41_FILE, H5P_DEFAULT);
     }
     H5E_END_TRY
 } /* end cleanup_misc() */

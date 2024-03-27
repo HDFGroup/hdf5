@@ -140,6 +140,9 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
 #endif
 
     for (size_t u = 0; u < mesg->nused; u++) {
+
+        hsize_t offset = 0;
+
         /* Name */
         if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
@@ -156,7 +159,8 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
         /* File offset */
         if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-        H5F_DECODE_LENGTH(f, p, mesg->slot[u].offset);
+        H5F_DECODE_LENGTH(f, p, offset); /* Decode into an hsize_t to avoid sign warnings */
+        mesg->slot[u].offset = (HDoff_t)offset;
 
         /* Size */
         if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))

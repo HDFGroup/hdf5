@@ -12,12 +12,12 @@ File space information for file metadata (in bytes):
 	Superblock extension: 0
 	User block: 0
 	Object headers: (total/unused)
-		Groups: 48/8
-		Datasets(exclude compact data): 4136/1344
+		Groups: 40/0
+		Datasets(exclude compact data): 4128/1088
 		Datatypes: 80/0
 	Groups:
 		B-tree/List: 1200
-		Heap: 288
+		Heap: 384
 	Attributes:
 		B-tree/List: 0
 		Heap: 0
@@ -50,7 +50,7 @@ Dataset dimension information:
 		# of datasets with dimension size 100 - 999: 1
 		Total # of datasets: 1
 Dataset storage information:
-	Total raw data size: 8659
+	Total raw data size: 9046
 	Total external raw data size: 400
 Dataset layout information:
 	Dataset layout counts[COMPACT]: 1
@@ -91,9 +91,9 @@ Free-space section bins:
 File space management strategy: H5F_FSPACE_STRATEGY_FSM_AGGR
 File space page size: 4096 bytes
 Summary of file space information:
-  File metadata: 37312 bytes
-  Raw data: 8659 bytes
+  File metadata: 37392 bytes
+  Raw data: 9046 bytes
   Amount/Percent of tracked free space: 0 bytes/0.0%
-  Unaccounted space: 301 bytes
-Total space: 46272 bytes
+  Unaccounted space: 258 bytes
+Total space: 46696 bytes
 External raw data: 400 bytes

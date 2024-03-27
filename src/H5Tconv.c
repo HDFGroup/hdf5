@@ -19,18 +19,21 @@
 /****************/
 
 #include "H5Tmodule.h" /* This source code file is part of the H5T module */
+#define H5R_FRIEND     /* Suppress error about including H5Rpkg */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions            */
-#include "H5CXprivate.h" /* API Contexts                         */
-#include "H5Dprivate.h"  /* Datasets                */
-#include "H5Eprivate.h"  /* Error handling              */
-#include "H5FLprivate.h" /* Free Lists                           */
-#include "H5Iprivate.h"  /* IDs                      */
-#include "H5MMprivate.h" /* Memory management            */
-#include "H5Tpkg.h"      /* Datatypes                */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5CXprivate.h" /* API Contexts                             */
+#include "H5Dprivate.h"  /* Datasets                                 */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Pprivate.h"  /* Property lists                           */
+#include "H5Rpkg.h"      /* References                               */
+#include "H5Tpkg.h"      /* Datatypes                                */
 
 /****************/
 /* Local Macros */
@@ -3445,26 +3448,33 @@ H5T__conv_vlen(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T
     bool                  write_to_file = false; /* Flag to indicate writing to file */
     htri_t                parent_is_vlen;        /* Flag to indicate parent is vlen datatype */
     size_t                bg_seq_len = 0;        /* The number of elements in the background sequence */
-    H5T_t                *tsrc_cpy   = NULL;     /*temporary copy of source base datatype */
-    H5T_t                *tdst_cpy   = NULL;     /*temporary copy of destination base datatype */
-    hid_t                 tsrc_id    = H5I_INVALID_HID; /*temporary type atom */
-    hid_t                 tdst_id    = H5I_INVALID_HID; /*temporary type atom */
-    uint8_t              *s          = NULL;            /*source buffer            */
-    uint8_t              *d          = NULL;            /*destination buffer        */
-    uint8_t              *b          = NULL;            /*background buffer        */
-    ssize_t               s_stride, d_stride;           /*src and dst strides        */
-    ssize_t               b_stride;                     /*bkg stride            */
-    size_t                safe;                  /*how many elements are safe to process in each pass */
-    size_t                src_base_size;         /*source base size*/
-    size_t                dst_base_size;         /*destination base size*/
-    void                 *conv_buf      = NULL;  /*temporary conversion buffer          */
-    size_t                conv_buf_size = 0;     /*size of conversion buffer in bytes */
-    void                 *tmp_buf       = NULL;  /*temporary background buffer          */
-    size_t                tmp_buf_size  = 0;     /*size of temporary bkg buffer         */
-    bool                  nested        = false; /*flag of nested VL case             */
-    bool                  need_ids      = false; /*whether we need IDs for the datatypes */
-    size_t                elmtno;                /*element number counter         */
-    herr_t                ret_value = SUCCEED;   /* Return value */
+    H5T_t                *tsrc_cpy   = NULL;     /* Temporary copy of source base datatype */
+    H5T_t                *tdst_cpy   = NULL;     /* Temporary copy of destination base datatype */
+    hid_t                 tsrc_id    = H5I_INVALID_HID; /* Temporary type atom */
+    hid_t                 tdst_id    = H5I_INVALID_HID; /* Temporary type atom */
+    uint8_t              *s          = NULL;            /* Source buffer            */
+    uint8_t              *d          = NULL;            /* Destination buffer        */
+    uint8_t              *b          = NULL;            /* Background buffer        */
+    ssize_t               s_stride   = 0;               /* Src stride */
+    ssize_t               d_stride   = 0;               /* Dst stride */
+    ssize_t               b_stride;                     /* Bkg stride            */
+    size_t                safe = 0;              /* How many elements are safe to process in each pass */
+    size_t                src_base_size;         /* Source base size*/
+    size_t                dst_base_size;         /* Destination base size*/
+    void                 *conv_buf      = NULL;  /* Temporary conversion buffer          */
+    size_t                conv_buf_size = 0;     /* Size of conversion buffer in bytes */
+    void                 *tmp_buf       = NULL;  /* Temporary background buffer          */
+    size_t                tmp_buf_size  = 0;     /* Size of temporary bkg buffer         */
+    bool                  nested        = false; /* Flag of nested VL case             */
+    bool                  need_ids      = false; /* Whether we need IDs for the datatypes */
+    size_t                elmtno        = 0;     /* Element number counter               */
+    size_t                orig_d_stride = 0;     /* Original destination stride (used for error handling) */
+    size_t orig_nelmts = nelmts; /* Original # of elements to convert (used for error handling) */
+    bool   convert_forward =
+        true; /* Current direction of conversion (forward or backward, used for error handling) */
+    bool conversions_made =
+        false; /* Flag to indicate conversions have been performed, used for error handling */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -3600,6 +3610,10 @@ H5T__conv_vlen(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T
             /* Set the flag for nested VL case */
             if (write_to_file && parent_is_vlen && bkg != NULL)
                 nested = true;
+
+            /* Save info for unraveling on errors */
+            orig_d_stride   = (size_t)d_stride;
+            convert_forward = !(d_stride > s_stride);
 
             /* The outer loop of the type conversion macro, controlling which */
             /* direction the buffer is walked */
@@ -3782,6 +3796,9 @@ H5T__conv_vlen(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T
                         }         /* end if */
                     }             /* end else */
 
+                    /* Indicate that elements have been converted, in case of error */
+                    conversions_made = true;
+
                     /* Advance pointers */
                     s += s_stride;
                     d += d_stride;
@@ -3801,6 +3818,49 @@ H5T__conv_vlen(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T
     } /* end switch */
 
 done:
+    /* Release converted elements on error */
+    if (ret_value < 0 && conversions_made) {
+        size_t dest_count;
+
+        /* Set up for first pass to destroy references */
+        if (nelmts < orig_nelmts || (convert_forward && elmtno < safe)) {
+            dest_count = orig_nelmts - nelmts;
+
+            /* Set pointer to correct location, based on direction chosen */
+            if (convert_forward) {
+                d = (uint8_t *)buf;
+                dest_count += elmtno; /* Include partial iteration in first pass, for forward conversions */
+            }
+            else
+                d = (uint8_t *)buf + (nelmts * orig_d_stride);
+
+            /* Destroy vlen elements that have already been converted */
+            while (dest_count > 0) {
+                H5T_vlen_reclaim_elmt(d, dst); /* Ignore errors at this point */
+                d += orig_d_stride;
+                dest_count--;
+            }
+        }
+
+        /* Do any remaining partial iteration, if converting backwards */
+        if (!convert_forward && elmtno < safe) {
+            dest_count = elmtno;
+
+            /* Set pointer to correct location */
+            if (d_stride > 0)
+                d = (uint8_t *)buf + ((nelmts - safe) * orig_d_stride);
+            else
+                d = (uint8_t *)buf + ((nelmts - elmtno) * orig_d_stride);
+
+            /* Destroy references that have already been converted */
+            while (dest_count > 0) {
+                H5T_vlen_reclaim_elmt(d, dst); /* Ignore errors at this point */
+                d += orig_d_stride;
+                dest_count--;
+            }
+        }
+    }
+
     if (tsrc_id >= 0) {
         if (H5I_dec_ref(tsrc_id) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "can't decrement reference on temporary ID");
@@ -4033,16 +4093,23 @@ H5T__conv_ref(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
               const H5T_conv_ctx_t H5_ATTR_UNUSED *conv_ctx, size_t nelmts, size_t buf_stride,
               size_t bkg_stride, void *buf, void *bkg)
 {
-    uint8_t *s = NULL;             /* source buffer                        */
-    uint8_t *d = NULL;             /* destination buffer                   */
-    uint8_t *b = NULL;             /* background buffer                    */
-    ssize_t  s_stride, d_stride;   /* src and dst strides                  */
-    ssize_t  b_stride;             /* bkg stride                           */
-    size_t   safe;                 /* how many elements are safe to process in each pass */
-    void    *conv_buf      = NULL; /* temporary conversion buffer          */
-    size_t   conv_buf_size = 0;    /* size of conversion buffer in bytes   */
-    size_t   elmtno;               /* element number counter               */
-    herr_t   ret_value = SUCCEED;  /* return value                         */
+    uint8_t *s        = NULL;        /* source buffer                        */
+    uint8_t *d        = NULL;        /* destination buffer                   */
+    uint8_t *b        = NULL;        /* background buffer                    */
+    ssize_t  s_stride = 0;           /* src stride                  */
+    ssize_t  d_stride = 0;           /* dst stride                  */
+    ssize_t  b_stride;               /* bkg stride                           */
+    size_t   safe          = 0;      /* how many elements are safe to process in each pass */
+    void    *conv_buf      = NULL;   /* temporary conversion buffer          */
+    size_t   conv_buf_size = 0;      /* size of conversion buffer in bytes   */
+    size_t   elmtno        = 0;      /* element number counter               */
+    size_t   orig_d_stride = 0;      /* Original destination stride (used for error handling) */
+    size_t   orig_nelmts   = nelmts; /* Original # of elements to convert (used for error handling) */
+    bool     convert_forward =
+        true; /* Current direction of conversion (forward or backward, used for error handling) */
+    bool conversions_made =
+        false; /* Flag to indicate conversions have been performed, used for error handling */
+    herr_t ret_value = SUCCEED; /* return value                         */
 
     FUNC_ENTER_PACKAGE
 
@@ -4102,6 +4169,10 @@ H5T__conv_ref(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
             } /* end if */
             else
                 b_stride = 0;
+
+            /* Save info for unraveling on errors */
+            orig_d_stride   = (size_t)d_stride;
+            convert_forward = !(d_stride > s_stride);
 
             /* The outer loop of the type conversion macro, controlling which */
             /* direction the buffer is walked */
@@ -4202,6 +4273,9 @@ H5T__conv_ref(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                         } /* end else */
                     }     /* end else */
 
+                    /* Indicate that elements have been converted, in case of error */
+                    conversions_made = true;
+
                     /* Advance pointers */
                     s += s_stride;
                     d += d_stride;
@@ -4221,6 +4295,52 @@ H5T__conv_ref(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
     } /* end switch */
 
 done:
+    /* Release converted elements on error */
+    if (ret_value < 0 && conversions_made) {
+        H5R_ref_priv_t ref_priv;
+        size_t         dest_count;
+
+        /* Set up for first pass to destroy references */
+        if (nelmts < orig_nelmts || (convert_forward && elmtno < safe)) {
+            dest_count = orig_nelmts - nelmts;
+
+            /* Set pointer to correct location, based on direction chosen */
+            if (convert_forward) {
+                d = (uint8_t *)buf;
+                dest_count += elmtno; /* Include partial iteration in first pass, for forward conversions */
+            }
+            else
+                d = (uint8_t *)buf + (nelmts * orig_d_stride);
+
+            /* Destroy references that have already been converted */
+            while (dest_count > 0) {
+                memcpy(&ref_priv, d, sizeof(H5R_ref_priv_t));
+                H5R__destroy(&ref_priv); /* Ignore errors at this point */
+                d += orig_d_stride;
+                dest_count--;
+            }
+        }
+
+        /* Do any remaining partial iteration, if converting backwards */
+        if (!convert_forward && elmtno < safe) {
+            dest_count = elmtno;
+
+            /* Set pointer to correct location */
+            if (d_stride > 0)
+                d = (uint8_t *)buf + ((nelmts - safe) * orig_d_stride);
+            else
+                d = (uint8_t *)buf + ((nelmts - elmtno) * orig_d_stride);
+
+            /* Destroy references that have already been converted */
+            while (dest_count > 0) {
+                memcpy(&ref_priv, d, sizeof(H5R_ref_priv_t));
+                H5R__destroy(&ref_priv); /* Ignore errors at this point */
+                d += orig_d_stride;
+                dest_count--;
+            }
+        }
+    }
+
     /* Release the conversion buffer (always allocated, except on errors) */
     if (conv_buf)
         conv_buf = H5FL_BLK_FREE(ref_seq, conv_buf);
