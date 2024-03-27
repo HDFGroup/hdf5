@@ -35,7 +35,7 @@
 #define H5VL_MAP_CREATE   1 /**< Callback operation ID for map create */
 #define H5VL_MAP_OPEN     2 /**< Callback operation ID for map open */
 #define H5VL_MAP_GET_VAL  3 /**< Callback operation ID for getting an associated value from a map */
-#define H5VL_MAP_EXISTS   4 /**< Callback operation ID for checking a map existence */
+#define H5VL_MAP_EXISTS   4 /**< Callback operation ID for checking if a value exists in a map */
 #define H5VL_MAP_PUT      5 /**< Callback operation ID for putting a key-value pair to a map */
 #define H5VL_MAP_GET      6 /**< Callback operation ID for map get callback */
 #define H5VL_MAP_SPECIFIC 7 /**< Callback operation ID for map specific operation */
