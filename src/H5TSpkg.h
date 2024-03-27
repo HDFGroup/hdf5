@@ -43,14 +43,6 @@
 /* Package Private Typedefs */
 /****************************/
 
-/* Recursive exclusive locks */
-typedef struct H5TS_ex_lock_t {
-    H5TS_mutex_t  mutex;
-    H5TS_cond_t   cond_var;
-    H5TS_thread_t owner_thread;
-    unsigned      lock_count;
-} H5TS_ex_lock_t;
-
 /* Thread Barrier */
 #ifdef H5_HAVE_PTHREAD_BARRIER
 typedef pthread_barrier_t H5TS_barrier_t;
@@ -67,7 +59,10 @@ typedef struct H5TS_barrier_t {
 /* Info for the global API lock */
 typedef struct H5TS_api_info_t {
     /* API lock */
-    H5TS_ex_lock_t api_lock;
+    H5TS_mutex_t api_mutex;
+
+    /* Count of recursive API calls by the same thread */
+    unsigned lock_count;
 
     /* Count of # of attempts to acquire API lock */
     H5TS_atomic_uint_t attempt_lock_count;
@@ -254,14 +249,6 @@ H5_DLL herr_t H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock);
 H5_DLL herr_t H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock);
 H5_DLL herr_t H5TS__rw_unlock(H5TS_rw_lock_t *rw_lock);
 H5_DLL herr_t H5TS__rw_lock_destroy(H5TS_rw_lock_t *rw_lock);
-
-/* Recursive exclusive lock related function declarations */
-H5_DLL herr_t H5TS__ex_lock_init(H5TS_ex_lock_t *lock);
-H5_DLL herr_t H5TS__ex_lock(H5TS_ex_lock_t *lock);
-H5_DLL herr_t H5TS__ex_acquire(H5TS_ex_lock_t *lock, unsigned lock_count, bool *acquired);
-H5_DLL herr_t H5TS__ex_release(H5TS_ex_lock_t *lock, unsigned int *lock_count);
-H5_DLL herr_t H5TS__ex_unlock(H5TS_ex_lock_t *lock);
-H5_DLL herr_t H5TS__ex_lock_destroy(H5TS_ex_lock_t *lock);
 
 /* Barrier related function declarations */
 H5_DLL herr_t H5TS__barrier_init(H5TS_barrier_t *barrier, uint64_t count);

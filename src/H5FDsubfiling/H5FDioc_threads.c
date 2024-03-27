@@ -1400,7 +1400,7 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, bool try_lock)
         bool   acquired;
         herr_t ret;
 
-        ret = H5TS_mutex_try_lock(&ioc_data->io_queue.q_mutex, &acquired);
+        ret = H5TS_mutex_trylock(&ioc_data->io_queue.q_mutex, &acquired);
         assert(SUCCEED == ret);
         if (!acquired)
             return;

@@ -116,9 +116,10 @@ H5TS__init(void)
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
-    /* Initialize the global API lock */
-    if (H5_UNLIKELY(H5TS__ex_lock_init(&H5TS_api_info_p.api_lock) < 0))
+    /* Initialize the global API lock info */
+    if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_api_info_p.api_mutex, H5TS_MUTEX_TYPE_RECURSIVE) < 0))
         HGOTO_DONE(FAIL);
+    H5TS_api_info_p.lock_count = 0;
     H5TS_atomic_init_uint(&H5TS_api_info_p.attempt_lock_count, 0);
 
     /* Initialize per-thread library info */
@@ -146,13 +147,11 @@ H5TS_term_package(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Destroy global API lock */
-    H5TS__ex_lock_destroy(&H5TS_api_info_p.api_lock);
-
-    /* Destroy the "lock acquisition attempt" atomic */
+    /* Reset global API lock info */
+    H5TS_mutex_destroy(&H5TS_api_info_p.api_mutex);
     H5TS_atomic_destroy_uint(&H5TS_api_info_p.attempt_lock_count);
 
-    /* Clean up per-process thread local storage */
+    /* Clean up per-thread library info */
     H5TS__tinfo_term();
 
     FUNC_LEAVE_NOAPI_VOID
@@ -166,22 +165,28 @@ H5TS_term_package(void)
  * Note:        On success, the 'acquired' flag indicates if the HDF5 library
  *              global lock was acquired.
  *
- * Note:        The Windows threads code is very likely bogus.
- *
  * Return:      Non-negative on success / Negative on failure
  *
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS__mutex_acquire(unsigned int lock_count, bool *acquired)
+H5TS__mutex_acquire(unsigned lock_count, bool *acquired)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Attempt to acquire the lock */
-    if (H5_UNLIKELY(H5TS__ex_acquire(&H5TS_api_info_p.api_lock, lock_count, acquired) < 0))
+    if (H5_UNLIKELY(H5TS_mutex_trylock(&H5TS_api_info_p.api_mutex, acquired) < 0))
         HGOTO_DONE(FAIL);
+
+    /* If acquired, increment the levels of recursion by 'lock_count' - 1 */
+    if (*acquired) {
+        for(unsigned u = 0; u < (lock_count - 1); u++)
+            if (H5_UNLIKELY(H5TS_mutex_lock(&H5TS_api_info_p.api_mutex) < 0))
+                HGOTO_DONE(FAIL);
+        H5TS_api_info_p.lock_count += lock_count;
+    }
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -217,9 +222,12 @@ H5TS_api_lock(void)
     /* Increment the attempt lock count */
     H5TS_atomic_fetch_add_uint(&H5TS_api_info_p.attempt_lock_count, 1);
 
-    /* Acquire the library's exclusive API lock */
-    if (H5_UNLIKELY(H5TS__ex_lock(&H5TS_api_info_p.api_lock) < 0))
+    /* Acquire the library's API lock */
+    if (H5_UNLIKELY(H5TS_mutex_lock(&H5TS_api_info_p.api_mutex) < 0))
         HGOTO_DONE(FAIL);
+
+    /* Increment the lock count for this thread */
+    H5TS_api_info_p.lock_count++;
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -243,9 +251,16 @@ H5TS__mutex_release(unsigned *lock_count)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Release the library's exclusive API lock */
-    if (H5_UNLIKELY(H5TS__ex_release(&H5TS_api_info_p.api_lock, lock_count) < 0))
-        HGOTO_DONE(FAIL);
+    /* Return the current lock count */
+    *lock_count = H5TS_api_info_p.lock_count;
+
+    /* Reset recursive lock count */
+    H5TS_api_info_p.lock_count = 0;
+
+    /* Release the library's API lock 'lock_count' times */
+    for(unsigned u = 0; u < *lock_count; u++)
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_api_info_p.api_mutex) < 0))
+            HGOTO_DONE(FAIL);
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -254,8 +269,9 @@ done:
 /*--------------------------------------------------------------------------
  * Function:    H5TS_api_unlock
  *
- * Purpose:     Decrements the global "API" lock counter for accessing the
- *              HDF5 library, releasing the lock when the counter reaches 0.
+ * Purpose:     Decrements the global "API" lock for accessing the
+ *              HDF5 library, releasing the lock when it's been unlocked as
+ *              many times as it was locked.
  *
  * Return:      Non-negative on success / Negative on failure
  *
@@ -268,8 +284,11 @@ H5TS_api_unlock(void)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Release the library's exclusive API lock */
-    if (H5_UNLIKELY(H5TS__ex_unlock(&H5TS_api_info_p.api_lock) < 0))
+    /* Decrement the lock count for this thread */
+    H5TS_api_info_p.lock_count--;
+
+    /* Release the library's API lock */
+    if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_api_info_p.api_mutex) < 0))
         HGOTO_DONE(FAIL);
 
 done:

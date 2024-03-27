@@ -183,7 +183,7 @@ H5_DLL herr_t H5TS_once(H5TS_once_t *once, H5TS_once_init_func_t func);
 /* Mutex operations */
 H5_DLL herr_t H5TS_mutex_init(H5TS_mutex_t *mutex, int type);
 H5_DLL herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex) H5TS_ACQUIRE(*mutex);
-H5_DLL herr_t H5TS_mutex_try_lock(H5TS_mutex_t *mutex, bool *acquired) H5TS_TRY_ACQUIRE(SUCCEED, *mutex);
+H5_DLL herr_t H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired) H5TS_TRY_ACQUIRE(SUCCEED, *mutex);
 H5_DLL herr_t H5TS_mutex_unlock(H5TS_mutex_t *mutex) H5TS_RELEASE(*mutex);
 H5_DLL herr_t H5TS_mutex_destroy(H5TS_mutex_t *mutex);
 
@@ -196,7 +196,7 @@ H5_DLL herr_t H5TS_cond_destroy(H5TS_cond_t *cond);
 
 /* Thread-specific keys */
 H5_DLL herr_t H5TS_key_create(H5TS_key_t *key, H5TS_key_destructor_func_t dtor);
-H5_DLL herr_t H5TS_key_set_value(H5TS_key_t key, const void *value);
+H5_DLL herr_t H5TS_key_set_value(H5TS_key_t key, void *value);
 H5_DLL herr_t H5TS_key_get_value(H5TS_key_t key, void **value);
 H5_DLL herr_t H5TS_key_delete(H5TS_key_t key);
 

@@ -98,7 +98,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_key_set_value(H5TS_key_t key, const void *value)
+H5TS_key_set_value(H5TS_key_t key, void *value)
 {
     herr_t ret_value = SUCCEED;
 
@@ -198,7 +198,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_key_set_value(H5TS_key_t key, const void *value)
+H5TS_key_set_value(H5TS_key_t key, void *value)
 {
     herr_t ret_value = SUCCEED;
 
@@ -302,7 +302,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_key_set_value(H5TS_key_t key, const void *value)
+H5TS_key_set_value(H5TS_key_t key, void *value)
 {
     herr_t ret_value = SUCCEED;
 

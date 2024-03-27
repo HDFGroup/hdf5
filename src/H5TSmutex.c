@@ -108,7 +108,7 @@ done:
 } /* end H5TS_mutex_lock() */
 
 /*-------------------------------------------------------------------------
- * Function: H5TS_mutex_try_lock
+ * Function: H5TS_mutex_trylock
  *
  * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to TRUE if so
  *
@@ -117,7 +117,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_try_lock(H5TS_mutex_t *mutex, bool *acquired) H5TS_NO_THREAD_SAFETY_ANALYSIS
+H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired) H5TS_NO_THREAD_SAFETY_ANALYSIS
 {
     int    rc;
     herr_t ret_value = SUCCEED;
@@ -134,7 +134,7 @@ H5TS_mutex_try_lock(H5TS_mutex_t *mutex, bool *acquired) H5TS_NO_THREAD_SAFETY_A
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_mutex_try_lock() */
+} /* end H5TS_mutex_trylock() */
 
 /*-------------------------------------------------------------------------
  * Function: H5TS_mutex_unlock
@@ -221,7 +221,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex) H5TS_NO_THREAD_SAFETY_ANALYSIS
 } /* end H5TS_mutex_lock() */
 
 /*-------------------------------------------------------------------------
- * Function: H5TS_mutex_try_lock
+ * Function: H5TS_mutex_trylock
  *
  * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to TRUE if so
  *
@@ -230,14 +230,14 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex) H5TS_NO_THREAD_SAFETY_ANALYSIS
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_try_lock(H5TS_mutex_t *mutex, bool *acquired) H5TS_NO_THREAD_SAFETY_ANALYSIS
+H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired) H5TS_NO_THREAD_SAFETY_ANALYSIS
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     *acquired = TryEnterCriticalSection(mutex);
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
-} /* end H5TS_mutex_try_lock() */
+} /* end H5TS_mutex_trylock() */
 
 /*-------------------------------------------------------------------------
  * Function: H5TS_mutex_unlock
@@ -341,7 +341,7 @@ done:
 } /* end H5TS_mutex_lock() */
 
 /*-------------------------------------------------------------------------
- * Function: H5TS_mutex_try_lock
+ * Function: H5TS_mutex_trylock
  *
  * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to TRUE if so
  *
@@ -350,7 +350,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_try_lock(H5TS_mutex_t *mutex, bool *acquired) H5TS_NO_THREAD_SAFETY_ANALYSIS
+H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired) H5TS_NO_THREAD_SAFETY_ANALYSIS
 {
     int    rc;
     herr_t ret_value = SUCCEED;
@@ -367,7 +367,7 @@ H5TS_mutex_try_lock(H5TS_mutex_t *mutex, bool *acquired) H5TS_NO_THREAD_SAFETY_A
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_mutex_try_lock() */
+} /* end H5TS_mutex_trylock() */
 
 /*-------------------------------------------------------------------------
  * Function: H5TS_mutex_unlock

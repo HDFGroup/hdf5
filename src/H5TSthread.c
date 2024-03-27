@@ -139,7 +139,7 @@ done:
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS_thread_setcancelstate(int state, int *oldstate)
+H5TS_thread_setcancelstate(int H5_ATTR_UNUSED state, int H5_ATTR_UNUSED *oldstate)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
