@@ -54,15 +54,15 @@ typedef enum H5VL_map_get_t {
     H5VL_MAP_GET_MCPL,     /**< Callback operation ID for getting map creation property list */
     H5VL_MAP_GET_KEY_TYPE, /**< Callback operation ID for getting the key datatype for a map */
     H5VL_MAP_GET_VAL_TYPE, /**< Callback operation ID for getting the value datatype for a map */
-    H5VL_MAP_GET_COUNT     /**< Callback operation ID for getting the number of key-value pairs stored in a map */
+    H5VL_MAP_GET_COUNT /**< Callback operation ID for getting the number of key-value pairs stored in a map */
 } H5VL_map_get_t;
 
 /**
  * Types for map SPECIFIC callback
  */
 typedef enum H5VL_map_specific_t {
-    H5VL_MAP_ITER,         /**< Callback operation ID for iterating over all key-value pairs stored in the map */
-    H5VL_MAP_DELETE        /**< Callback operation ID for deleting a key-value pair stored in the map */
+    H5VL_MAP_ITER,  /**< Callback operation ID for iterating over all key-value pairs stored in the map */
+    H5VL_MAP_DELETE /**< Callback operation ID for deleting a key-value pair stored in the map */
 } H5VL_map_specific_t;
 
 //! <!-- [H5M_iterate_t_snip] -->
@@ -156,7 +156,7 @@ typedef union H5VL_map_args_t {
     /** H5VL_MAP_SPECIFIC */
     struct {
         H5VL_map_specific_t specific_type;
-            /**< 'specific' operation to perform, which are 'iterate' and 'del' currently */
+        /**< 'specific' operation to perform, which are 'iterate' and 'del' currently */
 
         /** Parameters for each operation */
         union {
