@@ -1325,8 +1325,8 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
     if (ioc_data->io_queue.q_len != H5TS_atomic_load_int(&ioc_data->sf_io_ops_pending)) {
         H5_subfiling_log(
             wk_req_ptr->context_id,
-            "%s: ioc_data->io_queue->q_len = %d != %d = H5TS_atomic_load_int(&ioc_data->sf_io_ops_pending).", __func__,
-            ioc_data->io_queue.q_len, H5TS_atomic_load_int(&ioc_data->sf_io_ops_pending));
+            "%s: ioc_data->io_queue->q_len = %d != %d = H5TS_atomic_load_int(&ioc_data->sf_io_ops_pending).",
+            __func__, ioc_data->io_queue.q_len, H5TS_atomic_load_int(&ioc_data->sf_io_ops_pending));
     }
 #endif
 

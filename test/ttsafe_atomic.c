@@ -27,8 +27,8 @@ static H5TS_atomic_int_t counter_g;
 static H5TS_THREAD_RETURN_TYPE
 noop_task(void *_counter)
 {
-    H5TS_atomic_int_t *counter = (H5TS_atomic_int_t *)_counter;
-    H5TS_thread_ret_t ret_value = 0;
+    H5TS_atomic_int_t *counter   = (H5TS_atomic_int_t *)_counter;
+    H5TS_thread_ret_t  ret_value = 0;
 
     VERIFY(H5TS_atomic_load_int(counter), 0, "noop_task");
 
@@ -38,8 +38,8 @@ noop_task(void *_counter)
 static H5TS_THREAD_RETURN_TYPE
 incr_task(void *_counter)
 {
-    H5TS_atomic_int_t *counter = (H5TS_atomic_int_t *)_counter;
-    H5TS_thread_ret_t ret_value = 0;
+    H5TS_atomic_int_t *counter   = (H5TS_atomic_int_t *)_counter;
+    H5TS_thread_ret_t  ret_value = 0;
 
     H5TS_atomic_fetch_add_int(counter, 1);
 
@@ -49,8 +49,8 @@ incr_task(void *_counter)
 static H5TS_THREAD_RETURN_TYPE
 decr_task(void *_counter)
 {
-    H5TS_atomic_int_t *counter = (H5TS_atomic_int_t *)_counter;
-    H5TS_thread_ret_t ret_value = 0;
+    H5TS_atomic_int_t *counter   = (H5TS_atomic_int_t *)_counter;
+    H5TS_thread_ret_t  ret_value = 0;
 
     H5TS_atomic_fetch_sub_int(counter, 1);
 
@@ -117,7 +117,7 @@ tts_atomics(void)
 
     /* Create pool, add pair of 'incr' & 'decr' tasks, destroy pool */
     H5TS_atomic_store_int(&counter_g, 10);
-    result        = H5TS_pool_create(&pool, NUM_THREADS);
+    result = H5TS_pool_create(&pool, NUM_THREADS);
     CHECK_I(result, "H5TS_pool_create");
 
     result = H5TS_pool_add_task(pool, incr_task, &counter_g);
@@ -133,7 +133,7 @@ tts_atomics(void)
 
     /* Create pool, add many 'incr' & 'decr' tasks, destroy pool */
     H5TS_atomic_store_int(&counter_g, 3);
-    result        = H5TS_pool_create(&pool, NUM_THREADS);
+    result = H5TS_pool_create(&pool, NUM_THREADS);
     CHECK_I(result, "H5TS_pool_create");
 
     for (unsigned u = 0; u < 200; u++) {
@@ -153,7 +153,7 @@ tts_atomics(void)
 
     /* Create pool, add *lots* of 'incr' & 'decr' tasks, destroy pool */
     H5TS_atomic_store_int(&counter_g, 5);
-    result        = H5TS_pool_create(&pool, NUM_THREADS);
+    result = H5TS_pool_create(&pool, NUM_THREADS);
     CHECK_I(result, "H5TS_pool_create");
 
     for (unsigned u = 0; u < 2 * 1000 * 1000; u++) {
@@ -178,4 +178,3 @@ tts_atomics(void)
 } /* end tts_atomics() */
 
 #endif /*H5_HAVE_THREADSAFE*/
-

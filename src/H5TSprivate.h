@@ -25,7 +25,6 @@
 /* Include package's public headers */
 #include "H5TSdevelop.h"
 
-
 /**************************/
 /* Library Private Macros */
 /**************************/
@@ -72,11 +71,11 @@
 
 /* Atomics macros */
 #ifdef H5_HAVE_STDATOMIC_H
-#define H5TS_atomic_init_int(obj, desired)      atomic_init((obj), (desired))
-#define H5TS_atomic_load_int(obj)               atomic_load(obj)
-#define H5TS_atomic_store_int(obj, desired)     atomic_store((obj), (desired))
-#define H5TS_atomic_fetch_add_int(obj, arg)     atomic_fetch_add((obj), (arg))
-#define H5TS_atomic_fetch_sub_int(obj, arg)     atomic_fetch_sub((obj), (arg))
+#define H5TS_atomic_init_int(obj, desired)  atomic_init((obj), (desired))
+#define H5TS_atomic_load_int(obj)           atomic_load(obj)
+#define H5TS_atomic_store_int(obj, desired) atomic_store((obj), (desired))
+#define H5TS_atomic_fetch_add_int(obj, arg) atomic_fetch_add((obj), (arg))
+#define H5TS_atomic_fetch_sub_int(obj, arg) atomic_fetch_sub((obj), (arg))
 #endif /* H5_HAVE_STDATOMIC_H */
 
 /****************************/
@@ -108,7 +107,7 @@ typedef DWORD                  H5TS_key_t;
 typedef CRITICAL_SECTION       H5TS_CAPABILITY("mutex") H5TS_mutex_t;
 typedef CONDITION_VARIABLE     H5TS_cond_t;
 typedef PINIT_ONCE             H5TS_once_t;
-typedef PINIT_ONCE_FN H5TS_once_init_func_t
+typedef PINIT_ONCE_FN          H5TS_once_init_func_t
 #else
 typedef pthread_t H5TS_thread_t;
 typedef void *(*H5TS_thread_start_func_t)(void *);
@@ -125,9 +124,9 @@ typedef void (*H5TS_once_init_func_t)(void);
 #ifdef H5_HAVE_STDATOMIC_H
 typedef atomic_int H5TS_atomic_int_t;
 #else
-typedef struct {
+    typedef struct {
     H5TS_mutex_t mutex;
-    int value;
+    int          value;
 } H5TS_atomic_int_t;
 #endif
 
@@ -192,10 +191,10 @@ H5_DLL herr_t H5TS_pool_destroy(H5TS_pool_t *pool);
 /* Emulated C11 atomics */
 #ifndef H5_HAVE_STDATOMIC_H
 H5_DLL void H5TS_atomic_init_int(H5TS_atomic_int_t *obj, int desired);
-H5_DLL int H5TS_atomic_load_int(H5TS_atomic_int_t *obj);
+H5_DLL int  H5TS_atomic_load_int(H5TS_atomic_int_t *obj);
 H5_DLL void H5TS_atomic_store_int(H5TS_atomic_int_t *obj, int desired);
-H5_DLL int H5TS_atomic_fetch_add_int(H5TS_atomic_int_t *obj, int arg);
-H5_DLL int H5TS_atomic_fetch_sub_int(H5TS_atomic_int_t *obj, int arg);
+H5_DLL int  H5TS_atomic_fetch_add_int(H5TS_atomic_int_t *obj, int arg);
+H5_DLL int  H5TS_atomic_fetch_sub_int(H5TS_atomic_int_t *obj, int arg);
 #endif /* H5_HAVE_STDATOMIC_H */
 
 #else /* H5_HAVE_THREADSAFE */
