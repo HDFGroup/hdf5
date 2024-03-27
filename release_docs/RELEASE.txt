@@ -1724,6 +1724,11 @@ Platforms Tested
 Known Problems
 ==============
 
+    When building with the NAG Fortran compiler using the Autotools and libtool
+    2.4.2 or earlier, the -shared flag will be missing '-Wl,', which will cause
+    compilation to fail. This is due to a bug in libtool that was fixed in 2012
+    and released in 2.4.4 in 2014.
+
     When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may
     also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur
     in the following tests:
