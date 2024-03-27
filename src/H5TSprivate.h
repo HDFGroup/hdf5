@@ -86,7 +86,7 @@
 #define H5TS_atomic_fetch_add_uint(obj, arg) atomic_fetch_add((obj), (arg))
 #define H5TS_atomic_fetch_sub_uint(obj, arg) atomic_fetch_sub((obj), (arg))
 #define H5TS_atomic_destroy_uint(obj)        /* void */
-#endif /* H5_HAVE_STDATOMIC_H */
+#endif                                       /* H5_HAVE_STDATOMIC_H */
 
 /****************************/
 /* Library Private Typedefs */
@@ -132,7 +132,7 @@ typedef void (*H5TS_once_init_func_t)(void);
 
 /* Atomics */
 #ifdef H5_HAVE_STDATOMIC_H
-typedef atomic_int H5TS_atomic_int_t;
+typedef atomic_int  H5TS_atomic_int_t;
 typedef atomic_uint H5TS_atomic_uint_t;
 #else
     typedef struct {
@@ -210,12 +210,12 @@ H5_DLL int  H5TS_atomic_fetch_sub_int(H5TS_atomic_int_t *obj, int arg);
 H5_DLL void H5TS_atomic_destroy_int(H5TS_atomic_int_t *obj);
 
 /* atomic_uint */
-H5_DLL void H5TS_atomic_init_uint(H5TS_atomic_uint_t *obj, unsigned desired);
-H5_DLL unsigned  H5TS_atomic_load_uint(H5TS_atomic_uint_t *obj);
-H5_DLL void H5TS_atomic_store_uint(H5TS_atomic_uint_t *obj, unsigned desired);
-H5_DLL unsigned  H5TS_atomic_fetch_add_uint(H5TS_atomic_uint_t *obj, unsigned arg);
-H5_DLL unsigned  H5TS_atomic_fetch_sub_uint(H5TS_atomic_uint_t *obj, unsigned arg);
-H5_DLL void H5TS_atomic_destroy_uint(H5TS_atomic_uint_t *obj);
+H5_DLL void     H5TS_atomic_init_uint(H5TS_atomic_uint_t *obj, unsigned desired);
+H5_DLL unsigned H5TS_atomic_load_uint(H5TS_atomic_uint_t *obj);
+H5_DLL void     H5TS_atomic_store_uint(H5TS_atomic_uint_t *obj, unsigned desired);
+H5_DLL unsigned H5TS_atomic_fetch_add_uint(H5TS_atomic_uint_t *obj, unsigned arg);
+H5_DLL unsigned H5TS_atomic_fetch_sub_uint(H5TS_atomic_uint_t *obj, unsigned arg);
+H5_DLL void     H5TS_atomic_destroy_uint(H5TS_atomic_uint_t *obj);
 #endif /* H5_HAVE_STDATOMIC_H */
 
 #else /* H5_HAVE_THREADSAFE */

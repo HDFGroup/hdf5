@@ -106,7 +106,7 @@ done:
 herr_t
 H5TSmutex_get_attempt_count(unsigned *count)
 {
-    herr_t ret_value  = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API_NAMECHECK_ONLY
 
