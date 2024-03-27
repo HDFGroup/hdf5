@@ -223,8 +223,8 @@ H5TS_atomic_destroy_int(H5TS_atomic_int_t *obj)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Destroy mutex that protects the "atomic" value */
-    (void) H5TS_mutex_destroy(&obj->mutex);
+        /* Destroy mutex that protects the "atomic" value */
+        (void) H5TS_mutex_destroy(&obj->mutex);
 
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* end H5TS_atomic_destroy_int() */

@@ -77,7 +77,7 @@
 #define H5TS_atomic_fetch_add_int(obj, arg) atomic_fetch_add((obj), (arg))
 #define H5TS_atomic_fetch_sub_int(obj, arg) atomic_fetch_sub((obj), (arg))
 #define H5TS_atomic_destroy_int(obj)        /* void */
-#endif /* H5_HAVE_STDATOMIC_H */
+#endif                                      /* H5_HAVE_STDATOMIC_H */
 
 /****************************/
 /* Library Private Typedefs */
@@ -125,7 +125,7 @@ typedef void (*H5TS_once_init_func_t)(void);
 #ifdef H5_HAVE_STDATOMIC_H
 typedef atomic_int H5TS_atomic_int_t;
 #else
-typedef struct {
+    typedef struct {
     H5TS_mutex_t mutex;
     int          value;
 } H5TS_atomic_int_t;
