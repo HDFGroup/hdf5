@@ -878,7 +878,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_derived_flt
  *
- * Purpose:     Tests user-define and query functions of floating-point types.
+ * Purpose:     Tests user-defined and query functions of floating-point types.
  *
  * Return:      Success:        0
  *
@@ -903,7 +903,7 @@ test_derived_flt(void)
     char           str[256];             /*message string    */
     unsigned int   i, j;
 
-    TESTING("user-define and query functions of floating-point types");
+    TESTING("user-defined and query functions of floating-point types");
 
     /* Create File */
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
@@ -1324,7 +1324,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_derived_integer
  *
- * Purpose:     Tests user-define and query functions of integer types.
+ * Purpose:     Tests user-defined and query functions of integer types.
  *
  * Return:      Success:        0
  *
@@ -1347,7 +1347,7 @@ test_derived_integer(void)
     char           str[256];             /*message string    */
     unsigned int   i, j;
 
-    TESTING("user-define and query functions of integer types");
+    TESTING("user-defined and query functions of integer types");
 
     /* Create File */
     h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof filename);
@@ -5990,11 +5990,11 @@ main(void)
     /* Test H5Tcompiler_conv() for querying hard conversion. */
     nerrors += (unsigned long)test_hard_query();
 
-    /* Test user-define, query functions and software conversion
+    /* Test user-defined, query functions and software conversion
      * for user-defined floating-point types */
     nerrors += (unsigned long)test_derived_flt();
 
-    /* Test user-define, query functions and software conversion
+    /* Test user-defined, query functions and software conversion
      * for user-defined integer types */
     nerrors += (unsigned long)test_derived_integer();
 
