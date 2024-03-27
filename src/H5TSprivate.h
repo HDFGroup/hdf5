@@ -49,8 +49,8 @@
 #define H5TS_THREAD_CANCEL_DISABLE 0
 
 /* Mutex macros */
-#define H5TS_MUTEX_TYPE_PLAIN      mtx_plain
-#define H5TS_MUTEX_TYPE_RECURSIVE  (mtx_plain | mtx_recursive)
+#define H5TS_MUTEX_TYPE_PLAIN     mtx_plain
+#define H5TS_MUTEX_TYPE_RECURSIVE (mtx_plain | mtx_recursive)
 #else
 #ifdef H5_HAVE_WIN_THREADS
 /* Static initialization values */

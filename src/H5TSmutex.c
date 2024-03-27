@@ -290,9 +290,9 @@ H5TS_mutex_destroy(H5TS_mutex_t *mutex)
 herr_t
 H5TS_mutex_init(H5TS_mutex_t *mutex, int type)
 {
-    pthread_mutexattr_t _attr;
-    pthread_mutexattr_t *attr = NULL;
-    herr_t ret_value = SUCCEED;
+    pthread_mutexattr_t  _attr;
+    pthread_mutexattr_t *attr      = NULL;
+    herr_t               ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
