@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.cb3169f</span>
+   &#160;<span id="projectnumber">1.15.0.c4d2891</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -555,7 +555,7 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">offset</td><td>Logical position of the chunk's first element in units of dataset elements </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">filter_mask</td><td>Bitmask indicating the filters used when the chunk was written </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">addr</td><td>Chunk address in the file </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">addr</td><td>Chunk address in the file, taking the user block (if any) into account </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Chunk size in bytes, 0 if the chunk does not exist </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">op_data</td><td>Pointer to any user-defined data associated with the operation. </td></tr>
   </table>

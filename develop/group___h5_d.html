@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.cb3169f</span>
+   &#160;<span id="projectnumber">1.15.0.c4d2891</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -440,6 +440,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p>H5Dchunk_iter iterates over all chunks in the dataset, calling the user supplied callback with the details of the chunk and the supplied context <code>op_data</code>.</p>
+<dl class="section note"><dt>Note</dt><dd>Prior to HDF5 1.14.4, the address passed to the callback did not take the user block into account.</dd></dl>
 <dl class="section user"><dt>Example</dt><dd>For each chunk, print the allocated chunk size (0 for unallocated chunks). <div class="fragment"><div class="line"><span class="keywordtype">int</span></div>
 <div class="line">chunk_cb(<span class="keyword">const</span> <a class="code hl_typedef" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *offset, <span class="keywordtype">unsigned</span> filter_mask, <a class="code hl_typedef" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> addr, <a class="code hl_typedef" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> size, <span class="keywordtype">void</span> *op_data)</div>
 <div class="line">{</div>
@@ -1102,13 +1103,14 @@ Applications sometimes write data only to portions of an allocated dataset. It i
     <tr><td class="paramdir">[in]</td><td class="paramname">chk_idx</td><td>Index of the chunk </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">offset</td><td>Logical position of the chunk's first element in units of dataset elements </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">filter_mask</td><td>Bitmask indicating the filters used when the chunk was written </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">addr</td><td>Chunk address in the file </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">addr</td><td>Chunk address in the file, taking the user block (if any) into account </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">size</td><td>Chunk size in bytes, 0 if the chunk does not exist</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="#gaccff213d3e0765b86f66d08dd9959807" title="Retrieves information about a chunk specified by its index.">H5Dget_chunk_info()</a> retrieves the offset coordinates, <code>offset</code>, filter mask, <code>filter_mask</code>, size, <code>size</code>, and address <code>addr</code> for the dataset specified by the identifier <code>dset_id</code> and the chunk specified by the index <code>index</code>. The chunk belongs to a set of chunks in the selection specified by <code>fspace_id</code>. If the queried chunk does not exist in the file, the size will be set to 0 and address to <a class="el" href="_h5public_8h.html#a676244a60b85ee8bbd111afd4a8fce3c">HADDR_UNDEF</a>. The value pointed to by filter_mask will not be modified. <code>NULL</code> can be passed in for any <code>out</code> parameters.</p>
+<dl class="section note"><dt>Note</dt><dd>Prior to HDF5 1.14.4, the reported address did not take the user block into account.</dd></dl>
 <p><code>chk_idx</code> is the chunk index in the selection. The index value may have a value of 0 up to the number of chunks stored in the file that has a nonempty intersection with the file dataspace selection.</p>
 <dl class="section note"><dt>Note</dt><dd>As of 1.10.5, the dataspace intersection is not yet supported. Hence, the index is of all the written chunks.</dd></dl>
 <p><code>fspace_id</code> specifies the file dataspace selection. It is intended to take <a class="el" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a> to specify the current selection.</p>
@@ -1158,7 +1160,7 @@ Applications sometimes write data only to portions of an allocated dataset. It i
     <tr><td class="paramdir">[in]</td><td class="paramname">dset_id</td><td>Dataset identifier </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">offset</td><td>Logical position of the chunk's first element in units of dataset elements </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">filter_mask</td><td>Bitmask indicating the filters used when the chunk was written </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">addr</td><td>Chunk address in the file </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">addr</td><td>Chunk address in the file, taking the user block (if any) into account </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">size</td><td>Chunk size in bytes, 0 if the chunk does not exist</td></tr>
   </table>
   </dd>
@@ -1167,6 +1169,7 @@ Applications sometimes write data only to portions of an allocated dataset. It i
 <p><a class="el" href="#ga408a49c6ec59c5b65ce4c791f8d26cb0" title="Retrieves information about a chunk specified by its coordinates.">H5Dget_chunk_info_by_coord()</a> retrieves the <code>filter_mask</code>, <code>size</code>, and <code>addr</code> for a chunk in the dataset specified by <code>dset_id</code>, using the coordinates specified by <code>offset</code>.</p>
 <p>If the queried chunk does not exist in the file, <code>size</code> will be set to 0, <code>addr</code> to <code>HADDR_UNDEF</code>, and the buffer <code>filter_mask</code> will not be modified.</p>
 <p><code>offset</code> is a pointer to a one-dimensional array with a size equal to the dataset's rank. Each element is the logical position of the chunk's first element in a dimension.</p>
+<dl class="section note"><dt>Note</dt><dd>Prior to HDF5 1.14.4, the reported address did not take the user block into account.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.10.5 </dd></dl>
 
 </div>
