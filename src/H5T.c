@@ -381,6 +381,7 @@ static H5T_path_t *H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const
 static herr_t      H5T__path_find_init_path_table(void);
 static herr_t      H5T__path_find_init_new_path(H5T_path_t *path, const H5T_t *src, const H5T_t *dst,
                                                 H5T_conv_func_t *conv, H5T_conv_ctx_t *conv_ctx);
+static herr_t      H5T__path_free(H5T_path_t *path, H5T_conv_ctx_t *conv_ctx);
 static bool        H5T_path_match(H5T_path_t *path, H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
                                   H5VL_object_t *owned_vol_obj, H5T_conv_t func);
 static bool   H5T_path_match_find_type_with_volobj(const H5T_t *datatype, const H5VL_object_t *owned_vol_obj);
@@ -1671,52 +1672,16 @@ H5T_top_term_package(void)
 
     /* Unregister all conversion functions */
     if (H5T_g.path) {
-        int i, nprint = 0;
+        H5T_conv_ctx_t conv_ctx = {0};
 
-        for (i = 0; i < H5T_g.npaths; i++) {
-            H5T_path_t *path;
+        conv_ctx.u.free.src_type_id = H5I_INVALID_HID;
+        conv_ctx.u.free.dst_type_id = H5I_INVALID_HID;
 
-            path = H5T_g.path[i];
-            assert(path);
-            if (path->conv.u.app_func) {
-                H5T__print_stats(path, &nprint /*in,out*/);
-                path->cdata.command = H5T_CONV_FREE;
-                if (path->conv.is_app) {
-                    if ((path->conv.u.app_func)(H5I_INVALID_HID, H5I_INVALID_HID, &(path->cdata), 0, 0, 0,
-                                                NULL, NULL, H5CX_get_dxpl()) < 0) {
-#ifdef H5T_DEBUG
-                        if (H5DEBUG(T)) {
-                            fprintf(H5DEBUG(T),
-                                    "H5T: conversion function "
-                                    "0x%016zx failed to free private data for "
-                                    "%s (ignored)\n",
-                                    (size_t)path->conv.u.app_func, path->name);
-                        } /* end if */
-#endif
-                        H5E_clear_stack(NULL); /*ignore the error*/
-                    }                          /* end if */
-                }                              /* end if */
-                else {
-                    if ((path->conv.u.lib_func)(NULL, NULL, &(path->cdata), NULL, 0, 0, 0, NULL, NULL) < 0) {
-#ifdef H5T_DEBUG
-                        if (H5DEBUG(T)) {
-                            fprintf(H5DEBUG(T),
-                                    "H5T: conversion function "
-                                    "0x%016zx failed to free private data for "
-                                    "%s (ignored)\n",
-                                    (size_t)path->conv.u.lib_func, path->name);
-                        } /* end if */
-#endif
-                        H5E_clear_stack(NULL); /*ignore the error*/
-                    }                          /* end if */
-                }                              /* end else */
-            }                                  /* end if */
+        for (int i = 0; i < H5T_g.npaths; i++) {
+            H5T_path_t *path = H5T_g.path[i];
 
-            if (path->src)
-                (void)H5T_close_real(path->src);
-            if (path->dst)
-                (void)H5T_close_real(path->dst);
-            path          = H5FL_FREE(H5T_path_t, path);
+            (void)H5T__path_free(path, &conv_ctx);
+
             H5T_g.path[i] = NULL;
         } /* end for */
 
@@ -2664,7 +2629,6 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
     H5T_t      *tmp_dtype = NULL;            /*temporary destination datatype */
     hid_t       tmp_sid   = H5I_INVALID_HID; /*temporary datatype ID */
     hid_t       tmp_did   = H5I_INVALID_HID; /*temporary datatype ID */
-    int         nprint    = 0;               /*number of paths shut down  */
     int         i;                           /*counter                    */
     herr_t      ret_value = SUCCEED;         /*return value               */
 
@@ -2696,7 +2660,7 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
         } /* end if */
     }     /* end if */
     else {
-        H5T_conv_ctx_t tmp_ctx = {0};
+        H5T_conv_ctx_t conv_ctx = {0};
 
         /*
          * Get the datatype conversion exception callback structure.
@@ -2704,7 +2668,7 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
          * pushed, since we could have arrived here during library
          * initialization of the H5T package.
          */
-        if (!conv->is_app && H5CX_pushed() && (H5CX_get_dt_conv_cb(&tmp_ctx.u.init.cb_struct) < 0))
+        if (!conv->is_app && H5CX_pushed() && (H5CX_get_dt_conv_cb(&conv_ctx.u.init.cb_struct) < 0))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get conversion exception callback");
 
         /* Add function to end of soft list */
@@ -2767,8 +2731,8 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
                     continue;
                 } /* end if */
             }     /* end if */
-            else if ((conv->u.lib_func)(old_path->src, old_path->dst, &cdata, &tmp_ctx, 0, 0, 0, NULL, NULL) <
-                     0) {
+            else if ((conv->u.lib_func)(old_path->src, old_path->dst, &cdata, &conv_ctx, 0, 0, 0, NULL,
+                                        NULL) < 0) {
                 if (H5E_clear_stack(NULL) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRESET, FAIL, "unable to clear current error stack");
                 continue;
@@ -2791,37 +2755,10 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
             new_path      = NULL; /*so we don't free it on error*/
 
             /* Free old path */
-            H5T__print_stats(old_path, &nprint);
-            old_path->cdata.command = H5T_CONV_FREE;
-            if (old_path->conv.is_app) {
-                if ((old_path->conv.u.app_func)(tmp_sid, tmp_did, &(old_path->cdata), 0, 0, 0, NULL, NULL,
-                                                H5CX_get_dxpl()) < 0) {
-#ifdef H5T_DEBUG
-                    if (H5DEBUG(T))
-                        fprintf(H5DEBUG(T),
-                                "H5T: conversion function 0x%016zx "
-                                "failed to free private data for %s (ignored)\n",
-                                (size_t)old_path->conv.u.app_func, old_path->name);
-#endif
-                } /* end if */
-            }     /* end if */
-            else if ((old_path->conv.u.lib_func)(old_path->src, old_path->dst, &(old_path->cdata), NULL, 0, 0,
-                                                 0, NULL, NULL) < 0) {
-#ifdef H5T_DEBUG
-                if (H5DEBUG(T))
-                    fprintf(H5DEBUG(T),
-                            "H5T: conversion function 0x%016zx "
-                            "failed to free private data for %s (ignored)\n",
-                            (size_t)old_path->conv.u.lib_func, old_path->name);
-#endif
-            } /* end if */
-
-            if (H5T_close_real(old_path->src) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close datatype");
-            if (H5T_close_real(old_path->dst) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close datatype");
-
-            old_path = H5FL_FREE(H5T_path_t, old_path);
+            conv_ctx.u.free.src_type_id = tmp_sid;
+            conv_ctx.u.free.dst_type_id = tmp_did;
+            if (H5T__path_free(old_path, &conv_ctx) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype conversion path");
 
             /* Release temporary atoms */
             if (tmp_sid >= 0) {
@@ -2941,12 +2878,15 @@ herr_t
 H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5VL_object_t *owned_vol_obj,
                H5T_conv_t func)
 {
-    H5T_path_t *path   = NULL; /*conversion path             */
-    H5T_soft_t *soft   = NULL; /*soft conversion information */
-    int         nprint = 0;    /*number of paths shut down   */
-    int         i;             /*counter                     */
+    H5T_conv_ctx_t conv_ctx  = {0};  /* Conversion context object   */
+    H5T_path_t    *path      = NULL; /* Conversion path             */
+    H5T_soft_t    *soft      = NULL; /* Soft conversion information */
+    herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
+
+    conv_ctx.u.free.src_type_id = H5I_INVALID_HID;
+    conv_ctx.u.free.dst_type_id = H5I_INVALID_HID;
 
     /*
      * Remove matching entries from the soft list if:
@@ -2964,7 +2904,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5VL_o
      *    source or destination types matches the given VOL object.
      */
     if ((H5T_PERS_DONTCARE == pers || H5T_PERS_SOFT == pers) && !owned_vol_obj) {
-        for (i = H5T_g.nsoft - 1; i >= 0; --i) {
+        for (int i = H5T_g.nsoft - 1; i >= 0; --i) {
             soft = H5T_g.soft + i;
             assert(soft);
             if (name && *name && strcmp(name, soft->name) != 0)
@@ -2978,11 +2918,11 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5VL_o
 
             memmove(H5T_g.soft + i, H5T_g.soft + i + 1, (size_t)(H5T_g.nsoft - (i + 1)) * sizeof(H5T_soft_t));
             --H5T_g.nsoft;
-        } /* end for */
-    }     /* end if */
+        }
+    }
 
     /* Remove matching conversion paths, except no-op path */
-    for (i = H5T_g.npaths - 1; i > 0; --i) {
+    for (int i = H5T_g.npaths - 1; i > 0; --i) {
         bool nomatch;
 
         path = H5T_g.path[i];
@@ -3000,45 +2940,20 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5VL_o
              * the list to be recalculated to avoid the removed function.
              */
             path->cdata.recalc = true;
-        } /* end if */
+        }
         else {
             /* Remove from table */
             memmove(H5T_g.path + i, H5T_g.path + i + 1,
                     (size_t)(H5T_g.npaths - (i + 1)) * sizeof(H5T_path_t *));
             --H5T_g.npaths;
 
-            /* Shut down path */
-            H5T__print_stats(path, &nprint);
-            path->cdata.command = H5T_CONV_FREE;
-            if (path->conv.is_app) {
-                if ((path->conv.u.app_func)(H5I_INVALID_HID, H5I_INVALID_HID, &(path->cdata), 0, 0, 0, NULL,
-                                            NULL, H5CX_get_dxpl()) < 0) {
-#ifdef H5T_DEBUG
-                    if (H5DEBUG(T))
-                        fprintf(H5DEBUG(T),
-                                "H5T: conversion function 0x%016zx failed "
-                                "to free private data for %s (ignored)\n",
-                                (size_t)path->conv.u.app_func, path->name);
-#endif
-                } /* end if */
-            }     /* end if */
-            else if ((path->conv.u.lib_func)(NULL, NULL, &(path->cdata), NULL, 0, 0, 0, NULL, NULL) < 0) {
-#ifdef H5T_DEBUG
-                if (H5DEBUG(T))
-                    fprintf(H5DEBUG(T),
-                            "H5T: conversion function 0x%016zx failed "
-                            "to free private data for %s (ignored)\n",
-                            (size_t)path->conv.u.lib_func, path->name);
-#endif
-            } /* end if */
-            (void)H5T_close_real(path->src);
-            (void)H5T_close_real(path->dst);
-            path = H5FL_FREE(H5T_path_t, path);
-            H5E_clear_stack(NULL); /*ignore all shutdown errors*/
-        }                          /* end else */
-    }                              /* end for */
+            if (H5T__path_free(path, &conv_ctx) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype conversion path");
+        }
+    }
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_unregister() */
 
 /*-------------------------------------------------------------------------
@@ -5197,12 +5112,12 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
     H5T_path_t    *path         = NULL;  /* Pointer to current path */
     bool           noop_conv    = false; /* Whether this is a no-op conversion */
     bool           new_path     = false; /* Whether we're creating a new path */
-    bool           new_api_func = false; /* If the caller is an API function specifying a new conversion function */
-    bool           new_lib_func = false; /* If the caller is a private function specifying a new conversion function */
-    int            old_npaths;       /* Previous number of paths in table */
-    int            last_cmp  = 0;    /* Value of last comparison during binary search */
-    int            path_idx  = 0;    /* Index into path table for path */
-    H5T_path_t    *ret_value = NULL; /* Return value */
+    bool new_api_func = false; /* If the caller is an API function specifying a new conversion function */
+    bool new_lib_func = false; /* If the caller is a private function specifying a new conversion function */
+    int  old_npaths;           /* Previous number of paths in table */
+    int  last_cmp         = 0; /* Value of last comparison during binary search */
+    int  path_idx         = 0; /* Index into path table for path */
+    H5T_path_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -5287,40 +5202,12 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
 
     /* Replace an existing table entry or add a new entry */
     if (matched_path && new_path) {
-        herr_t status;
-        int    nprint = 0;
-
         assert(matched_path == H5T_g.path[path_idx]);
-        H5T__print_stats(matched_path, &nprint);
 
-        /* Free the old conversion path table entry */
-        matched_path->cdata.command = H5T_CONV_FREE;
-        if (matched_path->conv.is_app)
-            status = (matched_path->conv.u.app_func)(H5I_INVALID_HID, H5I_INVALID_HID, &(matched_path->cdata),
-                                                     0, 0, 0, NULL, NULL, H5CX_get_dxpl());
-        else
-            status = (matched_path->conv.u.lib_func)(NULL, NULL, &(matched_path->cdata), &tmp_ctx, 0, 0, 0,
-                                                     NULL, NULL);
-
-        if (status < 0) {
-#ifdef H5T_DEBUG
-            if (H5DEBUG(T))
-                fprintf(H5DEBUG(T), "H5T: conversion function 0x%016zx free failed for %s (ignored)\n",
-                        matched_path->conv.is_app ? (size_t)matched_path->conv.u.app_func
-                                                  : (size_t)matched_path->conv.u.lib_func,
-                        matched_path->name);
-#endif
-
-            /* ignore the failure */
-            if (H5E_clear_stack(NULL) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRESET, NULL, "unable to clear current error stack");
-        }
-
-        if (matched_path->src && (H5T_close_real(matched_path->src) < 0))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close datatype");
-        if (matched_path->dst && (H5T_close_real(matched_path->dst) < 0))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close datatype");
-        matched_path = H5FL_FREE(H5T_path_t, matched_path);
+        tmp_ctx.u.free.src_type_id = H5I_INVALID_HID;
+        tmp_ctx.u.free.dst_type_id = H5I_INVALID_HID;
+        if (H5T__path_free(matched_path, &tmp_ctx) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, NULL, "unable to free datatype conversion path");
 
         H5T_g.path[path_idx] = path;
     }
@@ -5585,6 +5472,69 @@ done:
         if (H5T_close(tmp_dtype) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:  H5T__path_free
+ *
+ * Purpose:   Helper function to free a datatype conversion path. This
+ *            function assumes that the 'free' member of the passed in
+ *            'conv_ctx' has been initialized.
+ *
+ * Return:    Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5T__path_free(H5T_path_t *path, H5T_conv_ctx_t *conv_ctx)
+{
+    herr_t status    = SUCCEED;
+    int    nprint    = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(path);
+    assert(conv_ctx);
+
+    if (path->conv.u.app_func) {
+        H5T__print_stats(path, &nprint);
+
+        path->cdata.command = H5T_CONV_FREE;
+
+        if (path->conv.is_app)
+            status = (path->conv.u.app_func)(conv_ctx->u.free.src_type_id, conv_ctx->u.free.dst_type_id,
+                                             &(path->cdata), 0, 0, 0, NULL, NULL, H5CX_get_dxpl());
+        else
+            status =
+                (path->conv.u.lib_func)(path->src, path->dst, &(path->cdata), conv_ctx, 0, 0, 0, NULL, NULL);
+
+        if (status < 0) {
+            /* Ignore any error from shutting down the path */
+            if (H5E_clear_stack(NULL) < 0)
+                /* Push error, but keep going */
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTRESET, FAIL, "unable to clear current error stack");
+
+#ifdef H5T_DEBUG
+            if (H5DEBUG(T)) {
+                fprintf(H5DEBUG(T), "H5T: conversion function 0x%016zx free failed for %s (ignored)\n",
+                        path->conv.is_app ? (size_t)path->conv.u.app_func : (size_t)path->conv.u.lib_func,
+                        path->name);
+            }
+#endif
+        }
+    }
+
+    if (path->src && (H5T_close_real(path->src) < 0))
+        /* Push error, but keep going */
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close source datatype");
+    if (path->dst && (H5T_close_real(path->dst) < 0))
+        /* Push error, but keep going */
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close destination datatype");
+
+    path = H5FL_FREE(H5T_path_t, path);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
