@@ -1231,6 +1231,27 @@ done:
 } /* end H5I_dec_app_ref_always_close_async() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5I_do_inc_ref
+ *
+ * Purpose:     Helper function for H5I_inc_ref/H5I_inc_ref_noherr to
+ *              actually increment the reference count for an object.
+ *
+ * Return:      The new reference count (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+static inline int
+H5I_do_inc_ref(H5I_id_info_t *info, bool app_ref)
+{
+    /* Adjust reference counts */
+    ++(info->count);
+    if (app_ref)
+        ++(info->app_count);
+
+    return (int)(app_ref ? info->app_count : info->count);
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5I_inc_ref
  *
  * Purpose:     Increment the reference count for an object.
@@ -1255,17 +1276,58 @@ H5I_inc_ref(hid_t id, bool app_ref)
     if (NULL == (info = H5I__find_id(id)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID");
 
-    /* Adjust reference counts */
-    ++(info->count);
-    if (app_ref)
-        ++(info->app_count);
-
     /* Set return value */
-    ret_value = (int)(app_ref ? info->app_count : info->count);
+    ret_value = H5I_do_inc_ref(info, app_ref);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_inc_ref() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5I_inc_ref_noherr
+ *
+ * Purpose:     Increment the reference count for an object. Exactly like
+ *              H5I_inc_ref, except that it makes use of HGOTO_DONE on
+ *              failure instead of HGOTO_ERROR. This function is
+ *              specifically meant to be used in the H5E package, where we
+ *              have to avoid calling any function or macro that may call
+ *              HGOTO_ERROR and similar. Otherwise, we can cause a stack
+ *              overflow that looks like (for example):
+ *
+ *              H5E_printf_stack()
+ *              H5E__push_stack()
+ *              H5I_inc_ref()
+ *              H5I__find_id() (FAIL)
+ *                HGOTO_ERROR()
+ *                H5E_printf_stack()
+ *                ...
+ *
+ * Return:      Success:    The new reference count
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5I_inc_ref_noherr(hid_t id, bool app_ref)
+{
+    H5I_id_info_t *info      = NULL; /* Pointer to the ID info */
+    int            ret_value = 0;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    /* Sanity check */
+    assert(id >= 0);
+
+    /* General lookup of the ID */
+    if (NULL == (info = H5I__find_id(id)))
+        HGOTO_DONE((-1));
+
+    /* Set return value */
+    ret_value = H5I_do_inc_ref(info, app_ref);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I_inc_ref_noherr() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5I_get_ref
