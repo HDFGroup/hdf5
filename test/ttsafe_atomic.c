@@ -171,10 +171,6 @@ tts_atomics(void)
 
     VERIFY(H5TS_atomic_load_int(&counter_g), 5 + (1000 * 1000), "2,000,000 incr + 1,000,000 decr");
 
-    /* Destroy the counter's mutex */
-    result = H5TS_mutex_destroy(&counter_g.mutex);
-    CHECK_I(result, "H5TS_mutex_destroy");
-
 } /* end tts_atomics() */
 
 #endif /*H5_HAVE_THREADSAFE*/
