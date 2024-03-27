@@ -206,6 +206,29 @@ H5TS_atomic_fetch_sub_int(H5TS_atomic_int_t *obj, int arg)
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_atomic_fetch_sub_int() */
 
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_atomic_destroy_int
+ *
+ * Purpose:     Destroys / releases resources for an atomic variable
+ *
+ * Note:        No equivalent in the C11 atomics, but needed here, to destroy
+ *              the mutex used to protect the atomic value.
+ *
+ * Return:      None
+ *
+ *--------------------------------------------------------------------------
+ */
+void
+H5TS_atomic_destroy_int(H5TS_atomic_int_t *obj)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Destroy mutex that protects the "atomic" value */
+    (void) H5TS_mutex_destroy(&obj->mutex);
+
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
+} /* end H5TS_atomic_destroy_int() */
+
 #endif /* H5_HAVE_THREADS_H */
 
 #endif /* H5_HAVE_THREADSAFE */

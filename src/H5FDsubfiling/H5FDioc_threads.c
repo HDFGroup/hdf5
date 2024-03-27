@@ -221,6 +221,12 @@ finalize_ioc_threads(void *_sf_context)
 
         /* Wait for IOC main thread to exit */
         H5TS_thread_join(ioc_data->ioc_main_thread, NULL);
+
+        /* Destroy atomic vars */
+        H5TS_atomic_destroy_int(&ioc_data->sf_ioc_ready);
+        H5TS_atomic_destroy_int(&ioc_data->sf_shutdown_flag);
+        H5TS_atomic_destroy_int(&ioc_data->sf_io_ops_pending);
+        H5TS_atomic_destroy_int(&ioc_data->sf_work_pending);
     }
 
     if (ioc_data->io_queue.num_failed > 0)

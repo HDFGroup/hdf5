@@ -171,6 +171,9 @@ tts_atomics(void)
 
     VERIFY(H5TS_atomic_load_int(&counter_g), 5 + (1000 * 1000), "2,000,000 incr + 1,000,000 decr");
 
+    /* Destroy the atomic counter */
+    H5TS_atomic_destroy_int(&counter_g);
+
 } /* end tts_atomics() */
 
 #endif /*H5_HAVE_THREADSAFE*/
