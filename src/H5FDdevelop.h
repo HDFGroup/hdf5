@@ -50,17 +50,17 @@
  * Fractal heap header block; it is mapped to 'ohdr' type file memory to
  * benefit their similarity.
  */
-#define H5FD_MEM_FHEAP_HDR      H5FD_MEM_OHDR
+#define H5FD_MEM_FHEAP_HDR H5FD_MEM_OHDR
 /**
  * Fractal heap indirect block; it is mapped to 'ohdr' type file memory
  * because the indirect blocks are similar to fractal heap header blocks.
  */
-#define H5FD_MEM_FHEAP_IBLOCK   H5FD_MEM_OHDR
+#define H5FD_MEM_FHEAP_IBLOCK H5FD_MEM_OHDR
 /**
  * Fractal heap direct block; it is mapped to 'lheap' type file memory,
  * because the fractal heap direct blocks will be replacing local heaps.
  */
-#define H5FD_MEM_FHEAP_DBLOCK   H5FD_MEM_LHEAP
+#define H5FD_MEM_FHEAP_DBLOCK H5FD_MEM_LHEAP
 /**
  * Fractal heap 'huge' object; it is mapped to 'draw' type file memory because
  * the fractal heap 'huge' objects represent large objects that are directly
@@ -69,10 +69,10 @@
 #define H5FD_MEM_FHEAP_HUGE_OBJ H5FD_MEM_DRAW
 
 /**
- * Free space header blocks; it is mapped to 'ohdr' type file memory to 
+ * Free space header blocks; it is mapped to 'ohdr' type file memory to
  * benefit their similarity.
  */
-#define H5FD_MEM_FSPACE_HDR   H5FD_MEM_OHDR
+#define H5FD_MEM_FSPACE_HDR H5FD_MEM_OHDR
 /**
  * Free space serialized section; it is mapped to 'lheap' type file memory
  * because it is similar enough to local heap info.
@@ -93,22 +93,22 @@
  * Extensible array header block; it is mapped to 'ohdr' type file memory to
  * benefit their similarity.
  */
-#define H5FD_MEM_EARRAY_HDR       H5FD_MEM_OHDR
+#define H5FD_MEM_EARRAY_HDR H5FD_MEM_OHDR
 /**
  * Extensible array index block; it is mapped to 'ohdr' type file memory because
  * these index blocks are similar to extensible array header blocks.
  */
-#define H5FD_MEM_EARRAY_IBLOCK    H5FD_MEM_OHDR
+#define H5FD_MEM_EARRAY_IBLOCK H5FD_MEM_OHDR
 /**
  * Extensible array super block; it is mappend to 'btree' type file memory
  * because the indices are similar enough to B-tree nodes.
  */
-#define H5FD_MEM_EARRAY_SBLOCK    H5FD_MEM_BTREE
+#define H5FD_MEM_EARRAY_SBLOCK H5FD_MEM_BTREE
 /**
  * Extensible array data block; it is mapped to 'lheap' type file memory
  * because it is similar enough to local heap info.
  */
-#define H5FD_MEM_EARRAY_DBLOCK    H5FD_MEM_LHEAP
+#define H5FD_MEM_EARRAY_DBLOCK H5FD_MEM_LHEAP
 /**
  * Extensible array data block & page; it is mapped to 'lheap' type file memory
  * because it is similar enough to local heap info.
@@ -118,12 +118,12 @@
  * Fixed array header block; it is mapped to 'ohdr' type file memory to
  * benefit their similarity.
  */
-#define H5FD_MEM_FARRAY_HDR       H5FD_MEM_OHDR
+#define H5FD_MEM_FARRAY_HDR H5FD_MEM_OHDR
 /**
  * Fixed array data block; it is mapped to 'lheap' type file memory
  * because it is similar enough to local heap info.
  */
-#define H5FD_MEM_FARRAY_DBLOCK    H5FD_MEM_LHEAP
+#define H5FD_MEM_FARRAY_DBLOCK H5FD_MEM_LHEAP
 /**
  * Fixed array data block & page; it is mapped to 'lheap' type file memory
  * because it is similar enough to local heap info.
@@ -189,16 +189,16 @@ typedef struct H5FD_t H5FD_t;
  * Class information for each file driver
  */
 typedef struct H5FD_class_t {
-    unsigned           version;
+    unsigned version;
     /**< File driver class struct version number */
 
     H5FD_class_value_t value;
     /**< File driver identifier */
 
-    const char        *name;
+    const char *name;
     /**< File driver name, must be unique */
 
-    haddr_t            maxaddr;
+    haddr_t maxaddr;
     /**< Maximum address for file */
 
     H5F_close_degree_t fc_degree;
@@ -216,7 +216,7 @@ typedef struct H5FD_class_t {
     herr_t (*sb_decode)(H5FD_t *f, const char *name, const unsigned char *p);
     /**< Decodes the superblock information for this driver */
 
-    size_t fapl_size;           /**< Size of driver-specific file access properties */
+    size_t fapl_size; /**< Size of driver-specific file access properties */
     void *(*fapl_get)(H5FD_t *file);
     /**< Returns the file access property list */
 
@@ -317,8 +317,8 @@ typedef struct H5FD_class_t {
 } H5FD_class_t;
 
 /**
-  * A free list is a singly-linked list of address/size pairs.
-  */
+ * A free list is a singly-linked list of address/size pairs.
+ */
 typedef struct H5FD_free_t {
     haddr_t             addr;
     hsize_t             size;
