@@ -86,4 +86,3 @@ H5TS__c11_first_thread_init(void)
 #endif /* H5_HAVE_THREADS_H */
 
 #endif /* H5_HAVE_THREADSAFE */
-

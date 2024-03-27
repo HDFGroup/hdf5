@@ -40,7 +40,7 @@
 
 #ifdef H5_HAVE_C11_THREADS
 /* Static initialization values */
-#define H5TS_ONCE_INITIALIZER      ONCE_FLAG_INIT
+#define H5TS_ONCE_INITIALIZER ONCE_FLAG_INIT
 
 /* Thread macros */
 #define H5TS_thread_self()         thrd_current()
@@ -50,7 +50,7 @@
 #else
 #ifdef H5_HAVE_WIN_THREADS
 /* Static initialization values */
-#define H5TS_ONCE_INITIALIZER INIT_ONCE_STATIC_INIT
+#define H5TS_ONCE_INITIALIZER      INIT_ONCE_STATIC_INIT
 
 /* Thread macros */
 #define H5TS_thread_self()         GetCurrentThread()
@@ -81,13 +81,13 @@ typedef struct H5TS_pool_t H5TS_pool_t;
 
 /* Portability aliases */
 #ifdef H5_HAVE_C11_THREADS
-typedef thrd_t          H5TS_thread_t;
+typedef thrd_t H5TS_thread_t;
 typedef int (*H5TS_thread_start_func_t)(void *);
-typedef int             H5TS_thread_ret_t;
-typedef tss_t           H5TS_key_t;
-typedef mtx_t           H5TS_CAPABILITY("mutex") H5TS_mutex_t;
-typedef cnd_t           H5TS_cond_t;
-typedef once_flag       H5TS_once_t;
+typedef int       H5TS_thread_ret_t;
+typedef tss_t     H5TS_key_t;
+typedef mtx_t     H5TS_CAPABILITY("mutex") H5TS_mutex_t;
+typedef cnd_t     H5TS_cond_t;
+typedef once_flag H5TS_once_t;
 typedef void (*H5TS_once_init_func_t)(void);
 #else
 #ifdef H5_HAVE_WIN_THREADS
@@ -111,17 +111,16 @@ typedef void (*H5TS_once_init_func_t)(void);
 #endif
 #endif
 
-    /*****************************/
-    /* Library-private Variables */
-    /*****************************/
+/*****************************/
+/* Library-private Variables */
+/*****************************/
 
-    /***************************************/
-    /* Library-private Function Prototypes */
-    /***************************************/
+/***************************************/
+/* Library-private Function Prototypes */
+/***************************************/
 
-    /* Library/thread init/term operations */
-    H5_DLL void
-    H5TS_term_package(void);
+/* Library/thread init/term operations */
+H5_DLL void H5TS_term_package(void);
 
 /* API locking */
 H5_DLL herr_t H5TS_api_lock(void);

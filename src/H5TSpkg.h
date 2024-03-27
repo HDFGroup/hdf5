@@ -39,7 +39,6 @@
 #define H5TS_ENABLE_REC_RW_LOCK_STATS 0
 #endif
 
-
 /****************************/
 /* Package Private Typedefs */
 /****************************/

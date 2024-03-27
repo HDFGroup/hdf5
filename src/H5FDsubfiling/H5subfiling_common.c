@@ -369,9 +369,9 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
         mpi_finalized = 1;
     }
 
-    sf_context->sf_context_id           = -1;
-    sf_context->h5_file_id              = UINT64_MAX;
-    sf_context->threads_inited          = false;
+    sf_context->sf_context_id  = -1;
+    sf_context->h5_file_id     = UINT64_MAX;
+    sf_context->threads_inited = false;
     if (H5TS_mutex_destroy(&sf_context->mutex) < 0)
         return FAIL;
     sf_context->file_ref                = 0;
@@ -1849,8 +1849,8 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
     assert(app_topology->n_io_concentrators > 0);
     assert(MPI_COMM_NULL != file_comm);
 
-    sf_context->h5_file_id      = file_id;
-    sf_context->threads_inited  = false;
+    sf_context->h5_file_id     = file_id;
+    sf_context->threads_inited = false;
     if (H5TS_mutex_init(&sf_context->mutex) < 0)
         return FAIL;
     sf_context->file_ref        = 0;

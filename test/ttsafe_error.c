@@ -51,8 +51,8 @@ err_num_t    expected_g[EXPECTED_ERROR_DEPTH];
 H5TS_mutex_t error_mutex_g;
 
 /* Prototypes */
-static herr_t error_callback(hid_t, void *);
-static herr_t walk_error_callback(unsigned, const H5E_error2_t *, void *);
+static herr_t                  error_callback(hid_t, void *);
+static herr_t                  walk_error_callback(unsigned, const H5E_error2_t *, void *);
 static H5TS_THREAD_RETURN_TYPE tts_error_thread(void *);
 
 void

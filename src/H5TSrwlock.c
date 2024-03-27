@@ -84,7 +84,6 @@ static void H5TS__key_destructor(void *key_val);
 /* Local Variables */
 /*******************/
 
-
 /*--------------------------------------------------------------------------
  * Function:    H5TS__key_destructor
  *
