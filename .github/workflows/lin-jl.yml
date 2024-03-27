@@ -4,7 +4,11 @@ on:
   workflow_dispatch:
   push:
   pull_request:
+<<<<<<< HEAD
     branches: [ hdf5_1_14 ]
+=======
+    branches: [ develop ]
+>>>>>>> 967db7f... Add Julia GitHub Actions. (#4123)
     paths-ignore:
       - '.github/CODEOWNERS'
       - '.github/FUNDING.yml'
@@ -28,6 +32,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+<<<<<<< HEAD
+=======
+          repository: HDFGroup/hdf5
+>>>>>>> 967db7f... Add Julia GitHub Actions. (#4123)
           path: hdf5
       - name: Install HDF5
         run: |
