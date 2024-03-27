@@ -182,7 +182,7 @@ H5TS__mutex_acquire(unsigned lock_count, bool *acquired)
 
     /* If acquired, increment the levels of recursion by 'lock_count' - 1 */
     if (*acquired) {
-        for(unsigned u = 0; u < (lock_count - 1); u++)
+        for (unsigned u = 0; u < (lock_count - 1); u++)
             if (H5_UNLIKELY(H5TS_mutex_lock(&H5TS_api_info_p.api_mutex) < 0))
                 HGOTO_DONE(FAIL);
         H5TS_api_info_p.lock_count += lock_count;
@@ -258,7 +258,7 @@ H5TS__mutex_release(unsigned *lock_count)
     H5TS_api_info_p.lock_count = 0;
 
     /* Release the library's API lock 'lock_count' times */
-    for(unsigned u = 0; u < *lock_count; u++)
+    for (unsigned u = 0; u < *lock_count; u++)
         if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_api_info_p.api_mutex) < 0))
             HGOTO_DONE(FAIL);
 
