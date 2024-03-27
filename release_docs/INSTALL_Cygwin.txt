@@ -2,20 +2,21 @@
          HDF5 Build and Install Instructions for Cygwin
 ************************************************************************
 
-This document is an instruction on how to build, test and install HDF5 library on
-Cygwin.  See detailed information in hdf5/INSTALL.
+This document is an instruction on how to build, test and install HDF5 library
+on Cygwin.  See detailed information in hdf5/INSTALL.
 
-NOTE: hdf5 can be built with CMake, see the INSTALL_CMake.txt file for more guidance.
+NOTE: hdf5 can be built with CMake, see the INSTALL_CMake.txt file for more
+guidance.
 
 Preconditions:
 --------------
 
-1. Installed Cygwin 1.7.25 or higher
+1. Cygwin 3.5.1 or higher Installed
 
    To install the Cygwin net release, go to http://www.cygwin.com and
-   click on "setup-x86.exe" (32-bit installation) under the heading
+   click on "setup-x86_64.exe" under the heading
     "Current Cygwin DLL version". This will download a GUI
-   installer called setup-x86.exe which can be run to download a complete
+   installer called setup-x86_64.exe which can be run to download a complete
    Cygwin installation via the internet. Then follow the instructions
    on each screen to install Cygwin.
 
@@ -34,10 +35,10 @@ Preconditions:
 
     The following compilers are supported by HDF5 and included in the Cygwin
     package system:
-       gcc (4.7.3 and 4.9.2), which includes:
-            gcc4-core    : C compiler
-            gcc4-g++     : C++ compiler
-            gcc4-fortran : fortran compiler
+       gcc, which includes:
+            gcc-core    : C compiler
+            gcc-g++     : C++ compiler
+            gcc-fortran : Fortran compiler
 
 
    2.1.1 Using Compilers Not Supported
@@ -59,18 +60,13 @@ Preconditions:
 
     2.2 HDF5 External Library Dependencies
 
-    2.2.1 Zlib
+    2.2.1 zlib
 
-         zlib-1.2.5 or later is supported and tested on Cygwin.
+         zlib-1.2.8 or later is supported and tested.
 
     2.2.2 Szip
-       The HDF5 library has a predefined compression filter that uses
-       the extended-Rice lossless compression algorithm for chunked
-       datasets. For more information on Szip compression, license terms,
-       and obtaining the Szip source code, see:
 
-          https://portal.hdfgroup.org/display/HDF5/Szip+Compression+in+HDF+Products
-
+         libaec-1.1.2 or later is supported and tested.
 
     2.3 Additional Utilities
 
@@ -92,7 +88,7 @@ Build, Test and Install HDF5 on Cygwin
 
 1. Get HDF5 source code package
    Users can download HDF5 source code package from HDF website
-   (http://hdfgroup.org).
+   (https://hdfgroup.org).
 
 2. Unpacking the distribution
 
@@ -102,32 +98,30 @@ Build, Test and Install HDF5 on Cygwin
 
    2.1 Non-compressed tar archive (*.tar)
 
-            $ tar xf hdf5-1.15.x.tar
+          $ tar xf hdf5-1.15.x.tar
 
    2.2 Gzip'd tar archive (*.tar.gz)
 
-            $ gunzip < hdf5-1.15.x.tar.gz | tar xf -
+          $ gunzip < hdf5-1.15.x.tar.gz | tar xf -
 
    2.3 Bzip'd tar archive (*.tar.bz2)
 
-            $ bunzip2 < hdf5-1.15.x.tar.bz2 | tar xf -
+          $ bunzip2 < hdf5-1.15.x.tar.bz2 | tar xf -
 
 2. Setup Environment
 
     In Cygwin, most compilers and setting are automatically detected during
-    the configure script.  However, if you are building Fortran we recommend
+    the configure script. However, if you are building Fortran, we recommend
     that you explicitly set the "FC" variable in your environment to use the
-    gfortran compiler.  For example, issue the command:
+    gfortran compiler. For example, issue the command:
 
-            $ export FC=gfortran
+          $ export FC=gfortran
 
 4. Configuring
 
-   Notes: See detailed information in hdf5/release_docs/INSTALL,
-          part 5. Full installation instructions for source
-          distributions
+   Notes: See detailed information in hdf5/release_docs/INSTALL_Auto.txt.
 
-   The host configuration file for cygwin i686-pc-cygwin is located
+   The host configuration file for Cygwin is located
    in the `config' directory and are based on architecture name,
    vendor name, and operating system which are displayed near the
    beginning of the `configure' output. The host config file influences
@@ -137,34 +131,34 @@ Build, Test and Install HDF5 on Cygwin
 
    To configure HDF5 C Library, using
 
-            $ ./configure
+           $ ./configure
 
    To configure HDF5 C/C++ Library, using
 
-            $ ./configure --enable-cxx
+           $ ./configure --enable-cxx
 
    To configure HDF5 C/Fortran Library, using
 
-            $ ./configure --enable-fortran
+           $ ./configure --enable-fortran
 
    To configure HDF5 C with Szip library, using
 
-            $ ./configure  --with-szlib="path to szlib"
+           $ ./configure  --with-szlib="path to szlib"
 
-       For example, if szip library was installed in the directory
+       For example, if Szip library was installed in the directory
        /cygdrive/c/szip, which is parent directory of "include" and
        "lib", then the following command will configure HDF5 C library
-       with szip enabled:
+       with Szip enabled:
 
-            $ ./configure --with-szlib=/cygdrive/c/szip
+           $ ./configure --with-szlib=/cygdrive/c/szip
 
-   To configure HDF5 C without Zlib,
+   To configure HDF5 C without zlib,
 
        To disable zlib, using
 
            $ ./configure --without-zlib
 
-   Two ways to configure HDF5 C with specified Zlib
+   Two ways to configure HDF5 C with specified zlib
 
       Using
 
@@ -174,7 +168,7 @@ Build, Test and Install HDF5 on Cygwin
        /cygdrive/c/usr, which is the parent directory of directories
        "include" and "lib",
 
- $ ./configure --with-zlib=/cygdrive/c/usr/include,/cygdrive/c/usr/lib
+           $ ./configure --with-zlib=/cygdrive/c/usr/include,/cygdrive/c/usr/lib
 
       Through the CPPFLAGS and LDFLAGS Variables
 
@@ -188,7 +182,7 @@ Build, Test and Install HDF5 on Cygwin
 
     To specify the installation directories, using
 
-            $ ./configure --prefix="path for installation"
+           $ ./configure --prefix="path for installation"
 
        By default, HDF5 library, header files, examples, and
        support programs will be installed in /usr/local/lib,
@@ -201,7 +195,7 @@ Build, Test and Install HDF5 on Cygwin
 
        All of the above switches can be combined together. For
        example, if users want to configure HDF5 C/C++/Fortran
-       library with szip library enabled, with zlib library at
+       library with Szip library enabled, with zlib library at
        /cygdrive/c/usr/, and install HDF5 into directory
        /cygdrive/c/hdf5 using gcc/g++ as C/C++ compiler and gfortran
        as fortran compiler
@@ -237,15 +231,15 @@ Build, Test and Install HDF5 on Cygwin
    After configuration is done successfully, run the following series of
    commands to build, test and install HDF5
 
-            $ make          > "output file name"
-            $ make check    > "output file name"
+           $ make          > "output file name"
+           $ make check    > "output file name"
 
    Before run "make install", check output file for "make check", there
    should be no failures at all.
 
 6. Make Install
 
-            $ make install  > "output file name"
+           $ make install  > "output file name"
 
 
 7. Check installed HDF5 library
@@ -255,8 +249,7 @@ Build, Test and Install HDF5 on Cygwin
 
 8. Known Problems
 
-   dt_arith tests may fail due to the use of fork. This is a known issue
-   with cygwin on Windows.
+   cache_api tests may fail. This is a known issue with Cygwin.
 
    "make check" fails when building shared lib files is enabled.  The default
    on Cygwin has been changed to disable shared.  It can be enabled with
