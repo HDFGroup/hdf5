@@ -5197,14 +5197,12 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
     H5T_path_t    *path         = NULL;  /* Pointer to current path */
     bool           noop_conv    = false; /* Whether this is a no-op conversion */
     bool           new_path     = false; /* Whether we're creating a new path */
-    bool           new_api_hard_func =
-        false; /* If the caller is an API function specifying a new hard conversion function */
-    bool new_lib_hard_func =
-        false; /* If the caller is a private function specifying a new hard conversion function */
-    int         old_npaths;       /* Previous number of paths in table */
-    int         last_cmp  = 0;    /* Value of last comparison during binary search */
-    int         path_idx  = 0;    /* Index into path table for path */
-    H5T_path_t *ret_value = NULL; /* Return value */
+    bool           new_api_func = false; /* If the caller is an API function specifying a new conversion function */
+    bool           new_lib_func = false; /* If the caller is a private function specifying a new conversion function */
+    int            old_npaths;       /* Previous number of paths in table */
+    int            last_cmp  = 0;    /* Value of last comparison during binary search */
+    int            path_idx  = 0;    /* Index into path table for path */
+    H5T_path_t    *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -5246,15 +5244,15 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
     old_npaths = H5T_g.npaths;
 
     /* Set a few convenience variables */
-    new_api_hard_func = (matched_path && conv->is_app && conv->u.app_func);
-    new_lib_hard_func = (matched_path && !conv->is_app && conv->u.lib_func);
+    new_api_func = (matched_path && conv->is_app && conv->u.app_func);
+    new_lib_func = (matched_path && !conv->is_app && conv->u.lib_func);
 
     /* If we didn't find the path, if the caller is an API function specifying
      * a new hard conversion function, or if the caller is a private function
      * specifying a new hard conversion and the path is a soft conversion, then
      * create a new path and add the new function to the path.
      */
-    new_path = !matched_path || new_api_hard_func || (new_lib_hard_func && !matched_path->is_hard);
+    new_path = !matched_path || new_api_func || (new_lib_func && !matched_path->is_hard);
 
     if (new_path) {
         if (NULL == (path = H5FL_CALLOC(H5T_path_t)))
