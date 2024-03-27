@@ -1285,7 +1285,7 @@
   ADD_H5_COMP_TEST (tfletcher32 0 0 --enable-error-stack -H -p -d fletcher32  tfilters.h5)
 
   # nbit
-  ADD_H5_COMP_TEST (tnbit 0 10 --enable-error-stack -H -p -d nbit  tfilters.h5)
+  ADD_H5_COMP_TEST (tnbit 0 1 --enable-error-stack -H -p -d nbit  tfilters.h5)
 
   # scaleoffset
   ADD_H5_COMP_TEST (tscaleoffset 0 4 --enable-error-stack -H -p -d scaleoffset  tfilters.h5)

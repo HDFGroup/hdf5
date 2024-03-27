@@ -395,8 +395,12 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
 
             /* Invoke correct "high level" I/O routine */
-            if ((*dset_info[i].io_ops.multi_read)(&io_info, &dset_info[i]) < 0)
+            if ((*dset_info[i].io_ops.multi_read)(&io_info, &dset_info[i]) < 0) {
+                /* Reset metadata tagging */
+                H5AC_tag(prev_tag, NULL);
+
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
+            }
 
             /* Reset metadata tagging */
             H5AC_tag(prev_tag, NULL);

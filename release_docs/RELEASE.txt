@@ -693,17 +693,17 @@ Bug Fixes since HDF5-1.14.0 release
 
     Library
     -------
-    - Fixed a cache assert with too-large metadata objects
+    - Fixed a cache assert with very large metadata objects
 
-      If the library tries to load a metadata object that is above the
-      library's hard-coded limits, the size will trip an assert in debug
-      builds. In HDF5 1.14.4, this can happen if you create a very large
-      number of links in an old-style group that uses local heaps.
+      If the library tries to load a metadata object that is above a
+      certain size, this would trip an assert in debug builds. This could
+      happen if you create a very large number of links in an old-style
+      group that uses local heaps.
 
-      The library will now emit a normal error when it tries to load a
-      metadata object that is too large.
+      There is no need for this assert. The library's metadata cache
+      can handle large objects. The assert has been removed.
 
-      Partially addresses GitHub #3762
+      Fixes GitHub #3762
 
     - Fixed an issue with the Subfiling VFD and multiple opens of a
       file
@@ -1716,6 +1716,11 @@ Platforms Tested
 
 Known Problems
 ==============
+
+    When building with the NAG Fortran compiler using the Autotools and libtool
+    2.4.2 or earlier, the -shared flag will be missing '-Wl,', which will cause
+    compilation to fail. This is due to a bug in libtool that was fixed in 2012
+    and released in 2.4.4 in 2014.
 
     When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may
     also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur
