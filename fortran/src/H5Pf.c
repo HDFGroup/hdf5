@@ -4606,8 +4606,8 @@ h5pset_fapl_mpio_c(hid_t_f *prp_id, void *comm, void *info)
     herr_t   ret;
     MPI_Comm c_comm;
     MPI_Info c_info;
-    c_comm = MPI_Comm_f2c(*((int *)comm));
-    c_info = MPI_Info_f2c(*((int *)info));
+    c_comm = MPI_Comm_f2c(*((MPI_Fint *)comm));
+    c_info = MPI_Info_f2c(*((MPI_Fint *)info));
 
     /*
      * Call H5Pset_mpi function.
@@ -4677,8 +4677,8 @@ h5pset_mpi_params_c(hid_t_f *prp_id, void *comm, void *info)
     herr_t   ret;
     MPI_Comm c_comm;
     MPI_Info c_info;
-    c_comm = MPI_Comm_f2c(*((int *)comm));
-    c_info = MPI_Info_f2c(*((int *)info));
+    c_comm = MPI_Comm_f2c(*((MPI_Fint *)comm));
+    c_info = MPI_Info_f2c(*((MPI_Fint *)info));
 
     /*
      * Call H5Pset_mpi_params.
