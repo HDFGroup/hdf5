@@ -2025,7 +2025,7 @@ H5TBinsert_field(hid_t loc_id, const char *dset_name, const char *field_name, hi
         goto out;
 
     /* alloc fill value attribute buffer */
-    if (NULL == (tmp_fill_buf = (unsigned char *)malloc(total_size)))
+    if (NULL == (tmp_fill_buf = (unsigned char *)calloc(1, total_size)))
         goto out;
 
     /* get the fill value attributes */
