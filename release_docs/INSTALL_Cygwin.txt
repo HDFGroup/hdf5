@@ -87,8 +87,8 @@ Build, Test and Install HDF5 on Cygwin
 --------------------------------------
 
 1. Get HDF5 source code package
-   Users can download HDF5 source code package from HDF website
-   (https://hdfgroup.org).
+   Users can download the HDF5 source code from the official GitHub repository
+   (https://github.com/HDFGroup/hdf5).
 
 2. Unpacking the distribution
 
