@@ -80,11 +80,10 @@ if(USE_SANITIZER)
       endif()
 
       if(USE_SANITIZER MATCHES "([Mm]emory([Ww]ith[Oo]rigins)?)")
-        # Optional: -fno-optimize-sibling-calls -fsanitize-memory-track-origins=2
         set(SANITIZER_MEM_FLAG "-fsanitize=memory")
         if(USE_SANITIZER MATCHES "([Mm]emory[Ww]ith[Oo]rigins)")
           message(STATUS "Testing with MemoryWithOrigins sanitizer")
-          append("-fsanitize-memory-track-origins" SANITIZER_MEM_FLAG)
+          append("-fno-optimize-sibling-calls -fsanitize-memory-track-origins=2" SANITIZER_MEM_FLAG)
         else()
           message(STATUS "Testing with Memory sanitizer")
         endif()
