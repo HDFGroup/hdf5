@@ -35,7 +35,6 @@ jobs:
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           $GITHUB_WORKSPACE/configure \
-            FCFLAGS="-fPIC -fortranlibs" \
             --enable-build-mode=${{ inputs.build_mode }} \
             --disable-fortran \
             --enable-shared \
