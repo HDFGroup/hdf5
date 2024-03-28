@@ -149,8 +149,8 @@ H5O__dset_free_copy_file_udata(void *_udata)
  * Purpose:	Determines if an object has the requisite messages for being
  *		a dataset.
  *
- * Return:	Success:	TRUE if the required dataset messages are
- *				present; FALSE otherwise.
+ * Return:	Success:	true if the required dataset messages are
+ *				present; false otherwise.
  *
  *		Failure:	FAIL if the existence of certain messages
  *				cannot be determined.
@@ -161,7 +161,7 @@ static htri_t
 H5O__dset_isa(const H5O_t *oh)
 {
     htri_t exists;           /* Flag if header message of interest exists */
-    htri_t ret_value = TRUE; /* Return value */
+    htri_t ret_value = true; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -171,13 +171,13 @@ H5O__dset_isa(const H5O_t *oh)
     if ((exists = H5O_msg_exists_oh(oh, H5O_DTYPE_ID)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header");
     else if (!exists)
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
 
     /* Layout */
     if ((exists = H5O_msg_exists_oh(oh, H5O_SDSPACE_ID)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header");
     else if (!exists)
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -335,8 +335,8 @@ H5O__dset_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
 {
     H5O_layout_t layout;              /* Data storage layout message */
     H5O_efl_t    efl;                 /* External File List message */
-    hbool_t      layout_read = FALSE; /* Whether the layout message was read */
-    hbool_t      efl_read    = FALSE; /* Whether the external file list message was read */
+    bool         layout_read = false; /* Whether the layout message was read */
+    bool         efl_read    = false; /* Whether the external file list message was read */
     htri_t       exists;              /* Flag if header message of interest exists */
     herr_t       ret_value = SUCCEED; /* Return value */
 
@@ -352,7 +352,7 @@ H5O__dset_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
     /* Get the layout message from the object header */
     if (NULL == H5O_msg_read_oh(loc->file, oh, H5O_LAYOUT_ID, &layout))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find layout message");
-    layout_read = TRUE;
+    layout_read = true;
 
     /* Check for chunked dataset storage */
     if (layout.type == H5D_CHUNKED && H5D__chunk_is_space_alloc(&layout.storage)) {
@@ -383,7 +383,7 @@ H5O__dset_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
         /* Get External File List message from the object header */
         if (NULL == H5O_msg_read_oh(loc->file, oh, H5O_EFL_ID, &efl))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find EFL message");
-        efl_read = TRUE;
+        efl_read = true;
 
         /* Get size of local heap for EFL message's file list */
         if (H5D__efl_bh_info(loc->file, &efl, &(bh_info->heap_size)) < 0)

@@ -32,7 +32,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Metadata cache			*/
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5Gpkg.h"      /* Groups		  		*/
@@ -55,7 +54,7 @@
 /* User data for path traversal routine for getting object info */
 typedef struct {
     H5G_stat_t *statbuf;     /* Stat buffer about object */
-    hbool_t     follow_link; /* Whether we are following a link or not */
+    bool        follow_link; /* Whether we are following a link or not */
     H5F_t      *loc_file;    /* Pointer to the file the location is in */
 } H5G_trav_goi_t;
 
@@ -178,7 +177,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a property list");
 
         /* Make a copy of the default property list */
-        if ((tmp_gcpl = H5P_copy_plist(gc_plist, FALSE)) < 0)
+        if ((tmp_gcpl = H5P_copy_plist(gc_plist, false)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5I_INVALID_HID, "unable to copy the creation property list");
 
         /* Get pointer to the copied property list */
@@ -216,7 +215,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group");
 
     /* Get an ID for the group */
-    if ((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, true)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group");
 
 done:
@@ -274,7 +273,7 @@ H5Gopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open group");
 
     /* Get an ID for the group */
-    if ((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, true)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group");
 
 done:
@@ -627,7 +626,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf /*out*/)
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*szx", loc_id, name, size, buf);
+    H5TRACE4("e", "i*sz*s", loc_id, name, size, buf);
 
     /* Check arguments */
     if (!name || !*name)
@@ -748,7 +747,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf /*out*/
     int                                ret_value;       /* Return value */
 
     FUNC_ENTER_API(-1)
-    H5TRACE4("Is", "i*szx", loc_id, name, bufsize, buf);
+    H5TRACE4("Is", "i*sz*s", loc_id, name, bufsize, buf);
 
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "no name specified");
@@ -884,7 +883,7 @@ H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs /*out*/)
     herr_t                ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", loc_id, num_objs);
+    H5TRACE2("e", "i*h", loc_id, num_objs);
 
     /* Check args */
     id_type = H5I_get_type(loc_id);
@@ -933,7 +932,7 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link, H5G_stat_t *
     herr_t                            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*sbx", loc_id, name, follow_link, statbuf);
+    H5TRACE4("e", "i*sb*Gs", loc_id, name, follow_link, statbuf);
 
     /* Check arguments */
     if (!name || !*name)
@@ -1062,7 +1061,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5G_stat_t *statbuf /*out*/)
+H5G__get_objinfo(const H5G_loc_t *loc, const char *name, bool follow_link, H5G_stat_t *statbuf /*out*/)
 {
     H5G_trav_goi_t udata;               /* User data for callback */
     herr_t         ret_value = SUCCEED; /* Return value */
@@ -1148,7 +1147,7 @@ H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name /*out*/, size_t size
     ssize_t              ret_value;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("Zs", "ihxz", loc_id, idx, name, size);
+    H5TRACE4("Zs", "ih*sz", loc_id, idx, name, size);
 
     /* Set up collective metadata if appropriate */
     if (H5CX_set_loc(loc_id) < 0)

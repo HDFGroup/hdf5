@@ -14,7 +14,6 @@
 
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fprivate.h"  /* File access                          */
 #include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5Oprivate.h"  /* Object headers		  	*/
@@ -71,7 +70,7 @@ H5Z__can_apply_szip(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_U
     const H5T_t *type;             /* Datatype */
     size_t       dtype_size;       /* Datatype's size (in bits) */
     H5T_order_t  dtype_order;      /* Datatype's endianness order */
-    htri_t       ret_value = TRUE; /* Return value */
+    htri_t       ret_value = true; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -85,7 +84,7 @@ H5Z__can_apply_szip(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_U
 
     /* Range check datatype's size */
     if (dtype_size > 32 && dtype_size != 64)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "invalid datatype size");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, false, "invalid datatype size");
 
     /* Get datatype's endianness order */
     if ((dtype_order = H5T_get_order(type)) == H5T_ORDER_ERROR)
@@ -94,7 +93,7 @@ H5Z__can_apply_szip(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_U
     /* Range check datatype's endianness order */
     /* (Note: this may not handle non-atomic datatypes well) */
     if (dtype_order != H5T_ORDER_LE && dtype_order != H5T_ORDER_BE)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "invalid datatype endianness order");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, false, "invalid datatype endianness order");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

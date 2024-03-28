@@ -133,11 +133,18 @@ endif ()
 message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
 # remove special output
-file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-string (FIND TEST_STREAM "_pmi_alps" TEST_FIND_RESULT)
-if (TEST_FIND_RESULT GREATER -1)
-  string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
-  file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  string (FIND "${TEST_STREAM}" "_pmi_alps" TEST_FIND_RESULT)
+  if (TEST_FIND_RESULT GREATER -1)
+    string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
+  endif ()
+  string (FIND "${TEST_STREAM}" "ulimit -s" TEST_FIND_RESULT)
+  if (TEST_FIND_RESULT GREATER -1)
+    string (REGEX REPLACE "^.*ulimit -s[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
+  endif ()
 endif ()
 
 # remove special error output
@@ -148,7 +155,7 @@ else ()
   # the error stack remains in the .err file
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
 endif ()
-string (FIND TEST_STREAM "no version information available" TEST_FIND_RESULT)
+string (FIND "${TEST_STREAM}" "no version information available" TEST_FIND_RESULT)
 if (TEST_FIND_RESULT GREATER -1)
   string (REGEX REPLACE "^.*no version information available[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
   # write back the changes to the original files
@@ -160,7 +167,7 @@ if (TEST_FIND_RESULT GREATER -1)
 endif ()
 
 # if the output file needs Storage text removed
-if (TEST_MASK)
+if (TEST_MASK_STORE)
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
   string (REGEX REPLACE "Storage:[^\n]+\n" "Storage:   <details removed for portability>\n" TEST_STREAM "${TEST_STREAM}")
   file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
@@ -198,8 +205,16 @@ if (TEST_MASK_ERROR)
 endif ()
 
 # remove text from the output file
+if (TEST_MASK)
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  string (REGEX REPLACE "${TEST_MASK}" "" TEST_STREAM "${TEST_STREAM}")
+  file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+endif ()
+
+# replace text from the output file
 if (TEST_FILTER)
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  message (STATUS "TEST_FILTER: ${TEST_FILTER} TEST_FILTER_REPLACE: ${TEST_FILTER_REPLACE}")
   string (REGEX REPLACE "${TEST_FILTER}" "${TEST_FILTER_REPLACE}" TEST_STREAM "${TEST_STREAM}")
   file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
 endif ()
@@ -218,14 +233,6 @@ if (NOT TEST_SKIP_COMPARE)
     file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
     list (LENGTH TEST_STREAM test_len)
     if (test_len GREATER 0)
-    #  if (WIN32) # no longer needed for CMake > 3.15
-    #    configure_file(${TEST_FOLDER}/${TEST_REFERENCE} ${TEST_FOLDER}/${TEST_REFERENCE}.tmp NEWLINE_STYLE CRLF)
-    #    if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}.tmp")
-    #      file(RENAME ${TEST_FOLDER}/${TEST_REFERENCE}.tmp ${TEST_FOLDER}/${TEST_REFERENCE})
-    #    endif ()
-    #    #file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
-    #    #file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
-    #  endif ()
 
       if (NOT TEST_SORT_COMPARE)
         # now compare the output with the reference
@@ -293,14 +300,6 @@ if (NOT TEST_SKIP_COMPARE)
     file (READ ${TEST_FOLDER}/${TEST_ERRREF} TEST_STREAM)
     list (LENGTH TEST_STREAM test_len)
     if (test_len GREATER 0)
-    #  if (WIN32) # no longer needed for CMake > 3.15
-    #    configure_file(${TEST_FOLDER}/${TEST_ERRREF} ${TEST_FOLDER}/${TEST_ERRREF}.tmp NEWLINE_STYLE CRLF)
-    #    if (EXISTS "${TEST_FOLDER}/${TEST_ERRREF}.tmp")
-    #      file(RENAME ${TEST_FOLDER}/${TEST_ERRREF}.tmp ${TEST_FOLDER}/${TEST_ERRREF})
-    #    endif ()
-    #    #file (READ ${TEST_FOLDER}/${TEST_ERRREF} TEST_STREAM)
-    #    #file (WRITE ${TEST_FOLDER}/${TEST_ERRREF} "${TEST_STREAM}")
-    #  endif ()
 
       # now compare the error output with the error reference
       execute_process (

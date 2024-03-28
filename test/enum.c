@@ -808,12 +808,12 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDputs("All enum tests passed.");
+    puts("All enum tests passed.");
     h5_cleanup(FILENAME, fapl_id);
 
     return EXIT_SUCCESS;
 
 error:
-    HDputs("*** ENUM TESTS FAILED ***");
+    puts("*** ENUM TESTS FAILED ***");
     return EXIT_FAILURE;
 }

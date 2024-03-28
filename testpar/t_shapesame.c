@@ -24,6 +24,21 @@
 #include "H5Spkg.h" /* Dataspaces                           */
 #include "testphdf5.h"
 
+#ifndef PATH_MAX
+#define PATH_MAX 512
+#endif
+
+/* FILENAME and filenames must have the same number of names.
+ * Use PARATESTFILE in general and use a separated filename only if the file
+ * created in one test is accessed by a different test.
+ * filenames[0] is reserved as the file name for PARATESTFILE.
+ */
+#define NFILENAME    2
+#define PARATESTFILE filenames[0]
+const char *FILENAME[NFILENAME] = {"ShapeSameTest", NULL};
+char       *filenames[NFILENAME];
+hid_t       fapl; /* file access property list */
+
 /* On Lustre (and perhaps other parallel file systems?), we have severe
  * slow downs if two or more processes attempt to access the same file system
  * block.  To minimize this problem, we set alignment in the shape same tests
@@ -112,14 +127,14 @@ struct hs_dr_pio_test_vars_t {
 static void
 hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker_edge_size,
                       const int chunk_edge_size, const int small_rank, const int large_rank,
-                      const hbool_t use_collective_io, const hid_t dset_type, const int express_test,
+                      const bool use_collective_io, const hid_t dset_type, const int express_test,
                       struct hs_dr_pio_test_vars_t *tv_ptr)
 {
 #if CONTIG_HS_DR_PIO_TEST__SETUP__DEBUG
     const char *fcnName = "hs_dr_pio_test__setup()";
 #endif /* CONTIG_HS_DR_PIO_TEST__SETUP__DEBUG */
     const char *filename;
-    hbool_t     mis_match = FALSE;
+    bool        mis_match = false;
     int         i;
     int         mrc;
     int         mpi_rank; /* needed by the VRFY macro */
@@ -452,7 +467,7 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
 
     /* verify that the correct data was written to the small data set */
     expected_value = 0;
-    mis_match      = FALSE;
+    mis_match      = false;
     ptr_1          = tv_ptr->small_ds_buf_1;
 
     i = 0;
@@ -460,12 +475,12 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
 
         if (*ptr_1 != expected_value) {
 
-            mis_match = TRUE;
+            mis_match = true;
         }
         ptr_1++;
         expected_value++;
     }
-    VRFY((mis_match == FALSE), "small ds init data good.");
+    VRFY((mis_match == false), "small ds init data good.");
 
     /* setup selections for writing initial data to the large data set */
 
@@ -523,7 +538,7 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
 
     /* verify that the correct data was written to the large data set */
     expected_value = 0;
-    mis_match      = FALSE;
+    mis_match      = false;
     ptr_1          = tv_ptr->large_ds_buf_1;
 
     i = 0;
@@ -531,12 +546,12 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
 
         if (*ptr_1 != expected_value) {
 
-            mis_match = TRUE;
+            mis_match = true;
         }
         ptr_1++;
         expected_value++;
     }
-    VRFY((mis_match == FALSE), "large ds init data good.");
+    VRFY((mis_match == false), "large ds init data good.");
 
     /* sync with the other processes before changing data */
     mrc = MPI_Barrier(MPI_COMM_WORLD);
@@ -684,7 +699,7 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 #if CONTIG_HS_DR_PIO_TEST__D2M_L2S__DEBUG
     const char *fcnName = "contig_hs_dr_pio_test__run_test()";
 #endif /* CONTIG_HS_DR_PIO_TEST__D2M_L2S__DEBUG */
-    hbool_t   mis_match = FALSE;
+    bool      mis_match = false;
     int       i, j, k, l;
     size_t    n;
     int       mpi_rank; /* needed by the VRFY macro */
@@ -806,7 +821,7 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
                      * selections as having the same shape.
                      */
                     check = H5Sselect_shape_same(tv_ptr->small_ds_slice_sid, tv_ptr->file_large_ds_sid_0);
-                    VRFY((check == TRUE), "H5Sselect_shape_same passed");
+                    VRFY((check == true), "H5Sselect_shape_same passed");
 
                     /* Read selection from disk */
 #if CONTIG_HS_DR_PIO_TEST__D2M_L2S__DEBUG
@@ -824,7 +839,7 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                     /* verify that expected data is retrieved */
 
-                    mis_match = FALSE;
+                    mis_match = false;
                     ptr_1     = tv_ptr->small_ds_slice_buf;
                     expected_value =
                         (uint32_t)((i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size *
@@ -836,7 +851,7 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                         if (*ptr_1 != expected_value) {
 
-                            mis_match = TRUE;
+                            mis_match = true;
                         }
 
                         *ptr_1 = 0; /* zero data for next use */
@@ -845,7 +860,7 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
                         expected_value++;
                     }
 
-                    VRFY((mis_match == FALSE), "small slice read from large ds data good.");
+                    VRFY((mis_match == false), "small slice read from large ds data good.");
 
                     (tv_ptr->tests_run)++;
                 }
@@ -892,7 +907,7 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 #if CONTIG_HS_DR_PIO_TEST__D2M_S2L__DEBUG
     const char *fcnName = "contig_hs_dr_pio_test__d2m_s2l()";
 #endif /* CONTIG_HS_DR_PIO_TEST__D2M_S2L__DEBUG */
-    hbool_t   mis_match = FALSE;
+    bool      mis_match = false;
     int       i, j, k, l;
     size_t    n;
     int       mpi_rank; /* needed by the VRFY macro */
@@ -1035,7 +1050,7 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                      * selections as having the same shape.
                      */
                     check = H5Sselect_shape_same(tv_ptr->file_small_ds_sid_0, tv_ptr->mem_large_ds_sid);
-                    VRFY((check == TRUE), "H5Sselect_shape_same passed");
+                    VRFY((check == true), "H5Sselect_shape_same passed");
 
                     /* Read selection from disk */
 #if CONTIG_HS_DR_PIO_TEST__D2M_S2L__DEBUG
@@ -1071,7 +1086,7 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                             if (*ptr_1 != expected_value) {
 
-                                mis_match = TRUE;
+                                mis_match = true;
                             }
                             expected_value++;
                         }
@@ -1079,7 +1094,7 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                             if (*ptr_1 != 0) {
 
-                                mis_match = TRUE;
+                                mis_match = true;
                             }
                         }
                         /* zero out the value for the next pass */
@@ -1088,7 +1103,7 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                         ptr_1++;
                     }
 
-                    VRFY((mis_match == FALSE), "small slice read from large ds data good.");
+                    VRFY((mis_match == false), "small slice read from large ds data good.");
 
                     (tv_ptr->tests_run)++;
                 }
@@ -1137,7 +1152,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 #if CONTIG_HS_DR_PIO_TEST__M2D_L2S__DEBUG
     const char *fcnName = "contig_hs_dr_pio_test__m2d_l2s()";
 #endif /* CONTIG_HS_DR_PIO_TEST__M2D_L2S__DEBUG */
-    hbool_t   mis_match = FALSE;
+    bool      mis_match = false;
     int       i, j, k, l;
     size_t    n;
     int       mpi_rank; /* needed by the VRFY macro */
@@ -1301,7 +1316,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
                      * on disk full square selections as having the same shape.
                      */
                     check = H5Sselect_shape_same(tv_ptr->file_small_ds_sid_0, tv_ptr->mem_large_ds_sid);
-                    VRFY((check == TRUE), "H5Sselect_shape_same passed.");
+                    VRFY((check == true), "H5Sselect_shape_same passed.");
 
                     /* write the slice from the in memory large data set to the
                      * slice of the on disk small dataset. */
@@ -1324,7 +1339,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                     /* verify that expected data is retrieved */
 
-                    mis_match = FALSE;
+                    mis_match = false;
                     ptr_1     = tv_ptr->small_ds_buf_1;
 
                     expected_value =
@@ -1345,7 +1360,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                             if (*ptr_1 != expected_value) {
 
-                                mis_match = TRUE;
+                                mis_match = true;
                             }
                             expected_value++;
                         }
@@ -1353,7 +1368,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                             if (*ptr_1 != 0) {
 
-                                mis_match = TRUE;
+                                mis_match = true;
                             }
                         }
                         /* zero out the value for the next pass */
@@ -1362,7 +1377,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
                         ptr_1++;
                     }
 
-                    VRFY((mis_match == FALSE), "small slice write from large ds data good.");
+                    VRFY((mis_match == false), "small slice write from large ds data good.");
 
                     (tv_ptr->tests_run)++;
                 }
@@ -1413,7 +1428,7 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 #if CONTIG_HS_DR_PIO_TEST__M2D_S2L__DEBUG
     const char *fcnName = "contig_hs_dr_pio_test__m2d_s2l()";
 #endif /* CONTIG_HS_DR_PIO_TEST__M2D_S2L__DEBUG */
-    hbool_t   mis_match = FALSE;
+    bool      mis_match = false;
     int       i, j, k, l;
     size_t    n;
     int       mpi_rank; /* needed by the VRFY macro */
@@ -1584,7 +1599,7 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                      * as having the same shape.
                      */
                     check = H5Sselect_shape_same(tv_ptr->mem_small_ds_sid, tv_ptr->file_large_ds_sid_0);
-                    VRFY((check == TRUE), "H5Sselect_shape_same passed");
+                    VRFY((check == true), "H5Sselect_shape_same passed");
 
                     /* write the small data set slice from memory to the
                      * target slice of the disk data set
@@ -1632,7 +1647,7 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                             if (*ptr_1 != expected_value) {
 
-                                mis_match = TRUE;
+                                mis_match = true;
                             }
 
                             expected_value++;
@@ -1641,7 +1656,7 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                             if (*ptr_1 != 0) {
 
-                                mis_match = TRUE;
+                                mis_match = true;
                             }
                         }
                         /* zero out buffer for next test */
@@ -1649,7 +1664,7 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                         ptr_1++;
                     }
 
-                    VRFY((mis_match == FALSE), "small ds slice write to large ds slice data good.");
+                    VRFY((mis_match == false), "small ds slice write to large ds slice data good.");
 
                     (tv_ptr->tests_run)++;
                 }
@@ -1683,9 +1698,10 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 
 static void
 contig_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const int chunk_edge_size,
-                                const int small_rank, const int large_rank, const hbool_t use_collective_io,
+                                const int small_rank, const int large_rank, const bool use_collective_io,
                                 const hid_t dset_type, int express_test, int *skips_ptr, int max_skips,
-                                int64_t *total_tests_ptr, int64_t *tests_run_ptr, int64_t *tests_skipped_ptr)
+                                int64_t *total_tests_ptr, int64_t *tests_run_ptr, int64_t *tests_skipped_ptr,
+                                int mpi_rank)
 {
 #if CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG
     const char *fcnName = "contig_hs_dr_pio_test__run_test()";
@@ -1701,7 +1717,7 @@ contig_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
         /* int         chunk_edge_size                 = */ -1,
         /* int         small_rank                      = */ -1,
         /* int         large_rank                      = */ -1,
-        /* hid_t       dset_type                       = */ -1,
+        /* hid_t       dset_type                       = */ H5I_INVALID_HID,
         /* uint32_t  * small_ds_buf_0                  = */ NULL,
         /* uint32_t  * small_ds_buf_1                  = */ NULL,
         /* uint32_t  * small_ds_buf_2                  = */ NULL,
@@ -1712,24 +1728,24 @@ contig_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
         /* uint32_t  * large_ds_slice_buf              = */ NULL,
         /* int         small_ds_offset                 = */ -1,
         /* int         large_ds_offset                 = */ -1,
-        /* hid_t       fid                             = */ -1, /* HDF5 file ID */
+        /* hid_t       fid                             = */ H5I_INVALID_HID, /* HDF5 file ID */
         /* hid_t       xfer_plist                      = */ H5P_DEFAULT,
-        /* hid_t       full_mem_small_ds_sid           = */ -1,
-        /* hid_t       full_file_small_ds_sid          = */ -1,
-        /* hid_t       mem_small_ds_sid                = */ -1,
-        /* hid_t       file_small_ds_sid_0             = */ -1,
-        /* hid_t       file_small_ds_sid_1             = */ -1,
-        /* hid_t       small_ds_slice_sid              = */ -1,
-        /* hid_t       full_mem_large_ds_sid           = */ -1,
-        /* hid_t       full_file_large_ds_sid          = */ -1,
-        /* hid_t       mem_large_ds_sid                = */ -1,
-        /* hid_t       file_large_ds_sid_0             = */ -1,
-        /* hid_t       file_large_ds_sid_1             = */ -1,
-        /* hid_t       file_large_ds_process_slice_sid = */ -1,
-        /* hid_t       mem_large_ds_process_slice_sid  = */ -1,
-        /* hid_t       large_ds_slice_sid              = */ -1,
-        /* hid_t       small_dataset                   = */ -1, /* Dataset ID */
-        /* hid_t       large_dataset                   = */ -1, /* Dataset ID */
+        /* hid_t       full_mem_small_ds_sid           = */ H5I_INVALID_HID,
+        /* hid_t       full_file_small_ds_sid          = */ H5I_INVALID_HID,
+        /* hid_t       mem_small_ds_sid                = */ H5I_INVALID_HID,
+        /* hid_t       file_small_ds_sid_0             = */ H5I_INVALID_HID,
+        /* hid_t       file_small_ds_sid_1             = */ H5I_INVALID_HID,
+        /* hid_t       small_ds_slice_sid              = */ H5I_INVALID_HID,
+        /* hid_t       full_mem_large_ds_sid           = */ H5I_INVALID_HID,
+        /* hid_t       full_file_large_ds_sid          = */ H5I_INVALID_HID,
+        /* hid_t       mem_large_ds_sid                = */ H5I_INVALID_HID,
+        /* hid_t       file_large_ds_sid_0             = */ H5I_INVALID_HID,
+        /* hid_t       file_large_ds_sid_1             = */ H5I_INVALID_HID,
+        /* hid_t       file_large_ds_process_slice_sid = */ H5I_INVALID_HID,
+        /* hid_t       mem_large_ds_process_slice_sid  = */ H5I_INVALID_HID,
+        /* hid_t       large_ds_slice_sid              = */ H5I_INVALID_HID,
+        /* hid_t       small_dataset                   = */ H5I_INVALID_HID, /* Dataset ID */
+        /* hid_t       large_dataset                   = */ H5I_INVALID_HID, /* Dataset ID */
         /* size_t      small_ds_size                   = */ 1,
         /* size_t      small_ds_slice_size             = */ 1,
         /* size_t      large_ds_size                   = */ 1,
@@ -1750,6 +1766,10 @@ contig_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
         /* int64_t     tests_run                       = */ 0,
         /* int64_t     tests_skipped                   = */ 0};
     struct hs_dr_pio_test_vars_t *tv_ptr = &test_vars;
+
+    if (MAINPROCESS)
+        printf("\r - running test #%lld: small rank = %d, large rank = %d", (long long)(test_num + 1),
+               small_rank, large_rank);
 
     hs_dr_pio_test__setup(test_num, edge_size, -1, chunk_edge_size, small_rank, large_rank, use_collective_io,
                           dset_type, express_test, tv_ptr);
@@ -1923,9 +1943,9 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* contiguous data set, independent I/O */
                     chunk_edge_size = 0;
 
-                    contig_hs_dr_pio_test__run_test(test_num, edge_size, chunk_edge_size, small_rank,
-                                                    large_rank, FALSE, dset_type, express_test, &skips,
-                                                    max_skips, &total_tests, &tests_run, &tests_skipped);
+                    contig_hs_dr_pio_test__run_test(
+                        test_num, edge_size, chunk_edge_size, small_rank, large_rank, false, dset_type,
+                        express_test, &skips, max_skips, &total_tests, &tests_run, &tests_skipped, mpi_rank);
                     test_num++;
                     break;
                     /* end of case IND_CONTIG */
@@ -1934,9 +1954,9 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* contiguous data set, collective I/O */
                     chunk_edge_size = 0;
 
-                    contig_hs_dr_pio_test__run_test(test_num, edge_size, chunk_edge_size, small_rank,
-                                                    large_rank, TRUE, dset_type, express_test, &skips,
-                                                    max_skips, &total_tests, &tests_run, &tests_skipped);
+                    contig_hs_dr_pio_test__run_test(
+                        test_num, edge_size, chunk_edge_size, small_rank, large_rank, true, dset_type,
+                        express_test, &skips, max_skips, &total_tests, &tests_run, &tests_skipped, mpi_rank);
                     test_num++;
                     break;
                     /* end of case COL_CONTIG */
@@ -1945,9 +1965,9 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* chunked data set, independent I/O */
                     chunk_edge_size = 5;
 
-                    contig_hs_dr_pio_test__run_test(test_num, edge_size, chunk_edge_size, small_rank,
-                                                    large_rank, FALSE, dset_type, express_test, &skips,
-                                                    max_skips, &total_tests, &tests_run, &tests_skipped);
+                    contig_hs_dr_pio_test__run_test(
+                        test_num, edge_size, chunk_edge_size, small_rank, large_rank, false, dset_type,
+                        express_test, &skips, max_skips, &total_tests, &tests_run, &tests_skipped, mpi_rank);
                     test_num++;
                     break;
                     /* end of case IND_CHUNKED */
@@ -1956,15 +1976,15 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* chunked data set, collective I/O */
                     chunk_edge_size = 5;
 
-                    contig_hs_dr_pio_test__run_test(test_num, edge_size, chunk_edge_size, small_rank,
-                                                    large_rank, TRUE, dset_type, express_test, &skips,
-                                                    max_skips, &total_tests, &tests_run, &tests_skipped);
+                    contig_hs_dr_pio_test__run_test(
+                        test_num, edge_size, chunk_edge_size, small_rank, large_rank, true, dset_type,
+                        express_test, &skips, max_skips, &total_tests, &tests_run, &tests_skipped, mpi_rank);
                     test_num++;
                     break;
                     /* end of case COL_CHUNKED */
 
                 default:
-                    VRFY((FALSE), "unknown test type");
+                    VRFY((false), "unknown test type");
                     break;
 
             } /* end of switch(sstest_type) */
@@ -1977,9 +1997,13 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
         }
     }
 
-    if ((MAINPROCESS) && (tests_skipped > 0)) {
-        fprintf(stdout, "    %" PRId64 " of %" PRId64 " subtests skipped to expedite testing.\n",
-                tests_skipped, total_tests);
+    if (MAINPROCESS) {
+        if (tests_skipped > 0) {
+            fprintf(stdout, "    %" PRId64 " of %" PRId64 " subtests skipped to expedite testing.\n",
+                    tests_skipped, total_tests);
+        }
+        else
+            printf("\n");
     }
 
     return;
@@ -2019,7 +2043,7 @@ ckrbrd_hs_dr_pio_test__slct_ckrbrd(const int mpi_rank, const hid_t tgt_sid, cons
 #if CKRBRD_HS_DR_PIO_TEST__SELECT_CHECKER_BOARD__DEBUG
     const char *fcnName = "ckrbrd_hs_dr_pio_test__slct_ckrbrd():";
 #endif
-    hbool_t   first_selection = TRUE;
+    bool      first_selection = true;
     int       i, j, k, l, m;
     int       n_cube_offset;
     int       sel_offset;
@@ -2222,7 +2246,7 @@ ckrbrd_hs_dr_pio_test__slct_ckrbrd(const int mpi_rank, const hid_t tgt_sid, cons
 
                             if (first_selection) {
 
-                                first_selection = FALSE;
+                                first_selection = false;
 
                                 ret = H5Sselect_hyperslab(tgt_sid, H5S_SELECT_SET, &(start[n_cube_offset]),
                                                           &(stride[n_cube_offset]), &(count[n_cube_offset]),
@@ -2294,7 +2318,7 @@ ckrbrd_hs_dr_pio_test__slct_ckrbrd(const int mpi_rank, const hid_t tgt_sid, cons
 **  ckrbrd_hs_dr_pio_test__verify_data():
 **
 **    Examine the supplied buffer to see if it contains the
-**    expected data.  Return TRUE if it does, and FALSE
+**    expected data.  Return true if it does, and false
 **      otherwise.
 **
 **    The supplied buffer is presumed to this process's slice
@@ -2347,17 +2371,17 @@ ckrbrd_hs_dr_pio_test__slct_ckrbrd(const int mpi_rank, const hid_t tgt_sid, cons
 
 #define CKRBRD_HS_DR_PIO_TEST__VERIFY_DATA__DEBUG 0
 
-static hbool_t
+static bool
 ckrbrd_hs_dr_pio_test__verify_data(uint32_t *buf_ptr, const int rank, const int edge_size,
                                    const int checker_edge_size, uint32_t first_expected_val,
-                                   hbool_t buf_starts_in_checker)
+                                   bool buf_starts_in_checker)
 {
 #if CKRBRD_HS_DR_PIO_TEST__VERIFY_DATA__DEBUG
     const char *fcnName = "ckrbrd_hs_dr_pio_test__verify_data():";
 #endif
-    hbool_t   good_data = TRUE;
-    hbool_t   in_checker;
-    hbool_t   start_in_checker[5];
+    bool      good_data = true;
+    bool      in_checker;
+    bool      start_in_checker[5];
     uint32_t  expected_value;
     uint32_t *val_ptr;
     int       i, j, k, l, m;     /* to track position in n-cube */
@@ -2449,17 +2473,17 @@ do {
 
                         if (*val_ptr != expected_value) {
 
-                            good_data = FALSE;
+                            good_data = false;
                         }
 
-                        /* zero out buffer for re-use */
+                        /* zero out buffer for reuse */
                         *val_ptr = 0;
                     }
                     else if (*val_ptr != 0) {
 
-                        good_data = FALSE;
+                        good_data = false;
 
-                        /* zero out buffer for re-use */
+                        /* zero out buffer for reuse */
                         *val_ptr = 0;
                     }
 
@@ -2519,7 +2543,7 @@ ckrbrd_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
     const char *fcnName = "ckrbrd_hs_dr_pio_test__d2m_l2s()";
     uint32_t   *ptr_0;
 #endif /* CHECKER_BOARD_HS_DR_PIO_TEST__D2M_L2S__DEBUG */
-    hbool_t  data_ok = FALSE;
+    bool     data_ok = false;
     int      i, j, k, l;
     uint32_t expected_value;
     int      mpi_rank; /* needed by VRFY */
@@ -2671,7 +2695,7 @@ ckrbrd_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
                      * selections as having the same shape.
                      */
                     check = H5Sselect_shape_same(tv_ptr->small_ds_slice_sid, tv_ptr->file_large_ds_sid_0);
-                    VRFY((check == TRUE), "H5Sselect_shape_same passed");
+                    VRFY((check == true), "H5Sselect_shape_same passed");
 
                     /* Read selection from disk */
 #if CHECKER_BOARD_HS_DR_PIO_TEST__D2M_L2S__DEBUG
@@ -2702,9 +2726,9 @@ ckrbrd_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                     data_ok = ckrbrd_hs_dr_pio_test__verify_data(
                         tv_ptr->small_ds_slice_buf, tv_ptr->small_rank - 1, tv_ptr->edge_size,
-                        tv_ptr->checker_edge_size, expected_value, (hbool_t)TRUE);
+                        tv_ptr->checker_edge_size, expected_value, (bool)true);
 
-                    VRFY((data_ok == TRUE), "small slice read from large ds data good.");
+                    VRFY((data_ok == true), "small slice read from large ds data good.");
 
                     (tv_ptr->tests_run)++;
                 }
@@ -2751,7 +2775,7 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 #if CHECKER_BOARD_HS_DR_PIO_TEST__D2M_S2L__DEBUG
     const char *fcnName = "ckrbrd_hs_dr_pio_test__d2m_s2l()";
 #endif /* CHECKER_BOARD_HS_DR_PIO_TEST__D2M_S2L__DEBUG */
-    hbool_t   data_ok = FALSE;
+    bool      data_ok = false;
     int       i, j, k, l;
     size_t    u;
     size_t    start_index;
@@ -2893,7 +2917,7 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                      * selections as having the same shape.
                      */
                     check = H5Sselect_shape_same(tv_ptr->file_small_ds_sid_0, tv_ptr->mem_large_ds_sid);
-                    VRFY((check == TRUE), "H5Sselect_shape_same passed");
+                    VRFY((check == true), "H5Sselect_shape_same passed");
 
                     /* Read selection from disk */
 #if CHECKER_BOARD_HS_DR_PIO_TEST__D2M_S2L__DEBUG
@@ -2911,7 +2935,7 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                     /* verify that the expected data and only the
                      * expected data was read.
                      */
-                    data_ok        = TRUE;
+                    data_ok        = true;
                     ptr_1          = tv_ptr->large_ds_buf_1;
                     expected_value = (uint32_t)((size_t)(tv_ptr->mpi_rank) * tv_ptr->small_ds_slice_size);
                     start_index =
@@ -2951,7 +2975,7 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                         if (*ptr_1 != 0) {
 
-                            data_ok = FALSE;
+                            data_ok = false;
                         }
 
                         /* zero out the value for the next pass */
@@ -2960,13 +2984,13 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                         ptr_1++;
                     }
 
-                    VRFY((data_ok == TRUE), "slice read from small to large ds data good(1).");
+                    VRFY((data_ok == true), "slice read from small to large ds data good(1).");
 
                     data_ok = ckrbrd_hs_dr_pio_test__verify_data(ptr_1, tv_ptr->small_rank - 1,
                                                                  tv_ptr->edge_size, tv_ptr->checker_edge_size,
-                                                                 expected_value, (hbool_t)TRUE);
+                                                                 expected_value, (bool)true);
 
-                    VRFY((data_ok == TRUE), "slice read from small to large ds data good(2).");
+                    VRFY((data_ok == true), "slice read from small to large ds data good(2).");
 
                     ptr_1 = tv_ptr->large_ds_buf_1 + stop_index + 1;
 
@@ -2974,7 +2998,7 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                         if (*ptr_1 != 0) {
 
-                            data_ok = FALSE;
+                            data_ok = false;
                         }
 
                         /* zero out the value for the next pass */
@@ -2983,7 +3007,7 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                         ptr_1++;
                     }
 
-                    VRFY((data_ok == TRUE), "slice read from small to large ds data good(3).");
+                    VRFY((data_ok == true), "slice read from small to large ds data good(3).");
 
                     (tv_ptr->tests_run)++;
                 }
@@ -3034,7 +3058,7 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 #if CHECKER_BOARD_HS_DR_PIO_TEST__M2D_L2S__DEBUG
     const char *fcnName = "ckrbrd_hs_dr_pio_test__m2d_l2s()";
 #endif /* CHECKER_BOARD_HS_DR_PIO_TEST__M2D_L2S__DEBUG */
-    hbool_t   data_ok = FALSE;
+    bool      data_ok = false;
     int       i, j, k, l;
     size_t    u;
     size_t    start_index;
@@ -3215,7 +3239,7 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
                      * slice of the small data set as having the same shape.
                      */
                     check = H5Sselect_shape_same(tv_ptr->file_small_ds_sid_1, tv_ptr->mem_large_ds_sid);
-                    VRFY((check == TRUE), "H5Sselect_shape_same passed.");
+                    VRFY((check == true), "H5Sselect_shape_same passed.");
 
                     /* write the checker board selection of the slice from the in
                      * memory large data set to the slice of the on disk small
@@ -3252,33 +3276,33 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
                     assert(start_index < stop_index);
                     assert(stop_index <= tv_ptr->small_ds_size);
 
-                    data_ok = TRUE;
+                    data_ok = true;
 
                     ptr_1 = tv_ptr->small_ds_buf_1;
                     for (u = 0; u < start_index; u++, ptr_1++) {
 
                         if (*ptr_1 != 0) {
 
-                            data_ok = FALSE;
+                            data_ok = false;
                             *ptr_1  = 0;
                         }
                     }
 
                     data_ok &= ckrbrd_hs_dr_pio_test__verify_data(
                         tv_ptr->small_ds_buf_1 + start_index, tv_ptr->small_rank - 1, tv_ptr->edge_size,
-                        tv_ptr->checker_edge_size, expected_value, (hbool_t)TRUE);
+                        tv_ptr->checker_edge_size, expected_value, (bool)true);
 
                     ptr_1 = tv_ptr->small_ds_buf_1;
                     for (u = stop_index; u < tv_ptr->small_ds_size; u++, ptr_1++) {
 
                         if (*ptr_1 != 0) {
 
-                            data_ok = FALSE;
+                            data_ok = false;
                             *ptr_1  = 0;
                         }
                     }
 
-                    VRFY((data_ok == TRUE), "large slice write slice to small slice data good.");
+                    VRFY((data_ok == true), "large slice write slice to small slice data good.");
 
                     (tv_ptr->tests_run)++;
                 }
@@ -3329,7 +3353,7 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 #if CHECKER_BOARD_HS_DR_PIO_TEST__M2D_S2L__DEBUG
     const char *fcnName = "ckrbrd_hs_dr_pio_test__m2d_s2l()";
 #endif /* CONTIG_HS_DR_PIO_TEST__M2D_S2L__DEBUG */
-    hbool_t   data_ok = FALSE;
+    bool      data_ok = false;
     int       i, j, k, l;
     size_t    u;
     size_t    start_index;
@@ -3506,7 +3530,7 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                      * as having the same shape.
                      */
                     check = H5Sselect_shape_same(tv_ptr->mem_small_ds_sid, tv_ptr->file_large_ds_sid_1);
-                    VRFY((check == TRUE), "H5Sselect_shape_same passed");
+                    VRFY((check == true), "H5Sselect_shape_same passed");
 
                     /* write the small data set slice from memory to the
                      * target slice of the disk data set
@@ -3546,33 +3570,33 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                     assert(start_index < stop_index);
                     assert(stop_index < tv_ptr->large_ds_size);
 
-                    data_ok = TRUE;
+                    data_ok = true;
 
                     ptr_1 = tv_ptr->large_ds_buf_1;
                     for (u = 0; u < start_index; u++, ptr_1++) {
 
                         if (*ptr_1 != 0) {
 
-                            data_ok = FALSE;
+                            data_ok = false;
                             *ptr_1  = 0;
                         }
                     }
 
                     data_ok &= ckrbrd_hs_dr_pio_test__verify_data(
                         tv_ptr->large_ds_buf_1 + start_index, tv_ptr->small_rank - 1, tv_ptr->edge_size,
-                        tv_ptr->checker_edge_size, expected_value, (hbool_t)TRUE);
+                        tv_ptr->checker_edge_size, expected_value, (bool)true);
 
                     ptr_1 = tv_ptr->large_ds_buf_1;
                     for (u = stop_index; u < tv_ptr->small_ds_size; u++, ptr_1++) {
 
                         if (*ptr_1 != 0) {
 
-                            data_ok = FALSE;
+                            data_ok = false;
                             *ptr_1  = 0;
                         }
                     }
 
-                    VRFY((data_ok == TRUE), "small ds cb slice write to large ds slice data good.");
+                    VRFY((data_ok == true), "small ds cb slice write to large ds slice data good.");
 
                     (tv_ptr->tests_run)++;
                 }
@@ -3607,9 +3631,9 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 static void
 ckrbrd_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const int checker_edge_size,
                                 const int chunk_edge_size, const int small_rank, const int large_rank,
-                                const hbool_t use_collective_io, const hid_t dset_type,
-                                const int express_test, int *skips_ptr, int max_skips,
-                                int64_t *total_tests_ptr, int64_t *tests_run_ptr, int64_t *tests_skipped_ptr)
+                                const bool use_collective_io, const hid_t dset_type, const int express_test,
+                                int *skips_ptr, int max_skips, int64_t *total_tests_ptr,
+                                int64_t *tests_run_ptr, int64_t *tests_skipped_ptr, int mpi_rank)
 
 {
 #if CKRBRD_HS_DR_PIO_TEST__RUN_TEST__DEBUG
@@ -3626,7 +3650,7 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
         /* int         chunk_edge_size                 = */ -1,
         /* int         small_rank                      = */ -1,
         /* int         large_rank                      = */ -1,
-        /* hid_t       dset_type                       = */ -1,
+        /* hid_t       dset_type                       = */ H5I_INVALID_HID,
         /* uint32_t  * small_ds_buf_0                  = */ NULL,
         /* uint32_t  * small_ds_buf_1                  = */ NULL,
         /* uint32_t  * small_ds_buf_2                  = */ NULL,
@@ -3637,24 +3661,24 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
         /* uint32_t  * large_ds_slice_buf              = */ NULL,
         /* int         small_ds_offset                 = */ -1,
         /* int         large_ds_offset                 = */ -1,
-        /* hid_t       fid                             = */ -1, /* HDF5 file ID */
+        /* hid_t       fid                             = */ H5I_INVALID_HID, /* HDF5 file ID */
         /* hid_t       xfer_plist                      = */ H5P_DEFAULT,
-        /* hid_t       full_mem_small_ds_sid           = */ -1,
-        /* hid_t       full_file_small_ds_sid          = */ -1,
-        /* hid_t       mem_small_ds_sid                = */ -1,
-        /* hid_t       file_small_ds_sid_0             = */ -1,
-        /* hid_t       file_small_ds_sid_1             = */ -1,
-        /* hid_t       small_ds_slice_sid              = */ -1,
-        /* hid_t       full_mem_large_ds_sid           = */ -1,
-        /* hid_t       full_file_large_ds_sid          = */ -1,
-        /* hid_t       mem_large_ds_sid                = */ -1,
-        /* hid_t       file_large_ds_sid_0             = */ -1,
-        /* hid_t       file_large_ds_sid_1             = */ -1,
-        /* hid_t       file_large_ds_process_slice_sid = */ -1,
-        /* hid_t       mem_large_ds_process_slice_sid  = */ -1,
-        /* hid_t       large_ds_slice_sid              = */ -1,
-        /* hid_t       small_dataset                   = */ -1, /* Dataset ID */
-        /* hid_t       large_dataset                   = */ -1, /* Dataset ID */
+        /* hid_t       full_mem_small_ds_sid           = */ H5I_INVALID_HID,
+        /* hid_t       full_file_small_ds_sid          = */ H5I_INVALID_HID,
+        /* hid_t       mem_small_ds_sid                = */ H5I_INVALID_HID,
+        /* hid_t       file_small_ds_sid_0             = */ H5I_INVALID_HID,
+        /* hid_t       file_small_ds_sid_1             = */ H5I_INVALID_HID,
+        /* hid_t       small_ds_slice_sid              = */ H5I_INVALID_HID,
+        /* hid_t       full_mem_large_ds_sid           = */ H5I_INVALID_HID,
+        /* hid_t       full_file_large_ds_sid          = */ H5I_INVALID_HID,
+        /* hid_t       mem_large_ds_sid                = */ H5I_INVALID_HID,
+        /* hid_t       file_large_ds_sid_0             = */ H5I_INVALID_HID,
+        /* hid_t       file_large_ds_sid_1             = */ H5I_INVALID_HID,
+        /* hid_t       file_large_ds_process_slice_sid = */ H5I_INVALID_HID,
+        /* hid_t       mem_large_ds_process_slice_sid  = */ H5I_INVALID_HID,
+        /* hid_t       large_ds_slice_sid              = */ H5I_INVALID_HID,
+        /* hid_t       small_dataset                   = */ H5I_INVALID_HID, /* Dataset ID */
+        /* hid_t       large_dataset                   = */ H5I_INVALID_HID, /* Dataset ID */
         /* size_t      small_ds_size                   = */ 1,
         /* size_t      small_ds_slice_size             = */ 1,
         /* size_t      large_ds_size                   = */ 1,
@@ -3675,6 +3699,10 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
         /* int64_t     tests_run                       = */ 0,
         /* int64_t     tests_skipped                   = */ 0};
     struct hs_dr_pio_test_vars_t *tv_ptr = &test_vars;
+
+    if (MAINPROCESS)
+        printf("\r - running test #%lld: small rank = %d, large rank = %d", (long long)(test_num + 1),
+               small_rank, large_rank);
 
     hs_dr_pio_test__setup(test_num, edge_size, checker_edge_size, chunk_edge_size, small_rank, large_rank,
                           use_collective_io, dset_type, express_test, tv_ptr);
@@ -3838,9 +3866,9 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* contiguous data set, independent I/O */
                     chunk_edge_size = 0;
                     ckrbrd_hs_dr_pio_test__run_test(test_num, edge_size, checker_edge_size, chunk_edge_size,
-                                                    small_rank, large_rank, FALSE, dset_type, express_test,
+                                                    small_rank, large_rank, false, dset_type, express_test,
                                                     &skips, max_skips, &total_tests, &tests_run,
-                                                    &tests_skipped);
+                                                    &tests_skipped, mpi_rank);
                     test_num++;
                     break;
                     /* end of case IND_CONTIG */
@@ -3848,9 +3876,10 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                 case COL_CONTIG:
                     /* contiguous data set, collective I/O */
                     chunk_edge_size = 0;
-                    ckrbrd_hs_dr_pio_test__run_test(
-                        test_num, edge_size, checker_edge_size, chunk_edge_size, small_rank, large_rank, TRUE,
-                        dset_type, express_test, &skips, max_skips, &total_tests, &tests_run, &tests_skipped);
+                    ckrbrd_hs_dr_pio_test__run_test(test_num, edge_size, checker_edge_size, chunk_edge_size,
+                                                    small_rank, large_rank, true, dset_type, express_test,
+                                                    &skips, max_skips, &total_tests, &tests_run,
+                                                    &tests_skipped, mpi_rank);
                     test_num++;
                     break;
                     /* end of case COL_CONTIG */
@@ -3859,9 +3888,9 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* chunked data set, independent I/O */
                     chunk_edge_size = 5;
                     ckrbrd_hs_dr_pio_test__run_test(test_num, edge_size, checker_edge_size, chunk_edge_size,
-                                                    small_rank, large_rank, FALSE, dset_type, express_test,
+                                                    small_rank, large_rank, false, dset_type, express_test,
                                                     &skips, max_skips, &total_tests, &tests_run,
-                                                    &tests_skipped);
+                                                    &tests_skipped, mpi_rank);
                     test_num++;
                     break;
                     /* end of case IND_CHUNKED */
@@ -3869,15 +3898,16 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                 case COL_CHUNKED:
                     /* chunked data set, collective I/O */
                     chunk_edge_size = 5;
-                    ckrbrd_hs_dr_pio_test__run_test(
-                        test_num, edge_size, checker_edge_size, chunk_edge_size, small_rank, large_rank, TRUE,
-                        dset_type, express_test, &skips, max_skips, &total_tests, &tests_run, &tests_skipped);
+                    ckrbrd_hs_dr_pio_test__run_test(test_num, edge_size, checker_edge_size, chunk_edge_size,
+                                                    small_rank, large_rank, true, dset_type, express_test,
+                                                    &skips, max_skips, &total_tests, &tests_run,
+                                                    &tests_skipped, mpi_rank);
                     test_num++;
                     break;
                     /* end of case COL_CHUNKED */
 
                 default:
-                    VRFY((FALSE), "unknown test type");
+                    VRFY((false), "unknown test type");
                     break;
 
             } /* end of switch(sstest_type) */
@@ -3890,9 +3920,13 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
         }
     }
 
-    if ((MAINPROCESS) && (tests_skipped > 0)) {
-        fprintf(stdout, "     %" PRId64 " of %" PRId64 " subtests skipped to expedite testing.\n",
-                tests_skipped, total_tests);
+    if (MAINPROCESS) {
+        if (tests_skipped > 0) {
+            fprintf(stdout, "     %" PRId64 " of %" PRId64 " subtests skipped to expedite testing.\n",
+                    tests_skipped, total_tests);
+        }
+        else
+            printf("\n");
     }
 
     return;
@@ -3904,12 +3938,6 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
 /*
  * Main driver of the Parallel HDF5 tests
  */
-
-#include "testphdf5.h"
-
-#ifndef PATH_MAX
-#define PATH_MAX 512
-#endif /* !PATH_MAX */
 
 /* global variables */
 int dim0;
@@ -3927,17 +3955,6 @@ H5E_auto2_t old_func;        /* previous error handler */
 void       *old_client_data; /* previous error handler arg.*/
 
 /* other option flags */
-
-/* FILENAME and filenames must have the same number of names.
- * Use PARATESTFILE in general and use a separated filename only if the file
- * created in one test is accessed by a different test.
- * filenames[0] is reserved as the file name for PARATESTFILE.
- */
-#define NFILENAME    2
-#define PARATESTFILE filenames[0]
-const char *FILENAME[NFILENAME] = {"ShapeSameTest", NULL};
-char       *filenames[NFILENAME];
-hid_t       fapl; /* file access property list */
 
 #ifdef USE_PAUSE
 /* pause the process for a moment to allow debugger to attach if desired. */
@@ -3967,7 +3984,8 @@ pause_proc(void)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Get_processor_name(mpi_name, &mpi_namelen);
 
-    if (MAINPROCESS)
+    if (MAINPROCESS) {
+        memset(&statbuf, 0, sizeof(h5_stat_t));
         while ((HDstat(greenlight, &statbuf) == -1) && loops < maxloop) {
             if (!loops++) {
                 printf("Proc %d (%*s, %d): to debug, attach %d\n", mpi_rank, mpi_namelen, mpi_name, pid, pid);
@@ -3975,7 +3993,10 @@ pause_proc(void)
             printf("waiting(%ds) for file %s ...\n", time_int, greenlight);
             fflush(stdout);
             HDsleep(time_int);
+
+            memset(&statbuf, 0, sizeof(h5_stat_t));
         }
+    }
     MPI_Barrier(MPI_COMM_WORLD);
 }
 
@@ -4089,7 +4110,8 @@ parse_options(int argc, char **argv)
                 case 'h': /* print help message--return with nerrors set */
                     return (1);
                 default:
-                    printf("Illegal option(%s)\n", *argv);
+                    if (MAINPROCESS)
+                        printf("Illegal option(%s)\n", *argv);
                     nerrors++;
                     return (1);
             }
@@ -4098,12 +4120,14 @@ parse_options(int argc, char **argv)
 
     /* check validity of dimension and chunk sizes */
     if (dim0 <= 0 || dim1 <= 0) {
-        printf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
+        if (MAINPROCESS)
+            printf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
         nerrors++;
         return (1);
     }
     if (chunkdim0 <= 0 || chunkdim1 <= 0) {
-        printf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
+        if (MAINPROCESS)
+            printf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
         nerrors++;
         return (1);
     }
@@ -4128,9 +4152,11 @@ parse_options(int argc, char **argv)
                 nerrors++;
                 return (1);
             }
-        printf("Test filenames are:\n");
-        for (i = 0; i < n; i++)
-            printf("    %s\n", filenames[i]);
+        if (MAINPROCESS) {
+            printf("Test filenames are:\n");
+            for (i = 0; i < n; i++)
+                printf("    %s\n", filenames[i]);
+        }
     }
 
     return (0);
@@ -4142,7 +4168,7 @@ parse_options(int argc, char **argv)
 hid_t
 create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
 {
-    hid_t  ret_pl = -1;
+    hid_t  ret_pl = H5I_INVALID_HID;
     herr_t ret;      /* generic return value */
     int    mpi_rank; /* mpi variables */
 
@@ -4159,9 +4185,9 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
         /* set Parallel access with communicator */
         ret = H5Pset_fapl_mpio(ret_pl, comm, info);
         VRFY((ret >= 0), "");
-        ret = H5Pset_all_coll_metadata_ops(ret_pl, TRUE);
+        ret = H5Pset_all_coll_metadata_ops(ret_pl, true);
         VRFY((ret >= 0), "");
-        ret = H5Pset_coll_metadata_write(ret_pl, TRUE);
+        ret = H5Pset_coll_metadata_write(ret_pl, true);
         VRFY((ret >= 0), "");
         return (ret_pl);
     }
@@ -4249,6 +4275,11 @@ int
 main(int argc, char **argv)
 {
     int mpi_size, mpi_rank; /* mpi variables */
+    int mpi_code;
+#ifdef H5_HAVE_TEST_API
+    int required = MPI_THREAD_MULTIPLE;
+    int provided;
+#endif
 
 #ifndef H5_HAVE_WIN32_API
     /* Un-buffer the stdout and stderr */
@@ -4256,9 +4287,37 @@ main(int argc, char **argv)
     HDsetbuf(stdout, NULL);
 #endif
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#ifdef H5_HAVE_TEST_API
+    /* Attempt to initialize with MPI_THREAD_MULTIPLE if possible */
+    if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(&argc, &argv, required, &provided))) {
+        printf("MPI_Init_thread failed with error code %d\n", mpi_code);
+        return -1;
+    }
+#else
+    if (MPI_SUCCESS != (mpi_code = MPI_Init(&argc, &argv))) {
+        printf("MPI_Init failed with error code %d\n", mpi_code);
+        return -1;
+    }
+#endif
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank))) {
+        printf("MPI_Comm_rank failed with error code %d\n", mpi_code);
+        MPI_Finalize();
+        return -1;
+    }
+
+#ifdef H5_HAVE_TEST_API
+    /* Warn about missing MPI_THREAD_MULTIPLE support */
+    if ((provided < required) && MAINPROCESS)
+        printf("** MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE **\n");
+#endif
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(MPI_COMM_WORLD, &mpi_size))) {
+        if (MAINPROCESS)
+            printf("MPI_Comm_size failed with error code %d\n", mpi_code);
+        MPI_Finalize();
+        return -1;
+    }
 
     mpi_rank_framework_g = mpi_rank;
 
@@ -4283,6 +4342,28 @@ main(int argc, char **argv)
     };
     H5open();
     h5_show_hostname();
+
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+
+    /* Get the capability flag of the VOL connector being used */
+    if (H5Pget_vol_cap_flags(fapl, &vol_cap_flags_g) < 0) {
+        if (MAINPROCESS)
+            printf("Failed to get the capability flag of the VOL connector being used\n");
+
+        MPI_Finalize();
+        return -1;
+    }
+
+    /* Make sure the connector supports the API functions being tested.  This test only
+     * uses a few API functions, such as H5Fcreate/close/delete, H5Dcreate/write/read/close,
+     */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+        if (MAINPROCESS)
+            printf("API functions for basic file and dataset aren't supported with this connector\n");
+
+        MPI_Finalize();
+        return 0;
+    }
 
     memset(filenames, 0, sizeof(filenames));
     for (int i = 0; i < NFILENAME; i++) {
@@ -4311,7 +4392,6 @@ main(int argc, char **argv)
     TestInfo(argv[0]);
 
     /* setup file access property list */
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
     /* Parse command line arguments */
@@ -4337,6 +4417,8 @@ main(int argc, char **argv)
 
     /* Clean up test files */
     h5_clean_files(FILENAME, fapl);
+
+    H5Pclose(fapl);
 
     nerrors += GetTestNumErrs();
 

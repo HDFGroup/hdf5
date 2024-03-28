@@ -176,28 +176,28 @@ done:
  *                + Sorted by increasing logical address (no duplicates)
  *                + Logical addresses are multiples of page size.
  *
- * Return:      TRUE/FALSE
+ * Return:      true/false
  *-----------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5FD__onion_archival_index_is_valid(const H5FD_onion_archival_index_t *aix)
 {
-    hbool_t ret_value = TRUE;
+    bool ret_value = true;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     assert(aix);
 
     if (H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR != aix->version)
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
     if (NULL == aix->list)
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
 
     /* Ensure list is sorted on logical_page field */
     if (aix->n_entries > 1)
         for (uint64_t i = 1; i < aix->n_entries - 1; i++)
             if (aix->list[i + 1].logical_page <= aix->list[i].logical_page)
-                HGOTO_DONE(FALSE);
+                HGOTO_DONE(false);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -604,7 +604,7 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
     assert(H5FD_ONION_REVISION_RECORD_VERSION_CURR == record->version);
     assert(H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR == record->archival_index.version);
 
-    if (HDstrncmp((const char *)buf, H5FD_ONION_REVISION_RECORD_SIGNATURE, 4))
+    if (strncmp((const char *)buf, H5FD_ONION_REVISION_RECORD_SIGNATURE, 4))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid signature");
 
     if (H5FD_ONION_REVISION_RECORD_VERSION_CURR != buf[4])

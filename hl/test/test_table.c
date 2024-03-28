@@ -198,7 +198,7 @@ test_table(hid_t fid, int do_write)
     hsize_t    chunk_size   = 10;
     int        compress     = 0;
     int       *fill         = NULL;
-    particle_t fill1[1]     = {{"no data", -1, -99.0, -99.0, -1}};
+    particle_t fill1[1]     = {{"no data", -1, -99.0F, -99.0, -1}};
     int        fill1_new[1] = {-100};
     hsize_t    position;
     char       tname[20];
@@ -226,23 +226,23 @@ test_table(hid_t fid, int do_write)
     particle2_t rbuf2[NRECORDS];
     particle3_t rbuf3[NRECORDS];
     particle_t  rbufc[NRECORDS * 2];
-    particle_t  abuf[2] = {{"eight", 80, 8.0, 80.0, 80}, {"nine", 90, 9.0, 90.0, 90}};
-    particle_t  ibuf[2] = {{"zero", 0, 0.0, 0.0, 0}, {"zero", 0, 0.0, 0.0, 0}};
+    particle_t  abuf[2] = {{"eight", 80, 8.0F, 80.0, 80}, {"nine", 90, 9.0F, 90.0, 90}};
+    particle_t  ibuf[2] = {{"zero", 0, 0.0F, 0.0, 0}, {"zero", 0, 0.0F, 0.0, 0}};
     particle_t  wbufd[NRECORDS];
     particle_t  wbuf[NRECORDS] = {{
                                      "zero",
                                      0,
-                                     0.0,
+                                     0.0F,
                                      0.0,
                                      0,
                                  },
-                                 {"one", 10, 1.0, 10.0, 10},
-                                 {"two", 20, 2.0, 20.0, 20},
-                                 {"three", 30, 3.0, 30.0, 30},
-                                 {"four", 40, 4.0, 40.0, 40},
-                                 {"five", 50, 5.0, 50.0, 50},
-                                 {"six", 60, 6.0, 60.0, 60},
-                                 {"seven", 70, 7.0, 70.0, 70}};
+                                 {"one", 10, 1.0F, 10.0, 10},
+                                 {"two", 20, 2.0F, 20.0, 20},
+                                 {"three", 30, 3.0F, 30.0, 30},
+                                 {"four", 40, 4.0F, 40.0, 40},
+                                 {"five", 50, 5.0F, 50.0, 50},
+                                 {"six", 60, 6.0F, 60.0, 60},
+                                 {"seven", 70, 7.0F, 70.0, 70}};
     /* buffers for the field "Pressure" and "New_field" */
     float pressure_in[NRECORDS] = {0.0F, 1.0F, 2.0F, 3.0F, 4.0F, 5.0F, 6.0F, 7.0F};
     float pressure_out[NRECORDS];
@@ -375,6 +375,8 @@ test_table(hid_t fid, int do_write)
     field_type[2] = H5T_NATIVE_FLOAT;
     field_type[3] = H5T_NATIVE_DOUBLE;
     field_type[4] = H5T_NATIVE_INT;
+
+    memset(wbufd, 0, NRECORDS * sizeof(particle_t));
 
     /*-------------------------------------------------------------------------
      *

@@ -11,6 +11,9 @@ be found in the USING_HDF5_CMake.txt file found in this folder.
 
 NOTE: Building applications with the dynamic/shared hdf5 libraries requires
       that the "H5_BUILT_AS_DYNAMIC_LIB" compile definition be used.
+      Go to "Project" and select "Properties", find "Configuration Properties",
+      and then "C/C++"and then "Preprocessor".
+      Add H5_BUILT_AS_DYNAMIC_LIB to Preprocessor definitions.
 
 The following two sections are helpful if you do not use CMake to build
 your applications.
@@ -41,7 +44,9 @@ Using Visual Studio 2010 and above with HDF5 Libraries built with Visual Studio 
           hdf5.lib hdf5_cpp.lib
 
           For static linking:
-          libszaec.lib libaec.lib libzlib.lib libhdf5.lib libhdf5_cpp.lib
+            HDF5 libraries:        libhdf5.lib libhdf5_cpp.lib
+            Compression libraries: libszaec.lib libaec.lib libzlib.lib
+            System libraries:      shlwapi.lib
 
 
 ==========================================================================
@@ -73,7 +78,12 @@ Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
           library, and then optionally the HDF5 High Level, Fortran or C++
           libraries. For example, to compile a C++ application, enter:
 
-          szip.lib zlib.lib hdf5.lib hdf5_cpp.lib
+          hdf5.lib hdf5_cpp.lib
+
+          For static linking:
+            HDF5 libraries:        libhdf5.lib libhdf5_cpp.lib
+            Compression libraries: libszaec.lib libaec.lib libzlib.lib
+            System libraries:      shlwapi.lib
 
 ========================================================================
 3. Helpful Pointers
@@ -81,10 +91,9 @@ Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
 
     3.1 FAQ
 
-    Many other common questions and hints are located online and being updated
-    in the HDF Knowledge Base, please see:
+    Community support forum available, please see:
 
-       https://portal.hdfgroup.org/display/knowledge/HDF+Knowledge+Base
+       https://forum.hdfgroup.org/c/hdf5/8
 
 ************************************************************************
  Please send email to help@hdfgroup.org for further assistance.

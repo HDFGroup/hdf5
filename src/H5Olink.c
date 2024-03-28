@@ -19,14 +19,12 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5G_FRIEND     /*suppress error about including H5Gpkg   */
 #define H5L_FRIEND     /*suppress error about including H5Lpkg	  */
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free lists                           */
-#include "H5Gpkg.h"      /* Groups		  		*/
 #include "H5Iprivate.h"  /* IDs                                  */
 #include "H5Lpkg.h"      /* Links                                */
 #include "H5MMprivate.h" /* Memory management			*/
@@ -35,14 +33,15 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O__link_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
                               const uint8_t *p);
-static herr_t H5O__link_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__link_encode(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                               const void *_mesg);
 static void  *H5O__link_copy(const void *_mesg, void *_dest);
-static size_t H5O__link_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static size_t H5O__link_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__link_reset(void *_mesg);
 static herr_t H5O__link_free(void *_mesg);
-static herr_t H5O__link_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
+static herr_t H5O__link_pre_copy_file(H5F_t *file_src, const void *mesg_src, bool *deleted,
                                       const H5O_copy_t *cpy_info, void *udata);
-static void  *H5O__link_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
+static void  *H5O__link_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst, bool *recompute_size,
                                   unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__link_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
                                        void *mesg_dst, unsigned *mesg_flags, H5O_copy_t *cpy_info);
@@ -150,11 +149,11 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
         if (H5_IS_BUFFER_OVERFLOW(p, 8, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         INT64DECODE(p, lnk->corder);
-        lnk->corder_valid = TRUE;
+        lnk->corder_valid = true;
     }
     else {
         lnk->corder       = 0;
-        lnk->corder_valid = FALSE;
+        lnk->corder_valid = false;
     }
 
     /* Check for non-default name character set */
@@ -289,7 +288,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__link_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                 const void *_mesg)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;
     uint64_t          len;        /* Length of a string in the message */
@@ -303,7 +303,7 @@ H5O__link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
     assert(lnk);
 
     /* Get length of link's name */
-    len = (uint64_t)HDstrlen(lnk->name);
+    len = (uint64_t)strlen(lnk->name);
     assert(len > 0);
 
     /* encode */
@@ -370,7 +370,7 @@ H5O__link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
 
         case H5L_TYPE_SOFT:
             /* Store the link value */
-            len = (uint16_t)HDstrlen(lnk->u.soft.name);
+            len = (uint16_t)strlen(lnk->u.soft.name);
             assert(len > 0);
             UINT16ENCODE(p, len);
             H5MM_memcpy(p, lnk->u.soft.name, (size_t)len);
@@ -473,7 +473,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__link_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__link_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;
     uint64_t          name_len;      /* Length of name */
@@ -486,7 +486,7 @@ H5O__link_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
     HDcompile_assert(sizeof(uint64_t) >= sizeof(size_t));
 
     /* Get name's length */
-    name_len = (uint64_t)HDstrlen(lnk->name);
+    name_len = (uint64_t)strlen(lnk->name);
 
     /* Determine correct value for name size bits */
     if (name_len > 4294967295)
@@ -514,8 +514,8 @@ H5O__link_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
             break;
 
         case H5L_TYPE_SOFT:
-            ret_value += 2 +                         /* Link value length */
-                         HDstrlen(lnk->u.soft.name); /* Link value */
+            ret_value += 2 +                       /* Link value length */
+                         strlen(lnk->u.soft.name); /* Link value */
             break;
 
         case H5L_TYPE_ERROR:
@@ -663,8 +663,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__link_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSED *native_src,
-                        hbool_t *deleted, const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
+H5O__link_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSED *native_src, bool *deleted,
+                        const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -678,7 +678,7 @@ H5O__link_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSE
      *  on it.
      */
     if (cpy_info->max_depth >= 0 && cpy_info->curr_depth >= cpy_info->max_depth)
-        *deleted = TRUE;
+        *deleted = true;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__link_pre_copy_file() */
@@ -696,7 +696,7 @@ H5O__link_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSE
  */
 static void *
 H5O__link_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *native_src, H5F_t H5_ATTR_UNUSED *file_dst,
-                    hbool_t H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
+                    bool H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
                     H5O_copy_t H5_ATTR_UNUSED *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     H5O_link_t *link_src  = (H5O_link_t *)native_src;
@@ -816,7 +816,7 @@ H5O__link_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
             if (lnk->type >= H5L_TYPE_UD_MIN) {
                 if (lnk->type == H5L_TYPE_EXTERNAL) {
                     const char *objname =
-                        (const char *)lnk->u.ud.udata + (HDstrlen((const char *)lnk->u.ud.udata) + 1);
+                        (const char *)lnk->u.ud.udata + (strlen((const char *)lnk->u.ud.udata) + 1);
 
                     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                             "External File Name:", (const char *)lnk->u.ud.udata);

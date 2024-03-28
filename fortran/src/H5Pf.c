@@ -69,30 +69,6 @@ done:
     return ret_value;
 }
 
-/****if* H5Pf/h5pclose_c
- * NAME
- *  h5pclose_c
- * PURPOSE
- *  Call H5Pclose to close property lis
- * INPUTS
- *  prp_id - identifier of the property list to be closed
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-
-int_f
-h5pclose_c(hid_t_f *prp_id)
-/******/
-{
-    int_f ret_value = 0;
-
-    if (H5Pclose((hid_t)*prp_id) < 0)
-        ret_value = -1;
-
-    return ret_value;
-}
-
 /****if* H5Pf/h5pcopy_c
  * NAME
  *  h5pcopy_c
@@ -358,76 +334,6 @@ h5pget_chunk_c(hid_t_f *prp_id, int_f *max_rank, hsize_t_f *dims)
     return ret_value;
 }
 
-/****if* H5Pf/h5pset_fill_value_c
- * NAME
- *  h5pset_fill_value_c
- * PURPOSE
- *  Call H5Pset_fill_value to set a fillvalue for a dataset
- * INPUTS
- *  prp_id     - property list identifier
- *  type_id    - datatype identifier (fill value is of type type_id)
- *  fillvalue - fillvalue
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5pset_fill_value_c(hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
-/******/
-{
-    int    ret_value = -1;
-    hid_t  c_prp_id;
-    hid_t  c_type_id;
-    herr_t ret;
-
-    /*
-     * Call H5Pset_fill_value function.
-     */
-    c_prp_id  = (hid_t)*prp_id;
-    c_type_id = (hid_t)*type_id;
-    ret       = H5Pset_fill_value(c_prp_id, c_type_id, fillvalue);
-
-    if (ret < 0)
-        return ret_value;
-    ret_value = 0;
-    return ret_value;
-}
-
-/****if* H5Pf/h5pget_fill_value_c
- * NAME
- *  h5pget_fill_value_c
- * PURPOSE
- *  Call H5Pget_fill_value to set a fillvalue for a dataset
- * INPUTS
- *  prp_id - property list identifier
- *  type_id - datatype identifier (fill value is of type type_id)
- *  fillvalue - fillvalue
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5pget_fill_value_c(hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
-/******/
-{
-    int    ret_value = -1;
-    hid_t  c_prp_id;
-    hid_t  c_type_id;
-    herr_t ret;
-
-    /*
-     * Call H5Pget_fill_value function.
-     */
-    c_prp_id  = (hid_t)*prp_id;
-    c_type_id = (hid_t)*type_id;
-    ret       = H5Pget_fill_value(c_prp_id, c_type_id, fillvalue);
-
-    if (ret < 0)
-        return ret_value;
-    ret_value = 0;
-    return ret_value;
-}
-
 /****if* H5Pf/h5pget_version_c
  * NAME
  *  h5pget_version_c
@@ -486,77 +392,6 @@ h5pget_version_c(hid_t_f *prp_id, int_f *boot, int_f *freelist, int_f *stab, int
     return 0;
 }
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-
-/****if* H5Pf/h5pget_userblock_c
- * NAME
- *  h5pget_userblock_c
- * PURPOSE
- *  Call H5Pget_userblock to get the size of a user block in
- *  a file creation property list
- * INPUTS
- *  prp_id - property list identifier
- *  Outputs      size - Size of the user-block in bytes
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5pget_userblock_c(hid_t_f *prp_id, hsize_t_f *size)
-/******/
-{
-    int     ret_value = -1;
-    hid_t   c_prp_id;
-    herr_t  ret;
-    hsize_t c_size;
-
-    /*
-     * Call H5Pget_userblock function.
-     */
-    c_prp_id = (hid_t)*prp_id;
-    ret      = H5Pget_userblock(c_prp_id, &c_size);
-    if (ret < 0)
-        return ret_value;
-
-    *size     = (hsize_t_f)c_size;
-    ret_value = 0;
-
-    return ret_value;
-}
-
-/****if* H5Pf/h5pset_userblock_c
- * NAME
- *  h5pset_userblock_c
- * PURPOSE
- *  Call H5Pset_userblock to set the size of a user block in
- *  a file creation property list
- * INPUTS
- *  prp_id - property list identifier
- *  size - Size of the user-block in bytes
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5pset_userblock_c(hid_t_f *prp_id, hsize_t_f *size)
-/******/
-{
-    int     ret_value = -1;
-    hid_t   c_prp_id;
-    herr_t  ret;
-    hsize_t c_size;
-    c_size = (hsize_t)*size;
-
-    /*
-     * Call H5Pset_userblock function.
-     */
-    c_prp_id = (hid_t)*prp_id;
-    ret      = H5Pset_userblock(c_prp_id, c_size);
-
-    if (ret < 0)
-        return ret_value;
-    ret_value = 0;
-    return ret_value;
-}
 
 /****if* H5Pf/h5pget_sizes_c
  * NAME
@@ -2393,52 +2228,6 @@ h5pget_hyper_vector_size_c(hid_t_f *prp_id, size_t_f *size)
     return ret_value;
 }
 
-/****if* H5Pf/h5pcreate_class_c
- * NAME
- *  h5pcreate_class_c
- * PURPOSE
- *  Call H5Pcreate_class ito create a new property class
- * INPUTS
- *  parent - property list class identifier
- *  name   - name of the new class
- *  name_len - length of the "name" buffer
- * OUTPUTS
- *  class - new class identifier
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5pcreate_class_c(hid_t_f *parent, _fcd name, int_f *name_len, hid_t_f *cls, H5P_cls_create_func_t create,
-                  void *create_data, H5P_cls_copy_func_t copy, void *copy_data, H5P_cls_close_func_t close,
-                  void *close_data)
-/******/
-{
-    int   ret_value = -1;
-    hid_t c_class;
-    char *c_name;
-
-    c_name = (char *)HD5f2cstring(name, (size_t)*name_len);
-    if (c_name == NULL)
-        goto DONE;
-
-    /*
-     * Call H5Pcreate_class function.
-     */
-    c_class =
-        H5Pcreate_class((hid_t)*parent, c_name, create, create_data, copy, copy_data, close, close_data);
-
-    if (c_class < 0)
-        goto DONE;
-    *cls      = (hid_t_f)c_class;
-    ret_value = 0;
-
-DONE:
-    if (c_name != NULL)
-        free(c_name);
-    return ret_value;
-}
-
 /****if* H5Pf/h5pregister_c
  * NAME
  *  h5pregister_c
@@ -3142,7 +2931,7 @@ h5pset_fapl_multi_c(hid_t_f *prp_id, int_f *memb_map, hid_t_f *memb_fapl, _fcd m
      *  Check that we got correct values from Fortran for memb_addr array
      */
     for (i = 0; i < H5FD_MEM_NTYPES; i++) {
-        if (memb_addr[i] >= 1.0f)
+        if (memb_addr[i] >= (real_f)1.0)
             return ret_value;
     }
     /*
@@ -4809,7 +4598,7 @@ h5pget_file_image_c(hid_t_f *fapl_id, void **buf_ptr, size_t_f *buf_len_ptr)
  * SOURCE
  */
 int_f
-h5pset_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info)
+h5pset_fapl_mpio_c(hid_t_f *prp_id, void *comm, void *info)
 /******/
 {
     int      ret_value = -1;
@@ -4817,8 +4606,8 @@ h5pset_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info)
     herr_t   ret;
     MPI_Comm c_comm;
     MPI_Info c_info;
-    c_comm = MPI_Comm_f2c(*comm);
-    c_info = MPI_Info_f2c(*info);
+    c_comm = MPI_Comm_f2c(*((MPI_Fint *)comm));
+    c_info = MPI_Info_f2c(*((MPI_Fint *)info));
 
     /*
      * Call H5Pset_mpi function.
@@ -4844,7 +4633,7 @@ h5pset_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info)
  * SOURCE
  */
 int_f
-h5pget_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info)
+h5pget_fapl_mpio_c(hid_t_f *prp_id, int *comm, int *info)
 /******/
 {
     int      ret_value = -1;
@@ -4860,8 +4649,8 @@ h5pget_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info)
     ret      = H5Pget_fapl_mpio(c_prp_id, &c_comm, &c_info);
     if (ret < 0)
         return ret_value;
-    *comm     = (int_f)MPI_Comm_c2f(c_comm);
-    *info     = (int_f)MPI_Info_c2f(c_info);
+    *comm     = (int)MPI_Comm_c2f(c_comm);
+    *info     = (int)MPI_Info_c2f(c_info);
     ret_value = 0;
     return ret_value;
 }
@@ -4880,7 +4669,7 @@ h5pget_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info)
  * SOURCE
  */
 int_f
-h5pset_mpi_params_c(hid_t_f *prp_id, int_f *comm, int_f *info)
+h5pset_mpi_params_c(hid_t_f *prp_id, void *comm, void *info)
 /******/
 {
     int      ret_value = -1;
@@ -4888,8 +4677,8 @@ h5pset_mpi_params_c(hid_t_f *prp_id, int_f *comm, int_f *info)
     herr_t   ret;
     MPI_Comm c_comm;
     MPI_Info c_info;
-    c_comm = MPI_Comm_f2c(*comm);
-    c_info = MPI_Info_f2c(*info);
+    c_comm = MPI_Comm_f2c(*((MPI_Fint *)comm));
+    c_info = MPI_Info_f2c(*((MPI_Fint *)info));
 
     /*
      * Call H5Pset_mpi_params.
@@ -4916,7 +4705,7 @@ h5pset_mpi_params_c(hid_t_f *prp_id, int_f *comm, int_f *info)
  * SOURCE
  */
 int_f
-h5pget_mpi_params_c(hid_t_f *prp_id, int_f *comm, int_f *info)
+h5pget_mpi_params_c(hid_t_f *prp_id, int *comm, int *info)
 /******/
 {
     int      ret_value = -1;
@@ -4932,8 +4721,8 @@ h5pget_mpi_params_c(hid_t_f *prp_id, int_f *comm, int_f *info)
     ret      = H5Pget_mpi_params(c_prp_id, &c_comm, &c_info);
     if (ret < 0)
         return ret_value;
-    *comm     = (int_f)MPI_Comm_c2f(c_comm);
-    *info     = (int_f)MPI_Info_c2f(c_info);
+    *comm     = (int)MPI_Comm_c2f(c_comm);
+    *info     = (int)MPI_Info_c2f(c_info);
     ret_value = 0;
     return ret_value;
 }

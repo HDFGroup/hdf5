@@ -31,6 +31,7 @@
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5B2pkg.h"     /* v2 B-trees				*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5MFprivate.h" /* File memory management		*/
 #include "H5MMprivate.h" /* Memory management			*/
 
@@ -80,7 +81,7 @@ herr_t
 H5B2__create_leaf(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr)
 {
     H5B2_leaf_t *leaf      = NULL;    /* Pointer to new leaf node created */
-    hbool_t      inserted  = FALSE;   /* Whether the leaf node was inserted into cache */
+    bool         inserted  = false;   /* Whether the leaf node was inserted into cache */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -118,7 +119,7 @@ H5B2__create_leaf(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr)
     /* Cache the new B-tree node */
     if (H5AC_insert_entry(hdr->f, H5AC_BT2_LEAF, node_ptr->addr, leaf, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't add B-tree leaf to cache");
-    inserted = TRUE;
+    inserted = true;
 
     /* Add leaf node as child of 'top' proxy */
     if (hdr->top_proxy) {
@@ -161,7 +162,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5B2_leaf_t *
-H5B2__protect_leaf(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr, hbool_t shadow, unsigned flags)
+H5B2__protect_leaf(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr, bool shadow, unsigned flags)
 {
     H5B2_leaf_cache_ud_t udata;            /* User-data for callback */
     H5B2_leaf_t         *leaf;             /* v2 B-tree leaf node */
@@ -268,7 +269,7 @@ H5B2__neighbor_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, void *neigh
     assert(op);
 
     /* Lock current B-tree node */
-    if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, curr_node_ptr, FALSE, H5AC__READ_ONLY_FLAG)))
+    if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, curr_node_ptr, false, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
 
     /* Locate node pointer for child */
@@ -336,7 +337,7 @@ H5B2__insert_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_
     assert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
-    if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, curr_node_ptr, FALSE, H5AC__NO_FLAGS_SET)))
+    if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, curr_node_ptr, false, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
 
     /* Must have a leaf node with enough space to insert a record now */
@@ -447,7 +448,7 @@ H5B2__update_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_update_s
     assert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
-    if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, curr_node_ptr, FALSE, H5AC__NO_FLAGS_SET)))
+    if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, curr_node_ptr, false, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
 
     /* Sanity check number of records */
@@ -486,12 +487,12 @@ H5B2__update_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_update_s
 
     /* Check for modifying existing record */
     if (0 == cmp) {
-        hbool_t changed = FALSE; /* Whether the 'modify' callback changed the record */
+        bool changed = false; /* Whether the 'modify' callback changed the record */
 
         /* Make callback for current record */
         if ((op)(H5B2_LEAF_NREC(leaf, hdr, idx), op_data, &changed) < 0) {
             /* Make certain that the callback didn't modify the value if it failed */
-            assert(changed == FALSE);
+            assert(changed == false);
 
             HGOTO_ERROR(H5E_BTREE, H5E_CANTMODIFY, FAIL,
                         "'modify' callback failed for B-tree update operation");
@@ -610,7 +611,7 @@ H5B2__swap_leaf(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, unsi
         /* Lock B-tree child nodes */
         if (NULL ==
             (child_internal = H5B2__protect_internal(hdr, internal, &internal->node_ptrs[idx],
-                                                     (uint16_t)(depth - 1), FALSE, H5AC__NO_FLAGS_SET)))
+                                                     (uint16_t)(depth - 1), false, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
         child_addr = internal->node_ptrs[idx].addr;
 
@@ -625,7 +626,7 @@ H5B2__swap_leaf(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, unsi
         child_class = H5AC_BT2_LEAF;
 
         /* Lock B-tree child node */
-        if (NULL == (child_leaf = H5B2__protect_leaf(hdr, internal, &internal->node_ptrs[idx], FALSE,
+        if (NULL == (child_leaf = H5B2__protect_leaf(hdr, internal, &internal->node_ptrs[idx], false,
                                                      H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
         child_addr = internal->node_ptrs[idx].addr;
@@ -752,7 +753,7 @@ H5B2__remove_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_
     assert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
-    if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, curr_node_ptr, FALSE, H5AC__NO_FLAGS_SET)))
+    if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, curr_node_ptr, false, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
     leaf_addr = curr_node_ptr->addr;
 
@@ -855,7 +856,7 @@ H5B2__remove_leaf_by_idx(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_n
     assert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock B-tree leaf node */
-    if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, curr_node_ptr, FALSE, H5AC__NO_FLAGS_SET)))
+    if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, curr_node_ptr, false, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
     leaf_addr = curr_node_ptr->addr;
 

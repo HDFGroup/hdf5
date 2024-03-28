@@ -57,19 +57,20 @@
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
   # copy the list of test files
-  foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
-    get_filename_component(fname "${listfiles}" NAME)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5ls_vds_files")
+  foreach (listfiles ${LIST_HDF5_TEST_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/${listfiles}" "h5ls_vds_files")
+  endforeach ()
+
+  foreach (listothers ${LIST_OTHER_TEST_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/vds/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/vds/${listothers}" "h5ls_vds_files")
   endforeach ()
 
   foreach (listfiles ${LIST_HDF5_TEST_FILES})
-    get_filename_component(fname "${listfiles}" NAME)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${fname}" "h5ls_vds_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${listfiles}" "h5ls_vds_files")
   endforeach ()
 
-  foreach (listfiles ${LIST_OTHER_TEST_FILES})
-    get_filename_component(fname "${listfiles}" NAME)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5LS_SOURCE_DIR}/vds_prefix/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${fname}" "h5ls_vds_files")
+  foreach (listothers ${LIST_OTHER_TEST_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/vds_prefix/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${listothers}" "h5ls_vds_files")
   endforeach ()
 
   add_custom_target(h5ls_vds_files ALL COMMENT "Copying files needed by h5ls_vds tests" DEPENDS ${h5ls_vds_files_list})
@@ -82,8 +83,8 @@
 
   macro (ADD_H5_VDS_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls${tgt_file_ext}> ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
       set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -93,7 +94,7 @@
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/vds"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -102,12 +103,15 @@
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
+    if ("H5LS-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5LS-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5LS_PREFIX-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls${tgt_file_ext}> ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5LS_PREFIX-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
       set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES
           ENVIRONMENT "HDF5_VDS_PREFIX=\${ORIGIN}"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
@@ -120,7 +124,7 @@
           NAME H5LS_PREFIX-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=vds/prefix/${resultfile}.out"
@@ -130,6 +134,9 @@
               -D "TEST_ENV_VALUE=\${ORIGIN}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
+    endif ()
+    if ("H5LS_PREFIX-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES DISABLED true)
     endif ()
   endmacro ()
 

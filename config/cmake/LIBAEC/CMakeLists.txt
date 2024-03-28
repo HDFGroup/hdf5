@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.18)
 PROJECT (LIBAEC C)
 
 #-----------------------------------------------------------------------------
@@ -127,14 +127,14 @@ endif ()
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
 if (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM" OR CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
-   set (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS} -Wno-deprecated-non-prototype")
+   set (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
 endif ()
 
 #-----------------------------------------------------------------------------
 # This is in here to help some of the GCC based IDES like Eclipse
 # and code blocks parse the compiler errors and warnings better.
 #-----------------------------------------------------------------------------
-if (CMAKE_COMPILER_IS_GNUCC)
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
 endif ()
 
@@ -146,7 +146,9 @@ configure_file (${LIBAEC_RESOURCES_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/
 #-----------------------------------------------------------------------------
 # All libs/tests/examples need the main include directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${LIBAEC_BINARY_DIR} ${LIBAEC_SOURCE_DIR}/src ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES 
+    "${LIBAEC_BINARY_DIR};${LIBAEC_SOURCE_DIR}/src;${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+)
 
 #-----------------------------------------------------------------------------
 # Define LIBAEC Library
@@ -172,7 +174,7 @@ target_link_libraries (${LIBAEC_LIB_TARGET} PRIVATE ${LINK_LIBS})
 H5_SET_LIB_OPTIONS (${LIBAEC_LIB_TARGET} ${LIBAEC_LIB_NAME} STATIC 0)
 set_target_properties (${LIBAEC_LIB_TARGET} PROPERTIES
     VERSION 0.0.12 SOVERSION 0
-    PUBLIC_HEADER "${LIBAEC_PUBLIC_HEADERS}"
+    PUBLIC_HEADER ""
     LINKER_LANGUAGE C
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
@@ -194,7 +196,7 @@ target_link_libraries (${SZIP_LIB_TARGET} PRIVATE ${LIBAEC_LIB_TARGET})
 H5_SET_LIB_OPTIONS (${SZIP_LIB_TARGET} ${SZIP_LIB_NAME} STATIC 0)
 set_target_properties (${SZIP_LIB_TARGET} PROPERTIES
     VERSION 2.0.1 SOVERSION 2
-    PUBLIC_HEADER "${SZIP_PUBLIC_HEADERS}"
+    PUBLIC_HEADER ""
     LINKER_LANGUAGE C
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
@@ -233,17 +235,6 @@ if (WIN32)
   endif ()
   find_program (WIX_EXECUTABLE candle  PATHS "${CPACK_WIX_ROOT}/bin")
 endif ()
-
-#-----------------------------------------------------------------------------
-# Add file(s) to CMake Install
-#-----------------------------------------------------------------------------
-#if (NOT LIBAEC_INSTALL_NO_DEVELOPMENT)
-#  install (
-#      FILES ${PROJECT_BINARY_DIR}/aec_config.h
-#      DESTINATION ${LIBAEC_INSTALL_INCLUDE_DIR}
-#      COMPONENT headers
-#  )
-#endif ()
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
@@ -334,20 +325,6 @@ if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Add Document File(s) to CMake Install
-#-----------------------------------------------------------------------------
-if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
-  install (
-      FILES
-          ${LIBAEC_SOURCE_DIR}/README.md
-          ${LIBAEC_SOURCE_DIR}/INSTALL.md
-          ${LIBAEC_SOURCE_DIR}/CHANGELOG.md
-      DESTINATION ${LIBAEC_INSTALL_DATA_DIR}
-      COMPONENT documents
-  )
-endif ()
-
-#-----------------------------------------------------------------------------
 # Check for Installation Utilities
 #-----------------------------------------------------------------------------
 if (WIN32)
@@ -369,10 +346,10 @@ configure_file (${LIBAEC_SOURCE_DIR}/README.md ${LIBAEC_BINARY_DIR}/LIBAEC_READM
 if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
   set (CPACK_PACKAGE_VENDOR "HDF_Group")
   set (CPACK_PACKAGE_NAME "${LIBAEC_PACKAGE_NAME}")
-  if (CDASH_LOCAL)
-    set (CPACK_PACKAGE_VERSION "${LIBAEC_PACKAGE_VERSION}")
-  else ()
+  if (NOT WIN32 OR LIBAEC_VERS_SUBRELEASE MATCHES "^[0-9]+$")
     set (CPACK_PACKAGE_VERSION "${LIBAEC_PACKAGE_VERSION_STRING}")
+  else ()
+    set (CPACK_PACKAGE_VERSION "${LIBAEC_PACKAGE_VERSION}")
   endif ()
   set (CPACK_PACKAGE_VERSION_MAJOR "${LIBAEC_PACKAGE_VERSION_MAJOR}")
   set (CPACK_PACKAGE_VERSION_MINOR "${LIBAEC_PACKAGE_VERSION_MINOR}")
@@ -464,7 +441,6 @@ if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
   include (InstallRequiredSystemLibraries)
 
   set (CPACK_INSTALL_CMAKE_PROJECTS "${LIBAEC_BINARY_DIR};LIBAEC;libraries;/")
-  set (CPACK_INSTALL_CMAKE_PROJECTS "${LIBAEC_BINARY_DIR};LIBAEC;headers;/")
   set (CPACK_INSTALL_CMAKE_PROJECTS "${LIBAEC_BINARY_DIR};LIBAEC;configinstall;/")
 
   set (CPACK_ALL_INSTALL_TYPES Full Developer User)
@@ -476,32 +452,11 @@ if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
 
   cpack_add_component_group(Runtime)
 
-  cpack_add_component_group(Documents
-      EXPANDED
-      DESCRIPTION "Release notes for libaec"
-  )
-
-  cpack_add_component_group(Development
-      EXPANDED
-      DESCRIPTION "All of the tools you'll need to develop applications"
-  )
-
   cpack_add_component (libraries
       DISPLAY_NAME "LIBAEC Libraries"
       REQUIRED
       GROUP Runtime
       INSTALL_TYPES Full Developer User
-  )
-  cpack_add_component (headers
-      DISPLAY_NAME "LIBAEC Headers"
-      DEPENDS libraries
-      GROUP Development
-      INSTALL_TYPES Full Developer
-  )
-  cpack_add_component (documents
-      DISPLAY_NAME "LIBAEC Documents"
-      GROUP Documents
-      INSTALL_TYPES Full Developer
   )
   cpack_add_component (configinstall
       DISPLAY_NAME "LIBAEC CMake files"

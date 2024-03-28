@@ -9,8 +9,8 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED TRUE)
+set (CMAKE_C_STANDARD 99)
+set (CMAKE_C_STANDARD_REQUIRED TRUE)
 
 set (CMAKE_C_FLAGS "${CMAKE_C99_STANDARD_COMPILE_OPTION} ${CMAKE_C_FLAGS}")
 set (CMAKE_C_FLAGS "${CMAKE_C_SANITIZER_FLAGS} ${CMAKE_C_FLAGS}")
@@ -18,36 +18,85 @@ message (VERBOSE "Warnings Configuration: C default: ${CMAKE_C_FLAGS}")
 #-----------------------------------------------------------------------------
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
-if(WIN32 AND CMAKE_C_COMPILER_ID STREQUAL "Intel")
-  set(_INTEL_WINDOWS 1)
-endif()
+if (WIN32 AND (CMAKE_C_COMPILER_ID STREQUAL "Intel" OR CMAKE_C_COMPILER_ID MATCHES "IntelLLVM"))
+  set (_INTEL_WINDOWS 1)
+endif ()
 
-if(WIN32 AND CMAKE_C_COMPILER_ID MATCHES "[Cc]lang" AND "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
-  set(_CLANG_MSVC_WINDOWS 1)
-endif()
+if (WIN32 AND CMAKE_C_COMPILER_ID MATCHES "[Cc]lang" AND "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
+  set (_CLANG_MSVC_WINDOWS 1)
+endif ()
 
 # Disable deprecation warnings for standard C functions.
 # really only needed for newer versions of VS, but should
 # not hurt other versions, and this will work into the
 # future
-if(MSVC OR _INTEL_WINDOWS OR _CLANG_MSVC_WINDOWS)
-  add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
-endif()
+if (MSVC OR _INTEL_WINDOWS OR _CLANG_MSVC_WINDOWS)
+  add_definitions (-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
+endif ()
 
-if(MSVC)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stack:10000000")
-endif()
+if (MSVC)
+  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stack:10000000")
+endif ()
 
 # MSVC 14.28 enables C5105, but the Windows SDK 10.0.18362.0 triggers it.
-if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 19.28)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -wd5105")
-endif()
+if (CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 19.28)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -wd5105")
+endif ()
 
 if(_CLANG_MSVC_WINDOWS AND "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Xlinker -stack:20000000")
 endif()
 
-if (CMAKE_COMPILER_IS_GNUCC)
+if (CMAKE_C_COMPILER_ID STREQUAL "NVHPC" )
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Minform=warn")
+  if (NOT ${HDF_CFG_NAME} MATCHES "Debug" AND NOT ${HDF_CFG_NAME} MATCHES "Developer")
+    if (NOT ${HDF_CFG_NAME} MATCHES "RelWithDebInfo")
+      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s")
+    endif ()
+  else ()
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Mbounds -g")
+  endif ()
+
+  # With at least NVHPC 23.5 - 23.9, compiling with -O2 or higher and -DNDEBUG
+  # appears to have issues that manifest in the tests as incorrect metadata
+  # checksums being read or memory being corrupted. Compiling without -DNDEBUG
+  # does not appear to have these issues, but is not ideal due to compiling in
+  # asserts and other library debug code. Compiling with -O1 also does not appear
+  # to have these issues, so set maximum optimization level to -O1 for now until
+  # it can be determined whether these issues are compiler-specific or issues
+  # in the library.
+  set (cmake_c_flags_minsizerel_edited "${CMAKE_C_FLAGS_MINSIZEREL}")
+  string (REPLACE "-O2" "" cmake_c_flags_minsizerel_edited "${cmake_c_flags_minsizerel_edited}")
+  string (REPLACE "-O3" "" cmake_c_flags_minsizerel_edited "${cmake_c_flags_minsizerel_edited}")
+  string (REPLACE "-O4" "" cmake_c_flags_minsizerel_edited "${cmake_c_flags_minsizerel_edited}")
+  string (REPLACE "-Ofast" "" cmake_c_flags_minsizerel_edited "${cmake_c_flags_minsizerel_edited}")
+  string (REPLACE "-fast" "" cmake_c_flags_minsizerel_edited "${cmake_c_flags_minsizerel_edited}")
+  string (STRIP "${cmake_c_flags_minsizerel_edited}" cmake_c_flags_minsizerel_edited)
+  string (PREPEND cmake_c_flags_minsizerel_edited "-O1 ")
+  set (CMAKE_C_FLAGS_MINSIZEREL "${cmake_c_flags_minsizerel_edited}")
+
+  set (cmake_c_flags_release_edited "${CMAKE_C_FLAGS_RELEASE}")
+  string (REPLACE "-O2" "" cmake_c_flags_release_edited "${cmake_c_flags_release_edited}")
+  string (REPLACE "-O3" "" cmake_c_flags_release_edited "${cmake_c_flags_release_edited}")
+  string (REPLACE "-O4" "" cmake_c_flags_release_edited "${cmake_c_flags_release_edited}")
+  string (REPLACE "-Ofast" "" cmake_c_flags_release_edited "${cmake_c_flags_release_edited}")
+  string (REPLACE "-fast" "" cmake_c_flags_release_edited "${cmake_c_flags_release_edited}")
+  string (STRIP "${cmake_c_flags_release_edited}" cmake_c_flags_release_edited)
+  string (PREPEND cmake_c_flags_release_edited "-O1 ")
+  set (CMAKE_C_FLAGS_RELEASE "${cmake_c_flags_release_edited}")
+
+  set (cmake_c_flags_relwithdebinfo_edited "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+  string (REPLACE "-O2" "" cmake_c_flags_relwithdebinfo_edited "${cmake_c_flags_relwithdebinfo_edited}")
+  string (REPLACE "-O3" "" cmake_c_flags_relwithdebinfo_edited "${cmake_c_flags_relwithdebinfo_edited}")
+  string (REPLACE "-O4" "" cmake_c_flags_relwithdebinfo_edited "${cmake_c_flags_relwithdebinfo_edited}")
+  string (REPLACE "-Ofast" "" cmake_c_flags_relwithdebinfo_edited "${cmake_c_flags_relwithdebinfo_edited}")
+  string (REPLACE "-fast" "" cmake_c_flags_relwithdebinfo_edited "${cmake_c_flags_relwithdebinfo_edited}")
+  string (STRIP "${cmake_c_flags_relwithdebinfo_edited}" cmake_c_flags_relwithdebinfo_edited)
+  string (PREPEND cmake_c_flags_relwithdebinfo_edited "-O1 ")
+  set (CMAKE_C_FLAGS_RELWITHDEBINFO "${cmake_c_flags_relwithdebinfo_edited}")
+endif ()
+
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   set (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
   if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
     if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
@@ -106,7 +155,7 @@ if (HDF5_DISABLE_COMPILER_WARNINGS)
 endif ()
 
 #-----------------------------------------------------------------------------
-# HDF5 library compile options
+# HDF5 library compile options - to be made available to all targets
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
@@ -135,20 +184,20 @@ else ()
   # warnings that are emitted. If you need it, add it at configure time.
   if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
     if (_INTEL_WINDOWS)
-      ADD_H5_FLAGS (HDF5_CMAKE_C_FLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/win-general")
+      ADD_H5_FLAGS (HDF5_CMAKE_C_FLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/classic/win-general")
     else ()
-      ADD_H5_FLAGS (HDF5_CMAKE_C_FLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/general")
+      ADD_H5_FLAGS (HDF5_CMAKE_C_FLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/classic/general")
     endif()
     if (NOT _INTEL_WINDOWS)
-      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 15.0)
-        ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/15")
-      endif()
+      if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 15.0)
+        ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/classic/15")
+      endif ()
       # this is just a failsafe
       list (APPEND H5_CFLAGS "-finline-functions")
-      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 18.0)
-        ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/18")
-      endif()
-    endif()
+      if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 18.0)
+        ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/classic/18")
+      endif ()
+    endif ()
   elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     # Add general CFlags for GCC versions 4.8 and above
     if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
@@ -158,7 +207,15 @@ else ()
     # gcc automatically inlines based on the optimization level
     # this is just a failsafe
     list (APPEND H5_CFLAGS "-finline-functions")
-  elseif (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM" OR CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
+  elseif (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM")
+    if (_INTEL_WINDOWS)
+      ADD_H5_FLAGS (HDF5_CMAKE_C_FLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/oneapi/win-general")
+    else ()
+      # this is just a failsafe
+      list (APPEND H5_CFLAGS "-finline-functions")
+      ADD_H5_FLAGS (HDF5_CMAKE_C_FLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/oneapi/general")
+    endif ()
+  elseif (CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
     ADD_H5_FLAGS (HDF5_CMAKE_C_FLAGS "${HDF5_SOURCE_DIR}/config/clang-warnings/general")
     ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/clang-warnings/error-general")
   elseif (CMAKE_C_COMPILER_ID STREQUAL "PGI")
@@ -180,13 +237,19 @@ if (HDF5_ENABLE_DEV_WARNINGS)
   message (STATUS "....HDF5 developer group warnings are enabled")
   if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
     if (_INTEL_WINDOWS)
-      ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/win-developer-general")
+      ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/classic/win-developer-general")
     else ()
-      ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/developer-general")
+      ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/classic/developer-general")
     endif ()
   elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
     ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-general")
-  elseif (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM" OR CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
+  elseif (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM")
+    if (_INTEL_WINDOWS)
+      ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/oneapi/win-developer-general")
+    else ()
+      ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/oneapi/developer-general")
+    endif ()
+  elseif (CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
     ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/clang-warnings/developer-general")
   endif ()
 
@@ -200,12 +263,16 @@ if (HDF5_ENABLE_DEV_WARNINGS)
       list (APPEND H5_CFLAGS "-Winline")
     elseif (CMAKE_C_COMPILER_ID STREQUAL "Intel" AND NOT _INTEL_WINDOWS)
       list (APPEND H5_CFLAGS "-Winline")
+    elseif (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM" AND NOT _INTEL_WINDOWS)
+      list (APPEND H5_CFLAGS "-Winline")
+    elseif (CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
+      list (APPEND H5_CFLAGS "-Winline")
     endif ()
   endif ()
 else ()
   if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
     ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-general")
-  elseif (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM" OR CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
+  elseif (CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
     ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/clang-warnings/no-developer-general")
   endif ()
 endif ()
@@ -308,11 +375,8 @@ if (HDF5_ENABLE_DEBUG_APIS)
       H5D_DEBUG
       H5D_CHUNK_DEBUG
       H5F_DEBUG
-      H5HL_DEBUG
-      H5I_DEBUG
       H5MM_DEBUG
       H5O_DEBUG
-      H5S_DEBUG
       H5T_DEBUG
       H5Z_DEBUG
   )
@@ -341,7 +405,7 @@ endif ()
 # This is in here to help some of the GCC based IDES like Eclipse
 # and code blocks parse the compiler errors and warnings better.
 #-----------------------------------------------------------------------------
-if (CMAKE_COMPILER_IS_GNUCC)
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
 endif ()
 

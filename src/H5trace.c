@@ -23,7 +23,7 @@
 /* Module Setup */
 /****************/
 #include "H5module.h" /* This source code file is part of the H5 module */
-#define H5I_FRIEND    /*suppress error about including H5Ipkg      */
+#define H5I_FRIEND    /* Suppress error about including H5Ipkg */
 
 /***********/
 /* Headers */
@@ -40,7 +40,7 @@
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #ifdef H5_HAVE_PARALLEL
-/* datatypes of predefined drivers needed by H5_trace() */
+/* Datatypes of predefined drivers needed by H5_trace() */
 #include "H5FDmpio.h"
 #endif /* H5_HAVE_PARALLEL */
 
@@ -59,7 +59,7 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5_trace_args_bool(H5RS_str_t *rs, hbool_t val);
+static herr_t H5_trace_args_bool(H5RS_str_t *rs, bool val);
 static herr_t H5_trace_args_cset(H5RS_str_t *rs, H5T_cset_t cset);
 static herr_t H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degree);
 
@@ -78,19 +78,19 @@ static herr_t H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degr
 /*-------------------------------------------------------------------------
  * Function:    H5_trace_args_bool
  *
- * Purpose:     This routine formats an hbool_t and adds the output to
- *		the refcounted string (RS) argument.
+ * Purpose:     This routine formats an bool and adds the output to
+ *              the refcounted string (RS) argument.
  *
  * Return:      SUCCEED / FAIL
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5_trace_args_bool(H5RS_str_t *rs, hbool_t val)
+H5_trace_args_bool(H5RS_str_t *rs, bool val)
 {
     /* FUNC_ENTER() should not be called */
 
-    if (TRUE == val)
+    if (true == val)
         H5RS_acat(rs, "TRUE");
     else if (!val)
         H5RS_acat(rs, "FALSE");
@@ -104,7 +104,7 @@ H5_trace_args_bool(H5RS_str_t *rs, hbool_t val)
  * Function:    H5_trace_args_cset
  *
  * Purpose:     This routine formats an H5T_cset_t and adds the output to
- *		the refcounted string (RS) argument.
+ *              the refcounted string (RS) argument.
  *
  * Return:      SUCCEED / FAIL
  *
@@ -148,7 +148,7 @@ H5_trace_args_cset(H5RS_str_t *rs, H5T_cset_t cset)
         default:
             H5RS_asprintf_cat(rs, "%ld", (long)cset);
             break;
-    } /* end switch */
+    }
 
     return SUCCEED;
 } /* end H5_trace_args_cset() */
@@ -197,14 +197,14 @@ H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degree)
  * Function:    H5_trace_args
  *
  * Purpose:     This routine formats a set of function arguments, placing the
- *		resulting string in the refcounted string (RS) argument.
+ *              resulting string in the refcounted string (RS) argument.
  *
- *		The TYPE argument is a string which gives the type of each of
+ *              The TYPE argument is a string which gives the type of each of
  *              the following argument pairs.  Each type begins with zero or
- *		more asterisks (one for each level of indirection, although
- *		some types have one level of indirection already implied)
- *		followed by either one letter (lower case) or two letters
- *		(first one uppercase).
+ *              more asterisks (one for each level of indirection, although
+ *              some types have one level of indirection already implied)
+ *              followed by either one letter (lower case) or two letters
+ *              (first one uppercase).
  *
  *              The variable argument list consists of pairs of values. Each
  *              pair is a string which is the formal argument name in the
@@ -250,7 +250,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                 type = rest + 1;
             }
             else {
-                rest = (char *)HDstrchr(type, ']');
+                rest = (char *)strchr(type, ']');
                 assert(rest);
                 type      = rest + 1;
                 asize_idx = -1;
@@ -472,10 +472,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     } /* end switch */
                     break;
 
-                case 'b': /* hbool_t */
+                case 'b': /* bool */
                 {
-                    /* Can't pass hbool_t to va_arg() */
-                    hbool_t bool_var = (hbool_t)va_arg(ap, int);
+                    /* Can't pass bool to va_arg() */
+                    bool bool_var = (bool)va_arg(ap, int);
 
                     H5_trace_args_bool(rs, bool_var);
                 } /* end block */
@@ -897,42 +897,42 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         {
                             H5D_mpio_no_collective_cause_t nocol_cause_mode =
                                 (H5D_mpio_no_collective_cause_t)va_arg(ap, int);
-                            hbool_t flag_already_displayed = FALSE;
+                            bool flag_already_displayed = false;
 
                             /* Check for all bit-flags which might be set */
                             if (nocol_cause_mode & H5D_MPIO_COLLECTIVE) {
                                 H5RS_acat(rs, "H5D_MPIO_COLLECTIVE");
-                                flag_already_displayed = TRUE;
+                                flag_already_displayed = true;
                             } /* end if */
                             if (nocol_cause_mode & H5D_MPIO_SET_INDEPENDENT) {
                                 H5RS_asprintf_cat(rs, "%sH5D_MPIO_SET_INDEPENDENT",
                                                   flag_already_displayed ? " | " : "");
-                                flag_already_displayed = TRUE;
+                                flag_already_displayed = true;
                             } /* end if */
                             if (nocol_cause_mode & H5D_MPIO_DATATYPE_CONVERSION) {
                                 H5RS_asprintf_cat(rs, "%sH5D_MPIO_DATATYPE_CONVERSION",
                                                   flag_already_displayed ? " | " : "");
-                                flag_already_displayed = TRUE;
+                                flag_already_displayed = true;
                             } /* end if */
                             if (nocol_cause_mode & H5D_MPIO_DATA_TRANSFORMS) {
                                 H5RS_asprintf_cat(rs, "%sH5D_MPIO_DATA_TRANSFORMS",
                                                   flag_already_displayed ? " | " : "");
-                                flag_already_displayed = TRUE;
+                                flag_already_displayed = true;
                             } /* end if */
                             if (nocol_cause_mode & H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED) {
                                 H5RS_asprintf_cat(rs, "%sH5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED",
                                                   flag_already_displayed ? " | " : "");
-                                flag_already_displayed = TRUE;
+                                flag_already_displayed = true;
                             } /* end if */
                             if (nocol_cause_mode & H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES) {
                                 H5RS_asprintf_cat(rs, "%sH5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES",
                                                   flag_already_displayed ? " | " : "");
-                                flag_already_displayed = TRUE;
+                                flag_already_displayed = true;
                             } /* end if */
                             if (nocol_cause_mode & H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET) {
                                 H5RS_asprintf_cat(rs, "%sH5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET",
                                                   flag_already_displayed ? " | " : "");
-                                flag_already_displayed = TRUE;
+                                flag_already_displayed = true;
                             } /* end if */
 
                             /* Display '<none>' if there's no flags set */
@@ -1480,8 +1480,40 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                             H5G_iterate_t git = (H5G_iterate_t)va_arg(ap, H5G_iterate_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)git);
-                        } /* end block */
-                        break;
+                        } break;
+
+                        case 'I': /* H5G_info_t */
+                        {
+                            H5G_info_t ginfo = va_arg(ap, H5G_info_t);
+
+                            H5RS_acat(rs, "{");
+                            switch (ginfo.storage_type) {
+                                case H5G_STORAGE_TYPE_UNKNOWN:
+                                    H5RS_asprintf_cat(rs, "H5G_STORAGE_TYPE_UNKNOWN");
+                                    break;
+
+                                case H5G_STORAGE_TYPE_SYMBOL_TABLE:
+                                    H5RS_asprintf_cat(rs, "H5G_STORAGE_TYPE_SYMBOL_TABLE");
+                                    break;
+
+                                case H5G_STORAGE_TYPE_COMPACT:
+                                    H5RS_asprintf_cat(rs, "H5G_STORAGE_TYPE_COMPACT");
+                                    break;
+
+                                case H5G_STORAGE_TYPE_DENSE:
+                                    H5RS_asprintf_cat(rs, "H5G_STORAGE_TYPE_DENSE");
+                                    break;
+
+                                default:
+                                    H5RS_asprintf_cat(rs, "%ld", (long)ginfo.storage_type);
+                                    break;
+                            }
+                            H5RS_asprintf_cat(rs, ", ");
+                            H5RS_asprintf_cat(rs, "%" PRIuHSIZE ", ", ginfo.nlinks);
+                            H5RS_asprintf_cat(rs, "%" PRId64 ", ", ginfo.max_corder);
+                            H5_trace_args_bool(rs, ginfo.mounted);
+                            H5RS_asprintf_cat(rs, "}");
+                        } break;
 
                         case 'o': /* H5G_obj_t */
                         {
@@ -1625,12 +1657,20 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5T_NATIVE_LLONG");
                                 else if (obj == H5T_NATIVE_ULLONG_g)
                                     H5RS_acat(rs, "H5T_NATIVE_ULLONG");
+#ifdef H5_HAVE__FLOAT16
+                                else if (obj == H5T_NATIVE_FLOAT16_g)
+                                    H5RS_acat(rs, "H5T_NATIVE_FLOAT16");
+#endif
                                 else if (obj == H5T_NATIVE_FLOAT_g)
                                     H5RS_acat(rs, "H5T_NATIVE_FLOAT");
                                 else if (obj == H5T_NATIVE_DOUBLE_g)
                                     H5RS_acat(rs, "H5T_NATIVE_DOUBLE");
                                 else if (obj == H5T_NATIVE_LDOUBLE_g)
                                     H5RS_acat(rs, "H5T_NATIVE_LDOUBLE");
+                                else if (obj == H5T_IEEE_F16BE_g)
+                                    H5RS_acat(rs, "H5T_IEEE_F16BE");
+                                else if (obj == H5T_IEEE_F16LE_g)
+                                    H5RS_acat(rs, "H5T_IEEE_F16LE");
                                 else if (obj == H5T_IEEE_F32BE_g)
                                     H5RS_acat(rs, "H5T_IEEE_F32BE");
                                 else if (obj == H5T_IEEE_F32LE_g)
@@ -3961,8 +4001,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     H5RS_str_t       *rs = NULL;
     hssize_t          i;
     FILE             *out                 = H5_debug_g.trace;
-    static hbool_t    is_first_invocation = TRUE;
-    H5_timer_t        function_timer      = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, FALSE};
+    static bool       is_first_invocation = true;
+    H5_timer_t        function_timer      = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, false};
     H5_timevals_t     function_times      = {0.0, 0.0, 0.0};
     static H5_timer_t running_timer;
     H5_timevals_t     running_times;
@@ -3997,7 +4037,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     /* Get time for event if the trace times flag is set */
     if (is_first_invocation && H5_debug_g.ttimes) {
         /* Start the library-wide timer */
-        is_first_invocation = FALSE;
+        is_first_invocation = false;
         H5_timer_init(&running_timer);
         H5_timer_start(&running_timer);
     }
@@ -4025,8 +4065,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                 H5_timer_get_times(function_timer, &function_times);
                 H5_timer_get_times(running_timer, &running_times);
-                HDsnprintf(tmp, sizeof(tmp), "%.6f", (function_times.elapsed - running_times.elapsed));
-                H5RS_asprintf_cat(rs, " %*s ", (int)HDstrlen(tmp), "");
+                snprintf(tmp, sizeof(tmp), "%.6f", (function_times.elapsed - running_times.elapsed));
+                H5RS_asprintf_cat(rs, " %*s ", (int)strlen(tmp), "");
             }
             for (i = 0; i < current_depth; i++)
                 H5RS_aputc(rs, '+');
@@ -4069,7 +4109,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         last_call_depth = current_depth++;
         H5RS_acat(rs, ")");
     }
-    HDfputs(H5RS_get_str(rs), out);
+    fputs(H5RS_get_str(rs), out);
     fflush(out);
     H5RS_decr(rs);
 

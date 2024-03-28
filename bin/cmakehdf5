@@ -1,4 +1,5 @@
 #!/bin/sh
+echo "Deprecated: This will be removed in a future release"
 # Build and Test HDF5 using cmake.
 
 # Copyright: The HDF Group, 2012-14

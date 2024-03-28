@@ -35,7 +35,6 @@
 #include "H5Iprivate.h"  /* IDs                                  */
 #include "H5Lprivate.h"  /* Links                                */
 #include "H5MMprivate.h" /* Memory management			*/
-#include "H5Ppublic.h"   /* Property Lists                       */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
@@ -91,7 +90,7 @@ H5G__link_cmp_name_inc(const void *lnk1, const void *lnk2)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    FUNC_LEAVE_NOAPI(HDstrcmp(((const H5O_link_t *)lnk1)->name, ((const H5O_link_t *)lnk2)->name))
+    FUNC_LEAVE_NOAPI(strcmp(((const H5O_link_t *)lnk1)->name, ((const H5O_link_t *)lnk2)->name))
 } /* end H5G__link_cmp_name_inc() */
 
 /*-------------------------------------------------------------------------
@@ -113,7 +112,7 @@ H5G__link_cmp_name_dec(const void *lnk1, const void *lnk2)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    FUNC_LEAVE_NOAPI(HDstrcmp(((const H5O_link_t *)lnk2)->name, ((const H5O_link_t *)lnk1)->name))
+    FUNC_LEAVE_NOAPI(strcmp(((const H5O_link_t *)lnk2)->name, ((const H5O_link_t *)lnk1)->name))
 } /* end H5G__link_cmp_name_dec() */
 
 /*-------------------------------------------------------------------------
@@ -188,8 +187,8 @@ H5G__link_cmp_corder_dec(const void *lnk1, const void *lnk2)
 herr_t
 H5G__ent_to_link(H5O_link_t *lnk, const H5HL_t *heap, const H5G_entry_t *ent, const char *name)
 {
-    hbool_t dup_soft  = FALSE;   /* xstrdup the symbolic link name or not */
-    herr_t  ret_value = SUCCEED; /* Return value */
+    bool   dup_soft  = false;   /* xstrdup the symbolic link name or not */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -202,7 +201,7 @@ H5G__ent_to_link(H5O_link_t *lnk, const H5HL_t *heap, const H5G_entry_t *ent, co
     /* Set (default) common info for link */
     lnk->cset         = H5F_DEFAULT_CSET;
     lnk->corder       = 0;
-    lnk->corder_valid = FALSE; /* Creation order not valid for this link */
+    lnk->corder_valid = false; /* Creation order not valid for this link */
     if ((lnk->name = H5MM_xstrdup(name)) == NULL)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to duplicate link name");
 
@@ -217,7 +216,7 @@ H5G__ent_to_link(H5O_link_t *lnk, const H5HL_t *heap, const H5G_entry_t *ent, co
         if ((lnk->u.soft.name = H5MM_xstrdup(s)) == NULL)
             HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to duplicate symbolic link name");
 
-        dup_soft = TRUE;
+        dup_soft = true;
 
         /* Set link type */
         lnk->type = H5L_TYPE_SOFT;
@@ -276,7 +275,7 @@ H5G_link_to_info(const H5O_loc_t *link_loc, const H5O_link_t *lnk, H5L_info2_t *
                 break;
 
             case H5L_TYPE_SOFT:
-                info->u.val_size = HDstrlen(lnk->u.soft.name) + 1; /*count the null terminator*/
+                info->u.val_size = strlen(lnk->u.soft.name) + 1; /*count the null terminator*/
                 break;
 
             case H5L_TYPE_ERROR:
@@ -353,7 +352,7 @@ H5G__link_to_loc(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, H5G_loc_t *obj
 
     /* Set the object location, if it's a hard link set the address also */
     obj_loc->oloc->file         = grp_loc->oloc->file;
-    obj_loc->oloc->holding_file = FALSE;
+    obj_loc->oloc->holding_file = false;
     if (lnk->type == H5L_TYPE_HARD)
         obj_loc->oloc->addr = lnk->u.hard.addr;
 

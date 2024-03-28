@@ -1,7 +1,7 @@
 # HDF5 API Tests
 
 This directory contains several test applications that exercise HDF5's
-public API and serve as regression tests for HDF5 [VOL Connectors](https://portal.hdfgroup.org/display/HDF5/Virtual+Object+Layer).
+public API and serve as regression tests for HDF5 [VOL Connectors](https://docs.hdfgroup.org/hdf5/develop/_h5_v_l__u_g.html).
 
 ## Build Process and options
 
@@ -42,7 +42,7 @@ Currently unsupported
 
 These API tests currently only support usage with the native HDF5 VOL connector and HDF5 VOL
 connectors that can be loaded dynamically as a plugin. For information on how to build a VOL
-connector in this manner, refer to section 2.3 of the [HDF5 VOL Connector Author Guide](https://portal.hdfgroup.org/display/HDF5/HDF5+VOL+Connector+Authors+Guide?preview=/53610813/59903039/vol_connector_author_guide.pdf).
+connector in this manner, refer to section 2.3 of the [HDF5 VOL Connector Author Guide](https://docs.hdfgroup.org/hdf5/develop/_v_o_l__connector.html).
 
 TODO: section on building VOL connectors alongside HDF5 for use with tests
 
@@ -84,4 +84,4 @@ following will appear in the test output:
 
 ### Help and Support
 
-For help with building or using the HDF5 API tests, please contact the [HDF Help Desk](https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk).
+For help with building or using the HDF5 API tests, please contact the [HDF Help Desk](https://help.hdfgroup.org/).

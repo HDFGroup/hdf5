@@ -69,11 +69,11 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
         const void *Parameters)
 {
     /* Sanity checking */
-    if (HDstrlen(TheDescr) >= MAXTESTDESC) {
+    if (strlen(TheDescr) >= MAXTESTDESC) {
         printf("Test description ('%s') too long, increase MAXTESTDESC(%d).\n", TheDescr, MAXTESTDESC);
         exit(EXIT_FAILURE);
     }
-    if (HDstrlen(TheName) >= MAXTESTNAME) {
+    if (strlen(TheName) >= MAXTESTNAME) {
         printf("Test name too long, increase MAXTESTNAME(%d).\n", MAXTESTNAME);
         exit(EXIT_FAILURE);
     }
@@ -96,13 +96,13 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
     }
 
     /* Set up test function */
-    HDstrcpy(Test[Index].Description, TheDescr);
+    strcpy(Test[Index].Description, TheDescr);
     if (*TheName != '-') {
-        HDstrcpy(Test[Index].Name, TheName);
+        strcpy(Test[Index].Name, TheName);
         Test[Index].SkipFlag = 0;
     }
     else { /* skip test by default */
-        HDstrcpy(Test[Index].Name, TheName + 1);
+        strcpy(Test[Index].Name, TheName + 1);
         Test[Index].SkipFlag = 1;
     }
     Test[Index].Call       = TheCall;
@@ -155,35 +155,37 @@ TestUsage(void)
 {
     unsigned i;
 
-    print_func("Usage: %s [-v[erbose] (l[ow]|m[edium]|h[igh]|0-9)] %s\n", TestProgName,
-               (TestPrivateUsage ? "<extra options>" : ""));
-    print_func("              [-[e]x[clude] name]+ \n");
-    print_func("              [-o[nly] name]+ \n");
-    print_func("              [-b[egin] name] \n");
-    print_func("              [-s[ummary]]  \n");
-    print_func("              [-c[leanoff]]  \n");
-    print_func("              [-h[elp]]  \n");
-    print_func("\n\n");
-    print_func("verbose   controls the amount of information displayed\n");
-    print_func("exclude   to exclude tests by name\n");
-    print_func("only      to name tests which should be run\n");
-    print_func("begin     start at the name of the test givin\n");
-    print_func("summary   prints a summary of test results at the end\n");
-    print_func("cleanoff  does not delete *.hdf files after execution of tests\n");
-    print_func("help      print out this information\n");
-    if (TestPrivateUsage) {
-        print_func("\nExtra options\n");
-        TestPrivateUsage();
+    if (mpi_rank_framework_g == 0) {
+        print_func("Usage: %s [-v[erbose] (l[ow]|m[edium]|h[igh]|0-9)] %s\n", TestProgName,
+                   (TestPrivateUsage ? "<extra options>" : ""));
+        print_func("              [-[e]x[clude] name]+ \n");
+        print_func("              [-o[nly] name]+ \n");
+        print_func("              [-b[egin] name] \n");
+        print_func("              [-s[ummary]]  \n");
+        print_func("              [-c[leanoff]]  \n");
+        print_func("              [-h[elp]]  \n");
+        print_func("\n\n");
+        print_func("verbose   controls the amount of information displayed\n");
+        print_func("exclude   to exclude tests by name\n");
+        print_func("only      to name tests which should be run\n");
+        print_func("begin     start at the name of the test given\n");
+        print_func("summary   prints a summary of test results at the end\n");
+        print_func("cleanoff  does not delete *.hdf files after execution of tests\n");
+        print_func("help      print out this information\n");
+        if (TestPrivateUsage) {
+            print_func("\nExtra options\n");
+            TestPrivateUsage();
+        }
+        print_func("\n\n");
+        print_func("This program currently tests the following: \n\n");
+        print_func("%16s %s\n", "Name", "Description");
+        print_func("%16s %s\n", "----", "-----------");
+
+        for (i = 0; i < Index; i++)
+            print_func("%16s %s\n", Test[i].Name, Test[i].Description);
+
+        print_func("\n\n");
     }
-    print_func("\n\n");
-    print_func("This program currently tests the following: \n\n");
-    print_func("%16s %s\n", "Name", "Description");
-    print_func("%16s %s\n", "----", "-----------");
-
-    for (i = 0; i < Index; i++)
-        print_func("%16s %s\n", Test[i].Name, Test[i].Description);
-
-    print_func("\n\n");
 }
 
 /*
@@ -192,12 +194,14 @@ TestUsage(void)
 void
 TestInfo(const char *ProgName)
 {
-    unsigned major, minor, release;
+    if (mpi_rank_framework_g == 0) {
+        unsigned major, minor, release;
 
-    H5get_libversion(&major, &minor, &release);
+        H5get_libversion(&major, &minor, &release);
 
-    print_func("\nFor help use: %s -help\n", ProgName);
-    print_func("Linked with hdf5 version %u.%u release %u\n", major, minor, release);
+        print_func("\nFor help use: %s -help\n", ProgName);
+        print_func("Linked with hdf5 version %u.%u release %u\n", major, minor, release);
+    }
 }
 
 /*
@@ -210,11 +214,11 @@ TestInfo(const char *ProgName)
 void
 TestParseCmdLine(int argc, char *argv[])
 {
-    hbool_t skipped_all = FALSE;
-    int     ret_code;
+    bool skipped_all = false;
+    int  ret_code;
 
     while ((void)argv++, --argc > 0) {
-        if ((HDstrcmp(*argv, "-verbose") == 0) || (HDstrcmp(*argv, "-v") == 0)) {
+        if ((strcmp(*argv, "-verbose") == 0) || (strcmp(*argv, "-v") == 0)) {
             if (argc > 0) {
                 --argc;
                 ++argv;
@@ -225,7 +229,7 @@ TestParseCmdLine(int argc, char *argv[])
                 exit(EXIT_FAILURE);
             }
         }
-        else if (((HDstrcmp(*argv, "-exclude") == 0) || (HDstrcmp(*argv, "-x") == 0))) {
+        else if (((strcmp(*argv, "-exclude") == 0) || (strcmp(*argv, "-x") == 0))) {
             if (argc > 0) {
                 --argc;
                 ++argv;
@@ -236,7 +240,7 @@ TestParseCmdLine(int argc, char *argv[])
                 exit(EXIT_FAILURE);
             }
         }
-        else if (((HDstrcmp(*argv, "-begin") == 0) || (HDstrcmp(*argv, "-b") == 0))) {
+        else if (((strcmp(*argv, "-begin") == 0) || (strcmp(*argv, "-b") == 0))) {
             if (argc > 0) {
                 --argc;
                 ++argv;
@@ -247,7 +251,7 @@ TestParseCmdLine(int argc, char *argv[])
                 exit(EXIT_FAILURE);
             }
         }
-        else if (((HDstrcmp(*argv, "-only") == 0) || (HDstrcmp(*argv, "-o") == 0))) {
+        else if (((strcmp(*argv, "-only") == 0) || (strcmp(*argv, "-o") == 0))) {
             if (argc > 0) {
                 unsigned Loop;
 
@@ -258,7 +262,7 @@ TestParseCmdLine(int argc, char *argv[])
                 if (!skipped_all) {
                     for (Loop = 0; Loop < Index; Loop++)
                         Test[Loop].SkipFlag = 1;
-                    skipped_all = TRUE;
+                    skipped_all = true;
                 } /* end if */
                 SetTest(*argv, ONLYTEST);
             }
@@ -267,15 +271,15 @@ TestParseCmdLine(int argc, char *argv[])
                 exit(EXIT_FAILURE);
             }
         }
-        else if ((HDstrcmp(*argv, "-summary") == 0) || (HDstrcmp(*argv, "-s") == 0))
+        else if ((strcmp(*argv, "-summary") == 0) || (strcmp(*argv, "-s") == 0))
             Summary = 1;
-        else if (HDstrcmp(*argv, "-enable-error-stack") == 0)
+        else if (strcmp(*argv, "-enable-error-stack") == 0)
             enable_error_stack = 1;
-        else if ((HDstrcmp(*argv, "-help") == 0) || (HDstrcmp(*argv, "-h") == 0)) {
+        else if ((strcmp(*argv, "-help") == 0) || (strcmp(*argv, "-h") == 0)) {
             TestUsage();
             exit(EXIT_SUCCESS);
         }
-        else if ((HDstrcmp(*argv, "-cleanoff") == 0) || (HDstrcmp(*argv, "-c") == 0))
+        else if ((strcmp(*argv, "-cleanoff") == 0) || (strcmp(*argv, "-c") == 0))
             SetTestNoCleanup();
         else {
             /* non-standard option.  Break out. */
@@ -301,20 +305,24 @@ PerformTests(void)
 
     for (Loop = 0; Loop < Index; Loop++)
         if (Test[Loop].SkipFlag) {
-            MESSAGE(2, ("Skipping -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
+            if (mpi_rank_framework_g == 0)
+                MESSAGE(2, ("Skipping -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
         }
         else {
             if (mpi_rank_framework_g == 0)
                 MESSAGE(2, ("Testing  -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
-            MESSAGE(5, ("===============================================\n"));
+            if (mpi_rank_framework_g == 0)
+                MESSAGE(5, ("===============================================\n"));
             Test[Loop].NumErrors = num_errs;
             Test_parameters      = Test[Loop].Parameters;
             TestAlarmOn();
             Test[Loop].Call();
             TestAlarmOff();
             Test[Loop].NumErrors = num_errs - Test[Loop].NumErrors;
-            MESSAGE(5, ("===============================================\n"));
-            MESSAGE(5, ("There were %d errors detected.\n\n", (int)Test[Loop].NumErrors));
+            if (mpi_rank_framework_g == 0) {
+                MESSAGE(5, ("===============================================\n"));
+                MESSAGE(5, ("There were %d errors detected.\n\n", (int)Test[Loop].NumErrors));
+            }
         }
 
     Test_parameters = NULL; /* clear it. */
@@ -358,7 +366,8 @@ TestCleanup(void)
 {
     unsigned Loop;
 
-    MESSAGE(2, ("\nCleaning Up temp files...\n\n"));
+    if (mpi_rank_framework_g == 0)
+        MESSAGE(2, ("\nCleaning Up temp files...\n\n"));
 
     /* call individual cleanup routines in each source module */
     for (Loop = 0; Loop < Index; Loop++)
@@ -445,13 +454,13 @@ GetTestExpress(void)
 #endif
 
         /* Check if HDF5TestExpress is set to override the default level */
-        env_val = HDgetenv("HDF5TestExpress");
+        env_val = getenv("HDF5TestExpress");
         if (env_val) {
-            if (HDstrcmp(env_val, "0") == 0)
+            if (strcmp(env_val, "0") == 0)
                 express_val = 0;
-            else if (HDstrcmp(env_val, "1") == 0)
+            else if (strcmp(env_val, "1") == 0)
                 express_val = 1;
-            else if (HDstrcmp(env_val, "2") == 0)
+            else if (strcmp(env_val, "2") == 0)
                 express_val = 2;
             else
                 express_val = 3;
@@ -570,7 +579,7 @@ TestErrPrintf(const char *format, ...)
 
     /* Print the requested information */
     va_start(arglist, format);
-    ret_value = HDvprintf(format, arglist);
+    ret_value = vprintf(format, arglist);
     va_end(arglist);
 
     /* Return the length of the string produced (like printf() does) */
@@ -592,14 +601,14 @@ SetTest(const char *testname, int action)
     switch (action) {
         case SKIPTEST:
             for (Loop = 0; Loop < Index; Loop++)
-                if (HDstrcmp(testname, Test[Loop].Name) == 0) {
+                if (strcmp(testname, Test[Loop].Name) == 0) {
                     Test[Loop].SkipFlag = 1;
                     break;
                 }
             break;
         case BEGINTEST:
             for (Loop = 0; Loop < Index; Loop++) {
-                if (HDstrcmp(testname, Test[Loop].Name) != 0)
+                if (strcmp(testname, Test[Loop].Name) != 0)
                     Test[Loop].SkipFlag = 1;
                 else {
                     /* Found it. Set it to run.  Done. */
@@ -610,7 +619,7 @@ SetTest(const char *testname, int action)
             break;
         case ONLYTEST:
             for (Loop = 0; Loop < Index; Loop++) {
-                if (HDstrcmp(testname, Test[Loop].Name) == 0) {
+                if (strcmp(testname, Test[Loop].Name) == 0) {
                     /* Found it. Set it to run. Break to skip the rest. */
                     Test[Loop].SkipFlag = 0;
                     break;
@@ -619,7 +628,8 @@ SetTest(const char *testname, int action)
             break;
         default:
             /* error */
-            printf("*** ERROR: Unknown action (%d) for SetTest\n", action);
+            if (mpi_rank_framework_g == 0)
+                printf("*** ERROR: Unknown action (%d) for SetTest\n", action);
             break;
     }
 }
@@ -627,14 +637,15 @@ SetTest(const char *testname, int action)
 /* Enable a test timer that will kill long-running tests, the time is configurable
  * via an environment variable.
  *
- * Only useful on POSIX systems where alarm(2) is present.
+ * Only useful on POSIX systems where alarm(2) is present. This does not include
+ * MinGW builds, which will often incorrectly decide that alarm(2) exists.
  */
 void
 TestAlarmOn(void)
 {
 #ifdef H5_HAVE_ALARM
-    char         *env_val   = HDgetenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
-    unsigned long alarm_sec = H5_ALARM_SEC;                   /* Number of seconds before alarm goes off */
+    char         *env_val   = getenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
+    unsigned long alarm_sec = H5_ALARM_SEC;                 /* Number of seconds before alarm goes off */
 
     /* Get the alarm value from the environment variable, if set */
     if (env_val != NULL)

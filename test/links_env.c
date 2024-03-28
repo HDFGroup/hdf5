@@ -30,7 +30,7 @@ static const char *FILENAME[] = {"extlinks_env0",        /* 0: main file */
                                  TMPDIR "extlinks_env1", /* 2 */
                                  NULL};
 
-static int external_link_env(hid_t fapl, hbool_t new_format);
+static int external_link_env(hid_t fapl, bool new_format);
 
 /*-------------------------------------------------------------------------
  * Function:    external_link_env (moved from links.c)
@@ -48,11 +48,11 @@ static int external_link_env(hid_t fapl, hbool_t new_format);
  *-------------------------------------------------------------------------
  */
 static int
-external_link_env(hid_t fapl, hbool_t new_format)
+external_link_env(hid_t fapl, bool new_format)
 {
-    hid_t       fid    = (-1); /* File ID */
-    hid_t       gid    = (-1); /* Group IDs */
-    const char *envval = NULL; /* Pointer to environment variable */
+    hid_t       fid    = (H5I_INVALID_HID); /* File ID */
+    hid_t       gid    = (H5I_INVALID_HID); /* Group IDs */
+    const char *envval = NULL;              /* Pointer to environment variable */
     char        filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE],
         filename3[NAME_BUF_SIZE]; /* Holders for filename */
 
@@ -61,9 +61,9 @@ external_link_env(hid_t fapl, hbool_t new_format)
     else
         TESTING("external links via environment variable");
 
-    if ((envval = HDgetenv("HDF5_EXT_PREFIX")) == NULL)
+    if ((envval = getenv("HDF5_EXT_PREFIX")) == NULL)
         envval = "nomatch";
-    if (HDstrcmp(envval, ".:tmp_links_env") != 0)
+    if (strcmp(envval, ".:tmp_links_env") != 0)
         TEST_ERROR;
 
     /* Set up name for main file:"extlinks_env0" */
@@ -109,7 +109,7 @@ external_link_env(hid_t fapl, hbool_t new_format)
     /* Should be able to find the target file from pathnames set via HDF5_EXT_PREFIX */
     if (gid < 0) {
         H5_FAILED();
-        HDputs("    Should have found the file in tmp_links_env directory.");
+        puts("    Should have found the file in tmp_links_env directory.");
         goto error;
     }
 
@@ -144,31 +144,29 @@ error:
 int
 main(void)
 {
-    const char *env_h5_drvr; /* File driver value from environment */
+    const char *driver_name; /* File driver value from environment */
     hid_t       fapl;        /* File access property lists */
     int         nerrors = 0; /* Error from tests */
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Splitter VFD has issues with external links */
-    if (!HDstrcmp(env_h5_drvr, "splitter")) {
-        HDputs(" -- SKIPPED for incompatible VFD --");
+    if (!strcmp(driver_name, "splitter")) {
+        puts(" -- SKIPPED for incompatible VFD --");
         exit(EXIT_SUCCESS);
     }
 
     h5_reset();
     fapl = h5_fileaccess();
 
-    nerrors += external_link_env(fapl, FALSE) < 0 ? 1 : 0;
+    nerrors += external_link_env(fapl, false) < 0 ? 1 : 0;
 
     /* Set the "use the latest version of the format" bounds for creating objects in the file */
     if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         TEST_ERROR;
 
-    nerrors += external_link_env(fapl, TRUE) < 0 ? 1 : 0;
+    nerrors += external_link_env(fapl, true) < 0 ? 1 : 0;
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
@@ -189,6 +187,6 @@ main(void)
     exit(EXIT_SUCCESS);
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     exit(EXIT_FAILURE);
 } /* end main() */

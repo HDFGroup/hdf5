@@ -1,0 +1,88 @@
+name: hdf5 dev cmake CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel. We just have one job, but the matrix items defined below will
+# run in parallel.
+jobs:
+    call-workflow-special-cmake:
+      name: "CMake Special Workflows"
+      uses: ./.github/workflows/main-cmake-spc.yml
+
+    call-debug-thread-cmake:
+        name: "CMake Debug Thread-Safety Workflows"
+        uses: ./.github/workflows/main-cmake.yml
+        with:
+            thread_safety: "TS"
+            build_mode: "Debug"
+
+    call-release-thread-cmake:
+        name: "CMake Release Thread-Safety Workflows"
+        uses: ./.github/workflows/main-cmake.yml
+        with:
+            thread_safety: "TS"
+            build_mode: "Release"
+
+    call-debug-cmake:
+        name: "CMake Debug Workflows"
+        uses: ./.github/workflows/main-cmake.yml
+        with:
+            thread_safety: ""
+            build_mode: "Debug"
+
+    call-release-cmake:
+        name: "CMake Release Workflows"
+        uses: ./.github/workflows/main-cmake.yml
+        with:
+            thread_safety: ""
+            build_mode: "Release"
+
+    call-release-bintest:
+        name: "CMake Test Release Binaries"
+        needs: call-release-cmake
+        uses: ./.github/workflows/cmake-bintest.yml
+        with:
+            build_mode: "Release"
+
+    call-release-par:
+        name: "CMake Parallel Release Workflows"
+        uses: ./.github/workflows/main-cmake-par.yml
+        with:
+            build_mode: "Release"
+
+    call-debug-par:
+        name: "CMake Parallel Debug Workflows"
+        uses: ./.github/workflows/main-cmake-par.yml
+        with:
+            build_mode: "Debug"
+
+    call-release-cmake-intel:
+        name: "CMake Intel Workflows"
+        uses: ./.github/workflows/intel-cmake.yml
+        with:
+            build_mode: "Release"
+
+    call-release-cmake-nvhpc:
+        name: "CMake nvhpc Workflows"
+        uses: ./.github/workflows/nvhpc-cmake.yml
+        with:
+            build_mode: "Release"
+
+    call-release-cmake-aocc:
+        name: "CMake aocc Workflows"
+        uses: ./.github/workflows/aocc-cmake.yml
+        with:
+            build_mode: "Release"
+
+    call-release-cmake-cygwin:
+        name: "CMake Cygwin Workflows"
+        uses: ./.github/workflows/cygwin-cmake.yml
+        with:
+            build_mode: "Release"
+            

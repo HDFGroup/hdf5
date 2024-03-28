@@ -156,25 +156,25 @@ parse_flag(const char *s_flag, unsigned *flag)
 {
     unsigned fla = 0;
 
-    if (HDstrcmp(s_flag, "shallow") == 0) {
+    if (strcmp(s_flag, "shallow") == 0) {
         fla = H5O_COPY_SHALLOW_HIERARCHY_FLAG;
     }
-    else if (HDstrcmp(s_flag, "soft") == 0) {
+    else if (strcmp(s_flag, "soft") == 0) {
         fla = H5O_COPY_EXPAND_SOFT_LINK_FLAG;
     }
-    else if (HDstrcmp(s_flag, "ext") == 0) {
+    else if (strcmp(s_flag, "ext") == 0) {
         fla = H5O_COPY_EXPAND_EXT_LINK_FLAG;
     }
-    else if (HDstrcmp(s_flag, "ref") == 0) {
+    else if (strcmp(s_flag, "ref") == 0) {
         fla = H5O_COPY_EXPAND_REFERENCE_FLAG;
     }
-    else if (HDstrcmp(s_flag, "noattr") == 0) {
+    else if (strcmp(s_flag, "noattr") == 0) {
         fla = H5O_COPY_WITHOUT_ATTR_FLAG;
     }
-    else if (HDstrcmp(s_flag, "allflags") == 0) {
+    else if (strcmp(s_flag, "allflags") == 0) {
         fla = H5O_COPY_ALL;
     }
-    else if (HDstrcmp(s_flag, "nullmsg") == 0) {
+    else if (strcmp(s_flag, "nullmsg") == 0) {
         fla = H5O_COPY_PRESERVE_NULL_FLAG;
     }
     else {
@@ -229,7 +229,7 @@ main(int argc, char *argv[])
     while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'd':
-                oname_dst = HDstrdup(H5_optarg);
+                oname_dst = strdup(H5_optarg);
                 break;
 
             case 'f':
@@ -238,7 +238,7 @@ main(int argc, char *argv[])
                     usage();
                     leave(EXIT_FAILURE);
                 }
-                str_flag = HDstrdup(H5_optarg);
+                str_flag = strdup(H5_optarg);
                 break;
 
             case 'h':
@@ -247,11 +247,11 @@ main(int argc, char *argv[])
                 break;
 
             case 'i':
-                fname_src = HDstrdup(H5_optarg);
+                fname_src = strdup(H5_optarg);
                 break;
 
             case 'o':
-                fname_dst = HDstrdup(H5_optarg);
+                fname_dst = strdup(H5_optarg);
                 break;
 
             case 'p':
@@ -259,7 +259,7 @@ main(int argc, char *argv[])
                 break;
 
             case 's':
-                oname_src = HDstrdup(H5_optarg);
+                oname_src = strdup(H5_optarg);
                 break;
 
             case 'V':
@@ -322,13 +322,13 @@ main(int argc, char *argv[])
     /* Attempt to open an existing HDF5 file first. Need to open the dst file
        before the src file just in case that the dst and src are the same file
      */
-    fid_dst = h5tools_fopen(fname_dst, H5F_ACC_RDWR, H5P_DEFAULT, FALSE, NULL, 0);
+    fid_dst = h5tools_fopen(fname_dst, H5F_ACC_RDWR, H5P_DEFAULT, false, NULL, 0);
 
     /*-------------------------------------------------------------------------
      * open input file
      *-------------------------------------------------------------------------*/
 
-    fid_src = h5tools_fopen(fname_src, H5F_ACC_RDONLY, H5P_DEFAULT, FALSE, NULL, 0);
+    fid_src = h5tools_fopen(fname_src, H5F_ACC_RDONLY, H5P_DEFAULT, false, NULL, 0);
 
     /*-------------------------------------------------------------------------
      * test for error in opening input file
@@ -403,7 +403,7 @@ main(int argc, char *argv[])
         /* error, if parent groups doesn't already exist in destination file */
         size_t i, len;
 
-        len = HDstrlen(oname_dst);
+        len = strlen(oname_dst);
 
         /* check if all the parents groups exist. skip root group */
         for (i = 1; i < len; i++) {
@@ -411,7 +411,7 @@ main(int argc, char *argv[])
                 char *str_ptr;
 
                 str_ptr = (char *)calloc(i + 1, sizeof(char));
-                HDstrncpy(str_ptr, oname_dst, i);
+                strncpy(str_ptr, oname_dst, i);
                 str_ptr[i] = '\0';
                 if (H5Lexists(fid_dst, str_ptr, H5P_DEFAULT) <= 0) {
                     error_msg("group <%s> doesn't exist. Use -p to create parent groups.\n", str_ptr);

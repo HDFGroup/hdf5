@@ -600,7 +600,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: H5IMunlink_palette
  *
- * Purpose: This function dettaches a palette from an existing image dataset
+ * Purpose: This function detaches a palette from an existing image dataset
  *
  * Return: Success: 0, Failure: -1
  *

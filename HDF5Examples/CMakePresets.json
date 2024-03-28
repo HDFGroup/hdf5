@@ -1,0 +1,230 @@
+{
+  "version": 6,
+  "include": [
+    "config/cmake-presets/hidden-presets.json"
+  ],
+  "configurePresets": [
+    {
+      "name": "ci-base-examples",
+      "hidden": true,
+      "cacheVariables": {
+        "CPACK_PACKAGE_VERSION": "2.0.4",
+        "HDF5_NAMESPACE": {"type": "STRING", "value": "hdf5::"},
+        "HDF5_PACKAGE_NAME": {"type": "STRING", "value": "hdf5"},
+        "H5EX_BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "ci-StdJava",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF_BUILD_JAVA": "ON"
+      }
+    },
+    {
+      "name": "ci-StdFortran",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF_BUILD_FORTRAN": "ON"
+      }
+    },
+    {
+      "name": "ci-StdPlugins",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF_BUILD_FILTERS": "ON"
+      }
+    },
+    {
+      "name": "ci-StdShar",
+      "hidden": true,
+      "inherits": ["ci-base", "ci-base-examples"],
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "ON",
+        "USE_SHARED_LIBS": "ON"
+      }
+    },
+    {
+      "name": "ci-StdShar-MSVC",
+      "description": "MSVC Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-StdShar"
+      ]
+    },
+    {
+      "name": "ci-StdShar-Clang",
+      "description": "Clang Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "ci-StdShar"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC",
+      "description": "GNUC Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-StdShar"
+      ]
+    },
+    {
+      "name": "ci-StdShar-Intel",
+      "description": "Intel Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-Intel",
+        "ci-StdShar"
+      ]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "ci-StdShar-MSVC",
+      "description": "MSVC Standard Build for x64 (Release)",
+      "configurePreset": "ci-StdShar-MSVC",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-StdShar-Clang",
+      "description": "Clang Standard Build for x64 (Release)",
+      "configurePreset": "ci-StdShar-Clang",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC",
+      "description": "GNUC Standard Build for x64 (Release)",
+      "configurePreset": "ci-StdShar-GNUC",
+      "verbose": false,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-StdShar-Intel",
+      "description": "Intel Standard Build for x64 (Release)",
+      "configurePreset": "ci-StdShar-Intel",
+      "verbose": false,
+      "inherits": [
+        "ci-x64-Release-Intel"
+      ]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "ci-StdShar-MSVC",
+      "configurePreset": "ci-StdShar-MSVC",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-StdShar-Clang",
+      "configurePreset": "ci-StdShar-Clang",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-StdShar-OSX-Clang",
+      "configurePreset": "ci-StdShar-Clang",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ],
+      "execution": {
+        "noTestsAction": "error",
+        "timeout": 180,
+        "jobs": 2
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "ci-StdShar-GNUC",
+      "configurePreset": "ci-StdShar-GNUC",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-StdShar-win-Intel",
+      "configurePreset": "ci-StdShar-Intel",
+      "inherits": [
+        "ci-x64-Release-Intel"
+      ],
+      "filter": {
+        "exclude": {
+          "name": "H5DUMP-tfloatsattrs"
+        }
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "ci-StdShar-Intel",
+      "configurePreset": "ci-StdShar-Intel",
+      "inherits": [
+        "ci-x64-Release-Intel"
+      ]
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "ci-StdShar-MSVC",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-MSVC"},
+        {"type": "build", "name": "ci-StdShar-MSVC"},
+        {"type": "test", "name": "ci-StdShar-MSVC"}
+      ]
+    },
+    {
+      "name": "ci-StdShar-Clang",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-Clang"},
+        {"type": "build", "name": "ci-StdShar-Clang"},
+        {"type": "test", "name": "ci-StdShar-Clang"}
+      ]
+    },
+    {
+      "name": "ci-StdShar-OSX-Clang",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-Clang"},
+        {"type": "build", "name": "ci-StdShar-Clang"},
+        {"type": "test", "name": "ci-StdShar-OSX-Clang"}
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-GNUC"},
+        {"type": "build", "name": "ci-StdShar-GNUC"},
+        {"type": "test", "name": "ci-StdShar-GNUC"}
+      ]
+    },
+    {
+      "name": "ci-StdShar-Intel",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-Intel"},
+        {"type": "build", "name": "ci-StdShar-Intel"},
+        {"type": "test", "name": "ci-StdShar-Intel"}
+      ]
+    },
+    {
+      "name": "ci-StdShar-win-Intel",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-Intel"},
+        {"type": "build", "name": "ci-StdShar-Intel"},
+        {"type": "test", "name": "ci-StdShar-win-Intel"}
+      ]
+    }
+  ]
+}

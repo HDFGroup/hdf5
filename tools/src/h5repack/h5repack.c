@@ -67,7 +67,7 @@ h5repack(const char *infile, const char *outfile, pack_opt_t *options)
  *-------------------------------------------------------------------------
  */
 int
-h5repack_init(pack_opt_t *options, int verbose, hbool_t latest)
+h5repack_init(pack_opt_t *options, int verbose, bool latest)
 {
     int k, n;
 
@@ -373,7 +373,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
     H5O_info2_t   oinfo; /* object info */
     int           j;
     unsigned      u;
-    hbool_t       is_ref     = 0;
+    bool          is_ref     = 0;
     H5T_class_t   type_class = -1;
     int           ret_value  = 0;
 
@@ -523,7 +523,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
 
             /* Check if we have VL data and string in the attribute's  datatype that must
              * be reclaimed */
-            if (TRUE == h5tools_detect_vlen(wtype_id))
+            if (true == h5tools_detect_vlen(wtype_id))
                 H5Treclaim(wtype_id, space_id, H5P_DEFAULT, buf);
 
             free(buf);
@@ -562,7 +562,7 @@ done:
             /* Check if we have VL data and string in the attribute's
              * datatype that must be reclaimed
              */
-            if (TRUE == h5tools_detect_vlen(wtype_id))
+            if (true == h5tools_detect_vlen(wtype_id))
                 H5Treclaim(wtype_id, space_id, H5P_DEFAULT, buf);
 
             /* Free buf */

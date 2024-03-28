@@ -18,10 +18,8 @@
 #include "H5Tmodule.h" /* This source code file is part of the H5T module */
 
 #include "H5private.h"   /* Generic Functions            */
-#include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling              */
 #include "H5Iprivate.h"  /* IDs                      */
-#include "H5Pprivate.h"  /* Property lists            */
 #include "H5MMprivate.h" /* Memory management            */
 #include "H5Tpkg.h"      /* Datatypes                */
 
@@ -50,6 +48,7 @@ static herr_t H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_siz
  *                      H5T_NATIVE_LONG         H5T_NATIVE_ULONG
  *                      H5T_NATIVE_LLONG        H5T_NATIVE_ULLONG
  *
+ *                      H5T_NATIVE_FLOAT16 (if available)
  *                      H5T_NATIVE_FLOAT
  *                      H5T_NATIVE_DOUBLE
  *                      H5T_NATIVE_LDOUBLE
@@ -86,7 +85,7 @@ H5Tget_native_type(hid_t type_id, H5T_direction_t direction)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "cannot retrieve native type");
 
     /* Get an ID for the new type */
-    if ((ret_value = H5I_register(H5I_DATATYPE, new_dt, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_DATATYPE, new_dt, true)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register data type");
 
 done:
@@ -137,7 +136,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
 
     assert(dtype);
 
-    if (H5T_NO_CLASS == (h5_class = H5T_get_class(dtype, FALSE)))
+    if (H5T_NO_CLASS == (h5_class = H5T_get_class(dtype, false)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class");
 
     if (0 == (size = H5T_get_size(dtype)))
@@ -219,7 +218,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
 
             /* Update size, offset and compound alignment for parent. */
-            if (0 == H5T_cmp(ret_value, dt, FALSE)) {
+            if (0 == H5T_cmp(ret_value, dt, false)) {
                 align    = H5T_HOBJREF_ALIGN_g;
                 ref_size = sizeof(hobj_ref_t);
             } /* end if */
@@ -228,7 +227,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
                 if (NULL == (dt = (H5T_t *)H5I_object(H5T_STD_REF_DSETREG_g)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
 
-                if (0 == H5T_cmp(ret_value, dt, FALSE)) {
+                if (0 == H5T_cmp(ret_value, dt, false)) {
                     align    = H5T_HDSETREGREF_ALIGN_g;
                     ref_size = sizeof(hdset_reg_ref_t);
                 } /* end if */
@@ -332,7 +331,6 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
 
         case H5T_ENUM: {
             H5T_path_t *tpath; /* Type conversion info    */
-            hid_t       super_type_id, nat_super_type_id;
 
             /* Don't need to do anything special for alignment, offset since the ENUM type usually is integer.
              */
@@ -343,11 +341,6 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
             if (NULL == (nat_super_type =
                              H5T__get_native_type(super_type, direction, struct_align, offset, comp_size)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "base native type retrieval failed");
-
-            if ((super_type_id = H5I_register(H5I_DATATYPE, super_type, FALSE)) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot register datatype");
-            if ((nat_super_type_id = H5I_register(H5I_DATATYPE, nat_super_type, FALSE)) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot register datatype");
 
             /* Allocate room for the enum values */
             if (NULL == (tmp_memb_value = H5MM_calloc(H5T_get_size(super_type))))
@@ -375,7 +368,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value");
                 H5MM_memcpy(memb_value, tmp_memb_value, H5T_get_size(super_type));
 
-                if (H5T_convert(tpath, super_type_id, nat_super_type_id, (size_t)1, (size_t)0, (size_t)0,
+                if (H5T_convert(tpath, super_type, nat_super_type, (size_t)1, (size_t)0, (size_t)0,
                                 memb_value, NULL) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value");
 
@@ -386,12 +379,10 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
             memb_value     = H5MM_xfree(memb_value);
             tmp_memb_value = H5MM_xfree(tmp_memb_value);
 
-            /* Close base type */
-            if (H5I_dec_app_ref(nat_super_type_id) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
-            /* Close super type */
-            if (H5I_dec_app_ref(super_type_id) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+            if (H5T_close(nat_super_type) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "can't close datatype");
+            if (H5T_close(super_type) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "can't close datatype");
 
             ret_value = new_type;
         } /* end case */
@@ -579,7 +570,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
             match       = H5T_NATIVE_INT_MATCH_LLONG;
             native_size = sizeof(long long);
         }
-        else { /* If no native type matches the querried datatype, simply choose the type of biggest size. */
+        else { /* If no native type matches the queried datatype, simply choose the type of biggest size. */
             match       = H5T_NATIVE_INT_MATCH_LLONG;
             native_size = sizeof(long long);
         }
@@ -703,6 +694,7 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
     size_t align       = 0;    /* Alignment necessary for native datatype */
     size_t native_size = 0;    /* Datatype size of the native type */
     enum match_type {          /* The different kinds of floating point types we can match */
+                      H5T_NATIVE_FLOAT_MATCH_FLOAT16,
                       H5T_NATIVE_FLOAT_MATCH_FLOAT,
                       H5T_NATIVE_FLOAT_MATCH_DOUBLE,
                       H5T_NATIVE_FLOAT_MATCH_LDOUBLE,
@@ -715,7 +707,14 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
     assert(size > 0);
 
     if (direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
-        if (size <= sizeof(float)) {
+#ifdef H5_HAVE__FLOAT16
+        if (size <= sizeof(H5__Float16)) {
+            match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
+            native_size = sizeof(H5__Float16);
+        }
+        else
+#endif
+            if (size <= sizeof(float)) {
             match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
             native_size = sizeof(float);
         }
@@ -741,14 +740,29 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
             match       = H5T_NATIVE_FLOAT_MATCH_DOUBLE;
             native_size = sizeof(double);
         }
-        else {
+        else
+#ifdef H5_HAVE__FLOAT16
+            if (size > sizeof(H5__Float16))
+#endif
+        {
             match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
             native_size = sizeof(float);
         }
+#ifdef H5_HAVE__FLOAT16
+        else {
+            match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
+            native_size = sizeof(H5__Float16);
+        }
+#endif
     }
 
     /* Set the appropriate native floating point information */
     switch (match) {
+        case H5T_NATIVE_FLOAT_MATCH_FLOAT16:
+            tid   = H5T_NATIVE_FLOAT16;
+            align = H5T_NATIVE_FLOAT16_ALIGN_g;
+            break;
+
         case H5T_NATIVE_FLOAT_MATCH_FLOAT:
             tid   = H5T_NATIVE_FLOAT;
             align = H5T_NATIVE_FLOAT_ALIGN_g;
@@ -838,7 +852,7 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_
             native_size = 8;
             align       = H5T_NATIVE_UINT64_ALIGN_g;
         }
-        else { /* If no native type matches the querried datatype, simply choose the type of biggest size. */
+        else { /* If no native type matches the queried datatype, simply choose the type of biggest size. */
             tid         = H5T_NATIVE_B64;
             native_size = 8;
             align       = H5T_NATIVE_UINT64_ALIGN_g;
@@ -1240,7 +1254,7 @@ H5T__init_native_internal(void)
             dt->shared->u.atomic.order = byte_order;
             *table[j].alignmentp       = table[j].alignment;
 
-            if ((*table[j].hidp = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+            if ((*table[j].hidp = H5I_register(H5I_DATATYPE, dt, false)) < 0)
                 return FAIL;
         }
     }

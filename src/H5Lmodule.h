@@ -33,32 +33,16 @@
  * \defgroup H5L Links (H5L)
  *
  * Use the functions in this module to manage HDF5 links and link types.
- *
- * <table>
- * <tr><th>Create</th><th>Read</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5L_examples.c create
- *   </td>
- *   <td>
- *   \snippet{lineno} H5L_examples.c iter_cb
- *   \snippet{lineno} H5L_examples.c read
- *   </td>
- * <tr><th>Update</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5L_examples.c update
- *   </td>
- *   <td>
- *   \snippet{lineno} H5L_examples.c delete
- *   </td>
- * </tr>
- * </table>
+ * @see \ref TRAV for #H5Literate, #H5Literate_by_name and #H5Lvisit, #H5Lvisit_by_name
+ * @see \ref H5LA for #H5Lregister, #H5Lunregister and #H5Lis_registered
  *
  * \defgroup TRAV Link Traversal
  * \ingroup H5L
+ * Traverse through links
+ *
  * \defgroup H5LA Advanced Link Functions
  * \ingroup H5L
+ * Registration of User-defined links
  */
 
 #endif /* H5Lmodule_H */

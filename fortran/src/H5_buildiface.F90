@@ -43,7 +43,6 @@
 #include <H5config_f.inc>
 
 PROGRAM H5_buildiface
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_LOC
   IMPLICIT NONE
 
 ! These values are valid REAL KINDs (with corresponding C float) found during configure
@@ -890,7 +889,7 @@ PROGRAM H5_buildiface
      WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr '
      WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr '
      WRITE(11,'(A)') '    f_ptr = C_LOC(fillvalue)'
-     WRITE(11,'(A)') '    hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)'
+     WRITE(11,'(A)') '    hdferr = INT(h5pset_fill_value(prp_id, type_id, f_ptr))'
      WRITE(11,'(A)') '  END SUBROUTINE h5pset_fill_value_kind_'//TRIM(ADJUSTL(chr2))
   ENDDO
 
@@ -912,7 +911,7 @@ PROGRAM H5_buildiface
      WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
      WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
      WRITE(11,'(A)') '    f_ptr = C_LOC(fillvalue)'
-     WRITE(11,'(A)') '    hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)'
+     WRITE(11,'(A)') '    hdferr = INT(h5pget_fill_value(prp_id, type_id, f_ptr))'
      WRITE(11,'(A)') '  END SUBROUTINE h5pget_fill_value_kind_'//TRIM(ADJUSTL(chr2))
   ENDDO
 

@@ -515,16 +515,46 @@ extern "C" {
 #endif
 
 /* Token <--> address converters */
+
 /**
  * \ingroup H5VLNAT
+ *
+ * \brief Convert a haddr_t address to a native VOL connector token
+ *
+ * \fgdta_loc_obj_id{loc_id}
+ * \param[in] addr Object address
+ * \param[out] token Object token
+ *
+ * \return \herr_t
+ *
+ * \details This API call maps pre-VOL haddr_t native file format addresses
+ *          to the more generic H5O_token_t tokens used by the VOL.
+ *
+ * \since 1.12.0
  */
 H5_DLL herr_t H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token);
 /**
  * \ingroup H5VLNAT
+ *
+ * \brief Convert a native VOL connector token to a haddr_t address
+ *
+ * \fgdta_loc_obj_id{loc_id}
+ * \param[in] token Object token
+ * \param[out] addr Object address
+ *
+ * \return \herr_t
+ *
+ * \details This API call maps generic H5O_token_t tokens used by the VOL to
+ *          pre-VOL haddr_t native file format addresses.
+ *
+ * \since 1.12.0
  */
 H5_DLL herr_t H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr);
 
-/* Not really public but must be included here */
+/** @private
+ *
+ * \brief Register the native VOL connector and retrieve an ID for it
+ */
 H5_DLL hid_t H5VL_native_register(void);
 
 #ifdef __cplusplus

@@ -35,7 +35,6 @@
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Apkg.h"      /* Attributes                               */
 #include "H5CXprivate.h" /* API Contexts                             */
-#include "H5Dprivate.h"  /* Datasets                                 */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Opkg.h"      /* Object headers                           */
@@ -140,7 +139,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t 
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute");
 
     /* Register the new attribute and get an ID for it */
-    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, true)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute for ID");
 
 done:
@@ -205,7 +204,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute");
 
     /* Register the attribute and get an ID for it */
-    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, true)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute handle");
 
 done:
@@ -273,7 +272,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute");
 
     /* Register the attribute and get an ID for it */
-    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, true)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute handle");
 
 done:

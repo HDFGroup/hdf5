@@ -496,7 +496,7 @@ files at configure time by the `bin/make_err` script. The original intent was fo
 codes to be strongly associated. i.e., a given minor code would *only* be used
 with its associated major code. Unfortunately, this has not been the case in
 practice, and the emitted text can appear nonsensical in error
-stack dumps. Even worse, the major and minor error codes are used inconsitently
+stack dumps. Even worse, the major and minor error codes are used inconsistently
 throughout the library, making interpreting them almost impossible for
 external users. We hope to address this deficiency in the near future.
 
@@ -556,7 +556,7 @@ configure/CMake options, but it's normally easier to use external tools like
 valgrind or the compiler's memory debugging options.
 
 `H5FL` provides memory pools (*Free Lists*) that create a set of fixed-size allocations
-of a certain type that the library will re-use as needed. They use `H5MM` calls
+of a certain type that the library will reuse as needed. They use `H5MM` calls
 under the hood and can be useful when the library creates and frees a lot of
 objects of that type. It's difficult to give a good guideline as to when to use
 the `H5FL` calls and when to use the `H5MM` calls, but it's probably best to
@@ -726,7 +726,7 @@ are others in `h5test.h` if you want to emit custom text, dump the HDF5 error
 stack when it would not normally be triggered, etc.
 
 Most tests will be set up to run with arbitrary VFDs. To do this, you set the
-fapl ID using the `h5_fileaccess()` function, which will check the `HDF5_DRIVER`
+fapl ID using the `h5_fileaccess()` function, which will check the `HDF5_TEST_DRIVER`
 environment variable and set the fapl's VFD accordingly. The `h5_fixname()`
 call can then be used to get a VFD-appropriate filename for the `H5Fcreate()`,
 etc. call.

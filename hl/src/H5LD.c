@@ -344,7 +344,7 @@ H5LD_get_dset_type_size(hid_t did, const char *fields)
             goto done;
 
         /* Get a copy of "fields" */
-        if (NULL == (dup_fields = HDstrdup(fields)))
+        if (NULL == (dup_fields = strdup(fields)))
             goto done;
 
         /* Allocate memory for a list of H5LD_memb_t pointers to store "fields" info */
@@ -499,7 +499,7 @@ H5LD_get_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsize_t *cur_dims
             goto done;
 
         /* Make a copy of "fields" */
-        if (NULL == (dup_fields = HDstrdup(fields)))
+        if (NULL == (dup_fields = strdup(fields)))
             goto done;
 
         /* Allocate memory for the vector of H5LD_memb_t pointers */

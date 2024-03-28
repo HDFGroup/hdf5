@@ -31,8 +31,8 @@
 #include "H5private.h"   /* Generic Functions           */
 #include "H5Eprivate.h"  /* Error handling              */
 #include "H5Fprivate.h"  /* File access                 */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5HGpkg.h"     /* Global heaps                */
-#include "H5MFprivate.h" /* File memory management      */
 #include "H5MMprivate.h" /* Memory management           */
 
 /****************/
@@ -55,7 +55,7 @@
 static herr_t H5HG__cache_heap_get_initial_load_size(void *udata, size_t *image_len);
 static herr_t H5HG__cache_heap_get_final_load_size(const void *_image, size_t image_len, void *udata,
                                                    size_t *actual_len);
-static void  *H5HG__cache_heap_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5HG__cache_heap_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5HG__cache_heap_image_len(const void *thing, size_t *image_len);
 static herr_t H5HG__cache_heap_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5HG__cache_heap_free_icr(void *thing);
@@ -214,7 +214,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
+H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, bool H5_ATTR_UNUSED *dirty)
 {
     H5F_t         *f         = (H5F_t *)_udata; /* File pointer */
     H5HG_heap_t   *heap      = NULL;            /* New global heap */
@@ -369,7 +369,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
     /* Post-parse checks */
     if (p != heap->chunk + heap->size)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "partially decoded global heap");
-    if (FALSE == H5HG_ISALIGNED(heap->obj[0].size))
+    if (false == H5HG_ISALIGNED(heap->obj[0].size))
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "decoded global heap is not aligned");
 
     /* Set the next index value to use when creating a new object */

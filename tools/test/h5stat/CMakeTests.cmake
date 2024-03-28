@@ -75,15 +75,15 @@
   )
 
   foreach (ddl_file ${HDF5_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5STAT_SOURCE_DIR}/testfiles/${ddl_file}.ddl" "${PROJECT_BINARY_DIR}/${ddl_file}.ddl" "h5stat_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${ddl_file}.ddl" "${PROJECT_BINARY_DIR}/${ddl_file}.ddl" "h5stat_files")
   endforeach ()
 
   foreach (h5_file ${HDF5_REFERENCE_ERR_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5STAT_SOURCE_DIR}/testfiles/${h5_file}.err" "${PROJECT_BINARY_DIR}/${h5_file}.err" "h5stat_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_file}.err" "${PROJECT_BINARY_DIR}/${h5_file}.err" "h5stat_files")
   endforeach ()
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5STAT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5stat_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5stat_files")
   endforeach ()
   add_custom_target(h5stat_files ALL COMMENT "Copying files needed by h5stat tests" DEPENDS ${h5stat_files_list})
 
@@ -95,17 +95,17 @@
 
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat${tgt_file_ext}> ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+    else (HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -117,21 +117,24 @@
     set_tests_properties (H5STAT-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
     )
+    if ("H5STAT-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5STAT-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (ADD_H5_ERR_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat${tgt_file_ext}> ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+    else (HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -144,6 +147,9 @@
     set_tests_properties (H5STAT-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
     )
+    if ("H5STAT-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5STAT-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
 ##############################################################################
@@ -160,7 +166,7 @@
   ADD_H5_TEST (h5stat_notexist 1 notexist.h5)
   ADD_H5_TEST (h5stat_nofile 1 '')
 
-# Test file with groups, compressed datasets, user-applied fileters, etc.
+# Test file with groups, compressed datasets, user-applied filters, etc.
 # h5stat_filters.h5 is a copy of ../../testfiles/tfilters.h5 as of release 1.8.0-alpha4
   ADD_H5_TEST (h5stat_filters 0 h5stat_filters.h5)
   ADD_H5_TEST (h5stat_filters-file 0 -f h5stat_filters.h5)

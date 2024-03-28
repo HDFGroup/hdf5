@@ -248,12 +248,11 @@ H5Eprint1(FILE *stream)
     FUNC_ENTER_API_NOCLEAR(FAIL)
     /*NO TRACE*/
 
-    if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
-                                                   non-threaded case */
+    if (NULL == (estack = H5E__get_my_stack()))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Print error stack */
-    if (H5E__print(estack, stream, TRUE) < 0)
+    if (H5E__print(estack, stream, true) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't display error stack");
 
 done:
@@ -282,8 +281,7 @@ H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client_data)
     FUNC_ENTER_API_NOCLEAR(FAIL)
     /*NO TRACE*/
 
-    if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
-                                                   non-threaded case */
+    if (NULL == (estack = H5E__get_my_stack()))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Walk the error stack */
@@ -317,11 +315,10 @@ H5Eget_auto1(H5E_auto1_t *func /*out*/, void **client_data /*out*/)
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "xx", func, client_data);
+    H5TRACE2("e", "*Ea**x", func, client_data);
 
     /* Retrieve default error stack */
-    if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
-                                                   non-threaded case */
+    if (NULL == (estack = H5E__get_my_stack()))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Get the automatic error reporting information */
@@ -370,8 +367,7 @@ H5Eset_auto1(H5E_auto1_t func, void *client_data)
     FUNC_ENTER_API_NOCLEAR(FAIL)
     H5TRACE2("e", "Ea*x", func, client_data);
 
-    if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
-                                                   non-threaded case */
+    if (NULL == (estack = H5E__get_my_stack()))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Get the automatic error reporting information */
@@ -381,9 +377,9 @@ H5Eset_auto1(H5E_auto1_t func, void *client_data)
     /* Set the automatic error reporting information */
     auto_op.vers = 1;
     if (func != auto_op.func1_default)
-        auto_op.is_default = FALSE;
+        auto_op.is_default = false;
     else
-        auto_op.is_default = TRUE;
+        auto_op.is_default = true;
     auto_op.func1 = func;
 
     if (H5E__set_auto(estack, &auto_op, client_data) < 0)

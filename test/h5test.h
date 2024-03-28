@@ -113,30 +113,30 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
     } while (0)
 #define PASSED()                                                                                             \
     do {                                                                                                     \
-        HDputs(" PASSED");                                                                                   \
+        puts(" PASSED");                                                                                     \
         fflush(stdout);                                                                                      \
         n_tests_passed_g++;                                                                                  \
     } while (0)
 #define H5_FAILED()                                                                                          \
     do {                                                                                                     \
-        HDputs("*FAILED*");                                                                                  \
+        puts("*FAILED*");                                                                                    \
         fflush(stdout);                                                                                      \
         n_tests_failed_g++;                                                                                  \
     } while (0)
 #define H5_WARNING()                                                                                         \
     do {                                                                                                     \
-        HDputs("*WARNING*");                                                                                 \
+        puts("*WARNING*");                                                                                   \
         fflush(stdout);                                                                                      \
     } while (0)
 #define SKIPPED()                                                                                            \
     do {                                                                                                     \
-        HDputs(" -SKIP-");                                                                                   \
+        puts(" -SKIP-");                                                                                     \
         fflush(stdout);                                                                                      \
         n_tests_skipped_g++;                                                                                 \
     } while (0)
 #define PUTS_ERROR(s)                                                                                        \
     do {                                                                                                     \
-        HDputs(s);                                                                                           \
+        puts(s);                                                                                             \
         AT();                                                                                                \
         goto error;                                                                                          \
     } while (0)
@@ -162,7 +162,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
     do {                                                                                                     \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
-        HDputs(s);                                                                                           \
+        puts(s);                                                                                             \
         goto error;                                                                                          \
     } while (0)
 
@@ -172,7 +172,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 #define TESTING_MULTIPART(WHAT)                                                                              \
     do {                                                                                                     \
         printf("Testing %-62s", WHAT);                                                                       \
-        HDputs("");                                                                                          \
+        puts("");                                                                                            \
         fflush(stdout);                                                                                      \
     } while (0)
 
@@ -230,7 +230,8 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 #define H5_ALARM_SEC 1200 /* default is 20 minutes */
 
 /* Flags for h5_fileaccess_flags() */
-#define H5_FILEACCESS_LIBVER 0x01
+#define H5_FILEACCESS_VFD    0x01
+#define H5_FILEACCESS_LIBVER 0x02
 
 /* Flags for h5_driver_uses_multiple_files() */
 #define H5_EXCLUDE_MULTIPART_DRIVERS     0x01
@@ -289,13 +290,17 @@ H5TEST_DLL H5VL_class_t  *h5_get_dummy_vol_class(void);
 H5TEST_DLL const char    *h5_get_version_string(H5F_libver_t libver);
 H5TEST_DLL int            h5_compare_file_bytes(char *fname1, char *fname2);
 H5TEST_DLL int            h5_duplicate_file_by_bytes(const char *orig, const char *dest);
-H5TEST_DLL herr_t         h5_check_if_file_locking_enabled(hbool_t *are_enabled);
-H5TEST_DLL hbool_t        h5_using_default_driver(const char *drv_name);
-H5TEST_DLL herr_t         h5_using_parallel_driver(hid_t fapl_id, hbool_t *driver_is_parallel);
-H5TEST_DLL herr_t         h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatible);
-H5TEST_DLL hbool_t        h5_driver_uses_multiple_files(const char *drv_name, unsigned flags);
+H5TEST_DLL herr_t         h5_check_if_file_locking_enabled(bool *are_enabled);
+H5TEST_DLL void           h5_check_file_locking_env_var(htri_t *use_locks, htri_t *ignore_disabled_locks);
+H5TEST_DLL herr_t         h5_using_native_vol(hid_t fapl_id, hid_t obj_id, bool *is_native_vol);
+H5TEST_DLL const char    *h5_get_test_driver_name(void);
+H5TEST_DLL bool           h5_using_default_driver(const char *drv_name);
+H5TEST_DLL herr_t         h5_using_parallel_driver(hid_t fapl_id, bool *driver_is_parallel);
+H5TEST_DLL herr_t         h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *default_vfd_compatible);
+H5TEST_DLL bool           h5_driver_uses_multiple_files(const char *drv_name, unsigned flags);
 
 /* Functions that will replace components of a FAPL */
+H5TEST_DLL herr_t h5_get_vfd_fapl(hid_t fapl_id);
 H5TEST_DLL herr_t h5_get_libver_fapl(hid_t fapl_id);
 
 /* h5_clean_files() replacements */

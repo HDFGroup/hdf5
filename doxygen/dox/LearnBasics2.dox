@@ -626,6 +626,11 @@ into a long integer buffer.)
 <th span="3"><strong>Float</strong></th>
 </tr>
 <tr>
+<td>_Float16</td>
+<td>#H5T_NATIVE_FLOAT16</td>
+<td>#H5T_IEEE_F16BE or #H5T_IEEE_F16LE</td>
+</tr>
+<tr>
 <td>float</td>
 <td>#H5T_NATIVE_FLOAT</td>
 <td>#H5T_IEEE_F32BE or #H5T_IEEE_F32LE</td>
@@ -728,12 +733,12 @@ There are numerous datatype functions that allow a user to alter a pre-defined d
 Refer to the \ref H5T in the \ref RM. Example functions are #H5Tset_size and #H5Tset_precision.
 
 \section secLBDtypeSpec Specific Datatypes
-On the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a>
-page under <a href="https://confluence.hdfgroup.org/display/HDF5/Examples+by+API#ExamplesbyAPI-datatypes">Datatypes</a>
+On the \ref ExAPI
+page under \ref sec_exapi_dtypes
 you will find many example programs for creating and reading datasets with different datatypes.
 
 Below is additional information on some of the datatypes. See
-the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a>
+the \ref ExAPI
 page for examples of these datatypes.
 
 \subsection subsecLBDtypeSpec Array Datatype vs Array Dataspace

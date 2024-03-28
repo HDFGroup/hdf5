@@ -48,12 +48,12 @@ Navigate back: \ref index "Main" / \ref GettingStarted
 
 \section secViewToolsCommandObtain Obtain Tools and Files (Optional)
 Pre-built binaries for Linux and Windows are distributed within the respective HDF5 binary release
-packages, which can be obtained from the <a href="https://portal.hdfgroup.org/display/support/Download+HDF5">Download HDF5</a> page.
+packages, which can be obtained from the <a href="https://portal.hdfgroup.org/downloads/index.html">Download HDF5</a> page.
 
 HDF5 files can be obtained from various places such as \ref HDF5Examples and <a href="http://www.hdfeos.org/">HDF-EOS and Tools and
 Information Center</a>. Specifically, the following examples are used in this tutorial topic:
 \li HDF5 Files created from compiling the \ref LBExamples
-\li HDF5 Files on the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page
+\li HDF5 Files on the \ref ExAPI page
 \li NPP JPSS files, <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/SVM01_npp_d20130524_t1255132_e1256374_b08146_c20130524192048864992_noaa_ops.h5.gz">SVM01_npp.. (gzipped)</a>
 and <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5.gz">SVM09_npp.. (gzipped)</a>
 \li HDF-EOS <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/OMI-Aura.he5">OMI-Aura file</a>
@@ -497,7 +497,7 @@ In the file shown below the dataset <code style="background-color:whitesmoke;">/
 \endcode
 
 You can obtain the <code style="background-color:whitesmoke;">h5ex_d_gzip.c</code> program that created this file, as well as the file created,
-from the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page.
+from the \ref ExAPI page.
 
 \subsection subsecViewToolsViewDset_h5ls h5ls
 Specific datasets can be specified with <code style="background-color:whitesmoke;">h5ls</code> by simply adding the dataset path and dataset after the
@@ -925,7 +925,7 @@ The output of the above command is shown below:
 
 \subsection subsecViewToolsViewDtypes_h5dump h5dump
 The following datatypes are discussed, using the output of <code style="background-color:whitesmoke;">h5dump</code> with HDF5 files from the
-<a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page:
+\ref ExAPI page:
 <ul>
 <li>@ref subsubsecViewToolsViewDtypes_array</li>
 <li>@ref subsubsecViewToolsViewDtypes_objref</li>
@@ -1036,7 +1036,7 @@ the elements or slab that is selected. A dataset with a Region Reference datatyp
 one or more Region References.
 
 An example of a Region Reference dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.h5</code>) can be found on the
-<a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page,
+\ref ExAPI page,
 under Datatypes. If you examine this dataset with <code style="background-color:whitesmoke;">h5dump</code> you will see that <code style="background-color:whitesmoke;">/DS1</code> is a
 Region Reference dataset as indicated by its datatype, highlighted in bold below:
 \code

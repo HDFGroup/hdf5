@@ -23,7 +23,7 @@ hsize_t compute_user_block_size(hsize_t);
 hsize_t copy_some_to_file(int, int, hsize_t, hsize_t, ssize_t);
 void    parse_command_line(int, const char *const *);
 
-static int   do_clobber  = FALSE;
+static int   do_clobber  = false;
 static char *output_file = NULL;
 static char *input_file  = NULL;
 static char *ub_file     = NULL;
@@ -105,22 +105,22 @@ leave(int ret)
 void
 parse_command_line(int argc, const char *const *argv)
 {
-    int opt = FALSE;
+    int opt = false;
 
     /* parse command line options */
     while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'o':
-                output_file = HDstrdup(H5_optarg);
+                output_file = strdup(H5_optarg);
                 break;
             case 'i':
-                input_file = HDstrdup(H5_optarg);
+                input_file = strdup(H5_optarg);
                 break;
             case 'u':
-                ub_file = HDstrdup(H5_optarg);
+                ub_file = strdup(H5_optarg);
                 break;
             case 'c':
-                do_clobber = TRUE;
+                do_clobber = true;
                 break;
             case 'h':
                 usage(h5tools_getprogname());
@@ -245,6 +245,7 @@ main(int argc, char *argv[])
         goto done;
     }
 
+    memset(&sbuf, 0, sizeof(h5_stat_t));
     res = HDfstat(ufid, &sbuf);
     if (res < 0) {
         error_msg("Can't stat file \"%s\"\n", ub_file);
@@ -261,6 +262,7 @@ main(int argc, char *argv[])
         goto done;
     }
 
+    memset(&sbuf2, 0, sizeof(h5_stat_t));
     res = HDfstat(h5fid, &sbuf2);
     if (res < 0) {
         error_msg("Can't stat file \"%s\"\n", input_file);
@@ -294,7 +296,7 @@ main(int argc, char *argv[])
     startub = usize;
 
     if (usize > 0) {
-        if (do_clobber == TRUE) {
+        if (do_clobber == true) {
             /* where is max of the current size or the new UB */
             if (usize > newubsize) {
                 newubsize = usize;
@@ -392,6 +394,7 @@ copy_some_to_file(int infid, int outfid, hsize_t starting, hsize_t startout, ssi
     } /* end if */
 
     if (limit < 0) {
+        memset(&sbuf, 0, sizeof(h5_stat_t));
         res = HDfstat(infid, &sbuf);
         if (res < 0) {
             error_msg("Can't stat file \n");
@@ -420,8 +423,8 @@ copy_some_to_file(int infid, int outfid, hsize_t starting, hsize_t startout, ssi
     } /* end if */
 
     while (howmuch > 0) {
-        HDlseek(outfid, (off_t)to, SEEK_SET);
-        HDlseek(infid, (off_t)from, SEEK_SET);
+        HDlseek(outfid, (HDoff_t)to, SEEK_SET);
+        HDlseek(infid, (HDoff_t)from, SEEK_SET);
 
         if (howmuch > 512) {
             nchars = HDread(infid, buf, (unsigned)512);
@@ -499,7 +502,7 @@ write_pad(int ofile, hsize_t old_where, hsize_t *new_where)
 
     buf[0] = '\0';
 
-    HDlseek(ofile, (off_t)old_where, SEEK_SET);
+    HDlseek(ofile, (HDoff_t)old_where, SEEK_SET);
 
     psize = compute_user_block_size(old_where);
     psize -= old_where;

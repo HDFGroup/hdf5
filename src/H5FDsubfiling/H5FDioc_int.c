@@ -265,7 +265,7 @@ ioc__read_independent_async(int64_t context_id, int64_t offset, int64_t elements
     subfiling_context_t *sf_context    = NULL;
     MPI_Request          ack_request   = MPI_REQUEST_NULL;
     io_req_t            *sf_io_request = NULL;
-    hbool_t              need_data_tag = FALSE;
+    bool                 need_data_tag = false;
     int64_t              ioc_start;
     int64_t              ioc_offset;
     int64_t              ioc_subfile_idx;
@@ -297,9 +297,13 @@ ioc__read_independent_async(int64_t context_id, int64_t offset, int64_t elements
      * unpredictable order. However, if some IOCs own more than
      * 1 subfile, we need to associate each read with a unique
      * message tag to make sure the data is received in the
-     * correct order.
+     * correct order. We also need a unique message tag in the
+     * case where only 1 subfile is used in total. In this case,
+     * vector I/O calls are passed directly down to this VFD without
+     * being split up into multiple I/O requests, so we need the
+     * tag to distinguish each I/O request.
      */
-    need_data_tag = num_subfiles != num_io_concentrators;
+    need_data_tag = (num_subfiles == 1) || (num_subfiles != num_io_concentrators);
     if (!need_data_tag)
         data_tag = READ_INDEP_DATA;
 
@@ -423,8 +427,14 @@ ioc__async_completion(MPI_Request *mpi_reqs, size_t num_reqs)
     assert(mpi_reqs);
 
     H5_CHECK_OVERFLOW(num_reqs, size_t, int);
+
+    /* Have to supppress gcc warnings regarding MPI_STATUSES_IGNORE
+     * with MPICH (https://github.com/pmodels/mpich/issues/5687)
+     */
+    H5_GCC_DIAG_OFF("stringop-overflow")
     if (MPI_SUCCESS != (mpi_code = MPI_Waitall((int)num_reqs, mpi_reqs, MPI_STATUSES_IGNORE)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Waitall failed", mpi_code);
+    H5_GCC_DIAG_ON("stringop-overflow")
 
 done:
     H5_SUBFILING_FUNC_LEAVE;

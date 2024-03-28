@@ -20,210 +20,212 @@
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
   set (HDF5_REFERENCE_FILES
-      ${HDF5_TOOLS_DIR}/testfiles/charsets.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/err_attr_dspace.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/file_space.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/filter_fail.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/non_existing.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/packedbits.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tall-1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tall-2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tall-2A.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tall-2A0.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tall-2B.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tall-3.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tall-4s.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tall-5s.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tall-6.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tall-7.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tall-7N.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tallfilters.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tarray1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tarray1_big.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tarray2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tarray3.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tarray4.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tarray5.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tarray6.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tarray7.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tarray8.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tattr-1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tattr-2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tattr-3.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tattr-4_be.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tattrcontents1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tattrcontents2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tattrintsize.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tattrreg.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tattrregR.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tbin1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tbin1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tbin2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tbin3.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tbin4.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tbinregR.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tbigdims.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tbitnopaque_be.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tbitnopaque_le.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tboot1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tboot2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tboot2A.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tboot2B.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tchar1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tchunked.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tcmpdattrintsize.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tcmpdintarray.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tcmpdints.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tcmpdintsize.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tcompound_complex2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tcomp-1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tcomp-2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tcomp-3.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tcomp-4.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tcompact.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tcontents.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tcontiguos.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tdatareg.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tdataregR.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tdeflate.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tdset-1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tdset-2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tdset-3s.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tempty.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/texceedsubstart.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/texceedsubcount.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/texceedsubstride.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/texceedsubblock.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/texternal.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/textlinkfar.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/textlink.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tfill.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tfletcher32.ddl
-      #${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.ddl #native
-      #${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.wddl #special for windows
-      ${HDF5_TOOLS_DIR}/testfiles/tfpformat.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tgroup-1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tgroup-2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tgrp_comments.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tgrpnullspace.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/thlink-1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/thlink-2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/thlink-3.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/thlink-4.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/thlink-5.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/thyperslab.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tindicesno.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tindicessub1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tindicessub2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tindicessub3.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tindicessub4.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tindicesyes.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tints4dims.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tints4dimsBlock2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tints4dimsBlockEq.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tints4dimsCount2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tints4dimsCountEq.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tints4dimsStride2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tintsattrs.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tintsnodata.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tlarge_objname.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tldouble.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tldouble_scalar.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tlonglinks.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tloop-1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tmulti.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tmultifile.ddl
-      #${HDF5_TOOLS_DIR}/testfiles/tqmarkfile.ddl
-      #${HDF5_TOOLS_DIR}/testfiles/tstarfile.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tnamed_dtype_attr.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tnestcomp-1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tnestedcmpddt.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tnbit.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tnoattrdata.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tnoattrddl.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tnodata.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tnoddl.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tnoddlfile.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tno-subset.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tnullspace.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tordergr1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tordergr2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tordergr3.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tordergr4.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tordergr5.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/torderattr1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/torderattr2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/torderattr3.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/torderattr4.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tordercontents1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tordercontents2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/torderlinks1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/torderlinks2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tperror.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/trawdatafile.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/trawssetfile.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/treadfilter.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/treadintfilter.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/treference.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tsaf.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tscalarattrintsize.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tscalarintattrsize.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tscalarintsize.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tscalarstring.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tscaleoffset.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tshuffle.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tslink-1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tslink-2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tslink-D.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tsplit_file.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tstr-1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tstr-2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tstring.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tstring2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tstringe.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tszip.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tudfilter.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tudlink-1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tudlink-2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tuserfilter.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes1.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes2.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes3.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes4.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes5.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tvlenstr_array.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tvlstr.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tvms.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/twidedisplay.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/twithddlfile.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/h5dump-help.txt
-      ${HDF5_TOOLS_DIR}/testfiles/out3.h5import
-      ${HDF5_TOOLS_DIR}/testfiles/zerodim.ddl
+      charsets.ddl
+      err_attr_dspace.ddl
+      file_space.ddl
+      filter_fail.ddl
+      non_existing.ddl
+      packedbits.ddl
+      tall-1.ddl
+      tall-2.ddl
+      tall-2A.ddl
+      tall-2A0.ddl
+      tall-2B.ddl
+      tall-3.ddl
+      tall-4s.ddl
+      tall-5s.ddl
+      tall-6.ddl
+      tall-7.ddl
+      tall-7N.ddl
+      tallfilters.ddl
+      tarray1.ddl
+      tarray1_big.ddl
+      tarray2.ddl
+      tarray3.ddl
+      tarray4.ddl
+      tarray5.ddl
+      tarray6.ddl
+      tarray7.ddl
+      tarray8.ddl
+      tattr-1.ddl
+      tattr-2.ddl
+      tattr-3.ddl
+      tattr-4_be.ddl
+      tattrcontents1.ddl
+      tattrcontents2.ddl
+      tattrintsize.ddl
+      tattrreg.ddl
+      tattrregR.ddl
+      tbin1.ddl
+      tbin1.ddl
+      tbin2.ddl
+      tbin3.ddl
+      tbin4.ddl
+      tbinregR.ddl
+      tbigdims.ddl
+      tbitnopaque_be.ddl
+      tbitnopaque_le.ddl
+      tboot1.ddl
+      tboot2.ddl
+      tboot2A.ddl
+      tboot2B.ddl
+      tchar1.ddl
+      tchunked.ddl
+      tcmpdattrintsize.ddl
+      tcmpdintarray.ddl
+      tcmpdints.ddl
+      tcmpdintsize.ddl
+      tcompound_complex2.ddl
+      tcomp-1.ddl
+      tcomp-2.ddl
+      tcomp-3.ddl
+      tcomp-4.ddl
+      tcompact.ddl
+      tcontents.ddl
+      tcontiguos.ddl
+      tdatareg.ddl
+      tdataregR.ddl
+      tdeflate.ddl
+      tdset-1.ddl
+      tdset-2.ddl
+      tdset-3s.ddl
+      tempty.ddl
+      texceedsubstart.ddl
+      texceedsubcount.ddl
+      texceedsubstride.ddl
+      texceedsubblock.ddl
+      texternal.ddl
+      textlinksrc.ddl
+      textlinkfar.ddl
+      textlink.ddl
+      tfamily.ddl
+      tfill.ddl
+      tfletcher32.ddl
+      #tfloatsattrs.ddl #native
+      #tfloatsattrs.wddl #special for windows
+      tfloat16.ddl
+      tfloat16_be.ddl
+      tfpformat.ddl
+      tgroup-1.ddl
+      tgroup-2.ddl
+      tgrp_comments.ddl
+      tgrpnullspace.ddl
+      thlink-1.ddl
+      thlink-2.ddl
+      thlink-3.ddl
+      thlink-4.ddl
+      thlink-5.ddl
+      thyperslab.ddl
+      tindicesno.ddl
+      tindicessub1.ddl
+      tindicessub2.ddl
+      tindicessub3.ddl
+      tindicessub4.ddl
+      tindicesyes.ddl
+      tints4dims.ddl
+      tints4dimsBlock2.ddl
+      tints4dimsBlockEq.ddl
+      tints4dimsCount2.ddl
+      tints4dimsCountEq.ddl
+      tints4dimsStride2.ddl
+      tintsattrs.ddl
+      tintsnodata.ddl
+      tlarge_objname.ddl
+      tldouble.ddl
+      tldouble_scalar.ddl
+      tlonglinks.ddl
+      tloop-1.ddl
+      tmulti.ddl
+      tmultifile.ddl
+      #tqmarkfile.ddl
+      #tstarfile.ddl
+      tnamed_dtype_attr.ddl
+      tnestcomp-1.ddl
+      tnestedcmpddt.ddl
+      tnbit.ddl
+      tnoattrdata.ddl
+      tnoattrddl.ddl
+      tnodata.ddl
+      tnoddl.ddl
+      tnoddlfile.ddl
+      tno-subset.ddl
+      tnullspace.ddl
+      tordergr1.ddl
+      tordergr2.ddl
+      tordergr3.ddl
+      tordergr4.ddl
+      tordergr5.ddl
+      torderattr1.ddl
+      torderattr2.ddl
+      torderattr3.ddl
+      torderattr4.ddl
+      tordercontents1.ddl
+      tordercontents2.ddl
+      torderlinks1.ddl
+      torderlinks2.ddl
+      tperror.ddl
+      trawdatafile.ddl
+      trawssetfile.ddl
+      treadfilter.ddl
+      treadintfilter.ddl
+      treference.ddl
+      tsaf.ddl
+      tscalarattrintsize.ddl
+      tscalarintattrsize.ddl
+      tscalarintsize.ddl
+      tscalarstring.ddl
+      tscaleoffset.ddl
+      tshuffle.ddl
+      tslink-1.ddl
+      tslink-2.ddl
+      tslink-D.ddl
+      tsplit_file.ddl
+      tstr-1.ddl
+      tstr-2.ddl
+      tstring.ddl
+      tstring2.ddl
+      tstringe.ddl
+      tszip.ddl
+      tudfilter.ddl
+      tudlink-1.ddl
+      tudlink-2.ddl
+      tuserfilter.ddl
+      tvldtypes1.ddl
+      tvldtypes2.ddl
+      tvldtypes3.ddl
+      tvldtypes4.ddl
+      tvldtypes5.ddl
+      tvlenstr_array.ddl
+      tvlstr.ddl
+      tvms.ddl
+      twidedisplay.ddl
+      twithddlfile.ddl
+      h5dump-help.txt
+      out3.h5import
+      zerodim.ddl
       #STD_REF_OBJ files
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_attrR.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_compatR.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_extR.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_grpR.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_obj_delR.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_objR.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_paramR.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_reg_1dR.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_regR.ddl
+      trefer_attrR.ddl
+      trefer_compatR.ddl
+      trefer_extR.ddl
+      trefer_grpR.ddl
+      trefer_obj_delR.ddl
+      trefer_objR.ddl
+      trefer_paramR.ddl
+      trefer_reg_1dR.ddl
+      trefer_regR.ddl
       # Onion VFD files
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_objs.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_ext.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_1d.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_revision_count.ddl
+      tst_onion_objs.ddl
+      tst_onion_dset_ext.ddl
+      tst_onion_dset_1d.ddl
+      tst_onion_revision_count.ddl
   )
   set (HDF5_N_REFERENCE_FILES
-      tall-3
-      tattr-2
-      tcomp-2
-      thlink-4
-      thlink-5
-      tslink-2
+      tall-3.ddl
+      tattr-2.ddl
+      tcomp-2.ddl
+      thlink-4.ddl
+      thlink-5.ddl
+      tslink-2.ddl
   )
   set (HDF5_REFERENCE_EXP_FILES
       tall-6.exp
@@ -236,159 +238,161 @@
       twithddlfile.exp
   )
   set (HDF5_REFERENCE_TEST_FILES
-      ${HDF5_TOOLS_DIR}/testfiles/charsets.h5
-      ${HDF5_TOOLS_DIR}/testfiles/err_attr_dspace.h5
-      ${HDF5_TOOLS_DIR}/testfiles/file_space.h5
-      ${HDF5_TOOLS_DIR}/testfiles/filter_fail.h5
-      ${HDF5_TOOLS_DIR}/testfiles/packedbits.h5
-      ${HDF5_TOOLS_DIR}/testfiles/taindices.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tall.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray1.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray1_big.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray3.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray4.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray5.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray6.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray7.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray8.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tattr.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tattr2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tattr4_be.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tattrintsize.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tattrreg.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tbigdims.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tbinary.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tbitnopaque.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tchar.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tcmpdattrintsize.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tcmpdintarray.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tcmpdints.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tcmpdintsize.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tcompound.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tcompound_complex.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tcompound_complex2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tdatareg.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tdset.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tempty.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tsoftlinks.h5
-      ${HDF5_TOOLS_DIR}/testfiles/textlinkfar.h5
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc.h5
-      ${HDF5_TOOLS_DIR}/testfiles/textlinktar.h5
-      ${HDF5_TOOLS_DIR}/testfiles/textlink.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00000.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00001.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00002.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00003.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00004.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00005.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00006.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00007.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00008.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00009.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00010.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfcontents1.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfcontents2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfilters.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfpformat.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfvalues.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tgroup.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tgrp_comments.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tgrpnullspace.h5
-      ${HDF5_TOOLS_DIR}/testfiles/thlink.h5
-      ${HDF5_TOOLS_DIR}/testfiles/thyperslab.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tints4dims.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tintsattrs.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tintsnodata.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tlarge_objname.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tldouble.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tldouble_scalar.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tlonglinks.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tloop.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tmulti-b.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tmulti-g.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tmulti-l.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tmulti-o.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tmulti-r.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tmulti-s.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tnamed_dtype_attr.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tnestedcomp.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tnestedcmpddt.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tno-subset.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tnullspace.h5
-      ${HDF5_TOOLS_DIR}/testfiles/torderattr.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tordergr.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tsaf.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tscalarattrintsize.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tscalarintattrsize.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tscalarintsize.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tscalarstring.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tslink.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tsplit_file-m.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tsplit_file-r.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tstr.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tstr2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tstr3.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tudfilter.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tudlink.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes1.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes3.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes4.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes5.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvlenstr_array.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvlstr.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvms.h5
-      ${HDF5_TOOLS_DIR}/testfiles/t128bit_float.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tCVE_2018_11206_fill_old.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tCVE_2018_11206_fill_new.h5
-      ${HDF5_TOOLS_DIR}/testfiles/zerodim.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tCVE-2021-37501_attr_decode.h5
+      charsets.h5
+      err_attr_dspace.h5
+      file_space.h5
+      filter_fail.h5
+      packedbits.h5
+      taindices.h5
+      tall.h5
+      tarray1.h5
+      tarray1_big.h5
+      tarray2.h5
+      tarray3.h5
+      tarray4.h5
+      tarray5.h5
+      tarray6.h5
+      tarray7.h5
+      tarray8.h5
+      tattr.h5
+      tattr2.h5
+      tattr4_be.h5
+      tattrintsize.h5
+      tattrreg.h5
+      tbigdims.h5
+      tbinary.h5
+      tbitnopaque.h5
+      tchar.h5
+      tcmpdattrintsize.h5
+      tcmpdintarray.h5
+      tcmpdints.h5
+      tcmpdintsize.h5
+      tcompound.h5
+      tcompound_complex.h5
+      tcompound_complex2.h5
+      tdatareg.h5
+      tdset.h5
+      tempty.h5
+      tsoftlinks.h5
+      textlinkfar.h5
+      textlinksrc.h5
+      textlinktar.h5
+      textlink.h5
+      tfamily00000.h5
+      tfamily00001.h5
+      tfamily00002.h5
+      tfamily00003.h5
+      tfamily00004.h5
+      tfamily00005.h5
+      tfamily00006.h5
+      tfamily00007.h5
+      tfamily00008.h5
+      tfamily00009.h5
+      tfamily00010.h5
+      tfcontents1.h5
+      tfcontents2.h5
+      tfilters.h5
+      tfloatsattrs.h5
+      tfloat16.h5
+      tfloat16_be.h5
+      tfpformat.h5
+      tfvalues.h5
+      tgroup.h5
+      tgrp_comments.h5
+      tgrpnullspace.h5
+      thlink.h5
+      thyperslab.h5
+      tints4dims.h5
+      tintsattrs.h5
+      tintsnodata.h5
+      tlarge_objname.h5
+      tldouble.h5
+      tldouble_scalar.h5
+      tlonglinks.h5
+      tloop.h5
+      tmulti-b.h5
+      tmulti-g.h5
+      tmulti-l.h5
+      tmulti-o.h5
+      tmulti-r.h5
+      tmulti-s.h5
+      tnamed_dtype_attr.h5
+      tnestedcomp.h5
+      tnestedcmpddt.h5
+      tno-subset.h5
+      tnullspace.h5
+      torderattr.h5
+      tordergr.h5
+      tsaf.h5
+      tscalarattrintsize.h5
+      tscalarintattrsize.h5
+      tscalarintsize.h5
+      tscalarstring.h5
+      tslink.h5
+      tsplit_file-m.h5
+      tsplit_file-r.h5
+      tstr.h5
+      tstr2.h5
+      tstr3.h5
+      tudfilter.h5
+      tudlink.h5
+      tvldtypes1.h5
+      tvldtypes2.h5
+      tvldtypes3.h5
+      tvldtypes4.h5
+      tvldtypes5.h5
+      tvlenstr_array.h5
+      tvlstr.h5
+      tvms.h5
+      t128bit_float.h5
+      tCVE_2018_11206_fill_old.h5
+      tCVE_2018_11206_fill_new.h5
+      zerodim.h5
+      tCVE-2021-37501_attr_decode.h5
       #STD_REF_OBJ files
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_attr.h5
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_compat.h5
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_ext1.h5
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_ext2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_grp.h5
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_obj_del.h5
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_obj.h5
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_param.h5
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_reg_1d.h5
-      ${HDF5_TOOLS_DIR}/testfiles/trefer_reg.h5
+      trefer_attr.h5
+      trefer_compat.h5
+      trefer_ext1.h5
+      trefer_ext2.h5
+      trefer_grp.h5
+      trefer_obj_del.h5
+      trefer_obj.h5
+      trefer_param.h5
+      trefer_reg_1d.h5
+      trefer_reg.h5
       # Onion VFD files
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_objs.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_objs.h5.onion
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_ext.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_ext.h5.onion
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_1d.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_1d.h5.onion
+      tst_onion_objs.h5
+      tst_onion_objs.h5.onion
+      tst_onion_dset_ext.h5
+      tst_onion_dset_ext.h5.onion
+      tst_onion_dset_1d.h5
+      tst_onion_dset_1d.h5.onion
   )
   set (HDF5_ERROR_REFERENCE_TEST_FILES
-      ${PROJECT_SOURCE_DIR}/errfiles/filter_fail.err
-      ${PROJECT_SOURCE_DIR}/errfiles/non_existing.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tall-1.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tall-2A.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tall-2A0.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tall-2B.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tarray1_big.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tattrregR.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tattr-3.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tcomp-3.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tdataregR.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tdset-2.err
-      ${PROJECT_SOURCE_DIR}/errfiles/texceedsubblock.err
-      ${PROJECT_SOURCE_DIR}/errfiles/texceedsubcount.err
-      ${PROJECT_SOURCE_DIR}/errfiles/texceedsubstart.err
-      ${PROJECT_SOURCE_DIR}/errfiles/texceedsubstride.err
-      ${PROJECT_SOURCE_DIR}/errfiles/textlink.err
-      ${PROJECT_SOURCE_DIR}/errfiles/textlinkfar.err
-      ${PROJECT_SOURCE_DIR}/errfiles/textlinksrc.err
-      ${PROJECT_SOURCE_DIR}/errfiles/torderlinks1.err
-      ${PROJECT_SOURCE_DIR}/errfiles/torderlinks2.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tgroup-2.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tperror.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tslink-D.err
+      filter_fail.err
+      non_existing.err
+      tall-1.err
+      tall-2A.err
+      tall-2A0.err
+      tall-2B.err
+      tarray1_big.err
+      tattrregR.err
+      tattr-3.err
+      tcomp-3.err
+      tdataregR.err
+      tdset-2.err
+      texceedsubblock.err
+      texceedsubcount.err
+      texceedsubstart.err
+      texceedsubstride.err
+      textlink.err
+      textlinkfar.err
+      textlinksrc.err
+      torderlinks1.err
+      torderlinks2.err
+      tgroup-2.err
+      tperror.err
+      tslink-D.err
   )
 
   # make test dir
@@ -398,40 +402,38 @@
   # copy test files from source dir to test dir
   #
   foreach (tst_h5_file ${HDF5_REFERENCE_TEST_FILES})
-    get_filename_component (fname "${tst_h5_file}" NAME)
-    HDFTEST_COPY_FILE("${tst_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${tst_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5_file}" "h5dump_std_files")
   endforeach ()
 
   foreach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/exportfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}" "h5dump_std_files")
   endforeach ()
 
   foreach (tst_other_file ${HDF5_REFERENCE_FILES})
-    get_filename_component (fname "${tst_other_file}" NAME)
-    HDFTEST_COPY_FILE("${tst_other_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${tst_other_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_other_file}" "h5dump_std_files")
   endforeach ()
+  
   foreach (tst_h5N_file ${HDF5_N_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${tst_h5N_file}.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N.ddl" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${tst_h5N_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N" "h5dump_std_files")
   endforeach ()
 
   foreach (tst_error_file ${HDF5_ERROR_REFERENCE_TEST_FILES})
-    get_filename_component (fname "${tst_error_file}" NAME)
-    HDFTEST_COPY_FILE("${tst_error_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/errfiles/${tst_error_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_error_file}" "h5dump_std_files")
   endforeach ()
 
   # --------------------------------------------------------------------
   # Special file handling
   # --------------------------------------------------------------------
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
+  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
 
   if (WIN32 AND CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION VERSION_LESS 10.0.18362.0)
-    configure_file(${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
-    #file (READ ${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp TEST_STREAM)
+    configure_file(${PROJECT_SOURCE_DIR}/exportfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
+    #file (READ ${PROJECT_SOURCE_DIR}/exportfiles/tbinregR.exp TEST_STREAM)
     #file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.wddl" "${PROJECT_BINARY_DIR}/testfiles/std/tfloatsattrs.ddl" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/tfloatsattrs.wddl" "${PROJECT_BINARY_DIR}/testfiles/std/tfloatsattrs.ddl" "h5dump_std_files")
   else ()
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tfloatsattrs.ddl" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/exportfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/tfloatsattrs.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tfloatsattrs.ddl" "h5dump_std_files")
   endif ()
   add_custom_target(h5dump_std_files ALL COMMENT "Copying files needed by h5dump_std tests" DEPENDS ${h5dump_std_files_list})
 
@@ -443,14 +445,14 @@
 
   macro (ADD_HELP_TEST testname resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5DUMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
     else ()
       add_test (
           NAME H5DUMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=h5dump-${testname}.out"
@@ -462,16 +464,19 @@
     set_tests_properties (H5DUMP-${testname} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
+    if ("H5DUMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP-${testname} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (ADD_SKIP_H5_TEST skipresultfile skipresultcode testtype)
     if ("${testtype}" STREQUAL "SKIP")
-      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      if (NOT HDF5_USING_ANALYSIS_TOOL)
         add_test (
             NAME H5DUMP-${skipresultfile}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile} ${ARGN}"
         )
-        set_property(TEST H5DUMP-${skipresultfile} PROPERTY DISABLED)
+        set_property(TEST H5DUMP-${skipresultfile} PROPERTY DISABLED true)
       endif ()
     else ()
       ADD_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})
@@ -480,8 +485,8 @@
 
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
@@ -493,7 +498,7 @@
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -505,6 +510,43 @@
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
+    if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_COMP_TEST resultfile resultcode resultvalue)
+    # If using memchecker add tests without using scripts
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
+      if (${resultcode})
+        set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
+      endif ()
+      set_tests_properties (H5DUMP-${resultfile} PROPERTIES
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
+      )
+    else ()
+      add_test (
+          NAME H5DUMP-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_FILTER:STRING=SIZE [0-9]* \\(${resultvalue}\\\.[0-9][0-9][0-9]:1 COMPRESSION\\)"
+              -D "TEST_FILTER_REPLACE:STRING=SIZE XXXX (${resultvalue}.XXX:1 COMPRESSION)"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+    endif ()
+    set_tests_properties (H5DUMP-${resultfile} PROPERTIES
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
+    )
+    if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (ADD_H5_TEST_N resultfile resultcode)
@@ -517,13 +559,12 @@
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-N-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5DUMP-N-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES
-          DEPENDS H5DUMP-N-${resultfile}-clear-objects
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
     else ()
@@ -531,7 +572,7 @@
           NAME H5DUMP-N-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}-N.out"
@@ -543,6 +584,9 @@
     set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES
         DEPENDS H5DUMP-N-${resultfile}-clear-objects
     )
+    if ("H5DUMP-N-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES DISABLED true)
+    endif ()
     add_test (
         NAME H5DUMP-N-${resultfile}-clean-objects
         COMMAND ${CMAKE_COMMAND} -E remove
@@ -564,13 +608,12 @@
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN} ${resultfile}.txt ${targetfile})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN} ${resultfile}.txt ${targetfile})
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
-          DEPENDS H5DUMP-${resultfile}-clear-objects
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
     else ()
@@ -578,7 +621,7 @@
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN};${resultfile}.txt;${targetfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -589,6 +632,9 @@
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           DEPENDS H5DUMP-${resultfile}-clear-objects
       )
+      if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5DUMP-${resultfile}-output-cmp
           COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
@@ -598,13 +644,16 @@
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
       set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
+      if ("H5DUMP-${resultfile}-output-cmp" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DISABLED true)
+      endif ()
     endif ()
     add_test (
         NAME H5DUMP-${resultfile}-clean-objects
         COMMAND ${CMAKE_COMMAND} -E remove
             ${resultfile}.txt
     )
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       set_tests_properties (H5DUMP-${resultfile}-clean-objects PROPERTIES
           DEPENDS H5DUMP-${resultfile}
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
@@ -628,8 +677,8 @@
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> --ddl=${ddlfile}.txt ${ARGN} ${resultfile}.txt ${targetfile})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> --ddl=${ddlfile}.txt ${ARGN} ${resultfile}.txt ${targetfile})
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
@@ -642,7 +691,7 @@
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=--ddl=${ddlfile}.txt;${ARGN};${resultfile}.txt;${targetfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -654,6 +703,9 @@
           DEPENDS H5DUMP-${resultfile}-clear-objects
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5DUMP-${resultfile}-output-cmp
           COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
@@ -670,6 +722,9 @@
           DEPENDS H5DUMP-${resultfile}-output-cmp
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-${resultfile}-output-cmp-ddl" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES DISABLED true)
+      endif ()
     endif ()
     add_test (
         NAME H5DUMP-${resultfile}-clean-objects
@@ -677,7 +732,7 @@
             ${ddlfile}.txt
             ${resultfile}.txt
     )
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       set_tests_properties (H5DUMP-${resultfile}-clean-objects PROPERTIES
           DEPENDS H5DUMP-${resultfile}
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
@@ -691,7 +746,7 @@
   endmacro ()
 
   macro (ADD_H5_EXPORT_TEST resultfile targetfile resultcode)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP-output-${resultfile}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove
@@ -702,12 +757,15 @@
       )
       add_test (
           NAME H5DUMP-output-${resultfile}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN} ${resultfile}.txt ${targetfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN} ${resultfile}.txt ${targetfile}
       )
       set_tests_properties (H5DUMP-output-${resultfile} PROPERTIES
           DEPENDS H5DUMP-output-${resultfile}-clear-objects
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-output-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-output-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5DUMP-output-cmp-${resultfile}
           COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
@@ -716,6 +774,9 @@
           DEPENDS H5DUMP-output-${resultfile}
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-output-cmp-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5DUMP-output-${resultfile}-clean-objects
           COMMAND ${CMAKE_COMMAND} -E remove
@@ -729,12 +790,12 @@
   endmacro ()
 
   macro (ADD_H5_MASK_TEST resultfile resultcode)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -746,16 +807,19 @@
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
   macro (ADD_H5_GREP_TEST resultfile resultcode result_check)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -766,16 +830,19 @@
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
   macro (ADD_H5ERR_MASK_TEST resultfile resultcode result_errcheck)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -787,16 +854,19 @@
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
   macro (ADD_H5ERR_MASK_ENV_TEST resultfile resultcode result_errcheck envvar envval)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -810,11 +880,14 @@
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
   macro (ADD_H5_BIN_EXPORT conffile resultcode testfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP-BIN_EXPORT-${conffile}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove
@@ -827,7 +900,7 @@
           NAME H5DUMP-BIN_EXPORT-${conffile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN};-o;${conffile}.bin;${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${conffile}.out"
@@ -838,6 +911,9 @@
       set_tests_properties (H5DUMP-BIN_EXPORT-${conffile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-BIN_EXPORT-${conffile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-BIN_EXPORT-${conffile} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5DUMP-BIN_EXPORT-${conffile}-clean-objects
           COMMAND ${CMAKE_COMMAND} -E remove
@@ -852,7 +928,7 @@
 
   macro (ADD_H5_TEST_IMPORT conffile resultfile testfile resultcode)
     # If using memchecker add tests without using scripts
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP-IMPORT-${resultfile}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove
@@ -866,7 +942,7 @@
           NAME H5DUMP-IMPORT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN};-o;${resultfile}.bin;${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${conffile}.out"
@@ -878,16 +954,25 @@
           DEPENDS H5DUMP-IMPORT-${resultfile}-clear-objects
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
-      add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5import${tgt_file_ext}> ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
+      if ("H5DUMP-IMPORT-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-IMPORT-${resultfile} PROPERTIES DISABLED true)
+      endif ()
+      add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5import> ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
       set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES
           DEPENDS H5DUMP-IMPORT-${resultfile}
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
-      add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_file_ext}> ${testfile} ${resultfile}.h5 /integer /integer)
+      if ("H5DUMP-IMPORT-h5import-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES DISABLED true)
+      endif ()
+      add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${testfile} ${resultfile}.h5 /integer /integer)
       set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES
           DEPENDS H5DUMP-IMPORT-h5import-${resultfile}
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-IMPORT-h5diff-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5DUMP-IMPORT-${resultfile}-clean-objects
           COMMAND ${CMAKE_COMMAND} -E remove
@@ -902,12 +987,12 @@
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP_UD-${testname}-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -921,6 +1006,9 @@
       set_tests_properties (H5DUMP_UD-${testname}-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP_UD-${testname}-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP_UD-${testname}-${resultfile} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -1029,7 +1117,7 @@
     ADD_H5_TEST (tbitnopaque_le 0 --enable-error-stack tbitnopaque.h5)
   endif ()
 
-  #test for the nested compound type
+  # test for the nested compound type
   ADD_H5_TEST (tnestcomp-1 0 --enable-error-stack tnestedcomp.h5)
   ADD_H5_TEST (tnestedcmpddt 0 --enable-error-stack tnestedcmpddt.h5)
 
@@ -1058,7 +1146,7 @@
   ADD_H5_TEST (tvldtypes4 0 --enable-error-stack tvldtypes4.h5)
   ADD_H5_TEST (tvldtypes5 0 --enable-error-stack tvldtypes5.h5)
 
-  #test for file with variable length string data
+  # test for file with variable length string data
   ADD_H5_TEST (tvlstr 0 --enable-error-stack tvlstr.h5)
   ADD_H5_TEST (tvlenstr_array 0 --enable-error-stack tvlenstr_array.h5)
 
@@ -1185,25 +1273,25 @@
 
   # tests for filters
   # SZIP
-  ADD_H5_TEST (tszip 0 --enable-error-stack -H -p -d szip tfilters.h5)
+  ADD_H5_COMP_TEST (tszip 0 2 --enable-error-stack -H -p -d szip tfilters.h5)
 
   # deflate
-  ADD_H5_TEST (tdeflate 0 --enable-error-stack -H -p -d deflate tfilters.h5)
+  ADD_H5_COMP_TEST (tdeflate 0 2 --enable-error-stack -H -p -d deflate tfilters.h5)
 
   # shuffle
   ADD_H5_TEST (tshuffle 0 --enable-error-stack -H -p -d shuffle tfilters.h5)
 
   # fletcher32
-  ADD_H5_TEST (tfletcher32 0 --enable-error-stack -H -p -d fletcher32  tfilters.h5)
+  ADD_H5_COMP_TEST (tfletcher32 0 0 --enable-error-stack -H -p -d fletcher32  tfilters.h5)
 
   # nbit
-  ADD_H5_TEST (tnbit 0 --enable-error-stack -H -p -d nbit  tfilters.h5)
+  ADD_H5_COMP_TEST (tnbit 0 1 --enable-error-stack -H -p -d nbit  tfilters.h5)
 
   # scaleoffset
-  ADD_H5_TEST (tscaleoffset 0 --enable-error-stack -H -p -d scaleoffset  tfilters.h5)
+  ADD_H5_COMP_TEST (tscaleoffset 0 4 --enable-error-stack -H -p -d scaleoffset  tfilters.h5)
 
   # all
-  ADD_H5_TEST (tallfilters 0 --enable-error-stack -H -p -d all  tfilters.h5)
+  ADD_H5_COMP_TEST (tallfilters 0 1 --enable-error-stack -H -p -d all  tfilters.h5)
 
   # user defined
   ADD_H5_TEST (tuserfilter 0 --enable-error-stack -H  -p -d myfilter  tfilters.h5)
@@ -1252,6 +1340,10 @@
   ADD_H5_TEST (tldouble 0 --enable-error-stack tldouble.h5)
   ADD_H5_TEST (tldouble_scalar 0 -p --enable-error-stack tldouble_scalar.h5)
 
+  # Add tests for _Float16 type
+  ADD_H5_TEST (tfloat16 0 --enable-error-stack tfloat16.h5)
+  ADD_H5_TEST (tfloat16_be 0 --enable-error-stack tfloat16_be.h5)
+
   # test for vms
   ADD_H5_TEST (tvms 0 --enable-error-stack tvms.h5)
 
@@ -1265,14 +1357,14 @@
   # NATIVE default. the NATIVE test can be validated with h5import/h5diff
 #  ADD_H5_TEST_IMPORT (tbin1 out1D tbinary.h5 0 --enable-error-stack -d integer -b)
 
-  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  if (NOT HDF5_USING_ANALYSIS_TOOL)
     ADD_H5_BIN_EXPORT (tbin2 0 tbinary.h5 --enable-error-stack -b BE -d float)
   endif ()
 
   # the NATIVE test can be validated with h5import/h5diff
 #  ADD_H5_TEST_IMPORT (tbin3 out3D tbinary.h5 0 --enable-error-stack -d integer -b NATIVE)
 
-  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  if (NOT HDF5_USING_ANALYSIS_TOOL)
     ADD_H5_BIN_EXPORT (tbin4 0 tbinary.h5 --enable-error-stack -d double -b FILE)
   endif ()
 

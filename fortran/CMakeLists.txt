@@ -13,16 +13,9 @@ endif ()
 add_subdirectory (src)
 
 #-----------------------------------------------------------------------------
-# Build the Fortran Examples
-#-----------------------------------------------------------------------------
-if (HDF5_BUILD_EXAMPLES)
-  add_subdirectory (examples)
-endif ()
-
-#-----------------------------------------------------------------------------
 # Testing
 #-----------------------------------------------------------------------------
-if (BUILD_TESTING)
+if (NOT HDF5_EXTERNALLY_CONFIGURED AND BUILD_TESTING)
   add_subdirectory (test)
   if (MPI_Fortran_FOUND)
     add_subdirectory (testpar)

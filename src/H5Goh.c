@@ -22,6 +22,7 @@
 /***********/
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Gpkg.h"      /* Groups				*/
 #include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5Opkg.h"      /* Object headers			*/
@@ -140,8 +141,8 @@ H5O__group_free_copy_file_udata(void *_udata)
  * Purpose:	Determines if an object has the requisite messages for being
  *		a group.
  *
- * Return:	Success:	TRUE if the required group messages are
- *				present; FALSE otherwise.
+ * Return:	Success:	true if the required group messages are
+ *				present; false otherwise.
  *
  *		Failure:	FAIL if the existence of certain messages
  *				cannot be determined.

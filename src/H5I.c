@@ -107,21 +107,21 @@ H5Iregister_type(size_t H5_ATTR_DEBUG_API_USED hash_size, unsigned reserved, H5I
         H5I_next_type_g++;
     }
     else {
-        hbool_t done; /* Indicate that search was successful */
-        int     i;
+        bool done; /* Indicate that search was successful */
+        int  i;
 
         /* Look for a free type to give out */
-        done = FALSE;
-        for (i = H5I_NTYPES; i < H5I_MAX_NUM_TYPES && done == FALSE; i++) {
+        done = false;
+        for (i = H5I_NTYPES; i < H5I_MAX_NUM_TYPES && done == false; i++) {
             if (NULL == H5I_type_info_array_g[i]) {
                 /* Found a free type ID */
                 new_type = (H5I_type_t)i;
-                done     = TRUE;
+                done     = true;
             }
         }
 
         /* Verify that we found a type to give out */
-        if (done == FALSE)
+        if (done == false)
             HGOTO_ERROR(H5E_ID, H5E_NOSPACE, H5I_BADID, "Maximum number of ID types exceeded");
     }
 
@@ -157,14 +157,14 @@ done:
  * Purpose:     Query function to inform the user if a given type is
  *              currently registered with the library.
  *
- * Return:      TRUE/FALSE/FAIL
+ * Return:      true/false/FAIL
  *
  *-------------------------------------------------------------------------
  */
 htri_t
 H5Itype_exists(H5I_type_t type)
 {
-    htri_t ret_value = TRUE; /* Return value */
+    htri_t ret_value = true; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "It", type);
@@ -176,7 +176,7 @@ H5Itype_exists(H5I_type_t type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number");
 
     if (NULL == H5I_type_info_array_g[type])
-        ret_value = FALSE;
+        ret_value = false;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -249,7 +249,7 @@ H5Iclear_type(H5I_type_t type, hbool_t force)
     if (H5I_IS_LIB_TYPE(type))
         HGOTO_ERROR(H5E_ID, H5E_BADGROUP, FAIL, "cannot call public function on library type");
 
-    ret_value = H5I_clear_type(type, force, TRUE);
+    ret_value = H5I_clear_type(type, force, true);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -307,7 +307,7 @@ H5Iregister(H5I_type_t type, const void *object)
         HGOTO_ERROR(H5E_ID, H5E_BADGROUP, H5I_INVALID_HID, "cannot call public function on library type");
 
     /* Register the object */
-    if ((ret_value = H5I__register(type, object, TRUE, NULL, NULL)) < 0)
+    if ((ret_value = H5I__register(type, object, true, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object");
 
 done:
@@ -340,7 +340,7 @@ H5Iregister_future(H5I_type_t type, const void *object, H5I_future_realize_func_
         HGOTO_ERROR(H5E_ID, H5E_BADVALUE, H5I_INVALID_HID, "NULL pointer for realize_cb not allowed");
 
     /* Register the future object */
-    if ((ret_value = H5I__register(type, object, TRUE, realize_cb, discard_cb)) < 0)
+    if ((ret_value = H5I__register(type, object, true, realize_cb, discard_cb)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object");
 
 done:
@@ -499,7 +499,7 @@ H5Iinc_ref(hid_t id)
         HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "invalid ID");
 
     /* Do actual increment operation */
-    if ((ret_value = H5I_inc_ref(id, TRUE)) < 0)
+    if ((ret_value = H5I_inc_ref(id, true)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTINC, (-1), "can't increment ID ref count");
 
 done:
@@ -529,7 +529,7 @@ H5Iget_ref(hid_t id)
         HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "invalid ID");
 
     /* Do actual retrieve operation */
-    if ((ret_value = H5I_get_ref(id, TRUE)) < 0)
+    if ((ret_value = H5I_get_ref(id, true)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTGET, (-1), "can't get ID ref count");
 
 done:
@@ -647,7 +647,7 @@ done:
  * Purpose:     Check if the given id is valid.  An id is valid if it is in
  *              use and has an application reference count of at least 1.
  *
- * Return:      TRUE/FALSE/FAIL
+ * Return:      true/false/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -655,16 +655,16 @@ htri_t
 H5Iis_valid(hid_t id)
 {
     H5I_id_info_t *info      = NULL; /* Pointer to the ID info */
-    htri_t         ret_value = TRUE; /* Return value */
+    htri_t         ret_value = true; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "i", id);
 
     /* Find the ID */
     if (NULL == (info = H5I__find_id(id)))
-        ret_value = FALSE;
+        ret_value = false;
     else if (!info->app_count) /* Check if the found id is an internal id */
-        ret_value = FALSE;
+        ret_value = false;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -745,7 +745,7 @@ H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key)
     /* Note that H5I_iterate returns an error code.  We ignore it
      * here, as we can't do anything with it without revising the API.
      */
-    (void)H5I_iterate(type, H5I__search_cb, &udata, TRUE);
+    (void)H5I_iterate(type, H5I__search_cb, &udata, true);
 
     /* Set return value */
     ret_value = udata.ret_obj;
@@ -826,7 +826,7 @@ H5Iiterate(H5I_type_t type, H5I_iterate_func_t op, void *op_data)
     /* Note that H5I_iterate returns an error code.  We ignore it
      * here, as we can't do anything with it without revising the API.
      */
-    if ((ret_value = H5I_iterate(type, H5I__iterate_pub_cb, &int_udata, TRUE)) < 0)
+    if ((ret_value = H5I_iterate(type, H5I__iterate_pub_cb, &int_udata, true)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "can't iterate over ids");
 
 done:
@@ -867,7 +867,7 @@ H5Iget_file_id(hid_t obj_id)
             HGOTO_ERROR(H5E_ID, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
         /* Get the file ID */
-        if ((ret_value = H5F_get_file_id(vol_obj, type, TRUE)) < 0)
+        if ((ret_value = H5F_get_file_id(vol_obj, type, true)) < 0)
             HGOTO_ERROR(H5E_ID, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file ID");
     }
     else
@@ -908,7 +908,7 @@ H5Iget_name(hid_t id, char *name /*out*/, size_t size)
     ssize_t                ret_value    = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "ixz", id, name, size);
+    H5TRACE3("Zs", "i*sz", id, name, size);
 
     /* Get the object pointer */
     if (NULL == (vol_obj = H5VL_vol_object(id)))

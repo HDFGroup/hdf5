@@ -23,6 +23,7 @@
 /***********/
 #include "H5private.h"          /* Generic Functions        */
 #include "H5Eprivate.h"         /* Error handling           */
+#include "H5Iprivate.h"         /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory handling          */
 #include "H5VLnative_private.h" /* Native VOL connector     */
 
@@ -107,12 +108,12 @@ H5VL__native_token_to_str(void *obj, H5I_type_t obj_type, const H5O_token_t *tok
     if (addr == 0)
         addr_ndigits = 1;
     else
-        addr_ndigits = (size_t)(HDfloor(HDlog10((double)addr)) + 1);
+        addr_ndigits = (size_t)(floor(log10((double)addr)) + 1);
 
     if (NULL == (*token_str = H5MM_malloc(addr_ndigits + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for token string");
 
-    HDsnprintf(*token_str, addr_ndigits + 1, "%" PRIuHADDR, addr);
+    snprintf(*token_str, addr_ndigits + 1, "%" PRIuHADDR, addr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -139,7 +140,7 @@ H5VL__native_str_to_token(void *obj, H5I_type_t obj_type, const char *token_str,
     /* Check parameters */
     assert(token_str);
 
-    HDsscanf(token_str, "%" PRIuHADDR, &addr);
+    sscanf(token_str, "%" PRIuHADDR, &addr);
 
     if (H5VL_native_addr_to_token(obj, obj_type, addr, token) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, FAIL, "can't convert address to object token");

@@ -78,7 +78,7 @@ H5_DLL herr_t  H5VL_get_cap_flags(const H5VL_connector_prop_t *prop, uint64_t *c
 
 /* Functions that deal with VOL connectors */
 union H5PL_key_t;
-H5_DLL herr_t H5VL_check_plugin_load(const H5VL_class_t *cls, const union H5PL_key_t *key, hbool_t *success);
+H5_DLL herr_t H5VL_check_plugin_load(const H5VL_class_t *cls, const union H5PL_key_t *key, bool *success);
 
 /* NOTE:    The object and ID functions below deal in VOL objects (i.e.;
  *          H5VL_object_t). Similar non-VOL calls exist in H5Iprivate.h. Use
@@ -100,9 +100,9 @@ H5_DLL H5VL_object_t *H5VL_create_object(void *object, H5VL_t *vol_connector);
 H5_DLL H5VL_object_t *H5VL_create_object_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id);
 H5_DLL hsize_t        H5VL_object_inc_rc(H5VL_object_t *obj);
 H5_DLL herr_t         H5VL_free_object(H5VL_object_t *obj);
-H5_DLL herr_t         H5VL_object_is_native(const H5VL_object_t *obj, hbool_t *is_native);
+H5_DLL herr_t         H5VL_object_is_native(const H5VL_object_t *obj, bool *is_native);
 H5_DLL herr_t         H5VL_file_is_same(const H5VL_object_t *vol_obj1, const H5VL_object_t *vol_obj2,
-                                        hbool_t *same_file);
+                                        bool *same_file);
 
 /* Functions that wrap / unwrap VOL objects */
 H5_DLL herr_t H5VL_get_wrap_ctx(const H5VL_class_t *connector, void *obj, void **wrap_ctx);
@@ -122,23 +122,23 @@ H5_DLL herr_t H5VL_finish_lib_state(void);
 H5_DLL herr_t H5VL_free_lib_state(void *state);
 
 /* ID registration functions */
-H5_DLL hid_t  H5VL_register(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t app_ref);
-H5_DLL hid_t  H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref);
-H5_DLL hid_t  H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id, hbool_t app_ref);
+H5_DLL hid_t  H5VL_register(H5I_type_t type, void *object, H5VL_t *vol_connector, bool app_ref);
+H5_DLL hid_t  H5VL_wrap_register(H5I_type_t type, void *obj, bool app_ref);
+H5_DLL hid_t  H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id, bool app_ref);
 H5_DLL herr_t H5VL_register_using_existing_id(H5I_type_t type, void *object, H5VL_t *vol_connector,
-                                              hbool_t app_ref, hid_t existing_id);
+                                              bool app_ref, hid_t existing_id);
 
 /* Object access functions */
 struct H5P_libclass_t;
 H5_DLL herr_t H5VL_setup_args(hid_t loc_id, H5I_type_t id_type, H5VL_object_t **vol_obj);
 H5_DLL herr_t H5VL_setup_loc_args(hid_t loc_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params);
-H5_DLL herr_t H5VL_setup_acc_args(hid_t loc_id, const struct H5P_libclass_t *libclass, hbool_t is_collective,
+H5_DLL herr_t H5VL_setup_acc_args(hid_t loc_id, const struct H5P_libclass_t *libclass, bool is_collective,
                                   hid_t *acspl_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params);
 H5_DLL herr_t H5VL_setup_self_args(hid_t loc_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params);
-H5_DLL herr_t H5VL_setup_name_args(hid_t loc_id, const char *name, hbool_t is_collective, hid_t lapl_id,
+H5_DLL herr_t H5VL_setup_name_args(hid_t loc_id, const char *name, bool is_collective, hid_t lapl_id,
                                    H5VL_object_t **vol_obj, H5VL_loc_params_t *loc_params);
 H5_DLL herr_t H5VL_setup_idx_args(hid_t loc_id, const char *name, H5_index_t idx_type, H5_iter_order_t order,
-                                  hsize_t n, hbool_t is_collective, hid_t lapl_id, H5VL_object_t **vol_obj,
+                                  hsize_t n, bool is_collective, hid_t lapl_id, H5VL_object_t **vol_obj,
                                   H5VL_loc_params_t *loc_params);
 H5_DLL herr_t H5VL_setup_token_args(hid_t loc_id, H5O_token_t *obj_token, H5VL_object_t **vol_obj,
                                     H5VL_loc_params_t *loc_params);

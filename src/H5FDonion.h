@@ -11,19 +11,18 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Onion Virtual File Driver (VFD)
- *
- * Purpose:    The public header file for the Onion VFD.
+ * Purpose:	The public header file for the onion virtual file driver (VFD)
  */
 #ifndef H5FDonion_H
 #define H5FDonion_H
 
-#define H5FD_ONION       (H5FDperform_init(H5FD_onion_init))
+/** Initializer for the onion VFD */
+#define H5FD_ONION (H5FDperform_init(H5FD_onion_init))
+
+/** Identifier for the onion VFD */
 #define H5FD_ONION_VALUE H5_VFD_ONION
 
-/**
- *  Current version of the onion VFD fapl info struct.
- */
+/** Current version of the onion VFD fapl info struct */
 #define H5FD_ONION_FAPL_INFO_VERSION_CURR 1
 
 #define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT                                               \
@@ -114,6 +113,10 @@ typedef struct H5FD_onion_fapl_info_t {
 extern "C" {
 #endif
 
+/** @private
+ *
+ * \brief Private initializer for the onion VFD
+ */
 H5_DLL hid_t H5FD_onion_init(void);
 
 /**

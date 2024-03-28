@@ -38,6 +38,7 @@ MODULE TH5D
   USE HDF5 ! This module contains all necessary modules
   USE TH5_MISC
   USE TH5_MISC_GEN
+  USE ISO_C_BINDING
 
 CONTAINS
   SUBROUTINE datasettest(cleanup, total_error)
@@ -514,8 +515,6 @@ CONTAINS
 
   SUBROUTINE test_userblock_offset(cleanup, total_error)
 
-    USE ISO_C_BINDING
-
     IMPLICIT NONE
     LOGICAL, INTENT(IN) :: cleanup
     INTEGER, INTENT(OUT) :: total_error
@@ -631,8 +630,6 @@ CONTAINS
 
   SUBROUTINE test_dset_fill(cleanup, total_error)
 
-    USE ISO_C_BINDING
-
     IMPLICIT NONE
     LOGICAL, INTENT(IN) :: cleanup
     INTEGER, INTENT(OUT) :: total_error
@@ -640,11 +637,9 @@ CONTAINS
     INTEGER, PARAMETER :: DIM0=10
     INTEGER, PARAMETER :: int_kind_1  = SELECTED_INT_KIND(2)  !should map to INTEGER*1 on most modern processors
     INTEGER, PARAMETER :: int_kind_4  = SELECTED_INT_KIND(4)  !should map to INTEGER*2 on most modern processors
-    INTEGER, PARAMETER :: int_kind_8  = SELECTED_INT_KIND(9)  !should map to INTEGER*4 on most modern processors
     INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(18) !should map to INTEGER*8 on most modern processors
     INTEGER(KIND=int_kind_1) , DIMENSION(1:DIM0), TARGET :: data_i1
     INTEGER(KIND=int_kind_4) , DIMENSION(1:DIM0), TARGET :: data_i4
-    INTEGER(KIND=int_kind_8) , DIMENSION(1:DIM0), TARGET :: data_i8
     INTEGER(KIND=int_kind_16), DIMENSION(1:DIM0), TARGET :: data_i16
     INTEGER(KIND=int_kind_1) , TARGET :: data0_i1 = 4
     INTEGER(KIND=int_kind_4) , TARGET :: data0_i4 = 4
@@ -683,7 +678,6 @@ CONTAINS
     ! Initialize memory buffer
     data_i1  = -2
     data_i4  = -2
-    data_i8  = -2
     data_i16 = -2
     data_int = -2
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
@@ -798,7 +792,6 @@ CONTAINS
     ! Initialize memory buffer
     data_i1  = -2
     data_i4  = -2
-    data_i8  = -2
     data_i16 = -2
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
     data_i32 = -2
@@ -990,8 +983,174 @@ CONTAINS
        ENDIF
     ENDDO
 
-
   END SUBROUTINE test_dset_fill
+
+  SUBROUTINE test_direct_chunk_io(cleanup, total_error)
+
+    IMPLICIT NONE
+
+    LOGICAL, INTENT(IN) :: cleanup
+    INTEGER, INTENT(OUT) :: total_error
+    CHARACTER(LEN=4), PARAMETER :: filename = "doIO"
+    CHARACTER(LEN=80) :: fix_filename
+
+    CHARACTER(LEN=15), PARAMETER :: dsetname   = "dset"
+
+    INTEGER :: RANK = 2
+
+    INTEGER(HID_T) :: file_id     ! File identifier
+    INTEGER(HID_T) :: dset_id     ! Dataset identifier
+    INTEGER(HID_T) :: dataspace   ! Dataspace identifier
+    INTEGER(HID_T) :: dcpl        ! dataset creation property identifier
+
+    !
+    !dataset dimensions at creation time
+    !
+    INTEGER, PARAMETER :: DIM0 = 4
+    INTEGER, PARAMETER :: DIM1 = 32
+    INTEGER(SIZE_T), PARAMETER :: CHUNK0 = DIM0
+    INTEGER(SIZE_T), PARAMETER :: CHUNK1 = DIM1/2
+    INTEGER(HSIZE_T), DIMENSION(2) :: offset
+    INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/DIM0,DIM1/)
+    INTEGER, DIMENSION(CHUNK0,CHUNK1), TARGET :: wdata1, rdata1, wdata2, rdata2
+    INTEGER(HSIZE_T), DIMENSION(2) :: chunk = (/CHUNK0, CHUNK1/)
+    INTEGER :: i, j, n
+    INTEGER :: error
+    TYPE(C_PTR) :: f_ptr
+    INTEGER :: filters
+    INTEGER(SIZE_T) :: sizeINT
+    INTEGER(HID_T) :: dxpl
+
+    !
+    !Create a new file using default properties.
+    !
+    CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+    IF (error .NE. 0) THEN
+       WRITE(*,*) "Cannot modify filename"
+       STOP
+    ENDIF
+
+    CALL h5pcreate_f(H5P_DATASET_XFER_F, dxpl, error)
+    CALL check("h5pcreate_f",error,total_error)
+
+    CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
+    CALL check("h5fcreate_f",error,total_error)
+
+    ! Dataset Fortran
+
+    CALL h5screate_simple_f(RANK, dims, dataspace, error)
+    CALL check("h5screate_simple_f",error,total_error)
+
+    CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl, error)
+    CALL check("h5pcreate_f",error,total_error)
+
+    CALL h5pset_chunk_f(dcpl, RANK, chunk, error)
+    CALL check("h5pset_chunk_f",error,total_error)
+
+    CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dataspace, dset_id, error, dcpl )
+    CALL check("h5dcreate_f",error,total_error)
+
+    CALL h5sclose_f(dataspace, error)
+    CALL check("h5sclose_f",error,total_error)
+    CALL h5pclose_f(dcpl, error)
+    CALL check("h5pclose_f",error,total_error)
+
+    n = 0
+    DO i = 1, CHUNK0
+       DO j = 1, CHUNK1
+          n = n + 1
+          wdata1(i,j) = n
+          wdata2(i,j) = n*10
+       END DO
+    END DO
+
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+    sizeINT = storage_size(i, KIND=size_t)/storage_size(c_char_'a',c_size_t)
+#else
+    sizeINT = SIZEOF(i)
+#endif
+
+    f_ptr = C_LOC(wdata1)
+    offset(1:2) = (/0, 0/)
+    CALL H5Dwrite_chunk_f(dset_id, 0, offset, CHUNK0 * CHUNK1 * sizeINT, f_ptr, error)
+    CALL check("h5dwrite_f",error,total_error)
+
+    f_ptr = C_LOC(wdata2)
+    offset(1:2) = (/0, 16/)
+    CALL H5Dwrite_chunk_f(dset_id, 0, offset, CHUNK0 * CHUNK1 * sizeINT, f_ptr, error, dxpl)
+    CALL check("h5dwrite_f",error,total_error)
+
+    CALL h5dclose_f(dset_id, error)
+    CALL check("h5dclose_f",error,total_error)
+
+    !
+    !Close the file.
+    !
+    CALL h5fclose_f(file_id, error)
+    CALL check("h5fclose_f",error,total_error)
+
+    !
+    !read the data back
+    !
+    !Open the file.
+    !
+    CALL h5fopen_f(fix_filename, H5F_ACC_RDONLY_F, file_id, error)
+    CALL check("hfopen_f",error,total_error)
+
+    !
+    !Open the  dataset.
+    !
+    CALL h5dopen_f(file_id, dsetname, dset_id, error)
+    CALL check("h5dopen_f",error,total_error)
+
+    f_ptr = C_LOC(rdata1)
+    filters = 99
+    offset(1:2) = (/0, 0/)
+    CALL H5Dread_chunk_f(dset_id, offset, filters, f_ptr, error)
+    CALL check("H5Dread_chunk_f",error,total_error)
+
+    ! Verify that the data read was correct.
+    DO i = 1, CHUNK0
+       DO j = 1, CHUNK1
+          CALL VERIFY("H5Dread_chunk_f", rdata1(i,j), wdata1(i,j), total_error)
+          IF(total_error.NE.0) EXIT
+       ENDDO
+    ENDDO
+
+    CALL VERIFY("H5Dread_chunk_f",filters, 0, total_error)
+
+    f_ptr = C_LOC(rdata2)
+    offset(1:2) = (/0, 16/)
+    CALL H5Dread_chunk_f(dset_id, offset, filters, f_ptr, error, dxpl)
+    CALL check("H5Dread_chunk_f",error,total_error)
+
+    ! Verify that the data read was correct.
+    DO i = 1, CHUNK0
+       DO j = 1, CHUNK1
+          CALL VERIFY("H5Dread_chunk_f", rdata2(i,j), wdata2(i,j), total_error)
+          IF(total_error.NE.0) EXIT
+       ENDDO
+    ENDDO
+
+    CALL VERIFY("H5Dread_chunk_f",filters, 0, total_error)
+
+    CALL h5dclose_f(dset_id, error)
+    CALL check("h5dclose_f",error,total_error)
+
+    !
+    !Close the file.
+    !
+    CALL h5fclose_f(file_id, error)
+    CALL check("h5fclose_f",error,total_error)
+
+    CALL h5pclose_f(dxpl, error)
+    CALL check("h5pclose_f",error,total_error)
+
+    IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+    CALL check("h5_cleanup_f", error, total_error)
+
+    RETURN
+  END SUBROUTINE test_direct_chunk_io
 
 END MODULE TH5D
 

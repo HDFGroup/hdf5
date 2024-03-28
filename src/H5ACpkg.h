@@ -204,49 +204,49 @@ H5FL_EXTERN(H5AC_aux_t);
  *		H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED.
  *
  * dirty_bytes_propagations: This field only exists when the
- *		H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
+ *		H5AC_DEBUG_DIRTY_BYTES_CREATION #define is true.
  *
  *		It is used to track the number of times the cleaned list
  *		has been propagated from process 0 to the other
  *		processes.
  *
  * unprotect_dirty_bytes:  This field only exists when the
- *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
+ *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is true.
  *
  *		It is used to track the number of dirty bytes created
  *		via unprotect operations since the last time the cleaned
  *		list was propagated.
  *
  * unprotect_dirty_bytes_updates: This field only exists when the
- *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
+ *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is true.
  *
  *		It is used to track the number of times dirty bytes have
  *		been created via unprotect operations since the last time
  *		the cleaned list was propagated.
  *
  * insert_dirty_bytes:  This field only exists when the
- *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
+ *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is true.
  *
  *		It is used to track the number of dirty bytes created
  *		via insert operations since the last time the cleaned
  *		list was propagated.
  *
  * insert_dirty_bytes_updates:  This field only exists when the
- *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
+ *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is true.
  *
  *		It is used to track the number of times dirty bytes have
  *		been created via insert operations since the last time
  *		the cleaned list was propagated.
  *
  * move_dirty_bytes:  This field only exists when the
- *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
+ *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is true.
  *
  *		It is used to track the number of dirty bytes created
  *		via move operations since the last time the cleaned
  *		list was propagated.
  *
  * move_dirty_bytes_updates:  This field only exists when the
- *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
+ *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is true.
  *
  *		It is used to track the number of times dirty bytes have
  *		been created via move operations since the last time
@@ -351,7 +351,7 @@ typedef struct H5AC_aux_t {
     int      mpi_rank;
     int      mpi_size;
 
-    hbool_t write_permitted;
+    bool    write_permitted;
     size_t  dirty_bytes_threshold;
     size_t  dirty_bytes;
     int32_t metadata_write_strategy;
@@ -391,7 +391,7 @@ typedef void (*H5AC_write_done_cb_t)(void);
 H5_DLL herr_t H5AC__log_deleted_entry(const H5AC_info_t *entry_ptr);
 H5_DLL herr_t H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr);
 H5_DLL herr_t H5AC__log_cleaned_entry(const H5AC_info_t *entry_ptr);
-H5_DLL herr_t H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr, hbool_t was_dirty, unsigned flags);
+H5_DLL herr_t H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr, bool was_dirty, unsigned flags);
 H5_DLL herr_t H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr);
 H5_DLL herr_t H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr);
 H5_DLL herr_t H5AC__flush_entries(H5F_t *f);

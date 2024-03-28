@@ -28,7 +28,6 @@
 #include "H5FDsec2.h"    /* Sec2 file driver         */
 #include "H5FLprivate.h" /* Free Lists               */
 #include "H5Iprivate.h"  /* IDs                      */
-#include "H5MMprivate.h" /* Memory management        */
 #include "H5Pprivate.h"  /* Property lists           */
 
 /* The driver identification number, initialized at runtime */
@@ -55,7 +54,7 @@ typedef struct H5FD_sec2_t {
     haddr_t        eof; /* end of file; current file size   */
     haddr_t        pos; /* current file I/O position        */
     H5FD_file_op_t op;  /* last operation                   */
-    hbool_t        ignore_disabled_file_locks;
+    bool           ignore_disabled_file_locks;
     char           filename[H5FD_MAX_FILENAME_LEN]; /* Copy of file name from open operation */
 #ifndef H5_HAVE_WIN32_API
     /* On most systems the combination of device and i-node number uniquely
@@ -93,7 +92,7 @@ typedef struct H5FD_sec2_t {
      * Whether to eliminate the family driver info and convert this file to
      * a single file.
      */
-    hbool_t fam_to_single;
+    bool fam_to_single;
 } H5FD_sec2_t;
 
 /*
@@ -131,8 +130,8 @@ static herr_t  H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, ha
                                void *buf);
 static herr_t  H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
                                 const void *buf);
-static herr_t  H5FD__sec2_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD__sec2_lock(H5FD_t *_file, hbool_t rw);
+static herr_t  H5FD__sec2_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
+static herr_t  H5FD__sec2_lock(H5FD_t *_file, bool rw);
 static herr_t  H5FD__sec2_unlock(H5FD_t *_file);
 static herr_t  H5FD__sec2_delete(const char *filename, hid_t fapl_id);
 static herr_t  H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
@@ -204,16 +203,16 @@ H5FD_sec2_init(void)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check the use disabled file locks environment variable */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
-    if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
-        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
-    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
-        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
+    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
+    if (lock_env_var && !strcmp(lock_env_var, "BEST_EFFORT"))
+        ignore_disabled_file_locks_s = true; /* Override: Ignore disabled locks */
+    else if (lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "1")))
+        ignore_disabled_file_locks_s = false; /* Override: Don't ignore disabled locks */
     else
         ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
 
     if (H5I_VFL != H5I_get_type(H5FD_SEC2_g))
-        H5FD_SEC2_g = H5FD_register(&H5FD_sec2_g, sizeof(H5FD_class_t), FALSE);
+        H5FD_SEC2_g = H5FD_register(&H5FD_sec2_g, sizeof(H5FD_class_t), false);
 
     /* Set return value */
     ret_value = H5FD_SEC2_g;
@@ -323,11 +322,12 @@ H5FD__sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         HGOTO_ERROR(
             H5E_FILE, H5E_CANTOPENFILE, NULL,
             "unable to open file: name = '%s', errno = %d, error message = '%s', flags = %x, o_flags = %x",
-            name, myerrno, HDstrerror(myerrno), flags, (unsigned)o_flags);
+            name, myerrno, strerror(myerrno), flags, (unsigned)o_flags);
     } /* end if */
 
+    memset(&sb, 0, sizeof(h5_stat_t));
     if (HDfstat(fd, &sb) < 0)
-        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
+        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
 
     /* Create the new file struct */
     if (NULL == (file = H5FL_CALLOC(H5FD_sec2_t)))
@@ -368,7 +368,7 @@ H5FD__sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     }
 
     /* Retain a copy of the name used to open the file, for possible error reporting */
-    HDstrncpy(file->filename, name, sizeof(file->filename));
+    strncpy(file->filename, name, sizeof(file->filename) - 1);
     file->filename[sizeof(file->filename) - 1] = '\0';
 
     /* Check for non-default FAPL */
@@ -421,7 +421,7 @@ H5FD__sec2_close(H5FD_t *_file)
 
     /* Close the underlying file */
     if (HDclose(file->fd) < 0)
-        HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+        HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
     /* Release the file info */
     file = H5FL_FREE(H5FD_sec2_t, file);
@@ -665,7 +665,7 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     /* Seek to the correct location (if we don't have pread) */
     if (addr != file->pos || OP_READ != file->op)
         if (HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
-            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
 #endif /* H5_HAVE_PREADWRITE */
 
     /* Read data, being careful of interrupted system calls, partial results,
@@ -697,13 +697,13 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             int    myerrno = errno;
             time_t mytime  = HDtime(NULL);
 
-            offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+            offset = HDlseek(file->fd, 0, SEEK_CUR);
 
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
                         "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
                         "error message = '%s', buf = %p, total read size = %llu, bytes this sub-read = %llu, "
                         "bytes actually read = %llu, offset = %llu",
-                        HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf,
+                        HDctime(&mytime), file->filename, file->fd, myerrno, strerror(myerrno), buf,
                         (unsigned long long)size, (unsigned long long)bytes_in,
                         (unsigned long long)bytes_read, (unsigned long long)offset);
         } /* end if */
@@ -771,7 +771,7 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
     /* Seek to the correct location (if we don't have pwrite) */
     if (addr != file->pos || OP_WRITE != file->op)
         if (HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
-            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
 #endif /* H5_HAVE_PREADWRITE */
 
     /* Write the data, being careful of interrupted system calls and partial
@@ -803,13 +803,13 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
             int    myerrno = errno;
             time_t mytime  = HDtime(NULL);
 
-            offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+            offset = HDlseek(file->fd, 0, SEEK_CUR);
 
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                         "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
                         "error message = '%s', buf = %p, total write size = %llu, bytes this sub-write = "
                         "%llu, bytes actually written = %llu, offset = %llu",
-                        HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf,
+                        HDctime(&mytime), file->filename, file->fd, myerrno, strerror(myerrno), buf,
                         (unsigned long long)size, (unsigned long long)bytes_in,
                         (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
@@ -849,7 +849,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
+H5FD__sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     H5FD_sec2_t *file      = (H5FD_sec2_t *)_file;
     herr_t       ret_value = SUCCEED; /* Return value */
@@ -888,7 +888,7 @@ H5FD__sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
 #else  /* H5_HAVE_WIN32_API */
         if (-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
-            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
 #endif /* H5_HAVE_WIN32_API */
 
         /* Update the eof value */
@@ -908,15 +908,15 @@ done:
  *
  * Purpose:     To place an advisory lock on a file.
  *		The lock type to apply depends on the parameter "rw":
- *			TRUE--opens for write: an exclusive lock
- *			FALSE--opens for read: a shared lock
+ *			true--opens for write: an exclusive lock
+ *			false--opens for read: a shared lock
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__sec2_lock(H5FD_t *_file, hbool_t rw)
+H5FD__sec2_lock(H5FD_t *_file, bool rw)
 {
     H5FD_sec2_t *file = (H5FD_sec2_t *)_file; /* VFD file struct          */
     int          lock_flags;                  /* file locking flags       */
@@ -938,7 +938,7 @@ H5FD__sec2_lock(H5FD_t *_file, hbool_t rw)
             errno = 0;
         }
         else
-            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "unable to lock file")
+            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "unable to lock file");
     }
 
 done:
@@ -972,7 +972,7 @@ H5FD__sec2_unlock(H5FD_t *_file)
             errno = 0;
         }
         else
-            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock file")
+            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock file");
     }
 
 done:
@@ -998,7 +998,7 @@ H5FD__sec2_delete(const char *filename, hid_t H5_ATTR_UNUSED fapl_id)
     assert(filename);
 
     if (HDremove(filename) < 0)
-        HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file")
+        HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

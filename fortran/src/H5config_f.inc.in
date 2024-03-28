@@ -17,8 +17,14 @@
 ! Define if we have parallel support
 #undef HAVE_PARALLEL
 
+! Define if MPI supports mpi_f08 module
+#undef HAVE_MPI_F08
+
 ! Define if we have subfiling support
 #undef HAVE_SUBFILING_VFD
+
+! Define if on APPLE
+#undef HAVE_DARWIN
 
 ! Define if the intrinsic function STORAGE_SIZE exists
 #undef FORTRAN_HAVE_STORAGE_SIZE
@@ -29,16 +35,25 @@
 ! Define if the intrinsic function C_SIZEOF exists
 #undef FORTRAN_HAVE_C_SIZEOF
 
+! Define if Fortran supports allocatable character
+#undef FORTRAN_HAVE_CHAR_ALLOC
+
 ! Define if the intrinsic function C_LONG_DOUBLE exists
 #undef FORTRAN_HAVE_C_LONG_DOUBLE
 
 ! Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE
 #undef FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
 
-! Define if the intrinsic module ISO_FORTRAN_ENV exists
+! Define if Fortran C_BOOL is different from default LOGICAL
+#undef FORTRAN_C_BOOL_IS_UNIQUE
+
+! Define if Fortran supports ISO_FORTRAN_ENV (F08)
 #undef HAVE_ISO_FORTRAN_ENV
 
-! Define the size of C's long double
+! Define MPI Fortran KIND of LOGICAL
+#undef MPI_LOGICAL_KIND
+
+! Define the size of C's double
 #undef SIZEOF_DOUBLE
 
 ! Define the size of C's long double
@@ -76,4 +91,22 @@
 
 ! Define if deprecated public API symbols are disabled
 #undef NO_DEPRECATED_SYMBOLS
+
+! For major interface/format changes
+#undef VERS_MAJOR_TMP
+
+! For minor interface/format changes
+#undef VERS_MINOR_TMP
+
+! For tweaks, bug-fixes, or development
+#undef VERS_RELEASE_TMP
+
+! macros for comparing versions
+#define VERSION_GE(Maj, Min, Rel)                                                      \
+    (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE >= Rel)) || \
+     ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR > Min)) || (H5_VERS_MAJOR > Maj))
+
+#define VERSION_LE(Maj, Min, Rel)                                                      \
+    (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE <= Rel)) || \
+     ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR < Min)) || (H5_VERS_MAJOR < Maj))
 

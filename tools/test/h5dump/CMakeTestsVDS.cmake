@@ -84,28 +84,19 @@
   )
 
   foreach (vds_h5_file ${HDF5_REFERENCE_TEST_VDS})
-    get_filename_component(fname "${vds_h5_file}" NAME)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5dump_vds_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/vds/${vds_h5_file}" "h5dump_vds_files")
   endforeach ()
 
   foreach (vds_h5_file ${HDF5_REFERENCE_PREFIX_VDS})
-    get_filename_component(fname "${vds_h5_file}" NAME)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${fname}" "h5dump_vds_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${vds_h5_file}" "h5dump_vds_files")
   endforeach ()
 
   foreach (ddl_vds ${HDF5_REFERENCE_VDS})
-    get_filename_component(fname "${ddl_vds}" NAME)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5dump_vds_files")
-  endforeach ()
-
-  foreach (ddl_vds ${HDF5_REFERENCE_VDS})
-    get_filename_component(fname "${ddl_vds}" NAME)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${fname}" "h5dump_vds_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/vds/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${ddl_vds}" "h5dump_vds_files")
   endforeach ()
 
   foreach (ddl_vds ${HDF5_ERROR_REFERENCE_VDS})
-    get_filename_component(fname "${ddl_vds}" NAME)
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/errfiles/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5dump_vds_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/errfiles/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/vds/${ddl_vds}" "h5dump_vds_files")
   endforeach ()
   add_custom_target(h5dump_vds_files ALL COMMENT "Copying files needed by h5dump_vds tests" DEPENDS ${h5dump_vds_files_list})
 
@@ -117,8 +108,8 @@
 
   macro (ADD_H5_VDS_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
@@ -127,7 +118,7 @@
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/vds"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -139,12 +130,15 @@
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds"
     )
+    if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP_PREFIX-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5DUMP_PREFIX-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
       set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES
           ENVIRONMENT "HDF5_VDS_PREFIX=${PROJECT_BINARY_DIR}/testfiles/vds/"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds/prefix"
@@ -160,7 +154,7 @@
           NAME H5DUMP_PREFIX-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/vds/prefix"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -171,12 +165,15 @@
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
+    if ("H5DUMP_PREFIX-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (ADD_H5_VDS_LAYOUT resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> -p ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> -p ${ARGN})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -189,7 +186,7 @@
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=-p;${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/vds"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -197,6 +194,9 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
+    endif ()
+    if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
     endif ()
   endmacro ()
 

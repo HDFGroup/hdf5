@@ -832,11 +832,15 @@ H5_DLL herr_t H5Smodify_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_i
  *          \p space_id. The offset array must be the same number of
  *          elements as the number of dimensions for the dataspace. If the
  *          \p offset array is set to NULL, the offset for the dataspace is
- *          reset to 0.
+ *          reset to 0 in all dimensions.
  *
  *          This function allows the same shaped selection to be moved to
  *          different locations within a dataspace without requiring it to
  *          be redefined.
+ *
+ * \note    Until 1.14.4, setting the offset parameter to NULL was considered
+ *          an error, despite the reference manual stating that it had the
+ *          behavior described above.
  *
  * \version 1.4.0 Fortran subroutine was introduced.
  * \since 1.0.0
@@ -848,7 +852,7 @@ H5_DLL herr_t H5Soffset_simple(hid_t space_id, const hssize_t *offset);
  *
  * \brief Closes a dataspace selection iterator
  *
- * \space_id{sel_iter_id}
+ * \param[in] sel_iter_id Identifier of the dataspace selection iterator
  *
  * \return \herr_t
  *
@@ -865,8 +869,9 @@ H5_DLL herr_t H5Ssel_iter_close(hid_t sel_iter_id);
  *
  * \space_id{spaceid}
  * \param[in] elmt_size  Size of element in the selection
- * \param[in] flags      Selection iterator flag
- *
+ * \param[in] flags      Selection iterator flag, valid values are:
+ *                       \li @ref H5S_SEL_ITER_GET_SEQ_LIST_SORTED
+ *                       \li @ref H5S_SEL_ITER_SHARE_WITH_DATASPACE
  * \return \hid_t{valid dataspace selection iterator}
  *
  * \details H5Ssel_iter_create() creates a selection iterator and initializes
@@ -882,13 +887,13 @@ H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags)
  * \brief Retrieves a list of offset / length sequences for the elements in
  *        an iterator
  *
- * \space_id{sel_iter_id}
- * \param[in]  maxseq   Maximum number of sequences to retrieve
- * \param[in]  maxelmts Maximum number of elements to retrieve in sequences
- * \param[out] nseq     Number of sequences retrieved
- * \param[out] nelmts   Number of elements retrieved, in all sequences
- * \param[out] off      Array of sequence offsets
- * \param[out] len      Array of sequence lengths
+ * \param[in]  sel_iter_id Identifier of the dataspace selection iterator
+ * \param[in]  maxseq      Maximum number of sequences to retrieve
+ * \param[in]  maxelmts    Maximum number of elements to retrieve in sequences
+ * \param[out] nseq        Number of sequences retrieved
+ * \param[out] nelmts      Number of elements retrieved, in all sequences
+ * \param[out] off         Array of sequence offsets
+ * \param[out] len         Array of sequence lengths
  *
  * \return \herr_t
  *
@@ -1194,8 +1199,9 @@ H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op, size_t num_el
  *          2x2 blocks of array elements starting with location (1,1) with the
  *          selected blocks at locations (1,1), (5,1), (9,1), (1,5), (5,5), etc.;
  *          in Fortran, they will specify a hyperslab consisting of 21 2x2
- *          blocks of array elements starting with location (2,2) with the
- *          selected blocks at locations (2,2), (6,2), (10,2), (2,6), (6,6), etc.
+ *          blocks of array elements starting with location (2,2), since \p start
+ *          is 0-based indexed, with the selected blocks at
+ *          locations (2,2), (6,2), (10,2), (2,6), (6,6), etc.
  *
  *          Regions selected with this function call default to C order
  *          iteration when I/O is performed.

@@ -40,6 +40,9 @@ static const char *FILENAME[] = {"ntypes", NULL};
 #define DSET_OPAQUE_NAME     "opaque_type"
 #define DSET1_BITFIELD_NAME  "bitfield_type_1"
 #define DSET2_BITFIELD_NAME  "bitfield_type_2"
+#ifdef H5_HAVE__FLOAT16
+#define DSET_FLOAT16_NAME "_Float16_type"
+#endif
 
 #define SPACE1_DIM1    4
 #define SPACE1_RANK    1
@@ -62,8 +65,8 @@ static const char *FILENAME[] = {"ntypes", NULL};
 static herr_t
 test_atomic_dtype(hid_t file)
 {
-    hid_t   dataset = -1, space = -1;
-    hid_t   dtype = -1, native_type = -1;
+    hid_t   dataset = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    hid_t   dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID;
     int     i, j, n;
     hsize_t dims[2];
     void   *tmp = NULL;
@@ -319,8 +322,9 @@ test_compound_dtype2(hid_t file)
         s2                 st;
         unsigned long long l;
     } s1;
-    hid_t dataset = -1, space = -1;
-    hid_t dtype = -1, native_type = -1, tid = -1, tid2 = -1, tid_m = -1, tid_m2 = -1, mem_id = -1,
+    hid_t dataset = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    hid_t dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID, tid = H5I_INVALID_HID,
+          tid2 = H5I_INVALID_HID, tid_m = H5I_INVALID_HID, tid_m2 = H5I_INVALID_HID, mem_id = H5I_INVALID_HID,
           nest_mem_id = -1;
     int     i, j, n;
     hsize_t dims[2];
@@ -445,7 +449,7 @@ test_compound_dtype2(hid_t file)
     if ((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
         TEST_ERROR;
 
-    if (H5Tequal(native_type, tid_m) != TRUE)
+    if (H5Tequal(native_type, tid_m) != true)
         TEST_ERROR;
 
     /* Verify the datatype of each field retrieved and converted */
@@ -629,8 +633,9 @@ test_compound_dtype(hid_t file)
         unsigned int i;
         long long    l;
     } s1;
-    hid_t   dataset = -1, space = -1;
-    hid_t   dtype = -1, native_type = -1, tid = -1, tid2 = -1, mem_id = -1;
+    hid_t dataset = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    hid_t dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID, tid = H5I_INVALID_HID,
+          tid2 = H5I_INVALID_HID, mem_id = H5I_INVALID_HID;
     int     i, j, n;
     hsize_t dims[2];
     s1     *temp_point = NULL;
@@ -711,7 +716,7 @@ test_compound_dtype(hid_t file)
     if ((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
         TEST_ERROR;
 
-    if (H5Tequal(native_type, tid2) != TRUE)
+    if (H5Tequal(native_type, tid2) != true)
         TEST_ERROR;
 
     /* Verify the datatype of each field retrieved and converted */
@@ -837,8 +842,9 @@ test_compound_dtype3(hid_t file)
         int       a[5];
         long long l;
     } s1;
-    hid_t dataset = -1, space = -1;
-    hid_t dtype = -1, native_type = -1, tid = -1, tid2 = -1, tid_m = -1, tid_m2 = -1, mem_id = -1,
+    hid_t dataset = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    hid_t dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID, tid = H5I_INVALID_HID,
+          tid2 = H5I_INVALID_HID, tid_m = H5I_INVALID_HID, tid_m2 = H5I_INVALID_HID, mem_id = H5I_INVALID_HID,
           nest_mem_id     = -1;
     hsize_t array_dims[1] = {5};
     int     i, j, k, n;
@@ -1073,8 +1079,9 @@ test_compound_opaque(hid_t file)
         unsigned char o[5];
         long long     l;
     } s1;
-    hid_t   dataset = -1, space = -1;
-    hid_t   dtype = -1, native_type = -1, tid = -1, tid2 = -1, tid_m = -1, mem_id = -1;
+    hid_t dataset = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    hid_t dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID, tid = H5I_INVALID_HID,
+          tid2 = H5I_INVALID_HID, tid_m = H5I_INVALID_HID, mem_id = H5I_INVALID_HID;
     int     i, j, k, n;
     hsize_t dims[2];
     s1     *temp_point = NULL, *temp_check = NULL;
@@ -1290,8 +1297,9 @@ error:
 static herr_t
 test_enum_dtype(hid_t file)
 {
-    hid_t         dataset = -1, space = -1;
-    hid_t         tid = -1, tid_m = -1, dtype = -1, native_type = -1;
+    hid_t dataset = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    hid_t tid = H5I_INVALID_HID, tid_m = H5I_INVALID_HID, dtype = H5I_INVALID_HID,
+          native_type = H5I_INVALID_HID;
     int           i, j, n;
     hsize_t       dims[2];
     void         *tmp = NULL;
@@ -1449,8 +1457,9 @@ test_array_dtype(hid_t file)
         int       i;
         long long l;
     } s1;
-    hid_t   dataset = -1, space = -1;
-    hid_t   dtype = -1, native_type = -1, tid = -1, tid2 = -1, tid3 = -1, tid_m = -1;
+    hid_t dataset = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    hid_t dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID, tid = H5I_INVALID_HID,
+          tid2 = H5I_INVALID_HID, tid3 = H5I_INVALID_HID, tid_m = H5I_INVALID_HID;
     int     i, j, k, n;
     hsize_t space_dims[2], array_dims[1] = {5};
     s1     *temp_point = NULL, *temp_check = NULL;
@@ -1627,8 +1636,9 @@ error:
 static herr_t
 test_array_dtype2(hid_t file)
 {
-    hid_t   dataset = -1, space = -1;
-    hid_t   dtype = -1, native_type = -1, tid = -1, tid_m = -1;
+    hid_t dataset = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    hid_t dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID, tid = H5I_INVALID_HID,
+          tid_m = H5I_INVALID_HID;
     int     i, j, k, n;
     hsize_t space_dims[2], array_dims[1] = {5};
     void   *tmp = NULL;
@@ -1778,10 +1788,11 @@ test_vl_dtype(hid_t file)
     hvl_t   rdata[SPACE1_DIM1]; /* Information read in */
     hvl_t  *t1, *t2;            /* Temporary pointer to VL information */
     hsize_t dims1[] = {SPACE1_DIM1};
-    hid_t   dataset = -1, space = -1;
-    hid_t   dtype = -1, native_type = -1, nat_super_type = -1, tid = -1, tid2 = -1, tid_m = -1, tid_m2 = -1;
-    size_t  i, j, k;
-    void  **tmp = NULL;
+    hid_t   dataset = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    hid_t   dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID, nat_super_type = H5I_INVALID_HID,
+          tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID, tid_m = H5I_INVALID_HID, tid_m2 = H5I_INVALID_HID;
+    size_t i, j, k;
+    void **tmp = NULL;
 
     TESTING("variable length datatype");
 
@@ -1981,11 +1992,11 @@ test_vlstr_dtype(hid_t file)
         "conceived in liberty and dedicated to the proposition that all men are created equal.",
         "Now we are engaged in a great civil war,",
         "testing whether that nation or any nation so conceived and so dedicated can long endure."};
-    char    *rdata[SPACE1_DIM1];                      /* Information read in */
-    hbool_t  rdata_alloc = FALSE;                     /* Whether the read data is allocated */
-    hid_t    dataset     = -1;                        /* Dataset ID            */
-    hid_t    sid1        = -1;                        /* Dataspace ID            */
-    hid_t    tid1 = -1, dtype = -1, native_type = -1; /* Datatype ID            */
+    char    *rdata[SPACE1_DIM1];            /* Information read in */
+    bool     rdata_alloc = false;           /* Whether the read data is allocated */
+    hid_t    dataset     = H5I_INVALID_HID; /* Dataset ID            */
+    hid_t    sid1        = H5I_INVALID_HID; /* Dataspace ID            */
+    hid_t    tid1 = H5I_INVALID_HID, dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID; /* Datatype ID */
     hsize_t  dims1[] = {SPACE1_DIM1};
     unsigned i; /* counting variable */
 
@@ -2036,17 +2047,17 @@ test_vlstr_dtype(hid_t file)
     /* Read dataset from disk */
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
         TEST_ERROR;
-    rdata_alloc = TRUE;
+    rdata_alloc = true;
 
     /* Compare data read in */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
+        if (strlen(wdata[i]) != strlen(rdata[i])) {
             H5_FAILED();
             printf("    VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
-                   (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
+                   (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
             goto error;
         } /* end if */
-        if (HDstrcmp(wdata[i], rdata[i]) != 0) {
+        if (strcmp(wdata[i], rdata[i]) != 0) {
             H5_FAILED();
             printf("    VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i], (int)i,
                    rdata[i]);
@@ -2071,7 +2082,7 @@ test_vlstr_dtype(hid_t file)
     /* Free memory for rdata */
     for (i = 0; i < SPACE1_DIM1; i++)
         free(rdata[i]);
-    rdata_alloc = FALSE;
+    rdata_alloc = false;
 
     PASSED();
     return 0;
@@ -2112,11 +2123,11 @@ test_str_dtype(hid_t file)
 {
     const char wdata[SPACE1_DIM1][4] = {"one", "two", "3rd", "4th"}; /* Information to write */
     char       rdata[SPACE1_DIM1][4];                                /* Information read in */
-    hid_t      dataset = -1;                                         /* Dataset ID            */
-    hid_t      sid1    = -1;                                         /* Dataspace ID            */
-    hid_t      tid1 = -1, dtype = -1, native_type = -1;              /* Datatype ID            */
-    hsize_t    dims1[] = {SPACE1_DIM1};
-    unsigned   i; /* counting variable */
+    hid_t      dataset = H5I_INVALID_HID;                            /* Dataset ID            */
+    hid_t      sid1    = H5I_INVALID_HID;                            /* Dataspace ID            */
+    hid_t    tid1 = H5I_INVALID_HID, dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID; /* Datatype ID */
+    hsize_t  dims1[] = {SPACE1_DIM1};
+    unsigned i; /* counting variable */
 
     /* Output message about test being performed */
     TESTING("fixed-length string datatype");
@@ -2168,13 +2179,13 @@ test_str_dtype(hid_t file)
 
     /* Compare data read in */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
+        if (strlen(wdata[i]) != strlen(rdata[i])) {
             H5_FAILED();
             printf("    data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
-                   (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
+                   (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
             goto error;
         } /* end if */
-        if (HDstrcmp(wdata[i], rdata[i]) != 0) {
+        if (strcmp(wdata[i], rdata[i]) != 0) {
             H5_FAILED();
             printf("    data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i], (int)i,
                    rdata[i]);
@@ -2234,10 +2245,10 @@ test_refer_dtype(hid_t file)
         float        c;
     } s1_t;
 
-    hid_t       dataset = -1;                            /* Dataset ID            */
-    hid_t       group   = -1;                            /* Group ID             */
-    hid_t       sid1    = -1;                            /* Dataspace ID            */
-    hid_t       tid1 = -1, dtype = -1, native_type = -1; /* Datatype ID    */
+    hid_t dataset = H5I_INVALID_HID; /* Dataset ID            */
+    hid_t group   = H5I_INVALID_HID; /* Group ID             */
+    hid_t sid1    = H5I_INVALID_HID; /* Dataspace ID            */
+    hid_t tid1 = H5I_INVALID_HID, dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID; /* Datatype ID    */
     hsize_t     dims1[] = {1};
     H5O_type_t  obj_type;    /* Object type */
     hobj_ref_t *wbuf = NULL, /* buffer to write to disk */
@@ -2395,11 +2406,11 @@ error:
 static herr_t
 test_refer_dtype2(hid_t file)
 {
-    hid_t dset1           = -1, /* Dataset ID            */
-        dset2             = -1; /* Dereferenced dataset ID */
-    hid_t sid1            = -1, /* Dataspace ID    #1        */
-        sid2              = -1; /* Dataspace ID    #2        */
-    hid_t           dtype = -1, native_type = -1;
+    hid_t dset1           = H5I_INVALID_HID, /* Dataset ID            */
+        dset2             = -1;              /* Dereferenced dataset ID */
+    hid_t sid1            = H5I_INVALID_HID, /* Dataspace ID    #1        */
+        sid2              = -1;              /* Dataspace ID    #2        */
+    hid_t           dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID;
     hsize_t         dims1[] = {1}, dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t         start[SPACE2_RANK];  /* Starting location of hyperslab */
     hsize_t         stride[SPACE2_RANK]; /* Stride of hyperslab */
@@ -2604,8 +2615,8 @@ error:
 static herr_t
 test_opaque_dtype(hid_t file)
 {
-    hid_t         type = -1, space = -1, dset = -1;
-    hid_t         dataset = -1, dtype = -1, native_type = -1;
+    hid_t         type = H5I_INVALID_HID, space = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+    hid_t         dataset = H5I_INVALID_HID, dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID;
     size_t        i;
     unsigned char wbuf[32], rbuf[32];
     hsize_t       nelmts;
@@ -2698,8 +2709,9 @@ error:
 static herr_t
 test_bitfield_dtype(hid_t file)
 {
-    hid_t          type = -1, space = -1, dset1 = -1, dset2 = -1;
-    hid_t          dataset1 = -1, dataset2 = -1, dtype = -1, native_type = -1;
+    hid_t type = H5I_INVALID_HID, space = H5I_INVALID_HID, dset1 = H5I_INVALID_HID, dset2 = H5I_INVALID_HID;
+    hid_t dataset1 = H5I_INVALID_HID, dataset2 = H5I_INVALID_HID, dtype = H5I_INVALID_HID,
+          native_type = H5I_INVALID_HID;
     size_t         ntype_size, i;
     unsigned char  wbuf[BITFIELD_ENUMB * sizeof(int)];
     unsigned char *p    = NULL;
@@ -2849,19 +2861,19 @@ error:
 static herr_t
 test_ninteger(void)
 {
-    hid_t   fid1    = -1;     /* file ID */
-    hid_t   fid2    = -1;     /* file ID */
-    hid_t   did1    = -1;     /* dataset ID */
-    hid_t   did2    = -1;     /* dataset ID */
-    hid_t   sid1    = -1;     /* dataspace ID */
-    hid_t   dcpl1   = -1;     /* dataset creation property list ID */
-    hid_t   dcpl2   = -1;     /* dataset creation property list ID */
-    hid_t   tid1    = -1;     /* file datatype */
-    hid_t   tid2    = -1;     /* file datatype */
-    hid_t   nid1    = -1;     /* native datatype */
-    hid_t   nid2    = -1;     /* native datatype */
-    hsize_t dims[1] = {DIM3}; /* dataspace dimensions */
-    int     rank    = 1;      /* rank of dataset */
+    hid_t   fid1    = H5I_INVALID_HID; /* file ID */
+    hid_t   fid2    = H5I_INVALID_HID; /* file ID */
+    hid_t   did1    = H5I_INVALID_HID; /* dataset ID */
+    hid_t   did2    = H5I_INVALID_HID; /* dataset ID */
+    hid_t   sid1    = H5I_INVALID_HID; /* dataspace ID */
+    hid_t   dcpl1   = H5I_INVALID_HID; /* dataset creation property list ID */
+    hid_t   dcpl2   = H5I_INVALID_HID; /* dataset creation property list ID */
+    hid_t   tid1    = H5I_INVALID_HID; /* file datatype */
+    hid_t   tid2    = H5I_INVALID_HID; /* file datatype */
+    hid_t   nid1    = H5I_INVALID_HID; /* native datatype */
+    hid_t   nid2    = H5I_INVALID_HID; /* native datatype */
+    hsize_t dims[1] = {DIM3};          /* dataspace dimensions */
+    int     rank    = 1;               /* rank of dataset */
     int     buf[DIM3];
     int     chk[DIM3];
     int     i;
@@ -3042,6 +3054,120 @@ error:
     return -1;
 } /* end test_ninteger() */
 
+#ifdef H5_HAVE__FLOAT16
+static herr_t
+test__Float16(hid_t file)
+{
+    hsize_t dims[2];
+    hid_t   dataset     = H5I_INVALID_HID;
+    hid_t   space       = H5I_INVALID_HID;
+    hid_t   dtype       = H5I_INVALID_HID;
+    hid_t   native_type = H5I_INVALID_HID;
+    struct {
+        H5__Float16 arr[DIM0][DIM1];
+    } *ipoints = NULL;
+    struct {
+        H5__Float16 arr[DIM0][DIM1];
+    } *icheck = NULL;
+
+    TESTING("_Float16 datatype");
+
+    if (NULL == (ipoints = calloc(1, sizeof(*ipoints))))
+        TEST_ERROR;
+    if (NULL == (icheck = calloc(1, sizeof(*icheck))))
+        TEST_ERROR;
+
+    /* Initialize the data */
+    for (size_t i = 0; i < DIM0; i++)
+        for (size_t j = 0; j < DIM1; j++)
+            ipoints->arr[i][j] = (H5__Float16)(HDrand() / (double)RAND_MAX);
+
+    /* Create the data space */
+    dims[0] = DIM0;
+    dims[1] = DIM1;
+    if ((space = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    if ((dataset = H5Dcreate2(file, DSET_FLOAT16_NAME, H5T_IEEE_F16BE, space, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write the data to the dataset */
+    if (H5Dwrite(dataset, H5T_NATIVE_FLOAT16, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+
+    /* Open dataset again to check H5Tget_native_type */
+    if ((dataset = H5Dopen2(file, DSET_FLOAT16_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dtype = H5Dget_type(dataset)) < 0)
+        TEST_ERROR;
+
+    if ((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Verify the datatype retrieved and converted */
+    if (H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_FLOAT16))
+        TEST_ERROR;
+    if (H5Tget_size(native_type) != H5Tget_size(H5T_IEEE_F16BE))
+        TEST_ERROR;
+    if (H5T_FLOAT != H5Tget_class(native_type))
+        TEST_ERROR;
+
+    /* Read the dataset back */
+    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, icheck) < 0)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    for (size_t i = 0; i < DIM0; i++)
+        for (size_t j = 0; j < DIM1; j++) {
+            if (!H5_FLT16_ABS_EQUAL(ipoints->arr[i][j], icheck->arr[i][j])) {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %zu,%zu\n", i, j);
+                goto error;
+            } /* end if */
+        }
+
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    if (H5Tclose(native_type) < 0)
+        TEST_ERROR;
+    if (H5Tclose(dtype) < 0)
+        TEST_ERROR;
+
+    free(ipoints);
+    ipoints = NULL;
+    free(icheck);
+    icheck = NULL;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dataset);
+        H5Tclose(native_type);
+        H5Tclose(dtype);
+        H5Sclose(space);
+    }
+    H5E_END_TRY
+
+    free(ipoints);
+    free(icheck);
+
+    return -1;
+}
+#endif
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -3052,10 +3178,10 @@ error:
 int
 main(void)
 {
-    hid_t   file, fapl;
-    int     nerrors = 0;
-    char    filename[1024];
-    hbool_t driver_is_parallel;
+    hid_t file, fapl;
+    int   nerrors = 0;
+    char  filename[1024];
+    bool  driver_is_parallel;
 
     h5_reset();
     fapl = h5_fileaccess();
@@ -3091,6 +3217,10 @@ main(void)
     nerrors += test_opaque_dtype(file) < 0 ? 1 : 0;
     nerrors += test_bitfield_dtype(file) < 0 ? 1 : 0;
     nerrors += test_ninteger() < 0 ? 1 : 0;
+
+#ifdef H5_HAVE__FLOAT16
+    nerrors += test__Float16(file) < 0 ? 1 : 0;
+#endif
 
     if (H5Fclose(file) < 0)
         goto error;

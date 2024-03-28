@@ -36,13 +36,13 @@
 /* report 0.0 in case t is zero too */
 #define MB_PER_SEC(bytes, t) ((fabs(t) < 0.0000000001) ? 0.0 : ((((double)(bytes)) / (double)ONE_MB) / (t)))
 
-#ifndef TRUE
-#define TRUE 1
-#endif /* TRUE */
+#ifndef true
+#define true 1
+#endif /* true */
 
-#ifndef FALSE
-#define FALSE (!TRUE)
-#endif /* FALSE */
+#ifndef false
+#define false (!true)
+#endif /* false */
 
 #ifndef S_IRWXU
 #define S_IRWXU (_S_IREAD | _S_IWRITE)
@@ -54,7 +54,7 @@ static const char *option_prefix    = NULL;
 static char       *filename         = NULL;
 static int         compress_percent = 0;
 static int         compress_level   = Z_DEFAULT_COMPRESSION;
-static int         output, random_test = FALSE;
+static int         output, random_test = false;
 static int         report_once_flag;
 static double      compression_time;
 
@@ -85,7 +85,7 @@ error(const char *fmt, ...)
     va_start(ap, fmt);
     fprintf(stderr, "%s: error: ", prog);
     H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
-    HDvfprintf(stderr, fmt, ap);
+    vfprintf(stderr, fmt, ap);
     H5_GCC_CLANG_DIAG_ON("format-nonliteral")
     fprintf(stderr, "\n");
     va_end(ap);
@@ -100,7 +100,7 @@ error(const char *fmt, ...)
 static void
 cleanup(void)
 {
-    if (!HDgetenv(HDF5_NOCLEANUP))
+    if (!getenv(HDF5_NOCLEANUP))
         HDunlink(filename);
     free(filename);
 }
@@ -140,7 +140,7 @@ write_file(Bytef *source, uLongf sourceLen)
         int rc = (int)HDwrite(output, d_ptr, (size_t)d_len);
 
         if (rc == -1)
-            error(HDstrerror(errno));
+            error(strerror(errno));
 
         if (rc == (int)d_len)
             break;
@@ -197,7 +197,7 @@ static void
 get_unique_name(void)
 {
     const char *prefix = NULL;
-    const char *env    = HDgetenv("HDF5_PREFIX");
+    const char *env    = getenv("HDF5_PREFIX");
 
     if (env)
         prefix = env;
@@ -207,19 +207,19 @@ get_unique_name(void)
 
     if (prefix)
         /* 2 = 1 for '/' + 1 for null terminator */
-        filename = (char *)malloc(HDstrlen(prefix) + HDstrlen(ZIP_PERF_FILE) + 2);
+        filename = (char *)malloc(strlen(prefix) + strlen(ZIP_PERF_FILE) + 2);
     else
-        filename = (char *)malloc(HDstrlen(ZIP_PERF_FILE) + 1);
+        filename = (char *)malloc(strlen(ZIP_PERF_FILE) + 1);
 
     if (!filename)
         error("out of memory");
 
     filename[0] = 0;
     if (prefix) {
-        HDstrcpy(filename, prefix);
-        HDstrcat(filename, "/");
+        strcpy(filename, prefix);
+        strcat(filename, "/");
     }
-    HDstrcat(filename, ZIP_PERF_FILE);
+    strcat(filename, ZIP_PERF_FILE);
 }
 
 /*
@@ -308,6 +308,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
     unsigned  u;
     h5_stat_t stat_buf;
 
+    memset(&stat_buf, 0, sizeof(h5_stat_t));
     if (HDstat("/dev/urandom", &stat_buf) == 0) {
         uLongf len = src_len;
         Bytef *buf = src;
@@ -316,13 +317,13 @@ fill_with_random_data(Bytef *src, uLongf src_len)
         fprintf(stdout, "Using /dev/urandom for random data\n");
 
         if (fd < 0)
-            error(HDstrerror(errno));
+            error(strerror(errno));
 
         for (;;) {
             ssize_t rc = HDread(fd, buf, src_len);
 
             if (rc == -1)
-                error(HDstrerror(errno));
+                error(strerror(errno));
 
             if (rc == (ssize_t)len)
                 break;
@@ -391,7 +392,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
         output = HDopen(filename, O_RDWR | O_CREAT, S_IRWXU);
 
         if (output == -1)
-            error(HDstrerror(errno));
+            error(strerror(errno));
 
         for (i = 0; i <= iters; ++i) {
             Bytef *s_ptr = src;
@@ -402,7 +403,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
                 ssize_t rc = HDwrite(output, s_ptr, s_len);
 
                 if (rc == -1)
-                    error(HDstrerror(errno));
+                    error(strerror(errno));
 
                 if (rc == (ssize_t)s_len)
                     break;
@@ -427,7 +428,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
         output = HDopen(filename, O_RDWR | O_CREAT, S_IRWXU);
 
         if (output == -1)
-            error(HDstrerror(errno));
+            error(strerror(errno));
 
         report_once_flag = 1;
         HDgettimeofday(&timer_start, NULL);
@@ -500,7 +501,7 @@ main(int argc, char *argv[])
                 option_prefix = H5_optarg;
                 break;
             case 'r':
-                random_test = TRUE;
+                random_test = true;
                 break;
             case 's':
                 file_size = parse_size_directive(H5_optarg);

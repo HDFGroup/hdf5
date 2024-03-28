@@ -36,10 +36,10 @@ TEST_PROG_PARA=parallel_test subfiling_test async_test
 check_PROGRAMS=$(TEST_PROG_PARA)
 
 # Temporary files
-CHECK_CLEANFILES+=parf[12].h5 subf.h5*
+CHECK_CLEANFILES+=parf[12].h5 h5*_tests.h5 subf.h5* *.mod
 
 # Test source files
-parallel_test_SOURCES=ptest.F90 hyper.F90 mdset.F90 multidsetrw.F90
+parallel_test_SOURCES=ptest.F90 hyper.F90 mdset.F90 multidsetrw.F90 mpi_param.F90
 subfiling_test_SOURCES=subfiling.F90
 async_test_SOURCES=async.F90
 

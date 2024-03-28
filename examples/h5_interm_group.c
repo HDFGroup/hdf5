@@ -18,8 +18,6 @@
 #include "hdf5.h"
 
 #define H5FILE_NAME "interm_group.h5"
-#define TRUE        1
-#define FALSE       0
 
 int
 main(void)

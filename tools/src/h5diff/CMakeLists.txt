@@ -4,77 +4,50 @@ project (HDF5_TOOLS_SRC_H5DIFF C)
 # --------------------------------------------------------------------
 # Add the h5diff executables
 # --------------------------------------------------------------------
-if (BUILD_STATIC_LIBS)
-  add_executable (h5diff
-      ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
-      ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_main.c
-      ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.h
-  )
-  target_include_directories (h5diff PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  target_compile_options(h5diff PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-  #target_compile_definitions (h5diff PRIVATE H5_TOOLS_DEBUG)
+add_executable (h5diff
+    ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
+    ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_main.c
+    ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.h
+)
+target_include_directories (h5diff PRIVATE "${HDF5_TOOLS_ROOT_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_compile_options(h5diff PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+#target_compile_definitions (h5diff PRIVATE H5_TOOLS_DEBUG)
+if (HDF5_BUILD_STATIC_TOOLS)
   TARGET_C_PROPERTIES (h5diff STATIC)
   target_link_libraries (h5diff PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
-  set_target_properties (h5diff PROPERTIES FOLDER tools)
-  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5diff")
-
-  set (H5_DEP_EXECUTABLES h5diff)
+else ()
+  TARGET_C_PROPERTIES (h5diff SHARED)
+  target_link_libraries (h5diff PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
 endif ()
-if (BUILD_SHARED_LIBS)
-  add_executable (h5diff-shared
-      ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
-      ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_main.c
-      ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.h
-  )
-  target_include_directories (h5diff-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  target_compile_options(h5diff-shared PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-  #target_compile_definitions (h5diff-shared PRIVATE H5_TOOLS_DEBUG)
-  TARGET_C_PROPERTIES (h5diff-shared SHARED)
-  target_link_libraries (h5diff-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-  set_target_properties (h5diff-shared PROPERTIES FOLDER tools)
-  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5diff-shared")
+set_target_properties (h5diff PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5diff")
 
-  set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5diff-shared)
-endif ()
+set (H5_DEP_EXECUTABLES h5diff)
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (BUILD_STATIC_LIBS)
-    clang_format (HDF5_H5DIFF_SRC_FORMAT h5diff)
-  else ()
-    clang_format (HDF5_H5DIFF_SRC_FORMAT h5diff-shared)
-  endif ()
+  clang_format (HDF5_H5DIFF_SRC_FORMAT h5diff)
 endif ()
 
 if (H5_HAVE_PARALLEL)
-  if (BUILD_STATIC_LIBS)
-    add_executable (ph5diff
-        ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
-        ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/ph5diff_main.c
-    )
-    target_include_directories (ph5diff PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-    target_compile_options(ph5diff PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+  add_executable (ph5diff
+      ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
+      ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/ph5diff_main.c
+  )
+  target_include_directories (ph5diff PRIVATE "${HDF5_TOOLS_ROOT_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_compile_options(ph5diff PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+  if (HDF5_BUILD_STATIC_TOOLS)
     TARGET_C_PROPERTIES (ph5diff STATIC)
     target_link_libraries (ph5diff PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>")
-    set_target_properties (ph5diff PROPERTIES FOLDER tools)
-    set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};ph5diff")
-    set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} ph5diff)
+  else ()
+    TARGET_C_PROPERTIES (ph5diff SHARED)
+    target_link_libraries (ph5diff PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>")
   endif ()
-  if (BUILD_SHARED_LIBS)
-    add_executable (ph5diff-shared
-        ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
-        ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/ph5diff_main.c
-    )
-    target_include_directories (ph5diff-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-    target_compile_options(ph5diff-shared PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-    TARGET_C_PROPERTIES (ph5diff-shared SHARED)
-    target_link_libraries (ph5diff-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>")
-    set_target_properties (ph5diff-shared PROPERTIES FOLDER tools)
-    set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};ph5diff-shared")
-    set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} ph5diff-shared)
-  endif ()
+  set_target_properties (ph5diff PROPERTIES FOLDER tools)
+  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};ph5diff")
+  set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} ph5diff)
 endif ()
 
 ##############################################################################

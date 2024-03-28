@@ -35,7 +35,6 @@
 #include "H5private.h"   /* Generic Functions			 */
 #include "H5Eprivate.h"  /* Error handling		  	 */
 #include "H5ESpkg.h"     /* Event Sets                           */
-#include "H5FLprivate.h" /* Free Lists                           */
 #include "H5Iprivate.h"  /* IDs                                  */
 #include "H5MMprivate.h" /* Memory management                    */
 
@@ -91,7 +90,7 @@ H5EScreate(void)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCREATE, H5I_INVALID_HID, "can't create event set");
 
     /* Register the new event set to get an ID for it */
-    if ((ret_value = H5I_register(H5I_EVENTSET, es, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_EVENTSET, es, true)) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register event set");
 
 done:
@@ -161,7 +160,7 @@ H5ESget_count(hid_t es_id, size_t *count /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", es_id, count);
+    H5TRACE2("e", "i*z", es_id, count);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
@@ -202,7 +201,7 @@ H5ESget_op_counter(hid_t es_id, uint64_t *op_counter /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", es_id, op_counter);
+    H5TRACE2("e", "i*UL", es_id, op_counter);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
@@ -252,7 +251,7 @@ H5ESget_requests(hid_t es_id, H5_iter_order_t order, hid_t *connector_ids, void 
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "iIo*i**xzx", es_id, order, connector_ids, requests, array_len, count);
+    H5TRACE6("e", "iIo*i**xz*z", es_id, order, connector_ids, requests, array_len, count);
 
     /* Check arguments */
     if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
@@ -304,7 +303,7 @@ H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress /*out*/, hbool_t
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iULxx", es_id, timeout, num_in_progress, op_failed);
+    H5TRACE4("e", "iUL*z*b", es_id, timeout, num_in_progress, op_failed);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
@@ -344,7 +343,7 @@ H5EScancel(hid_t es_id, size_t *num_not_canceled /*out*/, hbool_t *op_failed /*o
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", es_id, num_not_canceled, op_failed);
+    H5TRACE3("e", "i*z*b", es_id, num_not_canceled, op_failed);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
@@ -384,7 +383,7 @@ H5ESget_err_status(hid_t es_id, hbool_t *err_status /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", es_id, err_status);
+    H5TRACE2("e", "i*b", es_id, err_status);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
@@ -423,7 +422,7 @@ H5ESget_err_count(hid_t es_id, size_t *num_errs /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", es_id, num_errs);
+    H5TRACE2("e", "i*z", es_id, num_errs);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {
@@ -467,7 +466,7 @@ H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t err_info[] /*
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "izxx", es_id, num_err_info, err_info, num_cleared);
+    H5TRACE4("e", "iz*#*z", es_id, num_err_info, err_info, num_cleared);
 
     /* Passing H5ES_NONE is valid, but a no-op */
     if (H5ES_NONE != es_id) {

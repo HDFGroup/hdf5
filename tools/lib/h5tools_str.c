@@ -43,10 +43,10 @@ typedef struct H5LD_memb_t {
 /* Variable length string datatype */
 #define STR_INIT_LEN 4096 /*initial length            */
 
-static char   *h5tools_escape(char *s, size_t size);
-static hbool_t h5tools_str_is_zero(const void *_mem, size_t size);
-static void    h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch);
-void           h5tools_str_indent(h5tools_str_t *str, const h5tool_format_t *info, h5tools_context_t *ctx);
+static char *h5tools_escape(char *s, size_t size);
+static bool  h5tools_str_is_zero(const void *_mem, size_t size);
+static void  h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch);
+void         h5tools_str_indent(h5tools_str_t *str, const h5tool_format_t *info, h5tools_context_t *ctx);
 
 /*-------------------------------------------------------------------------
  * Function:    h5tools_str_close
@@ -106,7 +106,7 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
     if (!str->s || str->nalloc <= 0)
         h5tools_str_reset(str);
 
-    if (HDstrlen(fmt) == 0)
+    if (strlen(fmt) == 0)
         /* nothing to print */
         return str->s;
 
@@ -117,17 +117,17 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
         size_t avail  = str->nalloc - str->len;
 
         va_start(ap, fmt);
-        nchars = HDvsnprintf(str->s + str->len, avail, fmt, ap);
+        nchars = vsnprintf(str->s + str->len, avail, fmt, ap);
         va_end(ap);
 
-        /* Note: HDvsnprintf() behaves differently on Windows as Unix, when
+        /* Note: vsnprintf() behaves differently on Windows as Unix, when
          * buffer is smaller than source string. On Unix, this function
          * returns length of the source string and copy string up to the
          * buffer size with NULL at the end of the buffer. However on
          * Windows with the same condition, this function returns -1 and
          * doesn't add NULL at the end of the buffer.
          * Because of this different return results, the strlen of the new string
-         * is used to handle when HDvsnprintf() returns -1 on Windows due
+         * is used to handle when vsnprintf() returns -1 on Windows due
          * to lack of buffer size, so try one more time after realloc more
          * buffer size before return NULL.
          */
@@ -135,7 +135,7 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
             /* failure, such as bad format */
             return NULL;
 
-        if ((size_t)nchars >= avail || (0 == nchars && (HDstrcmp(fmt, "%s") != 0))) {
+        if ((size_t)nchars >= avail || (0 == nchars && (strcmp(fmt, "%s") != 0))) {
             /* Truncation return value as documented by C99, or zero return value with either of the
              * following conditions, each of which indicates that the proper C99 return value probably
              *  should have been positive when the format string is
@@ -230,14 +230,14 @@ h5tools_str_fmt(h5tools_str_t *str /*in,out*/, size_t start, const char *fmt)
     assert(fmt);
 
     /* If the format string is simply "%s" then don't bother doing anything */
-    if (!HDstrcmp(fmt, "%s"))
+    if (!strcmp(fmt, "%s"))
         return str->s;
 
     /*
      * Save the input value if there is a `%' anywhere in FMT.  Otherwise
      * don't bother because we don't need a temporary copy.
      */
-    if (HDstrchr(fmt, '%')) {
+    if (strchr(fmt, '%')) {
         size_t n = sizeof(_temp);
         if (str->len - start + 1 > n) {
             n    = str->len - start + 1;
@@ -245,7 +245,7 @@ h5tools_str_fmt(h5tools_str_t *str /*in,out*/, size_t start, const char *fmt)
             assert(temp);
         }
 
-        HDstrncpy(temp, str->s + start, n - 1);
+        strncpy(temp, str->s + start, n - 1);
         temp[n - 1] = '\0';
     }
 
@@ -669,8 +669,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     H5TOOLS_START_DEBUG(" ");
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
-        HDsnprintf(fmt_llong, sizeof(fmt_llong), "%%lld");
-        HDsnprintf(fmt_ullong, sizeof(fmt_ullong), "%%llu");
+        snprintf(fmt_llong, sizeof(fmt_llong), "%%lld");
+        snprintf(fmt_ullong, sizeof(fmt_ullong), "%%llu");
     }
 
     /* Append value depending on data type */
@@ -700,7 +700,17 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         switch (type_class) {
             case H5T_FLOAT:
                 H5TOOLS_DEBUG("H5T_FLOAT");
-                if (sizeof(float) == nsize) {
+#ifdef H5_HAVE__FLOAT16
+                if (sizeof(H5__Float16) == nsize) {
+                    /* if (H5Tequal(type, H5T_NATIVE_FLOAT16)) */
+                    H5__Float16 tempfloat16;
+
+                    memcpy(&tempfloat16, vp, sizeof(H5__Float16));
+                    h5tools_str_append(str, OPT(info->fmt_float, "%g"), (double)tempfloat16);
+                }
+                else
+#endif
+                    if (sizeof(float) == nsize) {
                     /* if (H5Tequal(type, H5T_NATIVE_FLOAT)) */
                     float tempfloat;
 
@@ -741,10 +751,10 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                 quote = '\0';
                 if (H5Tis_variable_str(type)) {
                     /* cp_vp is the pointer into the struct where a `char*' is stored. So we have
-                     * to dereference the pointer to get the `char*' to pass to HDstrlen(). */
+                     * to dereference the pointer to get the `char*' to pass to strlen(). */
                     s = *(char **)((void *)cp_vp);
                     if (s != NULL)
-                        size = HDstrlen(s);
+                        size = strlen(s);
                 }
                 else {
                     s    = cp_vp;
@@ -1197,54 +1207,58 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                         /*
                          * Object references -- show the type and OID of the referenced object.
                          */
-                        H5O_info2_t oi;
-                        char       *obj_tok_str = NULL;
-
                         H5TOOLS_DEBUG("H5T_REFERENCE:H5T_STD_REF_OBJ");
                         obj = H5Rdereference2(container, H5P_DEFAULT, H5R_OBJECT, vp);
-                        H5Oget_info3(obj, &oi, H5O_INFO_BASIC);
+                        if (obj >= 0) {
+                            H5O_info2_t oi;
+                            char       *obj_tok_str = NULL;
 
-                        /* Print object type and close object */
-                        switch (oi.type) {
-                            case H5O_TYPE_GROUP:
-                                h5tools_str_append(str, H5_TOOLS_GROUP);
-                                break;
+                            H5Oget_info3(obj, &oi, H5O_INFO_BASIC);
 
-                            case H5O_TYPE_DATASET:
-                                h5tools_str_append(str, H5_TOOLS_DATASET);
-                                break;
+                            /* Print object type and close object */
+                            switch (oi.type) {
+                                case H5O_TYPE_GROUP:
+                                    h5tools_str_append(str, H5_TOOLS_GROUP);
+                                    break;
 
-                            case H5O_TYPE_NAMED_DATATYPE:
-                                h5tools_str_append(str, H5_TOOLS_DATATYPE);
-                                break;
+                                case H5O_TYPE_DATASET:
+                                    h5tools_str_append(str, H5_TOOLS_DATASET);
+                                    break;
 
-                            case H5O_TYPE_MAP:
-                                h5tools_str_append(str, H5_TOOLS_MAP);
-                                break;
+                                case H5O_TYPE_NAMED_DATATYPE:
+                                    h5tools_str_append(str, H5_TOOLS_DATATYPE);
+                                    break;
 
-                            case H5O_TYPE_UNKNOWN:
-                            case H5O_TYPE_NTYPES:
-                            default:
-                                h5tools_str_append(str, "%u-", (unsigned)oi.type);
-                                break;
+                                case H5O_TYPE_MAP:
+                                    h5tools_str_append(str, H5_TOOLS_MAP);
+                                    break;
+
+                                case H5O_TYPE_UNKNOWN:
+                                case H5O_TYPE_NTYPES:
+                                default:
+                                    h5tools_str_append(str, "%u-", (unsigned)oi.type);
+                                    break;
+                            }
+
+                            /* Print OID */
+                            H5Otoken_to_str(obj, &oi.token, &obj_tok_str);
+
+                            H5Oclose(obj);
+
+                            if (info->obj_hidefileno)
+                                h5tools_str_append(str, info->obj_format, obj_tok_str);
+                            else
+                                h5tools_str_append(str, info->obj_format, oi.fileno, obj_tok_str);
+
+                            if (obj_tok_str) {
+                                H5free_memory(obj_tok_str);
+                                obj_tok_str = NULL;
+                            }
+
+                            h5tools_str_sprint_old_reference(str, container, H5R_OBJECT, vp);
                         }
-
-                        /* Print OID */
-                        H5Otoken_to_str(obj, &oi.token, &obj_tok_str);
-
-                        H5Oclose(obj);
-
-                        if (info->obj_hidefileno)
-                            h5tools_str_append(str, info->obj_format, obj_tok_str);
                         else
-                            h5tools_str_append(str, info->obj_format, oi.fileno, obj_tok_str);
-
-                        if (obj_tok_str) {
-                            H5free_memory(obj_tok_str);
-                            obj_tok_str = NULL;
-                        }
-
-                        h5tools_str_sprint_old_reference(str, container, H5R_OBJECT, vp);
+                            h5tools_str_append(str, "<unknown>");
                     } /* end else if (H5Tequal(type, H5T_STD_REF_OBJ)) */
                 }
                 break;
@@ -1494,7 +1508,7 @@ h5tools_escape(char *s /*in,out*/, size_t size)
     size_t      i;
     const char *escape;
     char        octal[8];
-    size_t      n = HDstrlen(s);
+    size_t      n = strlen(s);
 
     for (i = 0; i < n; i++) {
         switch (s[i]) {
@@ -1533,7 +1547,7 @@ h5tools_escape(char *s /*in,out*/, size_t size)
                 break;
             default:
                 if (!isprint(s[i])) {
-                    HDsnprintf(octal, sizeof(octal), "\\%03o", (unsigned char)s[i]);
+                    snprintf(octal, sizeof(octal), "\\%03o", (unsigned char)s[i]);
                     escape = octal;
                 }
                 else
@@ -1543,7 +1557,7 @@ h5tools_escape(char *s /*in,out*/, size_t size)
         }
 
         if (escape) {
-            size_t esc_size = HDstrlen(escape);
+            size_t esc_size = strlen(escape);
 
             if (n + esc_size + 1 > size)
                 /*would overflow*/
@@ -1564,20 +1578,20 @@ h5tools_escape(char *s /*in,out*/, size_t size)
  *
  * Purpose:     Determines if memory is initialized to all zero bytes.
  *
- * Return:      TRUE if all bytes are zero; FALSE otherwise
+ * Return:      true if all bytes are zero; false otherwise
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 h5tools_str_is_zero(const void *_mem, size_t size)
 {
     const unsigned char *mem = (const unsigned char *)_mem;
 
     while (size-- > 0)
         if (mem[size])
-            return FALSE;
+            return false;
 
-    return TRUE;
+    return true;
 }
 
 /*-------------------------------------------------------------------------
@@ -1601,26 +1615,26 @@ h5tools_str_replace(const char *string, const char *substr, const char *replacem
     char *head   = NULL;
 
     if (substr == NULL || replacement == NULL)
-        return HDstrdup(string);
-    newstr = HDstrdup(string);
+        return strdup(string);
+    newstr = strdup(string);
     head   = newstr;
-    while ((tok = HDstrstr(head, substr))) {
+    while ((tok = strstr(head, substr))) {
         char *oldstr;
 
         oldstr = newstr;
-        newstr = (char *)malloc(HDstrlen(oldstr) - HDstrlen(substr) + HDstrlen(replacement) + 1);
+        newstr = (char *)malloc(strlen(oldstr) - strlen(substr) + strlen(replacement) + 1);
 
         if (newstr == NULL) {
             free(oldstr);
             return NULL;
         }
         memcpy(newstr, oldstr, (size_t)(tok - oldstr));
-        memcpy(newstr + (tok - oldstr), replacement, HDstrlen(replacement));
-        memcpy(newstr + (tok - oldstr) + HDstrlen(replacement), tok + HDstrlen(substr),
-               HDstrlen(oldstr) - HDstrlen(substr) - (size_t)(tok - oldstr));
-        memset(newstr + HDstrlen(oldstr) - HDstrlen(substr) + HDstrlen(replacement), 0, 1);
+        memcpy(newstr + (tok - oldstr), replacement, strlen(replacement));
+        memcpy(newstr + (tok - oldstr) + strlen(replacement), tok + strlen(substr),
+               strlen(oldstr) - strlen(substr) - (size_t)(tok - oldstr));
+        memset(newstr + strlen(oldstr) - strlen(substr) + strlen(replacement), 0, 1);
         /* move back head right after the last replacement */
-        head = newstr + (tok - oldstr) + HDstrlen(replacement);
+        head = newstr + (tok - oldstr) + strlen(replacement);
         free(oldstr);
     }
 

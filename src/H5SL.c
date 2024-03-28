@@ -77,7 +77,7 @@
 
 /* Define a code template for comparing string keys for the "CMP" in the H5SL_LOCATE macro */
 #define H5SL_LOCATE_STRING_CMP(SLIST, TYPE, PNODE, PKEY, HASHVAL)                                            \
-    (((PNODE)->hashval == HASHVAL) ? (HDstrcmp((const char *)(PNODE)->key, (const char *)PKEY) < 0)          \
+    (((PNODE)->hashval == HASHVAL) ? (strcmp((const char *)(PNODE)->key, (const char *)PKEY) < 0)            \
                                    : ((PNODE)->hashval < HASHVAL))
 
 /* Define a code template for comparing H5_obj_t keys for the "CMP" in the H5SL_LOCATE macro */
@@ -95,7 +95,7 @@
 
 /* Define a code template for comparing string keys for the "EQ" in the H5SL_LOCATE macro */
 #define H5SL_LOCATE_STRING_EQ(SLIST, TYPE, PNODE, PKEY, HASHVAL)                                             \
-    (((PNODE)->hashval == HASHVAL) && (HDstrcmp((const char *)(PNODE)->key, (const char *)PKEY) == 0))
+    (((PNODE)->hashval == HASHVAL) && (strcmp((const char *)(PNODE)->key, (const char *)PKEY) == 0))
 
 /* Define a code template for comparing H5_obj_t keys for the "EQ" in the H5SL_LOCATE macro */
 #define H5SL_LOCATE_OBJ_EQ(SLIST, TYPE, PNODE, PKEY, HASHVAL)                                                \

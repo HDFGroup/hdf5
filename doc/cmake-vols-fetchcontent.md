@@ -97,12 +97,21 @@ After the VOL's internal name is generated, the following new variables get crea
         variable must be set in order for the VOL connector to be testable with
         HDF5's tests.
 
+    HDF5_VOL_<VOL name>_CMAKE_PACKAGE_NAME (Default: "<lowercased <VOL name>>")
+        This variable specifies the exact name that would be passed to CMake
+        find_package(...) calls for the VOL connector in question. It is used as
+        the dependency name when making CMake FetchContent calls to try to ensure
+        that any other VOL connectors to be built which depend on this VOL connector
+        can make find_package(...) calls for this VOL connector at configure time.
+        By default, this variable is set to a lowercased version of the internal
+        name generated for the VOL connector (described above).
+
     HDF5_VOL_<VOL name>_TEST_PARALLEL (Default: OFF)
         This variable determines whether the VOL connector with the CMake-internal
         name '<VOL name>' should be tested against HDF5's parallel tests.
 
 If the source was retrieved from a Git URL, then the following variable will additionally be created:
-    
+
     HDF5_VOL_<VOL name>_BRANCH (Default: "main")
         This variable specifies the git branch name or tag to use when fetching
         the source code for the VOL connector with the CMake-internal name
@@ -111,9 +120,10 @@ If the source was retrieved from a Git URL, then the following variable will add
 As an example, this would create the following variables for the
 previously-mentioned VOL connector if it is retrieved from a URL:
 
-    HDF5_VOL_VOL-ASYNC_BRANCH
-    HDF5_VOL_VOL-ASYNC_NAME
-    HDF5_VOL_VOL-ASYNC_TEST_PARALLEL
+    HDF5_VOL_VOL-ASYNC_NAME                  ""
+    HDF5_VOL_VOL-ASYNC_CMAKE_PACKAGE_NAME    "vol-async"
+    HDF5_VOL_VOL-ASYNC_BRANCH                "main"
+    HDF5_VOL_VOL-ASYNC_TEST_PARALLEL         OFF
 
 **NOTE**
 If a VOL connector requires extra information to be passed in its
@@ -139,9 +149,10 @@ would typically be passed when building HDF5, such as `CMAKE_INSTALL_PREFIX`,
       -DHDF5_TEST_API=ON
       -DHDF5_VOL_ALLOW_EXTERNAL="GIT"
       -DHDF5_VOL_URL01=https://github.com/hpc-io/vol-async.git
-      -DHDF5_VOL_VOL-ASYNC_BRANCH=develop 
+      -DHDF5_VOL_VOL-ASYNC_BRANCH=develop
       -DHDF5_VOL_VOL-ASYNC_NAME="async under_vol=0\;under_info={}"
-      -DHDF5_VOL_VOL-ASYNC_TEST_PARALLEL=ON ..
+      -DHDF5_VOL_VOL-ASYNC_TEST_PARALLEL=ON
+      ..
 
 Here, we are specifying that:
 
@@ -156,7 +167,8 @@ Here, we are specifying that:
     variable should be set to "async under_vol=0\;under_info={}", which
     specifies that the VOL connector with the canonical name "async" should
     be loaded and it should be passed the string "under_vol=0;under_info={}"
-    for its configuration
+    for its configuration (note the backslash-escaping of semicolons in the string
+    provided)
   * The Asynchronous I/O VOL connector should be tested against HDF5's parallel API tests
 
 Note that this also assumes that the Asynchronous I/O VOL connector's

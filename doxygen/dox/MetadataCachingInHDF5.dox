@@ -971,7 +971,7 @@ Finally, the cache also contains an extensive sanity checking code. Much of this
 is turned on when you compile in debug mode, but to enable the full suite, turn
 on H5C_DO_SANITY_CHECKS in H5Cprivate.h.
 
-\section trouble Trouble Shooting
+\section trouble Troubleshooting
 
 Absent major bugs in the cache, the only troubleshooting you should have to do
 is diagnosing and fixing problems with your cache configuration.

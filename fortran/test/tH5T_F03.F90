@@ -709,8 +709,8 @@ END SUBROUTINE test_array_compound_atomic
     DO i = 1, LENGTH
        DO j = 1, ALEN
           cf(i)%a(j) = 100*(i+1) + j
-          cf(i)%b(j) = (100.*(i+1) + 0.01*j)
-          cf(i)%c(j) = 100.*(i+1) + 0.02*j
+          cf(i)%b(j) = (100._sp*REAL(i+1,sp) + 0.01_sp*REAL(j,sp))
+          cf(i)%c(j) = 100._dp*REAL(i+1,dp) + 0.02_dp*REAL(j,dp)
        ENDDO
     ENDDO
 
@@ -855,7 +855,7 @@ END SUBROUTINE test_array_compound_atomic
     ! --------------------------------
     DO i = 1, LENGTH
        DO j = 1, ALEN
-          fld(i)%b(j) = 1.313
+          fld(i)%b(j) = 1.313_sp
           cf(i)%b(j) = fld(i)%b(j)
        ENDDO
     ENDDO
@@ -984,7 +984,7 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER, PARAMETER :: real_kind_15 = C_DOUBLE  !should map to REAL*8 on most modern processors
 
 ! Check if C has quad precision extension
-#if H5_HAVE_FLOAT128!=0
+#ifdef H5_HAVE_FLOAT128
 ! Check if Fortran supports quad precision
 # if H5_PAC_FC_MAX_REAL_PRECISION > 26
     INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(31)
@@ -1441,7 +1441,7 @@ SUBROUTINE t_enum(total_error)
   !
   ! Create dataspace.  Setting maximum size to be the current size.
   !
-  CALL h5screate_simple_f(2, dims, space, total_error)
+  CALL h5screate_simple_f(2, dims, space, error)
   CALL check("h5screate_simple_f",error, total_error)
   !
   ! Create the dataset and write the enumerated data to it.
@@ -2930,8 +2930,8 @@ SUBROUTINE test_nbit(total_error )
   ! dataset datatype (no precision loss during datatype conversion)
   !
   REAL(kind=wp), DIMENSION(1:2,1:5), TARGET :: orig_data = &
-       RESHAPE( (/188384.00, 19.103516, -1.0831790e9, -84.242188, &
-       5.2045898, -49140.000, 2350.2500, -3.2110596e-1, 6.4998865e-5, -0.0000000/) , (/2,5/) )
+       RESHAPE( (/188384.00_wp, 19.103516_wp, -1.0831790e9_wp, -84.242188_wp, &
+       5.2045898_wp, -49140.000_wp, 2350.2500_wp, -3.2110596e-1_wp, 6.4998865e-5_wp, -0.0000000_wp/) , (/2,5/) )
   REAL(kind=wp), DIMENSION(1:2,1:5), TARGET :: new_data
   INTEGER(size_t) :: PRECISION, offset
   INTEGER :: error
@@ -3400,20 +3400,18 @@ SUBROUTINE multiple_dset_rw(total_error)
 !-------------------------------------------------------------------------
 ! Subroutine: multiple_dset_rw
 !
-! Purpose:  Tests the reading and writing of multiple datasets 
+! Purpose:  Tests the reading and writing of multiple datasets
 !           using H5Dread_multi and H5Dwrite_multi
 !
 ! Return: Success:      0
 !         Failure:      number of errors
 !-------------------------------------------------------------------------
 !
-  USE iso_c_binding
-  USE hdf5
   IMPLICIT NONE
-  
+
   INTEGER, INTENT(INOUT) :: total_error   ! number of errors
   INTEGER :: error                        ! HDF hdferror flag
-  
+
   INTEGER(SIZE_T), PARAMETER :: ndset = 5 ! Number of data sets
   INTEGER(HID_T), DIMENSION(:), ALLOCATABLE :: dset_id
   INTEGER(HID_T), DIMENSION(:), ALLOCATABLE :: mem_type_id
@@ -3426,9 +3424,9 @@ SUBROUTINE multiple_dset_rw(total_error)
   INTEGER, PARAMETER :: sdim=2  ! length of character string
   INTEGER, PARAMETER :: ddim=2  ! size of derived type array
   INTEGER  :: i,j,k
-  
+
   TYPE(C_PTR), ALLOCATABLE, DIMENSION(:) :: buf_md ! array to hold the multi-datasets
-  
+
   INTEGER, DIMENSION(1:idim), TARGET :: wbuf_int             ! integer write buffer
   INTEGER, DIMENSION(1:idim,idim2,idim3), TARGET :: wbuf_intmd
   REAL, DIMENSION(1:rdim), TARGET :: wbuf_real               ! real write buffer
@@ -3537,7 +3535,7 @@ SUBROUTINE multiple_dset_rw(total_error)
   CALL check("h5tinsert_f", error, total_error)
   CALL h5tcopy_f(H5T_NATIVE_CHARACTER, strtype, error)
   CALL check("h5tcopy_f", error, total_error)
-  CALL h5tset_size_f(strtype, INT(sdim,size_t), error)  
+  CALL h5tset_size_f(strtype, INT(sdim,size_t), error)
   CALL check("h5tset_size_f", error, total_error)
   CALL h5tinsert_f(mem_type_id(4), "chr", &
        H5OFFSETOF(C_LOC(wbuf_derived(1)),C_LOC(wbuf_derived(1)%c(1:1))), strtype, error)

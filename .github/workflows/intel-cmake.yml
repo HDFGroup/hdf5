@@ -1,0 +1,119 @@
+name: hdf5 dev CMake icx
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  intel_oneapi_linux:
+    name: "linux-oneapi ${{ inputs.build_mode }}"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Sources (Linux)
+        uses: actions/checkout@v4.1.1
+
+      - name: Install Dependencies (Linux)
+        shell: bash
+        run: |
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+
+      - name: Install oneAPI (Linux)
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: intel
+          version: '2024.0'
+
+      - name: CMake Configure (Linux)
+        shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -G Ninja \
+            --log-level=VERBOSE \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            $GITHUB_WORKSPACE
+
+      - name: CMake Build (Linux)
+        shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: CMake Run Tests (Linux)
+        shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+
+  Intel_oneapi_windows:
+    name: "windows-oneapi ${{ inputs.build_mode }}"
+    runs-on: windows-latest
+    steps:
+      - name: Get Sources (Windows)
+        uses: actions/checkout@v4.1.1
+
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
+
+      - name: install oneAPI (Windows)
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: intel
+          version: '2024.0'
+
+      - name: CMake Configure (Windows)
+        shell: pwsh
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          Set-Location -Path "${{ runner.workspace }}\\build"
+          cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DHDF5_BUILD_FORTRAN=ON -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF ${{ github.workspace }}
+
+      - name: CMake Build (Windows)
+        shell: pwsh
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: CMake Run Tests (Windows)
+        shell: pwsh
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E tfloatsattrs
+        working-directory: ${{ runner.workspace }}/build

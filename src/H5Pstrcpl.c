@@ -31,7 +31,6 @@
 #include "H5private.h"  /* Generic Functions			*/
 #include "H5Eprivate.h" /* Error handling		  	*/
 #include "H5Fprivate.h" /* Files */
-#include "H5Iprivate.h" /* IDs			  		*/
 #include "H5Ppkg.h"     /* Property lists		  	*/
 
 /****************/
@@ -175,7 +174,7 @@ H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, encoding);
+    H5TRACE2("e", "i*Tc", plist_id, encoding);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_STRING_CREATE)))

@@ -40,7 +40,7 @@
 int
 main(void)
 {
-    hid_t   fid = -1, sid = -1, did = -1, dcpl_id = -1;
+    hid_t   fid = H5I_INVALID_HID, sid = H5I_INVALID_HID, did = H5I_INVALID_HID, dcpl_id = H5I_INVALID_HID;
     hsize_t dims[SPACE_RANK]       = {SPACE_DIM1, SPACE_DIM2};
     hsize_t chunk_dims[SPACE_RANK] = {CHUNK_DIM1, CHUNK_DIM2};
     size_t  i, j;        /* Local index variables */

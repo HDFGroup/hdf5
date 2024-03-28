@@ -441,9 +441,9 @@ H5G__loc_find_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
 {
     H5G_loc_fbi_t *udata = (H5G_loc_fbi_t *)_udata; /* User data passed in */
     H5O_link_t     fnd_lnk;                         /* Link within group */
-    hbool_t        lnk_copied    = FALSE;           /* Whether the link was copied */
-    hbool_t        obj_loc_valid = FALSE;           /* Flag to indicate that the object location is valid */
-    hbool_t        obj_exists    = FALSE;           /* Whether the object exists (unused) */
+    bool           lnk_copied    = false;           /* Whether the link was copied */
+    bool           obj_loc_valid = false;           /* Flag to indicate that the object location is valid */
+    bool           obj_exists    = false;           /* Whether the object exists (unused) */
     herr_t         ret_value     = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -455,17 +455,17 @@ H5G__loc_find_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
     /* Query link */
     if (H5G_obj_lookup_by_idx(obj_loc->oloc, udata->idx_type, udata->order, udata->n, &fnd_lnk) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "link not found");
-    lnk_copied = TRUE;
+    lnk_copied = true;
 
     /* Build the initial object location for the link */
     if (H5G__link_to_loc(obj_loc, &fnd_lnk, udata->loc) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot initialize object location");
-    obj_loc_valid = TRUE;
+    obj_loc_valid = true;
 
     /* Perform any special traversals that the link needs */
     /* (soft links, user-defined links, file mounting, etc.) */
     /* (may modify the object location) */
-    if (H5G__traverse_special(obj_loc, &fnd_lnk, H5G_TARGET_NORMAL, TRUE, udata->loc, &obj_exists) < 0)
+    if (H5G__traverse_special(obj_loc, &fnd_lnk, H5G_TARGET_NORMAL, true, udata->loc, &obj_exists) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "special link traversal failed");
 
 done:
@@ -548,12 +548,12 @@ H5G__loc_insert(H5G_loc_t *grp_loc, char *name, H5G_loc_t *obj_loc, H5O_type_t o
     lnk.type         = H5L_TYPE_HARD;
     lnk.cset         = H5F_DEFAULT_CSET;
     lnk.corder       = 0;     /* Will be reset if the group is tracking creation order */
-    lnk.corder_valid = FALSE; /* Indicate that the creation order isn't valid (yet) */
+    lnk.corder_valid = false; /* Indicate that the creation order isn't valid (yet) */
     lnk.name         = name;
     lnk.u.hard.addr  = obj_loc->oloc->addr;
 
     /* Insert new group into current group's symbol table */
-    if (H5G_obj_insert(grp_loc->oloc, name, &lnk, TRUE, obj_type, crt_info) < 0)
+    if (H5G_obj_insert(grp_loc->oloc, name, &lnk, true, obj_type, crt_info) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert object");
 
     /* Set the name of the object location */
@@ -578,19 +578,19 @@ H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_
                    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata /*in,out*/,
                    H5G_own_loc_t *own_loc /*out*/)
 {
-    hbool_t *exists    = (hbool_t *)_udata; /* User data passed in */
-    herr_t   ret_value = SUCCEED;           /* Return value */
+    bool  *exists    = (bool *)_udata; /* User data passed in */
+    herr_t ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid object */
     if (obj_loc == NULL)
         if (lnk)
-            *exists = FALSE;
+            *exists = false;
         else
             HGOTO_ERROR(H5E_SYM, H5E_INTERNAL, FAIL, "no object or link info?");
     else
-        *exists = TRUE;
+        *exists = true;
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
@@ -605,13 +605,13 @@ done:
  *
  * Purpose:	Check if an object actually exists at a location
  *
- * Return:	Success:	TRUE/FALSE
+ * Return:	Success:	true/false
  * 		Failure:	Negative
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_loc_exists(const H5G_loc_t *loc, const char *name, hbool_t *exists)
+H5G_loc_exists(const H5G_loc_t *loc, const char *name, bool *exists)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -865,13 +865,13 @@ H5G__loc_set_comment_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
 
     /* Remove the previous comment message if any */
     if (exists)
-        if (H5O_msg_remove(obj_loc->oloc, H5O_NAME_ID, 0, TRUE) < 0)
+        if (H5O_msg_remove(obj_loc->oloc, H5O_NAME_ID, 0, true) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL,
                         "unable to delete existing comment object header message");
 
     /* Add the new message */
     if (udata->comment && *udata->comment) {
-        if (NULL == (comment.s = HDstrdup(udata->comment)))
+        if (NULL == (comment.s = strdup(udata->comment)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy group comment");
         if (H5O_msg_create(obj_loc->oloc, H5O_NAME_ID, 0, H5O_UPDATE_TIME, &comment) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment object header message");
@@ -953,8 +953,8 @@ H5G__loc_get_comment_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
     }
     else {
         if (udata->comment && udata->bufsize)
-            HDstrncpy(udata->comment, comment.s, udata->bufsize);
-        udata->comment_size = HDstrlen(comment.s);
+            strncpy(udata->comment, comment.s, udata->bufsize);
+        udata->comment_size = strlen(comment.s);
         H5O_msg_reset(H5O_NAME_ID, &comment);
     }
 

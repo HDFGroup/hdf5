@@ -449,6 +449,38 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5d_flags[30] = (int_f)H5D_SELECTION_IO_MODE_OFF;
     h5d_flags[31] = (int_f)H5D_SELECTION_IO_MODE_ON;
 
+    h5d_flags[32] = (int_f)H5D_MPIO_COLLECTIVE;
+    h5d_flags[33] = (int_f)H5D_MPIO_SET_INDEPENDENT;
+    h5d_flags[34] = (int_f)H5D_MPIO_DATATYPE_CONVERSION;
+    h5d_flags[35] = (int_f)H5D_MPIO_DATA_TRANSFORMS;
+    h5d_flags[36] = (int_f)H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED;
+    h5d_flags[37] = (int_f)H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
+    h5d_flags[38] = (int_f)H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+    h5d_flags[39] = (int_f)H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED;
+    h5d_flags[40] = (int_f)H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE;
+    h5d_flags[41] = (int_f)H5D_MPIO_NO_SELECTION_IO;
+    h5d_flags[42] = (int_f)H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE;
+
+    h5d_flags[43] = (int_f)H5D_SEL_IO_DISABLE_BY_API;
+    h5d_flags[44] = (int_f)H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+    h5d_flags[45] = (int_f)H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
+    h5d_flags[46] = (int_f)H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
+    h5d_flags[47] = (int_f)H5D_SEL_IO_PAGE_BUFFER;
+    h5d_flags[48] = (int_f)H5D_SEL_IO_DATASET_FILTER;
+    h5d_flags[49] = (int_f)H5D_SEL_IO_CHUNK_CACHE;
+    h5d_flags[50] = (int_f)H5D_SEL_IO_TCONV_BUF_TOO_SMALL;
+    h5d_flags[51] = (int_f)H5D_SEL_IO_BKG_BUF_TOO_SMALL;
+    h5d_flags[52] = (int_f)H5D_SEL_IO_DEFAULT_OFF;
+    h5d_flags[53] = (int_f)H5D_MPIO_NO_SELECTION_IO_CAUSES;
+
+    h5d_flags[54] = (int_f)H5D_MPIO_NO_CHUNK_OPTIMIZATION;
+    h5d_flags[55] = (int_f)H5D_MPIO_LINK_CHUNK;
+    h5d_flags[56] = (int_f)H5D_MPIO_MULTI_CHUNK;
+
+    h5d_flags[57] = (int_f)H5D_SCALAR_IO;
+    h5d_flags[58] = (int_f)H5D_VECTOR_IO;
+    h5d_flags[59] = (int_f)H5D_SELECTION_IO;
+
     /*
      *  H5E flags
      */
@@ -497,10 +529,15 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5f_flags[18] = (int_f)H5F_LIBVER_ERROR;
     h5f_flags[19] = (int_f)H5F_LIBVER_NBOUNDS;
     h5f_flags[20] = (int_f)H5F_UNLIMITED;
-    h5f_flags[21] = (int_f)H5F_LIBVER_V18;
-    h5f_flags[22] = (int_f)H5F_LIBVER_V110;
-    h5f_flags[23] = (int_f)H5F_LIBVER_V112;
-    h5f_flags[24] = (int_f)H5F_LIBVER_V114;
+    h5f_flags[21] = (int_f)H5F_FSPACE_STRATEGY_FSM_AGGR;
+    h5f_flags[22] = (int_f)H5F_FSPACE_STRATEGY_PAGE;
+    h5f_flags[23] = (int_f)H5F_FSPACE_STRATEGY_AGGR;
+    h5f_flags[24] = (int_f)H5F_FSPACE_STRATEGY_NONE;
+    h5f_flags[25] = (int_f)H5F_FSPACE_STRATEGY_NTYPES;
+    h5f_flags[26] = (int_f)H5F_LIBVER_V18;
+    h5f_flags[27] = (int_f)H5F_LIBVER_V110;
+    h5f_flags[28] = (int_f)H5F_LIBVER_V112;
+    h5f_flags[29] = (int_f)H5F_LIBVER_V114;
 
     /*
      *  H5FD flags
@@ -734,6 +771,8 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
      *  H5S flags
      */
     h5s_hid_flags[0] = (hid_t_f)H5S_ALL;
+    h5s_hid_flags[1] = (hid_t_f)H5S_BLOCK;
+    h5s_hid_flags[2] = (hid_t_f)H5S_PLIST;
 
     h5s_hsize_flags[0] = (hsize_t_f)H5S_UNLIMITED;
 
@@ -758,6 +797,9 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5s_flags[15] = (int_f)H5S_SEL_POINTS;
     h5s_flags[16] = (int_f)H5S_SEL_HYPERSLABS;
     h5s_flags[17] = (int_f)H5S_SEL_ALL;
+
+    h5s_flags[18] = (int_f)H5S_SEL_ITER_GET_SEQ_LIST_SORTED;
+    h5s_flags[19] = (int_f)H5S_SEL_ITER_SHARE_WITH_DATASPACE;
 
     /*
      *  H5T flags

@@ -18,7 +18,6 @@
 #define H5Z_FRIEND     /*suppress error about including H5Zpkg      */
 
 #include "H5private.h"   /* Generic Functions            */
-#include "H5Dprivate.h"  /* Datasets                     */
 #include "H5Eprivate.h"  /* Error handling               */
 #include "H5FLprivate.h" /* Free Lists                   */
 #include "H5MMprivate.h" /* Memory management            */
@@ -33,7 +32,7 @@ static void  *H5O__pline_copy(const void *_mesg, void *_dest);
 static size_t H5O__pline_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O__pline_reset(void *_mesg);
 static herr_t H5O__pline_free(void *_mesg);
-static herr_t H5O__pline_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
+static herr_t H5O__pline_pre_copy_file(H5F_t *file_src, const void *mesg_src, bool *deleted,
                                        const H5O_copy_t *cpy_info, void *_udata);
 static herr_t H5O__pline_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -192,7 +191,7 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
             size_t max = (size_t)(p_end - p + 1); /* Max possible name length */
 
             /* Determine actual name length (without padding, but with null terminator) */
-            actual_name_length = HDstrnlen((const char *)p, max);
+            actual_name_length = strnlen((const char *)p, max);
             if (actual_name_length == max)
                 HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "filter name not null terminated");
             actual_name_length += 1; /* include \0 byte */
@@ -206,7 +205,7 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
             else
                 filter->name = filter->_name;
 
-            HDstrncpy(filter->name, (const char *)p, actual_name_length);
+            strncpy(filter->name, (const char *)p, actual_name_length);
 
             if (H5_IS_BUFFER_OVERFLOW(p, name_length, p_end))
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
@@ -311,7 +310,7 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
              */
             if (NULL == (name = filter->name) && (cls = H5Z_find(filter->id)))
                 name = cls->name;
-            name_length = name ? HDstrlen(name) + 1 : 0;
+            name_length = name ? strlen(name) + 1 : 0;
 
             /* Filter name length */
             UINT16ENCODE(p, pline->version == H5O_PLINE_VERSION_1 ? H5O_ALIGN_OLD(name_length) : name_length);
@@ -394,7 +393,7 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
             if (src->filter[i].name) {
                 size_t namelen; /* Length of source filter name, including null terminator  */
 
-                namelen = HDstrlen(src->filter[i].name) + 1;
+                namelen = strlen(src->filter[i].name) + 1;
 
                 /* Allocate space for the filter name, or use the internal buffer */
                 if (namelen > H5Z_COMMON_NAME_LEN) {
@@ -478,7 +477,7 @@ H5O__pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
             /* Get the name of the filter, same as done with H5O__pline_encode() */
             if (NULL == (name = pline->filter[i].name) && (cls = H5Z_find(pline->filter[i].id)))
                 name = cls->name;
-            name_len = name ? HDstrlen(name) + 1 : 0;
+            name_len = name ? strlen(name) + 1 : 0;
         } /* end else */
 
         ret_value +=
@@ -529,7 +528,7 @@ H5O__pline_reset(void *mesg)
         /* Free information for each filter */
         for (i = 0; i < pline->nused; i++) {
             if (pline->filter[i].name && pline->filter[i].name != pline->filter[i]._name)
-                assert((HDstrlen(pline->filter[i].name) + 1) > H5Z_COMMON_NAME_LEN);
+                assert((strlen(pline->filter[i].name) + 1) > H5Z_COMMON_NAME_LEN);
             if (pline->filter[i].name != pline->filter[i]._name)
                 pline->filter[i].name = (char *)H5MM_xfree(pline->filter[i].name);
             if (pline->filter[i].cd_values && pline->filter[i].cd_values != pline->filter[i]._cd_values)
@@ -585,8 +584,8 @@ H5O__pline_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__pline_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
-                         hbool_t H5_ATTR_UNUSED *deleted, const H5O_copy_t *cpy_info, void *_udata)
+H5O__pline_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src, bool H5_ATTR_UNUSED *deleted,
+                         const H5O_copy_t *cpy_info, void *_udata)
 {
     const H5O_pline_t         *pline_src = (const H5O_pline_t *)mesg_src;       /* Source pline */
     H5O_copy_file_ud_common_t *udata     = (H5O_copy_file_ud_common_t *)_udata; /* Object copying user data */
@@ -652,7 +651,7 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
         char name[64];
 
         memset(name, 0, 64);
-        HDsnprintf(name, sizeof(name), "Filter at position %zu", i);
+        snprintf(name, sizeof(name), "Filter at position %zu", i);
 
         fprintf(stream, "%*s%-*s\n", indent, "", fwidth, name);
         fprintf(stream, "%*s%-*s 0x%04x\n", indent + 3, "", MAX(0, fwidth - 3),
@@ -671,7 +670,7 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
         for (size_t j = 0; j < pline->filter[i].cd_nelmts; j++) {
             char field_name[32];
 
-            HDsnprintf(field_name, sizeof(field_name), "CD value %lu", (unsigned long)j);
+            snprintf(field_name, sizeof(field_name), "CD value %lu", (unsigned long)j);
             fprintf(stream, "%*s%-*s %u\n", indent + 6, "", MAX(0, fwidth - 6), field_name,
                     pline->filter[i].cd_values[j]);
         }

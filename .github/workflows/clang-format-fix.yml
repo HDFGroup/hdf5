@@ -21,9 +21,9 @@ jobs:
     permissions:
         contents: write # In order to allow EndBug/add-and-commit to commit changes
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
     - name: Fix C and Java formatting issues detected by clang-format
-      uses: DoozyX/clang-format-lint-action@v0.13
+      uses: DoozyX/clang-format-lint-action@9ea72631b74e61ce337d0839a90e76180e997283 # v0.13
       with:
         source: '.'
         extensions: 'c,h,cpp,hpp,java'
@@ -31,7 +31,7 @@ jobs:
         inplace: True
         style: file
         exclude: './config ./hl/src/H5LTanalyze.c ./hl/src/H5LTparse.c ./hl/src/H5LTparse.h ./src/H5Epubgen.h ./src/H5Einit.h ./src/H5Eterm.h ./src/H5Edefin.h ./src/H5version.h ./src/H5overflow.h'
-    - uses: EndBug/add-and-commit@v9
+    - uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
       with:
           author_name: github-actions
           author_email: 41898282+github-actions[bot]@users.noreply.github.com

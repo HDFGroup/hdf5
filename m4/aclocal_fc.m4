@@ -64,11 +64,11 @@ dnl
 dnl See if the fortran compiler supports the intrinsic module "ISO_FORTRAN_ENV"
 
 AC_DEFUN([PAC_PROG_FC_ISO_FORTRAN_ENV],[
-  HAVE_ISO_FORTRAN_ENV="no"
-  AC_MSG_CHECKING([if Fortran compiler supports intrinsic module ISO_FORTRAN_ENV])
+  CHECK_ISO_FORTRAN_ENV="no"
+  AC_MSG_CHECKING([if Fortran compiler supports intrinsic module ISO_FORTRAN_ENV (F08)])
   TEST_SRC="`sed -n '/PROGRAM PROG_FC_ISO_FORTRAN_ENV/,/END PROGRAM PROG_FC_ISO_FORTRAN_ENV/p' $srcdir/m4/aclocal_fc.f90`"
   AC_LINK_IFELSE([$TEST_SRC],[AC_MSG_RESULT([yes])
-        HAVE_ISO_FORTRAN_ENV="yes"],
+        CHECK_ISO_FORTRAN_ENV="yes"],
       [AC_MSG_RESULT([no])])
 ])
 
@@ -106,6 +106,18 @@ AC_DEFUN([PAC_PROG_FC_STORAGE_SIZE],[
 
 ])
 
+dnl See if the fortran compiler supports allocatable character
+
+AC_DEFUN([PAC_HAVE_CHAR_ALLOC],[
+  HAVE_CHAR_ALLOC_FORTRAN="no"
+  AC_MSG_CHECKING([if Fortran compiler supports allocatable character])
+  TEST_SRC="`sed -ne '/PROGRAM PROG_CHAR_ALLOC/,/END PROGRAM PROG_CHAR_ALLOC/p' $srcdir/m4/aclocal_fc.f90`"
+  AC_LINK_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
+        HAVE_CHAR_ALLOC_FORTRAN="yes"],
+     [AC_MSG_RESULT([no])])
+
+])
+
 dnl Check to see C_LONG_DOUBLE is available
 
 AC_DEFUN([PAC_PROG_FC_HAVE_C_LONG_DOUBLE],[
@@ -131,12 +143,23 @@ AC_DEFUN([PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE],[
 ])
 fi
 
+dnl Check if C_BOOL is different from default LOGICAL
+
+AC_DEFUN([PAC_PROG_FC_C_BOOL_EQ_LOGICAL],[
+  C_BOOL_IS_UNIQUE_FORTRAN="no"
+  AC_MSG_CHECKING([if Fortran C_BOOL is different from default LOGICAL])
+  TEST_SRC="`sed -n '/MODULE l_type_mod/,/END PROGRAM PROG_FC_C_BOOL_EQ_LOGICAL/p' $srcdir/m4/aclocal_fc.f90`"
+  AC_COMPILE_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
+            C_BOOL_IS_UNIQUE_FORTRAN="yes"],
+         [AC_MSG_RESULT([no])])
+])
+
 dnl Checking if the compiler supports the required Fortran 2003 features and
 dnl disable Fortran 2003 if it does not.
 
 AC_DEFUN([PAC_PROG_FC_HAVE_F2003_REQUIREMENTS],[
    HAVE_F2003_REQUIREMENTS="no"
-   AC_MSG_CHECKING([if Fortran compiler version compatible with Fortran 2003 HDF])
+   AC_MSG_CHECKING([if Fortran compiler version compatible with Fortran 2003])
    TEST_SRC="`sed -n '/PROG_FC_HAVE_F2003_REQUIREMENTS/,/END PROGRAM PROG_FC_HAVE_F2003_REQUIREMENTS/p' $srcdir/m4/aclocal_fc.f90`"
    AC_COMPILE_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
             HAVE_F2003_REQUIREMENTS="yes"],
@@ -300,6 +323,99 @@ AC_RUN_IFELSE([$TEST_SRC],
 
 AC_LANG_POP([Fortran])
 ])
+
+dnl --------------------------------------------------------------
+dnl Determine the available KINDs for REALs, INTEGERs and LOGICALS
+dnl --------------------------------------------------------------
+dnl
+dnl This is a runtime test.
+dnl
+AC_DEFUN([PAC_FC_AVAIL_KINDS_F08],[
+AC_LANG_PUSH([Fortran])
+TEST_SRC="`sed -n '/PROGRAM FC08_AVAIL_KINDS/,/END PROGRAM FC08_AVAIL_KINDS/p' $srcdir/m4/aclocal_fc.f90`"
+AC_RUN_IFELSE([$TEST_SRC],
+ [
+        dnl The output from the above program will be:
+        dnl    -- LINE 1 --  valid integer kinds (comma separated list)
+        dnl    -- LINE 2 --  valid real kinds (comma separated list)
+        dnl    -- LINE 3 --  max decimal precision for reals
+        dnl    -- LINE 4 --  number of valid integer kinds
+        dnl    -- LINE 5 --  number of valid real kinds
+        dnl    -- LINE 6 --  number of valid logical kinds
+        dnl    -- LINE 7 --  valid logical kinds (comma separated list)
+
+        pac_validIntKinds=$(./conftest$EXEEXT 2>&1 | sed -n '1p')
+        pac_validRealKinds=$(./conftest$EXEEXT 2>&1 | sed -n '2p')
+        PAC_FC_MAX_REAL_PRECISION=$(./conftest$EXEEXT 2>&1 | sed -n '3p')
+        AC_DEFINE_UNQUOTED([PAC_FC_MAX_REAL_PRECISION], $PAC_FC_MAX_REAL_PRECISION, [Define Fortran Maximum Real Decimal Precision])
+
+        PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds`}"
+        PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds`}"
+
+        PAC_FORTRAN_NUM_INTEGER_KINDS=$(./conftest$EXEEXT 2>&1 | sed -n '4p')
+        H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `echo $PAC_FORTRAN_NUM_INTEGER_KINDS`"
+        H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds`/)"
+        H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = $(./conftest$EXEEXT 2>&1 | sed -n '5p')"
+        H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $pac_validRealKinds`/)"
+
+        AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_RKIND], $H5CONFIG_F_NUM_RKIND, [Define number of valid Fortran REAL KINDs])
+        AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_IKIND], $H5CONFIG_F_NUM_IKIND, [Define number of valid Fortran INTEGER KINDs])
+        AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])
+        AC_DEFINE_UNQUOTED([H5CONFIG_F_IKIND], $H5CONFIG_F_IKIND, [Define valid Fortran INTEGER KINDs])
+
+        PAC_FORTRAN_NUM_LOGICAL_KINDS=$(./conftest$EXEEXT 2>&1 | sed -n '6p')
+        pac_validLogicalKinds=$(./conftest$EXEEXT 2>&1 | sed -n '7p')
+        PAC_FC_ALL_LOGICAL_KINDS="{`echo $pac_validLogicalKinds`}"
+
+        AC_MSG_CHECKING([for Number of Fortran INTEGER KINDs])
+        AC_MSG_RESULT([$PAC_FORTRAN_NUM_INTEGER_KINDS])
+        AC_MSG_CHECKING([for Fortran INTEGER KINDs])
+        AC_MSG_RESULT([$PAC_FC_ALL_INTEGER_KINDS])
+        AC_MSG_CHECKING([for Fortran REAL KINDs])
+        AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS])
+        AC_MSG_CHECKING([for Fortran REALs maximum decimal precision])
+        AC_MSG_RESULT([$PAC_FC_MAX_REAL_PRECISION])
+        AC_MSG_CHECKING([for Number of Fortran LOGICAL KINDs])
+        AC_MSG_RESULT([$PAC_FORTRAN_NUM_LOGICAL_KINDS])
+        AC_MSG_CHECKING([for Fortran LOGICAL KINDs])
+        AC_MSG_RESULT([$PAC_FC_ALL_LOGICAL_KINDS])
+],[
+    AC_MSG_RESULT([Error])
+    AC_MSG_ERROR([Failed to run Fortran program to determine available KINDs])
+],[])
+AC_LANG_POP([Fortran])
+])
+
+AC_DEFUN([PAC_FIND_MPI_LOGICAL_KIND],[
+AC_REQUIRE([PAC_FC_AVAIL_KINDS])
+AC_MSG_CHECKING([default Fortran KIND of LOGICAL in MPI])
+AC_LANG_PUSH([Fortran])
+saved_FCFLAGS=$FCFLAGS
+FCFLAGS=""
+for kind in `echo $pac_validLogicalKinds | sed -e 's/,/ /g'`; do
+        AC_COMPILE_IFELSE([
+                PROGRAM main
+                 USE MPI
+                 IMPLICIT NONE
+                 LOGICAL(KIND=$kind) :: flag
+                 INTEGER(KIND=MPI_INTEGER_KIND) :: info_ret, mpierror
+                 CHARACTER(LEN=3) :: info_val
+                 CALL mpi_info_get(info_ret,"foo", 3_MPI_INTEGER_KIND, info_val, flag, mpierror)
+                END],
+         [AC_SUBST([PAC_MPI_LOGICAL_KIND]) PAC_MPI_LOGICAL_KIND=$kind],
+         []
+        )
+done
+if test "X$PAC_MPI_LOGICAL_KIND" = "X"; then
+  AC_MSG_ERROR([Failed to find Fortran KIND of LOGICAL in MPI])
+else
+  AC_DEFINE_UNQUOTED([MPI_LOGICAL_KIND], [$PAC_MPI_LOGICAL_KIND], [Define MPI Fortran KIND of LOGICAL])
+  AC_MSG_RESULT([$PAC_MPI_LOGICAL_KIND])
+fi
+FCFLAGS=$saved_FCFLAGS
+AC_LANG_POP([Fortran])
+])
+
 AC_DEFUN([PAC_FC_SIZEOF_INT_KINDS],[
 AC_REQUIRE([PAC_FC_AVAIL_KINDS])
 AC_MSG_CHECKING([sizeof of available INTEGER KINDs])
@@ -368,6 +484,8 @@ AC_DEFUN([PAC_FC_NATIVE_INTEGER],[
 AC_REQUIRE([PAC_FC_AVAIL_KINDS])
 AC_MSG_CHECKING([sizeof of native KINDS])
 AC_LANG_PUSH([Fortran])
+saved_FCFLAGS=$FCFLAGS
+FCFLAGS=$saved_user_FCFLAGS
 pack_int_sizeof=""
 rm -f pac_fconftest.out
   AC_LANG_CONFTEST([
@@ -401,6 +519,7 @@ rm -f pac_fconftest.out
             pack_int_sizeof="$2"
         ])
 AC_MSG_RESULT([$pack_int_sizeof])
+FCFLAGS=$saved_FCFLAGS
 AC_LANG_POP([Fortran])
 ])
 

@@ -87,7 +87,7 @@ typedef struct H5A_shared_t {
 struct H5A_t {
     H5O_shared_t  sh_loc;     /* Shared message info (must be first) */
     H5O_loc_t     oloc;       /* Object location for object attribute is on */
-    hbool_t       obj_opened; /* Object header entry opened? */
+    bool          obj_opened; /* Object header entry opened? */
     H5G_name_t    path;       /* Group hierarchy path */
     H5A_shared_t *shared;     /* Shared attribute information */
 };
@@ -113,7 +113,7 @@ typedef struct H5A_dense_bt2_corder_rec_t {
 } H5A_dense_bt2_corder_rec_t;
 
 /* Define the 'found' callback function pointer for matching an attribute record in a v2 B-tree */
-typedef herr_t (*H5A_bt2_found_t)(const H5A_t *attr, hbool_t *took_ownership, void *op_data);
+typedef herr_t (*H5A_bt2_found_t)(const H5A_t *attr, bool *took_ownership, void *op_data);
 
 /*
  * Common data exchange structure for dense attribute storage.  This structure
@@ -145,8 +145,9 @@ typedef struct H5A_bt2_ud_ins_t {
 
 /* Data structure to hold table of attributes for an object */
 typedef struct {
-    size_t  nattrs; /* # of attributes in table */
-    H5A_t **attrs;  /* Pointer to array of attribute pointers */
+    size_t  num_attrs; /* Curr. # of attributes in table */
+    size_t  max_attrs; /* Max. # of attributes in table */
+    H5A_t **attrs;     /* Pointer to array of attribute pointers */
 } H5A_attr_table_t;
 
 /*****************************/
@@ -200,7 +201,7 @@ H5_DLL herr_t H5A__delete_by_name(const H5G_loc_t *loc, const char *obj_name, co
 H5_DLL herr_t H5A__delete_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
                                  H5_iter_order_t order, hsize_t n);
 H5_DLL herr_t H5A__exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name,
-                                  hbool_t *attr_exists);
+                                  bool *attr_exists);
 H5_DLL herr_t H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf);
 H5_DLL herr_t H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf);
 H5_DLL herr_t H5A__get_name(H5A_t *attr, size_t buf_size, char *buf, size_t *attr_name_len);
@@ -218,7 +219,7 @@ H5_DLL herr_t H5A__dense_iterate(H5F_t *f, hid_t loc_id, const H5O_ainfo_t *ainf
 H5_DLL herr_t H5A__dense_remove(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name);
 H5_DLL herr_t H5A__dense_remove_by_idx(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type,
                                        H5_iter_order_t order, hsize_t n);
-H5_DLL herr_t H5A__dense_exists(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name, hbool_t *attr_exists);
+H5_DLL herr_t H5A__dense_exists(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name, bool *attr_exists);
 H5_DLL herr_t H5A__dense_delete(H5F_t *f, H5O_ainfo_t *ainfo);
 
 /* Attribute table operations */
@@ -243,8 +244,8 @@ H5_DLL herr_t H5O__attr_iterate(hid_t loc_id, H5_index_t idx_type, H5_iter_order
 H5_DLL herr_t H5O__attr_remove(const H5O_loc_t *loc, const char *name);
 H5_DLL herr_t H5O__attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order_t order,
                                       hsize_t n);
-H5_DLL herr_t H5O__attr_exists(const H5O_loc_t *loc, const char *name, hbool_t *attr_exists);
-H5_DLL H5A_t *H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_size,
+H5_DLL herr_t H5O__attr_exists(const H5O_loc_t *loc, const char *name, bool *attr_exists);
+H5_DLL H5A_t *H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, bool *recompute_size,
                                   H5O_copy_t *cpy_info);
 H5_DLL herr_t H5A__attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *mesg_src, H5O_loc_t *dst_oloc,
                                        const H5A_t *mesg_dst, H5O_copy_t *cpy_info);

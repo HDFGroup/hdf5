@@ -1,3 +1,14 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "hdf5.h"
 #include "testphdf5.h"
@@ -1107,10 +1118,10 @@ single_rank_independent_io(void)
 
     if (MAIN_PROCESS) {
         hsize_t  dims[1];
-        hid_t    file_id   = -1;
-        hid_t    fapl_id   = -1;
-        hid_t    dset_id   = -1;
-        hid_t    fspace_id = -1;
+        hid_t    file_id   = H5I_INVALID_HID;
+        hid_t    fapl_id   = H5I_INVALID_HID;
+        hid_t    dset_id   = H5I_INVALID_HID;
+        hid_t    fspace_id = H5I_INVALID_HID;
         herr_t   ret;
         int     *data = NULL;
         uint64_t i;
@@ -1181,7 +1192,7 @@ single_rank_independent_io(void)
 hid_t
 create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
 {
-    hid_t  ret_pl = -1;
+    hid_t  ret_pl = H5I_INVALID_HID;
     herr_t ret;      /* generic return value */
     int    mpi_rank; /* mpi variables */
 
@@ -1198,9 +1209,9 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
         /* set Parallel access with communicator */
         ret = H5Pset_fapl_mpio(ret_pl, comm, info);
         VRFY_G((ret >= 0), "");
-        ret = H5Pset_all_coll_metadata_ops(ret_pl, TRUE);
+        ret = H5Pset_all_coll_metadata_ops(ret_pl, true);
         VRFY_G((ret >= 0), "");
-        ret = H5Pset_coll_metadata_write(ret_pl, TRUE);
+        ret = H5Pset_coll_metadata_write(ret_pl, true);
         VRFY_G((ret >= 0), "");
         return (ret_pl);
     }
@@ -1854,7 +1865,13 @@ main(int argc, char **argv)
 {
     hsize_t newsize = 1048576;
     /* Set the bigio processing limit to be 'newsize' bytes */
-    hsize_t oldsize = H5_mpi_set_bigio_count(newsize);
+    hsize_t oldsize   = H5_mpi_set_bigio_count(newsize);
+    hid_t   acc_plist = H5I_INVALID_HID;
+#ifdef H5_HAVE_TEST_API
+    int required = MPI_THREAD_MULTIPLE;
+    int provided;
+#endif
+    int mpi_code;
 
     /* Having set the bigio handling to a size that is manageable,
      * we'll set our 'bigcount' variable to be 2X that limit so
@@ -1864,9 +1881,37 @@ main(int argc, char **argv)
     if (newsize != oldsize)
         bigcount = newsize * 2;
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size_g);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank_g);
+#ifdef H5_HAVE_TEST_API
+    /* Attempt to initialize with MPI_THREAD_MULTIPLE if possible */
+    if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(&argc, &argv, required, &provided))) {
+        printf("MPI_Init_thread failed with error code %d\n", mpi_code);
+        return -1;
+    }
+#else
+    if (MPI_SUCCESS != (mpi_code = MPI_Init(&argc, &argv))) {
+        printf("MPI_Init failed with error code %d\n", mpi_code);
+        return -1;
+    }
+#endif
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank_g))) {
+        printf("MPI_Comm_rank failed with error code %d\n", mpi_code);
+        MPI_Finalize();
+        return -1;
+    }
+
+#ifdef H5_HAVE_TEST_API
+    /* Warn about missing MPI_THREAD_MULTIPLE support */
+    if ((provided < required) && MAIN_PROCESS)
+        printf("** MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE **\n");
+#endif
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(MPI_COMM_WORLD, &mpi_size_g))) {
+        if (MAIN_PROCESS)
+            printf("MPI_Comm_size failed with error code %d\n", mpi_code);
+        MPI_Finalize();
+        return -1;
+    }
 
     /* Attempt to turn off atexit post processing so that in case errors
      * happen during the test and the process is aborted, it will not get
@@ -1878,6 +1923,30 @@ main(int argc, char **argv)
 
     /* set alarm. */
     TestAlarmOn();
+
+    acc_plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+
+    /* Get the capability flag of the VOL connector being used */
+    if (H5Pget_vol_cap_flags(acc_plist, &vol_cap_flags_g) < 0) {
+        if (MAIN_PROCESS)
+            printf("Failed to get the capability flag of the VOL connector being used\n");
+
+        MPI_Finalize();
+        return -1;
+    }
+
+    /* Make sure the connector supports the API functions being tested.  This test only
+     * uses a few API functions, such as H5Fcreate/open/close/delete, H5Dcreate/write/read/close,
+     * and H5Dget_space. */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if (MAIN_PROCESS)
+            printf(
+                "API functions for basic file, dataset basic or more aren't supported with this connector\n");
+
+        MPI_Finalize();
+        return 0;
+    }
 
     dataset_big_write();
     MPI_Barrier(MPI_COMM_WORLD);
@@ -1899,9 +1968,6 @@ main(int argc, char **argv)
      */
     H5_mpi_set_bigio_count(oldsize);
     single_rank_independent_io();
-
-    /* turn off alarm */
-    TestAlarmOff();
 
     if (mpi_rank_g == 0) {
         hid_t fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1925,6 +1991,11 @@ main(int argc, char **argv)
             printf("Parallel big IO tests finished with no errors\n");
         printf("==================================================\n");
     }
+
+    H5Pclose(acc_plist);
+
+    /* turn off alarm */
+    TestAlarmOff();
 
     /* close HDF5 library */
     H5close();

@@ -75,6 +75,7 @@ install-data-local:
 	fi
 	$(CP) $(top_builddir)/$(subdir)/H5f90i_gen.h $(DESTDIR)$(includedir)/.
 	$(CP) $(top_srcdir)/fortran/src/H5f90i.h $(DESTDIR)$(includedir)/.
+	$(CP) $(top_builddir)/$(subdir)/H5config_f.inc $(DESTDIR)$(includedir)/.
 
 uninstall-local:
 	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
@@ -84,6 +85,7 @@ uninstall-local:
 	fi;								\
 	$(RM) $(DESTDIR)$(bindir)/$(H5FC_NAME)
 	$(RM) $(DESTDIR)$(includedir)/H5f90i*.h
+	$(RM) $(DESTDIR)$(includedir)/H5config_f.inc
 
 # Also install and uninstall (uninstall-local above) h5fc script
 install-exec-local:
@@ -141,10 +143,11 @@ FORTRAN_API=yes
 # modules they depend upon are actually made. *sigh*
 H5f90global.lo:      $(srcdir)/H5f90global.F90 H5fortran_types.lo
 H5_buildiface.lo:    $(srcdir)/H5_buildiface.F90
+H5fortkit.lo:        $(srcdir)/H5fortkit.F90 H5fortran_types.lo
 H5_ff.lo:            $(srcdir)/H5_ff.F90 H5Fff.lo H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.F90 H5f90global.lo
 H5Dff.lo:            $(srcdir)/H5Dff.F90 H5f90global.lo H5_ff.lo H5Sff.lo
-H5Eff.lo:            $(srcdir)/H5Eff.F90 H5f90global.lo
+H5Eff.lo:            $(srcdir)/H5Eff.F90 H5f90global.lo H5fortkit.lo
 H5ESff.lo:           $(srcdir)/H5ESff.F90 H5f90global.lo
 H5Fff.lo:            $(srcdir)/H5Fff.F90 H5f90global.lo
 H5Gff.lo:            $(srcdir)/H5Gff.F90 H5f90global.lo H5Pff.lo

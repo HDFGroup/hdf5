@@ -257,7 +257,7 @@ static herr_t  H5FD__hdfs_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, ha
                                void *buf);
 static herr_t  H5FD__hdfs_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
                                 const void *buf);
-static herr_t  H5FD__hdfs_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t  H5FD__hdfs_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
 
 static herr_t H5FD__hdfs_validate_config(const H5FD_hdfs_fapl_t *fa);
 
@@ -333,7 +333,7 @@ H5FD_hdfs_init(void)
 #endif
 
     if (H5I_VFL != H5I_get_type(H5FD_HDFS_g))
-        H5FD_HDFS_g = H5FD_register(&H5FD_hdfs_g, sizeof(H5FD_class_t), FALSE);
+        H5FD_HDFS_g = H5FD_register(&H5FD_hdfs_g, sizeof(H5FD_class_t), false);
 
 #if HDFS_STATS
     /* pre-compute statsbin boundaries
@@ -600,7 +600,7 @@ H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_dst /*out*/)
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", fapl_id, fa_dst);
+    H5TRACE2("e", "i*#", fapl_id, fa_dst);
 
 #if HDFS_DEBUG
     fprintf(stdout, "called %s.\n", __func__);
@@ -926,7 +926,7 @@ hdfs__fprint_stats(FILE *stream, const H5FD_hdfs_t *file)
     unsigned long long max_raw      = 0;
     unsigned long long bytes_raw    = 0;
     unsigned long long bytes_meta   = 0;
-    double             re_dub       = 0.0; /* re-usable double variable */
+    double             re_dub       = 0.0; /* reusable double variable */
     unsigned           suffix_i     = 0;
     const char         suffixes[]   = {' ', 'K', 'M', 'G', 'T', 'P'};
 
@@ -1220,10 +1220,10 @@ H5FD__hdfs_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     if (finfo1->mBlockSize != finfo2->mBlockSize) {
         HGOTO_DONE(-1);
     }
-    if (HDstrcmp(finfo1->mOwner, finfo2->mOwner)) {
+    if (strcmp(finfo1->mOwner, finfo2->mOwner)) {
         HGOTO_DONE(-1);
     }
-    if (HDstrcmp(finfo1->mGroup, finfo2->mGroup)) {
+    if (strcmp(finfo1->mGroup, finfo2->mGroup)) {
         HGOTO_DONE(-1);
     }
     if (finfo1->mPermissions != finfo2->mPermissions) {
@@ -1528,8 +1528,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__hdfs_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id,
-                    hbool_t H5_ATTR_UNUSED closing)
+H5FD__hdfs_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     herr_t ret_value = SUCCEED;
 

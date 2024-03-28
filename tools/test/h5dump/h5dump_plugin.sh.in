@@ -45,10 +45,10 @@ AWK='awk'
 SRC_TOOLS="$srcdir/../.."
 
 # testfiles source dirs for tools
-SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
-SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS/test/h5dump/testfiles"
+SRC_H5DUMP_OUTFILES="$SRC_TOOLS/test/h5dump/expected"
 
-TESTDIR=./testplug
+TESTDIR=./tmppl
 test -d $TESTDIR || mkdir $TESTDIR
 
 ######################################################################
@@ -62,7 +62,7 @@ test -d $TESTDIR || mkdir $TESTDIR
 # --------------------------------------------------------------------
 LIST_HDF5_TEST_FILES="
 $SRC_H5DUMP_TESTFILES/tudfilter.h5
-$SRC_H5DUMP_TESTFILES/tudfilter.ddl
+$SRC_H5DUMP_OUTFILES/tudfilter.ddl
 "
 
 # RUNSERIAL is used. Check if it can return exit code from executable correctly.

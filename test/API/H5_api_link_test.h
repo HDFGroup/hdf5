@@ -29,9 +29,10 @@ int H5_api_link_test(void);
 #define HARD_LINK_TEST_GROUP_LONG_NAME "hard_link_long_name"
 #define MAX_NAME_LEN                   ((64 * 1024) + 1024)
 
-#define HARD_LINK_TEST_GROUP_MANY_NAME          "hard_link_many_name"
-#define HARD_LINK_TEST_GROUP_MANY_FINAL_NAME    "hard_link_final"
-#define HARD_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE 1024
+#define HARD_LINK_TEST_GROUP_MANY_NAME           "hard_link_many_name"
+#define HARD_LINK_TEST_GROUP_MANY_FINAL_NAME     "hard_link_final"
+#define HARD_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE  1024
+#define HARD_LINK_TEST_GROUP_MANY_NUM_HARD_LINKS 21
 
 #define H5L_SAME_LOC_TEST_GROUP_NAME "h5l_same_loc_test_group"
 #define H5L_SAME_LOC_TEST_LINK_NAME1 "h5l_same_loc_test_link1"
@@ -58,9 +59,10 @@ int H5_api_link_test(void);
 #define SOFT_LINK_TEST_GROUP_LONG_NAME  "soft_link_long_name"
 #define SOFT_LINK_TEST_LONG_OBJECT_NAME "soft_link_object_name"
 
-#define SOFT_LINK_TEST_GROUP_MANY_NAME          "soft_link_many_name"
-#define SOFT_LINK_TEST_GROUP_MANY_FINAL_NAME    "soft_link_final"
-#define SOFT_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE 1024
+#define SOFT_LINK_TEST_GROUP_MANY_NAME                 "soft_link_many_name"
+#define SOFT_LINK_TEST_GROUP_MANY_FINAL_NAME           "soft_link_final"
+#define SOFT_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE        1024
+#define SOFT_LINK_TEST_GROUP_MANY_NAME_SOFT_LINK_COUNT 16
 
 #define SOFT_LINK_INVALID_PARAMS_TEST_GROUP_NAME "soft_link_creation_invalid_params_test"
 #define SOFT_LINK_INVALID_PARAMS_TEST_LINK_NAME  "soft_link_to_root"
@@ -82,6 +84,7 @@ int H5_api_link_test(void);
 #define EXTERNAL_LINK_TEST_PING_PONG_NAME1         "ext_link_file_ping_pong_1.h5"
 #define EXTERNAL_LINK_TEST_PING_PONG_NAME2         "ext_link_file_ping_pong_2.h5"
 #define EXTERNAL_LINK_TEST_PING_PONG_NAME_BUF_SIZE 1024
+#define EXTERNAL_LINK_TEST_PING_PONG_NUM_LINKS     6
 
 #define EXTERNAL_LINK_INVALID_PARAMS_TEST_GROUP_NAME "external_link_creation_invalid_params_test"
 #define EXTERNAL_LINK_INVALID_PARAMS_TEST_FILE_NAME  "ext_link_invalid_params_file.h5"

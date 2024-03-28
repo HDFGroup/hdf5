@@ -33,15 +33,15 @@ typedef struct ioc_data_t {
     hg_thread_pool_t *io_thread_pool;
     int64_t           sf_context_id;
 
-    /* sf_io_ops_pending is use to track the number of I/O operations pending so that we can wait
+    atomic_int sf_ioc_ready;
+    atomic_int sf_shutdown_flag;
+    /* sf_io_ops_pending tracks the number of I/O operations pending so that we can wait
      * until all I/O operations have been serviced before shutting down the worker thread pool.
      * The value of this variable must always be non-negative.
      *
      * Note that this is a convenience variable -- we could use io_queue.q_len instead.
      * However, accessing this field requires locking io_queue.q_mutex.
      */
-    atomic_int sf_ioc_ready;
-    atomic_int sf_shutdown_flag;
     atomic_int sf_io_ops_pending;
     atomic_int sf_work_pending;
 } ioc_data_t;
@@ -85,7 +85,7 @@ static int ioc_file_report_eof(sf_work_request_t *msg, MPI_Comm comm);
 
 static ioc_io_queue_entry_t *ioc_io_queue_alloc_entry(void);
 static void ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_ptr);
-static void ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, hbool_t try_lock);
+static void ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, bool try_lock);
 static void ioc_io_queue_free_entry(ioc_io_queue_entry_t *q_entry_ptr);
 static void ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr);
 
@@ -167,7 +167,7 @@ initialize_ioc_threads(void *_sf_context)
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, (-1), "can't initialize IOC thread queue mutex");
 
     /* Allow experimentation with the number of helper threads */
-    if ((env_value = HDgetenv(H5FD_IOC_THREAD_POOL_SIZE)) != NULL) {
+    if ((env_value = getenv(H5FD_IOC_THREAD_POOL_SIZE)) != NULL) {
         int value_check = atoi(env_value);
         if (value_check > 0) {
             thread_pool_size = (unsigned int)value_check;
@@ -456,8 +456,9 @@ translate_opcode(io_op_t op)
         case LOGGING_OP:
             return "LOGGING_OP";
             break;
+        default:
+            return "unknown";
     }
-    return "unknown";
 }
 #endif
 
@@ -654,7 +655,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_
 {
     subfiling_context_t *sf_context = NULL;
     MPI_Status           msg_status;
-    hbool_t              send_nack = FALSE;
+    bool                 send_nack = false;
     int64_t              file_context_id;
     int64_t              data_size;
     int64_t              file_offset;
@@ -686,7 +687,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_
     subfile_idx = msg->header[2];
 
     if (data_size < 0) {
-        send_nack = TRUE;
+        send_nack = true;
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_BADVALUE, -1, "invalid data size for write");
     }
 
@@ -719,7 +720,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_
 
     /* Allocate space to receive data sent from the client */
     if (NULL == (recv_buf = malloc((size_t)data_size))) {
-        send_nack = TRUE;
+        send_nack = true;
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, -1, "couldn't allocate receive buffer for data");
     }
 
@@ -839,9 +840,9 @@ static int
 ioc_file_queue_read_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_Comm comm, uint32_t counter)
 {
     subfiling_context_t *sf_context     = NULL;
-    hbool_t              send_empty_buf = TRUE;
-    hbool_t              send_nack      = FALSE;
-    hbool_t              need_data_tag  = FALSE;
+    bool                 send_empty_buf = true;
+    bool                 send_nack      = false;
+    bool                 need_data_tag  = false;
     int64_t              file_context_id;
     int64_t              data_size;
     int64_t              file_offset;
@@ -873,9 +874,14 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_C
      * unpredictable order. However, if some IOCs own more than
      * 1 subfile, we need to associate each read with a unique
      * message tag to make sure the data is received in the
-     * correct order.
+     * correct order. We also need a unique message tag in the
+     * case where only 1 subfile is used in total. In this case,
+     * vector I/O calls are passed directly down to this VFD without
+     * being split up into multiple I/O requests, so we need the
+     * tag to distinguish each I/O request.
      */
-    need_data_tag = sf_context->sf_num_subfiles != sf_context->topology->n_io_concentrators;
+    need_data_tag = (sf_context->sf_num_subfiles == 1) ||
+                    (sf_context->sf_num_subfiles != sf_context->topology->n_io_concentrators);
     if (!need_data_tag)
         send_tag = READ_INDEP_DATA;
 
@@ -886,8 +892,8 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_C
 
     if (data_size < 0) {
         if (need_data_tag) {
-            send_nack      = TRUE;
-            send_empty_buf = FALSE;
+            send_nack      = true;
+            send_empty_buf = false;
         }
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_BADVALUE, -1, "invalid data size for read");
     }
@@ -913,8 +919,8 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_C
     /* Allocate space to send data read from file to client */
     if (NULL == (send_buf = malloc((size_t)data_size))) {
         if (need_data_tag) {
-            send_nack      = TRUE;
-            send_empty_buf = FALSE;
+            send_nack      = true;
+            send_empty_buf = false;
         }
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, -1, "couldn't allocate send buffer for data");
     }
@@ -934,7 +940,7 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_C
         send_tag += IO_TAG_BASE;
 
         if (send_ack_to_client(send_tag, source, ioc_idx, READ_INDEP_ACK, comm) < 0) {
-            send_empty_buf = FALSE;
+            send_empty_buf = false;
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_READERROR, -1, "couldn't send ACK to client");
         }
     }
@@ -951,7 +957,7 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_C
                                 read_ret);
     }
 
-    send_empty_buf = FALSE;
+    send_empty_buf = false;
 
     /* Send read data to the client */
     H5_CHECK_OVERFLOW(data_size, int64_t, int);
@@ -1207,6 +1213,7 @@ ioc_file_report_eof(sf_work_request_t *msg, MPI_Comm comm)
 
     fd = sf_context->sf_fids[subfile_idx];
 
+    memset(&sb, 0, sizeof(h5_stat_t));
     if (HDfstat(fd, &sb) < 0)
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SYSERRSTR, -1, "HDfstat failed");
 
@@ -1251,7 +1258,7 @@ ioc_io_queue_alloc_entry(void)
         q_entry_ptr->magic       = H5FD_IOC__IO_Q_ENTRY_MAGIC;
         q_entry_ptr->next        = NULL;
         q_entry_ptr->prev        = NULL;
-        q_entry_ptr->in_progress = FALSE;
+        q_entry_ptr->in_progress = false;
         q_entry_ptr->counter     = 0;
 
         /* will memcpy the wk_req field, so don't bother to initialize */
@@ -1414,9 +1421,9 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
  *       can become O(N**2) in the worst case.
  */
 static void
-ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, hbool_t try_lock)
+ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, bool try_lock)
 {
-    hbool_t               conflict_detected;
+    bool                  conflict_detected;
     int64_t               entry_offset;
     int64_t               entry_len;
     int64_t               scan_offset;
@@ -1462,7 +1469,7 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, hbool_t try_lock)
             entry_offset = entry_ptr->wk_req.header[1];
             entry_len    = entry_ptr->wk_req.header[0];
 
-            conflict_detected = FALSE;
+            conflict_detected = false;
 
             scan_ptr = entry_ptr->prev;
 
@@ -1497,7 +1504,7 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, hbool_t try_lock)
                     /* TODO: update this if statement when we add collective I/O */
                     if ((entry_ptr->wk_req.tag != READ_INDEP) || (scan_ptr->wk_req.tag != READ_INDEP)) {
 
-                        conflict_detected = TRUE;
+                        conflict_detected = true;
                     }
                 }
 
@@ -1509,7 +1516,7 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, hbool_t try_lock)
                 assert(scan_ptr == NULL);
                 assert(!entry_ptr->in_progress);
 
-                entry_ptr->in_progress = TRUE;
+                entry_ptr->in_progress = true;
 
                 assert(ioc_data->io_queue.num_pending > 0);
 

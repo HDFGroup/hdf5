@@ -28,10 +28,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5B2pkg.h"     /* v2 B-trees				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FLprivate.h" /* Free Lists                           */
+#include "H5private.h"  /* Generic Functions			*/
+#include "H5B2pkg.h"    /* v2 B-trees				*/
+#include "H5Eprivate.h" /* Error handling		  	*/
 
 /****************/
 /* Local Macros */
@@ -124,7 +123,7 @@ H5B2__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     /* Print relevant node info */
     fprintf(stream, "%*sNode Info: (max_nrec/split_nrec/merge_nrec)\n", indent, "");
     for (u = 0; u < (unsigned)(hdr->depth + 1); u++) {
-        HDsnprintf(temp_str, sizeof(temp_str), "Depth %u:", u);
+        snprintf(temp_str, sizeof(temp_str), "Depth %u:", u);
         fprintf(stream, "%*s%-*s (%u/%u/%u)\n", indent + 3, "", MAX(0, fwidth - 3), temp_str,
                 hdr->node_info[u].max_nrec, hdr->node_info[u].split_nrec, hdr->node_info[u].merge_nrec);
     } /* end for */
@@ -184,7 +183,7 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     H5_CHECK_OVERFLOW(depth, unsigned, uint16_t);
     node_ptr.addr = addr;
     H5_CHECKED_ASSIGN(node_ptr.node_nrec, uint16_t, nrec, unsigned);
-    if (NULL == (internal = H5B2__protect_internal(hdr, NULL, &node_ptr, (uint16_t)depth, FALSE,
+    if (NULL == (internal = H5B2__protect_internal(hdr, NULL, &node_ptr, (uint16_t)depth, false,
                                                    H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node");
 
@@ -206,13 +205,13 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     /* Print all node pointers and records */
     for (u = 0; u < internal->nrec; u++) {
         /* Print node pointer */
-        HDsnprintf(temp_str, sizeof(temp_str), "Node pointer #%u: (all/node/addr)", u);
+        snprintf(temp_str, sizeof(temp_str), "Node pointer #%u: (all/node/addr)", u);
         fprintf(stream, "%*s%-*s (%" PRIuHSIZE "/%u/%" PRIuHADDR ")\n", indent + 3, "", MAX(0, fwidth - 3),
                 temp_str, internal->node_ptrs[u].all_nrec, internal->node_ptrs[u].node_nrec,
                 internal->node_ptrs[u].addr);
 
         /* Print record */
-        HDsnprintf(temp_str, sizeof(temp_str), "Record #%u:", u);
+        snprintf(temp_str, sizeof(temp_str), "Record #%u:", u);
         fprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), temp_str);
         assert(H5B2_INT_NREC(internal, hdr, u));
         (void)(type->debug)(stream, indent + 6, MAX(0, fwidth - 6), H5B2_INT_NREC(internal, hdr, u),
@@ -220,7 +219,7 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     } /* end for */
 
     /* Print final node pointer */
-    HDsnprintf(temp_str, sizeof(temp_str), "Node pointer #%u: (all/node/addr)", u);
+    snprintf(temp_str, sizeof(temp_str), "Node pointer #%u: (all/node/addr)", u);
     fprintf(stream, "%*s%-*s (%" PRIuHSIZE "/%u/%" PRIuHADDR ")\n", indent + 3, "", MAX(0, fwidth - 3),
             temp_str, internal->node_ptrs[u].all_nrec, internal->node_ptrs[u].node_nrec,
             internal->node_ptrs[u].addr);
@@ -282,7 +281,7 @@ H5B2__leaf_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, c
     H5_CHECK_OVERFLOW(nrec, unsigned, uint16_t);
     node_ptr.addr = addr;
     H5_CHECKED_ASSIGN(node_ptr.node_nrec, uint16_t, nrec, unsigned);
-    if (NULL == (leaf = H5B2__protect_leaf(hdr, NULL, &node_ptr, FALSE, H5AC__READ_ONLY_FLAG)))
+    if (NULL == (leaf = H5B2__protect_leaf(hdr, NULL, &node_ptr, false, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
 
     /* Print opening message */
@@ -303,7 +302,7 @@ H5B2__leaf_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, c
     /* Print all node pointers and records */
     for (u = 0; u < leaf->nrec; u++) {
         /* Print record */
-        HDsnprintf(temp_str, sizeof(temp_str), "Record #%u:", u);
+        snprintf(temp_str, sizeof(temp_str), "Record #%u:", u);
         fprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), temp_str);
         assert(H5B2_LEAF_NREC(leaf, hdr, u));
         (void)(type->debug)(stream, indent + 6, MAX(0, fwidth - 6), H5B2_LEAF_NREC(leaf, hdr, u),

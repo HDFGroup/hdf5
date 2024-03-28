@@ -13,13 +13,6 @@
 #include "h5hltest.h"
 #include "H5DOpublic.h"
 
-#if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER)
-#define H5_ZLIB_HEADER "zlib.h"
-#endif
-#if defined(H5_ZLIB_HEADER)
-#include H5_ZLIB_HEADER /* "zlib.h" */
-#endif
-
 #define FILENAME     "test_append.h5"
 #define DNAME_NOTSET "dataset_notset"
 #define DNAME_UNLIM  "dataset_unlim"
@@ -85,6 +78,7 @@ test_dataset_append_notset(hid_t fid)
     } /* end for */
 
     /* File size when not flushed */
+    memset(&sb1, 0, sizeof(h5_stat_t));
     if (HDstat(FILENAME, &sb1) < 0)
         TEST_ERROR;
 
@@ -93,6 +87,7 @@ test_dataset_append_notset(hid_t fid)
         FAIL_STACK_ERROR;
 
     /* File size after flushing */
+    memset(&sb2, 0, sizeof(h5_stat_t));
     if (HDstat(FILENAME, &sb2) < 0)
         TEST_ERROR;
 

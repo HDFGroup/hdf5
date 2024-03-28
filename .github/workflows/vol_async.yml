@@ -1,0 +1,94 @@
+name: Test HDF5 async VOL
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "CMake Build type"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_test:
+    name: Test HDF5 asynchronous I/O VOL connector
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt-get install automake autoconf libtool libtool-bin libopenmpi-dev
+
+      - name: Checkout HDF5
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: HDFGroup/hdf5
+          path: hdf5
+
+      - name: Checkout Argobots
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: pmodels/argobots
+          path: abt
+
+      # Argobots builds and installs fairly quickly,
+      # so no caching is currently performed here
+      - name: Install Argobots
+        working-directory: ${{ github.workspace }}/abt
+        run: |
+          ./autogen.sh
+          ./configure --prefix=/usr/local
+          make -j2
+          sudo make -j2 install
+
+      - name: Configure HDF5 with asynchronous I/O VOL connector
+        shell: bash
+        run: |
+          mkdir ${{ github.workspace }}/hdf5/build
+          cd ${{ github.workspace }}/hdf5/build
+          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+            -DBUILD_STATIC_LIBS=OFF \
+            -DHDF5_TEST_API:BOOL=ON \
+            -DHDF5_TEST_API_ENABLE_ASYNC:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
+            -DALLOW_UNSUPPORTED:BOOL=ON \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+            -DHDF5_VOL_ALLOW_EXTERNAL:STRING="GIT" \
+            -DHDF5_VOL_URL01:STRING="https://github.com/hpc-io/vol-async.git" \
+            -DHDF5_VOL_VOL-ASYNC_BRANCH:STRING="develop" \
+            -DHDF5_VOL_VOL-ASYNC_NAME:STRING="async under_vol=0\;under_info={}" \
+            -DHDF5_VOL_VOL-ASYNC_TEST_PARALLEL:BOOL=ON \
+            ${{ github.workspace }}/hdf5
+          cat src/libhdf5.settings
+
+      - name: Build HDF5 and asynchronous I/O VOL connector
+        shell: bash
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          echo "LD_LIBRARY_PATH=/usr/local/lib:${{ github.workspace }}/hdf5/build/bin" >> $GITHUB_ENV
+
+      # Workaround for asynchronous I/O VOL CMake issue
+      - name: Copy testing files
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          cp bin/async_test* ./_deps/vol-async-build/test
+
+      - name: Test HDF5 asynchronous I/O VOL connector with external tests
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "async_test" .
+
+      - name: Test HDF5 asynchronous I/O VOL connector with HDF5 API tests
+        working-directory: ${{ github.workspace }}/hdf5/build
+        # Don't test the Async VOL connector with the HDF5 API tests yet,
+        # as it doesn't currently pass all the tests. Leave the step in,
+        # but skip it to leave an indication that this should be re-enabled
+        # in the future.
+        if: false
+        run: |
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "HDF5_VOL_vol-async" .

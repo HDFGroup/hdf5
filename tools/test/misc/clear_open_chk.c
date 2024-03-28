@@ -47,10 +47,10 @@ main(int argc, char *argv[])
     }
 
     /* Get the file name */
-    fname = HDstrdup(argv[1]);
+    fname = strdup(argv[1]);
 
     /* Try opening the file */
-    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, FALSE, NULL, (size_t)0)) < 0) {
+    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, false, NULL, (size_t)0)) < 0) {
         fprintf(stderr, "clear_open_chk: unable to open the file\n");
         free(fname);
         exit(EXIT_FAILURE);

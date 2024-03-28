@@ -67,25 +67,39 @@ file_image_daisy_chain_test(void)
     int        space_ndims;
     MPI_Status rcvstat;
     int       *vector_ptr = NULL;
-    hid_t      fapl_id    = -1;
+    hid_t      fapl_id    = H5I_INVALID_HID;
     hid_t      file_id; /* file IDs */
-    hid_t      dset_id      = -1;
-    hid_t      dset_type_id = -1;
-    hid_t      space_id     = -1;
+    hid_t      dset_id      = H5I_INVALID_HID;
+    hid_t      dset_type_id = H5I_INVALID_HID;
+    hid_t      space_id     = H5I_INVALID_HID;
     herr_t     err;
     hsize_t    dims[1];
     void      *image_ptr = NULL;
     ssize_t    bytes_read;
     ssize_t    image_len;
-    hbool_t    vector_ok = TRUE;
+    bool       vector_ok = true;
     htri_t     tri_result;
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, dataset, or dataset more aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
+
     /* setup file name */
-    HDsnprintf(file_name, 1024, "file_image_daisy_chain_test_%05d.h5", (int)mpi_rank);
+    snprintf(file_name, 1024, "file_image_daisy_chain_test_%05d.h5", (int)mpi_rank);
 
     if (mpi_rank == 0) {
 
@@ -95,7 +109,7 @@ file_image_daisy_chain_test(void)
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((fapl_id >= 0), "creating fapl");
 
-        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), FALSE);
+        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), false);
         VRFY((err >= 0), "setting core file driver in fapl.");
 
         file_id = H5Fcreate(file_name, 0, H5P_DEFAULT, fapl_id);
@@ -184,7 +198,7 @@ file_image_daisy_chain_test(void)
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((fapl_id >= 0), "creating fapl");
 
-        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), FALSE);
+        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), false);
         VRFY((err >= 0), "setting core file driver in fapl.");
 
         err = H5Pset_file_image(fapl_id, image_ptr, (size_t)image_len);
@@ -200,7 +214,7 @@ file_image_daisy_chain_test(void)
         VRFY((dset_type_id >= 0), "obtained data set type");
 
         tri_result = H5Tequal(dset_type_id, H5T_NATIVE_INT);
-        VRFY((tri_result == TRUE), "verified data set type");
+        VRFY((tri_result == true), "verified data set type");
 
         space_id = H5Dget_space(dset_id);
         VRFY((space_id >= 0), "opened data space");
@@ -218,10 +232,10 @@ file_image_daisy_chain_test(void)
         err = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)vector_ptr);
         VRFY((err >= 0), "read received vector.");
 
-        vector_ok = TRUE;
+        vector_ok = true;
         for (i = 0; i < mpi_size; i++)
             if (vector_ptr[i] != i)
-                vector_ok = FALSE;
+                vector_ok = false;
         VRFY((vector_ok), "verified received vector.");
 
         free(vector_ptr);
@@ -266,7 +280,7 @@ file_image_daisy_chain_test(void)
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((fapl_id >= 0), "creating fapl");
 
-        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), FALSE);
+        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), false);
         VRFY((err >= 0), "setting core file driver in fapl.");
 
         err = H5Pset_file_image(fapl_id, image_ptr, (size_t)image_len);
@@ -283,7 +297,7 @@ file_image_daisy_chain_test(void)
         VRFY((dset_type_id >= 0), "obtained data set type");
 
         tri_result = H5Tequal(dset_type_id, H5T_NATIVE_INT);
-        VRFY((tri_result == TRUE), "verified data set type");
+        VRFY((tri_result == true), "verified data set type");
 
         space_id = H5Dget_space(dset_id);
         VRFY((space_id >= 0), "opened data space");
@@ -301,15 +315,15 @@ file_image_daisy_chain_test(void)
         err = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)vector_ptr);
         VRFY((err >= 0), "read received vector.");
 
-        vector_ok = TRUE;
+        vector_ok = true;
         for (i = 0; i < mpi_size; i++) {
             if (i < mpi_rank) {
                 if (vector_ptr[i] != i)
-                    vector_ok = FALSE;
+                    vector_ok = false;
             }
             else {
                 if (vector_ptr[i] != -1)
-                    vector_ok = FALSE;
+                    vector_ok = false;
             }
         }
         VRFY((vector_ok), "verified received vector.");

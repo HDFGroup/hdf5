@@ -25,10 +25,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions			*/
-#include "H5Eprivate.h" /* Error handling		  	*/
-#include "H5Fpkg.h"     /* File access				*/
-#include "H5MFpkg.h"    /* File memory management		*/
+#include "H5private.h"   /* Generic Functions			*/
+#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5Fpkg.h"      /* File access				*/
+#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5MFpkg.h"     /* File memory management		*/
 
 /****************/
 /* Local Macros */
@@ -340,7 +341,7 @@ done:
  *
  * Note:        Second section must be "after" first section
  *
- * Return:	Success:	non-negative (TRUE/FALSE)
+ * Return:	Success:	non-negative (true/false)
  *		Failure:	negative
  *
  *-------------------------------------------------------------------------
@@ -412,7 +413,7 @@ done:
  *
  * Purpose:	Can this section shrink the container?
  *
- * Return:	Success:	non-negative (TRUE/FALSE)
+ * Return:	Success:	non-negative (true/false)
  *		Failure:	negative
  *
  *-------------------------------------------------------------------------
@@ -450,12 +451,12 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
         /* Indicate shrinking can occur */
-        HGOTO_DONE(TRUE);
+        HGOTO_DONE(true);
     } /* end if */
     else {
         /* Shrinking can't occur if the 'eoa_shrink_only' flag is set and we're not shrinking the EOA */
         if (udata->allow_eoa_shrink_only)
-            HGOTO_DONE(FALSE);
+            HGOTO_DONE(false);
 
         /* Check if this section is allowed to merge with metadata aggregation block */
         if (udata->f->shared->fs_aggr_merge[udata->alloc_type] & H5F_FS_MERGE_METADATA) {
@@ -475,7 +476,7 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
                 /* Indicate shrinking can occur */
-                HGOTO_DONE(TRUE);
+                HGOTO_DONE(true);
             } /* end if */
         }     /* end if */
 
@@ -498,13 +499,13 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
                 /* Indicate shrinking can occur */
-                HGOTO_DONE(TRUE);
+                HGOTO_DONE(true);
             } /* end if */
         }     /* end if */
     }         /* end else */
 
     /* Set return value */
-    ret_value = FALSE;
+    ret_value = false;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -641,7 +642,7 @@ done:
  * Note: Second section must be "after" first section
  *       The "merged" section cannot cross page boundary.
  *
- * Return:	Success:	non-negative (TRUE/FALSE)
+ * Return:	Success:	non-negative (true/false)
  *          Failure:	negative
  *
  *-------------------------------------------------------------------------
@@ -652,7 +653,7 @@ H5MF__sect_small_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section
     const H5MF_free_section_t *sect1     = (const H5MF_free_section_t *)_sect1; /* File free section */
     const H5MF_free_section_t *sect2     = (const H5MF_free_section_t *)_sect2; /* File free section */
     H5MF_sect_ud_t            *udata     = (H5MF_sect_ud_t *)_udata;            /* User data for callback */
-    htri_t                     ret_value = FALSE;                               /* Return value */
+    htri_t                     ret_value = false;                               /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -668,7 +669,7 @@ H5MF__sect_small_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section
         /* If they are on different pages, couldn't merge */
         if ((sect1->sect_info.addr / udata->f->shared->fs_page_size) !=
             (((sect2->sect_info.addr + sect2->sect_info.size - 1) / udata->f->shared->fs_page_size)))
-            ret_value = FALSE;
+            ret_value = false;
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
     fprintf(stderr, "%s: Leaving: ret_value = %d\n", __func__, ret_value);
@@ -747,7 +748,7 @@ done:
  *
  * Note: Second section must be "after" first section
  *
- * Return:	Success:	non-negative (TRUE/FALSE)
+ * Return:	Success:	non-negative (true/false)
  *          Failure:	negative
  *
  *-------------------------------------------------------------------------
@@ -758,7 +759,7 @@ H5MF__sect_large_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section
 {
     const H5MF_free_section_t *sect1     = (const H5MF_free_section_t *)_sect1; /* File free section */
     const H5MF_free_section_t *sect2     = (const H5MF_free_section_t *)_sect2; /* File free section */
-    htri_t                     ret_value = FALSE;                               /* Return value */
+    htri_t                     ret_value = false;                               /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -821,7 +822,7 @@ done:
  *
  * Purpose:	Can this section shrink the container?
  *
- * Return:	Success:	non-negative (TRUE/FALSE)
+ * Return:	Success:	non-negative (true/false)
  *          Failure:	negative
  *
  *-------------------------------------------------------------------------
@@ -833,7 +834,7 @@ H5MF__sect_large_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     H5MF_sect_ud_t            *udata = (H5MF_sect_ud_t *)_udata;           /* User data for callback */
     haddr_t                    eoa;               /* End of address space in the file */
     haddr_t                    end;               /* End of section to extend */
-    htri_t                     ret_value = FALSE; /* Return value */
+    htri_t                     ret_value = false; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -860,7 +861,7 @@ H5MF__sect_large_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
         /* Indicate shrinking can occur */
-        HGOTO_DONE(TRUE);
+        HGOTO_DONE(true);
     } /* end if */
 
 done:

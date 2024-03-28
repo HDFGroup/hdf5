@@ -35,6 +35,7 @@
 #include "H5private.h"   /* Generic Functions                            */
 #include "H5Eprivate.h"  /* Error handling                               */
 #include "H5FApkg.h"     /* Fixed Arrays                                 */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5MFprivate.h" /* File memory management                       */
 #include "H5MMprivate.h" /* Memory management                            */
 
@@ -162,7 +163,7 @@ haddr_t
 H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
 {
     H5FA_hdr_t *hdr       = NULL;  /* Fixed array header */
-    hbool_t     inserted  = FALSE; /* Whether the header was inserted into cache */
+    bool        inserted  = false; /* Whether the header was inserted into cache */
     haddr_t     ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_PACKAGE
@@ -202,7 +203,7 @@ H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
     if (HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_FARRAY_HDR, (hsize_t)hdr->size)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, HADDR_UNDEF, "file allocation failed for Fixed Array header");
 
-    /* Create 'top' proxy for extensible array entries */
+    /* Create 'top' proxy for fixed array entries */
     if (hdr->swmr_write)
         if (NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTCREATE, HADDR_UNDEF, "can't create fixed array entry proxy");
@@ -210,7 +211,7 @@ H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
     /* Cache the new Fixed Array header */
     if (H5AC_insert_entry(f, H5AC_FARRAY_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTINSERT, HADDR_UNDEF, "can't add fixed array header to cache");
-    inserted = TRUE;
+    inserted = true;
 
     /* Add header as child of 'top' proxy */
     if (hdr->top_proxy)

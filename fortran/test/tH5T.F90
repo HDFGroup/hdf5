@@ -819,8 +819,6 @@ CONTAINS
 
     SUBROUTINE enumtest(cleanup, total_error)
 
-    USE HDF5
-    USE TH5_MISC
     IMPLICIT NONE
 
     LOGICAL, INTENT(IN)  :: cleanup
@@ -943,7 +941,7 @@ CONTAINS
 !-------------------------------------------------------------------------
 ! * Function:    test_derived_flt
 ! *
-! * Purpose:     Tests user-define and query functions of floating-point types.
+! * Purpose:     Tests user-defined and query functions of floating-point types.
 ! *              test h5tget/set_fields_f.
 ! *
 ! * Return:      Success:        0

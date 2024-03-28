@@ -39,6 +39,13 @@
 
 MODULE H5P
 
+#ifdef H5_HAVE_PARALLEL
+#ifdef H5_HAVE_MPI_F08
+  USE MPI_F08, ONLY : MPI_INTEGER_KIND
+#else
+  USE MPI, ONLY : MPI_INTEGER_KIND
+#endif
+#endif
   USE H5GLOBAL
   USE H5fortkit
 
@@ -49,6 +56,13 @@ MODULE H5P
   PRIVATE h5pget_integer, h5pget_char, h5pget_ptr
   PRIVATE h5pregister_integer, h5pregister_ptr
   PRIVATE h5pinsert_integer, h5pinsert_char, h5pinsert_ptr
+#ifdef H5_HAVE_PARALLEL
+  PRIVATE MPI_INTEGER_KIND
+  PRIVATE h5pset_fapl_mpio_f90, h5pget_fapl_mpio_f90
+#ifdef H5_HAVE_MPI_F08
+  PRIVATE h5pset_fapl_mpio_f08, h5pget_fapl_mpio_f08
+#endif
+#endif
 
 #ifndef H5_DOXYGEN
 
@@ -102,27 +116,27 @@ MODULE H5P
   END INTERFACE
 
   INTERFACE
-     INTEGER FUNCTION h5pget_fill_value_c(prp_id, type_id, fillvalue) &
-          BIND(C, NAME='h5pget_fill_value_c')
-       IMPORT :: c_ptr
+     INTEGER(C_INT) FUNCTION H5Pset_fill_value(prp_id, type_id, fillvalue) &
+          BIND(C, NAME='H5Pset_fill_value')
+       IMPORT :: C_INT, C_PTR
        IMPORT :: HID_T
        IMPLICIT NONE
-       INTEGER(HID_T), INTENT(IN) :: prp_id
-       INTEGER(HID_T), INTENT(IN) :: type_id
-       TYPE(C_PTR), VALUE :: fillvalue
-     END FUNCTION h5pget_fill_value_c
+       INTEGER(hid_t), VALUE :: prp_id
+       INTEGER(hid_t), VALUE :: type_id
+       TYPE(C_PTR)   , VALUE :: fillvalue
+     END FUNCTION H5Pset_fill_value
   END INTERFACE
 
   INTERFACE
-     INTEGER FUNCTION h5pset_fill_value_c(prp_id, type_id, fillvalue) &
-          BIND(C, NAME='h5pset_fill_value_c')
-       IMPORT :: c_ptr
+     INTEGER(C_INT) FUNCTION H5Pget_fill_value(prp_id, type_id, fillvalue) &
+          BIND(C, NAME='H5Pget_fill_value')
+       IMPORT :: C_INT, C_PTR
        IMPORT :: HID_T
        IMPLICIT NONE
-       INTEGER(HID_T), INTENT(IN) :: prp_id
-       INTEGER(HID_T), INTENT(IN) :: type_id
-       TYPE(C_PTR), VALUE :: fillvalue
-     END FUNCTION h5pset_fill_value_c
+       INTEGER(hid_t), VALUE :: prp_id
+       INTEGER(hid_t), VALUE :: type_id
+       TYPE(C_PTR)   , VALUE :: fillvalue
+     END FUNCTION H5Pget_fill_value
   END INTERFACE
 
   INTERFACE
@@ -181,6 +195,35 @@ MODULE H5P
 #endif
 
 #ifdef H5_HAVE_PARALLEL
+
+  INTERFACE h5pset_fapl_mpio_f
+      MODULE PROCEDURE h5pset_fapl_mpio_f90
+#ifdef H5_HAVE_MPI_F08
+      MODULE PROCEDURE h5pset_fapl_mpio_f08
+#endif
+    END INTERFACE
+
+  INTERFACE h5pget_fapl_mpio_f
+    MODULE PROCEDURE h5pget_fapl_mpio_f90      
+#ifdef H5_HAVE_MPI_F08  
+    MODULE PROCEDURE h5pget_fapl_mpio_f08
+#endif
+  END INTERFACE
+
+  INTERFACE H5Pset_mpi_params_f
+    MODULE PROCEDURE H5Pset_mpi_params_f90
+#ifdef H5_HAVE_MPI_F08
+    MODULE PROCEDURE H5Pset_mpi_params_f08
+#endif
+  END INTERFACE
+
+  INTERFACE H5Pget_mpi_params_f
+    MODULE PROCEDURE H5Pget_mpi_params_f90
+#ifdef H5_HAVE_MPI_F08
+    MODULE PROCEDURE H5Pget_mpi_params_f08
+#endif
+  END INTERFACE
+
 #ifdef H5_HAVE_SUBFILING_VFD
 !> \addtogroup FH5P
 !> @{
@@ -399,15 +442,16 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5pclose_c(prp_id) &
-            BIND(C,NAME='h5pclose_c')
+       INTEGER(C_INT) FUNCTION H5Pclose(prp_id) &
+            BIND(C,NAME='H5Pclose')
+         IMPORT :: C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-       END FUNCTION h5pclose_c
+         INTEGER(HID_T), VALUE :: prp_id
+       END FUNCTION H5Pclose
     END INTERFACE
 
-    hdferr = h5pclose_c(prp_id)
+    hdferr = INT(H5Pclose(prp_id))
   END SUBROUTINE h5pclose_f
 
 !>
@@ -514,7 +558,7 @@ CONTAINS
 !!
 !! \brief Retrieves the version information of various objects for a file creation property list.
 !!
-!! \param prp_id   File createion property list identifier.
+!! \param prp_id   File creation property list identifier.
 !! \param boot     Super block version number.
 !! \param freelist Global freelist version number.
 !! \param stab     Symbol table version number.
@@ -565,16 +609,17 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN) :: size
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5pset_userblock_c(prp_id, size) &
-            BIND(C,NAME='h5pset_userblock_c')
+       INTEGER FUNCTION H5Pset_userblock(prp_id, size) &
+            BIND(C,NAME='H5Pset_userblock')
          IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-         INTEGER(HSIZE_T), INTENT(IN) :: size
-       END FUNCTION h5pset_userblock_c
+         INTEGER(HID_T)  , VALUE :: prp_id
+         INTEGER(HSIZE_T), VALUE :: size
+       END FUNCTION H5Pset_userblock
     END INTERFACE
 
-    hdferr = h5pset_userblock_c(prp_id, size)
+    hdferr = H5Pset_userblock(prp_id, size)
+
   END SUBROUTINE h5pset_userblock_f
 
 !>
@@ -594,15 +639,17 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(OUT) ::  block_size
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5pget_userblock_c(prp_id, block_size) &
-            BIND(C,NAME='h5pget_userblock_c')
+       INTEGER FUNCTION H5Pget_userblock(prp_id, block_size) &
+            BIND(C,NAME='H5Pget_userblock')
          IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-         INTEGER(HSIZE_T), INTENT(OUT) :: block_size
-       END FUNCTION h5pget_userblock_c
+         INTEGER(HID_T)  , VALUE :: prp_id
+         INTEGER(HSIZE_T)        :: block_size
+       END FUNCTION H5Pget_userblock
     END INTERFACE
-    hdferr = h5pget_userblock_c(prp_id,  block_size)
+
+    hdferr = H5Pget_userblock(prp_id,  block_size)
+
   END SUBROUTINE h5pget_userblock_f
 
 !>
@@ -1576,6 +1623,9 @@ CONTAINS
 !! \param bytes  Size of the external file data.
 !! \param hdferr \fortran_error
 !!
+!! \note On Windows, off_t is typically a 32-bit signed long value, which
+!!       limits the valid offset that can be set to 2 GiB.
+!!
 !! See C API: @ref H5Pset_external()
 !!
   SUBROUTINE h5pset_external_f(prp_id, name, offset, bytes, hdferr)
@@ -1647,9 +1697,12 @@ CONTAINS
 !! \param bytes     Size of the external file data.
 !! \param hdferr    \fortran_error
 !!
+!! \note On Windows, off_t is typically a 32-bit signed long value, which
+!!       limits the valid offset that can be returned to 2 GiB.
+!!
 !! See C API: @ref H5Pget_external()
 !!
-  SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr)
+  SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset, bytes, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(IN) :: idx
@@ -4592,11 +4645,12 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER(HID_T), INTENT(IN) :: type_id
     INTEGER, INTENT(IN), TARGET :: fillvalue
     INTEGER, INTENT(OUT) :: hdferr
+
     TYPE(C_PTR) :: f_ptr ! C address
 
     f_ptr = C_LOC(fillvalue)
 
-    hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)
+    hdferr = INT(H5Pset_fill_value(prp_id, type_id, f_ptr))
 
   END SUBROUTINE h5pset_fill_value_integer
 
@@ -4610,7 +4664,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
     f_ptr = C_LOC(fillvalue)
 
-    hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)
+    hdferr = INT(H5Pget_fill_value(prp_id, type_id, f_ptr))
 
   END SUBROUTINE h5pget_fill_value_integer
 
@@ -4623,7 +4677,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     TYPE(C_PTR) :: f_ptr                       ! C address
 
     f_ptr = C_LOC(fillvalue(1:1))
-    hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)
+    hdferr = INT(H5Pset_fill_value(prp_id, type_id, f_ptr))
 
   END SUBROUTINE h5pset_fill_value_char
 
@@ -4650,7 +4704,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     ENDIF
 
     f_ptr = C_LOC(chr(1)(1:1))
-    hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)
+
+    hdferr = INT(H5Pget_fill_value(prp_id, type_id, f_ptr))
 
     DO i = 1, chr_len
        fillvalue(i:i) = chr(i)
@@ -4663,10 +4718,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER(HID_T), INTENT(IN) :: type_id
-    TYPE(C_PTR), INTENT(IN)    :: fillvalue
+    TYPE(C_PTR)                :: fillvalue
     INTEGER, INTENT(OUT)       :: hdferr
 
-    hdferr = h5pset_fill_value_c(prp_id, type_id, fillvalue)
+    hdferr = INT(H5Pset_fill_value(prp_id, type_id, fillvalue))
 
   END SUBROUTINE h5pset_fill_value_ptr
 
@@ -4674,10 +4729,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: prp_id
     INTEGER(HID_T), INTENT(IN)  :: type_id
-    TYPE(C_PTR)   , INTENT(IN)  :: fillvalue
+    TYPE(C_PTR)                 :: fillvalue
     INTEGER       , INTENT(OUT) :: hdferr
 
-    hdferr = h5pget_fill_value_c(prp_id, type_id, fillvalue)
+    hdferr = INT(H5Pget_fill_value(prp_id, type_id, fillvalue))
 
   END SUBROUTINE h5pget_fill_value_ptr
 
@@ -4999,31 +5054,32 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER         , INTENT(OUT) :: hdferr
     TYPE(C_PTR)     , OPTIONAL, INTENT(IN) :: create_data, copy_data, close_data
     TYPE(C_FUNPTR)  , OPTIONAL, INTENT(IN) :: create, copy, close
-    INTEGER :: name_len
-    TYPE(C_PTR) :: create_data_default, copy_data_default, close_data_default
+    TYPE(C_PTR)    :: create_data_default, copy_data_default, close_data_default
     TYPE(C_FUNPTR) :: create_default, copy_default, close_default
-    INTERFACE
-       INTEGER FUNCTION h5pcreate_class_c(parent, name, name_len, class, &
-            create, create_data, copy, copy_data, close, close_data) &
-            BIND(C, NAME='h5pcreate_class_c')
-         IMPORT :: c_char, c_ptr, c_funptr
-         IMPORT :: HID_T
-         INTEGER(HID_T), INTENT(IN) :: parent
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER, INTENT(IN)         :: name_len
-         INTEGER(HID_T), INTENT(OUT) :: class
-         TYPE(C_PTR), VALUE :: create_data, copy_data, close_data
-         TYPE(C_FUNPTR), VALUE :: create, copy, close
-       END FUNCTION h5pcreate_class_c
-    END INTERFACE
-    name_len = LEN(name)
 
-    create_default = c_null_funptr     !fix:scot
-    create_data_default = c_null_ptr
-    copy_default = c_null_funptr    !fix:scot
-    copy_data_default = c_null_ptr
-    close_default = c_null_funptr   !fix:scot
-    close_data_default = c_null_ptr
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Pcreate_class(parent, name, &
+            create, create_data, copy, copy_data, close, close_data) &
+            BIND(C, NAME='H5Pcreate_class')
+         IMPORT :: C_CHAR, C_PTR, C_FUNPTR
+         IMPORT :: HID_T
+         INTEGER(HID_T), VALUE :: parent
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         TYPE(C_PTR), VALUE    :: create_data, copy_data, close_data
+         TYPE(C_FUNPTR), VALUE  :: create, copy, close
+       END FUNCTION H5Pcreate_class
+    END INTERFACE
+
+    c_name = TRIM(name)//C_NULL_CHAR
+
+    create_default = C_NULL_FUNPTR
+    create_data_default = C_NULL_PTR
+    copy_default = C_NULL_FUNPTR
+    copy_data_default = C_NULL_PTR
+    close_default = C_NULL_FUNPTR
+    close_data_default = C_NULL_PTR
 
     IF(PRESENT(create)) create_default = create
     IF(PRESENT(create_data)) create_data_default = create_data
@@ -5032,10 +5088,13 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IF(PRESENT(close)) close_default = close
     IF(PRESENT(close_data)) close_data_default = close_data
 
-    hdferr = h5pcreate_class_c(parent, name , name_len, class, &
+    class = H5Pcreate_class(parent, c_name, &
          create_default, create_data_default, &
          copy_default, copy_data_default, &
          close_default, close_data_default)
+
+    hdferr = 0
+    IF(class.LT.0) hdferr = -1
 
   END SUBROUTINE h5pcreate_class_f
 
@@ -5114,6 +5173,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 ! *********************************************************************
 
 #ifdef H5_HAVE_PARALLEL
+
+#ifdef H5_DOXYGEN
 !>
 !! \ingroup FH5P
 !!
@@ -5129,24 +5190,72 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   SUBROUTINE h5pset_fapl_mpio_f(prp_id, comm, info, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
-    INTEGER, INTENT(IN) :: comm
-    INTEGER, INTENT(IN) :: info
+    INTEGER(KIND=MPI_INTEGER_KIND), INTENT(IN) :: comm
+    INTEGER(KIND=MPI_INTEGER_KIND), INTENT(IN) :: info
+    INTEGER, INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pset_fapl_mpio_f
+!>
+!! \ingroup FH5P
+!!
+!! \brief Stores MPI IO communicator information to the file access property list.
+!!
+!! \note Supports MPI Fortran module mpi_f08
+!!
+!! \param prp_id File access property list identifier.
+!! \param comm   MPI-3 communicator.
+!! \param info   MPI-3 info object.
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5Pset_fapl_mpio()
+!!
+  SUBROUTINE h5pset_fapl_mpio_f(prp_id, comm, info, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    TYPE(MPI_COMM), INTENT(IN) :: comm
+    TYPE(MPI_INFO), INTENT(IN) :: info
+    INTEGER, INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pset_fapl_mpio_f
+
+#else
+
+  SUBROUTINE h5pset_fapl_mpio_f90(prp_id, comm, info, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    INTEGER(KIND=MPI_INTEGER_KIND), INTENT(IN) :: comm
+    INTEGER(KIND=MPI_INTEGER_KIND), INTENT(IN) :: info
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
        INTEGER FUNCTION h5pset_fapl_mpio_c(prp_id, comm, info) &
             BIND(C,NAME='h5pset_fapl_mpio_c')
-         IMPORT :: HID_T
+         IMPORT :: HID_T, MPI_INTEGER_KIND
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-         INTEGER       , INTENT(IN) :: comm
-         INTEGER       , INTENT(IN) :: info
+         INTEGER(HID_T) :: prp_id
+         INTEGER(KIND=MPI_INTEGER_KIND) :: comm
+         INTEGER(KIND=MPI_INTEGER_KIND) :: info
        END FUNCTION h5pset_fapl_mpio_c
     END INTERFACE
 
     hdferr = h5pset_fapl_mpio_c(prp_id, comm, info)
 
-  END SUBROUTINE h5pset_fapl_mpio_f
+  END SUBROUTINE h5pset_fapl_mpio_f90
 
+#ifdef H5_HAVE_MPI_F08
+  SUBROUTINE h5pset_fapl_mpio_f08(prp_id, comm, info, hdferr)
+    USE mpi_f08
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    TYPE(MPI_COMM), INTENT(IN) :: comm
+    TYPE(MPI_INFO), INTENT(IN) :: info
+    INTEGER, INTENT(OUT) :: hdferr
+
+    CALL h5pset_fapl_mpio_f90(prp_id, INT(comm%mpi_val,MPI_INTEGER_KIND), INT(info%mpi_val,MPI_INTEGER_KIND), hdferr)
+
+  END SUBROUTINE h5pset_fapl_mpio_f08
+#endif
+
+#endif
+
+#ifdef H5_DOXYGEN
 !>
 !! \ingroup FH5P
 !!
@@ -5157,28 +5266,91 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param info   MPI-2 info object.
 !! \param hdferr \fortran_error
 !!
+!! \attention It is the responsibility of the application to free the MPI objects.
+!!
 !! See C API: @ref H5Pget_fapl_mpio()
 !!
-  SUBROUTINE h5pget_fapl_mpio_f(prp_id, comm, info, hdferr)
+SUBROUTINE h5pget_fapl_mpio_f(prp_id, comm, info, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id
+  INTEGER, INTENT(OUT) :: comm
+  INTEGER, INTENT(OUT) :: info
+  INTEGER, INTENT(OUT) :: hdferr
+END SUBROUTINE h5pget_fapl_mpio_f
+!>
+!! \ingroup FH5P
+!!
+!! \brief Returns MPI communicator information.
+!!
+!! \note Supports MPI Fortran module mpi_f08
+!!
+!! \param prp_id File access property list identifier.
+!! \param comm   MPI-3 communicator.
+!! \param info   MPI-3 info object.
+!! \param hdferr \fortran_error
+!!
+!! \attention It is the responsibility of the application to free the MPI objects.
+!!
+!! See C API: @ref H5Pget_fapl_mpio()
+!!
+SUBROUTINE h5pget_fapl_mpio_f(prp_id, comm, info, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)  :: prp_id
+  TYPE(MPI_COMM), INTENT(OUT) :: comm
+  TYPE(MPI_INFO), INTENT(OUT) :: info
+  INTEGER       , INTENT(OUT) :: hdferr
+END SUBROUTINE h5pget_fapl_mpio_f
+
+#else
+
+  SUBROUTINE h5pget_fapl_mpio_f90(prp_id, comm, info, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
-    INTEGER, INTENT(OUT) :: comm
-    INTEGER, INTENT(OUT) :: info
+    INTEGER(KIND=MPI_INTEGER_KIND), INTENT(OUT) :: comm
+    INTEGER(KIND=MPI_INTEGER_KIND), INTENT(OUT) :: info
     INTEGER, INTENT(OUT) :: hdferr
+
+    INTEGER(KIND=C_INT) :: c_comm
+    INTEGER(KIND=C_INT) :: c_info
+
     INTERFACE
        INTEGER FUNCTION h5pget_fapl_mpio_c(prp_id, comm, info) &
             BIND(C,NAME='h5pget_fapl_mpio_c')
-         IMPORT :: HID_T
+         IMPORT :: HID_T, C_INT
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN)  :: prp_id
-         INTEGER       , INTENT(OUT) :: comm
-         INTEGER       , INTENT(OUT) :: info
+         INTEGER(HID_T) :: prp_id
+         INTEGER(KIND=C_INT)       :: comm
+         INTEGER(KIND=C_INT)       :: info
        END FUNCTION h5pget_fapl_mpio_c
     END INTERFACE
 
-    hdferr = h5pget_fapl_mpio_c(prp_id, comm, info)
+    hdferr = h5pget_fapl_mpio_c(prp_id, c_comm, c_info)
 
-  END SUBROUTINE h5pget_fapl_mpio_f
+    comm = INT(c_comm,KIND=MPI_INTEGER_KIND)
+    info = INT(c_info,KIND=MPI_INTEGER_KIND)
+
+  END SUBROUTINE h5pget_fapl_mpio_f90
+
+#ifdef H5_HAVE_MPI_F08
+  SUBROUTINE h5pget_fapl_mpio_f08(prp_id, comm, info, hdferr)
+    USE mpi_f08
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    TYPE(MPI_COMM), INTENT(OUT) :: comm
+    TYPE(MPI_INFO), INTENT(OUT) :: info
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTEGER(KIND=MPI_INTEGER_KIND) :: tmp_comm
+    INTEGER(KIND=MPI_INTEGER_KIND) :: tmp_info
+
+    CALL h5pget_fapl_mpio_f90(prp_id, tmp_comm, tmp_info, hdferr)
+
+    comm%mpi_val = tmp_comm
+    info%mpi_val = tmp_info
+
+  END SUBROUTINE h5pget_fapl_mpio_f08
+#endif
+#endif
 
 #ifdef H5_HAVE_SUBFILING_VFD
 !>
@@ -5322,16 +5494,58 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pget_fapl_ioc(prp_id, f_ptr)
 
   END SUBROUTINE h5pget_fapl_ioc_f
+
 #endif
 
 !>
 !! \ingroup FH5P
 !!
-!! \brief Set the MPI communicator and info.
+!! \brief Retrieves local and global causes that broke collective I/O on the last parallel I/O call.
+!!
+!! \param plist_id                   Dataset transfer property list identifier
+!! \param local_no_collective_cause  An enumerated set value indicating the causes that prevented collective I/O in the local process
+!! \param global_no_collective_cause An enumerated set value indicating the causes across all processes that prevented collective I/O
+!! \param hdferr                     \fortran_error
+!!
+!! See C API: @ref H5Pget_mpio_no_collective_cause()
+!!
+   SUBROUTINE h5pget_mpio_no_collective_cause_f(plist_id, local_no_collective_cause, global_no_collective_cause, hdferr)
+     IMPLICIT NONE
+     INTEGER(HID_T)    , INTENT(IN)  :: plist_id
+     INTEGER, INTENT(OUT) :: local_no_collective_cause
+     INTEGER, INTENT(OUT) :: global_no_collective_cause
+     INTEGER           , INTENT(OUT) :: hdferr
+
+     INTEGER(C_INT32_T) :: c_local_no_collective_cause
+     INTEGER(C_INT32_T) :: c_global_no_collective_cause
+
+     INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pget_mpio_no_collective_cause(plist_id, local_no_collective_cause, global_no_collective_cause) &
+             BIND(C, NAME='H5Pget_mpio_no_collective_cause')
+          IMPORT :: HID_T, C_INT, C_INT32_T
+          IMPLICIT NONE
+          INTEGER(HID_T)    , VALUE :: plist_id
+          INTEGER(C_INT32_T) :: local_no_collective_cause
+          INTEGER(C_INT32_T) :: global_no_collective_cause
+        END FUNCTION H5Pget_mpio_no_collective_cause
+     END INTERFACE
+
+     hdferr = INT(H5Pget_mpio_no_collective_cause(plist_id, c_local_no_collective_cause, c_global_no_collective_cause))
+
+     local_no_collective_cause = INT(c_local_no_collective_cause)
+     global_no_collective_cause = INT(c_global_no_collective_cause)
+
+   END SUBROUTINE h5pget_mpio_no_collective_cause_f
+
+#ifdef H5_DOXYGEN
+!>
+!! \ingroup FH5P
+!!
+!! \brief Set the MPI communicator and information.
 !!
 !! \param prp_id File access property list identifier.
-!! \param comm   The MPI communicator.
-!! \param info   The MPI info object.
+!! \param comm   MPI-2 communicator.
+!! \param info   MPI-2 info object.
 !! \param hdferr \fortran_error
 !!
 !! See C API: @ref H5Pset_mpi_params()
@@ -5339,33 +5553,81 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   SUBROUTINE H5Pset_mpi_params_f(prp_id, comm, info, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: prp_id
-    INTEGER       , INTENT(IN)  :: comm
-    INTEGER       , INTENT(IN)  :: info
+    INTEGER(KIND=MPI_INTEGER_KIND), INTENT(IN)  :: comm
+    INTEGER(KIND=MPI_INTEGER_KIND), INTENT(IN)  :: info
+    INTEGER       , INTENT(OUT) :: hdferr
+  END SUBROUTINE H5Pset_mpi_params_f
+!>
+!! \ingroup FH5P
+!!
+!! \brief Set the MPI communicator and information.
+!!
+!! \note Supports MPI Fortran module mpi_f08
+!!
+!! \param prp_id File access property list identifier.
+!! \param comm   MPI-3 communicator.
+!! \param info   MPI-3 info object.
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5Pset_mpi_params()
+!!
+  SUBROUTINE H5Pset_mpi_params_f(prp_id, comm, info, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    TYPE(MPI_COMM), INTENT(IN)  :: comm
+    TYPE(MPI_INFO), INTENT(IN)  :: info
+    INTEGER       , INTENT(OUT) :: hdferr
+  END SUBROUTINE H5Pset_mpi_params_f
+
+#else
+
+  SUBROUTINE H5Pset_mpi_params_f90(prp_id, comm, info, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    INTEGER(KIND=MPI_INTEGER_KIND), INTENT(IN)  :: comm
+    INTEGER(KIND=MPI_INTEGER_KIND), INTENT(IN)  :: info
     INTEGER       , INTENT(OUT) :: hdferr
 
     INTERFACE
        INTEGER FUNCTION h5pset_mpi_params_c(prp_id, comm, info) &
             BIND(C,NAME='h5pset_mpi_params_c')
-         IMPORT :: HID_T
+         IMPORT :: HID_T, MPI_INTEGER_KIND
          IMPLICIT NONE
          INTEGER(HID_T) :: prp_id
-         INTEGER :: comm
-         INTEGER :: info
+         INTEGER(KIND=MPI_INTEGER_KIND) :: comm
+         INTEGER(KIND=MPI_INTEGER_KIND) :: info
        END FUNCTION H5pset_mpi_params_c
     END INTERFACE
 
     hdferr = H5Pset_mpi_params_c(prp_id, comm, info)
 
-  END SUBROUTINE H5Pset_mpi_params_f
+  END SUBROUTINE H5Pset_mpi_params_f90
 
+#ifdef H5_HAVE_MPI_F08
+  SUBROUTINE H5Pset_mpi_params_f08(prp_id, comm, info, hdferr)
+    USE mpi_f08
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    TYPE(MPI_COMM), INTENT(IN)  :: comm
+    TYPE(MPI_INFO), INTENT(IN)  :: info
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    CALL H5Pset_mpi_params_f90(prp_id, comm%mpi_val, info%mpi_val, hdferr)
+
+  END SUBROUTINE H5Pset_mpi_params_f08
+#endif
+
+#endif
+
+#ifdef H5_DOXYGEN
 !>
 !! \ingroup FH5P
 !!
 !! \brief Get the MPI communicator and info.
 !!
 !! \param prp_id File access property list identifier.
-!! \param comm   The MPI communicator.
-!! \param info   The MPI info object.
+!! \param comm   MPI-2 communicator.
+!! \param info   MPI-2 info object.
 !! \param hdferr \fortran_error
 !!
 !! See C API: @ref H5Pget_mpi_params()
@@ -5373,24 +5635,85 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   SUBROUTINE H5Pget_mpi_params_f(prp_id, comm, info, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: prp_id
-    INTEGER       , INTENT(OUT) :: comm
-    INTEGER       , INTENT(OUT) :: info
+    INTEGER, INTENT(OUT) :: comm
+    INTEGER, INTENT(OUT) :: info
     INTEGER       , INTENT(OUT) :: hdferr
+  END SUBROUTINE H5Pget_mpi_params_f
+!>
+!! \ingroup FH5P
+!!
+!! \brief Get the MPI communicator and information.
+!!
+!! \note Supports MPI Fortran module mpi_f08
+!!
+!! \param prp_id File access property list identifier.
+!! \param comm   MPI-3 communicator.
+!! \param info   MPI-3 info object.
+!! \param hdferr \fortran_error
+!!
+!! \attention It is the responsibility of the application to free the MPI objects.
+!!
+!! See C API: @ref H5Pget_mpi_params()
+!!
+  SUBROUTINE H5Pget_mpi_params_f(prp_id, comm, info, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    TYPE(MPI_COMM), INTENT(OUT) :: comm
+    TYPE(MPI_INFO), INTENT(OUT) :: info
+    INTEGER       , INTENT(OUT) :: hdferr
+  END SUBROUTINE H5Pget_mpi_params_f
+
+#else
+
+  SUBROUTINE H5Pget_mpi_params_f90(prp_id, comm, info, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    INTEGER(KIND=MPI_INTEGER_KIND), INTENT(OUT) :: comm
+    INTEGER(KIND=MPI_INTEGER_KIND), INTENT(OUT) :: info
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTEGER(KIND=C_INT) :: c_comm
+    INTEGER(KIND=C_INT) :: c_info
 
     INTERFACE
        INTEGER FUNCTION h5pget_mpi_params_c(prp_id, comm, info) &
             BIND(C,NAME='h5pget_mpi_params_c')
-         IMPORT :: HID_T
+         IMPORT :: HID_T, C_INT
          IMPLICIT NONE
          INTEGER(HID_T) :: prp_id
-         INTEGER        :: comm
-         INTEGER        :: info
+         INTEGER(KIND=C_INT) :: comm
+         INTEGER(KIND=C_INT) :: info
        END FUNCTION H5pget_mpi_params_c
     END INTERFACE
 
-    hdferr = H5Pget_mpi_params_c(prp_id, comm, info)
+    hdferr = H5Pget_mpi_params_c(prp_id, c_comm, c_info)
 
-  END SUBROUTINE H5Pget_mpi_params_f
+    comm = INT(c_comm,KIND=MPI_INTEGER_KIND)
+    info = INT(c_info,KIND=MPI_INTEGER_KIND)
+
+  END SUBROUTINE H5Pget_mpi_params_f90
+
+#ifdef H5_HAVE_MPI_F08
+  SUBROUTINE H5Pget_mpi_params_f08(prp_id, comm, info, hdferr)
+    USE mpi_f08
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    TYPE(MPI_COMM), INTENT(OUT) :: comm
+    TYPE(MPI_INFO), INTENT(OUT) :: info
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTEGER(KIND=MPI_INTEGER_KIND) :: tmp_comm
+    INTEGER(KIND=MPI_INTEGER_KIND) :: tmp_info
+
+    CALL H5Pget_mpi_params_f90(prp_id, tmp_comm, tmp_info, hdferr)
+
+    comm%mpi_val = tmp_comm
+    info%mpi_val = tmp_info
+
+  END SUBROUTINE H5Pget_mpi_params_f08
+#endif
+
+#endif
 
 !>
 !! \ingroup FH5P
@@ -5966,7 +6289,7 @@ SUBROUTINE h5pget_virtual_filename_f(dcpl_id, index, name, hdferr, name_len)
      IF(INT(h5pget_virtual_filename(dcpl_id, index, f_ptr, INT(LEN(name)+1,SIZE_T)), SIZE_T).LT.0)THEN
         hdferr = -1
      ELSE
-        CALL HD5c2fstring(name,c_name,LEN(name))
+        CALL HD5c2fstring(name, c_name, LEN(name,KIND=SIZE_T), LEN(name,KIND=SIZE_T)+1_SIZE_T )
      ENDIF
 
   ENDIF
@@ -6020,7 +6343,7 @@ SUBROUTINE h5pget_virtual_dsetname_f(dcpl_id, index, name, hdferr, name_len)
      IF(INT(h5pget_virtual_dsetname(dcpl_id, index, f_ptr, INT(LEN(name)+1,SIZE_T)), SIZE_T).LT.0)THEN
         hdferr = -1
      ELSE
-        CALL HD5c2fstring(name,c_name,LEN(name))
+        CALL HD5c2fstring(name, c_name, LEN(name,KIND=SIZE_T), LEN(name,KIND=SIZE_T)+1_SIZE_T )
      ENDIF
   ENDIF
 
@@ -6273,6 +6596,229 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     hdferr = INT(H5Pset_file_locking(fapl_id, c_use_flag, c_ignore_flag))
 
   END SUBROUTINE h5pset_file_locking_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Retrieves the cause for not performing selection or vector I/O on the last parallel I/O call.
+!!
+!! \param plist_id              Dataset transfer property list identifier
+!! \param no_selection_io_cause	A bitwise set value indicating the relevant causes that prevented selection I/O from being performed
+!! \param hdferr                \fortran_error
+!!
+!! See C API: @ref H5Pget_no_selection_io_cause()
+!!
+   SUBROUTINE h5pget_no_selection_io_cause_f(plist_id, no_selection_io_cause, hdferr)
+     IMPLICIT NONE
+     INTEGER(HID_T), INTENT(IN)  :: plist_id
+     INTEGER       , INTENT(OUT) :: no_selection_io_cause
+     INTEGER       , INTENT(OUT) :: hdferr
+
+     INTEGER(C_INT32_T) :: c_no_selection_io_cause
+
+     INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pget_no_selection_io_cause(plist_id, no_selection_io_cause) &
+             BIND(C, NAME='H5Pget_no_selection_io_cause')
+          IMPORT :: HID_T, C_INT, C_INT32_T
+          IMPLICIT NONE
+          INTEGER(HID_T)    , VALUE :: plist_id
+          INTEGER(C_INT32_T)        :: no_selection_io_cause
+        END FUNCTION H5Pget_no_selection_io_cause
+     END INTERFACE
+
+     hdferr = INT( H5Pget_no_selection_io_cause(plist_id, c_no_selection_io_cause))
+
+     no_selection_io_cause = INT(c_no_selection_io_cause)
+
+   END SUBROUTINE h5pget_no_selection_io_cause_f
+
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Sets the file space handling strategy and persisting free-space values for a file creation property list.
+!!
+!! \param plist_id  File creation property list identifier
+!! \param strategy  The file space handling strategy to be used. See: H5F_fspace_strategy_t
+!! \param persist   Indicates whether free space should be persistent or not
+!! \param threshold The smallest free-space section size that the free space manager will track
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Pset_file_space_strategy()
+!!
+   SUBROUTINE H5Pset_file_space_strategy_f(plist_id, strategy, persist, threshold, hdferr)
+     IMPLICIT NONE
+     INTEGER(HID_T)  , INTENT(IN)  :: plist_id
+     INTEGER         , INTENT(IN)  :: strategy
+     LOGICAL         , INTENT(IN)  :: persist
+     INTEGER(HSIZE_T), INTENT(IN)  :: threshold
+     INTEGER         , INTENT(OUT) :: hdferr
+
+     LOGICAL(C_BOOL) :: c_persist
+
+     INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pset_file_space_strategy(plist_id, strategy, persist, threshold) &
+             BIND(C, NAME='H5Pset_file_space_strategy')
+          IMPORT :: HID_T, HSIZE_T, C_INT, C_BOOL
+          IMPLICIT NONE
+          INTEGER(HID_T)  , VALUE :: plist_id
+          INTEGER(C_INT)  , VALUE :: strategy
+          LOGICAL(C_BOOL) , VALUE :: persist
+          INTEGER(HSIZE_T), VALUE :: threshold
+        END FUNCTION H5Pset_file_space_strategy
+     END INTERFACE
+
+     ! Transfer value of Fortran LOGICAL to C C_BOOL type
+     c_persist = persist
+
+     hdferr = INT( H5Pset_file_space_strategy(plist_id, INT(strategy, C_INT), c_persist, threshold) )
+
+   END SUBROUTINE H5Pset_file_space_strategy_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Gets the file space handling strategy and persisting free-space values for a file creation property list.
+!!
+!! \param plist_id  File creation property list identifier
+!! \param strategy  The file space handling strategy to be used
+!! \param persist   Indicate whether free space should be persistent or not
+!! \param threshold The free-space section size threshold value
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Pget_file_space_strategy()
+!!
+   SUBROUTINE h5pget_file_space_strategy_f(plist_id, strategy, persist, threshold, hdferr)
+     IMPLICIT NONE
+     INTEGER(HID_T)  , INTENT(IN)  :: plist_id
+     INTEGER         , INTENT(OUT) :: strategy
+     LOGICAL         , INTENT(OUT) :: persist
+     INTEGER(HSIZE_T), INTENT(OUT) :: threshold
+     INTEGER         , INTENT(OUT) :: hdferr
+
+     LOGICAL(C_BOOL) :: c_persist
+     INTEGER(C_INT)  :: c_strategy
+
+     INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pget_file_space_strategy(plist_id, strategy, persist, threshold) &
+             BIND(C, NAME='H5Pget_file_space_strategy')
+          IMPORT :: HID_T, HSIZE_T, C_INT, C_BOOL
+          IMPLICIT NONE
+          INTEGER(HID_T), VALUE :: plist_id
+          INTEGER(C_INT)   :: strategy
+          LOGICAL(C_BOOL)  :: persist
+          INTEGER(HSIZE_T) :: threshold
+        END FUNCTION H5Pget_file_space_strategy
+     END INTERFACE
+
+
+     hdferr = INT( H5Pget_file_space_strategy(plist_id, c_strategy, c_persist, threshold) )
+
+     ! Transfer value of Fortran LOGICAL and C C_BOOL type
+     persist = .FALSE.
+     strategy = -1
+     IF(hdferr .GE. 0)THEN
+        persist = c_persist
+        strategy = INT(c_strategy)
+     ENDIF
+
+   END SUBROUTINE h5pget_file_space_strategy_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Sets the file space page size for a file creation property list.
+!!
+!! \param prp_id   File creation property list identifier
+!! \param fsp_size File space page size
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Pset_file_space_page_size()
+!!
+  SUBROUTINE h5pset_file_space_page_size_f(prp_id, fsp_size, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    INTEGER(HSIZE_T), INTENT(IN) :: fsp_size
+    INTEGER, INTENT(OUT) :: hdferr
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pset_file_space_page_size(prp_id, fsp_size) &
+            BIND(C,NAME='H5Pset_file_space_page_size')
+         IMPORT :: C_INT, HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T)  , VALUE :: prp_id
+         INTEGER(HSIZE_T), VALUE :: fsp_size
+       END FUNCTION H5Pset_file_space_page_size
+    END INTERFACE
+
+    hdferr = INT(h5pset_file_space_page_size(prp_id, fsp_size))
+
+  END SUBROUTINE h5pset_file_space_page_size_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Gets the file space page size for a file creation property list.
+!!
+!! \param prp_id   File creation property list identifier
+!! \param fsp_size File space page size
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Pget_file_space_page_size()
+!!
+  SUBROUTINE h5pget_file_space_page_size_f(prp_id, fsp_size, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    INTEGER(HSIZE_T), INTENT(OUT) :: fsp_size
+    INTEGER, INTENT(OUT) :: hdferr
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pget_file_space_page_size(prp_id, fsp_size) &
+            BIND(C,NAME='H5Pget_file_space_page_size')
+         IMPORT :: C_INT, HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: prp_id
+         INTEGER(HSIZE_T)      :: fsp_size
+       END FUNCTION H5Pget_file_space_page_size
+    END INTERFACE
+
+    hdferr = INT(h5pget_file_space_page_size(prp_id, fsp_size))
+
+  END SUBROUTINE h5pget_file_space_page_size_f
+!>
+!! \ingroup FH5P
+!!
+!! \brief Retrieves the type(s) of I/O that HDF5 actually performed on raw data
+!!        during the last I/O call.
+!!
+!! \param plist_id                 File creation property list identifier
+!! \param actual_selection_io_mode A bitwise set value indicating the type(s) of I/O performed
+!! \param hdferr                   \fortran_error
+!!
+!! See C API: @ref H5Pget_actual_selection_io_mode()
+!!
+  SUBROUTINE h5pget_actual_selection_io_mode_f(plist_id, actual_selection_io_mode, hdferr)
+
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: plist_id
+    INTEGER       , INTENT(OUT) :: actual_selection_io_mode
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTEGER(C_INT32_T) :: c_actual_selection_io_mode
+
+    INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pget_actual_selection_io_mode(plist_id, actual_selection_io_mode) &
+             BIND(C, NAME='H5Pget_actual_selection_io_mode')
+          IMPORT :: HID_T, C_INT32_T, C_INT
+          IMPLICIT NONE
+          INTEGER(HID_T), VALUE :: plist_id
+          INTEGER(C_INT32_T)    :: actual_selection_io_mode
+        END FUNCTION H5Pget_actual_selection_io_mode
+     END INTERFACE
+
+     hdferr = INT(H5Pget_actual_selection_io_mode(plist_id, c_actual_selection_io_mode))
+
+     actual_selection_io_mode = INT(c_actual_selection_io_mode)
+
+   END SUBROUTINE h5pget_actual_selection_io_mode_f
 
 END MODULE H5P
 

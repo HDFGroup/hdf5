@@ -19,112 +19,125 @@
   # --------------------------------------------------------------------
   # Copy all the test files from source directory to test directory
   # --------------------------------------------------------------------
+  set (LIST_HDF5_TESTLS_FILES
+      tdset_idx.h5
+  )
+
   set (LIST_HDF5_TEST_FILES
-      ${HDF5_TOOLS_DIR}/testfiles/tall.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray1.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tattr2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tattrreg.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tcompound.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tdatareg.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tdset.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tempty.h5
-      ${HDF5_TOOLS_DIR}/testfiles/textlink.h5
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc.h5
-      ${HDF5_TOOLS_DIR}/testfiles/textlinktar.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tgroup.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tgrp_comments.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tgrpnullspace.h5
-      ${HDF5_TOOLS_DIR}/testfiles/thlink.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tloop.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tnestedcomp.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tsaf.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tslink.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tsoftlinks.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tstr.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tudfilter.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tudlink.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes1.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tdset_idx.h5
+      tall.h5
+      tarray1.h5
+      tattr2.h5
+      tattrreg.h5
+      tcompound.h5
+      tdatareg.h5
+      tdset.h5
+      tempty.h5
+      textlink.h5
+      textlinksrc.h5
+      textlinktar.h5
+      tfloat16.h5
+      tfloat16_be.h5
+      tgroup.h5
+      tgrp_comments.h5
+      tgrpnullspace.h5
+      thlink.h5
+      tloop.h5
+      tnestedcomp.h5
+      tsaf.h5
+      tslink.h5
+      tsoftlinks.h5
+      tstr.h5
+      tudfilter.h5
+      tudlink.h5
+      tvldtypes1.h5
   )
 
   set (LIST_ERR_TEST_FILES
-      ${HDF5_TOOLS_DIR}/test/h5ls/errfiles/nosuchfile.err
-      ${HDF5_TOOLS_DIR}/test/h5ls/errfiles/textlinksrc-nodangle-1.err
-      ${HDF5_TOOLS_DIR}/test/h5ls/errfiles/tgroup-1.err
+      nosuchfile.err
+      textlinksrc-nodangle-1.err
+      tgroup-1.err
   )
 
   set (LIST_OTHER_TEST_FILES
-      ${HDF5_TOOLS_DIR}/testfiles/help-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/help-2.ls
-      ${HDF5_TOOLS_DIR}/testfiles/help-3.ls
-      ${HDF5_TOOLS_DIR}/testfiles/nosuchfile.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tall-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tall-2.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tarray1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tattr2.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tattrreg_le.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tattrreg_be.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tcomp-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tdataregbe.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tdataregle.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tdset-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tempty.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlink-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc-2.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc-3.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc-4.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc-5.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc-6.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc-7.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc-1-old.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc-2-old.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc-3-old.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc-6-old.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc-7-old.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tsoftlinks-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tsoftlinks-2.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tsoftlinks-3.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tsoftlinks-4.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tsoftlinks-5.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc-nodangle-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc-nodangle-2.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tgrp_comments.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tsoftlinks-nodangle-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/thlinks-nodangle-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tgroup.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tgroup-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tgroup-2.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tgroup-3.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tgrpnullspace.ls
-      ${HDF5_TOOLS_DIR}/testfiles/thlink-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tloop-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tmultifile.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tnestcomp-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tnestcomp-2.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tnestcomp-3.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tnestcomp-4.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tsaf.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tslink-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tstr-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tudfilter.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tudlink-1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes1.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes2le.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes2be.ls
-      ${HDF5_TOOLS_DIR}/testfiles/tdset_idx.ls
+      help-1.ls
+      help-2.ls
+      help-3.ls
+      nosuchfile.ls
+      tall-1.ls
+      tall-2.ls
+      tarray1.ls
+      tattr2.ls
+      tattrreg_le.ls
+      tattrreg_be.ls
+      tcomp-1.ls
+      tdataregbe.ls
+      tdataregle.ls
+      tdset-1.ls
+      tdset_idx.ls
+      tempty.ls
+      textlink-1.ls
+      textlinksrc-1.ls
+      textlinksrc-2.ls
+      textlinksrc-3.ls
+      textlinksrc-4.ls
+      textlinksrc-5.ls
+      textlinksrc-6.ls
+      textlinksrc-7.ls
+      textlinksrc-1-old.ls
+      textlinksrc-2-old.ls
+      textlinksrc-3-old.ls
+      textlinksrc-6-old.ls
+      textlinksrc-7-old.ls
+      textlinksrc-nodangle-1.ls
+      textlinksrc-nodangle-2.ls
+      tfloat16.ls
+      tfloat16_nosupport.ls
+      tfloat16_be.ls
+      tfloat16_be_nosupport.ls
+      tgroup.ls
+      tgroup-1.ls
+      tgroup-2.ls
+      tgroup-3.ls
+      tgrpnullspace.ls
+      tgrp_comments.ls
+      thlinks-nodangle-1.ls
+      thlink-1.ls
+      tloop-1.ls
+      tmultifile.ls
+      tnestcomp-1.ls
+      tnestcomp-2.ls
+      tnestcomp-3.ls
+      tnestcomp-4.ls
+      tsaf.ls
+      tslink-1.ls
+      tsoftlinks-1.ls
+      tsoftlinks-2.ls
+      tsoftlinks-3.ls
+      tsoftlinks-4.ls
+      tsoftlinks-5.ls
+      tsoftlinks-nodangle-1.ls
+      tstr-1.ls
+      tudfilter.ls
+      tudlink-1.ls
+      tvldtypes1.ls
+      tvldtypes2le.ls
+      tvldtypes2be.ls
   )
 
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
   # copy the list of test files
-  foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
-    get_filename_component(fname "${listfiles}" NAME)
-    HDFTEST_COPY_FILE("${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5ls_files")
+  foreach (listlsfiles ${LIST_HDF5_TESTLS_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${listlsfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listlsfiles}" "h5ls_files")
   endforeach ()
-  foreach (listfiles ${LIST_ERR_TEST_FILES})
-    get_filename_component(fname "${listfiles}" NAME)
-    HDFTEST_COPY_FILE("${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5ls_files")
+  foreach (listfiles ${LIST_HDF5_TEST_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listfiles}" "h5ls_files")
+  endforeach ()
+  foreach (listothers ${LIST_OTHER_TEST_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/${listothers}" "h5ls_files")
+  endforeach ()
+  foreach (listerrfiles ${LIST_ERR_TEST_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/errfiles/${listerrfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listerrfiles}" "h5ls_files")
   endforeach ()
   add_custom_target(h5ls_files ALL COMMENT "Copying files needed by h5ls tests" DEPENDS ${h5ls_files_list})
 
@@ -136,8 +149,8 @@
 
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls${tgt_file_ext}> ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
       set_tests_properties (H5LS-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
       )
@@ -150,7 +163,7 @@
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -162,12 +175,15 @@
     set_tests_properties (H5LS-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
+    if ("H5LS-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5LS-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
-  macro (ADD_H5_ERR_TEST resultfile resultcode)
+  macro (ADD_H5_ERR_TEST resultfile resultcode result_errcheck)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls${tgt_file_ext}> ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
       set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -177,28 +193,32 @@
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ls"
-              -D "TEST_ERRREF=${resultfile}.err"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+              -D "TEST_ERRREF=${result_errcheck}"
+              -D "TEST_SKIP_COMPARE=true"
+              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
     endif ()
     set_tests_properties (H5LS-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
+    if ("H5LS-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5LS-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5LS_UD-${testname}-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -212,6 +232,9 @@
       set_tests_properties (H5LS_UD-${testname}-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
       )
+      if ("H5LS_UD-${testname}-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5LS_UD-${testname}-${resultfile} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -248,7 +271,7 @@
   # test for displaying groups
   # The following combination of arguments is expected to return an error message
   # and return value 1
-  ADD_H5_ERR_TEST (tgroup-1 1 -w80 -r -g tgroup.h5)
+  ADD_H5_ERR_TEST (tgroup-1 1 "option not compatible" -w80 -r -g tgroup.h5)
   ADD_H5_TEST (tgroup-2 0 -w80 -g tgroup.h5/g1)
 
   # test for files with groups that have long comments
@@ -289,13 +312,40 @@
   # tests for no-dangling-links
   # if this option is given on dangling link, h5ls should return exit code 1
   # when used alone , expect to print out help and return exit code 1
-  ADD_H5_ERR_TEST (textlinksrc-nodangle-1 1 -w80 --no-dangling-links textlinksrc.h5)
+  ADD_H5_ERR_TEST (textlinksrc-nodangle-1 1 "no-dangling-links must be used" -w80 --no-dangling-links textlinksrc.h5)
   # external dangling link - expected exit code 1
   ADD_H5_TEST (textlinksrc-nodangle-2 1 -w80 --follow-symlinks --no-dangling-links textlinksrc.h5)
   # soft dangling link - expected exit code 1
   ADD_H5_TEST (tsoftlinks-nodangle-1 1 -w80 --follow-symlinks --no-dangling-links tsoftlinks.h5)
   # when used file with no dangling links - expected exit code 0
   ADD_H5_TEST (thlinks-nodangle-1 0 -w80 --follow-symlinks --no-dangling-links thlink.h5)
+
+  # tests for _Float16 type
+  if (${${HDF_PREFIX}_HAVE__FLOAT16})
+    # If support is available for _Float16 type, the second test
+    # will fail as the type will be printed out as "native _Float16"
+    # rather than "IEEE 16-bit little-endian float".
+    if (H5_WORDS_BIGENDIAN)
+      ADD_H5_TEST (tfloat16_be 0 -w80 -v tfloat16_be.h5)
+      ADD_H5_TEST (tfloat16_be_nosupport 0 -w80 -v tfloat16_be.h5)
+      set_tests_properties (H5LS-tfloat16_be_nosupport PROPERTIES WILL_FAIL "true")
+    else ()
+      ADD_H5_TEST (tfloat16 0 -w80 -v tfloat16.h5)
+      ADD_H5_TEST (tfloat16_nosupport 0 -w80 -v tfloat16.h5)
+      set_tests_properties (H5LS-tfloat16_nosupport PROPERTIES WILL_FAIL "true")
+    endif ()
+  else ()
+    # If support is NOT available for _Float16 type, the first two tests
+    # will fail as the types will be printed out as
+    # "IEEE 16-bit little-endian float" and "IEEE 16-bit big-endian float"
+    # rather than "native _Float16"
+    ADD_H5_TEST (tfloat16 0 -w80 -v tfloat16.h5)
+    set_tests_properties (H5LS-tfloat16 PROPERTIES WILL_FAIL "true")
+    ADD_H5_TEST (tfloat16_be 0 -w80 -v tfloat16_be.h5)
+    set_tests_properties (H5LS-tfloat16_be PROPERTIES WILL_FAIL "true")
+    ADD_H5_TEST (tfloat16_nosupport 0 -w80 -v tfloat16.h5)
+    ADD_H5_TEST (tfloat16_be_nosupport 0 -w80 -v tfloat16_be.h5)
+  endif ()
 
 # test for wildcards in filename (does not work with cmake)
 #  ADD_H5_TEST (tstarfile 0 -w80 t*link.h5)
@@ -351,7 +401,7 @@
   endif ()
 
   # test for non-existing file
-  ADD_H5_ERR_TEST (nosuchfile 1 nosuchfile.h5)
+  ADD_H5_ERR_TEST (nosuchfile 1 "unable to open file" nosuchfile.h5)
 
   # test for variable length data types in verbose mode
   if (H5_WORDS_BIGENDIAN)

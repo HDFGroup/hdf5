@@ -16,6 +16,8 @@ srcdir=@srcdir@
 
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
+HAVE__FLOAT16="@HAVE__FLOAT16@"
+WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
 
 TESTNAME=h5ls
 EXIT_SUCCESS=0
@@ -33,19 +35,16 @@ DIRNAME='dirname'
 LS='ls'
 AWK='awk'
 
-WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
-
 nerrors=0
 verbose=yes
 h5haveexitcode=yes      # default is yes
 
 # source dirs
 SRC_TOOLS="$srcdir/../.."
-SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 
 # testfiles source dirs for tools
-SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
-SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5LS_TESTFILES="$SRC_TOOLS/test/h5ls/testfiles"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS/test/h5dump/testfiles"
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
@@ -53,8 +52,9 @@ SRC_H5JAM_TESTFILES="$SRC_TOOLS/test/h5jam/testfiles"
 SRC_H5STAT_TESTFILES="$SRC_TOOLS/test/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
 SRC_H5LS_ERRFILES="$SRC_TOOLS/test/h5ls/errfiles"
+SRC_H5LS_OUTFILES="$SRC_TOOLS/test/h5ls/expected"
 
-TESTDIR=./testfiles
+TESTDIR=./tmp
 test -d $TESTDIR || mkdir $TESTDIR
 
 ######################################################################
@@ -67,29 +67,31 @@ test -d $TESTDIR || mkdir $TESTDIR
 #       Comment '#' without space can be used.
 # --------------------------------------------------------------------
 LIST_HDF5_TEST_FILES="
-$SRC_H5LS_TESTFILES/tall.h5
-$SRC_H5LS_TESTFILES/tarray1.h5
-$SRC_H5LS_TESTFILES/tattr2.h5
-$SRC_H5LS_TESTFILES/tattrreg.h5
-$SRC_H5LS_TESTFILES/tcompound.h5
-$SRC_H5LS_TESTFILES/tdatareg.h5
-$SRC_H5LS_TESTFILES/tdset.h5
-$SRC_H5LS_TESTFILES/tempty.h5
-$SRC_H5LS_TESTFILES/textlink.h5
-$SRC_H5LS_TESTFILES/textlinksrc.h5
-$SRC_H5LS_TESTFILES/textlinktar.h5
-$SRC_H5LS_TESTFILES/tgroup.h5
-$SRC_H5LS_TESTFILES/tgrp_comments.h5
-$SRC_H5LS_TESTFILES/tgrpnullspace.h5
-$SRC_H5LS_TESTFILES/thlink.h5
-$SRC_H5LS_TESTFILES/tloop.h5
-$SRC_H5LS_TESTFILES/tnestedcomp.h5
-$SRC_H5LS_TESTFILES/tsaf.h5
-$SRC_H5LS_TESTFILES/tslink.h5
-$SRC_H5LS_TESTFILES/tsoftlinks.h5
-$SRC_H5LS_TESTFILES/tstr.h5
-$SRC_H5LS_TESTFILES/tudlink.h5
-$SRC_H5LS_TESTFILES/tvldtypes1.h5
+$SRC_H5DUMP_TESTFILES/tall.h5
+$SRC_H5DUMP_TESTFILES/tarray1.h5
+$SRC_H5DUMP_TESTFILES/tattr2.h5
+$SRC_H5DUMP_TESTFILES/tattrreg.h5
+$SRC_H5DUMP_TESTFILES/tcompound.h5
+$SRC_H5DUMP_TESTFILES/tdatareg.h5
+$SRC_H5DUMP_TESTFILES/tdset.h5
+$SRC_H5DUMP_TESTFILES/tempty.h5
+$SRC_H5DUMP_TESTFILES/textlink.h5
+$SRC_H5DUMP_TESTFILES/textlinksrc.h5
+$SRC_H5DUMP_TESTFILES/textlinktar.h5
+$SRC_H5DUMP_TESTFILES/tfloat16.h5
+$SRC_H5DUMP_TESTFILES/tfloat16_be.h5
+$SRC_H5DUMP_TESTFILES/tgroup.h5
+$SRC_H5DUMP_TESTFILES/tgrp_comments.h5
+$SRC_H5DUMP_TESTFILES/tgrpnullspace.h5
+$SRC_H5DUMP_TESTFILES/thlink.h5
+$SRC_H5DUMP_TESTFILES/tloop.h5
+$SRC_H5DUMP_TESTFILES/tnestedcomp.h5
+$SRC_H5DUMP_TESTFILES/tsaf.h5
+$SRC_H5DUMP_TESTFILES/tslink.h5
+$SRC_H5DUMP_TESTFILES/tsoftlinks.h5
+$SRC_H5DUMP_TESTFILES/tstr.h5
+$SRC_H5DUMP_TESTFILES/tudlink.h5
+$SRC_H5DUMP_TESTFILES/tvldtypes1.h5
 $SRC_H5LS_TESTFILES/tdset_idx.h5
 "
 
@@ -100,64 +102,68 @@ $SRC_H5LS_ERRFILES/tgroup-1.err
 "
 
 LIST_OTHER_TEST_FILES="
-$SRC_H5LS_TESTFILES/help-1.ls
-$SRC_H5LS_TESTFILES/help-2.ls
-$SRC_H5LS_TESTFILES/help-3.ls
-$SRC_H5LS_TESTFILES/nosuchfile.ls
-$SRC_H5LS_TESTFILES/tall-1.ls
-$SRC_H5LS_TESTFILES/tall-2.ls
-$SRC_H5LS_TESTFILES/tarray1.ls
-$SRC_H5LS_TESTFILES/tattr2.ls
-$SRC_H5LS_TESTFILES/tattrreg_le.ls
-$SRC_H5LS_TESTFILES/tattrreg_be.ls
-$SRC_H5LS_TESTFILES/tcomp-1.ls
-$SRC_H5LS_TESTFILES/tdataregbe.ls
-$SRC_H5LS_TESTFILES/tdataregle.ls
-$SRC_H5LS_TESTFILES/tdset-1.ls
-$SRC_H5LS_TESTFILES/tempty.ls
-$SRC_H5LS_TESTFILES/textlink-1.ls
-$SRC_H5LS_TESTFILES/textlinksrc-1.ls
-$SRC_H5LS_TESTFILES/textlinksrc-2.ls
-$SRC_H5LS_TESTFILES/textlinksrc-3.ls
-$SRC_H5LS_TESTFILES/textlinksrc-4.ls
-$SRC_H5LS_TESTFILES/textlinksrc-5.ls
-$SRC_H5LS_TESTFILES/textlinksrc-6.ls
-$SRC_H5LS_TESTFILES/textlinksrc-7.ls
-$SRC_H5LS_TESTFILES/textlinksrc-1-old.ls
-$SRC_H5LS_TESTFILES/textlinksrc-2-old.ls
-$SRC_H5LS_TESTFILES/textlinksrc-3-old.ls
-$SRC_H5LS_TESTFILES/textlinksrc-6-old.ls
-$SRC_H5LS_TESTFILES/textlinksrc-7-old.ls
-$SRC_H5LS_TESTFILES/tsoftlinks-1.ls
-$SRC_H5LS_TESTFILES/tsoftlinks-2.ls
-$SRC_H5LS_TESTFILES/tsoftlinks-3.ls
-$SRC_H5LS_TESTFILES/tsoftlinks-4.ls
-$SRC_H5LS_TESTFILES/tsoftlinks-5.ls
-$SRC_H5LS_TESTFILES/textlinksrc-nodangle-1.ls
-$SRC_H5LS_TESTFILES/textlinksrc-nodangle-2.ls
-$SRC_H5LS_TESTFILES/tgrp_comments.ls
-$SRC_H5LS_TESTFILES/tsoftlinks-nodangle-1.ls
-$SRC_H5LS_TESTFILES/thlinks-nodangle-1.ls
-$SRC_H5LS_TESTFILES/tgroup.ls
-$SRC_H5LS_TESTFILES/tgroup-1.ls
-$SRC_H5LS_TESTFILES/tgroup-2.ls
-$SRC_H5LS_TESTFILES/tgroup-3.ls
-$SRC_H5LS_TESTFILES/tgrpnullspace.ls
-$SRC_H5LS_TESTFILES/thlink-1.ls
-$SRC_H5LS_TESTFILES/tloop-1.ls
-$SRC_H5LS_TESTFILES/tmultifile.ls
-$SRC_H5LS_TESTFILES/tnestcomp-1.ls
-$SRC_H5LS_TESTFILES/tnestcomp-2.ls
-$SRC_H5LS_TESTFILES/tnestcomp-3.ls
-$SRC_H5LS_TESTFILES/tnestcomp-4.ls
-$SRC_H5LS_TESTFILES/tsaf.ls
-$SRC_H5LS_TESTFILES/tslink-1.ls
-$SRC_H5LS_TESTFILES/tstr-1.ls
-$SRC_H5LS_TESTFILES/tudlink-1.ls
-$SRC_H5LS_TESTFILES/tvldtypes1.ls
-$SRC_H5LS_TESTFILES/tvldtypes2le.ls
-$SRC_H5LS_TESTFILES/tvldtypes2be.ls
-$SRC_H5LS_TESTFILES/tdset_idx.ls
+$SRC_H5LS_OUTFILES/help-1.ls
+$SRC_H5LS_OUTFILES/help-2.ls
+$SRC_H5LS_OUTFILES/help-3.ls
+$SRC_H5LS_OUTFILES/nosuchfile.ls
+$SRC_H5LS_OUTFILES/tall-1.ls
+$SRC_H5LS_OUTFILES/tall-2.ls
+$SRC_H5LS_OUTFILES/tarray1.ls
+$SRC_H5LS_OUTFILES/tattr2.ls
+$SRC_H5LS_OUTFILES/tattrreg_le.ls
+$SRC_H5LS_OUTFILES/tattrreg_be.ls
+$SRC_H5LS_OUTFILES/tcomp-1.ls
+$SRC_H5LS_OUTFILES/tdataregbe.ls
+$SRC_H5LS_OUTFILES/tdataregle.ls
+$SRC_H5LS_OUTFILES/tdset-1.ls
+$SRC_H5LS_OUTFILES/tempty.ls
+$SRC_H5LS_OUTFILES/textlink-1.ls
+$SRC_H5LS_OUTFILES/textlinksrc-1.ls
+$SRC_H5LS_OUTFILES/textlinksrc-2.ls
+$SRC_H5LS_OUTFILES/textlinksrc-3.ls
+$SRC_H5LS_OUTFILES/textlinksrc-4.ls
+$SRC_H5LS_OUTFILES/textlinksrc-5.ls
+$SRC_H5LS_OUTFILES/textlinksrc-6.ls
+$SRC_H5LS_OUTFILES/textlinksrc-7.ls
+$SRC_H5LS_OUTFILES/textlinksrc-1-old.ls
+$SRC_H5LS_OUTFILES/textlinksrc-2-old.ls
+$SRC_H5LS_OUTFILES/textlinksrc-3-old.ls
+$SRC_H5LS_OUTFILES/textlinksrc-6-old.ls
+$SRC_H5LS_OUTFILES/textlinksrc-7-old.ls
+$SRC_H5LS_OUTFILES/tfloat16.ls
+$SRC_H5LS_OUTFILES/tfloat16_nosupport.ls
+$SRC_H5LS_OUTFILES/tfloat16_be.ls
+$SRC_H5LS_OUTFILES/tfloat16_be_nosupport.ls
+$SRC_H5LS_OUTFILES/tsoftlinks-1.ls
+$SRC_H5LS_OUTFILES/tsoftlinks-2.ls
+$SRC_H5LS_OUTFILES/tsoftlinks-3.ls
+$SRC_H5LS_OUTFILES/tsoftlinks-4.ls
+$SRC_H5LS_OUTFILES/tsoftlinks-5.ls
+$SRC_H5LS_OUTFILES/textlinksrc-nodangle-1.ls
+$SRC_H5LS_OUTFILES/textlinksrc-nodangle-2.ls
+$SRC_H5LS_OUTFILES/tgrp_comments.ls
+$SRC_H5LS_OUTFILES/tsoftlinks-nodangle-1.ls
+$SRC_H5LS_OUTFILES/thlinks-nodangle-1.ls
+$SRC_H5LS_OUTFILES/tgroup.ls
+$SRC_H5LS_OUTFILES/tgroup-1.ls
+$SRC_H5LS_OUTFILES/tgroup-2.ls
+$SRC_H5LS_OUTFILES/tgroup-3.ls
+$SRC_H5LS_OUTFILES/tgrpnullspace.ls
+$SRC_H5LS_OUTFILES/thlink-1.ls
+$SRC_H5LS_OUTFILES/tloop-1.ls
+$SRC_H5LS_OUTFILES/tmultifile.ls
+$SRC_H5LS_OUTFILES/tnestcomp-1.ls
+$SRC_H5LS_OUTFILES/tnestcomp-2.ls
+$SRC_H5LS_OUTFILES/tnestcomp-3.ls
+$SRC_H5LS_OUTFILES/tnestcomp-4.ls
+$SRC_H5LS_OUTFILES/tsaf.ls
+$SRC_H5LS_OUTFILES/tslink-1.ls
+$SRC_H5LS_OUTFILES/tstr-1.ls
+$SRC_H5LS_OUTFILES/tudlink-1.ls
+$SRC_H5LS_OUTFILES/tvldtypes1.ls
+$SRC_H5LS_OUTFILES/tvldtypes2le.ls
+$SRC_H5LS_OUTFILES/tvldtypes2be.ls
+$SRC_H5LS_OUTFILES/tdset_idx.ls
 "
 
 
@@ -360,6 +366,18 @@ TOOLTEST textlinksrc-nodangle-2.ls 1 -w80 --follow-symlinks --no-dangling-links 
 TOOLTEST tsoftlinks-nodangle-1.ls 1 -w80 --follow-symlinks --no-dangling-links tsoftlinks.h5
 # when used file with no dangling links - expected exit code 0
 TOOLTEST thlinks-nodangle-1.ls 0 -w80 --follow-symlinks --no-dangling-links thlink.h5
+
+# test for _Float16 type
+if test $HAVE__FLOAT16 = "yes" ; then
+  if test $WORDS_BIGENDIAN = "yes" ; then
+    TOOLTEST tfloat16_be.ls 0 -w80 -v tfloat16_be.h5
+  else
+    TOOLTEST tfloat16.ls 0 -w80 -v tfloat16.h5
+  fi
+else
+  TOOLTEST tfloat16_nosupport.ls 0 -w80 -v tfloat16.h5
+  TOOLTEST tfloat16_be_nosupport.ls 0 -w80 -v tfloat16_be.h5
+fi
 
 # test for wildcards in filename (does not work with cmake)
 # this h5ls test script does not pass the filename properly like the h5dump test script???

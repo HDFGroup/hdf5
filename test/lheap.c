@@ -42,7 +42,7 @@ int
 main(void)
 {
     hid_t       fapl = H5P_DEFAULT;     /* file access properties   */
-    hid_t       file = -1;              /* hdf5 file                */
+    hid_t       file = H5I_INVALID_HID; /* hdf5 file                */
     H5F_t      *f    = NULL;            /* hdf5 file pointer        */
     char        filename[1024];         /* file name                */
     haddr_t     heap_addr;              /* local heap address       */
@@ -51,8 +51,8 @@ main(void)
     int         i, j;                   /* miscellaneous counters   */
     char        buf[1024];              /* the value to store       */
     const char *s;                      /* value to read            */
-    hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
-    hbool_t     driver_is_default_compatible;
+    bool        api_ctx_pushed = false; /* Whether API context pushed */
+    bool        driver_is_default_compatible;
 
     /* Reset library */
     h5_reset();
@@ -61,7 +61,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /*
      * Test writing to the heap...
@@ -91,13 +91,13 @@ main(void)
         goto error;
     }
     for (i = 0; i < NOBJS; i++) {
-        HDsnprintf(buf, sizeof(buf), "%03d-", i);
+        snprintf(buf, sizeof(buf), "%03d-", i);
         for (j = 4; j < i; j++)
             buf[j] = (char)('0' + j % 10);
         if (j > 4)
             buf[j] = '\0';
 
-        if (H5HL_insert(f, heap, HDstrlen(buf) + 1, buf, &obj[i]) < 0) {
+        if (H5HL_insert(f, heap, strlen(buf) + 1, buf, &obj[i]) < 0) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
@@ -131,7 +131,7 @@ main(void)
         goto error;
     }
     for (i = 0; i < NOBJS; i++) {
-        HDsnprintf(buf, sizeof(buf), "%03d-", i);
+        snprintf(buf, sizeof(buf), "%03d-", i);
         for (j = 4; j < i; j++)
             buf[j] = (char)('0' + j % 10);
         if (j > 4)
@@ -149,7 +149,7 @@ main(void)
             goto error;
         }
 
-        if (HDstrcmp(s, buf) != 0) {
+        if (strcmp(s, buf) != 0) {
             H5_FAILED();
             printf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
             printf("    got: \"%s\"\n", s);
@@ -176,7 +176,7 @@ main(void)
         TESTING("opening pre-created file with non-default sizes");
         {
             const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
-            hid_t       dset     = -1;
+            hid_t       dset     = H5I_INVALID_HID;
             file                 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
             if (file >= 0) {
                 if ((dset = H5Dopen2(file, "/Dataset1", H5P_DEFAULT)) < 0)
@@ -200,17 +200,17 @@ main(void)
         TEST_ERROR;
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
-    HDputs("All local heap tests passed.");
+    puts("All local heap tests passed.");
     h5_cleanup(FILENAME, fapl);
 
     return EXIT_SUCCESS;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY
     {
         H5Fclose(file);
@@ -218,7 +218,7 @@ error:
     H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     return EXIT_FAILURE;
 }

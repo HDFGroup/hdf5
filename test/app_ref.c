@@ -79,7 +79,7 @@ Abrt_Handler(int H5_ATTR_UNUSED sig)
 int
 main(void)
 {
-    const char *env_h5_drvr; /* File Driver value from environment */
+    const char *driver_name; /* File Driver value from environment */
     hid_t       ids[T_NUMCLASSES];
     hid_t       fapl; /* File Access Property List */
     int         ninc;
@@ -94,15 +94,13 @@ main(void)
     TESTING("library shutdown with reference count > 1");
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Don't run this test with the multi/split VFD. A bug in library shutdown
      * ordering causes problems with the multi VFD when IDs are left dangling.
      */
-    if (!HDstrcmp(env_h5_drvr, "multi") || !HDstrcmp(env_h5_drvr, "split")) {
-        HDputs("\n -- SKIPPED for incompatible VFD --");
+    if (!strcmp(driver_name, "multi") || !strcmp(driver_name, "split")) {
+        puts("\n -- SKIPPED for incompatible VFD --");
         return 0;
     }
 
@@ -193,7 +191,7 @@ main(void)
 
 error:
 
-    HDputs("***** APPLICATION REFERENCE COUNT TESTS FAILED *****");
+    puts("***** APPLICATION REFERENCE COUNT TESTS FAILED *****");
 
     return EXIT_FAILURE;
 }

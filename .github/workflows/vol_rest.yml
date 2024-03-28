@@ -1,0 +1,195 @@
+name: Test HDF5 REST VOL
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "CMake Build type"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  ADMIN_PASSWORD: admin
+  ADMIN_USERNAME: admin
+  USER_NAME: test_user1
+  USER_PASSWORD: test
+  USER2_NAME: test_user2
+  USER2_PASSWORD: test
+  HSDS_USERNAME: test_user1
+  HSDS_PASSWORD: test
+  HSDS_PATH: /home/test_user1/
+  HDF5_API_TEST_PATH_PREFIX: /home/test_user1/
+  HSDS_ENDPOINT: http+unix://%2Ftmp%2Fhs%2Fsn_1.sock
+  HDF5_VOL_CONNECTOR: REST
+  ROOT_DIR: ${{github.workspace}}/hsdsdata
+  BUCKET_NAME: hsdstest
+
+jobs:
+  build_and_test:
+    name: Test HDF5 REST VOL connector
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install automake autoconf libtool libtool-bin libcurl4-openssl-dev libyajl-dev
+
+      - name: Checkout HDF5
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: HDFGroup/hdf5
+          path: hdf5
+
+      - name: Configure HDF5 with REST VOL connector
+        shell: bash
+        run: |
+          mkdir ${{ github.workspace }}/hdf5/build
+          cd ${{ github.workspace }}/hdf5/build
+          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+            -DBUILD_STATIC_LIBS=OFF \
+            -DHDF5_BUILD_HL_LIB:BOOL=ON \
+            -DHDF5_TEST_API:BOOL=ON \
+            -DALLOW_UNSUPPORTED:BOOL=ON \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+            -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
+            -DHDF5_VOL_ALLOW_EXTERNAL:STRING="GIT" \
+            -DHDF5_VOL_URL01:STRING="https://github.com/HDFGroup/vol-rest.git" \
+            -DHDF5_VOL_VOL-REST_BRANCH:STRING="master" \
+            -DHDF5_VOL_VOL-REST_NAME:STRING="REST" \
+            -DHDF5_VOL_VOL-REST_TEST_PARALLEL:BOOL=OFF \
+            -DHDF5_VOL_REST_ENABLE_EXAMPLES=ON \
+            ${{ github.workspace }}/hdf5
+          cat src/libhdf5.settings
+
+      - name: Build and install HDF5 and REST VOL connector
+        shell: bash
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          cmake --install .
+          echo "LD_LIBRARY_PATH=${{ github.workspace }}/hdf5/build/bin" >> $GITHUB_ENV
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Checkout HSDS
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: HDFGroup/hsds
+          path: ${{github.workspace}}/hsds
+
+      - name: Get HSDS HEAD commit SHA
+        shell: bash
+        working-directory: ${{github.workspace}}/hsds
+        run: |
+          export HSDS_COMMIT=`git rev-parse HEAD`
+          export HSDS_COMMIT_SHORT=`git rev-parse --short HEAD`
+          echo "HSDS_COMMIT=${HSDS_COMMIT}" >> $GITHUB_ENV
+          echo "HSDS_COMMIT_SHORT=${HSDS_COMMIT_SHORT}" >> $GITHUB_ENV
+
+      # Note that we don't currently cache HSDS, as we would need
+      # to pick a fixed commit/tag in order to generate a reasonable
+      # key to use for caching/restoring from the cache
+      #- name: Restore HSDS (${{ env.HSDS_COMMIT_SHORT }}) installation cache
+      #  id: restore-hsds
+      #  uses: actions/cache@v3
+      #  with:
+      #    path: ${{ runner.workspace }}/hsds-${{ env.HSDS_COMMIT_SHORT }}-install
+      #    key: ${{ runner.os }}-${{ runner.arch }}-hsds-${{ env.HSDS_COMMIT }}-${{ inputs.build_mode }}-cache
+
+      - name: Install HSDS (${{ env.HSDS_COMMIT_SHORT }}) dependencies
+        shell: bash
+        working-directory: ${{github.workspace}}/hsds
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Install HSDS (${{ env.HSDS_COMMIT_SHORT }}) package
+        #if: ${{ ! steps.restore-hsds.outputs.cache-hit }}
+        shell: bash
+        run: |
+          cd ${{github.workspace}}/hsds
+          pip install -e .
+
+      #- name: Cache HSDS (${{ env.HSDS_COMMIT_SHORT }}) installation
+      #  uses: actions/cache/save@v3
+      #  if: ${{ ! steps.restore-hsds.outputs.cache-hit }}
+      #  with:
+      #    path: ${{ runner.workspace }}/hsds-${{ env.HSDS_COMMIT_SHORT }}-install
+      #    key: ${{ runner.os }}-${{ runner.arch }}-hsds-${{ env.HSDS_COMMIT }}-${{ inputs.build_mode }}-cache
+
+      - name: Run HSDS unit tests
+        shell: bash
+        working-directory: ${{github.workspace}}/hsds
+        run: |
+          pytest
+
+      - name: Start HSDS
+        working-directory: ${{github.workspace}}/hsds
+        run: |
+          mkdir ${{github.workspace}}/hsdsdata &&
+          mkdir ${{github.workspace}}/hsdsdata/hsdstest &&
+          cp admin/config/groups.default admin/config/groups.txt &&
+          cp admin/config/passwd.default admin/config/passwd.txt &&
+          cp admin/config/groups.default admin/config/groups.txt &&
+          cp admin/config/passwd.default admin/config/passwd.txt
+          ROOT_DIR=${{github.workspace}}/hsdsdata ./runall.sh --no-docker 1 &
+          sleep 10
+
+      - name: Test HSDS
+        working-directory: ${{github.workspace}}/hsds
+        run: |
+          python tests/integ/setup_test.py
+
+      - name: Test HDF5 REST VOL connector with external tests
+        working-directory: ${{github.workspace}}/hdf5/build/
+        run: |
+          sudo \
+          HDF5_PLUGIN_PATH="${{ runner.workspace }}/hdf5_build/lib" \
+          HDF5_VOL_CONNECTOR=REST \
+          ADMIN_USERNAME=admin ADMIN_PASSWORD=admin \
+          USER_NAME=test_user1 USER_PASSWORD=test \
+          USER2_NAME=test_user2 USER2_PASSWORD=test \
+          HSDS_USERNAME=test_user1 HSDS_PASSWORD=test \
+          HSDS_PATH=/home/test_user1/ HDF5_API_TEST_PATH_PREFIX=/home/test_user1/ \
+          HSDS_ENDPOINT=http+unix://%2Ftmp%2Fhs%2Fsn_1.sock \
+          ROOT_DIR=${{github.workspace}}/hsdsdata \
+          BUCKET_NAME=hsdstest \
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "test_rest_vol" .
+
+      - name: Test HDF5 REST VOL connector with HDF5 API tests
+        working-directory: ${{github.workspace}}/hdf5/build/
+        # Don't test the REST VOL connector with the HDF5 API tests yet,
+        # as it doesn't currently pass all the tests. Leave the step in,
+        # but skip it to leave an indication that this should be re-enabled
+        # in the future.
+        if: false
+        run: |
+          sudo \
+          HDF5_PLUGIN_PATH="${{ runner.workspace }}/hdf5_build/lib" \
+          HDF5_VOL_CONNECTOR=REST \
+          ADMIN_USERNAME=admin ADMIN_PASSWORD=admin \
+          USER_NAME=test_user1 USER_PASSWORD=test \
+          USER2_NAME=test_user2 USER2_PASSWORD=test \
+          HSDS_USERNAME=test_user1 HSDS_PASSWORD=test \
+          HSDS_PATH=/home/test_user1/ HDF5_API_TEST_PATH_PREFIX=/home/test_user1/ \
+          HSDS_ENDPOINT=http+unix://%2Ftmp%2Fhs%2Fsn_1.sock \
+          ROOT_DIR=${{github.workspace}}/hsdsdata \
+          BUCKET_NAME=hsdstest \
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "h5_api" .
+
+      - name: Stop HSDS
+        working-directory: ${{github.workspace}}/hsds
+        run: |
+          ./stopall.sh

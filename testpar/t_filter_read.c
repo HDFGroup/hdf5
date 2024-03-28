@@ -18,10 +18,6 @@
 
 #include "testphdf5.h"
 
-#ifdef H5_HAVE_SZLIB_H
-#include "szlib.h"
-#endif
-
 static int mpi_size, mpi_rank;
 
 /* Chunk sizes */
@@ -52,7 +48,8 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     hsize_t hs_size[2];    /* Hyperslab size */
     size_t  i, j;          /* Local index variables */
     char    name[32] = "dataset";
-    herr_t  hrc;           /* Error status */
+    herr_t  hrc; /* Error status */
+    bool    vol_is_native;
     int    *points = NULL; /* Writing buffer for entire dataset */
     int    *check  = NULL; /* Reading buffer for selected hyperslab */
 
@@ -93,6 +90,9 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
         file = H5Fcreate(h5_rmprefix(filename), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         VRFY(file >= 0, "H5Fcreate");
 
+        /* Check if native VOL is being used */
+        VRFY((h5_using_native_vol(H5P_DEFAULT, file, &vol_is_native) >= 0), "h5_using_native_vol");
+
         /* Create the dataset */
         dataset = H5Dcreate2(file, name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         VRFY(dataset >= 0, "H5Dcreate2");
@@ -100,8 +100,10 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
         hrc = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points);
         VRFY(hrc >= 0, "H5Dwrite");
 
-        *dset_size = H5Dget_storage_size(dataset);
-        VRFY(*dset_size > 0, "H5Dget_storage_size");
+        if (vol_is_native) {
+            *dset_size = H5Dget_storage_size(dataset);
+            VRFY(*dset_size > 0, "H5Dget_storage_size");
+        }
 
         hrc = H5Dclose(dataset);
         VRFY(hrc >= 0, "H5Dclose");
@@ -124,6 +126,9 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     file = H5Fopen(filename, H5F_ACC_RDWR, access_plist);
     VRFY((file >= 0), "H5Fopen");
 
+    /* Check if native VOL is being used */
+    VRFY((h5_using_native_vol(H5P_DEFAULT, file, &vol_is_native) >= 0), "h5_using_native_vol");
+
     dataset = H5Dopen2(file, name, H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dopen2");
 
@@ -145,14 +150,16 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
                         (unsigned long)(hs_offset[1] + j));
                 fprintf(stderr, "    At original: %d\n", (int)points[i * size[1] + (size_t)hs_offset[1] + j]);
                 fprintf(stderr, "    At returned: %d\n", (int)check[i * hs_size[1] + j]);
-                VRFY(FALSE, "");
+                VRFY(false, "");
             }
         }
     }
 
-    /* Get the storage size of the dataset */
-    *dset_size = H5Dget_storage_size(dataset);
-    VRFY(*dset_size != 0, "H5Dget_storage_size");
+    if (vol_is_native) {
+        /* Get the storage size of the dataset */
+        *dset_size = H5Dget_storage_size(dataset);
+        VRFY(*dset_size != 0, "H5Dget_storage_size");
+    }
 
     /* Clean up objects used for this test */
     hrc = H5Dclose(dataset);
@@ -194,9 +201,8 @@ test_filter_read(void)
     unsigned      disable_partial_chunk_filters; /* Whether filters are disabled on partial chunks */
     herr_t        hrc;
     const char   *filename;
-#ifdef H5_HAVE_FILTER_FLETCHER32
-    hsize_t fletcher32_size; /* Size of dataset with Fletcher32 checksum */
-#endif
+    bool          vol_is_native;
+    hsize_t       fletcher32_size; /* Size of dataset with Fletcher32 checksum */
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     hsize_t deflate_size; /* Size of dataset with deflate filter */
@@ -208,7 +214,7 @@ test_filter_read(void)
     unsigned szip_pixels_per_block = 4;
 #endif /* H5_HAVE_FILTER_SZIP */
 
-    hsize_t shuffle_size; /* Size of dataset with shuffle filter */
+    hsize_t shuffle_size = 0; /* Size of dataset with shuffle filter */
 
 #if (defined H5_HAVE_FILTER_DEFLATE || defined H5_HAVE_FILTER_SZIP)
     hsize_t combo_size; /* Size of dataset with multiple filters */
@@ -218,6 +224,24 @@ test_filter_read(void)
 
     if (VERBOSE_MED)
         printf("Parallel reading of dataset written with filters %s\n", filename);
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_FILTERS)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf(
+                "    API functions for basic file, dataset or filter aren't supported with this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
+
+    /* Check if native VOL is being used */
+    VRFY(h5_using_native_vol(H5P_DEFAULT, H5I_INVALID_HID, &vol_is_native) >= 0, "h5_using_native_vol");
 
     /*----------------------------------------------------------
      * STEP 0: Test without filters.
@@ -258,7 +282,6 @@ test_filter_read(void)
          * STEP 1: Test Fletcher32 Checksum by itself.
          *----------------------------------------------------------
          */
-#ifdef H5_HAVE_FILTER_FLETCHER32
 
         dc = H5Pcreate(H5P_DATASET_CREATE);
         VRFY(dc >= 0, "H5Pset_filter");
@@ -273,13 +296,13 @@ test_filter_read(void)
         VRFY(hrc >= 0, "H5Pset_filter");
 
         filter_read_internal(filename, dc, &fletcher32_size);
-        VRFY(fletcher32_size > null_size, "Size after checksumming is incorrect.");
+
+        if (vol_is_native)
+            VRFY(fletcher32_size > null_size, "Size after checksumming is incorrect.");
 
         /* Clean up objects used for this test */
         hrc = H5Pclose(dc);
         VRFY(hrc >= 0, "H5Pclose");
-
-#endif /* H5_HAVE_FILTER_FLETCHER32 */
 
         /*----------------------------------------------------------
          * STEP 2: Test deflation by itself.
@@ -349,7 +372,9 @@ test_filter_read(void)
     VRFY(hrc >= 0, "H5Pset_shuffle");
 
     filter_read_internal(filename, dc, &shuffle_size);
-    VRFY(shuffle_size == null_size, "Shuffled size not the same as uncompressed size.");
+
+    if (vol_is_native)
+        VRFY(shuffle_size == null_size, "Shuffled size not the same as uncompressed size.");
 
     /* Clean up objects used for this test */
     hrc = H5Pclose(dc);

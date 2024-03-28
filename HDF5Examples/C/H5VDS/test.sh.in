@@ -1,0 +1,96 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://www.hdfgroup.org/licenses.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+
+srcdir=@srcdir@
+
+
+case $CC in
+*/*)    H5DUMP=`echo $CC | sed -e 's/\/[^/]*$/\/h5dump/'`;
+        test -x $H5DUMP || H5DUMP=h5dump;;
+*)      H5DUMP=h5dump;;
+esac
+
+
+case `echo "testing\c"; echo 1,2,3`,`echo -n testing; echo 1,2,3` in
+  *c*,-n*) ECHO_N= ECHO_C='
+' ;;
+  *c*,*  ) ECHO_N=-n ECHO_C= ;;
+  *)       ECHO_N= ECHO_C='\c' ;;
+esac
+ECHO_N="echo $ECHO_N"
+
+
+exout() {
+    $*
+}
+
+dumpout() {
+    $H5DUMP $*
+}
+
+# compare current version, required version.
+# returns if cur_ver < req_ver is true.
+version_compare() {
+  version_lt=0
+  if [ ! "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]; then
+          version_lt=1
+  fi
+}
+
+H5_LIBVER=@H5_LIBVER@
+H5_LIBVER_DIR=@H5_LIBVER_DIR@
+
+topics=""
+topics110="vds vds-exc vds-exclim vds-eiger vds-simpleIO vds-percival vds-percival-unlim vds-percival-unlim-maxmin"
+
+return_val=0
+
+version_compare "$H5_LIBVER" "1.10.0"
+if [ "$version_lt" = 0 ]; then
+  for topic in $topics110
+  do
+    fname=h5ex_$topic
+    $ECHO_N "Testing C/H5VDS/$fname...$ECHO_C"
+    exout ./$fname >tmp.test
+    status=$?
+    if test $status -eq 1
+    then
+        echo "  Unsupported feature"
+        status=0
+    else
+        cmp -s tmp.test $srcdir/tfiles/110/$fname.tst
+        status=$?
+        if test $status -ne 0
+        then
+            echo "  FAILED!"
+        else
+          dumpout $fname.h5 >tmp.test
+          rm -f $fname.h5
+          cmp -s tmp.test $srcdir/tfiles/110/$fname.ddl
+          status=$?
+          if test $status -ne 0
+          then
+              echo "  FAILED!"
+          else
+              echo "  Passed"
+          fi
+        fi
+        return_val=`expr $status + $return_val`
+    fi
+  done
+fi
+
+
+rm -f tmp.test
+echo "$return_val tests failed in C/H5VDS/"
+exit $return_val

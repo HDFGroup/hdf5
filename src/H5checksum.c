@@ -65,7 +65,7 @@
 static uint32_t H5_crc_table[256];
 
 /* Flag: has the table been computed? */
-static hbool_t H5_crc_table_computed = FALSE;
+static bool H5_crc_table_computed = false;
 
 /*-------------------------------------------------------------------------
  * Function:	H5_checksum_fletcher32
@@ -162,7 +162,7 @@ H5__checksum_crc_make_table(void)
                 c = c >> 1;
         H5_crc_table[n] = c;
     }
-    H5_crc_table_computed = TRUE;
+    H5_crc_table_computed = true;
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5__checksum_crc_make_table() */
@@ -345,7 +345,7 @@ the return value.  Two keys differing by one or two bits will have
 totally different hash values.
 
 The best hash table sizes are powers of 2.  There is no need to do
-mod a prime (mod is sooo slow!).  If you need less than 32 bits,
+mod a prime (mod is so slow!).  If you need less than 32 bits,
 use a bitmask.  For example, if you need only 10 bits, do
   h = (h & hashmask(10));
 In which case, the hash table should have hashsize(10) elements.

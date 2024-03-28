@@ -31,7 +31,6 @@
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free Lists                           */
-#include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5MMprivate.h" /* Memory management                    */
 #include "H5Oprivate.h"  /* Object headers		  	*/
 #include "H5Ppkg.h"      /* Property lists		  	*/
@@ -356,7 +355,7 @@ H5P__ocpy_merge_comm_dt_list_enc(const void *value, void **_pp, size_t *size)
     dt_list = *dt_list_ptr;
     while (dt_list) {
         /* Get length of encoded path */
-        len = HDstrlen(dt_list->path) + 1;
+        len = strlen(dt_list->path) + 1;
 
         /* Encode merge committed dtype list */
         if (*pp) {
@@ -415,7 +414,7 @@ H5P__ocpy_merge_comm_dt_list_dec(const void **_pp, void *_value)
     *dt_list = NULL;
 
     /* Decode the string sequence */
-    len = HDstrlen(*(const char **)pp);
+    len = strlen(*(const char **)pp);
     while (len > 0) {
         /* Create new node & duplicate string */
         if (NULL == (tmp_dt_list = H5FL_CALLOC(H5O_copy_dtype_merge_list_t)))
@@ -423,7 +422,7 @@ H5P__ocpy_merge_comm_dt_list_dec(const void **_pp, void *_value)
         if (NULL == (tmp_dt_list->path = H5MM_strdup(*(const char **)pp)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed");
         *pp += len + 1;
-        assert(len == HDstrlen(tmp_dt_list->path));
+        assert(len == strlen(tmp_dt_list->path));
 
         /* Add copied node to dtype list */
         if (dt_list_tail) {
@@ -437,7 +436,7 @@ H5P__ocpy_merge_comm_dt_list_dec(const void **_pp, void *_value)
         tmp_dt_list = NULL;
 
         /* Compute length of next string */
-        len = HDstrlen(*(const char **)pp);
+        len = strlen(*(const char **)pp);
     } /* end while */
 
     /* Advance past terminator for string sequence */
@@ -543,7 +542,7 @@ H5P__ocpy_merge_comm_dt_list_cmp(const void *_dt_list1, const void *_dt_list2, s
         assert(dt_list2->path);
 
         /* Compare paths */
-        ret_value = HDstrcmp(dt_list1->path, dt_list2->path);
+        ret_value = strcmp(dt_list1->path, dt_list2->path);
         if (ret_value != 0)
             HGOTO_DONE(ret_value);
 
@@ -646,7 +645,7 @@ H5Pget_copy_object(hid_t plist_id, unsigned *cpy_option /*out*/)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, cpy_option);
+    H5TRACE2("e", "i*Iu", plist_id, cpy_option);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
@@ -839,7 +838,7 @@ H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func /*out*/, void *
     herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", plist_id, func, op_data);
+    H5TRACE3("e", "i*Os**x", plist_id, func, op_data);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))

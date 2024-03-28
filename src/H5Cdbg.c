@@ -32,6 +32,7 @@
 #include "H5ACprivate.h" /* Metadata Cache               */
 #include "H5Cpkg.h"      /* Cache                        */
 #include "H5Eprivate.h"  /* Error Handling               */
+#include "H5SLprivate.h" /* Skip Lists                               */
 
 /****************/
 /* Local Macros */
@@ -317,10 +318,10 @@ H5C_set_prefix(H5C_t *cache_ptr, char *prefix)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (cache_ptr == NULL || prefix == NULL || HDstrlen(prefix) >= H5C__PREFIX_LEN)
+    if (cache_ptr == NULL || prefix == NULL || strlen(prefix) >= H5C__PREFIX_LEN)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry");
 
-    HDstrncpy(&(cache_ptr->prefix[0]), prefix, (size_t)(H5C__PREFIX_LEN));
+    strncpy(&(cache_ptr->prefix[0]), prefix, (size_t)(H5C__PREFIX_LEN));
 
     cache_ptr->prefix[H5C__PREFIX_LEN - 1] = '\0';
 
@@ -339,7 +340,7 @@ done:
  */
 herr_t
 H5C_stats(H5C_t *cache_ptr, const char *cache_name,
-          hbool_t
+          bool
 #if !H5C_COLLECT_CACHE_STATS
               H5_ATTR_UNUSED
 #endif /* H5C_COLLECT_CACHE_STATS */
@@ -779,13 +780,13 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
  *          of protect / unprotect calls prior to this call.
  *
  *          If either the parent or the child is not in the metadata
- *          cache, the function sets *fd_exists_ptr to FALSE.
+ *          cache, the function sets *fd_exists_ptr to false.
  *
  *          If both are in the cache, the child's list of parents is
  *          searched for the proposed parent.  If the proposed parent
  *          is found in the child's parent list, the function sets
- *          *fd_exists_ptr to TRUE.  In all other non-error cases,
- *          the function sets *fd_exists_ptr FALSE.
+ *          *fd_exists_ptr to true.  In all other non-error cases,
+ *          the function sets *fd_exists_ptr false.
  *
  * Return:      SUCCEED on success/FAIL on failure.  Note that
  *              *fd_exists_ptr is undefined on failure.
@@ -794,12 +795,12 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
  */
 #ifndef NDEBUG
 herr_t
-H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, haddr_t child_addr, hbool_t *fd_exists_ptr)
+H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, haddr_t child_addr, bool *fd_exists_ptr)
 {
-    hbool_t            fd_exists = FALSE; /* whether flush dependency exists */
+    bool               fd_exists = false; /* whether flush dependency exists */
     H5C_cache_entry_t *parent_ptr;        /* Ptr to parent entry */
     H5C_cache_entry_t *child_ptr;         /* Ptr to child entry */
-    hbool_t            ret_value = FALSE; /* Return value */
+    bool               ret_value = false; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -821,7 +822,7 @@ H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, haddr_t child
 
             for (u = 0; u < child_ptr->flush_dep_nparents; u++) {
                 if (child_ptr->flush_dep_parent[u] == parent_ptr) {
-                    fd_exists = TRUE;
+                    fd_exists = true;
                     assert(parent_ptr->flush_dep_nchildren > 0);
                     break;
                 } /* end if */
@@ -1025,7 +1026,7 @@ done:
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
-hbool_t
+bool
 H5C_get_serialization_in_progress(const H5C_t *cache_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1044,19 +1045,19 @@ H5C_get_serialization_in_progress(const H5C_t *cache_ptr)
  *		metadata cache are clean from the outermost ring, inwards
  *		to the inner ring specified.
  *
- *		Returns TRUE if all specified rings are clean, and FALSE
+ *		Returns true if all specified rings are clean, and false
  *		if not.  Throws an assertion failure on error.
  *
- * Return:      TRUE if the indicated ring(s) are clean, and FALSE otherwise.
+ * Return:      true if the indicated ring(s) are clean, and false otherwise.
  *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
-hbool_t
+bool
 H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring)
 {
     H5C_ring_t ring      = H5C_RING_USER;
-    hbool_t    ret_value = TRUE; /* Return value */
+    bool       ret_value = true; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1067,7 +1068,7 @@ H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring)
 
     while (ring <= inner_ring) {
         if (cache_ptr->dirty_index_ring_size[ring] > 0)
-            HGOTO_DONE(FALSE);
+            HGOTO_DONE(false);
 
         ring++;
     } /* end while */
@@ -1085,12 +1086,12 @@ done:
  *		type field contains the expted value.
  *
  *		If the specified entry is in cache, *in_cache_ptr is set
- *		to TRUE, and *type_ok_ptr is set to TRUE or FALSE depending
+ *		to true, and *type_ok_ptr is set to true or false depending
  *		on whether the entries type field matches the expected_type
  *		parameter.
  *
  *		If the target entry is not in cache, *in_cache_ptr is
- *		set to FALSE, and *type_ok_ptr is undefined.
+ *		set to false, and *type_ok_ptr is undefined.
  *
  *		Note that this function is only defined if NDEBUG
  *		is not defined.
@@ -1101,8 +1102,8 @@ done:
  */
 #ifndef NDEBUG
 herr_t
-H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr, const H5C_class_t *expected_type, hbool_t *in_cache_ptr,
-                      hbool_t *type_ok_ptr)
+H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr, const H5C_class_t *expected_type, bool *in_cache_ptr,
+                      bool *type_ok_ptr)
 {
     H5C_cache_entry_t *entry_ptr = NULL;
     herr_t             ret_value = SUCCEED; /* Return value */
@@ -1122,9 +1123,9 @@ H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr, const H5C_class_t *expecte
         /* the entry doesn't exist in the cache -- report this
          * and quit.
          */
-        *in_cache_ptr = FALSE;
+        *in_cache_ptr = false;
     else {
-        *in_cache_ptr = TRUE;
+        *in_cache_ptr = true;
 
         if (entry_ptr->prefetched)
             *type_ok_ptr = (expected_type->id == entry_ptr->prefetch_type_id);
@@ -1485,18 +1486,18 @@ done:
  *        is in present.  We need this, as it is possible for
  *        an entry to be in the skip list twice.
  *
- * Return:      FALSE if the entry is not in the skip list, and TRUE
+ * Return:      false if the entry is not in the skip list, and true
  *        if it is.
  *
  *-------------------------------------------------------------------------
  */
 #ifdef H5C_DO_SLIST_SANITY_CHECKS
-hbool_t
+bool
 H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
 {
     H5SL_node_t *node_ptr;
-    hbool_t      in_slist;
-    hbool_t      ret_value;
+    bool         in_slist;
+    bool         ret_value;
 
     FUNC_ENTER_PACKAGE
 
@@ -1505,7 +1506,7 @@ H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
     assert(cache_ptr->slist_ptr);
 
     node_ptr = H5SL_first(cache_ptr->slist_ptr);
-    in_slist = FALSE;
+    in_slist = false;
     while ((node_ptr != NULL) && (!in_slist)) {
         H5C_cache_entry_t *entry_ptr;
 
@@ -1516,7 +1517,7 @@ H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
         assert(entry_ptr->in_slist);
 
         if (entry_ptr == target_ptr)
-            in_slist = TRUE;
+            in_slist = true;
         else
             node_ptr = H5SL_next(node_ptr);
     }
@@ -1540,9 +1541,9 @@ done:
  */
 herr_t
 #if H5C_COLLECT_CACHE_STATS
-H5C__image_stats(H5C_t *cache_ptr, hbool_t print_header)
+H5C__image_stats(H5C_t *cache_ptr, bool print_header)
 #else  /* H5C_COLLECT_CACHE_STATS */
-H5C__image_stats(H5C_t *cache_ptr, hbool_t H5_ATTR_UNUSED print_header)
+H5C__image_stats(H5C_t *cache_ptr, bool H5_ATTR_UNUSED print_header)
 #endif /* H5C_COLLECT_CACHE_STATS */
 {
 #if H5C_COLLECT_CACHE_STATS

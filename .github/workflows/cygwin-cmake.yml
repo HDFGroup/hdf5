@@ -1,0 +1,64 @@
+name: hdf5 dev CMake cygwin
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  cygwin_build_and_test:
+    name: "cygwin-${{ inputs.build_mode }}"
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Set git to use LF
+        run: |
+          git config --global core.autocrlf input
+
+      - name: Get Sources
+        uses: actions/checkout@v4.1.1
+
+      - name: Install Cygwin
+        uses: cygwin/cygwin-install-action@master
+        with:
+          packages: cmake gcc-fortran make ninja zlib-devel flex bison perl
+
+      - name: CMake Configure
+        shell: C:\cygwin\bin\bash.exe -eo pipefail -o igncr '{0}'
+        run: |
+          export PATH=/usr/bin:$PATH
+          mkdir build
+          cd build
+          cmake -C ../config/cmake/cacheinit.cmake \
+            -G Ninja \
+            --log-level=VERBOSE \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DBUILD_SHARED_LIBS:BOOL=OFF \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=ON \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            ..
+
+      - name: CMake Build
+        shell: C:\cygwin\bin\bash.exe -eo pipefail -o igncr '{0}'
+        run: |
+          export PATH=/usr/bin:$PATH
+          cd build
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+
+      - name: CMake Run Tests
+        shell: C:\cygwin\bin\bash.exe -eo pipefail -o igncr '{0}'
+        run: |
+           export PATH=/usr/bin:$PATH
+           cd build
+           ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+#           ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "FORTRAN|H5TEST"

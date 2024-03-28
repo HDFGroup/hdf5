@@ -59,7 +59,7 @@ parse_command_line(int argc, const char *const *argv)
     while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'c':
-                nbytes = HDstrdup(H5_optarg);
+                nbytes = strdup(H5_optarg);
                 break;
             case '?':
             default:
@@ -105,10 +105,10 @@ main(int argc, char *argv[])
         goto error;
     } /* end if */
 
-    filename = HDstrdup(argv[H5_optind]);
+    filename = strdup(argv[H5_optind]);
 
     size = 0;
-    if (EOF == (res = HDsscanf(nbytes, "%u", &size))) {
+    if (EOF == (res = sscanf(nbytes, "%u", &size))) {
         /* fail */
         error_msg("missing file name\n");
         usage(h5tools_getprogname());

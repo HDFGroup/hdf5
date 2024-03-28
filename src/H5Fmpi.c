@@ -97,11 +97,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5F_mpi_get_comm
  *
- * Purpose:     Retrieves the file's communicator
+ * Purpose:     Retrieves the file's MPI_Comm communicator object
  *
- * Return:      Success:    The communicator (non-negative)
- *
- *              Failure:    Negative
+ * Return:      Success:    The communicator object
+ *              Failure:    MPI_COMM_NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -121,6 +120,33 @@ H5F_mpi_get_comm(const H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mpi_get_comm() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_mpi_get_info
+ *
+ * Purpose:     Retrieves the file's MPI_Info info object
+ *
+ * Return:      Success:    The info object
+ *              Failure:    MPI_INFO_NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+MPI_Info
+H5F_mpi_get_info(const H5F_t *f)
+{
+    MPI_Info ret_value = MPI_INFO_NULL;
+
+    FUNC_ENTER_NOAPI(MPI_INFO_NULL)
+
+    assert(f && f->shared);
+
+    /* Dispatch to driver */
+    if ((ret_value = H5FD_mpi_get_info(f->shared->lf)) == MPI_INFO_NULL)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, MPI_INFO_NULL, "driver get_info request failed");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_mpi_get_info() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_shared_mpi_get_size
@@ -188,7 +214,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__set_mpi_atomicity(H5F_t *file, hbool_t flag)
+H5F__set_mpi_atomicity(H5F_t *file, bool flag)
 {
     herr_t ret_value = SUCCEED;
 
@@ -258,7 +284,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__get_mpi_atomicity(const H5F_t *file, hbool_t *flag)
+H5F__get_mpi_atomicity(const H5F_t *file, bool *flag)
 {
     herr_t ret_value = SUCCEED;
 
@@ -292,7 +318,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag /*out*/)
+H5Fget_mpi_atomicity(hid_t file_id, bool *flag /*out*/)
 {
     H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
@@ -300,7 +326,7 @@ H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag /*out*/)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", file_id, flag);
+    H5TRACE2("e", "i*b", file_id, flag);
 
     /* Get the file object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -401,29 +427,52 @@ done:
  *              coordinates between the file-global flag and the flag set
  *              for the current operation in the current API context.
  *
- * Return:      TRUE/FALSE (can't fail)
+ * Return:      true/false (can't fail)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_get_coll_metadata_reads(const H5F_t *file)
 {
-    H5P_coll_md_read_flag_t file_flag = H5P_USER_FALSE;
-    hbool_t                 ret_value = FALSE;
-
     FUNC_ENTER_NOAPI_NOERR
 
     assert(file && file->shared);
 
+    FUNC_LEAVE_NOAPI(H5F_shared_get_coll_metadata_reads(file->shared));
+} /* end H5F_get_coll_metadata_reads() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_shared_get_coll_metadata_reads
+ *
+ * Purpose:     Determines whether collective metadata reads should be
+ *              performed. This routine is meant to be the single source of
+ *              truth for the collective metadata reads status, as it
+ *              coordinates between the file-global flag and the flag set
+ *              for the current operation in the current API context.
+ *
+ * Return:      true/false (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+bool
+H5F_shared_get_coll_metadata_reads(const H5F_shared_t *f_sh)
+{
+    H5P_coll_md_read_flag_t file_flag = H5P_USER_FALSE;
+    bool                    ret_value = false;
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    assert(f_sh);
+
     /* Retrieve the file-global flag */
-    file_flag = H5F_COLL_MD_READ(file);
+    file_flag = H5F_SHARED_COLL_MD_READ(f_sh);
 
     /* If file flag is set to H5P_FORCE_FALSE, exit early
-     * with FALSE, since collective metadata reads have
+     * with false, since collective metadata reads have
      * been explicitly disabled somewhere in the library.
      */
     if (H5P_FORCE_FALSE == file_flag)
-        ret_value = FALSE;
+        ret_value = false;
     else {
         /* If file flag is set to H5P_USER_TRUE, ignore
          * any settings in the API context. A file-global
@@ -432,7 +481,7 @@ H5F_get_coll_metadata_reads(const H5F_t *file)
          * Property List for an individual operation.
          */
         if (H5P_USER_TRUE == file_flag)
-            ret_value = TRUE;
+            ret_value = true;
         else {
             /* Get the collective metadata reads flag from
              * the current API context.
@@ -442,7 +491,7 @@ H5F_get_coll_metadata_reads(const H5F_t *file)
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_coll_metadata_reads() */
+} /* end H5F_shared_get_coll_metadata_reads() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_coll_metadata_reads
@@ -484,10 +533,10 @@ H5F_get_coll_metadata_reads(const H5F_t *file)
  *-------------------------------------------------------------------------
  */
 void
-H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, hbool_t *context_flag)
+H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, bool *context_flag)
 {
     H5P_coll_md_read_flag_t prev_file_flag    = H5P_USER_FALSE;
-    hbool_t                 prev_context_flag = FALSE;
+    bool                    prev_context_flag = false;
 
     FUNC_ENTER_NOAPI_NOERR
 
@@ -516,12 +565,12 @@ H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, hbo
  * Function:    H5F_mpi_get_file_block_type
  *
  * Purpose:     Creates an MPI derived datatype for communicating an
- *              H5F_block_t structure. If `commit` is specified as TRUE,
+ *              H5F_block_t structure. If `commit` is specified as true,
  *              the resulting datatype will be committed and ready for
  *              use in communication. Otherwise, the type is only suitable
  *              for building other derived types.
  *
- *              If TRUE is returned through `new_type_derived`, this lets
+ *              If true is returned through `new_type_derived`, this lets
  *              the caller know that the datatype has been derived and
  *              should be freed with MPI_Type_free once it is no longer
  *              needed.
@@ -531,7 +580,7 @@ H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, hbo
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_mpi_get_file_block_type(hbool_t commit, MPI_Datatype *new_type, hbool_t *new_type_derived)
+H5F_mpi_get_file_block_type(bool commit, MPI_Datatype *new_type, bool *new_type_derived)
 {
     MPI_Datatype types[2];
     MPI_Aint     displacements[2];
@@ -545,7 +594,7 @@ H5F_mpi_get_file_block_type(hbool_t commit, MPI_Datatype *new_type, hbool_t *new
     assert(new_type);
     assert(new_type_derived);
 
-    *new_type_derived = FALSE;
+    *new_type_derived = false;
 
     field_count = 2;
     assert(field_count == sizeof(types) / sizeof(MPI_Datatype));
@@ -559,7 +608,7 @@ H5F_mpi_get_file_block_type(hbool_t commit, MPI_Datatype *new_type, hbool_t *new
     if (MPI_SUCCESS !=
         (mpi_code = MPI_Type_create_struct(field_count, block_lengths, displacements, types, new_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
-    *new_type_derived = TRUE;
+    *new_type_derived = true;
 
     if (commit && MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
@@ -569,7 +618,7 @@ done:
         if (*new_type_derived) {
             if (MPI_SUCCESS != (mpi_code = MPI_Type_free(new_type)))
                 HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-            *new_type_derived = FALSE;
+            *new_type_derived = false;
         }
     }
 

@@ -11,30 +11,47 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	The public header file for the direct driver.
+ * Purpose:	The public header file for the direct virtual file driver (VFD)
  */
 #ifndef H5FDdirect_H
 #define H5FDdirect_H
 
 #ifdef H5_HAVE_DIRECT
-#define H5FD_DIRECT       (H5FDperform_init(H5FD_direct_init))
+
+/** Initializer for the direct VFD */
+#define H5FD_DIRECT (H5FDperform_init(H5FD_direct_init))
+
+/** Identifier for the direct VFD */
 #define H5FD_DIRECT_VALUE H5_VFD_DIRECT
+
 #else
+
+/** Initializer for the direct VFD (disabled) */
 #define H5FD_DIRECT       (H5I_INVALID_HID)
+
+/** Identifier for the direct VFD (disabled) */
 #define H5FD_DIRECT_VALUE H5_VFD_INVALID
+
 #endif /* H5_HAVE_DIRECT */
+
+/** Default value for memory boundary */
+#define MBOUNDARY_DEF 4096
+
+/** Default value for file block size */
+#define FBSIZE_DEF 4096
+
+/** Default value for maximum copy buffer size */
+#define CBSIZE_DEF (16 * 1024 * 1024)
 
 #ifdef H5_HAVE_DIRECT
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Default values for memory boundary, file block size, and maximal copy buffer size.
- * Application can set these values through the function H5Pset_fapl_direct. */
-#define MBOUNDARY_DEF 4096
-#define FBSIZE_DEF    4096
-#define CBSIZE_DEF    16 * 1024 * 1024
-
+/** @private
+ *
+ * \brief Private initializer for the direct VFD
+ */
 H5_DLL hid_t H5FD_direct_init(void);
 
 /**

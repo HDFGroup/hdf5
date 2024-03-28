@@ -34,9 +34,9 @@
 /* Local Prototypes */
 /********************/
 
-static hid_t open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned random_seed,
-                           hbool_t old);
-static int   add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecords,
+static hid_t open_skeleton(const char *filename, bool verbose, FILE *verbose_file, unsigned random_seed,
+                           bool old);
+static int   add_records(hid_t fid, bool verbose, FILE *verbose_file, unsigned long nrecords,
                          unsigned long flush_count);
 static void  usage(void);
 
@@ -48,7 +48,7 @@ static void  usage(void);
  * Parameters:  const char *filename
  *              The filename of the SWMR HDF5 file to open
  *
- *              hbool_t verbose
+ *              bool verbose
  *              Whether or not to emit verbose console messages
  *
  *              FILE *verbose_file
@@ -57,7 +57,7 @@ static void  usage(void);
  *              unsigned random_seed
  *              Random seed for the file (used for verbose logging)
  *
- *              hbool_t old
+ *              bool old
  *              Whether to write in "old" file format
  *
  * Return:      Success:    The file ID of the opened SWMR file
@@ -68,12 +68,12 @@ static void  usage(void);
  *-------------------------------------------------------------------------
  */
 static hid_t
-open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned random_seed, hbool_t old)
+open_skeleton(const char *filename, bool verbose, FILE *verbose_file, unsigned random_seed, bool old)
 {
     hid_t    fid;                 /* File ID for new HDF5 file */
     hid_t    fapl;                /* File access property list */
     unsigned u, v;                /* Local index variable */
-    hbool_t  use_log_vfd = FALSE; /* Use the log VFD (set this manually) */
+    bool     use_log_vfd = false; /* Use the log VFD (set this manually) */
 
     assert(filename);
 
@@ -90,7 +90,7 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file, unsigne
     if (use_log_vfd) {
         char verbose_name[1024];
 
-        HDsnprintf(verbose_name, sizeof(verbose_name), "swmr_writer.log.%u", random_seed);
+        snprintf(verbose_name, sizeof(verbose_name), "swmr_writer.log.%u", random_seed);
 
         H5Pset_fapl_log(fapl, verbose_name, H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
     } /* end if */
@@ -127,7 +127,7 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file, unsigne
  * Parameters:  hid_t fid
  *              The file ID of the SWMR HDF5 file
  *
- *              hbool_t verbose
+ *              bool verbose
  *              Whether or not to emit verbose console messages
  *
  *              FILE *verbose_file
@@ -145,7 +145,7 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file, unsigne
  *-------------------------------------------------------------------------
  */
 static int
-add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecords, unsigned long flush_count)
+add_records(hid_t fid, bool verbose, FILE *verbose_file, unsigned long nrecords, unsigned long flush_count)
 {
     hid_t         tid;                                  /* Datatype ID for records */
     hid_t         mem_sid;                              /* Memory dataspace ID */
@@ -279,10 +279,10 @@ main(int argc, char *argv[])
     hid_t    fid;                  /* File ID for file opened */
     long     nrecords     = 0;     /* # of records to append */
     long     flush_count  = 10000; /* # of records to write between flushing file */
-    hbool_t  verbose      = TRUE;  /* Whether to emit some informational messages */
+    bool     verbose      = true;  /* Whether to emit some informational messages */
     FILE    *verbose_file = NULL;  /* File handle for verbose output */
-    hbool_t  old          = FALSE; /* Whether to use non-latest-format when opening file */
-    hbool_t  use_seed     = FALSE; /* Set to TRUE if a seed was set on the command line */
+    bool     old          = false; /* Whether to use non-latest-format when opening file */
+    bool     use_seed     = false; /* Set to true if a seed was set on the command line */
     unsigned random_seed  = 0;     /* Random # seed */
     unsigned u;                    /* Local index variable */
     int      temp;
@@ -305,13 +305,13 @@ main(int argc, char *argv[])
 
                     /* Be quiet */
                     case 'q':
-                        verbose = FALSE;
+                        verbose = false;
                         u++;
                         break;
 
                     /* Random # seed */
                     case 'r':
-                        use_seed    = TRUE;
+                        use_seed    = true;
                         temp        = atoi(argv[u + 1]);
                         random_seed = (unsigned)temp;
                         u += 2;
@@ -319,7 +319,7 @@ main(int argc, char *argv[])
 
                     /* Use non-latest-format when opening file */
                     case 'o':
-                        old = TRUE;
+                        old = true;
                         u++;
                         break;
 
@@ -356,7 +356,7 @@ main(int argc, char *argv[])
     if (verbose) {
         char verbose_name[1024];
 
-        HDsnprintf(verbose_name, sizeof(verbose_name), "swmr_writer.out.%u", random_seed);
+        snprintf(verbose_name, sizeof(verbose_name), "swmr_writer.out.%u", random_seed);
         if (NULL == (verbose_file = fopen(verbose_name, "w"))) {
             fprintf(stderr, "Can't open verbose output file!\n");
             exit(EXIT_FAILURE);

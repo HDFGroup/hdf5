@@ -92,7 +92,7 @@ typedef struct H5FL_reg_node_t {
 
 /* Data structure for free list of blocks */
 typedef struct H5FL_reg_head_t {
-    hbool_t          init;      /* Whether the free list has been initialized */
+    bool             init;      /* Whether the free list has been initialized */
     unsigned         allocated; /* Number of blocks allocated */
     unsigned         onlist;    /* Number of blocks on free list */
     const char      *name;      /* Name of the type */
@@ -163,7 +163,7 @@ typedef struct H5FL_blk_node_t {
 
 /* Data structure for priority queue of native block free lists */
 typedef struct H5FL_blk_head_t {
-    hbool_t          init;      /* Whether the free list has been initialized */
+    bool             init;      /* Whether the free list has been initialized */
     unsigned         allocated; /* Total number of blocks allocated */
     unsigned         onlist;    /* Total number of blocks on free list */
     size_t           list_mem;  /* Total amount of memory in blocks on free list */
@@ -201,7 +201,7 @@ typedef struct H5FL_blk_head_t {
 #define H5FL_BLK_REALLOC(t, blk, new_size)                                                                   \
     (uint8_t *)H5FL_blk_realloc(&(H5FL_BLK_NAME(t)), blk, new_size H5FL_TRACK_INFO)
 
-/* Check if there is a free block available to re-use */
+/* Check if there is a free block available to reuse */
 #define H5FL_BLK_AVAIL(t, size) H5FL_blk_free_block_avail(&(H5FL_BLK_NAME(t)), size)
 
 #else /* H5_NO_BLK_FREE_LISTS */
@@ -215,7 +215,7 @@ typedef struct H5FL_blk_head_t {
 #define H5FL_BLK_CALLOC(t, size)           (uint8_t *)H5MM_calloc(size)
 #define H5FL_BLK_FREE(t, blk)              (uint8_t *)H5MM_xfree(blk)
 #define H5FL_BLK_REALLOC(t, blk, new_size) (uint8_t *)H5MM_realloc(blk, new_size)
-#define H5FL_BLK_AVAIL(t, size)            (FALSE)
+#define H5FL_BLK_AVAIL(t, size)            (false)
 #endif /* H5_NO_BLK_FREE_LISTS */
 
 /* Data structure to store each array in free list */
@@ -237,7 +237,7 @@ typedef struct H5FL_arr_node_t {
 
 /* Data structure for free list of array blocks */
 typedef struct H5FL_arr_head_t {
-    hbool_t          init;      /* Whether the free list has been initialized */
+    bool             init;      /* Whether the free list has been initialized */
     unsigned         allocated; /* Total number of blocks allocated */
     size_t           list_mem;  /* Amount of memory in block on free list */
     const char      *name;      /* Name of the type */
@@ -358,7 +358,7 @@ typedef struct H5FL_fac_node_t    H5FL_fac_node_t;
 
 /* Data structure for free list block factory */
 typedef struct H5FL_fac_head_t {
-    hbool_t             init;      /* Whether the free list has been initialized */
+    bool                init;      /* Whether the free list has been initialized */
     unsigned            allocated; /* Number of blocks allocated */
     unsigned            onlist;    /* Number of blocks on free list */
     size_t              size;      /* Size of the blocks in the list */

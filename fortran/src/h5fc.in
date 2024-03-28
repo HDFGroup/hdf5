@@ -60,7 +60,7 @@ host_os="@host_os@"
 
 prog_name="`basename $0`"
 
-allargs=""
+misc_args=""
 compile_args=""
 link_args=""
 link_objs=""
@@ -110,15 +110,15 @@ usage() {
   # A wonderfully informative "usage" message.
   echo "usage: $prog_name [OPTIONS] <compile line>"
   echo "  OPTIONS:"
-  echo "    -help        This help message."
-  echo "    -echo        Show all the shell commands executed"
-  echo "    -prefix=DIR  Prefix directory to find HDF5 lib/ and include/"
-  echo "                   subdirectories [default: $prefix]"
-  echo "    -show        Show the commands without executing them"
-  echo "    -showconfig  Show the HDF5 library configuration summary"
-  echo "    -shlib       Compile with shared HDF5 libraries [default for hdf5 built"
+  echo "    -help | --help | -h   This help message."
+  echo "    -echo                 Show all the shell commands executed"
+  echo "    -prefix=DIR           Prefix directory to find HDF5 lib/ and include/"
+  echo "                                                     subdirectories [default: $prefix]"
+  echo "    -show                 Show the commands without executing them"
+  echo "    -showconfig           Show the HDF5 library configuration summary"
+  echo "    -shlib                Compile with shared HDF5 libraries [default for hdf5 built"
   echo "                                                     without static libraries]"
-  echo "    -noshlib     Compile with static HDF5 libraries [default for hdf5 built"
+  echo "    -noshlib              Compile with static HDF5 libraries [default for hdf5 built"
   echo "                                                     with static libraries]"
   echo " "
   echo "  <compile line>  - the normal compile line options for your compiler."
@@ -176,7 +176,6 @@ for arg in $@ ; do
 
   case "$arg" in
     -c)
-      allargs="$allargs $arg"
       compile_args="$compile_args $arg"
 
       if test "x$do_link" = "xyes" -a -n "$output_file"; then
@@ -187,7 +186,6 @@ for arg in $@ ; do
       dash_c="yes"
       ;;
     -o)
-      allargs="$allargs $arg"
       dash_o="yes"
 
       if test "x$dash_c" = "xyes"; then
@@ -199,14 +197,12 @@ for arg in $@ ; do
       fi
       ;;
     -E|-M|-MT)
-      allargs="$allargs $arg"
       compile_args="$compile_args $arg"
       dash_c="yes"
       do_link="no"
       ;;
     -l*)
       link_args="$link_args $arg"
-      allargs="$allargs $arg"
       ;;
     -prefix=*)
       prefix="`expr "$arg" : '-prefix=\(.*\)'`"
@@ -230,16 +226,22 @@ for arg in $@ ; do
     -help)
       usage
       ;;
+    --help)
+      usage
+      ;;
+    -h)
+      usage
+      ;;
     *\"*)
       qarg="'"$arg"'"
-      allargs="$allargs $qarg"
+      misc_args="$misc_args $qarg"
       ;;
     *\'*)
-      qarg='\"'"$arg"'\"'
-      allargs="$allargs $qarg"
+      qarg='"'"$arg"'"'
+      misc_args="$misc_args $qarg"
       ;;
 
-        *) allargs="$allargs $arg"
+        *) misc_args="$misc_args $arg"
 	if [ -s "$arg" ] ; then
 	    ext=`expr "$arg" : '.*\(\..*\)'`
 	    if [ "$ext" = ".f" -o "$ext" = ".F" -o \
@@ -287,7 +289,7 @@ if test "x$do_compile" = "xyes"; then
   fi
 
 
-  $SHOW $FC $H5BLD_FCFLAGS $FCFLAGS ${F9XSUFFIXFLAG} ${fmodules} $compile_args
+  $SHOW $FC $H5BLD_FCFLAGS $FCFLAGS ${F9XSUFFIXFLAG} ${fmodules} $misc_args $compile_args
   status=$?
 
   if test "$status" != "0"; then
@@ -306,20 +308,20 @@ if test "x$do_link" = "xyes"; then
   fi
   link_args="$link_args -L${libdir}"
 
-  case "$host_os" in
-    linux*)               flag="@fortran_linux_linker_option@-rpath -Wl," ;;
-    hpux*)                flag="-Wl,+b -Wl," ;;
-    freebsd*|solaris*)    flag="-R" ;;
-    rs6000*|aix*)         flag="-L" ;;
-    sgi)                  flag="-rpath " ;;
-    *)                    flag="" ;;
-  esac
+  if test "x$USE_SHARED_LIB" = "xyes"; then
+    case "$host_os" in
+      linux*)               flag="@fortran_linux_linker_option@-rpath -Wl," ;;
+      hpux*)                flag="-Wl,+b -Wl," ;;
+      freebsd*|solaris*)    flag="-R" ;;
+      rs6000*|aix*)         flag="-L" ;;
+      sgi)                  flag="-rpath " ;;
+      *)                    flag="" ;;
+    esac
 
-  if test -n "$flag"; then
-    shared_link="${flag}${libdir}"
-  fi
-
-  if test "x$USE_SHARED_LIB" != "xyes"; then
+    if test -n "$flag"; then
+      shared_link="${flag}${libdir}"
+    fi
+  else
     # The hdf5 library "-l" flags are in here already.  This is a static
     # compile though, so change it to the static versions (.a) of the libraries.
     new_libraries=""

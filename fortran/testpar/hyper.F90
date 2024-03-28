@@ -25,8 +25,8 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   INTEGER, INTENT(in) :: length                     ! array length
   LOGICAL, INTENT(in) :: do_collective              ! use collective I/O
   LOGICAL, INTENT(in) :: do_chunk                   ! use chunking
-  INTEGER, INTENT(in) :: mpi_size                   ! number of processes in the group of communicator
-  INTEGER, INTENT(in) :: mpi_rank                   ! rank of the calling process in the communicator
+  INTEGER(KIND=MPI_INTEGER_KIND), INTENT(in) :: mpi_size ! number of processes in the group of communicator
+  INTEGER(KIND=MPI_INTEGER_KIND), INTENT(in) :: mpi_rank ! rank of the calling process in the communicator
   INTEGER, INTENT(inout) :: nerrors                 ! number of errors
   INTEGER :: hdferror                               ! HDF hdferror flag
   INTEGER(hsize_t), DIMENSION(1) :: dims            ! dataset dimensions
@@ -51,6 +51,12 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   INTEGER        :: actual_io_mode                  ! The type of I/O performed by this process
   LOGICAL        :: is_coll
   LOGICAL        :: is_coll_true = .TRUE.
+
+  INTEGER :: local_no_collective_cause
+  INTEGER :: global_no_collective_cause
+  INTEGER :: no_selection_io_cause
+  INTEGER :: actual_selection_io_mode
+
   !
   ! initialize the array data between the processes (3)
   ! for the 12 size array we get
@@ -231,28 +237,71 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   CALL h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,wbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
   CALL check("h5dwrite_f", hdferror, nerrors)
 
+  CALL h5pget_actual_selection_io_mode_f(dxpl_id, actual_selection_io_mode, hdferror)
+  CALL check("h5pget_actual_selection_io_mode_f", hdferror, nerrors)
+  IF(do_collective)THEN
+     IF(actual_selection_io_mode .NE. H5D_SELECTION_IO_F)THEN
+        PRINT*, "Incorrect actual selection io mode"
+        nerrors = nerrors + 1
+     ENDIF
+  ELSE
+     IF(actual_selection_io_mode .NE. IOR(H5D_SELECTION_IO_F, H5D_SCALAR_IO_F))THEN
+        PRINT*, "Incorrect actual selection io mode"
+        nerrors = nerrors + 1
+     ENDIF
+  ENDIF
 
   ! Check h5pget_mpio_actual_io_mode_f function
   CALL h5pget_mpio_actual_io_mode_f(dxpl_id, actual_io_mode, hdferror)
   CALL check("h5pget_mpio_actual_io_mode_f", hdferror, nerrors)
 
-! MSB -- TODO FIX: skipping for now since multi-dataset
-!        has no specific  path for contiguous collective
-! 
-!  IF(do_collective.AND.do_chunk)THEN
-!     IF(actual_io_mode.NE.H5D_MPIO_CHUNK_COLLECTIVE_F)THEN
-!       CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
-!     ENDIF
-!  ELSEIF(.NOT.do_collective)THEN
-!     IF(actual_io_mode.NE.H5D_MPIO_NO_COLLECTIVE_F)THEN
-!        CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
-!     ENDIF
-!  ELSEIF( do_collective.AND.(.NOT.do_chunk))THEN
-!     IF(actual_io_mode.NE.H5D_MPIO_CONTIG_COLLECTIVE_F)THEN
-!        CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
-!     ENDIF
-!  ENDIF
-! MSB
+  CALL h5pget_mpio_no_collective_cause_f(dxpl_id, local_no_collective_cause, global_no_collective_cause, hdferror)
+  CALL check("h5pget_mpio_no_collective_cause_f", hdferror, nerrors)
+
+  IF(do_collective) THEN
+     IF(local_no_collective_cause .NE. H5D_MPIO_COLLECTIVE_F) &
+          CALL check("h5pget_mpio_no_collective_cause_f", -1, nerrors)
+     IF(global_no_collective_cause .NE. H5D_MPIO_COLLECTIVE_F) &
+          CALL check("h5pget_mpio_no_collective_cause_f", -1, nerrors)
+  ELSE
+     IF(local_no_collective_cause .NE. H5D_MPIO_SET_INDEPENDENT_F) &
+          CALL check("h5pget_mpio_no_collective_cause_f", -1, nerrors)
+     IF(global_no_collective_cause .NE. H5D_MPIO_SET_INDEPENDENT_F) &
+          CALL check("h5pget_mpio_no_collective_cause_f", -1, nerrors)
+  ENDIF
+
+  IF(do_collective.AND.do_chunk)THEN
+     IF(actual_io_mode.NE.H5D_MPIO_CHUNK_COLLECTIVE_F)THEN
+       CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
+     ENDIF
+  ELSEIF(.NOT.do_collective)THEN
+     IF(actual_io_mode.NE.H5D_MPIO_NO_COLLECTIVE_F)THEN
+        CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
+     ENDIF
+  ELSEIF( do_collective.AND.(.NOT.do_chunk))THEN
+     IF(actual_io_mode.NE.H5D_MPIO_CONTIG_COLLECTIVE_F)THEN
+        CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
+     ENDIF
+  ENDIF
+
+  CALL h5pset_selection_io_f(dxpl_id, H5D_SELECTION_IO_MODE_OFF_F, hdferror)
+  CALL check("h5pset_selection_io_f", hdferror, nerrors)
+
+  CALL h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,wbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
+  CALL check("h5dwrite_f", hdferror, nerrors)
+
+  ! Verify bitwise operations are correct
+
+  IF( IOR(H5D_MPIO_DATATYPE_CONVERSION_F,H5D_MPIO_DATA_TRANSFORMS_F).NE.6)THEN
+     PRINT*, "Incorrect bitwise operations for Fortran defined constants"
+     nerrors = nerrors + 1
+  ENDIF
+
+  CALL h5pget_no_selection_io_cause_f(dxpl_id, no_selection_io_cause, hdferror)
+  CALL check("h5pget_no_selection_io_cause_f", hdferror, nerrors)
+
+  IF(no_selection_io_cause .NE. H5D_SEL_IO_DISABLE_BY_API_F) &
+       CALL check("h5pget_no_selection_io_cause_f", -1, nerrors)
 
   !
   ! close HDF5 I/O

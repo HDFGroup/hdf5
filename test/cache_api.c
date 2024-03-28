@@ -27,12 +27,12 @@ static const char *FILENAME[] = {"cache_api_test", NULL};
 
 /* private function declarations: */
 
-static hbool_t              check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id);
-static hbool_t              check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id);
-static hbool_t              mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id);
+static bool                 check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id);
+static bool                 check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id);
+static bool                 mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id);
 static H5AC_cache_config_t *init_invalid_configs(void);
-static hbool_t              check_fapl_mdc_api_errs(void);
-static hbool_t              check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id);
+static bool                 check_fapl_mdc_api_errs(void);
+static bool                 check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id);
 
 /**************************************************************************/
 /**************************************************************************/
@@ -51,29 +51,29 @@ static hbool_t              check_file_mdc_api_errs(unsigned paged, hid_t fcpl_i
  *              be sufficient to verify that the desired configuration
  *              data is getting to the cache.
  *
- * Return:      Test pass status (TRUE/FALSE)
+ * Return:      Test pass status (true/false)
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 {
     char                filename[512];
     herr_t              result;
-    hid_t               fapl_id        = -1;
-    hid_t               test_fapl_id   = -1;
-    hid_t               file_id        = -1;
+    hid_t               fapl_id        = H5I_INVALID_HID;
+    hid_t               test_fapl_id   = H5I_INVALID_HID;
+    hid_t               file_id        = H5I_INVALID_HID;
     H5F_t              *file_ptr       = NULL;
     H5C_t              *cache_ptr      = NULL;
     H5AC_cache_config_t default_config = H5AC__DEFAULT_CACHE_CONFIG;
     H5AC_cache_config_t mod_config     = {
         /* int         version                = */ H5AC__CURR_CACHE_CONFIG_VERSION,
-        /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-        /* hbool_t     open_trace_file        = */ FALSE,
-        /* hbool_t     close_trace_file       = */ FALSE,
+        /* bool     rpt_fcn_enabled        = */ false,
+        /* bool     open_trace_file        = */ false,
+        /* bool     close_trace_file       = */ false,
         /* char        trace_file_name[]      = */ "",
-        /* hbool_t     evictions_enabled      = */ TRUE,
-        /* hbool_t     set_initial_size       = */ TRUE,
+        /* bool     evictions_enabled      = */ true,
+        /* bool     set_initial_size       = */ true,
         /* size_t      initial_size           = */ (1 * 1024 * 1024 + 1),
         /* double      min_clean_fraction     = */ 0.2,
         /* size_t      max_size               = */ (16 * 1024 * 1024 + 1),
@@ -82,7 +82,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
         /* double      lower_hr_threshold     = */ 0.91,
         /* double      increment              = */ 2.1,
-        /* hbool_t     apply_max_increment    = */ TRUE,
+        /* bool     apply_max_increment    = */ true,
         /* size_t      max_increment          = */ (4 * 1024 * 1024 + 1),
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
@@ -91,10 +91,10 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out,
         /* double      upper_hr_threshold     = */ 0.998,
         /* double      decrement              = */ 0.91,
-        /* hbool_t     apply_max_decrement    = */ TRUE,
+        /* bool     apply_max_decrement    = */ true,
         /* size_t      max_decrement          = */ (1 * 1024 * 1024 - 1),
         /* int         epochs_before_eviction = */ 4,
-        /* hbool_t     apply_empty_reserve    = */ TRUE,
+        /* bool     apply_empty_reserve    = */ true,
         /* double      empty_reserve          = */ 0.05,
         /* int         dirty_bytes_threshold  = */ (256 * 1024),
         /* int        metadata_write_strategy = */
@@ -108,7 +108,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     else
         TESTING("MDC/FAPL related API calls");
 
-    pass = TRUE;
+    pass = true;
 
     XLATE_EXT_TO_INT_MDC_CONFIG(default_auto_size_ctl, default_config)
     XLATE_EXT_TO_INT_MDC_CONFIG(mod_auto_size_ctl, mod_config)
@@ -123,7 +123,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (fapl_id < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
         }
     }
@@ -136,12 +136,12 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (result < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pget_mdc_config() failed.\n";
         }
-        else if (!CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE)) {
+        else if (!CACHE_CONFIGS_EQUAL(default_config, scratch, true, true)) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "retrieved config doesn't match default.";
         }
     }
@@ -156,7 +156,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (result < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pset_mdc_config() failed.\n";
         }
     }
@@ -169,12 +169,12 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (result < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pget_mdc_config() failed.\n";
         }
-        else if (!CACHE_CONFIGS_EQUAL(mod_config, scratch, TRUE, TRUE)) {
+        else if (!CACHE_CONFIGS_EQUAL(mod_config, scratch, true, true)) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "retrieved config doesn't match mod config.";
         }
     }
@@ -183,7 +183,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (H5Pclose(fapl_id) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pclose() failed.\n";
         }
     }
@@ -200,7 +200,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename)) == NULL) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "h5_fixname() failed.\n";
         }
     }
@@ -212,7 +212,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (file_id < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fcreate() failed.\n";
         }
     }
@@ -224,7 +224,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (file_ptr == NULL) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "Can't get file_ptr.\n";
         }
         else {
@@ -238,17 +238,17 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (cache_ptr == NULL || cache_ptr->resize_ctl.version != H5C__CURR_AUTO_SIZE_CTL_VER) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "Can't access cache resize_ctl.\n";
         }
     }
 
-    /* conpare the cache's internal configuration with the expected value */
+    /* compare the cache's internal configuration with the expected value */
     if (pass) {
 
-        if (!resize_configs_are_equal(&default_auto_size_ctl, &cache_ptr->resize_ctl, TRUE)) {
+        if (!resize_configs_are_equal(&default_auto_size_ctl, &cache_ptr->resize_ctl, true)) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "Unexpected value(s) in cache resize_ctl 1.\n";
         }
     }
@@ -260,7 +260,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (fapl_id < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fget_access_plist() failed.\n";
         }
     }
@@ -276,17 +276,17 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (result < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pget_mdc_config() failed.\n";
         }
-        else if (!CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE)) {
+        else if (!CACHE_CONFIGS_EQUAL(default_config, scratch, true, true)) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "config retrieved from file doesn't match default.";
         }
         else if (H5Pclose(fapl_id) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pclose() failed.\n";
         }
     }
@@ -296,12 +296,12 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (H5Fclose(file_id) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fclose() failed.\n";
         }
         else if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fdelete() failed.\n";
         }
     }
@@ -320,7 +320,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (fapl_id < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
         }
     }
@@ -333,7 +333,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (result < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pset_mdc_config() failed.\n";
         }
     }
@@ -343,7 +343,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename)) == NULL) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "h5_fixname() failed.\n";
         }
     }
@@ -355,7 +355,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (file_id < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fcreate() failed.\n";
         }
     }
@@ -367,7 +367,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (file_ptr == NULL) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "Can't get file_ptr.\n";
         }
         else {
@@ -381,17 +381,17 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (cache_ptr == NULL || cache_ptr->resize_ctl.version != H5C__CURR_AUTO_SIZE_CTL_VER) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "Can't access cache resize_ctl.\n";
         }
     }
 
-    /* conpare the cache's internal configuration with the expected value */
+    /* compare the cache's internal configuration with the expected value */
     if (pass) {
 
-        if (!resize_configs_are_equal(&mod_auto_size_ctl, &cache_ptr->resize_ctl, TRUE)) {
+        if (!resize_configs_are_equal(&mod_auto_size_ctl, &cache_ptr->resize_ctl, true)) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "Unexpected value(s) in cache resize_ctl 2.\n";
         }
     }
@@ -403,7 +403,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (test_fapl_id < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fget_access_plist() failed.\n";
         }
     }
@@ -419,17 +419,17 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (result < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pget_mdc_config() failed.\n";
         }
-        else if (!CACHE_CONFIGS_EQUAL(mod_config, scratch, TRUE, TRUE)) {
+        else if (!CACHE_CONFIGS_EQUAL(mod_config, scratch, true, true)) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "config retrieved from file doesn't match.";
         }
         else if (H5Pclose(test_fapl_id) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pclose() failed.\n";
         }
     }
@@ -439,12 +439,12 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (H5Fclose(file_id) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fclose() failed.\n";
         }
         else if (H5Fdelete(filename, fapl_id) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fdelete() failed.\n";
         }
     }
@@ -454,7 +454,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (H5Pclose(fapl_id) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pclose() failed.\n";
         }
     }
@@ -491,15 +491,15 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
  *              We shouldn't need to verify data correctness beyond that
  *              point.
  *
- * Return:      Test pass status (TRUE/FALSE)
+ * Return:      Test pass status (true/false)
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 {
     char                filename[512];
-    hid_t               file_id = -1;
+    hid_t               file_id = H5I_INVALID_HID;
     size_t              max_size;
     size_t              min_clean_size;
     size_t              cur_size;
@@ -508,12 +508,12 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     H5AC_cache_config_t default_config = H5AC__DEFAULT_CACHE_CONFIG;
     H5AC_cache_config_t mod_config_1   = {
         /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-        /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-        /* hbool_t     open_trace_file        = */ FALSE,
-        /* hbool_t     close_trace_file       = */ FALSE,
+        /* bool     rpt_fcn_enabled        = */ false,
+        /* bool     open_trace_file        = */ false,
+        /* bool     close_trace_file       = */ false,
         /* char        trace_file_name[]      = */ "",
-        /* hbool_t     evictions_enabled      = */ TRUE,
-        /* hbool_t     set_initial_size       = */ TRUE,
+        /* bool     evictions_enabled      = */ true,
+        /* bool     set_initial_size       = */ true,
         /* size_t      initial_size           = */ (1 * 1024 * 1024 + 1),
         /* double      min_clean_fraction     = */ 0.2,
         /* size_t      max_size               = */ (16 * 1024 * 1024 + 1),
@@ -522,7 +522,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
         /* double      lower_hr_threshold     = */ 0.91,
         /* double      increment              = */ 2.1,
-        /* hbool_t     apply_max_increment    = */ TRUE,
+        /* bool     apply_max_increment    = */ true,
         /* size_t      max_increment          = */ (4 * 1024 * 1024 + 1),
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
@@ -531,22 +531,22 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out,
         /* double      upper_hr_threshold     = */ 0.998,
         /* double      decrement              = */ 0.91,
-        /* hbool_t     apply_max_decrement    = */ TRUE,
+        /* bool     apply_max_decrement    = */ true,
         /* size_t      max_decrement          = */ (1 * 1024 * 1024 - 1),
         /* int         epochs_before_eviction = */ 4,
-        /* hbool_t     apply_empty_reserve    = */ TRUE,
+        /* bool     apply_empty_reserve    = */ true,
         /* double      empty_reserve          = */ 0.05,
         /* int         dirty_bytes_threshold  = */ (256 * 1024),
         /* int        metadata_write_strategy = */
         H5AC__DEFAULT_METADATA_WRITE_STRATEGY};
     H5AC_cache_config_t mod_config_2 = {
         /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-        /* hbool_t     rpt_fcn_enabled        = */ TRUE,
-        /* hbool_t     open_trace_file        = */ FALSE,
-        /* hbool_t     close_trace_file       = */ FALSE,
+        /* bool     rpt_fcn_enabled        = */ true,
+        /* bool     open_trace_file        = */ false,
+        /* bool     close_trace_file       = */ false,
         /* char        trace_file_name[]      = */ "",
-        /* hbool_t     evictions_enabled      = */ TRUE,
-        /* hbool_t     set_initial_size       = */ TRUE,
+        /* bool     evictions_enabled      = */ true,
+        /* bool     set_initial_size       = */ true,
         /* size_t      initial_size           = */ (512 * 1024),
         /* double      min_clean_fraction     = */ 0.1,
         /* size_t      max_size               = */ (8 * 1024 * 1024),
@@ -555,7 +555,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
         /* double      lower_hr_threshold     = */ 0.9,
         /* double      increment              = */ 2.0,
-        /* hbool_t     apply_max_increment    = */ TRUE,
+        /* bool     apply_max_increment    = */ true,
         /* size_t      max_increment          = */ (2 * 1024 * 1024),
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
@@ -564,22 +564,22 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__threshold,
         /* double      upper_hr_threshold     = */ 0.9995,
         /* double      decrement              = */ 0.95,
-        /* hbool_t     apply_max_decrement    = */ TRUE,
+        /* bool     apply_max_decrement    = */ true,
         /* size_t      max_decrement          = */ (512 * 1024),
         /* int         epochs_before_eviction = */ 4,
-        /* hbool_t     apply_empty_reserve    = */ TRUE,
+        /* bool     apply_empty_reserve    = */ true,
         /* double      empty_reserve          = */ 0.05,
         /* int         dirty_bytes_threshold  = */ (256 * 1024),
         /* int        metadata_write_strategy = */
         H5AC__DEFAULT_METADATA_WRITE_STRATEGY};
     H5AC_cache_config_t mod_config_3 = {
         /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-        /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-        /* hbool_t     open_trace_file        = */ FALSE,
-        /* hbool_t     close_trace_file       = */ FALSE,
+        /* bool     rpt_fcn_enabled        = */ false,
+        /* bool     open_trace_file        = */ false,
+        /* bool     close_trace_file       = */ false,
         /* char        trace_file_name[]      = */ "",
-        /* hbool_t     evictions_enabled      = */ TRUE,
-        /* hbool_t     set_initial_size       = */ TRUE,
+        /* bool     evictions_enabled      = */ true,
+        /* bool     set_initial_size       = */ true,
         /* size_t      initial_size           = */ (1 * 1024 * 1024),
         /* double      min_clean_fraction     = */ 0.2,
         /* size_t      max_size               = */ (16 * 1024 * 1024),
@@ -588,7 +588,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__off,
         /* double      lower_hr_threshold     = */ 0.90,
         /* double      increment              = */ 2.0,
-        /* hbool_t     apply_max_increment    = */ TRUE,
+        /* bool     apply_max_increment    = */ true,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
@@ -597,22 +597,22 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__off,
         /* double      upper_hr_threshold     = */ 0.999,
         /* double      decrement              = */ 0.9,
-        /* hbool_t     apply_max_decrement    = */ FALSE,
+        /* bool     apply_max_decrement    = */ false,
         /* size_t      max_decrement          = */ (1 * 1024 * 1024 - 1),
         /* int         epochs_before_eviction = */ 3,
-        /* hbool_t     apply_empty_reserve    = */ FALSE,
+        /* bool     apply_empty_reserve    = */ false,
         /* double      empty_reserve          = */ 0.05,
         /* int         dirty_bytes_threshold  = */ (256 * 1024),
         /* int        metadata_write_strategy = */
         H5AC__DEFAULT_METADATA_WRITE_STRATEGY};
     H5AC_cache_config_t mod_config_4 = {
         /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-        /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-        /* hbool_t     open_trace_file        = */ FALSE,
-        /* hbool_t     close_trace_file       = */ FALSE,
+        /* bool     rpt_fcn_enabled        = */ false,
+        /* bool     open_trace_file        = */ false,
+        /* bool     close_trace_file       = */ false,
         /* char        trace_file_name[]      = */ "",
-        /* hbool_t     evictions_enabled      = */ TRUE,
-        /* hbool_t     set_initial_size       = */ TRUE,
+        /* bool     evictions_enabled      = */ true,
+        /* bool     set_initial_size       = */ true,
         /* size_t      initial_size           = */ (1 * 1024 * 1024),
         /* double      min_clean_fraction     = */ 0.15,
         /* size_t      max_size               = */ (20 * 1024 * 1024),
@@ -621,7 +621,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
         /* double      lower_hr_threshold     = */ 0.9,
         /* double      increment              = */ 2.0,
-        /* hbool_t     apply_max_increment    = */ TRUE,
+        /* bool     apply_max_increment    = */ true,
         /* size_t      max_increment          = */ (2 * 1024 * 1024),
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
@@ -631,10 +631,10 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         H5C_decr__age_out_with_threshold,
         /* double      upper_hr_threshold     = */ 0.999,
         /* double      decrement              = */ 0.9,
-        /* hbool_t     apply_max_decrement    = */ TRUE,
+        /* bool     apply_max_decrement    = */ true,
         /* size_t      max_decrement          = */ (1 * 1024 * 1024),
         /* int         epochs_before_eviction = */ 3,
-        /* hbool_t     apply_empty_reserve    = */ TRUE,
+        /* bool     apply_empty_reserve    = */ true,
         /* double      empty_reserve          = */ 0.1,
         /* int         dirty_bytes_threshold  = */ (256 * 1024),
         /* int        metadata_write_strategy = */
@@ -645,7 +645,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     else
         TESTING("MDC/FILE related API calls");
 
-    pass = TRUE;
+    pass = true;
 
     /* Open a file with the default FAPL.  Verify that the cache is
      * configured as per the default both by looking at its internal
@@ -660,7 +660,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename)) == NULL) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "h5_fixname() failed.\n";
         }
     }
@@ -672,65 +672,65 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (file_id < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fcreate() failed.\n";
         }
     }
 
     /* verify that the cache is set to the default config */
-    validate_mdc_config(file_id, &default_config, TRUE, 1);
+    validate_mdc_config(file_id, &default_config, true, 1);
 
     /* set alternate config 1 */
     if (pass) {
 
         if (H5Fset_mdc_config(file_id, &mod_config_1) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fset_mdc_config() failed 1.\n";
         }
     }
 
     /* verify that the cache is now set to the alternate config */
-    validate_mdc_config(file_id, &mod_config_1, TRUE, 2);
+    validate_mdc_config(file_id, &mod_config_1, true, 2);
 
     /* set alternate config 2 */
     if (pass) {
 
         if (H5Fset_mdc_config(file_id, &mod_config_2) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fset_mdc_config() failed 2.\n";
         }
     }
 
     /* verify that the cache is now set to the alternate config */
-    validate_mdc_config(file_id, &mod_config_2, TRUE, 3);
+    validate_mdc_config(file_id, &mod_config_2, true, 3);
 
     /* set alternate config 3 */
     if (pass) {
 
         if (H5Fset_mdc_config(file_id, &mod_config_3) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fset_mdc_config() failed 3.\n";
         }
     }
 
     /* verify that the cache is now set to the alternate config */
-    validate_mdc_config(file_id, &mod_config_3, TRUE, 4);
+    validate_mdc_config(file_id, &mod_config_3, true, 4);
 
     /* set alternate config 4 */
     if (pass) {
 
         if (H5Fset_mdc_config(file_id, &mod_config_4) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fset_mdc_config() failed 4.\n";
         }
     }
 
     /* verify that the cache is now set to the alternate config */
-    validate_mdc_config(file_id, &mod_config_4, TRUE, 5);
+    validate_mdc_config(file_id, &mod_config_4, true, 5);
 
     /* Run some quick smoke checks on the cache status monitoring
      * calls -- no interesting data as the cache hasn't had a
@@ -741,12 +741,12 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (H5Fget_mdc_hit_rate(file_id, &hit_rate) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fget_mdc_hit_rate() failed 1.\n";
         }
         else if (!H5_DBL_ABS_EQUAL(hit_rate, 0.0)) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fget_mdc_hit_rate() returned unexpected hit rate.\n";
         }
     }
@@ -755,13 +755,13 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (H5Fget_mdc_size(file_id, &max_size, &min_clean_size, &cur_size, &cur_num_entries) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fget_mdc_size() failed 1.\n";
         }
         else if ((mod_config_4.initial_size != max_size) ||
                  (min_clean_size != (size_t)((double)max_size * mod_config_4.min_clean_fraction))) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fget_mdc_size() returned unexpected value(s).\n";
         }
     }
@@ -771,12 +771,12 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
         if (H5Fclose(file_id) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fclose() failed.\n";
         }
         else if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fdelete() failed.\n";
         }
     }
@@ -808,7 +808,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
  *              NOTE: This test takes some time to run and checks the
  *                    testing express level value.
  *
- * Return:      Test pass status (TRUE/FALSE)
+ * Return:      Test pass status (true/false)
  *
  *-------------------------------------------------------------------------
  */
@@ -818,21 +818,21 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 #define NUM_DSETS           6
 #define NUM_RANDOM_ACCESSES 200000
 
-static hbool_t
+static bool
 mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 {
     char                filename[512];
-    hbool_t             valid_chunk;
-    hbool_t             dump_hit_rate   = FALSE;
+    bool                valid_chunk;
+    bool                dump_hit_rate   = false;
     int64_t             min_accesses    = 1000;
     double              min_hit_rate    = 0.90;
-    hbool_t             dump_cache_size = FALSE;
-    hid_t               file_id         = -1;
-    hid_t               dataspace_id    = -1;
+    bool                dump_cache_size = false;
+    hid_t               file_id         = H5I_INVALID_HID;
+    hid_t               dataspace_id    = H5I_INVALID_HID;
     hid_t               filespace_ids[NUM_DSETS];
-    hid_t               memspace_id = -1;
+    hid_t               memspace_id = H5I_INVALID_HID;
     hid_t               dataset_ids[NUM_DSETS];
-    hid_t               properties = -1;
+    hid_t               properties = H5I_INVALID_HID;
     char                dset_name[64];
     int                 i, j, k, l, m, n;
     herr_t              status;
@@ -844,12 +844,12 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
     H5AC_cache_config_t default_config = H5AC__DEFAULT_CACHE_CONFIG;
     H5AC_cache_config_t mod_config_1   = {
         /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-        /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-        /* hbool_t     open_trace_file        = */ FALSE,
-        /* hbool_t     close_trace_file       = */ FALSE,
+        /* bool     rpt_fcn_enabled        = */ false,
+        /* bool     open_trace_file        = */ false,
+        /* bool     close_trace_file       = */ false,
         /* char        trace_file_name[]      = */ "",
-        /* hbool_t     evictions_enabled      = */ TRUE,
-        /* hbool_t     set_initial_size       = */ TRUE,
+        /* bool     evictions_enabled      = */ true,
+        /* bool     set_initial_size       = */ true,
         /* size_t      initial_size           = */ 500000,
         /* double      min_clean_fraction     = */ 0.1,
         /* size_t      max_size               = */ 16000000,
@@ -858,7 +858,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__off,
         /* double      lower_hr_threshold     = */ 0.95,
         /* double      increment              = */ 2.0,
-        /* hbool_t     apply_max_increment    = */ FALSE,
+        /* bool     apply_max_increment    = */ false,
         /* size_t      max_increment          = */ 4000000,
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
@@ -867,22 +867,22 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__off,
         /* double      upper_hr_threshold     = */ 0.999,
         /* double      decrement              = */ 0.9,
-        /* hbool_t     apply_max_decrement    = */ FALSE,
+        /* bool     apply_max_decrement    = */ false,
         /* size_t      max_decrement          = */ 1000000,
         /* int         epochs_before_eviction = */ 2,
-        /* hbool_t     apply_empty_reserve    = */ TRUE,
+        /* bool     apply_empty_reserve    = */ true,
         /* double      empty_reserve          = */ 0.05,
         /* int         dirty_bytes_threshold  = */ (256 * 1024),
         /* int        metadata_write_strategy = */
         H5AC__DEFAULT_METADATA_WRITE_STRATEGY};
     H5AC_cache_config_t mod_config_2 = {
         /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-        /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-        /* hbool_t     open_trace_file        = */ FALSE,
-        /* hbool_t     close_trace_file       = */ FALSE,
+        /* bool     rpt_fcn_enabled        = */ false,
+        /* bool     open_trace_file        = */ false,
+        /* bool     close_trace_file       = */ false,
         /* char        trace_file_name[]      = */ "",
-        /* hbool_t     evictions_enabled      = */ TRUE,
-        /* hbool_t     set_initial_size       = */ TRUE,
+        /* bool     evictions_enabled      = */ true,
+        /* bool     set_initial_size       = */ true,
         /* size_t      initial_size           = */ 12000000,
         /* double      min_clean_fraction     = */ 0.1,
         /* size_t      max_size               = */ 16000000,
@@ -891,7 +891,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__off,
         /* double      lower_hr_threshold     = */ 0.95,
         /* double      increment              = */ 2.0,
-        /* hbool_t     apply_max_increment    = */ FALSE,
+        /* bool     apply_max_increment    = */ false,
         /* size_t      max_increment          = */ 4000000,
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
@@ -900,22 +900,22 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__off,
         /* double      upper_hr_threshold     = */ 0.999,
         /* double      decrement              = */ 0.9,
-        /* hbool_t     apply_max_decrement    = */ FALSE,
+        /* bool     apply_max_decrement    = */ false,
         /* size_t      max_decrement          = */ 1000000,
         /* int         epochs_before_eviction = */ 2,
-        /* hbool_t     apply_empty_reserve    = */ TRUE,
+        /* bool     apply_empty_reserve    = */ true,
         /* double      empty_reserve          = */ 0.05,
         /* int         dirty_bytes_threshold  = */ (256 * 1024),
         /* int        metadata_write_strategy = */
         H5AC__DEFAULT_METADATA_WRITE_STRATEGY};
     H5AC_cache_config_t mod_config_3 = {
         /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-        /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-        /* hbool_t     open_trace_file        = */ FALSE,
-        /* hbool_t     close_trace_file       = */ FALSE,
+        /* bool     rpt_fcn_enabled        = */ false,
+        /* bool     open_trace_file        = */ false,
+        /* bool     close_trace_file       = */ false,
         /* char        trace_file_name[]      = */ "",
-        /* hbool_t     evictions_enabled      = */ TRUE,
-        /* hbool_t     set_initial_size       = */ TRUE,
+        /* bool     evictions_enabled      = */ true,
+        /* bool     set_initial_size       = */ true,
         /* size_t      initial_size           = */ 2000000,
         /* double      min_clean_fraction     = */ 0.1,
         /* size_t      max_size               = */ 16000000,
@@ -924,7 +924,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__off,
         /* double      lower_hr_threshold     = */ 0.95,
         /* double      increment              = */ 2.0,
-        /* hbool_t     apply_max_increment    = */ FALSE,
+        /* bool     apply_max_increment    = */ false,
         /* size_t      max_increment          = */ 4000000,
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
@@ -933,10 +933,10 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__off,
         /* double      upper_hr_threshold     = */ 0.999,
         /* double      decrement              = */ 0.9,
-        /* hbool_t     apply_max_decrement    = */ FALSE,
+        /* bool     apply_max_decrement    = */ false,
         /* size_t      max_decrement          = */ 1000000,
         /* int         epochs_before_eviction = */ 2,
-        /* hbool_t     apply_empty_reserve    = */ TRUE,
+        /* bool     apply_empty_reserve    = */ true,
         /* double      empty_reserve          = */ 0.05,
         /* int         dirty_bytes_threshold  = */ (256 * 1024),
         /* int        metadata_write_strategy = */
@@ -947,7 +947,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
     else
         TESTING("MDC API smoke check");
 
-    pass = TRUE;
+    pass = true;
 
     if (express_test > 0) {
 
@@ -971,7 +971,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
         if (h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename)) == NULL) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "h5_fixname() failed.\n";
         }
     }
@@ -983,26 +983,26 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
         if (file_id < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fcreate() failed.\n";
         }
     }
 
     /* verify that the cache is set to the default config */
-    validate_mdc_config(file_id, &default_config, TRUE, 1);
+    validate_mdc_config(file_id, &default_config, true, 1);
 
     /* set alternate config 1 */
     if (pass) {
 
         if (H5Fset_mdc_config(file_id, &mod_config_1) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fset_mdc_config() failed 1.\n";
         }
     }
 
     /* verify that the cache is now set to the alternate config */
-    validate_mdc_config(file_id, &mod_config_1, TRUE, 2);
+    validate_mdc_config(file_id, &mod_config_1, true, 2);
 
     /* create the datasets */
     if (pass) {
@@ -1017,7 +1017,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
             if (dataspace_id < 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "H5Screate_simple() failed.";
             }
 
@@ -1033,7 +1033,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
                 if (properties < 0) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "H5Pcreate() failed.";
                 }
             }
@@ -1042,7 +1042,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
                 if (H5Pset_chunk(properties, 2, chunk_size) < 0) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "H5Pset_chunk() failed.";
                 }
             }
@@ -1050,13 +1050,13 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
             /* create the dataset */
             if (pass) {
 
-                HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
+                snprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE, dataspace_id, H5P_DEFAULT,
                                             properties, H5P_DEFAULT);
 
                 if (dataset_ids[i] < 0) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "H5Dcreate2() failed.";
                 }
             }
@@ -1068,7 +1068,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
                 if (filespace_ids[i] < 0) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "H5Dget_space() failed.";
                 }
             }
@@ -1086,7 +1086,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
         if (memspace_id < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Screate_simple() failed.";
         }
     }
@@ -1102,7 +1102,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
         if (status < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Sselect_hyperslab() failed.";
         }
     }
@@ -1131,7 +1131,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
                 if (status < 0) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "disk H5Sselect_hyperslab() failed.";
                 }
 
@@ -1141,7 +1141,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
                 if (status < 0) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "H5Dwrite() failed.";
                 }
                 m++;
@@ -1173,13 +1173,13 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
         if (H5Fset_mdc_config(file_id, &mod_config_2) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fset_mdc_config() failed 2.\n";
         }
     }
 
     /* verify that the cache is now set to the alternate config */
-    validate_mdc_config(file_id, &mod_config_2, TRUE, 3);
+    validate_mdc_config(file_id, &mod_config_2, true, 3);
 
     /* do random reads on all datasets */
     n = 0;
@@ -1197,7 +1197,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
         if (status < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "disk hyperslab create failed.";
         }
 
@@ -1209,7 +1209,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
             if (status < 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "disk hyperslab create failed.";
             }
         }
@@ -1217,18 +1217,18 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
         /* validate the slab */
         if (pass) {
 
-            valid_chunk = TRUE;
+            valid_chunk = true;
             for (k = 0; k < CHUNK_SIZE; k++) {
                 for (l = 0; l < CHUNK_SIZE; l++) {
                     if (data_chunk[k][l] != ((DSET_SIZE * DSET_SIZE * m) + (DSET_SIZE * (i + k)) + j + l)) {
 
-                        valid_chunk = FALSE;
+                        valid_chunk = false;
                     }
                 }
             }
 
             if (!valid_chunk) {
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "slab validation failed.";
             }
         }
@@ -1248,7 +1248,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
     while ((pass) && (i < NUM_DSETS)) {
         if (H5Sclose(filespace_ids[i]) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Sclose() failed.";
         }
         i++;
@@ -1259,7 +1259,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
     while ((pass) && (i < NUM_DSETS)) {
         if (H5Dclose(dataset_ids[i]) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Dclose() failed.";
         }
         i++;
@@ -1270,13 +1270,13 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
         if (H5Fset_mdc_config(file_id, &mod_config_3) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fset_mdc_config() failed 3.\n";
         }
     }
 
     /* verify that the cache is now set to the alternate config */
-    validate_mdc_config(file_id, &mod_config_3, TRUE, 4);
+    validate_mdc_config(file_id, &mod_config_3, true, 4);
 
     /* do random reads on data set 0 only */
     m = 0;
@@ -1294,7 +1294,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
         if (status < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "disk hyperslab create failed.";
         }
 
@@ -1306,7 +1306,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
             if (status < 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "disk hyperslab create failed.";
             }
         }
@@ -1314,19 +1314,19 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
         /* validate the slab */
         if (pass) {
 
-            valid_chunk = TRUE;
+            valid_chunk = true;
             for (k = 0; k < CHUNK_SIZE; k++) {
                 for (l = 0; l < CHUNK_SIZE; l++) {
                     if (data_chunk[k][l] != ((DSET_SIZE * DSET_SIZE * m) + (DSET_SIZE * (i + k)) + j + l)) {
 
-                        valid_chunk = FALSE;
+                        valid_chunk = false;
                     }
                 }
             }
 
             if (!valid_chunk) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "slab validation failed.";
             }
         }
@@ -1346,7 +1346,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
         if (H5Sclose(filespace_ids[0]) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Sclose(filespace_ids[0]) failed.";
         }
     }
@@ -1356,7 +1356,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
         if (H5Sclose(dataspace_id) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Sclose(dataspace) failed.";
         }
     }
@@ -1366,7 +1366,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
         if (H5Sclose(memspace_id) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Sclose(memspace_id) failed.";
         }
     }
@@ -1376,7 +1376,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
         if (H5Dclose(dataset_ids[0]) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Dclose(dataset_ids[0]) failed.";
         }
     }
@@ -1386,12 +1386,12 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
         if (H5Fclose(file_id) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fclose() failed.\n";
         }
         else if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fdelete() failed.\n";
         }
     }
@@ -1422,7 +1422,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
  *              related API calls.
  *
  *              Note: It is assumed that boolean parameters are only set
- *                    to TRUE/FALSE.
+ *                    to true/false.
  *
  * Return:      Success:    Pointer to an array of cache configurations.
  *              Failure:    NULL
@@ -1450,12 +1450,12 @@ init_invalid_configs(void)
     for (i = 0; i < NUM_INVALID_CONFIGS; i++) {
 
         configs[i].version          = H5C__CURR_AUTO_SIZE_CTL_VER;
-        configs[i].rpt_fcn_enabled  = FALSE;
-        configs[i].open_trace_file  = FALSE;
-        configs[i].close_trace_file = FALSE;
+        configs[i].rpt_fcn_enabled  = false;
+        configs[i].open_trace_file  = false;
+        configs[i].close_trace_file = false;
         /* trace file name set to all ASCII NUL by calloc() */
-        configs[i].evictions_enabled       = TRUE;
-        configs[i].set_initial_size        = TRUE;
+        configs[i].evictions_enabled       = true;
+        configs[i].set_initial_size        = true;
         configs[i].initial_size            = (1 * 1024 * 1024);
         configs[i].min_clean_fraction      = 0.25;
         configs[i].max_size                = (16 * 1024 * 1024);
@@ -1464,7 +1464,7 @@ init_invalid_configs(void)
         configs[i].incr_mode               = H5C_incr__threshold;
         configs[i].lower_hr_threshold      = 0.9;
         configs[i].increment               = 2.0;
-        configs[i].apply_max_increment     = TRUE;
+        configs[i].apply_max_increment     = true;
         configs[i].max_increment           = (4 * 1024 * 1024);
         configs[i].flash_incr_mode         = H5C_flash_incr__off;
         configs[i].flash_multiple          = 2.0;
@@ -1472,10 +1472,10 @@ init_invalid_configs(void)
         configs[i].decr_mode               = H5C_decr__age_out_with_threshold;
         configs[i].upper_hr_threshold      = 0.999;
         configs[i].decrement               = 0.9;
-        configs[i].apply_max_decrement     = TRUE;
+        configs[i].apply_max_decrement     = true;
         configs[i].max_decrement           = (1 * 1024 * 1024);
         configs[i].epochs_before_eviction  = 3;
-        configs[i].apply_empty_reserve     = TRUE;
+        configs[i].apply_empty_reserve     = true;
         configs[i].empty_reserve           = 0.1;
         configs[i].dirty_bytes_threshold   = (256 * 1024);
         configs[i].metadata_write_strategy = H5AC__DEFAULT_METADATA_WRITE_STRATEGY;
@@ -1486,8 +1486,8 @@ init_invalid_configs(void)
     /* 0 -- bad version */
     configs[0].version = -1;
 
-    /* 1 -- open_trace_file == TRUE and empty trace_file_name */
-    configs[1].open_trace_file = TRUE;
+    /* 1 -- open_trace_file == true and empty trace_file_name */
+    configs[1].open_trace_file = true;
     /* trace file name set to all ASCII NUL by calloc() */
 
     /* 2 -- max_size too big */
@@ -1592,11 +1592,11 @@ init_invalid_configs(void)
     configs[32].dirty_bytes_threshold = (H5C__MAX_MAX_CACHE_SIZE / 4) + 1;
 
     /* 33 -- attempt to disable evictions when auto incr enabled */
-    configs[33].evictions_enabled = FALSE;
+    configs[33].evictions_enabled = false;
     configs[33].decr_mode         = H5C_decr__off;
 
     /* 34 -- attempt to disable evictions when auto decr enabled */
-    configs[34].evictions_enabled = FALSE;
+    configs[34].evictions_enabled = false;
     configs[34].decr_mode         = H5C_decr__age_out;
 
     /* 35 -- unknown metadata write strategy */
@@ -1612,23 +1612,23 @@ init_invalid_configs(void)
  * Purpose:     Verify that the FAPL related MDC API calls reject input
  *              errors gracefully.
  *
- * Return:      Test pass status (TRUE/FALSE)
+ * Return:      Test pass status (true/false)
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 check_fapl_mdc_api_errs(void)
 {
     static char         msg[128];
     int                 i;
     herr_t              result;
-    hid_t               fapl_id        = -1;
+    hid_t               fapl_id        = H5I_INVALID_HID;
     H5AC_cache_config_t default_config = H5AC__DEFAULT_CACHE_CONFIG;
     H5AC_cache_config_t scratch;
 
     TESTING("MDC/FAPL related API input errors");
 
-    pass = TRUE;
+    pass = true;
 
     /* first test H5Pget_mdc_config().
      */
@@ -1638,13 +1638,13 @@ check_fapl_mdc_api_errs(void)
 
         H5E_BEGIN_TRY
         {
-            result = H5Pget_mdc_config((hid_t)-1, &scratch);
+            result = H5Pget_mdc_config((hid_t)H5I_INVALID_HID, &scratch);
         }
         H5E_END_TRY
 
         if (result >= 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pget_mdc_config() accepted invalid plist_id.";
         }
     }
@@ -1659,16 +1659,16 @@ check_fapl_mdc_api_errs(void)
 
         if (fapl_id < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
         }
     }
 
     scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
     if ((pass) && ((H5Pget_mdc_config(fapl_id, &scratch) < 0) ||
-                   (!CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE)))) {
+                   (!CACHE_CONFIGS_EQUAL(default_config, scratch, true, true)))) {
 
-        pass         = FALSE;
+        pass         = false;
         failure_mssg = "New FAPL has unexpected metadata cache config?!?!?.\n";
     }
 
@@ -1682,7 +1682,7 @@ check_fapl_mdc_api_errs(void)
 
         if (result >= 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pget_mdc_config() accepted NULL config_ptr.";
         }
     }
@@ -1700,7 +1700,7 @@ check_fapl_mdc_api_errs(void)
 
         if (result >= 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pget_mdc_config() accepted bad config version.";
         }
     }
@@ -1713,13 +1713,13 @@ check_fapl_mdc_api_errs(void)
 
         H5E_BEGIN_TRY
         {
-            result = H5Pset_mdc_config((hid_t)-1, &default_config);
+            result = H5Pset_mdc_config((hid_t)H5I_INVALID_HID, &default_config);
         }
         H5E_END_TRY
 
         if (result >= 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pset_mdc_config() accepted bad invalid plist_id.";
         }
     }
@@ -1734,7 +1734,7 @@ check_fapl_mdc_api_errs(void)
 
         if (result >= 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pset_mdc_config() accepted NULL config_ptr.";
         }
     }
@@ -1749,8 +1749,8 @@ check_fapl_mdc_api_errs(void)
 
         if (result >= 0) {
 
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "H5Pset_mdc_config() accepted invalid_configs[%d].", i);
+            pass = false;
+            snprintf(msg, (size_t)128, "H5Pset_mdc_config() accepted invalid_configs[%d].", i);
             failure_mssg = msg;
         }
         i++;
@@ -1761,9 +1761,9 @@ check_fapl_mdc_api_errs(void)
      */
     scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
     if ((pass) && ((H5Pget_mdc_config(fapl_id, &scratch) < 0) ||
-                   (!CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE)))) {
+                   (!CACHE_CONFIGS_EQUAL(default_config, scratch, true, true)))) {
 
-        pass         = FALSE;
+        pass         = false;
         failure_mssg = "FAPL metadata cache config changed???.\n";
     }
 
@@ -1791,19 +1791,19 @@ check_fapl_mdc_api_errs(void)
  * Purpose:     Verify that the file related MDC API calls reject input
  *              errors gracefully.
  *
- * Return:      Test pass status (TRUE/FALSE)
+ * Return:      Test pass status (true/false)
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 {
     char                filename[512];
     static char         msg[128];
-    hbool_t             show_progress = FALSE;
+    bool                show_progress = false;
     int                 i;
     herr_t              result;
-    hid_t               file_id = -1;
+    hid_t               file_id = H5I_INVALID_HID;
     size_t              max_size;
     size_t              min_clean_size;
     size_t              cur_size;
@@ -1817,7 +1817,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
     else
         TESTING("MDC/FILE related API input errors");
 
-    pass = TRUE;
+    pass = true;
 
     /* Create a file for test purposes, and verify that its metadata cache
      * set to the default MDC configuration.
@@ -1833,7 +1833,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename)) == NULL) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "h5_fixname() failed.\n";
         }
     }
@@ -1849,12 +1849,12 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (file_id < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fcreate() failed.\n";
         }
     }
 
-    validate_mdc_config(file_id, &default_config, TRUE, 1);
+    validate_mdc_config(file_id, &default_config, true, 1);
 
     /* test H5Fget_mdc_config().  */
 
@@ -1868,13 +1868,13 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         H5E_BEGIN_TRY
         {
-            result = H5Fget_mdc_config((hid_t)-1, &scratch);
+            result = H5Fget_mdc_config((hid_t)H5I_INVALID_HID, &scratch);
         }
         H5E_END_TRY
 
         if (result >= 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fget_mdc_config() accepted invalid file_id.";
         }
     }
@@ -1894,7 +1894,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (result >= 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fget_mdc_config() accepted NULL config_ptr.";
         }
     }
@@ -1915,7 +1915,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (result >= 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fget_mdc_config() accepted bad config version.";
         }
     }
@@ -1932,13 +1932,13 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         H5E_BEGIN_TRY
         {
-            result = H5Fset_mdc_config((hid_t)-1, &default_config);
+            result = H5Fset_mdc_config((hid_t)H5I_INVALID_HID, &default_config);
         }
         H5E_END_TRY
 
         if (result >= 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fset_mdc_config() accepted bad invalid file_id.";
         }
     }
@@ -1958,7 +1958,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (result >= 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fset_mdc_config() accepted NULL config_ptr.";
         }
     }
@@ -1978,8 +1978,8 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (result >= 0) {
 
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "H5Fset_mdc_config() accepted invalid_configs[%d].", i);
+            pass = false;
+            snprintf(msg, (size_t)128, "H5Fset_mdc_config() accepted invalid_configs[%d].", i);
             failure_mssg = msg;
         }
         i++;
@@ -1988,7 +1988,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
     /* verify that none of the above calls to H5Fset_mdc_config() changed
      * the configuration in the FAPL.
      */
-    validate_mdc_config(file_id, &default_config, TRUE, 2);
+    validate_mdc_config(file_id, &default_config, true, 2);
 
     /* test H5Fget_mdc_hit_rate() */
     if (pass) {
@@ -2000,13 +2000,13 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         H5E_BEGIN_TRY
         {
-            result = H5Fget_mdc_hit_rate((hid_t)-1, &hit_rate);
+            result = H5Fget_mdc_hit_rate((hid_t)H5I_INVALID_HID, &hit_rate);
         }
         H5E_END_TRY
 
         if (result >= 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fget_mdc_hit_rate() accepted bad file_id.";
         }
     }
@@ -2026,7 +2026,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (result >= 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fget_mdc_hit_rate() accepted NULL hit_rate_ptr.";
         }
     }
@@ -2041,13 +2041,13 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         H5E_BEGIN_TRY
         {
-            result = H5Freset_mdc_hit_rate_stats((hid_t)-1);
+            result = H5Freset_mdc_hit_rate_stats((hid_t)H5I_INVALID_HID);
         }
         H5E_END_TRY
 
         if (result >= 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Freset_mdc_hit_rate_stats() accepted bad file_id.";
         }
     }
@@ -2062,13 +2062,14 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         H5E_BEGIN_TRY
         {
-            result = H5Fget_mdc_size((hid_t)-1, &max_size, &min_clean_size, &cur_size, &cur_num_entries);
+            result = H5Fget_mdc_size((hid_t)H5I_INVALID_HID, &max_size, &min_clean_size, &cur_size,
+                                     &cur_num_entries);
         }
         H5E_END_TRY
 
         if (result >= 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fget_mdc_size() accepted bad file_id.";
         }
     }
@@ -2086,7 +2087,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
             (H5Fget_mdc_size(file_id, NULL, NULL, NULL, &cur_num_entries) < 0) ||
             (H5Fget_mdc_size(file_id, NULL, NULL, NULL, NULL) < 0)) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fget_mdc_size() failed to handle NULL params.";
         }
     }
@@ -2101,12 +2102,12 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (H5Fclose(file_id) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fclose() failed.\n";
         }
         else if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Fdelete() failed.\n";
         }
     }
@@ -2143,8 +2144,8 @@ main(void)
 {
     unsigned nerrs = 0;
     int      express_test;
-    hid_t    fcpl_id  = -1;
-    hid_t    fcpl2_id = -1;
+    hid_t    fcpl_id  = H5I_INVALID_HID;
+    hid_t    fcpl2_id = H5I_INVALID_HID;
     unsigned paged;
 
     H5open();
@@ -2186,7 +2187,7 @@ main(void)
 
     /* Test with paged aggregation enabled or not */
     /* The "my_fcpl" passed to each test has the paged or non-paged strategy set up accordingly */
-    for (paged = FALSE; paged <= TRUE; paged++) {
+    for (paged = false; paged <= true; paged++) {
         hid_t my_fcpl = fcpl_id;
 
         if (paged) {

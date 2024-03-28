@@ -125,11 +125,17 @@ test_h5s_basic(void)
     hsize_t  tdims[4]; /* Dimension array to test with */
     hsize_t  tmax[4];
     hssize_t n; /* Number of dataspace elements */
-    hbool_t  driver_is_default_compatible;
+    bool     vol_is_native;
+    bool     driver_is_default_compatible;
     herr_t   ret; /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataspace Manipulation\n"));
+
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
 
     sid1 = H5Screate_simple(SPACE1_RANK, dims1, max2);
     CHECK(sid1, FAIL, "H5Screate_simple");
@@ -194,10 +200,13 @@ test_h5s_basic(void)
      * If this test fails and the H5S_MAX_RANK variable has changed, follow
      * the instructions in space_overflow.c for regenerating the th5s.h5 file.
      */
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, H5I_INVALID_HID, &vol_is_native), FAIL, "h5_using_native_vol");
+    /* Check if VFD used is native file format compatible */
     ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
     CHECK_I(ret, "h5_driver_is_default_vfd_compatible");
 
-    if (driver_is_default_compatible) {
+    if (vol_is_native && driver_is_default_compatible) {
         const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
 
         fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -603,6 +612,11 @@ test_h5s_zero_dim(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataspace with zero dimension size\n"));
 
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
+
     /* Initialize the data */
     for (i = 0; i < SPACE1_DIM2; i++)
         for (j = 0; j < SPACE1_DIM3; j++) {
@@ -919,7 +933,7 @@ test_h5s_zero_dim(void)
          * space in the external file is the size of the dataset (zero because one dimension size is zero).
          * There's no need to clean up the external file since the library doesn't create it
          * until the data is written to it. */
-        ret = H5Pset_external(plist_id, EXTFILE_NAME, (off_t)0, (hsize_t)0);
+        ret = H5Pset_external(plist_id, EXTFILE_NAME, 0, (hsize_t)0);
         CHECK(ret, FAIL, "H5Pset_external");
 
         ret = H5Pset_alloc_time(plist_id, alloc_time);
@@ -1210,8 +1224,8 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
 {
     hid_t          sid1, sid2, sid3; /* Dataspace ID        */
     hid_t          decoded_sid1, decoded_sid2, decoded_sid3;
-    int            rank;           /* Logical rank of dataspace    */
-    hid_t          fapl      = -1; /* File access property list ID */
+    int            rank;                        /* Logical rank of dataspace    */
+    hid_t          fapl      = H5I_INVALID_HID; /* File access property list ID */
     hsize_t        dims1[]   = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     size_t         sbuf_size = 0, null_size = 0, scalar_size = 0;
     unsigned char *sbuf = NULL, *null_sbuf = NULL, *scalar_buf = NULL;
@@ -1606,11 +1620,11 @@ test_h5s_encode1(void)
 ****************************************************************/
 static herr_t
 test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid, uint32_t expected_version, uint8_t expected_enc_size,
-                        hbool_t expected_to_fail)
+                        bool expected_to_fail)
 {
-    char   *buf = NULL; /* Pointer to the encoded buffer */
-    size_t  buf_size;   /* Size of the encoded buffer */
-    hid_t   d_sid = -1; /* The decoded dataspace ID */
+    char   *buf = NULL;              /* Pointer to the encoded buffer */
+    size_t  buf_size;                /* Size of the encoded buffer */
+    hid_t   d_sid = H5I_INVALID_HID; /* The decoded dataspace ID */
     htri_t  check;
     hsize_t in_low_bounds[1];  /* The low bounds for the selection for in_sid */
     hsize_t in_high_bounds[1]; /* The high bounds for the selection for in_sid */
@@ -1649,7 +1663,7 @@ test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid, uint32_t expected_version, 
 
         /* Verify if the two dataspace selections (in_sid, d_sid) are the same shape */
         check = H5Sselect_shape_same(in_sid, d_sid);
-        VERIFY(check, TRUE, "H5Sselect_shape_same");
+        VERIFY(check, true, "H5Sselect_shape_same");
 
         /* Compare the starting/ending coordinates of the bounding box for in_sid and d_sid */
         ret = H5Sget_select_bounds(in_sid, in_low_bounds, in_high_bounds);
@@ -1711,10 +1725,10 @@ test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid, uint32_t expected_version, 
 static void
 test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
 {
-    hid_t    fapl            = -1;      /* File access property list ID */
-    hid_t    sid             = -1;      /* Dataspace ID */
-    hsize_t  numparticles    = 8388608; /* Used to calculate dimension size */
-    unsigned num_dsets       = 513;     /* Used to calculate dimension size */
+    hid_t    fapl            = H5I_INVALID_HID; /* File access property list ID */
+    hid_t    sid             = H5I_INVALID_HID; /* Dataspace ID */
+    hsize_t  numparticles    = 8388608;         /* Used to calculate dimension size */
+    unsigned num_dsets       = 513;             /* Used to calculate dimension size */
     hsize_t  total_particles = numparticles * num_dsets;
     hsize_t  vdsdims[1]      = {total_particles}; /* Dimension size */
     hsize_t  start, stride, count, block;         /* Selection info */
@@ -1741,7 +1755,7 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
 
     /* Testing with each configuration */
     for (config = CONFIG_16; config <= CONFIG_32; config++) {
-        hbool_t expected_to_fail = FALSE;
+        bool expected_to_fail = false;
 
         /* Testing with unlimited or not */
         for (unlim = 0; unlim <= 1; unlim++) {
@@ -1749,7 +1763,7 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
             count = unlim ? H5S_UNLIMITED : 2;
 
             if ((high <= H5F_LIBVER_V18) && (unlim || config == CONFIG_32))
-                expected_to_fail = TRUE;
+                expected_to_fail = true;
 
             if (low >= H5F_LIBVER_V112)
                 expected_version = 3;
@@ -1906,7 +1920,7 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
 static void
 test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
 {
-    hid_t    fapl = -1;                 /* File access property list ID */
+    hid_t    fapl = H5I_INVALID_HID;    /* File access property list ID */
     hid_t    sid;                       /* Dataspace ID */
     hsize_t  numparticles    = 8388608; /* Used to calculate dimension size */
     unsigned num_dsets       = 513;     /* Used to calculate dimension size */
@@ -1934,7 +1948,7 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
 
     /* Testing with each configuration */
     for (config = CONFIG_8; config <= CONFIG_32; config++) {
-        hbool_t  expected_to_fail  = FALSE; /* Whether H5Sencode2 is expected to fail */
+        bool     expected_to_fail  = false; /* Whether H5Sencode2 is expected to fail */
         uint32_t expected_version  = 0;     /* Expected version for selection info */
         uint32_t expected_enc_size = 0;     /* Expected encoded size for selection info */
 
@@ -1945,7 +1959,7 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
         /* H5Sencode2 is expected to fail for library v110 and below
            when the selection exceeds the 32 bits integer limit */
         if (high <= H5F_LIBVER_V110 && config == CONFIG_32)
-            expected_to_fail = TRUE;
+            expected_to_fail = true;
 
         if (low >= H5F_LIBVER_V112 || config == CONFIG_32)
             expected_version = 3;
@@ -2005,7 +2019,7 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
 
         /* Should be irregular hyperslab */
         is_regular = H5Sis_regular_hyperslab(sid);
-        VERIFY(is_regular, FALSE, "H5Sis_regular_hyperslab");
+        VERIFY(is_regular, false, "H5Sis_regular_hyperslab");
 
         /* Verify the version and encoded size expected for the configuration */
         assert(expected_enc_size <= 255);
@@ -2031,7 +2045,7 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
 static void
 test_h5s_encode_points(H5F_libver_t low, H5F_libver_t high)
 {
-    hid_t    fapl = -1;                 /* File access property list ID */
+    hid_t    fapl = H5I_INVALID_HID;    /* File access property list ID */
     hid_t    sid;                       /* Dataspace ID */
     hsize_t  numparticles    = 8388608; /* Used to calculate dimension size */
     unsigned num_dsets       = 513;     /* used to calculate dimension size */
@@ -2039,7 +2053,7 @@ test_h5s_encode_points(H5F_libver_t low, H5F_libver_t high)
     hsize_t  vdsdims[1]      = {total_particles}; /* Dimension size */
     hsize_t  coord[4];                            /* The point coordinates */
     herr_t   ret;                                 /* Generic return value */
-    hbool_t  expected_to_fail  = FALSE;           /* Expected to fail or not */
+    bool     expected_to_fail  = false;           /* Expected to fail or not */
     uint32_t expected_version  = 0;               /* Expected version for selection info */
     uint8_t  expected_enc_size = 0;               /* Expected encoded size of selection info */
 
@@ -2066,7 +2080,7 @@ test_h5s_encode_points(H5F_libver_t low, H5F_libver_t high)
     ret      = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)4, coord);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
-    expected_to_fail  = FALSE;
+    expected_to_fail  = false;
     expected_enc_size = 4;
     expected_version  = 1;
 
@@ -2091,7 +2105,7 @@ test_h5s_encode_points(H5F_libver_t low, H5F_libver_t high)
 
     /* test 3 */
     if (high <= H5F_LIBVER_V110)
-        expected_to_fail = TRUE;
+        expected_to_fail = true;
 
     if (high >= H5F_LIBVER_V112) {
         expected_version  = 2;
@@ -2659,423 +2673,423 @@ test_h5s_extent_equal(void)
 
     /* Compare null dataspace against all others, including itself */
     ext_equal = H5Sextent_equal(null_space, null_space);
-    VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+    VERIFY(ext_equal, true, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(null_space, scalar_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(null_space, d1_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(null_space, d1_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(null_space, d1_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(null_space, d1_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(null_space, d2_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(null_space, d2_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(null_space, d2_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(null_space, d2_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(null_space, d3_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(null_space, d3_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(null_space, d3_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(null_space, d3_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
 
     /* Compare scalar dataspace against all others, including itself */
     ext_equal = H5Sextent_equal(scalar_space, null_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(scalar_space, scalar_space);
-    VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+    VERIFY(ext_equal, true, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(scalar_space, d1_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(scalar_space, d1_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(scalar_space, d1_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(scalar_space, d1_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(scalar_space, d2_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(scalar_space, d2_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(scalar_space, d2_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(scalar_space, d2_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(scalar_space, d3_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(scalar_space, d3_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(scalar_space, d3_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(scalar_space, d3_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
 
     /* Compare small 1-D dataspace w/no max. dims against all others, including itself */
     ext_equal = H5Sextent_equal(d1_space1, null_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space1, scalar_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space1, d1_space1);
-    VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+    VERIFY(ext_equal, true, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space1, d1_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space1, d1_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space1, d1_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space1, d2_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space1, d2_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space1, d2_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space1, d2_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space1, d3_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space1, d3_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space1, d3_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space1, d3_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
 
     /* Compare larger 1-D dataspace w/no max. dims against all others, including itself */
     ext_equal = H5Sextent_equal(d1_space2, null_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space2, scalar_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space2, d1_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space2, d1_space2);
-    VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+    VERIFY(ext_equal, true, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space2, d1_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space2, d1_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space2, d2_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space2, d2_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space2, d2_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space2, d2_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space2, d3_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space2, d3_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space2, d3_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space2, d3_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
 
     /* Compare small 1-D dataspace w/fixed max. dims against all others, including itself */
     ext_equal = H5Sextent_equal(d1_space3, null_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space3, scalar_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space3, d1_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space3, d1_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space3, d1_space3);
-    VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+    VERIFY(ext_equal, true, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space3, d1_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space3, d2_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space3, d2_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space3, d2_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space3, d2_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space3, d3_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space3, d3_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space3, d3_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space3, d3_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
 
     /* Compare small 1-D dataspace w/unlimited max. dims against all others, including itself */
     ext_equal = H5Sextent_equal(d1_space4, null_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space4, scalar_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space4, d1_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space4, d1_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space4, d1_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space4, d1_space4);
-    VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+    VERIFY(ext_equal, true, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space4, d2_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space4, d2_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space4, d2_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space4, d2_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space4, d3_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space4, d3_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space4, d3_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d1_space4, d3_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
 
     /* Compare small 2-D dataspace w/no max. dims against all others, including itself */
     ext_equal = H5Sextent_equal(d2_space1, null_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space1, scalar_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space1, d1_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space1, d1_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space1, d1_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space1, d1_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space1, d2_space1);
-    VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+    VERIFY(ext_equal, true, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space1, d2_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space1, d2_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space1, d2_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space1, d3_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space1, d3_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space1, d3_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space1, d3_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
 
     /* Compare larger 2-D dataspace w/no max. dims against all others, including itself */
     ext_equal = H5Sextent_equal(d2_space2, null_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space2, scalar_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space2, d1_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space2, d1_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space2, d1_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space2, d1_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space2, d2_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space2, d2_space2);
-    VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+    VERIFY(ext_equal, true, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space2, d2_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space2, d2_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space2, d3_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space2, d3_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space2, d3_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space2, d3_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
 
     /* Compare small 2-D dataspace w/fixed max. dims against all others, including itself */
     ext_equal = H5Sextent_equal(d2_space3, null_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space3, scalar_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space3, d1_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space3, d1_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space3, d1_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space3, d1_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space3, d2_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space3, d2_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space3, d2_space3);
-    VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+    VERIFY(ext_equal, true, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space3, d2_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space3, d3_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space3, d3_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space3, d3_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space3, d3_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
 
     /* Compare small 2-D dataspace w/unlimited max. dims against all others, including itself */
     ext_equal = H5Sextent_equal(d2_space4, null_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space4, scalar_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space4, d1_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space4, d1_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space4, d1_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space4, d1_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space4, d2_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space4, d2_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space4, d2_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space4, d2_space4);
-    VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+    VERIFY(ext_equal, true, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space4, d3_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space4, d3_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space4, d3_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d2_space4, d3_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
 
     /* Compare small 3-D dataspace w/no max. dims against all others, including itself */
     ext_equal = H5Sextent_equal(d3_space1, null_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space1, scalar_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space1, d1_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space1, d1_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space1, d1_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space1, d1_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space1, d2_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space1, d2_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space1, d2_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space1, d2_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space1, d3_space1);
-    VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+    VERIFY(ext_equal, true, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space1, d3_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space1, d3_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space1, d3_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
 
     /* Compare larger 2-D dataspace w/no max. dims against all others, including itself */
     ext_equal = H5Sextent_equal(d3_space2, null_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space2, scalar_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space2, d1_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space2, d1_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space2, d1_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space2, d1_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space2, d2_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space2, d2_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space2, d2_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space2, d2_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space2, d3_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space2, d3_space2);
-    VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+    VERIFY(ext_equal, true, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space2, d3_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space2, d3_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
 
     /* Compare small 2-D dataspace w/fixed max. dims against all others, including itself */
     ext_equal = H5Sextent_equal(d3_space3, null_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space3, scalar_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space3, d1_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space3, d1_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space3, d1_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space3, d1_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space3, d2_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space3, d2_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space3, d2_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space3, d2_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space3, d3_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space3, d3_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space3, d3_space3);
-    VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+    VERIFY(ext_equal, true, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space3, d3_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
 
     /* Compare small 2-D dataspace w/unlimited max. dims against all others, including itself */
     ext_equal = H5Sextent_equal(d3_space4, null_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space4, scalar_space);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space4, d1_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space4, d1_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space4, d1_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space4, d1_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space4, d2_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space4, d2_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space4, d2_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space4, d2_space4);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space4, d3_space1);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space4, d3_space2);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space4, d3_space3);
-    VERIFY(ext_equal, FALSE, "H5Sextent_equal");
+    VERIFY(ext_equal, false, "H5Sextent_equal");
     ext_equal = H5Sextent_equal(d3_space4, d3_space4);
-    VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+    VERIFY(ext_equal, true, "H5Sextent_equal");
 
     /* Close dataspaces */
     ret = H5Sclose(null_space);
@@ -3120,8 +3134,11 @@ test_h5s_extent_equal(void)
 static void
 test_h5s_extent_copy(void)
 {
-    hid_t spaces[14] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}; /* Array of all dataspaces */
-    hid_t tmp_space  = -1;
+    hid_t spaces[14] = {
+        H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+        H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+        H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID}; /* Array of all dataspaces */
+    hid_t   tmp_space   = H5I_INVALID_HID;
     hsize_t d1_dims1[1] = {10}, /* 1-D dimensions */
         d1_dims2[1] = {20}, d1_dims3[1] = {H5S_UNLIMITED};
     hsize_t d2_dims1[2] = {10, 10}, /* 2-D dimensions */
@@ -3198,7 +3215,7 @@ test_h5s_extent_copy(void)
 
             /* Verify that the extents are equal */
             ext_equal = H5Sextent_equal(tmp_space, spaces[j]);
-            VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+            VERIFY(ext_equal, true, "H5Sextent_equal");
 
             /* Verify that the correct number of elements is selected */
             npoints_ret = H5Sget_select_npoints(tmp_space);
@@ -3210,7 +3227,7 @@ test_h5s_extent_copy(void)
 
             /* Verify that the extents are equal */
             ext_equal = H5Sextent_equal(tmp_space, spaces[i]);
-            VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+            VERIFY(ext_equal, true, "H5Sextent_equal");
 
             /* Verify that the correct number of elements is selected */
             npoints_ret = H5Sget_select_npoints(tmp_space);
@@ -3261,7 +3278,7 @@ test_h5s_bug1(void)
     /* Check that space1's selection is valid */
     select_valid = H5Sselect_valid(space1);
     CHECK(select_valid, FAIL, "H5Sselect_valid");
-    VERIFY(select_valid, TRUE, "H5Sselect_valid result");
+    VERIFY(select_valid, true, "H5Sselect_valid result");
 
     /* Close dataspaces */
     ret = H5Sclose(space1);
@@ -3309,7 +3326,7 @@ test_h5s_bug2(void)
     /* Check that space's selection is valid */
     select_valid = H5Sselect_valid(space);
     CHECK(select_valid, FAIL, "H5Sselect_valid");
-    VERIFY(select_valid, TRUE, "H5Sselect_valid result");
+    VERIFY(select_valid, true, "H5Sselect_valid result");
 
     /* Check that 4 elements are selected */
     elements_selected = H5Sget_select_npoints(space);
@@ -3342,15 +3359,16 @@ test_h5s_bug2(void)
 static void
 test_versionbounds(void)
 {
-    hid_t        file       = -1; /* File ID */
-    hid_t        space      = -1; /* Dataspace ID */
-    hid_t        dset       = -1; /* Dataset ID */
-    hid_t        fapl       = -1; /* File access property list ID */
-    hid_t        dset_space = -1; /* Retrieved dataset's dataspace ID */
-    hsize_t      dim[1];          /* Dataset dimensions */
-    H5F_libver_t low, high;       /* File format bounds */
-    H5S_t       *spacep = NULL;   /* Pointer to internal dataspace */
-    herr_t       ret    = 0;      /* Generic return value */
+    hid_t        file       = H5I_INVALID_HID; /* File ID */
+    hid_t        space      = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t        dset       = H5I_INVALID_HID; /* Dataset ID */
+    hid_t        fapl       = H5I_INVALID_HID; /* File access property list ID */
+    hid_t        dset_space = H5I_INVALID_HID; /* Retrieved dataset's dataspace ID */
+    hsize_t      dim[1];                       /* Dataset dimensions */
+    H5F_libver_t low, high;                    /* File format bounds */
+    H5S_t       *spacep = NULL;                /* Pointer to internal dataspace */
+    bool         vol_is_native;
+    herr_t       ret = 0; /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Version Bounds\n"));
@@ -3358,6 +3376,9 @@ test_versionbounds(void)
     /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(fapl, H5I_INVALID_HID, &vol_is_native), FAIL, "h5_using_native_vol");
 
     /* Create dataspace */
     dim[0] = 10;
@@ -3386,11 +3407,14 @@ test_versionbounds(void)
         /* Get the internal dataspace pointer */
         dset_space = H5Dget_space(dset);
         CHECK(dset_space, FAIL, "H5Dget_space");
-        spacep = (H5S_t *)H5I_object(dset_space);
-        CHECK_PTR(spacep, "H5I_object");
 
-        /* Dataspace version should remain as H5O_SDSPACE_VERSION_1 */
-        VERIFY(spacep->extent.version, H5O_SDSPACE_VERSION_1, "basic dataspace version bound");
+        if (vol_is_native) {
+            spacep = (H5S_t *)H5I_object(dset_space);
+            CHECK_PTR(spacep, "H5I_object");
+
+            /* Dataspace version should remain as H5O_SDSPACE_VERSION_1 */
+            VERIFY(spacep->extent.version, H5O_SDSPACE_VERSION_1, "basic dataspace version bound");
+        }
 
         /* Close dataspace */
         ret = H5Sclose(dset_space);
@@ -3423,11 +3447,14 @@ test_versionbounds(void)
     /* Get the internal dataspace pointer */
     dset_space = H5Dget_space(dset);
     CHECK(dset_space, FAIL, "H5Dget_space");
-    spacep = (H5S_t *)H5I_object(dset_space);
-    CHECK_PTR(spacep, "H5I_object");
 
-    /* Verify the dataspace version */
-    VERIFY(spacep->extent.version, H5O_sdspace_ver_bounds[low], "upgraded dataspace version");
+    if (vol_is_native) {
+        spacep = (H5S_t *)H5I_object(dset_space);
+        CHECK_PTR(spacep, "H5I_object");
+
+        /* Verify the dataspace version */
+        VERIFY(spacep->extent.version, H5O_sdspace_ver_bounds[low], "upgraded dataspace version");
+    }
 
     /* Close everything */
     ret = H5Sclose(dset_space);

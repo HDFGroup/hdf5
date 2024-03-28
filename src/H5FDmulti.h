@@ -11,16 +11,22 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	The public header file for the "multi" driver.
+ * Purpose:	The public header file for the multi virtual file driver (VFD)
  */
 #ifndef H5FDmulti_H
 #define H5FDmulti_H
 
+/** Initializer for the multi VFD */
 #define H5FD_MULTI (H5FDperform_init(H5FD_multi_init))
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/** @private
+ *
+ * \brief Private initializer for the multi VFD
+ */
 H5_DLL hid_t H5FD_multi_init(void);
 
 /**
@@ -34,7 +40,7 @@ H5_DLL hid_t H5FD_multi_init(void);
  * \param[in] memb_name Name generator for names of member files
  * \param[in] memb_addr The offsets within the virtual address space, from 0
  *           (zero) to #HADDR_MAX, at which each type of data storage begins
- * \param[in] relax Allows read-only access to incomplete file sets when \c TRUE
+ * \param[in] relax Allows read-only access to incomplete file sets when \c true
  * \returns \herr_t
  *
  * \details H5Pset_fapl_multi() sets the file access property list \p fapl_id to
@@ -69,7 +75,7 @@ H5_DLL hid_t H5FD_multi_init(void);
  *          address space, from 0 (zero) to #HADDR_MAX, at which each type of
  *          data storage begins.
  *
- *          If \p relax is set to 1 (TRUE), then opening an existing file for
+ *          If \p relax is set to 1 (true), then opening an existing file for
  *          read-only access will not fail if some file members are
  *          missing. This allows a file to be accessed in a limited sense if
  *          just the meta data is available.
@@ -145,7 +151,7 @@ H5_DLL hid_t H5FD_multi_init(void);
  *
  * hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
  * H5Pset_fapl_multi(fapl, memb_map, memb_fapl,
- *                   memb_name, memb_addr, TRUE);
+ *                   memb_name, memb_addr, true);
  * \endcode
  *
  * \version 1.6.3 \p memb_name parameter type changed to \Code{const char* const*}.
@@ -165,7 +171,7 @@ H5_DLL herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const
  * \param[out] memb_name Name generator for names of member files
  * \param[out] memb_addr The offsets within the virtual address space, from 0
  *           (zero) to #HADDR_MAX, at which each type of data storage begins
- * \param[out] relax Allows read-only access to incomplete file sets when \c TRUE
+ * \param[out] relax Allows read-only access to incomplete file sets when \c true
  * \returns \herr_t
  *
  * \details H5Pget_fapl_multi() returns information about the multi-file access

@@ -139,9 +139,7 @@ do_sio(parameters param, results *res)
     /* IO type */
     iot = param.io_type;
 
-    if (NULL == (fname = calloc(FILENAME_MAX, sizeof(char))))
-        GOTOERROR(FAIL);
-
+    /* MUST initialize fd early since we check its file IDs in cleanup code */
     switch (iot) {
         case POSIXIO:
             fd.posixfd  = -1;
@@ -156,6 +154,9 @@ do_sio(parameters param, results *res)
             fprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
             GOTOERROR(FAIL);
     }
+
+    if (NULL == (fname = calloc(FILENAME_MAX, sizeof(char))))
+        GOTOERROR(FAIL);
 
     linear_buf_size = 1;
 
@@ -197,7 +198,7 @@ do_sio(parameters param, results *res)
      */
     /* Open file for write */
 
-    HDstrcpy(base_name, "#sio_tmp");
+    strcpy(base_name, "#sio_tmp");
     sio_create_filename(iot, base_name, fname, FILENAME_MAX, &param);
 
     if (sio_debug_level > 0)
@@ -310,7 +311,7 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
     }
 
     /* First use the environment variable and then try the constant */
-    prefix = HDgetenv("HDF5_PREFIX");
+    prefix = getenv("HDF5_PREFIX");
 
 #ifdef HDF5_PREFIX
     if (!prefix)
@@ -324,8 +325,8 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
          * directory instead. */
         char *user, *login, *subdir;
 
-        user   = HDgetenv("USER");
-        login  = HDgetenv("LOGIN");
+        user   = getenv("USER");
+        login  = getenv("LOGIN");
         subdir = (user ? user : login);
 
         if (subdir) {
@@ -339,25 +340,26 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         }
         else {
             /* We didn't append the prefix yet */
-            HDstrncpy(fullname, prefix, size);
+            strncpy(fullname, prefix, size);
             fullname[size - 1] = '\0';
         }
 
-        if ((HDstrlen(fullname) + HDstrlen(base_name) + 1) < size) {
+        if ((strlen(fullname) + strlen(base_name) + 1) < size) {
             /* Append the base_name with a slash first. Multiple slashes are
              * handled below. */
             h5_stat_t buf;
 
+            memset(&buf, 0, sizeof(h5_stat_t));
             if (HDstat(fullname, &buf) < 0)
                 /* The directory doesn't exist just yet */
                 if (HDmkdir(fullname, 0755) < 0 && errno != EEXIST) {
                     /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
                      * Default to PREFIX's original prefix value. */
-                    HDstrcpy(fullname, prefix);
+                    strcpy(fullname, prefix);
                 }
 
-            HDstrcat(fullname, "/");
-            HDstrcat(fullname, base_name);
+            strcat(fullname, "/");
+            strcat(fullname, base_name);
         }
         else {
             /* Buffer is too small */
@@ -369,15 +371,15 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         return NULL;
     }
     else {
-        HDstrcpy(fullname, base_name);
+        strcpy(fullname, base_name);
     }
 
     /* Append a suffix */
     if (suffix) {
-        if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
+        if (strlen(fullname) + strlen(suffix) >= size)
             return NULL;
 
-        HDstrcat(fullname, suffix);
+        strcat(fullname, suffix);
     }
 
     /* Remove any double slashes in the filename */
@@ -513,7 +515,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
                 } /* end if */
             }     /* end if */
 
-            HDsnprintf(dname, sizeof(dname), "Dataset_%ld", (unsigned long)parms->num_bytes);
+            snprintf(dname, sizeof(dname), "Dataset_%ld", (unsigned long)parms->num_bytes);
             h5ds_id =
                 H5Dcreate2(fd->h5fd, dname, ELMT_H5_TYPE, h5dset_space_id, H5P_DEFAULT, h5dcpl, H5P_DEFAULT);
 
@@ -836,7 +838,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
             break;
 
         case HDF5:
-            HDsnprintf(dname, sizeof(dname), "Dataset_%ld", (long)parms->num_bytes);
+            snprintf(dname, sizeof(dname), "Dataset_%ld", (long)parms->num_bytes);
             h5ds_id = H5Dopen2(fd->h5fd, dname, H5P_DEFAULT);
             if (h5ds_id < 0) {
                 fprintf(stderr, "HDF5 Dataset open failed\n");
@@ -1129,7 +1131,7 @@ set_vfd(parameters *param)
     }
     else if (vfd == core) {
         /* In-core temporary file with 1MB increment */
-        if (H5Pset_fapl_core(my_fapl, (size_t)1024 * 1024, TRUE) < 0)
+        if (H5Pset_fapl_core(my_fapl, (size_t)1024 * 1024, true) < 0)
             return -1;
     }
     else if (vfd == split) {
@@ -1153,18 +1155,18 @@ set_vfd(parameters *param)
         memset(memb_name, 0, sizeof memb_name);
         memset(memb_addr, 0, sizeof memb_addr);
 
-        assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+        assert(strlen(multi_letters) == H5FD_MEM_NTYPES);
 
         if (NULL == (sv = calloc(1, sizeof(*sv))))
             return -1;
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
             memb_fapl[mt] = H5P_DEFAULT;
-            HDsnprintf(sv->arr[mt], 1024, "%%s-%c.h5", multi_letters[mt]);
+            snprintf(sv->arr[mt], 1024, "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv->arr[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
         }
 
-        if (H5Pset_fapl_multi(my_fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0) {
+        if (H5Pset_fapl_multi(my_fapl, memb_map, memb_fapl, memb_name, memb_addr, false) < 0) {
             free(sv);
             return -1;
         }
@@ -1175,7 +1177,7 @@ set_vfd(parameters *param)
         hsize_t fam_size = 1 * 1024 * 1024; /*100 MB*/
 
         /* Family of files, each 1MB and using the default driver */
-        /* if ((val=HDstrtok(NULL, " \t\n\r")))
+        /* if ((val=strtok(NULL, " \t\n\r")))
             fam_size = (hsize_t)(strtod(val, NULL) * 1024*1024); */
         if (H5Pset_fapl_family(my_fapl, fam_size, H5P_DEFAULT) < 0)
             return -1;
@@ -1259,7 +1261,7 @@ do_cleanupfile(iotype iot, char *filename)
         goto done;
 
     if (clean_file_g == -1)
-        clean_file_g = (HDgetenv(HDF5_NOCLEANUP) == NULL) ? 1 : 0;
+        clean_file_g = (getenv(HDF5_NOCLEANUP) == NULL) ? 1 : 0;
 
     if (clean_file_g) {
 
@@ -1274,7 +1276,7 @@ do_cleanupfile(iotype iot, char *filename)
                 if (driver == H5FD_FAMILY) {
                     for (j = 0; /*void*/; j++) {
                         H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
-                        HDsnprintf(temp, temp_sz, filename, j);
+                        snprintf(temp, temp_sz, filename, j);
                         H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
                         if (HDaccess(temp, F_OK) < 0)
@@ -1284,7 +1286,7 @@ do_cleanupfile(iotype iot, char *filename)
                     }
                 }
                 else if (driver == H5FD_CORE) {
-                    hbool_t backing; /* Whether the core file has backing store */
+                    bool backing; /* Whether the core file has backing store */
 
                     H5Pget_fapl_core(fapl, NULL, &backing);
 
@@ -1294,10 +1296,10 @@ do_cleanupfile(iotype iot, char *filename)
                 }
                 else if (driver == H5FD_MULTI) {
                     H5FD_mem_t mt;
-                    assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+                    assert(strlen(multi_letters) == H5FD_MEM_NTYPES);
 
                     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
-                        HDsnprintf(temp, temp_sz, "%s-%c.h5", filename, multi_letters[mt]);
+                        snprintf(temp, temp_sz, "%s-%c.h5", filename, multi_letters[mt]);
                         HDremove(temp); /*don't care if it fails*/
                     }
                 }

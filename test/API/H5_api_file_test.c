@@ -948,7 +948,7 @@ test_flush_file(void)
     }
 
     for (u = 0; u < 10; u++) {
-        HDsprintf(dset_name, "Dataset %u", u);
+        snprintf(dset_name, sizeof(dset_name), "Dataset %u", u);
 
         if ((dset_id = H5Dcreate2(file_id, dset_name, H5T_STD_U32LE, dspace_id, H5P_DEFAULT, H5P_DEFAULT,
                                   H5P_DEFAULT)) < 0) {
@@ -2211,7 +2211,7 @@ test_get_file_name(void)
                 PART_ERROR(H5Fget_name_file_id);
             }
 
-            if (HDstrncmp(file_name_buf, prefixed_filename, (size_t)file_name_buf_len)) {
+            if (strncmp(file_name_buf, prefixed_filename, (size_t)file_name_buf_len)) {
                 H5_FAILED();
                 printf("    file name '%s' didn't match expected name '%s'\n", file_name_buf,
                        prefixed_filename);
@@ -2242,7 +2242,7 @@ test_get_file_name(void)
                 PART_ERROR(H5Fget_name_grp_id);
             }
 
-            if (HDstrncmp(file_name_buf, prefixed_filename, (size_t)file_name_buf_len)) {
+            if (strncmp(file_name_buf, prefixed_filename, (size_t)file_name_buf_len)) {
                 H5_FAILED();
                 printf("    file name '%s' didn't match expected name '%s'\n", file_name_buf,
                        prefixed_filename);
@@ -2287,7 +2287,7 @@ test_get_file_name(void)
                 PART_ERROR(H5Fget_name_dset_id);
             }
 
-            if (HDstrncmp(file_name_buf, prefixed_filename, (size_t)file_name_buf_len)) {
+            if (strncmp(file_name_buf, prefixed_filename, (size_t)file_name_buf_len)) {
                 H5_FAILED();
                 printf("    file name '%s' didn't match expected name '%s'\n", file_name_buf,
                        prefixed_filename);
@@ -2340,7 +2340,7 @@ test_get_file_name(void)
                 PART_ERROR(H5Fget_name_attr_id);
             }
 
-            if (HDstrncmp(file_name_buf, prefixed_filename, (size_t)file_name_buf_len)) {
+            if (strncmp(file_name_buf, prefixed_filename, (size_t)file_name_buf_len)) {
                 H5_FAILED();
                 printf("    file name '%s' didn't match expected name '%s'\n", file_name_buf,
                        prefixed_filename);
@@ -2393,7 +2393,7 @@ test_get_file_name(void)
                 PART_ERROR(H5Fget_name_dtype_id);
             }
 
-            if (HDstrncmp(file_name_buf, prefixed_filename, (size_t)file_name_buf_len)) {
+            if (strncmp(file_name_buf, prefixed_filename, (size_t)file_name_buf_len)) {
                 H5_FAILED();
                 printf("    file name '%s' didn't match expected name '%s'\n", file_name_buf,
                        prefixed_filename);

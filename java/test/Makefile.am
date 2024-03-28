@@ -90,7 +90,8 @@ noinst_DATA = $(jarfile)
 check_SCRIPTS = junit.sh
 TEST_SCRIPT = $(check_SCRIPTS)
 
-CLEANFILES = classnoinst.stamp $(jarfile) $(JAVAROOT)/$(pkgpath)/*.class junit.sh
+CLEANFILES = classnoinst.stamp $(jarfile) $(JAVAROOT)/$(pkgpath)/*.class junit.sh \
+    *.h5 testExport*.txt
 
 clean:
 	rm -rf $(JAVAROOT)/*

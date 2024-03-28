@@ -15,12 +15,9 @@
  */
 
 #include "H5private.h"   /* Generic Functions			*/
-#include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fprivate.h"  /* File access				*/
 #include "H5FDprivate.h" /* File drivers				*/
 #include "H5FDmpi.h"     /* Common MPI file driver		*/
-#include "H5Pprivate.h"  /* Property lists			*/
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -104,13 +101,12 @@ done:
 } /* end H5FD_mpi_get_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpi_get_comm
+ * Function:    H5FD_mpi_get_comm
  *
- * Purpose:	Retrieves the file's communicator
+ * Purpose:	    Retrieves the file's MPI_Comm communicator object
  *
- * Return:	Success:	The communicator (non-negative)
- *
- *		Failure:	Negative
+ * Return:      Success:    The communicator object
+ *              Failure:    MPI_COMM_NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -142,6 +138,45 @@ H5FD_mpi_get_comm(H5FD_t *file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpi_get_comm() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_mpi_get_info
+ *
+ * Purpose:     Retrieves the file's MPI_Info info object
+ *
+ * Return:      Success:    The info object
+ *              Failure:    MPI_INFO_NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+MPI_Info
+H5FD_mpi_get_info(H5FD_t *file)
+{
+    const H5FD_class_t *cls;
+    uint64_t            flags    = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
+    MPI_Info            info     = MPI_INFO_NULL;
+    void               *info_ptr = (void *)(&info);
+    MPI_Info            ret_value;
+
+    FUNC_ENTER_NOAPI(MPI_INFO_NULL)
+
+    assert(file);
+    cls = (const H5FD_class_t *)(file->cls);
+    assert(cls);
+    assert(cls->ctl); /* All MPI drivers must implement this */
+
+    /* Dispatch to driver */
+    if ((cls->ctl)(file, H5FD_CTL_GET_MPI_INFO_OPCODE, flags, NULL, &info_ptr) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_INFO_NULL, "driver get_info request failed");
+
+    if (info == MPI_INFO_NULL)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_INFO_NULL, "driver get_info request failed -- bad info object");
+
+    ret_value = info;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_mpi_get_info() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_mpi_MPIOff_to_haddr
@@ -214,7 +249,7 @@ H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off /*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_mpi_get_file_sync_required(H5FD_t *file, hbool_t *file_sync_required)
+H5FD_mpi_get_file_sync_required(H5FD_t *file, bool *file_sync_required)
 {
     const H5FD_class_t *cls;
     uint64_t            flags                  = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;

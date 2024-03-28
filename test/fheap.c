@@ -40,7 +40,7 @@
 
 /* "Small" heap creation parameters */
 #define SMALL_DBLOCK_OVERHEAD      21          /* Overhead for direct blocks */
-#define SMALL_CHECKSUM_DBLOCKS     TRUE        /* Whether to checksum direct blocks */
+#define SMALL_CHECKSUM_DBLOCKS     true        /* Whether to checksum direct blocks */
 #define SMALL_MAN_WIDTH            4           /* Managed obj. table width */
 #define SMALL_MAN_START_BLOCK_SIZE 512         /* Managed obj. starting block size */
 #define SMALL_MAN_MAX_DIRECT_SIZE  (64 * 1024) /* Managed obj. max. direct block size */
@@ -52,7 +52,7 @@
 /* "Large" heap creation parameters */
 #define LARGE_DBLOCK_OVERHEAD 21         /* Overhead for direct blocks */
                                          /* (coincidentally the same size as for small direct blocks) */
-#define LARGE_CHECKSUM_DBLOCKS     FALSE /* Whether to checksum direct blocks */
+#define LARGE_CHECKSUM_DBLOCKS     false /* Whether to checksum direct blocks */
 #define LARGE_MAN_WIDTH            32    /* Managed obj. table width */
 #define LARGE_MAN_START_BLOCK_SIZE 4096  /* Managed obj. starting block size */
 #define LARGE_MAN_MAX_DIRECT_SIZE  (1024 * 1024) /* Managed obj. max. direct block size */
@@ -376,8 +376,8 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
 
     /* Check for tracking the heap's state */
     if (state) {
-        size_t  tiny_max_len;      /* Max. length of tiny objects */
-        hbool_t tiny_len_extended; /* Do tiny objects use two bytes for the length? */
+        size_t tiny_max_len;      /* Max. length of tiny objects */
+        bool   tiny_len_extended; /* Do tiny objects use two bytes for the length? */
 
         /* Check information about tiny objects */
         if (H5HF_get_tiny_info_test(fh, &tiny_max_len, &tiny_len_extended) < 0)
@@ -517,7 +517,7 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *
      */
     size_t test_desc_len = strlen(base_desc) + sizeof(" ") + strlen(del_str);
     test_desc            = H5MM_malloc(test_desc_len);
-    (void)HDsnprintf(test_desc, test_desc_len, "%s %s", base_desc, del_str);
+    (void)snprintf(test_desc, test_desc_len, "%s %s", base_desc, del_str);
 
     TESTING(test_desc);
     H5MM_xfree(test_desc);
@@ -1719,7 +1719,7 @@ error:
 static unsigned
 test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f = NULL;                     /* Internal file object pointer */
     H5HF_create_t      test_cparam;                  /* Creation parameters for heap */
@@ -1835,7 +1835,7 @@ error:
 static unsigned
 test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f = NULL;                     /* Internal file object pointer */
     H5HF_create_t      test_cparam;                  /* Creation parameters for heap */
@@ -1845,7 +1845,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     h5_stat_size_t     file_size;                    /* File size, after deleting heap */
     size_t             id_len;                       /* Size of fractal heap IDs */
     fheap_heap_state_t state;                        /* State of fractal heap */
-    hbool_t            page = FALSE;                 /* Paged aggregation strategy or not */
+    bool               page = false;                 /* Paged aggregation strategy or not */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -1871,7 +1871,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         STACK_ERROR;
 
     if (f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE)
-        page = TRUE;
+        page = true;
 
     /* Ignore metadata tags in the file's cache */
     if (H5AC_ignore_tags(f) < 0)
@@ -1985,8 +1985,8 @@ error:
 static unsigned
 test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file  = -1;                   /* File ID */
-    hid_t              file2 = -1;                   /* File ID */
+    hid_t              file  = H5I_INVALID_HID;      /* File ID */
+    hid_t              file2 = H5I_INVALID_HID;      /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5F_t             *f2 = NULL;                    /* Internal file object pointer */
@@ -1998,7 +1998,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     h5_stat_size_t     file_size;                    /* File size, after deleting heap */
     size_t             id_len;                       /* Size of fractal heap IDs */
     fheap_heap_state_t state;                        /* State of fractal heap */
-    hbool_t            page = FALSE;                 /* Paged aggregation strategy or not */
+    bool               page = false;                 /* Paged aggregation strategy or not */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2024,7 +2024,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         STACK_ERROR;
 
     if (f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE)
-        page = TRUE;
+        page = true;
 
     /* Ignore metadata tags in the file's cache */
     if (H5AC_ignore_tags(f) < 0)
@@ -2160,7 +2160,7 @@ error:
 static unsigned
 test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f = NULL;                     /* Internal file object pointer */
     H5HF_create_t      test_cparam;                  /* Creation parameters for heap */
@@ -2335,7 +2335,7 @@ error:
 static unsigned
 test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
 {
-    hid_t         file = -1;                    /* File ID */
+    hid_t         file = H5I_INVALID_HID;       /* File ID */
     char          filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t        *f  = NULL;                    /* Internal file object pointer */
     H5HF_t       *fh = NULL;                    /* Fractal heap wrapper */
@@ -2343,8 +2343,8 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     unsigned      deflate_level;                /* Deflation level */
     size_t        id_len;                       /* Size of fractal heap IDs */
     size_t        tiny_max_len;                 /* Max. length of tiny objects */
-    hbool_t       tiny_len_extended;            /* Do tiny objects use two bytes for the length? */
-    hbool_t       huge_ids_direct;              /* Are 'huge' objects directly accessed? */
+    bool          tiny_len_extended;            /* Do tiny objects use two bytes for the length? */
+    bool          huge_ids_direct;              /* Are 'huge' objects directly accessed? */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2383,11 +2383,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != (HEAP_ID_LEN - 1))
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != FALSE)
+    if (huge_ids_direct != false)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2412,11 +2412,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 16)
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2446,11 +2446,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 27)
         TEST_ERROR;
-    if (tiny_len_extended != TRUE)
+    if (tiny_len_extended != true)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2491,11 +2491,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 7)
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != FALSE)
+    if (huge_ids_direct != false)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2521,11 +2521,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 16)
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2551,11 +2551,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 16)
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2581,11 +2581,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 17)
         TEST_ERROR;
-    if (tiny_len_extended != TRUE)
+    if (tiny_len_extended != true)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2611,11 +2611,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 43)
         TEST_ERROR;
-    if (tiny_len_extended != TRUE)
+    if (tiny_len_extended != true)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2670,7 +2670,7 @@ error:
 static unsigned
 test_filtered_create(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
 {
-    hid_t         file = -1;                    /* File ID */
+    hid_t         file = H5I_INVALID_HID;       /* File ID */
     char          filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t        *f  = NULL;                    /* Internal file object pointer */
     H5HF_t       *fh = NULL;                    /* Fractal heap wrapper */
@@ -2789,7 +2789,7 @@ error:
 static unsigned
 test_size(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
 {
-    hid_t   file = -1;                    /* File ID */
+    hid_t   file = H5I_INVALID_HID;       /* File ID */
     char    filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t  *f  = NULL;                    /* Internal file object pointer */
     H5HF_t *fh = NULL;                    /* Fractal heap wrapper */
@@ -2928,7 +2928,7 @@ error:
 static unsigned
 test_reopen_hdr(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
 {
-    hid_t   file1 = -1;                   /* File ID */
+    hid_t   file1 = H5I_INVALID_HID;      /* File ID */
     hid_t   file2 = -2;                   /* File ID */
     char    filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t  *f  = NULL;                    /* Internal file object pointer */
@@ -3057,7 +3057,7 @@ error:
 static unsigned
 test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3169,7 +3169,7 @@ error:
 static unsigned
 test_man_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3267,7 +3267,7 @@ error:
 static unsigned
 test_man_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3360,7 +3360,7 @@ error:
 static unsigned
 test_man_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3456,7 +3456,7 @@ error:
 static unsigned
 test_man_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3559,7 +3559,7 @@ error:
 static unsigned
 test_man_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3663,7 +3663,7 @@ error:
 static unsigned
 test_man_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3771,7 +3771,7 @@ error:
 static unsigned
 test_man_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3864,7 +3864,7 @@ error:
 static unsigned
 test_man_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3964,7 +3964,7 @@ error:
 static unsigned
 test_man_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4062,7 +4062,7 @@ error:
 static unsigned
 test_man_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4169,7 +4169,7 @@ error:
 static unsigned
 test_man_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4264,7 +4264,7 @@ error:
 static unsigned
 test_man_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4357,7 +4357,7 @@ error:
 static unsigned
 test_man_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4456,7 +4456,7 @@ error:
 static unsigned
 test_man_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4563,7 +4563,7 @@ error:
 static unsigned
 test_man_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4663,7 +4663,7 @@ error:
 static unsigned
 test_man_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4771,7 +4771,7 @@ error:
 static unsigned
 test_man_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4876,7 +4876,7 @@ error:
 static unsigned
 test_man_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4971,7 +4971,7 @@ error:
 static unsigned
 test_man_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5077,7 +5077,7 @@ error:
 static unsigned
 test_man_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5177,7 +5177,7 @@ error:
 static unsigned
 test_man_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5284,7 +5284,7 @@ error:
 static unsigned
 test_man_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5392,7 +5392,7 @@ error:
 static unsigned
 test_man_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5497,7 +5497,7 @@ error:
 static unsigned
 test_man_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5603,7 +5603,7 @@ error:
 static unsigned
 test_man_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5715,7 +5715,7 @@ error:
 static unsigned
 test_man_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5833,7 +5833,7 @@ error:
 static unsigned
 test_man_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5942,7 +5942,7 @@ error:
 static unsigned
 test_man_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -6053,7 +6053,7 @@ error:
 static unsigned
 test_man_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -6177,7 +6177,7 @@ error:
 static unsigned
 test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -6334,7 +6334,7 @@ error:
 static unsigned
 test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -6495,7 +6495,7 @@ error:
 static unsigned
 test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -6686,7 +6686,7 @@ error:
 static unsigned
 test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -6852,7 +6852,7 @@ error:
 static unsigned
 test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -7089,7 +7089,7 @@ error:
 static unsigned
 test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -7384,7 +7384,7 @@ error:
 static unsigned
 test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t           file = -1;                    /* File ID */
+    hid_t           file = H5I_INVALID_HID;       /* File ID */
     char            filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t          *f  = NULL;                    /* Internal file object pointer */
     H5HF_t         *fh = NULL;                    /* Fractal heap wrapper */
@@ -7449,7 +7449,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
             if (H5HF_remove(fh, heap_id[j]) < 0)
                 FAIL_STACK_ERROR;
 
-            HDsnprintf(obj2.b, sizeof(obj2.b), "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
+            snprintf(obj2.b, sizeof(obj2.b), "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
             if (H5HF_insert(fh, (sizeof(obj2)), &obj2, heap_id[j]) < 0)
                 FAIL_STACK_ERROR;
         } /* end for */
@@ -7460,7 +7460,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
 
         /* Insert object */
         memset(heap_id[i], 0, id_len);
-        HDsnprintf(obj1.b, sizeof(obj1.b), "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
+        snprintf(obj1.b, sizeof(obj1.b), "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
         if (H5HF_insert(fh, (sizeof(obj1)), &obj1, heap_id[i]) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -7511,7 +7511,7 @@ error:
 static unsigned
 test_man_remove_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -7581,7 +7581,7 @@ error:
 static unsigned
 test_man_remove_two_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -7666,7 +7666,7 @@ error:
 static unsigned
 test_man_remove_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -7733,7 +7733,7 @@ error:
 static unsigned
 test_man_remove_first_two_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -7802,7 +7802,7 @@ error:
 static unsigned
 test_man_remove_first_four_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -7875,7 +7875,7 @@ error:
 static unsigned
 test_man_remove_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -7942,7 +7942,7 @@ error:
 static unsigned
 test_man_remove_2nd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8013,7 +8013,7 @@ error:
 static unsigned
 test_man_remove_3rd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8091,7 +8091,7 @@ error:
 static unsigned
 test_man_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8166,7 +8166,7 @@ error:
 static unsigned
 test_man_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8262,7 +8262,7 @@ error:
 static unsigned
 test_man_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8369,7 +8369,7 @@ error:
 static unsigned
 test_man_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8463,7 +8463,7 @@ error:
 static unsigned
 test_man_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8606,7 +8606,7 @@ static unsigned
 test_man_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                      fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8769,7 +8769,7 @@ error:
 static unsigned
 test_man_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8894,7 +8894,7 @@ static unsigned
 test_man_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                         fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -9019,7 +9019,7 @@ static unsigned
 test_man_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                            fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -9141,7 +9141,7 @@ static unsigned
 test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                                fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -9270,7 +9270,7 @@ static unsigned
 test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                                fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -9413,7 +9413,7 @@ static unsigned
 test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                                   fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -9573,7 +9573,7 @@ static unsigned
 test_man_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                         fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -9726,7 +9726,7 @@ static unsigned
 test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                                           fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -9907,7 +9907,7 @@ static unsigned
 test_man_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                       fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -10035,7 +10035,7 @@ static unsigned
 test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                                    fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -10174,7 +10174,7 @@ test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(h
                                                                                H5HF_create_t      *cparam,
                                                                                fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -10324,7 +10324,7 @@ test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(
                                                                                 H5HF_create_t      *cparam,
                                                                                 fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -10478,7 +10478,7 @@ static unsigned
 test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                                            fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -10639,7 +10639,7 @@ static unsigned
 test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(
     hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -10804,7 +10804,7 @@ static unsigned
 test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                                   fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -10964,7 +10964,7 @@ static unsigned
 test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(
     hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -11144,7 +11144,7 @@ static unsigned
 test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped(
     hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -11361,7 +11361,7 @@ static unsigned
 test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(
     hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -11558,7 +11558,7 @@ static unsigned
 test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(
     hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -11784,7 +11784,7 @@ error:
 static unsigned
 test_man_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -11912,7 +11912,7 @@ error:
 static unsigned
 test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -12080,7 +12080,7 @@ error:
 static unsigned
 test_man_frag_2nd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -12189,7 +12189,7 @@ error:
 static unsigned
 test_man_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -12300,7 +12300,7 @@ error:
 static unsigned
 test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -12447,7 +12447,7 @@ error:
 static unsigned
 test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -12674,7 +12674,7 @@ error:
 static unsigned
 test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -12976,7 +12976,7 @@ error:
 static unsigned
 test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -13396,7 +13396,7 @@ error:
 static unsigned
 test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -13413,8 +13413,8 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     fheap_heap_state_t state;                        /* State of fractal heap */
     unsigned           deflate_level;                /* Deflation level */
     size_t             old_actual_id_len = 0;        /* Old actual ID length */
-    hbool_t            huge_ids_direct;              /* Are 'huge' objects directly accessed? */
-    hbool_t            pline_init = FALSE;           /* Whether the I/O pipeline has been initialized */
+    bool               huge_ids_direct;              /* Are 'huge' objects directly accessed? */
+    bool               pline_init = false;           /* Whether the I/O pipeline has been initialized */
     /* Test description */
     const char *base_desc = "insert 'huge' object into heap with I/O filters, then remove";
 
@@ -13425,7 +13425,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     deflate_level = 6;
     if (H5Z_append(&tmp_cparam.pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, (size_t)1, &deflate_level) < 0)
         FAIL_STACK_ERROR;
-    pline_init = TRUE;
+    pline_init = true;
 
     /* Adjust actual ID length, if asking for IDs that can directly access 'huge' objects */
     if (cparam->id_len == 1) {
@@ -13454,15 +13454,15 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
     if (cparam->id_len == 1) {
-        if (huge_ids_direct != TRUE)
+        if (huge_ids_direct != true)
             TEST_ERROR;
     } /* end if */
     else if (tparam->actual_id_len >= 29) {
-        if (huge_ids_direct != TRUE)
+        if (huge_ids_direct != true)
             TEST_ERROR;
     } /* end if */
     else {
-        if (huge_ids_direct != FALSE)
+        if (huge_ids_direct != false)
             TEST_ERROR;
     } /* end else */
 
@@ -13606,7 +13606,7 @@ error:
 static unsigned
 test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -13753,7 +13753,7 @@ error:
 static unsigned
 test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -13981,7 +13981,7 @@ error:
 static unsigned
 test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -14582,7 +14582,7 @@ error:
 static unsigned
 test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -14752,7 +14752,7 @@ error:
 static unsigned
 test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -15079,7 +15079,7 @@ error:
 static unsigned
 test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -15280,7 +15280,7 @@ error:
 static unsigned
 test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -15488,13 +15488,13 @@ error:
  */
 /* Custom filter used to verify that the filters are actually called and do not
  * just silently fail */
-static hbool_t test_write_filter_called;
+static bool test_write_filter_called;
 static size_t
 test_write_filter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
                   const unsigned int H5_ATTR_UNUSED cd_values[], size_t nbytes,
                   size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
-    test_write_filter_called = TRUE;
+    test_write_filter_called = true;
 
     return nbytes;
 } /* end link_filter_filter */
@@ -15502,7 +15502,7 @@ test_write_filter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_ne
 static unsigned
 test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -15511,7 +15511,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     size_t             id_len;                       /* Size of fractal heap IDs */
     unsigned char      tiny_heap_id[HEAP_ID_LEN];    /* Heap ID for 'tiny' object */
     unsigned char      huge_heap_id[HEAP_ID_LEN];    /* Heap ID for 'huge' object */
-    hbool_t            id_changed  = FALSE;          /* Whether the heap ID changed */
+    bool               id_changed  = false;          /* Whether the heap ID changed */
     unsigned char     *rewrite_obj = NULL;           /* Pointer to re-write buffer for objects */
     fheap_heap_ids_t   keep_ids;                     /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                   /* Size of a file with an empty heap */
@@ -15549,8 +15549,8 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         /* Register and append custom filter */
         filter_class.version         = H5Z_CLASS_T_VERS;
         filter_class.id              = H5Z_FILTER_RESERVED + 43;
-        filter_class.encoder_present = TRUE;
-        filter_class.decoder_present = TRUE;
+        filter_class.encoder_present = true;
+        filter_class.decoder_present = true;
         filter_class.name            = "custom_fheap_filter";
         filter_class.can_apply       = NULL;
         filter_class.set_local       = NULL;
@@ -15559,7 +15559,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
             TEST_ERROR;
         if (H5Z_append(&tmp_cparam.pline, H5Z_FILTER_RESERVED + 43, 0, (size_t)0, NULL) < 0)
             FAIL_STACK_ERROR;
-        test_write_filter_called = FALSE;
+        test_write_filter_called = false;
     } /* end if */
 
     /* Perform common file & heap open operations */
@@ -15621,7 +15621,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
         if (!test_write_filter_called)
             TEST_ERROR;
-        test_write_filter_called = FALSE;
+        test_write_filter_called = false;
     } /* end if */
 
     /* Re-open the file */
@@ -15779,7 +15779,7 @@ error:
 static unsigned
 test_bug1(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -15947,28 +15947,26 @@ error:
 int
 main(void)
 {
-    fheap_test_param_t tparam;                   /* Testing parameters */
-    H5HF_create_t      small_cparam;             /* Creation parameters for "small" heap */
-    H5HF_create_t      large_cparam;             /* Creation parameters for "large" heap */
-    hid_t              fapl = -1, def_fapl = -1; /* File access property list for data files */
-    hid_t              pb_fapl = -1;             /* File access property list for data files */
-    hid_t              fcpl = -1, def_fcpl = -1; /* File creation property list for data files */
-    fheap_test_type_t  curr_test;                /* Current test being worked on */
-    unsigned           u, v;                     /* Local index variable */
-    unsigned           nerrors = 0;              /* Cumulative error count */
+    fheap_test_param_t tparam;                                /* Testing parameters */
+    H5HF_create_t      small_cparam;                          /* Creation parameters for "small" heap */
+    H5HF_create_t      large_cparam;                          /* Creation parameters for "large" heap */
+    hid_t fapl = H5I_INVALID_HID, def_fapl = H5I_INVALID_HID; /* File access property list for data files */
+    hid_t pb_fapl = H5I_INVALID_HID;                          /* File access property list for data files */
+    hid_t fcpl = H5I_INVALID_HID, def_fcpl = H5I_INVALID_HID; /* File creation property list for data files */
+    fheap_test_type_t curr_test;                              /* Current test being worked on */
+    unsigned          u, v;                                   /* Local index variable */
+    unsigned          nerrors = 0;                            /* Cumulative error count */
     unsigned    num_pb_fs = 1; /* The number of settings to test for page buffering and file space handling */
     int         ExpressMode;   /* Express testing level */
-    const char *envval;        /* Environment variable */
-    hbool_t     contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
-    hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
+    const char *driver_name;   /* Environment variable */
+    bool        contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
+    bool        api_ctx_pushed = false; /* Whether API context pushed */
 
     /* Don't run this test using certain file drivers */
-    envval = HDgetenv(HDF5_DRIVER);
-    if (envval == NULL)
-        envval = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(envval, "split") != 0 && HDstrcmp(envval, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     /* Reset library */
     h5_reset();
@@ -16003,7 +16001,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Allocate space for the shared objects */
     shared_obj_size_g = large_cparam.max_man_size + 256;
@@ -16037,12 +16035,12 @@ main(void)
 
         switch (v) {
             case 0:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, FALSE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, false, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = def_fapl;
                 break;
             case 1:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = def_fapl;
                 /* This is a fix for the daily test failure from the checkin for libver bounds. */
@@ -16074,22 +16072,22 @@ main(void)
                     TEST_ERROR;
                 break;
             case 2:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = def_fapl;
                 break;
             case 3:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, true, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = def_fapl;
                 break;
             case 4:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = pb_fapl;
                 break;
             case 5:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, true, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = pb_fapl;
                 break;
@@ -16112,12 +16110,12 @@ main(void)
             switch (curr_test) {
                 /* "Normal" testing parameters */
                 case FHEAP_TEST_NORMAL:
-                    HDputs("Testing with normal parameters");
+                    puts("Testing with normal parameters");
                     break;
 
                 /* "Re-open heap" testing parameters */
                 case FHEAP_TEST_REOPEN:
-                    HDputs("Testing with reopen heap flag set");
+                    puts("Testing with reopen heap flag set");
                     tparam.reopen_heap = FHEAP_TEST_REOPEN;
                     break;
 
@@ -16149,12 +16147,12 @@ main(void)
                     switch (fill) {
                         /* "Bulk fill" heap blocks with 'large' objects */
                         case FHEAP_TEST_FILL_LARGE:
-                            HDputs("Bulk-filling blocks w/large objects");
+                            puts("Bulk-filling blocks w/large objects");
                             break;
 
                         /* "Bulk fill" heap blocks with 'single' objects */
                         case FHEAP_TEST_FILL_SINGLE:
-                            HDputs("Bulk-filling blocks w/single object");
+                            puts("Bulk-filling blocks w/single object");
                             break;
 
                         /* An unknown test? */
@@ -16354,12 +16352,12 @@ main(void)
                     switch (id_len) {
                         /* Use "normal" form for 'huge' object's heap IDs */
                         case 0:
-                            HDputs("Using 'normal' heap ID format for 'huge' objects");
+                            puts("Using 'normal' heap ID format for 'huge' objects");
                             break;
 
                         /* Use "direct" form for 'huge' object's heap IDs */
                         case 1:
-                            HDputs("Using 'direct' heap ID format for 'huge' objects");
+                            puts("Using 'direct' heap ID format for 'huge' objects");
 
                             /* Adjust actual length of heap IDs for directly storing 'huge' object's file
                              * offset & length in heap ID */
@@ -16369,8 +16367,8 @@ main(void)
                         /* Use "direct" storage for 'huge' objects and larger IDs for 'tiny' objects */
                         case 2:
                             small_cparam.id_len = 37;
-                            HDputs("Using 'direct' heap ID format for 'huge' objects and larger IDs for "
-                                   "'tiny' objects");
+                            puts("Using 'direct' heap ID format for 'huge' objects and larger IDs for "
+                                 "'tiny' objects");
                             tparam.actual_id_len = 37;
                             break;
 
@@ -16436,7 +16434,7 @@ main(void)
                 printf("***Express test mode on.  Some tests skipped\n");
             else {
                 /* Random tests using "small" heap creation parameters */
-                HDputs("Using 'small' heap creation parameters");
+                puts("Using 'small' heap creation parameters");
 
                 /* (reduce size of tests when re-opening each time) */
                 /* XXX: Try to speed things up enough that these tests don't have to be reduced when
@@ -16458,7 +16456,7 @@ main(void)
                                             fapl, &small_cparam, &tparam);
 
                 /* Random tests using "large" heap creation parameters */
-                HDputs("Using 'large' heap creation parameters");
+                puts("Using 'large' heap creation parameters");
                 tparam.actual_id_len = LARGE_HEAP_ID_LEN;
 
                 /* (reduce size of tests when re-opening each time) */
@@ -16513,7 +16511,7 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDputs("All fractal heap tests passed.");
+    puts("All fractal heap tests passed.");
 
     /* Release space for the shared objects */
     H5MM_xfree(shared_wobj_g);
@@ -16528,9 +16526,9 @@ main(void)
         TEST_ERROR;
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     /* Clean up file used */
     h5_cleanup(FILENAME, def_fapl);
@@ -16538,7 +16536,7 @@ main(void)
     return 0;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY
     {
         H5MM_xfree(shared_wobj_g);
@@ -16554,7 +16552,7 @@ error:
     H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     return 1;
 } /* end main() */

@@ -21,7 +21,7 @@
 !
 
 PROGRAM PROG_FC_ISO_FORTRAN_ENV
-  USE, INTRINSIC :: ISO_FORTRAN_ENV
+  USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : logical_kinds
 END PROGRAM PROG_FC_ISO_FORTRAN_ENV
 
 PROGRAM PROG_FC_SIZEOF
@@ -54,6 +54,35 @@ PROGRAM PROG_FC_HAVE_F2003_REQUIREMENTS
   CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
   ptr = C_LOC(ichr(1:1))
 END PROGRAM PROG_FC_HAVE_F2003_REQUIREMENTS
+
+PROGRAM PROG_CHAR_ALLOC
+  CHARACTER(:), ALLOCATABLE :: str
+END PROGRAM PROG_CHAR_ALLOC
+
+!---- START ----- Check to see C_BOOL is different from LOGICAL
+MODULE l_type_mod
+  USE ISO_C_BINDING
+  INTERFACE h5t
+     MODULE PROCEDURE h5t_c_bool
+     MODULE PROCEDURE h5t_logical
+  END INTERFACE
+CONTAINS
+  SUBROUTINE h5t_c_bool(lcb)
+    LOGICAL(KIND=C_BOOL) :: lcb
+  END SUBROUTINE h5t_c_bool
+  SUBROUTINE h5t_logical(l)
+    LOGICAL :: l
+  END SUBROUTINE h5t_logical
+END MODULE l_type_mod
+PROGRAM PROG_FC_C_BOOL_EQ_LOGICAL
+  USE ISO_C_BINDING
+  USE l_type_mod
+  LOGICAL(KIND=C_BOOL) :: lcb
+  LOGICAL              :: l
+  CALL h5t(lcb)
+  CALL h5t(l)
+END PROGRAM PROG_FC_C_BOOL_EQ_LOGICAL
+!---- END ------- Check to see C_BOOL is different from LOGICAL
 
 !---- START ----- Check to see C_LONG_DOUBLE is different from C_DOUBLE
 MODULE type_mod
@@ -153,8 +182,72 @@ PROGRAM FC_AVAIL_KINDS
 END PROGRAM FC_AVAIL_KINDS
 !---- END ----- Determine the available KINDs for REALs and INTEGERs
 
+!---- START ----- Determine the available KINDs for REALs, INTEGERs and LOGICALs -- ISO_FORTRAN_ENV (F08)
+PROGRAM FC08_AVAIL_KINDS
+      USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stdout=>OUTPUT_UNIT, integer_kinds, real_kinds, logical_kinds
+      IMPLICIT NONE
+      INTEGER :: ik, jk, k, max_decimal_prec
+      INTEGER :: num_rkinds, num_ikinds, num_lkinds
+
+      ! Find integer KINDs
+
+      num_ikinds = SIZE(integer_kinds)
+
+      DO k = 1, num_ikinds
+         WRITE(stdout,'(I0)', ADVANCE='NO') integer_kinds(k)
+         IF(k.NE.num_ikinds)THEN
+            WRITE(stdout,'(A)',ADVANCE='NO') ','
+         ELSE
+            WRITE(stdout,'()')
+         ENDIF
+      ENDDO
+
+      ! Find real KINDs
+
+      num_rkinds = SIZE(real_kinds)
+
+      max_decimal_prec = 1
+
+      prec: DO ik = 2, 36
+         exp: DO jk = 1, 700
+            k = SELECTED_REAL_KIND(ik,jk)
+            IF(k.LT.0) EXIT exp
+            max_decimal_prec = ik
+         ENDDO exp
+      ENDDO prec
+
+      DO k = 1, num_rkinds
+         WRITE(stdout,'(I0)', ADVANCE='NO') real_kinds(k)
+         IF(k.NE.num_rkinds)THEN
+            WRITE(stdout,'(A)',ADVANCE='NO') ','
+         ELSE
+            WRITE(stdout,'()')
+         ENDIF
+      ENDDO
+
+     WRITE(stdout,'(I0)') max_decimal_prec
+     WRITE(stdout,'(I0)') num_ikinds
+     WRITE(stdout,'(I0)') num_rkinds
+
+     ! Find logical KINDs
+
+     num_lkinds = SIZE(logical_kinds)
+     WRITE(stdout,'(I0)') num_lkinds
+
+     DO k = 1, num_lkinds
+        WRITE(stdout,'(I0)', ADVANCE='NO') logical_kinds(k)
+        IF(k.NE.num_lkinds)THEN
+           WRITE(stdout,'(A)',ADVANCE='NO') ','
+        ELSE
+           WRITE(stdout,'()')
+        ENDIF
+     ENDDO
+
+END PROGRAM FC08_AVAIL_KINDS
+!---- END ----- Determine the available KINDs for REALs, INTEGERs and LOGICALs -- ISO_FORTRAN_ENV (F08)
+
 PROGRAM FC_MPI_CHECK
-  INCLUDE 'mpif.h'
+  USE mpi
   INTEGER :: comm, amode, info, fh, ierror
   CHARACTER(LEN=1) :: filename
   CALL MPI_File_open( comm, filename, amode, info, fh, ierror)

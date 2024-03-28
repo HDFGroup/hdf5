@@ -160,19 +160,19 @@ H5G__create_api_common(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string");
 
     /* Set up object access arguments */
-    if (H5VL_setup_acc_args(loc_id, H5P_CLS_GACC, TRUE, &gapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_acc_args(loc_id, H5P_CLS_GACC, true, &gapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments");
 
     /* Check link creation property list */
     if (H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
-    else if (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
+    else if (true != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a link creation property list");
 
     /* Check group creation property list */
     if (H5P_DEFAULT == gcpl_id)
         gcpl_id = H5P_GROUP_CREATE_DEFAULT;
-    else if (TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
+    else if (true != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a group creation property list");
 
     /* Set the LCPL for the API context */
@@ -184,7 +184,7 @@ H5G__create_api_common(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group");
 
     /* Get an ID for the group */
-    if ((ret_value = H5VL_register(H5I_GROUP, grp, (*vol_obj_ptr)->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_GROUP, grp, (*vol_obj_ptr)->connector, true)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to get ID for group handle");
 
 done:
@@ -302,7 +302,7 @@ done:
  *
  * Example:     To create missing groups "A" and "B01" along the given path "/A/B01/grp"
  *              hid_t create_id = H5Pcreate(H5P_GROUP_CREATE);
- *              int   status = H5Pset_create_intermediate_group(create_id, TRUE);
+ *              int   status = H5Pset_create_intermediate_group(create_id, true);
  *              hid_t gid = H5Gcreate_anon(file_id, "/A/B01/grp", create_id, H5P_DEFAULT);
  *
  * Return:      Success:    The object ID of a new, empty group open for
@@ -327,16 +327,16 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     /* Check group property list */
     if (H5P_DEFAULT == gcpl_id)
         gcpl_id = H5P_GROUP_CREATE_DEFAULT;
-    else if (TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
+    else if (true != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not group create property list");
 
     if (H5P_DEFAULT == gapl_id)
         gapl_id = H5P_GROUP_ACCESS_DEFAULT;
-    else if (TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
+    else if (true != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not group access property list");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&gapl_id, H5P_CLS_GACC, loc_id, TRUE) < 0)
+    if (H5CX_set_apl(&gapl_id, H5P_CLS_GACC, loc_id, true) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info");
 
     /* Set location struct fields */
@@ -353,7 +353,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group");
 
     /* Get an ID for the group */
-    if ((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, true)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to get ID for group handle");
 
 done:
@@ -395,7 +395,7 @@ H5G__open_api_common(hid_t loc_id, const char *name, hid_t gapl_id, void **token
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string");
 
     /* Set up object access arguments */
-    if (H5VL_setup_acc_args(loc_id, H5P_CLS_GACC, FALSE, &gapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_acc_args(loc_id, H5P_CLS_GACC, false, &gapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments");
 
     if (NULL == (grp = H5VL_group_open(*vol_obj_ptr, &loc_params, name, gapl_id, H5P_DATASET_XFER_DEFAULT,
@@ -403,7 +403,7 @@ H5G__open_api_common(hid_t loc_id, const char *name, hid_t gapl_id, void **token
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open group");
 
     /* Register an ID for the group */
-    if ((ret_value = H5VL_register(H5I_GROUP, grp, (*vol_obj_ptr)->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_GROUP, grp, (*vol_obj_ptr)->connector, true)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group");
 
 done:
@@ -591,7 +591,7 @@ H5Gget_info(hid_t loc_id, H5G_info_t *group_info /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", loc_id, group_info);
+    H5TRACE2("e", "i*GI", loc_id, group_info);
 
     /* Retrieve group information synchronously */
     if (H5G__get_info_api_common(loc_id, group_info, NULL, NULL) < 0)
@@ -620,7 +620,7 @@ H5Gget_info_async(const char *app_file, const char *app_func, unsigned app_line,
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*s*sIuixi", app_file, app_func, app_line, loc_id, group_info, es_id);
+    H5TRACE6("e", "*s*sIui*GIi", app_file, app_func, app_line, loc_id, group_info, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -634,7 +634,7 @@ H5Gget_info_async(const char *app_file, const char *app_func, unsigned app_line,
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                H5ARG_TRACE6(__func__, "*s*sIuixi", app_file, app_func, app_line, loc_id, group_info, es_id)) < 0)
+                H5ARG_TRACE6(__func__, "*s*sIui*GIi", app_file, app_func, app_line, loc_id, group_info, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 
@@ -670,7 +670,7 @@ H5G__get_info_by_name_api_common(hid_t loc_id, const char *name, H5G_info_t *gro
 
     /* Set up VOL callback & object access arguments */
     vol_cb_args.op_type = H5VL_GROUP_GET_INFO;
-    if (H5VL_setup_name_args(loc_id, name, FALSE, lapl_id, vol_obj_ptr,
+    if (H5VL_setup_name_args(loc_id, name, false, lapl_id, vol_obj_ptr,
                              &vol_cb_args.args.get_info.loc_params) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set object access arguments");
     vol_cb_args.args.get_info.ginfo = group_info;
@@ -699,7 +699,7 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *group_info /*out
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*sxi", loc_id, name, group_info, lapl_id);
+    H5TRACE4("e", "i*s*GIi", loc_id, name, group_info, lapl_id);
 
     /* Retrieve group information synchronously */
     if (H5G__get_info_by_name_api_common(loc_id, name, group_info, lapl_id, NULL, NULL) < 0)
@@ -728,7 +728,7 @@ H5Gget_info_by_name_async(const char *app_file, const char *app_func, unsigned a
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "*s*sIui*sxii", app_file, app_func, app_line, loc_id, name, group_info, lapl_id, es_id);
+    H5TRACE8("e", "*s*sIui*s*GIii", app_file, app_func, app_line, loc_id, name, group_info, lapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -742,7 +742,7 @@ H5Gget_info_by_name_async(const char *app_file, const char *app_func, unsigned a
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE8(__func__, "*s*sIui*sxii", app_file, app_func, app_line, loc_id, name, group_info, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE8(__func__, "*s*sIui*s*GIii", app_file, app_func, app_line, loc_id, name, group_info, lapl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 
@@ -779,7 +779,7 @@ H5G__get_info_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t
 
     /* Set up VOL callback & object access arguments */
     vol_cb_args.op_type = H5VL_GROUP_GET_INFO;
-    if (H5VL_setup_idx_args(loc_id, group_name, idx_type, order, n, FALSE, lapl_id, vol_obj_ptr,
+    if (H5VL_setup_idx_args(loc_id, group_name, idx_type, order, n, false, lapl_id, vol_obj_ptr,
                             &vol_cb_args.args.get_info.loc_params) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set object access arguments");
     vol_cb_args.args.get_info.ginfo = group_info;
@@ -809,7 +809,7 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIohxi", loc_id, group_name, idx_type, order, n, group_info, lapl_id);
+    H5TRACE7("e", "i*sIiIoh*GIi", loc_id, group_name, idx_type, order, n, group_info, lapl_id);
 
     /* Retrieve group information synchronously */
     if (H5G__get_info_by_idx_api_common(loc_id, group_name, idx_type, order, n, group_info, lapl_id, NULL,
@@ -840,8 +840,8 @@ H5Gget_info_by_idx_async(const char *app_file, const char *app_func, unsigned ap
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE11("e", "*s*sIui*sIiIohxii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n,
-              group_info, lapl_id, es_id);
+    H5TRACE11("e", "*s*sIui*sIiIoh*GIii", app_file, app_func, app_line, loc_id, group_name, idx_type, order,
+              n, group_info, lapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -856,7 +856,7 @@ H5Gget_info_by_idx_async(const char *app_file, const char *app_func, unsigned ap
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE11(__func__, "*s*sIui*sIiIohxii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, group_info, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE11(__func__, "*s*sIui*sIiIoh*GIii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, group_info, lapl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 

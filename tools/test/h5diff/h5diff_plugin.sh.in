@@ -45,8 +45,9 @@ SRC_TOOLS="$srcdir/../.."
 
 # testfiles source dirs for tools
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
+SRC_H5DIFF_OUTFILES="$SRC_TOOLS/test/h5diff/expected"
 
-TESTDIR=./testplug
+TESTDIR=./tmppl
 test -d $TESTDIR || mkdir $TESTDIR
 
 ######################################################################
@@ -61,9 +62,9 @@ test -d $TESTDIR || mkdir $TESTDIR
 LIST_HDF5_TEST_FILES="
 $SRC_H5DIFF_TESTFILES/tudfilter.h5
 $SRC_H5DIFF_TESTFILES/tudfilter2.h5
-$SRC_H5DIFF_TESTFILES/h5diff_ud.txt
-$SRC_H5DIFF_TESTFILES/h5diff_udfail.err
-$SRC_H5DIFF_TESTFILES/h5diff_udfail.txt
+$SRC_H5DIFF_OUTFILES/h5diff_ud.txt
+$SRC_H5DIFF_OUTFILES/h5diff_udfail.err
+$SRC_H5DIFF_OUTFILES/h5diff_udfail.txt
 "
 
 # Main Body

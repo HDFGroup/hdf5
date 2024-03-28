@@ -118,7 +118,7 @@ setup_parameters(int argc, char *const argv[], options_t *opts)
     /* use case defaults */
     memset(opts, 0, sizeof(options_t));
     opts->chunksize   = Chunksize_DFT;
-    opts->use_swmr    = TRUE;
+    opts->use_swmr    = true;
     opts->iterations  = 1;
     opts->chunkplanes = 1;
     opts->progname    = THIS_PROGNAME;
@@ -156,7 +156,7 @@ main(int argc, char *argv[])
     int                         child_wait_option = 0;
     int                         ret_value         = 0;
     int                         child_ret_value;
-    hbool_t                     send_wait = FALSE;
+    bool                        send_wait = false;
     hid_t                       fid       = H5I_INVALID_HID;
     H5FD_mirror_fapl_t          mirr_fa;
     H5FD_splitter_vfd_config_t *split_fa     = NULL;
@@ -169,7 +169,7 @@ main(int argc, char *argv[])
     mirr_fa.magic          = H5FD_MIRROR_FAPL_MAGIC;
     mirr_fa.version        = H5FD_MIRROR_CURR_FAPL_T_VERSION;
     mirr_fa.handshake_port = SERVER_PORT;
-    HDstrncpy(mirr_fa.remote_ip, SERVER_IP, H5FD_MIRROR_MAX_IP_LEN);
+    strncpy(mirr_fa.remote_ip, SERVER_IP, H5FD_MIRROR_MAX_IP_LEN);
 
     if (NULL == (split_fa = calloc(1, sizeof(H5FD_splitter_vfd_config_t)))) {
         fprintf(stderr, "can't allocate memory for splitter config\n");
@@ -181,13 +181,13 @@ main(int argc, char *argv[])
     split_fa->magic            = H5FD_SPLITTER_MAGIC;
     split_fa->version          = H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION;
     split_fa->log_file_path[0] = '\0'; /* none */
-    split_fa->ignore_wo_errs   = FALSE;
-    HDstrncpy(split_fa->wo_path, MIRROR_FILE_NAME, H5FD_SPLITTER_PATH_MAX);
+    split_fa->ignore_wo_errs   = false;
+    strncpy(split_fa->wo_path, MIRROR_FILE_NAME, H5FD_SPLITTER_PATH_MAX);
 
     /* Determine the need to send/wait message file*/
     if (UC_opts.launch == UC_READWRITE) {
         HDunlink(WRITER_MESSAGE);
-        send_wait = TRUE;
+        send_wait = true;
     }
 
     /* ==============================================================*/
@@ -259,7 +259,7 @@ main(int argc, char *argv[])
     /* ============ */
     if (UC_opts.launch == UC_READWRITE) {
         if ((childpid = fork()) < 0) {
-            HDperror("fork");
+            perror("fork");
             Hgoto_error(1);
         }
     }
@@ -354,7 +354,7 @@ main(int argc, char *argv[])
     /* ================================================ */
     if (UC_opts.launch == UC_READWRITE) {
         if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0) {
-            HDperror("waitpid");
+            perror("waitpid");
             Hgoto_error(1);
         }
 

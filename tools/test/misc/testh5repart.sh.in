@@ -38,33 +38,33 @@ verbose=yes
 # source dirs
 SRC_TOOLS="$srcdir/../.."
 
-SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+SRC_H5REPART_TESTFILES="$SRC_TOOLS/test/misc/testfiles"
 
-TESTDIR=./testrepart
+TESTDIR=./tmprp
 test -d $TESTDIR || mkdir -p $TESTDIR
 
 #
 # copy test files and expected output files from source dirs to test dir
 #
 COPY_TESTFILES="
-$SRC_TOOLS_TESTFILES/family_file00000.h5
-$SRC_TOOLS_TESTFILES/family_file00001.h5
-$SRC_TOOLS_TESTFILES/family_file00002.h5
-$SRC_TOOLS_TESTFILES/family_file00003.h5
-$SRC_TOOLS_TESTFILES/family_file00004.h5
-$SRC_TOOLS_TESTFILES/family_file00005.h5
-$SRC_TOOLS_TESTFILES/family_file00006.h5
-$SRC_TOOLS_TESTFILES/family_file00007.h5
-$SRC_TOOLS_TESTFILES/family_file00008.h5
-$SRC_TOOLS_TESTFILES/family_file00009.h5
-$SRC_TOOLS_TESTFILES/family_file00010.h5
-$SRC_TOOLS_TESTFILES/family_file00011.h5
-$SRC_TOOLS_TESTFILES/family_file00012.h5
-$SRC_TOOLS_TESTFILES/family_file00013.h5
-$SRC_TOOLS_TESTFILES/family_file00014.h5
-$SRC_TOOLS_TESTFILES/family_file00015.h5
-$SRC_TOOLS_TESTFILES/family_file00016.h5
-$SRC_TOOLS_TESTFILES/family_file00017.h5
+$SRC_H5REPART_TESTFILES/family_file00000.h5
+$SRC_H5REPART_TESTFILES/family_file00001.h5
+$SRC_H5REPART_TESTFILES/family_file00002.h5
+$SRC_H5REPART_TESTFILES/family_file00003.h5
+$SRC_H5REPART_TESTFILES/family_file00004.h5
+$SRC_H5REPART_TESTFILES/family_file00005.h5
+$SRC_H5REPART_TESTFILES/family_file00006.h5
+$SRC_H5REPART_TESTFILES/family_file00007.h5
+$SRC_H5REPART_TESTFILES/family_file00008.h5
+$SRC_H5REPART_TESTFILES/family_file00009.h5
+$SRC_H5REPART_TESTFILES/family_file00010.h5
+$SRC_H5REPART_TESTFILES/family_file00011.h5
+$SRC_H5REPART_TESTFILES/family_file00012.h5
+$SRC_H5REPART_TESTFILES/family_file00013.h5
+$SRC_H5REPART_TESTFILES/family_file00014.h5
+$SRC_H5REPART_TESTFILES/family_file00015.h5
+$SRC_H5REPART_TESTFILES/family_file00016.h5
+$SRC_H5REPART_TESTFILES/family_file00017.h5
 "
 
 COPY_TESTFILES_TO_TESTDIR()
@@ -100,7 +100,7 @@ CLEAN_TESTFILES_AND_TESTDIR()
     # skip rm if srcdir is same as destdir
     # this occurs when build/test performed in source dir and
     # make cp fail
-    SDIR=$SRC_TOOLS_TESTFILES
+    SDIR=$SRC_H5REPART_TESTFILES
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then

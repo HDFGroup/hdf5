@@ -44,7 +44,7 @@
 /* Local Prototypes */
 /********************/
 
-static int  gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp_level,
+static int  gen_skeleton(const char *filename, bool verbose, bool swmr_write, int comp_level,
                          const char *index_type, unsigned random_seed);
 static void usage(void);
 
@@ -57,10 +57,10 @@ static void usage(void);
  * Parameters:  const char *filename
  *              The SWMR test file's name.
  *
- *              hbool_t verbose
+ *              bool verbose
  *              Whether verbose console output is desired.
  *
- *              hbool_t swmr_write
+ *              bool swmr_write
  *              Whether to create the file with SWMR writing enabled
  *
  *              int comp_level
@@ -79,8 +79,8 @@ static void usage(void);
  *-------------------------------------------------------------------------
  */
 static int
-gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp_level,
-             const char *index_type, unsigned random_seed)
+gen_skeleton(const char *filename, bool verbose, bool swmr_write, int comp_level, const char *index_type,
+             unsigned random_seed)
 {
     hid_t   fid;                                /* File ID for new HDF5 file */
     hid_t   fcpl;                               /* File creation property list */
@@ -115,7 +115,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp
      * With one unlimited dimension, we get the extensible array index
      * type, with two unlimited dimensions, we get a v2 B-tree.
      */
-    if (!HDstrcmp(index_type, "b2"))
+    if (!strcmp(index_type, "b2"))
         max_dims[0] = H5S_UNLIMITED;
 
     /* Create file creation property list */
@@ -182,10 +182,10 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp
     /* Create the datasets */
     for (u = 0; u < NLEVELS; u++)
         for (v = 0; v < symbol_count[u]; v++) {
-            hid_t   dsid; /* Dataset ID */
-            char    name_buf[64];
-            hbool_t move_dataspace_message =
-                FALSE; /* Whether to move the dataspace message out of object header chunk #0 */
+            hid_t dsid; /* Dataset ID */
+            char  name_buf[64];
+            bool  move_dataspace_message =
+                false; /* Whether to move the dataspace message out of object header chunk #0 */
 
             generate_name(name_buf, sizeof(name_buf), u, v);
             if ((dsid = H5Dcreate2(fid, name_buf, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -193,7 +193,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp
 
             /* Determine if the dataspace message for this dataset should be
              * moved out of chunk #0 of the object header
-             * (Set to TRUE for every fourth dataset)
+             * (Set to true for every fourth dataset)
              */
             move_dataspace_message = !(HDrandom() % 4);
             if (move_dataspace_message) {
@@ -260,10 +260,10 @@ int
 main(int argc, char *argv[])
 {
     int         comp_level  = -1;    /* Compression level (-1 is no compression) */
-    hbool_t     verbose     = TRUE;  /* Whether to emit some informational messages */
-    hbool_t     swmr_write  = FALSE; /* Whether to create file with SWMR_WRITE access */
+    bool        verbose     = true;  /* Whether to emit some informational messages */
+    bool        swmr_write  = false; /* Whether to create file with SWMR_WRITE access */
     const char *index_type  = "b1";  /* Chunk index type */
-    hbool_t     use_seed    = FALSE; /* Set to TRUE if a seed was set on the command line */
+    bool        use_seed    = false; /* Set to true if a seed was set on the command line */
     unsigned    random_seed = 0;     /* Random # seed */
     unsigned    u;                   /* Local index variables */
     int         temp;
@@ -285,14 +285,14 @@ main(int argc, char *argv[])
                     /* Chunk index type */
                     case 'i':
                         index_type = argv[u + 1];
-                        if (HDstrcmp(index_type, "ea") != 0 && HDstrcmp(index_type, "b2") != 0)
+                        if (strcmp(index_type, "ea") != 0 && strcmp(index_type, "b2") != 0)
                             usage();
                         u += 2;
                         break;
 
                     /* Random # seed */
                     case 'r':
-                        use_seed = TRUE;
+                        use_seed = true;
                         temp     = atoi(argv[u + 1]);
                         if (temp < 0)
                             usage();
@@ -303,13 +303,13 @@ main(int argc, char *argv[])
 
                     /* Be quiet */
                     case 'q':
-                        verbose = FALSE;
+                        verbose = false;
                         u++;
                         break;
 
                     /* Run with SWMR_WRITE */
                     case 's':
-                        swmr_write = TRUE;
+                        swmr_write = true;
                         u++;
                         break;
 

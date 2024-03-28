@@ -19,8 +19,6 @@
 
 #include "null_vfd_plugin.h"
 
-#define DEFAULT_DRIVER_NAME "sec2"
-
 /*-------------------------------------------------------------------------
  * Function:    test_set_by_name()
  *
@@ -42,7 +40,7 @@ test_set_by_name(void)
     /* The null VFD should not be registered at the start of the test */
     if ((is_registered = H5FDis_driver_registered_by_name(NULL_VFD_NAME)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     /* Register the null VFD by name */
@@ -54,7 +52,7 @@ test_set_by_name(void)
     /* The null VFD should be registered now */
     if ((is_registered = H5FDis_driver_registered_by_name(NULL_VFD_NAME)) < 0)
         TEST_ERROR;
-    if (FALSE == is_registered)
+    if (false == is_registered)
         FAIL_PUTS_ERROR("NULL VFD was not registered");
 
     /* Unregister the null VFD */
@@ -70,7 +68,7 @@ test_set_by_name(void)
     /* The null VFD should not be registered now */
     if ((is_registered = H5FDis_driver_registered_by_name(NULL_VFD_NAME)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     PASSED();
@@ -109,7 +107,7 @@ test_set_by_value(void)
     /* The null VFD should not be registered at the start of the test */
     if ((is_registered = H5FDis_driver_registered_by_value(NULL_VFD_VALUE)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     /* Register the null VFD by value */
@@ -121,7 +119,7 @@ test_set_by_value(void)
     /* The null VFD should be registered now */
     if ((is_registered = H5FDis_driver_registered_by_value(NULL_VFD_VALUE)) < 0)
         TEST_ERROR;
-    if (FALSE == is_registered)
+    if (false == is_registered)
         FAIL_PUTS_ERROR("NULL VFD was not registered");
 
     /* Unregister the null VFD */
@@ -137,7 +135,7 @@ test_set_by_value(void)
     /* The null VFD should not be registered now */
     if ((is_registered = H5FDis_driver_registered_by_value(NULL_VFD_VALUE)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     PASSED();
@@ -177,7 +175,7 @@ test_set_multi(void)
     /* The null VFD should not be registered at the start of the test */
     if ((is_registered = H5FDis_driver_registered_by_name(NULL_VFD_NAME)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     /* Register the VFD multiple times */
@@ -191,7 +189,7 @@ test_set_multi(void)
     /* The null VFD should be registered now */
     if ((is_registered = H5FDis_driver_registered_by_name(NULL_VFD_NAME)) < 0)
         TEST_ERROR;
-    if (FALSE == is_registered)
+    if (false == is_registered)
         FAIL_PUTS_ERROR("NULL VFD was not registered");
 
     /* Unregister the null VFD */
@@ -209,7 +207,7 @@ test_set_multi(void)
     /* The null VFD should not be registered now */
     if ((is_registered = H5FDis_driver_registered_by_name(NULL_VFD_NAME)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     /* Repeat testing with the _by_value routines */
@@ -217,7 +215,7 @@ test_set_multi(void)
     /* The null VFD should not be registered at the start of the test */
     if ((is_registered = H5FDis_driver_registered_by_value(NULL_VFD_VALUE)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     /* Register the VFD multiple times */
@@ -231,7 +229,7 @@ test_set_multi(void)
     /* The null VFD should be registered now */
     if ((is_registered = H5FDis_driver_registered_by_value(NULL_VFD_VALUE)) < 0)
         TEST_ERROR;
-    if (FALSE == is_registered)
+    if (false == is_registered)
         FAIL_PUTS_ERROR("NULL VFD was not registered");
 
     /* Unregister the null VFD */
@@ -249,7 +247,7 @@ test_set_multi(void)
     /* The null VFD should not be registered now */
     if ((is_registered = H5FDis_driver_registered_by_value(NULL_VFD_VALUE)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     PASSED();
@@ -297,17 +295,17 @@ test_get_config_str(void)
         TEST_ERROR;
     if (0 != config_str_len)
         TEST_ERROR;
-    if (HDstrlen(config_str_buf) > 0)
+    if (strlen(config_str_buf) > 0)
         TEST_ERROR;
 
     /* Set a new configuration string on the FAPL and retrieve it */
-    if (H5Pset_driver_by_name(fapl_id, DEFAULT_DRIVER_NAME, config_str) < 0)
+    if (H5Pset_driver_by_name(fapl_id, H5_DEFAULT_VFD_NAME, config_str) < 0)
         TEST_ERROR;
     if ((config_str_len = H5Pget_driver_config_str(fapl_id, config_str_buf, 128)) < 0)
         TEST_ERROR;
-    if (HDstrlen(config_str) != config_str_len)
+    if (strlen(config_str) != config_str_len)
         TEST_ERROR;
-    if (HDstrncmp(config_str_buf, config_str, 128))
+    if (strncmp(config_str_buf, config_str, 128))
         TEST_ERROR;
 
     if (H5Pclose(fapl_id) < 0)
@@ -355,7 +353,7 @@ test_env_var(void)
         TEST_ERROR;
     if (0 != config_str_len)
         TEST_ERROR;
-    if (HDstrlen(config_str_buf) > 0)
+    if (strlen(config_str_buf) > 0)
         TEST_ERROR;
 
     /* Set default driver and driver configuration using environment variables */
@@ -382,9 +380,9 @@ test_env_var(void)
     memset(config_str_buf, 0, 128);
     if ((config_str_len = H5Pget_driver_config_str(H5P_FILE_ACCESS_DEFAULT, config_str_buf, 128)) < 0)
         TEST_ERROR;
-    if (HDstrlen(config_str) != config_str_len)
+    if (strlen(config_str) != config_str_len)
         TEST_ERROR;
-    if (HDstrncmp(config_str_buf, config_str, 128))
+    if (strncmp(config_str_buf, config_str, 128))
         TEST_ERROR;
 
     /* Unset environment variables */
@@ -420,7 +418,7 @@ main(void)
 
     h5_reset();
 
-    HDputs("Testing VFD plugin functionality.");
+    puts("Testing VFD plugin functionality.");
 
     nerrors += (test_set_by_name() < 0) ? 1 : 0;
     nerrors += (test_set_by_value() < 0) ? 1 : 0;
@@ -433,7 +431,7 @@ main(void)
         exit(EXIT_FAILURE);
     }
 
-    HDputs("All VFD plugin tests passed.");
+    puts("All VFD plugin tests passed.");
 
     exit(EXIT_SUCCESS);
 }

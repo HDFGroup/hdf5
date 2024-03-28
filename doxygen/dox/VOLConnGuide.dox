@@ -92,7 +92,7 @@ Public header Files you will need to be familiar with include:
 </table>
 
 Many VOL connectors are listed on The HDF Group's VOL plugin registration page, located at:
-<a href="https://portal.hdfgroup.org/display/support/Registered+VOL+Connectors">Registered VOL Connectors</a>.
+<a href="https://portal.hdfgroup.org/documentation/hdf5-docs/registered_vol_connectors.html">Registered VOL Connectors</a>.
 Not all of these VOL connectors are supported by The HDF Group and the level of completeness varies, but the
 connectors found there can serve as examples of working implementations
 
@@ -195,7 +195,7 @@ contact <a href="help@hdfgroup.org">help@hdfgroup.org</a> for help with this. We
 name you've chosen will appear on the registered VOL connectors page.
 
 As noted above, registered VOL connectors will be listed at:
-<a href="https://portal.hdfgroup.org/display/support/Registered+VOL+Connectors">Registered VOL Connectors</a>
+<a href="https://portal.hdfgroup.org/documentation/hdf5-docs/registered_vol_connectors.html">Registered VOL Connectors</a>
 
 A new \b conn_version field has been added to the class struct for 1.13. This field is currently not used by
 the library so its use is determined by the connector author. Best practices for this field will be determined

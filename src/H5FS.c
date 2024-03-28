@@ -28,9 +28,11 @@
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5ACprivate.h" /* Metadata cache                           */
 #include "H5Eprivate.h"  /* Error handling                           */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5FSpkg.h"     /* File free space                          */
 #include "H5MFprivate.h" /* File memory management                   */
 #include "H5MMprivate.h" /* Memory management                        */
+#include "H5SLprivate.h" /* Skip Lists                               */
 
 /****************/
 /* Local Macros */
@@ -264,31 +266,31 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
 
         fprintf(stderr, "%s: fspace_status = %0x: ", __func__, fspace_status);
         if (fspace_status) {
-            hbool_t printed = FALSE;
+            bool printed = false;
 
             if (fspace_status & H5AC_ES__IN_CACHE) {
                 fprintf(stderr, "H5AC_ES__IN_CACHE");
-                printed = TRUE;
+                printed = true;
             } /* end if */
             if (fspace_status & H5AC_ES__IS_DIRTY) {
                 fprintf(stderr, "%sH5AC_ES__IS_DIRTY", (printed ? " | " : ""));
-                printed = TRUE;
+                printed = true;
             } /* end if */
             if (fspace_status & H5AC_ES__IS_PROTECTED) {
                 fprintf(stderr, "%sH5AC_ES__IS_PROTECTED", (printed ? " | " : ""));
-                printed = TRUE;
+                printed = true;
             } /* end if */
             if (fspace_status & H5AC_ES__IS_PINNED) {
                 fprintf(stderr, "%sH5AC_ES__IS_PINNED", (printed ? " | " : ""));
-                printed = TRUE;
+                printed = true;
             } /* end if */
             if (fspace_status & H5AC_ES__IS_FLUSH_DEP_PARENT) {
                 fprintf(stderr, "%sH5AC_ES__IS_FLUSH_DEP_PARENT", (printed ? " | " : ""));
-                printed = TRUE;
+                printed = true;
             } /* end if */
             if (fspace_status & H5AC_ES__IS_FLUSH_DEP_CHILD) {
                 fprintf(stderr, "%sH5AC_ES__IS_FLUSH_DEP_CHILD", (printed ? " | " : ""));
-                printed = TRUE;
+                printed = true;
             } /* end if */
         }     /* end if */
         fprintf(stderr, "\n");
@@ -488,7 +490,7 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
                                                       fspace->alloc_sect_size)) < 0)
                             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMERGE, FAIL,
                                         "can't check for absorbing section info");
-                        else if (status == FALSE) {
+                        else if (status == false) {
                             /* Section info can't "go away", but it's free.  Allow
                              *      header to record it
                              */
@@ -867,7 +869,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_free(H5F_t *f, H5FS_t *fspace, hbool_t free_file_space)
+H5FS_free(H5F_t *f, H5FS_t *fspace, bool free_file_space)
 {
     haddr_t  saved_addr;          /* Previous address of item */
     unsigned cache_flags;         /* Flags for unprotecting cache entries */

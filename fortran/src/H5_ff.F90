@@ -12,8 +12,6 @@
 ! PURPOSE
 !  This module is used to pass C stubs for H5 Fortran APIs. The C stubs are
 !  packed into arrays in H5_f.c and these arrays are then passed to Fortran.
-!  This module then uses EQUIVALENCE to assign elements of the arrays to
-!  Fortran equivalent C stubs.
 !
 ! NOTES
 !  The size of the C arrays in H5_f.c has to match the values of the variables
@@ -58,7 +56,7 @@ MODULE H5LIB
   !
   ! H5F flags declaration
   !
-  INTEGER, PARAMETER :: H5F_FLAGS_LEN = 25
+  INTEGER, PARAMETER :: H5F_FLAGS_LEN = 30
   INTEGER, DIMENSION(1:H5F_FLAGS_LEN) :: H5F_flags
   !
   ! H5generic flags declaration
@@ -76,7 +74,7 @@ MODULE H5LIB
   !
   ! H5D flags declaration
   !
-  INTEGER, PARAMETER :: H5D_FLAGS_LEN = 32
+  INTEGER, PARAMETER :: H5D_FLAGS_LEN = 60
   INTEGER, DIMENSION(1:H5D_FLAGS_LEN) :: H5D_flags
   INTEGER, PARAMETER :: H5D_SIZE_FLAGS_LEN = 2
   INTEGER(SIZE_T), DIMENSION(1:H5D_SIZE_FLAGS_LEN) :: H5D_size_flags
@@ -137,11 +135,11 @@ MODULE H5LIB
   !
   ! H5S flags declaration
   !
-  INTEGER, PARAMETER :: H5S_FLAGS_LEN = 18
+  INTEGER, PARAMETER :: H5S_FLAGS_LEN = 20
   INTEGER, DIMENSION(1:H5S_FLAGS_LEN) :: H5S_flags
   INTEGER, PARAMETER :: H5S_HSIZE_FLAGS_LEN = 1
   INTEGER(HSIZE_T), DIMENSION(1:H5S_HSIZE_FLAGS_LEN) :: H5S_hsize_flags
-  INTEGER, PARAMETER :: H5S_HID_FLAGS_LEN = 1
+  INTEGER, PARAMETER :: H5S_HID_FLAGS_LEN = 3
   INTEGER(HSIZE_T), DIMENSION(1:H5S_HID_FLAGS_LEN)   :: H5S_hid_flags
   !
   ! H5T flags declaration
@@ -168,7 +166,7 @@ MODULE H5LIB
   INTEGER, DIMENSION(1:H5LIB_FLAGS_LEN) :: H5LIB_flags
 
   PUBLIC :: h5open_f, h5close_f, h5get_libversion_f, h5dont_atexit_f, h5kind_to_type, h5offsetof, h5gmtime
-  PUBLIC :: h5garbage_collect_f, h5check_version_f
+  PUBLIC :: h5garbage_collect_f, h5check_version_f, h5get_free_list_sizes_f
 
 CONTAINS
 !>
@@ -350,31 +348,36 @@ CONTAINS
     !
     ! H5F flags
     !
-    H5F_ACC_RDWR_F        = H5F_flags(1)
-    H5F_ACC_RDONLY_F      = H5F_flags(2)
-    H5F_ACC_TRUNC_F       = H5F_flags(3)
-    H5F_ACC_EXCL_F        = H5F_flags(4)
-    H5F_ACC_DEBUG_F       = H5F_flags(5)
-    H5F_SCOPE_LOCAL_F     = H5F_flags(6)
-    H5F_SCOPE_GLOBAL_F    = H5F_flags(7)
-    H5F_CLOSE_DEFAULT_F   = H5F_flags(8)
-    H5F_CLOSE_WEAK_F      = H5F_flags(9)
-    H5F_CLOSE_SEMI_F      = H5F_flags(10)
-    H5F_CLOSE_STRONG_F    = H5F_flags(11)
-    H5F_OBJ_FILE_F        = H5F_flags(12)
-    H5F_OBJ_DATASET_F     = H5F_flags(13)
-    H5F_OBJ_GROUP_F       = H5F_flags(14)
-    H5F_OBJ_DATATYPE_F    = H5F_flags(15)
-    H5F_OBJ_ALL_F         = H5F_flags(16)
-    H5F_LIBVER_EARLIEST_F = H5F_flags(17)
-    H5F_LIBVER_LATEST_F   = H5F_flags(18)
-    H5F_LIBVER_ERROR_F    = H5F_flags(19)
-    H5F_LIBVER_NBOUNDS_F  = H5F_flags(20)
-    H5F_UNLIMITED_F       = H5F_flags(21)
-    H5F_LIBVER_V18_F      = H5F_flags(22)
-    H5F_LIBVER_V110_F     = H5F_flags(23)
-    H5F_LIBVER_V112_F     = H5F_flags(24)
-    H5F_LIBVER_V114_F     = H5F_flags(25)
+    H5F_ACC_RDWR_F                 = H5F_flags(1)
+    H5F_ACC_RDONLY_F               = H5F_flags(2)
+    H5F_ACC_TRUNC_F                = H5F_flags(3)
+    H5F_ACC_EXCL_F                 = H5F_flags(4)
+    H5F_ACC_DEBUG_F                = H5F_flags(5)
+    H5F_SCOPE_LOCAL_F              = H5F_flags(6)
+    H5F_SCOPE_GLOBAL_F             = H5F_flags(7)
+    H5F_CLOSE_DEFAULT_F            = H5F_flags(8)
+    H5F_CLOSE_WEAK_F               = H5F_flags(9)
+    H5F_CLOSE_SEMI_F               = H5F_flags(10)
+    H5F_CLOSE_STRONG_F             = H5F_flags(11)
+    H5F_OBJ_FILE_F                 = H5F_flags(12)
+    H5F_OBJ_DATASET_F              = H5F_flags(13)
+    H5F_OBJ_GROUP_F                = H5F_flags(14)
+    H5F_OBJ_DATATYPE_F             = H5F_flags(15)
+    H5F_OBJ_ALL_F                  = H5F_flags(16)
+    H5F_LIBVER_EARLIEST_F          = H5F_flags(17)
+    H5F_LIBVER_LATEST_F            = H5F_flags(18)
+    H5F_LIBVER_ERROR_F             = H5F_flags(19)
+    H5F_LIBVER_NBOUNDS_F           = H5F_flags(20)
+    H5F_UNLIMITED_F                = H5F_flags(21)
+    H5F_FSPACE_STRATEGY_FSM_AGGR_F = H5F_flags(22)
+    H5F_FSPACE_STRATEGY_PAGE_F     = H5F_flags(23)
+    H5F_FSPACE_STRATEGY_AGGR_F     = H5F_flags(24)
+    H5F_FSPACE_STRATEGY_NONE_F     = H5F_flags(25)
+    H5F_FSPACE_STRATEGY_NTYPES_F   = H5F_flags(26)
+    H5F_LIBVER_V18_F               = H5F_flags(27)
+    H5F_LIBVER_V110_F              = H5F_flags(28)
+    H5F_LIBVER_V112_F              = H5F_flags(29)
+    H5F_LIBVER_V114_F              = H5F_flags(30)
     !
     ! H5generic flags
     !
@@ -439,6 +442,34 @@ CONTAINS
     H5D_SELECTION_IO_MODE_DEFAULT_F = H5D_flags(30)
     H5D_SELECTION_IO_MODE_OFF_F     = H5D_flags(31)
     H5D_SELECTION_IO_MODE_ON_F      = H5D_flags(32)
+    H5D_MPIO_COLLECTIVE_F                               = H5D_flags(33)
+    H5D_MPIO_SET_INDEPENDENT_F                          = H5D_flags(34)
+    H5D_MPIO_DATATYPE_CONVERSION_F                      = H5D_flags(35)
+    H5D_MPIO_DATA_TRANSFORMS_F                          = H5D_flags(36)
+    H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED_F           = H5D_flags(37)
+    H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES_F          = H5D_flags(38)
+    H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_F        = H5D_flags(39)
+    H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED_F        = H5D_flags(40)
+    H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE_F = H5D_flags(41)
+    H5D_MPIO_NO_SELECTION_IO_F                          = H5D_flags(42)
+    H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE_F                  = H5D_flags(43)
+    H5D_SEL_IO_DISABLE_BY_API_F                         = H5D_flags(44)
+    H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_F      = H5D_flags(45)
+    H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER_F                = H5D_flags(46)
+    H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB_F           = H5D_flags(47)
+    H5D_SEL_IO_PAGE_BUFFER_F                            = H5D_flags(48)
+    H5D_SEL_IO_DATASET_FILTER_F                         = H5D_flags(49)
+    H5D_SEL_IO_CHUNK_CACHE_F                            = H5D_flags(50)
+    H5D_SEL_IO_TCONV_BUF_TOO_SMALL_F                    = H5D_flags(51)
+    H5D_SEL_IO_BKG_BUF_TOO_SMALL_F                      = H5D_flags(52)
+    H5D_SEL_IO_DEFAULT_OFF_F                            = H5D_flags(53)
+    H5D_MPIO_NO_SELECTION_IO_CAUSES_F                   = H5D_flags(54)
+    H5D_MPIO_NO_CHUNK_OPTIMIZATION_F                    = H5D_flags(55)
+    H5D_MPIO_LINK_CHUNK_F                               = H5D_flags(56)
+    H5D_MPIO_MULTI_CHUNK_F                              = H5D_flags(57)
+    H5D_SCALAR_IO_F                                     = H5D_flags(58)
+    H5D_VECTOR_IO_F                                     = H5D_flags(59)
+    H5D_SELECTION_IO_F                                  = H5D_flags(60)
 
     H5D_CHUNK_CACHE_NSLOTS_DFLT_F = H5D_size_flags(1)
     H5D_CHUNK_CACHE_NBYTES_DFLT_F = H5D_size_flags(2)
@@ -601,7 +632,9 @@ CONTAINS
     !
     ! H5S flags
     !
-    H5S_ALL_F = H5S_hid_flags(1)
+    H5S_ALL_F   = H5S_hid_flags(1)
+    H5S_BLOCK_F = H5S_hid_flags(2)
+    H5S_PLIST_F = H5S_hid_flags(3)
 
     H5S_UNLIMITED_F = H5S_hsize_flags(1)
 
@@ -623,6 +656,8 @@ CONTAINS
     H5S_SEL_POINTS_F     = H5S_flags(16)
     H5S_SEL_HYPERSLABS_F = H5S_flags(17)
     H5S_SEL_ALL_F        = H5S_flags(18)
+    H5S_SEL_ITER_GET_SEQ_LIST_SORTED_F  = H5S_flags(19)
+    H5S_SEL_ITER_SHARE_WITH_DATASPACE_F = H5S_flags(20)
     !
     ! H5T flags declaration
     !
@@ -801,6 +836,8 @@ CONTAINS
 !! \param relnum  Release version of the library.
 !! \param error   \fortran_error
 !!
+!! See C API: @ref H5get_libversion()
+!!
   SUBROUTINE h5get_libversion_f(majnum, minnum, relnum, error)
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: majnum, minnum, relnum, error
@@ -826,6 +863,8 @@ CONTAINS
 !! \param relnum Release version of the library.
 !! \param error  \fortran_error
 !!
+!! See C API: @ref H5check_version()
+!!
   SUBROUTINE h5check_version_f(majnum, minnum, relnum, error)
     IMPLICIT NONE
     INTEGER, INTENT(IN)  :: majnum, minnum, relnum
@@ -848,6 +887,8 @@ CONTAINS
 !!
 !! \param error \fortran_error
 !!
+!! See C API: @ref H5garbage_collect()
+!!
   SUBROUTINE h5garbage_collect_f(error)
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
@@ -867,6 +908,8 @@ CONTAINS
 !!
 !! \param error \fortran_error
 !!
+!! See C API: @ref H5dont_atexit()
+!!
   SUBROUTINE h5dont_atexit_f(error)
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
@@ -879,6 +922,41 @@ CONTAINS
     error = h5dont_atexit_c()
 
   END SUBROUTINE h5dont_atexit_f
+
+!>
+!! \ingroup FH5
+!! \brief Gets the current size of the free lists used to manage memory
+!!
+!! \param reg_size The current size of all "regular" free list memory used
+!! \param arr_size The current size of all "array" free list memory used
+!! \param blk_size The current size of all "block" free list memory used
+!! \param fac_size The current size of all "factory" free list memory used
+!! \param error \fortran_error
+!!
+!! See C API: @ref H5get_free_list_sizes()
+!!
+  SUBROUTINE h5get_free_list_sizes_f(reg_size, arr_size, blk_size, fac_size, error)
+    IMPLICIT NONE
+    INTEGER(C_SIZE_T), INTENT(OUT) :: reg_size
+    INTEGER(C_SIZE_T), INTENT(OUT) :: arr_size
+    INTEGER(C_SIZE_T), INTENT(OUT) :: blk_size
+    INTEGER(C_SIZE_T), INTENT(OUT) :: fac_size
+    INTEGER, INTENT(OUT) :: error
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5get_free_list_sizes(reg_size, arr_size, blk_size, fac_size) BIND(C,NAME='H5get_free_list_sizes')
+         IMPORT :: C_INT, C_SIZE_T
+         IMPLICIT NONE
+         INTEGER(C_SIZE_T), INTENT(OUT) :: reg_size
+         INTEGER(C_SIZE_T), INTENT(OUT) :: arr_size
+         INTEGER(C_SIZE_T), INTENT(OUT) :: blk_size
+         INTEGER(C_SIZE_T), INTENT(OUT) :: fac_size
+       END FUNCTION H5get_free_list_sizes
+    END INTERFACE
+
+    error = INT(H5get_free_list_sizes(reg_size, arr_size, blk_size, fac_size))
+
+  END SUBROUTINE h5get_free_list_sizes_f
 
 !>
 !! \ingroup FH5
@@ -922,7 +1000,7 @@ CONTAINS
           h5_type = H5T_NATIVE_REAL_C_LONG_DOUBLE
 #endif
 #if H5_PAC_FC_MAX_REAL_PRECISION > 28
-#if H5_HAVE_FLOAT128 == 1
+#ifdef H5_HAVE_FLOAT128
        ELSE
           h5_type = H5T_NATIVE_FLOAT_128
 #endif

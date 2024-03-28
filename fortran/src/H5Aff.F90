@@ -591,8 +591,8 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
 
     INTERFACE
-       INTEGER FUNCTION H5Aclose(attr_id) BIND(C, NAME='H5Aclose')
-         IMPORT :: HID_T
+       INTEGER(C_INT) FUNCTION H5Aclose(attr_id) BIND(C, NAME='H5Aclose')
+         IMPORT :: HID_T, C_INT
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
        END FUNCTION H5Aclose
@@ -1131,6 +1131,9 @@ CONTAINS
     attr_id = INT(H5Aopen_by_idx(loc_id, c_obj_name, INT(idx_type, C_INT), INT(order, C_INT), n, &
          aapl_id_default, lapl_id_default), HID_T)
 
+    hdferr = 0
+    IF(attr_id.LT.0) hdferr = -1
+    
   END SUBROUTINE h5aopen_by_idx_f
 
 !>

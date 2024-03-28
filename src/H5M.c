@@ -116,7 +116,7 @@ H5M_top_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5I_nmembers(H5I_MAP) > 0) {
-        (void)H5I_clear_type(H5I_MAP, FALSE, FALSE);
+        (void)H5I_clear_type(H5I_MAP, false, false);
         n++;
     }
 
@@ -224,17 +224,17 @@ H5M__create_api_common(hid_t loc_id, const char *name, hid_t key_type_id, hid_t 
     /* Get link creation property list */
     if (H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
-    else if (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
+    else if (true != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "lcpl_id is not a link creation property list");
 
     /* Get map creation property list */
     if (H5P_DEFAULT == mcpl_id)
         mcpl_id = H5P_MAP_CREATE_DEFAULT;
-    else if (TRUE != H5P_isa_class(mcpl_id, H5P_MAP_CREATE))
+    else if (true != H5P_isa_class(mcpl_id, H5P_MAP_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "mcpl_id is not a map create property list ID");
 
     /* Set up VOL callback arguments */
-    if (H5VL_setup_acc_args(loc_id, H5P_CLS_MACC, TRUE, &mapl_id, vol_obj_ptr, &map_args.create.loc_params) <
+    if (H5VL_setup_acc_args(loc_id, H5P_CLS_MACC, true, &mapl_id, vol_obj_ptr, &map_args.create.loc_params) <
         0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments");
     map_args.create.name        = name;
@@ -253,7 +253,7 @@ H5M__create_api_common(hid_t loc_id, const char *name, hid_t key_type_id, hid_t 
     map = map_args.create.map;
 
     /* Get an ID for the map */
-    if ((ret_value = H5VL_register(H5I_MAP, map, (*vol_obj_ptr)->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_MAP, map, (*vol_obj_ptr)->connector, true)) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register map handle");
 
 done:
@@ -393,11 +393,11 @@ H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id, hid_t mcpl_id
     /* Check arguments */
     if (H5P_DEFAULT == mcpl_id)
         mcpl_id = H5P_MAP_CREATE_DEFAULT;
-    else if (TRUE != H5P_isa_class(mcpl_id, H5P_MAP_CREATE))
+    else if (true != H5P_isa_class(mcpl_id, H5P_MAP_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not map create property list ID");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&mapl_id, H5P_CLS_MACC, loc_id, TRUE) < 0)
+    if (H5CX_set_apl(&mapl_id, H5P_CLS_MACC, loc_id, true) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info");
 
     /* get the location object */
@@ -425,7 +425,7 @@ H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id, hid_t mcpl_id
     map = map_args.create.map;
 
     /* Get an ID for the map */
-    if ((ret_value = H5VL_register(H5I_MAP, map, vol_obj->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_MAP, map, vol_obj->connector, true)) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register map");
 
 done:
@@ -474,7 +474,7 @@ H5M__open_api_common(hid_t loc_id, const char *name, hid_t mapl_id, void **token
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string");
 
     /* Set up VOL callback arguments */
-    if (H5VL_setup_acc_args(loc_id, H5P_CLS_MACC, FALSE, &mapl_id, vol_obj_ptr, &map_args.open.loc_params) <
+    if (H5VL_setup_acc_args(loc_id, H5P_CLS_MACC, false, &mapl_id, vol_obj_ptr, &map_args.open.loc_params) <
         0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments");
     map_args.open.name    = name;
@@ -489,7 +489,7 @@ H5M__open_api_common(hid_t loc_id, const char *name, hid_t mapl_id, void **token
     map = map_args.open.map;
 
     /* Register an ID for the map */
-    if ((ret_value = H5VL_register(H5I_MAP, map, (*vol_obj_ptr)->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_MAP, map, (*vol_obj_ptr)->connector, true)) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register map ID");
 
 done:
@@ -881,7 +881,7 @@ H5Mget_count(hid_t map_id, hsize_t *count /*out*/, hid_t dxpl_id)
     herr_t               ret_value = SUCCEED; /* Return value         */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("e", "ixi", map_id, count, dxpl_id);
+    H5TRACE3("e", "i*hi", map_id, count, dxpl_id);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
@@ -890,11 +890,8 @@ H5Mget_count(hid_t map_id, hsize_t *count /*out*/, hid_t dxpl_id)
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
-
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
 
     /* Set up VOL callback arguments */
     map_args.get.get_type             = H5VL_MAP_GET_COUNT;
@@ -949,11 +946,8 @@ H5M__put_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
-
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
 
     /* Set up VOL callback arguments */
     map_args.put.key_mem_type_id   = key_mem_type_id;
@@ -1084,11 +1078,8 @@ H5M__get_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
-
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
 
     /* Set up VOL callback arguments */
     map_args.get_val.key_mem_type_id   = key_mem_type_id;
@@ -1222,16 +1213,13 @@ H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, hbool_t *exists,
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
-
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
 
     /* Set up VOL callback arguments */
     map_args.exists.key_mem_type_id = key_mem_type_id;
     map_args.exists.key             = key;
-    map_args.exists.exists          = FALSE;
+    map_args.exists.exists          = false;
     vol_cb_args.op_type             = H5VL_MAP_EXISTS;
     vol_cb_args.args                = &map_args;
 
@@ -1302,11 +1290,8 @@ H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
-
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
 
     /* Set up VOL callback arguments */
     map_args.specific.specific_type                    = H5VL_MAP_ITER;
@@ -1391,11 +1376,8 @@ H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *idx, hid_t key_m
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
-
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
 
     /* Set up VOL callback arguments */
     map_args.specific.specific_type                                        = H5VL_MAP_ITER;
@@ -1459,11 +1441,8 @@ H5Mdelete(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t dxpl_id)
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
-
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
 
     /* Set up VOL callback arguments */
     map_args.specific.specific_type                = H5VL_MAP_DELETE;

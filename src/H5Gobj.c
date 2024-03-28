@@ -28,14 +28,13 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fprivate.h"  /* File access				*/
-#include "H5Gpkg.h"      /* Groups		  		*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5Lprivate.h"  /* Links			  	*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Pprivate.h"  /* Property Lists			*/
+#include "H5private.h"  /* Generic Functions			*/
+#include "H5Eprivate.h" /* Error handling		  	*/
+#include "H5Fprivate.h" /* File access				*/
+#include "H5Gpkg.h"     /* Groups		  		*/
+#include "H5Iprivate.h" /* IDs			  		*/
+#include "H5Lprivate.h" /* Links			  	*/
+#include "H5Pprivate.h" /* Property Lists			*/
 
 /****************/
 /* Local Macros */
@@ -155,10 +154,10 @@ herr_t
 H5G__obj_create_real(H5F_t *f, const H5O_ginfo_t *ginfo, const H5O_linfo_t *linfo, const H5O_pline_t *pline,
                      H5G_obj_create_t *gcrt_info, H5O_loc_t *oloc /*out*/)
 {
-    size_t  hdr_size;                       /* Size of object header to request */
-    hbool_t use_at_least_v18;               /* Flag indicating the new group format should be used */
-    hid_t   gcpl_id   = gcrt_info->gcpl_id; /* Group creation property list ID */
-    herr_t  ret_value = SUCCEED;            /* Return value */
+    size_t hdr_size;                       /* Size of object header to request */
+    bool   use_at_least_v18;               /* Flag indicating the new group format should be used */
+    hid_t  gcpl_id   = gcrt_info->gcpl_id; /* Group creation property list ID */
+    herr_t ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -178,9 +177,9 @@ H5G__obj_create_real(H5F_t *f, const H5O_ginfo_t *ginfo, const H5O_linfo_t *linf
     /* Check for using the latest version of the group format which is introduced in v18 */
     /* (add more checks for creating "new format" groups when needed) */
     if ((H5F_LOW_BOUND(f) >= H5F_LIBVER_V18) || linfo->track_corder || (pline && pline->nused))
-        use_at_least_v18 = TRUE;
+        use_at_least_v18 = true;
     else
-        use_at_least_v18 = FALSE;
+        use_at_least_v18 = false;
 
     /* Make certain that the creation order is being tracked if an index is
      *  going to be built on it.
@@ -218,7 +217,25 @@ H5G__obj_create_real(H5F_t *f, const H5O_ginfo_t *ginfo, const H5O_linfo_t *linf
         assert(link_size);
 
         /* Compute size of header to use for creation */
-        hdr_size = linfo_size + ginfo_size + pline_size + (ginfo->est_num_entries * link_size);
+
+        /* Basic header size */
+        hdr_size = linfo_size + ginfo_size + pline_size;
+
+        /* If this is likely to be a compact group, add space for the link
+         * messages, unless the size of the link messages is greater than
+         * the largest allowable object header message size, since the size
+         * of the link messages is the size of the NIL spacer message that
+         * would have to be written out to reserve enough space to hold the
+         * links if the group were left empty.
+         */
+        bool compact = ginfo->est_num_entries <= ginfo->max_compact;
+        if (compact) {
+
+            size_t size_of_links = ginfo->est_num_entries * link_size;
+
+            if (size_of_links < H5O_MESG_MAX_SIZE)
+                hdr_size += size_of_links;
+        }
     } /* end if */
     else
         hdr_size = (size_t)(4 + 2 * H5F_SIZEOF_ADDR(f));
@@ -271,7 +288,7 @@ done:
  * Purpose:     Retrieves the "link info" message for an object.  Also
  *              sets the number of links correctly, if it isn't set up yet.
  *
- * Return:	Success:	TRUE/FALSE whether message was found & retrieved
+ * Return:	Success:	true/false whether message was found & retrieved
  *              Failure:        FAIL if error occurred
  *
  *-------------------------------------------------------------------------
@@ -380,7 +397,7 @@ H5G__obj_stab_to_new_cb(const H5O_link_t *lnk, void *_udata)
 
     /* Insert link into group */
     H5_GCC_CLANG_DIAG_OFF("cast-qual")
-    if (H5G_obj_insert(udata->grp_oloc, lnk->name, (H5O_link_t *)lnk, FALSE, H5O_TYPE_UNKNOWN, NULL) < 0)
+    if (H5G_obj_insert(udata->grp_oloc, lnk->name, (H5O_link_t *)lnk, false, H5O_TYPE_UNKNOWN, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5_ITER_ERROR, "can't insert link into group");
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
@@ -402,15 +419,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk, hbool_t adj_link,
+H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk, bool adj_link,
                H5O_type_t obj_type, const void *crt_info)
 {
     H5O_pline_t  tmp_pline;             /* Pipeline message */
     H5O_pline_t *pline = NULL;          /* Pointer to pipeline message */
     H5O_linfo_t  linfo;                 /* Link info message */
     htri_t       linfo_exists;          /* Whether the link info message exists */
-    hbool_t      use_old_format;        /* Whether to use 'old format' (symbol table) for insertions or not */
-    hbool_t      use_new_dense = FALSE; /* Whether to use "dense" form of 'new format' group */
+    bool         use_old_format;        /* Whether to use 'old format' (symbol table) for insertions or not */
+    bool         use_new_dense = false; /* Whether to use "dense" form of 'new format' group */
     herr_t       ret_value     = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(grp_oloc->addr, FAIL)
@@ -429,20 +446,20 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
         size_t      link_msg_size; /* Size of new link message in the file */
 
         /* Using the new format for groups */
-        use_old_format = FALSE;
+        use_old_format = false;
 
         /* Check for tracking creation order on this group's links */
         if (linfo.track_corder) {
             /* Set the creation order for the new link & indicate that it's valid */
             obj_lnk->corder       = linfo.max_corder;
-            obj_lnk->corder_valid = TRUE;
+            obj_lnk->corder_valid = true;
 
             /* Increment the max. creation order used in the group */
             linfo.max_corder++;
         } /* end if */
 
         /* Get the link's message size */
-        if ((link_msg_size = H5O_msg_raw_size(grp_oloc->file, H5O_LINK_ID, FALSE, obj_lnk)) == 0)
+        if ((link_msg_size = H5O_msg_raw_size(grp_oloc->file, H5O_LINK_ID, false, obj_lnk)) == 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't get link size");
 
         /* Get the group info */
@@ -454,9 +471,9 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
          *  header message, convert to using dense link storage instead of link messages)
          */
         if (H5_addr_defined(linfo.fheap_addr))
-            use_new_dense = TRUE;
+            use_new_dense = true;
         else if (linfo.nlinks < ginfo.max_compact && link_msg_size < H5O_MESG_MAX_SIZE)
-            use_new_dense = FALSE;
+            use_new_dense = false;
         else {
             htri_t              pline_exists; /* Whether the pipeline message exists */
             H5G_obj_oh_it_ud1_t udata;        /* User data for iteration */
@@ -487,10 +504,10 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over links");
 
             /* Remove all the 'link' messages */
-            if (H5O_msg_remove(grp_oloc, H5O_LINK_ID, H5O_ALL, FALSE) < 0)
+            if (H5O_msg_remove(grp_oloc, H5O_LINK_ID, H5O_ALL, false) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link messages");
 
-            use_new_dense = TRUE;
+            use_new_dense = true;
         } /* end else */
     }     /* end if */
     else {
@@ -520,7 +537,7 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over old format links");
 
             /* Remove the symbol table message from the group */
-            if (H5O_msg_remove(grp_oloc, H5O_STAB_ID, 0, FALSE) < 0)
+            if (H5O_msg_remove(grp_oloc, H5O_STAB_ID, 0, false) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete old format link storage");
 
             /* Recursively call this routine to insert the new link, since the
@@ -534,7 +551,7 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
             HGOTO_DONE(SUCCEED);
         } /* end if */
         else
-            use_old_format = TRUE;
+            use_old_format = true;
     } /* end if */
 
     /* Insert into symbol table or "dense" storage */
@@ -820,7 +837,7 @@ H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
         /* Check if there's no more links */
         if (linfo->nlinks == 0) {
             /* Delete the dense storage */
-            if (H5G__dense_delete(oloc->file, linfo, FALSE) < 0)
+            if (H5G__dense_delete(oloc->file, linfo, false) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete dense link storage");
         } /* end if */
         /* Check for switching back to compact storage */
@@ -835,7 +852,7 @@ H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
             if (linfo->nlinks < ginfo.min_dense) {
                 struct H5O_t    *oh = NULL;          /* Pointer to group's object header */
                 H5G_link_table_t ltable;             /* Table of links */
-                hbool_t          can_convert = TRUE; /* Whether converting to link messages is possible */
+                bool             can_convert = true; /* Whether converting to link messages is possible */
                 size_t           u;                  /* Local index */
 
                 /* Build the table of links for this group */
@@ -853,7 +870,7 @@ H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
                 for (u = 0; u < linfo->nlinks; u++)
                     if (H5O_msg_size_oh(oloc->file, oh, H5O_LINK_ID, &(ltable.lnks[u]), (size_t)0) >=
                         H5O_MESG_MAX_SIZE) {
-                        can_convert = FALSE;
+                        can_convert = false;
                         break;
                     } /* end if */
 
@@ -872,7 +889,7 @@ H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
                         } /* end if */
 
                     /* Remove the dense storage */
-                    if (H5G__dense_delete(oloc->file, linfo, FALSE) < 0)
+                    if (H5G__dense_delete(oloc->file, linfo, false) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete dense link storage");
                 } /* end if */
 
@@ -910,7 +927,7 @@ H5G_obj_remove(const H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const char *n
 {
     H5O_linfo_t linfo;               /* Link info message            */
     htri_t      linfo_exists;        /* Whether the link info message exists */
-    hbool_t     use_old_format;      /* Whether to use 'old format' (symbol table) for deletion or not */
+    bool        use_old_format;      /* Whether to use 'old format' (symbol table) for deletion or not */
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(oloc->addr, FAIL)
@@ -924,7 +941,7 @@ H5G_obj_remove(const H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const char *n
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check for link info message");
     if (linfo_exists) {
         /* Using the new format for groups */
-        use_old_format = FALSE;
+        use_old_format = false;
 
         /* Check for dense or compact storage */
         if (H5_addr_defined(linfo.fheap_addr)) {
@@ -939,7 +956,7 @@ H5G_obj_remove(const H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const char *n
     } /* end if */
     else {
         /* Using the old format for groups */
-        use_old_format = TRUE;
+        use_old_format = true;
 
         /* Remove object from the symbol table */
         if (H5G__stab_remove(oloc, grp_full_path_r, name) < 0)
@@ -971,7 +988,7 @@ H5G_obj_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r, H5
 {
     H5O_linfo_t linfo;               /* Link info message            */
     htri_t      linfo_exists;        /* Whether the link info message exists */
-    hbool_t     use_old_format;      /* Whether to use 'old format' (symbol table) for deletion or not */
+    bool        use_old_format;      /* Whether to use 'old format' (symbol table) for deletion or not */
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -991,7 +1008,7 @@ H5G_obj_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r, H5
         } /* end if */
 
         /* Using the new format for groups */
-        use_old_format = FALSE;
+        use_old_format = false;
 
         /* Check for dense or compact storage */
         if (H5_addr_defined(linfo.fheap_addr)) {
@@ -1011,7 +1028,7 @@ H5G_obj_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r, H5
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query");
 
         /* Using the old format for groups */
-        use_old_format = TRUE;
+        use_old_format = true;
 
         /* Remove object from the symbol table */
         if (H5G__stab_remove_by_idx(grp_oloc, grp_full_path_r, order, n) < 0)
@@ -1037,7 +1054,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name, hbool_t *found, H5O_link_t *lnk)
+H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name, bool *found, H5O_link_t *lnk)
 {
     H5O_linfo_t linfo;               /* Link info message */
     htri_t      linfo_exists;        /* Whether the link info message exists */

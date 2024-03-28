@@ -31,11 +31,9 @@
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
-#include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Opkg.h"      /* Object headers                           */
 #include "H5Ppkg.h"      /* Property lists                           */
-#include "H5PLprivate.h" /* Dynamic plugin                           */
 #include "H5VMprivate.h" /* Vector Functions                         */
 #include "H5Zprivate.h"  /* Filter pipeline                          */
 
@@ -246,7 +244,7 @@ H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", plist_id, max_compact, min_dense);
+    H5TRACE3("e", "i*Iu*Iu", plist_id, max_compact, min_dense);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
@@ -330,7 +328,7 @@ H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_flags /*out*/)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, crt_order_flags);
+    H5TRACE2("e", "i*Iu", plist_id, crt_order_flags);
 
     /* Get values */
     if (crt_order_flags) {
@@ -427,7 +425,7 @@ H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times /*out*/)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, track_times);
+    H5TRACE2("e", "i*b", plist_id, track_times);
 
     /* Get values */
     if (track_times) {
@@ -443,7 +441,7 @@ H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times /*out*/)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags");
 
         /* Set track times flag to return */
-        *track_times = (hbool_t)((ohdr_flags & H5O_HDR_STORE_TIMES) ? TRUE : FALSE);
+        *track_times = (bool)((ohdr_flags & H5O_HDR_STORE_TIMES) ? true : false);
     } /* end if */
 
 done:
@@ -756,7 +754,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5Z_filter_t
-H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t *cd_nelmts /*in_out*/,
+H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t *cd_nelmts /*in,out*/,
                unsigned cd_values[] /*out*/, size_t namelen, char name[] /*out*/,
                unsigned *filter_config /*out*/)
 {
@@ -766,7 +764,8 @@ H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
     H5Z_filter_t             ret_value; /* return value */
 
     FUNC_ENTER_API(H5Z_FILTER_ERROR)
-    H5TRACE8("Zf", "iIux*zxzxx", plist_id, idx, flags, cd_nelmts, cd_values, namelen, name, filter_config);
+    H5TRACE8("Zf", "iIu*Iu*z*Iuz*s*Iu", plist_id, idx, flags, cd_nelmts, cd_values, namelen, name,
+             filter_config);
 
     /* Check args */
     if (cd_nelmts || cd_values) {
@@ -837,7 +836,7 @@ done:
  */
 herr_t
 H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id, unsigned int *flags /*out*/,
-                     size_t *cd_nelmts /*in_out*/, unsigned cd_values[] /*out*/, size_t namelen,
+                     size_t *cd_nelmts /*in,out*/, unsigned cd_values[] /*out*/, size_t namelen,
                      char name[] /*out*/, unsigned *filter_config)
 {
     H5O_pline_t        pline;               /* Filter pipeline */
@@ -883,14 +882,15 @@ done:
  */
 herr_t
 H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*/,
-                     size_t *cd_nelmts /*in_out*/, unsigned cd_values[] /*out*/, size_t namelen,
+                     size_t *cd_nelmts /*in,out*/, unsigned cd_values[] /*out*/, size_t namelen,
                      char name[] /*out*/, unsigned *filter_config /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "iZfx*zxzxx", plist_id, id, flags, cd_nelmts, cd_values, namelen, name, filter_config);
+    H5TRACE8("e", "iZf*Iu*z*Iuz*s*Iu", plist_id, id, flags, cd_nelmts, cd_values, namelen, name,
+             filter_config);
 
     /* Check args */
     if (id < 0 || id > H5Z_FILTER_MAX)
@@ -933,7 +933,7 @@ done:
  * Purpose:    This is a query routine to verify that all the filters set
  *              in the dataset creation property list are available currently.
  *
- * Return:    Success:    TRUE if all filters available, FALSE if one or
+ * Return:    Success:    true if all filters available, false if one or
  *                              more filters not currently available.
  *        Failure:    FAIL on error
  *
@@ -971,8 +971,8 @@ done:
  * Purpose:    Check whether the filter is in the pipeline of the object
  *              creation property list.
  *
- * Return:    TRUE:        found
- *        FALSE:        not found
+ * Return:    true:        found
+ *        false:        not found
  *              FAIL:         error
  *
  *-------------------------------------------------------------------------
@@ -1001,7 +1001,7 @@ done:
  * Function: H5Premove_filter
  *
  * Purpose: Deletes a filter from the dataset creation property list;
- *  deletes all filters if FILTER is H5Z_FILTER_NONE
+ *  deletes all filters if FILTER is H5Z_FILTER_ALL
  *
  * Return: Non-negative on success/Negative on failure
  *
@@ -1139,7 +1139,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, size_t *cd_nelmts /*in_out*/,
+H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, size_t *cd_nelmts /*in,out*/,
                 unsigned cd_values[] /*out*/, size_t namelen, char name[] /*out*/,
                 unsigned *filter_config /*out*/)
 {
@@ -1178,14 +1178,14 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
 
         /* Check for actual name */
         if (s) {
-            HDstrncpy(name, s, namelen);
+            strncpy(name, s, namelen);
             name[namelen - 1] = '\0';
         } /* end if */
         else {
             /* Check for unknown library filter */
             /* (probably from a future version of the library) */
             if (filter->id < 256) {
-                HDstrncpy(name, "Unknown library filter", namelen);
+                strncpy(name, "Unknown library filter", namelen);
                 name[namelen - 1] = '\0';
             } /* end if */
             else
@@ -1319,16 +1319,16 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
             /* encode filter name if it exists */
             if (NULL != pline->filter[u].name) {
-                /* encode TRUE indicating that it exits */
-                *(*pp)++ = (uint8_t)TRUE;
+                /* encode true indicating that it exits */
+                *(*pp)++ = (uint8_t) true;
 
                 /* encode filter name */
                 H5MM_memcpy(*pp, (uint8_t *)(pline->filter[u].name), H5Z_COMMON_NAME_LEN);
                 *pp += H5Z_COMMON_NAME_LEN;
             } /* end if */
             else
-                /* encode FALSE indicating that it does not exist */
-                *(*pp)++ = (uint8_t)FALSE;
+                /* encode false indicating that it does not exist */
+                *(*pp)++ = (uint8_t) false;
 
             /* encode cd_nelmts */
             enc_value = (uint64_t)pline->filter[u].cd_nelmts;
@@ -1572,7 +1572,7 @@ H5P__ocrt_pipeline_cmp(const void *_pline1, const void *_pline2, size_t H5_ATTR_
             if (pline1->filter[u].name != NULL && pline2->filter[u].name == NULL)
                 HGOTO_DONE(1);
             if (pline1->filter[u].name != NULL)
-                if ((cmp_value = HDstrcmp(pline1->filter[u].name, pline2->filter[u].name)) != 0)
+                if ((cmp_value = strcmp(pline1->filter[u].name, pline2->filter[u].name)) != 0)
                     HGOTO_DONE(cmp_value);
 
             /* Check the number of parameters for the filter */
@@ -1656,7 +1656,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5Z_filter_t
-H5Pget_filter1(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t *cd_nelmts /*in_out*/,
+H5Pget_filter1(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t *cd_nelmts /*in,out*/,
                unsigned cd_values[] /*out*/, size_t namelen, char name[] /*out*/)
 {
     H5O_pline_t              pline;     /* Filter pipeline */
@@ -1665,7 +1665,7 @@ H5Pget_filter1(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
     H5Z_filter_t             ret_value; /* return value */
 
     FUNC_ENTER_API(H5Z_FILTER_ERROR)
-    H5TRACE7("Zf", "iIux*zxzx", plist_id, idx, flags, cd_nelmts, cd_values, namelen, name);
+    H5TRACE7("Zf", "iIu*Iu*z*Iuz*s", plist_id, idx, flags, cd_nelmts, cd_values, namelen, name);
 
     /* Check args */
     if (cd_nelmts || cd_values) {
@@ -1735,14 +1735,14 @@ done:
  */
 herr_t
 H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*/,
-                     size_t *cd_nelmts /*in_out*/, unsigned cd_values[] /*out*/, size_t namelen,
+                     size_t *cd_nelmts /*in,out*/, unsigned cd_values[] /*out*/, size_t namelen,
                      char name[] /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "iZfx*zxzx", plist_id, id, flags, cd_nelmts, cd_values, namelen, name);
+    H5TRACE7("e", "iZf*Iu*z*Iuz*s", plist_id, id, flags, cd_nelmts, cd_values, namelen, name);
 
     /* Check args */
     if (id < 0 || id > H5Z_FILTER_MAX)

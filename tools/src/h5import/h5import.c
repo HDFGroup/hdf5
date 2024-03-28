@@ -26,54 +26,54 @@
 #endif
 
 /* Local function declarations */
-static int gtoken(char *s);
-static int process(struct Options *opt);
-static int processConfigurationFile(char *infile, struct Input *in);
-static int mapKeywordToIndex(char *key);
-static int parsePathInfo(struct path_info *path, char *strm);
-static int parseDimensions(struct Input *in, char *strm);
-static int getInputSize(struct Input *in, int ival);
-static int getInputClass(struct Input *in, char *strm);
-static int getInputClassType(struct Input *in, char *strm);
-static int getInputByteOrder(struct Input *in, FILE *strm);
-static int InputClassStrToInt(char *temp);
-static int getRank(struct Input *in, FILE *strm);
-static int getDimensionSizes(struct Input *in, FILE *strm);
-static int getOutputSize(struct Input *in, FILE *strm);
-static int getOutputClass(struct Input *in, FILE *strm);
-static int OutputClassStrToInt(char *temp);
-static int getOutputArchitecture(struct Input *in, FILE *strm);
-static int OutputArchStrToInt(const char *temp);
-static int getOutputByteOrder(struct Input *in, FILE *strm);
-static int OutputByteOrderStrToInt(const char *temp);
-static int getChunkedDimensionSizes(struct Input *in, FILE *strm);
-static int getCompressionType(struct Input *in, FILE *strm);
-static int CompressionTypeStrToInt(char *temp);
-static int getCompressionParameter(struct Input *in, FILE *strm);
-static int getExternalFilename(struct Input *in, FILE *strm);
-static int getMaximumDimensionSizes(struct Input *in, FILE *strm);
-static int processDataFile(char *infile, struct Input *in, hid_t file_id);
-static int readIntegerData(FILE *strm, struct Input *in);
-static int readFloatData(FILE *strm, struct Input *in);
-static int allocateIntegerStorage(struct Input *in);
-static int allocateFloatStorage(struct Input *in);
-static int readUIntegerData(FILE *strm, struct Input *in);
-static int allocateUIntegerStorage(struct Input *in);
-static int validateConfigurationParameters(struct Input *in);
-static int processStrData(FILE *strm, struct Input *in, hid_t file_id);
-static int processStrHDFData(FILE *strm, struct Input *in, hid_t file_id);
-uint16_t   swap_uint16(uint16_t val);
-int16_t    swap_int16(int16_t val);
-uint32_t   swap_uint32(uint32_t val);
-int32_t    swap_int32(int32_t val);
-int64_t    swap_int64(int64_t val);
-uint64_t   swap_uint64(uint64_t val);
+static int             gtoken(char *s);
+static int             process(struct Options *opt);
+static int             processConfigurationFile(char *infile, struct Input *in);
+static int             mapKeywordToIndex(char *key);
+static int             parsePathInfo(struct path_info *path, char *strm);
+static int             parseDimensions(struct Input *in, char *strm);
+static int             getInputSize(struct Input *in, int ival);
+static int             getInputClass(struct Input *in, char *strm);
+static int             getInputClassType(struct Input *in, char *strm);
+static int             getInputByteOrder(struct Input *in, FILE *strm);
+static int             InputClassStrToInt(char *temp);
+static int             getRank(struct Input *in, FILE *strm);
+static int             getDimensionSizes(struct Input *in, FILE *strm);
+static int             getOutputSize(struct Input *in, FILE *strm);
+static int             getOutputClass(struct Input *in, FILE *strm);
+static int             OutputClassStrToInt(char *temp);
+static int             getOutputArchitecture(struct Input *in, FILE *strm);
+static int             OutputArchStrToInt(const char *temp);
+static int             getOutputByteOrder(struct Input *in, FILE *strm);
+static int             OutputByteOrderStrToInt(const char *temp);
+static int             getChunkedDimensionSizes(struct Input *in, FILE *strm);
+static int             getCompressionType(struct Input *in, FILE *strm);
+static int             CompressionTypeStrToInt(char *temp);
+static int             getCompressionParameter(struct Input *in, FILE *strm);
+static int             getExternalFilename(struct Input *in, FILE *strm);
+static int             getMaximumDimensionSizes(struct Input *in, FILE *strm);
+static int             processDataFile(char *infile, struct Input *in, hid_t file_id);
+static int             readIntegerData(FILE *strm, struct Input *in);
+static int             readFloatData(FILE *strm, struct Input *in);
+static int             allocateIntegerStorage(struct Input *in);
+static int             allocateFloatStorage(struct Input *in);
+static int             readUIntegerData(FILE *strm, struct Input *in);
+static int             allocateUIntegerStorage(struct Input *in);
+static int             validateConfigurationParameters(struct Input *in);
+static int             processStrData(FILE *strm, struct Input *in, hid_t file_id);
+static int             processStrHDFData(FILE *strm, struct Input *in, hid_t file_id);
+H5_ATTR_CONST uint16_t swap_uint16(uint16_t val);
+H5_ATTR_CONST int16_t  swap_int16(int16_t val);
+H5_ATTR_CONST uint32_t swap_uint32(uint32_t val);
+H5_ATTR_CONST int32_t  swap_int32(int32_t val);
+H5_ATTR_CONST int64_t  swap_int64(int64_t val);
+H5_ATTR_CONST uint64_t swap_uint64(uint64_t val);
 
 int
 main(int argc, char *argv[])
 {
     struct Options *opt;
-    int             outfile_named = FALSE;
+    int             outfile_named = false;
     int             token;
     int             i;
     int             state = 0;
@@ -104,7 +104,7 @@ main(int argc, char *argv[])
     if ((opt = (struct Options *)calloc(1, sizeof(struct Options))) == NULL)
         goto err;
 
-    if (argv[1] && (HDstrcmp("-V", argv[1]) == 0)) {
+    if (argv[1] && (strcmp("-V", argv[1]) == 0)) {
         print_version(PROGRAMNAME);
         exit(EXIT_SUCCESS);
     }
@@ -133,7 +133,7 @@ main(int argc, char *argv[])
 
             case 1: /* counting input files */
                 if (opt->fcount < 29) {
-                    (void)HDstrcpy(opt->infiles[opt->fcount].datafile, argv[i]);
+                    (void)strcpy(opt->infiles[opt->fcount].datafile, argv[i]);
                     in                               = &(opt->infiles[opt->fcount].in);
                     opt->infiles[opt->fcount].config = 0;
                     setDefaultValues(in, opt->fcount);
@@ -150,7 +150,7 @@ main(int argc, char *argv[])
                 break;
 
             case 3: /* get configfile name */
-                (void)HDstrcpy(opt->infiles[opt->fcount - 1].configfile, argv[i]);
+                (void)strcpy(opt->infiles[opt->fcount - 1].configfile, argv[i]);
                 opt->infiles[opt->fcount - 1].config = 1;
                 break;
 
@@ -158,12 +158,12 @@ main(int argc, char *argv[])
                 break;
 
             case 5: /* get outfile found */
-                if (HDstrlen(argv[i]) > MAX_PATH_NAME_LENGTH) {
+                if (strlen(argv[i]) > MAX_PATH_NAME_LENGTH) {
                     (void)fprintf(stderr, err10, argv[i]);
                     goto err;
                 }
-                (void)HDstrcpy(opt->outfile, argv[i]);
-                outfile_named = TRUE;
+                (void)strcpy(opt->outfile, argv[i]);
+                outfile_named = true;
                 break;
 
             case 6: /* -h found; help, then exit */
@@ -228,7 +228,7 @@ main(int argc, char *argv[])
         }
     }
 
-    if (FALSE == outfile_named) {
+    if (false == outfile_named) {
         (void)fprintf(stderr, "%s", err3);
         usage(argv[0]);
         goto err;
@@ -287,40 +287,40 @@ gtoken(char *s)
      * identify the token type
      */
     if (s[0] == '-') { /* option name (or negative number) */
-        len = HDstrlen(&s[1]);
+        len = strlen(&s[1]);
         switch (s[1]) {
             case 'o':
-                if (!HDstrncmp("outfile", &s[1], len))
+                if (!strncmp("outfile", &s[1], len))
                     token = OPT_o;
                 break;
 
             case 'c':
-                if (!HDstrncmp("config", &s[1], len))
+                if (!strncmp("config", &s[1], len))
                     token = OPT_c;
                 break;
 
             case 'h':
-                if (!HDstrncmp("help", &s[1], len))
+                if (!strncmp("help", &s[1], len))
                     token = OPT_h;
                 break;
 
             case 'd':
-                if (!HDstrncmp("dims", &s[1], len))
+                if (!strncmp("dims", &s[1], len))
                     token = OPT_d;
                 break;
 
             case 'p':
-                if (!HDstrncmp("path", &s[1], len))
+                if (!strncmp("path", &s[1], len))
                     token = OPT_p;
                 break;
 
             case 't':
-                if (!HDstrncmp("type", &s[1], len))
+                if (!strncmp("type", &s[1], len))
                     token = OPT_t;
                 break;
 
             case 's':
-                if (!HDstrncmp("size", &s[1], len))
+                if (!strncmp("size", &s[1], len))
                     token = OPT_s;
                 break;
             default:
@@ -489,7 +489,7 @@ readIntegerData(FILE *strm, struct Input *in)
                 case 0: /* TEXTIN */
                     in08 = (H5DT_INT8 *)in->data;
                     for (i = 0; i < len; i++, in08++) {
-                        if (HDfscanf(strm, "%hd", &temp16) != 1) {
+                        if (fscanf(strm, "%hd", &temp16) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -521,7 +521,7 @@ readIntegerData(FILE *strm, struct Input *in)
             switch (in->inputClass) {
                 case 0: /* TEXTIN */
                     for (i = 0; i < len; i++, in16++) {
-                        if (HDfscanf(strm, "%hd", in16) != 1) {
+                        if (fscanf(strm, "%hd", in16) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -558,7 +558,7 @@ readIntegerData(FILE *strm, struct Input *in)
             switch (in->inputClass) {
                 case 0: /* TEXTIN */
                     for (i = 0; i < len; i++, in32++) {
-                        if (HDfscanf(strm, "%d", in32) != 1) {
+                        if (fscanf(strm, "%d", in32) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -594,7 +594,7 @@ readIntegerData(FILE *strm, struct Input *in)
             switch (in->inputClass) {
                 case 0: /* TEXTIN */
                     for (i = 0; i < len; i++, in64++) {
-                        if (HDfscanf(strm, "%s", buffer) < 1) {
+                        if (fscanf(strm, "%s", buffer) < 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -660,7 +660,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                 case 6: /* TEXTUIN */
                     in08 = (H5DT_UINT8 *)in->data;
                     for (i = 0; i < len; i++, in08++) {
-                        if (HDfscanf(strm, "%hu", &temp16) != 1) {
+                        if (fscanf(strm, "%hu", &temp16) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -689,7 +689,7 @@ readUIntegerData(FILE *strm, struct Input *in)
             switch (in->inputClass) {
                 case 6: /* TEXTUIN */
                     for (i = 0; i < len; i++, in16++) {
-                        if (HDfscanf(strm, "%hu", in16) != 1) {
+                        if (fscanf(strm, "%hu", in16) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -725,7 +725,7 @@ readUIntegerData(FILE *strm, struct Input *in)
             switch (in->inputClass) {
                 case 6: /* TEXTUIN */
                     for (i = 0; i < len; i++, in32++) {
-                        if (HDfscanf(strm, "%u", in32) != 1) {
+                        if (fscanf(strm, "%u", in32) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -761,7 +761,7 @@ readUIntegerData(FILE *strm, struct Input *in)
             switch (in->inputClass) {
                 case 6: /* TEXTUIN */
                     for (i = 0; i < len; i++, in64++) {
-                        if (HDfscanf(strm, "%s", buffer) < 1) {
+                        if (fscanf(strm, "%s", buffer) < 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -826,7 +826,7 @@ readFloatData(FILE *strm, struct Input *in)
             switch (in->inputClass) {
                 case 1: /* TEXTFP */
                     for (i = 0; i < len; i++, fp32++) {
-                        if (HDfscanf(strm, "%f", fp32) != 1) {
+                        if (fscanf(strm, "%f", fp32) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -839,7 +839,7 @@ readFloatData(FILE *strm, struct Input *in)
                 case 2: /*TEXTFPE */
 
                     for (i = 0; i < len; i++, fp32++) {
-                        if (HDfscanf(strm, "%f", fp32) != 1) {
+                        if (fscanf(strm, "%f", fp32) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -878,7 +878,7 @@ readFloatData(FILE *strm, struct Input *in)
             switch (in->inputClass) {
                 case 1: /* TEXTFP */
                     for (i = 0; i < len; i++, fp64++) {
-                        if (HDfscanf(strm, "%lf", fp64) != 1) {
+                        if (fscanf(strm, "%lf", fp64) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -891,7 +891,7 @@ readFloatData(FILE *strm, struct Input *in)
                 case 2: /*TEXTFPE */
 
                     for (i = 0; i < len; i++, fp64++) {
-                        if (HDfscanf(strm, "%lf", fp64) != 1) {
+                        if (fscanf(strm, "%lf", fp64) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -964,7 +964,7 @@ processStrData(FILE *strm, struct Input *in, hid_t file_id)
      *-------------------------------------------------------------------------
      */
 
-    while (EOF != (c = HDfgetc(strm)))
+    while (EOF != (c = fgetc(strm)))
         if (c == 10) /* eol */
             nlines++;
 
@@ -1029,7 +1029,7 @@ processStrData(FILE *strm, struct Input *in, hid_t file_id)
 
     line = 0;
 
-    while (EOF != (c = HDfgetc(strm))) {
+    while (EOF != (c = fgetc(strm))) {
         str[i] = (char)c;
 
         i++;
@@ -1162,7 +1162,7 @@ processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
     line = 0;
     j    = 0;
 
-    while (HDfgets(str, sizeof(str), strm)) {
+    while (fgets(str, sizeof(str), strm)) {
         str1 = str;
         str2 = NULL;
         str3 = NULL;
@@ -1173,24 +1173,24 @@ processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
         str2 = strchr(str1, '"');
         if (str2 != NULL) {
 #ifdef H5DEBUGIMPORT
-            printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", HDstrlen(str2), str2);
+            printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", strlen(str2), str2);
 #endif
             str2++;
 #ifdef H5DEBUGIMPORT
-            printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", HDstrlen(str2), str2);
+            printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", strlen(str2), str2);
 #endif
             str3 = strrchr(str2, '"');
             if (str3 != NULL) {
 #ifdef H5DEBUGIMPORT
-                printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", HDstrlen(str3), str3);
+                printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", strlen(str3), str3);
 #endif
                 *str3 = '\0';
 
 #ifdef H5DEBUGIMPORT
-                printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", HDstrlen(str2), str2);
+                printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", strlen(str2), str2);
 #endif
 
-                if (HDstrlen(str2) > 0) {
+                if (strlen(str2) > 0) {
                     hid_t   fspace_id;
                     hsize_t start[1];
                     hsize_t count[1] = {1};
@@ -1461,18 +1461,18 @@ processConfigurationFile(char *infile, struct Input *in)
         goto error;
     }
 
-    scanret = HDfscanf(strm, "%254s", key);
-    if ((scanret == 1) && !HDstrcmp("HDF5", key)) {
+    scanret = fscanf(strm, "%254s", key);
+    if ((scanret == 1) && !strcmp("HDF5", key)) {
 #ifdef H5DEBUGIMPORT
         int pndx;
         printf("\nh5dump file\n");
 #endif
         in->h5dumpInput = 1;
-        scanret         = HDfscanf(strm, "%254s", temp); /* filename */
-        scanret         = HDfscanf(strm, "%254s", temp); /* start bracket */
-        scanret         = HDfscanf(strm, "%254s", key);  /* DATASET */
+        scanret         = fscanf(strm, "%254s", temp); /* filename */
+        scanret         = fscanf(strm, "%254s", temp); /* start bracket */
+        scanret         = fscanf(strm, "%254s", key);  /* DATASET */
         while (scanret == 1) {
-            if (!HDstrcmp("DATASET", key)) { /* PATH */
+            if (!strcmp("DATASET", key)) { /* PATH */
 #ifdef H5DEBUGIMPORT
                 printf("h5dump DATASET key\n");
 #endif
@@ -1480,7 +1480,7 @@ processConfigurationFile(char *infile, struct Input *in)
                     (void)fprintf(stderr, err3a, infile);
                     goto error;
                 }
-                if (HDfscanf(strm, "%254s", temp) != 1) {
+                if (fscanf(strm, "%254s", temp) != 1) {
                     (void)fprintf(stderr, "%s", err18);
                     goto error;
                 }
@@ -1492,12 +1492,12 @@ processConfigurationFile(char *infile, struct Input *in)
                     goto error;
                 }
                 in->configOptionVector[PATH] = 1;
-                scanret                      = HDfscanf(strm, "%254s", temp); /* start bracket */
+                scanret                      = fscanf(strm, "%254s", temp); /* start bracket */
 #ifdef H5DEBUGIMPORT
                 printf("h5dump DATASET %s found\n", temp);
 #endif
-            }                                      /* if(!HDstrcmp("DATASET", key))  PATH */
-            else if (!HDstrcmp("DATATYPE", key)) { /* INPUT-CLASS */
+            }                                    /* if(!strcmp("DATASET", key))  PATH */
+            else if (!strcmp("DATATYPE", key)) { /* INPUT-CLASS */
 #ifdef H5DEBUGIMPORT
                 printf("h5dump DATATYPE key\n");
 #endif
@@ -1506,7 +1506,7 @@ processConfigurationFile(char *infile, struct Input *in)
                     goto error;
                 }
 
-                if (HDfscanf(strm, "%254s", temp) != 1) {
+                if (fscanf(strm, "%254s", temp) != 1) {
                     (void)fprintf(stderr, "%s", err18);
                     goto error;
                 }
@@ -1542,27 +1542,27 @@ processConfigurationFile(char *infile, struct Input *in)
 #ifdef H5DEBUGIMPORT
                     printf("h5dump DATATYPE STRING found\n");
 #endif
-                    if (HDfscanf(strm, "%254s", temp) != 1) { /* start bracket */
+                    if (fscanf(strm, "%254s", temp) != 1) { /* start bracket */
                         (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump DATATYPE STRING %s found\n", temp);
 #endif
-                    if (HDfscanf(strm, "%254s", temp) != 1) { /* string properties */
+                    if (fscanf(strm, "%254s", temp) != 1) { /* string properties */
                         (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
                     while (get_next_prop) {
-                        if (!HDstrcmp("STRSIZE", temp)) { /* STRSIZE */
-                            if (HDfscanf(strm, "%254s", temp) != 1) {
+                        if (!strcmp("STRSIZE", temp)) { /* STRSIZE */
+                            if (fscanf(strm, "%254s", temp) != 1) {
                                 (void)fprintf(stderr, "%s", err19);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
                             printf("h5dump DATATYPE STRING STRSIZE %s found\n", temp);
 #endif
-                            if (HDstrcmp("H5T_VARIABLE;", temp) != 0) {
+                            if (strcmp("H5T_VARIABLE;", temp) != 0) {
                                 char *more = temp;
                                 ival       = (int)strtol(more, &more, 10);
                                 if (getInputSize(in, ival) == -1) {
@@ -1574,8 +1574,8 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                             }
                         }
-                        else if (!HDstrcmp("STRPAD", temp)) {         /* STRPAD */
-                            if (HDfscanf(strm, "%254s", temp) != 1) { /* STRPAD type */
+                        else if (!strcmp("STRPAD", temp)) {         /* STRPAD */
+                            if (fscanf(strm, "%254s", temp) != 1) { /* STRPAD type */
                                 (void)fprintf(stderr, "%s", err18);
                                 goto error;
                             }
@@ -1583,8 +1583,8 @@ processConfigurationFile(char *infile, struct Input *in)
                             printf("h5dump DATATYPE STRING STRPAD %s found\n", temp);
 #endif
                         }
-                        else if (!HDstrcmp("CSET", key)) {            /* CSET */
-                            if (HDfscanf(strm, "%254s", temp) != 1) { /* CSET type */
+                        else if (!strcmp("CSET", key)) {            /* CSET */
+                            if (fscanf(strm, "%254s", temp) != 1) { /* CSET type */
                                 (void)fprintf(stderr, "%s", err18);
                                 goto error;
                             }
@@ -1592,69 +1592,69 @@ processConfigurationFile(char *infile, struct Input *in)
                             printf("h5dump DATATYPE STRING CSET %s found\n", temp);
 #endif
                         }
-                        else if (!HDstrcmp("CTYPE", temp)) {          /* CTYPE */
-                            if (HDfscanf(strm, "%254s", temp) != 1) { /* CTYPE type */
+                        else if (!strcmp("CTYPE", temp)) {          /* CTYPE */
+                            if (fscanf(strm, "%254s", temp) != 1) { /* CTYPE type */
                                 (void)fprintf(stderr, "%s", err18);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
                             printf("h5dump DATATYPE STRING  CTYPE %s found\n", temp);
 #endif
-                        } /* if(!HDstrcmp("CSET", key)) */
-                        if (HDfscanf(strm, "%254s", temp) != 1) {
+                        } /* if(!strcmp("CSET", key)) */
+                        if (fscanf(strm, "%254s", temp) != 1) {
                             (void)fprintf(stderr, "%s", err18);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
                         printf("h5dump DATATYPE STRING %s found\n", temp);
 #endif
-                        if (!HDstrcmp("}", temp)) { /* end bracket */
+                        if (!strcmp("}", temp)) { /* end bracket */
                             get_next_prop = 0;
                         }
-                    }                               /* while (get_next_prop) */
-                }                                   /* if(kindex == 5)  STRING */
-            }                                       /* else if(!HDstrcmp("DATATYPE", key))  INPUT-CLASS */
-            else if (!HDstrcmp("DATASPACE", key)) { /* RANK and DIMENSIONS */
+                    }                             /* while (get_next_prop) */
+                }                                 /* if(kindex == 5)  STRING */
+            }                                     /* else if(!strcmp("DATATYPE", key))  INPUT-CLASS */
+            else if (!strcmp("DATASPACE", key)) { /* RANK and DIMENSIONS */
                 hsize_t temp_dims[MAX_NUM_DIMENSION];
 
 #ifdef H5DEBUGIMPORT
                 printf("h5dump DATASPACE key\n");
 #endif
-                if (HDfscanf(strm, "%254s", temp) != 1) {
+                if (fscanf(strm, "%254s", temp) != 1) {
                     (void)fprintf(stderr, "%s", err18);
                     goto error;
                 }
-                if (!HDstrcmp("SCALAR", temp)) { /* SCALAR */
+                if (!strcmp("SCALAR", temp)) { /* SCALAR */
                     in->rank = 0;
-                }                                   /* if(!HDstrcmp("SCALAR", key)) */
-                else if (!HDstrcmp("NULL", temp)) { /* NULL */
+                }                                 /* if(!strcmp("SCALAR", key)) */
+                else if (!strcmp("NULL", temp)) { /* NULL */
                     (void)fprintf(stderr, err6b, infile);
                     goto error;
-                }                                     /* else if(!HDstrcmp("NULL", key)) */
-                else if (!HDstrcmp("SIMPLE", temp)) { /* SIMPLE */
+                }                                   /* else if(!strcmp("NULL", key)) */
+                else if (!strcmp("SIMPLE", temp)) { /* SIMPLE */
                     int icount = 0;
 #ifdef H5DEBUGIMPORT
                     printf("h5dump DATASPACE SIMPLE found\n");
 #endif
-                    if (HDfscanf(strm, "%254s", temp) != 1) { /* start bracket */
+                    if (fscanf(strm, "%254s", temp) != 1) { /* start bracket */
                         (void)fprintf(stderr, err6b, infile);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
-                    if (HDfscanf(strm, "%254s", temp) != 1) { /* start paren */
+                    if (fscanf(strm, "%254s", temp) != 1) { /* start paren */
                         (void)fprintf(stderr, err6b, infile);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
-                    if (!HDstrcmp("(", temp)) { /* start paren */
+                    if (!strcmp("(", temp)) { /* start paren */
                         int get_next_dim = 1;
                         int i            = 0;
 
-                        if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
+                        if (fscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
                             (void)fprintf(stderr, err16c, infile);
                             goto error;
                         }
@@ -1664,14 +1664,14 @@ processConfigurationFile(char *infile, struct Input *in)
                         while (get_next_dim) {
                             char *more        = temp;
                             temp_dims[icount] = strtoull(more, &more, 10);
-                            if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
+                            if (fscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
                                 (void)fprintf(stderr, err6b, infile);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
                             printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
-                            if (!HDstrcmp(")", temp)) { /* end paren */
+                            if (!strcmp(")", temp)) { /* end paren */
                                 in->rank                     = ++icount;
                                 in->configOptionVector[RANK] = 1;
                                 get_next_dim                 = 0;
@@ -1703,38 +1703,38 @@ processConfigurationFile(char *infile, struct Input *in)
                         printf("\n");
 #endif
                         in->configOptionVector[DIM] = 1;
-                    } /* if(!HDstrcmp("(", key))  start paren */
+                    } /* if(!strcmp("(", key))  start paren */
                     else {
                         (void)fprintf(stderr, err5b, infile);
                         goto error;
                     }
-                    if (HDfscanf(strm, "%254s", temp) != 1) {
+                    if (fscanf(strm, "%254s", temp) != 1) {
                         (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
-                    if (!HDstrcmp("/", temp)) { /* / max dims */
+                    if (!strcmp("/", temp)) { /* / max dims */
                         if ((in->maxsizeOfDimension =
                                  (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
                             goto error;
                         }
-                        if (HDfscanf(strm, "%254s", temp) != 1) { /* start paren */
+                        if (fscanf(strm, "%254s", temp) != 1) { /* start paren */
                             (void)fprintf(stderr, err6b, infile);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
                         printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
-                        if (!HDstrcmp("(", temp)) { /* start paren */
+                        if (!strcmp("(", temp)) { /* start paren */
                             int get_next_dim = 1;
                             int i            = 0;
 
 #ifdef H5DEBUGIMPORT
                             printf("h5dump DATASPACE SIMPLE process max dim values\n");
 #endif
-                            if (HDfscanf(strm, "%254s", temp) != 1) { /* max dim with optional comma */
+                            if (fscanf(strm, "%254s", temp) != 1) { /* max dim with optional comma */
                                 (void)fprintf(stderr, err16c, infile);
                                 goto error;
                             }
@@ -1745,8 +1745,8 @@ processConfigurationFile(char *infile, struct Input *in)
 #ifdef H5DEBUGIMPORT
                                 printf("h5dump DATASPACE SIMPLE get max dim value\n");
 #endif
-                                if (!HDstrcmp("H5S_UNLIMITED", temp) ||
-                                    !HDstrcmp("H5S_UNLIMITED,", temp)) { /* unlimited */
+                                if (!strcmp("H5S_UNLIMITED", temp) ||
+                                    !strcmp("H5S_UNLIMITED,", temp)) { /* unlimited */
                                     in->maxsizeOfDimension[i]      = H5S_UNLIMITED;
                                     in->configOptionVector[EXTEND] = 1;
                                 }
@@ -1754,14 +1754,14 @@ processConfigurationFile(char *infile, struct Input *in)
                                     char *more                = temp;
                                     in->maxsizeOfDimension[i] = strtoull(more, &more, 10);
                                 }
-                                if (HDfscanf(strm, "%254s", temp) != 1) { /* max dim or end paren */
+                                if (fscanf(strm, "%254s", temp) != 1) { /* max dim or end paren */
                                     (void)fprintf(stderr, err16c, infile);
                                     goto error;
                                 }
 #ifdef H5DEBUGIMPORT
                                 printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
-                                if (!HDstrcmp(")", temp)) { /* end paren */
+                                if (!strcmp(")", temp)) { /* end paren */
                                     get_next_dim = 0;
                                 }
                                 else { /* comma */
@@ -1780,57 +1780,57 @@ processConfigurationFile(char *infile, struct Input *in)
                             printf("\n");
                             printf("h5dump DATASPACE SIMPLE get max dim finished\n");
 #endif
-                        } /* if(!HDstrcmp("(", key))  start paren */
+                        } /* if(!strcmp("(", key))  start paren */
                         else {
                             (void)fprintf(stderr, err16c, infile);
                             goto error;
                         }
-                        scanret = HDfscanf(strm, "%254s", temp); /* end bracket */
+                        scanret = fscanf(strm, "%254s", temp); /* end bracket */
 #ifdef H5DEBUGIMPORT
                         printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
-                    } /* if(!HDstrcmp("/", key)) max dims separator */
-                }     /* else if(!HDstrcmp("SIMPLE", key)) */
+                    } /* if(!strcmp("/", key)) max dims separator */
+                }     /* else if(!strcmp("SIMPLE", key)) */
                 else {
                     (void)fprintf(stderr, err5b, infile);
                     goto error;
                 }
-            } /* else if(!HDstrcmp("DATASPACE", key))  RANK and DIMENSIONS */
-            else if (!HDstrcmp("STORAGE_LAYOUT", key)) { /* CHUNKED-DIMENSION-SIZES */
+            } /* else if(!strcmp("DATASPACE", key))  RANK and DIMENSIONS */
+            else if (!strcmp("STORAGE_LAYOUT", key)) { /* CHUNKED-DIMENSION-SIZES */
 #ifdef H5DEBUGIMPORT
                 printf("h5dump STORAGE_LAYOUT key\n");
 #endif
-                if (HDfscanf(strm, "%254s", temp) != 1) { /* start bracket */
+                if (fscanf(strm, "%254s", temp) != 1) { /* start bracket */
                     (void)fprintf(stderr, err6b, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
                 printf("h5dump STORAGE_LAYOUT %s found\n", temp);
 #endif
-                if (HDfscanf(strm, "%254s", temp) != 1) { /* CHUNKED */
+                if (fscanf(strm, "%254s", temp) != 1) { /* CHUNKED */
                     (void)fprintf(stderr, err6b, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
                 printf("h5dump STORAGE_LAYOUT %s found\n", temp);
 #endif
-                if (!HDstrcmp("CHUNKED", temp)) { /* CHUNKED */
+                if (!strcmp("CHUNKED", temp)) { /* CHUNKED */
                     if ((in->sizeOfChunk = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
                         (void)fprintf(stderr, "Unable to allocate dynamic memory.\n");
                         goto error;
                     }
-                    if (HDfscanf(strm, "%254s", temp) != 1) { /* start paren */
+                    if (fscanf(strm, "%254s", temp) != 1) { /* start paren */
                         (void)fprintf(stderr, err6b, infile);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
 #endif
-                    if (!HDstrcmp("(", temp)) { /* start paren */
+                    if (!strcmp("(", temp)) { /* start paren */
                         int get_next_dim = 1;
                         int icount       = 0;
 
-                        if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
+                        if (fscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
                             (void)fprintf(stderr, err16c, infile);
                             goto error;
                         }
@@ -1840,14 +1840,14 @@ processConfigurationFile(char *infile, struct Input *in)
                         while (get_next_dim) {
                             char *more              = temp;
                             in->sizeOfChunk[icount] = strtoull(more, &more, 10);
-                            if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
+                            if (fscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
                                 (void)fprintf(stderr, err6b, infile);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
                             printf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
 #endif
-                            if (!HDstrcmp(")", temp)) { /* end paren */
+                            if (!strcmp(")", temp)) { /* end paren */
                                 in->configOptionVector[RANK] = 1;
                                 get_next_dim                 = 0;
                             }
@@ -1867,20 +1867,20 @@ processConfigurationFile(char *infile, struct Input *in)
                         printf("\n");
 #endif
                         in->configOptionVector[DIM] = 1;
-                    } /* if(!HDstrcmp("(", key))  start paren */
+                    } /* if(!strcmp("(", key))  start paren */
                     else {
                         (void)fprintf(stderr, err5b, infile);
                         goto error;
                     }
-                    if (HDfscanf(strm, "%254s", temp) != 1) { /* SIZE */
+                    if (fscanf(strm, "%254s", temp) != 1) { /* SIZE */
                         (void)fprintf(stderr, err6b, infile);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
 #endif
-                    if (!HDstrcmp("SIZE", temp)) { /* SIZE */
-                        if (HDfscanf(strm, "%d", (&ival)) != 1) {
+                    if (!strcmp("SIZE", temp)) { /* SIZE */
+                        if (fscanf(strm, "%d", (&ival)) != 1) {
                             (void)fprintf(stderr, "%s", err19);
                             goto error;
                         }
@@ -1888,8 +1888,8 @@ processConfigurationFile(char *infile, struct Input *in)
                         printf("h5dump STORAGE_LAYOUT CHUNKED SIZE %d found\n", ival);
 #endif
                     }
-                    while (HDstrcmp("}", temp) != 0) {
-                        if (HDfscanf(strm, "%254s", temp) != 1) { /* end bracket */
+                    while (strcmp("}", temp) != 0) {
+                        if (fscanf(strm, "%254s", temp) != 1) { /* end bracket */
                             (void)fprintf(stderr, "%s", err18);
                             goto error;
                         }
@@ -1898,52 +1898,52 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                     }
                     in->configOptionVector[CHUNK] = 1;
-                } /* if(!HDstrcmp("CHUNKED", key))  CHUNKED */
-            }     /* else if(!HDstrcmp("STORAGE_LAYOUT", key))  CHUNKED-DIMENSION-SIZES */
-            else if (!HDstrcmp("FILTERS", key)) { /* FILTERS */
+                } /* if(!strcmp("CHUNKED", key))  CHUNKED */
+            }     /* else if(!strcmp("STORAGE_LAYOUT", key))  CHUNKED-DIMENSION-SIZES */
+            else if (!strcmp("FILTERS", key)) { /* FILTERS */
 #ifdef H5DEBUGIMPORT
                 printf("h5dump FILTERS key\n");
 #endif
-                if (HDfscanf(strm, "%254s", temp) != 1) { /* start bracket */
+                if (fscanf(strm, "%254s", temp) != 1) { /* start bracket */
                     (void)fprintf(stderr, err6b, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
                 printf("h5dump FILTERS %s found\n", temp);
 #endif
-                if (HDfscanf(strm, "%254s", temp) != 1) {
+                if (fscanf(strm, "%254s", temp) != 1) {
                     (void)fprintf(stderr, err6b, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
                 printf("h5dump FILTERS %s found\n", temp);
 #endif
-                if (!HDstrcmp("COMPRESSION", temp)) { /* COMPRESSION */
+                if (!strcmp("COMPRESSION", temp)) { /* COMPRESSION */
 #ifdef H5DEBUGIMPORT
                     printf("h5dump FILTERS COMPRESSION found\n");
 #endif
-                    if (HDfscanf(strm, "%254s", temp) != 1) { /* DEFLATE */
+                    if (fscanf(strm, "%254s", temp) != 1) { /* DEFLATE */
                         (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump FILTERS COMPRESSION %s found\n", temp);
 #endif
-                    if (HDfscanf(strm, "%254s", temp) != 1) { /* bgin bracket */
+                    if (fscanf(strm, "%254s", temp) != 1) { /* bgin bracket */
                         (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump FILTERS COMPRESSION %s found\n", temp);
 #endif
-                    if (HDfscanf(strm, "%254s", temp) != 1) { /* LEVEL */
+                    if (fscanf(strm, "%254s", temp) != 1) { /* LEVEL */
                         (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump FILTERS COMPRESSION %s found\n", temp);
 #endif
-                    if (HDfscanf(strm, "%d", (&ival)) != 1) {
+                    if (fscanf(strm, "%d", (&ival)) != 1) {
                         (void)fprintf(stderr, "%s", err19);
                         goto error;
                     }
@@ -1951,7 +1951,7 @@ processConfigurationFile(char *infile, struct Input *in)
                     printf("h5dump FILTERS COMPRESSION LEVEL %d found\n", ival);
 #endif
                     in->compressionParam = ival;
-                    if (HDfscanf(strm, "%254s", temp) != 1) { /* end bracket */
+                    if (fscanf(strm, "%254s", temp) != 1) { /* end bracket */
                         (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
@@ -1961,19 +1961,19 @@ processConfigurationFile(char *infile, struct Input *in)
                     in->compressionType              = 0; /* ONLY GZIP supported */
                     in->configOptionVector[COMPRESS] = 1;
                 }
-                else if (!HDstrcmp("CONTIGUOUS", temp)) { /* CONTIGUOUS */
+                else if (!strcmp("CONTIGUOUS", temp)) { /* CONTIGUOUS */
 #ifdef H5DEBUGIMPORT
                     printf("h5dump FILTERS CONTIGUOUS found\n");
 #endif
                     in->configOptionVector[COMPRESS] = 0;
                 }
-                else if (!HDstrcmp("NONE", temp)) { /* NONE */
+                else if (!strcmp("NONE", temp)) { /* NONE */
 #ifdef H5DEBUGIMPORT
                     printf("h5dump FILTERS NONE found\n");
 #endif
                     in->configOptionVector[COMPRESS] = 0;
                 }
-                if (HDfscanf(strm, "%254s", temp) != 1) { /* end bracket */
+                if (fscanf(strm, "%254s", temp) != 1) { /* end bracket */
                     (void)fprintf(stderr, "%s", err18);
                     goto error;
                 }
@@ -1981,20 +1981,20 @@ processConfigurationFile(char *infile, struct Input *in)
                 printf("h5dump FILTERS %s found\n", temp);
 #endif
             }
-            else if (!HDstrcmp("SUBSET", key)) { /* reduce dimensions */
+            else if (!strcmp("SUBSET", key)) { /* reduce dimensions */
                 hsize_t temp_dims[MAX_NUM_DIMENSION];
                 int     get_next_prop = 1;
 #ifdef H5DEBUGIMPORT
                 printf("h5dump SUBSET key\n");
 #endif
-                if (HDfscanf(strm, "%254s", temp) != 1) { /* start bracket */
+                if (fscanf(strm, "%254s", temp) != 1) { /* start bracket */
                     (void)fprintf(stderr, err20, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
                 printf("h5dump SUBSET %s found\n", temp);
 #endif
-                if (HDfscanf(strm, "%254s", temp) != 1) { /* SUBSET keyword */
+                if (fscanf(strm, "%254s", temp) != 1) { /* SUBSET keyword */
                     (void)fprintf(stderr, "%s", err18);
                     goto error;
                 }
@@ -2002,20 +2002,20 @@ processConfigurationFile(char *infile, struct Input *in)
                 printf("h5dump SUBSET %s found\n", temp);
 #endif
                 while (get_next_prop) {
-                    if (!HDstrcmp("COUNT", temp)) { /* COUNT */
+                    if (!strcmp("COUNT", temp)) { /* COUNT */
                         int icount = 0;
-                        if (HDfscanf(strm, "%254s", temp) != 1) { /* start paren */
+                        if (fscanf(strm, "%254s", temp) != 1) { /* start paren */
                             (void)fprintf(stderr, err6b, infile);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
                         printf("h5dump SUBSET %s found\n", temp);
 #endif
-                        if (!HDstrcmp("(", temp)) { /* start paren */
+                        if (!strcmp("(", temp)) { /* start paren */
                             int get_next_dim = 1;
                             int i            = 0;
 
-                            if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
+                            if (fscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
                                 (void)fprintf(stderr, err16c, infile);
                                 goto error;
                             }
@@ -2025,14 +2025,14 @@ processConfigurationFile(char *infile, struct Input *in)
                             while (get_next_dim) {
                                 char *more        = temp;
                                 temp_dims[icount] = strtoull(more, &more, 10);
-                                if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
+                                if (fscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
                                     (void)fprintf(stderr, err6b, infile);
                                     goto error;
                                 }
 #ifdef H5DEBUGIMPORT
                                 printf("h5dump SUBSET COUNT %s found\n", temp);
 #endif
-                                if (!HDstrcmp(");", temp)) { /* end paren */
+                                if (!strcmp(");", temp)) { /* end paren */
                                     in->rank                     = ++icount;
                                     in->configOptionVector[RANK] = 1;
                                     get_next_dim                 = 0;
@@ -2056,22 +2056,22 @@ processConfigurationFile(char *infile, struct Input *in)
                             printf("\n");
 #endif
                             in->configOptionVector[DIM] = 1;
-                        }                           /* if(!HDstrcmp("(", key))  start paren */
-                    }                               /* if(!HDstrcmp("COUNT", temp))  COUNT */
-                    if (!HDstrcmp("BLOCK", temp)) { /* BLOCK */
+                        }                         /* if(!strcmp("(", key))  start paren */
+                    }                             /* if(!strcmp("COUNT", temp))  COUNT */
+                    if (!strcmp("BLOCK", temp)) { /* BLOCK */
                         int icount = 0;
-                        if (HDfscanf(strm, "%254s", temp) != 1) { /* start paren */
+                        if (fscanf(strm, "%254s", temp) != 1) { /* start paren */
                             (void)fprintf(stderr, err6b, infile);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
                         printf("h5dump SUBSET %s found\n", temp);
 #endif
-                        if (!HDstrcmp("(", temp)) { /* start paren */
+                        if (!strcmp("(", temp)) { /* start paren */
                             int get_next_dim = 1;
                             int i            = 0;
 
-                            if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
+                            if (fscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
                                 (void)fprintf(stderr, err16c, infile);
                                 goto error;
                             }
@@ -2081,14 +2081,14 @@ processConfigurationFile(char *infile, struct Input *in)
                             while (get_next_dim) {
                                 char *more        = temp;
                                 temp_dims[icount] = strtoull(more, &more, 10);
-                                if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
+                                if (fscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
                                     (void)fprintf(stderr, err6b, infile);
                                     goto error;
                                 }
 #ifdef H5DEBUGIMPORT
                                 printf("h5dump SUBSET BLOCK %s found\n", temp);
 #endif
-                                if (!HDstrcmp(");", temp)) { /* end paren */
+                                if (!strcmp(");", temp)) { /* end paren */
                                     in->rank                     = ++icount;
                                     in->configOptionVector[RANK] = 1;
                                     get_next_dim                 = 0;
@@ -2112,28 +2112,28 @@ processConfigurationFile(char *infile, struct Input *in)
                             printf("\n");
 #endif
                             in->configOptionVector[DIM] = 1;
-                        } /* if(!HDstrcmp("(", key))  start paren */
-                    }     /* if(!HDstrcmp("BLOCK", temp))  BLOCK */
-                    if (HDfscanf(strm, "%254s", temp) != 1) {
+                        } /* if(!strcmp("(", key))  start paren */
+                    }     /* if(!strcmp("BLOCK", temp))  BLOCK */
+                    if (fscanf(strm, "%254s", temp) != 1) {
                         (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump SUBSET %s found\n", temp);
 #endif
-                    if (!HDstrcmp("}", temp)) { /* end bracket */
+                    if (!strcmp("}", temp)) { /* end bracket */
                         get_next_prop = 0;
                     }
-                }                              /* while (get_next_prop) */
-            }                                  /* else if(!HDstrcmp("SUBSET", key)) */
-            else if (!HDstrcmp("DATA", key)) { /* FINISHED */
+                }                            /* while (get_next_prop) */
+            }                                /* else if(!strcmp("SUBSET", key)) */
+            else if (!strcmp("DATA", key)) { /* FINISHED */
 #ifdef H5DEBUGIMPORT
                 printf("h5dump DATA key\n");
 #endif
                 scanret = 0;
                 break;
             }
-            scanret = HDfscanf(strm, "%254s", key);
+            scanret = fscanf(strm, "%254s", key);
         }
 #ifdef H5DEBUGIMPORT
         printf("h5dump path");
@@ -2174,7 +2174,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         (void)fprintf(stderr, err3a, infile);
                         goto error;
                     }
-                    if (HDfscanf(strm, "%254s", temp) != 1) {
+                    if (fscanf(strm, "%254s", temp) != 1) {
                         (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
@@ -2191,7 +2191,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         goto error;
                     }
 
-                    if (HDfscanf(strm, "%254s", temp) != 1) {
+                    if (fscanf(strm, "%254s", temp) != 1) {
                         (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
@@ -2218,7 +2218,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         (void)fprintf(stderr, err5a, infile);
                         goto error;
                     }
-                    if (HDfscanf(strm, "%254d", (&ival)) != 1) {
+                    if (fscanf(strm, "%254d", (&ival)) != 1) {
                         (void)fprintf(stderr, "%s", err19);
                         goto error;
                     }
@@ -2415,7 +2415,7 @@ processConfigurationFile(char *infile, struct Input *in)
                 default:
                     break;
             }
-            scanret = HDfscanf(strm, "%254s", key);
+            scanret = fscanf(strm, "%254s", key);
         }
 
         /*
@@ -2505,7 +2505,7 @@ mapKeywordToIndex(char *key)
     int i;
 
     for (i = 0; i < NUM_KEYS; i++)
-        if (!HDstrcmp(keytable[i], key))
+        if (!strcmp(keytable[i], key))
             return i;
     return -1;
 }
@@ -2518,22 +2518,22 @@ parsePathInfo(struct path_info *path, char *temp)
     int         i    = 0;
     const char *err1 = "Path string larger than MAX_PATH_NAME_LENGTH.\n";
 
-    token = HDstrtok(temp, delimiter);
-    if (HDstrlen(token) >= MAX_PATH_NAME_LENGTH) {
+    token = strtok(temp, delimiter);
+    if (strlen(token) >= MAX_PATH_NAME_LENGTH) {
         (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
-    HDstrcpy(path->group[i++], token);
+    strcpy(path->group[i++], token);
 
     while (1) {
-        token = HDstrtok(NULL, delimiter);
+        token = strtok(NULL, delimiter);
         if (token == NULL)
             break;
-        if (HDstrlen(token) >= MAX_PATH_NAME_LENGTH) {
+        if (strlen(token) >= MAX_PATH_NAME_LENGTH) {
             (void)fprintf(stderr, "%s", err1);
             return (-1);
         }
-        HDstrcpy(path->group[i++], token);
+        strcpy(path->group[i++], token);
     }
     path->count = i;
     return (0);
@@ -2548,12 +2548,12 @@ parseDimensions(struct Input *in, char *strm)
     int         i    = 0;
     const char *err1 = "Unable to allocate dynamic memory.\n";
 
-    HDstrncpy(temp, strm, sizeof(temp));
+    strncpy(temp, strm, sizeof(temp));
     temp[sizeof(temp) - 1] = '\0';
-    HDstrtok(temp, delimiter);
+    strtok(temp, delimiter);
 
     while (1) {
-        token = HDstrtok(NULL, delimiter);
+        token = strtok(NULL, delimiter);
         if (token == NULL)
             break;
         i++;
@@ -2565,12 +2565,12 @@ parseDimensions(struct Input *in, char *strm)
     }
 
     i = 0;
-    HDstrncpy(temp, strm, sizeof(temp));
+    strncpy(temp, strm, sizeof(temp));
     temp[sizeof(temp) - 1]   = '\0';
-    in->sizeOfDimension[i++] = strtoull(HDstrtok(temp, delimiter), NULL, BASE_10);
+    in->sizeOfDimension[i++] = strtoull(strtok(temp, delimiter), NULL, BASE_10);
 
     while (1) {
-        token = HDstrtok(NULL, delimiter);
+        token = strtok(NULL, delimiter);
         if (token == NULL)
             break;
         in->sizeOfDimension[i++] = strtoull(token, NULL, BASE_10);
@@ -2586,7 +2586,7 @@ getOutputClass(struct Input *in, FILE *strm)
     const char *err1 = "Unable to get 'string' value.\n";
     const char *err2 = "Invalid value for output class.\n";
 
-    if (HDfscanf(strm, "%254s", temp) != 1) {
+    if (fscanf(strm, "%254s", temp) != 1) {
         (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
@@ -2606,7 +2606,7 @@ OutputClassStrToInt(char *temp)
     int  i;
     char classKeywordTable[3][15] = {"IN", "FP", "UIN"};
     for (i = 0; i < 3; i++)
-        if (!HDstrcmp(classKeywordTable[i], temp))
+        if (!strcmp(classKeywordTable[i], temp))
             return i;
 
     return -1;
@@ -2621,7 +2621,7 @@ getOutputSize(struct Input *in, FILE *strm)
     const char *err1                     = "Unable to get integer value.\n";
     const char *err2                     = "Invalid value for output size.\n";
 
-    if (HDfscanf(strm, "%d", (&ival)) != 1) {
+    if (fscanf(strm, "%d", (&ival)) != 1) {
         (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
@@ -2658,7 +2658,7 @@ getInputClassType(struct Input *in, char *buffer)
     const char *err2   = "Invalid value for output architecture.\n";
     const char *err3   = "Invalid value for input byte-order.\n";
 
-    if (!HDstrcmp(buffer, "H5T_STD_I8BE")) {
+    if (!strcmp(buffer, "H5T_STD_I8BE")) {
         in->inputSize                      = 8;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2679,7 +2679,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 4;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_I8LE")) {
+    else if (!strcmp(buffer, "H5T_STD_I8LE")) {
         in->inputSize                      = 8;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2700,7 +2700,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 4;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_I16BE")) {
+    else if (!strcmp(buffer, "H5T_STD_I16BE")) {
         in->inputSize                      = 16;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2721,7 +2721,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 4;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_I16LE")) {
+    else if (!strcmp(buffer, "H5T_STD_I16LE")) {
         in->inputSize                      = 16;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2742,7 +2742,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 4;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_I32BE")) {
+    else if (!strcmp(buffer, "H5T_STD_I32BE")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2763,7 +2763,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 4;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_I32LE")) {
+    else if (!strcmp(buffer, "H5T_STD_I32LE")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2784,7 +2784,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 4;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_I64BE")) {
+    else if (!strcmp(buffer, "H5T_STD_I64BE")) {
         in->inputSize                      = 64;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2805,7 +2805,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 4;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_I64LE")) {
+    else if (!strcmp(buffer, "H5T_STD_I64LE")) {
         in->inputSize                      = 64;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2826,7 +2826,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 4;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_U8BE")) {
+    else if (!strcmp(buffer, "H5T_STD_U8BE")) {
         in->inputSize                      = 8;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2847,7 +2847,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 7;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_U8LE")) {
+    else if (!strcmp(buffer, "H5T_STD_U8LE")) {
         in->inputSize                      = 8;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2868,7 +2868,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 7;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_U16BE")) {
+    else if (!strcmp(buffer, "H5T_STD_U16BE")) {
         in->inputSize                      = 16;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2889,7 +2889,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 7;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_U16LE")) {
+    else if (!strcmp(buffer, "H5T_STD_U16LE")) {
         in->inputSize                      = 16;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2910,7 +2910,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 7;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_U32BE")) {
+    else if (!strcmp(buffer, "H5T_STD_U32BE")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2931,7 +2931,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 7;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_U32LE")) {
+    else if (!strcmp(buffer, "H5T_STD_U32LE")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2952,7 +2952,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 7;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_U64BE")) {
+    else if (!strcmp(buffer, "H5T_STD_U64BE")) {
         in->inputSize                      = 64;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2973,7 +2973,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 7;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_U64LE")) {
+    else if (!strcmp(buffer, "H5T_STD_U64LE")) {
         in->inputSize                      = 64;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -2994,7 +2994,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 7;
     }
-    else if (!HDstrcmp(buffer, "H5T_NATIVE_SCHAR")) {
+    else if (!strcmp(buffer, "H5T_NATIVE_SCHAR")) {
         in->inputSize                      = 8;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3006,7 +3006,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 4;
     }
-    else if (!HDstrcmp(buffer, "H5T_NATIVE_UCHAR")) {
+    else if (!strcmp(buffer, "H5T_NATIVE_UCHAR")) {
         in->inputSize                      = 8;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3018,7 +3018,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 7;
     }
-    else if (!HDstrcmp(buffer, "H5T_NATIVE_SHORT")) {
+    else if (!strcmp(buffer, "H5T_NATIVE_SHORT")) {
         in->inputSize                      = 16;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3030,7 +3030,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 4;
     }
-    else if (!HDstrcmp(buffer, "H5T_NATIVE_USHORT")) {
+    else if (!strcmp(buffer, "H5T_NATIVE_USHORT")) {
         in->inputSize                      = 16;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3042,7 +3042,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 7;
     }
-    else if (!HDstrcmp(buffer, "H5T_NATIVE_INT")) {
+    else if (!strcmp(buffer, "H5T_NATIVE_INT")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3054,7 +3054,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 4;
     }
-    else if (!HDstrcmp(buffer, "H5T_NATIVE_UINT")) {
+    else if (!strcmp(buffer, "H5T_NATIVE_UINT")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3066,7 +3066,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 7;
     }
-    else if (!HDstrcmp(buffer, "H5T_NATIVE_LONG")) {
+    else if (!strcmp(buffer, "H5T_NATIVE_LONG")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3078,7 +3078,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 4;
     }
-    else if (!HDstrcmp(buffer, "H5T_NATIVE_ULONG")) {
+    else if (!strcmp(buffer, "H5T_NATIVE_ULONG")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3090,7 +3090,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 7;
     }
-    else if (!HDstrcmp(buffer, "H5T_NATIVE_LLONG")) {
+    else if (!strcmp(buffer, "H5T_NATIVE_LLONG")) {
         in->inputSize                      = 64;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3102,7 +3102,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 4;
     }
-    else if (!HDstrcmp(buffer, "H5T_NATIVE_ULLONG")) {
+    else if (!strcmp(buffer, "H5T_NATIVE_ULLONG")) {
         in->inputSize                      = 64;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3114,7 +3114,49 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 7;
     }
-    else if (!HDstrcmp(buffer, "H5T_IEEE_F32BE")) {
+    else if (!strcmp(buffer, "H5T_IEEE_F16BE")) {
+        in->inputSize                      = 16;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
+            (void)fprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void)fprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+#ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+#endif
+
+        kindex = 3;
+    }
+    else if (!strcmp(buffer, "H5T_IEEE_F16LE")) {
+        in->inputSize                      = 16;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
+            (void)fprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void)fprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+#ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+#endif
+
+        kindex = 3;
+    }
+    else if (!strcmp(buffer, "H5T_IEEE_F32BE")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3135,7 +3177,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
-    else if (!HDstrcmp(buffer, "H5T_IEEE_F32LE")) {
+    else if (!strcmp(buffer, "H5T_IEEE_F32LE")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3156,7 +3198,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
-    else if (!HDstrcmp(buffer, "H5T_IEEE_F64BE")) {
+    else if (!strcmp(buffer, "H5T_IEEE_F64BE")) {
         in->inputSize                      = 64;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3177,7 +3219,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
-    else if (!HDstrcmp(buffer, "H5T_IEEE_F64LE")) {
+    else if (!strcmp(buffer, "H5T_IEEE_F64LE")) {
         in->inputSize                      = 64;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3198,19 +3240,33 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
-    else if (!HDstrcmp(buffer, "H5T_VAX_F32")) {
+    else if (!strcmp(buffer, "H5T_VAX_F32")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
 
         kindex = 3;
     }
-    else if (!HDstrcmp(buffer, "H5T_VAX_F64")) {
+    else if (!strcmp(buffer, "H5T_VAX_F64")) {
         in->inputSize                      = 64;
         in->configOptionVector[INPUT_SIZE] = 1;
 
         kindex = 3;
     }
-    else if (!HDstrcmp(buffer, "H5T_NATIVE_FLOAT")) {
+#ifdef H5_HAVE__FLOAT16
+    else if (!strcmp(buffer, "H5T_NATIVE_FLOAT16")) {
+        in->inputSize                      = 16;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void)fprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 3;
+    }
+#endif
+    else if (!strcmp(buffer, "H5T_NATIVE_FLOAT")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3222,7 +3278,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
-    else if (!HDstrcmp(buffer, "H5T_NATIVE_DOUBLE")) {
+    else if (!strcmp(buffer, "H5T_NATIVE_DOUBLE")) {
         in->inputSize                      = 64;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3234,7 +3290,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
-    else if (!HDstrcmp(buffer, "H5T_NATIVE_LDOUBLE")) {
+    else if (!strcmp(buffer, "H5T_NATIVE_LDOUBLE")) {
         in->inputSize                      = H5_SIZEOF_LONG_DOUBLE;
         in->configOptionVector[INPUT_SIZE] = 1;
 
@@ -3246,14 +3302,14 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
-    else if (!HDstrcmp(buffer, "H5T_TIME: not yet implemented")) {
+    else if (!strcmp(buffer, "H5T_TIME: not yet implemented")) {
         kindex = -1;
     }
-    else if (!HDstrcmp(buffer, "H5T_STRING")) {
+    else if (!strcmp(buffer, "H5T_STRING")) {
         kindex = 5;
     }
     /*    case H5T_BITFIELD: */
-    else if (!HDstrcmp(buffer, "H5T_STD_B8BE")) {
+    else if (!strcmp(buffer, "H5T_STD_B8BE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
             (void)fprintf(stderr, "%s", err2);
@@ -3272,7 +3328,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = -1;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_B8LE")) {
+    else if (!strcmp(buffer, "H5T_STD_B8LE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
             (void)fprintf(stderr, "%s", err2);
@@ -3291,7 +3347,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = -1;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_B16BE")) {
+    else if (!strcmp(buffer, "H5T_STD_B16BE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
             (void)fprintf(stderr, "%s", err2);
@@ -3310,7 +3366,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = -1;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_B16LE")) {
+    else if (!strcmp(buffer, "H5T_STD_B16LE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
             (void)fprintf(stderr, "%s", err2);
@@ -3329,7 +3385,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = -1;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_B32BE")) {
+    else if (!strcmp(buffer, "H5T_STD_B32BE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
             (void)fprintf(stderr, "%s", err2);
@@ -3348,7 +3404,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = -1;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_B32LE")) {
+    else if (!strcmp(buffer, "H5T_STD_B32LE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
             (void)fprintf(stderr, "%s", err2);
@@ -3367,7 +3423,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = -1;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_B64BE")) {
+    else if (!strcmp(buffer, "H5T_STD_B64BE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
             (void)fprintf(stderr, "%s", err2);
@@ -3386,7 +3442,7 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = -1;
     }
-    else if (!HDstrcmp(buffer, "H5T_STD_B64LE")) {
+    else if (!strcmp(buffer, "H5T_STD_B64LE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
             (void)fprintf(stderr, "%s", err2);
@@ -3406,27 +3462,27 @@ getInputClassType(struct Input *in, char *buffer)
         kindex = -1;
     }
     /*    case H5T_OPAQUE: */
-    else if (!HDstrcmp(buffer, "H5T_OPAQUE")) {
+    else if (!strcmp(buffer, "H5T_OPAQUE")) {
         kindex = -1;
     }
     /*    case H5T_COMPOUND: */
-    else if (!HDstrcmp(buffer, "H5T_COMPOUND")) {
+    else if (!strcmp(buffer, "H5T_COMPOUND")) {
         kindex = -1;
     }
     /*    case H5T_REFERENCE: */
-    else if (!HDstrcmp(buffer, "H5T_REFERENCE")) {
+    else if (!strcmp(buffer, "H5T_REFERENCE")) {
         kindex = -1;
     }
     /*    case H5T_ENUM: */
-    else if (!HDstrcmp(buffer, "H5T_ENUM")) {
+    else if (!strcmp(buffer, "H5T_ENUM")) {
         kindex = -1;
     }
     /*    case H5T_VLEN: */
-    else if (!HDstrcmp(buffer, "H5T_VLEN")) {
+    else if (!strcmp(buffer, "H5T_VLEN")) {
         kindex = -1;
     }
     /*    case H5T_ARRAY: */
-    else if (!HDstrcmp(buffer, "H5T_ARRAY")) {
+    else if (!strcmp(buffer, "H5T_ARRAY")) {
         kindex = -1;
     }
 
@@ -3454,7 +3510,7 @@ InputClassStrToInt(char *temp)
     int  i;
     char classKeywordTable[8][15] = {"TEXTIN", "TEXTFP", "TEXTFPE", "FP", "IN", "STR", "TEXTUIN", "UIN"};
     for (i = 0; i < 8; i++)
-        if (!HDstrcmp(classKeywordTable[i], temp))
+        if (!strcmp(classKeywordTable[i], temp))
             return i;
     return -1;
 }
@@ -3484,7 +3540,7 @@ getInputByteOrder(struct Input *in, FILE *strm)
     const char *err1 = "Unable to get 'string' value.\n";
     const char *err2 = "Invalid value for input byte-order.\n";
 
-    if (HDfscanf(strm, "%254s", temp) != 1) {
+    if (fscanf(strm, "%254s", temp) != 1) {
         (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
@@ -3506,7 +3562,7 @@ getRank(struct Input *in, FILE *strm)
     const char *err1 = "Unable to get integer value.\n";
     const char *err2 = "Invalid value for rank.\n";
 
-    if (HDfscanf(strm, "%d", (&ival)) != 1) {
+    if (fscanf(strm, "%d", (&ival)) != 1) {
         (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
@@ -3535,7 +3591,7 @@ getDimensionSizes(struct Input *in, FILE *strm)
         return (-1);
     }
 
-    while (HDfscanf(strm, "%llu", (&ullval)) == 1)
+    while (fscanf(strm, "%llu", (&ullval)) == 1)
         in->sizeOfDimension[i++] = ullval;
 
     if (in->rank != i) {
@@ -3561,7 +3617,7 @@ getChunkedDimensionSizes(struct Input *in, FILE *strm)
         return (-1);
     }
 
-    while (HDfscanf(strm, "%llu", (&ullval)) == 1)
+    while (fscanf(strm, "%llu", (&ullval)) == 1)
         in->sizeOfChunk[i++] = ullval;
 
     if (in->rank != i) {
@@ -3594,7 +3650,7 @@ getMaximumDimensionSizes(struct Input *in, FILE *strm)
         return (-1);
     }
 
-    while (HDfscanf(strm, "%lld", (&llval)) == 1) {
+    while (fscanf(strm, "%lld", (&llval)) == 1) {
         if (llval == -1)
             in->maxsizeOfDimension[i++] = H5S_UNLIMITED;
         else
@@ -3624,7 +3680,7 @@ getOutputArchitecture(struct Input *in, FILE *strm)
     const char *err1 = "Unable to get 'string' value.\n";
     const char *err2 = "Invalid value for output architecture.\n";
 
-    if (HDfscanf(strm, "%254s", temp) != 1) {
+    if (fscanf(strm, "%254s", temp) != 1) {
         (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
@@ -3644,7 +3700,7 @@ OutputArchStrToInt(const char *temp)
     int  i;
     char outputArchKeywordTable[8][15] = {"NATIVE", "STD", "IEEE", "INTEL", "CRAY", "MIPS", "ALPHA", "UNIX"};
     for (i = 0; i < 8; i++)
-        if (!HDstrcmp(outputArchKeywordTable[i], temp))
+        if (!strcmp(outputArchKeywordTable[i], temp))
             return i;
     return -1;
 }
@@ -3657,7 +3713,7 @@ getOutputByteOrder(struct Input *in, FILE *strm)
     const char *err1 = "Unable to get 'string' value.\n";
     const char *err2 = "Invalid value for output byte-order.\n";
 
-    if (HDfscanf(strm, "%254s", temp) != 1) {
+    if (fscanf(strm, "%254s", temp) != 1) {
         (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
@@ -3677,7 +3733,7 @@ OutputByteOrderStrToInt(const char *temp)
     int  i;
     char outputByteOrderKeywordTable[2][15] = {"BE", "LE"};
     for (i = 0; i < 2; i++)
-        if (!HDstrcmp(outputByteOrderKeywordTable[i], temp))
+        if (!strcmp(outputByteOrderKeywordTable[i], temp))
             return i;
     return -1;
 }
@@ -3690,7 +3746,7 @@ getCompressionType(struct Input *in, FILE *strm)
     const char *err1 = "Unable to get 'string' value.\n";
     const char *err2 = "Invalid value for compression.\n";
 
-    if (HDfscanf(strm, "%254s", temp) != 1) {
+    if (fscanf(strm, "%254s", temp) != 1) {
         (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
@@ -3713,7 +3769,7 @@ CompressionTypeStrToInt(char *temp)
     int  i;
     char CompressionTypeKeywordTable[1][15] = {"GZIP"};
     for (i = 0; i < 1; i++)
-        if (!HDstrcmp(CompressionTypeKeywordTable[i], temp))
+        if (!strcmp(CompressionTypeKeywordTable[i], temp))
             return i;
     return -1;
 }
@@ -3732,7 +3788,7 @@ getCompressionParameter(struct Input *in, FILE *strm)
 
     switch (in->compressionType) {
         case 0: /* GZIP */
-            if (HDfscanf(strm, "%d", (&ival)) != 1) {
+            if (fscanf(strm, "%d", (&ival)) != 1) {
                 (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
@@ -3757,14 +3813,14 @@ getExternalFilename(struct Input *in, FILE *strm)
     char        temp[255];
     const char *err1 = "Unable to get 'string' value.\n";
 
-    if (HDfscanf(strm, "%254s", temp) != 1) {
+    if (fscanf(strm, "%254s", temp) != 1) {
         (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
-    temp_len           = HDstrlen(temp);
+    temp_len           = strlen(temp);
     in->externFilename = (char *)malloc((temp_len + 1) * sizeof(char));
-    (void)HDstrcpy(in->externFilename, temp);
+    (void)strcpy(in->externFilename, temp);
     in->externFilename[temp_len] = '\0';
     return (0);
 }
@@ -3785,10 +3841,10 @@ setDefaultValues(struct Input *in, int count)
     in->rank           = 0;
     in->path.count     = 1;
 
-    HDstrcpy(temp, "dataset");
-    HDsnprintf(num, sizeof(num), "%d", count);
-    HDstrcat(temp, num);
-    HDstrcpy(in->path.group[0], temp);
+    strcpy(temp, "dataset");
+    snprintf(num, sizeof(num), "%d", count);
+    strcat(temp, num);
+    strcpy(in->path.group[0], temp);
 
     in->outputArchitecture = 0;  /* NATIVE */
     in->outputByteOrder    = -1; /* use default    */
@@ -3936,6 +3992,12 @@ createOutputDataType(struct Input *in)
             switch (in->outputArchitecture) {
                 case 0:
                     switch (in->outputSize) {
+#ifdef H5_HAVE__FLOAT16
+                        case 16:
+                            new_type = H5Tcopy(H5T_NATIVE_FLOAT16);
+                            break;
+#endif
+
                         case 32:
                             new_type = H5Tcopy(H5T_NATIVE_FLOAT);
                             break;
@@ -3971,6 +4033,23 @@ createOutputDataType(struct Input *in)
 
                 case 2:
                     switch (in->outputSize) {
+                        case 16:
+                            switch (in->outputByteOrder) {
+                                case -1:
+                                case 0:
+                                    new_type = H5Tcopy(H5T_IEEE_F16BE);
+                                    break;
+
+                                case 1:
+                                    new_type = H5Tcopy(H5T_IEEE_F16LE);
+                                    break;
+
+                                default:
+                                    (void)fprintf(stderr, "%s", err3);
+                                    return (-1);
+                            }
+                            break;
+
                         case 32:
                             switch (in->outputByteOrder) {
                                 case -1:
@@ -4291,6 +4370,12 @@ createInputDataType(struct Input *in)
                 switch (in->inputArchitecture) {
                     case 0:
                         switch (in->inputSize) {
+#ifdef H5_HAVE__FLOAT16
+                            case 16:
+                                new_type = H5Tcopy(H5T_NATIVE_FLOAT16);
+                                break;
+#endif
+
                             case 32:
                                 new_type = H5Tcopy(H5T_NATIVE_FLOAT);
                                 break;
@@ -4326,6 +4411,23 @@ createInputDataType(struct Input *in)
 
                     case 2:
                         switch (in->inputSize) {
+                            case 16:
+                                switch (in->inputByteOrder) {
+                                    case -1:
+                                    case 0:
+                                        new_type = H5Tcopy(H5T_IEEE_F16BE);
+                                        break;
+
+                                    case 1:
+                                        new_type = H5Tcopy(H5T_IEEE_F16LE);
+                                        break;
+
+                                    default:
+                                        (void)fprintf(stderr, "%s", err3);
+                                        return (-1);
+                                }
+                                break;
+
                             case 32:
                                 switch (in->inputByteOrder) {
                                     case -1:
@@ -4535,6 +4637,12 @@ createInputDataType(struct Input *in)
             case 2:
             case 3:
                 switch (in->inputSize) {
+#ifdef H5_HAVE__FLOAT16
+                    case 16:
+                        new_type = H5Tcopy(H5T_NATIVE_FLOAT16);
+                        break;
+#endif
+
                     case 32:
                         new_type = H5Tcopy(H5T_NATIVE_FLOAT);
                         break;
@@ -4702,8 +4810,7 @@ process(struct Options *opt)
                     return (-1);
                 }
                 fclose(extfile);
-                H5Pset_external(proplist, in->externFilename, (off_t)0,
-                                numOfElements * (hsize_t)in->inputSize / 8);
+                H5Pset_external(proplist, in->externFilename, 0, numOfElements * (hsize_t)in->inputSize / 8);
             }
 
             /* create dataspace */

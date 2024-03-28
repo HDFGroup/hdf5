@@ -85,8 +85,9 @@ main(int argc, char *argv[])
 
             MPI_Barrier(MPI_COMM_WORLD);
 
-            print_info(&opts);
             print_manager_output();
+
+            print_info(&opts);
         }
         /* All other tasks become workers and wait for assignments. */
         else {
@@ -127,7 +128,7 @@ ph5diff_worker(int nID)
             char filenames[2][MAX_FILENAME];
 
             /* Retrieve filenames */
-            MPI_Recv(filenames, MAX_FILENAME * 2, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+            MPI_Recv(filenames, MAX_FILENAME * 2, MPI_CHAR, 0, MPI_TAG_PARALLEL, MPI_COMM_WORLD, &Status);
 
             /* disable error reporting */
             H5E_BEGIN_TRY
@@ -173,7 +174,7 @@ ph5diff_worker(int nID)
 
                 /* When get token, send all of our output to the manager task and then return the token */
                 for (i = 0; i < outBuffOffset; i += PRINT_DATA_MAX_SIZE)
-                    MPI_Send(outBuff + i, PRINT_DATA_MAX_SIZE, MPI_BYTE, 0, MPI_TAG_PRINT_DATA,
+                    MPI_Send(outBuff + i, PRINT_DATA_MAX_SIZE, MPI_CHAR, 0, MPI_TAG_PRINT_DATA,
                              MPI_COMM_WORLD);
 
                 /* An overflow file exists, so we send it's output to the manager too and then delete it */
@@ -188,7 +189,7 @@ ph5diff_worker(int nID)
                     while ((tmp = getc(overflow_file)) >= 0) {
                         *(out_data + i++) = (char)tmp;
                         if (i == PRINT_DATA_MAX_SIZE) {
-                            MPI_Send(out_data, PRINT_DATA_MAX_SIZE, MPI_BYTE, 0, MPI_TAG_PRINT_DATA,
+                            MPI_Send(out_data, PRINT_DATA_MAX_SIZE, MPI_CHAR, 0, MPI_TAG_PRINT_DATA,
                                      MPI_COMM_WORLD);
                             i = 0;
                             memset(out_data, 0, PRINT_DATA_MAX_SIZE);
@@ -196,7 +197,7 @@ ph5diff_worker(int nID)
                     }
 
                     if (i > 0)
-                        MPI_Send(out_data, PRINT_DATA_MAX_SIZE, MPI_BYTE, 0, MPI_TAG_PRINT_DATA,
+                        MPI_Send(out_data, PRINT_DATA_MAX_SIZE, MPI_CHAR, 0, MPI_TAG_PRINT_DATA,
                                  MPI_COMM_WORLD);
 
                     fclose(overflow_file);
@@ -246,8 +247,8 @@ print_manager_output(void)
         if (overflow_file) {
             int tmp;
             rewind(overflow_file);
-            while ((tmp = HDgetc(overflow_file)) >= 0)
-                HDputchar(tmp);
+            while ((tmp = getc(overflow_file)) >= 0)
+                putchar(tmp);
             fclose(overflow_file);
             overflow_file = NULL;
         }

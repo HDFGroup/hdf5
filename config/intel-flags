@@ -127,14 +127,14 @@ if test "X-icc" = "X-$cc_vendor"; then
     ###########
 
     # Add various general warning flags in intel-warnings.
-    H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments general)"
+    H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments classic/general)"
 
     ######################
     # Developer warnings #
     ######################
 
-    #NO_DEVELOPER_WARNING_CFLAGS=$(load_intel_arguments no-developer-general)
-    #DEVELOPER_WARNING_CFLAGS=$(load_intel_arguments developer-general)
+    #NO_DEVELOPER_WARNING_CFLAGS=$(load_intel_arguments classic/no-developer-general)
+    #DEVELOPER_WARNING_CFLAGS=$(load_intel_arguments classic/developer-general)
 
     #############################
     # Version-specific warnings #
@@ -153,18 +153,12 @@ if test "X-icc" = "X-$cc_vendor"; then
 
     # intel >= 15
     if test $cc_vers_major -ge 15; then
-        H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments 15)"
+        H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments classic/15)"
     fi
 
     # intel >= 18
     if test $cc_vers_major -ge 18; then
-        H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments 18)"
-    fi
-
-    # intel <= 19
-    # this file has warnings only available before oneapi versions
-    if test $cc_vers_major -le 19; then
-        H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments general-19)"
+        H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments classic/18)"
     fi
 
     #################

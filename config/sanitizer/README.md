@@ -1,11 +1,10 @@
 # CMake Scripts <!-- omit in toc -->
 
-[![pipeline status](https://git.stabletec.com/other/cmake-scripts/badges/master/pipeline.svg)](https://git.stabletec.com/other/cmake-scripts/commits/master)
-[![license](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://git.stabletec.com/other/cmake-scripts/blob/master/LICENSE)
+[![pipeline status](https://git.stabletec.com/other/cmake-scripts/badges/main/pipeline.svg)](https://git.stabletec.com/other/cmake-scripts/commits/main)
+[![license](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://git.stabletec.com/other/cmake-scripts/blob/main/LICENSE)
 
 This is a collection of quite useful scripts that expand the possibilities for building software with CMake, by making some things easier and otherwise adding new build types
 
-- [C++ Standards `c++-standards.cmake`](#c-standards-c-standardscmake)
 - [Sanitizer Builds `sanitizers.cmake`](#sanitizer-builds-sanitizerscmake)
 - [Code Coverage `code-coverage.cmake`](#code-coverage-code-coveragecmake)
   - [Added Targets](#added-targets)
@@ -15,28 +14,15 @@ This is a collection of quite useful scripts that expand the possibilities for b
       - [1b - Via target commands](#1b---via-target-commands)
     - [Example 2: Target instrumented, but with regex pattern of files to be excluded from report](#example-2-target-instrumented-but-with-regex-pattern-of-files-to-be-excluded-from-report)
     - [Example 3: Target added to the 'ccov' and 'ccov-all' targets](#example-3-target-added-to-the-ccov-and-ccov-all-targets)
-- [Compiler Options `compiler-options.cmake`](#compiler-options-compiler-optionscmake)
+- [AFL Fuzzing Instrumentation `afl-fuzzing.cmake`](#afl-fuzzing-instrumentation-afl-fuzzingcmake)
+  - [Usage](#usage-1)
 - [Dependency Graph `dependency-graph.cmake`](#dependency-graph-dependency-graphcmake)
   - [Required Arguments](#required-arguments)
-    - [OUTPUT_TYPE *STR*](#output_type-str)
+    - [OUTPUT\_TYPE *STR*](#output_type-str)
   - [Optional Arguments](#optional-arguments)
-    - [ADD_TO_DEP_GRAPH](#add_to_dep_graph)
-    - [TARGET_NAME *STR*](#target_name-str)
-    - [OUTPUT_DIR *STR*](#output_dir-str)
-- [Doxygen `doxygen.cmake`](#doxygen-doxygencmake)
-  - [Optional Arguments](#optional-arguments-1)
-    - [ADD_TO_DOC](#add_to_doc)
-    - [INSTALLABLE](#installable)
-    - [PROCESS_DOXYFILE](#process_doxyfile)
-    - [TARGET_NAME *STR*](#target_name-str-1)
-    - [OUTPUT_DIR *STR*](#output_dir-str-1)
-    - [INSTALL_PATH *STR*](#install_path-str)
-    - [DOXYFILE_PATH *STR*](#doxyfile_path-str)
-- [Prepare the Catch Test Framework `prepare_catch.cmake`](#prepare-the-catch-test-framework-prepare_catchcmake)
-  - [Optional Arguments](#optional-arguments-2)
-    - [COMPILED_CATCH](#compiled_catch)
-    - [CATCH1](#catch1)
-    - [CLONE](#clone)
+    - [ADD\_TO\_DEP\_GRAPH](#add_to_dep_graph)
+    - [TARGET\_NAME *STR*](#target_name-str)
+    - [OUTPUT\_DIR *STR*](#output_dir-str)
 - [Tools `tools.cmake`](#tools-toolscmake)
   - [clang-tidy](#clang-tidy)
   - [include-what-you-use](#include-what-you-use)
@@ -45,15 +31,9 @@ This is a collection of quite useful scripts that expand the possibilities for b
   - [clang-format](#clang-format)
   - [cmake-format](#cmake-format)
 
-## C++ Standards [`c++-standards.cmake`](c++-standards.cmake)
-
-Using the functions `cxx_11()`, `cxx_14()`, `cxx_17()` or `cxx_20()` this adds the appropriate flags for both unix and MSVC compilers, even for those before 3.11 with improper support.
-
-These obviously force the standard to be required, and also disables compiler-specific extensions, ie `--std=gnu++11`. This helps to prevent fragmenting the code base with items not available elsewhere, adhering to the agreed C++ standards only.
-
 ## Sanitizer Builds [`sanitizers.cmake`](sanitizers.cmake)
 
-Sanitizers are tools that perform checks during a program's runtime and return issues, and as such, along with unit testing, code coverage and static analysis, are another tool to add to the programmer's toolbox. And, of course, like the previous tools, they are simple to add to any project using CMake, allowing any project and developer to quickly and easily use them.
+Sanitizers are tools that perform checks during a program’s runtime and returns issues, and as such, along with unit testing, code coverage and static analysis, is another tool to add to the programmers toolbox. And of course, like the previous tools, are tragically simple to add into any project using CMake, allowing any project and developer to quickly and easily use.
 
 A quick rundown of the tools available, and what they do:
 - [LeakSanitizer](https://clang.llvm.org/docs/LeakSanitizer.html) detects memory leaks, or issues where memory is allocated and never deallocated, causing programs to slowly consume more and more memory, eventually leading to a crash.
@@ -72,20 +52,20 @@ A quick rundown of the tools available, and what they do:
     - Division by zero
     - Unreachable code
 - [MemorySanitizer](https://clang.llvm.org/docs/MemorySanitizer.html) detects uninitialized reads.
+- [Control Flow Integrity](https://clang.llvm.org/docs/ControlFlowIntegrity.html) is designed to detect certain forms of undefined behaviour that can potentially allow attackers to subvert the program's control flow.
 
-These are used by declaring the `USE_SANITIZER` CMake variable as one of:
+These are used by declaring the `USE_SANITIZER` CMake variable as string containing any of:
 - Address
 - Memory
 - MemoryWithOrigins
 - Undefined
 - Thread
-- Address;Undefined
-- Undefined;Address
 - Leak
+- CFI
+
+Multiple values are allowed, e.g. `-DUSE_SANITIZER=Address,Leak` but some sanitizers cannot be combined together, e.g.`-DUSE_SANITIZER=Address,Memory` will result in configuration error. The delimiter character is not required and `-DUSE_SANITIZER=AddressLeak` would work as well.
 
 ## Code Coverage [`code-coverage.cmake`](code-coverage.cmake)
-
-![Code Coverage Examples](img/code-cov.png)
 
 > In computer science, test coverage is a measure used to describe the degree to which the source code of a program is executed when a particular test suite runs. A program with high test coverage, measured as a percentage, has had more of its source code executed during testing, which suggests it has a lower chance of containing undetected software bugs compared to a program with low test coverage. Many different metrics can be used to calculate test coverage; some of the most basic are the percentage of program subroutines and the percentage of program statements called during execution of the test suite. 
 >
@@ -101,7 +81,7 @@ To enable, turn on the `CODE_COVERAGE` variable.
 
 - GCOV/LCOV:
     - ccov : Generates HTML code coverage report for every target added with 'AUTO' parameter.
-    - ccov-${TARNGET_NAME} : Generates HTML code coverage report for the associated named target.
+    - ccov-${TARGET_NAME} : Generates HTML code coverage report for the associated named target.
     - ccov-all : Generates HTML code coverage report, merging every target added with 'ALL' parameter into a single detailed report.
     - ccov-all-capture : Generates an all-merged.info file, for use with coverage dashboards (e.g. codecov.io, coveralls).
 - LLVM-COV:
@@ -156,7 +136,7 @@ target_code_coverage(theExe) # As an executable target, adds the 'ccov-theExe' t
 
 ```
 add_executable(theExe main.cpp non_covered.cpp)
-target_code_coverage(theExe EXCLUDE non_covered.cpp) # As an executable target, the reports will exclude the non-covered.cpp file.
+target_code_coverage(theExe EXCLUDE non_covered.cpp) # As an executable target, the reports will exclude the non_covered.cpp file.
 ```
 
 #### Example 3: Target added to the 'ccov' and 'ccov-all' targets
@@ -168,7 +148,41 @@ add_executable(theExe main.cpp non_covered.cpp)
 target_code_coverage(theExe AUTO ALL EXCLUDE non_covered.cpp test/*) # As an executable target, adds to the 'ccov' and ccov-all' targets, and the reports will exclude the non-covered.cpp file, and any files in a test/ folder.
 ```
 
-## Compiler Options [`compiler-options.cmake`](compiler-options.cmake)
+## AFL Fuzzing Instrumentation [`afl-fuzzing.cmake`](afl-fuzzing.cmake)
+
+> American fuzzy lop is a security-oriented fuzzer that employs a novel type of compile-time instrumentation and genetic algorithms to automatically discover clean, interesting test cases that trigger new internal states in the targeted binary. This substantially improves the functional coverage for the fuzzed code. The compact synthesized corpora produced by the tool are also useful for seeding other, more labor- or resource-intensive testing regimes down the road.
+>
+> [american fuzzy lop](https://lcamtuf.coredump.cx/afl/)
+
+NOTE: This actually works based off the still-developed daughter project [AFL++](https://aflplus.plus/).
+
+### Usage
+
+To enable the use of AFL instrumentation, this file needs to be included into the CMake scripts at any point *before* any of the compilers are setup by CMake, typically at/before the first call to project(), or any part before compiler detection/validation occurs. This is since CMake does not support changing the compiler after it has been set:
+
+```
+cmake_minimum_required(VERSION 3.4)
+include(cmake/afl-fuzzing.cmake)
+project(Example C CXX)
+```
+
+Using `-DAFL=ON` will search for and switch to the AFL++ compiler wrappers that will instrument builds, or error if it cannot.
+
+Using `-DAFL_MODE=<MODE>` will attempt to use the specified  instrumentation type, see [here](https://github.com/AFLplusplus/AFLplusplus/blob/stable/docs/fuzzing_in_depth.md). Options are:
+- LTO
+- LLVM
+- GCC-PLUGIN
+- CLANG
+- GCC
+
+Using `-DAFL_ENV_OPTIONS=<...;...>` allows adding any number of AFL++'s instrumentation enabled via environment variables, and these will be prefixed to the build calls (see `afl-cc -hh`).
+
+As an example, a CMake configuration such as this:
+```cmake .. -DAFL_MODE=LTO -DAFL_ENV_OPTIONS=AFL_LLVM_THREADSAFE_INST=1;AFL_LLVM_LAF_ALL=1```
+would result in build commands such as this:
+```AFL_LLVM_THREADSAFE_INST=1 AFL_LLVM_LAF_ALL=1 afl-clang-lto --afl-lto <...>```
+
+## Compiler Options
 
 Allows for easy use of some pre-made compiler options for the major compilers.
 
@@ -186,8 +200,7 @@ Using `-DGENERATE_DEPENDENCY_DATA=ON` generates `.d` files along with regular ob
 
 ## Dependency Graph [`dependency-graph.cmake`](dependency-graph.cmake)
 
-CMake, with the dot application available, will build a visual representation of the library/executable dependencies, like so:
-![Dependency Graph](img/dp-graph.png)
+CMake, with the dot application available, will build a visual representation of the library/executable dependencies.
 
 ### Required Arguments
 
@@ -205,75 +218,62 @@ The name to give the doc target. (Default: doc-${PROJECT_NAME})
 #### OUTPUT_DIR *STR*
 The directory to place the generated output
 
-## Doxygen [`doxygen.cmake`](doxygen.cmake)
-
-Builds doxygen documentation with a default 'Doxyfile.in' or with a specified one, and can make the results installable (under the `doc` install target)
-
-This can only be used once per project, as each target generated is as `doc-${PROJECT_NAME}` unless TARGET_NAME is specified.
-
-### Optional Arguments
-
-#### ADD_TO_DOC
-If specified, adds this generated target to be a dependency of the more general `doc` target.
-
-#### INSTALLABLE
-Adds the generated documentation to the generic `install` target, under the `documentation` installation group.
-
-#### PROCESS_DOXYFILE
-If set, then will process the found Doxyfile through the CMAKE `configure_file` function for macro replacements before using it. (@ONLY)
-
-#### TARGET_NAME *STR*
-The name to give the doc target. (Default: doc-${PROJECT_NAME})
-
-#### OUTPUT_DIR *STR*
-The directory to place the generated output. (Default: ${CMAKE_CURRENT_BINARY_DIR}/doc)
-
-#### INSTALL_PATH *STR*
-The path to install the documenttation under. (if not specified, defaults to 'share/${PROJECT_NAME})
-
-#### DOXYFILE_PATH *STR*
-The given doxygen file to use/process. (Defaults to'${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile')
-
-## Prepare the Catch Test Framework [`prepare_catch.cmake`](prepare_catch.cmake)
-
-The included `prepare_catch` function contained within attempts to add the infrastructure necessary for automatically adding C/C++ tests using the Catch2 library, including either an interface or pre-compiled 'catch' target library.
-
-It first attempts to find the header on the local machine, and failing that, clones the single header variant for use. It does make the determination between pre-C++11 and will use Catch1.X rather than Catch2 (when cloned), automatically or forced.. Adds a subdirectory of tests/ if it exists from the macro's calling location.
-
-### Optional Arguments
-
-#### COMPILED_CATCH
-If this option is specified, then generates the 'catch' target as a library with catch already pre-compiled as part of the library. Otherwise acts just an interface library for the header location.
-
-#### CATCH1
-Force the use of Catch1.X, rather than auto-detecting the C++ version in use.
-
-#### CLONE
-Force cloning of Catch, rather than attempting to use a locally-found variant.
-
 ## Tools [`tools.cmake`](tools.cmake)
+
+The three tools in this are used via two provided functions each, for example for clang-tidy:
+```
+add_executable(big_test)
+
+clang_tidy()
+
+# Sources provided here are run with clang-tidy with no options
+add_executable(test2 main2.cpp)
+target_sources(big_test test2.c test2.cpp)
+
+clang_tidy(-header-filter='${CMAKE_SOURCE_DIR}/*')
+
+# Sources provided here are run with clang-tidy with the header-filter options provided to it from above
+add_execuable(test1 main1.cpp)
+target_sources(big_test test1.c test1.cpp)
+
+reset_clang_tidy()
+
+# Sources provided here are not run with clang-tidy at all
+add_executable(test3 main3.cpp)
+target_sources(big_test test3.c test3.cpp)
+
+clang_tidy()
+
+# Sources provided here are run with clang-tidy with no options
+add_executable(test4 main4.cpp)
+target_sources(big_test test4.c test4.cpp)
+```
 
 ### clang-tidy
 
 > clang-tidy is a clang-based C++ “linter” tool. Its purpose is to provide an extensible framework for diagnosing and fixing typical programming errors, like style violations, interface misuse, or bugs that can be deduced via static analysis. clang-tidy is modular and provides a convenient interface for writing new checks.
 >
-> [clang-tidy page](https://clang.llvm.org/extra/clang-tidy/)
+> [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)
 
-When detected, [clang-tidy](https://clang.llvm.org/extra/clang-tidy/) can be enabled by using the option of `-DCLANG_TIDY=ON`, as it is disabled by default.
-
-To use, add the `clang_tidy()` function, with the arguments being the options to pass to the clang tidy program, such as '-checks=*'.
+To use, add the `clang_tidy()` macro, with the arguments being the options passed to the clang-tidy call in the form of `clang-tidy ${ARGS}`. The settings used with clang-tidy can be changed by calling `clang_tidy()` macro again. It can be turned off by calling the `reset_clang_tidy()` macro.
 
 ### include-what-you-use
 
-This tool helps to organize headers for all files encompass all items being used in that file, without accidentally relying upon headers deep down a chain of other headers. This is disabled by default, and can be enabled via have the program installed and adding `-DIWYU=ON`.
+> "Include what you use" means this: for every symbol (type, function variable, or macro) that you use in foo.cc, either foo.cc or foo.h should #include a .h file that exports the declaration of that symbol. The include-what-you-use tool is a program that can be built with the clang libraries in order to analyze #includes of source files to find include-what-you-use violations, and suggest fixes for them.
+>
+> The main goal of include-what-you-use is to remove superfluous #includes. It does this both by figuring out what #includes are not actually needed for this file (for both .cc and .h files), and replacing #includes with forward-declares when possible.
+>
+> [include-what-you-use](https://include-what-you-use.org/)
 
-To use, add the `include_what_you_use()` function, with the arguments being the options to pass to the program.
+To use, add the `include_what_you_use()` macro, with the arguments being the options passed to the include_what_you_use call in the form of `include-what-you-use ${ARGS}`. The settings used with include-what-you-use can be changed by calling `include_what_you_use()` macro again. It can be turned off by calling the `reset_include_what_you_use()` macro.
 
 ### cppcheck
 
-This tool is another static analyzer in the vein of clang-tidy, which focuses on having no false positives. This is by default disabled, and can be enabled via have the program installed and adding `-DCPPCHECK=ON`.
+> Cppcheck is a static analysis tool for C/C++ code. It provides unique code analysis to detect bugs and focuses on detecting undefined behaviour and dangerous coding constructs. The goal is to have very few false positives. Cppcheck is designed to be able to analyze your C/C++ code even if it has non-standard syntax (common in embedded projects). 
+> 
+> [cppcheck](http://cppcheck.net/)
 
-To use, add the `cppcheck()` function, with the arguments being the options to pass to the program.
+To use, add the `cppcheck()` macro, with the arguments being the options passed to the cppcheck call in the form of `cppcheck ${ARGS}`. The settings used with iwyu can be changed by calling `cppcheck()` macro again. It can be turned off by calling the `reset_cppcheck()` macro.
 
 ## Formatting [`formatting.cmake`](formatting.cmake)
 

@@ -51,7 +51,7 @@ unsigned test_read_after(H5F_t *f);
 unsigned test_free(H5F_t *f);
 unsigned test_big(H5F_t *f);
 unsigned test_random_write(H5F_t *f);
-unsigned test_swmr_write_big(hbool_t newest_format);
+unsigned test_swmr_write_big(bool newest_format);
 
 /* Helper Function Prototypes */
 void accum_printf(const H5F_t *f);
@@ -61,7 +61,7 @@ void accum_printf(const H5F_t *f);
 #define accum_read(a, s, b)  H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), (b))
 #define accum_free(f, a, s)  H5F__accum_free(f->shared, H5FD_MEM_DEFAULT, (haddr_t)(a), (hsize_t)(s))
 #define accum_flush(f)       H5F__accum_flush(f->shared)
-#define accum_reset(f)       H5F__accum_reset(f->shared, TRUE)
+#define accum_reset(f)       H5F__accum_reset(f->shared, true)
 
 /* ================= */
 /* Main Test Routine */
@@ -81,14 +81,14 @@ int
 main(void)
 {
     unsigned nerrors        = 0;     /* track errors */
-    hbool_t  api_ctx_pushed = FALSE; /* Whether API context pushed */
-    hid_t    fid            = -1;
-    hid_t    fapl           = -1; /* File access property list */
+    bool     api_ctx_pushed = false; /* Whether API context pushed */
+    hid_t    fid            = H5I_INVALID_HID;
+    hid_t    fapl           = H5I_INVALID_HID; /* File access property list */
     char     filename[1024];
     H5F_t   *f = NULL; /* File for all tests */
 
     /* Test Setup */
-    HDputs("Testing the metadata accumulator");
+    puts("Testing the metadata accumulator");
 
     /* File access property list */
     h5_reset();
@@ -103,7 +103,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Get H5F_t * to internal file structure */
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
@@ -133,30 +133,30 @@ main(void)
     nerrors += test_random_write(f);
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     /* End of test code, close and delete file */
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
     /* This test uses a different file */
-    nerrors += test_swmr_write_big(TRUE);
-    nerrors += test_swmr_write_big(FALSE);
+    nerrors += test_swmr_write_big(true);
+    nerrors += test_swmr_write_big(false);
 
     if (nerrors)
         goto error;
-    HDputs("All metadata accumulator tests passed.");
+    puts("All metadata accumulator tests passed.");
     h5_cleanup(FILENAME, fapl);
 
     return 0;
 
 error:
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     return 1;
 } /* end main() */
 
@@ -2047,19 +2047,18 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned
-test_swmr_write_big(hbool_t newest_format)
+test_swmr_write_big(bool newest_format)
 {
-
-    hid_t    fid  = -1;   /* File ID */
-    hid_t    fapl = -1;   /* File access property list */
-    H5F_t   *rf   = NULL; /* File pointer */
-    char     filename[1024];
-    uint8_t *wbuf2 = NULL, *rbuf = NULL; /* Buffers for reading & writing */
-    uint8_t  wbuf[1024];                 /* Buffer for reading & writing */
-    unsigned u;                          /* Local index variable */
-    hbool_t  process_success = FALSE;
-    char    *driver          = NULL;  /* VFD string (from env variable) */
-    hbool_t  api_ctx_pushed  = FALSE; /* Whether API context pushed */
+    const char *driver_name = NULL;            /* VFD string (from env variable) */
+    hid_t       fid         = H5I_INVALID_HID; /* File ID */
+    hid_t       fapl        = H5I_INVALID_HID; /* File access property list */
+    H5F_t      *rf          = NULL;            /* File pointer */
+    char        filename[1024];
+    uint8_t    *wbuf2 = NULL, *rbuf = NULL; /* Buffers for reading & writing */
+    uint8_t     wbuf[1024];                 /* Buffer for reading & writing */
+    unsigned    u;                          /* Local index variable */
+    bool        process_success = false;
+    bool        api_ctx_pushed  = false; /* Whether API context pushed */
 
     if (newest_format)
         TESTING("SWMR write of large metadata: with latest format");
@@ -2070,17 +2069,17 @@ test_swmr_write_big(hbool_t newest_format)
 
     /* Not a Windows or POSIX system */
     SKIPPED();
-    HDputs("    Test skipped: Not a Windows or POSIX system.");
+    puts("    Test skipped: Not a Windows or POSIX system.");
     return 0;
 
 #else
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    driver = HDgetenv(HDF5_DRIVER);
-    if (!H5FD__supports_swmr_test(driver)) {
+    driver_name = h5_get_test_driver_name();
+    if (!H5FD__supports_swmr_test(driver_name)) {
         SKIPPED();
-        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        puts("    Test skipped due to VFD not supporting SWMR I/O.");
         return 0;
     }
 
@@ -2113,7 +2112,7 @@ test_swmr_write_big(hbool_t newest_format)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Get H5F_t * to internal file structure */
     if (NULL == (rf = (H5F_t *)H5VL_object(fid)))
@@ -2193,17 +2192,17 @@ test_swmr_write_big(hbool_t newest_format)
         si.cb = sizeof(si);
         ZeroMemory(&pi, sizeof(pi));
 
-        if (0 == CreateProcess(NULL, SWMR_READER, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
-            printf("CreateProcess failed (%d).\n", GetLastError());
+        if (0 == CreateProcess(NULL, SWMR_READER, NULL, NULL, false, 0, NULL, NULL, &si, &pi)) {
+            printf("CreateProcess failed (%lu).\n", GetLastError());
             FAIL_STACK_ERROR;
         }
 
         (void)WaitForSingleObject(pi.hProcess, INFINITE);
 
-        if (FALSE == GetExitCodeProcess(pi.hProcess, &exit_code) || EXIT_FAILURE == exit_code)
-            process_success = FALSE;
+        if (false == GetExitCodeProcess(pi.hProcess, &exit_code) || EXIT_FAILURE == exit_code)
+            process_success = false;
         else
-            process_success = TRUE;
+            process_success = true;
 
         CloseHandle(pi.hProcess);
         CloseHandle(pi.hThread);
@@ -2215,7 +2214,7 @@ test_swmr_write_big(hbool_t newest_format)
 
         /* Fork child process to verify that the data at [1024, 2014] does get written to disk */
         if ((pid = fork()) < 0) {
-            HDperror("fork");
+            perror("fork");
             FAIL_STACK_ERROR;
         }
         else if (0 == pid) { /* Child process */
@@ -2228,7 +2227,7 @@ test_swmr_write_big(hbool_t newest_format)
             char *const new_argv[]    = {swmr_reader, NULL};
             /* Run the reader */
             status = execv(SWMR_READER, new_argv);
-            printf("errno from execv = %s\n", HDstrerror(errno));
+            printf("errno from execv = %s\n", strerror(errno));
             FAIL_STACK_ERROR;
         } /* end if */
 
@@ -2238,7 +2237,7 @@ test_swmr_write_big(hbool_t newest_format)
 
         /* Check if child process terminates normally and its return value */
         if (WIFEXITED(status) && !WEXITSTATUS(status))
-            process_success = TRUE;
+            process_success = true;
     }
 #endif /* defined(H5_HAVE_WIN32_API) */
 
@@ -2259,9 +2258,9 @@ test_swmr_write_big(hbool_t newest_format)
         FAIL_STACK_ERROR;
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     /* Release memory */
     if (wbuf2)
@@ -2277,7 +2276,7 @@ error:
     H5Fclose(fid);
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     H5Pclose(fapl);
 
@@ -2319,7 +2318,7 @@ accum_printf(const H5F_t *f)
         printf("=====================================================\n");
         printf(" accumulator allocated size == %zu\n", accum->alloc_size);
         printf(" accumulated data size      == %zu\n", accum->size);
-        fprintf(stdout, " accumulator dirty?         == %s\n", accum->dirty ? "TRUE" : "FALSE");
+        fprintf(stdout, " accumulator dirty?         == %s\n", accum->dirty ? "true" : "false");
         printf("=====================================================\n");
         fprintf(stdout, " start of accumulated data, loc = %" PRIuHADDR "\n", accum->loc);
         if (accum->dirty) {

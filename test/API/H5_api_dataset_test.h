@@ -42,6 +42,13 @@ int H5_api_dataset_test(void);
 #define DATASET_CREATE_ANONYMOUS_INVALID_PARAMS_GROUP_NAME   "anon_dset_creation_invalid_params_test"
 #define DATASET_CREATE_ANONYMOUS_INVALID_PARAMS_SPACE_RANK   2
 
+#define DATASET_STRING_ENCODINGS_RANK         1
+#define DATASET_STRING_ENCODINGS_EXTENT       1
+#define DATASET_STRING_ENCODINGS_DSET_NAME1   "encoding_dset1"
+#define DATASET_STRING_ENCODINGS_DSET_NAME2   "encoding_dset2"
+#define DATASET_STRING_ENCODINGS_ASCII_STRING "asciistr"
+#define DATASET_STRING_ENCODINGS_UTF8_STRING  "αaααaaaα"
+
 #define DATASET_CREATE_NULL_DATASPACE_TEST_SUBGROUP_NAME "dataset_with_null_space_test"
 #define DATASET_CREATE_NULL_DATASPACE_TEST_DSET_NAME     "dataset_with_null_space"
 
@@ -53,7 +60,7 @@ int H5_api_dataset_test(void);
 #define ZERO_DIM_DSET_TEST_DSET_NAME  "zero_dim_dset"
 
 #define DATASET_MANY_CREATE_GROUP_NAME "group_for_many_datasets"
-#define DSET_NAME_BUF_SIZE             64u
+#define DSET_NAME_BUF_SIZE             64
 #define DATASET_NUMB                   100u
 
 #define DATASET_SHAPE_TEST_DSET_BASE_NAME "dataset_shape_test"
@@ -106,6 +113,10 @@ int H5_api_dataset_test(void);
 #define DATASET_CREATION_PROPERTIES_TEST_MAX_COMPACT               12
 #define DATASET_CREATION_PROPERTIES_TEST_MIN_DENSE                 8
 #define DATASET_CREATION_PROPERTIES_TEST_SHAPE_RANK                3
+#define DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_ID              32004
+#define DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NAME            "lz4"
+#define DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_DSET_NAME       "ud_filter_test"
+#define DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NUM_PARAMS      3
 
 #define DATASET_OPEN_INVALID_PARAMS_SPACE_RANK 2
 #define DATASET_OPEN_INVALID_PARAMS_GROUP_NAME "dataset_open_test"
@@ -126,6 +137,24 @@ int H5_api_dataset_test(void);
 #define DATASET_PROPERTY_LIST_TEST_DSET_NAME3    "property_list_test_dataset3"
 #define DATASET_PROPERTY_LIST_TEST_DSET_NAME4    "property_list_test_dataset4"
 
+#define DATASET_STORAGE_SIZE_TEST_ALL_DSET_SPACE_RANK  2
+#define DATASET_STORAGE_SIZE_TEST_ALL_DSET_EXTENT      10
+#define DATASET_STORAGE_SIZE_TEST_GROUP_NAME           "dataset_get_storage_size_test"
+#define DATASET_STORAGE_SIZE_TEST_DSET_CONTIGUOUS_NAME "dataset_contiguous"
+#define DATASET_STORAGE_SIZE_TEST_DSET_CHUNKED_NAME    "dataset_chunked"
+#define DATASET_STORAGE_SIZE_TEST_DSET_FILTERED_NAME   "dataset_filtered"
+#define DATASET_STORAGE_SIZE_TEST_TYPE                 H5T_NATIVE_INT
+
+#define DATASET_FILL_VALUE_TEST_DSET_NAME1        "dataset_fill_value_test_dataset1"
+#define DATASET_FILL_VALUE_TEST_DSET_NAME2        "dataset_fill_value_test_dataset2"
+#define DATASET_FILL_VALUE_TEST_DSET_NAME3        "dataset_fill_value_test_dataset3"
+#define DATASET_FILL_VALUE_TEST_INT_TYPE          H5T_NATIVE_INT
+#define DATASET_FILL_VALUE_TEST_INT_FILL_VALUE    1
+#define DATASET_FILL_VALUE_TEST_DOUBLE_TYPE       H5T_NATIVE_DOUBLE
+#define DATASET_FILL_VALUE_TEST_DOUBLE_FILL_VALUE 2.002
+#define DATASET_FILL_VALUE_TEST_STRING_FILL_VALUE "abcdefgh"
+#define DATASET_FILL_VALUE_TEST_STRING_SIZE       8 /* No null terminator for fixed length string*/
+
 #define DATASET_SMALL_READ_TEST_ALL_DSET_SPACE_RANK 3
 #define DATASET_SMALL_READ_TEST_ALL_DSET_DTYPESIZE  sizeof(int)
 #define DATASET_SMALL_READ_TEST_ALL_DSET_DTYPE      H5T_NATIVE_INT
@@ -144,6 +173,12 @@ int H5_api_dataset_test(void);
 #define DATASET_SMALL_READ_TEST_POINT_SELECTION_NUM_POINTS      10
 #define DATASET_SMALL_READ_TEST_POINT_SELECTION_GROUP_NAME      "dataset_small_read_point_selection_test"
 #define DATASET_SMALL_READ_TEST_POINT_SELECTION_DSET_NAME       "dataset_small_read_point_selection_dset"
+
+#define DATASET_MULTI_COUNT                                10
+#define DATASET_SMALL_READ_MULTI_TEST_ALL_GROUP_NAME       "dataset_small_read_multi_all_test"
+#define DATASET_SMALL_READ_MULTI_TEST_HYPERSLAB_GROUP_NAME "dataset_small_read_multi_hyperslab_test"
+#define DATASET_SMALL_READ_MULTI_TEST_POINT_SELECTION_GROUP_NAME                                             \
+    "dataset_small_read_multi_point_selection_test"
 
 #define DATASET_IO_POINT_GROUP_NAME        "dataset_io_point_selection_test"
 #define DATASET_IO_POINT_DSET_NAME_NOCHUNK "dataset_io_point_selection_dset_nochunk"
@@ -181,6 +216,20 @@ int H5_api_dataset_test(void);
 #define DATASET_DATA_VERIFY_WRITE_TEST_GROUP_NAME      "dataset_data_write_verification_test"
 #define DATASET_DATA_VERIFY_WRITE_TEST_DSET_NAME       "dataset_data_write_verification_dset"
 
+#define DATASET_SMALL_WRITE_MULTI_TEST_ALL_GROUP_NAME "dataset_small_write_multi_all_test"
+#define DATASET_SMALL_WRITE_MULTI_TEST_ALL_DSET_NAME  "dataset_small_write_multi_all_dset"
+
+#define DATASET_SMALL_WRITE_MULTI_TEST_HYPERSLAB_GROUP_NAME "dataset_small_write_multi_hyperslab_test"
+#define DATASET_SMALL_WRITE_MULTI_TEST_HYPERSLAB_DSET_NAME  "dataset_small_write_multi_hyperslab_dset"
+
+#define DATASET_SMALL_WRITE_MULTI_TEST_POINT_SELECTION_GROUP_NAME                                            \
+    "dataset_small_write_multi_point_selection_test"
+#define DATASET_SMALL_WRITE_MULTI_TEST_POINT_SELECTION_DSET_NAME                                             \
+    "dataset_small_write_multi_point_selection_dset"
+
+#define DATASET_DATA_VERIFY_WRITE_MULTI_TEST_GROUP_NAME "dataset_data_write_multi_verification_test"
+#define DATASET_DATA_VERIFY_WRITE_MULTI_TEST_DSET_NAME  "dataset_data_write_multi_verification_dset"
+
 #define DATASET_WRITE_INVALID_PARAMS_TEST_DSET_SPACE_RANK 3
 #define DATASET_WRITE_INVALID_PARAMS_TEST_DSET_DTYPESIZE  sizeof(int)
 #define DATASET_WRITE_INVALID_PARAMS_TEST_DSET_DTYPE      H5T_NATIVE_INT
@@ -194,9 +243,23 @@ int H5_api_dataset_test(void);
 #define DATASET_DATA_BUILTIN_CONVERSION_TEST_GROUP_NAME      "dataset_builtin_conversion_verification_test"
 #define DATASET_DATA_BUILTIN_CONVERSION_TEST_DSET_NAME       "dataset_builtin_conversion_verification_dset"
 
+#define DATASET_DATA_REAL_CONVERSION_TEST_DSET_SPACE_RANK 3
+#define DATASET_DATA_REAL_CONVERSION_TEST_NUM_POINTS      10
+#define DATASET_DATA_REAL_CONVERSION_TEST_GROUP_NAME      "dataset_real_conversion_verification_test"
+#define DATASET_DATA_REAL_CONVERSION_TEST_DSET_NAME       "dataset_real_conversion_verification_dset"
+#define DATASET_DATA_REAL_CONVERSION_TEST_INT_DTYPESIZE   sizeof(int)
+#define DATASET_DATA_REAL_CONVERSION_TEST_INT_TYPE        H5T_NATIVE_INT
+#define DATASET_DATA_REAL_CONVERSION_TEST_REAL_DTYPESIZE  sizeof(double)
+#define DATASET_DATA_REAL_CONVERSION_TEST_REAL_TYPE       H5T_NATIVE_DOUBLE
+
 #define DATASET_COMPOUND_PARTIAL_IO_DSET_DIMS            10
 #define DATASET_DATA_COMPOUND_PARTIAL_IO_TEST_GROUP_NAME "dataset_compound_partial_io_test"
 #define DATASET_DATA_COMPOUND_PARTIAL_IO_TEST_DSET_NAME  "dataset_compound_partial_io_test"
+
+#define DATASET_VLEN_IO_DSET_DIMS 100
+#define DATASET_VLEN_IO_DSET_NAME "vlen_dset"
+#define DATASET_VLEN_IO_STR_LEN   8
+#define DATASET_VLEN_IO_STR_VALUE "abcdefgh"
 
 #define DATASET_SET_EXTENT_CHUNKED_UNLIMITED_TEST_SPACE_RANK 2
 #define DATASET_SET_EXTENT_CHUNKED_UNLIMITED_TEST_NUM_PASSES 3

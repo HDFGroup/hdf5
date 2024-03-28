@@ -11,12 +11,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Install gfortran
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y gfortran-12
+    - name: Install Fortran
+      uses: fortran-lang/setup-fortran@v1
+      with:
+        compiler: gcc
+        version: 13
     - name: Checkout Spack
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4.1.1
       with:
         repository: spack/spack
         path: ./spack

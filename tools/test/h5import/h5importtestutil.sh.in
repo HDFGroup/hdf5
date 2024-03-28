@@ -41,11 +41,10 @@ nerrors=0
 
 # source dirs
 SRC_TOOLS="$srcdir/../.."
-SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 
 # testfiles source dirs for tools
-SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
-SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5LS_TESTFILES="$SRC_TOOLS/test/h5ls/testfiles"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS/test/h5dump/testfiles"
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
@@ -53,7 +52,7 @@ SRC_H5JAM_TESTFILES="$SRC_TOOLS/test/h5jam/testfiles"
 SRC_H5STAT_TESTFILES="$SRC_TOOLS/test/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
 
-TESTDIR=./testfiles
+TESTDIR=./tmp
 test -d $TESTDIR || mkdir $TESTDIR
 
 ######################################################################
@@ -82,8 +81,8 @@ $SRC_H5IMPORT_TESTFILES/txtuin16.h5
 $SRC_H5IMPORT_TESTFILES/txtuin32.h5
 $SRC_H5IMPORT_TESTFILES/txtstr.h5
 $SRC_H5IMPORT_TESTFILES/textpfe.h5
-$SRC_TOOLS_TESTFILES/tall.h5
-$SRC_TOOLS_TESTFILES/tintsattrs.h5
+$SRC_H5DUMP_TESTFILES/tall.h5
+$SRC_H5DUMP_TESTFILES/tintsattrs.h5
 "
 
 LIST_OTHER_TEST_FILES="

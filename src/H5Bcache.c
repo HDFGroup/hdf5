@@ -31,6 +31,7 @@
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Bpkg.h"      /* B-link trees				*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5MMprivate.h" /* Memory management			*/
 
 /****************/
@@ -47,7 +48,7 @@
 
 /* Metadata cache callbacks */
 static herr_t H5B__cache_get_initial_load_size(void *udata, size_t *image_len);
-static void  *H5B__cache_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5B__cache_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5B__cache_image_len(const void *thing, size_t *image_len);
 static herr_t H5B__cache_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5B__cache_free_icr(void *thing);
@@ -118,7 +119,7 @@ H5B__cache_get_initial_load_size(void *_udata, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static void *
-H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
+H5B__cache_deserialize(const void *_image, size_t len, void *_udata, bool H5_ATTR_UNUSED *dirty)
 {
     H5B_t          *bt    = NULL;                     /* Pointer to the deserialized B-tree node */
     H5B_cache_ud_t *udata = (H5B_cache_ud_t *)_udata; /* User data for callback */
@@ -289,7 +290,7 @@ H5B__cache_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len, vo
     *image++ = (uint8_t)shared->type->id;
 
     /* 2^8 limit: only 1 byte is used to store node level */
-    if (bt->level >= HDpow(2, LEVEL_BITS))
+    if (bt->level >= pow(2, LEVEL_BITS))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode node level");
 
     H5_CHECK_OVERFLOW(bt->level, unsigned, uint8_t);

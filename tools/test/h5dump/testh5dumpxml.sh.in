@@ -37,19 +37,19 @@ verbose=yes
 # source dirs
 SRC_TOOLS="$srcdir/../.."
 
-SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 # testfiles source dirs for tools
-SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
-SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5LS_TESTFILES="$SRC_TOOLS/test/h5ls/testfiles"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS/test/h5dump/testfiles"
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
 SRC_H5JAM_TESTFILES="$SRC_TOOLS/test/h5jam/testfiles"
 SRC_H5STAT_TESTFILES="$SRC_TOOLS/test/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
+SRC_H5DUMP_OUTFILES="$SRC_TOOLS/test/h5dump/expected"
 
 TEST_P_DIR=./testfiles
-TESTDIR=./testfiles/xml
+TESTDIR=./tmpxml
 test -d $TEST_P_DIR || mkdir -p $TEST_P_DIR
 test -d $TESTDIR || mkdir -p $TESTDIR
 
@@ -63,6 +63,30 @@ test -d $TESTDIR || mkdir -p $TESTDIR
 #       Comment '#' without space can be used.
 # --------------------------------------------------------------------
 LIST_HDF5_TEST_FILES_XML="
+$SRC_H5DUMP_TESTFILES/xml/tbitfields.h5
+$SRC_H5DUMP_TESTFILES/xml/tcompound2.h5
+$SRC_H5DUMP_TESTFILES/xml/tdset2.h5
+$SRC_H5DUMP_TESTFILES/xml/tenum.h5
+$SRC_H5DUMP_TESTFILES/xml/test35.nc
+$SRC_H5DUMP_TESTFILES/xml/tloop2.h5
+$SRC_H5DUMP_TESTFILES/xml/tmany.h5
+$SRC_H5DUMP_TESTFILES/xml/tname-amp.h5
+$SRC_H5DUMP_TESTFILES/xml/tname-apos.h5
+$SRC_H5DUMP_TESTFILES/xml/tname-gt.h5
+$SRC_H5DUMP_TESTFILES/xml/tname-lt.h5
+$SRC_H5DUMP_TESTFILES/xml/tname-quot.h5
+$SRC_H5DUMP_TESTFILES/xml/tname-sp.h5
+$SRC_H5DUMP_TESTFILES/xml/tnodata.h5
+$SRC_H5DUMP_TESTFILES/xml/tobjref.h5
+$SRC_H5DUMP_TESTFILES/xml/topaque.h5
+$SRC_H5DUMP_TESTFILES/xml/tref.h5
+$SRC_H5DUMP_TESTFILES/xml/tref-escapes.h5
+$SRC_H5DUMP_TESTFILES/xml/tref-escapes-at.h5
+$SRC_H5DUMP_TESTFILES/xml/tstring.h5
+$SRC_H5DUMP_TESTFILES/xml/tstring-at.h5
+"
+
+LIST_HDF5_TEST_FILES="
 $SRC_H5DUMP_TESTFILES/tall.h5
 $SRC_H5DUMP_TESTFILES/tarray1.h5
 $SRC_H5DUMP_TESTFILES/tarray2.h5
@@ -70,43 +94,24 @@ $SRC_H5DUMP_TESTFILES/tarray3.h5
 $SRC_H5DUMP_TESTFILES/tarray6.h5
 $SRC_H5DUMP_TESTFILES/tarray7.h5
 $SRC_H5DUMP_TESTFILES/tattr.h5
-$SRC_H5DUMP_TESTFILES/tbitfields.h5
 $SRC_H5DUMP_TESTFILES/tcompound.h5
-$SRC_H5DUMP_TESTFILES/tcompound2.h5
 $SRC_H5DUMP_TESTFILES/tcompound_complex.h5
 $SRC_H5DUMP_TESTFILES/tdatareg.h5
 $SRC_H5DUMP_TESTFILES/tdset.h5
-$SRC_H5DUMP_TESTFILES/tdset2.h5
 $SRC_H5DUMP_TESTFILES/tempty.h5
-$SRC_H5DUMP_TESTFILES/tenum.h5
-$SRC_H5DUMP_TESTFILES/test35.nc
 $SRC_H5DUMP_TESTFILES/textlink.h5
+$SRC_H5DUMP_TESTFILES/tfloat16.h5
+$SRC_H5DUMP_TESTFILES/tfloat16_be.h5
 $SRC_H5DUMP_TESTFILES/tfpformat.h5
 $SRC_H5DUMP_TESTFILES/tgroup.h5
 $SRC_H5DUMP_TESTFILES/thlink.h5
 $SRC_H5DUMP_TESTFILES/tloop.h5
-$SRC_H5DUMP_TESTFILES/tloop2.h5
-$SRC_H5DUMP_TESTFILES/tmany.h5
-$SRC_H5DUMP_TESTFILES/tname-amp.h5
-$SRC_H5DUMP_TESTFILES/tname-apos.h5
-$SRC_H5DUMP_TESTFILES/tname-gt.h5
-$SRC_H5DUMP_TESTFILES/tname-lt.h5
-$SRC_H5DUMP_TESTFILES/tname-quot.h5
-$SRC_H5DUMP_TESTFILES/tname-sp.h5
 $SRC_H5DUMP_TESTFILES/tnamed_dtype_attr.h5
 $SRC_H5DUMP_TESTFILES/tnestedcomp.h5
-$SRC_H5DUMP_TESTFILES/tnodata.h5
 $SRC_H5DUMP_TESTFILES/tnullspace.h5
-$SRC_H5DUMP_TESTFILES/tobjref.h5
-$SRC_H5DUMP_TESTFILES/topaque.h5
 $SRC_H5DUMP_TESTFILES/torderattr.h5
-$SRC_H5DUMP_TESTFILES/tref.h5
-$SRC_H5DUMP_TESTFILES/tref-escapes.h5
-$SRC_H5DUMP_TESTFILES/tref-escapes-at.h5
 $SRC_H5DUMP_TESTFILES/tsaf.h5
 $SRC_H5DUMP_TESTFILES/tslink.h5
-$SRC_H5DUMP_TESTFILES/tstring.h5
-$SRC_H5DUMP_TESTFILES/tstring-at.h5
 $SRC_H5DUMP_TESTFILES/tstr.h5
 $SRC_H5DUMP_TESTFILES/tstr2.h5
 $SRC_H5DUMP_TESTFILES/tudlink.h5
@@ -119,78 +124,80 @@ $SRC_H5DUMP_TESTFILES/tvlstr.h5
 "
 
 LIST_OTHER_TEST_FILES_XML="
-$SRC_H5DUMP_TESTFILES/tall.h5.xml
-$SRC_H5DUMP_TESTFILES/tall-2A.h5.xml
-$SRC_H5DUMP_TESTFILES/tarray1.h5.xml
-$SRC_H5DUMP_TESTFILES/tarray2.h5.xml
-$SRC_H5DUMP_TESTFILES/tarray3.h5.xml
-$SRC_H5DUMP_TESTFILES/tarray6.h5.xml
-$SRC_H5DUMP_TESTFILES/tarray7.h5.xml
-$SRC_H5DUMP_TESTFILES/tattr.h5.xml
-$SRC_H5DUMP_TESTFILES/tbitfields_be.h5.xml
-$SRC_H5DUMP_TESTFILES/tbitfields_le.h5.xml
-$SRC_H5DUMP_TESTFILES/tcompound_complex.h5.xml
-$SRC_H5DUMP_TESTFILES/tcompound.h5.xml
-$SRC_H5DUMP_TESTFILES/tcompound2.h5.xml
-$SRC_H5DUMP_TESTFILES/tdatareg.h5.xml
-$SRC_H5DUMP_TESTFILES/tdset.h5.xml
-$SRC_H5DUMP_TESTFILES/tdset2.h5.xml
-$SRC_H5DUMP_TESTFILES/tempty.h5.xml
-$SRC_H5DUMP_TESTFILES/tempty-dtd.h5.xml
-$SRC_H5DUMP_TESTFILES/tempty-dtd-2.h5.xml
-$SRC_H5DUMP_TESTFILES/tempty-dtd-uri.h5.xml
-$SRC_H5DUMP_TESTFILES/tempty-nons.h5.xml
-$SRC_H5DUMP_TESTFILES/tempty-nons-2.h5.xml
-$SRC_H5DUMP_TESTFILES/tempty-nons-uri.h5.xml
-$SRC_H5DUMP_TESTFILES/tempty-ns.h5.xml
-$SRC_H5DUMP_TESTFILES/tempty-ns-2.h5.xml
-$SRC_H5DUMP_TESTFILES/tenum.h5.xml
-$SRC_H5DUMP_TESTFILES/test35.nc.xml
-$SRC_H5DUMP_TESTFILES/textlink.h5.xml
-$SRC_H5DUMP_TESTFILES/tfpformat.h5.xml
-$SRC_H5DUMP_TESTFILES/tgroup.h5.xml
-$SRC_H5DUMP_TESTFILES/thlink.h5.xml
-$SRC_H5DUMP_TESTFILES/tloop.h5.xml
-$SRC_H5DUMP_TESTFILES/tloop2.h5.xml
-$SRC_H5DUMP_TESTFILES/tmany.h5.xml
-$SRC_H5DUMP_TESTFILES/tname-amp.h5.xml
-$SRC_H5DUMP_TESTFILES/tname-apos.h5.xml
-$SRC_H5DUMP_TESTFILES/tnamed_dtype_attr.h5.xml
-$SRC_H5DUMP_TESTFILES/tname-gt.h5.xml
-$SRC_H5DUMP_TESTFILES/tname-lt.h5.xml
-$SRC_H5DUMP_TESTFILES/tname-quot.h5.xml
-$SRC_H5DUMP_TESTFILES/tname-sp.h5.xml
-$SRC_H5DUMP_TESTFILES/tnestedcomp.h5.xml
-$SRC_H5DUMP_TESTFILES/tnodata.h5.xml
-$SRC_H5DUMP_TESTFILES/tnullspace.h5.xml
-$SRC_H5DUMP_TESTFILES/tobjref.h5.xml
-$SRC_H5DUMP_TESTFILES/topaque.h5.xml
-$SRC_H5DUMP_TESTFILES/torderattr1.h5.xml
-$SRC_H5DUMP_TESTFILES/torderattr2.h5.xml
-$SRC_H5DUMP_TESTFILES/torderattr3.h5.xml
-$SRC_H5DUMP_TESTFILES/torderattr4.h5.xml
-$SRC_H5DUMP_TESTFILES/tref.h5.xml
-$SRC_H5DUMP_TESTFILES/tref-escapes.h5.xml
-$SRC_H5DUMP_TESTFILES/tref-escapes-at.h5.xml
-$SRC_H5DUMP_TESTFILES/tsaf.h5.xml
-$SRC_H5DUMP_TESTFILES/tslink.h5.xml
-$SRC_H5DUMP_TESTFILES/tstr.h5.xml
-$SRC_H5DUMP_TESTFILES/tstr2.h5.xml
-$SRC_H5DUMP_TESTFILES/tstring.h5.xml
-$SRC_H5DUMP_TESTFILES/tstring-at.h5.xml
-$SRC_H5DUMP_TESTFILES/tudlink.h5.xml
-$SRC_H5DUMP_TESTFILES/tvldtypes1.h5.xml
-$SRC_H5DUMP_TESTFILES/tvldtypes2.h5.xml
-$SRC_H5DUMP_TESTFILES/tvldtypes3.h5.xml
-$SRC_H5DUMP_TESTFILES/tvldtypes4.h5.xml
-$SRC_H5DUMP_TESTFILES/tvldtypes5.h5.xml
-$SRC_H5DUMP_TESTFILES/tvlstr.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tall.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tall-2A.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tarray1.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tarray2.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tarray3.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tarray6.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tarray7.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tattr.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tbitfields_be.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tbitfields_le.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tcompound_complex.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tcompound.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tcompound2.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tdatareg.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tdset.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tdset2.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tempty.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tempty-dtd.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tempty-dtd-2.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tempty-dtd-uri.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tempty-nons.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tempty-nons-2.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tempty-nons-uri.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tempty-ns.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tempty-ns-2.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tenum.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/test35.nc.xml
+$SRC_H5DUMP_OUTFILES/xml/textlink.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tfloat16.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tfloat16_be.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tfpformat.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tgroup.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/thlink.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tloop.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tloop2.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tmany.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tname-amp.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tname-apos.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tnamed_dtype_attr.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tname-gt.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tname-lt.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tname-quot.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tname-sp.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tnestedcomp.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tnodata.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tnullspace.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tobjref.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/topaque.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/torderattr1.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/torderattr2.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/torderattr3.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/torderattr4.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tref.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tref-escapes.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tref-escapes-at.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tsaf.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tslink.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tstr.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tstr2.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tstring.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tstring-at.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tudlink.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tvldtypes1.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tvldtypes2.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tvldtypes3.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tvldtypes4.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tvldtypes5.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tvlstr.h5.xml
 "
 
 #
 # copy test files and expected output files from source dirs to test dir
 #
-COPY_TESTFILES="$LIST_HDF5_TEST_FILES_XML $LIST_OTHER_TEST_FILES_XML"
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_HDF5_TEST_FILES_XML $LIST_OTHER_TEST_FILES_XML"
 
 COPY_TESTFILES_TO_TESTDIR()
 {
@@ -379,6 +386,10 @@ TOOLTEST torderattr1.h5.xml --xml -H --sort_by=name --sort_order=ascending torde
 TOOLTEST torderattr2.h5.xml --xml -H --sort_by=name --sort_order=descending torderattr.h5
 TOOLTEST torderattr3.h5.xml --xml -H --sort_by=creation_order --sort_order=ascending torderattr.h5
 TOOLTEST torderattr4.h5.xml --xml -H --sort_by=creation_order --sort_order=descending torderattr.h5
+
+# tests for _Float16 type
+TOOLTEST tfloat16.h5.xml --xml tfloat16.h5
+TOOLTEST tfloat16_be.h5.xml --xml tfloat16_be.h5
 
 # tests for floating point user defined printf format
 TOOLTEST tfpformat.h5.xml -u -m %.7f tfpformat.h5

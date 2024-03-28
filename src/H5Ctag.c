@@ -37,7 +37,6 @@
 #include "H5Eprivate.h"  /* Error Handling                           */
 #include "H5Fpkg.h"      /* Files                                    */
 #include "H5FLprivate.h" /* Free Lists                               */
-#include "H5MMprivate.h" /* Memory management                        */
 
 /****************/
 /* Local Macros */
@@ -49,19 +48,19 @@
 
 /* Typedef for tagged entry iterator callback context - evict tagged entries */
 typedef struct {
-    H5F_t  *f;                           /* File pointer for evicting entry */
-    hbool_t evicted_entries_last_pass;   /* Flag to indicate that an entry
-                                          * was evicted when iterating over
-                                          * cache
-                                          */
-    hbool_t pinned_entries_need_evicted; /* Flag to indicate that a pinned
-                                          * entry was attempted to be evicted
-                                          */
-    hbool_t skipped_pf_dirty_entries;    /* Flag indicating that one or more
-                                          * entries marked prefetched_dirty
-                                          * were encountered and not
-                                          * evicted.
-                                          */
+    H5F_t *f;                         /* File pointer for evicting entry */
+    bool   evicted_entries_last_pass; /* Flag to indicate that an entry
+                                       * was evicted when iterating over
+                                       * cache
+                                       */
+    bool pinned_entries_need_evicted; /* Flag to indicate that a pinned
+                                       * entry was attempted to be evicted
+                                       */
+    bool skipped_pf_dirty_entries;    /* Flag indicating that one or more
+                                       * entries marked prefetched_dirty
+                                       * were encountered and not
+                                       * evicted.
+                                       */
 } H5C_tag_iter_evict_ctx_t;
 
 /* Typedef for tagged entry iterator callback context - expunge tag type metadata */
@@ -73,15 +72,13 @@ typedef struct {
 
 /* Typedef for tagged entry iterator callback context - mark corked */
 typedef struct {
-    hbool_t cork_val; /* Corked value */
+    bool cork_val; /* Corked value */
 } H5C_tag_iter_cork_ctx_t;
 
 /********************/
 /* Local Prototypes */
 /********************/
 static herr_t H5C__iter_tagged_entries_real(H5C_t *cache, haddr_t tag, H5C_tag_iter_cb_t cb, void *cb_ctx);
-static herr_t H5C__mark_tagged_entries(H5C_t *cache, haddr_t tag);
-static herr_t H5C__flush_marked_entries(H5F_t *f);
 
 /*********************/
 /* Package Variables */
@@ -125,7 +122,7 @@ H5C_ignore_tags(H5C_t *cache)
     assert(cache != NULL);
 
     /* Set variable to ignore tag values upon assignment */
-    cache->ignore_tags = TRUE;
+    cache->ignore_tags = true;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5C_ignore_tags */
@@ -139,7 +136,7 @@ H5C_ignore_tags(H5C_t *cache)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5C_get_ignore_tags(const H5C_t *cache)
 {
     FUNC_ENTER_NOAPI_NOERR
@@ -370,7 +367,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global, H5C_tag_iter_cb_t cb, void *cb_ctx)
+H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, bool match_global, H5C_tag_iter_cb_t cb, void *cb_ctx)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -430,17 +427,17 @@ H5C__evict_tagged_entries_cb(H5C_cache_entry_t *entry, void *_ctx)
         /* Can't evict at this time, but let's note that we hit a pinned
             entry and we'll loop back around again (as evicting other
             entries will hopefully unpin this entry) */
-        ctx->pinned_entries_need_evicted = TRUE;
+        ctx->pinned_entries_need_evicted = true;
     else if (!entry->prefetched_dirty) {
         /* Evict the Entry */
         if (H5C__flush_single_entry(ctx->f, entry,
                                     H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG |
                                         H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, H5_ITER_ERROR, "Entry eviction failed.");
-        ctx->evicted_entries_last_pass = TRUE;
+        ctx->evicted_entries_last_pass = true;
     }
     else
-        ctx->skipped_pf_dirty_entries = TRUE;
+        ctx->skipped_pf_dirty_entries = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -456,7 +453,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, hbool_t match_global)
+H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, bool match_global)
 {
     H5C_t                   *cache;               /* Pointer to cache structure */
     H5C_tag_iter_evict_ctx_t ctx;                 /* Context for iterator callback */
@@ -477,16 +474,16 @@ H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, hbool_t match_global)
     /* Start evicting entries */
     do {
         /* Reset pinned/evicted tracking flags */
-        ctx.pinned_entries_need_evicted = FALSE;
-        ctx.evicted_entries_last_pass   = FALSE;
-        ctx.skipped_pf_dirty_entries    = FALSE;
+        ctx.pinned_entries_need_evicted = false;
+        ctx.evicted_entries_last_pass   = false;
+        ctx.skipped_pf_dirty_entries    = false;
 
         /* Iterate through entries in the cache */
         if (H5C__iter_tagged_entries(cache, tag, match_global, H5C__evict_tagged_entries_cb, &ctx) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed");
 
         /* Keep doing this until we have stopped evicted entries */
-    } while (TRUE == ctx.evicted_entries_last_pass);
+    } while (true == ctx.evicted_entries_last_pass);
 
     /* In most cases, fail if we have finished evicting entries and pinned
      * entries still need evicted
@@ -511,7 +508,7 @@ H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, hbool_t match_global)
      * entries from becoming unpinned.
      *
      * Thus we must ignore ctx.pinned_entries_need_evicted if
-     * ctx.skipped_pf_dirty_entries is TRUE.
+     * ctx.skipped_pf_dirty_entries is true.
      */
     if ((!ctx.skipped_pf_dirty_entries) && (ctx.pinned_entries_need_evicted))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Pinned entries still need evicted?!");
@@ -519,101 +516,6 @@ H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, hbool_t match_global)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_evict_tagged_entries() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5C__mark_tagged_entries_cb
- *
- * Purpose:     Callback to set the flush marker on dirty entries in the cache
- *
- * Return:      H5_ITER_CONT (can't fail)
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5C__mark_tagged_entries_cb(H5C_cache_entry_t *entry, void H5_ATTR_UNUSED *_ctx)
-{
-    /* Function enter macro */
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Sanity checks */
-    assert(entry);
-
-    /* We only want to set the flush marker on entries that
-     * actually need flushed (i.e., dirty ones) */
-    if (entry->is_dirty)
-        entry->flush_marker = TRUE;
-
-    FUNC_LEAVE_NOAPI(H5_ITER_CONT)
-} /* H5C__mark_tagged_entries_cb() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5C__mark_tagged_entries
- *
- * Purpose:     Set the flush marker on dirty entries in the cache that have
- *              the specified tag, as well as all globally tagged entries.
- *
- * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5C__mark_tagged_entries(H5C_t *cache, haddr_t tag)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    /* Function enter macro */
-    FUNC_ENTER_PACKAGE
-
-    /* Sanity check */
-    assert(cache);
-
-    /* Iterate through hash table entries, marking those with specified tag, as
-     * well as any major global entries which should always be flushed
-     * when flushing based on tag value */
-    if (H5C__iter_tagged_entries(cache, tag, TRUE, H5C__mark_tagged_entries_cb, NULL) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C__mark_tagged_entries() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5C__flush_marked_entries
- *
- * Purpose:     Flushes all marked entries in the cache.
- *
- * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5C__flush_marked_entries(H5F_t *f)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
-
-    /* Assertions */
-    assert(f != NULL);
-
-    /* Enable the slist, as it is needed in the flush */
-    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
-
-    /* Flush all marked entries */
-    if (H5C_flush_cache(f, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache");
-
-    /* Disable the slist.  Set the clear_slist parameter to TRUE
-     * since we called H5C_flush_cache() with the
-     * H5C__FLUSH_MARKED_ENTRIES_FLAG.
-     */
-    if (H5C_set_slist_enabled(f->shared->cache, FALSE, TRUE) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C__flush_marked_entries */
 
 #ifdef H5C_DO_TAGGING_SANITY_CHECKS
 
@@ -685,6 +587,36 @@ done:
 #endif
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C__flush_tagged_entries_cb
+ *
+ * Purpose:     Callback to set the flush marker on dirty entries in the cache
+ *
+ * Return:      H5_ITER_CONT (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5C__flush_tagged_entries_cb(H5C_cache_entry_t *entry, void *_ctx)
+{
+    H5C_t *cache_ptr = (H5C_t *)_ctx;
+    int    ret_value = H5_ITER_CONT;
+
+    /* Function enter macro */
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    assert(entry);
+    assert(cache_ptr);
+
+    /* We only want to add entries to the slist that actually need flushed (i.e., dirty ones) */
+    if (entry->is_dirty)
+        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry, H5_ITER_ERROR);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__flush_tagged_entries_cb() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_flush_tagged_entries
  *
  * Purpose:     Flushes all entries with the specified tag to disk.
@@ -709,13 +641,22 @@ H5C_flush_tagged_entries(H5F_t *f, haddr_t tag)
     /* Get cache pointer */
     cache = f->shared->cache;
 
-    /* Mark all entries with specified tag */
-    if (H5C__mark_tagged_entries(cache, tag) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries");
+    /* Enable the slist, as it is needed in the flush */
+    if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
 
-    /* Flush all marked entries */
-    if (H5C__flush_marked_entries(f) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush marked entries");
+    /* Iterate through hash table entries, adding those with specified tag to the slist, as well as any major
+     * global entries which should always be flushed when flushing based on tag value */
+    if (H5C__iter_tagged_entries(cache, tag, true, H5C__flush_tagged_entries_cb, cache) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed");
+
+    /* Flush all entries in the slist */
+    if (H5C_flush_cache(f, H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache");
+
+    /* Disable the slist */
+    if (H5C_set_slist_enabled(f->shared->cache, false, false) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -823,7 +764,7 @@ H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags
     ctx.flags   = flags;
 
     /* Iterate through hash table entries, expunge those with specified tag and type id */
-    if (H5C__iter_tagged_entries(cache, tag, FALSE, H5C__expunge_tag_type_metadata_cb, &ctx) < 0)
+    if (H5C__iter_tagged_entries(cache, tag, false, H5C__expunge_tag_type_metadata_cb, &ctx) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed");
 
 done:

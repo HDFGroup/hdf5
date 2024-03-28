@@ -19,138 +19,147 @@
   #
   # copy XML test files from source dir to test dir
   #
+  set (HDF5_XML_REFERENCE_ONLY_FILES
+      tbitfields.h5
+      tcompound2.h5
+      tdset2.h5
+      tenum.h5
+      test35.nc
+      tloop2.h5
+      tmany.h5
+      tname-amp.h5
+      tname-apos.h5
+      tname-gt.h5
+      tname-lt.h5
+      tname-quot.h5
+      tname-sp.h5
+      tnodata.h5
+      tobjref.h5
+      topaque.h5
+      tref.h5
+      tref-escapes.h5
+      tref-escapes-at.h5
+      tstring.h5
+      tstring-at.h5
+  )
+
   set (HDF5_XML_REFERENCE_TEST_FILES
-      ${HDF5_TOOLS_DIR}/testfiles/tall.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray1.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray3.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray6.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray7.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tattr.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tbitfields.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tcompound.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tcompound2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tcompound_complex.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tdatareg.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tdset.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tdset2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tempty.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tenum.h5
-      ${HDF5_TOOLS_DIR}/testfiles/textlink.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfpformat.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tgroup.h5
-      ${HDF5_TOOLS_DIR}/testfiles/thlink.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tloop.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tloop2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tmany.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tname-amp.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tname-apos.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tname-gt.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tname-lt.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tname-quot.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tname-sp.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tnamed_dtype_attr.h5
-      ${HDF5_TOOLS_DIR}/testfiles/test35.nc
-      ${HDF5_TOOLS_DIR}/testfiles/tnestedcomp.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tnodata.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tnullspace.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tobjref.h5
-      ${HDF5_TOOLS_DIR}/testfiles/topaque.h5
-      ${HDF5_TOOLS_DIR}/testfiles/torderattr.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tref.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tref-escapes.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tref-escapes-at.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tsaf.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tslink.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tstring.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tstring-at.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tstr.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tstr2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tudlink.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes1.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes3.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes4.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes5.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tvlstr.h5
+      tall.h5
+      tarray1.h5
+      tarray2.h5
+      tarray3.h5
+      tarray6.h5
+      tarray7.h5
+      tattr.h5
+      tcompound.h5
+      tcompound_complex.h5
+      tdatareg.h5
+      tdset.h5
+      tempty.h5
+      textlink.h5
+      tfloat16.h5
+      tfloat16_be.h5
+      tfpformat.h5
+      tgroup.h5
+      thlink.h5
+      tloop.h5
+      tnamed_dtype_attr.h5
+      tnestedcomp.h5
+      tnullspace.h5
+      torderattr.h5
+      tsaf.h5
+      tslink.h5
+      tstr.h5
+      tstr2.h5
+      tudlink.h5
+      tvldtypes1.h5
+      tvldtypes2.h5
+      tvldtypes3.h5
+      tvldtypes4.h5
+      tvldtypes5.h5
+      tvlstr.h5
   )
   set (HDF5_XML_REFERENCE_FILES
-      ${HDF5_TOOLS_DIR}/testfiles/tall.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tall-2A.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tarray1.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tarray2.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tarray3.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tarray6.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tarray7.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tattr.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tbitfields_be.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tbitfields_le.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tcompound_complex.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tcompound.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tcompound2.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tdatareg.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tdset.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tdset2.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tempty.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tempty-dtd.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tempty-dtd-2.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tempty-dtd-uri.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tempty-nons.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tempty-nons-2.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tempty-nons-uri.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tempty-ns.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tempty-ns-2.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tenum.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/test35.nc.xml
-      ${HDF5_TOOLS_DIR}/testfiles/textlink.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tfpformat.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tgroup.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/thlink.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tloop.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tloop2.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tmany.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tname-amp.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tname-apos.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tnamed_dtype_attr.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tname-gt.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tname-lt.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tname-quot.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tname-sp.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tnestedcomp.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tnodata.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tnullspace.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tobjref.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/topaque.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/torderattr1.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/torderattr2.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/torderattr3.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/torderattr4.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tref.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tref-escapes.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tref-escapes-at.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tsaf.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tslink.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tstr.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tstr2.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tstring.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tstring-at.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tudlink.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes1.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes2.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes3.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes4.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes5.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tvlstr.h5.xml
+      tall.h5.xml
+      tall-2A.h5.xml
+      tarray1.h5.xml
+      tarray2.h5.xml
+      tarray3.h5.xml
+      tarray6.h5.xml
+      tarray7.h5.xml
+      tattr.h5.xml
+      tbitfields_be.h5.xml
+      tbitfields_le.h5.xml
+      tcompound_complex.h5.xml
+      tcompound.h5.xml
+      tcompound2.h5.xml
+      tdatareg.h5.xml
+      tdset.h5.xml
+      tdset2.h5.xml
+      tempty.h5.xml
+      tempty-dtd.h5.xml
+      tempty-dtd-2.h5.xml
+      tempty-dtd-uri.h5.xml
+      tempty-nons.h5.xml
+      tempty-nons-2.h5.xml
+      tempty-nons-uri.h5.xml
+      tempty-ns.h5.xml
+      tempty-ns-2.h5.xml
+      tenum.h5.xml
+      test35.nc.xml
+      textlink.h5.xml
+      tfloat16.h5.xml
+      tfloat16_be.h5.xml
+      tfpformat.h5.xml
+      tgroup.h5.xml
+      thlink.h5.xml
+      tloop.h5.xml
+      tloop2.h5.xml
+      tmany.h5.xml
+      tname-amp.h5.xml
+      tname-apos.h5.xml
+      tnamed_dtype_attr.h5.xml
+      tname-gt.h5.xml
+      tname-lt.h5.xml
+      tname-quot.h5.xml
+      tname-sp.h5.xml
+      tnestedcomp.h5.xml
+      tnodata.h5.xml
+      tnullspace.h5.xml
+      tobjref.h5.xml
+      topaque.h5.xml
+      torderattr1.h5.xml
+      torderattr2.h5.xml
+      torderattr3.h5.xml
+      torderattr4.h5.xml
+      tref.h5.xml
+      tref-escapes.h5.xml
+      tref-escapes-at.h5.xml
+      tsaf.h5.xml
+      tslink.h5.xml
+      tstr.h5.xml
+      tstr2.h5.xml
+      tstring.h5.xml
+      tstring-at.h5.xml
+      tudlink.h5.xml
+      tvldtypes1.h5.xml
+      tvldtypes2.h5.xml
+      tvldtypes3.h5.xml
+      tvldtypes4.h5.xml
+      tvldtypes5.h5.xml
+      tvlstr.h5.xml
   )
 
   foreach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
-    get_filename_component(fname "${tst_xml_h5_file}" NAME)
-    HDFTEST_COPY_FILE("${tst_xml_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}" "h5dump_xml_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${tst_xml_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xml_h5_file}" "h5dump_xml_files")
+  endforeach ()
+
+  foreach (tst_xmlonly_h5_file ${HDF5_XML_REFERENCE_ONLY_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/xml/${tst_xmlonly_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xmlonly_h5_file}" "h5dump_xml_files")
   endforeach ()
 
   foreach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
-    get_filename_component(fname "${tst_xml_other_file}" NAME)
-    HDFTEST_COPY_FILE("${tst_xml_other_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}" "h5dump_xml_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/xml/${tst_xml_other_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xml_other_file}" "h5dump_xml_files")
   endforeach ()
   add_custom_target(h5dump_xml_files ALL COMMENT "Copying files needed by h5dump_xml tests" DEPENDS ${h5dump_xml_files_list})
 
@@ -162,12 +171,12 @@
 
   macro (ADD_XML_SKIP_H5_TEST skipresultfile skipresultcode testtype)
     if ("${testtype}" STREQUAL "SKIP")
-      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      if (NOT HDF5_USING_ANALYSIS_TOOL)
         add_test (
             NAME H5DUMP_XML-${skipresultfile}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile}.xml --xml ${ARGN}"
         )
-        set_property(TEST H5DUMP_XML-${skipresultfile} PROPERTY DISABLED)
+        set_property(TEST H5DUMP_XML-${skipresultfile} PROPERTY DISABLED true)
       endif ()
     else ()
       ADD_XML_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})
@@ -175,8 +184,8 @@
   endmacro ()
 
   macro (ADD_XML_H5_TEST resultfile resultcode)
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP_XML-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> --xml ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5DUMP_XML-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> --xml ${ARGN})
       if (${resultcode})
         set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
@@ -185,7 +194,7 @@
           NAME H5DUMP_XML-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=--xml;${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/xml"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -197,6 +206,9 @@
     set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml"
     )
+    if ("H5DUMP_XML-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
 ##############################################################################
@@ -285,6 +297,10 @@
   ADD_XML_H5_TEST (torderattr2.h5 0 -H --sort_by=name --sort_order=descending torderattr.h5)
   ADD_XML_H5_TEST (torderattr3.h5 0 -H --sort_by=creation_order --sort_order=ascending torderattr.h5)
   ADD_XML_H5_TEST (torderattr4.h5 0 -H --sort_by=creation_order --sort_order=descending torderattr.h5)
+
+  # Add tests for _Float16 type
+  ADD_XML_H5_TEST (tfloat16.h5 0 tfloat16.h5)
+  ADD_XML_H5_TEST (tfloat16_be.h5 0 tfloat16_be.h5)
 
   # tests for floating point user defined printf format
   ADD_XML_H5_TEST (tfpformat.h5 0 -u -m %.7f tfpformat.h5)

@@ -145,6 +145,9 @@ typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  *          The return value from the filter is the number of bytes in the
  *          output buffer. If an error occurs then the function should return
  *          zero and leave all pointer arguments unchanged.
+ *
+ * \since 1.0.0
+ *
  */
 //! <!-- [H5Z_func_t_snip] -->
 typedef size_t (*H5Z_func_t)(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
@@ -378,6 +381,8 @@ extern "C" {
  * \version 1.6.0 This function was substantially revised in Release 1.6.0 with
  *                a new #H5Z_class_t struct and new set local and can apply
  *                callback functions.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Zregister(const void *cls);

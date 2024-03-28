@@ -31,7 +31,6 @@
 #include "H5Gprivate.h"  /* Groups                                   */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Opkg.h"      /* Object headers                           */
-#include "H5Pprivate.h"  /* Property lists                           */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
@@ -187,11 +186,11 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
             if (loc_params->type == H5VL_OBJECT_BY_SELF) {
                 *args->args.get_file.file = (void *)loc.oloc->file;
 
-                /* TODO we currently need to set id_exists to TRUE because
+                /* TODO we currently need to set id_exists to true because
                  * the upper layer will create an ID from the returned
                  * object. In theory this should not be needed and id_exists
                  * should be removed once the H5Fmount code gets fixed. */
-                loc.oloc->file->id_exists = TRUE;
+                loc.oloc->file->id_exists = true;
             }
             else
                 HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown get_file parameters");

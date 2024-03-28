@@ -1406,17 +1406,23 @@ test_attr_dtype_shared(FileAccPropList &fapl)
     SUBTEST("Shared Datatypes with Attributes");
 
     try {
+        h5_stat_size_t empty_filesize        = 0; // Size of empty file
+        bool           is_default_vfd_compat = false;
+
         // Create a file
         H5File fid1(FILE_DTYPE, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
         // Close file
         fid1.close();
 
-        // Get size of file
-        h5_stat_size_t empty_filesize; // Size of empty file
-        empty_filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
-        if (empty_filesize < 0)
-            TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
+        h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &is_default_vfd_compat);
+
+        if (is_default_vfd_compat) {
+            // Get size of file
+            empty_filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
+            if (empty_filesize < 0)
+                TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
+        }
 
         // Open the file again
         fid1.openFile(FILE_DTYPE, H5F_ACC_RDWR);
@@ -1533,10 +1539,12 @@ test_attr_dtype_shared(FileAccPropList &fapl)
         // Close file
         fid1.close();
 
-        // Check size of file
-        filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
-        verify_val(static_cast<long>(filesize), static_cast<long>(empty_filesize), "Checking file size",
-                   __LINE__, __FILE__);
+        if (is_default_vfd_compat) {
+            // Check size of file
+            filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
+            verify_val(static_cast<long>(filesize), static_cast<long>(empty_filesize), "Checking file size",
+                       __LINE__, __FILE__);
+        }
 
         PASSED();
     } // end try block
@@ -1604,7 +1612,7 @@ test_string_attr(FileAccPropList &fapl)
         // Read and verify the attribute string as a string of chars.
         char flstring_att_check[ATTR_LEN];
         gr_flattr1.read(fls_type, flstring_att_check);
-        if (HDstrcmp(flstring_att_check, ATTRSTR_DATA.c_str()) != 0)
+        if (strcmp(flstring_att_check, ATTRSTR_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",
                           __LINE__, ATTRSTR_DATA.c_str(), flstring_att_check);
 
@@ -1614,7 +1622,7 @@ test_string_attr(FileAccPropList &fapl)
         char  *fl_dyn_string_att_check;
         fl_dyn_string_att_check = new char[attr_size + 1];
         gr_flattr1.read(fls_type, fl_dyn_string_att_check);
-        if (HDstrcmp(fl_dyn_string_att_check, ATTRSTR_DATA.c_str()) != 0)
+        if (strcmp(fl_dyn_string_att_check, ATTRSTR_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",
                           __LINE__, ATTRSTR_DATA.c_str(), fl_dyn_string_att_check);
         delete[] fl_dyn_string_att_check;
@@ -1629,9 +1637,9 @@ test_string_attr(FileAccPropList &fapl)
                           ATTRSTR_DATA.c_str(), read_flstr1.c_str());
 
         // Read and verify the attribute string as a string of chars.
-        HDstrcpy(flstring_att_check, "");
+        strcpy(flstring_att_check, "");
         gr_flattr2.read(fls_type, flstring_att_check);
-        if (HDstrcmp(flstring_att_check, ATTRSTR_DATA.c_str()) != 0)
+        if (strcmp(flstring_att_check, ATTRSTR_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",
                           __LINE__, ATTRSTR_DATA.c_str(), flstring_att_check);
 
@@ -1660,7 +1668,7 @@ test_string_attr(FileAccPropList &fapl)
         // Read and verify the attribute string as a string of chars.
         char *string_att_check;
         gr_vlattr.read(vls_type, &string_att_check);
-        if (HDstrcmp(string_att_check, ATTRSTR_DATA.c_str()) != 0)
+        if (strcmp(string_att_check, ATTRSTR_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,string_att_check=%s\n",
                           __LINE__, ATTRSTR_DATA.c_str(), string_att_check);
         free(string_att_check);

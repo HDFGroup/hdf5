@@ -39,11 +39,11 @@ verbose=yes
 # source dirs
 SRC_TOOLS="$srcdir/../.."
 
-SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 # testfiles source dirs for tools
 SRC_H5MKGRP_TESTFILES="$SRC_TOOLS/test/misc/testfiles"
+SRC_H5MKGRP_OUTFILES="$SRC_TOOLS/test/misc/expected"
 
-TESTDIR=./testgrp
+TESTDIR=./tmpmkg
 test -d $TESTDIR || mkdir -p $TESTDIR
 
 ######################################################################
@@ -60,19 +60,19 @@ test -d $TESTDIR || mkdir -p $TESTDIR
 # copy test files and expected output files from source dirs to test dir
 #
 COPY_TESTFILES="
-$SRC_H5MKGRP_TESTFILES/h5mkgrp_help.txt
-$SRC_TOOLS_TESTFILES/h5mkgrp_single.ls
-$SRC_TOOLS_TESTFILES/h5mkgrp_single_v.ls
-$SRC_TOOLS_TESTFILES/h5mkgrp_single_p.ls
-$SRC_TOOLS_TESTFILES/h5mkgrp_single_l.ls
-$SRC_TOOLS_TESTFILES/h5mkgrp_several.ls
-$SRC_TOOLS_TESTFILES/h5mkgrp_several_v.ls
-$SRC_TOOLS_TESTFILES/h5mkgrp_several_p.ls
-$SRC_TOOLS_TESTFILES/h5mkgrp_several_l.ls
-$SRC_TOOLS_TESTFILES/h5mkgrp_nested_p.ls
-$SRC_TOOLS_TESTFILES/h5mkgrp_nested_lp.ls
-$SRC_TOOLS_TESTFILES/h5mkgrp_nested_mult_p.ls
-$SRC_TOOLS_TESTFILES/h5mkgrp_nested_mult_lp.ls
+$SRC_H5MKGRP_OUTFILES/h5mkgrp_help.txt
+$SRC_H5MKGRP_OUTFILES/h5mkgrp_single.ls
+$SRC_H5MKGRP_OUTFILES/h5mkgrp_single_v.ls
+$SRC_H5MKGRP_OUTFILES/h5mkgrp_single_p.ls
+$SRC_H5MKGRP_OUTFILES/h5mkgrp_single_l.ls
+$SRC_H5MKGRP_OUTFILES/h5mkgrp_several.ls
+$SRC_H5MKGRP_OUTFILES/h5mkgrp_several_v.ls
+$SRC_H5MKGRP_OUTFILES/h5mkgrp_several_p.ls
+$SRC_H5MKGRP_OUTFILES/h5mkgrp_several_l.ls
+$SRC_H5MKGRP_OUTFILES/h5mkgrp_nested_p.ls
+$SRC_H5MKGRP_OUTFILES/h5mkgrp_nested_lp.ls
+$SRC_H5MKGRP_OUTFILES/h5mkgrp_nested_mult_p.ls
+$SRC_H5MKGRP_OUTFILES/h5mkgrp_nested_mult_lp.ls
 "
 
 COPY_TESTFILES_TO_TESTDIR()

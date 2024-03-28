@@ -12,7 +12,7 @@
 
 /*
  *  For details of the HDF libraries, see the HDF Documentation at:
- *    http://hdfgroup.org/HDF5/doc/
+ *    https://portal.hdfgroup.org/documentation/index.html
  *
  */
 
@@ -1741,15 +1741,15 @@ Java_hdf_hdf5lib_H5_H5Pget_1mdc_1config(JNIEnv *env, jclass clss, jlong plist)
     args[9].j  = (jlong)cacheinfo.max_size;
     args[10].j = (jlong)cacheinfo.min_size;
     args[11].j = cacheinfo.epoch_length;
-    args[12].i = cacheinfo.incr_mode;
+    args[12].i = (jint)cacheinfo.incr_mode;
     args[13].d = cacheinfo.lower_hr_threshold;
     args[14].d = cacheinfo.increment;
     args[15].z = cacheinfo.apply_max_increment;
     args[16].j = (jlong)cacheinfo.max_increment;
-    args[17].i = cacheinfo.flash_incr_mode;
+    args[17].i = (jint)cacheinfo.flash_incr_mode;
     args[18].d = cacheinfo.flash_multiple;
     args[19].d = cacheinfo.flash_threshold;
-    args[20].i = cacheinfo.decr_mode;
+    args[20].i = (jint)cacheinfo.decr_mode;
     args[21].d = cacheinfo.upper_hr_threshold;
     args[22].d = cacheinfo.decrement;
     args[23].z = cacheinfo.apply_max_decrement;

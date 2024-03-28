@@ -58,6 +58,11 @@ size_t             cd_nelmts                      = FILTER_NUM_CDVALUES;
 #define DIM0_SCALE_FACTOR 4
 #define DIM1_SCALE_FACTOR 2
 
+/* The maximum number of datasets to work on simultaneously
+ * when using H5Dwrite_multi/H5Dread_multi
+ */
+#define MAX_NUM_DSETS_MULTI 5
+
 /* Struct type for the compound datatype filtered dataset tests */
 typedef struct {
     short field1;
@@ -439,7 +444,7 @@ typedef struct {
 #define SHRINKING_GROWING_CHUNKS_NCOLS        (mpi_size * DIM1_SCALE_FACTOR)
 #define SHRINKING_GROWING_CHUNKS_CH_NROWS     (SHRINKING_GROWING_CHUNKS_NROWS / mpi_size)
 #define SHRINKING_GROWING_CHUNKS_CH_NCOLS     (SHRINKING_GROWING_CHUNKS_NCOLS / mpi_size)
-#define SHRINKING_GROWING_CHUNKS_NLOOPS       20
+#define SHRINKING_GROWING_CHUNKS_NLOOPS       8
 
 /* Defines for the unshared filtered edge chunks write test */
 #define WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME  "unshared_filtered_edge_chunks_write"

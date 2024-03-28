@@ -16,7 +16,7 @@
  * + h5repack_<NAME>.h5
  * + h5repack_<NAME>_ex.h5
  * + h5repack_<NAME>_ex-<N>.dat
- * ...where NAME idenfities the type, and N is a positive decimal number;
+ * ...where NAME identifies the type, and N is a positive decimal number;
  * multiple external files (*.dat) are allowed per file, but they must
  * follow the pattern and be in contiguous numerical sequence starting at 0.
  *
@@ -115,7 +115,7 @@ set_dcpl_external_list(hid_t dcpl, const char *filename, unsigned n_elts_per_fil
         return -1;
 
     for (i = 0; i < n_external_files; i++) {
-        if (HDsnprintf(name, MAX_NAME_SIZE, "%s_ex-%u.dat", filename, i) >= MAX_NAME_SIZE)
+        if (snprintf(name, MAX_NAME_SIZE, "%s_ex-%u.dat", filename, i) >= MAX_NAME_SIZE)
             return -1;
 
         if (H5Pset_external(dcpl, name, 0, n_elts_per_file * elt_size) < 0)
@@ -140,7 +140,7 @@ make_file(const char *basename, struct external_def *ext, hid_t type_id, hsize_t
     hid_t space_id  = H5I_INVALID_HID;
     int   ret_value = 0;
 
-    if (HDsnprintf(filename, MAX_NAME_SIZE, "%s%s.h5", basename, (NULL != ext) ? "_ex" : "") >= MAX_NAME_SIZE)
+    if (snprintf(filename, MAX_NAME_SIZE, "%s%s.h5", basename, (NULL != ext) ? "_ex" : "") >= MAX_NAME_SIZE)
         H5REPACKGENTEST_OOPS;
 
     if (NULL != ext) {
@@ -173,7 +173,7 @@ done:
  * Returns 0 on success, -1 on failure.
  */
 static int
-generate_int32le_1d(hbool_t external)
+generate_int32le_1d(bool external)
 {
     int32_t              wdata[12];
     hsize_t              dims[]    = {12};
@@ -188,7 +188,7 @@ generate_int32le_1d(hbool_t external)
         wdata[n] = n - 6;
     }
 
-    def_ptr = (TRUE == external) ? (&def) : NULL;
+    def_ptr = (true == external) ? (&def) : NULL;
     if (make_file(FILE_INT32LE_1, def_ptr, H5T_STD_I32LE, 1, dims, wdata) < 0)
         ret_value = -1;
 
@@ -199,7 +199,7 @@ generate_int32le_1d(hbool_t external)
  * Returns 0 on success, -1 on failure.
  */
 static int
-generate_int32le_2d(hbool_t external)
+generate_int32le_2d(bool external)
 {
     int32_t              wdata[64];
     hsize_t              dims[]    = {8, 8};
@@ -214,7 +214,7 @@ generate_int32le_2d(hbool_t external)
         wdata[n] = n - 32;
     }
 
-    def_ptr = (TRUE == external) ? (&def) : NULL;
+    def_ptr = (true == external) ? (&def) : NULL;
     if (make_file(FILE_INT32LE_2, def_ptr, H5T_STD_I32LE, 2, dims, wdata) < 0)
         ret_value = -1;
 
@@ -225,7 +225,7 @@ generate_int32le_2d(hbool_t external)
  * Returns 0 on success, -1 on failure.
  */
 static int
-generate_int32le_3d(hbool_t external)
+generate_int32le_3d(bool external)
 {
     hsize_t              dims[] = {8, 8, 8};
     int32_t              wdata[512]; /* 8^3, from dims */
@@ -247,7 +247,7 @@ generate_int32le_3d(hbool_t external)
         }
     }
 
-    def_ptr = (TRUE == external) ? (&def) : NULL;
+    def_ptr = (true == external) ? (&def) : NULL;
     if (make_file(FILE_INT32LE_3, def_ptr, H5T_STD_I32LE, 3, dims, wdata) < 0)
         ret_value = -1;
 
@@ -258,7 +258,7 @@ generate_int32le_3d(hbool_t external)
  * Returns 0 on success, -1 on failure.
  */
 static int
-generate_uint8be(hbool_t external)
+generate_uint8be(bool external)
 {
     hsize_t              dims[] = {4, 8, 8};
     uint8_t              wdata[256]; /* 4*8*8, from dims */
@@ -280,7 +280,7 @@ generate_uint8be(hbool_t external)
         }
     }
 
-    def_ptr = (TRUE == external) ? (&def) : NULL;
+    def_ptr = (true == external) ? (&def) : NULL;
     if (make_file(FILE_UINT8BE, def_ptr, H5T_STD_U8BE, 3, dims, wdata) < 0)
         ret_value = -1;
 
@@ -291,7 +291,7 @@ generate_uint8be(hbool_t external)
  * Returns 0 on success, -1 on failure.
  */
 static int
-generate_f32le(hbool_t external)
+generate_f32le(bool external)
 {
     hsize_t              dims[] = {12, 6};
     float                wdata[72]; /* 12*6, from dims */
@@ -310,7 +310,7 @@ generate_f32le(hbool_t external)
         }
     }
 
-    def_ptr = (TRUE == external) ? (&def) : NULL;
+    def_ptr = (true == external) ? (&def) : NULL;
     if (make_file(FILE_F32LE, def_ptr, H5T_IEEE_F32LE, 2, dims, wdata) < 0)
         ret_value = -1;
 
@@ -327,7 +327,7 @@ main(void)
     int i = 0;
 
     for (i = 0; i < 2; i++) {
-        hbool_t external = (i & 1) ? TRUE : FALSE;
+        bool external = (i & 1) ? true : false;
         if (generate_int32le_1d(external) < 0)
             printf("A generate_int32le_1d failed!\n");
 

@@ -83,7 +83,7 @@ struct H5HL_t {
     size_t       prots;            /* # of times the heap has been protected                       */
     size_t       sizeof_size;      /* Size of file sizes                                           */
     size_t       sizeof_addr;      /* Size of file addresses                                       */
-    hbool_t      single_cache_obj; /* Indicate if the heap is a single object in the cache         */
+    bool         single_cache_obj; /* Indicate if the heap is a single object in the cache         */
     H5HL_free_t *freelist;         /* the free list                                                */
 
     /* Prefix-specific fields */

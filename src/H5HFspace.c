@@ -79,7 +79,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF__space_start(H5HF_hdr_t *hdr, hbool_t may_create)
+H5HF__space_start(H5HF_hdr_t *hdr, bool may_create)
 {
     const H5FS_section_class_t *classes[] = {/* Free space section classes implemented for fractal heap */
                                              H5HF_FSPACE_SECT_CLS_SINGLE, H5HF_FSPACE_SECT_CLS_FIRST_ROW,
@@ -152,7 +152,7 @@ H5HF__space_add(H5HF_hdr_t *hdr, H5HF_free_section_t *node, unsigned flags)
 
     /* Check if the free space for the heap has been initialized */
     if (!hdr->fspace)
-        if (H5HF__space_start(hdr, TRUE) < 0)
+        if (H5HF__space_start(hdr, true) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space");
 
     /* Construct user data */
@@ -179,7 +179,7 @@ done:
 htri_t
 H5HF__space_find(H5HF_hdr_t *hdr, hsize_t request, H5HF_free_section_t **node)
 {
-    htri_t node_found = FALSE; /* Whether an existing free list node was found */
+    htri_t node_found = false; /* Whether an existing free list node was found */
     htri_t ret_value  = FAIL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -193,7 +193,7 @@ H5HF__space_find(H5HF_hdr_t *hdr, hsize_t request, H5HF_free_section_t **node)
 
     /* Check if the free space for the heap has been initialized */
     if (!hdr->fspace)
-        if (H5HF__space_start(hdr, FALSE) < 0)
+        if (H5HF__space_start(hdr, false) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space");
 
     /* Search for free space in the heap */
@@ -394,7 +394,7 @@ H5HF__space_size(H5HF_hdr_t *hdr, hsize_t *fs_size)
 
     /* Check if the free space for the heap has been initialized */
     if (!hdr->fspace)
-        if (H5HF__space_start(hdr, FALSE) < 0)
+        if (H5HF__space_start(hdr, false) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space");
 
     /* Get free space metadata size */

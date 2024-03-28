@@ -267,13 +267,21 @@ test_h5o_open_by_addr(void)
     H5I_type_t  id_type;    /* Type of IDs returned from H5Oopen */
     H5G_info_t  ginfo;      /* Group info struct */
     H5T_class_t type_class; /* Class of the datatype */
-    herr_t      ret;        /* Value returned from API calls */
+    bool        vol_is_native;
+    herr_t      ret; /* Value returned from API calls */
 
     h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
 
     /* Create a new HDF5 file */
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, fid, &vol_is_native), FAIL, "h5_using_native_vol");
+    if (!vol_is_native) {
+        CHECK(H5Fclose(fid), FAIL, "H5Fclose");
+        return;
+    }
 
     /* Create a group, dataset, and committed datatype within the file */
     /* Create the group */
@@ -934,13 +942,13 @@ test_h5o_plist(void)
 static void
 test_h5o_link(void)
 {
-    hid_t        file_id  = -1;
-    hid_t        group_id = -1;
-    hid_t        space_id = -1;
-    hid_t        dset_id  = -1;
-    hid_t        type_id  = -1;
-    hid_t        fapl_id  = -1;
-    hid_t        lcpl_id  = -1;
+    hid_t        file_id  = H5I_INVALID_HID;
+    hid_t        group_id = H5I_INVALID_HID;
+    hid_t        space_id = H5I_INVALID_HID;
+    hid_t        dset_id  = H5I_INVALID_HID;
+    hid_t        type_id  = H5I_INVALID_HID;
+    hid_t        fapl_id  = H5I_INVALID_HID;
+    hid_t        lcpl_id  = H5I_INVALID_HID;
     char         filename[1024];
     hsize_t      dims[2] = {TEST6_DIM1, TEST6_DIM2};
     htri_t       committed; /* Whether the named datatype is committed */
@@ -973,7 +981,7 @@ test_h5o_link(void)
     /* Create LCPL with intermediate group creation flag set */
     lcpl_id = H5Pcreate(H5P_LINK_CREATE);
     CHECK(lcpl_id, FAIL, "H5Pcreate");
-    ret = H5Pset_create_intermediate_group(lcpl_id, TRUE);
+    ret = H5Pset_create_intermediate_group(lcpl_id, true);
     CHECK(ret, FAIL, "H5Pset_create_intermediate_group");
 
     /* Create a file access property list */
@@ -1008,7 +1016,7 @@ test_h5o_link(void)
             ret = H5Tcommit_anon(file_id, type_id, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(ret, FAIL, "H5Tcommit_anon");
             committed = H5Tcommitted(type_id);
-            VERIFY(committed, TRUE, "H5Tcommitted");
+            VERIFY(committed, true, "H5Tcommitted");
 
             /* Create a dataset with no name using the committed datatype*/
             dset_id = H5Dcreate_anon(file_id, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
@@ -1109,6 +1117,7 @@ test_h5o_comment(void)
     char        check_comment[64];
     ssize_t     comment_len = 0;
     ssize_t     len;
+    bool        vol_is_native;
     herr_t      ret; /* Value returned from API calls */
     int         ret_value;
 
@@ -1117,6 +1126,13 @@ test_h5o_comment(void)
     /* Create a new HDF5 file */
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, fid, &vol_is_native), FAIL, "h5_using_native_vol");
+    if (!vol_is_native) {
+        CHECK(H5Fclose(fid), FAIL, "H5Fclose");
+        return;
+    }
 
     /* Create an attribute for the file */
     attr_space = H5Screate_simple(1, &attr_dims, NULL);
@@ -1203,7 +1219,7 @@ test_h5o_comment(void)
     len = H5Oget_comment(fid, check_comment, (size_t)comment_len + 1);
     CHECK(len, FAIL, "H5Oget_comment");
 
-    ret_value = HDstrcmp(file_comment, check_comment);
+    ret_value = strcmp(file_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment");
 
     /* Open the group */
@@ -1217,7 +1233,7 @@ test_h5o_comment(void)
     len = H5Oget_comment(grp, check_comment, (size_t)comment_len + 1);
     CHECK(len, FAIL, "H5Oget_comment");
 
-    ret_value = HDstrcmp(grp_comment, check_comment);
+    ret_value = strcmp(grp_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment");
 
     /* Open the datatype */
@@ -1231,7 +1247,7 @@ test_h5o_comment(void)
     len = H5Oget_comment(dtype, check_comment, (size_t)comment_len + 1);
     CHECK(len, FAIL, "H5Oget_comment");
 
-    ret_value = HDstrcmp(dtype_comment, check_comment);
+    ret_value = strcmp(dtype_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment");
 
     /* Open the dataset */
@@ -1245,7 +1261,7 @@ test_h5o_comment(void)
     len = H5Oget_comment(dset, check_comment, (size_t)comment_len + 1);
     CHECK(ret, len, "H5Oget_comment");
 
-    ret_value = HDstrcmp(dset_comment, check_comment);
+    ret_value = strcmp(dset_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment");
 
     /* Close the IDs */
@@ -1284,6 +1300,7 @@ test_h5o_comment_by_name(void)
     char        check_comment[64];
     ssize_t     comment_len = 0;
     ssize_t     len;
+    bool        vol_is_native;
     herr_t      ret; /* Value returned from API calls */
     int         ret_value;
 
@@ -1292,6 +1309,13 @@ test_h5o_comment_by_name(void)
     /* Create a new HDF5 file */
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, fid, &vol_is_native), FAIL, "h5_using_native_vol");
+    if (!vol_is_native) {
+        CHECK(H5Fclose(fid), FAIL, "H5Fclose");
+        return;
+    }
 
     /* Create an attribute for the file */
     attr_space = H5Screate_simple(1, &attr_dims, NULL);
@@ -1378,7 +1402,7 @@ test_h5o_comment_by_name(void)
     len = H5Oget_comment_by_name(fid, ".", check_comment, (size_t)comment_len + 1, H5P_DEFAULT);
     CHECK(len, FAIL, "H5Oget_comment_by_name");
 
-    ret_value = HDstrcmp(file_comment, check_comment);
+    ret_value = strcmp(file_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment_by_name");
 
     /* Open the group */
@@ -1392,7 +1416,7 @@ test_h5o_comment_by_name(void)
     len = H5Oget_comment_by_name(fid, "group", check_comment, (size_t)comment_len + 1, H5P_DEFAULT);
     CHECK(len, FAIL, "H5Oget_comment_by_name");
 
-    ret_value = HDstrcmp(grp_comment, check_comment);
+    ret_value = strcmp(grp_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment_by_name");
 
     /* Getting the comment on the datatype and verify it */
@@ -1402,7 +1426,7 @@ test_h5o_comment_by_name(void)
     len = H5Oget_comment_by_name(grp, "datatype", check_comment, (size_t)comment_len + 1, H5P_DEFAULT);
     CHECK(len, FAIL, "H5Oget_comment");
 
-    ret_value = HDstrcmp(dtype_comment, check_comment);
+    ret_value = strcmp(dtype_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment_by_name");
 
     /* Getting the comment on the dataset and verify it */
@@ -1412,7 +1436,7 @@ test_h5o_comment_by_name(void)
     len = H5Oget_comment_by_name(fid, "dataset", check_comment, (size_t)comment_len + 1, H5P_DEFAULT);
     CHECK(len, FAIL, "H5Oget_comment_by_name");
 
-    ret_value = HDstrcmp(dset_comment, check_comment);
+    ret_value = strcmp(dset_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment_by_name");
 
     /* Close the IDs */
@@ -1556,13 +1580,21 @@ test_h5o_open_by_addr_deprec(void)
     H5I_type_t  id_type;    /* Type of IDs returned from H5Oopen */
     H5G_info_t  ginfo;      /* Group info struct */
     H5T_class_t type_class; /* Class of the datatype */
-    herr_t      ret;        /* Value returned from API calls */
+    bool        vol_is_native;
+    herr_t      ret; /* Value returned from API calls */
 
     h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
 
     /* Create a new HDF5 file */
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, fid, &vol_is_native), FAIL, "h5_using_native_vol");
+    if (!vol_is_native) {
+        CHECK(H5Fclose(fid), FAIL, "H5Fclose");
+        return;
+    }
 
     /* Create a group, dataset, and committed datatype within the file */
     /* Create the group */
@@ -1699,16 +1731,16 @@ visit_obj_cb(hid_t group_id, const char *name, const H5O_info1_t *oinfo1, void H
     H5O_info1_t oinfo2; /* Object info structs */
 
     /* Verify the object info for "group1", "group2" and the root group */
-    if (!(HDstrcmp(name, "group1"))) {
+    if (!(strcmp(name, "group1"))) {
         H5Oget_info_by_name2(group_id, name, &oinfo2, H5O_INFO_NUM_ATTRS, H5P_DEFAULT);
         VERIFY(oinfo1->num_attrs, oinfo2.num_attrs, "obj info from H5Ovisit1");
     }
-    else if (!(HDstrcmp(name, "group2"))) {
+    else if (!(strcmp(name, "group2"))) {
         H5Oget_info_by_name2(group_id, name, &oinfo2, H5O_INFO_HDR, H5P_DEFAULT);
         VERIFY(oinfo1->hdr.nmesgs, oinfo2.hdr.nmesgs, "obj info from H5Ovisit1/H5Oget_info2");
         VERIFY(oinfo1->hdr.nchunks, oinfo2.hdr.nchunks, "obj info from H5Ovisit1/H5Oget_info2");
     }
-    else if (!(HDstrcmp(name, "."))) {
+    else if (!(strcmp(name, "."))) {
         H5Oget_info_by_name2(group_id, name, &oinfo2, H5O_INFO_META_SIZE, H5P_DEFAULT);
         VERIFY(oinfo1->meta_size.obj.index_size, oinfo2.meta_size.obj.index_size,
                "obj info from H5Ovisit1/H5Oget_info2");
@@ -1731,15 +1763,16 @@ visit_obj_cb(hid_t group_id, const char *name, const H5O_info1_t *oinfo1, void H
 static void
 test_h5o_getinfo_visit(void)
 {
-    hid_t       fid  = -1;            /* HDF5 File ID */
-    hid_t       gid1 = -1, gid2 = -1; /* Group IDs */
-    hid_t       sid = -1;             /* Dataspace ID */
-    hid_t       aid = -1;             /* Attribute ID */
+    hid_t       fid  = H5I_INVALID_HID;                         /* HDF5 File ID */
+    hid_t       gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t       sid = H5I_INVALID_HID;                          /* Dataspace ID */
+    hid_t       aid = H5I_INVALID_HID;                          /* Attribute ID */
     char        filename[1024];
     H5O_info1_t oinfo1, oinfo2; /* Object info structs */
     char        attrname[25];   /* Attribute name */
     int         j;              /* Local index variable */
-    herr_t      ret;            /* Value returned from API calls */
+    bool        vol_is_native;
+    herr_t      ret; /* Value returned from API calls */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing info returned by H5Oget_info vs H5Ovisit\n"));
@@ -1749,6 +1782,14 @@ test_h5o_getinfo_visit(void)
     /* Create an HDF5 file */
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, fid, &vol_is_native), FAIL, "h5_using_native_vol");
+    if (!vol_is_native) {
+        CHECK(H5Fclose(fid), FAIL, "H5Fclose");
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
 
     /* Create "group1" in the file */
     gid1 = H5Gcreate2(fid, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1761,7 +1802,7 @@ test_h5o_getinfo_visit(void)
     /* Attach 10 attributes to "group1" */
     for (j = 0; j < 10; j++) {
         /* Create the attribute name */
-        HDsnprintf(attrname, sizeof(attrname), "attr%u", j);
+        snprintf(attrname, sizeof(attrname), "attr%u", j);
         /* Create the attribute */
         aid = H5Acreate2(gid1, attrname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(aid, FAIL, "H5Acreate2");

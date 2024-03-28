@@ -81,7 +81,7 @@ H5AC_stats(const H5F_t *f)
     assert(f->shared->cache);
 
     /* at present, this can't fail */
-    (void)H5C_stats(f->shared->cache, H5F_OPEN_NAME(f), FALSE);
+    (void)H5C_stats(f->shared->cache, H5F_OPEN_NAME(f), false);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5AC_stats() */
@@ -186,13 +186,13 @@ done:
  *              of protect / unprotect calls prior to this call.
  *
  *              If either the parent or the child is not in the metadata
- *              cache, the function sets *fd_exists_ptr to FALSE.
+ *              cache, the function sets *fd_exists_ptr to false.
  *
  *              If both are in the cache, the child's list of parents is
  *              searched for the proposed parent.  If the proposed parent
  *              is found in the child's parent list, the function sets
- *              *fd_exists_ptr to TRUE.  In all other non-error cases,
- *              the function sets *fd_exists_ptr FALSE.
+ *              *fd_exists_ptr to true.  In all other non-error cases,
+ *              the function sets *fd_exists_ptr false.
  *
  * Return:      SUCCEED on success/FAIL on failure.  Note that
  *              *fd_exists_ptr is undefined on failure.
@@ -201,7 +201,7 @@ done:
  */
 #ifndef NDEBUG
 herr_t
-H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr, haddr_t child_addr, hbool_t *fd_exists_ptr)
+H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr, haddr_t child_addr, bool *fd_exists_ptr)
 {
     H5C_t *cache_ptr;        /* Ptr to cache */
     herr_t ret_value = FAIL; /* Return value */
@@ -228,12 +228,12 @@ H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr, haddr_t child_addr, 
  *              type field contains the expected value.
  *
  *              If the specified entry is in cache, *in_cache_ptr is set
- *              to TRUE, and *type_ok_ptr is set to TRUE or FALSE depending
+ *              to true, and *type_ok_ptr is set to true or false depending
  *		on whether the entries type field matches the
  *		expected_type parameter
  *
  *              If the target entry is not in cache, *in_cache_ptr is
- *              set to FALSE, and *type_ok_ptr is undefined.
+ *              set to false, and *type_ok_ptr is undefined.
  *
  *              Note that this function is only defined if NDEBUG
  *              is not defined.
@@ -247,8 +247,8 @@ H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr, haddr_t child_addr, 
  */
 #ifndef NDEBUG
 herr_t
-H5AC_verify_entry_type(const H5F_t *f, haddr_t addr, const H5AC_class_t *expected_type, hbool_t *in_cache_ptr,
-                       hbool_t *type_ok_ptr)
+H5AC_verify_entry_type(const H5F_t *f, haddr_t addr, const H5AC_class_t *expected_type, bool *in_cache_ptr,
+                       bool *type_ok_ptr)
 {
     H5C_t *cache_ptr;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -279,11 +279,11 @@ done:
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
-hbool_t
+bool
 H5AC_get_serialization_in_progress(H5F_t *f)
 {
-    H5C_t  *cache_ptr;
-    hbool_t ret_value = FALSE; /* Return value */
+    H5C_t *cache_ptr;
+    bool   ret_value = false; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -307,19 +307,19 @@ H5AC_get_serialization_in_progress(H5F_t *f)
  *              metadata cache are clean from the outermost ring, inwards
  *              to the inner ring specified.
  *
- *              Returns TRUE if all specified rings are clean, and FALSE
+ *              Returns true if all specified rings are clean, and false
  *              if not.  Throws an assertion failure on error.
  *
- * Return:      TRUE if the indicated ring(s) are clean, and FALSE otherwise.
+ * Return:      true if the indicated ring(s) are clean, and false otherwise.
  *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
-hbool_t
+bool
 H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring)
 {
-    H5C_t  *cache_ptr;
-    hbool_t ret_value = FALSE; /* Return value */
+    H5C_t *cache_ptr;
+    bool   ret_value = false; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

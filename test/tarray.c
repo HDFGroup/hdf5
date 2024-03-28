@@ -686,7 +686,7 @@ test_array_compound_atomic(void)
     /* Check the 1st field's name */
     mname = H5Tget_member_name(tid2, 0);
     CHECK_PTR(mname, "H5Tget_member_name");
-    if (HDstrcmp(mname, "i") != 0)
+    if (strcmp(mname, "i") != 0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
     H5free_memory(mname);
 
@@ -705,7 +705,7 @@ test_array_compound_atomic(void)
     /* Check the 2nd field's name */
     mname = H5Tget_member_name(tid2, 1);
     CHECK_PTR(mname, "H5Tget_member_name");
-    if (HDstrcmp(mname, "f") != 0)
+    if (strcmp(mname, "f") != 0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
     H5free_memory(mname);
 
@@ -908,7 +908,7 @@ test_array_compound_array(void)
     /* Check the 1st field's name */
     mname = H5Tget_member_name(tid2, 0);
     CHECK_PTR(mname, "H5Tget_member_name");
-    if (HDstrcmp(mname, "i") != 0)
+    if (strcmp(mname, "i") != 0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
     H5free_memory(mname);
 
@@ -927,7 +927,7 @@ test_array_compound_array(void)
     /* Check the 2nd field's name */
     mname = H5Tget_member_name(tid2, 1);
     CHECK_PTR(mname, "H5Tget_member_name");
-    if (HDstrcmp(mname, "f") != 0)
+    if (strcmp(mname, "f") != 0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
     H5free_memory(mname);
 
@@ -1664,9 +1664,9 @@ test_array_bkg(void)
     for (i = 0; i < dtsinfo->nsubfields; i++)
         dtsinfo->name[i] = (char *)calloc((size_t)20, sizeof(char));
 
-    HDstrcpy(dtsinfo->name[0], "One");
-    HDstrcpy(dtsinfo->name[1], "Two");
-    HDstrcpy(dtsinfo->name[2], "Three");
+    strcpy(dtsinfo->name[0], "One");
+    strcpy(dtsinfo->name[1], "Two");
+    strcpy(dtsinfo->name[2], "Three");
 
     /* Create file */
     /* ----------- */
@@ -1918,7 +1918,8 @@ test_compat(void)
     size_t      off;                  /* Offset of compound field         */
     hid_t       mtid;                 /* Datatype ID for field            */
     int         i;                    /* Index variables                  */
-    hbool_t     driver_is_default_compatible;
+    bool        vol_is_native;
+    bool        driver_is_default_compatible;
     herr_t      ret; /* Generic return value             */
 
     /* Output message about test being performed */
@@ -1934,16 +1935,25 @@ test_compat(void)
      *  the tarrold.h5 file.
      */
 
-    if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0)
-        TestErrPrintf("can't check if VFD is default VFD compatible\n");
+    /* Check if VFD used is native file format compatible */
+    CHECK(h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible), FAIL,
+          "h5_driver_is_default_vfd_compatible");
     if (!driver_is_default_compatible) {
-        printf(" -- SKIPPED --\n");
+        MESSAGE(5, (" -- SKIPPED --\n"));
         return;
     }
 
     /* Open the testfile */
     fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK_I(fid1, "H5Fopen");
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, fid1, &vol_is_native), FAIL, "h5_using_native_vol");
+    if (!vol_is_native) {
+        CHECK(H5Fclose(fid1), FAIL, "H5Fclose");
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
 
     /* Only try to proceed if the file is around */
     if (fid1 >= 0) {
@@ -1966,7 +1976,7 @@ test_compat(void)
         /* Check the 1st field's name */
         mname = H5Tget_member_name(tid1, 0);
         CHECK_PTR(mname, "H5Tget_member_name");
-        if (HDstrcmp(mname, "i") != 0)
+        if (strcmp(mname, "i") != 0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
         H5free_memory(mname);
 
@@ -1985,7 +1995,7 @@ test_compat(void)
         /* Check the 2nd field's name */
         mname = H5Tget_member_name(tid1, 1);
         CHECK_PTR(mname, "H5Tget_member_name");
-        if (HDstrcmp(mname, "f") != 0)
+        if (strcmp(mname, "f") != 0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
         H5free_memory(mname);
 
@@ -2004,7 +2014,7 @@ test_compat(void)
         /* Check the 3rd field's name */
         mname = H5Tget_member_name(tid1, 2);
         CHECK_PTR(mname, "H5Tget_member_name");
-        if (HDstrcmp(mname, "l") != 0)
+        if (strcmp(mname, "l") != 0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
         H5free_memory(mname);
 
@@ -2047,7 +2057,7 @@ test_compat(void)
         /* Check the 1st field's name */
         mname = H5Tget_member_name(tid1, 0);
         CHECK_PTR(mname, "H5Tget_member_name");
-        if (mname && HDstrcmp(mname, "i") != 0)
+        if (mname && strcmp(mname, "i") != 0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
         if (mname)
             H5free_memory(mname);
@@ -2067,7 +2077,7 @@ test_compat(void)
         /* Check the 2nd field's name */
         mname = H5Tget_member_name(tid1, 1);
         CHECK_PTR(mname, "H5Tget_member_name");
-        if (mname && HDstrcmp(mname, "f") != 0)
+        if (mname && strcmp(mname, "f") != 0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
         if (mname)
             H5free_memory(mname);
@@ -2115,7 +2125,7 @@ test_compat(void)
         /* Check the 3rd field's name */
         mname = H5Tget_member_name(tid1, 2);
         CHECK_PTR(mname, "H5Tget_member_name");
-        if (mname && HDstrcmp(mname, "l") != 0)
+        if (mname && strcmp(mname, "l") != 0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
         if (mname)
             H5free_memory(mname);
@@ -2163,7 +2173,7 @@ test_compat(void)
         /* Check the 4th field's name */
         mname = H5Tget_member_name(tid1, 3);
         CHECK_PTR(mname, "H5Tget_member_name");
-        if (mname && HDstrcmp(mname, "d") != 0)
+        if (mname && strcmp(mname, "d") != 0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
         if (mname)
             H5free_memory(mname);

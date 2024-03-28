@@ -29,9 +29,9 @@
 static MPI_Comm comm = MPI_COMM_WORLD;
 static MPI_Info info = MPI_INFO_NULL;
 
-hbool_t     pass               = TRUE; /* set to FALSE on error */
-hbool_t     disp_failure_mssgs = TRUE; /* global force display of failure messages */
-const char *failure_mssg       = NULL;
+static bool        pass               = true; /* set to false on error */
+static bool        disp_failure_mssgs = true; /* global force display of failure messages */
+static const char *failure_mssg       = NULL;
 
 const char *FILENAMES[] = {"mpio_vfd_test_file_0",      /*0*/
                            "mpio_vfd_test_file_1",      /*1*/
@@ -40,13 +40,14 @@ const char *FILENAMES[] = {"mpio_vfd_test_file_0",      /*0*/
                            "mpio_vfd_test_file_4",      /*4*/
                            "mpio_vfd_test_file_5",      /*5*/
                            "mpio_vfd_test_file_6",      /*6*/
-                           "subfiling_vfd_test_file_0", /*7*/
-                           "subfiling_vfd_test_file_1", /*8*/
-                           "subfiling_vfd_test_file_2", /*9*/
-                           "subfiling_vfd_test_file_3", /*10*/
-                           "subfiling_vfd_test_file_4", /*11*/
-                           "subfiling_vfd_test_file_5", /*12*/
-                           "subfiling_vfd_test_file_6", /*13*/
+                           "mpio_vfd_test_file_7",      /*7*/
+                           "subfiling_vfd_test_file_0", /*8*/
+                           "subfiling_vfd_test_file_1", /*9*/
+                           "subfiling_vfd_test_file_2", /*10*/
+                           "subfiling_vfd_test_file_3", /*11*/
+                           "subfiling_vfd_test_file_4", /*12*/
+                           "subfiling_vfd_test_file_5", /*13*/
+                           "subfiling_vfd_test_file_6", /*14*/
                            NULL};
 
 /* File Test Images
@@ -99,6 +100,8 @@ static unsigned vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size
 static unsigned vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_t xfer_mode,
                                     H5FD_mpio_collective_opt_t coll_opt_mode, const char *vfd_name);
 static unsigned vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_t xfer_mode,
+                                    H5FD_mpio_collective_opt_t coll_opt_mode, const char *vfd_name);
+static unsigned vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_t xfer_mode,
                                     H5FD_mpio_collective_opt_t coll_opt_mode, const char *vfd_name);
 /*
  * Tests for selection I/O:
@@ -162,7 +165,7 @@ int *erbufs[2] = {NULL, NULL}; /* Array of expected read buffers */
             if (err_result == 0)                                                                             \
                 PASSED();                                                                                    \
             else                                                                                             \
-                HDputs("     ***TEST FAILED***");                                                            \
+                puts("     ***TEST FAILED***");                                                              \
         }                                                                                                    \
     } while (0)
 
@@ -170,7 +173,7 @@ int *erbufs[2] = {NULL, NULL}; /* Array of expected read buffers */
 static herr_t test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t block[],
                                             H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_spaces[],
                                             hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[],
-                                            uint32_t rbufcount, int *erb[], hbool_t shorten_rbufs);
+                                            uint32_t rbufcount, int *erb[], bool shorten_rbufs);
 
 static herr_t test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count,
                                       hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[],
@@ -218,9 +221,9 @@ alloc_and_init_file_images(int mpi_size)
     int         buf_len;
     size_t      buf_size;
     int         i;
-    hbool_t     show_progress = FALSE;
+    bool        show_progress = false;
 
-    pass = TRUE;
+    pass = true;
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -240,7 +243,7 @@ alloc_and_init_file_images(int mpi_size)
         if ((!increasing_fi_buf) || (!decreasing_fi_buf) || (!negative_fi_buf) || (!zero_fi_buf) ||
             (!read_fi_buf)) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "Can't allocate one or more file image buffers.";
         }
     }
@@ -348,11 +351,11 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
     const char *fcn_name = "setup_vfd_test_file()";
     char        filename[512];
     int         cp            = 0;
-    hbool_t     show_progress = FALSE;
-    hid_t       fapl_id       = -1;   /* file access property list ID */
-    hid_t       dxpl_id       = -1;   /* data access property list ID */
-    unsigned    flags         = 0;    /* file open flags              */
-    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    unsigned    flags         = 0;               /* file open flags              */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
 
     assert(vfd_name);
     assert(lf_ptr);
@@ -368,7 +371,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
         if (h5_fixname(FILENAMES[file_name_id], H5P_DEFAULT, filename, sizeof(filename)) == NULL) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "h5_fixname() failed.\n";
         }
     }
@@ -381,23 +384,23 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
         if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "Can't create fapl.";
         }
     }
 
     if (pass) {
 
-        if (HDstrcmp(vfd_name, "mpio") == 0) {
+        if (strcmp(vfd_name, "mpio") == 0) {
 
             if (H5Pset_fapl_mpio(fapl_id, comm, info) < 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "Can't set mpio fapl.";
             }
         }
 #ifdef H5_HAVE_SUBFILING_VFD
-        else if (HDstrcmp(vfd_name, H5FD_SUBFILING_NAME) == 0) {
+        else if (strcmp(vfd_name, H5FD_SUBFILING_NAME) == 0) {
 
             H5FD_subfiling_params_t shared_conf = {
                 /* ioc_selection = */ SELECT_IOC_ONE_PER_NODE,
@@ -408,7 +411,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
                 /* magic         = */ H5FD_SUBFILING_FAPL_MAGIC,
                 /* version       = */ H5FD_SUBFILING_CURR_FAPL_VERSION,
                 /* ioc_fapl_id   = */ H5P_DEFAULT, /* will over write? */
-                /* require_ioc   = */ TRUE,
+                /* require_ioc   = */ true,
                 /* shared_cfg    = */ shared_conf,
             };
             H5FD_ioc_config_t ioc_config = {
@@ -420,21 +423,21 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
             if ((pass) && ((ioc_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "Can't create ioc fapl.";
             }
 
             /* set the MPI communicator and info in the FAPL */
             if (H5Pset_mpi_params(ioc_fapl, comm, info) < 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "Can't set MPI communicator and info in IOC fapl.";
             }
 
             /* set the MPI communicator and info in the FAPL */
             if (H5Pset_mpi_params(fapl_id, comm, info) < 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "Can't set MPI communicator and info in subfiling fapl.";
             }
 
@@ -444,7 +447,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
             /* Get subfiling VFD defaults */
             if ((pass) && (H5Pget_fapl_subfiling(fapl_id, &subfiling_conf) == FAIL)) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "Can't get sub-filing VFD defaults.";
             }
 
@@ -453,14 +456,14 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
                 /* Get IOC VFD defaults */
                 if ((pass) && ((H5Pget_fapl_ioc(ioc_fapl, &ioc_config) == FAIL))) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "Can't get IOC VFD defaults.";
                 }
 
                 /* Now we can set the IOC fapl. */
                 if ((pass) && ((H5Pset_fapl_ioc(ioc_fapl, &ioc_config) == FAIL))) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "Can't set IOC fapl.";
                 }
             }
@@ -468,7 +471,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
                 if ((pass) && ((H5Pset_fapl_sec2(ioc_fapl) == FAIL))) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "Can't set sec2 fapl.";
                 }
             }
@@ -479,13 +482,13 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
             /* Now we can set the SUBFILING fapl before returning. */
             if ((pass) && (H5Pset_fapl_subfiling(fapl_id, &subfiling_conf) == FAIL)) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "Can't set subfiling fapl.";
             }
         }
 #endif
         else {
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "un-supported VFD";
         }
     }
@@ -498,7 +501,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
         if (h5_fixname(FILENAMES[file_name_id], H5P_DEFAULT, filename, sizeof(filename)) == NULL) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "h5_fixname() failed.\n";
         }
     }
@@ -514,7 +517,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
         if (NULL == (lf = H5FDopen(filename, flags, fapl_id, HADDR_UNDEF))) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDopen() failed.\n";
         }
     }
@@ -530,7 +533,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
         if (H5FDset_eoa(lf, H5FD_MEM_DEFAULT, eoa) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDset_eoa() failed.\n";
         }
     }
@@ -544,7 +547,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
         if (dxpl_id < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pcreate(H5P_DATASET_XFER) failed.";
         }
     }
@@ -556,7 +559,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
         if (H5Pset_dxpl_mpio(dxpl_id, xfer_mode) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pset_dxpl_mpio() failed.";
         }
     }
@@ -568,14 +571,14 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
         if (H5Pset_dxpl_mpio_collective_opt(dxpl_id, coll_opt_mode) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5Pset_dxpl_mpio() failed.";
         }
     }
 
     if (pass) { /* setup pointers with return values */
 
-        HDstrncpy(file_name, filename, 512);
+        strncpy(file_name, filename, 512);
         *lf_ptr      = lf;
         *fapl_id_ptr = fapl_id;
         *dxpl_id_ptr = dxpl_id;
@@ -612,7 +615,7 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
 {
     const char *fcn_name      = "takedown_vfd_test_file()";
     int         cp            = 0;
-    hbool_t     show_progress = FALSE;
+    bool        show_progress = false;
 
     assert(lf_ptr);
     assert(fapl_id_ptr);
@@ -629,7 +632,7 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
 
         if (H5FDclose(*lf_ptr) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDclose() failed.\n";
         }
     }
@@ -647,7 +650,7 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
 
         if ((mpi_rank == 0) && (HDremove(filename) < 0)) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "HDremove() failed.\n";
         }
     }
@@ -661,7 +664,7 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
     /* Close the fapl */
     if (H5Pclose(*fapl_id_ptr) < 0) {
 
-        pass         = FALSE;
+        pass         = false;
         failure_mssg = "can't close fapl.\n";
     }
 
@@ -671,7 +674,7 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
     /* Close the dxpl */
     if (H5Pclose(*dxpl_id_ptr) < 0) {
 
-        pass         = FALSE;
+        pass         = false;
         failure_mssg = "can't close dxpl.\n";
     }
 
@@ -718,7 +721,7 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
  *
  *              7) On rank 0, delete the test file.
  *
- * Return:      FALSE on success, TRUE if any errors are detected.
+ * Return:      false on success, true if any errors are detected.
  *
  *-------------------------------------------------------------------------
  */
@@ -731,10 +734,10 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     char        test_title[120];
     char        filename[512];
     haddr_t     eoa;
-    hbool_t     show_progress = FALSE;
-    hid_t       fapl_id       = -1;   /* file access property list ID */
-    hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     uint32_t    count;
@@ -743,26 +746,26 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     size_t      sizes[1];
     void       *bufs[1];
 
-    pass = TRUE;
+    pass = true;
 
     if (mpi_rank == 0) {
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 1 -- %s / independent",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 1 -- %s / independent",
+                     vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 1 -- %s / col op / ind I/O",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 1 -- %s / col op / ind I/O",
+                     vfd_name);
         }
         else {
 
             assert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 1 -- %s / col op / col I/O",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 1 -- %s / col op / col I/O",
+                     vfd_name);
         }
 
         TESTING(test_title);
@@ -797,7 +800,7 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             if (H5FDwrite(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)increasing_fi_buf) <
                 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
             }
         }
@@ -837,7 +840,7 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (H5FDread_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDread_vector() failed.\n";
         }
 
@@ -847,7 +850,7 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
                 if (read_fi_buf[i] != 0) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "Unexpected value in read_fi_buf (1).\n";
                     break;
                 }
@@ -856,7 +859,7 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
                 if (read_fi_buf[i] != increasing_fi_buf[i]) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "Unexpected value in read_fi_buf (2).\n";
                     break;
                 }
@@ -948,7 +951,7 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *
  *              11) On rank 0, delete the test file.
  *
- * Return:      FALSE on success, TRUE if any errors are detected.
+ * Return:      false on success, true if any errors are detected.
  *
  *-------------------------------------------------------------------------
  */
@@ -961,10 +964,10 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     char        test_title[120];
     char        filename[512];
     haddr_t     eoa;
-    hbool_t     show_progress = FALSE;
-    hid_t       fapl_id       = -1;   /* file access property list ID */
-    hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     uint32_t    count;
@@ -973,26 +976,26 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     size_t      sizes[1];
     void       *bufs[1];
 
-    pass = TRUE;
+    pass = true;
 
     if (mpi_rank == 0) {
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 2 -- %s / independent",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 2 -- %s / independent",
+                     vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 2 -- %s / col op / ind I/O",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 2 -- %s / col op / ind I/O",
+                     vfd_name);
         }
         else {
 
             assert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 2 -- %s / col op / col I/O",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 2 -- %s / col op / col I/O",
+                     vfd_name);
         }
 
         TESTING(test_title);
@@ -1027,7 +1030,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             if (H5FDwrite(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)decreasing_fi_buf) <
                 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
             }
         }
@@ -1076,7 +1079,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (H5FDread_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDread_vector() failed.\n";
         }
     }
@@ -1115,7 +1118,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (H5FDread_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDread_vector() failed.\n";
         }
     }
@@ -1138,7 +1141,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
                 if (read_fi_buf[i] != 0) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "Unexpected value in read_fi_buf (1).\n";
                     break;
                 }
@@ -1147,7 +1150,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
                 if (read_fi_buf[i] != decreasing_fi_buf[i]) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "Unexpected value in read_fi_buf (2).\n";
                     break;
                 }
@@ -1245,7 +1248,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *
  *               9) On rank 0, delete the test file.
  *
- * Return:      FALSE on success, TRUE if any errors are detected.
+ * Return:      false on success, true if any errors are detected.
  *
  *-------------------------------------------------------------------------
  */
@@ -1262,10 +1265,10 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     int32_t     buf_2[(INTS_PER_RANK / 4) + 1];
     int32_t     buf_3[(INTS_PER_RANK / 4) + 1];
     haddr_t     eoa;
-    hbool_t     show_progress = FALSE;
-    hid_t       fapl_id       = -1;   /* file access property list ID */
-    hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     uint32_t    count;
@@ -1274,26 +1277,26 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     size_t      sizes[4];
     void       *bufs[4];
 
-    pass = TRUE;
+    pass = true;
 
     if (mpi_rank == 0) {
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 3 -- %s / independent",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 3 -- %s / independent",
+                     vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 3 -- %s / col op / ind I/O",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 3 -- %s / col op / ind I/O",
+                     vfd_name);
         }
         else {
 
             assert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 3 -- %s / col op / col I/O",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 3 -- %s / col op / col I/O",
+                     vfd_name);
         }
 
         TESTING(test_title);
@@ -1328,7 +1331,7 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             if (H5FDwrite(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)negative_fi_buf) <
                 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
             }
         }
@@ -1420,7 +1423,7 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (H5FDread_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDread_vector() failed.\n";
         }
     }
@@ -1441,7 +1444,7 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             if (((mpi_rank % 2 == 0) && (buf_0[i] != negative_fi_buf[base_index + i])) ||
                 ((mpi_rank % 2 == 1) && (buf_3[i] != negative_fi_buf[base_index + i]))) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "Unexpected value in buf (1).\n";
             }
         }
@@ -1453,7 +1456,7 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             if (((mpi_rank % 2 == 0) && (buf_1[i] != negative_fi_buf[base_index + i])) ||
                 ((mpi_rank % 2 == 1) && (buf_2[i] != negative_fi_buf[base_index + i]))) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "Unexpected value in buf (2).\n";
             }
         }
@@ -1465,7 +1468,7 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             if (((mpi_rank % 2 == 0) && (buf_2[i] != negative_fi_buf[base_index + i])) ||
                 ((mpi_rank % 2 == 1) && (buf_1[i] != negative_fi_buf[base_index + i]))) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "Unexpected value in buf (3).\n";
             }
         }
@@ -1477,7 +1480,7 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             if (((mpi_rank % 2 == 0) && (buf_3[i] != negative_fi_buf[base_index + i])) ||
                 ((mpi_rank % 2 == 1) && (buf_0[i] != negative_fi_buf[base_index + i]))) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "Unexpected value in buf (4).\n";
             }
         }
@@ -1598,7 +1601,7 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *
  *               9) On rank 0, delete the test file.
  *
- * Return:      FALSE on success, TRUE if any errors are detected.
+ * Return:      false on success, true if any errors are detected.
  *
  *-------------------------------------------------------------------------
  */
@@ -1612,10 +1615,10 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     char        filename[512];
     haddr_t     eoa;
     haddr_t     base_addr;
-    hbool_t     show_progress = FALSE;
-    hid_t       fapl_id       = -1;   /* file access property list ID */
-    hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         j;
@@ -1627,26 +1630,26 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     size_t      sizes[4];
     void       *bufs[4];
 
-    pass = TRUE;
+    pass = true;
 
     if (mpi_rank == 0) {
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 4 -- %s / independent",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 4 -- %s / independent",
+                     vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 4 -- %s / col op / ind I/O",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 4 -- %s / col op / ind I/O",
+                     vfd_name);
         }
         else {
 
             assert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 4 -- %s / col op / col I/O",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 4 -- %s / col op / col I/O",
+                     vfd_name);
         }
 
         TESTING(test_title);
@@ -1681,7 +1684,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             if (H5FDwrite(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)increasing_fi_buf) <
                 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
             }
         }
@@ -1808,7 +1811,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (H5FDread_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDread_vector() failed (1).\n";
         }
     }
@@ -1842,7 +1845,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
                                 if (read_fi_buf[j] != increasing_fi_buf[j]) {
 
-                                    pass         = FALSE;
+                                    pass         = false;
                                     failure_mssg = "unexpected data read from file (1.1)";
                                     fprintf(stdout, "\nread_fi_buf[%d] = %d, increasing_fi_buf[%d] = %d\n", j,
                                             read_fi_buf[j], j, increasing_fi_buf[j]);
@@ -1852,7 +1855,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
                                 if (read_fi_buf[j] != increasing_fi_buf[j]) {
 
-                                    pass         = FALSE;
+                                    pass         = false;
                                     failure_mssg = "unexpected data read from file (1.2)";
                                 }
                             }
@@ -1860,7 +1863,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
                                 if (read_fi_buf[j] != increasing_fi_buf[j]) {
 
-                                    pass         = FALSE;
+                                    pass         = false;
                                     failure_mssg = "unexpected data read from file (1.3)";
                                 }
                             }
@@ -1868,7 +1871,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
                                 if (read_fi_buf[j] != 0) {
 
-                                    pass         = FALSE;
+                                    pass         = false;
                                     failure_mssg = "unexpected data read from file (1.4)";
                                 }
                             }
@@ -1879,7 +1882,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
                                 if (read_fi_buf[j] != increasing_fi_buf[j]) {
 
-                                    pass         = FALSE;
+                                    pass         = false;
                                     failure_mssg = "unexpected data read from file (2.1)";
                                 }
                             }
@@ -1887,7 +1890,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
                                 if (read_fi_buf[j] != increasing_fi_buf[j]) {
 
-                                    pass         = FALSE;
+                                    pass         = false;
                                     failure_mssg = "unexpected data read from file (2.2)";
                                 }
                             }
@@ -1895,7 +1898,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
                                 if (read_fi_buf[j] != 0) {
 
-                                    pass         = FALSE;
+                                    pass         = false;
                                     failure_mssg = "unexpected data read from file (2.3)";
                                 }
                             }
@@ -1906,7 +1909,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
                                 if (read_fi_buf[j] != increasing_fi_buf[j]) {
 
-                                    pass         = FALSE;
+                                    pass         = false;
                                     failure_mssg = "unexpected data read from file (3.1)";
                                 }
                             }
@@ -1914,7 +1917,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
                                 if (read_fi_buf[j] != 0) {
 
-                                    pass         = FALSE;
+                                    pass         = false;
                                     failure_mssg = "unexpected data read from file (3.2)";
                                 }
                             }
@@ -1923,19 +1926,19 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
                         case 3:
                             if (read_fi_buf[j] != 0) {
 
-                                pass         = FALSE;
+                                pass         = false;
                                 failure_mssg = "unexpected data read from file (4)";
                             }
                             break;
 
                         default:
-                            assert(FALSE); /* should be un-reachable */
+                            assert(false); /* should be un-reachable */
                             break;
                     }
                 }
                 else if (read_fi_buf[j] != 0) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "unexpected data read from file (5)";
                 }
             } /* end for loop */
@@ -2026,7 +2029,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *
  *               9) On rank 0, delete the test file.
  *
- * Return:      FALSE on success, TRUE if any errors are detected.
+ * Return:      false on success, true if any errors are detected.
  *
  *-------------------------------------------------------------------------
  */
@@ -2040,10 +2043,10 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     char        filename[512];
     haddr_t     eoa;
     haddr_t     base_addr;
-    hbool_t     show_progress = FALSE;
-    hid_t       fapl_id       = -1;   /* file access property list ID */
-    hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         j;
@@ -2054,26 +2057,26 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     size_t      sizes[2];
     void       *bufs[(INTS_PER_RANK / 16) + 1];
 
-    pass = TRUE;
+    pass = true;
 
     if (mpi_rank == 0) {
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 5 -- %s / independent",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 5 -- %s / independent",
+                     vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 5 -- %s / col op / ind I/O",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 5 -- %s / col op / ind I/O",
+                     vfd_name);
         }
         else {
 
             assert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 5 -- %s / col op / col I/O",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector read test 5 -- %s / col op / col I/O",
+                     vfd_name);
         }
 
         TESTING(test_title);
@@ -2108,7 +2111,7 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             if (H5FDwrite(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)increasing_fi_buf) <
                 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
             }
         }
@@ -2168,7 +2171,7 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (H5FDread_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDread_vector() failed (1).\n";
         }
     }
@@ -2193,13 +2196,13 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
                     if (read_fi_buf[j] != increasing_fi_buf[j]) {
 
-                        pass         = FALSE;
+                        pass         = false;
                         failure_mssg = "unexpected data read from file (1)";
                     }
                 }
                 else if (read_fi_buf[j] != 0) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "unexpected data read from file (2)";
                 }
             } /* end for loop */
@@ -2265,7 +2268,7 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *
  *              6) On rank 0, delete the test file.
  *
- * Return:      FALSE on success, TRUE if any errors are detected.
+ * Return:      false on success, true if any errors are detected.
  *
  *-------------------------------------------------------------------------
  */
@@ -2278,10 +2281,10 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     char        test_title[120];
     char        filename[512];
     haddr_t     eoa;
-    hbool_t     show_progress = FALSE;
-    hid_t       fapl_id       = -1;   /* file access property list ID */
-    hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     uint32_t    count;
@@ -2290,26 +2293,26 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     size_t      sizes[1];
     const void *bufs[1];
 
-    pass = TRUE;
+    pass = true;
 
     if (mpi_rank == 0) {
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 1 -- %s / independent",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 1 -- %s / independent",
+                     vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            HDsnprintf(test_title, sizeof(test_title),
-                       "parallel vector write test 1 -- %s / col op / ind I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 1 -- %s / col op / ind I/O",
+                     vfd_name);
         }
         else {
 
             assert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            HDsnprintf(test_title, sizeof(test_title),
-                       "parallel vector write test 1 -- %s / col op / col I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 1 -- %s / col op / col I/O",
+                     vfd_name);
         }
 
         TESTING(test_title);
@@ -2347,7 +2350,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDwrite_vector() failed.\n";
         }
     }
@@ -2373,7 +2376,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDread() failed.\n";
         }
 
@@ -2381,7 +2384,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
             if (read_fi_buf[i] != increasing_fi_buf[i]) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "unexpected data read from file";
                 break;
             }
@@ -2451,7 +2454,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  *              5) Close the test file.  On rank 0, delete the test file.
  *
- * Return:      FALSE on success, TRUE if any errors are detected.
+ * Return:      false on success, true if any errors are detected.
  *
  *-------------------------------------------------------------------------
  */
@@ -2464,10 +2467,10 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     char        test_title[120];
     char        filename[512];
     haddr_t     eoa;
-    hbool_t     show_progress = FALSE;
-    hid_t       fapl_id       = -1;   /* file access property list ID */
-    hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         j;
@@ -2477,26 +2480,26 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     size_t      sizes[1];
     const void *bufs[1];
 
-    pass = TRUE;
+    pass = true;
 
     if (mpi_rank == 0) {
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 2 -- %s / independent",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 2 -- %s / independent",
+                     vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            HDsnprintf(test_title, sizeof(test_title),
-                       "parallel vector write test 2 -- %s / col op / ind I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 2 -- %s / col op / ind I/O",
+                     vfd_name);
         }
         else {
 
             assert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            HDsnprintf(test_title, sizeof(test_title),
-                       "parallel vector write test 2 -- %s / col op / col I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 2 -- %s / col op / col I/O",
+                     vfd_name);
         }
 
         TESTING(test_title);
@@ -2539,7 +2542,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
             if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "H5FDwrite_vector() failed (1).\n";
             }
         }
@@ -2547,7 +2550,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
             if (H5FDwrite_vector(lf, dxpl_id, 0, NULL, NULL, NULL, NULL) < 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "H5FDwrite_vector() failed (2).\n";
             }
         }
@@ -2566,7 +2569,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
             if (H5FDwrite_vector(lf, dxpl_id, 0, NULL, NULL, NULL, NULL) < 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "H5FDwrite_vector() failed (3).\n";
             }
         }
@@ -2580,7 +2583,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
             if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "H5FDwrite_vector() failed (4).\n";
             }
         }
@@ -2607,7 +2610,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDread() failed.\n";
         }
 
@@ -2619,7 +2622,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                     if (read_fi_buf[j] != increasing_fi_buf[j]) {
 
-                        pass         = FALSE;
+                        pass         = false;
                         failure_mssg = "unexpected data read from file";
                         break;
                     }
@@ -2631,7 +2634,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                     if (read_fi_buf[j] != negative_fi_buf[j]) {
 
-                        pass         = FALSE;
+                        pass         = false;
                         failure_mssg = "unexpected data read from file";
                         break;
                     }
@@ -2700,7 +2703,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  *              5) Close the test file.  On rank 0, delete the test file.
  *
- * Return:      FALSE on success, TRUE if any errors are detected.
+ * Return:      false on success, true if any errors are detected.
  *
  *-------------------------------------------------------------------------
  */
@@ -2717,10 +2720,10 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     int         ints_per_write;
     size_t      bytes_per_write;
     haddr_t     eoa;
-    hbool_t     show_progress = FALSE;
-    hid_t       fapl_id       = -1;   /* file access property list ID */
-    hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         j;
@@ -2730,26 +2733,26 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     size_t      sizes[4];
     const void *bufs[4];
 
-    pass = TRUE;
+    pass = true;
 
     if (mpi_rank == 0) {
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 3 -- %s / independent",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 3 -- %s / independent",
+                     vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            HDsnprintf(test_title, sizeof(test_title),
-                       "parallel vector write test 3 -- %s / col op / ind I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 3 -- %s / col op / ind I/O",
+                     vfd_name);
         }
         else {
 
             assert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            HDsnprintf(test_title, sizeof(test_title),
-                       "parallel vector write test 3 -- %s / col op / col I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 3 -- %s / col op / col I/O",
+                     vfd_name);
         }
 
         TESTING(test_title);
@@ -2810,7 +2813,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDwrite_vector() failed (1).\n";
         }
     }
@@ -2838,7 +2841,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDread() failed.\n";
         }
 
@@ -2850,7 +2853,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                 if (read_fi_buf[j] != increasing_fi_buf[j]) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "unexpected data read from file (1)";
                     break;
                 }
@@ -2862,7 +2865,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                 if (read_fi_buf[j] != decreasing_fi_buf[j]) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "unexpected data read from file (2)";
                     break;
                 }
@@ -2874,7 +2877,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                 if (read_fi_buf[j] != negative_fi_buf[j]) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "unexpected data read from file (3)";
                     break;
                 }
@@ -2886,7 +2889,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                 if (read_fi_buf[j] != zero_fi_buf[j]) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "unexpected data read from file (3)";
                     break;
                 }
@@ -2960,7 +2963,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  *              5) Close the test file.  On rank 0, delete the test file.
  *
- * Return:      FALSE on success, TRUE if any errors are detected.
+ * Return:      false on success, true if any errors are detected.
  *
  *-------------------------------------------------------------------------
  */
@@ -2977,10 +2980,10 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     int         ints_per_write;
     size_t      bytes_per_write;
     haddr_t     eoa;
-    hbool_t     show_progress = FALSE;
-    hid_t       fapl_id       = -1;   /* file access property list ID */
-    hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         j;
@@ -2990,26 +2993,26 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     size_t      sizes[4];
     const void *bufs[4];
 
-    pass = TRUE;
+    pass = true;
 
     if (mpi_rank == 0) {
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 4 -- %s / independent",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 4 -- %s / independent",
+                     vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            HDsnprintf(test_title, sizeof(test_title),
-                       "parallel vector write test 4 -- %s / col op / ind I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 4 -- %s / col op / ind I/O",
+                     vfd_name);
         }
         else {
 
             assert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            HDsnprintf(test_title, sizeof(test_title),
-                       "parallel vector write test 4 -- %s / col op / col I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 4 -- %s / col op / col I/O",
+                     vfd_name);
         }
 
         TESTING(test_title);
@@ -3071,7 +3074,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDwrite_vector() failed (1).\n";
         }
     }
@@ -3099,7 +3102,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDread() failed.\n";
         }
 
@@ -3111,7 +3114,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                 if (read_fi_buf[j] != zero_fi_buf[j]) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "unexpected data read from file (1)";
                     break;
                 }
@@ -3123,7 +3126,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                 if (read_fi_buf[j] != negative_fi_buf[j]) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "unexpected data read from file (2)";
                     break;
                 }
@@ -3135,7 +3138,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                 if (read_fi_buf[j] != decreasing_fi_buf[j]) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "unexpected data read from file (3)";
                     break;
                 }
@@ -3147,7 +3150,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                 if (read_fi_buf[j] != increasing_fi_buf[j]) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "unexpected data read from file (3)";
                     break;
                 }
@@ -3258,7 +3261,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  *              7) Close the test file.  On rank 0, delete the test file.
  *
- * Return:      FALSE on success, TRUE if any errors are detected.
+ * Return:      false on success, true if any errors are detected.
  *
  *-------------------------------------------------------------------------
  */
@@ -3273,10 +3276,10 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     base_addr;
     int         base_index;
     haddr_t     eoa;
-    hbool_t     show_progress = FALSE;
-    hid_t       fapl_id       = -1;   /* file access property list ID */
-    hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         j;
@@ -3287,26 +3290,26 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     size_t      sizes[4];
     const void *bufs[4];
 
-    pass = TRUE;
+    pass = true;
 
     if (mpi_rank == 0) {
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 5 -- %s / independent",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 5 -- %s / independent",
+                     vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            HDsnprintf(test_title, sizeof(test_title),
-                       "parallel vector write test 5 -- %s / col op / ind I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 5 -- %s / col op / ind I/O",
+                     vfd_name);
         }
         else {
 
             assert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            HDsnprintf(test_title, sizeof(test_title),
-                       "parallel vector write test 5 -- %s / col op / col I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 5 -- %s / col op / col I/O",
+                     vfd_name);
         }
 
         TESTING(test_title);
@@ -3343,7 +3346,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDwrite_vector() failed.\n";
         }
     }
@@ -3460,7 +3463,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDwrite_vector() failed (1).\n";
         }
     }
@@ -3487,7 +3490,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDread() failed.\n";
         }
 
@@ -3506,7 +3509,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                             if (read_fi_buf[j] != negative_fi_buf[j]) {
 
-                                pass         = FALSE;
+                                pass         = false;
                                 failure_mssg = "unexpected data read from file (1.1)";
 
                                 printf("\nread_fi_buf[%d] = %d, %d expected.\n", j, read_fi_buf[j],
@@ -3517,7 +3520,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                             if (read_fi_buf[j] != decreasing_fi_buf[j]) {
 
-                                pass         = FALSE;
+                                pass         = false;
                                 failure_mssg = "unexpected data read from file (1.2)";
 
                                 printf("\nread_fi_buf[%d] = %d, %d expected.\n", j, read_fi_buf[j],
@@ -3528,7 +3531,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                             if (read_fi_buf[j] != increasing_fi_buf[j]) {
 
-                                pass         = FALSE;
+                                pass         = false;
                                 failure_mssg = "unexpected data read from file (1.3)";
 
                                 printf("\nread_fi_buf[%d] = %d, %d expected.\n", j, read_fi_buf[j],
@@ -3539,7 +3542,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                             if (read_fi_buf[j] != 0) {
 
-                                pass         = FALSE;
+                                pass         = false;
                                 failure_mssg = "unexpected data read from file (1.4)";
                             }
                         }
@@ -3550,7 +3553,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                             if (read_fi_buf[j] != increasing_fi_buf[j]) {
 
-                                pass         = FALSE;
+                                pass         = false;
                                 failure_mssg = "unexpected data read from file (2.1)";
 
                                 printf("\nread_fi_buf[%d] = %d, %d expected.\n", j, read_fi_buf[j],
@@ -3561,7 +3564,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                             if (read_fi_buf[j] != decreasing_fi_buf[j]) {
 
-                                pass         = FALSE;
+                                pass         = false;
                                 failure_mssg = "unexpected data read from file (2.2)";
 
                                 printf("\nread_fi_buf[%d] = %d, %d expected.\n", j, read_fi_buf[j],
@@ -3572,7 +3575,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                             if (read_fi_buf[j] != 0) {
 
-                                pass         = FALSE;
+                                pass         = false;
                                 failure_mssg = "unexpected data read from file (2.3)";
                             }
                         }
@@ -3583,7 +3586,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                             if (read_fi_buf[j] != negative_fi_buf[j]) {
 
-                                pass         = FALSE;
+                                pass         = false;
                                 failure_mssg = "unexpected data read from file (3.1)";
 
                                 printf("\nread_fi_buf[%d] = %d, %d expected.\n", j, read_fi_buf[j],
@@ -3594,7 +3597,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                             if (read_fi_buf[j] != 0) {
 
-                                pass         = FALSE;
+                                pass         = false;
                                 failure_mssg = "unexpected data read from file (3.2)";
                             }
                         }
@@ -3603,13 +3606,13 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
                     case 3:
                         if (read_fi_buf[j] != 0) {
 
-                            pass         = FALSE;
+                            pass         = false;
                             failure_mssg = "unexpected data read from file (4)";
                         }
                         break;
 
                     default:
-                        assert(FALSE); /* should be un-reachable */
+                        assert(false); /* should be un-reachable */
                         break;
                 }
             }
@@ -3694,7 +3697,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  *               9) On rank 0, delete the test file.
  *
- * Return:      FALSE on success, TRUE if any errors are detected.
+ * Return:      false on success, true if any errors are detected.
  *
  *-------------------------------------------------------------------------
  */
@@ -3708,10 +3711,10 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     char        filename[512];
     haddr_t     eoa;
     haddr_t     base_addr;
-    hbool_t     show_progress = FALSE;
-    hid_t       fapl_id       = -1;   /* file access property list ID */
-    hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         base_index;
@@ -3721,26 +3724,26 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     size_t      sizes[2];
     const void *bufs[(INTS_PER_RANK / 16) + 1];
 
-    pass = TRUE;
+    pass = true;
 
     if (mpi_rank == 0) {
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 6 -- %s / independent",
-                       vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 6 -- %s / independent",
+                     vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            HDsnprintf(test_title, sizeof(test_title),
-                       "parallel vector write test 6 -- %s / col op / ind I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 6 -- %s / col op / ind I/O",
+                     vfd_name);
         }
         else {
 
             assert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            HDsnprintf(test_title, sizeof(test_title),
-                       "parallel vector write test 6 -- %s / col op / col I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 6 -- %s / col op / col I/O",
+                     vfd_name);
         }
 
         TESTING(test_title);
@@ -3774,7 +3777,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
             if (H5FDwrite(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)zero_fi_buf) < 0) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
             }
         }
@@ -3822,7 +3825,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDwrite_vector() failed (1).\n";
         }
     }
@@ -3847,7 +3850,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDread() failed.\n";
         }
 
@@ -3857,13 +3860,13 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                 if (read_fi_buf[i] != increasing_fi_buf[i]) {
 
-                    pass         = FALSE;
+                    pass         = false;
                     failure_mssg = "unexpected data read from file (1)";
                 }
             }
             else if (read_fi_buf[i] != zero_fi_buf[i]) {
 
-                pass         = FALSE;
+                pass         = false;
                 failure_mssg = "unexpected data read from file (2)";
             }
         }
@@ -3948,7 +3951,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  *              7) Close the test file.  On rank 0, delete the test file.
  *
- * Return:      FALSE on success, TRUE if any errors are detected.
+ * Return:      false on success, true if any errors are detected.
  *
  *-------------------------------------------------------------------------
  */
@@ -3964,10 +3967,10 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addr_increment;
     int         base_index;
     haddr_t     eoa;
-    hbool_t     show_progress = FALSE;
-    hid_t       fapl_id       = -1;   /* file access property list ID */
-    hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         j;
@@ -3978,23 +3981,26 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     size_t      sizes[8];
     const void *bufs[8];
 
-    pass = TRUE;
+    pass = true;
 
     if (mpi_rank == 0) {
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            HDsprintf(test_title, "parallel vector write test 7 -- %s / independent", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 7 -- %s / independent",
+                     vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            HDsprintf(test_title, "parallel vector write test 7 -- %s / col op / ind I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 7 -- %s / col op / ind I/O",
+                     vfd_name);
         }
         else {
 
             assert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            HDsprintf(test_title, "parallel vector write test 7 -- %s / col op / col I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 7 -- %s / col op / col I/O",
+                     vfd_name);
         }
 
         TESTING(test_title);
@@ -4031,7 +4037,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDwrite_vector() failed.\n";
         }
     }
@@ -4064,7 +4070,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDwrite_vector() failed (1).\n";
         }
     }
@@ -4090,7 +4096,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
-            pass         = FALSE;
+            pass         = false;
             failure_mssg = "H5FDread() failed.\n";
         }
 
@@ -4106,7 +4112,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                     if (read_fi_buf[j] != increasing_fi_buf[j]) {
 
-                        pass         = FALSE;
+                        pass         = false;
                         failure_mssg = "unexpected data read from file (1)";
 
                         printf("\nread_fi_buf[%d] = %d, %d expected.\n", j, read_fi_buf[j],
@@ -4117,7 +4123,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                     if (read_fi_buf[j] != 0) {
 
-                        pass         = FALSE;
+                        pass         = false;
                         failure_mssg = "unexpected data read from file (2)";
 
                         printf("\nread_fi_buf[%d] = %d, 0 expected.\n", j, read_fi_buf[j]);
@@ -4158,6 +4164,280 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     return (!pass);
 
 } /* vector_write_test_7() */
+
+/*-------------------------------------------------------------------------
+ * Function:    vector_write_test_8()
+ *
+ * Purpose:     This test is to verify the fix for the following problem
+ *              in H5FD__mpio_write_vector when calculating max_addr:
+ *              --illegal reference occurs when referencing the s_sizes array
+ *                with <count - 1> due to <count> exceeding the length of the
+ *                size array which uses the compressed feature.
+ *
+ *              1) Open the test file with the specified VFD, and set
+ *                 the eoa.
+ *
+ *              2) Set the test file in a known state by writing zeros
+ *                 to all bytes in the test file.  Since we have already
+ *                 tested this, do this via a vector write of zero_fi_buf.
+ *
+ *              3) Barrier
+ *
+ *              4) For each rank, define base_index equal to:
+ *
+ *                     mpi_rank * INTS_PER_RANK
+ *
+ *                 and define base_addr equal to
+ *
+ *                     base_index * sizeof(int32_t).
+ *
+ *                 Setup a vector of length INTS_PER_RANK - 1.
+ *                 Set up the size array with the compressed feature:
+ *                  --The first element has size (2 * sizeof(int32_t))
+ *                  --The second and third elements are of size sizeof(int32_t)
+ *                  --The fourth element is zero.
+ *                  Set up addrs and bufs accordingly.
+ *
+ *                 Write the vector.
+ *
+ *              5) Barrier
+ *
+ *              6) On each rank, read the entire file into the read_fi_buf,
+ *                 and compare against increasing_fi_buf.
+ *                 Report failure if any differences are detected.
+ *
+ *              7) Close the test file.  On rank 0, delete the test file.
+ *
+ * Return:      false on success, true if any errors are detected.
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_t xfer_mode,
+                    H5FD_mpio_collective_opt_t coll_opt_mode, const char *vfd_name)
+{
+    const char *fcn_name = "vector_write_test_8()";
+    char        test_title[120];
+    char        filename[512];
+    haddr_t     eoa;
+    haddr_t     base_addr;
+    bool        show_progress = false;
+    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
+    int         cp            = 0;
+    int         i;
+    int         base_index;
+    uint32_t    count = 0;
+    size_t      sizes[4];
+    H5FD_mem_t  types[2];
+
+    haddr_t     *tt_addrs = NULL; /* For storing addrs */
+    const void **tt_bufs  = NULL; /* For storing buf pointers */
+
+    pass = true;
+
+    if (mpi_rank == 0) {
+
+        if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
+
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 8 -- %s / independent",
+                     vfd_name);
+        }
+        else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
+
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 8 -- %s / col op / ind I/O",
+                     vfd_name);
+        }
+        else {
+
+            assert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
+
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 8 -- %s / col op / col I/O",
+                     vfd_name);
+        }
+
+        TESTING(test_title);
+    }
+
+    show_progress = ((show_progress) && (mpi_rank == 0));
+
+    if (show_progress)
+        fprintf(stdout, "\n%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* 1) Allocate local buffers for addrs and bufs,
+          open the test file with the specified VFD, set the eoa, and setup the dxpl */
+    if (pass) {
+
+        tt_addrs = (haddr_t *)malloc((INTS_PER_RANK) * sizeof(haddr_t *));
+        tt_bufs  = (const void **)malloc((INTS_PER_RANK) * sizeof(void *));
+
+        if (tt_addrs == NULL || tt_bufs == NULL) {
+            pass         = false;
+            failure_mssg = "Can't allocate local addrs and bufs buffers.";
+        }
+
+        if (pass) {
+            eoa = (haddr_t)mpi_size * (haddr_t)INTS_PER_RANK * (haddr_t)(sizeof(int32_t));
+
+            setup_vfd_test_file(file_name_id, filename, mpi_size, xfer_mode, coll_opt_mode, vfd_name, eoa,
+                                &lf, &fapl_id, &dxpl_id);
+        }
+    }
+
+    if (show_progress)
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* 2) Using rank zero, write the entire negative_fi_buf to
+     *    the file.
+     */
+    if (pass) {
+
+        size_t image_size = (size_t)mpi_size * (size_t)INTS_PER_RANK * sizeof(int32_t);
+
+        if (mpi_rank == 0) {
+
+            if (H5FDwrite(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)zero_fi_buf) < 0) {
+
+                pass         = false;
+                failure_mssg = "H5FDwrite() on rank 0 failed.\n";
+            }
+        }
+    }
+
+    /* 3) Barrier */
+    MPI_Barrier(comm);
+
+    if (show_progress)
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* 4) For each rank, define base_index equal to:
+     *
+     *        mpi_rank * INTS_PER_RANK
+     *
+     *    and define base_addr equal to
+     *
+     *        base_index * sizeof(int32_t).
+     *
+     *    Set up the array of sizes and types with the compressed feature
+     *    as described in the routine header description.
+     */
+    if (pass) {
+
+        base_index = (mpi_rank * INTS_PER_RANK);
+        base_addr  = (haddr_t)base_index * (haddr_t)sizeof(int32_t);
+
+        count = INTS_PER_RANK - 1;
+
+        types[0] = H5FD_MEM_DRAW;
+        types[1] = H5FD_MEM_NOLIST;
+
+        sizes[0] = 2 * sizeof(int32_t);
+        sizes[1] = sizeof(int32_t);
+        sizes[2] = sizeof(int32_t);
+        sizes[3] = 0;
+
+        tt_addrs[0] = base_addr;
+        tt_bufs[0]  = (const void *)(&(increasing_fi_buf[base_index]));
+
+        tt_addrs[0] = base_addr;
+        base_index += 2;
+        base_addr = (haddr_t)base_index * (haddr_t)sizeof(int32_t);
+
+        for (i = 1; i < (INTS_PER_RANK - 1); i++) {
+
+            tt_addrs[i] = base_addr + ((haddr_t)(i - 1) * (haddr_t)sizeof(int32_t));
+            tt_bufs[i]  = (const void *)(&(increasing_fi_buf[base_index + (i - 1)]));
+        }
+
+        if (H5FDwrite_vector(lf, dxpl_id, count, types, tt_addrs, sizes, tt_bufs) < 0) {
+
+            pass         = false;
+            failure_mssg = "H5FDwrite_vector() failed (1).\n";
+        }
+    }
+
+    if (show_progress)
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* 5) Barrier */
+    MPI_Barrier(comm);
+
+    if (show_progress)
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* 6) On each rank, read the entire file into the read_fi_buf,
+     *    and compare against increasing_fi_buf
+     *    Report failure if any differences are detected.
+     */
+    if (pass) {
+
+        size_t image_size = (size_t)mpi_size * (size_t)INTS_PER_RANK * sizeof(int32_t);
+
+        if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
+
+            pass         = false;
+            failure_mssg = "H5FDread() failed.\n";
+        }
+
+        for (i = 0; ((pass) && (i < mpi_size * INTS_PER_RANK)); i++) {
+
+            if (read_fi_buf[i] != increasing_fi_buf[i]) {
+
+                pass         = false;
+                failure_mssg = "unexpected data read from file (1)";
+            }
+        }
+    } /* end if */
+
+    if (show_progress)
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* 7) Barrier */
+    MPI_Barrier(comm);
+
+    if (show_progress)
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* 8) Close the test file and delete it (on rank 0 only).
+     *    Close FAPL and DXPL.
+     */
+    takedown_vfd_test_file(mpi_rank, filename, &lf, &fapl_id, &dxpl_id);
+
+    /* Free the local buffers */
+    if (tt_addrs) {
+        free(tt_addrs);
+        tt_addrs = NULL;
+    }
+
+    if (tt_bufs) {
+        free(tt_bufs);
+        tt_bufs = NULL;
+    }
+
+    if (show_progress)
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* report results */
+    if (mpi_rank == 0) {
+
+        if (pass) {
+
+            PASSED();
+        }
+        else {
+
+            H5_FAILED();
+
+            if ((disp_failure_mssgs) || (show_progress)) {
+                fprintf(stdout, "%s: failure_mssg = \"%s\"\n", fcn_name, failure_mssg);
+            }
+        }
+    }
+
+    return (!pass);
+
+} /* vector_write_test_8() */
 
 static void
 test_vector_io(int mpi_rank, int mpi_size)
@@ -4248,6 +4528,13 @@ test_vector_io(int mpi_rank, int mpi_size)
         vector_write_test_7(6, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, "mpio");
     nerrs +=
         vector_write_test_7(6, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, "mpio");
+
+    nerrs +=
+        vector_write_test_8(7, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, "mpio");
+    nerrs +=
+        vector_write_test_8(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, "mpio");
+    nerrs +=
+        vector_write_test_8(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, "mpio");
 
     MPI_Barrier(comm);
 
@@ -4355,7 +4642,7 @@ static herr_t
 test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t block[], H5FD_t *lf,
                               H5FD_mem_t type, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[],
                               haddr_t offsets[], size_t element_sizes[], uint32_t rbufcount, int *erb[],
-                              hbool_t shorten_rbufs)
+                              bool shorten_rbufs)
 {
     int   *rbuf1    = NULL;
     int   *rbuf2    = NULL;
@@ -4578,7 +4865,7 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
 
         /* Read and verify */
         if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 2, mem_spaces,
-                                          file_spaces, addrs, element_sizes, 2, (int **)erbufs, FALSE) < 0)
+                                          file_spaces, addrs, element_sizes, 2, (int **)erbufs, false) < 0)
             P_TEST_ERROR;
 
         MPI_Barrier(comm);
@@ -4630,7 +4917,7 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 2, mem_spaces,
-                                          file_spaces, addrs, element_sizes, 2, (int **)fbufs, FALSE) < 0)
+                                          file_spaces, addrs, element_sizes, 2, (int **)fbufs, false) < 0)
             P_TEST_ERROR;
 
         MPI_Barrier(comm);
@@ -4745,7 +5032,7 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
         /* Read and verify */
         if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 2, mem_spaces,
                                           file_spaces, addrs, element_sizes, 1, (int **)&erbufs[1],
-                                          shorten_element_sizes ? TRUE : FALSE) < 0)
+                                          shorten_element_sizes ? true : false) < 0)
             P_TEST_ERROR;
 
         MPI_Barrier(comm);
@@ -4789,7 +5076,7 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
         verify_start[1] = start[0] * block[1];
         verify_block[1] = (block[0] * block[1]);
         if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 2, mem_spaces,
-                                          file_spaces, addrs, element_sizes, 2, (int **)fbufs, FALSE) < 0)
+                                          file_spaces, addrs, element_sizes, 2, (int **)fbufs, false) < 0)
             P_TEST_ERROR;
 
         MPI_Barrier(comm);
@@ -4892,7 +5179,7 @@ test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl
     verify_block[0] = (count[0] * stride[0]);
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
                                       &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&erbufs[0],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -4929,7 +5216,7 @@ test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl
     verify_block[0] = block[0];
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
                                       &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&fbufs[1],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -4985,7 +5272,7 @@ test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl
     verify_block[0] = (count[0] * count[1] * stride[0]);
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
                                       &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&erbufs[1],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5024,7 +5311,7 @@ test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl
     verify_block[0] = (block[0] * block[1]);
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
                                       &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&fbufs[0],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5094,7 +5381,7 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
     verify_block[0] = (block[0] * block[1]);
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
                                       &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&fbufs[1],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5146,7 +5433,7 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
     verify_block[0] = (count[0] * count[1] * stride[0]);
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
                                       &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&erbufs[1],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5178,7 +5465,7 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
     verify_block[0] = (block[0] * block[1]);
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
                                       &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&fbufs[1],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5228,7 +5515,7 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
     verify_block[0] = (count[0] * count[1] * stride[1]);
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
                                       &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&erbufs[1],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5260,7 +5547,7 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
     verify_block[0] = (block[0] * block[1]);
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
                                       &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&fbufs[1],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5326,7 +5613,7 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
     verify_block[0] = (count[0] * count[1] * stride[1]);
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
                                       &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&erbufs[1],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5358,7 +5645,7 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
     verify_block[0] = (block[0] * block[1]);
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
                                       &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&fbufs[1],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5422,7 +5709,7 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
 
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
                                       &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&fbufs[0],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5468,7 +5755,7 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
     verify_block[0] = (count[0] * stride[0]);
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
                                       &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&erbufs[0],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5496,7 +5783,7 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
     verify_block[0] = block[0];
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
                                       &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&fbufs[0],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5542,7 +5829,7 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
     verify_block[0] = count[0];
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
                                       &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&erbufs[0],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5570,7 +5857,7 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
     verify_block[0] = block[0];
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
                                       &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&fbufs[0],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5616,7 +5903,7 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
     verify_block[0] = (count[0] * stride[0]);
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
                                       &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&erbufs[0],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5644,7 +5931,7 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
     verify_block[0] = block[0];
     if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
                                       &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&fbufs[0],
-                                      FALSE) < 0)
+                                      false) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5902,7 +6189,7 @@ main(int argc, char **argv)
     int provided = 0;
 #endif
     int mpi_size;
-    int mpi_rank;
+    int mpi_rank = 0;
     int ret;
 
 #ifdef H5_HAVE_SUBFILING_VFD
@@ -5962,6 +6249,46 @@ main(int argc, char **argv)
     }
 
     test_vector_io(mpi_rank, mpi_size);
+
+#ifdef H5_HAVE_SUBFILING_VFD
+
+    if (mpi_rank == 0)
+        printf("\n --- TESTING SUBFILING VFD: environment variables set to empty --- \n");
+
+    HDsetenv("H5FD_SUBFILING_SUBFILE_PREFIX", "", 1);
+    HDsetenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA", "", 1);
+    HDsetenv("H5FD_SUBFILING_IOC_PER_NODE", "", 1);
+    HDsetenv("H5FD_SUBFILING_STRIPE_SIZE", "", 1);
+    HDsetenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX", "", 1);
+
+    MPI_Barrier(comm);
+
+    if (mpi_rank == 0)
+        printf("\n --- TESTING MPIO VFD: selection I/O --- \n");
+
+    test_selection_io(mpi_rank, mpi_size);
+
+    if (mpi_rank == 0)
+        printf("\n --- TESTING MPIO VFD: vector I/O --- \n");
+
+    if (mpi_size < 2) {
+        if (mpi_rank == 0) {
+            printf("     Need at least 2 processes to run tests for vector I/O.");
+            SKIPPED();
+        }
+        printf("\n");
+        goto finish;
+    }
+
+    test_vector_io(mpi_rank, mpi_size);
+
+    HDunsetenv("H5FD_SUBFILING_SUBFILE_PREFIX");
+    HDunsetenv("H5FD_SUBFILING_IOC_SELECTION_CRITERIA");
+    HDunsetenv("H5FD_SUBFILING_IOC_PER_NODE");
+    HDunsetenv("H5FD_SUBFILING_STRIPE_SIZE");
+    HDunsetenv("H5FD_SUBFILING_CONFIG_FILE_PREFIX");
+
+#endif
 
 finish:
     /* make sure all processes are finished before final report, cleanup

@@ -27,6 +27,7 @@
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5CSprivate.h" /* Function stack			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5MMprivate.h" /* Memory management                        */
 
 #ifdef H5_HAVE_CODESTACK
 
@@ -138,7 +139,7 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
     fprintf(stream, "thread %" PRIu64 ".", H5TS_thread_id());
     if (fstack && fstack->nused > 0)
         fprintf(stream, "  Back trace follows.");
-    HDfputc('\n', stream);
+    fputc('\n', stream);
 
     for (i = fstack->nused - 1; i >= 0; --i)
         fprintf(stream, "%*s#%03d: Routine: %s\n", indent, "", i, fstack->rec[i]);
@@ -228,10 +229,9 @@ H5CS_pop(void)
 H5CS_t *
 H5CS_copy_stack(void)
 {
-    H5CS_t  *old_stack = H5CS_get_my_stack(); /* Existing function stack for library */
-    H5CS_t  *new_stack;                       /* New function stack, for copy */
-    unsigned u;                               /* Local index variable */
-    H5CS_t  *ret_value = NULL;                /* Return value */
+    H5CS_t *old_stack = H5CS_get_my_stack(); /* Existing function stack for library */
+    H5CS_t *new_stack;                       /* New function stack, for copy */
+    H5CS_t *ret_value = NULL;                /* Return value */
 
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOFS
@@ -270,8 +270,6 @@ done:
 herr_t
 H5CS_close_stack(H5CS_t *stack)
 {
-    unsigned u; /* Local index variable */
-
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOERR_NOFS
 

@@ -34,10 +34,10 @@
 #define DEFAULT_INCREMENT (1024 * 1024)
 
 static char   *fname_g            = NULL;
-static hbool_t clear_status_flags = FALSE;
-static hbool_t remove_cache_image = FALSE;
-static hbool_t print_filesize     = FALSE;
-static hbool_t increment_eoa_eof  = FALSE;
+static bool    clear_status_flags = false;
+static bool    remove_cache_image = false;
+static bool    print_filesize     = false;
+static bool    increment_eoa_eof  = false;
 static hsize_t increment          = DEFAULT_INCREMENT;
 
 /*
@@ -61,6 +61,13 @@ static struct h5_long_options l_opts[] = {
 static void
 usage(const char *prog)
 {
+    fprintf(stdout, "h5clear clears superblock status flag field, removes metadata cache image, prints\n");
+    fprintf(stdout, "EOA and EOF, or sets EOA of a file.  It is not a general repair tool and should not\n");
+    fprintf(stdout, "be used to fix file corruption.  If a process doesn't shut down cleanly, the\n");
+    fprintf(stdout, "superblock mark can be left that prevents opening a file without SWMR.  Then,\n");
+    fprintf(stdout, "h5clear can be used to remove this superblock mark so that the file can be inspected\n");
+    fprintf(stdout, "and appropriate actions can be taken.\n");
+    fprintf(stdout, "\n");
     fprintf(stdout, "usage: %s [OPTIONS] file_name\n", prog);
     fprintf(stdout, "  OPTIONS\n");
     fprintf(stdout, "   -h, --help                Print a usage message and exit\n");
@@ -73,8 +80,8 @@ usage(const char *prog)
     fprintf(stdout,
             "                             C is >= 0; C is optional and will default to 1M when not set.\n");
     fprintf(stdout,
-            "                             This option helps to repair a crashed file where the stored EOA\n");
-    fprintf(stdout, "                             in the superblock is different from the actual EOF.\n");
+            "                             This option helps to repair a crashed SWMR file when the stored\n");
+    fprintf(stdout, "                             EOA in the superblock is different from the actual EOF.\n");
     fprintf(stdout, "                             The file's EOA and EOF will be the same after applying\n");
     fprintf(stdout, "                             this option to the file.\n");
     fprintf(stdout, "\n");
@@ -130,19 +137,19 @@ parse_command_line(int argc, const char *const *argv)
                 goto done;
 
             case 's':
-                clear_status_flags = TRUE;
+                clear_status_flags = true;
                 break;
 
             case 'm':
-                remove_cache_image = TRUE;
+                remove_cache_image = true;
                 break;
 
             case 'z':
-                print_filesize = TRUE;
+                print_filesize = true;
                 break;
 
             case 'i':
-                increment_eoa_eof = TRUE;
+                increment_eoa_eof = true;
                 if (H5_optarg != NULL) {
                     if (atoi(H5_optarg) < 0) {
                         usage(h5tools_getprogname());
@@ -167,7 +174,7 @@ parse_command_line(int argc, const char *const *argv)
         goto error;
     } /* end if */
 
-    fname_g = HDstrdup(argv[H5_optind]);
+    fname_g = strdup(argv[H5_optind]);
 
 done:
     return (0);
@@ -260,7 +267,7 @@ main(int argc, char *argv[])
     }
 
     /* Duplicate the file name */
-    fname = HDstrdup(fname_g);
+    fname = strdup(fname_g);
 
     /* Get a copy of the file access property list */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
@@ -308,7 +315,7 @@ main(int argc, char *argv[])
     }
 
     /* Open the file */
-    if ((fid = h5tools_fopen(fname, flags, fapl, FALSE, NULL, (size_t)0)) < 0) {
+    if ((fid = h5tools_fopen(fname, flags, fapl, false, NULL, (size_t)0)) < 0) {
         error_msg("h5tools_fopen\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
@@ -320,6 +327,7 @@ main(int argc, char *argv[])
         haddr_t   eoa; /* The EOA value */
 
         /* Get the file's EOA and EOF */
+        memset(&st, 0, sizeof(h5_stat_t));
         if (H5Fget_eoa(fid, &eoa) < 0 || HDstat(fname, &st) < 0) {
             error_msg("H5Fget_eoa or HDstat\n");
             h5tools_setstatus(EXIT_FAILURE);

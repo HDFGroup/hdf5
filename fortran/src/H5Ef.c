@@ -20,43 +20,15 @@
 #include "H5f90.h"
 #include "H5Eprivate.h"
 
-/****if* H5Ef/h5eclear_c
+/****if* H5Ef/h5eprint_c
  * NAME
- *  h5eclear_c
- * PURPOSE
- *  Call H5Eclear to clear the error stack for the current thread
- * INPUTS
- *
- * OUTPUTS
- *
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5eclear_c(hid_t_f *estack_id)
-/******/
-{
-    int_f ret_value = 0;
-
-    /*
-     * Call H5Eclear function.
-     */
-    if (H5Eclear2((hid_t)*estack_id) < 0)
-        HGOTO_DONE(FAIL);
-
-done:
-    return ret_value;
-}
-
-/****if* H5Ef/h5eprint_c1
- * NAME
- *  h5eprint_c1
+ *  h5eprint_c
  * PURPOSE
  *  Call H5Eprint to print the error stack in a default manner.
  * INPUTS
- *  name    - file name
- *  namelen - length of name
+ *  err_stack - error stack identifier
+ *  name      - file name
+ *  namelen   - length of name
  * OUTPUTS
  *
  * RETURNS
@@ -64,143 +36,29 @@ done:
  * SOURCE
  */
 int_f
-h5eprint_c1(_fcd name, int_f *namelen)
+h5eprint_c(hid_t_f *err_stack, _fcd name, size_t_f *namelen)
 /******/
 {
     FILE *file      = NULL;
     char *c_name    = NULL;
     int_f ret_value = 0;
 
-    if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL);
-    if (NULL == (file = fopen(c_name, "a")))
-        HGOTO_DONE(FAIL);
+    if (namelen) {
+        if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+            HGOTO_DONE(FAIL);
+        if (NULL == (file = fopen(c_name, "a")))
+            HGOTO_DONE(FAIL);
+    }
 
     /*
      * Call H5Eprint2 function.
      */
-    if (H5Eprint2(H5E_DEFAULT, file) < 0)
+    if (H5Eprint2((hid_t)*err_stack, file) < 0)
         HGOTO_DONE(FAIL);
 
 done:
     if (file)
         fclose(file);
-    if (c_name)
-        free(c_name);
-
-    return ret_value;
-}
-
-/****if* H5Ef/h5eprint_c2
- * NAME
- *  h5eprint_c2
- * PURPOSE
- *  Call H5Eprint to print the error stack to stderr
- *  in a default manner.
- * INPUTS
- *
- * OUTPUTS
- *
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5eprint_c2(void)
-/******/
-{
-    int_f ret_value = 0;
-
-    /*
-     * Call H5Eprint2 function.
-     */
-    if (H5Eprint2(H5E_DEFAULT, NULL) < 0)
-        HGOTO_DONE(FAIL);
-
-done:
-    return ret_value;
-}
-
-/****if* H5Ef/h5eget_major_c
- * NAME
- *  h5eget_major_c
- * PURPOSE
- *  Get a character string describing an error specified by a
- *  major error number.
- * INPUTS
- *  error_no - Major error number
- * OUTPUTS
- *  name - character string describing the error
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5eget_major_c(int_f *error_no, _fcd name, size_t_f *namelen)
-/******/
-{
-    char  *c_name    = NULL;
-    size_t c_namelen = (size_t)*namelen;
-    int_f  ret_value = 0;
-
-    if (c_namelen > 0)
-        c_name = (char *)malloc(c_namelen + 1);
-
-    if (!c_name)
-        HGOTO_DONE(FAIL);
-
-    /*
-     * Call H5Eget_msg function.
-     */
-    H5Eget_msg((hid_t)*error_no, NULL, c_name, c_namelen);
-    HD5packFstring((char *)c_name, _fcdtocp(name), c_namelen);
-    if (!strcmp(c_name, "Invalid major error number"))
-        HGOTO_DONE(FAIL);
-
-done:
-    if (c_name)
-        free(c_name);
-
-    return ret_value;
-}
-
-/****if* H5Ef/h5eget_minor_c
- * NAME
- *  h5eget_minor_c
- * PURPOSE
- *  Get a character string describing an error specified by a
- *  minor error number.
- * INPUTS
- *  error_no - Major error number
- * OUTPUTS
- *  name - character string describing the error
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5eget_minor_c(int_f *error_no, _fcd name, size_t_f *namelen)
-/******/
-{
-    char  *c_name    = NULL;
-    size_t c_namelen = (size_t)*namelen;
-    int_f  ret_value = 0;
-
-    if (c_namelen > 0)
-        c_name = (char *)malloc(c_namelen + 1);
-
-    if (!c_name)
-        HGOTO_DONE(FAIL);
-
-    /*
-     * Call H5Eget_msg function.
-     */
-    H5Eget_msg((hid_t)*error_no, NULL, c_name, c_namelen);
-    HD5packFstring((char *)c_name, _fcdtocp(name), c_namelen);
-    if (!strcmp(c_name, "Invalid minor error number"))
-        HGOTO_DONE(FAIL);
-
-done:
     if (c_name)
         free(c_name);
 
@@ -221,18 +79,6 @@ done:
  *  0 on success, -1 on failure
  * SOURCE
  */
-/* int_f */
-/* h5eset_auto2_c(hid_t_f *estack_id, H5E_auto2_t *func, void *client_data) */
-/* /\******\/ */
-/* { */
-/*   int ret_val = -1; */
-/*   herr_t status = -1; */
-
-/*   status = H5Eset_auto2((hid_t)*estack_id, *func, client_data); */
-/*   if (status >= 0) ret_val = 0; */
-/*   return ret_val; */
-/* } */
-
 int_f
 h5eset_auto2_c(int_f *printflag, hid_t_f *estack_id, H5E_auto2_t func, void *client_data)
 /******/
@@ -250,4 +96,40 @@ h5eset_auto2_c(int_f *printflag, hid_t_f *estack_id, H5E_auto2_t func, void *cli
         ret_val = 0;
 
     return ret_val;
+}
+
+int_f
+h5epush_c(hid_t_f *err_stack, _fcd file, int_f *file_len, _fcd func, int_f *func_len, int line,
+          hid_t_f *cls_id, hid_t_f *maj_id, hid_t_f *min_id, _fcd msg, int_f *msg_len, const char *arg1,
+          const char *arg2, const char *arg3, const char *arg4, const char *arg5, const char *arg6,
+          const char *arg7, const char *arg8, const char *arg9, const char *arg10, const char *arg11,
+          const char *arg12, const char *arg13, const char *arg14, const char *arg15, const char *arg16,
+          const char *arg17, const char *arg18, const char *arg19, const char *arg20)
+/******/
+{
+
+    char *c_file    = NULL; /* Buffer to hold C string */
+    char *c_func    = NULL; /* Buffer to hold C string */
+    char *c_msg     = NULL; /* Buffer to hold C string */
+    int_f ret_value = 0;    /* Return value */
+
+    /*
+     * Convert FORTRAN string to C string
+     */
+    if (NULL == (c_file = HD5f2cstring(file, (size_t)*file_len)))
+        HGOTO_DONE(FAIL);
+    if (NULL == (c_func = HD5f2cstring(func, (size_t)*func_len)))
+        HGOTO_DONE(FAIL);
+    if (NULL == (c_msg = HD5f2cstring(msg, (size_t)*msg_len)))
+        HGOTO_DONE(FAIL);
+
+    if (H5Epush2((hid_t)*err_stack, c_file, c_func, (unsigned int)line, (hid_t)*cls_id, (hid_t)*maj_id,
+                 (hid_t)*min_id, c_msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
+                 arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20) < 0)
+        HGOTO_DONE(FAIL);
+
+done:
+    if (c_msg)
+        free(c_msg);
+    return ret_value;
 }

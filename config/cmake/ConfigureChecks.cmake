@@ -78,8 +78,9 @@ if (WINDOWS)
   endif ()
   if (NOT UNIX AND NOT CYGWIN)
     set (${HDF_PREFIX}_HAVE_GETCONSOLESCREENBUFFERINFO 1)
-    set (${HDF_PREFIX}_GETTIMEOFDAY_GIVES_TZ 1)
-    set (${HDF_PREFIX}_HAVE_TIMEZONE 1)
+    if (MSVC_VERSION GREATER_EQUAL 1900)
+      set (${HDF_PREFIX}_HAVE_TIMEZONE 1)
+    endif ()
     set (${HDF_PREFIX}_HAVE_GETTIMEOFDAY 1)
     set (${HDF_PREFIX}_HAVE_LIBWS2_32 1)
     set (${HDF_PREFIX}_HAVE_LIBWSOCK32 1)
@@ -118,10 +119,7 @@ CHECK_INCLUDE_FILE_CONCAT ("features.h"      ${HDF_PREFIX}_HAVE_FEATURES_H)
 CHECK_INCLUDE_FILE_CONCAT ("dirent.h"        ${HDF_PREFIX}_HAVE_DIRENT_H)
 CHECK_INCLUDE_FILE_CONCAT ("unistd.h"        ${HDF_PREFIX}_HAVE_UNISTD_H)
 CHECK_INCLUDE_FILE_CONCAT ("pwd.h"           ${HDF_PREFIX}_HAVE_PWD_H)
-CHECK_INCLUDE_FILE_CONCAT ("globus/common.h" ${HDF_PREFIX}_HAVE_GLOBUS_COMMON_H)
-CHECK_INCLUDE_FILE_CONCAT ("pdb.h"           ${HDF_PREFIX}_HAVE_PDB_H)
 CHECK_INCLUDE_FILE_CONCAT ("pthread.h"       ${HDF_PREFIX}_HAVE_PTHREAD_H)
-CHECK_INCLUDE_FILE_CONCAT ("srbclient.h"     ${HDF_PREFIX}_HAVE_SRBCLIENT_H)
 CHECK_INCLUDE_FILE_CONCAT ("dlfcn.h"         ${HDF_PREFIX}_HAVE_DLFCN_H)
 CHECK_INCLUDE_FILE_CONCAT ("netinet/in.h"    ${HDF_PREFIX}_HAVE_NETINET_IN_H)
 CHECK_INCLUDE_FILE_CONCAT ("netdb.h"         ${HDF_PREFIX}_HAVE_NETDB_H)
@@ -142,7 +140,8 @@ else ()
 endif ()
 
 if (CYGWIN)
-  set (${HDF_PREFIX}_HAVE_LSEEK64 0)
+  set (CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_GNU_SOURCE")
+  add_definitions ("-D_GNU_SOURCE")
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -211,85 +210,59 @@ macro (HDF_FUNCTION_TEST OTHER_TEST)
 endmacro ()
 
 #-----------------------------------------------------------------------------
-#  Check for large file support
+#  Platform-specific flags
 #-----------------------------------------------------------------------------
-
-# The linux-lfs option is deprecated.
-set (LINUX_LFS 0)
 
 set (HDF_EXTRA_C_FLAGS)
-set (HDF_EXTRA_FLAGS)
-if (MINGW OR NOT WINDOWS)
-  if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-    # Linux Specific flags
-    # This was originally defined as _POSIX_SOURCE which was updated to
-    # _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
-    # functionality so clock_gettime and CLOCK_MONOTONIC are defined
-    # correctly. This was later updated to 200112L so that
-    # posix_memalign() is visible for the direct VFD code on Linux
-    # systems.
-    # POSIX feature information can be found in the gcc manual at:
-    # http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-    set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200809L)
 
-    # Need to add this so that O_DIRECT is visible for the direct
-    # VFD on Linux systems.
-    set (HDF_EXTRA_C_FLAGS ${HDF_EXTRA_C_FLAGS} -D_GNU_SOURCE)
+# Linux-specific flags
+if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+  # This was originally defined as _POSIX_SOURCE which was updated to
+  # _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
+  # functionality so clock_gettime and CLOCK_MONOTONIC are defined
+  # correctly. This was later updated to 200112L so that
+  # posix_memalign() is visible for the direct VFD code on Linux
+  # systems. Even later, this was changed to 200809L to support
+  # pread/pwrite in VFDs.
+  #
+  # POSIX feature information can be found in the gcc manual at:
+  # http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
+  set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200809L)
 
-    option (HDF_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
-    mark_as_advanced (HDF_ENABLE_LARGE_FILE)
-    if (HDF_ENABLE_LARGE_FILE AND NOT DEFINED TEST_LFS_WORKS_RUN)
-      set (msg "Performing TEST_LFS_WORKS")
-      try_run (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
-          ${CMAKE_BINARY_DIR}
-          ${HDF_RESOURCES_DIR}/HDFTests.c
-          COMPILE_DEFINITIONS "-DTEST_LFS_WORKS"
-      )
+  # Need to add this so that O_DIRECT is visible for the direct
+  # VFD on Linux systems.
+  set (HDF_EXTRA_C_FLAGS ${HDF_EXTRA_C_FLAGS} -D_GNU_SOURCE)
 
-      # The LARGEFILE definitions were from the transition period
-      # and are probably no longer needed. The FILE_OFFSET_BITS
-      # check should be generalized for all POSIX systems as it
-      # is in the Autotools.
-      if (TEST_LFS_WORKS_COMPILE)
-        if (TEST_LFS_WORKS_RUN MATCHES 0)
-          set (TEST_LFS_WORKS 1 CACHE INTERNAL ${msg})
-          set (LARGEFILE 1)
-          set (HDF_EXTRA_FLAGS ${HDF_EXTRA_FLAGS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
-          message (VERBOSE "${msg}... yes")
-        else ()
-          set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
-          message (VERBOSE "${msg}... no")
-          file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-                "Test TEST_LFS_WORKS Run failed with the following exit code:\n ${TEST_LFS_WORKS_RUN}\n"
-          )
-        endif ()
-      else ()
-        set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
-        message (VERBOSE "${msg}... no")
-        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-            "Test TEST_LFS_WORKS Compile failed\n"
-        )
-      endif ()
-    endif ()
-    set (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${HDF_EXTRA_FLAGS})
-  endif ()
+  # Set up large file support. This is only necessary on 32-bit systems
+  # but is used on all Linux systems. It has no effect on 64-bit systems
+  # so it's not worth hacking up a 32/64-bit test to selectively include it.
+  #
+  # The library currently does not use any of the 64-flavored API calls
+  # or types
+  set (HDF_EXTRA_C_FLAGS ${HDF_EXTRA_C_FLAGS} -D_LARGEFILE_SOURCE)
+  set (HDF_EXTRA_C_FLAGS ${HDF_EXTRA_C_FLAGS} -D_FILE_OFFSET_BITS=64)
+
+  set (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${HDF_EXTRA_C_FLAGS})
 endif ()
 
-#-----------------------------------------------------------------------------
-# Check for HAVE_OFF64_T functionality
-#-----------------------------------------------------------------------------
-if (MINGW OR NOT WINDOWS)
-  HDF_FUNCTION_TEST (HAVE_OFF64_T)
-  if (${HDF_PREFIX}_HAVE_OFF64_T)
-    CHECK_FUNCTION_EXISTS (lseek64            ${HDF_PREFIX}_HAVE_LSEEK64)
-  endif ()
+# As of 2024, both AIX and Solaris are uncommon, but still exist! The default
+# compiler options are also often set to -m32, which produces 32-bit binaries.
 
-  CHECK_FUNCTION_EXISTS (fseeko               ${HDF_PREFIX}_HAVE_FSEEKO)
+# 32-bit AIX compiles might require _LARGE_FILES, but we don't have a system on
+# which to test this (yet).
+#
+# https://www.ibm.com/docs/en/aix/7.1?topic=volumes-writing-programs-that-access-large-files
 
-  CHECK_STRUCT_HAS_MEMBER("struct stat64" st_blocks "sys/types.h;sys/stat.h" HAVE_STAT64_STRUCT)
-  if (HAVE_STAT64_STRUCT)
-    CHECK_FUNCTION_EXISTS (stat64             ${HDF_PREFIX}_HAVE_STAT64)
-  endif ()
+# 32-bit Solaris probably needs _LARGEFILE_SOURCE and _FILE_OFFSET_BITS=64,
+# as in Linux, above.
+#
+# https://docs.oracle.com/cd/E23824_01/html/821-1474/lfcompile-5.html
+
+# MinGW and Cygwin
+if (MINGW OR CYGWIN)
+  set (CMAKE_REQUIRED_DEFINITIONS
+    "${CURRENT_TEST_DEFINITIONS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE"
+  )
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -357,11 +330,7 @@ if (MINGW OR NOT WINDOWS)
 endif ()
 
 HDF_CHECK_TYPE_SIZE (off_t          ${HDF_PREFIX}_SIZEOF_OFF_T)
-HDF_CHECK_TYPE_SIZE (off64_t        ${HDF_PREFIX}_SIZEOF_OFF64_T)
-if (NOT ${HDF_PREFIX}_SIZEOF_OFF64_T)
-  set (${HDF_PREFIX}_SIZEOF_OFF64_T 0)
-endif ()
-HDF_CHECK_TYPE_SIZE (time_t          ${HDF_PREFIX}_SIZEOF_TIME_T)
+HDF_CHECK_TYPE_SIZE (time_t         ${HDF_PREFIX}_SIZEOF_TIME_T)
 
 #-----------------------------------------------------------------------------
 # Extra C99 types
@@ -396,7 +365,6 @@ if (MINGW OR NOT WINDOWS)
   CHECK_FUNCTION_EXISTS (gettimeofday      ${HDF_PREFIX}_HAVE_GETTIMEOFDAY)
   foreach (time_test
 #      HAVE_TIMEZONE
-      GETTIMEOFDAY_GIVES_TZ
       HAVE_TM_ZONE
       HAVE_STRUCT_TM_TM_ZONE
   )
@@ -475,62 +443,6 @@ if (MINGW OR NOT WINDOWS)
   endforeach ()
 endif ()
 
-#-----------------------------------------------------------------------------
-# Check if InitOnceExecuteOnce is available
-#-----------------------------------------------------------------------------
-if (WINDOWS)
-  if (NOT HDF_NO_IOEO_TEST)
-    message (VERBOSE "Checking for InitOnceExecuteOnce:")
-  if (NOT DEFINED ${HDF_PREFIX}_HAVE_IOEO)
-    if (LARGEFILE)
-      set (CMAKE_REQUIRED_DEFINITIONS
-          "${CURRENT_TEST_DEFINITIONS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE"
-      )
-    endif ()
-    set (MACRO_CHECK_FUNCTION_DEFINITIONS "-DHAVE_IOEO ${CMAKE_REQUIRED_FLAGS}")
-    if (CMAKE_REQUIRED_INCLUDES)
-      set (CHECK_C_SOURCE_COMPILES_ADD_INCLUDES "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}")
-    else ()
-      set (CHECK_C_SOURCE_COMPILES_ADD_INCLUDES)
-    endif ()
-
-    TRY_RUN(HAVE_IOEO_EXITCODE HAVE_IOEO_COMPILED
-        ${CMAKE_BINARY_DIR}
-        ${HDF_RESOURCES_DIR}/HDFTests.c
-        COMPILE_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} ${MACRO_CHECK_FUNCTION_DEFINITIONS}"
-        LINK_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}"
-        CMAKE_FLAGS "${CHECK_C_SOURCE_COMPILES_ADD_INCLUDES} -DCMAKE_SKIP_RPATH:BOOL=${CMAKE_SKIP_RPATH}"
-        COMPILE_OUTPUT_VARIABLE OUTPUT
-    )
-    # if it did not compile make the return value fail code of 1
-    if (NOT HAVE_IOEO_COMPILED)
-      set (HAVE_IOEO_EXITCODE 1)
-    endif ()
-    # if the return value was 0 then it worked
-    if ("${HAVE_IOEO_EXITCODE}" EQUAL 0)
-      set (${HDF_PREFIX}_HAVE_IOEO 1 CACHE INTERNAL "Test InitOnceExecuteOnce")
-      message (VERBOSE "Performing Test InitOnceExecuteOnce - Success")
-      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Performing C SOURCE FILE Test InitOnceExecuteOnce succeeded with the following output:\n"
-        "${OUTPUT}\n"
-        "Return value: ${HAVE_IOEO}\n")
-    else ()
-      if (CMAKE_CROSSCOMPILING AND "${HAVE_IOEO_EXITCODE}" MATCHES  "FAILED_TO_RUN")
-        set (${HDF_PREFIX}_HAVE_IOEO "${HAVE_IOEO_EXITCODE}")
-      else ()
-        set (${HDF_PREFIX}_HAVE_IOEO "" CACHE INTERNAL "Test InitOnceExecuteOnce")
-      endif ()
-
-      message (VERBOSE "Performing Test InitOnceExecuteOnce - Failed")
-      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Performing InitOnceExecuteOnce Test  failed with the following output:\n"
-        "${OUTPUT}\n"
-        "Return value: ${HAVE_IOEO_EXITCODE}\n")
-    endif ()
-  endif ()
-  endif ()
-endif ()
-
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can handle converting
 # denormalized floating-point values.
@@ -593,6 +505,17 @@ if (HDF5_ENABLE_CODESTACK)
   set (${HDF_PREFIX}_HAVE_CODESTACK 1)
 endif ()
 MARK_AS_ADVANCED (HDF5_ENABLE_CODESTACK)
+
+# ----------------------------------------------------------------------
+# Check if they would like to show all warnings (not suppressed internally)
+#-----------------------------------------------------------------------------
+option (HDF5_SHOW_ALL_WARNINGS "Show all warnings (not suppressed internally)." OFF)
+mark_as_advanced (HDF5_SHOW_ALL_WARNINGS)
+if (HDF5_SHOW_ALL_WARNINGS)
+  message (STATUS "....All warnings will be displayed")
+  set (${HDF_PREFIX}_SHOW_ALL_WARNINGS 1)
+endif ()
+MARK_AS_ADVANCED (HDF5_SHOW_ALL_WARNINGS)
 
 # ----------------------------------------------------------------------
 # Check if they would like to use file locking by default
@@ -677,38 +600,20 @@ unset (CMAKE_EXTRA_INCLUDE_FILES)
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
-#  Check if Direct I/O driver works
+# Check whether we can build the direct VFD
 #-----------------------------------------------------------------------------
-if (NOT WINDOWS)
-  option (HDF5_ENABLE_DIRECT_VFD "Build the Direct I/O Virtual File Driver" OFF)
-  if (HDF5_ENABLE_DIRECT_VFD)
-    set (msg "Performing TEST_DIRECT_VFD_WORKS")
-    set (MACRO_CHECK_FUNCTION_DEFINITIONS "-DTEST_DIRECT_VFD_WORKS -D_GNU_SOURCE ${CMAKE_REQUIRED_FLAGS}")
-    TRY_RUN (TEST_DIRECT_VFD_WORKS_RUN   TEST_DIRECT_VFD_WORKS_COMPILE
-        ${CMAKE_BINARY_DIR}
-        ${HDF_RESOURCES_DIR}/HDFTests.c
-        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
-        OUTPUT_VARIABLE OUTPUT
-    )
-    if (TEST_DIRECT_VFD_WORKS_COMPILE)
-      if (TEST_DIRECT_VFD_WORKS_RUN EQUAL "0")
-        HDF_FUNCTION_TEST (HAVE_DIRECT)
-        set (CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_GNU_SOURCE")
-        add_definitions ("-D_GNU_SOURCE")
-      else ()
-        set (TEST_DIRECT_VFD_WORKS "" CACHE INTERNAL ${msg})
-        message (VERBOSE "${msg}... no")
-        file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
-              "Test TEST_DIRECT_VFD_WORKS Run failed with the following output and exit code:\n ${OUTPUT}\n"
-        )
-      endif ()
-    else ()
-      set (TEST_DIRECT_VFD_WORKS "" CACHE INTERNAL ${msg})
-      message (VERBOSE "${msg}... no")
-      file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
-          "Test TEST_DIRECT_VFD_WORKS Compile failed with the following output:\n ${OUTPUT}\n"
-      )
-    endif ()
+option (HDF5_ENABLE_DIRECT_VFD "Build the Direct I/O Virtual File Driver" OFF)
+if (HDF5_ENABLE_DIRECT_VFD)
+  # The direct VFD is tied to POSIX direct I/O as enabled by the O_DIRECT
+  # flag. No other form of direct I/O is supported. This feature also
+  # requires posix_memalign().
+  CHECK_SYMBOL_EXISTS (O_DIRECT "fcntl.h" HAVE_O_DIRECT)
+  CHECK_SYMBOL_EXISTS (posix_memalign "stdlib.h" HAVE_POSIX_MEMALIGN)
+
+  if (HAVE_O_DIRECT AND HAVE_POSIX_MEMALIGN)
+    set (${HDF_PREFIX}_HAVE_DIRECT 1)
+  else ()
+    message (FATAL_ERROR "The direct VFD was requested but cannot be built.\nIt requires O_DIRECT flag support and posix_memalign()")
   endif ()
 endif ()
 
@@ -729,7 +634,7 @@ option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
 endif ()
 
 # ----------------------------------------------------------------------
-# Check whether we can build the Mirror VFD
+# Check whether we can build the mirror VFD
 # ----------------------------------------------------------------------
 option (HDF5_ENABLE_MIRROR_VFD "Build the Mirror Virtual File Driver" OFF)
 if (HDF5_ENABLE_MIRROR_VFD)
@@ -872,35 +777,50 @@ if (HDF5_BUILD_FORTRAN)
 endif()
 
 #-----------------------------------------------------------------------------
-# Macro to determine the various conversion capabilities
+# Macro to determine long double conversion properties
 #-----------------------------------------------------------------------------
-macro (H5ConversionTests TEST msg)
+macro (H5ConversionTests TEST def msg)
   if (NOT DEFINED ${TEST})
-    TRY_RUN (${TEST}_RUN   ${TEST}_COMPILE
-        ${CMAKE_BINARY_DIR}
-        ${HDF_RESOURCES_DIR}/ConversionTests.c
-        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=-D${TEST}_TEST
-        OUTPUT_VARIABLE OUTPUT
-    )
-    if (${TEST}_COMPILE)
-      if (${TEST}_RUN EQUAL "0")
-        set (${TEST} 1 CACHE INTERNAL ${msg})
-        message (VERBOSE "${msg}... yes")
+    if (NOT CMAKE_CROSSCOMPILING)
+      # Build and run the test code if not cross-compiling
+      TRY_RUN (${TEST}_RUN   ${TEST}_COMPILE
+          ${CMAKE_BINARY_DIR}
+          ${HDF_RESOURCES_DIR}/ConversionTests.c
+          CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=-D${TEST}_TEST
+          COMPILE_OUTPUT_VARIABLE ${TEST}_COMPILE_OUTPUT
+          RUN_OUTPUT_VARIABLE ${TEST}_RUN_OUTPUT
+      )
+      if (${TEST}_COMPILE)
+        if (${TEST}_RUN EQUAL "0")
+          set (${TEST} 1 CACHE INTERNAL ${msg})
+          message (VERBOSE "${msg}... yes")
+        else ()
+          set (${TEST} "" CACHE INTERNAL ${msg})
+          message (VERBOSE "${msg}... no")
+          file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+            "Test ${TEST} Compile succeeded with the following output:\n ${${TEST}_COMPILE_OUTPUT}\n"
+          )         
+          file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+            "Test ${TEST} Run failed with exit code ${${TEST}_RUN} and with the following output:\n ${${TEST}_RUN_OUTPUT}\n"
+          )
+        endif ()
       else ()
         set (${TEST} "" CACHE INTERNAL ${msg})
         message (VERBOSE "${msg}... no")
         file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
-              "Test ${TEST} Run failed with the following output and exit code:\n ${OUTPUT}\n"
+            "Test ${TEST} Compile failed with the following output:\n ${${TEST}_COMPILE_OUTPUT}\n"
         )
       endif ()
     else ()
-      set (${TEST} "" CACHE INTERNAL ${msg})
-      message (VERBOSE "${msg}... no")
-      file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
-          "Test ${TEST} Compile failed with the following output:\n ${OUTPUT}\n"
-      )
+      # Use the default if there's no cache variable and cross-compiling
+      if (${def})
+        message (VERBOSE "${msg}... yes (cross-compile default)")
+        set (${TEST} 1 CACHE INTERNAL ${msg})
+      else ()
+        message (VERBOSE "${msg}... no (cross-compile default)")
+        set (${TEST} "" CACHE INTERNAL ${msg})
+      endif ()
     endif ()
-
   endif ()
 endmacro ()
 
@@ -909,7 +829,7 @@ endmacro ()
 #-----------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
-# Set the flag to indicate that the machine is using a special algorithm toconvert
+# Set the flag to indicate that the machine is using a special algorithm to convert
 # 'long double' to '(unsigned) long' values.  (This flag should only be set for
 # the IBM Power Linux.  When the bit sequence of long double is
 # 0x4351ccf385ebc8a0bfcc2a3c3d855620, the converted value of (unsigned)long
@@ -917,7 +837,7 @@ endmacro ()
 # The machine's conversion gets the correct value.  We define the macro and disable
 # this kind of test until we figure out what algorithm they use.
 #-----------------------------------------------------------------------------
-H5ConversionTests (${HDF_PREFIX}_LDOUBLE_TO_LONG_SPECIAL  "Checking IF your system converts long double to (unsigned) long values with special algorithm")
+H5ConversionTests (${HDF_PREFIX}_LDOUBLE_TO_LONG_SPECIAL FALSE "Checking IF your system converts long double to (unsigned) long values with special algorithm")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine is using a special algorithm
 # to convert some values of '(unsigned) long' to 'long double' values.
@@ -926,7 +846,7 @@ H5ConversionTests (${HDF_PREFIX}_LDOUBLE_TO_LONG_SPECIAL  "Checking IF your syst
 # ..., 7fffff..., the compiler uses a unknown algorithm.  We define a
 # macro and skip the test for now until we know about the algorithm.
 #-----------------------------------------------------------------------------
-H5ConversionTests (${HDF_PREFIX}_LONG_TO_LDOUBLE_SPECIAL "Checking IF your system can convert (unsigned) long to long double values with special algorithm")
+H5ConversionTests (${HDF_PREFIX}_LONG_TO_LDOUBLE_SPECIAL FALSE "Checking IF your system can convert (unsigned) long to long double values with special algorithm")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
 # 'long double' to '(unsigned) long long' values.  (This flag should be set for
@@ -936,7 +856,7 @@ H5ConversionTests (${HDF_PREFIX}_LONG_TO_LDOUBLE_SPECIAL "Checking IF your syste
 # 0x4351ccf385ebc8a0dfcc... or 0x4351ccf385ebc8a0ffcc... will make the converted
 # values wildly wrong.  This test detects this wrong behavior and disable the test.
 #-----------------------------------------------------------------------------
-H5ConversionTests (${HDF_PREFIX}_LDOUBLE_TO_LLONG_ACCURATE "Checking IF correctly converting long double to (unsigned) long long values")
+H5ConversionTests (${HDF_PREFIX}_LDOUBLE_TO_LLONG_ACCURATE TRUE "Checking IF correctly converting long double to (unsigned) long long values")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
 # '(unsigned) long long' to 'long double' values.  (This flag should be set for
@@ -944,9 +864,101 @@ H5ConversionTests (${HDF_PREFIX}_LDOUBLE_TO_LLONG_ACCURATE "Checking IF correctl
 # 007fff..., 00ffff..., 01ffff..., ..., 7fffff..., the converted values are twice
 # as big as they should be.
 #-----------------------------------------------------------------------------
-H5ConversionTests (${HDF_PREFIX}_LLONG_TO_LDOUBLE_CORRECT "Checking IF correctly converting (unsigned) long long to long double values")
+H5ConversionTests (${HDF_PREFIX}_LLONG_TO_LDOUBLE_CORRECT TRUE "Checking IF correctly converting (unsigned) long long to long double values")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
 # some long double values
 #-----------------------------------------------------------------------------
-H5ConversionTests (${HDF_PREFIX}_DISABLE_SOME_LDOUBLE_CONV "Checking IF the cpu is power9 and cannot correctly converting long double values")
+H5ConversionTests (${HDF_PREFIX}_DISABLE_SOME_LDOUBLE_CONV FALSE "Checking IF the cpu is power9 and cannot correctly converting long double values")
+
+#-----------------------------------------------------------------------------
+# Check if _Float16 type is available
+#-----------------------------------------------------------------------------
+message (STATUS "Checking if _Float16 support is available")
+set (${HDF_PREFIX}_HAVE__FLOAT16 0)
+HDF_CHECK_TYPE_SIZE (_Float16 ${HDF_PREFIX}_SIZEOF__FLOAT16)
+if (${HDF_PREFIX}_SIZEOF__FLOAT16)
+  # Request _Float16 support
+  set (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} "-D__STDC_WANT_IEC_60559_TYPES_EXT__")
+
+  # Some compilers expose the _Float16 datatype, but not the macros and
+  # functions used with the datatype. We need the macros for proper
+  # datatype conversion support. Check for these here.
+  CHECK_SYMBOL_EXISTS (FLT16_EPSILON "float.h" h5_have_flt16_epsilon)
+  CHECK_SYMBOL_EXISTS (FLT16_MIN "float.h" h5_have_flt16_min)
+  CHECK_SYMBOL_EXISTS (FLT16_MAX "float.h" h5_have_flt16_max)
+  CHECK_SYMBOL_EXISTS (FLT16_MIN_10_EXP "float.h" h5_have_flt16_min_10_exp)
+  CHECK_SYMBOL_EXISTS (FLT16_MAX_10_EXP "float.h" h5_have_flt16_max_10_exp)
+  CHECK_SYMBOL_EXISTS (FLT16_MANT_DIG "float.h" h5_have_flt16_mant_dig)
+
+  if (h5_have_flt16_epsilon AND h5_have_flt16_min AND
+      h5_have_flt16_max AND h5_have_flt16_min_10_exp AND
+      h5_have_flt16_max_10_exp AND h5_have_flt16_mant_dig)
+    # Some compilers like OneAPI on Windows appear to detect _Float16 support
+    # properly up to this point, and, in the absence of any architecture-specific
+    # tuning compiler flags, will generate code for H5Tconv.c that performs
+    # software conversions on _Float16 variables with compiler-internal functions
+    # such as __extendhfsf2, __truncsfhf2, or __truncdfhf2. However, these
+    # compilers will fail to link these functions into the build for currently
+    # unknown reasons and cause the build to fail. Since these are compiler-internal
+    # functions that we don't appear to have much control over, let's try to
+    # compile a program that will generate these functions to check for _Float16
+    # support. If we fail to compile this program, we will simply disable
+    # _Float16 support for the time being.
+
+    # Some compilers, notably AppleClang on MacOS 12, will succeed in the
+    # configure check below when optimization flags like -O3 are manually
+    # passed in CMAKE_C_FLAGS. However, the build will then fail when it
+    # reaches compilation of H5Tconv.c because of the issue mentioned above.
+    # MacOS 13 appears to have fixed this, but, just to be sure, backup and
+    # clear CMAKE_C_FLAGS before performing these configure checks.
+    set (cmake_c_flags_backup "${CMAKE_C_FLAGS}")
+    set (CMAKE_C_FLAGS "")
+
+    H5ConversionTests (
+        ${HDF_PREFIX}_FLOAT16_CONVERSION_FUNCS_LINK
+        FALSE
+        "Checking if compiler can convert _Float16 type with casts"
+    )
+
+    set (CMAKE_C_FLAGS "${cmake_c_flags_backup}")
+
+    if (${${HDF_PREFIX}_FLOAT16_CONVERSION_FUNCS_LINK})
+      # Finally, MacOS 13 appears to have a bug specifically when converting
+      # long double values to _Float16. Release builds of the dt_arith test
+      # would cause any assignments to a _Float16 variable to be elided,
+      # whereas Debug builds would perform incorrect hardware conversions by
+      # simply chopping off all the bytes of the value except for the first 2.
+      # These tests pass on MacOS 14, so let's perform a quick test to check
+      # if the hardware conversion is done correctly.
+
+      # Backup and clear CMAKE_C_FLAGS before performing configure checks
+      set (cmake_c_flags_backup "${CMAKE_C_FLAGS}")
+      set (CMAKE_C_FLAGS "")
+
+      H5ConversionTests (
+          ${HDF_PREFIX}_LDOUBLE_TO_FLOAT16_CORRECT
+          TRUE
+          "Checking if correctly converting long double to _Float16 values"
+      )
+
+      set (CMAKE_C_FLAGS "${cmake_c_flags_backup}")
+
+      if (NOT ${${HDF_PREFIX}_LDOUBLE_TO_FLOAT16_CORRECT})
+        message (VERBOSE "Conversions from long double to _Float16 appear to be incorrect. These will be emulated through a soft conversion function.")
+      endif ()
+
+      set (${HDF_PREFIX}_HAVE__FLOAT16 1)
+
+      # Check if we can use fabsf16
+      CHECK_FUNCTION_EXISTS (fabsf16 ${HDF_PREFIX}_HAVE_FABSF16)
+    else ()
+      message (STATUS "_Float16 support has been disabled because the compiler couldn't compile and run a test program for _Float16 conversions")
+      message (STATUS "Check ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log for information on why the test program couldn't be compiled/run")
+    endif ()
+  else ()
+    message (STATUS "_Float16 support has been disabled since the required macros (FLT16_MAX, FLT16_EPSILON, etc. were not found)")
+  endif ()
+else ()
+  message (STATUS "_Float16 support has been disabled since the _Float16 type was not found")
+endif ()

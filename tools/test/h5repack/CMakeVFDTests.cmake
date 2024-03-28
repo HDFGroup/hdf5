@@ -60,7 +60,7 @@ set (H5REPACK_CLEANFILES
       h5repack_paged_persist.h5
 )
 macro (ADD_VFD_TEST vfdname resultcode)
-  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  if (NOT HDF5_USING_ANALYSIS_TOOL)
     add_test (
         NAME H5REPACK-${vfdname}-h5repacktest-clear-objects
         COMMAND ${CMAKE_COMMAND} -E remove ${H5REPACK_CLEANFILES}
@@ -83,6 +83,9 @@ macro (ADD_VFD_TEST vfdname resultcode)
           DEPENDS H5REPACK_VFD-${vfdname}-h5repacktest-clear-objects
           TIMEOUT ${CTEST_SHORT_TIMEOUT}
       )
+      if ("H5REPACK_VFD-${vfdname}-h5repacktest" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5REPACK_VFD-${vfdname}-h5repacktest PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5REPACK_VFD-${vfdname}-h5repacktest-clean-objects
           COMMAND ${CMAKE_COMMAND} -E remove

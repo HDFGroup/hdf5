@@ -53,6 +53,9 @@
 /* Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE */
 #define H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE @H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
 
+/* Define if Fortran C_BOOL is different from default LOGICAL */
+#define H5_FORTRAN_C_BOOL_IS_UNIQUE @H5_FORTRAN_C_BOOL_IS_UNIQUE@
+
 /* Define if we have Fortran C_LONG_DOUBLE */
 #define H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
 
@@ -64,6 +67,9 @@
 
 /* Define if we have Fortran intrinsic STORAGE_SIZE */
 #cmakedefine H5_FORTRAN_HAVE_STORAGE_SIZE @H5_FORTRAN_HAVE_STORAGE_SIZE@
+
+/* Define if Fortran supports allocatable character */
+#cmakedefine H5_FORTRAN_HAVE_CHAR_ALLOC @H5_FORTRAN_HAVE_CHAR_ALLOC@
 
 /* Determine the size of C long double */
 #cmakedefine H5_FORTRAN_SIZEOF_LONG_DOUBLE @H5_FORTRAN_SIZEOF_LONG_DOUBLE@
@@ -125,6 +131,9 @@
 /* Define if library information should be embedded in the executables */
 #cmakedefine H5_HAVE_EMBEDDED_LIBINFO @H5_HAVE_EMBEDDED_LIBINFO@
 
+/* Define to 1 if you have the `fabsf16' function. */
+#cmakedefine H5_HAVE_FABSF16 @H5_HAVE_FABSF16@
+
 /* Define to 1 if you have the `fcntl' function. */
 #cmakedefine H5_HAVE_FCNTL @H5_HAVE_FCNTL@
 
@@ -136,6 +145,9 @@
 
 /* Define if support for szip filter is enabled */
 #cmakedefine H5_HAVE_FILTER_SZIP @H5_HAVE_FILTER_SZIP@
+
+/* Determine if _Float16 is available */
+#cmakedefine H5_HAVE__FLOAT16 @H5_HAVE__FLOAT16@
 
 /* Determine if __float128 is available */
 #cmakedefine H5_HAVE_FLOAT128 @H5_HAVE_FLOAT128@
@@ -210,9 +222,6 @@
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine H5_HAVE_LIBZ @H5_HAVE_LIBZ@
 
-/* Define to 1 if you have the `lseek64' function. */
-#cmakedefine H5_HAVE_LSEEK64 @H5_HAVE_LSEEK64@
-
 /* Define if the map API (H5M) should be compiled */
 #cmakedefine H5_HAVE_MAP_API @H5_HAVE_MAP_API@
 
@@ -242,6 +251,9 @@
 
 /* Define if we have parallel support */
 #cmakedefine H5_HAVE_PARALLEL @H5_HAVE_PARALLEL@
+
+/* Define if MPI Fortran supports mpi_f08 module */
+#cmakedefine H5_HAVE_MPI_F08 @H5_HAVE_MPI_F08@
 
 /* Define if we have support for writing to filtered datasets in parallel */
 #cmakedefine H5_HAVE_PARALLEL_FILTERED_WRITES @H5_HAVE_PARALLEL_FILTERED_WRITES@
@@ -273,9 +285,6 @@
 /* Define whether the Read-Only S3 virtual file driver (VFD) should be
    compiled */
 #cmakedefine H5_HAVE_ROS3_VFD @H5_HAVE_ROS3_VFD@
-
-/* Define to 1 if you have the `stat64' function. */
-#cmakedefine H5_HAVE_STAT64 @H5_HAVE_STAT64@
 
 /* Define if struct stat has the st_blocks field */
 #cmakedefine H5_HAVE_STAT_ST_BLOCKS @H5_HAVE_STAT_ST_BLOCKS@
@@ -357,10 +366,10 @@
 /* Define to 1 if you have the `waitpid' function. */
 #cmakedefine H5_HAVE_WAITPID @H5_HAVE_WAITPID@
 
-/* Define to 1 if you have the 'InitOnceExecuteOnce' function. */
+/* Define to 1 if you have Win32 threads */
 #cmakedefine H5_HAVE_WIN_THREADS @H5_HAVE_WIN_THREADS@
 
-/* Define if your system has window style path name. */
+/* Define if your system has Windows-style path name. */
 #cmakedefine H5_HAVE_WINDOW_PATH @H5_HAVE_WINDOW_PATH@
 
 /* Define to 1 if you have the <zlib.h> header file. */
@@ -380,6 +389,9 @@
 
 /* Define if new-style references should be used with dimension scales */
 #cmakedefine H5_DIMENSION_SCALES_WITH_NEW_REF @H5_DIMENSION_SCALES_WITH_NEW_REF@
+
+/* Define if your system can convert long double to _Float16 values correctly. */
+#cmakedefine H5_LDOUBLE_TO_FLOAT16_CORRECT @H5_LDOUBLE_TO_FLOAT16_CORRECT@
 
 /* Define if your system can convert long double to (unsigned) long long
    values correctly. */
@@ -529,9 +541,6 @@
  #define H5_SIZEOF_LONG_LONG 8
 #endif
 
-/* The size of `off64_t', as computed by sizeof. */
-#cmakedefine H5_SIZEOF_OFF64_T @H5_SIZEOF_OFF64_T@
-
 /* The size of `off_t', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_OFF_T @H5_SIZEOF_OFF_T@
 
@@ -586,6 +595,9 @@
 /* The size of `_Quad', as computed by sizeof. */
 #define H5_SIZEOF__QUAD @H5_SIZEOF__QUAD@
 
+/* The size of `_Float16', as computed by sizeof. */
+#define H5_SIZEOF__FLOAT16 @H5_SIZEOF__FLOAT16@
+
 /* The size of `__float128', as computed by sizeof. */
 #define H5_SIZEOF___FLOAT128 @H5_SIZEOF___FLOAT128@
 
@@ -630,6 +642,9 @@
 
 /* Check exception handling functions during data conversions */
 #cmakedefine H5_WANT_DCONV_EXCEPTION @H5_WANT_DCONV_EXCEPTION@
+
+/* Define if showing all compiler warnings are desired (i.e. don't suppress them internally) */
+#cmakedefine H5_SHOW_ALL_WARNINGS @H5_SHOW_ALL_WARNINGS@
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

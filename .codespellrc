@@ -1,0 +1,6 @@
+# Ref: https://github.com/codespell-project/codespell#using-a-config-file
+[codespell]
+skip = .git,*.svg,.codespellrc,./bin/trace,./hl/tools/h5watch/h5watch.c,./tools/test/h5jam/tellub.c,./config/sanitizer/LICENSE,./config/sanitizer/sanitizers.cmake,./tools/test/h5repack/testfiles/*.dat,./test/API/driver,./configure,./bin/ltmain.sh,./bin/depcomp,./bin/config.guess,./bin/config.sub,./autom4te.cache,./m4/libtool.m4,./c++/src/*.html,./HDF5Examples/depcomp
+check-hidden = true
+# ignore-regex = 
+ignore-words-list = ot,isnt,inout,nd,parms,parm,ba,offsetP,ser,ois,had,fiter,fo,clude,refere,minnum,offsetp,creat,ans:,eiter,lastr,ans,isn't,ifset,sur,trun,dne,tthe,hda,filname,te,htmp,ake,gord,numer,ro,oce,msdos

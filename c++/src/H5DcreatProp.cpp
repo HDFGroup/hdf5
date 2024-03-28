@@ -368,7 +368,7 @@ DSetCreatPropList::setFilter(H5Z_filter_t filter_id, unsigned int flags, size_t 
 ///\exception   H5::PropListIException
 ///\par Description
 ///             Deletes a filter from the dataset creation property list;
-///             deletes all filters if \a filter_id is \c H5Z_FILTER_NONE.
+///             deletes all filters if \a filter_id is \c H5Z_FILTER_ALL.
 //--------------------------------------------------------------------------
 void
 DSetCreatPropList::removeFilter(H5Z_filter_t filter_id) const
@@ -645,6 +645,8 @@ DSetCreatPropList::setFletcher32() const
 ///             the total size is larger than the size of a dataset then the
 ///             dataset can be extended (provided the data space also allows
 ///             the extending).
+///\note        On Windows, off_t is typically a 32-bit signed long value, which
+///             limits the valid offset that can be set to 2 GiB.
 //--------------------------------------------------------------------------
 void
 DSetCreatPropList::setExternal(const char *name, off_t offset, hsize_t size) const
@@ -693,6 +695,8 @@ DSetCreatPropList::getExternalCount() const
 ///             external file name will not be returned.  If \a offset or
 ///             \a size are null pointers then the corresponding information
 ///             will not be returned.
+///\note        On Windows, off_t is typically a 32-bit signed long value, which
+///             limits the valid offset that can be returned to 2 GiB.
 //--------------------------------------------------------------------------
 void
 DSetCreatPropList::getExternal(unsigned idx, size_t name_size, char *name, off_t &offset, hsize_t &size) const
@@ -752,14 +756,6 @@ DSetCreatPropList::setVirtual(const DataSpace &vspace, const H5std_string src_fn
                               const H5std_string src_dsname, const DataSpace &sspace) const
 {
     setVirtual(vspace, src_fname.c_str(), src_dsname.c_str(), sspace);
-}
-
-//--------------------------------------------------------------------------
-// Function:    DSetCreatPropList destructor
-///\brief       Noop destructor.
-//--------------------------------------------------------------------------
-DSetCreatPropList::~DSetCreatPropList()
-{
 }
 
 } // namespace H5

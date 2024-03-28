@@ -27,9 +27,7 @@
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Gprivate.h"  /* Groups                                   */
-#include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Lpkg.h"      /* Links                                    */
-#include "H5Pprivate.h"  /* Property lists                           */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
@@ -184,7 +182,7 @@ H5VL__native_link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void
 
     /* Copy the link */
     if (H5L__move(src_loc_p, loc_params1->loc_data.loc_by_name.name, dst_loc_p,
-                  loc_params2->loc_data.loc_by_name.name, TRUE, lcpl_id) < 0)
+                  loc_params2->loc_data.loc_by_name.name, true, lcpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy link");
 
 done:
@@ -226,7 +224,7 @@ H5VL__native_link_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void
 
     /* Move the link */
     if (H5L__move(src_loc_p, loc_params1->loc_data.loc_by_name.name, dst_loc_p,
-                  loc_params2->loc_data.loc_by_name.name, FALSE, lcpl_id) < 0)
+                  loc_params2->loc_data.loc_by_name.name, false, lcpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link");
 
 done:

@@ -343,7 +343,7 @@ CONTAINS
        IF(INT(H5VLget_connector_name(obj_id, c_name, l), SIZE_T).LT.0)THEN
           hdferr = H5I_INVALID_HID_F
        ELSE
-          CALL HD5c2fstring(name,c_name,LEN(name))
+          CALL HD5c2fstring(name, c_name, LEN(name,KIND=SIZE_T), LEN(name,KIND=SIZE_T)+1_SIZE_T )
        ENDIF
     ENDIF
 
@@ -400,5 +400,69 @@ CONTAINS
     hdferr = INT(H5VLunregister_connector(plugin_id))
 
   END SUBROUTINE H5VLunregister_connector_f
+
+!>
+!! \ingroup FH5VL
+!!
+!! \brief Retrieves the token representation from an address for a location identifier.
+!!
+!! \param loc_id Specifies a location identifier
+!! \param addr   Address for object in the file
+!! \param token  Token representing the object in the file
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5VLnative_addr_to_token()
+!!
+  SUBROUTINE h5vlnative_addr_to_token_f(loc_id, addr, token, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)     , INTENT(IN)  :: loc_id
+    INTEGER(HADDR_T)   , INTENT(IN)  :: addr
+    TYPE(H5O_TOKEN_T_F), INTENT(OUT) :: token
+    INTEGER            , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5VLnative_addr_to_token(loc_id, addr, token) BIND(C, NAME='H5VLnative_addr_to_token')
+         IMPORT :: HID_T, C_INT, HADDR_T, H5O_TOKEN_T_F
+         INTEGER(HID_T)  , VALUE :: loc_id
+         INTEGER(HADDR_T), VALUE :: addr
+         TYPE(H5O_TOKEN_T_F)     :: token
+       END FUNCTION H5VLnative_addr_to_token
+    END INTERFACE
+
+    hdferr = INT(H5VLnative_addr_to_token(loc_id, addr, token))
+
+  END SUBROUTINE h5vlnative_addr_to_token_f
+
+!>
+!! \ingroup FH5VL
+!!
+!! \brief Retrieves the object address from a token representation for a location identifier.
+!!
+!! \param loc_id Specifies a location identifier
+!! \param token  Token representing the object in the file
+!! \param addr   Address for object in the file
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5VLnative_token_to_addr()
+!!
+  SUBROUTINE h5vlnative_token_to_addr_f(loc_id, token, addr, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)     , INTENT(IN)  :: loc_id
+    TYPE(H5O_TOKEN_T_F), INTENT(IN)  :: token
+    INTEGER(HADDR_T)   , INTENT(OUT) :: addr
+    INTEGER            , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5VLnative_token_to_addr(loc_id, token, addr) BIND(C, NAME='H5VLnative_token_to_addr')
+         IMPORT :: HID_T, C_INT, HADDR_T, H5O_TOKEN_T_F
+         INTEGER(HID_T)     , VALUE :: loc_id
+         TYPE(H5O_TOKEN_T_F), VALUE :: token
+         INTEGER(HADDR_T)           :: addr
+       END FUNCTION H5VLnative_token_to_addr
+    END INTERFACE
+
+    hdferr = INT(H5VLnative_token_to_addr(loc_id, token, addr))
+
+  END SUBROUTINE h5vlnative_token_to_addr_f
 
 END MODULE H5VL

@@ -26,26 +26,26 @@ endforeach ()
 
 foreach (vfdtest ${VFD_LIST})
   foreach (h5_tfile ${HDF5_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}" "HDF5_VFDTEST_LIB_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/${vfdtest}/testfiles/${h5_tfile}" "HDF5_VFDTEST_LIB_files")
   endforeach ()
 endforeach ()
 
 foreach (vfdtest ${VFD_LIST})
   foreach (ref_file ${HDF5_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/${vfdtest}/${ref_file}" "HDF5_VFDTEST_LIB_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/${vfdtest}/testfiles/${ref_file}" "HDF5_VFDTEST_LIB_files")
   endforeach ()
 endforeach ()
 
 foreach (vfdtest ${VFD_LIST})
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_TEST_BINARY_DIR}/${vfdtest}/${h5_file}" "HDF5_VFDTEST_LIB_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${HDF5_TEST_BINARY_DIR}/${vfdtest}/testfiles/${h5_file}" "HDF5_VFDTEST_LIB_files")
   endforeach ()
 endforeach ()
 
 foreach (vfdtest ${VFD_LIST})
   foreach (plistfile ${HDF5_REFERENCE_PLIST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/plist_files/${plistfile}" "${PROJECT_BINARY_DIR}/${vfdtest}/testfiles/plist_files/${plistfile}" "HDF5_VFDTEST_LIB_files")
-    HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/plist_files/def_${plistfile}" "${PROJECT_BINARY_DIR}/${vfdtest}/testfiles/plist_files/def_${plistfile}" "HDF5_VFDTEST_LIB_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/plist_files/${plistfile}" "${PROJECT_BINARY_DIR}/${vfdtest}/testfiles/plist_files/${plistfile}" "HDF5_VFDTEST_LIB_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/plist_files/def_${plistfile}" "${PROJECT_BINARY_DIR}/${vfdtest}/testfiles/plist_files/def_${plistfile}" "HDF5_VFDTEST_LIB_files")
   endforeach ()
 endforeach ()
 
@@ -71,6 +71,9 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
       links_env
       external_env
       vds_env
+      mirror_vfd
+      ros3
+      hdfs
   )
 
   # Skip several tests with subfiling VFD, mostly due
@@ -125,10 +128,14 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
               ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
               WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
           )
+          if ("VFD-${vfdname}-${vfdtest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+            set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES DISABLED true)
+          endif ()
         else ()
           add_test (NAME VFD-${vfdname}-${vfdtest}
               COMMAND ${CMAKE_COMMAND} -E echo "SKIP VFD-${vfdname}-${vfdtest}"
           )
+          set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES DISABLED true)
         endif ()
       else ()
         add_test (NAME VFD-${vfdname}-${vfdtest}
@@ -146,6 +153,9 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
             ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
         )
+        if ("VFD-${vfdname}-${vfdtest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+          set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES DISABLED true)
+        endif ()
       endif ()
     else ()
       add_test (NAME VFD-${vfdname}-${vfdtest}
@@ -163,6 +173,9 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
+      if ("VFD-${vfdname}-${vfdtest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -183,6 +196,9 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
+      if ("VFD-${vfdname}-${vfdtest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -228,6 +244,9 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
+      if ("VFD-${vfdname}-fheap" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (VFD-${vfdname}-fheap PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -253,4 +272,7 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
         ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/null_vfd_plugin_dir;srcdir=${HDF5_TEST_BINARY_DIR}"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
     )
+    if ("H5PLUGIN-vfd_plugin" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5PLUGIN-vfd_plugin PROPERTIES DISABLED true)
+     endif ()
   endif ()

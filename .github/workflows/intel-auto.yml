@@ -1,0 +1,88 @@
+name: hdf5 dev autotools icx
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  intel_oneapi_linux:
+    name: "linux-oneapi ${{ inputs.build_mode }}"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Sources
+        uses: actions/checkout@v4.1.1
+
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install autoconf automake libtool libtool-bin libaec-dev
+
+      - name: Install oneAPI (Linux)
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: intel
+          version: '2024.0'
+
+      - name: Autotools Configure
+        shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=${{ inputs.build_mode }} \
+            --enable-shared \
+            --disable-fortran
+
+      - name: Autotools Build
+        shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          make -j3
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Run Tests
+        shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          make check -j2
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Install
+        shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          make install
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Verify Install
+        shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          make check-install
+        working-directory: ${{ runner.workspace }}/build

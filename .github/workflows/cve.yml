@@ -16,7 +16,7 @@ on:
 
 # Using concurrency to cancel any in-progress job or run
 concurrency:
-  group: ${{ github.workflow }}-${{ github.sha || github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
   cancel-in-progress: true
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
     name: CVE regression
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
 
       - name: Install Autotools Dependencies (Linux)
         run: |
@@ -40,7 +40,7 @@ jobs:
           make
           sudo make install
       - name: Checkout CVE test repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
         with:
           repository: HDFGroup/cve_hdf5
           path: cve_hdf5

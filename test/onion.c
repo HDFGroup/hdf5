@@ -68,7 +68,7 @@ struct write_info {
     const unsigned char *buf;
 };
 struct revise_revision {
-    hbool_t           truncate; /* onion-create, truncating any existing data */
+    bool              truncate; /* onion-create, truncating any existing data */
     uint64_t          revision_num;
     size_t            n_writes;
     struct write_info writes[ONION_TEST_REV_REV_WRITES_MAX];
@@ -119,15 +119,15 @@ onion_filepaths_init(const char *basename)
 
     if (NULL == (paths->canon = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         TEST_ERROR;
-    HDsnprintf(paths->canon, ONION_TEST_FIXNAME_SIZE, "%s", basename);
+    snprintf(paths->canon, ONION_TEST_FIXNAME_SIZE, "%s", basename);
 
     if (NULL == (paths->onion = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         TEST_ERROR;
-    HDsnprintf(paths->onion, ONION_TEST_FIXNAME_SIZE, "%s.onion", paths->canon);
+    snprintf(paths->onion, ONION_TEST_FIXNAME_SIZE, "%s.onion", paths->canon);
 
     if (NULL == (paths->recovery = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         TEST_ERROR;
-    HDsnprintf(paths->recovery, ONION_TEST_FIXNAME_SIZE, "%s.onion.recovery", paths->canon);
+    snprintf(paths->recovery, ONION_TEST_FIXNAME_SIZE, "%s.onion.recovery", paths->canon);
 
     return paths;
 
@@ -848,7 +848,7 @@ test_fapl(void)
         TEST_ERROR;
     if (0 != info_out.force_write_open)
         TEST_ERROR;
-    if (HDstrcmp(info_in.comment, info_out.comment))
+    if (strcmp(info_in.comment, info_out.comment))
         TEST_ERROR;
 
     /* Cleanup */
@@ -1285,7 +1285,7 @@ test_revision_record_encode_decode(void)
         0, 0, 0, 0,                             /* Bytes 080-083:   checksum (populated below) */
         /* ENTRY 1 */
         0, 0xF0, 0x2E, 0, 0, 0, 0, 0,           /* Bytes 084-091:   entry 1: logical offset */
-        0xA7, 0, 0, 0, 0, 0, 0, 0,              /* Bytes 092-099:   entry 1: physical address */ 
+        0xA7, 0, 0, 0, 0, 0, 0, 0,              /* Bytes 092-099:   entry 1: physical address */
         0, 0, 0, 0,                             /* Bytes 100-103:   checksum (populated below) */
         /* ENTRY 2 */
         0, 0x50, 0x15, 0, 0, 0x20, 0, 0,        /* Bytes 104-111:   entry 2: logical offset */
@@ -1308,7 +1308,7 @@ test_revision_record_encode_decode(void)
     uint64_t                     size_ret;
     H5FD_onion_revision_record_t r_out;
     uint32_t                     checksum    = 0;
-    hbool_t                      badness     = FALSE;
+    bool                         badness     = false;
     char                         comment[25] = "Example comment message.";
     H5FD_onion_revision_record_t record      = {
         H5FD_ONION_REVISION_RECORD_VERSION_CURR,
@@ -1328,7 +1328,7 @@ test_revision_record_encode_decode(void)
     };
     size_t exp_size = H5FD_ONION_ENCODED_SIZE_REVISION_RECORD +
                       (H5FD_ONION_ENCODED_SIZE_INDEX_ENTRY * record.archival_index.n_entries) +
-                      HDstrlen("Example comment message.") + 1;
+                      strlen("Example comment message.") + 1;
 
     r_out.archival_index.list = NULL;
     r_out.comment             = NULL;
@@ -1386,7 +1386,7 @@ test_revision_record_encode_decode(void)
 
     for (i = 0; i < exp_size; i++) {
         if (exp[i] != buf[i]) {
-            badness = TRUE;
+            badness = true;
             printf("Bad encoded record - Index %zu: expected 0x%02X but got 0x%02X\n", i,
                    (unsigned int)exp[i], (unsigned int)buf[i]);
         }
@@ -1478,15 +1478,15 @@ test_revision_record_encode_decode(void)
         TEST_ERROR;
     if (record.checksum != r_out.checksum)
         TEST_ERROR;
-    if (HDstrncmp(record.time_of_creation, r_out.time_of_creation, 16) != 0)
+    if (strncmp(record.time_of_creation, r_out.time_of_creation, 16) != 0)
         TEST_ERROR;
     if (record.comment_size != r_out.comment_size)
         TEST_ERROR;
-    if (record.comment_size != HDstrlen(r_out.comment) + 1)
+    if (record.comment_size != strlen(r_out.comment) + 1)
         TEST_ERROR;
-    if (HDstrlen(record.comment) != HDstrlen(r_out.comment))
+    if (strlen(record.comment) != strlen(r_out.comment))
         TEST_ERROR;
-    if (HDstrcmp(record.comment, r_out.comment) != 0)
+    if (strcmp(record.comment, r_out.comment) != 0)
         TEST_ERROR;
 
     if (H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR != r_out.archival_index.version)
@@ -1678,7 +1678,7 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     if (H5FD__onion_history_decode(buf, &history_out) != readsize)
         TEST_ERROR;
 
-    /* Re-use buffer space to sanity-check checksum for record pointer(s). */
+    /* Reuse buffer space to sanity-check checksum for record pointer(s). */
     assert(readsize >= sizeof(H5FD_onion_record_loc_t));
     for (size_t i = 0; i < history_out.n_revisions; i++) {
 
@@ -1766,9 +1766,9 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
                 TEST_ERROR;
         }
         else {
-            if (HDstrlen(rev_out.comment) != HDstrlen(erp->comment))
+            if (strlen(rev_out.comment) != strlen(erp->comment))
                 TEST_ERROR;
-            if (HDstrcmp(rev_out.comment, erp->comment) != 0)
+            if (strcmp(rev_out.comment, erp->comment) != 0)
                 TEST_ERROR;
         }
         if (erp->n_index_entries != (uint64_t)(-1) &&
@@ -1897,9 +1897,9 @@ error:
  * Purpose:     Test the ability of the Onion VFD to create a valid
  *              'onionized' file.
  *
- *              When `truncate_canonical` is FALSE, the canonical file is
+ *              When `truncate_canonical` is false, the canonical file is
  *              nonexistent on the backing store on onion-creation.
- *              When `truncate_canonical` is TRUE, a canonical file is created
+ *              When `truncate_canonical` is true, a canonical file is created
  *              on the backing store with known contents, which are to be
  *              truncated on onion-creation.
  *
@@ -1908,7 +1908,7 @@ error:
  *-----------------------------------------------------------------------------
  */
 static int
-test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
+test_create_oniontarget(bool truncate_canonical, bool with_initial_data)
 {
     const char             *basename   = "somesuch";
     hid_t                   fapl_id    = H5I_INVALID_HID;
@@ -1929,11 +1929,11 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
     struct expected_history filter;
     char                   *buf = NULL;
 
-    if (TRUE == truncate_canonical && TRUE == with_initial_data)
+    if (true == truncate_canonical && true == with_initial_data)
         TESTING("onion creation; truncate extant canonical; w/ initial data");
-    else if (TRUE == truncate_canonical)
+    else if (true == truncate_canonical)
         TESTING("onion creation; truncate extant canonical; no initial data");
-    else if (TRUE == with_initial_data)
+    else if (true == with_initial_data)
         TESTING("onion creation; no extant canonical; w/ initial data");
     else
         TESTING("onion creation; no extant canonical; no initial data");
@@ -1955,7 +1955,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
     HDremove(paths->recovery);
 
     /* Create canonical file to be truncated */
-    if (TRUE == truncate_canonical) {
+    if (true == truncate_canonical) {
         /* Create canonical file. */
         vfile_raw = H5FDopen(paths->canon, flags_create_s, onion_info.backing_fapl_id, HADDR_UNDEF);
         if (NULL == vfile_raw)
@@ -2017,7 +2017,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
      * WRITING
      */
 
-    if (TRUE == with_initial_data) {
+    if (true == with_initial_data) {
         haddr_t half_size = 0;
         haddr_t buf_size  = 0;
 
@@ -2111,7 +2111,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
     filter.revisions[0].n_index_entries     = (uint64_t)(-1); /* don't care */
     filter.revisions[0].revision_num        = 0;
     filter.revisions[0].parent_revision_num = 0;
-    filter.revisions[0].logical_eof         = (TRUE == with_initial_data) ? a_list_size_s : 0;
+    filter.revisions[0].logical_eof         = (true == with_initial_data) ? a_list_size_s : 0;
 
     if (verify_history_as_expected_onion(vfile_raw, &filter) < 0)
         TEST_ERROR;
@@ -2126,7 +2126,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
     if (NULL == vfile_ro)
         TEST_ERROR;
 
-    if (TRUE == with_initial_data) {
+    if (true == with_initial_data) {
         /* Initial revision contains data */
         if (H5FDget_eof(vfile_ro, H5FD_MEM_DRAW) != a_list_size_s)
             TEST_ERROR;
@@ -2204,9 +2204,9 @@ error:
  * Purpose:     Test the ability of the Onion VFD to create a valid
  *              'onionized' file.
  *
- *              When `truncate_canonical` is FALSE, the canonical file is
+ *              When `truncate_canonical` is false, the canonical file is
  *              nonexistent on the backing store on onion-creation.
- *              When `truncate_canonical` is TRUE, a canonical file is created
+ *              When `truncate_canonical` is true, a canonical file is created
  *              on the backing store with known contents, which are to be
  *              truncated on onion-creation.
  *
@@ -2263,12 +2263,12 @@ test_several_revisions_with_logical_gaps(void)
     HDremove(paths->recovery);
 
     /* Empty first revision */
-    about[0].truncate     = TRUE;
+    about[0].truncate     = true;
     about[0].revision_num = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
     about[0].comment      = "first";
     about[0].n_writes     = 0;
 
-    about[1].truncate         = FALSE;
+    about[1].truncate         = false;
     about[1].revision_num     = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
     about[1].comment          = "second";
     about[1].n_writes         = 1;
@@ -2276,7 +2276,7 @@ test_several_revisions_with_logical_gaps(void)
     about[1].writes[0].size   = a_list_size_s;
     about[1].writes[0].buf    = a_list_s;
 
-    about[2].truncate         = FALSE;
+    about[2].truncate         = false;
     about[2].revision_num     = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
     about[2].comment          = "third";
     about[2].n_writes         = 1; /* TODO: several writes */
@@ -2284,7 +2284,7 @@ test_several_revisions_with_logical_gaps(void)
     about[2].writes[0].size   = b_list_size_s;
     about[2].writes[0].buf    = b_list_s;
 
-    about[3].truncate         = FALSE;
+    about[3].truncate         = false;
     about[3].revision_num     = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
     about[3].comment          = "fourth";
     about[3].n_writes         = 1;
@@ -2577,15 +2577,15 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
         size_t       j     = 0;
         unsigned int flags = H5F_ACC_RDWR;
 
-        if (i != 0 && about[i].truncate == TRUE)
+        if (i != 0 && about[i].truncate == true)
             goto error;
 
-        if (TRUE == about[i].truncate)
+        if (true == about[i].truncate)
             flags |= H5F_ACC_CREAT | H5F_ACC_TRUNC;
 
         onion_info_p->revision_num = about[i].revision_num;
         if (about[i].comment != NULL) {
-            j = MIN(HDstrlen(about[i].comment), H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN);
+            j = MIN(strlen(about[i].comment), H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN);
             memcpy(onion_info_p->comment, about[i].comment, j);
         }
         onion_info_p->comment[j] = '\0';
@@ -2615,7 +2615,7 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
             if (memcmp(buf_vfy, wi->buf, wi->size) != 0) {
                 const unsigned char *_buf = wi->buf;
                 size_t               z    = 0;
-                HDputs("i  exp  act");
+                puts("i  exp  act");
                 for (z = 0; z < wi->size; z++)
                     printf("%02zx %c %c\n", z, _buf[z], buf_vfy[z]);
                 fflush(stdout);
@@ -2712,7 +2712,7 @@ test_page_aligned_history_create(void)
     HDremove(paths->onion);
     HDremove(paths->recovery);
 
-    about[0].truncate         = TRUE;
+    about[0].truncate         = true;
     about[0].revision_num     = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
     about[0].comment          = "initial_commit";
     about[0].n_writes         = 1;
@@ -2720,7 +2720,7 @@ test_page_aligned_history_create(void)
     about[0].writes[0].size   = b_list_size_s;
     about[0].writes[0].buf    = b_list_s;
 
-    about[1].truncate         = FALSE;
+    about[1].truncate         = false;
     about[1].revision_num     = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
     about[1].comment          = "second";
     about[1].n_writes         = 1;
@@ -2746,7 +2746,7 @@ test_page_aligned_history_create(void)
     if (memcmp(a_list_s, buf + a_off, a_list_size_s) != 0) {
         size_t k;
         printf("aoff: %" PRIu64 "\n", a_off);
-        HDputs("i exp act");
+        puts("i exp act");
         for (k = 0; k < b_list_size_s; k++) {
             printf("%3zu:: %c : %c\n", k, (k < a_off) ? ' ' : a_list_s[k - a_off], buf[k]);
         }
@@ -2756,7 +2756,7 @@ test_page_aligned_history_create(void)
     if (memcmp(b_list_s, buf, a_off) != 0) {
         size_t k;
         printf("aoff: %" PRIu64 "\n", a_off);
-        HDputs("i exp act");
+        puts("i exp act");
         for (k = 0; k < b_list_size_s; k++) {
             printf("%3zu:: %c : %c\n", k, (k < a_off) ? b_list_s[k] : ' ', buf[k]);
         }
@@ -4908,8 +4908,8 @@ error:
 int
 main(void)
 {
-    const char *env_h5_drvr = NULL; /* VFD value from environment */
-    int         nerrors     = 0;
+    const char *driver_name; /* VFD value from environment */
+    int         nerrors = 0;
 
     printf("Testing Onion VFD functionality.\n");
 
@@ -4918,12 +4918,10 @@ main(void)
     /* The onion VFD only supports the sec2 VFD under the hood, so skip this
      * test when the environment variable has been set to something else
      */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
-    if ((0 != HDstrcmp(env_h5_drvr, "nomatch")) && (0 != HDstrcmp(env_h5_drvr, "sec2"))) {
+    driver_name = h5_get_test_driver_name();
+    if (0 != strcmp(driver_name, "sec2")) {
         SKIPPED();
-        HDputs("Onion VFD test skipped due to non-sec2 default VFD");
+        puts("Onion VFD test skipped due to non-sec2 default VFD");
         exit(EXIT_SUCCESS);
     }
 
@@ -4941,10 +4939,10 @@ main(void)
     nerrors -= test_history_encode_decode_empty();
     nerrors -= test_history_encode_decode();
     nerrors -= test_revision_record_encode_decode();
-    nerrors -= test_create_oniontarget(FALSE, FALSE);
-    nerrors -= test_create_oniontarget(TRUE, FALSE);
-    nerrors -= test_create_oniontarget(FALSE, TRUE);
-    nerrors -= test_create_oniontarget(TRUE, TRUE);
+    nerrors -= test_create_oniontarget(false, false);
+    nerrors -= test_create_oniontarget(true, false);
+    nerrors -= test_create_oniontarget(false, true);
+    nerrors -= test_create_oniontarget(true, true);
     nerrors -= test_several_revisions_with_logical_gaps();
     nerrors -= test_page_aligned_history_create();
     nerrors -= test_integration_create();

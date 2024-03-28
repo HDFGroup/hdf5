@@ -335,11 +335,11 @@ done:
 herr_t
 H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result)
 {
-    hbool_t same      = FALSE;
-    char   *key       = NULL;
-    char   *value1    = NULL;
-    char   *value2    = NULL;
-    herr_t  ret_value = SUCCEED;
+    bool   same      = false;
+    char  *key       = NULL;
+    char  *value1    = NULL;
+    char  *value2    = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -350,12 +350,12 @@ H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result)
     /* Check for MPI_INFO_NULL */
     if (MPI_INFO_NULL == info1 && MPI_INFO_NULL == info2) {
         /* Special case of both info objects being MPI_INFO_NULL */
-        same = TRUE;
+        same = true;
     }
     else if (MPI_INFO_NULL == info1 || MPI_INFO_NULL == info2) {
 
         /* Special case of one info object being MPI_INFO_NULL */
-        same = FALSE;
+        same = false;
     }
     else {
         int mpi_code;
@@ -369,9 +369,9 @@ H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result)
             HMPI_GOTO_ERROR(FAIL, "MPI_Info_get_nkeys failed", mpi_code)
 
         if (nkeys_1 != nkeys_2)
-            same = FALSE;
+            same = false;
         else if (0 == nkeys_1 && 0 == nkeys_2)
-            same = TRUE;
+            same = true;
         else {
             int i;
             int flag1 = -1;
@@ -380,15 +380,15 @@ H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result)
             /* Allocate buffers for iteration */
             if (NULL == (key = (char *)H5MM_malloc(MPI_MAX_INFO_KEY * sizeof(char))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            if (NULL == (value1 = (char *)H5MM_malloc(MPI_MAX_INFO_VAL * sizeof(char))))
+            if (NULL == (value1 = (char *)H5MM_malloc((MPI_MAX_INFO_VAL + 1) * sizeof(char))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            if (NULL == (value2 = (char *)H5MM_malloc(MPI_MAX_INFO_VAL * sizeof(char))))
+            if (NULL == (value2 = (char *)H5MM_malloc((MPI_MAX_INFO_VAL + 1) * sizeof(char))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
             /* Iterate over the keys, comparing them */
             for (i = 0; i < nkeys_1; i++) {
 
-                same = TRUE;
+                same = true;
 
                 /* Memset the buffers to zero */
                 memset(key, 0, MPI_MAX_INFO_KEY);
@@ -407,7 +407,7 @@ H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result)
 
                 /* Compare values and flags */
                 if (!flag1 || !flag2 || memcmp(value1, value2, MPI_MAX_INFO_VAL)) {
-                    same = FALSE;
+                    same = false;
                     break;
                 }
 
@@ -576,8 +576,8 @@ done:
  *                            MPI_(All)gatherv's `recvtype` parameter.
  *
  *              `allgather` - Specifies whether the gather operation to be
- *                            performed should be MPI_Allgatherv (TRUE) or
- *                            MPI_Gatherv (FALSE).
+ *                            performed should be MPI_Allgatherv (true) or
+ *                            MPI_Gatherv (false).
  *
  *              `root` - For MPI_Gatherv operations, specifies the rank
  *                       that will receive the data sent by other ranks.
@@ -616,20 +616,15 @@ done:
  */
 herr_t
 H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type, const int recv_counts[],
-                      const int displacements[], MPI_Datatype recv_type, hbool_t allgather, int root,
+                      const int displacements[], MPI_Datatype recv_type, bool allgather, int root,
                       MPI_Comm comm, int mpi_rank, int mpi_size, void **out_buf, size_t *out_buf_num_entries)
 {
-    size_t recv_buf_num_entries = 0;
-    void  *recv_buf             = NULL;
-#if H5_CHECK_MPI_VERSION(3, 0)
+    size_t    recv_buf_num_entries = 0;
+    void     *recv_buf             = NULL;
     MPI_Count type_lb;
     MPI_Count type_extent;
-#else
-    MPI_Aint type_lb;
-    MPI_Aint type_extent;
-#endif
-    int    mpi_code;
-    herr_t ret_value = SUCCEED;
+    int       mpi_code;
+    herr_t    ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -637,12 +632,8 @@ H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type, co
     if (allgather || (mpi_rank == root))
         assert(out_buf && out_buf_num_entries);
 
-        /* Retrieve the extent of the MPI Datatype being used */
-#if H5_CHECK_MPI_VERSION(3, 0)
+    /* Retrieve the extent of the MPI Datatype being used */
     if (MPI_SUCCESS != (mpi_code = MPI_Type_get_extent_x(recv_type, &type_lb, &type_extent)))
-#else
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_get_extent(recv_type, &type_lb, &type_extent)))
-#endif
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_get_extent(_x) failed", mpi_code)
 
     if (type_extent < 0)
@@ -710,7 +701,7 @@ done:
  */
 herr_t
 H5_mpio_gatherv_alloc_simple(void *send_buf, int send_count, MPI_Datatype send_type, MPI_Datatype recv_type,
-                             hbool_t allgather, int root, MPI_Comm comm, int mpi_rank, int mpi_size,
+                             bool allgather, int root, MPI_Comm comm, int mpi_rank, int mpi_size,
                              void **out_buf, size_t *out_buf_num_entries)
 {
     int   *recv_counts_disps_array = NULL;
@@ -791,7 +782,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required)
+H5_mpio_get_file_sync_required(MPI_File fh, bool *file_sync_required)
 {
     MPI_Info info_used;
     int      flag;
@@ -803,7 +794,7 @@ H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required)
 
     assert(file_sync_required);
 
-    *file_sync_required = FALSE;
+    *file_sync_required = false;
 
     if (MPI_SUCCESS != MPI_File_get_info(fh, &info_used))
         HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "can't get MPI info");
@@ -812,18 +803,18 @@ H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required)
         MPI_Info_get(info_used, "romio_visibility_immediate", MPI_MAX_INFO_VAL - 1, value, &flag))
         HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "can't get MPI info");
 
-    if (flag && !HDstrcmp(value, "false"))
-        *file_sync_required = TRUE;
+    if (flag && !strcmp(value, "false"))
+        *file_sync_required = true;
 
     if (MPI_SUCCESS != MPI_Info_free(&info_used))
         HGOTO_ERROR(H5E_LIB, H5E_CANTFREE, FAIL, "can't free MPI info");
 
     /* Force setting the flag via env variable (temp solution before the flag is implemented in MPI) */
-    sync_env_var = HDgetenv("HDF5_DO_MPI_FILE_SYNC");
-    if (sync_env_var && (!HDstrcmp(sync_env_var, "TRUE") || !HDstrcmp(sync_env_var, "1")))
-        *file_sync_required = TRUE;
-    if (sync_env_var && (!HDstrcmp(sync_env_var, "FALSE") || !HDstrcmp(sync_env_var, "0")))
-        *file_sync_required = FALSE;
+    sync_env_var = getenv("HDF5_DO_MPI_FILE_SYNC");
+    if (sync_env_var && (!strcmp(sync_env_var, "TRUE") || !strcmp(sync_env_var, "1")))
+        *file_sync_required = true;
+    if (sync_env_var && (!strcmp(sync_env_var, "FALSE") || !strcmp(sync_env_var, "0")))
+        *file_sync_required = false;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

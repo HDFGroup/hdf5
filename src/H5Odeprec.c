@@ -116,9 +116,10 @@ static herr_t
 H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2, void *op_data)
 {
     H5O_visit1_adapter_t *shim_data = (H5O_visit1_adapter_t *)op_data;
-    H5O_info1_t           oinfo;                    /* Deprecated object info struct */
-    unsigned              dm_fields;                /* Fields for data model query */
-    unsigned              nat_fields;               /* Fields for native query */
+    H5O_info1_t           oinfo;      /* Deprecated object info struct */
+    unsigned              dm_fields;  /* Fields for data model query */
+    unsigned              nat_fields; /* Fields for native query */
+    H5VL_object_t        *vol_obj;
     herr_t                ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -158,7 +159,6 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
     /* Check for retrieving native information */
     nat_fields = shim_data->fields & (H5O_INFO_HDR | H5O_INFO_META_SIZE);
     if (nat_fields) {
-        H5VL_object_t                     *vol_obj;      /* Object of obj_id */
         H5VL_optional_args_t               vol_cb_args;  /* Arguments to VOL callback */
         H5VL_native_object_optional_args_t obj_opt_args; /* Arguments for optional operation */
         H5VL_loc_params_t                  loc_params;   /* Location parameters for VOL callback */
@@ -341,7 +341,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
     void             *opened_obj = NULL;        /* Opened object */
     H5VL_loc_params_t loc_params;               /* Location parameters */
     H5O_token_t       obj_token = {0};          /* Object token */
-    hbool_t           is_native_vol_obj;
+    bool              is_native_vol_obj;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -379,7 +379,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object");
 
     /* Register the object's ID */
-    if ((ret_value = H5VL_register(opened_type, opened_obj, vol_obj->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(opened_type, opened_obj, vol_obj->connector, true)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle");
 
 done:
@@ -401,10 +401,11 @@ H5Oget_info1(hid_t loc_id, H5O_info1_t *oinfo /*out*/)
 {
     H5VL_object_t    *vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    bool              is_native_vol_obj = false;
+    herr_t            ret_value         = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", loc_id, oinfo);
+    H5TRACE2("e", "i*!", loc_id, oinfo);
 
     /* Check args */
     if (!oinfo)
@@ -417,6 +418,15 @@ H5Oget_info1(hid_t loc_id, H5O_info1_t *oinfo /*out*/)
     /* Get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+
+    /* Check if using native VOL connector */
+    if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object");
+
+    /* Must use native VOL connector for this operation */
+    if (!is_native_vol_obj)
+        HGOTO_ERROR(H5E_OHDR, H5E_VOL, FAIL,
+                    "Deprecated H5Oget_info1 is only meant to be used with the native VOL connector");
 
     /* Retrieve the object's information */
     if (H5O__get_info_old(vol_obj, &loc_params, oinfo, H5O_INFO_ALL) < 0)
@@ -441,10 +451,11 @@ H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info1_t *oinfo /*out*/,
 {
     H5VL_object_t    *vol_obj = NULL; /* object of loc_id */
     H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    bool              is_native_vol_obj = false;
+    herr_t            ret_value         = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*sxi", loc_id, name, oinfo, lapl_id);
+    H5TRACE4("e", "i*s*!i", loc_id, name, oinfo, lapl_id);
 
     /* Check args */
     if (!name)
@@ -455,7 +466,7 @@ H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info1_t *oinfo /*out*/,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "oinfo parameter cannot be NULL");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Fill out location struct */
@@ -467,6 +478,15 @@ H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info1_t *oinfo /*out*/,
     /* Get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+
+    /* Check if using native VOL connector */
+    if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object");
+
+    /* Must use native VOL connector for this operation */
+    if (!is_native_vol_obj)
+        HGOTO_ERROR(H5E_OHDR, H5E_VOL, FAIL,
+                    "Deprecated H5Oget_info_by_name1 is only meant to be used with the native VOL connector");
 
     /* Retrieve the object's information */
     if (H5O__get_info_old(vol_obj, &loc_params, oinfo, H5O_INFO_ALL) < 0)
@@ -493,10 +513,11 @@ H5Oget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
 {
     H5VL_object_t    *vol_obj = NULL; /* object of loc_id */
     H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    bool              is_native_vol_obj = false;
+    herr_t            ret_value         = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIohxi", loc_id, group_name, idx_type, order, n, oinfo, lapl_id);
+    H5TRACE7("e", "i*sIiIoh*!i", loc_id, group_name, idx_type, order, n, oinfo, lapl_id);
 
     /* Check args */
     if (!group_name || !*group_name)
@@ -509,7 +530,7 @@ H5Oget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info");
 
     loc_params.type                         = H5VL_OBJECT_BY_IDX;
@@ -523,6 +544,15 @@ H5Oget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     /* Get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+
+    /* Check if using native VOL connector */
+    if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object");
+
+    /* Must use native VOL connector for this operation */
+    if (!is_native_vol_obj)
+        HGOTO_ERROR(H5E_OHDR, H5E_VOL, FAIL,
+                    "Deprecated H5Oget_info_by_idx1 is only meant to be used with the native VOL connector");
 
     /* Retrieve the object's information */
     if (H5O__get_info_old(vol_obj, &loc_params, oinfo, H5O_INFO_ALL) < 0)
@@ -548,11 +578,11 @@ H5Oget_info2(hid_t loc_id, H5O_info1_t *oinfo /*out*/, unsigned fields)
 {
     H5VL_object_t    *vol_obj; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
-    hbool_t           is_native_vol_obj;
+    bool              is_native_vol_obj;
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixIu", loc_id, oinfo, fields);
+    H5TRACE3("e", "i*!Iu", loc_id, oinfo, fields);
 
     /* Check args */
     if (!oinfo)
@@ -574,7 +604,7 @@ H5Oget_info2(hid_t loc_id, H5O_info1_t *oinfo /*out*/, unsigned fields)
                     "can't determine if VOL object is native connector object");
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID,
-                    "H5Oget_info2 is only meant to be used with the native VOL connector");
+                    "Deprecated H5Oget_info2 is only meant to be used with the native VOL connector");
 
     /* Retrieve deprecated info struct */
     if (H5O__get_info_old(vol_obj, &loc_params, oinfo, fields) < 0)
@@ -601,11 +631,11 @@ H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info1_t *oinfo /*out*/,
 {
     H5VL_object_t    *vol_obj; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
-    hbool_t           is_native_vol_obj;
+    bool              is_native_vol_obj;
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*sxIui", loc_id, name, oinfo, fields, lapl_id);
+    H5TRACE5("e", "i*s*!Iui", loc_id, name, oinfo, fields, lapl_id);
 
     /* Check args */
     if (!name)
@@ -618,7 +648,7 @@ H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info1_t *oinfo /*out*/,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid fields");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Fill out location struct */
@@ -637,7 +667,7 @@ H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info1_t *oinfo /*out*/,
                     "can't determine if VOL object is native connector object");
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID,
-                    "H5Oget_info_by_name2 is only meant to be used with the native VOL connector");
+                    "Deprecated H5Oget_info_by_name2 is only meant to be used with the native VOL connector");
 
     /* Retrieve deprecated info struct */
     if (H5O__get_info_old(vol_obj, &loc_params, oinfo, fields) < 0)
@@ -666,11 +696,11 @@ H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
 {
     H5VL_object_t    *vol_obj; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
-    hbool_t           is_native_vol_obj;
+    bool              is_native_vol_obj;
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*sIiIohxIui", loc_id, group_name, idx_type, order, n, oinfo, fields, lapl_id);
+    H5TRACE8("e", "i*sIiIoh*!Iui", loc_id, group_name, idx_type, order, n, oinfo, fields, lapl_id);
 
     /* Check args */
     if (!group_name || !*group_name)
@@ -685,7 +715,7 @@ H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid fields");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info");
 
     loc_params.type                         = H5VL_OBJECT_BY_IDX;
@@ -706,7 +736,7 @@ H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
                     "can't determine if VOL object is native connector object");
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID,
-                    "H5Oget_info_by_idx2 is only meant to be used with the native VOL connector");
+                    "Deprecated H5Oget_info_by_idx2 is only meant to be used with the native VOL connector");
 
     /* Retrieve deprecated info struct */
     if (H5O__get_info_old(vol_obj, &loc_params, oinfo, fields) < 0)
@@ -753,6 +783,7 @@ H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1
     H5VL_loc_params_t           loc_params;     /* Location parameters for object access */
     H5O_visit1_adapter_t        shim_data;      /* Adapter for passing app callback & user data */
     herr_t                      ret_value;      /* Return value */
+    bool                        is_native_vol_obj = false;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "iIiIoOi*x", obj_id, idx_type, order, op, op_data);
@@ -768,6 +799,15 @@ H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1
     /* Get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+
+    /* Check if using native VOL connector */
+    if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object");
+
+    /* Must use native VOL connector for this operation */
+    if (!is_native_vol_obj)
+        HGOTO_ERROR(H5E_OHDR, H5E_VOL, FAIL,
+                    "Deprecated H5Ovisit1 is only meant to be used with the native VOL connector");
 
     /* Set location parameters */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
@@ -833,6 +873,7 @@ H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
     H5VL_loc_params_t           loc_params;     /* Location parameters for object access */
     H5O_visit1_adapter_t        shim_data;      /* Adapter for passing app callback & user data */
     herr_t                      ret_value;      /* Return value */
+    bool                        is_native_vol_obj = false;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIoOi*xi", loc_id, obj_name, idx_type, order, op, op_data, lapl_id);
@@ -850,12 +891,21 @@ H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+
+    /* Check if using native VOL connector */
+    if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object");
+
+    /* Must use native VOL connector for this operation */
+    if (!is_native_vol_obj)
+        HGOTO_ERROR(H5E_OHDR, H5E_VOL, FAIL,
+                    "Deprecated H5Ovisit_by_name1 is only meant to be used with the native VOL connector");
 
     /* Set location parameters */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -925,7 +975,7 @@ H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1
     H5VL_object_specific_args_t vol_cb_args; /* Arguments to VOL callback */
     H5VL_loc_params_t           loc_params;  /* Location parameters for object access */
     H5O_visit1_adapter_t        shim_data;   /* Adapter for passing app callback & user data */
-    hbool_t                     is_native_vol_obj;
+    bool                        is_native_vol_obj;
     herr_t                      ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -949,9 +999,10 @@ H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
                     "can't determine if VOL object is native connector object");
+
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID,
-                    "H5Ovisit2 is only meant to be used with the native VOL connector");
+                    "Deprecated H5Ovisit2 is only meant to be used with the native VOL connector");
 
     /* Set location parameters */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
@@ -1019,7 +1070,7 @@ H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
     H5VL_object_specific_args_t vol_cb_args; /* Arguments to VOL callback */
     H5VL_loc_params_t           loc_params;  /* Location parameters for object access */
     H5O_visit1_adapter_t        shim_data;   /* Adapter for passing app callback & user data */
-    hbool_t                     is_native_vol_obj;
+    bool                        is_native_vol_obj;
     herr_t                      ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1040,7 +1091,7 @@ H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid fields");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Get the location object */
@@ -1053,7 +1104,7 @@ H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
                     "can't determine if VOL object is native connector object");
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID,
-                    "H5Ovisit_by_name2 is only meant to be used with the native VOL connector");
+                    "Deprecated H5Ovisit_by_name2 is only meant to be used with the native VOL connector");
 
     /* Set location parameters */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;

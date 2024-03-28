@@ -61,7 +61,7 @@
 /*******************/
 
 /* Track whether tzset routine was called */
-static hbool_t H5_ntzset = FALSE;
+static bool H5_ntzset = false;
 
 #ifndef H5_HAVE_VASPRINTF
 /* HDvasprintf provides vasprintf-like function on targets where it is
@@ -78,7 +78,7 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
         va_list ap;
 
         va_copy(ap, _ap);
-        ret = HDvsnprintf(buf, bufsz, fmt, ap);
+        ret = vsnprintf(buf, bufsz, fmt, ap);
         va_end(ap);
         if (ret >= 0 && (size_t)ret < bufsz) {
             *bufp = buf;
@@ -224,7 +224,7 @@ H5_make_time(struct tm *tm)
     /* Initialize timezone information */
     if (!H5_ntzset) {
         HDtzset();
-        H5_ntzset = TRUE;
+        H5_ntzset = true;
     } /* end if */
 
     /* Perform base conversion */
@@ -339,13 +339,20 @@ Wsetenv(const char *name, const char *value, int overwrite)
      * value is non-zero), then return an error code.
      */
     if (!overwrite) {
+#ifndef H5_HAVE_MINGW
         size_t  bufsize;
         errno_t err;
 
         err = getenv_s(&bufsize, NULL, 0, name);
         if (err || bufsize)
             return (int)err;
-    } /* end if */
+#else
+        /* MinGW doesn't have getenv_s() */
+        char *test = getenv(name);
+        if (*test)
+            return FAIL;
+#endif
+    }
 
     return (int)_putenv_s(name, value);
 } /* end Wsetenv() */
@@ -378,7 +385,7 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
     FILETIME             ExitTime;
     LARGE_INTEGER        counts_start;
     static LARGE_INTEGER counts_freq;
-    static hbool_t       is_initialized = FALSE;
+    static bool          is_initialized = false;
     BOOL                 err;
 
     assert(tvs);
@@ -389,7 +396,7 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
         err            = QueryPerformanceFrequency(&counts_freq);
         if (0 == err)
             return -1;
-        is_initialized = TRUE;
+        is_initialized = true;
     } /* end if */
 
     /*************************
@@ -514,27 +521,21 @@ error:
 } /* end H5_get_utf16_str() */
 
 /*-------------------------------------------------------------------------
- * Function:     Wopen_utf8
+ * Function:     Wopen
  *
- * Purpose:      UTF-8 equivalent of open(2) for use on Windows.
- *               Converts a UTF-8 input path to UTF-16 and then opens the
- *               file via _wopen() under the hood
+ * Purpose:      Equivalent of open(2) for use on Windows. Necessary to
+ *               handle code pages and Unicode on that platform.
  *
  * Return:       Success:    A POSIX file descriptor
  *               Failure:    -1
- *
  *-------------------------------------------------------------------------
  */
 int
-Wopen_utf8(const char *path, int oflag, ...)
+Wopen(const char *path, int oflag, ...)
 {
     int      fd    = -1;   /* POSIX file descriptor to be returned */
     wchar_t *wpath = NULL; /* UTF-16 version of the path */
     int      pmode = 0;    /* mode (optionally set via variable args) */
-
-    /* Convert the input UTF-8 path to UTF-16 */
-    if (NULL == (wpath = H5_get_utf16_str(path)))
-        goto done;
 
     /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
      * transformations when performing I/O. Note that this will
@@ -551,47 +552,83 @@ Wopen_utf8(const char *path, int oflag, ...)
         va_end(vl);
     }
 
-    /* Open the file */
-    fd = _wopen(wpath, oflag, pmode);
+    /* First try opening the file with the normal POSIX open() call.
+     * This will handle ASCII without additional processing as well as
+     * systems where code pages are being used instead of true Unicode.
+     */
+    if ((fd = open(path, oflag, pmode)) >= 0) {
+        /* If this succeeds, we're done */
+        goto done;
+    }
 
-done:
-    if (wpath)
-        H5MM_xfree((void *)wpath);
-
-    return fd;
-} /* end Wopen_utf8() */
-
-/*-------------------------------------------------------------------------
- * Function:     Wremove_utf8
- *
- * Purpose:      UTF-8 equivalent of remove(3) for use on Windows.
- *               Converts a UTF-8 input path to UTF-16 and then opens the
- *               file via _wremove() under the hood
- *
- * Return:       Success:    0
- *               Failure:    -1
- *
- *-------------------------------------------------------------------------
- */
-int
-Wremove_utf8(const char *path)
-{
-    wchar_t *wpath = NULL; /* UTF-16 version of the path */
-    int      ret   = -1;
+    if (errno == ENOENT) {
+        /* Not found, reset errno and try with UTF-16 */
+        errno = 0;
+    }
+    else {
+        /* Some other error (like permissions), so just exit */
+        goto done;
+    }
 
     /* Convert the input UTF-8 path to UTF-16 */
     if (NULL == (wpath = H5_get_utf16_str(path)))
         goto done;
 
-    /* Open the file */
+    /* Open the file using a UTF-16 path */
+    fd = _wopen(wpath, oflag, pmode);
+
+done:
+    H5MM_xfree(wpath);
+
+    return fd;
+} /* end Wopen() */
+
+/*-------------------------------------------------------------------------
+ * Function:     Wremove
+ *
+ * Purpose:      Equivalent of remove(3) for use on Windows. Necessary to
+ *               handle code pages and Unicode on that platform.
+ *
+ * Return:       Success:    0
+ *               Failure:    -1
+ *-------------------------------------------------------------------------
+ */
+int
+Wremove(const char *path)
+{
+    wchar_t *wpath = NULL; /* UTF-16 version of the path */
+    int      ret   = -1;
+
+    /* First try removing the file with the normal POSIX remove() call.
+     * This will handle ASCII without additional processing as well as
+     * systems where code pages are being used instead of true Unicode.
+     */
+    if ((ret = remove(path)) >= 0) {
+        /* If this succeeds, we're done */
+        goto done;
+    }
+
+    if (errno == ENOENT) {
+        /* Not found, reset errno and try with UTF-16 */
+        errno = 0;
+    }
+    else {
+        /* Some other error (like permissions), so just exit */
+        goto done;
+    }
+
+    /* Convert the input UTF-8 path to UTF-16 */
+    if (NULL == (wpath = H5_get_utf16_str(path)))
+        goto done;
+
+    /* Remove the file using a UTF-16 path */
     ret = _wremove(wpath);
 
 done:
-    if (wpath)
-        H5MM_xfree((void *)wpath);
+    H5MM_xfree(wpath);
 
     return ret;
-} /* end Wremove_utf8() */
+} /* end Wremove() */
 
 #endif /* H5_HAVE_WIN32_API */
 
@@ -620,7 +657,6 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Sanity check */
     assert(name);
     assert(extpath);
 
@@ -634,15 +670,16 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
     if (H5_CHECK_ABSOLUTE(name)) {
         if (NULL == (full_path = (char *)H5MM_strdup(name)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed");
-    }      /* end if */
-    else { /* relative pathname */
+    }
+    else {
+        /* relative pathname */
         char  *retcwd;
         size_t name_len;
         int    drive;
 
         if (NULL == (cwdpath = (char *)H5MM_malloc(MAX_PATH_LEN)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed");
-        name_len = HDstrlen(name) + 1;
+        name_len = strlen(name) + 1;
         if (NULL == (new_name = (char *)H5MM_malloc(name_len)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed");
 
@@ -654,44 +691,48 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
         if (H5_CHECK_ABS_DRIVE(name)) {
             drive  = HDtoupper(name[0]) - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
-            HDstrncpy(new_name, &name[2], name_len);
-        } /* end if */
-          /*
-           * Windows: name[0] is a '/' or '\'
-           *  Get current drive
-           * Unix: does not apply
-           */
+            strncpy(new_name, &name[2], name_len);
+        }
+        /*
+         * Windows: name[0] is a '/' or '\'
+         *  Get current drive
+         * Unix: does not apply
+         */
         else if (H5_CHECK_ABS_PATH(name) && (0 != (drive = HDgetdrive()))) {
-            HDsnprintf(cwdpath, MAX_PATH_LEN, "%c:%c", (drive + 'A' - 1), name[0]);
+            snprintf(cwdpath, MAX_PATH_LEN, "%c:%c", (drive + 'A' - 1), name[0]);
             retcwd = cwdpath;
-            HDstrncpy(new_name, &name[1], name_len);
+            strncpy(new_name, &name[1], name_len);
         }
         /* totally relative for Unix and Windows: get current working directory  */
         else {
             retcwd = HDgetcwd(cwdpath, MAX_PATH_LEN);
-            HDstrncpy(new_name, name, name_len);
-        } /* end if */
+            strncpy(new_name, name, name_len);
+        }
 
         if (retcwd != NULL) {
             size_t cwdlen;
             size_t path_len;
 
-            assert(cwdpath);
-            cwdlen = HDstrlen(cwdpath);
-            assert(cwdlen);
-            assert(new_name);
-            path_len = cwdlen + HDstrlen(new_name) + 2;
+            cwdlen = strlen(cwdpath);
+            if (cwdlen == 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "cwd length is zero");
+            path_len = cwdlen + strlen(new_name) + 2;
             if (NULL == (full_path = (char *)H5MM_malloc(path_len)))
                 HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-            HDstrncpy(full_path, cwdpath, cwdlen + 1);
-            if (!H5_CHECK_DELIMITER(cwdpath[cwdlen - 1]))
-                HDstrncat(full_path, H5_DIR_SEPS, path_len - (cwdlen + 1));
-            HDstrncat(full_path, new_name, path_len - (cwdlen + 1) - HDstrlen(H5_DIR_SEPS));
-        } /* end if */
-    }     /* end else */
+            /* path_len will always be greater than zero, so no check before
+             * setting the terminal NUL byte of full_path
+             */
+            strncpy(full_path, cwdpath, path_len);
+            full_path[path_len - 1] = '\0';
 
-    /* strip out the last component (the file name itself) from the path */
+            if (!H5_CHECK_DELIMITER(cwdpath[cwdlen - 1]))
+                strncat(full_path, H5_DIR_SEPS, path_len - (cwdlen + 1));
+            strncat(full_path, new_name, path_len - (cwdlen + 1) - strlen(H5_DIR_SEPS));
+        }
+    }
+
+    /* Strip out the last component (the file name itself) from the path */
     if (full_path) {
         char *ptr = NULL;
 
@@ -699,10 +740,9 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
         assert(ptr);
         *++ptr   = '\0';
         *extpath = full_path;
-    } /* end if */
+    }
 
 done:
-    /* Release resources */
     if (cwdpath)
         H5MM_xfree(cwdpath);
     if (new_name)
@@ -734,8 +774,8 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
     assert(path2);
 
     if (path1)
-        path1_len = HDstrlen(path1);
-    path2_len = HDstrlen(path2);
+        path1_len = strlen(path1);
+    path2_len = strlen(path2);
 
     if (path1 == NULL || *path1 == '\0' || H5_CHECK_ABSOLUTE(path2)) {
 
@@ -753,7 +793,7 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
              */
             if (NULL == (*full_name = (char *)H5MM_malloc(path2_len + 3)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate path2 buffer");
-            HDsnprintf(*full_name, (path2_len + 3), "%c:%s", path1[0], path2);
+            snprintf(*full_name, (path2_len + 3), "%c:%s", path1[0], path2);
         } /* end if */
         else {
             /* On windows path2 is path absolute name ("\foo\bar"),
@@ -777,9 +817,9 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate filename buffer");
 
         /* Compose the full file name */
-        HDsnprintf(*full_name, (path1_len + path2_len + 2 + 2), "%s%s%s",
-                   path1, /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
-                   (H5_CHECK_DELIMITER(path1[path1_len - 1]) ? "" : H5_DIR_SEPS), path2);
+        snprintf(*full_name, (path1_len + path2_len + 2 + 2), "%s%s%s",
+                 path1, /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
+                 (H5_CHECK_DELIMITER(path1[path1_len - 1]) ? "" : H5_DIR_SEPS), path2);
     } /* end else */
 
 done:
@@ -803,14 +843,13 @@ H5_nanosleep(uint64_t nanosec)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef H5_HAVE_WIN32_API
-    DWORD dwMilliseconds = (DWORD)HDceil(nanosec / 1.0e6);
-    DWORD ignore;
+    DWORD dwMilliseconds = (DWORD)ceil(nanosec / 1.0e6);
 
     /* Windows can't sleep at a ns resolution. Best we can do is ~1 ms. We
      * don't care about the return value since the second parameter
-     * (bAlertable) is FALSE, so it will always be zero.
+     * (bAlertable) is false, so it will always be zero.
      */
-    ignore = SleepEx(dwMilliseconds, FALSE);
+    SleepEx(dwMilliseconds, false);
 
 #else
 
@@ -1000,7 +1039,7 @@ H5_dirname(const char *path, char **dirname)
     if (!dirname)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirname can't be NULL");
 
-    if (NULL == (sep = HDstrrchr(path, H5_DIR_SEPC))) {
+    if (NULL == (sep = strrchr(path, H5_DIR_SEPC))) {
         /* Pathname with no file separator characters */
         out = H5MM_strdup(".");
     }
@@ -1109,7 +1148,7 @@ H5_basename(const char *path, char **basename)
     if (!basename)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "basename can't be NULL");
 
-    if (NULL == (sep = HDstrrchr(path, H5_DIR_SEPC))) {
+    if (NULL == (sep = strrchr(path, H5_DIR_SEPC))) {
         if (*path == '\0')
             /* Empty pathname */
             out = H5MM_strdup(".");
@@ -1206,7 +1245,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         if (H5_optind >= argc || argv[H5_optind][0] != '-' || argv[H5_optind][1] == '\0') {
             return EOF;
         }
-        else if (HDstrcmp(argv[H5_optind], "--") == 0) {
+        else if (strcmp(argv[H5_optind], "--") == 0) {
             H5_optind++;
             return EOF;
         }
@@ -1216,19 +1255,19 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         /* long command line option */
         int        i;
         const char ch      = '=';
-        char      *arg     = HDstrdup(&argv[H5_optind][2]);
+        char      *arg     = strdup(&argv[H5_optind][2]);
         size_t     arg_len = 0;
 
         H5_optarg = strchr(&argv[H5_optind][2], ch);
-        arg_len   = HDstrlen(&argv[H5_optind][2]);
+        arg_len   = strlen(&argv[H5_optind][2]);
         if (H5_optarg) {
-            arg_len -= HDstrlen(H5_optarg);
+            arg_len -= strlen(H5_optarg);
             H5_optarg++; /* skip the equal sign */
         }
         arg[arg_len] = 0;
 
         for (i = 0; l_opts && l_opts[i].name; i++) {
-            if (HDstrcmp(arg, l_opts[i].name) == 0) {
+            if (strcmp(arg, l_opts[i].name) == 0) {
                 /* we've found a matching long command line flag */
                 optchar = l_opts[i].shortval;
 
@@ -1278,7 +1317,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         /* short command line option */
         optchar = argv[H5_optind][sp];
 
-        if (optchar == ':' || (cp = HDstrchr(opts, optchar)) == 0) {
+        if (optchar == ':' || (cp = strchr(opts, optchar)) == 0) {
             if (H5_opterr)
                 fprintf(stderr, "%s: unknown option \"%c\"\n", argv[0], optchar);
 

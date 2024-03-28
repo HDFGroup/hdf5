@@ -172,7 +172,7 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
     assert(history != NULL);
     assert(H5FD_ONION_HISTORY_VERSION_CURR == history->version);
 
-    if (HDstrncmp((const char *)buf, H5FD_ONION_HISTORY_SIGNATURE, 4))
+    if (strncmp((const char *)buf, H5FD_ONION_HISTORY_SIGNATURE, 4))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid signature");
 
     if (H5FD_ONION_HISTORY_VERSION_CURR != buf[4])

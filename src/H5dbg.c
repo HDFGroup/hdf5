@@ -102,30 +102,30 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *mark
                 fprintf(stream, "   ");
 
             if (7 == v)
-                HDfputc(' ', stream);
+                fputc(' ', stream);
         } /* end for */
-        HDfputc(' ', stream);
+        fputc(' ', stream);
 
         /* Print the character values */
         for (v = 0; v < 16; v++) {
             if (u + v < buf_size) {
                 if (marker[u + v])
-                    HDfputc(' ', stream);
+                    fputc(' ', stream);
                 else {
                     c = buf[buf_offset + u + v];
 
                     if (isprint(c))
-                        HDfputc(c, stream);
+                        fputc(c, stream);
                     else
-                        HDfputc('.', stream);
+                        fputc('.', stream);
                 } /* end else */
             }     /* end if */
 
             if (7 == v)
-                HDfputc(' ', stream);
+                fputc(' ', stream);
         } /* end for */
 
-        HDfputc('\n', stream);
+        fputc('\n', stream);
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

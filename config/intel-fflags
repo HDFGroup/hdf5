@@ -123,7 +123,7 @@ if test "X-ifort" = "X-$f9x_vendor"; then
     ###########
 
     H5_FCFLAGS="$H5_FCFLAGS -free"
-    H5_FCFLAGS="$H5_FCFLAGS $(load_intel_arguments ifort-general)"
+    H5_FCFLAGS="$H5_FCFLAGS $(load_intel_arguments classic/ifort-general)"
 
     #############################
     # Version-specific warnings #

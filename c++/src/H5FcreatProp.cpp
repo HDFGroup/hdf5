@@ -357,12 +357,4 @@ FileCreatPropList::getFileSpacePagesize() const
     return (fsp_psize);
 }
 
-//--------------------------------------------------------------------------
-// Function:    FileCreatPropList destructor
-///\brief       Noop destructor.
-//--------------------------------------------------------------------------
-FileCreatPropList::~FileCreatPropList()
-{
-}
-
 } // namespace H5

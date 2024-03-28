@@ -38,9 +38,9 @@
         nerrors++;                                                                                           \
         if (nerrors <= GHEAP_REPEATED_ERR_LIM) {                                                             \
             H5_FAILED();                                                                                     \
-            HDputs(MSG);                                                                                     \
+            puts(MSG);                                                                                       \
             if (nerrors == GHEAP_REPEATED_ERR_LIM)                                                           \
-                HDputs("    Suppressing further errors...");                                                 \
+                puts("    Suppressing further errors...");                                                   \
         }       /* end if */                                                                                 \
     } while (0) /* end GHEAP_REPEATED_ERR */
 
@@ -84,7 +84,7 @@ test_1(hid_t fapl)
         goto error;
     if (NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
-        HDputs("    Unable to create file");
+        puts("    Unable to create file");
         goto error;
     }
 
@@ -100,12 +100,12 @@ test_1(hid_t fapl)
         status = H5HG_insert(f, size, out, obj + u);
         if (status < 0) {
             H5_FAILED();
-            HDputs("    Unable to insert object into global heap");
+            puts("    Unable to insert object into global heap");
             nerrors++;
         }
         else if (u && H5_addr_gt(obj[u - 1].addr, obj[u].addr)) {
             H5_FAILED();
-            HDputs("    Collection addresses are not monotonically increasing");
+            puts("    Collection addresses are not monotonically increasing");
             nerrors++;
         }
     }
@@ -119,12 +119,12 @@ test_1(hid_t fapl)
         H5Eclear2(H5E_DEFAULT);
         if (NULL == H5HG_read(f, obj + u, in, NULL)) {
             H5_FAILED();
-            HDputs("    Unable to read object");
+            puts("    Unable to read object");
             nerrors++;
         }
         else if (memcmp(in, out, size) != 0) {
             H5_FAILED();
-            HDputs("    Value read doesn't match value written");
+            puts("    Value read doesn't match value written");
             nerrors++;
         }
     }
@@ -189,7 +189,7 @@ test_2(hid_t fapl)
         goto error;
     if (NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
-        HDputs("    Unable to create file");
+        puts("    Unable to create file");
         goto error;
     }
 
@@ -202,7 +202,7 @@ test_2(hid_t fapl)
         H5Eclear2(H5E_DEFAULT);
         if (H5HG_insert(f, size, out, obj + u) < 0) {
             H5_FAILED();
-            HDputs("    Unable to insert object into global heap");
+            puts("    Unable to insert object into global heap");
             nerrors++;
         }
     }
@@ -216,12 +216,12 @@ test_2(hid_t fapl)
         H5Eclear2(H5E_DEFAULT);
         if (NULL == H5HG_read(f, obj + u, in, NULL)) {
             H5_FAILED();
-            HDputs("    Unable to read object");
+            puts("    Unable to read object");
             nerrors++;
         }
         else if (memcmp(in, out, size) != 0) {
             H5_FAILED();
-            HDputs("    Value read doesn't match value written");
+            puts("    Value read doesn't match value written");
             nerrors++;
         }
     }
@@ -286,7 +286,7 @@ test_3(hid_t fapl)
         goto error;
     if (NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
-        HDputs("    Unable to create file");
+        puts("    Unable to create file");
         goto error;
     }
 
@@ -298,7 +298,7 @@ test_3(hid_t fapl)
         status = H5HG_insert(f, size, out, obj + u);
         if (status < 0) {
             H5_FAILED();
-            HDputs("    Unable to insert object into global heap");
+            puts("    Unable to insert object into global heap");
             nerrors++;
         }
     }
@@ -308,7 +308,7 @@ test_3(hid_t fapl)
         status = H5HG_remove(f, obj + u);
         if (status < 0) {
             H5_FAILED();
-            HDputs("    Unable to remove object");
+            puts("    Unable to remove object");
             nerrors++;
         }
     }
@@ -374,7 +374,7 @@ test_4(hid_t fapl)
         goto error;
     if (NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
-        HDputs("    Unable to create file");
+        puts("    Unable to create file");
         goto error;
     }
 
@@ -386,7 +386,7 @@ test_4(hid_t fapl)
         status = H5HG_insert(f, size, out, obj + u);
         if (status < 0) {
             H5_FAILED();
-            HDputs("    Unable to insert object into global heap");
+            puts("    Unable to insert object into global heap");
             nerrors++;
         }
 
@@ -399,7 +399,7 @@ test_4(hid_t fapl)
             status = H5HG_remove(f, obj + u - 1);
             if (status < 0) {
                 H5_FAILED();
-                HDputs("    Unable to remove object");
+                puts("    Unable to remove object");
                 nerrors++;
             }
             memset(obj + u - 1, 0, sizeof *obj);
@@ -465,7 +465,7 @@ test_ooo_indices(hid_t fapl)
         goto error;
     if (NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
-        HDputs("    Unable to create file");
+        puts("    Unable to create file");
         goto error;
     }
 
@@ -509,7 +509,7 @@ test_ooo_indices(hid_t fapl)
         goto error;
     if (NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
-        HDputs("    Unable to open file");
+        puts("    Unable to open file");
         goto error;
     } /* end if */
 
@@ -519,7 +519,7 @@ test_ooo_indices(hid_t fapl)
             goto error;
         if (i != j) {
             H5_FAILED();
-            HDputs("    Incorrect read value");
+            puts("    Incorrect read value");
             goto error;
         }
     }
@@ -557,9 +557,9 @@ error:
 int
 main(void)
 {
-    int     nerrors        = 0;
-    hid_t   fapl_id        = H5I_INVALID_HID;
-    hbool_t api_ctx_pushed = FALSE; /* Whether API context pushed */
+    int   nerrors        = 0;
+    hid_t fapl_id        = H5I_INVALID_HID;
+    bool  api_ctx_pushed = false; /* Whether API context pushed */
 
     h5_reset();
     if ((fapl_id = h5_fileaccess()) < 0)
@@ -568,7 +568,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     nerrors += test_1(fapl_id);
     nerrors += test_2(fapl_id);
@@ -582,12 +582,12 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDputs("All global heap tests passed.");
+    puts("All global heap tests passed.");
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     h5_cleanup(FILENAME, fapl_id);
     exit(EXIT_SUCCESS);
@@ -600,8 +600,8 @@ error:
     H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     exit(EXIT_FAILURE);
 } /* end main() */

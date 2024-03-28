@@ -126,7 +126,6 @@ CONTAINS
     INTEGER :: error
     INTEGER(HSIZE_T), DIMENSION(3) :: data_dims
 
-
     !
     !This writes data to the HDF5 file.
     !
@@ -315,13 +314,149 @@ CONTAINS
   END SUBROUTINE test_select_hyperslab
 
   !
-  !Subroutine to test element selection
+  ! Subroutine to test selection iterations
+  !
+
+  SUBROUTINE test_select_iter(cleanup, total_error)
+
+    IMPLICIT NONE
+    LOGICAL, INTENT(IN) :: cleanup
+    INTEGER, INTENT(INOUT) :: total_error
+
+    INTEGER, PARAMETER :: POINT1_NPOINTS = 10
+    INTEGER(SIZE_T), PARAMETER :: SEL_ITER_MAX_SEQ = 256 ! Information for testing selection iterators
+    INTEGER, PARAMETER :: rank = 2
+    INTEGER(SIZE_T), PARAMETER :: NUMP = 4
+
+    INTEGER(hsize_t), DIMENSION(2) :: dims1 = (/12, 6/) !  2-D Dataspace dimensions
+    INTEGER(HID_T) :: sid                       ! Dataspace ID
+    INTEGER(HID_T) :: iter_id                   ! Dataspace selection iterator ID
+    INTEGER(HSIZE_T), DIMENSION(rank, POINT1_NPOINTS) :: coord1   ! Coordinates for point selection
+    INTEGER(HSIZE_T), DIMENSION(2) :: start                  ! Hyperslab start
+    INTEGER(HSIZE_T), DIMENSION(2) :: stride                 ! Hyperslab stride
+    INTEGER(HSIZE_T), DIMENSION(2) :: count                  ! Hyperslab block count
+    INTEGER(HSIZE_T), DIMENSION(2) :: BLOCK                  ! Hyperslab block size
+    INTEGER(SIZE_T) :: nseq                      ! # of sequences retrieved
+    INTEGER(SIZE_T) :: nbytes                    ! # of bytes retrieved
+    INTEGER(HSIZE_T), DIMENSION(SEL_ITER_MAX_SEQ) :: off     ! Offsets for retrieved sequences
+    INTEGER(SIZE_T), DIMENSION(SEL_ITER_MAX_SEQ) :: ilen     ! Lengths for retrieved sequences
+    INTEGER :: sel_type                  ! Selection type
+    INTEGER :: error                     ! Error return value
+    integer(size_t) :: i
+
+    ! Create dataspace
+    CALL H5Screate_simple_f(2, dims1, sid, error)
+    CALL check("H5Screate_simple_f", error, total_error)
+
+    ! Test iterators on various basic selection types
+    DO sel_type = H5S_SEL_NONE_F, H5S_SEL_ALL_F
+       IF(sel_type .EQ. H5S_SEL_NONE_F)THEN ! "None" selection
+          CALL H5Sselect_none_f(sid, error)
+          CALL check("H5Sselect_none_f", error, total_error)
+       ELSE IF(sel_type.EQ.H5S_SEL_POINTS_F)THEN ! Point selection
+          ! Select sequence of four points
+          coord1(1, 1) = 1
+          coord1(2, 1) = 2
+          coord1(1, 2) = 3
+          coord1(2, 2) = 4
+          coord1(1, 3) = 5
+          coord1(2, 3) = 6
+          coord1(1, 4) = 7
+          coord1(2, 4) = 8
+          CALL H5Sselect_elements_f(sid, H5S_SELECT_SET_F, rank, NUMP, coord1, error)
+          CALL check("H5Sselect_elements_f", error, total_error)
+       ELSE IF(sel_type.EQ.H5S_SEL_HYPERSLABS_F)THEN ! Hyperslab selection
+          ! Select regular hyperslab
+          start(1) = 0
+          start(2) = 0
+          stride(1) = 1
+          stride(2) = 1
+          COUNT(1) = 4
+          COUNT(2) = 4
+          BLOCK(1) = 1
+          BLOCK(2) = 1
+          CALL H5Sselect_hyperslab_f(sid, H5S_SELECT_SET_F, start, count, error, stride=stride, BLOCK=BLOCK)
+          CALL check("H5Sselect_hyperslab_f", error, total_error)
+       ELSE IF(sel_type.EQ.H5S_SEL_ALL_F)THEN ! "All" selection
+          CALL H5Sselect_all_f(sid, error)
+          CALL check("H5Sselect_all_f", error, total_error)
+       ELSE
+          CALL check("Incorrect selection option", error, total_error)
+       ENDIF
+
+       ! Create selection iterator object
+       CALL H5Ssel_iter_create_f(sid, 1_size_t, H5S_SEL_ITER_SHARE_WITH_DATASPACE_F, iter_id, error)
+       CALL check("H5Ssel_iter_create_f", error, total_error)
+
+       ! Try retrieving all sequence
+       off = -99
+       ilen = -99
+       CALL H5Ssel_iter_get_seq_list_f(iter_id, SEL_ITER_MAX_SEQ, 1024_size_t * 1024_size_t, nseq, nbytes, off, ilen, error)
+       CALL check("H5Ssel_iter_get_seq_list_f", error, total_error)
+
+       ! Check results from retrieving sequence list
+
+       IF (sel_type .EQ. H5S_SEL_NONE_F)THEN ! "None" selection
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", nseq, INT(0,SIZE_T), total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", nbytes, INT(0,SIZE_T), total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(1), INT(-99,HSIZE_T), total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(1), INT(-99,SIZE_T), total_error)
+       ELSE IF (sel_type .EQ. H5S_SEL_POINTS_F)THEN ! Point selection
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", nseq, 4_SIZE_T, total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", nbytes, 4_SIZE_T, total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(NUMP+1), INT(-99,HSIZE_T), total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(NUMP+1), INT(-99,SIZE_T), total_error)
+          DO i = 1, NUMP
+             CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(i), INT((i-1)*26+12,HSIZE_T), total_error)
+             CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(i), INT(1,SIZE_T), total_error)
+          ENDDO
+       ELSE IF (sel_type .eq. H5S_SEL_HYPERSLABS_F)THEN ! Hyperslab selection
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", nseq, 4_SIZE_T, total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", nbytes, 16_SIZE_T, total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(NUMP+1), INT(-99,HSIZE_T), total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(NUMP+1), INT(-99,SIZE_T), total_error)
+          DO i = 1, NUMP
+             CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(i), INT((i-1)*12,HSIZE_T), total_error)
+             CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(i), INT(4,SIZE_T), total_error)
+          ENDDO
+       ELSE IF (sel_type.EQ.H5S_SEL_ALL_F)THEN ! "All" selection
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", nseq, 1_SIZE_T, total_error )
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", nbytes, 72_SIZE_T, total_error )
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(1), INT(0,HSIZE_T), total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(1), INT(72,SIZE_T), total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(2), INT(-99,HSIZE_T), total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(2), INT(-99,SIZE_T), total_error)
+       ELSE
+          CALL check("Incorrect selection option", error, total_error)
+       ENDIF
+
+       ! Reset iterator
+       CALL H5Ssel_iter_reset_f(iter_id, sid, error)
+       CALL check("H5Ssel_iter_reset_f", error, total_error)
+
+       ! Close selection iterator
+       CALL H5Ssel_iter_close_f(iter_id, error)
+       CALL check("H5Ssel_iter_close_f", error, total_error)
+    END DO
+
+    ! Create selection iterator object
+    CALL H5Ssel_iter_create_f(sid, 1_size_t, H5S_SEL_ITER_GET_SEQ_LIST_SORTED_F, iter_id, error)
+    CALL check("H5Ssel_iter_create_f", error, total_error)
+
+    ! Reset iterator
+    CALL H5Ssel_iter_reset_f(iter_id, sid, error)
+    CALL check("H5Ssel_iter_reset_f", error, total_error)
+
+    CALL h5sclose_f(sid, error)
+    CALL check("h5sclose_f", error, total_error)
+
+  END SUBROUTINE test_select_iter
+
+  !
+  ! Subroutine to test element selection
   !
 
   SUBROUTINE test_select_element(cleanup, total_error)
-
-    USE HDF5 ! This module contains all necessary modules
-    USE TH5_MISC
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
@@ -807,6 +942,12 @@ CONTAINS
      INTEGER :: error
      INTEGER(HSIZE_T), DIMENSION(3) :: data_dims
 
+     LOGICAL :: same, intersects
+     INTEGER(HID_T) :: scalar_all_sid
+
+     INTEGER(hsize_t), DIMENSION(1:2) :: block_start = (/0, 0/)  ! Start offset for BLOCK
+     INTEGER(hsize_t), DIMENSION(1:2) :: block_end   = (/2, 3/)  ! END offset for BLOCK
+
      !
      !initialize the coord array to give the selected points' position
      !
@@ -848,6 +989,22 @@ CONTAINS
      CALL h5screate_simple_f(RANK, dimsf, dataspace, error)
      CALL check("h5screate_simple_f", error, total_error)
 
+     ! Check shape same API
+     CALL h5sselect_shape_same_f(dataspace, dataspace, same, error)
+     CALL check("h5sselect_shape_same_f", error, total_error)
+     CALL VERIFY("h5sselect_shape_same_f", same, .TRUE., total_error)
+
+     CALL h5screate_f(H5S_SCALAR_F, scalar_all_sid, error)
+     CALL check("h5screate_f", error, total_error)
+
+     same = .TRUE.
+     CALL h5sselect_shape_same_f(dataspace, scalar_all_sid, same, error)
+     CALL check("h5sselect_shape_same_f", error, total_error)
+     CALL VERIFY("h5sselect_shape_same_f", same, .FALSE., total_error)
+
+     CALL h5sclose_f(scalar_all_sid,error)
+     CALL check("h5sclose_f", error, total_error)
+
      !
      ! Create the dataset with default properties
      !
@@ -862,6 +1019,33 @@ CONTAINS
      data_dims(2) = 6
      CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, data_dims, error)
      CALL check("h5dwrite_f", error, total_error)
+
+     ! Set selection to 'all'
+     CALL h5sselect_all_f(dataspace, error)
+     CALL check("h5sselect_all_f", error, total_error)
+
+     ! Test block intersection with 'all' selection (always true)
+     CALL h5sselect_intersect_block_f(dataspace, block_start, block_end, intersects, error)
+     CALL check("h5sselect_intersect_block_f", error, total_error)
+     CALL verify("h5sselect_intersect_block_f", intersects, .TRUE., total_error)
+
+     ! Select 2x2 region of the dataset
+     CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error)
+     CALL check("h5sselect_hyperslab_f", error, total_error)
+
+     ! Check an intersecting region
+     block_start(1:2) = (/1,0/)
+     block_end(1:2) = (/2,2/)
+     CALL h5sselect_intersect_block_f(dataspace, block_start, block_end, intersects, error)
+     CALL check("h5sselect_intersect_block_f", error, total_error)
+     CALL verify("h5sselect_intersect_block_f", intersects, .TRUE., total_error)
+
+     ! Check a non-intersecting region
+     block_start(1:2) = (/2,1/)
+     block_end(1:2) = (/4,5/)
+     CALL h5sselect_intersect_block_f(dataspace, block_start, block_end, intersects, error)
+     CALL check("h5sselect_intersect_block_f", error, total_error)
+     CALL verify("h5sselect_intersect_block_f2", intersects, .FALSE., total_error)
 
      !
      !Close the dataspace for the dataset.
