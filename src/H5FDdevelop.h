@@ -91,7 +91,7 @@
 #define H5FD_MEM_SOHM_INDEX H5FD_MEM_BTREE
 /**
  * Extensible array header block; it is mapped to 'ohdr' type file memory to
- * benefit their similarity.
+ * benefit from their similarity.
  */
 #define H5FD_MEM_EARRAY_HDR H5FD_MEM_OHDR
 /**
