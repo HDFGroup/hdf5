@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.74498cb</span>
+   &#160;<span id="projectnumber">1.15.0.ce3784d</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -508,6 +508,12 @@ Functions</h2></td></tr>
 <tr class="memitem:ga8008cddafa81bd1ddada23f6d9a161ca" id="r_ga8008cddafa81bd1ddada23f6d9a161ca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8008cddafa81bd1ddada23f6d9a161ca">H5Pset_page_buffer_size</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, size_t buf_size, unsigned min_meta_per, unsigned min_raw_per)</td></tr>
 <tr class="memdesc:ga8008cddafa81bd1ddada23f6d9a161ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the maximum size for the page buffer and the minimum percentage for metadata and raw data pages.  <br /></td></tr>
 <tr class="separator:ga8008cddafa81bd1ddada23f6d9a161ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafa8e677af3200e155e9208522f8e05c0" id="r_gafa8e677af3200e155e9208522f8e05c0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gafa8e677af3200e155e9208522f8e05c0">H5Pset_relax_file_integrity_checks</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, uint64_t flags)</td></tr>
+<tr class="memdesc:gafa8e677af3200e155e9208522f8e05c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relax file integrity checks that may issue errors for some valid files.  <br /></td></tr>
+<tr class="separator:gafa8e677af3200e155e9208522f8e05c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab1e57751a5f34c1a7cb6dd0194877d3e" id="r_gab1e57751a5f34c1a7cb6dd0194877d3e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gab1e57751a5f34c1a7cb6dd0194877d3e">H5Pget_relax_file_integrity_checks</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, uint64_t *flags)</td></tr>
+<tr class="memdesc:gab1e57751a5f34c1a7cb6dd0194877d3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve relaxed file integrity check flags.  <br /></td></tr>
+<tr class="separator:gab1e57751a5f34c1a7cb6dd0194877d3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="ga6735afde382cfd746b92a1a3b0e6a2ab" name="ga6735afde382cfd746b92a1a3b0e6a2ab"></a>
@@ -2258,6 +2264,39 @@ For a file opened without SWMR access, the value retrieved will always be the de
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="#ga0da11baf31cf424d053aa7952c933d98" title="Retrieves the maximum size for the page buffer and the minimum percentage for metadata and raw data p...">H5Pget_page_buffer_size()</a> retrieves <code>buf_size</code>, the maximum size in bytes of the page buffer, <code>min_meta_perc</code>, the minimum metadata percentage, and <code>min_raw_perc</code>, the minimum raw data percentage.</p>
 <dl class="section since"><dt>Since</dt><dd>1.10.1 </dd></dl>
+
+</div>
+</div>
+<a id="gab1e57751a5f34c1a7cb6dd0194877d3e" name="gab1e57751a5f34c1a7cb6dd0194877d3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab1e57751a5f34c1a7cb6dd0194877d3e">&#9670;&#160;</a></span>H5Pget_relax_file_integrity_checks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Pget_relax_file_integrity_checks </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>plist_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t *</td>          <td class="paramname"><span class="paramname"><em>flags</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieve relaxed file integrity check flags. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">plist_id</td><td>File access property list identifier </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">flags</td><td>Relaxed file integrity check flags</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="#gab1e57751a5f34c1a7cb6dd0194877d3e" title="Retrieve relaxed file integrity check flags.">H5Pget_relax_file_integrity_checks()</a> retrieves the relaxed file integrity check value into <code>flags</code> for the file access property list specified in <code>plist_id</code>.</p>
+<dl class="section since"><dt>Since</dt><dd>1.14.4 </dd></dl>
 
 </div>
 </div>
@@ -4789,6 +4828,45 @@ Failure Modes:<ul>
 <p>If a non-zero page buffer size is set, and the file space strategy is not set to paged or the page size for the file space strategy is larger than the page buffer size, the subsequent call to <a class="el" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4" title="Creates an HDF5 file.">H5Fcreate()</a> or <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen()</a> using the <code>plist_id</code> will fail.</p>
 <p>The function also allows setting the minimum percentage of pages for metadata and raw data to prevent a certain type of data to evict hot data of the other type.</p>
 <dl class="section since"><dt>Since</dt><dd>1.10.1 </dd></dl>
+
+</div>
+</div>
+<a id="gafa8e677af3200e155e9208522f8e05c0" name="gafa8e677af3200e155e9208522f8e05c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafa8e677af3200e155e9208522f8e05c0">&#9670;&#160;</a></span>H5Pset_relax_file_integrity_checks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Pset_relax_file_integrity_checks </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>plist_id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t</td>          <td class="paramname"><span class="paramname"><em>flags</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Relax file integrity checks that may issue errors for some valid files. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">plist_id</td><td>File access property list identifier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">flags</td><td>Relaxed integrity checks flag. Valid values are: <ul>
+<li><a class="el" href="_h5_fpublic_8h.html#aef18fabdccce8db11b6dd3e231028028">H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS</a> suppresses integrity checks for detecting unusually high values for the number of unused bits in numeric datatype classes (H5T_INTEGER, H5T_FLOAT, and H5T_BITFIELD). Integrity checks are triggered when the precision for a datatype (i.e. the number of bits containing actual data) is less than half of the datatype's size and the datatype is greater than 1 byte in size. For example, a datatype with a precision of 15 bits and a size of 4 bytes (i.e. 32 bits) will issue an error, but a datatype with 17 bits of precision and a size of 4 bytes will not issue an error, nor will a datatype with a precision of 1, 2, or 3 bits and a size of 1 byte issue an error. </li>
+<li><a class="el" href="_h5_fpublic_8h.html#a86e0864b6be8816c2820610bd52e049a">H5F_RFIC_ALL</a> relaxes all integrity checks above.</li>
+</ul>
+</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p>Incorrectly encoded or corrupted metadata in a native HDF5 format file can cause incorrect library behavior when the metadata has no checksum. Integrity checks within the library detect these circumstances and issue errors when incorrect metadata is found. Unfortunately, some of the integrity checks for detecting these circumstances may incorrectly issue an error for a valid HDF5 file that was intentionally created with these configurations. Setting the appropriate flag(s) with this routine will relax the file integrity checks for these valid files and suppress errors when accessing objects with these configurations.</p>
+<p>The library will also issue errors when these configurations are used to create objects, preventing applications from unintentionally creating them. Setting the appropriate flag with this routine will also suppress those errors on creation, although using this routine and the appropriate flag(s) will still be required when accessing files created with these configurations.</p>
+<p>A more complete solution that avoids errors on both object creation and access is to use the H5Pset_libver_bounds routine with a low bound of at least <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a> when creating objects with these configurations. This will cause the library to checksum a file's metadata, allowing accidental data corruption to be correctly detected and errors correctly issued without ambiguity.</p>
+<dl class="section since"><dt>Since</dt><dd>1.14.4 </dd></dl>
 
 </div>
 </div>
