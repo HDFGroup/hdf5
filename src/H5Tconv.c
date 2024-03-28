@@ -839,6 +839,8 @@
             ssize_t s_stride, d_stride; /*src and dst strides        */                                      \
             size_t  safe;               /*how many elements are safe to process in each pass */              \
                                                                                                              \
+            memset(&dst_aligned, 0, sizeof(DT));                                                             \
+                                                                                                             \
             switch (cdata->command) {                                                                        \
                 case H5T_CONV_INIT:                                                                          \
                     /* Sanity check and initialize statistics */                                             \
