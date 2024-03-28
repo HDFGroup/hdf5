@@ -391,7 +391,12 @@ AC_REQUIRE([PAC_FC_AVAIL_KINDS])
 AC_MSG_CHECKING([default Fortran KIND of LOGICAL in MPI])
 AC_LANG_PUSH([Fortran])
 saved_FCFLAGS=$FCFLAGS
-FCFLAGS=""
+check_Intel="`$FC -V 2>&1 |grep '^Intel'`"
+if test X != "X$check_Intel"; then
+  FCFLAGS="-warn error"
+else
+  FCFLAGS=""
+fi
 for kind in `echo $pac_validLogicalKinds | sed -e 's/,/ /g'`; do
         AC_COMPILE_IFELSE([
                 PROGRAM main
