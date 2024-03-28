@@ -53,7 +53,7 @@ jobs:
       - name: Install HDF5
         shell: bash
         run: |
-          make install
+          cmake --install .
         working-directory: ${{ runner.workspace }}/build
 
       - name: Install julia
