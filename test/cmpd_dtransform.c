@@ -44,7 +44,7 @@ main(void)
     att_t      *atts        = NULL;
     att_t      *atts_res    = NULL;
 
-    printf("Testing writing compound attribues followed by data w/ transform.\n");
+    printf("Testing writing compound attributes followed by data w/ transform.\n");
 
     TESTING("data types are reset properly");
 
