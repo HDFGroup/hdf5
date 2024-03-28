@@ -178,6 +178,22 @@ New Features
 
     Library:
     --------
+    - H5Pset_external() now uses HDoff_t, which is always a 64-bit type
+
+      The H5Pset_external() call took an off_t parameter in HDF5 1.14.x and
+      earlier. On POSIX systems, off_t is specified as a 64-bit type via
+      POSIX large-file support (LFS). On Windows, however, off_t is defined
+      as a 32-bit type, even on 64-bit Windows.
+
+      HDoff_t has been added to H5public.h and is defined to be __int64 on
+      Windows and the library has been updated to use HDoff_t in place of
+      off_t throughout. The H5Pset_external() offset parameter has also been
+      updated to be HDoff_t.
+
+      There is no API compatibility wrapper for this change.
+
+      Fixes GitHub issue #3506
+
     - Added support for in-place type conversion in most cases
 
       In-place type conversion allows the library to perform type conversion

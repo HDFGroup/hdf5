@@ -593,15 +593,18 @@ typedef struct {
  */
 #include "H5win32defs.h"
 
-/* Platform-independent definitions for struct stat and off_t */
-#ifndef H5_HAVE_WIN32_API
-/* These definitions differ in Windows and are defined in
- * H5win32defs for that platform.
+/* Platform-independent definition for struct stat. For Win32, see
+ * H5win32defs.h.
  */
+#ifndef H5_HAVE_WIN32_API
 typedef struct stat h5_stat_t;
-typedef off_t       h5_stat_size_t;
-#define HDoff_t off_t
 #endif
+
+/* __int64 is the correct type for the st_size field of the _stati64
+ * struct on Windows (MSDN isn't very clear about this). POSIX systems use
+ * off_t. Both of these are typedef'd to HDoff_t in H5public.h.
+ */
+typedef HDoff_t h5_stat_size_t;
 
 /* Redefine all the POSIX and C functions.  We should never see an
  * undecorated POSIX or C function (or any other non-HDF5 function)

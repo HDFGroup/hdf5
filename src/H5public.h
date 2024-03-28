@@ -290,6 +290,22 @@ typedef long long ssize_t;
  */
 typedef uint64_t hsize_t;
 
+/* off_t exists on Windows, but is always a 32-bit long, even on 64-bit Windows,
+ * so on Windows we define HDoff_t to be __int64, which is the type of the
+ * st_size field of the _stati64 struct.
+ */
+#ifdef H5_HAVE_WIN32_API
+/**
+ * Platform-independent offset
+ */
+typedef __int64 HDoff_t;
+#else
+/**
+ * Platform-independent offset
+ */
+typedef off_t HDoff_t;
+#endif
+
 #ifdef H5_HAVE_PARALLEL
 #define HSIZE_AS_MPI_TYPE MPI_UINT64_T
 #endif
