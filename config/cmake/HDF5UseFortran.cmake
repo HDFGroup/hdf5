@@ -218,6 +218,11 @@ if (${HAVE_ISO_FORTRAN_ENV})
     string (REGEX REPLACE "," ";" VAR "${pac_validLogicalKinds}")
 
     set(CMAKE_REQUIRED_QUIET TRUE)
+    set(save_CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS})
+    if (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+       set(CMAKE_Fortran_FLAGS "-warn error")
+    endif ()
+
     foreach (KIND ${VAR})
       unset(MPI_LOGICAL_KIND CACHE)
       set (PROG_SRC
@@ -243,6 +248,7 @@ if (${HAVE_ISO_FORTRAN_ENV})
        message (FATAL_ERROR "Failed to determine LOGICAL KIND for MPI")
     endif ()
     set(CMAKE_REQUIRED_QUIET FALSE)
+    set(CMAKE_Fortran_FLAGS ${save_CMAKE_Fortran_FLAGS})
   endif()
 endif()
 
