@@ -390,7 +390,8 @@ AC_DEFUN([PAC_FIND_MPI_LOGICAL_KIND],[
 AC_REQUIRE([PAC_FC_AVAIL_KINDS])
 AC_MSG_CHECKING([default Fortran KIND of LOGICAL in MPI])
 AC_LANG_PUSH([Fortran])
-
+saved_FCFLAGS=$FCFLAGS
+FCFLAGS=""
 for kind in `echo $pac_validLogicalKinds | sed -e 's/,/ /g'`; do
         AC_COMPILE_IFELSE([
                 PROGRAM main
@@ -411,6 +412,7 @@ else
   AC_DEFINE_UNQUOTED([MPI_LOGICAL_KIND], [$PAC_MPI_LOGICAL_KIND], [Define MPI Fortran KIND of LOGICAL])
   AC_MSG_RESULT([$PAC_MPI_LOGICAL_KIND])
 fi
+FCFLAGS=$saved_FCFLAGS
 AC_LANG_POP([Fortran])
 ])
 

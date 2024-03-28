@@ -1763,6 +1763,9 @@ Known Problems
     implemented: (1) derived type argument passed by value (H5VLff.F90),
     and (2) support for REAL with KIND = 2 in intrinsic SPACING used in testing.
 
+    Fortran tests HDF5_1_8.F90 and HDF5_F03.F90 will fail with Cray compilers greater than
+    version 16.0 due to a compiler bug. The latest version verified as failing was version 17.0.
+
     Several tests currently fail on certain platforms:
         MPI_TEST-t_bigio fails with spectrum-mpi on ppc64le platforms.
 
