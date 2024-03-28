@@ -45,10 +45,10 @@ macro (BASIC_SETTINGS varname)
   #-----------------------------------------------------------------------------
   # Compiler specific flags : Shouldn't there be compiler tests for these
   #-----------------------------------------------------------------------------
-  if (CMAKE_COMPILER_IS_GNUCC)
+  if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
   endif ()
-  if (CMAKE_CXX_COMPILER_LOADED AND CMAKE_COMPILER_IS_GNUCXX)
+  if (CMAKE_CXX_COMPILER_LOADED AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set (CMAKE_CXX_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_CXX_FLAGS}")
   endif ()
 
@@ -56,10 +56,10 @@ macro (BASIC_SETTINGS varname)
   # This is in here to help some of the GCC based IDES like Eclipse
   # and code blocks parse the compiler errors and warnings better.
   #-----------------------------------------------------------------------------
-  if (CMAKE_COMPILER_IS_GNUCC)
+  if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
   endif ()
-  if (CMAKE_CXX_COMPILER_LOADED AND CMAKE_COMPILER_IS_GNUCXX)
+  if (CMAKE_CXX_COMPILER_LOADED AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
   endif ()
 
@@ -74,7 +74,7 @@ macro (BASIC_SETTINGS varname)
       set (HDF_WARNINGS_BLOCKED 1)
       string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
-      if (CMAKE_CXX_COMPILER_LOADED AND CMAKE_COMPILER_IS_GNUCXX)
+      if (CMAKE_CXX_COMPILER_LOADED AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
       endif ()
@@ -91,7 +91,7 @@ macro (BASIC_SETTINGS varname)
     # Most compilers use -w to suppress warnings.
     if (NOT HDF_WARNINGS_BLOCKED)
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
-      if (CMAKE_CXX_COMPILER_LOADED AND CMAKE_COMPILER_IS_GNUCXX)
+      if (CMAKE_CXX_COMPILER_LOADED AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
       endif ()
     endif ()
