@@ -132,14 +132,6 @@ main(void)
         if (data[idx] != data_res[idx])
             TEST_ERROR;
 
-    free(atts);
-    free(atts_res);
-    free(data);
-    free(data_res);
-
-    if (H5Fdelete(FILENAME, H5P_DEFAULT) < 0)
-        TEST_ERROR;
-
     /* Close all identifiers. */
     if (H5Pclose(dxpl_id) < 0)
         TEST_ERROR;
@@ -157,6 +149,13 @@ main(void)
         TEST_ERROR;
     if (H5Tclose(str_dtyp_id) < 0)
         TEST_ERROR;
+
+    free(atts);
+    free(atts_res);
+    free(data);
+    free(data_res);
+
+    HDremove(FILENAME);
 
     PASSED();
     return EXIT_SUCCESS;
