@@ -48,7 +48,7 @@
 
 /**
  * Fractal heap header block; it is mapped to 'ohdr' type file memory to
- * benefit their similarity.
+ * benefit from their similarity.
  */
 #define H5FD_MEM_FHEAP_HDR H5FD_MEM_OHDR
 /**
