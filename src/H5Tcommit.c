@@ -490,8 +490,8 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header");
 
     /* Check for creating committed datatype with unusual datatype */
-    if (H5T_is_numeric_with_unusual_unused_bits(type) &&
-        !(H5O_has_chksum(oh) || (H5F_RFIC_FLAGS(file) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)))
+    if (!(H5O_has_chksum(oh) || (H5F_RFIC_FLAGS(file) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)) &&
+        H5T_is_numeric_with_unusual_unused_bits(type))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                     "creating committed datatype with unusual datatype, see documentation for "
                     "H5Pset_relax_file_integrity_checks for details.");
