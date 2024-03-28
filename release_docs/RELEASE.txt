@@ -461,6 +461,19 @@ Bug Fixes since HDF5-1.14.3 release
 
     Library
     -------
+    - Fixed CVE-2017-17507
+
+      This CVE was previously declared fixed, but later testing with a static
+      build of HDF5 showed that it was not fixed.
+
+      When parsing a malformed (fuzzed) compound type containing variable-length
+      string members, the library could produce a segmentation fault, crashing
+      the library.
+
+      This was fixed after GitHub PR #4234
+
+      Fixes GitHub issue #3446
+
     - Fixed a cache assert with very large metadata objects
 
       If the library tries to load a metadata object that is above a
