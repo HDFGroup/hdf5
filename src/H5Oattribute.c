@@ -212,8 +212,8 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header");
 
     /* Check for creating attribute with unusual datatype */
-    if (H5T_is_numeric_with_unusual_unused_bits(attr->shared->dt) &&
-        !(H5O_has_chksum(oh) || (H5F_RFIC_FLAGS(loc->file) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)))
+    if (!(H5O_has_chksum(oh) || (H5F_RFIC_FLAGS(loc->file) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)) &&
+        H5T_is_numeric_with_unusual_unused_bits(attr->shared->dt))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL,
                     "creating attribute with unusual datatype, see documentation for "
                     "H5Pset_relax_file_integrity_checks for details.");
