@@ -81,7 +81,7 @@
 
 /**
  * Shared object header message master table; it is mapped to 'ohdr' type file
- * memory to benefit their similarity.
+ * memory to benefit from their similarity.
  */
 #define H5FD_MEM_SOHM_TABLE H5FD_MEM_OHDR
 /**
