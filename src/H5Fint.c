@@ -2073,7 +2073,21 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         if (H5F__super_read(file, a_plist, true) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock");
 
-        /* Create the page buffer before initializing the superblock */
+        /* Skip trying to create a page buffer if the file space strategy
+         * stored in the superblock isn't paged.
+         */
+        if (shared->fs_strategy != H5F_FSPACE_STRATEGY_PAGE)
+            page_buf_size = 0;
+
+        /* If the page buffer is enabled, the strategy is paged, and the size in
+         * the fapl is smaller than the file's page size, bump the page buffer
+         * size up to the file's page size.
+         */
+        if (page_buf_size > 0 && shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE &&
+            shared->fs_page_size > page_buf_size)
+            page_buf_size = shared->fs_page_size;
+
+        /* Create the page buffer *after* reading the superblock */
         if (page_buf_size)
             if (H5PB_create(shared, page_buf_size, page_buf_min_meta_perc, page_buf_min_raw_perc) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create page buffer");
