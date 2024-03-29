@@ -1673,7 +1673,7 @@ static herr_t
 H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
 {
     H5P_genplist_t *plist;                     /* Property list */
-    H5O_fill_t     *fill_prop;                 /* Pointer to dataset's fill value info */
+    H5O_fill_t     *fill_prop = NULL;          /* Pointer to dataset's fill value info */
     unsigned        alloc_time_state;          /* Allocation time state */
     htri_t          msg_exists;                /* Whether a particular type of message exists */
     bool            layout_init       = false; /* Flag to indicate that chunk information was initialized */
