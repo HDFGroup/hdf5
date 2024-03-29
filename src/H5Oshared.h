@@ -57,7 +57,7 @@ H5O_SHARED_DECODE(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *iofla
     /* Check for shared message */
     if (mesg_flags & H5O_MSG_FLAG_SHARED) {
         /* Retrieve native message info indirectly through shared message */
-        if (NULL == (ret_value = H5O__shared_decode(f, open_oh, ioflags, p, H5O_SHARED_TYPE)))
+        if (NULL == (ret_value = H5O__shared_decode(f, open_oh, ioflags, p_size, p, H5O_SHARED_TYPE)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message");
 
             /* We currently do not support automatically fixing shared messages */

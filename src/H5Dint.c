@@ -1678,6 +1678,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
     htri_t          msg_exists;                /* Whether a particular type of message exists */
     bool            layout_init       = false; /* Flag to indicate that chunk information was initialized */
     bool            must_init_storage = false;
+    bool            fill_init         = false;   /* Flag to indicate that fill information was initialized */
     herr_t          ret_value         = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr)
@@ -1722,34 +1723,6 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
     /* Indicate that the layout information was initialized */
     layout_init = true;
 
-    /*
-     * Now that we've read the dataset's datatype, dataspace and
-     * layout information, perform a quick check for compact datasets
-     * to ensure that the size of the internal buffer that was
-     * allocated for the dataset's raw data matches the size of
-     * the data. A corrupted file can cause a mismatch between the
-     * two, which might result in buffer overflows during future
-     * I/O to the dataset.
-     */
-    if (H5D_COMPACT == dataset->shared->layout.type) {
-        hssize_t dset_nelemts   = 0;
-        size_t   dset_type_size = H5T_GET_SIZE(dataset->shared->type);
-        size_t   dset_data_size = 0;
-
-        assert(H5D_COMPACT == dataset->shared->layout.storage.type);
-
-        if ((dset_nelemts = H5S_GET_EXTENT_NPOINTS(dataset->shared->space)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                        "can't get number of elements in dataset's dataspace");
-
-        dset_data_size = (size_t)dset_nelemts * dset_type_size;
-
-        if (dataset->shared->layout.storage.u.compact.size != dset_data_size)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
-                        "bad value from dataset header - size of compact dataset's data buffer doesn't match "
-                        "size of dataset data");
-    }
-
     /* Set up flush append property */
     if (H5D__append_flush_setup(dataset, dapl_id))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set up flush append property");
@@ -1763,6 +1736,9 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
     if (msg_exists) {
         if (NULL == H5O_msg_read(&(dataset->oloc), H5O_FILL_NEW_ID, fill_prop))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message");
+
+        /* Indicate that the fill information was initialized */
+        fill_init = true;
     } /* end if */
     else {
         /* For backward compatibility, try to retrieve the old fill value message */
@@ -1771,6 +1747,9 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
         if (msg_exists) {
             if (NULL == H5O_msg_read(&(dataset->oloc), H5O_FILL_ID, fill_prop))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message");
+
+            /* Indicate that the fill information was initialized */
+            fill_init = true;
         } /* end if */
         else {
             /* Set the space allocation time appropriately, based on the type of dataset storage */
@@ -1809,6 +1788,33 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
         (dataset->shared->layout.type == H5D_VIRTUAL && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR))
         alloc_time_state = 1;
 
+    /* Check if there is a fill value, but no type yet */
+    if (fill_prop->buf != NULL && fill_prop->type == NULL) {
+        H5T_t *tmp_type; /* Temporary pointer to dataset's datatype */
+
+        /* Copy the dataset type into the fill value message */
+        if (NULL == (tmp_type = H5T_copy(dataset->shared->type, H5T_COPY_TRANSIENT)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy dataset datatype for fill value");
+
+        /* Check if conversion is necessary on fill buffer, and if fill-value
+         * buffer is too small to hold the result.
+         */
+        if (!H5T_noop_conv(dataset->shared->type, tmp_type)) {
+            size_t bkg_size = MAX(H5T_GET_SIZE(tmp_type), H5T_GET_SIZE(dataset->shared->type));
+
+            assert(fill_prop->size >= 0);
+            if ((size_t)fill_prop->size < bkg_size) {
+                if (H5T_close_real(tmp_type) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't free temporary datatype");
+                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
+                            "fill value size doesn't match dataset's datatype size");
+            }
+        }
+
+        if (H5T_close_real(tmp_type) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't free temporary datatype");
+    }
+
     /* Set revised fill value properties, if they are different from the defaults */
     if (H5P_fill_value_cmp(&H5D_def_dset.dcpl_cache.fill, fill_prop, sizeof(H5O_fill_t))) {
         if (H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, fill_prop) < 0)
@@ -1845,6 +1851,8 @@ done:
         if (H5_addr_defined(dataset->oloc.addr) && H5O_close(&(dataset->oloc), NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header");
         if (dataset->shared) {
+            if (fill_init)
+                H5O_msg_reset(H5O_FILL_ID, fill_prop);
             if (layout_init)
                 if (dataset->shared->layout.ops->dest && (dataset->shared->layout.ops->dest)(dataset) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info");
