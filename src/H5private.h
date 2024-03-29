@@ -479,7 +479,7 @@
                                   (X) >= (Y))
 #define H5_addr_cmp(X,Y)         (H5_addr_eq((X), (Y)) ? 0 :                \
                                  (H5_addr_lt((X), (Y)) ? -1 : 1))
-#define H5_addr_overlap(O1,L1,O2,L2) H5_RANGE_OVERLAP(O1, ((O1)+(L1)), O2, ((O2)+(L2)))
+#define H5_addr_overlap(O1,L1,O2,L2) H5_RANGE_OVERLAP(O1, ((O1)+(L1)-1), O2, ((O2)+(L2)-1))
 /* clang-format on */
 
 /*
