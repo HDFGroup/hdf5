@@ -17124,13 +17124,11 @@ main(void)
     unsigned    max_compact, min_dense;
     int         configuration; /* Configuration of tests. */
     int         ExpressMode;
-    const char *env_h5_drvr; /* File Driver value from environment */
+    const char *driver_name; /* File Driver value from environment */
     bool        same_file;   /* Whether to run tests that only use one file */
     bool        driver_is_default_compatible;
 
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Setup */
     h5_reset();
@@ -17292,7 +17290,7 @@ main(void)
                                     false, "H5Ocopy(): expand external link");
 
         /* Splitter VFD currently has external link-related bugs */
-        if (strcmp(env_h5_drvr, "splitter")) {
+        if (strcmp(driver_name, "splitter")) {
             nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
                                         H5O_COPY_EXPAND_SOFT_LINK_FLAG | H5O_COPY_EXPAND_EXT_LINK_FLAG, false,
                                         "H5Ocopy(): expand soft and external links");

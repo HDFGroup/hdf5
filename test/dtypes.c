@@ -6051,7 +6051,7 @@ test__Float16(void)
 {
 #ifdef H5_HAVE__FLOAT16
     H5T_path_t *path = NULL;
-    const char *env_h5_driver;
+    const char *driver_name;
     hsize_t     dims[1];
     htri_t      is_little_endian;
     H5T_t      *native_dtype = NULL;
@@ -6065,9 +6065,7 @@ test__Float16(void)
 
     TESTING("_Float16 datatype");
 
-    env_h5_driver = getenv(HDF5_DRIVER);
-    if (env_h5_driver == NULL)
-        env_h5_driver = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Check that native macro maps to a valid type */
     if (0 == H5Tget_size(H5T_NATIVE_FLOAT16)) {
@@ -6402,7 +6400,7 @@ test__Float16(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    if (!h5_driver_uses_multiple_files(env_h5_driver, H5_EXCLUDE_NON_MULTIPART_DRIVERS)) {
+    if (!h5_driver_uses_multiple_files(driver_name, H5_EXCLUDE_NON_MULTIPART_DRIVERS)) {
         bool is_default_vfd_compat = false;
 
         if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &is_default_vfd_compat) < 0)

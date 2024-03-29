@@ -198,21 +198,36 @@ saved_user_CPPFLAGS="$CPPFLAGS"
 ##
 ##  Regex:
 ##
-##      -Werror         Literal -Werror
-##      \(              Start optional capturing group
-##      =               Literal equals sign
-##      [^[:space:]-]   Non-space characters
-##      \+              1 or more of the above
-##      \)              End optional capturing group
-##      \?              0 or 1 capturing group matches
+##      -Werror        Literal -Werror
+##      \(             Start optional capturing group
+##      =              Literal equals sign
+##      [^[:space:]]   Non-space characters
+##      \+             1 or more of the above
+##      \)             End optional capturing group
+##      \?             0 or 1 capturing group matches
 ##
-WERROR_SED= "sed -e 's/-Werror\(=[^[:space:]]\+\)\?//g'"
-
-CFLAGS="`echo $CFLAGS | $WERROR_SED`"
-CXXFLAGS="`echo $CXXFLAGS | $WERROR_SED`"
-FCFLAGS="`echo $FCFLAGS | $WERROR_SED`"
-JAVACFLAGS="`echo $JAVACFLAGS | $WERROR_SED`"
-CPPFLAGS="`echo $CPPFLAGS | $WERROR_SED`"
+## Note that the outer pair of '[]' ends up getting removed
+WERROR_SED='s/-Werror\(=[[^[:space:]]]\+\)\?//g'
+CFLAGS_SED="`echo $CFLAGS | sed -e $WERROR_SED`"
+if test $? -eq 0; then
+  CFLAGS="$CFLAGS_SED"
+fi
+CXXFLAGS_SED="`echo $CXXFLAGS | sed -e $WERROR_SED`"
+if test $? -eq 0; then
+  CXXFLAGS="$CXXFLAGS_SED"
+fi
+FCFLAGS_SED="`echo $FCFLAGS | sed -e $WERROR_SED`"
+if test $? -eq 0; then
+  FCFLAGS="$FCFLAGS_SED"
+fi
+JAVACFLAGS_SED="`echo $JAVACFLAGS | sed -e $WERROR_SED`"
+if test $? -eq 0; then
+  JAVACFLAGS="$JAVACFLAGS_SED"
+fi
+CPPFLAGS_SED="`echo $CPPFLAGS | sed -e $WERROR_SED`"
+if test $? -eq 0; then
+  CPPFLAGS="$CPPFLAGS_SED"
+fi
 
 ## Support F9X variable to define Fortran compiler if FC variable is
 ## not used.  This should be deprecated in the future.
@@ -786,6 +801,15 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
   PAC_PROG_FC_STORAGE_SIZE
 
+  ## --------------------------------------------------------------------
+  ## Checking if the fortran compiler supports ISO_FORTRAN_ENV (Fortran 2008)
+  HAVE_ISO_FORTRAN_ENV="0"
+  PAC_PROG_FC_ISO_FORTRAN_ENV
+  if test "X$CHECK_ISO_FORTRAN_ENV" = "Xyes"; then
+    HAVE_ISO_FORTRAN_ENV="1"
+    AC_DEFINE([HAVE_ISO_FORTRAN_ENV], [1], [Define if Fortran supports ISO_FORTRAN_ENV (F08)])
+  fi
+
   ## Set the sizeof function for use later in the fortran tests
   if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes";then
     FC_SIZEOF_A="STORAGE_SIZE(a, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)"
@@ -802,14 +826,17 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     fi
   fi
 
-  ## See if the fortran compiler supports the intrinsic module "ISO_FORTRAN_ENV"
-  PAC_PROG_FC_ISO_FORTRAN_ENV
   ## Check KIND and size of native integer
   PAC_FC_NATIVE_INTEGER
 
   ## Find all available KINDs
-  PAC_FC_AVAIL_KINDS
-  ## Find all sizeofs for available KINDs
+  if test "X$HAVE_ISO_FORTRAN_ENV" = "X1";then
+    PAC_FC_AVAIL_KINDS_F08
+  else
+    PAC_FC_AVAIL_KINDS
+  fi
+
+  ## Find all SIZEOFs for available KINDs
   PAC_FC_SIZEOF_INT_KINDS
   PAC_FC_SIZEOF_REAL_KINDS
 
@@ -829,6 +856,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([FORTRAN_HAVE_C_LONG_DOUBLE])
   AC_SUBST([FORTRAN_C_LONG_DOUBLE_IS_UNIQUE])
   AC_SUBST([FORTRAN_C_BOOL_IS_UNIQUE])
+  AC_SUBST([HAVE_ISO_FORTRAN_ENV])
   AC_SUBST([H5CONFIG_F_NUM_RKIND])
   AC_SUBST([H5CONFIG_F_RKIND])
   AC_SUBST([H5CONFIG_F_RKIND_SIZEOF])
@@ -3032,6 +3060,16 @@ if test -n "$PARALLEL"; then
                 [AC_MSG_RESULT([no])]
     )
     AC_LANG_POP(Fortran)
+
+    if test "X$HDF5_TESTS" = "Xyes"; then
+        AC_SUBST([MPI_LOGICAL_KIND])
+        PAC_FIND_MPI_LOGICAL_KIND
+        if test "X$" = "Xyes"; then
+          HAVE_ISO_FORTRAN_ENV="1"
+          AC_DEFINE([HAVE_ISO_FORTRAN_ENV], [1], [Define if Fortran supports ISO_FORTRAN_ENV (F08)])
+        fi
+    fi
+
   fi
 
   ## ----------------------------------------------------------------------

@@ -946,6 +946,13 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
     if (NULL == (oh = H5O_pin(oloc)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header");
 
+    /* Check for creating dataset with unusual datatype */
+    if (!(H5O_has_chksum(oh) || (H5F_RFIC_FLAGS(file) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)) &&
+        H5T_is_numeric_with_unusual_unused_bits(type))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                    "creating dataset with unusual datatype, see documentation for "
+                    "H5Pset_relax_file_integrity_checks for details.");
+
     /* Write the dataspace header message */
     if (H5S_append(file, oh, dset->shared->space) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update dataspace header message");

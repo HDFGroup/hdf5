@@ -4,12 +4,12 @@ File space information for file metadata (in bytes):
 	Superblock extension: 0
 	User block: 0
 	Object headers: (total/unused)
-		Groups: 48/8
-		Datasets(exclude compact data): 4136/1344
+		Groups: 40/0
+		Datasets(exclude compact data): 4128/1088
 		Datatypes: 80/0
 	Groups:
 		B-tree/List: 1200
-		Heap: 288
+		Heap: 384
 	Attributes:
 		B-tree/List: 0
 		Heap: 0

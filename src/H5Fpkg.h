@@ -304,6 +304,7 @@ struct H5F_shared_t {
     bool                 use_file_locking;      /* Whether or not to use file locking */
     bool                 ignore_disabled_locks; /* Whether or not to ignore disabled file locking */
     bool                 closing;               /* File is in the process of being closed */
+    uint64_t             rfic_flags;            /* Relaxed file integrity check (RFIC) flags */
 
     /* Cached VOL connector ID & info */
     hid_t               vol_id;   /* ID of VOL connector for the container */

@@ -108,47 +108,47 @@ typedef enum {
 
 static int check_stats(const H5F_t *f, const H5FS_t *frsp, H5FS_stat_t *state);
 
-static unsigned test_mf_eoa(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_eoa(const char *driver_name, hid_t fapl);
+static unsigned test_mf_eoa_shrink(const char *driver_name, hid_t fapl);
+static unsigned test_mf_eoa_extend(const char *driver_name, hid_t fapl);
 static unsigned test_dichotomy(hid_t fapl);
 static unsigned test_mf_fs_start(hid_t fapl);
 static unsigned test_mf_fs_alloc_free(hid_t fapl);
 static unsigned test_mf_fs_extend(hid_t fapl);
-static unsigned test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_mf_aggr_alloc5(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
-static unsigned test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
-static unsigned test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
-static unsigned test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
-static unsigned test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
-static unsigned test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
-static unsigned test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
-static unsigned test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
-static unsigned test_mf_tmp(const char *env_h5_drvr, hid_t fapl, bool new_format);
-static unsigned test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, bool new_format);
-static unsigned test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, bool new_format);
-static unsigned test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, bool new_format);
-static unsigned test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, bool new_format);
+static unsigned test_mf_fs_absorb(const char *driver_name, hid_t fapl);
+static unsigned test_mf_aggr_alloc1(const char *driver_name, hid_t fapl);
+static unsigned test_mf_aggr_alloc2(const char *driver_name, hid_t fapl);
+static unsigned test_mf_aggr_alloc3(const char *driver_name, hid_t fapl);
+static unsigned test_mf_aggr_alloc4(const char *driver_name, hid_t fapl);
+static unsigned test_mf_aggr_alloc5(const char *driver_name, hid_t fapl);
+static unsigned test_mf_aggr_alloc6(const char *driver_name, hid_t fapl);
+static unsigned test_mf_aggr_alloc7(const char *driver_name, hid_t fapl);
+static unsigned test_mf_aggr_extend(const char *driver_name, hid_t fapl);
+static unsigned test_mf_aggr_absorb(const char *driver_name, hid_t fapl);
+static unsigned test_mf_align_eoa(const char *driver_name, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_align_fs(const char *driver_name, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_align_alloc1(const char *driver_name, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_align_alloc2(const char *driver_name, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_align_alloc3(const char *driver_name, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_align_alloc4(const char *driver_name, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_align_alloc5(const char *driver_name, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_align_alloc6(const char *driver_name, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_tmp(const char *driver_name, hid_t fapl, bool new_format);
+static unsigned test_mf_fs_gone(const char *driver_name, hid_t fapl, bool new_format);
+static unsigned test_mf_strat_thres_gone(const char *driver_name, hid_t fapl, bool new_format);
+static unsigned test_mf_fs_persist(const char *driver_name, hid_t fapl, bool new_format);
+static unsigned test_mf_strat_thres_persist(const char *driver_name, hid_t fapl, bool new_format);
 #ifdef PB_OUT
 static unsigned test_mf_fs_persist_split(void);
 static unsigned test_mf_fs_persist_multi(void);
 #endif
-static unsigned test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_page_small(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_page_large(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_page_try_shrink(const char *env_h5_drvr, hid_t fapl);
-static unsigned test_page_alignment(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_page_alloc_xfree(const char *driver_name, hid_t fapl);
+static unsigned test_page_small(const char *driver_name, hid_t fapl);
+static unsigned test_page_large(const char *driver_name, hid_t fapl);
+static unsigned test_page_large_try_extend(const char *driver_name, hid_t fapl);
+static unsigned test_page_small_try_extend(const char *driver_name, hid_t fapl);
+static unsigned test_page_try_shrink(const char *driver_name, hid_t fapl);
+static unsigned test_page_alignment(const char *driver_name, hid_t fapl);
 
 /*
  * Verify statistics for the free-space manager
@@ -210,7 +210,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
+test_mf_eoa(const char *driver_name, hid_t fapl)
 {
     hid_t          file     = H5I_INVALID_HID; /* File ID */
     hid_t          fapl_new = H5I_INVALID_HID; /* copy of fapl */
@@ -228,8 +228,8 @@ test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
     /* Skip test when using VFDs that has different address spaces for each
      *  type of metadata allocation. Also skip test for Direct VFD.
      */
-    suitable_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
-                          strcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+                          strcmp(driver_name, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -359,7 +359,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
+test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
 {
     hid_t          file     = H5I_INVALID_HID;   /* File ID */
     hid_t          fapl_new = H5I_INVALID_HID;   /* copy of fapl */
@@ -377,8 +377,8 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
     /* Skip test when using VFDs that has different address spaces for each
      *  type of metadata allocation. Also skip test for Direct VFD.
      */
-    suitable_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
-                          strcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+                          strcmp(driver_name, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -646,7 +646,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
+test_mf_eoa_extend(const char *driver_name, hid_t fapl)
 {
     hid_t          file     = H5I_INVALID_HID; /* File ID */
     hid_t          fapl_new = H5I_INVALID_HID; /* copy of fapl */
@@ -665,8 +665,8 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
     /* Skip test when using VFDs that has different address spaces for each
      *  type of metadata allocation. Also skip test for Direct VFD.
      */
-    suitable_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
-                          strcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+                          strcmp(driver_name, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -861,7 +861,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_tmp(const char *env_h5_drvr, hid_t fapl, bool new_format)
+test_mf_tmp(const char *driver_name, hid_t fapl, bool new_format)
 {
     hid_t file  = H5I_INVALID_HID; /* File ID */
     hid_t fapl2 = H5I_INVALID_HID; /* File access property list */
@@ -873,7 +873,7 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, bool new_format)
         TESTING("'temporary' file space allocation with old library format");
 
     /* Can't run this test with multi-file VFDs */
-    if (!h5_driver_uses_multiple_files(env_h5_drvr, 0)) {
+    if (!h5_driver_uses_multiple_files(driver_name, 0)) {
         char           filename[FILENAME_LEN];   /* Filename to use */
         H5F_t         *f = NULL;                 /* Internal file object pointer */
         h5_stat_size_t file_size, new_file_size; /* file size */
@@ -2002,7 +2002,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
+test_mf_fs_absorb(const char *driver_name, hid_t fapl)
 {
     hid_t                file = H5I_INVALID_HID; /* File ID */
     char                 filename[FILENAME_LEN]; /* Filename to use */
@@ -2017,7 +2017,7 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
     TESTING("A free-space section absorbs an aggregator: test 1");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2177,7 +2177,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl)
+test_mf_aggr_alloc1(const char *driver_name, hid_t fapl)
 {
     hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
@@ -2193,8 +2193,8 @@ test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl)
     TESTING("H5MF_alloc() of meta/sdata aggregator:test 1");
 
     /* Skip test when using VFDs that don't use the metadata aggregator. Also skip test for Direct VFD. */
-    suitable_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
-                          strcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+                          strcmp(driver_name, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2330,7 +2330,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl)
+test_mf_aggr_alloc2(const char *driver_name, hid_t fapl)
 {
     hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
@@ -2345,8 +2345,8 @@ test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl)
     TESTING("H5MF_alloc() of meta/sdata aggregator:test 2");
 
     /* Skip test when using VFDs that don't use the metadata aggregator. Also skip test for Direct VFD. */
-    suitable_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
-                          strcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+                          strcmp(driver_name, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2487,7 +2487,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl)
+test_mf_aggr_alloc3(const char *driver_name, hid_t fapl)
 {
     hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
@@ -2504,7 +2504,7 @@ test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl)
     TESTING("H5MF_alloc() of meta/sdata aggregator: test 3");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2657,7 +2657,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl)
+test_mf_aggr_alloc4(const char *driver_name, hid_t fapl)
 {
     hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
@@ -2672,7 +2672,7 @@ test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl)
     TESTING("H5MF_alloc() of meta/sdata aggregator:test 4");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2806,7 +2806,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_aggr_alloc5(const char *env_h5_drvr, hid_t fapl)
+test_mf_aggr_alloc5(const char *driver_name, hid_t fapl)
 {
     hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
@@ -2821,7 +2821,7 @@ test_mf_aggr_alloc5(const char *env_h5_drvr, hid_t fapl)
     TESTING("H5MF_alloc() of meta/sdata aggregator:test 5");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2943,7 +2943,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
+test_mf_aggr_alloc6(const char *driver_name, hid_t fapl)
 {
     hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
@@ -2959,7 +2959,7 @@ test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
     TESTING("H5MF_alloc() of meta/sdata aggregator:test 6");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -3117,7 +3117,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
+test_mf_aggr_alloc7(const char *driver_name, hid_t fapl)
 {
     hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
@@ -3133,7 +3133,7 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
     TESTING("H5MF_alloc() of meta/sdata aggregator:test 7");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -3288,7 +3288,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
+test_mf_aggr_extend(const char *driver_name, hid_t fapl)
 {
     hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
@@ -3304,7 +3304,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
     TESTING("H5MF_try_extend() of meta/sdata aggregator: test 1");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -3585,7 +3585,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
+test_mf_aggr_absorb(const char *driver_name, hid_t fapl)
 {
     hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
@@ -3602,7 +3602,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
     TESTING("H5MF_try_shrink() of meta/sdata aggregator: test 1");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -3835,7 +3835,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
+test_mf_align_eoa(const char *driver_name, hid_t fapl, hid_t new_fapl)
 {
     hid_t          file  = H5I_INVALID_HID; /* File ID */
     hid_t          fapl1 = H5I_INVALID_HID;
@@ -3857,8 +3857,8 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list.
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (bool)(strcmp(env_h5_drvr, "stdio") != 0 && strcmp(env_h5_drvr, "split") != 0 &&
-                          strcmp(env_h5_drvr, "multi") != 0 && strcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(strcmp(driver_name, "stdio") != 0 && strcmp(driver_name, "split") != 0 &&
+                          strcmp(driver_name, "multi") != 0 && strcmp(driver_name, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -4132,7 +4132,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
+test_mf_align_fs(const char *driver_name, hid_t fapl, hid_t new_fapl)
 {
     hid_t                file = H5I_INVALID_HID; /* File ID */
     char                 filename[FILENAME_LEN]; /* Filename to use */
@@ -4307,8 +4307,8 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (bool)(strcmp(env_h5_drvr, "stdio") != 0 && strcmp(env_h5_drvr, "split") != 0 &&
-                          strcmp(env_h5_drvr, "multi") != 0 && strcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(strcmp(driver_name, "stdio") != 0 && strcmp(driver_name, "split") != 0 &&
+                          strcmp(driver_name, "multi") != 0 && strcmp(driver_name, "direct") != 0);
     if (suitable_vfd) {
         if ((file_size = h5_get_file_size(filename, new_fapl)) < 0)
             TEST_ERROR;
@@ -4493,7 +4493,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
+test_mf_align_alloc1(const char *driver_name, hid_t fapl, hid_t new_fapl)
 {
     hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
@@ -4514,8 +4514,8 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list.
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (bool)(strcmp(env_h5_drvr, "stdio") != 0 && strcmp(env_h5_drvr, "split") != 0 &&
-                          strcmp(env_h5_drvr, "multi") != 0 && strcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(strcmp(driver_name, "stdio") != 0 && strcmp(driver_name, "split") != 0 &&
+                          strcmp(driver_name, "multi") != 0 && strcmp(driver_name, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -4757,7 +4757,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
+test_mf_align_alloc2(const char *driver_name, hid_t fapl, hid_t new_fapl)
 {
     hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
@@ -4777,8 +4777,8 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list.
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (bool)(strcmp(env_h5_drvr, "stdio") != 0 && strcmp(env_h5_drvr, "split") != 0 &&
-                          strcmp(env_h5_drvr, "multi") != 0 && strcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(strcmp(driver_name, "stdio") != 0 && strcmp(driver_name, "split") != 0 &&
+                          strcmp(driver_name, "multi") != 0 && strcmp(driver_name, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -5102,7 +5102,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
+test_mf_align_alloc3(const char *driver_name, hid_t fapl, hid_t new_fapl)
 {
     hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
@@ -5123,8 +5123,8 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list.
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (bool)(strcmp(env_h5_drvr, "stdio") != 0 && strcmp(env_h5_drvr, "split") != 0 &&
-                          strcmp(env_h5_drvr, "multi") != 0 && strcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(strcmp(driver_name, "stdio") != 0 && strcmp(driver_name, "split") != 0 &&
+                          strcmp(driver_name, "multi") != 0 && strcmp(driver_name, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -5417,7 +5417,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
+test_mf_align_alloc4(const char *driver_name, hid_t fapl, hid_t new_fapl)
 {
     hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
@@ -5437,8 +5437,8 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list.
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (bool)(strcmp(env_h5_drvr, "stdio") != 0 && strcmp(env_h5_drvr, "split") != 0 &&
-                          strcmp(env_h5_drvr, "multi") != 0 && strcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(strcmp(driver_name, "stdio") != 0 && strcmp(driver_name, "split") != 0 &&
+                          strcmp(driver_name, "multi") != 0 && strcmp(driver_name, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -5635,7 +5635,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
+test_mf_align_alloc5(const char *driver_name, hid_t fapl, hid_t new_fapl)
 {
     hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
@@ -5656,8 +5656,8 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list.
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (bool)(strcmp(env_h5_drvr, "stdio") != 0 && strcmp(env_h5_drvr, "split") != 0 &&
-                          strcmp(env_h5_drvr, "multi") != 0 && strcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(strcmp(driver_name, "stdio") != 0 && strcmp(driver_name, "split") != 0 &&
+                          strcmp(driver_name, "multi") != 0 && strcmp(driver_name, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -5906,7 +5906,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
+test_mf_align_alloc6(const char *driver_name, hid_t fapl, hid_t new_fapl)
 {
     hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
@@ -5927,8 +5927,8 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list.
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (bool)(strcmp(env_h5_drvr, "stdio") != 0 && strcmp(env_h5_drvr, "split") != 0 &&
-                          strcmp(env_h5_drvr, "multi") != 0 && strcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(strcmp(driver_name, "stdio") != 0 && strcmp(driver_name, "split") != 0 &&
+                          strcmp(driver_name, "multi") != 0 && strcmp(driver_name, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -6116,7 +6116,7 @@ error:
  * endpoint is extended to allocate an aligned object
  */
 static unsigned
-test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
+test_mf_bug1(const char *driver_name, hid_t fapl)
 {
     hid_t      file        = H5I_INVALID_HID; /* File ID */
     hid_t      copied_fapl = H5I_INVALID_HID; /* FAPL to use for this test */
@@ -6147,9 +6147,9 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
         TEST_ERROR;
 
     /* Check for split or multi driver */
-    if (!strcmp(env_h5_drvr, "split"))
+    if (!strcmp(driver_name, "split"))
         split = true;
-    else if (!strcmp(env_h5_drvr, "multi"))
+    else if (!strcmp(driver_name, "multi"))
         multi = true;
 
     /* Add alignment to member files for split/multi driver */
@@ -6931,7 +6931,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, bool new_format)
+test_mf_fs_persist(const char *driver_name, hid_t fapl, bool new_format)
 {
     hid_t       file  = H5I_INVALID_HID;                  /* File ID */
     hid_t       fcpl  = H5I_INVALID_HID;                  /* File creation property list ID */
@@ -6949,7 +6949,7 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, bool new_format)
     else
         TESTING("File's free-space is persistent with old library format");
 
-    if (strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0) {
+    if (strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0) {
 
         /* File creation property list template */
         if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -7106,7 +7106,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, bool new_format)
+test_mf_fs_gone(const char *driver_name, hid_t fapl, bool new_format)
 {
     hid_t       file  = H5I_INVALID_HID;    /* File ID */
     hid_t       fcpl  = H5I_INVALID_HID;    /* File creation property list */
@@ -7126,7 +7126,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, bool new_format)
         TESTING("File's free-space is going away with old library format");
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     if (contig_addr_vfd) {
 
@@ -7296,7 +7296,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, bool new_format)
+test_mf_strat_thres_persist(const char *driver_name, hid_t fapl, bool new_format)
 {
     hid_t                 file  = H5I_INVALID_HID;                  /* File ID */
     hid_t                 fcpl  = H5I_INVALID_HID;                  /* File creation property list template */
@@ -7317,7 +7317,7 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, bool new_format
         TESTING("File space strategy/persisting/threshold with old library format");
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -7465,7 +7465,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, bool new_format)
+test_mf_strat_thres_gone(const char *driver_name, hid_t fapl, bool new_format)
 {
     hid_t                 file  = H5I_INVALID_HID;                  /* File ID */
     hid_t                 fcpl  = H5I_INVALID_HID;                  /* File creation property list template */
@@ -7487,7 +7487,7 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, bool new_format)
         TESTING("File space merge/shrink for section size < threshold with old library format");
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -7801,7 +7801,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
+test_page_alloc_xfree(const char *driver_name, hid_t fapl)
 {
 
     hid_t    fid      = H5I_INVALID_HID; /* File ID */
@@ -7819,9 +7819,9 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
     TESTING("Paged aggregation for file space: H5MF_alloc/H5MF_xfree");
 
     /* Check for split or multi driver */
-    if (!strcmp(env_h5_drvr, "split"))
+    if (!strcmp(driver_name, "split"))
         split = true;
-    else if (!strcmp(env_h5_drvr, "multi"))
+    else if (!strcmp(driver_name, "multi"))
         multi = true;
 
     if (!multi && !split) {
@@ -8031,7 +8031,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_page_try_shrink(const char *env_h5_drvr, hid_t fapl)
+test_page_try_shrink(const char *driver_name, hid_t fapl)
 {
 
     hid_t          fid  = H5I_INVALID_HID; /* File ID */
@@ -8048,7 +8048,7 @@ test_page_try_shrink(const char *env_h5_drvr, hid_t fapl)
     TESTING("Paged aggregation for file space: H5MF_try_shrink()");
 
     /* Current VFD that does not support continuous address space */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     if (contig_addr_vfd) {
 
@@ -8160,7 +8160,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
+test_page_small_try_extend(const char *driver_name, hid_t fapl)
 {
 
     hid_t   fid  = H5I_INVALID_HID; /* File ID */
@@ -8175,8 +8175,8 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
     TESTING("Paged aggregation for file space: H5MF_try_extend() a small block");
 
     /* Current VFD that does not support continuous address space */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
-                             strcmp(env_h5_drvr, "family") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+                             strcmp(driver_name, "family") != 0);
 
     if (contig_addr_vfd) {
 
@@ -8338,7 +8338,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
+test_page_large_try_extend(const char *driver_name, hid_t fapl)
 {
 
     hid_t   fid  = H5I_INVALID_HID;         /* File ID */
@@ -8352,7 +8352,7 @@ test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
     TESTING("Paged aggregation for file space: H5MF_try_extend() a large block");
 
     /* Current VFD that does not support continuous address space */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     if (contig_addr_vfd) {
 
@@ -8499,7 +8499,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_page_large(const char *env_h5_drvr, hid_t fapl)
+test_page_large(const char *driver_name, hid_t fapl)
 {
 
     hid_t          fid  = H5I_INVALID_HID;         /* File ID */
@@ -8514,7 +8514,7 @@ test_page_large(const char *env_h5_drvr, hid_t fapl)
     TESTING("Paged aggregation for file space: large allocations and de-allocations");
 
     /* Current VFD that does not support continuous address space */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     if (contig_addr_vfd) {
 
@@ -8652,7 +8652,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_page_small(const char *env_h5_drvr, hid_t fapl)
+test_page_small(const char *driver_name, hid_t fapl)
 {
     hid_t       fid  = H5I_INVALID_HID;     /* File ID */
     hid_t       fcpl = H5I_INVALID_HID;     /* File creation property list */
@@ -8666,11 +8666,11 @@ test_page_small(const char *env_h5_drvr, hid_t fapl)
 
     TESTING("Paged aggregation for file space: small allocations and de-allocations");
 
-    if (!strcmp(env_h5_drvr, "split"))
+    if (!strcmp(driver_name, "split"))
         split = true;
-    else if (!strcmp(env_h5_drvr, "multi"))
+    else if (!strcmp(driver_name, "multi"))
         multi = true;
-    else if (!strcmp(env_h5_drvr, "family"))
+    else if (!strcmp(driver_name, "family"))
         family = true;
 
     if (!multi && !split) {
@@ -8822,7 +8822,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_page_alignment(const char *env_h5_drvr, hid_t fapl)
+test_page_alignment(const char *driver_name, hid_t fapl)
 {
 
     hid_t   fid      = H5I_INVALID_HID; /* File ID */
@@ -8839,9 +8839,9 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
     TESTING("Paged aggregation and H5Pset_alignment: verify proper alignment is used");
 
     /* Check for split or multi driver */
-    if (!strcmp(env_h5_drvr, "split"))
+    if (!strcmp(driver_name, "split"))
         split = true;
-    else if (!strcmp(env_h5_drvr, "multi"))
+    else if (!strcmp(driver_name, "multi"))
         multi = true;
 
     if (!multi && !split) {
@@ -9130,13 +9130,11 @@ main(void)
     hid_t       new_fapl = H5I_INVALID_HID; /* File access property list for alignment & aggr setting */
     unsigned    nerrors  = 0;               /* Cumulative error count */
     test_type_t curr_test;                  /* Current test being worked on */
-    const char *env_h5_drvr;                /* File Driver value from environment */
+    const char *driver_name;                /* File Driver value from environment */
     bool        api_ctx_pushed = false;     /* Whether API context pushed */
 
     /* Get the VFD to use */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     h5_reset();
 
@@ -9151,9 +9149,9 @@ main(void)
     if ((new_fapl = H5Pcopy(fapl)) < 0)
         TEST_ERROR;
     /* For old library format--interaction with file allocation */
-    nerrors += test_mf_eoa(env_h5_drvr, fapl);
-    nerrors += test_mf_eoa_shrink(env_h5_drvr, fapl);
-    nerrors += test_mf_eoa_extend(env_h5_drvr, fapl);
+    nerrors += test_mf_eoa(driver_name, fapl);
+    nerrors += test_mf_eoa_shrink(driver_name, fapl);
+    nerrors += test_mf_eoa_extend(driver_name, fapl);
 
     /* For old library format */
     nerrors += test_dichotomy(new_fapl);
@@ -9162,18 +9160,18 @@ main(void)
     nerrors += test_mf_fs_start(fapl);
     nerrors += test_mf_fs_alloc_free(fapl);
     nerrors += test_mf_fs_extend(fapl);
-    nerrors += test_mf_fs_absorb(env_h5_drvr, fapl);
+    nerrors += test_mf_fs_absorb(driver_name, fapl);
 
     /* For old library format--interaction with meta/sdata aggregator */
-    nerrors += test_mf_aggr_alloc1(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_alloc2(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_alloc3(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_alloc4(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_alloc5(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_alloc6(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_alloc7(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_extend(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_absorb(env_h5_drvr, fapl);
+    nerrors += test_mf_aggr_alloc1(driver_name, fapl);
+    nerrors += test_mf_aggr_alloc2(driver_name, fapl);
+    nerrors += test_mf_aggr_alloc3(driver_name, fapl);
+    nerrors += test_mf_aggr_alloc4(driver_name, fapl);
+    nerrors += test_mf_aggr_alloc5(driver_name, fapl);
+    nerrors += test_mf_aggr_alloc6(driver_name, fapl);
+    nerrors += test_mf_aggr_alloc7(driver_name, fapl);
+    nerrors += test_mf_aggr_extend(driver_name, fapl);
+    nerrors += test_mf_aggr_absorb(driver_name, fapl);
 
     /* For old library format--tests for alignment */
     for (curr_test = TEST_NORMAL; curr_test < TEST_NTESTS; curr_test++) {
@@ -9195,43 +9193,43 @@ main(void)
                 break;
         } /* end switch */
 
-        nerrors += test_mf_align_eoa(env_h5_drvr, fapl, new_fapl);
-        nerrors += test_mf_align_fs(env_h5_drvr, fapl, new_fapl);
-        nerrors += test_mf_align_alloc1(env_h5_drvr, fapl, new_fapl);
-        nerrors += test_mf_align_alloc2(env_h5_drvr, fapl, new_fapl);
-        nerrors += test_mf_align_alloc3(env_h5_drvr, fapl, new_fapl);
-        nerrors += test_mf_align_alloc4(env_h5_drvr, fapl, new_fapl);
-        nerrors += test_mf_align_alloc5(env_h5_drvr, fapl, new_fapl);
-        nerrors += test_mf_align_alloc6(env_h5_drvr, fapl, new_fapl);
+        nerrors += test_mf_align_eoa(driver_name, fapl, new_fapl);
+        nerrors += test_mf_align_fs(driver_name, fapl, new_fapl);
+        nerrors += test_mf_align_alloc1(driver_name, fapl, new_fapl);
+        nerrors += test_mf_align_alloc2(driver_name, fapl, new_fapl);
+        nerrors += test_mf_align_alloc3(driver_name, fapl, new_fapl);
+        nerrors += test_mf_align_alloc4(driver_name, fapl, new_fapl);
+        nerrors += test_mf_align_alloc5(driver_name, fapl, new_fapl);
+        nerrors += test_mf_align_alloc6(driver_name, fapl, new_fapl);
     } /* end for */
 
     /* For old and new format--interaction with temporary file space allocation */
-    nerrors += test_mf_tmp(env_h5_drvr, fapl, false);
-    nerrors += test_mf_tmp(env_h5_drvr, fapl, true);
+    nerrors += test_mf_tmp(driver_name, fapl, false);
+    nerrors += test_mf_tmp(driver_name, fapl, true);
 
     /* For old and new format--free-space merge/shrunk away */
 
     /* Temporary: modify to skip testing for multi/split driver:
          fail file create when persisting free-space or using paged aggregation strategy */
-    nerrors += test_mf_fs_gone(env_h5_drvr, fapl, false);
-    nerrors += test_mf_fs_gone(env_h5_drvr, fapl, true);
+    nerrors += test_mf_fs_gone(driver_name, fapl, false);
+    nerrors += test_mf_fs_gone(driver_name, fapl, true);
 
     /* Temporary: modify to skip testing multi/split driver:
          fail file create when persisting free-space or using paged aggregation strategy */
-    nerrors += test_mf_strat_thres_gone(env_h5_drvr, fapl, false);
-    nerrors += test_mf_strat_thres_gone(env_h5_drvr, fapl, true);
+    nerrors += test_mf_strat_thres_gone(driver_name, fapl, false);
+    nerrors += test_mf_strat_thres_gone(driver_name, fapl, true);
 
     /* For old and new format--persisting free-space */
 
     /* Temporary: Modify to skip testing for multi/split driver:
          fail file create when persisting free-space or using paged aggregation strategy */
-    nerrors += test_mf_fs_persist(env_h5_drvr, fapl, false);
-    nerrors += test_mf_fs_persist(env_h5_drvr, fapl, true);
+    nerrors += test_mf_fs_persist(driver_name, fapl, false);
+    nerrors += test_mf_fs_persist(driver_name, fapl, true);
 
     /* Temporary: modify to skip testing for multi/split driver:
          fail file create when persisting free-space or using paged aggregation strategy */
-    nerrors += test_mf_strat_thres_persist(env_h5_drvr, fapl, false);
-    nerrors += test_mf_strat_thres_persist(env_h5_drvr, fapl, true);
+    nerrors += test_mf_strat_thres_persist(driver_name, fapl, false);
+    nerrors += test_mf_strat_thres_persist(driver_name, fapl, true);
 
     /* Temporary skipped for multi/split drivers:
          fail file create when persisting free-space or using paged aggregation strategy */
@@ -9246,16 +9244,16 @@ main(void)
      */
     /* Temporary: The following 7 tests are modified to skip testing for multi/split driver:
          fail file create when persisting free-space or using paged aggregation strategy */
-    nerrors += test_page_small(env_h5_drvr, fapl);
-    nerrors += test_page_large(env_h5_drvr, fapl);
-    nerrors += test_page_large_try_extend(env_h5_drvr, fapl);
-    nerrors += test_page_small_try_extend(env_h5_drvr, fapl);
-    nerrors += test_page_try_shrink(env_h5_drvr, fapl);
-    nerrors += test_page_alloc_xfree(env_h5_drvr, fapl); /* can handle multi/split */
-    nerrors += test_page_alignment(env_h5_drvr, fapl);   /* can handle multi/split */
+    nerrors += test_page_small(driver_name, fapl);
+    nerrors += test_page_large(driver_name, fapl);
+    nerrors += test_page_large_try_extend(driver_name, fapl);
+    nerrors += test_page_small_try_extend(driver_name, fapl);
+    nerrors += test_page_try_shrink(driver_name, fapl);
+    nerrors += test_page_alloc_xfree(driver_name, fapl); /* can handle multi/split */
+    nerrors += test_page_alignment(driver_name, fapl);   /* can handle multi/split */
 
     /* tests for specific bugs */
-    nerrors += test_mf_bug1(env_h5_drvr, fapl);
+    nerrors += test_mf_bug1(driver_name, fapl);
 
     if (H5Pclose(new_fapl) < 0)
         FAIL_STACK_ERROR;

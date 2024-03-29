@@ -59,20 +59,18 @@ main(void)
     hsize_t     chunk_dim[1] = {10};            /* Chunk dimension sizes */
     int         buf[5]       = {1, 2, 3, 4, 5}; /* The data to be written to the dataset */
     char        filename[100];                  /* File name */
-    const char *env_h5_drvr;                    /* File Driver value from environment */
+    const char *driver_name;                    /* File Driver value from environment */
     bool        contig_addr_vfd;                /* Contiguous address vfd */
 
     /* Get the VFD to use */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Skip test when using VFDs that has different address spaces for each
      * type of metadata allocation.
      * Further investigation is needed to resolve the test failure with the
      * split/multi driver.  Please see HDFFV-10160.
      */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
     if (!contig_addr_vfd) {
         SKIPPED();
         puts("    Temporary skipped for a spilt/multi driver");

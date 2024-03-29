@@ -4,6 +4,11 @@ name: hdf5 dev ctest runs
 on:
   workflow_call:
     inputs:
+      snap_name:
+        description: 'The name in the source tarballs'
+        type: string
+        required: false
+        default: hdfsrc
       file_base:
         description: "The common base name of the source tarballs"
         required: true
@@ -46,11 +51,11 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "hdfsrc")
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
           else
-            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash
@@ -129,11 +134,11 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "hdfsrc")
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
           else
-            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 
@@ -181,7 +186,7 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/builddeb/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.deb ${{ runner.workspace }}/builddeb/hdf5
           cd "${{ runner.workspace }}/builddeb"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb hdf5
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb.tar.gz hdf5
         shell: bash
 
       - name: Publish rpm binary (Linux)
@@ -194,7 +199,7 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/buildrpm/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.rpm ${{ runner.workspace }}/buildrpm/hdf5
           cd "${{ runner.workspace }}/buildrpm"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm hdf5
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm.tar.gz hdf5
         shell: bash
 
       - name: List files in the space (Linux)
@@ -215,7 +220,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: deb-ubuntu-2204_gcc-binary
-              path: ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
+              path: ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       # Save files created by ctest script
@@ -223,7 +228,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: rpm-ubuntu-2204_gcc-binary
-              path: ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm
+              path: ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       # Save doxygen files created by ctest script
@@ -253,11 +258,11 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "hdfsrc")
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
           else
-            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 
@@ -333,11 +338,11 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "hdfsrc")
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
           else
-            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 
@@ -413,11 +418,11 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "hdfsrc")
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
           else
-            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash
@@ -502,11 +507,11 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "hdfsrc")
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
           else
-            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 

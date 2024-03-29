@@ -110,14 +110,13 @@ main(void)
     unsigned    new_format;  /* Whether to use the latest file format */
     unsigned    chunk_cache; /* Whether to enable chunk caching */
     int         nerrors = 0;
-    const char *env_h5_drvr;     /* File Driver value from environment */
+    const char *driver_name;     /* File Driver value from environment */
     bool        contig_addr_vfd; /* Whether VFD used has a contiguous address space */
 
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
+
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     /* Initialize random number seed */
     HDsrandom((unsigned)HDtime(NULL));

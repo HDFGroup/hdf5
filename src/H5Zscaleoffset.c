@@ -1210,6 +1210,8 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
             minbits_mask <<= i * 8;
             minbits |= minbits_mask;
         }
+        if (minbits >= p.size * 8)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "minimum number of bits exceeds size of type");
 
         /* retrieval of minval takes into consideration situation where sizeof
          * unsigned long long (datatype of minval) may change from compression

@@ -2934,12 +2934,11 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
 
     /* Check for (currently) incompatible combinations */
     if (test_mode & TEST_PAGE_BUFFER) {
-        char *env_h5_drvr = NULL;
+        const char *driver_name = h5_get_test_driver_name();
 
         /* The split and multi driver are not compatible with page buffering.  No message since the other
          * cases aren't skipped. */
-        env_h5_drvr = getenv(HDF5_DRIVER);
-        if (env_h5_drvr && (!strcmp(env_h5_drvr, "split") || !strcmp(env_h5_drvr, "multi")))
+        if (driver_name && (!strcmp(driver_name, "split") || !strcmp(driver_name, "multi")))
             return 0;
     }
 
@@ -3389,9 +3388,19 @@ main(void)
 
     h5_cleanup(FILENAME, fapl);
 
+    H5Pclose(fapl2);
+
     exit(EXIT_SUCCESS);
 
 error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+        H5Pclose(fapl2);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
     nerrors = MAX(1, nerrors);
     printf("***** %d SELECTION I/O DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     exit(EXIT_FAILURE);

@@ -10,8 +10,9 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Purpose:     This is a small program that checks if the HDF5_DRIVER
- *              environment variable is set to a value that supports SWMR.
+/* Purpose:     This is a small program that checks if the HDF5_DRIVER or
+ *              HDF5_TEST_DRIVER environment variable is set to a value that
+ *              supports SWMR.
  *
  *              It is intended for use in shell scripts.
  */
@@ -26,9 +27,9 @@
 /*-------------------------------------------------------------------------
  * Function:    main
  *
- * Purpose:     Inspects the HDF5_DRIVER environment variable, which
- *              determines the VFD that the test harness will use with
- *              the majority of the tests.
+ * Purpose:     Inspects the HDF5_DRIVER and HDF5_TEST_DRIVER environment
+ *              variables, which determines the VFD that the test harness
+ *              will use with the majority of the tests.
  *
  * Return:      VFD supports SWMR:          EXIT_SUCCESS
  *
@@ -43,6 +44,8 @@ main(void)
     char *driver = NULL;
 
     driver = getenv(HDF5_DRIVER);
+    if (!driver)
+        driver = getenv("HDF5_TEST_DRIVER");
 
     if (H5FD__supports_swmr_test(driver))
         return EXIT_SUCCESS;

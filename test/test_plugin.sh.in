@@ -18,7 +18,7 @@ TOP_BUILDDIR=@top_builddir@
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
 
-CP="cp -p"    # Use -p to preserve mode,ownership, timestamps
+CP="cp -rp"     # Use -p to preserve mode,ownership, timestamps
 RM="rm -rf"
 
 nerrors=0

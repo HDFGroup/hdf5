@@ -376,6 +376,8 @@ test_table(hid_t fid, int do_write)
     field_type[3] = H5T_NATIVE_DOUBLE;
     field_type[4] = H5T_NATIVE_INT;
 
+    memset(wbufd, 0, NRECORDS * sizeof(particle_t));
+
     /*-------------------------------------------------------------------------
      *
      * Functions tested:

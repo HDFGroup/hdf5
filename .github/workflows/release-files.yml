@@ -149,18 +149,18 @@ jobs:
 
       - name: Create sha256 sums for files
         run: |
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip > sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip > ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
 
       - name: Store snapshot name
         run: |
@@ -191,14 +191,14 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz
-              sha256sums.txt
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Release tag
@@ -215,14 +215,14 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz
-              sha256sums.txt
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: List files for the space (Linux)

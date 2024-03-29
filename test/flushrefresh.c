@@ -133,7 +133,7 @@ int
 main(int argc, char *argv[])
 {
     /* Variables */
-    const char *envval = NULL;
+    const char *driver_name = NULL;
 
     /* Initialize library */
     if (H5open() < 0)
@@ -146,9 +146,9 @@ main(int argc, char *argv[])
          * anything. */
 
         /* Determine driver being used */
-        envval = getenv(HDF5_DRIVER);
+        driver_name = h5_get_test_driver_name();
 
-        if (envval == NULL || H5FD__supports_swmr_test(envval)) {
+        if (driver_name == NULL || H5FD__supports_swmr_test(driver_name)) {
             if (test_flush() != SUCCEED)
                 TEST_ERROR;
             if (test_refresh() != SUCCEED)
