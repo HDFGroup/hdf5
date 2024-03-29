@@ -49,34 +49,34 @@ jobs:
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
 
     runs-on: ubuntu-latest
-      steps:
-        - name: Install Linux Dependencies
-          run: |
-               sudo apt update
-               sudo apt-get install ninja-build doxygen graphviz
-               sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-               sudo apt install gcc-12 g++-12 gfortran-12
-               echo "CC=gcc-12" >> $GITHUB_ENV
-               echo "CXX=g++-12" >> $GITHUB_ENV
-               echo "FC=gfortran-12" >> $GITHUB_ENV
-               
-        - name: Install Autotools Dependencies (Linux)
-          run: |
-            sudo apt install automake autoconf libtool libtool-bin
-            sudo apt install libaec0 libaec-dev
-          if: ${{ matrix.build_sys == 'Autotools' }}
+    steps:
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
 
-          # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-        - name: Get Sources
-          uses: actions/checkout@v4.1.1
+      - name: Install Autotools Dependencies (Linux)
+        run: |
+           sudo apt install automake autoconf libtool libtool-bin
+           sudo apt install libaec0 libaec-dev
+        if: ${{ matrix.build_sys == 'Autotools' }}
 
-          ##########   CMake  ###########
-        - name: CMake Configure
-          shell: bash
-          run: |
-              mkdir "${{ runner.workspace }}/build"
-              cd "${{ runner.workspace }}/build"
-              cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4.1.1
+
+        ##########   CMake  ###########
+      - name: CMake Configure
+        shell: bash
+        run: |
+           mkdir "${{ runner.workspace }}/build"
+           cd "${{ runner.workspace }}/build"
+           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
                 -G Ninja \
                 -DCMAKE_BUILD_TYPE=${{ matrix.build_mode }} \
                 -DBUILD_SHARED_LIBS=ON \
@@ -90,26 +90,26 @@ jobs:
                 -DZLIB_USE_LOCALCONTENT=OFF \
                 -DHDF_TEST_EXPRESS=0 \
                 $GITHUB_WORKSPACE
-          if: ${{ matrix.build_sys == 'CMake' }}
+        if: ${{ matrix.build_sys == 'CMake' }}
 
-        - name: CMake Build
-          run: cmake --build . --parallel 3 --config ${{ matrix.build_mode }}
-          working-directory: ${{ runner.workspace }}/build
-          if: ${{ matrix.build_sys == 'CMake' }}
+      - name: CMake Build
+        run: cmake --build . --parallel 3 --config ${{ matrix.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+        if: ${{ matrix.build_sys == 'CMake' }}
 
-        - name: CMake Run Tests
-          run: ctest . --parallel 2 -C ${{ matrix.build_mode }} -V -R H5TESTXPR
-          working-directory: ${{ runner.workspace }}/build
-          if: ${{ matrix.build_sys == 'CMake' }}
+      - name: CMake Run Tests
+        run: ctest . --parallel 2 -C ${{ matrix.build_mode }} -V -R H5TESTXPR
+        working-directory: ${{ runner.workspace }}/build
+        if: ${{ matrix.build_sys == 'CMake' }}
 
-          ##########   autotools  ###########
-        - name: Autotools Configure
-          shell: bash
-          run: |
-              sh ./autogen.sh
-              mkdir "${{ runner.workspace }}/build"
-              cd "${{ runner.workspace }}/build"
-              $GITHUB_WORKSPACE/configure \
+        ##########   autotools  ###########
+      - name: Autotools Configure
+        shell: bash
+        run: |
+           sh ./autogen.sh
+           mkdir "${{ runner.workspace }}/build"
+           cd "${{ runner.workspace }}/build"
+           $GITHUB_WORKSPACE/configure \
                 --enable-build-mode=debug \
                 --enable-deprecated-symbols \
                 --with-default-api-version=v16 \
@@ -122,10 +122,10 @@ jobs:
                 --enable-direct-vfd \
                 --enable-ros3-vfd \
                 --with-szlib=yes
-          if: ${{ matrix.build_sys == 'Autotools' }}
+        if: ${{ matrix.build_sys == 'Autotools' }}
 
-        - name: Autotools Build
-          shell: bash
-          run: make -j3
-          working-directory: ${{ runner.workspace }}/build
-          if: ${{ matrix.build_sys == 'Autotools' }}
+      - name: Autotools Build
+        shell: bash
+        run: make -j3
+        working-directory: ${{ runner.workspace }}/build
+        if: ${{ matrix.build_sys == 'Autotools' }}
