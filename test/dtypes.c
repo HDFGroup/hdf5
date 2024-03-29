@@ -6593,7 +6593,8 @@ test_array_cmpd_vl(void)
     /* Check for correctness of read data */
     for (int i = 0; i < 2; i++)
         for (int j = 0; j < 3; j++)
-            if (rdata[i][j].vl.len != 2 || ((int *)rdata[i][j].vl.p)[0] != int_wdata[i][j][0] || ((int *)rdata[i][j].vl.p)[1] != int_wdata[i][j][1]) {
+            if (rdata[i][j].vl.len != 2 || ((int *)rdata[i][j].vl.p)[0] != int_wdata[i][j][0] ||
+                ((int *)rdata[i][j].vl.p)[1] != int_wdata[i][j][1]) {
                 H5_FAILED();
                 AT();
                 printf("incorrect read data at [%d][%d]\n", i, j);
