@@ -78,6 +78,7 @@ Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@
                Default API mapping: @DEFAULT_API_VERSION@
     With deprecated public symbols: @HDF5_ENABLE_DEPRECATED_SYMBOLS@
             I/O filters (external): @EXTERNAL_FILTERS@
+                  _Float16 support: @HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16@
                      Map (H5M) API: @H5_HAVE_MAP_API@
                         Direct VFD: @HDF5_ENABLE_DIRECT_VFD@
                         Mirror VFD: @H5_HAVE_MIRROR_VFD@
