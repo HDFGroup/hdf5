@@ -734,13 +734,13 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
 
     if (estack->nused < H5E_NSLOTS) {
         /* Increment the IDs to indicate that they are used in this stack */
-        if (H5I_inc_ref(cls_id, false) < 0)
+        if (H5I_inc_ref_noherr(cls_id, false) < 0)
             HGOTO_DONE(FAIL);
         estack->slot[estack->nused].cls_id = cls_id;
-        if (H5I_inc_ref(maj_id, false) < 0)
+        if (H5I_inc_ref_noherr(maj_id, false) < 0)
             HGOTO_DONE(FAIL);
         estack->slot[estack->nused].maj_num = maj_id;
-        if (H5I_inc_ref(min_id, false) < 0)
+        if (H5I_inc_ref_noherr(min_id, false) < 0)
             HGOTO_DONE(FAIL);
         estack->slot[estack->nused].min_num = min_id;
         /* The 'func' & 'file' strings are statically allocated (by the compiler)

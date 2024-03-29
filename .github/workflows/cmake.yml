@@ -85,4 +85,10 @@ jobs:
         uses: ./.github/workflows/cygwin-cmake.yml
         with:
             build_mode: "Release"
+
+    call-release-cmake-julia:
+        name: "CMake Julia Workflows"
+        uses: ./.github/workflows/julia-cmake.yml
+        with:
+            build_mode: "Release"
             
