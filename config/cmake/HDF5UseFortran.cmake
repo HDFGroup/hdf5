@@ -219,7 +219,7 @@ if (${HAVE_ISO_FORTRAN_ENV})
 
     set(CMAKE_REQUIRED_QUIET TRUE)
     set(save_CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS})
-    if (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+    if (CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
        set(CMAKE_Fortran_FLAGS "-warn error")
     endif ()
 
