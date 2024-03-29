@@ -6571,6 +6571,51 @@ test_array_cmpd_vl(void)
             wdata[i][j].vl.p = int_wdata[i][j];
         }
 
+    /* Write data */
+    if (H5Dwrite(dset_id, outer_array_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't write data\n");
+        goto error;
+    } /* end if */
+
+    /* Initialize rdata */
+    (void)memset(rdata, 0, sizeof(rdata));
+
+    /* Read data */
+    if (H5Dread(dset_id, outer_array_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't read data\n");
+        goto error;
+    } /* end if */
+
+    /* Check for correctness of read data */
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 3; j++)
+            if (rdata[i][j].vl.len != 2 || ((int *)rdata[i][j].vl.p)[0] != int_wdata[i][j][0] || ((int *)rdata[i][j].vl.p)[1] != int_wdata[i][j][1]) {
+                H5_FAILED();
+                AT();
+                printf("incorrect read data at [%d][%d]\n", i, j);
+                goto error;
+            }
+
+    /* Reclaim memory */
+    if (H5Treclaim(outer_array_tid, space_id, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't reclaim memory\n");
+        goto error;
+    } /* end if */
+
+    /* Adjust write buffer */
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 3; j++) {
+            int_wdata[i][j][0] += 100;
+            int_wdata[i][j][1] += 100;
+        }
+
+    /* Overwrite dataset with adjusted wdata */
     if (H5Dwrite(dset_id, outer_array_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0) {
         H5_FAILED();
         AT();
