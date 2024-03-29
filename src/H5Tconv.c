@@ -2520,7 +2520,7 @@ H5T__conv_struct(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H
                     } /* end if */
                     else
                         offset -= dst_memb->size;
-                    memmove(xbkg + dst_memb->offset, xbuf + offset, dst_memb->size);
+                    memcpy(xbkg + dst_memb->offset, xbuf + offset, dst_memb->size);
                 } /* end for */
                 tmp_conv_ctx.u.conv.recursive = false;
 
@@ -2542,7 +2542,7 @@ H5T__conv_struct(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H
              * buffer.
              */
             for (xbuf = buf, xbkg = bkg, elmtno = 0; elmtno < nelmts; elmtno++) {
-                memmove(xbuf, xbkg, dst->shared->size);
+                memcpy(xbuf, xbkg, dst->shared->size);
                 xbuf += buf_stride ? buf_stride : dst->shared->size;
                 xbkg += bkg_delta;
             } /* end for */
@@ -2742,7 +2742,7 @@ H5T__conv_struct_opt(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, con
                 copy_size = priv->subset_info.copy_size;
 
                 for (elmtno = 0; elmtno < nelmts; elmtno++) {
-                    memmove(xbkg, xbuf, copy_size);
+                    memcpy(xbkg, xbuf, copy_size);
 
                     /* Update pointers */
                     xbuf += buf_stride;
@@ -2780,7 +2780,7 @@ H5T__conv_struct_opt(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, con
                                         "unable to convert compound datatype member");
 
                         for (elmtno = 0; elmtno < nelmts; elmtno++) {
-                            memmove(xbkg, xbuf, dst_memb->size);
+                            memcpy(xbkg, xbuf, dst_memb->size);
                             xbuf += buf_stride;
                             xbkg += bkg_stride;
                         } /* end for */
@@ -2825,7 +2825,7 @@ H5T__conv_struct_opt(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, con
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
                                         "unable to convert compound datatype member");
                         for (elmtno = 0; elmtno < nelmts; elmtno++) {
-                            memmove(xbkg, xbuf, dst_memb->size);
+                            memcpy(xbkg, xbuf, dst_memb->size);
                             xbuf += buf_stride;
                             xbkg += bkg_stride;
                         } /* end for */
@@ -2839,7 +2839,7 @@ H5T__conv_struct_opt(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, con
 
             /* Move background buffer into result buffer */
             for (xbuf = buf, xbkg = bkg, elmtno = 0; elmtno < nelmts; elmtno++) {
-                memmove(xbuf, xbkg, dst->shared->size);
+                memcpy(xbuf, xbkg, dst->shared->size);
                 xbuf += buf_stride;
                 xbkg += bkg_stride;
             } /* end for */
@@ -3093,7 +3093,7 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5T__conv_enum_init() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_enum
@@ -3848,17 +3848,17 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                 const H5T_conv_ctx_t H5_ATTR_UNUSED *conv_ctx, size_t nelmts, size_t buf_stride,
                 size_t bkg_stride, void *_buf, void *_bkg)
 {
-    H5T_conv_array_t *priv         = NULL;            /* Private conversion data */
-    H5T_conv_ctx_t    tmp_conv_ctx = {0};             /* Temporary conversion context */
-    H5T_t            *tsrc_cpy     = NULL;            /*temporary copy of source base datatype */
-    H5T_t            *tdst_cpy     = NULL;            /*temporary copy of destination base datatype */
-    hid_t             tsrc_id      = H5I_INVALID_HID; /*temporary type atom */
-    hid_t             tdst_id      = H5I_INVALID_HID; /*temporary type atom */
-    uint8_t          *sp, *dp, *bp;                   /*source, dest, and bkg traversal ptrs     */
-    ssize_t           src_delta, dst_delta;           /*source & destination stride         */
-    int               direction;                      /*direction of traversal         */
-    bool              need_ids  = false;              /*whether we need IDs for the datatypes */
-    herr_t            ret_value = SUCCEED;            /* Return value */
+    H5T_conv_array_t *priv         = NULL;             /* Private conversion data */
+    H5T_conv_ctx_t    tmp_conv_ctx = {0};              /* Temporary conversion context */
+    H5T_t            *tsrc_cpy     = NULL;             /* Temporary copy of source base datatype */
+    H5T_t            *tdst_cpy     = NULL;             /* Temporary copy of destination base datatype */
+    hid_t             tsrc_id      = H5I_INVALID_HID;  /* Temporary type atom */
+    hid_t             tdst_id      = H5I_INVALID_HID;  /* Temporary type atom */
+    uint8_t          *sp, *dp, *bp;                    /* Source, dest, and bkg traversal ptrs */
+    ssize_t           src_delta, dst_delta, bkg_delta; /* Source, dest, and bkg strides */
+    int               direction;                       /* Direction of traversal */
+    bool              need_ids  = false;               /* Whether we need IDs for the datatypes */
+    herr_t            ret_value = SUCCEED;             /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -3944,7 +3944,7 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
             else {
                 sp        = (uint8_t *)_buf + (nelmts - 1) * (buf_stride ? buf_stride : src->shared->size);
                 dp        = (uint8_t *)_buf + (nelmts - 1) * (buf_stride ? buf_stride : dst->shared->size);
-                bp        = (uint8_t *)_bkg + (nelmts - 1) * (bkg_stride ? bkg_stride : dst->shared->size);
+                bp        = _bkg ? (uint8_t *)_bkg + (nelmts - 1) * (bkg_stride ? bkg_stride : dst->shared->size) : NULL;
                 direction = -1;
             }
 
@@ -3956,6 +3956,7 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
             H5_CHECK_OVERFLOW(dst->shared->size, size_t, ssize_t);
             src_delta = (ssize_t)direction * (ssize_t)(buf_stride ? buf_stride : src->shared->size);
             dst_delta = (ssize_t)direction * (ssize_t)(buf_stride ? buf_stride : dst->shared->size);
+            bkg_delta = (ssize_t)direction * (ssize_t)(bkg_stride ? bkg_stride : dst->shared->size);
 
             /* Set up conversion path for base elements */
             if (!H5T_path_noop(priv->tpath)) {
@@ -3985,7 +3986,7 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
             tmp_conv_ctx.u.conv.recursive = true;
             for (size_t elmtno = 0; elmtno < nelmts; elmtno++) {
                 /* Copy the source array into the correct location for the destination */
-                memmove(dp, sp, src->shared->size);
+                memcpy(dp, sp, src->shared->size);
 
                 /* Convert array */
                 if (H5T_convert_with_ctx(priv->tpath, tsrc_cpy, tdst_cpy, &tmp_conv_ctx,
@@ -3996,7 +3997,7 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                 sp += src_delta;
                 dp += dst_delta;
                 if (bp)
-                    bp += dst_delta;
+                    bp += bkg_delta;
             } /* end for */
             tmp_conv_ctx.u.conv.recursive = false;
 
