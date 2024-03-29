@@ -693,6 +693,13 @@ Bug Fixes since HDF5-1.14.0 release
 
     Library
     -------
+    - Fixed potential buffer read overflows in H5PB_read
+
+      H5PB_read previously did not account for the fact that the size of the
+      read it's performing could overflow the page buffer pointer, depending
+      on the calculated offset for the read. This has been fixed by adjusting
+      the size of the read if it's determined that it would overflow the page.
+
     - Fixed CVE-2017-17507
 
       This CVE was previously declared fixed, but later testing with a static
