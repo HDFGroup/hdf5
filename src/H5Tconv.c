@@ -3987,7 +3987,7 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
             tmp_conv_ctx.u.conv.recursive = true;
             for (size_t elmtno = 0; elmtno < nelmts; elmtno++) {
                 /* Copy the source array into the correct location for the destination */
-                memcpy(dp, sp, src->shared->size);
+                memmove(dp, sp, src->shared->size);
 
                 /* Convert array */
                 if (H5T_convert_with_ctx(priv->tpath, tsrc_cpy, tdst_cpy, &tmp_conv_ctx,
