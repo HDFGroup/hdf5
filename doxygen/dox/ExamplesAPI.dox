@@ -435,7 +435,6 @@ FORTRAN
 <td>h5ex_t_bit.h5</td>
 <td><a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/C/H5T/tfiles/16/h5ex_t_bit.tst">h5ex_t_bit.tst</a></td>
 <td><a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/C/H5T/tfiles/18/h5ex_t_bit.ddl">h5ex_t_bit.ddl</a></td>
->>>>>>> 42f9d24... Correct reference copy for 16 API (#4244)
 </tr>
 <tr>
 <td>Read / Write Compound  (Attribute)</td>
@@ -449,7 +448,6 @@ FORTRAN
 <td>h5ex_t_cmpdatt.h5</td>
 <td><a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/C/H5T/tfiles/16/h5ex_t_cmpdatt.tst">h5ex_t_cmpdatt.tst</a></td>
 <td><a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/C/H5T/tfiles/18/h5ex_t_cmpdatt.ddl">h5ex_t_cmpdatt.ddl</a></td>
->>>>>>> 42f9d24... Correct reference copy for 16 API (#4244)
 </tr>
 <tr>
 <td>Read / Write Compound  (Dataset)</td>
