@@ -350,21 +350,26 @@ set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_attr_vlen.c
 )
 
-set (H5_TESTS
-    testhdf5 # multiple source
+set (H5_EXPRESS_TESTS
     cache
     cache_api
     cache_image # multiple source
+    btree2
+    farray
+    earray
+    fheap
+    objcopy_ref
+    objcopy
+)
+
+set (H5_TESTS
+    testhdf5 # multiple source
     cache_tagging
     lheap
     ohdr
     stab
     gheap
     evict_on_close
-    farray
-    earray
-    btree2
-    fheap
     accum
     hyperslab
     istore
@@ -383,8 +388,6 @@ set (H5_TESTS
     external
     external_env
     efc
-    objcopy_ref
-    objcopy
     links
     unlink
     twriteorder
