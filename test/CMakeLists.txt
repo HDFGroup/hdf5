@@ -466,7 +466,7 @@ set (H5_TESTS_MULTIPLE
     mirror_vfd
 )
 # Only build single source tests here
-foreach (h5_test ${H5_TESTS})
+foreach (h5_test ${H5_TESTS} ${H5_EXPRESS_TESTS})
   if (NOT h5_test IN_LIST H5_TESTS_MULTIPLE)
     ADD_H5_EXE(${h5_test})
   endif ()
