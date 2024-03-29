@@ -79,6 +79,14 @@
 ! Define if Fortran C_BOOL is different from default LOGICAL
 #define H5_FORTRAN_C_BOOL_IS_UNIQUE @H5_FORTRAN_C_BOOL_IS_UNIQUE@
 
+! Define  MPI Fortran KIND of LOGICAL
+#cmakedefine01 CMAKE_H5_MPI_LOGICAL_KIND
+#if CMAKE_H5_MPI_LOGICAL_KIND == 0
+#undef H5_MPI_LOGICAL_KIND
+#else
+#define H5_MPI_LOGICAL_KIND @H5_MPI_LOGICAL_KIND@
+#endif
+
 ! Define if Fortran supports ISO_FORTRAN_ENV (F08)
 #cmakedefine01 CMAKE_H5_HAVE_ISO_FORTRAN_ENV
 #if CMAKE_H5_HAVE_ISO_FORTRAN_ENV == 0

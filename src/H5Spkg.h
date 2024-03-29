@@ -89,15 +89,6 @@
  * H5S_UNLIMITED) */
 #define H5S_MAX_SIZE ((hsize_t)(hssize_t)(-2))
 
-/* Macro for checking if two ranges overlap one another */
-/*
- * Check for the inverse of whether the ranges are disjoint.  If they are
- * disjoint, then the low bound of one of the ranges must be greater than the
- * high bound of the other.
- */
-/* (Assumes that low & high bounds are _inclusive_) */
-#define H5S_RANGE_OVERLAP(L1, H1, L2, H2) (!((L1) > (H2) || (L2) > (H1)))
-
 /*
  * Dataspace extent information
  */

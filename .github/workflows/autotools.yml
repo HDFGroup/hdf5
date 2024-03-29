@@ -83,4 +83,10 @@ jobs:
       with:
             build_mode: "production"
 
+    call-release-cmake-julia:
+        name: "Autotools Julia Workflows"
+        uses: ./.github/workflows/julia-auto.yml
+        with:
+            build_mode: "production"
+
             

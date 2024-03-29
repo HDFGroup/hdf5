@@ -2918,3 +2918,23 @@ H5O__reset_info2(H5O_info2_t *oinfo)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__reset_info2() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_has_chksum
+ *
+ * Purpose:     Returns true if object header is checksummed
+ *
+ * Return:      true/false on success, can't fail
+ *
+ *-------------------------------------------------------------------------
+ */
+bool
+H5O_has_chksum(const H5O_t *oh)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check args */
+    assert(oh);
+
+    FUNC_LEAVE_NOAPI(H5O_SIZEOF_CHKSUM_OH(oh) > 0)
+} /* end H5O_has_chksum() */

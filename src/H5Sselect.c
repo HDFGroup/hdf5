@@ -1945,7 +1945,7 @@ H5S_select_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *en
         /* Loop over selection bounds and block, checking for overlap */
         for (u = 0; u < space->extent.rank; u++)
             /* If selection bounds & block don't overlap, can leave now */
-            if (!H5S_RANGE_OVERLAP(low[u], high[u], start[u], end[u]))
+            if (!H5_RANGE_OVERLAP(low[u], high[u], start[u], end[u]))
                 HGOTO_DONE(false);
     } /* end if */
 

@@ -461,17 +461,37 @@ Bug Fixes since HDF5-1.14.3 release
 
     Library
     -------
-    - Fixed a cache assert with too-large metadata objects
+    - Fixed potential buffer read overflows in H5PB_read
 
-      If the library tries to load a metadata object that is above the
-      library's hard-coded limits, the size will trip an assert in debug
-      builds. In HDF5 1.14.4, this can happen if you create a very large
-      number of links in an old-style group that uses local heaps.
+      H5PB_read previously did not account for the fact that the size of the
+      read it's performing could overflow the page buffer pointer, depending
+      on the calculated offset for the read. This has been fixed by adjusting
+      the size of the read if it's determined that it would overflow the page.
 
-      The library will now emit a normal error when it tries to load a
-      metadata object that is too large.
+    - Fixed CVE-2017-17507
 
-      Partially addresses GitHub #3762
+      This CVE was previously declared fixed, but later testing with a static
+      build of HDF5 showed that it was not fixed.
+
+      When parsing a malformed (fuzzed) compound type containing variable-length
+      string members, the library could produce a segmentation fault, crashing
+      the library.
+
+      This was fixed after GitHub PR #4234
+
+      Fixes GitHub issue #3446
+
+    - Fixed a cache assert with very large metadata objects
+
+      If the library tries to load a metadata object that is above a
+      certain size, this would trip an assert in debug builds. This could
+      happen if you create a very large number of links in an old-style
+      group that uses local heaps.
+
+      There is no need for this assert. The library's metadata cache
+      can handle large objects. The assert has been removed.
+
+      Fixes GitHub #3762
 
     - Fixed an issue with the Subfiling VFD and multiple opens of a
       file
@@ -551,6 +571,27 @@ Bug Fixes since HDF5-1.14.3 release
       within a compound or array within another variable length type, and
       overwriting data with a shorter (top level) variable length sequence, an
       error could occur. This has been fixed.
+
+    - Take user block into account in H5Dchunk_iter() and H5Dget_chunk_info()
+
+      The address reported by the following functions did not correctly
+      take the user block into account:
+
+        * H5Dchunk_iter()              <-- addr passed to callback
+        * H5Dget_chunk_info()          <-- addr parameter
+        * H5Dget_chunk_info_by_coord() <-- addr parameter
+
+      This means that these functions reported logical HDF5 file addresses,
+      which would only be equal to the physical addresses when there is no
+      user block prepended to the HDF5 file. This is unfortunate, as the
+      primary use of these functions is to get physical addresses in order
+      to directly access the chunks.
+
+      The listed functions now correctly take the user block into account,
+      so they will emit physical addresses that can be used to directly
+      access the chunks.
+
+      Fixes #3003
 
     - Fixed asserts raised by large values of H5Pset_est_link_info() parameters
 
@@ -959,6 +1000,11 @@ Platforms Tested
 Known Problems
 ==============
 
+    When building with the NAG Fortran compiler using the Autotools and libtool
+    2.4.2 or earlier, the -shared flag will be missing '-Wl,', which will cause
+    compilation to fail. This is due to a bug in libtool that was fixed in 2012
+    and released in 2.4.4 in 2014.
+
     When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may
     also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur
     in the following tests:
@@ -999,6 +1045,9 @@ Known Problems
     Flang Fortran compilation will fail (last check version 17) due to not yet
     implemented: (1) derived type argument passed by value (H5VLff.F90),
     and (2) support for REAL with KIND = 2 in intrinsic SPACING used in testing.
+
+    Fortran tests HDF5_1_8.F90 and HDF5_F03.F90 will fail with Cray compilers greater than
+    version 16.0 due to a compiler bug. The latest version verified as failing was version 17.0.
 
     Several tests currently fail on certain platforms:
         MPI_TEST-t_bigio fails with spectrum-mpi on ppc64le platforms.

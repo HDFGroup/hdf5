@@ -158,7 +158,10 @@ struct H5T_stats_t {
     H5_timevals_t times;  /*total time for conversion	     */
 };
 
-/* Context struct for information used during datatype conversions */
+/* Context struct for information used during datatype conversions.
+ * Which union member is valid to read from is dictated by the
+ * accompanying H5T_cdata_t structure's H5T_cmd_t member value.
+ */
 typedef struct H5T_conv_ctx_t {
     union {
         /*
@@ -187,7 +190,14 @@ typedef struct H5T_conv_ctx_t {
             bool recursive;
         } conv;
 
-        /* No fields currently defined for H5T_cmd_t H5T_CONV_FREE */
+        /*
+         * Fields only valid during conversion function free process
+         * (H5T_cmd_t H5T_CONV_FREE)
+         */
+        struct H5T_conv_ctx_free_fields {
+            hid_t src_type_id;
+            hid_t dst_type_id;
+        } free;
     } u;
 } H5T_conv_ctx_t;
 

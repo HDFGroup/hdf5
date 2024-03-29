@@ -333,6 +333,11 @@
 #endif
 #define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_ENC H5P__encode_bool
 #define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEC H5P__decode_bool
+/* Definition for 'rfic' flags */
+#define H5F_ACS_RFIC_FLAGS_SIZE sizeof(uint64_t)
+#define H5F_ACS_RFIC_FLAGS_DEF  0
+#define H5F_ACS_RFIC_FLAGS_ENC  H5P__encode_uint64_t
+#define H5F_ACS_RFIC_FLAGS_DEC  H5P__decode_uint64_t
 
 /******************/
 /* Local Typedefs */
@@ -529,6 +534,7 @@ static const bool H5F_def_use_file_locking_g =
     H5F_ACS_USE_FILE_LOCKING_DEF; /* Default use file locking flag */
 static const bool H5F_def_ignore_disabled_file_locks_g =
     H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF; /* Default ignore disabled file locks flag */
+static const uint64_t H5F_def_rfic_flags_g = H5F_ACS_RFIC_FLAGS_DEF; /* Default 'rfic' flags */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_reg_prop
@@ -824,6 +830,12 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
                            H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_SIZE, &H5F_def_ignore_disabled_file_locks_g,
                            NULL, NULL, NULL, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_ENC,
                            H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEC, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+
+    /* Register the 'rfic' flags. */
+    if (H5P__register_real(pclass, H5F_ACS_RFIC_FLAGS_NAME, H5F_ACS_RFIC_FLAGS_SIZE, &H5F_def_rfic_flags_g,
+                           NULL, NULL, NULL, H5F_ACS_RFIC_FLAGS_ENC, H5F_ACS_RFIC_FLAGS_DEC, NULL, NULL, NULL,
+                           NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
 done:
@@ -6264,3 +6276,75 @@ H5P__facc_vol_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_vol_close() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_relax_file_integrity_checks
+ *
+ * Purpose:     Relax certain file integrity checks that may issue errors
+ *              for valid files that have the potential for incorrect library
+ *              behavior when data is incorrect or corrupted.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_relax_file_integrity_checks(hid_t plist_id, uint64_t flags)
+{
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iUL", plist_id, flags);
+
+    /* Check arguments */
+    if (H5P_DEFAULT == plist_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
+    if (flags & (uint64_t)~H5F_RFIC_ALL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags");
+
+    /* Get the property list structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plist_id is not a file access property list");
+
+    /* Set value */
+    if (H5P_set(plist, H5F_ACS_RFIC_FLAGS_NAME, &flags) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set relaxed file integrity check flags");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_relax_file_integrity_checks() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_relax_file_integrity_checks
+ *
+ * Purpose:     Retrieve relaxed file integrity check flags
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_relax_file_integrity_checks(hid_t plist_id, uint64_t *flags /*out*/)
+{
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*UL", plist_id, flags);
+
+    if (H5P_DEFAULT == plist_id)
+        plist_id = H5P_FILE_ACCESS_DEFAULT;
+
+    /* Get the property list structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plist_id is not a file access property list");
+
+    /* Get value */
+    if (flags)
+        if (H5P_get(plist, H5F_ACS_RFIC_FLAGS_NAME, flags) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get relaxed file integrity check flags");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_relax_file_integrity_checks() */

@@ -18,9 +18,6 @@
 
 SUBROUTINE mpi_param_03(nerrors)
 
-#ifdef H5_HAVE_ISO_FORTRAN_ENV
-  USE, INTRINSIC :: iso_fortran_env, ONLY : atomic_logical_kind
-#endif
   USE MPI
   USE HDF5
   USE TH5_MISC
@@ -39,8 +36,8 @@ SUBROUTINE mpi_param_03(nerrors)
   INTEGER(KIND=MPI_INTEGER_KIND) :: info, info_ret
   INTEGER(KIND=MPI_INTEGER_KIND) :: comm, comm_ret
   INTEGER(KIND=MPI_INTEGER_KIND) :: nkeys
-#ifdef H5_HAVE_ISO_FORTRAN_ENV
-  LOGICAL(KIND=atomic_logical_kind) :: flag
+#ifdef H5_MPI_LOGICAL_KIND
+  LOGICAL(KIND=H5_MPI_LOGICAL_KIND) :: flag
 #else
   LOGICAL(KIND=MPI_INTEGER_KIND) :: flag
 #endif
@@ -178,10 +175,6 @@ END SUBROUTINE mpi_param_03
 SUBROUTINE mpi_param_08(nerrors)
 
 #ifdef H5_HAVE_MPI_F08
-
-#ifdef H5_HAVE_ISO_FORTRAN_ENV
-  USE, INTRINSIC :: iso_fortran_env, ONLY : atomic_logical_kind
-#endif
   USE MPI_F08
   USE HDF5
   USE TH5_MISC
@@ -199,8 +192,8 @@ SUBROUTINE mpi_param_08(nerrors)
   TYPE(MPI_INFO) :: info, info_ret
   TYPE(MPI_COMM) :: comm, comm_ret
   INTEGER(KIND=MPI_INTEGER_KIND) :: nkeys
-#ifdef H5_HAVE_ISO_FORTRAN_ENV
-  LOGICAL(KIND=atomic_logical_kind) :: flag
+#ifdef H5_MPI_LOGICAL_KIND
+  LOGICAL(KIND=H5_MPI_LOGICAL_KIND) :: flag
 #else
   LOGICAL(KIND=MPI_INTEGER_KIND) :: flag
 #endif

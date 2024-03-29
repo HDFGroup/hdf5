@@ -163,6 +163,8 @@ set (HDF5_REFERENCE_TEST_FILES
     test_filters_le.h5
     th5s.h5
     tlayouto.h5
+    tmisc38a.h5
+    tmisc38b.h5
     tmtimen.h5
     tmtimeo.h5
     tsizeslheap.h5

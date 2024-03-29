@@ -318,6 +318,15 @@
 /* limit the middle value to be within a range (inclusive) */
 #define RANGE(LO, X, HI) MAX(LO, MIN(X, HI))
 
+/* Macro for checking if two ranges overlap one another */
+/*
+ * Check for the inverse of whether the ranges are disjoint.  If they are
+ * disjoint, then the low bound of one of the ranges must be greater than the
+ * high bound of the other.
+ */
+/* (Assumes that low & high bounds are _inclusive_) */
+#define H5_RANGE_OVERLAP(L1, H1, L2, H2) (!((L1) > (H2) || (L2) > (H1)))
+
 /* absolute value */
 #ifndef ABS
 #define ABS(a) (((a) >= 0) ? (a) : -(a))
@@ -336,9 +345,28 @@
 #define H5_EXP2(n) (1 << (n))
 
 /* Check if a read of size bytes starting at ptr would overflow past
- * the last valid byte, pointed to by buffer_end.
+ * the last valid byte, pointed to by buffer_end. Note that 'size'
+ * is expected to be of type size_t. Providing values of other
+ * datatypes may cause warnings due to the comparison against
+ * PTRDIFF_MAX and comparison of < 0 after conversion to ptrdiff_t.
+ * For the time being, these can be suppressed with
+ * H5_GCC_CLANG_DIAG_OFF("type-limits")/H5_GCC_CLANG_DIAG_ON("type-limits")
  */
-#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end) (((ptr) + (size)-1) > (buffer_end))
+/* clang-format off */
+#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end)                                                         \
+    (                                                                                                        \
+      /* Trivial case */                                                                                     \
+      ((size) != 0) &&                                                                                       \
+      (                                                                                                      \
+        /* Bad precondition */                                                                               \
+        ((ptr) > (buffer_end)) ||                                                                            \
+        /* Account for (likely unintentional) negative 'size' */                                             \
+        (((size_t)(size) <= PTRDIFF_MAX) && ((ptrdiff_t)(size) < 0)) ||                                      \
+        /* Typical overflow */                                                                               \
+        ((size_t)(size) > (size_t)((((const uint8_t *)buffer_end) - ((const uint8_t *)ptr)) + 1))            \
+      )                                                                                                      \
+    )
+/* clang-format on */
 
 /* Variant of H5_IS_BUFFER_OVERFLOW, used with functions such as H5Tdecode()
  * that don't take a size parameter, where we need to skip the bounds checks.
@@ -347,7 +375,7 @@
  * the entire library.
  */
 #define H5_IS_KNOWN_BUFFER_OVERFLOW(skip, ptr, size, buffer_end)                                             \
-    (skip ? false : ((ptr) + (size)-1) > (buffer_end))
+    (skip ? false : H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end))
 
 /*
  * HDF Boolean type.
@@ -451,8 +479,7 @@
                                   (X) >= (Y))
 #define H5_addr_cmp(X,Y)         (H5_addr_eq((X), (Y)) ? 0 :                \
                                  (H5_addr_lt((X), (Y)) ? -1 : 1))
-#define H5_addr_overlap(O1,L1,O2,L2) (((O1) < (O2) && ((O1) + (L1)) > (O2)) || \
-                                      ((O1) >= (O2) && (O1) < ((O2) + (L2))))
+#define H5_addr_overlap(O1,L1,O2,L2) H5_RANGE_OVERLAP(O1, ((O1)+(L1)-1), O2, ((O2)+(L2)-1))
 /* clang-format on */
 
 /*
