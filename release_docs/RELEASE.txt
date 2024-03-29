@@ -182,6 +182,29 @@ New Features
 
     Library:
     --------
+    - Relaxed behavior of H5Pset_page_buffer_size() when opening files
+
+      This API call sets the size of a file's page buffer cache. This call
+      was extremely strict about matching its parameters to the file strategy
+      and page size used to create the file, requiring a separate open of the
+      file to obtain these parameters.
+
+      These requirements have been relaxed when using the fapl to open
+      a previously-created file:
+
+      * When opening a file that does not use the H5F_FSPACE_STRATEGY_PAGE
+        strategy, the setting is ignored and the file will be opened, but
+        without a page buffer cache. This was previously an error.
+
+      * When opening a file that has a page size larger than the desired
+        page buffer cache size, the page buffer cache size will be increased
+        to the file's page size. This was previously an error.
+
+      The behavior when creating a file using H5Pset_page_buffer_size() is
+      unchanged.
+
+      Fixes GitHub issue #3382
+
     - Added support for _Float16 16-bit half-precision floating-point datatype
 
       Support for the _Float16 C datatype has been added on platforms where:

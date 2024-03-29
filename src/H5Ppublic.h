@@ -5748,7 +5748,16 @@ H5_DLL herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t 
  *          If a non-zero page buffer size is set, and the file space strategy
  *          is not set to paged or the page size for the file space strategy is
  *          larger than the page buffer size, the subsequent call to H5Fcreate()
- *          or H5Fopen() using the \p plist_id will fail.
+ *          using the \p plist_id will fail.
+ *
+ * \note    As of HDF5 1.14.4, this property will be ignored when an existing
+ *          file is being opened and the file space strategy stored in the
+ *          file isn't paged. This was previously a failure.
+ *
+ * \note    As of HDF5 1.14.4, if a file with a paged file space strategy is
+ *          opened with a page size that is smaller than the file's page size,
+ *          the page cache size will be rounded up to the file's page size.
+ *          This was previously a failure.
  *
  *          The function also allows setting the minimum percentage of pages for
  *          metadata and raw data to prevent a certain type of data to evict hot
