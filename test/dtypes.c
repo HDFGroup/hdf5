@@ -73,8 +73,8 @@
         }                                                                                                    \
     } while (0)
 
-static const char *FILENAME[] = {"dtypes0",  "dtypes1",  "dtypes2", "dtypes3", "dtypes4",
-                                 "dtypes5",  "dtypes6",  "dtypes7", "dtypes8", "dtypes9",
+static const char *FILENAME[] = {"dtypes0",  "dtypes1",  "dtypes2",  "dtypes3", "dtypes4",
+                                 "dtypes5",  "dtypes6",  "dtypes7",  "dtypes8", "dtypes9",
                                  "dtypes10", "dtypes11", "dtypes12", NULL};
 
 #define TESTFILE "bad_compound.h5"
@@ -6556,8 +6556,8 @@ test_array_cmpd_vl(void)
         goto error;
     } /* end if */
 
-    if ((dset_id = H5Dcreate2(file, "Dataset", outer_array_tid, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
-        0) {
+    if ((dset_id = H5Dcreate2(file, "Dataset", outer_array_tid, space_id, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0) {
         H5_FAILED();
         AT();
         printf("Can't create dataset\n");
@@ -6568,7 +6568,7 @@ test_array_cmpd_vl(void)
     for (int i = 0; i < 2; i++)
         for (int j = 0; j < 3; j++) {
             wdata[i][j].vl.len = 2;
-            wdata[i][j].vl.p = int_wdata[i][j];
+            wdata[i][j].vl.p   = int_wdata[i][j];
         }
 
     /* Write data */
@@ -6637,7 +6637,8 @@ test_array_cmpd_vl(void)
     /* Check for correctness of read data */
     for (int i = 0; i < 2; i++)
         for (int j = 0; j < 3; j++)
-            if (rdata[i][j].vl.len != 2 || ((int *)rdata[i][j].vl.p)[0] != int_wdata[i][j][0] || ((int *)rdata[i][j].vl.p)[1] != int_wdata[i][j][1]) {
+            if (rdata[i][j].vl.len != 2 || ((int *)rdata[i][j].vl.p)[0] != int_wdata[i][j][0] ||
+                ((int *)rdata[i][j].vl.p)[1] != int_wdata[i][j][1]) {
                 H5_FAILED();
                 AT();
                 printf("incorrect read data at [%d][%d]\n", i, j);
