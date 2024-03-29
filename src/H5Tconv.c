@@ -3942,9 +3942,10 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                 direction = 1;
             }
             else {
-                sp        = (uint8_t *)_buf + (nelmts - 1) * (buf_stride ? buf_stride : src->shared->size);
-                dp        = (uint8_t *)_buf + (nelmts - 1) * (buf_stride ? buf_stride : dst->shared->size);
-                bp        = _bkg ? (uint8_t *)_bkg + (nelmts - 1) * (bkg_stride ? bkg_stride : dst->shared->size) : NULL;
+                sp = (uint8_t *)_buf + (nelmts - 1) * (buf_stride ? buf_stride : src->shared->size);
+                dp = (uint8_t *)_buf + (nelmts - 1) * (buf_stride ? buf_stride : dst->shared->size);
+                bp = _bkg ? (uint8_t *)_bkg + (nelmts - 1) * (bkg_stride ? bkg_stride : dst->shared->size)
+                          : NULL;
                 direction = -1;
             }
 
