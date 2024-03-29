@@ -5294,7 +5294,7 @@ H5T__init_path_table(void)
     /* Sanity check */
     if (0 != H5T_g.npaths)
         HGOTO_ERROR(H5E_DATATYPE, H5E_ALREADYINIT, FAIL,
-                    "datatype conversion path table is aleady initialized");
+                    "datatype conversion path table is already initialized");
 
     if (NULL == (H5T_g.path = H5MM_calloc(H5T_DEF_CONV_TABLE_SLOTS * sizeof(H5T_path_t *))))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
