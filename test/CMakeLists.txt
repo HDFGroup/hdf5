@@ -355,21 +355,26 @@ set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_thread_pool.c
 )
 
-set (H5_TESTS
-    testhdf5 # multiple source
+set (H5_EXPRESS_TESTS
     cache
     cache_api
     cache_image # multiple source
+    btree2
+    farray
+    earray
+    fheap
+    objcopy_ref
+    objcopy
+)
+
+set (H5_TESTS
+    testhdf5 # multiple source
     cache_tagging
     lheap
     ohdr
     stab
     gheap
     evict_on_close
-    farray
-    earray
-    btree2
-    fheap
     accum
     hyperslab
     istore
@@ -388,8 +393,6 @@ set (H5_TESTS
     external
     external_env
     efc
-    objcopy_ref
-    objcopy
     links
     unlink
     twriteorder
@@ -466,7 +469,7 @@ set (H5_TESTS_MULTIPLE
     mirror_vfd
 )
 # Only build single source tests here
-foreach (h5_test ${H5_TESTS})
+foreach (h5_test ${H5_TESTS} ${H5_EXPRESS_TESTS})
   if (NOT h5_test IN_LIST H5_TESTS_MULTIPLE)
     ADD_H5_EXE(${h5_test})
   endif ()
