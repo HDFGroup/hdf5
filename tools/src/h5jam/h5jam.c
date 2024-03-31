@@ -162,7 +162,7 @@ main(int argc, char *argv[])
     hsize_t   startub;
     hsize_t   where;
     hsize_t   newubsize;
-    off_t     fsize;
+    HDoff_t   fsize;
     h5_stat_t sbuf;
     h5_stat_t sbuf2;
     int       res;
@@ -253,7 +253,7 @@ main(int argc, char *argv[])
         goto done;
     }
 
-    fsize = (off_t)sbuf.st_size;
+    fsize = (HDoff_t)sbuf.st_size;
 
     h5fid = HDopen(input_file, O_RDONLY);
     if (h5fid < 0) {
