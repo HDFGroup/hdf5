@@ -13,34 +13,27 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        build_sys: ["CMake"]
-        build_mode: ["Release", "Debug"]
+        build_sys: ["CMake", "Autotools"]
+        build_mode: ["Release", "production", "Debug", "debug"]
         include:
           - build_sys: "CMake"
             build_mode: "Release"
           - build_sys: "CMake"
             build_mode: "Debug"
-#        build_sys: ["CMake", "Autotools"]
-#        build_mode: ["Release", "production", "Debug", "debug"]
-#        include:
-#          - build_sys: "CMake"
-#            build_mode: "Release"
-#          - build_sys: "CMake"
-#            build_mode: "Debug"
-#          - build_sys: "Autotools"
-#            build_mode: "production"
-#          - build_sys: "Autotools"
-#            build_mode: "debug"
-#        # Exclude mismatched configurations
-#        exclude:
-#          - build_sys: "CMake"
-#            build_mode: "production"
-#          - build_sys: "CMake"
-#            build_mode: "debug"
-#          - build_sys: "Autotools"
-#            build_mode: "Release"
-#          - build_sys: "Autotools"
-#            build_mode: "Debug"
+          - build_sys: "Autotools"
+            build_mode: "production"
+          - build_sys: "Autotools"
+            build_mode: "debug"
+        # Exclude mismatched configurations
+        exclude:
+          - build_sys: "CMake"
+            build_mode: "production"
+          - build_sys: "CMake"
+            build_mode: "debug"
+          - build_sys: "Autotools"
+            build_mode: "Release"
+          - build_sys: "Autotools"
+            build_mode: "Debug"
 
     # Sets the job's name from the properties
     name: "${{ matrix.build_sys }} ${{ matrix.build_mode }} Workflows"
@@ -129,7 +122,7 @@ jobs:
       - name: Autotools Test
         shell: bash
         env:
-            HDF_TEST_EXPRESS: 0
+            HDF5TestExpress: 0
         run: |
            cd test
            make -j3 check
