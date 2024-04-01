@@ -47,6 +47,36 @@ New Features
 
     Configuration:
     -------------
+    - Added configure options for enabling/disabling non-standard programming
+      language features
+
+      * Added a new configuration option that allows enabling or disabling of
+        support for features that are extensions to programming languages, such
+        as support for the _Float16 datatype:
+
+          CMake:      HDF5_ENABLE_NONSTANDARD_FEATURES (ON/OFF) (Default: ON)
+          Autotools:  --enable-nonstandard-features    (yes/no) (Default: yes)
+
+        When this option is enabled, configure time checks are still performed
+        to ensure that a feature can be used properly, but these checks may not
+        be sufficient when compiler support for a feature is incomplete or broken,
+        resulting in library build failures. When set to OFF/no, this option
+        provides a way to disable support for all non-standard features to avoid
+        these issues. Individual features can still be re-enabled with their
+        respective configuration options.
+
+      * Added a new configuration option that allows enabling or disabling of
+        support for the _Float16 C datatype:
+
+          CMake:      HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 (ON/OFF) (Default: ON)
+          Autotools:  --enable-nonstandard-feature-float16    (yes/no) (Default: yes)
+
+        While support for the _Float16 C datatype can generally be detected and
+        used properly, some compilers have incomplete support for the datatype
+        and will pass configure time checks while still failing to build HDF5.
+        This option provides a way to disable support for the _Float16 datatype
+        when the compiler doesn't have the proper support for it.
+
     - Deprecate bin/cmakehdf5 script
 
       With the improvements made in CMake since version 3.23 and the addition

@@ -99,6 +99,7 @@ const char H5build_settings[]=
     "               Default API mapping: @DEFAULT_API_VERSION@\n"
     "    With deprecated public symbols: @DEPRECATED_SYMBOLS@\n"
     "            I/O filters (external): @EXTERNAL_FILTERS@\n"
+    "                  _Float16 support: @HAVE__FLOAT16@\n"
     "                     Map (H5M) API: @MAP_API@\n"
     "                        Direct VFD: @DIRECT_VFD@\n"
     "                        Mirror VFD: @MIRROR_VFD@\n"

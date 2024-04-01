@@ -574,104 +574,156 @@ AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
 
+#-----------------------------------------------------------------------------
+# Option for enabling/disabling support for non-standard features, datatypes,
+# etc. These features should still be checked for at configure time, but these
+# options allow disabling of support for these features when compiler support
+# is incomplete or broken. In this case, configure time checks may not be
+# enough to properly enable/disable a feature and can cause library build
+# problems.
+#-----------------------------------------------------------------------------
+AC_MSG_CHECKING([if non-standard feature support is enabled])
+AC_ARG_ENABLE([nonstandard-features],
+              [AS_HELP_STRING([--enable-nonstandard-features],
+                              [Enable support for non-standard programming language features [default=yes]])],
+              [NONSTANDARD_FEATURES=$enableval])
+
+## Set default
+if test "X-$NONSTANDARD_FEATURES" = X- ; then
+  NONSTANDARD_FEATURES=yes
+fi
+
+case "X-$NONSTANDARD_FEATURES" in
+  X-yes|X-no)
+    AC_MSG_RESULT([$NONSTANDARD_FEATURES])
+    ;;
+  *)
+    AC_MSG_ERROR([Unrecognized value: $NONSTANDARD_FEATURES])
+    ;;
+esac
+
 ## ----------------------------------------------------------------------
 ## Check if _Float16 support is available
 ##
-AC_MSG_NOTICE([checking if _Float16 support is available])
+AC_MSG_CHECKING([if _Float16 support is enabled])
+AC_ARG_ENABLE([nonstandard-feature-float16],
+              [AS_HELP_STRING([--enable-nonstandard-feature-float16],
+                              [Enable support for _Float16 C datatype [default=yes]])],
+              [ENABLE_FLOAT16=$enableval])
+
+## Set default
+if test "X-$ENABLE_FLOAT16" = X- ; then
+  ENABLE_FLOAT16=$NONSTANDARD_FEATURES
+fi
+
+case "X-$ENABLE_FLOAT16" in
+  X-yes|X-no)
+    AC_MSG_RESULT([$ENABLE_FLOAT16])
+    ;;
+  *)
+    AC_MSG_ERROR([Unrecognized value: $ENABLE_FLOAT16])
+    ;;
+esac
+
 HAVE__FLOAT16="no"
-AC_CHECK_SIZEOF([_Float16])
-if test "$ac_cv_sizeof__Float16" != 0; then
-  # Some compilers expose the _Float16 datatype, but not the macros and
-  # functions used with the datatype. We need the macros for proper
-  # datatype conversion support. Check for these here.
-  AC_CHECK_DECL([FLT16_EPSILON], [], [], [[
-                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
-                 #include <float.h>]])
-  AC_CHECK_DECL([FLT16_MIN], [], [], [[
-                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
-                 #include <float.h>]])
-  AC_CHECK_DECL([FLT16_MAX], [], [], [[
-                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
-                 #include <float.h>]])
-  AC_CHECK_DECL([FLT16_MIN_10_EXP], [], [], [[
-                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
-                 #include <float.h>]])
-  AC_CHECK_DECL([FLT16_MAX_10_EXP], [], [], [[
-                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
-                 #include <float.h>]])
-  AC_CHECK_DECL([FLT16_MANT_DIG], [], [], [[
-                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
-                 #include <float.h>]])
+if test "X$ENABLE_FLOAT16" = "Xyes"; then
+  AC_MSG_NOTICE([checking if _Float16 support is available])
+  AC_CHECK_SIZEOF([_Float16])
+  if test "$ac_cv_sizeof__Float16" != 0; then
+    # Some compilers expose the _Float16 datatype, but not the macros and
+    # functions used with the datatype. We need the macros for proper
+    # datatype conversion support. Check for these here.
+    AC_CHECK_DECL([FLT16_EPSILON], [], [], [[
+                   #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                   #include <float.h>]])
+    AC_CHECK_DECL([FLT16_MIN], [], [], [[
+                   #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                   #include <float.h>]])
+    AC_CHECK_DECL([FLT16_MAX], [], [], [[
+                   #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                   #include <float.h>]])
+    AC_CHECK_DECL([FLT16_MIN_10_EXP], [], [], [[
+                   #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                   #include <float.h>]])
+    AC_CHECK_DECL([FLT16_MAX_10_EXP], [], [], [[
+                   #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                   #include <float.h>]])
+    AC_CHECK_DECL([FLT16_MANT_DIG], [], [], [[
+                   #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                   #include <float.h>]])
 
-  if test "X$ac_cv_have_decl_FLT16_EPSILON" = "Xyes" &&
-     test "X$ac_cv_have_decl_FLT16_MIN" = "Xyes" &&
-     test "X$ac_cv_have_decl_FLT16_MAX" = "Xyes" &&
-     test "X$ac_cv_have_decl_FLT16_MIN_10_EXP" = "Xyes" &&
-     test "X$ac_cv_have_decl_FLT16_MAX_10_EXP" = "Xyes" &&
-     test "X$ac_cv_have_decl_FLT16_MANT_DIG" = "Xyes" ; then
-    # Some compilers like OneAPI on Windows appear to detect _Float16 support
-    # properly up to this point, and, in the absence of any architecture-specific
-    # tuning compiler flags, will generate code for H5Tconv.c that performs
-    # software conversions on _Float16 variables with compiler-internal functions
-    # such as __extendhfsf2, __truncsfhf2, or __truncdfhf2. However, these
-    # compilers will fail to link these functions into the build for currently
-    # unknown reasons and cause the build to fail. Since these are compiler-internal
-    # functions that we don't appear to have much control over, let's try to
-    # compile a program that will generate these functions to check for _Float16
-    # support. If we fail to compile this program, we will simply disable
-    # _Float16 support for the time being.
-    AC_MSG_CHECKING([if compiler can correctly compile and run a test program which converts _Float16 to other types with casts])
-    TEST_SRC="`(echo \"#define H5_FLOAT16_CONVERSION_FUNCS_LINK_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
-    AC_CACHE_VAL([hdf5_cv_float16_conversion_funcs_link],
-    [AC_RUN_IFELSE(
-        [AC_LANG_SOURCE([$TEST_SRC])],
-        [hdf5_cv_float16_conversion_funcs_link=yes], [hdf5_cv_float16_conversion_funcs_link=no], [hdf5_cv_float16_conversion_funcs_link=no])])
+    if test "X$ac_cv_have_decl_FLT16_EPSILON" = "Xyes" &&
+       test "X$ac_cv_have_decl_FLT16_MIN" = "Xyes" &&
+       test "X$ac_cv_have_decl_FLT16_MAX" = "Xyes" &&
+       test "X$ac_cv_have_decl_FLT16_MIN_10_EXP" = "Xyes" &&
+       test "X$ac_cv_have_decl_FLT16_MAX_10_EXP" = "Xyes" &&
+       test "X$ac_cv_have_decl_FLT16_MANT_DIG" = "Xyes" ; then
+      # Some compilers like OneAPI on Windows appear to detect _Float16 support
+      # properly up to this point, and, in the absence of any architecture-specific
+      # tuning compiler flags, will generate code for H5Tconv.c that performs
+      # software conversions on _Float16 variables with compiler-internal functions
+      # such as __extendhfsf2, __truncsfhf2, or __truncdfhf2. However, these
+      # compilers will fail to link these functions into the build for currently
+      # unknown reasons and cause the build to fail. Since these are compiler-internal
+      # functions that we don't appear to have much control over, let's try to
+      # compile a program that will generate these functions to check for _Float16
+      # support. If we fail to compile this program, we will simply disable
+      # _Float16 support for the time being.
+      AC_MSG_CHECKING([if compiler can correctly compile and run a test program which converts _Float16 to other types with casts])
+      TEST_SRC="`(echo \"#define H5_FLOAT16_CONVERSION_FUNCS_LINK_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+      AC_CACHE_VAL([hdf5_cv_float16_conversion_funcs_link],
+      [AC_RUN_IFELSE(
+          [AC_LANG_SOURCE([$TEST_SRC])],
+          [hdf5_cv_float16_conversion_funcs_link=yes], [hdf5_cv_float16_conversion_funcs_link=no], [hdf5_cv_float16_conversion_funcs_link=no])])
 
-    if test ${hdf5_cv_float16_conversion_funcs_link} = "yes"; then
-      AC_MSG_RESULT([yes])
-
-      # Finally, MacOS 13 appears to have a bug specifically when converting
-      # long double values to _Float16. Release builds of the dt_arith test
-      # would cause any assignments to a _Float16 variable to be elided,
-      # whereas Debug builds would perform incorrect hardware conversions by
-      # simply chopping off all the bytes of the value except for the first 2.
-      # These tests pass on MacOS 14, so let's perform a quick test to check
-      # if the hardware conversion is done correctly.
-      AC_MSG_CHECKING([if compiler can correctly convert long double values to _Float16])
-      TEST_SRC="`(echo \"#define H5_LDOUBLE_TO_FLOAT16_CORRECT_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
-      if test ${ac_cv_sizeof_long_double} = 0; then
-        hdf5_cv_ldouble_to_float16_correct=${hdf5_cv_ldouble_to_float16_correct=no}
-      else
-        AC_CACHE_VAL([hdf5_cv_ldouble_to_float16_correct],
-        [AC_RUN_IFELSE(
-            [AC_LANG_SOURCE([$TEST_SRC])],
-            [hdf5_cv_ldouble_to_float16_correct=yes], [hdf5_cv_ldouble_to_float16_correct=no], [hdf5_cv_ldouble_to_float16_correct=yes])])
-      fi
-
-      if test ${hdf5_cv_ldouble_to_float16_correct} = "yes"; then
-        AC_DEFINE([LDOUBLE_TO_FLOAT16_CORRECT], [1],
-          [Define if your system can convert long double to _Float16 values correctly.])
+      if test ${hdf5_cv_float16_conversion_funcs_link} = "yes"; then
         AC_MSG_RESULT([yes])
+
+        # Finally, MacOS 13 appears to have a bug specifically when converting
+        # long double values to _Float16. Release builds of the dt_arith test
+        # would cause any assignments to a _Float16 variable to be elided,
+        # whereas Debug builds would perform incorrect hardware conversions by
+        # simply chopping off all the bytes of the value except for the first 2.
+        # These tests pass on MacOS 14, so let's perform a quick test to check
+        # if the hardware conversion is done correctly.
+        AC_MSG_CHECKING([if compiler can correctly convert long double values to _Float16])
+        TEST_SRC="`(echo \"#define H5_LDOUBLE_TO_FLOAT16_CORRECT_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+        if test ${ac_cv_sizeof_long_double} = 0; then
+          hdf5_cv_ldouble_to_float16_correct=${hdf5_cv_ldouble_to_float16_correct=no}
+        else
+          AC_CACHE_VAL([hdf5_cv_ldouble_to_float16_correct],
+          [AC_RUN_IFELSE(
+              [AC_LANG_SOURCE([$TEST_SRC])],
+              [hdf5_cv_ldouble_to_float16_correct=yes], [hdf5_cv_ldouble_to_float16_correct=no], [hdf5_cv_ldouble_to_float16_correct=yes])])
+        fi
+
+        if test ${hdf5_cv_ldouble_to_float16_correct} = "yes"; then
+          AC_DEFINE([LDOUBLE_TO_FLOAT16_CORRECT], [1],
+            [Define if your system can convert long double to _Float16 values correctly.])
+          AC_MSG_RESULT([yes])
+        else
+          AC_MSG_RESULT([no])
+          AC_MSG_NOTICE([Conversions from long double to _Float16 appear to be incorrect. These will be emulated through a soft conversion function.])
+        fi
+
+        HAVE__FLOAT16="yes"
+
+        # Check if we can use fabsf16
+        AC_CHECK_FUNC([fabsf16], [AC_DEFINE([HAVE_FABSF16], [1],
+                          [Define if has fabsf16 function])], [])
+
+        # Define HAVE__FLOAT16 macro for H5pubconf.h if _Float16 is available.
+        AC_DEFINE([HAVE__FLOAT16], [1], [Determine if _Float16 is available])
       else
         AC_MSG_RESULT([no])
-        AC_MSG_NOTICE([Conversions from long double to _Float16 appear to be incorrect. These will be emulated through a soft conversion function.])
       fi
-
-      HAVE__FLOAT16="yes"
-
-      # Check if we can use fabsf16
-      AC_CHECK_FUNC([fabsf16], [AC_DEFINE([HAVE_FABSF16], [1],
-                        [Define if has fabsf16 function])], [])
-
-      # Define HAVE__FLOAT16 macro for H5pubconf.h if _Float16 is available.
-      AC_DEFINE([HAVE__FLOAT16], [1], [Determine if _Float16 is available])
-    else
-      AC_MSG_RESULT([no])
     fi
-  fi
 
-  AC_MSG_CHECKING([if _Float16 support is enabled])
-  AC_MSG_RESULT([$HAVE__FLOAT16])
+    AC_MSG_CHECKING([if _Float16 support is enabled])
+    AC_MSG_RESULT([$HAVE__FLOAT16])
+  fi
+else
+  AC_DEFINE([SIZEOF__FLOAT16], [0])
 fi
 
 # Define HAVE__FLOAT16 value to substitute into other files for conditional testing
