@@ -2411,7 +2411,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                             H5RS_acat(rs, "Reference Region");
                             goto error;
                         } /* end block */
-                        break;
 
                         case 'o': /* hobj_ref_t */
                         {
@@ -2427,7 +2426,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                             H5RS_acat(rs, "Reference Opaque");
                             goto error;
                         } /* end block */
-                        break;
 
                         case 't': /* H5R_type_t */
                         {
