@@ -608,8 +608,8 @@ H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
     sect_end = (*sect)->sect_info.addr + (*sect)->sect_info.size;
     if (0 == udata->f->shared->fs_page_size)
         HGOTO_ERROR(H5E_RESOURCE, H5E_BADVALUE, FAIL, "page size of zero would result in division by zero");
-    rem      = sect_end % udata->f->shared->fs_page_size;
-    prem     = udata->f->shared->fs_page_size - rem;
+    rem  = sect_end % udata->f->shared->fs_page_size;
+    prem = udata->f->shared->fs_page_size - rem;
 
     /* Drop the section if it is at page end and its size is <= pgend threshold */
     if (!rem && (*sect)->sect_info.size <= H5F_PGEND_META_THRES(udata->f) &&
