@@ -295,13 +295,11 @@ done:
 H5HL_t *
 H5HL_protect(H5F_t *f, haddr_t addr, unsigned flags)
 {
-    H5HL_cache_prfx_ud_t prfx_udata;                /* User data for protecting local heap prefix       */
-    H5HL_prfx_t         *prfx = NULL;               /* Local heap prefix                                */
-    H5HL_dblk_t         *dblk = NULL;               /* Local heap data block                            */
-    H5HL_t              *heap = NULL;               /* Heap data structure                              */
-    unsigned prfx_cache_flags = H5AC__NO_FLAGS_SET; /* Cache flags for unprotecting prefix entry        */
-    unsigned dblk_cache_flags = H5AC__NO_FLAGS_SET; /* Cache flags for unprotecting data block entry    */
-    H5HL_t  *ret_value        = NULL;
+    H5HL_cache_prfx_ud_t prfx_udata;       /* User data for protecting local heap prefix       */
+    H5HL_prfx_t         *prfx      = NULL; /* Local heap prefix                                */
+    H5HL_dblk_t         *dblk      = NULL; /* Local heap data block                            */
+    H5HL_t              *heap      = NULL; /* Heap data structure                              */
+    H5HL_t              *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -328,19 +326,25 @@ H5HL_protect(H5F_t *f, haddr_t addr, unsigned flags)
     /* Check if the heap is already pinned in memory */
     /* (for re-entrant situation) */
     if (heap->prots == 0) {
+        void *pin_obj; /* Pointer to local heap object to pin */
+
         /* Check if heap has separate data block */
         if (heap->single_cache_obj)
-            /* Set the flag for pinning the prefix when unprotecting it */
-            prfx_cache_flags |= H5AC__PIN_ENTRY_FLAG;
+            /* Pin prefix */
+            pin_obj = prfx;
         else {
             /* Protect the local heap data block */
             if (NULL ==
                 (dblk = (H5HL_dblk_t *)H5AC_protect(f, H5AC_LHEAP_DBLK, heap->dblk_addr, heap, flags)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to load heap data block");
 
-            /* Set the flag for pinning the data block when unprotecting it */
-            dblk_cache_flags |= H5AC__PIN_ENTRY_FLAG;
+            /* Pin data block */
+            pin_obj = dblk;
         }
+
+        /* Pin local heap object */
+        if (H5AC_pin_protected_entry(pin_obj) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTPIN, NULL, "unable to pin local heap object");
     }
 
     /* Increment # of times heap is protected */
@@ -351,11 +355,11 @@ H5HL_protect(H5F_t *f, haddr_t addr, unsigned flags)
 
 done:
     /* Release the prefix from the cache, now pinned */
-    if (prfx && heap && H5AC_unprotect(f, H5AC_LHEAP_PRFX, heap->prfx_addr, prfx, prfx_cache_flags) < 0)
+    if (prfx && heap && H5AC_unprotect(f, H5AC_LHEAP_PRFX, heap->prfx_addr, prfx, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release local heap prefix");
 
     /* Release the data block from the cache, now pinned */
-    if (dblk && heap && H5AC_unprotect(f, H5AC_LHEAP_DBLK, heap->dblk_addr, dblk, dblk_cache_flags) < 0)
+    if (dblk && heap && H5AC_unprotect(f, H5AC_LHEAP_DBLK, heap->dblk_addr, dblk, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release local heap data block");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -887,6 +891,26 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL_delete() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HL_heap_get_size
+ *
+ * Purpose:     Retrieves the current size of a heap's block
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5HL_heap_get_size(const H5HL_t *heap)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check arguments */
+    assert(heap);
+
+    FUNC_LEAVE_NOAPI(heap->dblk_size)
+} /* end H5HL_heap_get_size() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5HL_get_size

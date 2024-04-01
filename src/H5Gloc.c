@@ -553,7 +553,7 @@ H5G__loc_insert(H5G_loc_t *grp_loc, char *name, H5G_loc_t *obj_loc, H5O_type_t o
     lnk.u.hard.addr  = obj_loc->oloc->addr;
 
     /* Insert new group into current group's symbol table */
-    if (H5G_obj_insert(grp_loc->oloc, name, &lnk, true, obj_type, crt_info) < 0)
+    if (H5G_obj_insert(grp_loc->oloc, &lnk, true, obj_type, crt_info) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert object");
 
     /* Set the name of the object location */
@@ -644,24 +644,21 @@ H5G__loc_addr_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_UN
                  const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata /*in,out*/,
                  H5G_own_loc_t *own_loc /*out*/)
 {
-    haddr_t *udata     = (haddr_t *)_udata; /* User data passed in */
-    herr_t   ret_value = SUCCEED;           /* Return value */
+    haddr_t *udata = (haddr_t *)_udata; /* User data passed in */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist");
+        *udata = HADDR_UNDEF; /* No object found */
+    else
+        *udata = obj_loc->oloc->addr; /* Set address of object */
 
-    /* Set address of object */
-    *udata = obj_loc->oloc->addr;
-
-done:
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
     *own_loc = H5G_OWN_NONE;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G__loc_addr_cb() */
 
 /*-------------------------------------------------------------------------

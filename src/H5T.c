@@ -377,9 +377,10 @@ static herr_t H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t
 static htri_t H5T__compiler_conv(H5T_t *src, H5T_t *dst);
 static herr_t H5T__set_size(H5T_t *dt, size_t size);
 static herr_t H5T__close_cb(H5T_t *dt, void **request);
+static herr_t H5T__init_path_table(void);
+static bool   H5T__path_table_search(const H5T_t *src, const H5T_t *dst, int *idx, int *last_cmp);
 static H5T_path_t *H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name,
                                        H5T_conv_func_t *conv);
-static herr_t      H5T__path_find_init_path_table(void);
 static herr_t      H5T__path_find_init_new_path(H5T_path_t *path, const H5T_t *src, const H5T_t *dst,
                                                 H5T_conv_func_t *conv, H5T_conv_ctx_t *conv_ctx);
 static herr_t      H5T__path_free(H5T_path_t *path, H5T_conv_ctx_t *conv_ctx);
@@ -4982,33 +4983,47 @@ done:
 } /* end H5T_cmp() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5T__bsearch_path_table
+ * Function:    H5T__path_table_search
  *
- * Purpose:    Performs a binary search on the type conversion path table.
- *             If `last_cmp` is non-NULL, the value of the last comparison
- *             is returned through it. If `idx` is non-NULL, the idx into
- *             the path table where the matching path was found is returned
- *             through it. If no matching path is found, the value for
- *             `idx` will be the index into the path table where a path
- *             entry with source and destination datatypes matching src and
- *             dst should be inserted. In this case, the caller should be
- *             sure to increment the index value by 1 if the value of the
- *             last comparison is > 0.
+ * Purpose:     Searches the global datatype conversion path table for a
+ *              conversion path between two datatypes.
  *
- * Return:    Success:    Pointer to the path in the path table
- *            Failure:    NULL if no matching path is found in the table
+ *              Sets `idx` to be the index of the last table entry compared
+ *              (which will be the index of the matching conversion path on
+ *              success). If no matching path is found, the value for `idx`
+ *              will be the index into the path table where a new path
+ *              entry with source and destination datatypes matching src
+ *              and dst should be inserted. In this case, the caller should
+ *              be sure to increment the index value by 1 if the value of
+ *              the last comparison is > 0.
+ *
+ *              If `last_cmp` is non-NULL, the value of the last comparison
+ *              (-1, 0, or 1) is returned through it.
+ *
+ * Return:    Success:    true (conversion path found, index in *idx)
+ *            Failure:    false (no conversion path between types)
  *
  *-------------------------------------------------------------------------
  */
-static void *
-H5T__bsearch_path_table(const H5T_t *src, const H5T_t *dst, int *last_cmp, int *idx)
+static bool
+H5T__path_table_search(const H5T_t *src, const H5T_t *dst, int *idx, int *last_cmp)
 {
-    int   cmp;
-    int   lt, rt, md;
-    void *ret_value = NULL;
+    int  lt, rt, md;        /* Left, middle, and right edges */
+    int  cmp;               /* Comparison result  */
+    bool ret_value = false; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
+    /* Sanity check */
+    assert(0 != H5T_g.npaths);
+    assert(src);
+    assert(src->shared);
+    assert(dst);
+    assert(dst->shared);
+    assert(idx);
+
+    /* Find the conversion path in the table, using a binary search */
+    /* NOTE: Doesn't match against entry 0, which is the no-op path */
     lt = md = 1;
     rt      = H5T_g.npaths;
     cmp     = -1;
@@ -5024,16 +5039,17 @@ H5T__bsearch_path_table(const H5T_t *src, const H5T_t *dst, int *last_cmp, int *
         else if (cmp > 0)
             lt = md + 1;
         else
-            ret_value = H5T_g.path[md];
+            /* Match found */
+            ret_value = true;
     }
 
+    /* Set middle index & comparison values */
+    *idx = md;
     if (last_cmp)
         *last_cmp = cmp;
-    if (idx)
-        *idx = md;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T__bsearch_path_table() */
+} /* end H5T__path_table_search() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T_path_find
@@ -5138,7 +5154,7 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, NULL, "unable to get conversion exception callback");
 
     /* Make sure the path table is initialized */
-    if ((0 == H5T_g.npaths) && (H5T__path_find_init_path_table() < 0))
+    if ((0 == H5T_g.npaths) && (H5T__init_path_table() < 0))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to initialize type conversion path table");
 
     /* Find the conversion path. If no "force conversion" flags are
@@ -5150,8 +5166,11 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
         src->shared->force_conv == false && dst->shared->force_conv == false && 0 == H5T_cmp(src, dst, true);
     if (noop_conv)
         matched_path = H5T_g.path[0];
-    else
-        matched_path = H5T__bsearch_path_table(src, dst, &last_cmp, &path_idx);
+    else {
+        /* Search the table of conversion paths */
+        if (H5T__path_table_search(src, dst, &path_idx, &last_cmp))
+            matched_path = H5T_g.path[path_idx];
+    }
 
     /* Keep a record of the number of paths in the table, in case one of the
      * initialization calls below (hard or soft) causes more entries to be
@@ -5199,7 +5218,8 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
      * and re-compute the correct location for this path if so. - QAK, 1/26/02
      */
     if (old_npaths != H5T_g.npaths)
-        matched_path = H5T__bsearch_path_table(src, dst, &last_cmp, &path_idx);
+        if (H5T__path_table_search(src, dst, &path_idx, &last_cmp))
+            matched_path = H5T_g.path[path_idx];
 
     /* Replace an existing table entry or add a new entry */
     if (matched_path && new_path) {
@@ -5254,7 +5274,7 @@ done:
 } /* end H5T__path_find_real() */
 
 /*-------------------------------------------------------------------------
- * Function:  H5T__path_find_init_path_table
+ * Function:  H5T__init_path_table
  *
  * Purpose:   Helper function to allocate and initialize the table holding
  *            pointers to datatype conversion paths. Sets the no-op
@@ -5265,26 +5285,28 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__path_find_init_path_table(void)
+H5T__init_path_table(void)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
-    assert(0 == H5T_g.npaths);
+    /* Sanity check */
+    if (0 != H5T_g.npaths)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_ALREADYINIT, FAIL,
+                    "datatype conversion path table is already initialized");
 
-    if (NULL == (H5T_g.path = H5MM_malloc(H5T_DEF_CONV_TABLE_SLOTS * sizeof(H5T_path_t *))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+    if (NULL == (H5T_g.path = H5MM_calloc(H5T_DEF_CONV_TABLE_SLOTS * sizeof(H5T_path_t *))))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
                     "memory allocation failed for type conversion path table");
-    H5T_g.apaths  = H5T_DEF_CONV_TABLE_SLOTS;
-    H5T_g.path[0] = NULL;
+    H5T_g.apaths = H5T_DEF_CONV_TABLE_SLOTS;
 
     /*
      * Allocate a path for the no-op conversion function
      * and set it as the first entry in the table
      */
     if (NULL == (H5T_g.path[0] = H5FL_CALLOC(H5T_path_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for no-op conversion path");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for no-op conversion path");
 
     /* Initialize the no-op path */
     snprintf(H5T_g.path[0]->name, sizeof(H5T_g.path[0]->name), "no-op");
@@ -5303,7 +5325,9 @@ H5T__path_find_init_path_table(void)
     } /* end if */
 
     H5T_g.path[0]->is_noop = true;
-    H5T_g.npaths           = 1;
+
+    /* Set # of initial paths in the table */
+    H5T_g.npaths = 1;
 
 done:
     if (ret_value < 0) {
@@ -5313,7 +5337,7 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5T__init_path_table() */
 
 /*-------------------------------------------------------------------------
  * Function:  H5T__path_find_init_new_path
@@ -5673,6 +5697,47 @@ H5T_path_noop(const H5T_path_t *p)
 
     FUNC_LEAVE_NOAPI(p->is_noop || (p->is_hard && 0 == H5T_cmp(p->src, p->dst, false)))
 } /* end H5T_path_noop() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_noop_conv
+ *
+ * Purpose:     Check if a conversion between two dataypes will be a no-op
+ *
+ * Return:      true / false (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+bool
+H5T_noop_conv(const H5T_t *src, const H5T_t *dst)
+{
+    bool ret_value = false; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    assert(src);
+    assert(src->shared);
+    assert(dst);
+    assert(dst->shared);
+
+    /* Check the conversion path.  If source and destination types are equal
+     * then its a no-op conversion, as long as neither type has a "force conversion"
+     * flag.  Otherwise search over the conversion table entries.
+     */
+    if (src->shared->force_conv == false && dst->shared->force_conv == false &&
+        0 == H5T_cmp(src, dst, true)) {
+        ret_value = true;
+    } /* end if */
+    else {
+        int idx = 0; /* Matching entry */
+
+        /* Search the table of conversion paths */
+        if (H5T__path_table_search(src, dst, &idx, NULL))
+            ret_value = H5T_path_noop(H5T_g.path[idx]);
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_noop_conv() */
 
 /*-------------------------------------------------------------------------
  * Function:  H5T_path_compound_subset
