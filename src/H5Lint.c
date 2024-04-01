@@ -572,7 +572,7 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     /* Insert link into group */
-    if (H5G_obj_insert(grp_loc->oloc, name, udata->lnk, true,
+    if (H5G_obj_insert(grp_loc->oloc, udata->lnk, true,
                        udata->ocrt_info ? udata->ocrt_info->obj_type : H5O_TYPE_UNKNOWN,
                        udata->ocrt_info ? udata->ocrt_info->crt_info : NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link for object");
@@ -1315,7 +1315,7 @@ H5L__move_dest_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t 
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     /* Insert the link into the group */
-    if (H5G_obj_insert(grp_loc->oloc, name, udata->lnk, true, H5O_TYPE_UNKNOWN, NULL) < 0)
+    if (H5G_obj_insert(grp_loc->oloc, udata->lnk, true, H5O_TYPE_UNKNOWN, NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object");
 
     /* If the link was a user-defined link, call its move callback if it has one */

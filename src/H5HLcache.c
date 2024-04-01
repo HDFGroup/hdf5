@@ -232,7 +232,7 @@ H5HL__fl_deserialize(H5HL_t *heap)
         const uint8_t *image; /* Pointer into image buffer */
 
         /* Sanity check */
-        if (free_block >= heap->dblk_size)
+        if ((free_block + (2 * heap->sizeof_size)) > heap->dblk_size)
             HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "bad heap free list");
 
         /* Allocate & initialize free list node */
