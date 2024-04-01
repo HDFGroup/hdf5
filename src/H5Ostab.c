@@ -331,6 +331,7 @@ H5O__stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
     const H5O_stab_t *stab_src = (const H5O_stab_t *)mesg_src;
     H5O_stab_t       *stab_dst = (H5O_stab_t *)mesg_dst;
     H5G_bt_it_cpy_t   udata;               /* B-tree user data */
+    H5HL_t           *heap      = NULL;    /* Pointer to source group's heap */
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -346,18 +347,26 @@ H5O__stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
     if (cpy_info->max_depth >= 0 && cpy_info->curr_depth >= cpy_info->max_depth)
         HGOTO_DONE(SUCCEED);
 
+    /* Get the heap for the copy*/
+    if (NULL == (heap = H5HL_protect(src_oloc->file, stab_src->heap_addr, H5AC__READ_ONLY_FLAG)))
+        HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect local heap");
+
     /* Set up B-tree iteration user data */
-    udata.src_oloc      = src_oloc;
-    udata.src_heap_addr = stab_src->heap_addr;
-    udata.dst_file      = dst_oloc->file;
-    udata.dst_stab      = stab_dst;
-    udata.cpy_info      = cpy_info;
+    udata.src_oloc       = src_oloc;
+    udata.src_heap       = heap;
+    udata.src_block_size = H5HL_heap_get_size(heap);
+    udata.dst_file       = dst_oloc->file;
+    udata.dst_stab       = stab_dst;
+    udata.cpy_info       = cpy_info;
 
     /* Iterate over objects in group, copying them */
     if ((H5B_iterate(src_oloc->file, H5B_SNODE, stab_src->btree_addr, H5G__node_copy, &udata)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed");
 
 done:
+    if (heap && H5HL_unprotect(heap) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, FAIL, "unable to unprotect local heap");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__stab_post_copy_file() */
 

@@ -342,139 +342,77 @@ H5G__ent_reset(H5G_entry_t *ent)
 } /* end H5G__ent_reset() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5G__ent_convert
+ * Function:	H5G__ent_to_link
  *
- * Purpose:     Convert a link to a symbol table entry
+ * Purpose:     Convert a symbol table entry to a link
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:	Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk, H5O_type_t obj_type,
-                 const void *crt_info, H5G_entry_t *ent)
+H5G__ent_to_link(const H5G_entry_t *ent, const H5HL_t *heap, H5O_link_t *lnk)
 {
-    size_t name_offset;         /* Offset of name in heap */
-    herr_t ret_value = SUCCEED; /* Return value */
+    const char *name;                /* Pointer to link name in heap */
+    size_t      block_size;          /* Size of the heap block */
+    bool        dup_soft  = false;   /* xstrdup the symbolic link name or not */
+    herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    assert(f);
+    assert(ent);
     assert(heap);
-    assert(name);
     assert(lnk);
 
-    /* Reset the new entry */
-    H5G__ent_reset(ent);
+    /* Get the size of the heap block */
+    block_size = H5HL_heap_get_size(heap);
 
-    /* Add the new name to the heap */
-    if (H5HL_insert(f, heap, strlen(name) + 1, name, &name_offset) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert symbol name into heap");
-    ent->name_off = name_offset;
+    /* Get pointer to link's name in the heap */
+    if (NULL == (name = (const char *)H5HL_offset_into(heap, ent->name_off)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get symbol table link name");
 
-    /* Build correct information for symbol table entry based on link type */
-    switch (lnk->type) {
-        case H5L_TYPE_HARD:
-            if (obj_type == H5O_TYPE_GROUP) {
-                const H5G_obj_create_t *gcrt_info = (const H5G_obj_create_t *)crt_info;
+    /* Set (default) common info for link */
+    lnk->cset         = H5F_DEFAULT_CSET;
+    lnk->corder       = 0;
+    lnk->corder_valid = false; /* Creation order not valid for this link */
+    if (NULL == (lnk->name = H5MM_strndup(name, (block_size - ent->name_off))))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to duplicate link name");
 
-                ent->type = gcrt_info->cache_type;
-                if (ent->type != H5G_NOTHING_CACHED)
-                    ent->cache = gcrt_info->cache;
-#ifndef NDEBUG
-                else {
-                    /* Make sure there is no stab message in the target object
-                     */
-                    H5O_loc_t targ_oloc;   /* Location of link target */
-                    htri_t    stab_exists; /* Whether the target symbol table exists */
+    /* Object is a symbolic or hard link */
+    if (ent->type == H5G_CACHED_SLINK) {
+        const char *s; /* Pointer to link value */
 
-                    /* Build target object location */
-                    if (H5O_loc_reset(&targ_oloc) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "unable to initialize target location");
-                    targ_oloc.file = f;
-                    targ_oloc.addr = lnk->u.hard.addr;
+        if (NULL == (s = (const char *)H5HL_offset_into(heap, ent->cache.slink.lval_offset)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get symbolic link name");
 
-                    /* Check if a symbol table message exists */
-                    if ((stab_exists = H5O_msg_exists(&targ_oloc, H5O_STAB_ID)) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to check for STAB message");
+        /* Copy the link value */
+        if (NULL == (lnk->u.soft.name = H5MM_strndup(s, (block_size - ent->cache.slink.lval_offset))))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to duplicate symbolic link name");
 
-                    assert(!stab_exists);
-                } /* end else */
-#endif            /* NDEBUG */
-            }     /* end if */
-            else if (obj_type == H5O_TYPE_UNKNOWN) {
-                /* Try to retrieve symbol table information for caching */
-                H5O_loc_t  targ_oloc;   /* Location of link target */
-                H5O_t     *oh;          /* Link target object header */
-                H5O_stab_t stab;        /* Link target symbol table */
-                htri_t     stab_exists; /* Whether the target symbol table exists */
+        dup_soft = true;
 
-                /* Build target object location */
-                if (H5O_loc_reset(&targ_oloc) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "unable to initialize target location");
-                targ_oloc.file = f;
-                targ_oloc.addr = lnk->u.hard.addr;
+        /* Set link type */
+        lnk->type = H5L_TYPE_SOFT;
+    } /* end if */
+    else {
+        /* Set address of object */
+        lnk->u.hard.addr = ent->header;
 
-                /* Get the object header */
-                if (NULL == (oh = H5O_protect(&targ_oloc, H5AC__READ_ONLY_FLAG, false)))
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, FAIL, "unable to protect target object header");
-
-                /* Check if a symbol table message exists */
-                if ((stab_exists = H5O_msg_exists_oh(oh, H5O_STAB_ID)) < 0) {
-                    if (H5O_unprotect(&targ_oloc, oh, H5AC__NO_FLAGS_SET) < 0)
-                        HERROR(H5E_SYM, H5E_CANTUNPROTECT, "unable to release object header");
-                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to check for STAB message");
-                } /* end if */
-
-                if (stab_exists) {
-                    /* Read symbol table message */
-                    if (NULL == H5O_msg_read_oh(f, oh, H5O_STAB_ID, &stab)) {
-                        if (H5O_unprotect(&targ_oloc, oh, H5AC__NO_FLAGS_SET) < 0)
-                            HERROR(H5E_SYM, H5E_CANTUNPROTECT, "unable to release object header");
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to read STAB message");
-                    } /* end if */
-
-                    /* Cache symbol table message */
-                    ent->type                  = H5G_CACHED_STAB;
-                    ent->cache.stab.btree_addr = stab.btree_addr;
-                    ent->cache.stab.heap_addr  = stab.heap_addr;
-                } /* end if */
-                else
-                    /* No symbol table message, don't cache anything */
-                    ent->type = H5G_NOTHING_CACHED;
-
-                if (H5O_unprotect(&targ_oloc, oh, H5AC__NO_FLAGS_SET) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
-            } /* end else */
-            else
-                ent->type = H5G_NOTHING_CACHED;
-
-            ent->header = lnk->u.hard.addr;
-            break;
-
-        case H5L_TYPE_SOFT: {
-            size_t lnk_offset; /* Offset to sym-link value	*/
-
-            /* Insert link value into local heap */
-            if (H5HL_insert(f, heap, strlen(lnk->u.soft.name) + 1, lnk->u.soft.name, &lnk_offset) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write link value to local heap");
-
-            ent->type                    = H5G_CACHED_SLINK;
-            ent->cache.slink.lval_offset = lnk_offset;
-        } break;
-
-        case H5L_TYPE_ERROR:
-        case H5L_TYPE_EXTERNAL:
-        case H5L_TYPE_MAX:
-        default:
-            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unrecognized link type");
-    } /* end switch */
+        /* Set link type */
+        lnk->type = H5L_TYPE_HARD;
+    } /* end else */
 
 done:
+    if (ret_value < 0) {
+        if (lnk->name)
+            H5MM_xfree(lnk->name);
+        if (ent->type == H5G_CACHED_SLINK && dup_soft)
+            H5MM_xfree(lnk->u.soft.name);
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G__ent_convert() */
+} /* end H5G__ent_to_link() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5G__ent_debug

@@ -7028,9 +7028,6 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
     bkg = udata.bkg;
 
 done:
-    /* Caller expects that source datatype will be freed */
-    if (dt_src && (H5T_close(dt_src) < 0))
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     if (dt_dst && (H5T_close(dt_dst) < 0))
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     if (dt_mem && (H5T_close(dt_mem) < 0))
