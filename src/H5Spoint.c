@@ -1414,6 +1414,9 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bo
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, sizeof(uint32_t), p_end))
         HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection rank");
     UINT32DECODE(pp, rank);
+    if (0 == rank || rank > H5S_MAX_RANK)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid rank (%u) for serialized point selection",
+                    rank);
 
     if (!*space) {
         /* Patch the rank of the allocated dataspace */
@@ -1455,10 +1458,6 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bo
             break;
     } /* end switch */
 
-    /* Allocate space for the coordinates */
-    if (NULL == (coord = (hsize_t *)H5MM_malloc(num_elem * rank * sizeof(hsize_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information");
-
     /* Determine necessary size of buffer for coordinates */
     enc_type_size = 0;
 
@@ -1479,9 +1478,18 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bo
 
     coordinate_buffer_requirement = num_elem * rank * enc_type_size;
 
+    /* Check for overflow during multiplication */
+    if (num_elem != (coordinate_buffer_requirement / (rank * enc_type_size)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "size of point selection buffer overflowed");
+
+    /* Check for possible buffer overrun */
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, coordinate_buffer_requirement, p_end))
         HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
                     "buffer overflow while decoding selection coordinates");
+
+    /* Allocate space for the coordinates */
+    if (NULL == (coord = (hsize_t *)H5MM_malloc(num_elem * rank * sizeof(hsize_t))))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate coordinate information");
 
     /* Retrieve the coordinates from the buffer */
     for (tcoord = coord, i = 0; i < num_elem; i++)

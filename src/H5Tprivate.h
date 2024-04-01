@@ -131,6 +131,7 @@ H5_DLL herr_t             H5T_convert_committed_datatype(H5T_t *dt, H5F_t *f);
 H5_DLL htri_t             H5T_is_relocatable(const H5T_t *dt);
 H5_DLL H5T_path_t        *H5T_path_find(const H5T_t *src, const H5T_t *dst);
 H5_DLL bool               H5T_path_noop(const H5T_path_t *p);
+H5_DLL bool               H5T_noop_conv(const H5T_t *src, const H5T_t *dst);
 H5_DLL H5T_bkg_t          H5T_path_bkg(const H5T_path_t *p);
 H5_DLL H5T_subset_info_t *H5T_path_compound_subset(const H5T_path_t *p);
 H5_DLL herr_t             H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,

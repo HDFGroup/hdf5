@@ -47,6 +47,36 @@ New Features
 
     Configuration:
     -------------
+    - Added configure options for enabling/disabling non-standard programming
+      language features
+
+      * Added a new configuration option that allows enabling or disabling of
+        support for features that are extensions to programming languages, such
+        as support for the _Float16 datatype:
+
+          CMake:      HDF5_ENABLE_NONSTANDARD_FEATURES (ON/OFF) (Default: ON)
+          Autotools:  --enable-nonstandard-features    (yes/no) (Default: yes)
+
+        When this option is enabled, configure time checks are still performed
+        to ensure that a feature can be used properly, but these checks may not
+        be sufficient when compiler support for a feature is incomplete or broken,
+        resulting in library build failures. When set to OFF/no, this option
+        provides a way to disable support for all non-standard features to avoid
+        these issues. Individual features can still be re-enabled with their
+        respective configuration options.
+
+      * Added a new configuration option that allows enabling or disabling of
+        support for the _Float16 C datatype:
+
+          CMake:      HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 (ON/OFF) (Default: ON)
+          Autotools:  --enable-nonstandard-feature-float16    (yes/no) (Default: yes)
+
+        While support for the _Float16 C datatype can generally be detected and
+        used properly, some compilers have incomplete support for the datatype
+        and will pass configure time checks while still failing to build HDF5.
+        This option provides a way to disable support for the _Float16 datatype
+        when the compiler doesn't have the proper support for it.
+
     - Deprecate bin/cmakehdf5 script
 
       With the improvements made in CMake since version 3.23 and the addition
@@ -182,6 +212,29 @@ New Features
 
     Library:
     --------
+    - Relaxed behavior of H5Pset_page_buffer_size() when opening files
+
+      This API call sets the size of a file's page buffer cache. This call
+      was extremely strict about matching its parameters to the file strategy
+      and page size used to create the file, requiring a separate open of the
+      file to obtain these parameters.
+
+      These requirements have been relaxed when using the fapl to open
+      a previously-created file:
+
+      * When opening a file that does not use the H5F_FSPACE_STRATEGY_PAGE
+        strategy, the setting is ignored and the file will be opened, but
+        without a page buffer cache. This was previously an error.
+
+      * When opening a file that has a page size larger than the desired
+        page buffer cache size, the page buffer cache size will be increased
+        to the file's page size. This was previously an error.
+
+      The behavior when creating a file using H5Pset_page_buffer_size() is
+      unchanged.
+
+      Fixes GitHub issue #3382
+
     - Added support for _Float16 16-bit half-precision floating-point datatype
 
       Support for the _Float16 C datatype has been added on platforms where:
@@ -461,6 +514,14 @@ Bug Fixes since HDF5-1.14.3 release
 
     Library
     -------
+    - Fixed a bug when using array datatypes with certain parent types
+
+      Array datatype conversion would never use a background buffer, even if the
+      array's parent type (what the array is an array of) required a background
+      buffer for conversion. This resulted in crashes in some cases when using
+      an array of compound, variable length, or reference datatypes. Array types
+      now use a background buffer if needed by the parent type.
+
     - Fixed potential buffer read overflows in H5PB_read
 
       H5PB_read previously did not account for the fact that the size of the

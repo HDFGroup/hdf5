@@ -1222,7 +1222,8 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims, const hs
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    assert(rank <= H5S_MAX_RANK);
+    if (rank > H5S_MAX_RANK)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "dataspace rank too large: %u", rank);
 
     /* shift out of the previous state to a "simple" dataspace.  */
     if (H5S__extent_release(&space->extent) < 0)
@@ -1593,6 +1594,30 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_decode() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5S_get_simple_extent
+ *
+ * Purpose:     Internal function for retrieving the extent for a dataspace object
+ *
+ * Return:      Success:    Pointer to the extent for a dataspace (not copied)
+ *              Failure:    NULL
+ *
+ * Note:        This routine participates in the "Inlining C function pointers"
+ *              pattern, don't call it directly, use the appropriate macro
+ *              defined in H5Sprivate.h.
+ *
+ *-------------------------------------------------------------------------
+ */
+const H5S_extent_t *
+H5S_get_simple_extent(const H5S_t *space)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(space);
+
+    FUNC_LEAVE_NOAPI(&space->extent)
+} /* end H5S_get_simple_extent() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5S_get_simple_extent_type

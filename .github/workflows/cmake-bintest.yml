@@ -98,7 +98,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install CMake Dependencies (Linux)
-        run: sudo apt-get install ninja-build doxygen graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build doxygen graphviz
 
       - name: Set up JDK 19
         uses: actions/setup-java@v4

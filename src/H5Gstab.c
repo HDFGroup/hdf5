@@ -227,8 +227,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__stab_insert_real(H5F_t *f, const H5O_stab_t *stab, const char *name, H5O_link_t *obj_lnk,
-                      H5O_type_t obj_type, const void *crt_info)
+H5G__stab_insert_real(H5F_t *f, const H5O_stab_t *stab, H5O_link_t *obj_lnk, H5O_type_t obj_type,
+                      const void *crt_info)
 {
     H5HL_t      *heap = NULL;         /* Pointer to local heap */
     H5G_bt_ins_t udata;               /* Data to pass through B-tree	*/
@@ -239,7 +239,6 @@ H5G__stab_insert_real(H5F_t *f, const H5O_stab_t *stab, const char *name, H5O_li
     /* check arguments */
     assert(f);
     assert(stab);
-    assert(name && *name);
     assert(obj_lnk);
 
     /* Pin the heap down in memory */
@@ -247,11 +246,12 @@ H5G__stab_insert_real(H5F_t *f, const H5O_stab_t *stab, const char *name, H5O_li
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap");
 
     /* Initialize data to pass through B-tree */
-    udata.common.name = name;
-    udata.common.heap = heap;
-    udata.lnk         = obj_lnk;
-    udata.obj_type    = obj_type;
-    udata.crt_info    = crt_info;
+    udata.common.name       = obj_lnk->name;
+    udata.common.heap       = heap;
+    udata.common.block_size = H5HL_heap_get_size(heap);
+    udata.lnk               = obj_lnk;
+    udata.obj_type          = obj_type;
+    udata.crt_info          = crt_info;
 
     /* Insert into symbol table */
     if (H5B_insert(f, H5B_SNODE, stab->btree_addr, &udata) < 0)
@@ -268,17 +268,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G__stab_insert
  *
- * Purpose:	Insert a new symbol into the table described by GRP_ENT in
- *		file F.	 The name of the new symbol is NAME and its symbol
- *		table entry is OBJ_ENT.
+ * Purpose:	Insert a new link, OBJ_LNK, into the group, GRP_OLOC.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__stab_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk, H5O_type_t obj_type,
-                 const void *crt_info)
+H5G__stab_insert(const H5O_loc_t *grp_oloc, H5O_link_t *obj_lnk, H5O_type_t obj_type, const void *crt_info)
 {
     H5O_stab_t stab;                /* Symbol table message		*/
     herr_t     ret_value = SUCCEED; /* Return value */
@@ -287,15 +284,14 @@ H5G__stab_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_ln
 
     /* check arguments */
     assert(grp_oloc && grp_oloc->file);
-    assert(name && *name);
     assert(obj_lnk);
 
     /* Retrieve symbol table message */
     if (NULL == H5O_msg_read(grp_oloc, H5O_STAB_ID, &stab))
         HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
 
-    if (H5G__stab_insert_real(grp_oloc->file, &stab, name, obj_lnk, obj_type, crt_info) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "unable to insert the name");
+    if (H5G__stab_insert_real(grp_oloc->file, &stab, obj_lnk, obj_type, crt_info) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "unable to insert the link");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -332,9 +328,10 @@ H5G__stab_remove(const H5O_loc_t *loc, H5RS_str_t *grp_full_path_r, const char *
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap");
 
     /* Initialize data to pass through B-tree */
-    udata.common.name     = name;
-    udata.common.heap     = heap;
-    udata.grp_full_path_r = grp_full_path_r;
+    udata.common.name       = name;
+    udata.common.heap       = heap;
+    udata.common.block_size = H5HL_heap_get_size(heap);
+    udata.grp_full_path_r   = grp_full_path_r;
 
     /* Remove from symbol table */
     if (H5B_remove(loc->file, H5B_SNODE, stab.btree_addr, &udata) < 0)
@@ -386,9 +383,10 @@ H5G__stab_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r, 
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap");
 
     /* Initialize data to pass through B-tree */
-    udata.common.name     = obj_lnk.name;
-    udata.common.heap     = heap;
-    udata.grp_full_path_r = grp_full_path_r;
+    udata.common.name       = obj_lnk.name;
+    udata.common.heap       = heap;
+    udata.common.block_size = H5HL_heap_get_size(heap);
+    udata.grp_full_path_r   = grp_full_path_r;
 
     /* Remove link from symbol table */
     if (H5B_remove(grp_oloc->file, H5B_SNODE, stab.btree_addr, &udata) < 0)
@@ -640,6 +638,7 @@ H5G__stab_get_name_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     H5G_bt_it_gnbi_t *udata = (H5G_bt_it_gnbi_t *)_udata;
     size_t            name_off;            /* Offset of name in heap */
     const char       *name;                /* Pointer to name string in heap */
+    size_t            block_size;          /* Size of the heap block */
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -648,13 +647,16 @@ H5G__stab_get_name_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     assert(ent);
     assert(udata && udata->heap);
 
+    /* Get the size of the heap block */
+    block_size = H5HL_heap_get_size(udata->heap);
+
     /* Get name offset in heap */
     name_off = ent->name_off;
 
     if ((name = (const char *)H5HL_offset_into(udata->heap, name_off)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get symbol table link name");
 
-    if ((udata->name = H5MM_strdup(name)) == NULL)
+    if (NULL == (udata->name = H5MM_strndup(name, (block_size - name_off))))
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to duplicate symbol table link name");
 
 done:
@@ -768,7 +770,7 @@ H5G__stab_lookup_cb(const H5G_entry_t *ent, void *_udata)
     /* Check for setting link info */
     if (udata->lnk)
         /* Convert the entry to a link */
-        if (H5G__ent_to_link(udata->lnk, udata->heap, ent, udata->name) < 0)
+        if (H5G__ent_to_link(ent, udata->heap, udata->lnk) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, FAIL, "unable to convert symbol table entry to link");
 
 done:
@@ -815,10 +817,11 @@ H5G__stab_lookup(const H5O_loc_t *grp_oloc, const char *name, bool *found, H5O_l
     udata.heap = heap;
 
     /* Set up the user data for actual B-tree find operation */
-    bt_udata.common.name = name;
-    bt_udata.common.heap = heap;
-    bt_udata.op          = H5G__stab_lookup_cb;
-    bt_udata.op_data     = &udata;
+    bt_udata.common.name       = name;
+    bt_udata.common.heap       = heap;
+    bt_udata.common.block_size = H5HL_heap_get_size(heap);
+    bt_udata.op                = H5G__stab_lookup_cb;
+    bt_udata.op_data           = &udata;
 
     /* Search the B-tree */
     if (H5B_find(grp_oloc->file, H5B_SNODE, stab.btree_addr, found, &bt_udata) < 0)
@@ -846,8 +849,7 @@ done:
 static herr_t
 H5G__stab_lookup_by_idx_cb(const H5G_entry_t *ent, void *_udata)
 {
-    H5G_bt_it_lbi_t *udata = (H5G_bt_it_lbi_t *)_udata;
-    const char      *name;                /* Pointer to name string in heap */
+    H5G_bt_it_lbi_t *udata     = (H5G_bt_it_lbi_t *)_udata;
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -856,12 +858,8 @@ H5G__stab_lookup_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     assert(ent);
     assert(udata && udata->heap);
 
-    /* Get a pointer to the link name */
-    if ((name = (const char *)H5HL_offset_into(udata->heap, ent->name_off)) == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get symbol table link name");
-
     /* Convert the entry to a link */
-    if (H5G__ent_to_link(udata->lnk, udata->heap, ent, name) < 0)
+    if (H5G__ent_to_link(ent, udata->heap, udata->lnk) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, FAIL, "unable to convert symbol table entry to link");
     udata->found = true;
 

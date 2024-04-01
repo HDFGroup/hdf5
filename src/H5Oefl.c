@@ -76,9 +76,10 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
 {
     H5O_efl_t     *mesg = NULL;
     int            version;
-    const uint8_t *p_end     = p + p_size - 1; /* pointer to last byte in p */
-    const char    *s         = NULL;
-    H5HL_t        *heap      = NULL;
+    const uint8_t *p_end = p + p_size - 1; /* pointer to last byte in p */
+    const char    *s     = NULL;
+    H5HL_t        *heap  = NULL;
+    size_t         block_size;       /* Size of the heap block */
     void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -139,6 +140,9 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "entry at offset 0 in local heap not an empty string");
 #endif
 
+    /* Get the size of the heap block */
+    block_size = H5HL_heap_get_size(heap);
+
     for (size_t u = 0; u < mesg->nused; u++) {
 
         hsize_t offset = 0;
@@ -152,7 +156,7 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to get external file name");
         if (*s == '\0')
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "invalid external file name");
-        mesg->slot[u].name = H5MM_xstrdup(s);
+        mesg->slot[u].name = H5MM_strndup(s, (block_size - mesg->slot[u].name_offset));
         if (mesg->slot[u].name == NULL)
             HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "string duplication failed");
 
@@ -386,33 +390,35 @@ H5O__efl_reset(void *_mesg)
 /*-------------------------------------------------------------------------
  * Function:	H5O_efl_total_size
  *
- * Purpose:	Return the total size of the external file list by summing
+ * Purpose:	Query the total size of the external file list by summing
  *		the sizes of all of the files.
  *
- * Return:	Success:	Total reserved size for external data.
- *
- *		Failure:	0
+ * Return:	Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
-H5O_efl_total_size(H5O_efl_t *efl)
+herr_t
+H5O_efl_total_size(const H5O_efl_t *efl, hsize_t *size)
 {
-    hsize_t ret_value = 0, tmp;
+    hsize_t total_size = 0, tmp;
+    herr_t  ret_value  = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(0)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if (efl->nused > 0 && H5O_EFL_UNLIMITED == efl->slot[efl->nused - 1].size)
-        ret_value = H5O_EFL_UNLIMITED;
+        *size = H5O_EFL_UNLIMITED;
     else {
         size_t u; /* Local index variable */
 
-        for (u = 0; u < efl->nused; u++, ret_value = tmp) {
-            tmp = ret_value + efl->slot[u].size;
-            if (tmp <= ret_value)
-                HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, 0, "total external storage size overflowed");
+        for (u = 0; u < efl->nused; u++, total_size = tmp) {
+            tmp = total_size + efl->slot[u].size;
+            if (tmp < total_size)
+                HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "total external storage size overflowed");
         } /* end for */
-    }     /* end else */
+
+        /* Set the size to return */
+        *size = total_size;
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
