@@ -746,6 +746,14 @@ Bug Fixes since HDF5-1.14.0 release
 
     Library
     -------
+    - Fixed a bug when using array datatypes with certain parent types
+
+      Array datatype conversion would never use a background buffer, even if the
+      array's parent type (what the array is an array of) required a background
+      buffer for conversion. This resulted in crashes in some cases when using
+      an array of compound, variable length, or reference datatypes. Array types
+      now use a background buffer if needed by the parent type.
+
     - Fixed potential buffer read overflows in H5PB_read
 
       H5PB_read previously did not account for the fact that the size of the
