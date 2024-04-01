@@ -606,6 +606,8 @@ H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
         HGOTO_DONE(ret_value);
 
     sect_end = (*sect)->sect_info.addr + (*sect)->sect_info.size;
+    if (0 == udata->f->shared->fs_page_size)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_BADVALUE, FAIL, "page size of zero would result in division by zero");
     rem      = sect_end % udata->f->shared->fs_page_size;
     prem     = udata->f->shared->fs_page_size - rem;
 
