@@ -603,6 +603,7 @@ unset (CMAKE_EXTRA_INCLUDE_FILES)
 # Check whether we can build the direct VFD
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_DIRECT_VFD "Build the Direct I/O Virtual File Driver" OFF)
+set (HDF5_ENABLE_DIRECT_VFD_SETTING OFF)
 if (HDF5_ENABLE_DIRECT_VFD)
   # The direct VFD is tied to POSIX direct I/O as enabled by the O_DIRECT
   # flag. No other form of direct I/O is supported. This feature also
@@ -612,6 +613,7 @@ if (HDF5_ENABLE_DIRECT_VFD)
 
   if (HAVE_O_DIRECT AND HAVE_POSIX_MEMALIGN)
     set (${HDF_PREFIX}_HAVE_DIRECT 1)
+    set (HDF5_ENABLE_DIRECT_VFD_SETTING ON)
   else ()
     message (FATAL_ERROR "The direct VFD was requested but cannot be built.\nIt requires O_DIRECT flag support and posix_memalign()")
   endif ()
@@ -621,11 +623,13 @@ endif ()
 #  Check if ROS3 driver can be built
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
+set (H5_ENABLE_ROS3_VFD_SETTING OFF)
   if (HDF5_ENABLE_ROS3_VFD)
     find_package(CURL REQUIRED)
     find_package(OpenSSL REQUIRED)
     if (${CURL_FOUND} AND ${OPENSSL_FOUND})
       set (${HDF_PREFIX}_HAVE_ROS3_VFD 1)
+      set (H5_ENABLE_ROS3_VFD_SETTING ON)
       list (APPEND LINK_LIBS ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES})
       INCLUDE_DIRECTORIES (${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
     else ()
@@ -637,6 +641,7 @@ endif ()
 # Check whether we can build the mirror VFD
 # ----------------------------------------------------------------------
 option (HDF5_ENABLE_MIRROR_VFD "Build the Mirror Virtual File Driver" OFF)
+set (${HDF_PREFIX}_HAVE_MIRROR_VFD_SETTING OFF)
 if (HDF5_ENABLE_MIRROR_VFD)
   if ( ${HDF_PREFIX}_HAVE_NETINET_IN_H AND
        ${HDF_PREFIX}_HAVE_NETDB_H      AND
@@ -644,8 +649,9 @@ if (HDF5_ENABLE_MIRROR_VFD)
        ${HDF_PREFIX}_HAVE_SYS_SOCKET_H AND
        ${HDF_PREFIX}_HAVE_FORK)
       set (${HDF_PREFIX}_HAVE_MIRROR_VFD 1)
+      set (${HDF_PREFIX}_HAVE_MIRROR_VFD_SETTING ON)
   else()
-    message(WARNING "The socket-based Mirror VFD was requested but cannot be built. System prerequisites are not met.")
+      message(WARNING "The socket-based Mirror VFD was requested but cannot be built. System prerequisites are not met.")
   endif()
 endif()
 
