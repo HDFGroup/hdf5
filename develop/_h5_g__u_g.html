@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.ce3784d</span>
+   &#160;<span id="projectnumber">1.15.0.a314a7a</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -443,7 +443,7 @@ Creating a Group</h3>
 <div class="line">group_new1 = <a class="code hl_define" href="group___h5_g.html#ga187cee27a9fc4f1a311eb19b0522c7b8">H5Gcreate</a>(file, <span class="stringliteral">&quot;/Data/Data_new1&quot;</span>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
 <div class="line">group_new2 = <a class="code hl_define" href="group___h5_g.html#ga187cee27a9fc4f1a311eb19b0522c7b8">H5Gcreate</a>(group, <span class="stringliteral">&quot;Data_new2&quot;</span>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
 <div class="ttc" id="a_h5_ipublic_8h_html_a0045db7ff9c22ad35db6ae91662e1943"><div class="ttname"><a href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></div><div class="ttdeci">int64_t hid_t</div><div class="ttdef"><b>Definition</b> H5Ipublic.h:60</div></div>
-<div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:102</div></div>
+<div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:228</div></div>
 <div class="ttc" id="agroup___h5_f_html_gaa3f4f877b9bb591f3880423ed2bf44bc"><div class="ttname"><a href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a></div><div class="ttdeci">hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)</div><div class="ttdoc">Opens an existing HDF5 file.</div></div>
 <div class="ttc" id="agroup___h5_g_html_ga187cee27a9fc4f1a311eb19b0522c7b8"><div class="ttname"><a href="group___h5_g.html#ga187cee27a9fc4f1a311eb19b0522c7b8">H5Gcreate</a></div><div class="ttdeci">#define H5Gcreate</div><div class="ttdef"><b>Definition</b> H5version.h:997</div></div>
 </div><!-- fragment --><p> The third <a class="el" href="group___h5_g.html#ga187cee27a9fc4f1a311eb19b0522c7b8">H5Gcreate</a> parameter optionally specifies how much file space to reserve to store the names that will appear in this group. If a non-positive value is supplied, a default size is chosen.</p>
@@ -561,77 +561,61 @@ c) A link named dset2 to the same dataset is created in /group2.</div></div>
   </td><td><div class="image">
 <img src="Groups_fig9_bb.gif" alt=""/>
 <div class="caption">
-d) The link from /group1 to dset1 is removed. The dataset is</div></div>
- still in the file, but can be accessed only as /group2/dset2."
-   &lt;/td&gt;
-   &lt;/tr&gt;
-   &lt;/table&gt;
-
-   Figure 10 illustrates loops in an HDF5 file structure. The file in part a contains three groups
-   and a dataset; group2 is a member of the root group and of the root group's other member group,
-   group1. group2 thus can be accessed by either of two paths: /group2 or /group1/GXX. Similarly,
-   the dataset can be accessed either as /group2/dset1 or as /group1/GXX/dset1.
-
-   Part b illustrates a different case: the dataset is a member of a single group but with two links, or
-   names, in that group. In this case, the dataset again has two names, /group1/dset1 and
-   /group1/dset2.
-
-   In part c, the dataset dset1 is a member of two groups, one of which can be accessed by either of
-   two names. The dataset thus has three path names: /group1/dset1, /group2/dset2, and
-   /group1/GXX/dset2.
-
-   And in part d, two of the groups are members of each other and the dataset is a member of both
-   groups. In this case, there are an infinite number of paths to the dataset because GXX and
-   GYY can be traversed any number of times on the way from the root group, /, to the dataset. This
-   can yield a path name such as /group1/GXX/GYY/GXX/GYY/GXX/dset2.
-
-   &lt;table&gt;
-   &lt;caption&gt;Figure 10 - More sample file structures&lt;/caption&gt;
-   &lt;tr&gt;
-   &lt;td&gt;
-@image html Groups_fig10_a.gif "a) dset1 has two names: /group2/dset1 and /group1/GXX/dset1."
-   &lt;/td&gt;
-   &lt;td&gt;
-@image html Groups_fig10_b.gif "b) dset1 again has two names: /group1/dset1 and /group1/dset2."
-   &lt;/td&gt;
-   &lt;/tr&gt;
-   &lt;tr&gt;
-   &lt;td&gt;
-@image html Groups_fig10_c.gif "c) dset1 has three names: /group1/dset1, /group2/dset2, and /group1/GXX/dset2."
-   &lt;/td&gt;
-   &lt;td&gt;
-@image html Groups_fig10_d.gif "d) dset1 has an infinite number of available path names."
-   &lt;/td&gt;
-   &lt;/tr&gt;
-   &lt;/table&gt;
-
-   Figure 11 takes us into the realm of soft links. The original file, in part a, contains only three
-   hard links. In part b, a soft link named dset2 from group2 to /group1/dset1 has been created,
-   making this dataset accessible as /group2/dset2.
-
-   In part c, another soft link has been created in group2. But this time the soft link, dset3, points
-   to a target object that does not yet exist. That target object, dset, has been added in part d and is
-   now accessible as either /group2/dset or /group2/dset3.
-
-   It could be said that HDF5 extends the organizing concepts of a file system to the internal
-   structure of a single file.
-
-   &lt;table&gt;
-   &lt;caption&gt;Figure 11 - Hard and soft links&lt;/caption&gt;
-   &lt;tr&gt;
-   &lt;td&gt;
-@image html Groups_fig11_a.gif "a) The file contains only hard links."
-   &lt;/td&gt;
-   &lt;td&gt;
-@image html Groups_fig11_b.gif "b) A soft link is added from group2 to /group1/dset1."
-   &lt;/td&gt;
-   &lt;/tr&gt;
-   &lt;tr&gt;
-   &lt;td&gt;
-@image html Groups_fig11_c.gif "c) A soft link named dset3 is added with a target that does not yet exist."
-   &lt;/td&gt;
-   &lt;td&gt;
-@image html Groups_fig11_d.gif "d) The target of the soft link is created or linked."   </td></tr>
+d) The link from /group1 to dset1 is removed.</div></div>
+ The dataset is still in the file, but can be accessed only as /group2/dset2.   </td></tr>
+</table>
+<p>Figure 10 illustrates loops in an HDF5 file structure. The file in part a contains three groups and a dataset; group2 is a member of the root group and of the root group's other member group, group1. group2 thus can be accessed by either of two paths: /group2 or /group1/GXX. Similarly, the dataset can be accessed either as /group2/dset1 or as /group1/GXX/dset1.</p>
+<p>Part b illustrates a different case: the dataset is a member of a single group but with two links, or names, in that group. In this case, the dataset again has two names, /group1/dset1 and /group1/dset2.</p>
+<p>In part c, the dataset dset1 is a member of two groups, one of which can be accessed by either of two names. The dataset thus has three path names: /group1/dset1, /group2/dset2, and /group1/GXX/dset2.</p>
+<p>And in part d, two of the groups are members of each other and the dataset is a member of both groups. In this case, there are an infinite number of paths to the dataset because GXX and GYY can be traversed any number of times on the way from the root group, /, to the dataset. This can yield a path name such as /group1/GXX/GYY/GXX/GYY/GXX/dset2.</p>
+<table class="doxtable">
+<caption>Figure 10 - More sample file structures</caption>
+<tr>
+<td><div class="image">
+<img src="Groups_fig10_a.gif" alt=""/>
+<div class="caption">
+a) dset1 has two names: /group2/dset1 and /group1/GXX/dset1.</div></div>
+  </td><td><div class="image">
+<img src="Groups_fig10_b.gif" alt=""/>
+<div class="caption">
+b) dset1 again has two names: /group1/dset1 and /group1/dset2.</div></div>
+   </td></tr>
+<tr>
+<td><div class="image">
+<img src="Groups_fig10_c.gif" alt=""/>
+<div class="caption">
+c) dset1 has 3 names: /group1/dset1, /group2/dset2, and /group1/GXX/dset2.</div></div>
+  </td><td><div class="image">
+<img src="Groups_fig10_d.gif" alt=""/>
+<div class="caption">
+d) dset1 has an infinite number of available path names.</div></div>
+   </td></tr>
+</table>
+<p>Figure 11 takes us into the realm of soft links. The original file, in part a, contains only three hard links. In part b, a soft link named dset2 from group2 to /group1/dset1 has been created, making this dataset accessible as /group2/dset2.</p>
+<p>In part c, another soft link has been created in group2. But this time the soft link, dset3, points to a target object that does not yet exist. That target object, dset, has been added in part d and is now accessible as either /group2/dset or /group2/dset3.</p>
+<p>It could be said that HDF5 extends the organizing concepts of a file system to the internal structure of a single file.</p>
+<table class="doxtable">
+<caption>Figure 11 - Hard and soft links</caption>
+<tr>
+<td><div class="image">
+<img src="Groups_fig11_a.gif" alt=""/>
+<div class="caption">
+a) The file contains only hard links.</div></div>
+  </td><td><div class="image">
+<img src="Groups_fig11_b.gif" alt=""/>
+<div class="caption">
+b) A soft link is added from group2 to /group1/dset1.</div></div>
+   </td></tr>
+<tr>
+<td><div class="image">
+<img src="Groups_fig11_c.gif" alt=""/>
+<div class="caption">
+c) A soft link named dset3 is added with a target that does not yet exist.</div></div>
+  </td><td><div class="image">
+<img src="Groups_fig11_d.gif" alt=""/>
+<div class="caption">
+d) The target of the soft link is created or linked.</div></div>
+   </td></tr>
 </table>
 <p>Previous Chapter <a class="el" href="_h5_f__u_g.html#sec_file">The HDF5 File</a> - Next Chapter <a class="el" href="_h5_d__u_g.html#sec_dataset">HDF5 Datasets</a> </p>
 </div></div><!-- contents -->
