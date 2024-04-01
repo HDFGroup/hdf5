@@ -514,6 +514,15 @@ Bug Fixes since HDF5-1.14.3 release
 
     Library
     -------
+    - Fixed a divide-by-zero issue when a corrupt file sets the page size to 0
+
+      If a corrupt file sets the page buffer size in the superblock to zero,
+      the library could attempt to divide by zero when allocating space in
+      the file. The library now checks for valid page buffer sizes when
+      reading the superblock message.
+
+      Fixes oss-fuzz issue 58762
+
     - Fixed a bug when using array datatypes with certain parent types
 
       Array datatype conversion would never use a background buffer, even if the
