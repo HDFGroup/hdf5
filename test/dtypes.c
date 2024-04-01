@@ -73,9 +73,9 @@
         }                                                                                                    \
     } while (0)
 
-static const char *FILENAME[] = {"dtypes0",  "dtypes1",  "dtypes2", "dtypes3", "dtypes4",
-                                 "dtypes5",  "dtypes6",  "dtypes7", "dtypes8", "dtypes9",
-                                 "dtypes10", "dtypes11", NULL};
+static const char *FILENAME[] = {"dtypes0",  "dtypes1",  "dtypes2",  "dtypes3", "dtypes4",
+                                 "dtypes5",  "dtypes6",  "dtypes7",  "dtypes8", "dtypes9",
+                                 "dtypes10", "dtypes11", "dtypes12", NULL};
 
 #define TESTFILE "bad_compound.h5"
 
@@ -6465,6 +6465,217 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    test_array_cmpd_vl
+ *
+ * Purpose:     Tests that conversion occurs correctly with an array of
+ *              arrays of compounds containing a variable length sequence.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_array_cmpd_vl(void)
+{
+    typedef struct cmpd_struct {
+        hvl_t vl;
+    } cmpd_struct;
+
+    int         int_wdata[2][3][2] = {{{0, 1}, {2, 3}, {4, 5}}, {{6, 7}, {8, 9}, {10, 11}}};
+    cmpd_struct wdata[2][3];
+    cmpd_struct rdata[2][3];
+    hid_t       file;
+    hid_t       vl_tid, cmpd_tid, inner_array_tid, outer_array_tid;
+    hid_t       space_id;
+    hid_t       dset_id;
+    hsize_t     dim1[1];
+    char        filename[1024];
+
+    TESTING("array of arrays of compounds with a vlen");
+
+    /* Create File */
+    h5_fixname(FILENAME[12], H5P_DEFAULT, filename, sizeof filename);
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create file!\n");
+        goto error;
+    } /* end if */
+
+    /* Create VL of ints datatype */
+    if ((vl_tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    /* Create compound datatype */
+    if ((cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    if (H5Tinsert(cmpd_tid, "vl", HOFFSET(struct cmpd_struct, vl), vl_tid) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't insert field 'vl'\n");
+        goto error;
+    } /* end if */
+
+    /* Create inner array type */
+    dim1[0] = 3;
+    if ((inner_array_tid = H5Tarray_create2(cmpd_tid, 1, dim1)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    /* Create outer array type */
+    dim1[0] = 2;
+    if ((outer_array_tid = H5Tarray_create2(inner_array_tid, 1, dim1)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    /* Create space, dataset */
+    dim1[0] = 1;
+    if ((space_id = H5Screate_simple(1, dim1, NULL)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create space\n");
+        goto error;
+    } /* end if */
+
+    if ((dset_id = H5Dcreate2(file, "Dataset", outer_array_tid, space_id, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create dataset\n");
+        goto error;
+    } /* end if */
+
+    /* Initialize wdata */
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 3; j++) {
+            wdata[i][j].vl.len = 2;
+            wdata[i][j].vl.p   = int_wdata[i][j];
+        }
+
+    /* Write data */
+    if (H5Dwrite(dset_id, outer_array_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't write data\n");
+        goto error;
+    } /* end if */
+
+    /* Initialize rdata */
+    (void)memset(rdata, 0, sizeof(rdata));
+
+    /* Read data */
+    if (H5Dread(dset_id, outer_array_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't read data\n");
+        goto error;
+    } /* end if */
+
+    /* Check for correctness of read data */
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 3; j++)
+            if (rdata[i][j].vl.len != 2 || ((int *)rdata[i][j].vl.p)[0] != int_wdata[i][j][0] ||
+                ((int *)rdata[i][j].vl.p)[1] != int_wdata[i][j][1]) {
+                H5_FAILED();
+                AT();
+                printf("incorrect read data at [%d][%d]\n", i, j);
+                goto error;
+            }
+
+    /* Reclaim memory */
+    if (H5Treclaim(outer_array_tid, space_id, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't reclaim memory\n");
+        goto error;
+    } /* end if */
+
+    /* Adjust write buffer */
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 3; j++) {
+            int_wdata[i][j][0] += 100;
+            int_wdata[i][j][1] += 100;
+        }
+
+    /* Overwrite dataset with adjusted wdata */
+    if (H5Dwrite(dset_id, outer_array_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't write data\n");
+        goto error;
+    } /* end if */
+
+    /* Initialize rdata */
+    (void)memset(rdata, 0, sizeof(rdata));
+
+    /* Read data */
+    if (H5Dread(dset_id, outer_array_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't read data\n");
+        goto error;
+    } /* end if */
+
+    /* Check for correctness of read data */
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 3; j++)
+            if (rdata[i][j].vl.len != 2 || ((int *)rdata[i][j].vl.p)[0] != int_wdata[i][j][0] ||
+                ((int *)rdata[i][j].vl.p)[1] != int_wdata[i][j][1]) {
+                H5_FAILED();
+                AT();
+                printf("incorrect read data at [%d][%d]\n", i, j);
+                goto error;
+            }
+
+    /* Reclaim memory */
+    if (H5Treclaim(outer_array_tid, space_id, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't reclaim memory\n");
+        goto error;
+    } /* end if */
+
+    /* Close */
+    if (H5Dclose(dset_id) < 0)
+        goto error;
+    if (H5Tclose(outer_array_tid) < 0)
+        goto error;
+    if (H5Tclose(inner_array_tid) < 0)
+        goto error;
+    if (H5Tclose(cmpd_tid) < 0)
+        goto error;
+    if (H5Tclose(vl_tid) < 0)
+        goto error;
+    if (H5Sclose(space_id) < 0)
+        goto error;
+    if (H5Fclose(file) < 0)
+        goto error;
+
+    PASSED();
+    return 0;
+
+error:
+    return 1;
+} /* end test_array_cmpd_vl() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_encode
  *
  * Purpose:     Tests functions of encoding and decoding datatype.
@@ -9700,6 +9911,7 @@ main(void)
     nerrors += test_bitfield_funcs();
     nerrors += test_opaque();
     nerrors += test_set_order();
+    nerrors += test_array_cmpd_vl();
 
     nerrors += test__Float16();
 
