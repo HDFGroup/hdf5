@@ -47,7 +47,7 @@ jobs:
     steps:
       - name: Install Linux Dependencies
         run: |
-          sudo apt update
+          sudo apt-get update
           sudo apt-get install automake autoconf libtool libtool-bin
         if: ${{ matrix.os == 'ubuntu-latest' }}
 
@@ -56,14 +56,14 @@ jobs:
       # versions of each, then build and cache those installations
       - name: Install OpenMPI
         run: |
-          sudo apt update
+          sudo apt-get update
           sudo apt-get install libopenmpi-dev
           echo "CC=mpicc" >> $GITHUB_ENV
         if: ${{ matrix.os == 'ubuntu-latest' && matrix.mpi_lib == 'OpenMPI' }}
 
       - name: Install MPICH
         run: |
-          sudo apt update
+          sudo apt-get update
           sudo apt-get install libmpich-dev
           echo "CC=mpicc" >> $GITHUB_ENV
         if: ${{ matrix.os == 'ubuntu-latest' && matrix.mpi_lib == 'MPICH' }}
