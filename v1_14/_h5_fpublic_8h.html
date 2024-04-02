@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.14.4.1</span>
+   &#160;<span id="projectnumber">1.14.4.9f7b987</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -174,6 +174,10 @@ Macros</h2></td></tr>
 <tr class="separator:a47d050173da48a2b85c730446f0771c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a67d0d121762e7c44c4ef3f40a49611" id="r_a3a67d0d121762e7c44c4ef3f40a49611"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3a67d0d121762e7c44c4ef3f40a49611">H5F_NUM_METADATA_READ_RETRY_TYPES</a>&#160;&#160;&#160;21</td></tr>
 <tr class="separator:a3a67d0d121762e7c44c4ef3f40a49611"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef18fabdccce8db11b6dd3e231028028" id="r_aef18fabdccce8db11b6dd3e231028028"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aef18fabdccce8db11b6dd3e231028028">H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS</a>&#160;&#160;&#160;    (0x0001u)</td></tr>
+<tr class="separator:aef18fabdccce8db11b6dd3e231028028"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86e0864b6be8816c2820610bd52e049a" id="r_a86e0864b6be8816c2820610bd52e049a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a86e0864b6be8816c2820610bd52e049a">H5F_RFIC_ALL</a>&#160;&#160;&#160;    (<a class="el" href="#aef18fabdccce8db11b6dd3e231028028">H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS</a>)</td></tr>
+<tr class="separator:a86e0864b6be8816c2820610bd52e049a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3ff563967a75b699c487fac04c42423" id="r_af3ff563967a75b699c487fac04c42423"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af3ff563967a75b699c487fac04c42423">H5F_ACC_DEBUG</a>&#160;&#160;&#160;(<a class="el" href="#a59058fd08440d7ea30ed09d8de233185">H5CHECK</a> <a class="el" href="_h5_epublic_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> 0x0000u)</td></tr>
 <tr class="separator:af3ff563967a75b699c487fac04c42423"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -706,6 +710,36 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Restrict search to objects opened through current file ID \ (as opposed to objects opened through any file ID accessing this file) </p>
+
+</div>
+</div>
+<a id="a86e0864b6be8816c2820610bd52e049a" name="a86e0864b6be8816c2820610bd52e049a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86e0864b6be8816c2820610bd52e049a">&#9670;&#160;</a></span>H5F_RFIC_ALL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define H5F_RFIC_ALL&#160;&#160;&#160;    (<a class="el" href="#aef18fabdccce8db11b6dd3e231028028">H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS</a>)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Suppress all format integrity check errors. See \ documentation for H5Pset_relax_file_integrity_checks \ for details. </p>
+
+</div>
+</div>
+<a id="aef18fabdccce8db11b6dd3e231028028" name="aef18fabdccce8db11b6dd3e231028028"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef18fabdccce8db11b6dd3e231028028">&#9670;&#160;</a></span>H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS&#160;&#160;&#160;    (0x0001u)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Suppress errors for numeric datatypes with an unusually \ high number of unused bits. See documentation for \ H5Pset_relax_file_integrity_checks for details. </p>
 
 </div>
 </div>
