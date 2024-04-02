@@ -122,7 +122,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install CMake Dependencies (Linux)
-        run: sudo apt-get install ninja-build graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build graphviz
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
@@ -330,8 +332,9 @@ jobs:
     steps:
       - name: Install CMake Dependencies (Linux S3)
         run: |
-           sudo apt-get install ninja-build doxygen graphviz
-           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+          sudo apt-get update
+          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
 
       - name: Set file base name (Linux S3)
         id: set-file-base
@@ -493,7 +496,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install CMake Dependencies (Linux_intel)
-        run: sudo apt-get install ninja-build doxygen graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build doxygen graphviz
 
       - name: add oneAPI to env
         uses: fortran-lang/setup-fortran@v1

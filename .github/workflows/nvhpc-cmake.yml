@@ -22,7 +22,7 @@ jobs:
       - name: Install Dependencies
         shell: bash
         run: |
-          sudo apt update
+          sudo apt-get update
           sudo apt-get install ninja-build doxygen graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
           sudo apt install -y libaec-dev zlib1g-dev wget curl bzip2 flex bison cmake libzip-dev openssl build-essential

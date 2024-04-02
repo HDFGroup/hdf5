@@ -800,8 +800,11 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
                         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set file space strategy");
                 } /* end if */
 
-                assert(f->shared->fs_page_size >= H5F_FILE_SPACE_PAGE_SIZE_MIN);
-                assert(fsinfo.page_size >= H5F_FILE_SPACE_PAGE_SIZE_MIN);
+                if (f->shared->fs_page_size < H5F_FILE_SPACE_PAGE_SIZE_MIN)
+                    HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file space page size too small");
+                if (fsinfo.page_size < H5F_FILE_SPACE_PAGE_SIZE_MIN)
+                    HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file space page size too small");
+
                 if (f->shared->fs_page_size != fsinfo.page_size) {
                     f->shared->fs_page_size = fsinfo.page_size;
 
