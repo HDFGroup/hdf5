@@ -28,7 +28,7 @@ Linking Options:
                      AM_LDFLAGS: @AM_LDFLAGS@
                 Extra libraries: @LINK_LIBS@
                        Archiver: @CMAKE_AR@
-                       AR_FLAGS: 
+                       AR_FLAGS:
                          Ranlib: @CMAKE_RANLIB@
 
 Languages:
@@ -79,12 +79,12 @@ Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@
     With deprecated public symbols: @HDF5_ENABLE_DEPRECATED_SYMBOLS@
             I/O filters (external): @EXTERNAL_FILTERS@
                   _Float16 support: @HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16@
-                     Map (H5M) API: @H5_HAVE_MAP_API@
+                     Map (H5M) API: @HDF5_ENABLE_MAP_API@
                         Direct VFD: @HDF5_ENABLE_DIRECT_VFD@
-                        Mirror VFD: @H5_HAVE_MIRROR_VFD@
-                     Subfiling VFD: @H5_HAVE_SUBFILING_VFD@
-                (Read-Only) S3 VFD: @H5_HAVE_ROS3_VFD@
-              (Read-Only) HDFS VFD: @H5_HAVE_LIBHDFS@
+                        Mirror VFD: @HDF5_ENABLE_MIRROR_VFD@
+                     Subfiling VFD: @HDF5_ENABLE_SUBFILING_VFD@
+                (Read-Only) S3 VFD: @HDF5_ENABLE_ROS3_VFD@
+              (Read-Only) HDFS VFD: @HDF5_ENABLE_HDFS@
     Packages w/ extra debug output: @INTERNAL_DEBUG_OUTPUT@
                        API Tracing: @HDF5_ENABLE_TRACE@
               Using memory checker: @HDF5_ENABLE_USING_MEMCHECKER@
