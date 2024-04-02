@@ -2,7 +2,23 @@ name: hdf5 1.14 cmake CI
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 on:
-  workflow_call:
+  workflow_dispatch:
+  push:
+  pull_request:
+    branches: [ develop ]
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'doc/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'COPYING**'
+      - '**.md'
+
+# Using concurrency to cancel any in-progress job or run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -91,4 +107,9 @@ jobs:
         uses: ./.github/workflows/julia-cmake.yml
         with:
             build_mode: "Release"
-            
+    
+    call-release-cmake-xpr:
+        name: "CMake TestExpress Workflows"
+        uses: ./.github/workflows/testxpr-cmake.yml
+
+                        

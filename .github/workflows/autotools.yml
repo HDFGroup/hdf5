@@ -2,7 +2,23 @@ name: hdf5 1.14 autools CI
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 on:
-  workflow_call:
+  workflow_dispatch:
+  push:
+  pull_request:
+    branches: [ develop ]
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'doc/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'COPYING**'
+      - '**.md'
+
+# Using concurrency to cancel any in-progress job or run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -83,10 +99,21 @@ jobs:
       with:
             build_mode: "production"
 
-    call-release-cmake-julia:
+    call-release-auto-julia:
         name: "Autotools Julia Workflows"
         uses: ./.github/workflows/julia-auto.yml
         with:
             build_mode: "production"
+            
+    call-release-auto-xpr:
+        name: "Autotools TestExpress Workflows"
+        uses: ./.github/workflows/testxpr-auto.yml
+
+#  workflow-msys2-autotools:
+#    name: "CMake msys2 Workflows"
+#    uses: ./.github/workflows/msys2-auto.yml
+#    with:
+#        build_mode: "production"
+#        build_option: "--enable-production"
 
             
