@@ -4913,7 +4913,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         /*          Test library's default overflow handling:
          * Hardware usually doesn't handle overflows too gracefully. The
          * hardware conversion result during overflows is usually garbage
-         * so we must handle those cases differetly when checking results.
+         * so we must handle those cases differently when checking results.
          *
          *          Test user's exception handler when overflows:
          * Try to follow the except_func callback function to check if the
