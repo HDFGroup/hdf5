@@ -122,7 +122,7 @@ if (HDF5_BUILD_TOOLS)
         TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${example_name}.ddl
+        ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
     )
   endforeach ()
 
@@ -135,14 +135,14 @@ if (HDF5_BUILD_TOOLS)
                 TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                 POST_BUILD
                 COMMAND    ${CMAKE_COMMAND}
-                ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/114/${example_name}.ddl ${example_name}.ddl
+                ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/114/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
             )
           else ()
             add_custom_command (
                 TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                 POST_BUILD
                 COMMAND    ${CMAKE_COMMAND}
-                ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${example_name}.ddl
+                ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
             )
           endif ()
         elseif ((${example_name} STREQUAL "h5ex_t_objref_F03" OR ${example_name} STREQUAL "h5ex_t_objrefatt_F03") OR (${example_name} STREQUAL "h5ex_t_regref_F03" OR ${example_name} STREQUAL "h5ex_t_regrefatt_F03"))
@@ -153,14 +153,14 @@ if (HDF5_BUILD_TOOLS)
                     TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                     POST_BUILD
                     COMMAND    ${CMAKE_COMMAND}
-                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}21.ddl ${example_name}.ddl
+                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}21.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
                 )
               else ()
                 add_custom_command (
                     TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                     POST_BUILD
                     COMMAND    ${CMAKE_COMMAND}
-                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${example_name}.ddl
+                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
                 )
               endif ()
             elseif (HDF5_VERSION_MAJOR VERSION_EQUAL "1.10")
@@ -169,14 +169,14 @@ if (HDF5_BUILD_TOOLS)
                     TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                     POST_BUILD
                     COMMAND    ${CMAKE_COMMAND}
-                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/110/${example_name}06.ddl ${example_name}.ddl
+                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/110/${example_name}06.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
                 )
               else ()
                 add_custom_command (
                     TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                     POST_BUILD
                     COMMAND    ${CMAKE_COMMAND}
-                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${example_name}.ddl
+                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
                 )
               endif ()
             elseif (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.12")
@@ -184,14 +184,14 @@ if (HDF5_BUILD_TOOLS)
                     TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                     POST_BUILD
                     COMMAND    ${CMAKE_COMMAND}
-                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/112/${example_name}.ddl ${example_name}.ddl
+                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/112/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
                 )
             else ()
               add_custom_command (
                   TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                   POST_BUILD
                   COMMAND    ${CMAKE_COMMAND}
-                  ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${example_name}.ddl
+                  ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
               )
             endif ()
           else ()
@@ -201,14 +201,14 @@ if (HDF5_BUILD_TOOLS)
                     TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                     POST_BUILD
                     COMMAND    ${CMAKE_COMMAND}
-                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}21.ddl ${example_name}.ddl
+                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}21.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
                 )
               else ()
                 add_custom_command (
                     TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                     POST_BUILD
                     COMMAND    ${CMAKE_COMMAND}
-                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${example_name}.ddl
+                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
                 )
               endif ()
             elseif (HDF5_VERSION_MAJOR VERSION_EQUAL "1.10")
@@ -217,14 +217,14 @@ if (HDF5_BUILD_TOOLS)
                     TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                     POST_BUILD
                     COMMAND    ${CMAKE_COMMAND}
-                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/110/${example_name}06.ddl ${example_name}.ddl
+                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/110/${example_name}06.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
                 )
               else ()
                 add_custom_command (
                     TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                     POST_BUILD
                     COMMAND    ${CMAKE_COMMAND}
-                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${example_name}.ddl
+                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
                 )
               endif ()
             elseif (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.12")
@@ -232,14 +232,14 @@ if (HDF5_BUILD_TOOLS)
                     TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                     POST_BUILD
                     COMMAND    ${CMAKE_COMMAND}
-                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/112/${example_name}.ddl ${example_name}.ddl
+                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/112/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
                 )
             else ()
               add_custom_command (
                   TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                   POST_BUILD
                   COMMAND    ${CMAKE_COMMAND}
-                  ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${example_name}.ddl
+                  ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
               )
             endif ()
           endif ()
@@ -248,7 +248,7 @@ if (HDF5_BUILD_TOOLS)
               TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
               POST_BUILD
               COMMAND    ${CMAKE_COMMAND}
-              ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${example_name}.ddl
+              ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
           )
         endif ()
       endif ()
