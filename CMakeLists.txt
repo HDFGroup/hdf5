@@ -679,6 +679,7 @@ if (HDF5_ENABLE_HDFS)
       list (APPEND LINK_LIBS -pthread)
     endif ()
   else ()
+    set (HDF5_ENABLE_HDFS OFF CACHE BOOL "Enable HDFS" FORCE)
     message (FATAL_ERROR "Set to use libhdfs library, but could not find or use libhdfs. Please verify that the path to HADOOP_HOME is valid, and/or reconfigure without HDF5_ENABLE_HDFS")
   endif ()
 endif ()
@@ -782,7 +783,11 @@ if (HDF5_ENABLE_SUBFILING_VFD)
 
   unset (CMAKE_EXTRA_INCLUDE_FILES)
   unset (CMAKE_REQUIRED_LIBRARIES)
+  if(NOT H5_HAVE_SUBFILING_VFD EQUAL 1)
+    set (HDF5_ENABLE_SUBFILING_VFD OFF CACHE BOOL "Build Parallel HDF5 Subfiling VFD" FORCE)
+  endif()
 endif()
+
 
 #option (DEFAULT_API_VERSION "Enable v1.16 API (v16, v18, v110, v112, v114, v116)" "v116")
 set (DEFAULT_API_VERSION "v116" CACHE STRING "Enable v1.16 API (v16, v18, v110, v112, v114, v116)")
@@ -920,6 +925,8 @@ endif ()
 option (HDF5_ENABLE_MAP_API "Build the map API" OFF)
 if (HDF5_ENABLE_MAP_API)
   set (H5_HAVE_MAP_API 1)
+else ()
+  set (HDF5_ENABLE_MAP_API OFF CACHE BOOL "Build the map API" FORCE)
 endif ()
 
 #-----------------------------------------------------------------------------
