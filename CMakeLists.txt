@@ -666,7 +666,6 @@ set (CMAKE_MODULE_PATH ${HDF_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
 # Option to Enable HDFS
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_HDFS "Enable HDFS" OFF)
-set(H5_HAVE_LIBHDFS_SETTING OFF)
 if (HDF5_ENABLE_HDFS)
   find_package(JNI REQUIRED)
   if (JNI_FOUND)
@@ -675,7 +674,6 @@ if (HDF5_ENABLE_HDFS)
   find_package(HDFS REQUIRED)
   if (HDFS_FOUND)
     set (H5_HAVE_LIBHDFS 1)
-    set (H5_HAVE_LIBHDFS_SETTING ON)
     set (H5_HAVE_HDFS_H 1)
     if (NOT MSVC)
       list (APPEND LINK_LIBS -pthread)
@@ -750,7 +748,6 @@ set (HDF5_SRC_INCLUDE_DIRS
     ${H5FD_SUBFILING_DIR}
 )
 option (HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF)
-set (H5_HAVE_SUBFILING_VFD_SETTING OFF)
 if (HDF5_ENABLE_SUBFILING_VFD)
   if (WIN32)
     message (FATAL_ERROR " **** Subfiling is not supported on Windows **** ")
@@ -784,7 +781,6 @@ if (HDF5_ENABLE_SUBFILING_VFD)
   endif()
 
   set (H5_HAVE_SUBFILING_VFD 1)
-  set (H5_HAVE_SUBFILING_VFD_SETTING ON)
   # IOC VFD is currently only built when subfiling is enabled
   set (H5_HAVE_IOC_VFD 1)
 
