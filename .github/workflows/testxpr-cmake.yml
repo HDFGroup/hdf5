@@ -1,0 +1,66 @@
+name: hdf5 TestExpress CMake CI
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_test:
+    strategy:
+      matrix:
+        build_mode: ["Release", "Debug"]
+        include:
+          - build_mode: "Release"
+          - build_mode: "Debug"
+
+    name: "CMake ${{ matrix.build_mode }} Express Test Workflows"
+
+    # Don't run the action if the commit message says to skip CI
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt-get update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install libaec0 libaec-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      - name: Get Sources
+        uses: actions/checkout@v4.1.1
+
+      - name: CMake Configure
+        shell: bash
+        run: |
+           mkdir "${{ runner.workspace }}/build"
+           cd "${{ runner.workspace }}/build"
+           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+                -G Ninja \
+                -DCMAKE_BUILD_TYPE=${{ matrix.build_mode }} \
+                -DBUILD_SHARED_LIBS=ON \
+                -DHDF5_ENABLE_ALL_WARNINGS=ON \
+                -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+                -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+                -DHDF5_BUILD_FORTRAN=OFF \
+                -DHDF5_BUILD_JAVA=OFF \
+                -DHDF5_BUILD_DOC=OFF \
+                -DLIBAEC_USE_LOCALCONTENT=OFF \
+                -DZLIB_USE_LOCALCONTENT=OFF \
+                -DHDF_TEST_EXPRESS=0 \
+                $GITHUB_WORKSPACE
+
+      - name: CMake Build
+        run: cmake --build . --parallel 3 --config ${{ matrix.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: CMake Run Tests
+        run: ctest . --parallel 2 -C ${{ matrix.build_mode }} -V -R H5TESTXPR
+        working-directory: ${{ runner.workspace }}/build
+
