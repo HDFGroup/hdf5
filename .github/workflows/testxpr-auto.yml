@@ -1,0 +1,68 @@
+name: hdf5 TestExpress Autotools CI
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_test:
+    strategy:
+      matrix:
+        build_mode: ["production", "debug"]
+        include:
+          - build_mode: "production"
+          - build_mode: "debug"
+
+    name: "Autotools ${{ matrix.build_mode }} Express Test Workflows"
+
+    # Don't run the action if the commit message says to skip CI
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt-get update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           sudo apt install automake autoconf libtool libtool-bin
+           sudo apt install libaec0 libaec-dev
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      - name: Get Sources
+        uses: actions/checkout@v4.1.1
+
+      - name: Autotools Configure
+        shell: bash
+        run: |
+           sh ./autogen.sh
+           mkdir "${{ runner.workspace }}/build"
+           cd "${{ runner.workspace }}/build"
+           $GITHUB_WORKSPACE/configure \
+                --enable-build-mode=${{ matrix.build_mode }} \
+                --enable-shared \
+                --disable-parallel \
+                --disable-cxx \
+                --disable-fortran \
+                --disable-java \
+                --with-szlib=yes
+
+      - name: Autotools Build
+        shell: bash
+        run:         |
+           make -j3
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Test
+        shell: bash
+        env:
+            HDF5TestExpress: 0
+        run: |
+           cd test
+           make -j3 check
+        working-directory: ${{ runner.workspace }}/build
