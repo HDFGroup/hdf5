@@ -1,6 +1,5 @@
 name: hdf5 TestExpress Autotools CI
 
-# Run TestExpress CI daily at 04:00 CDT (9:00 UTC)
 on:
   workflow_call:
 
@@ -16,7 +15,6 @@ jobs:
           - build_mode: "production"
           - build_mode: "debug"
 
-    # Sets the job's name from the properties
     name: "Autotools ${{ matrix.build_mode }} Express Test Workflows"
 
     # Don't run the action if the commit message says to skip CI
@@ -36,7 +34,6 @@ jobs:
            echo "CXX=g++-12" >> $GITHUB_ENV
            echo "FC=gfortran-12" >> $GITHUB_ENV
 
-        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
         uses: actions/checkout@v4.1.1
 
