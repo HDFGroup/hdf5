@@ -1537,8 +1537,6 @@ Bug Fixes since HDF5-1.14.0 release
     Tools
     -----
 
-    - Fixed h5dump to support subfiling VFD via command line options
-    
     - Renamed h5fuse.sh to h5fuse
 
       Addresses Discussion #3791
