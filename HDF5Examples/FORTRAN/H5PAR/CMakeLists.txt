@@ -46,7 +46,7 @@ if (H5EX_BUILD_TESTING)
     if (last_test)
       set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname}-clearall PROPERTIES DEPENDS ${last_test})
     endif ()
-    add_test (NAME ${EXAMPLE_VARNAME}_f90_${testname} COMMAND "${CMAKE_COMMAND}"
+    add_test (NAME MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname} COMMAND "${CMAKE_COMMAND}"
         -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${mumprocs};${MPIEXEC_PREFLAGS};$<TARGET_FILE:${EXAMPLE_VARNAME}_f90_${testname}>;${MPIEXEC_POSTFLAGS}"
         -D "TEST_ARGS:STRING="
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -57,8 +57,8 @@ if (H5EX_BUILD_TESTING)
         -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
         -P "${H5EX_RESOURCES_DIR}/grepTest.cmake"
     )
-    set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}-clearall)
-    set (last_test "${EXAMPLE_VARNAME}_f90_${testname}")
+    set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}-clearall)
+    set (last_test "MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}")
   endmacro ()
 
   # Ensure that 24 is a multiple of the number of processes.

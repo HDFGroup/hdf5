@@ -950,7 +950,7 @@ H5_DLL int       HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #define H5_STRINGIZE(x) #x
 #define H5_TOSTRING(x)  H5_STRINGIZE(x)
 
-/* Macro for "glueing" together items, for re-scanning macros */
+/* Macro for "gluing" together items, for re-scanning macros */
 #define H5_GLUE(x, y)        x##y
 #define H5_GLUE3(x, y, z)    x##y##z
 #define H5_GLUE4(w, x, y, z) w##x##y##z
