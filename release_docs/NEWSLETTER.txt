@@ -1,4 +1,4 @@
-Release of HDF5 1.14.4 Library and Tools is now available from the HDF5 Releases page.
+HDF5 version 1.14.5-1 currently under development
 
 This is a maintenance release with a few changes and updates:
 ----------------------------------------------------------------------------
