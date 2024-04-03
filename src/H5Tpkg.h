@@ -45,8 +45,7 @@
 #define H5T_NAMELEN 32
 
 /* Macro to ease detecting "complex" datatypes (i.e. those with base types or fields) */
-#define H5T_IS_COMPLEX(t)                                                                                    \
-    ((t) == H5T_COMPOUND || (t) == H5T_ENUM || (t) == H5T_VLEN || (t) == H5T_ARRAY || (t) == H5T_REFERENCE)
+#define H5T_IS_COMPLEX(t) ((t) == H5T_COMPOUND || (t) == H5T_ENUM || (t) == H5T_VLEN || (t) == H5T_ARRAY)
 
 /* Macro to ease detecting fixed "string" datatypes */
 #define H5T_IS_FIXED_STRING(dt) (H5T_STRING == (dt)->type)
@@ -56,6 +55,9 @@
 
 /* Macro to ease detecting fixed or variable-length "string" datatypes */
 #define H5T_IS_STRING(dt) (H5T_IS_FIXED_STRING(dt) || H5T_IS_VL_STRING(dt))
+
+/* Macro to ease detecting reference datatypes */
+#define H5T_IS_REF(dt) (H5T_REFERENCE == (dt)->type)
 
 /* Macro to ease detecting atomic datatypes */
 #define H5T_IS_ATOMIC(dt) (!(H5T_IS_COMPLEX((dt)->type) || (dt)->type == H5T_OPAQUE))

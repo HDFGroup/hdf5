@@ -6261,10 +6261,11 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
         /* Check the datatype of this element */
         switch (dt->shared->type) {
             case H5T_ARRAY: /* Recurse on VL, compound and array base element type */
-                /* Recurse if it's VL, compound, enum or array */
+                /* Recurse if it's VL, compound, enum, array or reference */
                 /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
                 if (dt->shared->parent->shared->force_conv &&
-                    H5T_IS_COMPLEX(dt->shared->parent->shared->type)) {
+                    (H5T_IS_COMPLEX(dt->shared->parent->shared->type) ||
+                     H5T_IS_REF(dt->shared->parent->shared))) {
                     /* Keep the old base element size for later */
                     old_size = dt->shared->parent->shared->size;
 
@@ -6302,10 +6303,11 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                     /* Set the member type pointer (for convenience) */
                     memb_type = dt->shared->u.compnd.memb[i].type;
 
-                    /* Recurse if it's VL, compound, enum or array */
+                    /* Recurse if it's VL, compound, enum, array or reference */
                     /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse)
                      */
-                    if (memb_type->shared->force_conv && H5T_IS_COMPLEX(memb_type->shared->type)) {
+                    if (memb_type->shared->force_conv &&
+                        (H5T_IS_COMPLEX(memb_type->shared->type) || H5T_IS_REF(memb_type->shared))) {
                         /* Keep the old field size for later */
                         old_size = memb_type->shared->size;
 
@@ -6347,8 +6349,7 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                  * them as part of the same blob)*/
                 /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
                 if (dt->shared->parent->shared->force_conv &&
-                    H5T_IS_COMPLEX(dt->shared->parent->shared->type) &&
-                    (dt->shared->parent->shared->type != H5T_REFERENCE)) {
+                    H5T_IS_COMPLEX(dt->shared->parent->shared->type)) {
                     if ((changed = H5T_set_loc(dt->shared->parent, file, loc)) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                     if (changed > 0)
