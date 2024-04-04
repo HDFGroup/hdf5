@@ -6796,24 +6796,13 @@ H5T_is_numeric_with_unusual_unused_bits(const H5T_t *dt)
     /* Is the correct type? */
     if (H5T_INTEGER == dt->shared->type || H5T_FLOAT == dt->shared->type ||
         H5T_BITFIELD == dt->shared->type) {
-#if LDBL_MANT_DIG == 106
-        /* This currently won't work for the IBM long double type */
-        if (H5T_FLOAT == dt->shared->type && dt->shared->size == 16 &&
-            (dt->shared->u.atomic.prec == 64 || dt->shared->u.atomic.prec == 128))
-            HGOTO_DONE(false);
-#endif
 
         /* Has unused bits? */
-        if (dt->shared->u.atomic.prec < (dt->shared->size * 8)) {
-            unsigned surround_bits =
-                1U << (1 + H5VM_log2_gen((dt->shared->u.atomic.prec + dt->shared->u.atomic.offset) - 1));
-
+        if (dt->shared->size > 1 && dt->shared->u.atomic.prec < (dt->shared->size * 8))
             /* Unused bits are unusually large? */
-            if (dt->shared->size > 1 && ((dt->shared->size * 8) > surround_bits))
-                HGOTO_DONE(true);
-        }
+            ret_value =
+                (dt->shared->size * 8) > (2 * (dt->shared->u.atomic.prec + dt->shared->u.atomic.offset));
     }
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_numeric_with_unusual_unused_bits() */
