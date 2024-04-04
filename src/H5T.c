@@ -3393,6 +3393,7 @@ H5T__create(H5T_class_t type, size_t size)
             /* Copy the default string datatype */
             if (NULL == (dt = H5T_copy(origin_dt, H5T_COPY_TRANSIENT)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy");
+            dt->shared->type = type;
 
             /* Modify the datatype */
             if (H5T__set_size(dt, size) < 0)
@@ -4577,6 +4578,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, bool superset)
             /*
              * Compound data types...
              */
+            if (dt1->shared->u.compnd.nmembs == 0 && dt2->shared->u.compnd.nmembs == 0)
+                HGOTO_DONE(0);
             if (dt1->shared->u.compnd.nmembs < dt2->shared->u.compnd.nmembs)
                 HGOTO_DONE(-1);
             if (dt1->shared->u.compnd.nmembs > dt2->shared->u.compnd.nmembs)
@@ -4619,11 +4622,13 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, bool superset)
 
 #ifdef H5T_DEBUG
             /* I don't quite trust the code above yet :-)  --RPM */
-            for (u = 0; u < dt1->shared->u.compnd.nmembs - 1; u++) {
-                assert(strcmp(dt1->shared->u.compnd.memb[idx1[u]].name,
-                              dt1->shared->u.compnd.memb[idx1[u + 1]].name));
-                assert(strcmp(dt2->shared->u.compnd.memb[idx2[u]].name,
-                              dt2->shared->u.compnd.memb[idx2[u + 1]].name));
+            if (dt1->shared->u.compnd.nmembs > 0) {
+                for (u = 0; u < dt1->shared->u.compnd.nmembs - 1; u++) {
+                    assert(strcmp(dt1->shared->u.compnd.memb[idx1[u]].name,
+                                  dt1->shared->u.compnd.memb[idx1[u + 1]].name));
+                    assert(strcmp(dt2->shared->u.compnd.memb[idx2[u]].name,
+                                  dt2->shared->u.compnd.memb[idx2[u + 1]].name));
+                }
             }
 #endif
 
@@ -4659,6 +4664,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, bool superset)
             /*
              * Enumeration data types...
              */
+            if (dt1->shared->u.enumer.nmembs == 0 && dt2->shared->u.enumer.nmembs == 0)
+                HGOTO_DONE(0);
 
             /* If we are doing a "superset" comparison, dt2 is allowed to have
              * more members than dt1
@@ -4716,9 +4723,13 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, bool superset)
 
 #ifdef H5T_DEBUG
             /* I don't quite trust the code above yet :-)  --RPM */
-            for (u = 0; u < dt1->shared->u.enumer.nmembs - 1; u++) {
-                assert(strcmp(dt1->shared->u.enumer.name[idx1[u]], dt1->shared->u.enumer.name[idx1[u + 1]]));
-                assert(strcmp(dt2->shared->u.enumer.name[idx2[u]], dt2->shared->u.enumer.name[idx2[u + 1]]));
+            if (dt1->shared->u.enumer.nmembs > 0) {
+                for (u = 0; u < dt1->shared->u.enumer.nmembs - 1; u++) {
+                    assert(
+                        strcmp(dt1->shared->u.enumer.name[idx1[u]], dt1->shared->u.enumer.name[idx1[u + 1]]));
+                    assert(
+                        strcmp(dt2->shared->u.enumer.name[idx2[u]], dt2->shared->u.enumer.name[idx2[u + 1]]));
+                }
             }
 #endif
 
