@@ -7630,6 +7630,299 @@ error:
 } /* end test_int_float_except() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_app_conv_ids_func
+ *
+ * Purpose:     Conversion function for test_app_conv_ids test that calls
+ *              H5Tget_class on the ID for the source and destination
+ *              datatypes to try to make sure they're valid.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_app_conv_ids_func(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t H5_ATTR_UNUSED nelmts,
+                       size_t H5_ATTR_UNUSED buf_stride, size_t H5_ATTR_UNUSED bkg_stride,
+                       void H5_ATTR_UNUSED *buf, void H5_ATTR_UNUSED *bkg, hid_t H5_ATTR_UNUSED dxpl)
+{
+    if (cdata->command == H5T_CONV_CONV) {
+        if (H5Tget_class(src_id) < 0)
+            return FAIL;
+        if (H5Tget_class(dst_id) < 0)
+            return FAIL;
+    }
+
+    return SUCCEED;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_app_conv_ids
+ *
+ * Purpose:     Tests that the IDs passed to an application conversion
+ *              function for different datatypes are valid.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_app_conv_ids(void)
+{
+    const size_t buf_size     = 1024; /* Must be big enough to hold element of largest datatype */
+    hsize_t      array_dims[] = {1};
+    hsize_t      dims[]       = {1};
+    hid_t        src_type_id  = H5I_INVALID_HID;
+    hid_t        dst_type_id  = H5I_INVALID_HID;
+    hid_t        space_id     = H5I_INVALID_HID;
+    hvl_t        vl_elem      = {0};
+    int          vl_int       = 0;
+    void        *conv_elem    = NULL;
+    void        *bkg_buf      = NULL;
+
+    TESTING("passing datatype IDs to application conversion function");
+
+    if (NULL == (conv_elem = malloc(buf_size)))
+        TEST_ERROR;
+    if (NULL == (bkg_buf = malloc(buf_size)))
+        TEST_ERROR;
+
+    vl_elem.len = 1;
+    vl_elem.p   = &vl_int;
+
+    for (int src_type = H5T_INTEGER; src_type < H5T_NCLASSES; src_type++) {
+        switch ((H5T_class_t)src_type) {
+            case H5T_BITFIELD:
+                if ((src_type_id = H5Tcopy(H5T_STD_B32LE)) < 0)
+                    TEST_ERROR;
+                break;
+            case H5T_REFERENCE:
+                if ((src_type_id = H5Tcopy(H5T_STD_REF)) < 0)
+                    TEST_ERROR;
+                break;
+            case H5T_ENUM:
+                if ((src_type_id = H5Tenum_create(H5T_NATIVE_INT)) < 0)
+                    TEST_ERROR;
+                break;
+            case H5T_VLEN:
+                if ((src_type_id = H5Tvlen_create(H5T_NATIVE_INT)) < 0)
+                    TEST_ERROR;
+                break;
+            case H5T_ARRAY:
+                if ((src_type_id = H5Tarray_create2(H5T_NATIVE_INT, 1, array_dims)) < 0)
+                    TEST_ERROR;
+                break;
+            case H5T_INTEGER:
+            case H5T_FLOAT:
+            case H5T_TIME:
+            case H5T_STRING:
+            case H5T_OPAQUE:
+            case H5T_COMPOUND:
+            default:
+                if ((src_type_id = H5Tcreate((H5T_class_t)src_type, buf_size / 2)) < 0)
+                    TEST_ERROR;
+                break;
+
+            case H5T_NO_CLASS:
+            case H5T_NCLASSES:
+                TEST_ERROR;
+        }
+
+        for (int dst_type = H5T_INTEGER; dst_type < H5T_NCLASSES; dst_type++) {
+            /* Use different datatype sizes for dest type so we don't convert with no-op function */
+            switch ((H5T_class_t)dst_type) {
+                case H5T_BITFIELD:
+                    if ((dst_type_id = H5Tcopy(H5T_STD_B64LE)) < 0)
+                        TEST_ERROR;
+                    break;
+                case H5T_REFERENCE:
+                    if ((dst_type_id = H5Tcopy(H5T_STD_REF)) < 0)
+                        TEST_ERROR;
+                    break;
+                case H5T_ENUM:
+                    if ((dst_type_id = H5Tenum_create(H5T_NATIVE_LONG)) < 0)
+                        TEST_ERROR;
+                    break;
+                case H5T_VLEN:
+                    if ((dst_type_id = H5Tvlen_create(H5T_NATIVE_LONG)) < 0)
+                        TEST_ERROR;
+                    break;
+                case H5T_ARRAY:
+                    if ((dst_type_id = H5Tarray_create2(H5T_NATIVE_LONG, 1, array_dims)) < 0)
+                        TEST_ERROR;
+                    break;
+                case H5T_INTEGER:
+                case H5T_FLOAT:
+                case H5T_TIME:
+                case H5T_STRING:
+                case H5T_OPAQUE:
+                case H5T_COMPOUND:
+                default:
+                    if ((dst_type_id = H5Tcreate((H5T_class_t)dst_type, buf_size / 4)) < 0)
+                        TEST_ERROR;
+                    break;
+
+                case H5T_NO_CLASS:
+                case H5T_NCLASSES:
+                    TEST_ERROR;
+            }
+
+            if (H5Tregister(H5T_PERS_SOFT, "app_conv_ids_func", src_type_id, dst_type_id,
+                            &test_app_conv_ids_func) < 0)
+                TEST_ERROR;
+
+            memset(conv_elem, 0, buf_size);
+
+            if (src_type == H5T_VLEN)
+                memcpy(conv_elem, &vl_elem, sizeof(hvl_t));
+
+            if (H5Tconvert(src_type_id, dst_type_id, 1, conv_elem, bkg_buf, H5P_DEFAULT) < 0)
+                TEST_ERROR;
+
+            if (H5Tunregister(H5T_PERS_SOFT, "app_conv_ids_func", src_type_id, dst_type_id,
+                              &test_app_conv_ids_func) < 0)
+                TEST_ERROR;
+
+            if (H5Tclose(dst_type_id) < 0)
+                TEST_ERROR;
+            dst_type_id = H5I_INVALID_HID;
+        }
+
+        if (H5Tclose(src_type_id) < 0)
+            TEST_ERROR;
+        src_type_id = H5I_INVALID_HID;
+    }
+
+    /* Reset library after type conversion path table was potentially modified */
+    h5_restore_err();
+    reset_hdf5();
+
+    /* Test with container-like datatypes where the conversion on the top-level type
+     * is performed with a library-internal conversion function, but conversions on
+     * the member types are performed with an application conversion function
+     */
+
+    if (H5Tregister(H5T_PERS_HARD, "app_conv_ids_func", H5T_NATIVE_INT, H5T_NATIVE_LONG,
+                    &test_app_conv_ids_func) < 0)
+        TEST_ERROR;
+
+    /*******************************
+     * Top-level compound datatype *
+     *******************************/
+    if ((src_type_id = H5Tcreate(H5T_COMPOUND, sizeof(int))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(src_type_id, "comp_mem", 0, H5T_NATIVE_INT) < 0)
+        TEST_ERROR;
+    if ((dst_type_id = H5Tcreate(H5T_COMPOUND, sizeof(long))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(dst_type_id, "comp_mem", 0, H5T_NATIVE_LONG) < 0)
+        TEST_ERROR;
+
+    memset(conv_elem, 0, buf_size);
+    if (H5Tconvert(src_type_id, dst_type_id, 1, conv_elem, bkg_buf, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(src_type_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(dst_type_id) < 0)
+        TEST_ERROR;
+
+    /***************************
+     * Top-level enum datatype *
+     ***************************/
+    if ((src_type_id = H5Tenum_create(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+    if ((dst_type_id = H5Tenum_create(H5T_NATIVE_LONG)) < 0)
+        TEST_ERROR;
+
+    memset(conv_elem, 0, buf_size);
+    if (H5Tconvert(src_type_id, dst_type_id, 1, conv_elem, bkg_buf, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(src_type_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(dst_type_id) < 0)
+        TEST_ERROR;
+
+    /**************************************
+     * Top-level variable-length datatype *
+     **************************************/
+    if ((src_type_id = H5Tvlen_create(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+    if ((dst_type_id = H5Tvlen_create(H5T_NATIVE_LONG)) < 0)
+        TEST_ERROR;
+
+    memset(conv_elem, 0, buf_size);
+    memcpy(conv_elem, &vl_elem, sizeof(hvl_t));
+    if (H5Tconvert(src_type_id, dst_type_id, 1, conv_elem, bkg_buf, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if ((space_id = H5Screate_simple(1, dims, NULL)) < 0)
+        TEST_ERROR;
+    if (H5Treclaim(dst_type_id, space_id, H5P_DEFAULT, conv_elem) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space_id) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(src_type_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(dst_type_id) < 0)
+        TEST_ERROR;
+
+    /****************************
+     * Top-level array datatype *
+     ****************************/
+    if ((src_type_id = H5Tarray_create2(H5T_NATIVE_INT, 1, array_dims)) < 0)
+        TEST_ERROR;
+    if ((dst_type_id = H5Tarray_create2(H5T_NATIVE_LONG, 1, array_dims)) < 0)
+        TEST_ERROR;
+
+    memset(conv_elem, 0, buf_size);
+    if (H5Tconvert(src_type_id, dst_type_id, 1, conv_elem, bkg_buf, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(src_type_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(dst_type_id) < 0)
+        TEST_ERROR;
+
+    if (H5Tunregister(H5T_PERS_HARD, "app_conv_ids_func", H5T_NATIVE_INT, H5T_NATIVE_LONG,
+                      &test_app_conv_ids_func) < 0)
+        TEST_ERROR;
+
+    free(bkg_buf);
+    bkg_buf = NULL;
+    free(conv_elem);
+    conv_elem = NULL;
+
+    /* Reset library after type conversion path table was potentially modified */
+    h5_restore_err();
+    reset_hdf5();
+
+    PASSED();
+
+    return 0;
+
+error:
+    free(bkg_buf);
+    free(conv_elem);
+
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(space_id);
+        H5Tclose(src_type_id);
+        H5Tclose(dst_type_id);
+    }
+    H5E_END_TRY
+
+    /* Reset library after type conversion path table was potentially modified */
+    h5_restore_err();
+    reset_hdf5();
+
+    return 1;
+} /* end test_app_conv_ids() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_set_order
  *
  * Purpose:     Tests H5Tset_order/H5Tget_order.  Verifies that
@@ -9918,6 +10211,8 @@ main(void)
     if (!driver_is_parallel) {
         nerrors += test_utf_ascii_conv();
     }
+
+    nerrors += test_app_conv_ids();
 
     nerrors += test_versionbounds();
 
