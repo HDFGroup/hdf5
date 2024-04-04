@@ -674,11 +674,34 @@ if test "X$ENABLE_FLOAT16" = "Xyes"; then
       AC_CACHE_VAL([hdf5_cv_float16_conversion_funcs_link],
       [AC_RUN_IFELSE(
           [AC_LANG_SOURCE([$TEST_SRC])],
-          [hdf5_cv_float16_conversion_funcs_link=yes], [hdf5_cv_float16_conversion_funcs_link=no], [hdf5_cv_float16_conversion_funcs_link=no])])
+          [hdf5_cv_float16_conversion_funcs_link=yes],
+          [hdf5_cv_float16_conversion_funcs_link=no],
+          [hdf5_cv_float16_conversion_funcs_link=no])])
+      AC_MSG_RESULT(${hdf5_cv_float16_conversion_funcs_link})
 
-      if test ${hdf5_cv_float16_conversion_funcs_link} = "yes"; then
-        AC_MSG_RESULT([yes])
+      # Some compilers, notably AppleClang on MacOS 12, will succeed in the
+      # configure check above when optimization flags like -O3 are manually
+      # passed in CFLAGS. However, the build will then fail when it reaches
+      # compilation of H5Tconv.c because of the issue mentioned above. MacOS
+      # 13 appears to have fixed this, but, just to be sure, make sure the
+      # check also passes without the passed in CFLAGS.
+      conftest_cflags_backup="$CFLAGS"
+      CFLAGS=""
 
+      AC_MSG_CHECKING([if compiler can correctly compile and run a test program which converts _Float16 to other types with casts (without CFLAGS)])
+      TEST_SRC="`(echo \"#define H5_FLOAT16_CONVERSION_FUNCS_LINK_NO_FLAGS_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+      AC_CACHE_VAL([hdf5_cv_float16_conversion_funcs_link_no_flags],
+      [AC_RUN_IFELSE(
+          [AC_LANG_SOURCE([$TEST_SRC])],
+          [hdf5_cv_float16_conversion_funcs_link_no_flags=yes],
+          [hdf5_cv_float16_conversion_funcs_link_no_flags=no],
+          [hdf5_cv_float16_conversion_funcs_link_no_flags=no])])
+      AC_MSG_RESULT(${hdf5_cv_float16_conversion_funcs_link_no_flags})
+
+      CFLAGS="$conftest_cflags_backup"
+
+      if test ${hdf5_cv_float16_conversion_funcs_link} = "yes" &&
+         test ${hdf5_cv_float16_conversion_funcs_link_no_flags} = "yes"; then
         # Finally, MacOS 13 appears to have a bug specifically when converting
         # long double values to _Float16. Release builds of the dt_arith test
         # would cause any assignments to a _Float16 variable to be elided,
@@ -694,15 +717,37 @@ if test "X$ENABLE_FLOAT16" = "Xyes"; then
           AC_CACHE_VAL([hdf5_cv_ldouble_to_float16_correct],
           [AC_RUN_IFELSE(
               [AC_LANG_SOURCE([$TEST_SRC])],
-              [hdf5_cv_ldouble_to_float16_correct=yes], [hdf5_cv_ldouble_to_float16_correct=no], [hdf5_cv_ldouble_to_float16_correct=yes])])
+              [hdf5_cv_ldouble_to_float16_correct=yes],
+              [hdf5_cv_ldouble_to_float16_correct=no],
+              [hdf5_cv_ldouble_to_float16_correct=yes])])
         fi
+        AC_MSG_RESULT(${hdf5_cv_ldouble_to_float16_correct})
 
-        if test ${hdf5_cv_ldouble_to_float16_correct} = "yes"; then
+        # Backup and clear CFLAGS before performing configure check again
+        conftest_cflags_backup="$CFLAGS"
+        CFLAGS=""
+
+        AC_MSG_CHECKING([if compiler can correctly convert long double values to _Float16 (without CFLAGS)])
+        TEST_SRC="`(echo \"#define H5_LDOUBLE_TO_FLOAT16_CORRECT_NO_FLAGS_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+        if test ${ac_cv_sizeof_long_double} = 0; then
+          hdf5_cv_ldouble_to_float16_correct_no_flags=${hdf5_cv_ldouble_to_float16_correct_no_flags=no}
+        else
+          AC_CACHE_VAL([hdf5_cv_ldouble_to_float16_correct_no_flags],
+          [AC_RUN_IFELSE(
+              [AC_LANG_SOURCE([$TEST_SRC])],
+              [hdf5_cv_ldouble_to_float16_correct_no_flags=yes],
+              [hdf5_cv_ldouble_to_float16_correct_no_flags=no],
+              [hdf5_cv_ldouble_to_float16_correct_no_flags=yes])])
+        fi
+        AC_MSG_RESULT(${hdf5_cv_ldouble_to_float16_correct_no_flags})
+
+        CFLAGS="$conftest_cflags_backup"
+
+        if test ${hdf5_cv_ldouble_to_float16_correct} = "yes" &&
+           test ${hdf5_cv_ldouble_to_float16_correct_no_flags} = "yes"; then
           AC_DEFINE([LDOUBLE_TO_FLOAT16_CORRECT], [1],
             [Define if your system can convert long double to _Float16 values correctly.])
-          AC_MSG_RESULT([yes])
         else
-          AC_MSG_RESULT([no])
           AC_MSG_NOTICE([Conversions from long double to _Float16 appear to be incorrect. These will be emulated through a soft conversion function.])
         fi
 
@@ -714,8 +759,6 @@ if test "X$ENABLE_FLOAT16" = "Xyes"; then
 
         # Define HAVE__FLOAT16 macro for H5pubconf.h if _Float16 is available.
         AC_DEFINE([HAVE__FLOAT16], [1], [Determine if _Float16 is available])
-      else
-        AC_MSG_RESULT([no])
       fi
     fi
 
