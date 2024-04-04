@@ -1174,7 +1174,6 @@ typedef struct H5T_conv_struct_t {
     H5T_path_t      **memb_path;   /*conversion path for each member    */
     H5T_subset_info_t subset_info; /*info related to compound subsets   */
     unsigned          src_nmembs;  /*needed by free function            */
-    bool              need_ids;    /*whether we need IDs for the datatypes */
 } H5T_conv_struct_t;
 
 /* Conversion data for H5T__conv_enum() */
@@ -2035,17 +2034,27 @@ H5T__conv_struct_free(H5T_conv_struct_t *priv)
 
     for (unsigned i = 0; i < priv->src_nmembs; i++)
         if (src2dst[i] >= 0) {
-            if (priv->need_ids) {
+            if (src_memb_id[i] >= 0) {
                 if (H5I_dec_ref(src_memb_id[i]) < 0)
                     ret_value = FAIL; /* set return value, but keep going */
-                if (H5I_dec_ref(dst_memb_id[src2dst[i]]) < 0)
-                    ret_value = FAIL; /* set return value, but keep going */
+                src_memb_id[i] = H5I_INVALID_HID;
+                src_memb[i]    = NULL;
             }
             else {
                 if (H5T_close(src_memb[i]) < 0)
                     ret_value = FAIL; /* set return value, but keep going */
+                src_memb[i] = NULL;
+            }
+            if (dst_memb_id[src2dst[i]] >= 0) {
+                if (H5I_dec_ref(dst_memb_id[src2dst[i]]) < 0)
+                    ret_value = FAIL; /* set return value, but keep going */
+                dst_memb_id[src2dst[i]] = H5I_INVALID_HID;
+                dst_memb[src2dst[i]]    = NULL;
+            }
+            else {
                 if (H5T_close(dst_memb[src2dst[i]]) < 0)
                     ret_value = FAIL; /* set return value, but keep going */
+                dst_memb[src2dst[i]] = NULL;
             }
         } /* end if */
 
@@ -2134,18 +2143,18 @@ H5T__conv_struct_init(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, co
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                         "couldn't allocate destination compound member datatype array");
 
-        priv->need_ids = (cdata->command == H5T_CONV_INIT && conv_ctx->u.init.cb_struct.func) ||
-                         (cdata->command == H5T_CONV_CONV && conv_ctx->u.conv.cb_struct.func);
+        /* Allocate and initialize arrays for datatype IDs */
+        if (NULL == (priv->src_memb_id = (hid_t *)H5MM_malloc(src_nmembs * sizeof(hid_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                        "couldn't allocate source compound member datatype ID array");
+        for (i = 0; i < src_nmembs; i++)
+            priv->src_memb_id[i] = H5I_INVALID_HID;
 
-        /* Only create IDs for compound member datatypes if we need to */
-        if (priv->need_ids) {
-            if (NULL == (priv->src_memb_id = (hid_t *)H5MM_malloc(src_nmembs * sizeof(hid_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "couldn't allocate source compound member datatype ID array");
-            if (NULL == (priv->dst_memb_id = (hid_t *)H5MM_malloc(dst_nmembs * sizeof(hid_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "couldn't allocate destination compound member datatype ID array");
-        }
+        if (NULL == (priv->dst_memb_id = (hid_t *)H5MM_malloc(dst_nmembs * sizeof(hid_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                        "couldn't allocate destination compound member datatype ID array");
+        for (i = 0; i < dst_nmembs; i++)
+            priv->dst_memb_id[i] = H5I_INVALID_HID;
 
         src2dst          = priv->src2dst;
         priv->src_nmembs = src_nmembs;
@@ -2177,31 +2186,16 @@ H5T__conv_struct_init(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, co
             }     /* end for */
             if (src2dst[i] >= 0) {
                 H5T_t *type;
-                hid_t  tid;
 
                 if (NULL == (type = H5T_copy(src->shared->u.compnd.memb[i].type, H5T_COPY_ALL)))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
                                 "can't copy source compound member datatype");
                 priv->src_memb[i] = type;
 
-                if (priv->need_ids) {
-                    if ((tid = H5I_register(H5I_DATATYPE, type, false)) < 0)
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-                                    "can't register ID for source compound member datatype");
-                    priv->src_memb_id[i] = tid;
-                }
-
                 if (NULL == (type = H5T_copy(dst->shared->u.compnd.memb[src2dst[i]].type, H5T_COPY_ALL)))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
                                 "can't copy destination compound member datatype");
                 priv->dst_memb[src2dst[i]] = type;
-
-                if (priv->need_ids) {
-                    if ((tid = H5I_register(H5I_DATATYPE, type, false)) < 0)
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-                                    "can't register ID for source compound member datatype");
-                    priv->dst_memb_id[src2dst[i]] = tid;
-                }
             } /* end if */
         }     /* end for */
     }         /* end if */
@@ -2224,16 +2218,47 @@ H5T__conv_struct_init(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, co
 
     for (i = 0; i < src_nmembs; i++) {
         if (src2dst[i] >= 0) {
-            H5T_path_t *tpath = H5T_path_find(src->shared->u.compnd.memb[i].type,
-                                              dst->shared->u.compnd.memb[src2dst[i]].type);
+            H5T_path_t *tpath;
+            bool        need_ids;
+
+            tpath = H5T_path_find(src->shared->u.compnd.memb[i].type,
+                                  dst->shared->u.compnd.memb[src2dst[i]].type);
 
             if (NULL == (priv->memb_path[i] = tpath)) {
                 H5T__conv_struct_free(priv);
                 cdata->priv = NULL;
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert member datatype");
             } /* end if */
-        }     /* end if */
-    }         /* end for */
+
+            /* Create IDs for the compound member datatypes if the conversion path uses
+             * an application conversion function or if a conversion exception function
+             * was provided.
+             */
+            need_ids = tpath->conv.is_app ||
+                       (cdata->command == H5T_CONV_INIT && conv_ctx->u.init.cb_struct.func) ||
+                       (cdata->command == H5T_CONV_CONV && conv_ctx->u.conv.cb_struct.func);
+
+            if (need_ids) {
+                hid_t tid;
+
+                if ((tid = H5I_register(H5I_DATATYPE, priv->src_memb[i], false)) < 0) {
+                    H5T__conv_struct_free(priv);
+                    cdata->priv = NULL;
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+                                "can't register ID for source compound member datatype");
+                }
+                priv->src_memb_id[i] = tid;
+
+                if ((tid = H5I_register(H5I_DATATYPE, priv->dst_memb[src2dst[i]], false)) < 0) {
+                    H5T__conv_struct_free(priv);
+                    cdata->priv = NULL;
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+                                "can't register ID for destination compound member datatype");
+                }
+                priv->dst_memb_id[src2dst[i]] = tid;
+            }
+        } /* end if */
+    }     /* end for */
 
     /* The compound conversion functions need a background buffer */
     cdata->need_bkg = H5T_BKG_YES;
@@ -2468,11 +2493,9 @@ H5T__conv_struct(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H
                     dst_memb = dst->shared->u.compnd.memb + src2dst[u];
 
                     if (dst_memb->size <= src_memb->size) {
-                        if (priv->need_ids) {
-                            /* Update IDs in conversion context */
-                            tmp_conv_ctx.u.conv.src_type_id = priv->src_memb_id[u];
-                            tmp_conv_ctx.u.conv.dst_type_id = priv->dst_memb_id[src2dst[u]];
-                        }
+                        /* Update IDs in conversion context */
+                        tmp_conv_ctx.u.conv.src_type_id = priv->src_memb_id[u];
+                        tmp_conv_ctx.u.conv.dst_type_id = priv->dst_memb_id[src2dst[u]];
 
                         if (H5T_convert_with_ctx(priv->memb_path[u], priv->src_memb[u],
                                                  priv->dst_memb[src2dst[u]], &tmp_conv_ctx, (size_t)1,
@@ -2507,11 +2530,9 @@ H5T__conv_struct(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H
                     dst_memb = dst->shared->u.compnd.memb + src2dst[i];
 
                     if (dst_memb->size > src_memb->size) {
-                        if (priv->need_ids) {
-                            /* Update IDs in conversion context */
-                            tmp_conv_ctx.u.conv.src_type_id = priv->src_memb_id[i];
-                            tmp_conv_ctx.u.conv.dst_type_id = priv->dst_memb_id[src2dst[i]];
-                        }
+                        /* Update IDs in conversion context */
+                        tmp_conv_ctx.u.conv.src_type_id = priv->src_memb_id[i];
+                        tmp_conv_ctx.u.conv.dst_type_id = priv->dst_memb_id[src2dst[i]];
 
                         offset -= src_memb->size;
                         if (H5T_convert_with_ctx(priv->memb_path[i], priv->src_memb[i],
@@ -2701,6 +2722,8 @@ H5T__conv_struct_opt(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, con
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
             if (NULL == conv_ctx)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid datatype conversion context pointer");
+            if (!bkg)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid background buffer pointer");
 
             /* Initialize temporary conversion context */
             tmp_conv_ctx = *conv_ctx;
@@ -2711,7 +2734,7 @@ H5T__conv_struct_opt(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, con
             priv = (H5T_conv_struct_t *)(cdata->priv);
             assert(priv);
             src2dst = priv->src2dst;
-            assert(bkg && cdata->need_bkg);
+            assert(cdata->need_bkg);
 
             /*
              * Insure that members are sorted.
@@ -2768,11 +2791,9 @@ H5T__conv_struct_opt(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, con
                     dst_memb = dst->shared->u.compnd.memb + src2dst[u];
 
                     if (dst_memb->size <= src_memb->size) {
-                        if (priv->need_ids) {
-                            /* Update IDs in conversion context */
-                            tmp_conv_ctx.u.conv.src_type_id = priv->src_memb_id[u];
-                            tmp_conv_ctx.u.conv.dst_type_id = priv->dst_memb_id[src2dst[u]];
-                        }
+                        /* Update IDs in conversion context */
+                        tmp_conv_ctx.u.conv.src_type_id = priv->src_memb_id[u];
+                        tmp_conv_ctx.u.conv.dst_type_id = priv->dst_memb_id[src2dst[u]];
 
                         xbuf = buf + src_memb->offset;
                         xbkg = bkg + dst_memb->offset;
@@ -2813,11 +2834,9 @@ H5T__conv_struct_opt(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, con
                     dst_memb = dst->shared->u.compnd.memb + src2dst[i];
 
                     if (dst_memb->size > src_memb->size) {
-                        if (priv->need_ids) {
-                            /* Update IDs in conversion context */
-                            tmp_conv_ctx.u.conv.src_type_id = priv->src_memb_id[i];
-                            tmp_conv_ctx.u.conv.dst_type_id = priv->dst_memb_id[src2dst[i]];
-                        }
+                        /* Update IDs in conversion context */
+                        tmp_conv_ctx.u.conv.src_type_id = priv->src_memb_id[i];
+                        tmp_conv_ctx.u.conv.dst_type_id = priv->dst_memb_id[src2dst[i]];
 
                         offset -= src_memb->size;
                         xbuf = buf + offset;
@@ -2938,9 +2957,6 @@ H5T__conv_enum_init(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, cons
         size_t        dst_nmembs;
         void         *tmp_realloc;
 
-        if (0 == src->shared->u.enumer.nmembs)
-            HGOTO_DONE(SUCCEED);
-
         /* Allocate everything we need to cache */
         if (priv->src_copy && H5T_close(priv->src_copy) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close copied source datatype");
@@ -2951,6 +2967,10 @@ H5T__conv_enum_init(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, cons
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy source datatype");
         if (NULL == (priv->dst_copy = H5T_copy(dst, H5T_COPY_ALL)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy destination datatype");
+
+        /* Nothing more to do if enum has no members */
+        if (0 == src->shared->u.enumer.nmembs)
+            HGOTO_DONE(SUCCEED);
 
         src_sh     = priv->src_copy->shared;
         dst_sh     = priv->src_copy->shared;
@@ -3468,7 +3488,6 @@ H5T__conv_vlen(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T
     void                 *tmp_buf       = NULL;  /* Temporary background buffer          */
     size_t                tmp_buf_size  = 0;     /* Size of temporary bkg buffer         */
     bool                  nested        = false; /* Flag of nested VL case             */
-    bool                  need_ids      = false; /* Whether we need IDs for the datatypes */
     size_t                elmtno        = 0;     /* Element number counter               */
     size_t                orig_d_stride = 0;     /* Original destination stride (used for error handling) */
     size_t orig_nelmts = nelmts; /* Original # of elements to convert (used for error handling) */
@@ -3524,8 +3543,6 @@ H5T__conv_vlen(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T
             /* Initialize temporary conversion context */
             tmp_conv_ctx = *conv_ctx;
 
-            need_ids = (conv_ctx->u.conv.cb_struct.func != NULL);
-
             /* Initialize source & destination strides */
             if (buf_stride) {
                 assert(buf_stride >= src->shared->size);
@@ -3573,7 +3590,11 @@ H5T__conv_vlen(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T
                     if (H5T_set_loc(tdst_cpy, dst->shared->u.vlen.file, dst->shared->u.vlen.loc) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set datatype location");
 
-                if (need_ids) {
+                /* Create IDs for the variable-length base datatypes if the conversion path
+                 * uses an application conversion function or if a conversion exception function
+                 * was provided.
+                 */
+                if (tpath->conv.is_app || conv_ctx->u.conv.cb_struct.func) {
                     if ((tsrc_id = H5I_register(H5I_DATATYPE, tsrc_cpy, false)) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                                     "unable to register ID for source base datatype");
@@ -3917,7 +3938,6 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
     uint8_t          *sp, *dp, *bp;                    /* Source, dest, and bkg traversal ptrs */
     ssize_t           src_delta, dst_delta, bkg_delta; /* Source, dest, and bkg strides */
     int               direction;                       /* Direction of traversal */
-    bool              need_ids  = false;               /* Whether we need IDs for the datatypes */
     herr_t            ret_value = SUCCEED;             /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3989,8 +4009,6 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
             /* Initialize temporary conversion context */
             tmp_conv_ctx = *conv_ctx;
 
-            need_ids = (conv_ctx->u.conv.cb_struct.func != NULL);
-
             /*
              * Do we process the values from beginning to end or vice
              * versa? Also, how many of the elements have the source and
@@ -4029,7 +4047,11 @@ H5T__conv_array(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
                                 "unable to copy dst base type for conversion");
 
-                if (need_ids) {
+                /* Create IDs for the array base datatypes if the conversion path uses an
+                 * application conversion function or if a conversion exception function
+                 * was provided.
+                 */
+                if (priv->tpath->conv.is_app || conv_ctx->u.conv.cb_struct.func) {
                     if ((tsrc_id = H5I_register(H5I_DATATYPE, tsrc_cpy, false)) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                                     "unable to register ID for source base datatype");
