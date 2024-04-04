@@ -188,8 +188,3 @@ jobs:
           ROOT_DIR=${{github.workspace}}/hsdsdata \
           BUCKET_NAME=hsdstest \
           ctest --build-config ${{ inputs.build_mode }} -VV -R "h5_api" .
-
-      - name: Stop HSDS
-        working-directory: ${{github.workspace}}/hsds
-        run: |
-          ./stopall.sh
