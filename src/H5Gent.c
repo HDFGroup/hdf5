@@ -365,6 +365,13 @@ H5G__ent_to_link(const H5G_entry_t *ent, const H5HL_t *heap, H5O_link_t *lnk)
     assert(heap);
     assert(lnk);
 
+    /* Initialize structure and set (default) common info for link */
+    lnk->type         = H5L_TYPE_ERROR;
+    lnk->corder_valid = false; /* Creation order not valid for this link */
+    lnk->corder       = 0;
+    lnk->cset         = H5F_DEFAULT_CSET;
+    lnk->name         = NULL;
+
     /* Get the size of the heap block */
     block_size = H5HL_heap_get_size(heap);
 
@@ -372,12 +379,10 @@ H5G__ent_to_link(const H5G_entry_t *ent, const H5HL_t *heap, H5O_link_t *lnk)
     if (NULL == (name = (const char *)H5HL_offset_into(heap, ent->name_off)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get symbol table link name");
 
-    /* Set (default) common info for link */
-    lnk->cset         = H5F_DEFAULT_CSET;
-    lnk->corder       = 0;
-    lnk->corder_valid = false; /* Creation order not valid for this link */
     if (NULL == (lnk->name = H5MM_strndup(name, (block_size - ent->name_off))))
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to duplicate link name");
+    if (!*lnk->name)
+        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "invalid link name");
 
     /* Object is a symbolic or hard link */
     if (ent->type == H5G_CACHED_SLINK) {
