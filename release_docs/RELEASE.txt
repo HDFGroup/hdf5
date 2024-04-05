@@ -169,15 +169,16 @@ New Features
 
     - Incorporated HDF5 examples repository into HDF5 library.
 
-      The HDF5Examples folder is equivalent to the repository hdf5-examples.
-      As such it can build and test the examples during library build or after
-      the library is installed. Previously, the hdf5-repository archives were
-      downloaded for packaging with the library. Now the examples can be built
+      The HDF5Examples folder is equivalent to the hdf5-examples repository.
+      This enables building and testing the examples
+      during the library build process or after the library has been installed.
+      Previously, the hdf5-examples archives were downloaded
+      for packaging with the library. Now the examples can be built
       and tested without a packaged install of the library.
 
-      However to maintain the ability to use the HDF5Examples with an installed
-      library, it is necessary to translate or synch the option names from those
-      used by the library to those used by the examples. The typical pattern is:
+      However, to maintain the ability to use the HDF5Examples with an installed
+      library, it is necessary to map the option names used by the library
+      to those used by the examples. The typical pattern is:
             <example option> = <library option>
             HDF_BUILD_FORTRAN = ${HDF5_BUILD_FORTRAN}
 
@@ -1537,6 +1538,8 @@ Bug Fixes since HDF5-1.14.0 release
     Tools
     -----
 
+    - Fixed h5dump to support subfiling VFD via command line options
+    
     - Renamed h5fuse.sh to h5fuse
 
       Addresses Discussion #3791
