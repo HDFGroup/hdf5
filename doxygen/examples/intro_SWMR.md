@@ -147,6 +147,6 @@ In the other window (in the bin/ directory) run h5watch on the file created by u
 
 Interrupt use\_append\_chunk while it is running, and stop h5watch.
 
-Use h5clear to clear the status flags in the superbock of the HDF5 file (use\_append\_chunk.h5).
+Use h5clear to clear the status flags in the superblock of the HDF5 file (use\_append\_chunk.h5).
 
 View the file with h5dump. You will see that it is a valid file even though the application did not close properly. It will contain data up to the point that it was interrupted.
