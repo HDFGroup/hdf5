@@ -23,12 +23,6 @@
 
 */
 
-/** \page Introduction to the Virtual Dataset - VDS
-
-\htmlinclude intro_VDS.md
-
-*/
-
 /** \page VFL HDF5 Virtual File Layer
 
 \htmlinclude VFL.html
