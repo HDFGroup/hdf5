@@ -610,6 +610,15 @@ set (H5T_SOURCES
     ${HDF5_SRC_DIR}/H5Tcommit.c
     ${HDF5_SRC_DIR}/H5Tcompound.c
     ${HDF5_SRC_DIR}/H5Tconv.c
+    ${HDF5_SRC_DIR}/H5Tconv_integer.c
+    ${HDF5_SRC_DIR}/H5Tconv_float.c
+    ${HDF5_SRC_DIR}/H5Tconv_string.c
+    ${HDF5_SRC_DIR}/H5Tconv_bitfield.c
+    ${HDF5_SRC_DIR}/H5Tconv_compound.c
+    ${HDF5_SRC_DIR}/H5Tconv_reference.c
+    ${HDF5_SRC_DIR}/H5Tconv_enum.c
+    ${HDF5_SRC_DIR}/H5Tconv_vlen.c
+    ${HDF5_SRC_DIR}/H5Tconv_array.c
     ${HDF5_SRC_DIR}/H5Tcset.c
     ${HDF5_SRC_DIR}/H5Tdbg.c
     ${HDF5_SRC_DIR}/H5Tdeprec.c
