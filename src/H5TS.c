@@ -418,7 +418,8 @@ H5TSmutex_acquire(unsigned int lock_count, bool *acquired)
 {
     FUNC_ENTER_API_NAMECHECK_ONLY
 
-        FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(&H5_g.init_lock, lock_count, acquired))}
+    FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(&H5_g.init_lock, lock_count, acquired))
+}
 /* end H5TSmutex_acquire() */
 
 /*--------------------------------------------------------------------------
@@ -441,7 +442,8 @@ H5TSmutex_acquire(unsigned int lock_count, bool *acquired)
  *
  *--------------------------------------------------------------------------
  */
-herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex)
+herr_t
+H5TS_mutex_lock(H5TS_mutex_t *mutex)
 {
     herr_t ret_value = SUCCEED;
 
