@@ -112,8 +112,8 @@ main(int argc, char *argv[])
             TEST_ERROR;
 
         /* Wait one second between writing planes */
-        delay = HDtime(0) + (time_t)1;
-        while (HDtime(0) < delay)
+        delay = time(0) + (time_t)1;
+        while (time(0) < delay)
             ;
 
         /* Flush */
