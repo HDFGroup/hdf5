@@ -231,7 +231,7 @@ sub errmesg ($$@) {
 }
 
 ##############################################################################
-# Given a C data type return the type string that goes with it.
+# Given a C data type, return the type string that goes with it
 #
 sub argstring ($$$) {
     my ($file, $func, $atype) = @_;
