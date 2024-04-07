@@ -1925,7 +1925,7 @@ test_random_write(H5F_t *f)
 /* seed = (unsigned)1155438845; */
 fprintf(stderr, "Random # seed was: %u\n", seed);
 #endif
-    HDsrandom(seed);
+    srand(seed);
 
     /* Allocate space for the segment length buffer */
     off = (size_t *)malloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
@@ -1940,8 +1940,8 @@ fprintf(stderr, "Random # seed was: %u\n", seed);
 
         /* Choose random length of segment, allowing for variance */
         do {
-            length += (size_t)(HDrandom() % RAND_SEG_LEN) + 1;
-        } while ((HDrandom() & 256) >= 128); /* end while */
+            length += (size_t)(rand() % RAND_SEG_LEN) + 1;
+        } while ((rand() & 256) >= 128); /* end while */
 
         /* Check for going off end of buffer */
         if ((cur_off + length) > RANDOM_BUF_SIZE)
@@ -1972,7 +1972,7 @@ fprintf(stderr, "Random # seed was: %u\n", seed);
         size_t tmp; /* Temporary holder for offset & length values */
 
         /* Choose value within next few elements to to swap with */
-        swap = ((size_t)HDrandom() % 8) + u;
+        swap = ((size_t)rand() % 8) + u;
         if (swap >= nsegments)
             swap = nsegments - 1;
 

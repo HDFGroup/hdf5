@@ -6318,7 +6318,6 @@ test_select_hyper_union_random_5d(hid_t read_plist)
     herr_t   ret;               /* Generic return value        */
     hssize_t npoints,           /* Number of elements in file selection */
         npoints2;               /* Number of elements in memory selection */
-    unsigned seed;              /* Random number seed for each test */
     unsigned test_num;          /* Count of tests being executed */
 
     /* Output message about test being performed */
@@ -6362,16 +6361,15 @@ test_select_hyper_union_random_5d(hid_t read_plist)
     CHECK(sid2, FAIL, "H5Screate_simple");
 
     /* Get initial random # seed */
-    seed = (unsigned)time(NULL);
-    HDsrandom(seed);
+    srand((unsigned)time(NULL));
 
     /* Crunch through a bunch of random hyperslab reads from the file dataset */
     for (test_num = 0; test_num < NRAND_HYPER; test_num++) {
         for (i = 0; i < NHYPERSLABS; i++) {
             /* Select random hyperslab location & size for selection */
             for (j = 0; j < SPACE5_RANK; j++) {
-                start[j] = ((hsize_t)HDrandom() % dims1[j]);
-                count[j] = (((hsize_t)HDrandom() % (dims1[j] - start[j])) + 1);
+                start[j] = ((hsize_t)rand() % dims1[j]);
+                count[j] = (((hsize_t)rand() % (dims1[j] - start[j])) + 1);
             }
 
             /* Select hyperslab */
@@ -6379,7 +6377,7 @@ test_select_hyper_union_random_5d(hid_t read_plist)
                                       NULL);
             CHECK(ret, FAIL, "H5Sselect_hyperslab");
             if (ret < 0) {
-                TestErrPrintf("Random hyperslabs for seed %u failed!\n", seed);
+                TestErrPrintf("Random hyperslabs failed!\n");
                 break;
             }
         }
@@ -6401,7 +6399,7 @@ test_select_hyper_union_random_5d(hid_t read_plist)
         ret = H5Dread(dataset, H5T_NATIVE_INT, sid2, sid1, read_plist, rbuf);
         CHECK(ret, FAIL, "H5Dread");
         if (ret < 0) {
-            TestErrPrintf("Random hyperslabs for seed %u failed!\n", seed);
+            TestErrPrintf("Random hyperslabs failed!\n");
             break;
         }
 
@@ -6409,7 +6407,7 @@ test_select_hyper_union_random_5d(hid_t read_plist)
         tbuf = rbuf;
         ret  = H5Diterate(wbuf, H5T_NATIVE_INT, sid1, test_select_hyper_iter2, &tbuf);
         if (ret < 0) {
-            TestErrPrintf("Random hyperslabs for seed %u failed!\n", seed);
+            TestErrPrintf("Random hyperslabs failed!\n");
             break;
         }
 

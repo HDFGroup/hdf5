@@ -2908,7 +2908,7 @@ test_insert_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t
 curr_time=1109170019;
 fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 #endif
-    HDsrandom((unsigned)curr_time);
+    srand((unsigned)curr_time);
 
     /*
      * Test inserting many records into v2 B-tree
@@ -2925,7 +2925,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Shuffle record #'s */
     for (u = 0; u < INSERT_MANY; u++) {
-        swap_idx          = ((unsigned)HDrandom() % (INSERT_MANY - u)) + u;
+        swap_idx          = ((unsigned)rand() % (INSERT_MANY - u)) + u;
         temp_rec          = records[u];
         records[u]        = records[swap_idx];
         records[swap_idx] = temp_rec;
@@ -3015,7 +3015,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     /* Find random records */
     for (u = 0; u < FIND_MANY; u++) {
         /* Pick random record */
-        idx = (hsize_t)(HDrandom() % INSERT_MANY);
+        idx = (hsize_t)(rand() % INSERT_MANY);
 
         /* Attempt to find existent record in root of level-4 B-tree */
         found = false;
@@ -3046,7 +3046,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     /* Find random records */
     for (u = 0; u < FIND_MANY; u++) {
         /* Pick random record */
-        idx = (hsize_t)(HDrandom() % INSERT_MANY);
+        idx = (hsize_t)(rand() % INSERT_MANY);
 
         /* Attempt to find existent record in root of level-4 B-tree */
         /* (in increasing order) */
@@ -4978,7 +4978,7 @@ test_update_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t
 curr_time = 1451342093;
 fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 #endif
-    HDsrandom((unsigned)curr_time);
+    srand((unsigned)curr_time);
 
     /*
      * Test inserting many records into v2 B-tree
@@ -5000,7 +5000,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         H5B2_test_rec_t temp_rec; /* Temporary record */
         unsigned        swap_idx; /* Location to swap with when shuffling */
 
-        swap_idx          = ((unsigned)HDrandom() % (INSERT_MANY_REC - u)) + u;
+        swap_idx          = ((unsigned)rand() % (INSERT_MANY_REC - u)) + u;
         temp_rec          = records[u];
         records[u]        = records[swap_idx];
         records[swap_idx] = temp_rec;
@@ -5076,7 +5076,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     /* Find random records */
     for (u = 0; u < FIND_MANY_REC; u++) {
         /* Pick random record */
-        find.key = (hsize_t)(HDrandom() % INSERT_MANY_REC);
+        find.key = (hsize_t)(rand() % INSERT_MANY_REC);
         find.val = (hsize_t)-1;
 
         /* Attempt to find existent record in level-4 B-tree */
@@ -5112,7 +5112,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         hsize_t idx; /* Record index */
 
         /* Pick random record */
-        idx = (hsize_t)(HDrandom() % INSERT_MANY_REC);
+        idx = (hsize_t)(rand() % INSERT_MANY_REC);
 
         /* Reset find record */
         find.key = (hsize_t)-1;
@@ -8624,7 +8624,7 @@ test_remove_lots(const char *driver_name, hid_t fapl, const H5B2_create_t *cpara
 curr_time = 1163537969;
 fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 #endif
-    HDsrandom((unsigned)curr_time);
+    srand((unsigned)curr_time);
 
     /*
      * Test removing many records into v2 B-tree
@@ -8643,7 +8643,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         hsize_t  temp_rec; /* Temporary record */
         unsigned swap_idx; /* Location to swap with when shuffling */
 
-        swap_idx          = ((unsigned)HDrandom() % (INSERT_MANY - u)) + u;
+        swap_idx          = ((unsigned)rand() % (INSERT_MANY - u)) + u;
         temp_rec          = records[u];
         records[u]        = records[swap_idx];
         records[swap_idx] = temp_rec;
@@ -8703,7 +8703,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         hsize_t  temp_rec; /* Temporary record */
         unsigned swap_idx; /* Location to swap with when shuffling */
 
-        swap_idx          = ((unsigned)HDrandom() % (INSERT_MANY - u)) + u;
+        swap_idx          = ((unsigned)rand() % (INSERT_MANY - u)) + u;
         temp_rec          = records[u];
         records[u]        = records[swap_idx];
         records[swap_idx] = temp_rec;
@@ -8797,7 +8797,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     /* Remove all records */
     for (u = 0; u < INSERT_MANY; u++) {
         /* Pick a record index to remove from randomly */
-        rem_idx = ((unsigned)HDrandom() % (INSERT_MANY - u));
+        rem_idx = ((unsigned)rand() % (INSERT_MANY - u));
         rrecord = HSIZET_MAX;
 
         /* Remove random record */

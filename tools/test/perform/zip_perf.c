@@ -337,7 +337,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
         fprintf(stdout, "Using random() for random data\n");
 
         for (u = 0; u < src_len; ++u)
-            src[u] = (Bytef)(0xff & HDrandom());
+            src[u] = (Bytef)(0xff & rand());
     }
 
     if (compress_percent) {

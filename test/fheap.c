@@ -6239,12 +6239,12 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
 /* seed = (unsigned long)1155438845; */
 fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
-    HDsrandom((unsigned)seed);
+    srand((unsigned)seed);
 
     /* Set heap ID to random (non-null) value */
     heap_id[0] = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_MAN;
     for (u = 1; u < HEAP_ID_LEN; u++)
-        heap_id[u] = (unsigned char)(HDrandom() + 1);
+        heap_id[u] = (unsigned char)(rand() + 1);
 
     /* Try removing bogus heap ID from empty heap */
     H5E_BEGIN_TRY
@@ -6268,7 +6268,7 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
         /* Set heap ID to random (non-null) value */
         heap_id[0] = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_MAN;
         for (u = 1; u < HEAP_ID_LEN; u++)
-            heap_id[u] = (unsigned char)(HDrandom() + 1);
+            heap_id[u] = (unsigned char)(rand() + 1);
 
         /* Get offset of random heap ID */
         if (H5HF_get_id_off_test(fh, heap_id, &obj_off) < 0)
@@ -15147,13 +15147,13 @@ test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
 /* seed = (unsigned long)1156158635; */
 fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
-    HDsrandom((unsigned)seed);
+    srand((unsigned)seed);
 
     /* Loop over adding objects to the heap, until the size limit is reached */
     total_obj_added = 0;
     while (total_obj_added < size_limit) {
         /* Choose a random size of object (from 1 up to above standalone block size limit) */
-        obj_size = (((uint32_t)HDrandom() % (tmp_cparam.max_man_size + 255)) + 1);
+        obj_size = (((uint32_t)rand() % (tmp_cparam.max_man_size + 255)) + 1);
         obj_loc  = (tmp_cparam.max_man_size + 255) - obj_size;
 
         /* Insert object */
@@ -15174,7 +15174,7 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
 
         /* Choose a position to swap with */
         /* (0 is current position) */
-        pos = ((size_t)HDrandom() % (keep_ids.num_ids - u));
+        pos = ((size_t)rand() % (keep_ids.num_ids - u));
 
         /* If we chose a different position, swap with it */
         if (pos > 0) {
@@ -15350,7 +15350,7 @@ test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_te
 /* seed = (unsigned long)1155181717; */
 fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
-    HDsrandom((unsigned)seed);
+    srand((unsigned)seed);
 
     /* Loop over adding objects to the heap, until the size limit is reached */
     total_obj_added = 0;
@@ -15362,13 +15362,13 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
          *      25% of the objects will be twice as large, 12.5% will be
          *      four times larger, etc.)
          */
-        while (HDrandom() < (RAND_MAX / 2) && size_range < tmp_cparam.max_man_size)
+        while (rand() < (RAND_MAX / 2) && size_range < tmp_cparam.max_man_size)
             size_range *= 2;
         if (size_range > (tmp_cparam.max_man_size + 255))
             size_range = tmp_cparam.max_man_size + 255;
 
         /* Choose a random size of object (from 1 up to stand alone block size) */
-        obj_size = (((unsigned)HDrandom() % (size_range - 1)) + 1);
+        obj_size = (((unsigned)rand() % (size_range - 1)) + 1);
         obj_loc  = (tmp_cparam.max_man_size + 255) - obj_size;
 
         /* Insert object */
@@ -15389,7 +15389,7 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
 
         /* Choose a position to swap with */
         /* (0 is current position) */
-        pos = ((size_t)HDrandom() % (keep_ids.num_ids - u));
+        pos = ((size_t)rand() % (keep_ids.num_ids - u));
 
         /* If we chose a different position, swap with it */
         if (pos > 0) {

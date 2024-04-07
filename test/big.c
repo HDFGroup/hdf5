@@ -103,8 +103,8 @@ randll(hsize_t limit, int current_index)
     /* Generate up to MAX_TRIES random numbers until one of them */
     /* does not overlap with any previous writes */
     while (overlap != 0 && tries < MAX_TRIES) {
-        acc = (hsize_t)HDrandom();
-        acc *= (hsize_t)HDrandom();
+        acc = (hsize_t)rand();
+        acc *= (hsize_t)rand();
         acc     = acc % limit;
         overlap = 0;
 
@@ -757,7 +757,7 @@ main(int ac, char **av)
     /* seed = (unsigned long)1155438845; */
     fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
-    HDsrandom((unsigned)seed);
+    srand((unsigned)seed);
 
     /* run VFD-specific test */
     if (H5FD_SEC2 == driver) {

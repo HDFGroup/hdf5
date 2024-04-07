@@ -815,14 +815,14 @@ test_unicode(void)
     MESSAGE(5, ("Testing UTF-8 Encoding\n"));
 
     /* Create a random string with length NUM_CHARS */
-    HDsrandom((unsigned)time(NULL));
+    srand((unsigned)time(NULL));
 
     memset(test_string, 0, sizeof(test_string));
     for (x = 0; x < NUM_CHARS; x++) {
         /* We need to avoid unprintable characters (codes 0-31) and the
          * . and / characters, since they aren't allowed in path names.
          */
-        unicode_point = (unsigned)(HDrandom() % (MAX_CODE_POINT - 32)) + 32;
+        unicode_point = (unsigned)(rand() % (MAX_CODE_POINT - 32)) + 32;
         if (unicode_point != 46 && unicode_point != 47)
             cur_pos = write_char(unicode_point, test_string, cur_pos);
     }

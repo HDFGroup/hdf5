@@ -1650,7 +1650,7 @@ eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
             size_t  swap_idx; /* Location to swap with when shuffling */
             hsize_t temp_idx; /* Temporary index */
 
-            swap_idx             = ((size_t)HDrandom() % ((size_t)cnt - u)) + u;
+            swap_idx             = ((size_t)rand() % ((size_t)cnt - u)) + u;
             temp_idx             = eiter->idx[u];
             eiter->idx[u]        = eiter->idx[swap_idx];
             eiter->idx[swap_idx] = temp_idx;
@@ -1796,7 +1796,7 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
         for (u = 0; u < (size_t)cnt; u++) {
             size_t swap_idx; /* Location to swap with when shuffling */
 
-            swap_idx          = ((size_t)HDrandom() % ((size_t)sparse_cnt - u)) + u;
+            swap_idx          = ((size_t)rand() % ((size_t)sparse_cnt - u)) + u;
             eiter->idx[u]     = tmp_idx[swap_idx];
             tmp_idx[swap_idx] = tmp_idx[u];
         } /* end for */
@@ -2297,7 +2297,6 @@ main(void)
     earray_iter_type_t  curr_iter;                 /* Current iteration type being worked on */
     hid_t               fapl    = H5I_INVALID_HID; /* File access property list for data files */
     unsigned            nerrors = 0;               /* Cumulative error count */
-    time_t              curr_time;                 /* Current time, for seeding random number generator */
     int                 ExpressMode;               /* Test express value */
     bool                api_ctx_pushed = false;    /* Whether API context pushed */
 
@@ -2317,8 +2316,7 @@ main(void)
     api_ctx_pushed = true;
 
     /* Seed random #'s */
-    curr_time = time(NULL);
-    HDsrandom((unsigned)curr_time);
+    srand((unsigned)time(NULL));
 
     /* Create an empty file to retrieve size */
     {
