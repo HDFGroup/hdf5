@@ -32,6 +32,10 @@ $Source = "";
 # Two-character strings begin with an upper-case letter which is
 # usually the same as the package name.
 #
+# These map to the types in H5trace.c (which should be updated if you add
+# a type here), so there are more types listed here than are used by the
+# existing macros.
+#
 %TypeString = ("haddr_t"                    => "a",
                "H5A_info_t"                 => "Ai",
                "H5A_operator1_t"            => "Ao",
