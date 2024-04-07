@@ -893,12 +893,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDtmpfile
 #define HDtmpfile() tmpfile()
 #endif
-#ifndef HDtolower
-#define HDtolower(C) tolower(C)
-#endif
-#ifndef HDtoupper
-#define HDtoupper(C) toupper(C)
-#endif
 #ifndef HDunlink
 #define HDunlink(S) unlink(S)
 #endif
