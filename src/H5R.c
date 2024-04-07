@@ -89,7 +89,6 @@ H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_p
     herr_t                      ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*si*Rr", loc_id, name, oapl_id, ref_ptr);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -186,7 +185,6 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, 
     herr_t                      ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*sii*Rr", loc_id, name, space_id, oapl_id, ref_ptr);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -286,7 +284,6 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl
     herr_t                      ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*s*si*Rr", loc_id, name, attr_name, oapl_id, ref_ptr);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -375,7 +372,6 @@ H5Rdestroy(H5R_ref_t *ref_ptr)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*Rr", ref_ptr);
 
     /* Check args */
     if (NULL == ref_ptr)
@@ -408,7 +404,6 @@ H5Rget_type(const H5R_ref_t *ref_ptr)
     H5R_type_t ret_value; /* Return value */
 
     FUNC_ENTER_API(H5R_BADTYPE)
-    H5TRACE1("Rt", "*Rr", ref_ptr);
 
     /* Check args */
     if (NULL == ref_ptr)
@@ -438,7 +433,6 @@ H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr)
     htri_t ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("t", "*Rr*Rr", ref1_ptr, ref2_ptr);
 
     /* Check args */
     if (!ref1_ptr || !ref2_ptr)
@@ -467,7 +461,6 @@ H5Rcopy(const H5R_ref_t *src_ref_ptr, H5R_ref_t *dst_ref_ptr)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "*Rr*Rr", src_ref_ptr, dst_ref_ptr);
 
     /* Check args */
     if (NULL == src_ref_ptr || NULL == dst_ref_ptr)
@@ -565,7 +558,6 @@ H5Ropen_object(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "*Rrii", ref_ptr, rapl_id, oapl_id);
 
     /* Open the dataset synchronously */
     if ((ret_value = H5R__open_object_api_common(ref_ptr, rapl_id, oapl_id, NULL, NULL)) < 0)
@@ -594,7 +586,6 @@ H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_li
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -733,7 +724,6 @@ H5Ropen_region(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "*Rrii", ref_ptr, rapl_id, oapl_id);
 
     /* Open the region synchronously */
     if ((ret_value = H5R__open_region_api_common(ref_ptr, rapl_id, oapl_id, NULL, NULL)) < 0)
@@ -762,7 +752,6 @@ H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_li
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -903,7 +892,6 @@ H5Ropen_attr(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "*Rrii", ref_ptr, rapl_id, aapl_id);
 
     /* Open the attribute synchronously */
     if ((ret_value = H5R__open_attr_api_common(ref_ptr, rapl_id, aapl_id, NULL, NULL)) < 0)
@@ -932,7 +920,6 @@ H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line
     hid_t          ret_value;                   /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, aapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -979,7 +966,6 @@ H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type /*out*/
     herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*Rri*Ot", ref_ptr, rapl_id, obj_type);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -1038,7 +1024,6 @@ H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf /*out*/, size_t size)
     ssize_t ret_value; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "*Rr*sz", ref_ptr, buf, size);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -1104,7 +1089,6 @@ H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf /*out*/, size_t siz
     ssize_t                ret_value    = 0;   /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE4("Zs", "*Rri*sz", ref_ptr, rapl_id, buf, size);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -1166,7 +1150,6 @@ H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *buf /*out*/, size_t size)
     ssize_t ret_value; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "*Rr*sz", ref_ptr, buf, size);
 
     /* Check args */
     if (ref_ptr == NULL)

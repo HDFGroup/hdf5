@@ -299,7 +299,6 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, si
     herr_t          ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*sULz", fapl_id, logfile, flags, buf_size);
 
     /* Do this first, so that we don't try to free a wild pointer if
      * H5P_object_verify() fails.

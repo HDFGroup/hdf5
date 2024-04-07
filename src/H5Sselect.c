@@ -128,7 +128,6 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Hs", space_id, offset);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -176,7 +175,6 @@ H5Sselect_copy(hid_t dst_id, hid_t src_id)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", dst_id, src_id);
 
     /* Check args */
     if (NULL == (src = (H5S_t *)H5I_object_verify(src_id, H5I_DATASPACE)))
@@ -366,7 +364,6 @@ H5Sget_select_npoints(hid_t spaceid)
     hssize_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("Hs", "i", spaceid);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
@@ -436,7 +433,6 @@ H5Sselect_valid(hid_t spaceid)
     htri_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "i", spaceid);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
@@ -595,7 +591,6 @@ H5Sget_select_bounds(hid_t spaceid, hsize_t start[] /*out*/, hsize_t end[] /*out
     herr_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*h*h", spaceid, start, end);
 
     /* Check args */
     if (start == NULL || end == NULL)
@@ -986,7 +981,6 @@ H5Sselect_adjust(hid_t space_id, const hssize_t *offset)
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Hs", space_id, offset);
 
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace");
@@ -1525,7 +1519,6 @@ H5Sget_select_type(hid_t space_id)
     H5S_sel_type ret_value; /* Return value */
 
     FUNC_ENTER_API(H5S_SEL_ERROR)
-    H5TRACE1("St", "i", space_id);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -1883,7 +1876,6 @@ H5Sselect_shape_same(hid_t space1_id, hid_t space2_id)
     htri_t ret_value;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("t", "ii", space1_id, space2_id);
 
     if (NULL == (space1 = (H5S_t *)H5I_object_verify(space1_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace");
@@ -1987,7 +1979,6 @@ H5Sselect_intersect_block(hid_t space_id, const hsize_t *start, const hsize_t *e
     htri_t   ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("t", "i*h*h", space_id, start, end);
 
     /* Check arguments */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -2665,7 +2656,6 @@ H5Sselect_project_intersection(hid_t src_space_id, hid_t dst_space_id, hid_t src
     hid_t  ret_value;                                   /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("i", "iii", src_space_id, dst_space_id, src_intersect_space_id);
 
     /* Check args */
     if (NULL == (src_space = (H5S_t *)H5I_object_verify(src_space_id, H5I_DATASPACE)))
@@ -2817,7 +2807,6 @@ H5Ssel_iter_create(hid_t space_id, size_t elmt_size, unsigned flags)
     hid_t           ret_value; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "izIu", space_id, elmt_size, flags);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -2900,7 +2889,6 @@ H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxelmts, size
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "izz*z*z*h*z", sel_iter_id, maxseq, maxelmts, nseq, nelmts, off, len);
 
     /* Check args */
     if (NULL == (sel_iter = (H5S_sel_iter_t *)H5I_object_verify(sel_iter_id, H5I_SPACE_SEL_ITER)))
@@ -3032,7 +3020,6 @@ H5Ssel_iter_reset(hid_t sel_iter_id, hid_t space_id)
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", sel_iter_id, space_id);
 
     /* Check args */
     if (NULL == (sel_iter = (H5S_sel_iter_t *)H5I_object_verify(sel_iter_id, H5I_SPACE_SEL_ITER)))
@@ -3136,7 +3123,6 @@ H5Ssel_iter_close(hid_t sel_iter_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", sel_iter_id);
 
     /* Check args */
     if (NULL == H5I_object_verify(sel_iter_id, H5I_SPACE_SEL_ITER))

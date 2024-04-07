@@ -539,7 +539,6 @@ H5dont_atexit(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT_NOERR_NOFS
-    H5TRACE0("e", "");
 
     if (H5_dont_atexit_g)
         ret_value = FAIL;
@@ -572,7 +571,6 @@ H5garbage_collect(void)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE0("e", "");
 
     /* Call the garbage collection routines in the library */
     if (H5FL_garbage_coll() < 0)
@@ -616,8 +614,6 @@ H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "IsIsIsIsIsIs", reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim,
-             blk_list_lim);
 
     /* Call the free list function to actually set the limits */
     if (H5FL_set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim,
@@ -654,7 +650,6 @@ H5get_free_list_sizes(size_t *reg_size /*out*/, size_t *arr_size /*out*/, size_t
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*z*z*z*z", reg_size, arr_size, blk_size, fac_size);
 
     /* Call the free list function to actually get the sizes */
     if (H5FL_get_free_list_sizes(reg_size, arr_size, blk_size, fac_size) < 0)
@@ -814,7 +809,6 @@ H5get_libversion(unsigned *majnum /*out*/, unsigned *minnum /*out*/, unsigned *r
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*Iu*Iu*Iu", majnum, minnum, relnum);
 
     /* Set the version information */
     if (majnum)
@@ -877,7 +871,6 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     herr_t              ret_value                = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT_NOERR_NOFS
-    H5TRACE3("e", "IuIuIu", majnum, minnum, relnum);
 
     /* Don't check again, if we already have */
     if (checked)
@@ -1047,7 +1040,6 @@ H5atclose(H5_atclose_func_t func, void *ctx)
     herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "Hc*x", func, ctx);
 
     /* Check arguments */
     if (NULL == func)
@@ -1087,7 +1079,6 @@ H5close(void)
      * this function for an uninitialized library.
      */
     FUNC_ENTER_API_NOINIT_NOERR_NOFS
-    H5TRACE0("e", "");
 
     H5_term_library();
 
@@ -1125,7 +1116,6 @@ H5allocate_memory(size_t size, bool clear)
     void *ret_value = NULL;
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE2("*x", "zb", size, clear);
 
     if (0 == size)
         return NULL;
@@ -1168,7 +1158,6 @@ H5resize_memory(void *mem, size_t size)
     void *ret_value = NULL;
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE2("*x", "*xz", mem, size);
 
     ret_value = H5MM_realloc(mem, size);
 
@@ -1191,7 +1180,6 @@ herr_t
 H5free_memory(void *mem)
 {
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "*x", mem);
 
     /* At this time, it is impossible for this to fail. */
     H5MM_xfree(mem);
@@ -1215,7 +1203,6 @@ H5is_library_threadsafe(bool *is_ts /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "*b", is_ts);
 
     if (is_ts) {
 #ifdef H5_HAVE_THREADSAFE
@@ -1250,7 +1237,6 @@ H5is_library_terminating(bool *is_terminating /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "*b", is_terminating);
 
     assert(is_terminating);
 
