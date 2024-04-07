@@ -290,7 +290,7 @@ my $file_args = 0;
 my $total_args = 0;
 sub rewrite_func ($$$$$) {
     my ($file, $type, $name, $args, $body) = @_;
-    my ($arg, $trace, $argtrace);
+    my ($arg, $argtrace);
     my (@arg_name, @arg_str, @arg_type);
     local $_;
 
@@ -302,7 +302,6 @@ sub rewrite_func ($$$$$) {
 
     # Parse arguments
     if ($args eq "void") {
-        $trace = "H5TRACE0(\"$rettype\", \"\");\n";
         $argtrace = "H5ARG_TRACE0(\"\")";
     } else {
         # Split arguments
@@ -363,60 +362,15 @@ sub rewrite_func ($$$$$) {
         }
 
         # Compose the trace macro
-        $trace = "H5TRACE" . scalar(@arg_str) . "(\"$rettype\", \"";
         $argtrace = "H5ARG_TRACE" . scalar(@arg_str) . "(__func__, \"";
-        $trace .= join("", @arg_str) . "\"";
         $argtrace .= join("", @arg_str) . "\"";
 
-        # Add 4 for indenting the line
-        my $len = 4 + length($trace);
-
+        # Append arguments
         for my $i (0 .. $#arg_name) {
-            # Handle wrapping
-
-            # Be VERY careful here! clang-format and this script MUST agree
-            # on which lines get wrapped or there will be churn as each tries
-            # to undo the other's output.
-            #
-            # TWO cases must be handled:
-            # 1) The argument is that last one and ');' will be appended
-            # 2) The argument is NOT the last one and ',' will be appended
-            #
-            # NB: clang-format does NOT consider terminal newlines when
-            #     counting columns for the ColumnLimit
-            #
-            # The extra '2' added after $len includes the ', ' that would be
-            # added BEFORE the argument.
-            #
-            my $adjust = ($i + 1 == scalar(@arg_str)) ? 2 : 1;
-            my $len_if_added = $len + 2 + length($arg_name[$i]) + $adjust;
-
-            # Wrap lines that will be longer than the limit
-            if ($len_if_added > $max_trace_macro_line_len) {
-                # Wrap line, with indentation
-                $trace .= ",\n             ";
-                $len = 13;              # Set to 13, for indentation
-
-                # Indent an extra space to account for extra digit in 'H5TRACE' macro
-                if (scalar(@arg_str) >= 10) {
-                    $trace .= " ";
-                    $len++;
-                }
-            } else {
-                $trace .= ", ";
-                $len += 2;     # Add 2, for ', '
-            }
-
-            # Append argument
-            $trace .= "$arg_name[$i]";
             $argtrace .= ", $arg_name[$i]";
-
-            # Add length of appended argument name
-            $len += length($arg_name[$i]);
         }
 
         # Append final ');' for macro
-        $trace .= ");\n";
         $argtrace .= ")";
     }
 
