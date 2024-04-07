@@ -10,6 +10,12 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
+
+##
+# Process H5ARG_TRACE() macros (defined in H5private.h) used in H5ES_insert(),
+# updating them with the caller's parameters, etc.
+##
+
 require 5.003;
 use warnings;
 $Source = "";
@@ -359,7 +365,7 @@ sub rewrite_func ($$$$$) {
             $argtrace .= ", $arg_name[$i]";
         }
 
-        # Append final ');' for macro
+        # Append final ')' for macro
         $argtrace .= ")";
     }
 
