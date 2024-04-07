@@ -792,46 +792,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDpwrite
 #define HDpwrite(F, B, C, O) pwrite(F, B, C, O)
 #endif
-
-/* clang-format off */
-#ifdef H5_HAVE_RAND_R
-#   ifndef HDrandom
-#   define HDrandom() HDrand()
-#   endif
-    H5_DLL int HDrand(void);
-#   ifndef HDsrandom
-#   define HDsrandom(S) HDsrand(S)
-#   endif
-    H5_DLL void HDsrand(unsigned int seed);
-#elif defined(H5_HAVE_RANDOM)
-#   ifndef HDrand
-#   define HDrand() random()
-#   endif
-#   ifndef HDrandom
-#   define HDrandom() random()
-#   endif
-#   ifndef HDsrand
-#   define HDsrand(S) srandom(S)
-#   endif
-#   ifndef HDsrandom
-#   define HDsrandom(S) srandom(S)
-#   endif
-#else
-#   ifndef HDrand
-#   define HDrand() rand()
-#   endif
-#   ifndef HDrandom
-#   define HDrandom() rand()
-#   endif
-#   ifndef HDsrand
-#   define HDsrand(S) srand(S)
-#   endif
-#   ifndef HDsrandom
-#   define HDsrandom(S) srand(S)
-#   endif
-#endif
-/* clang-format on */
-
 #ifndef HDread
 #define HDread(F, M, Z) read(F, M, Z)
 #endif

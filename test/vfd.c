@@ -3469,7 +3469,7 @@ setup_rand(void)
         fprintf(stdout, "\n%s: predefined_seed = %d.\n\n", __func__, seed);
         fflush(stdout);
 
-        HDsrand(seed);
+        srand(seed);
     }
     else {
 
@@ -3485,7 +3485,7 @@ setup_rand(void)
             fprintf(stdout, "\n%s: seed = %d.\n\n", __func__, seed);
             fflush(stdout);
 
-            HDsrand(seed);
+            srand(seed);
         }
     }
 

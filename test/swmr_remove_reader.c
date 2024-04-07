@@ -108,7 +108,7 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
     if (snpoints > 0) {
         /* Choose a random record in the dataset, choosing the last record half
          * the time */
-        start[1] = (hsize_t)(HDrandom() % (snpoints * 2));
+        start[1] = (hsize_t)(rand() % (snpoints * 2));
         if (start[1] > (hsize_t)(snpoints - 1))
             start[1] = (hsize_t)(snpoints - 1);
         if (H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
@@ -223,7 +223,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
 
             /* Determine the offset of the symbol, within level 0 symbols */
             /* (level 0 symbols are the most common symbols) */
-            offset     = (unsigned)HDrandom() % symbol_count[0];
+            offset     = (unsigned)rand() % symbol_count[0];
             sym_com[v] = &symbol_info[0][offset];
 
             /* Emit informational message */
@@ -466,7 +466,7 @@ main(int argc, char *argv[])
         HDgettimeofday(&t, NULL);
         random_seed = (unsigned)(t.tv_usec);
     } /* end if */
-    HDsrandom(random_seed);
+    srand(random_seed);
     /* ALWAYS emit the random seed for possible debugging */
     fprintf(stderr, "Using reader random seed: %u\n", random_seed);
 

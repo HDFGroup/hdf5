@@ -195,7 +195,7 @@ gen_skeleton(const char *filename, bool verbose, bool swmr_write, int comp_level
              * moved out of chunk #0 of the object header
              * (Set to true for every fourth dataset)
              */
-            move_dataspace_message = !(HDrandom() % 4);
+            move_dataspace_message = !(rand() % 4);
             if (move_dataspace_message) {
                 unsigned chunk_num; /* Object header chunk # for dataspace message */
 
@@ -336,7 +336,7 @@ main(int argc, char *argv[])
         HDgettimeofday(&t, NULL);
         random_seed = (unsigned)(t.tv_usec);
     } /* end if */
-    HDsrandom(random_seed);
+    srand(random_seed);
     /* ALWAYS emit the random seed for possible debugging */
     fprintf(stderr, "Using generator random seed (used in sparse test only): %u\n", random_seed);
 

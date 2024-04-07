@@ -2883,7 +2883,7 @@ local_pin_and_unpin_random_entries(H5F_t *file_ptr, int min_idx, int max_idx, in
         assert(0 <= min_count);
         assert(min_count < max_count);
 
-        count = (HDrand() % (max_count - min_count)) + min_count;
+        count = (rand() % (max_count - min_count)) + min_count;
 
         assert(min_count <= count);
         assert(count <= max_count);
@@ -2892,7 +2892,7 @@ local_pin_and_unpin_random_entries(H5F_t *file_ptr, int min_idx, int max_idx, in
             local_pin_random_entry(file_ptr, min_idx, max_idx);
         }
 
-        count = (HDrand() % (max_count - min_count)) + min_count;
+        count = (rand() % (max_count - min_count)) + min_count;
 
         assert(min_count <= count);
         assert(count <= max_count);
@@ -2938,7 +2938,7 @@ local_pin_random_entry(H5F_t *file_ptr, int min_idx, int max_idx)
         assert(max_idx < virt_num_data_entries);
 
         do {
-            idx = (HDrand() % (max_idx - min_idx)) + min_idx;
+            idx = (rand() % (max_idx - min_idx)) + min_idx;
             assert(min_idx <= idx);
             assert(idx <= max_idx);
         } while (data[idx].global_pinned || data[idx].local_pinned);
@@ -3055,7 +3055,7 @@ lock_and_unlock_random_entries(H5F_t *file_ptr, int min_idx, int max_idx, int mi
         assert(0 <= min_count);
         assert(min_count < max_count);
 
-        count = (HDrand() % (max_count - min_count)) + min_count;
+        count = (rand() % (max_count - min_count)) + min_count;
 
         assert(min_count <= count);
         assert(count <= max_count);
@@ -3093,7 +3093,7 @@ lock_and_unlock_random_entry(H5F_t *file_ptr, int min_idx, int max_idx)
         assert(max_idx < NUM_DATA_ENTRIES);
         assert(max_idx < virt_num_data_entries);
 
-        idx = (HDrand() % (max_idx - min_idx)) + min_idx;
+        idx = (rand() % (max_idx - min_idx)) + min_idx;
 
         assert(min_idx <= idx);
         assert(idx <= max_idx);
@@ -3933,7 +3933,7 @@ setup_rand(void)
         seed = predefined_seeds[world_mpi_rank];
         fprintf(stdout, "%d:%s: predefined_seed = %d.\n", world_mpi_rank, __func__, seed);
         fflush(stdout);
-        HDsrand(seed);
+        srand(seed);
     }
     else {
 
@@ -3950,7 +3950,7 @@ setup_rand(void)
                 fprintf(stdout, "%d:%s: seed = %d.\n", world_mpi_rank, __func__, seed);
                 fflush(stdout);
             }
-            HDsrand(seed);
+            srand(seed);
         }
     }
 
