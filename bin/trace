@@ -329,7 +329,7 @@ sub rewrite_func ($$$$$) {
             if($arg=~/\w*\.{3}\w*/){  # Skip "..." for varargs parameter
                 next;
             }
-            unless ($arg=~/^((\s*[a-z_A-Z](\w|\*)*\s+)+(\s*\*\s*|\s*const\s*|\s*volatile\s*)*)
+            unless ($arg=~/^((\s*[a-z_A-Z](\w|\*)*\s+)+(\s*\*\s*|\s*const\s*|\s*restrict\s*|\s*volatile\s*)*)
                       ([a-z_A-Z]\w*)(\[.*?\])?\s*$/x) {
                 errmesg $file, $name, "unable to parse \`$arg\'";
                 goto error;
