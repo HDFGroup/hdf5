@@ -122,7 +122,7 @@ main(int argc, char *argv[])
      * parse the command line
      */
     for (i = 1; i < argc; i++) {
-        if ((token = gtoken(argv[i])) == ERR) {
+        if ((token = gtoken(argv[i])) == INVALID_TOKEN) {
             usage(argv[0]);
             goto err;
         }
@@ -220,7 +220,7 @@ main(int argc, char *argv[])
                 in->outputSize = in->inputSize;
                 break;
 
-            case ERR: /* command syntax error */
+            case INVALID_TOKEN: /* command syntax error */
             default:
                 (void)fprintf(stderr, "%s", err2);
                 usage(argv[0]);
@@ -279,7 +279,7 @@ static int
 gtoken(char *s)
 {
     size_t len;
-    int    token = ERR;
+    int    token = INVALID_TOKEN;
 
     const char *err1 = "Illegal argument: %s.\n";
 
@@ -324,11 +324,11 @@ gtoken(char *s)
                     token = OPT_s;
                 break;
             default:
-                token = ERR; /* not a supported option tag */
+                token = INVALID_TOKEN; /* not a supported option tag */
                 break;
         }
 
-        if (token == ERR)
+        if (token == INVALID_TOKEN)
             (void)fprintf(stderr, err1, s);
     }
     else { /* filename */
