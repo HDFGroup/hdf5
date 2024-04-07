@@ -244,7 +244,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
     if (lowername == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for lowercase name copy.");
     for (i = 0; i < namelen; i++)
-        lowername[i] = (char)HDtolower((int)name[i]);
+        lowername[i] = (char)tolower((int)name[i]);
     lowername[namelen] = 0;
 
     /* If value supplied, copy name, value, and concatenated "name: value".
@@ -2172,7 +2172,7 @@ H5FD_s3comms_nlowercase(char *dest, const char *s, size_t len)
         H5MM_memcpy(dest, s, len);
         do {
             len--;
-            dest[len] = (char)HDtolower((int)dest[len]);
+            dest[len] = (char)tolower((int)dest[len]);
         } while (len > 0);
     }
 
@@ -2264,7 +2264,7 @@ H5FD_s3comms_parse_url(const char *str, parsed_url_t **_purl)
     strncpy(purl->scheme, curstr, (size_t)len);
     purl->scheme[len] = '\0';
     for (i = 0; i < len; i++)
-        purl->scheme[i] = (char)HDtolower(purl->scheme[i]);
+        purl->scheme[i] = (char)tolower(purl->scheme[i]);
 
     /* Skip "://" */
     tmpstr += 3;
