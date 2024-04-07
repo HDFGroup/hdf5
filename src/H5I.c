@@ -90,7 +90,7 @@ static int H5I__iterate_pub_cb(void *obj, hid_t id, void *udata);
  *-------------------------------------------------------------------------
  */
 H5I_type_t
-H5Iregister_type(size_t H5_ATTR_DEBUG_API_USED hash_size, unsigned reserved, H5I_free_t free_func)
+H5Iregister_type(size_t H5_ATTR_UNUSED hash_size, unsigned reserved, H5I_free_t free_func)
 {
     H5I_class_t *cls       = NULL;      /* New ID class */
     H5I_type_t   new_type  = H5I_BADID; /* New ID type value */

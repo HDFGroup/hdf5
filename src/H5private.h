@@ -203,12 +203,6 @@
 #       define H5_ATTR_DEPRECATED_USED /*void*/
 #   endif
 
-#   ifdef H5_DEBUG_API
-#       define H5_ATTR_DEBUG_API_USED /*void*/
-#   else
-#       define H5_ATTR_DEBUG_API_USED H5_ATTR_UNUSED
-#   endif
-
 #   ifndef NDEBUG
 #       define H5_ATTR_NDEBUG_UNUSED /*void*/
 #   else
@@ -247,7 +241,6 @@
 #   define H5_ATTR_FORMAT(X, Y, Z) /*void*/
 #   define H5_ATTR_UNUSED          /*void*/
 #   define H5_ATTR_NDEBUG_UNUSED   /*void*/
-#   define H5_ATTR_DEBUG_API_USED  /*void*/
 #   define H5_ATTR_DEPRECATED_USED /*void*/
 #   define H5_ATTR_PARALLEL_UNUSED /*void*/
 #   define H5_ATTR_PARALLEL_USED   /*void*/
@@ -1350,11 +1343,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     H5_API_UNSET_CANCEL                                                                                      \
     H5_API_LOCK
 
-/* Local variables for API routines */
-#define FUNC_ENTER_API_VARS H5TRACE_DECL
-
 #define FUNC_ENTER_API_COMMON                                                                                \
-    FUNC_ENTER_API_VARS                                                                                      \
     FUNC_ENTER_COMMON(H5_IS_API(__func__));                                                                  \
     FUNC_ENTER_API_THREADSAFE;
 
@@ -1429,7 +1418,6 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
         {                                                                                                    \
             {                                                                                                \
                 {                                                                                            \
-                    FUNC_ENTER_API_VARS                                                                      \
                     FUNC_ENTER_COMMON_NOERR(H5_IS_API(__func__));                                            \
                     FUNC_ENTER_API_THREADSAFE;                                                               \
                     {
@@ -1622,12 +1610,9 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     H5_API_UNLOCK                                                                                            \
     H5_API_SET_CANCEL
 
-#define FUNC_LEAVE_API_COMMON(ret_value) H5TRACE_RETURN(ret_value);
-
 #define FUNC_LEAVE_API(ret_value)                                                                            \
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
-    FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     if (api_ctx_pushed) {                                                                                    \
         (void)H5CX_pop(true);                                                                                \
         api_ctx_pushed = false;                                                                              \
@@ -1644,7 +1629,6 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 #define FUNC_LEAVE_API_NOINIT(ret_value)                                                                     \
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
-    FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
         (void)H5E_dump_api_stack(true);                                                                      \
@@ -1658,7 +1642,6 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 #define FUNC_LEAVE_API_NOFS(ret_value)                                                                       \
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
-    FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
     }                                                                                                        \
