@@ -478,8 +478,6 @@ H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config)
     MPI_Info                 info           = MPI_INFO_NULL;
     herr_t                   ret_value      = SUCCEED;
 
-    /*NO TRACE*/
-
     /* Ensure Subfiling (and therefore MPI) is initialized before doing anything */
     if (H5FD_subfiling_init() < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize subfiling VFD");
@@ -559,8 +557,6 @@ H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
     H5P_genplist_t                *plist              = NULL;
     bool                           use_default_config = false;
     herr_t                         ret_value          = SUCCEED;
-
-    /*NO TRACE*/
 
     if (config_out == NULL)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_out is NULL");

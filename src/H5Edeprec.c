@@ -246,7 +246,6 @@ H5Eprint1(FILE *stream)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    /*NO TRACE*/
 
     if (NULL == (estack = H5E__get_my_stack()))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
@@ -279,7 +278,6 @@ H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client_data)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    /*NO TRACE*/
 
     if (NULL == (estack = H5E__get_my_stack()))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");

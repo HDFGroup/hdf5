@@ -1327,7 +1327,6 @@ H5Eprint2(hid_t err_stack, FILE *stream)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    /*NO TRACE*/
 
     /* Print error stack */
     if ((ret_value = H5E__print2(err_stack, stream)) < 0)
@@ -1394,7 +1393,6 @@ H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t stack_func, voi
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    /*NO TRACE*/
 
     /* Need to check for errors */
     if (err_stack == H5E_DEFAULT) {

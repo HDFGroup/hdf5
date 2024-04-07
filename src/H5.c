@@ -1023,7 +1023,6 @@ H5open(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOPUSH(FAIL)
-    /*NO TRACE*/
 
     /* all work is done by FUNC_ENTER() */
 
