@@ -371,8 +371,10 @@ sub rewrite_func ($$$$$) {
         $argtrace .= ")";
     }
 
-    # Check for H5ARG_TRACE macros in non-API routines
+    # Check for H5ARG_TRACE macros to update
     if ( $body =~ /H5ARG_TRACE/ ) {
+        my $orig_body = $body;
+
         # Check for untraceable type (deferred until $argtrace used)
         if ( $argtrace =~ /(^!)|([^*]!)/ ) {
             errmesg $file, $name, "untraceable type in args";
@@ -380,11 +382,13 @@ sub rewrite_func ($$$$$) {
             goto error;
         }
 
-        # Replace / update H5ARG_TRACE macro.
+        # Update H5ARG_TRACE macro
         $body =~ s/(H5ARG_TRACE(\d+\s*\(.*?\))?)/"$argtrace"/esg;
 
-        #Increment # of non-API routines modified
-        $file_args++;
+        # Increment # of non-API routines modified if anything changed
+        if ($orig_body ne $body) {
+            $file_args++;
+        }
     }
 
 error:
