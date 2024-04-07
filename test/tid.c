@@ -1373,7 +1373,7 @@ void
 test_ids(void)
 {
     /* Set the random # seed */
-    HDsrandom((unsigned)HDtime(NULL));
+    HDsrandom((unsigned)time(NULL));
 
     if (basic_id_test() < 0)
         TestErrPrintf("Basic ID test failed\n");

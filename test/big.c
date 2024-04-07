@@ -752,7 +752,7 @@ main(int ac, char **av)
         sparse_support = is_sparse();
 
     /* Choose random # seed */
-    seed = (unsigned long)HDtime(NULL);
+    seed = (unsigned long)time(NULL);
 #if 0
     /* seed = (unsigned long)1155438845; */
     fprintf(stderr, "Random # seed was: %lu\n", seed);

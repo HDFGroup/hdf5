@@ -1598,8 +1598,8 @@ gmnow(void)
     struct tm *ret_value = NULL;
 
     /* Doctor assert, checks against error in time() */
-    if ((time_t)(-1) != HDtime(now_ptr))
-        ret_value = HDgmtime(now_ptr);
+    if ((time_t)(-1) != time(now_ptr))
+        ret_value = gmtime(now_ptr);
 
     assert(ret_value != NULL);
 

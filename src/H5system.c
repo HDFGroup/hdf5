@@ -223,12 +223,12 @@ H5_make_time(struct tm *tm)
 
     /* Initialize timezone information */
     if (!H5_ntzset) {
-        HDtzset();
+        tzset();
         H5_ntzset = true;
-    } /* end if */
+    }
 
     /* Perform base conversion */
-    if ((time_t)-1 == (the_time = HDmktime(tm)))
+    if ((time_t)-1 == (the_time = mktime(tm)))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCONVERT, FAIL, "badly formatted modification time message");
 
         /* Adjust for timezones */

@@ -2906,7 +2906,7 @@ main(void)
     double rdcc_w0;
 
     /* Set the random # seed */
-    HDsrandom((unsigned)HDtime(NULL));
+    HDsrandom((unsigned)time(NULL));
 
     /* Open */
     h5_reset();

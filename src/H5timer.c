@@ -156,7 +156,7 @@ H5_now(void)
         now = now_tv.tv_sec;
     }
 #else  /* H5_HAVE_GETTIMEOFDAY */
-    now = HDtime(NULL);
+    now = time(NULL);
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
     return (now);
@@ -200,7 +200,7 @@ H5_now_usec(void)
 #else  /* H5_HAVE_GETTIMEOFDAY */
     /* Cast all values in this expression to uint64_t to ensure that all intermediate calculations
      * are done in 64 bit, to prevent overflow */
-    now       = ((uint64_t)HDtime(NULL) * ((uint64_t)1000 * (uint64_t)1000));
+    now       = ((uint64_t)time(NULL) * ((uint64_t)1000 * (uint64_t)1000));
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
     return (now);
@@ -238,7 +238,7 @@ H5_get_time(void)
         ret_value = (double)now_tv.tv_sec + ((double)now_tv.tv_usec / 1000000.0);
     }
 #else
-    ret_value = (double)HDtime(NULL);
+    ret_value = (double)time(NULL);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)

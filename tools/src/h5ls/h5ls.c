@@ -2189,9 +2189,9 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
                 struct tm *tm;
 
                 if (simple_output_g)
-                    tm = HDgmtime(&(oinfo->mtime));
+                    tm = gmtime(&(oinfo->mtime));
                 else
-                    tm = HDlocaltime(&(oinfo->mtime));
+                    tm = localtime(&(oinfo->mtime));
                 if (tm) {
                     strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
                     h5tools_str_reset(&buffer);
