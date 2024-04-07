@@ -10129,7 +10129,7 @@ main(void)
     hid_t fapl    = H5I_INVALID_HID;
 
     /* Set the random # seed */
-    srand((unsigned)HDtime(NULL));
+    srand((unsigned)time(NULL));
 
     reset_hdf5();
     fapl = h5_fileaccess();

@@ -55,10 +55,9 @@ tst_rev_sort(const void *i1, const void *i2)
 static void
 test_skiplist_init(void)
 {
-    time_t   curr_time; /* Current time, for seeding random number generator */
-    int      new_val;   /* New value to insert */
-    unsigned found;     /* Flag to indicate value was inserted already */
-    size_t   u, v;      /* Local index variables */
+    int      new_val; /* New value to insert */
+    unsigned found;   /* Flag to indicate value was inserted already */
+    size_t   u, v;    /* Local index variables */
 
     /* Allocate arrays */
     rand_num = (int *)malloc(sizeof(int) * NUM_ELEMS);
@@ -69,8 +68,7 @@ test_skiplist_init(void)
     CHECK_PTR(rev_sort_rand_num, "malloc");
 
     /* Initialize random number seed */
-    curr_time = HDtime(NULL);
-    srand((unsigned)curr_time);
+    srand((unsigned)time(NULL));
 
     /* Create randomized set of numbers */
     for (u = 0; u < NUM_ELEMS; u++) {

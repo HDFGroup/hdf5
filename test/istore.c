@@ -582,7 +582,7 @@ main(int argc, char *argv[])
     printf("\n");
 
     /* Set the random # seed */
-    srand((unsigned)HDtime(NULL));
+    srand((unsigned)time(NULL));
 
     /* Check to see if the file system supports POSIX-style sparse files.
      * Windows NTFS does not, so we want to avoid tests which create

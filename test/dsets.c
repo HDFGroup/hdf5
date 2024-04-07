@@ -15917,7 +15917,7 @@ main(void)
     contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     /* Set the random # seed */
-    srand((unsigned)HDtime(NULL));
+    srand((unsigned)time(NULL));
 
     /* Initialize global arrays */
     /* points */

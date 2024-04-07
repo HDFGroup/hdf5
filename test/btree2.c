@@ -2903,7 +2903,7 @@ test_insert_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t
     herr_t      ret;                    /* Generic error return value */
 
     /* Initialize random number seed */
-    curr_time = HDtime(NULL);
+    curr_time = time(NULL);
 #if 0
 curr_time=1109170019;
 fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
@@ -4973,7 +4973,7 @@ test_update_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t
     herr_t           ret;                    /* Generic error return value */
 
     /* Initialize random number seed */
-    curr_time = HDtime(NULL);
+    curr_time = time(NULL);
 #if 0
 curr_time = 1451342093;
 fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
@@ -8619,7 +8619,7 @@ test_remove_lots(const char *driver_name, hid_t fapl, const H5B2_create_t *cpara
     bool      single_file_vfd;        /* Whether VFD used stores data in a single file */
 
     /* Initialize random number seed */
-    curr_time = HDtime(NULL);
+    curr_time = time(NULL);
 #if 0
 curr_time = 1163537969;
 fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);

@@ -656,7 +656,7 @@ main(int argc, char *argv[])
 
     /* Generate random number seed, if rank 0 */
     if (MAINPROCESS)
-        seed = (unsigned)HDtime(NULL);
+        seed = (unsigned)time(NULL);
 
     /* Broadcast seed from rank 0 (other ranks will receive rank 0's seed) */
     if (MPI_SUCCESS != MPI_Bcast(&seed, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD))

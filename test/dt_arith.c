@@ -5978,7 +5978,7 @@ main(void)
     unsigned long nerrors = 0;
 
     /* Set the random # seed */
-    srand((unsigned)HDtime(NULL));
+    srand((unsigned)time(NULL));
 
     reset_hdf5();
 

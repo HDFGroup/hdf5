@@ -1144,7 +1144,7 @@ main(int argc, char *argv[])
     printf("\n");
 
     /* Set the random # seed */
-    srand((unsigned)HDtime(NULL));
+    srand((unsigned)time(NULL));
 
     /*
      * Open the library explicitly for thread-safe builds, so per-thread

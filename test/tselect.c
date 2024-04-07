@@ -6318,7 +6318,6 @@ test_select_hyper_union_random_5d(hid_t read_plist)
     herr_t   ret;               /* Generic return value        */
     hssize_t npoints,           /* Number of elements in file selection */
         npoints2;               /* Number of elements in memory selection */
-    unsigned seed;              /* Random number seed for each test */
     unsigned test_num;          /* Count of tests being executed */
 
     /* Output message about test being performed */
@@ -6362,31 +6361,26 @@ test_select_hyper_union_random_5d(hid_t read_plist)
     CHECK(sid2, FAIL, "H5Screate_simple");
 
     /* Get initial random # seed */
-    seed = (unsigned)HDtime(NULL) + (unsigned)HDclock();
+    srand((unsigned)time(NULL));
 
     /* Crunch through a bunch of random hyperslab reads from the file dataset */
     for (test_num = 0; test_num < NRAND_HYPER; test_num++) {
-        /* Save random # seed for later use */
-        /* (Used in case of errors, to regenerate the hyperslab sequence) */
-        seed += (unsigned)HDclock();
-        srand(seed);
-
         for (i = 0; i < NHYPERSLABS; i++) {
             /* Select random hyperslab location & size for selection */
             for (j = 0; j < SPACE5_RANK; j++) {
-                start[j] = ((hsize_t)rand() % dims1[j]);
-                count[j] = (((hsize_t)rand() % (dims1[j] - start[j])) + 1);
-            } /* end for */
+                start[j] = ((hsize_t)HDrandom() % dims1[j]);
+                count[j] = (((hsize_t)HDrandom() % (dims1[j] - start[j])) + 1);
+            }
 
             /* Select hyperslab */
             ret = H5Sselect_hyperslab(sid1, (i == 0 ? H5S_SELECT_SET : H5S_SELECT_OR), start, NULL, count,
                                       NULL);
             CHECK(ret, FAIL, "H5Sselect_hyperslab");
             if (ret < 0) {
-                TestErrPrintf("Random hyperslabs for seed %u failed!\n", seed);
+                TestErrPrintf("Random hyperslabs failed!\n");
                 break;
-            } /* end if */
-        }     /* end for */
+            }
+        }
 
         /* Get the number of elements selected */
         npoints = H5Sget_select_npoints(sid1);
@@ -6405,17 +6399,17 @@ test_select_hyper_union_random_5d(hid_t read_plist)
         ret = H5Dread(dataset, H5T_NATIVE_INT, sid2, sid1, read_plist, rbuf);
         CHECK(ret, FAIL, "H5Dread");
         if (ret < 0) {
-            TestErrPrintf("Random hyperslabs for seed %u failed!\n", seed);
+            TestErrPrintf("Random hyperslabs failed!\n");
             break;
-        } /* end if */
+        }
 
         /* Compare data read with data written out */
         tbuf = rbuf;
         ret  = H5Diterate(wbuf, H5T_NATIVE_INT, sid1, test_select_hyper_iter2, &tbuf);
         if (ret < 0) {
-            TestErrPrintf("Random hyperslabs for seed %u failed!\n", seed);
+            TestErrPrintf("Random hyperslabs failed!\n");
             break;
-        } /* end if */
+        }
 
         /* Set the read buffer back to all zeroes */
         memset(rbuf, 0, (size_t)SPACE6_DIM1);

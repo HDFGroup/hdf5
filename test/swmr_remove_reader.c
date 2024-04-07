@@ -262,7 +262,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
         fprintf(stderr, "Reading records\n");
 
     /* Get the starting time */
-    start_time = HDtime(NULL);
+    start_time = time(NULL);
     curr_time  = start_time;
 
     /* Create file access property list */
@@ -322,7 +322,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
         HDsleep(poll_time);
 
         /* Retrieve the current time */
-        curr_time = HDtime(NULL);
+        curr_time = time(NULL);
     } /* end while */
 
     /* Close the fapl */
