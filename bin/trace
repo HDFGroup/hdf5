@@ -286,9 +286,7 @@ sub argstring ($$$) {
 # Given information about an API function, rewrite that function with
 # updated tracing information.
 #
-my $file_api = 0;
 my $file_args = 0;
-my $total_api = 0;
 my $total_args = 0;
 sub rewrite_func ($$$$$) {
     my ($file, $type, $name, $args, $body) = @_;
@@ -447,7 +445,6 @@ error:
 # tracing information.
 #
 for $file (@ARGV) {
-    $file_api = 0;
     $file_args = 0;
 
     # Ignore some files that do not need tracing macros
@@ -470,15 +467,13 @@ for $file (@ARGV) {
 
         # If the source changed then print out the new version
         if ($original ne $Source) {
-            printf "%s: instrumented %d API function%s and %d argument list%s\n",
-                    $file, $file_api, (1 == $file_api ? "" : "s"),
-                    $file_args, (1 == $file_args ? "" : "s");
+            printf "%s: instrumented %d argument list%s\n",
+                    $file, $file_args, (1 == $file_args ? "" : "s");
             rename $file, "$file~" or die "unable to make backup";
             open SOURCE, ">$file" or die "unable to modify source";
             print SOURCE $Source;
             close SOURCE;
 
-            $total_api += $file_api;
             $total_args += $file_args;
         }
     }
@@ -491,9 +486,8 @@ if ($found_errors eq 1) {
     printf "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
     exit 1;
 } else {
-    printf "Finished processing HDF5 API calls:\n";
-    printf "\tinstrumented %d API function%s and %d argument list%s\n",
-             $total_api, (1 == $total_api ? "" : "s"),
+    printf "Finished processing H5ES_insert() calls:\n";
+    printf "\tinstrumented %d argument list%s\n",
              $total_args, (1 == $total_args ? "" : "s");
 }
 
