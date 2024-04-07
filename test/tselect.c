@@ -6368,8 +6368,8 @@ test_select_hyper_union_random_5d(hid_t read_plist)
         for (i = 0; i < NHYPERSLABS; i++) {
             /* Select random hyperslab location & size for selection */
             for (j = 0; j < SPACE5_RANK; j++) {
-                start[j] = ((hsize_t)HDrandom() % dims1[j]);
-                count[j] = (((hsize_t)HDrandom() % (dims1[j] - start[j])) + 1);
+                start[j] = ((hsize_t)rand() % dims1[j]);
+                count[j] = (((hsize_t)rand() % (dims1[j] - start[j])) + 1);
             }
 
             /* Select hyperslab */
