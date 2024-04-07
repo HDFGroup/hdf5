@@ -422,67 +422,6 @@ sub rewrite_func ($$$$$) {
         $argtrace .= ")";
     }
 
-    # Check for API / non-API routine name
-    if( $name =~ /H5[A-Z]{0,2}[a-z].*/) {
-        # The H5TRACE() statement, for API routines
-        if ($body =~ /\/\*[ \t]*NO[ \t]*TRACE[ \t]*\*\//) {
-            # Ignored due to NO TRACE comment.
-        } else {
-            # Check for known, but unsupported type
-            if ( $trace =~ /(^#)|([^*]#)/ ) {
-                # Check for unsupported return type
-                if ( $type =~ /(^#)|([^*]#)/ ) {
-                    errmesg $file, $name, "unsupported type in return type\nAdd to TypeString hash in trace script and update H5_trace_args()";
-                    print "type = '$type'\n";
-                }
-
-                # Check for unsupported argument type
-                $index = 0;
-                for (@arg_str) {
-                    if ( $_ =~ /(^#)|([^*]#)/ ) {
-                        errmesg $file, $name, "unsupported type in args\nAdd to TypeString hash in trace script and update H5_trace_args()";
-                        print "type = $arg_type[$index]\n";
-                    }
-                    $index++;
-                }
-                goto error;
-            }
-
-            # Check for unknown (and therefore unsupported) type
-            if ( $trace =~ /(^!)|([^*]!)/ ) {
-                # Check for unsupported return type
-                if ( $type =~ /(^!)|([^*]!)/ ) {
-                    errmesg $file, $name, "unknown type in return type\nAdd to TypeString hash in trace script and also update H5_trace_args() if used by value";
-                    print "type = '$type'\n";
-                }
-
-                # Check for unsupported argument type
-                $index = 0;
-                for (@arg_str) {
-                    if ( $_ =~ /(^!)|([^*]!)/ ) {
-                        errmesg $file, $name, "unknown type in args\nAdd to TypeString hash in trace script and also update H5_trace_args() if used by value";
-                        print "type = $arg_type[$index]\n";
-                    }
-                    $index++;
-                }
-                goto error;
-            }
-
-            if ($body =~ s/((\n[ \t]*)H5TRACE\d+\s*\(.*?\);)\n/"$2$trace"/es) {
-                # Replaced an H5TRACE macro.
-            } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\w*[ \t]*(\(.*?\))?;??)\n/"$1$2$trace"/es) {
-                # Added an H5TRACE macro after a FUNC_ENTER macro.
-            } else {
-                errmesg $file, $name, "unable to insert tracing information";
-                print "body = ", $body, "\n";
-                goto error;
-            }
-        }
-
-        #Increment # of API routines modified
-        $file_api++;
-    }
-
     # Check for H5ARG_TRACE macros in non-API routines
     if ( $body =~ /H5ARG_TRACE/ ) {
         # Check for untraceable type (deferred until $argtrace used)
