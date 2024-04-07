@@ -1184,8 +1184,8 @@ H5D__piece_io(H5D_io_info_t *io_info)
             HGOTO_ERROR(H5E_IO, H5E_OPENERROR, FAIL, "couldn't open debugging log file");
 
         /* Print a short header for this I/O operation */
-        time_now = HDtime(NULL);
-        fprintf(debug_log_file, "##### %s", HDasctime(HDlocaltime(&time_now)));
+        time_now = time(NULL);
+        fprintf(debug_log_file, "##### %s", asctime(localtime(&time_now)));
 
         debug_stream = debug_log_file;
     }

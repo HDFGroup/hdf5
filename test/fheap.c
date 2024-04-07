@@ -6234,7 +6234,7 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     fill_size = get_fill_size(tparam);
 
     /* Choose random # seed */
-    seed = (unsigned long)HDtime(NULL);
+    seed = (unsigned long)time(NULL);
 #if 0
 /* seed = (unsigned long)1155438845; */
 fprintf(stderr, "Random # seed was: %lu\n", seed);
@@ -15142,7 +15142,7 @@ test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     } /* end else */
 
     /* Choose random # seed */
-    seed = (unsigned long)HDtime(NULL);
+    seed = (unsigned long)time(NULL);
 #if 0
 /* seed = (unsigned long)1156158635; */
 fprintf(stderr, "Random # seed was: %lu\n", seed);
@@ -15345,7 +15345,7 @@ test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_te
     } /* end else */
 
     /* Choose random # seed */
-    seed = (unsigned long)HDtime(NULL);
+    seed = (unsigned long)time(NULL);
 #if 0
 /* seed = (unsigned long)1155181717; */
 fprintf(stderr, "Random # seed was: %lu\n", seed);
