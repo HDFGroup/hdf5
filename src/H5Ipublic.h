@@ -409,8 +409,8 @@ H5_DLL int H5Iget_ref(hid_t id);
  *          identifier for it.
  *
  *          The \p hash_size parameter indicates the minimum size of the hash
- *          table used to store IDs in the new type. This field is unused in
- *          1.8.13 and later, when the implementation of ID storage changed.
+ *          table used to store IDs in the new type. This parameter is unused
+ *          in 1.8.13 and later, when the implementation of ID storage changed.
  *
  *          The \p reserved parameter indicates the number of IDs in this new
  *          type to be reserved. Reserved IDs are valid IDs which are not
