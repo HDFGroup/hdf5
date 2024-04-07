@@ -691,14 +691,8 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDaccess
 #define HDaccess(F, M) access(F, M)
 #endif
-#ifndef HDasctime
-#define HDasctime(T) asctime(T)
-#endif
 #ifndef HDchdir
 #define HDchdir(S) chdir(S)
-#endif
-#ifndef HDclock
-#define HDclock() clock()
 #endif
 #ifndef HDclose
 #define HDclose(F) close(F)
@@ -708,12 +702,6 @@ typedef off_t       h5_stat_size_t;
 #endif
 #ifndef HDcreat
 #define HDcreat(S, M) creat(S, M)
-#endif
-#ifndef HDctime
-#define HDctime(T) ctime(T)
-#endif
-#ifndef HDdifftime
-#define HDdifftime(X, Y) difftime(X, Y)
 #endif
 #ifndef HDfdopen
 #define HDfdopen(N, S) fdopen(N, S)
@@ -777,14 +765,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDgettimeofday
 #define HDgettimeofday(S, P) gettimeofday(S, P)
 #endif
-#ifndef HDgmtime
-#define HDgmtime(T) gmtime(T)
-#endif
 #ifndef HDisatty
 #define HDisatty(F) isatty(F)
-#endif
-#ifndef HDlocaltime
-#define HDlocaltime(T) localtime(T)
 #endif
 #ifndef HDlseek
 #define HDlseek(F, O, W) lseek(F, O, W)
@@ -794,9 +776,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDmkdir
 #define HDmkdir(S, M) mkdir(S, M)
-#endif
-#ifndef HDmktime
-#define HDmktime(T) mktime(T)
 #endif
 #ifndef HDnanosleep
 #define HDnanosleep(N, O) nanosleep(N, O)
@@ -917,20 +896,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDstrtok_r
 #define HDstrtok_r(X, Y, Z) strtok_r(X, Y, Z)
 #endif
-#ifndef HDtime
-#define HDtime(T) time(T)
-#endif
 #ifndef HDtmpfile
 #define HDtmpfile() tmpfile()
-#endif
-#ifndef HDtolower
-#define HDtolower(C) tolower(C)
-#endif
-#ifndef HDtoupper
-#define HDtoupper(C) toupper(C)
-#endif
-#ifndef HDtzset
-#define HDtzset() tzset()
 #endif
 #ifndef HDunlink
 #define HDunlink(S) unlink(S)

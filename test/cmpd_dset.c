@@ -2831,7 +2831,7 @@ test_pack_ooo(void)
                                        * the compound */
     unsigned i, j;                    /* Indices */
 
-    HDsrand((unsigned)HDtime(NULL));
+    HDsrand((unsigned)time(NULL));
 
     /* Initialize "free_order" array to indicate that all slots in order are
      * free */

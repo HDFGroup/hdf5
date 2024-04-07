@@ -1648,7 +1648,7 @@ main(void)
     api_ctx_pushed = true;
 
     /* Seed random #'s */
-    curr_time = HDtime(NULL);
+    curr_time = time(NULL);
     HDsrandom((unsigned)curr_time);
 
     /* Create an empty file to retrieve size */

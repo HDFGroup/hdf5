@@ -462,8 +462,8 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 
     FUNC_ENTER_PACKAGE
 
-    HDtime(&rawtime);
-    info = HDgmtime(&rawtime);
+    time(&rawtime);
+    info = gmtime(&rawtime);
     strftime(rec->time_of_creation, sizeof(rec->time_of_creation), "%Y%m%dT%H%M%SZ", info);
 
     rec->logical_eof = file->logical_eof;
