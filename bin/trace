@@ -297,9 +297,6 @@ sub rewrite_func ($$$$$) {
     # Keep copy of original arguments
     my $orig_args = $args;
 
-    # Parse return value
-    my $rettype = argstring $file, $name, $type;
-
     # Parse arguments
     if ($args eq "void") {
         $argtrace = "H5ARG_TRACE0(\"\")";
