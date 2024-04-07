@@ -5154,9 +5154,9 @@ test_conv_str_2(void)
     if (NULL == (buf = (char *)calloc(nelmts, (size_t)8)))
         goto error;
     for (i = 0; i < nelmts; i++) {
-        nchars = (size_t)(HDrand() % 8);
+        nchars = (size_t)(rand() % 8);
         for (j = 0; j < nchars; j++)
-            buf[i * 8 + j] = (char)('a' + HDrand() % 26);
+            buf[i * 8 + j] = (char)('a' + rand() % 26);
         while (j < nchars)
             buf[i * 8 + j++] = '\0';
     } /* end for */
@@ -5228,9 +5228,9 @@ test_conv_str_3(void)
     if (NULL == (buf = (char *)calloc(nelmts, (size_t)8)))
         FAIL_PUTS_ERROR("Allocation failed.");
     for (i = 0; i < nelmts; i++) {
-        nchars = (size_t)(HDrand() % 8);
+        nchars = (size_t)(rand() % 8);
         for (j = 0; j < nchars; j++)
-            buf[i * 8 + j] = (char)('a' + HDrand() % 26);
+            buf[i * 8 + j] = (char)('a' + rand() % 26);
         while (j < nchars)
             buf[i * 8 + j++] = '\0';
     } /* end for */
@@ -5367,7 +5367,7 @@ test_conv_enum_1(void)
     if (NULL == (buf = (int *)malloc(nelmts * MAX(H5Tget_size(t1), H5Tget_size(t2)))))
         goto error;
     for (u = 0; u < nelmts; u++)
-        buf[u] = HDrand() % 26;
+        buf[u] = rand() % 26;
 
     /* Conversions */
     snprintf(s, sizeof(s), "Testing random enum conversion O(N)");
@@ -10129,7 +10129,7 @@ main(void)
     hid_t fapl    = H5I_INVALID_HID;
 
     /* Set the random # seed */
-    HDsrandom((unsigned)time(NULL));
+    srand((unsigned)time(NULL));
 
     reset_hdf5();
     fapl = h5_fileaccess();

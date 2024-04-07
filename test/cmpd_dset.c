@@ -2831,7 +2831,7 @@ test_pack_ooo(void)
                                        * the compound */
     unsigned i, j;                    /* Indices */
 
-    HDsrand((unsigned)time(NULL));
+    srand((unsigned)time(NULL));
 
     /* Initialize "free_order" array to indicate that all slots in order are
      * free */
@@ -2842,7 +2842,7 @@ test_pack_ooo(void)
     for (i = 0; i < PACK_NMEMBS; i++) {
         /* Generate index into free_order array */
         num_free = PACK_NMEMBS - i;
-        j        = (unsigned)HDrandom() % num_free;
+        j        = (unsigned)rand() % num_free;
 
         /* Update order array at the randomly generated (but guaranteed to be
          * free) location */
@@ -2854,7 +2854,7 @@ test_pack_ooo(void)
     } /* end for */
 
     /* Generate order to insert inner compound type */
-    sub_cmpd_order = (unsigned)HDrandom() % PACK_NMEMBS;
+    sub_cmpd_order = (unsigned)rand() % PACK_NMEMBS;
 
     for (extra_space = 0; extra_space < 2; extra_space++) {
         if (extra_space)

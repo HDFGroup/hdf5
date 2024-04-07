@@ -296,7 +296,7 @@ test_large(hid_t fcpl, hid_t fapl, bool new_format)
         if (H5G__has_stab_test(cwg) != false)
             TEST_ERROR;
     for (i = 0; i < LARGE_NOBJS; i++) {
-        snprintf(name, sizeof(name), "%05d%05d", (HDrandom() % 100000), i);
+        snprintf(name, sizeof(name), "%05d%05d", (rand() % 100000), i);
         if ((dir = H5Gcreate2(cwg, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if (H5Gclose(dir) < 0)
