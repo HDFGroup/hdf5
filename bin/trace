@@ -422,7 +422,7 @@ for $file (@ARGV) {
 
         # If the source changed then print out the new version
         if ($original ne $Source) {
-            printf "%s: instrumented %d argument list%s\n",
+            printf "%s: Instrumented %d argument list%s\n",
                     $file, $file_args, (1 == $file_args ? "" : "s");
             rename $file, "$file~" or die "unable to make backup";
             open SOURCE, ">$file" or die "unable to modify source";
@@ -442,7 +442,7 @@ if ($found_errors eq 1) {
     exit 1;
 } else {
     printf "Finished processing H5ES_insert() calls:\n";
-    printf "\tinstrumented %d argument list%s\n",
+    printf "\tInstrumented %d argument list%s\n",
              $total_args, (1 == $total_args ? "" : "s");
 }
 
