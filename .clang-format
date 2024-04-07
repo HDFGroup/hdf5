@@ -11,7 +11,7 @@ BraceWrapping:
 BreakBeforeBraces: Stroustrup
 BreakAfterJavaFieldAnnotations: true
 BreakStringLiterals: true
-ColumnLimit:     110    # Update $max_trace_macro_line_len in bin/trace also
+ColumnLimit:     110
 IndentWidth:     4
 ---
 Language:        Cpp

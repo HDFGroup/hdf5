@@ -210,14 +210,6 @@ $Source = "";
                "H5VL_request_status_t"      => "#",
               );
 
-
-##############################################################################
-# Maximum length of H5TRACE macro line
-# If the ColumnLimit in .clang-format is changed, this value will need to be updated
-#
-my $max_trace_macro_line_len = 110;
-
-
 ##############################################################################
 # Print an error message.
 #
