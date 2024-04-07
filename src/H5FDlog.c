@@ -1228,7 +1228,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
 
         if (-1 == bytes_read) { /* error */
             int    myerrno = errno;
-            time_t mytime  = HDtime(NULL);
+            time_t mytime  = time(NULL);
 
             offset = HDlseek(file->fd, 0, SEEK_CUR);
 
@@ -1240,7 +1240,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
                         "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
                         "error message = '%s', buf = %p, total read size = %llu, bytes this sub-read = %llu, "
                         "bytes actually read = %llu, offset = %llu",
-                        HDctime(&mytime), file->filename, file->fd, myerrno, strerror(myerrno), buf,
+                        ctime(&mytime), file->filename, file->fd, myerrno, strerror(myerrno), buf,
                         (unsigned long long)size, (unsigned long long)bytes_in,
                         (unsigned long long)bytes_read, (unsigned long long)offset);
         }
@@ -1447,7 +1447,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
 
         if (-1 == bytes_wrote) { /* error */
             int    myerrno = errno;
-            time_t mytime  = HDtime(NULL);
+            time_t mytime  = time(NULL);
 
             offset = HDlseek(file->fd, 0, SEEK_CUR);
 
@@ -1459,7 +1459,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
                         "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
                         "error message = '%s', buf = %p, total write size = %llu, bytes this sub-write = "
                         "%llu, bytes actually written = %llu, offset = %llu",
-                        HDctime(&mytime), file->filename, file->fd, myerrno, strerror(myerrno), buf,
+                        ctime(&mytime), file->filename, file->fd, myerrno, strerror(myerrno), buf,
                         (unsigned long long)size, (unsigned long long)bytes_in,
                         (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */

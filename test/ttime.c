@@ -150,7 +150,7 @@ test_time_io(void)
     CHECK(dsid, FAIL, "H5Dcreate2");
 
     /* Initialize time data value */
-    timenow = HDtime(NULL);
+    timenow = time(NULL);
 
     /* Write time to dataset */
     status = H5Dwrite(dsid, H5T_UNIX_D32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &timenow);
@@ -182,7 +182,7 @@ test_time_io(void)
 
     status = H5Dread(dsid, H5T_UNIX_D32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &timethen);
     CHECK(status, FAIL, "H5Dread");
-    fprintf(stderr, "time written was: %s\n", HDctime(&timethen));
+    fprintf(stderr, "time written was: %s\n", ctime(&timethen));
 
     status = H5Dclose(dsid);
     CHECK(status, FAIL, "H5Dclose");

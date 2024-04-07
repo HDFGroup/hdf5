@@ -119,7 +119,7 @@ main(void)
     contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     /* Initialize random number seed */
-    HDsrandom((unsigned)HDtime(NULL));
+    HDsrandom((unsigned)time(NULL));
 
     h5_reset();
     fapl = h5_fileaccess();
