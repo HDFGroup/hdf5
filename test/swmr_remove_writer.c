@@ -158,7 +158,7 @@ remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned lon
         symbol = choose_dataset();
 
         /* Shrink the dataset's dataspace */
-        remove_size = (hsize_t)HDrandom() % MAX_REMOVE_SIZE + 1;
+        remove_size = (hsize_t)rand() % MAX_REMOVE_SIZE + 1;
         if (remove_size > symbol->nrecords)
             symbol->nrecords = 0;
         else
@@ -297,7 +297,7 @@ main(int argc, char *argv[])
         HDgettimeofday(&t, NULL);
         random_seed = (unsigned)(t.tv_usec);
     } /* end if */
-    HDsrandom(random_seed);
+    srand(random_seed);
     /* ALWAYS emit the random seed for possible debugging */
     fprintf(stderr, "Using writer random seed: %u\n", random_seed);
 

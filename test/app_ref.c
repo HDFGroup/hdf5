@@ -27,7 +27,7 @@
  * 1 to MAX_NINC).  Assumes integers i and ninc are in scope. */
 #define RAND_INC(id)                                                                                         \
     do {                                                                                                     \
-        ninc = (HDrand() % MAX_NINC) + 1;                                                                    \
+        ninc = (rand() % MAX_NINC) + 1;                                                                      \
                                                                                                              \
         for (i = 0; i < ninc; i++)                                                                           \
             if (H5Iinc_ref(ids[id]) != i + 2)                                                                \
@@ -89,7 +89,7 @@ main(void)
     h5_reset();
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
 
-    HDsrand((unsigned)HDtime(NULL));
+    srand((unsigned)HDtime(NULL));
 
     TESTING("library shutdown with reference count > 1");
 

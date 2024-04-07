@@ -1149,7 +1149,7 @@ fiter_rnd_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_par
             size_t  swap_idx; /* Location to swap with when shuffling */
             hsize_t temp_idx; /* Temporary index */
 
-            swap_idx             = ((size_t)HDrandom() % ((size_t)cnt - u)) + u;
+            swap_idx             = ((size_t)rand() % ((size_t)cnt - u)) + u;
             temp_idx             = fiter->idx[u];
             fiter->idx[u]        = fiter->idx[swap_idx];
             fiter->idx[swap_idx] = temp_idx;
@@ -1649,7 +1649,7 @@ main(void)
 
     /* Seed random #'s */
     curr_time = HDtime(NULL);
-    HDsrandom((unsigned)curr_time);
+    srand((unsigned)curr_time);
 
     /* Create an empty file to retrieve size */
     {

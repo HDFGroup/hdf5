@@ -310,7 +310,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
     for (i = 0; i < niter; i++) {
         /* Determine number of datasets */
         ndsets = (flags & MDSET_FLAG_MLAYOUT) ? 6
-                 : (flags & MDSET_FLAG_MDSET) ? (size_t)((size_t)HDrandom() % max_dsets) + 1
+                 : (flags & MDSET_FLAG_MDSET) ? (size_t)((size_t)rand() % max_dsets) + 1
                                               : 1;
 
         /* Create file */
@@ -325,16 +325,16 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                 (flags & MDSET_FLAG_CHUNK) || ((flags & MDSET_FLAG_MLAYOUT) && (j == 1 || j == 2));
 
             /* Generate file dataspace */
-            dset_dims[j][0] = (hsize_t)((HDrandom() % MAX_DSET_X) + 1);
-            dset_dims[j][1] = (hsize_t)((HDrandom() % MAX_DSET_Y) + 1);
+            dset_dims[j][0] = (hsize_t)((rand() % MAX_DSET_X) + 1);
+            dset_dims[j][1] = (hsize_t)((rand() % MAX_DSET_Y) + 1);
             if ((file_space_ids[j] = H5Screate_simple(2, dset_dims[j], use_chunk ? max_dims : NULL)) < 0)
                 TEST_ERROR;
 
             /* Generate chunk if called for by configuration (multi layout uses chunked for datasets
              * 1 and 2) */
             if (use_chunk) {
-                chunk_dims[0] = (hsize_t)((HDrandom() % MAX_CHUNK_X) + 1);
-                chunk_dims[1] = (hsize_t)((HDrandom() % MAX_CHUNK_Y) + 1);
+                chunk_dims[0] = (hsize_t)((rand() % MAX_CHUNK_X) + 1);
+                chunk_dims[1] = (hsize_t)((rand() % MAX_CHUNK_Y) + 1);
                 if (H5Pset_chunk(dcpl_id[j], 2, chunk_dims) < 0)
                     TEST_ERROR;
             } /* end if */
@@ -352,18 +352,18 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
             /* Create dataset */
             /* If MDSET_FLAG_TCONV is set, use a different datatype with 50% probability, so
              * some datasets require type conversion and others do not */
-            if ((dset_ids[j] = H5Dcreate2(file_id, dset_name[j],
-                                          (flags & MDSET_FLAG_TCONV && HDrandom() % 2) ? H5T_NATIVE_LONG
-                                                                                       : H5T_NATIVE_UINT,
-                                          file_space_ids[j], H5P_DEFAULT, dcpl_id[j], H5P_DEFAULT)) < 0)
+            if ((dset_ids[j] =
+                     H5Dcreate2(file_id, dset_name[j],
+                                (flags & MDSET_FLAG_TCONV && rand() % 2) ? H5T_NATIVE_LONG : H5T_NATIVE_UINT,
+                                file_space_ids[j], H5P_DEFAULT, dcpl_id[j], H5P_DEFAULT)) < 0)
                 TEST_ERROR;
 
             /* Create virtual source dataset if necessary.  Use dcpl_id[0] for a contiguous dataset
              */
             if ((flags & MDSET_FLAG_MLAYOUT) && (j == 6)) {
                 if ((source_dset = H5Dcreate2(file_id, SOURCE_DS_NAME,
-                                              (flags & MDSET_FLAG_TCONV && HDrandom() % 2) ? H5T_NATIVE_LONG
-                                                                                           : H5T_NATIVE_UINT,
+                                              (flags & MDSET_FLAG_TCONV && rand() % 2) ? H5T_NATIVE_LONG
+                                                                                       : H5T_NATIVE_UINT,
                                               file_space_ids[j], H5P_DEFAULT, dcpl_id[0], H5P_DEFAULT)) < 0)
                     TEST_ERROR;
                 if (H5Dclose(source_dset) < 0)
@@ -388,7 +388,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
         for (j = 0; j < OPS_PER_FILE; j++) {
             /* Decide whether to read or write.  Can't read on the first iteration with external
              * layout because the write is needed to create the external file. */
-            do_read = (j == 0 && flags & MDSET_FLAG_MLAYOUT) ? false : (bool)(HDrandom() % 2);
+            do_read = (j == 0 && flags & MDSET_FLAG_MLAYOUT) ? false : (bool)(rand() % 2);
 
             /* Loop over datasets */
             for (k = 0; k < ndsets; k++) {
@@ -401,10 +401,10 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                     TEST_ERROR;
 
                 /* Decide whether to do a hyperslab, point, or all selection */
-                sel_type = HDrandom() % 3;
+                sel_type = rand() % 3;
                 if (sel_type == 0) {
                     /* Hyperslab */
-                    size_t nhs      = (size_t)((HDrandom() % MAX_HS) + 1); /* Number of hyperslabs */
+                    size_t nhs      = (size_t)((rand() % MAX_HS) + 1); /* Number of hyperslabs */
                     size_t max_hs_x = (MAX_HS_X <= dset_dims[k][0])
                                           ? MAX_HS_X
                                           : dset_dims[k][0]; /* Determine maximum hyperslab size in X */
@@ -414,14 +414,14 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
 
                     for (l = 0; l < nhs; l++) {
                         /* Generate hyperslab */
-                        count[0] = (hsize_t)(((hsize_t)HDrandom() % max_hs_x) + 1);
-                        count[1] = (hsize_t)(((hsize_t)HDrandom() % max_hs_y) + 1);
+                        count[0] = (hsize_t)(((hsize_t)rand() % max_hs_x) + 1);
+                        count[1] = (hsize_t)(((hsize_t)rand() % max_hs_y) + 1);
                         start[0] = (count[0] == dset_dims[k][0])
                                        ? 0
-                                       : (hsize_t)HDrandom() % (dset_dims[k][0] - count[0] + 1);
+                                       : (hsize_t)rand() % (dset_dims[k][0] - count[0] + 1);
                         start[1] = (count[1] == dset_dims[k][1])
                                        ? 0
-                                       : (hsize_t)HDrandom() % (dset_dims[k][1] - count[1] + 1);
+                                       : (hsize_t)rand() % (dset_dims[k][1] - count[1] + 1);
 
                         /* Select hyperslab */
                         if (H5Sselect_hyperslab(mem_space_ids[k], H5S_SELECT_OR, start, NULL, count, NULL) <
@@ -445,12 +445,12 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                 }     /* end if */
                 else if (sel_type == 1) {
                     /* Point selection */
-                    size_t npoints = (size_t)(((size_t)HDrandom() % MAX_POINTS) + 1); /* Number of points */
+                    size_t npoints = (size_t)(((size_t)rand() % MAX_POINTS) + 1); /* Number of points */
 
                     /* Generate points */
                     for (l = 0; l < npoints; l++) {
-                        points[2 * l]       = (unsigned)((hsize_t)HDrandom() % dset_dims[k][0]);
-                        points[(2 * l) + 1] = (unsigned)((hsize_t)HDrandom() % dset_dims[k][1]);
+                        points[2 * l]       = (unsigned)((hsize_t)rand() % dset_dims[k][0]);
+                        points[(2 * l) + 1] = (unsigned)((hsize_t)rand() % dset_dims[k][1]);
                     } /* end for */
 
                     /* Select points in file */
@@ -646,7 +646,7 @@ main(void)
     fapl_id = h5_fileaccess();
 
     /* Initialize random number seed */
-    HDsrandom((unsigned)HDtime(NULL));
+    srand((unsigned)HDtime(NULL));
 
     /* Fill dset_name array */
     for (i = 0; i < MAX_DSETS; i++) {

@@ -1039,7 +1039,7 @@ test_derived_flt(void)
     aligned = (int *)calloc((size_t)1, src_size);
 
     for (i = 0; i < nelmts * src_size; i++)
-        buf[i] = saved_buf[i] = (unsigned char)HDrand();
+        buf[i] = saved_buf[i] = (unsigned char)rand();
 
     /* Convert data from native integer to derived floating-point type.
      * The mantissa is big enough to retain the integer's precision. */
@@ -1199,7 +1199,7 @@ test_derived_flt(void)
     memset(saved_buf, 0, nelmts * src_size);
 
     for (i = 0; i < nelmts * src_size; i++)
-        buf[i] = saved_buf[i] = (unsigned char)HDrand();
+        buf[i] = saved_buf[i] = (unsigned char)rand();
 
     /* Convert data from the 2nd to the 1st derived floating-point type.
      * The mantissa and exponent of the 2nd type are big enough to retain
@@ -1520,7 +1520,7 @@ test_derived_integer(void)
     memset(saved_buf, 0, nelmts * src_size);
 
     for (i = 0; i < nelmts * src_size; i++)
-        buf[i] = saved_buf[i] = (unsigned char)HDrand();
+        buf[i] = saved_buf[i] = (unsigned char)rand();
 
     /* Convert data from the 1st to the 2nd derived integer type.
      * The precision of the 2nd type are big enough to retain
@@ -5978,7 +5978,7 @@ main(void)
     unsigned long nerrors = 0;
 
     /* Set the random # seed */
-    HDsrandom((unsigned)HDtime(NULL));
+    srand((unsigned)HDtime(NULL));
 
     reset_hdf5();
 

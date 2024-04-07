@@ -2055,7 +2055,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 
     for (i = 0; i < size[0]; i++) {
         for (j = 0; j < size[1] / 2; j++) {
-            points[i][j] = (int)HDrandom();
+            points[i][j] = (int)rand();
         }
     }
     if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points_data) < 0)
@@ -2182,7 +2182,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 
     for (i = 0; i < (size_t)hs_size[0]; i++) {
         for (j = 0; j < (size_t)hs_size[1]; j++) {
-            points[(size_t)hs_offset[0] + i][(size_t)hs_offset[1] + j] = (int)HDrandom();
+            points[(size_t)hs_offset[0] + i][(size_t)hs_offset[1] + j] = (int)rand();
         }
     }
     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
@@ -3116,7 +3116,7 @@ test_onebyte_shuffle(hid_t file)
 
     for (i = 0; i < 10; i++)
         for (j = 0; j < 20; j++)
-            orig_data[i][j] = (unsigned char)HDrandom();
+            orig_data[i][j] = (unsigned char)rand();
 
     PASSED();
 
@@ -3232,7 +3232,7 @@ test_nbit_int(hid_t file)
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
             power           = pow(2.0, (double)(precision - 1));
-            orig_data[i][j] = (int)(((long long)HDrandom() % (long long)power) << offset);
+            orig_data[i][j] = (int)(((long long)rand() % (long long)power) << offset);
 
             /* even-numbered values are negative */
             if ((i * size[1] + j + 1) % 2 == 0)
@@ -3608,9 +3608,8 @@ test_nbit_array(hid_t file)
         for (j = 0; j < (size_t)size[1]; j++)
             for (m = 0; m < (size_t)adims[0]; m++)
                 for (n = 0; n < (size_t)adims[1]; n++) {
-                    power = pow(2.0, (double)precision);
-                    orig_data[i][j][m][n] =
-                        (unsigned int)(((long long)HDrandom() % (long long)power) << offset);
+                    power                 = pow(2.0, (double)precision);
+                    orig_data[i][j][m][n] = (unsigned int)(((long long)rand() % (long long)power) << offset);
                 } /* end for */
     PASSED();
 
@@ -3802,11 +3801,11 @@ test_nbit_compound(hid_t file)
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
             power             = pow(2.0, (double)(precision[0] - 1));
-            orig_data[i][j].i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
+            orig_data[i][j].i = (int)(((long long)rand() % (long long)power) << offset[0]);
             power             = pow(2.0, (double)(precision[1] - 1));
-            orig_data[i][j].c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
+            orig_data[i][j].c = (char)(((long long)rand() % (long long)power) << offset[1]);
             power             = pow(2.0, (double)(precision[2] - 1));
-            orig_data[i][j].s = (short)(((long long)HDrandom() % (long long)power) << offset[2]);
+            orig_data[i][j].s = (short)(((long long)rand() % (long long)power) << offset[2]);
             orig_data[i][j].f = float_val[i][j];
 
             /* some even-numbered integer values are negative */
@@ -4081,33 +4080,30 @@ test_nbit_compound_2(hid_t file)
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
             power               = pow(2.0, (double)(precision[0] - 1));
-            orig_data[i][j].a.i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
+            orig_data[i][j].a.i = (int)(((long long)rand() % (long long)power) << offset[0]);
             power               = pow(2.0, (double)(precision[1] - 1));
-            orig_data[i][j].a.c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
+            orig_data[i][j].a.c = (char)(((long long)rand() % (long long)power) << offset[1]);
             power               = pow(2.0, (double)(precision[2] - 1));
-            orig_data[i][j].a.s = (short)(-(((long long)HDrandom() % (long long)power) << offset[2]));
+            orig_data[i][j].a.s = (short)(-(((long long)rand() % (long long)power) << offset[2]));
             orig_data[i][j].a.f = float_val[i][j];
 
             power             = pow(2.0, (double)precision[3]);
-            orig_data[i][j].v = (unsigned int)(((long long)HDrandom() % (long long)power) << offset[3]);
+            orig_data[i][j].v = (unsigned int)(((long long)rand() % (long long)power) << offset[3]);
 
             for (m = 0; m < (size_t)array_dims[0]; m++)
                 for (n = 0; n < (size_t)array_dims[1]; n++) {
                     power                   = pow(2.0, (double)(precision[4] - 1));
-                    orig_data[i][j].b[m][n] = (char)(((long long)HDrandom() % (long long)power) << offset[4]);
+                    orig_data[i][j].b[m][n] = (char)(((long long)rand() % (long long)power) << offset[4]);
                 } /* end for */
 
             for (m = 0; m < (size_t)array_dims[0]; m++)
                 for (n = 0; n < (size_t)array_dims[1]; n++) {
-                    power = pow(2.0, (double)(precision[0] - 1));
-                    orig_data[i][j].d[m][n].i =
-                        (int)(-(((long long)HDrandom() % (long long)power) << offset[0]));
-                    power = pow(2.0, (double)(precision[1] - 1));
-                    orig_data[i][j].d[m][n].c =
-                        (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-                    power = pow(2.0, (double)(precision[2] - 1));
-                    orig_data[i][j].d[m][n].s =
-                        (short)(((long long)HDrandom() % (long long)power) << offset[2]);
+                    power                     = pow(2.0, (double)(precision[0] - 1));
+                    orig_data[i][j].d[m][n].i = (int)(-(((long long)rand() % (long long)power) << offset[0]));
+                    power                     = pow(2.0, (double)(precision[1] - 1));
+                    orig_data[i][j].d[m][n].c = (char)(((long long)rand() % (long long)power) << offset[1]);
+                    power                     = pow(2.0, (double)(precision[2] - 1));
+                    orig_data[i][j].d[m][n].s = (short)(((long long)rand() % (long long)power) << offset[2]);
                     orig_data[i][j].d[m][n].f = float_val[i][j];
                 } /* end for */
         }         /* end for */
@@ -4335,7 +4331,7 @@ test_nbit_compound_3(hid_t file)
     for (i = 0; i < (size_t)size[0]; i++) {
         power = pow(2.0, 17.0 - 1.0);
         memset(&orig_data[i], 0, sizeof(orig_data[i]));
-        orig_data[i].i = (int)(HDrandom() % (long)power);
+        orig_data[i].i = (int)(rand() % (long)power);
         strcpy(orig_data[i].str, "fixed-length C string");
         orig_data[i].vl_str = strdup("variable-length C string");
 
@@ -4520,7 +4516,7 @@ test_nbit_int_size(hid_t file)
     for (i = 0; i < DSET_DIM1; i++)
         for (j = 0; j < DSET_DIM2; j++) {
             power      = pow(2.0, (double)(precision - 1));
-            orig[i][j] = HDrandom() % (int)power << offset;
+            orig[i][j] = rand() % (int)power << offset;
         }
 
     /* Describe the dataspace. */
@@ -4728,7 +4724,7 @@ test_nbit_flt_size(hid_t file)
      */
     for (i = 0; i < DSET_DIM1; i++)
         for (j = 0; j < DSET_DIM2; j++)
-            orig[i][j] = (float)(HDrandom() % 1234567) / 2;
+            orig[i][j] = (float)(rand() % 1234567) / 2;
 
     /* Describe the dataspace. */
     dims[0] = DSET_DIM1;
@@ -4878,7 +4874,7 @@ test_scaleoffset_int(hid_t file)
     /* Initialize data */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            orig_data[i][j] = HDrandom() % 10000;
+            orig_data[i][j] = rand() % 10000;
 
             /* even-numbered values are negative */
             if ((i * size[1] + j + 1) % 2 == 0)
@@ -5019,7 +5015,7 @@ test_scaleoffset_int_2(hid_t file)
 
     /* Initialize data of hyperslab */
     for (j = 0; j < (size_t)size[1]; j++) {
-        orig_data[0][j] = (int)HDrandom() % 10000;
+        orig_data[0][j] = (int)rand() % 10000;
 
         /* even-numbered values are negative */
         if ((j + 1) % 2 == 0)
@@ -5138,7 +5134,7 @@ test_scaleoffset_float(hid_t file)
     /* Initialize data */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            orig_data[i][j] = (float)(HDrandom() % 100000) / 1000.0F;
+            orig_data[i][j] = (float)(rand() % 100000) / 1000.0F;
 
             /* even-numbered values are negative */
             if ((i * size[1] + j + 1) % 2 == 0)
@@ -5281,7 +5277,7 @@ test_scaleoffset_float_2(hid_t file)
 
     /* Initialize data of hyperslab */
     for (j = 0; j < (size_t)size[1]; j++) {
-        orig_data[0][j] = (float)(HDrandom() % 100000) / 1000.0F;
+        orig_data[0][j] = (float)(rand() % 100000) / 1000.0F;
 
         /* even-numbered values are negative */
         if ((j + 1) % 2 == 0)
@@ -5399,7 +5395,7 @@ test_scaleoffset_double(hid_t file)
     /* Initialize data */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            orig_data[i][j] = (HDrandom() % 10000000) / 10000000.0;
+            orig_data[i][j] = (rand() % 10000000) / 10000000.0;
 
             /* even-numbered values are negative */
             if ((i * size[1] + j + 1) % 2 == 0)
@@ -5542,7 +5538,7 @@ test_scaleoffset_double_2(hid_t file)
 
     /* Initialize data of hyperslab */
     for (j = 0; j < (size_t)size[1]; j++) {
-        orig_data[0][j] = (HDrandom() % 10000000) / 10000000.0;
+        orig_data[0][j] = (rand() % 10000000) / 10000000.0;
 
         /* even-numbered values are negative */
         if ((j + 1) % 2 == 0)
@@ -8097,7 +8093,7 @@ make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
 
     assert(0 < nelts);
 
-    *offsetp = HDrandom() % nelts;
+    *offsetp = rand() % nelts;
 
     /* `maxinc` is chosen so that for any `x` in [0, nelts - 1],
      * `x + maxinc` does not overflow a long.
@@ -8110,7 +8106,7 @@ make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
      * number.
      */
     do {
-        inc = 1 + HDrandom() % maxinc;
+        inc = 1 + rand() % maxinc;
     } while (gcd(inc, nelts) != 1);
 
     *incp = inc;
@@ -15921,7 +15917,7 @@ main(void)
     contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     /* Set the random # seed */
-    HDsrandom((unsigned)HDtime(NULL));
+    srand((unsigned)HDtime(NULL));
 
     /* Initialize global arrays */
     /* points */

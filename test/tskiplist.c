@@ -70,7 +70,7 @@ test_skiplist_init(void)
 
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
-    HDsrandom((unsigned)curr_time);
+    srand((unsigned)curr_time);
 
     /* Create randomized set of numbers */
     for (u = 0; u < NUM_ELEMS; u++) {
@@ -79,7 +79,7 @@ test_skiplist_init(void)
             found = 0;
 
             /* Generate random numbers from -5000 to 5000 */
-            new_val = (int)(HDrandom() % 10001) - 5001;
+            new_val = (int)(rand() % 10001) - 5001;
 
             /* Check if the value is already in the array */
             for (v = 0; v < u; v++)

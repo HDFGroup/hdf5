@@ -1650,7 +1650,7 @@ eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
             size_t  swap_idx; /* Location to swap with when shuffling */
             hsize_t temp_idx; /* Temporary index */
 
-            swap_idx             = ((size_t)HDrandom() % ((size_t)cnt - u)) + u;
+            swap_idx             = ((size_t)rand() % ((size_t)cnt - u)) + u;
             temp_idx             = eiter->idx[u];
             eiter->idx[u]        = eiter->idx[swap_idx];
             eiter->idx[swap_idx] = temp_idx;
@@ -1796,7 +1796,7 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
         for (u = 0; u < (size_t)cnt; u++) {
             size_t swap_idx; /* Location to swap with when shuffling */
 
-            swap_idx          = ((size_t)HDrandom() % ((size_t)sparse_cnt - u)) + u;
+            swap_idx          = ((size_t)rand() % ((size_t)sparse_cnt - u)) + u;
             eiter->idx[u]     = tmp_idx[swap_idx];
             tmp_idx[swap_idx] = tmp_idx[u];
         } /* end for */
@@ -2318,7 +2318,7 @@ main(void)
 
     /* Seed random #'s */
     curr_time = HDtime(NULL);
-    HDsrandom((unsigned)curr_time);
+    srand((unsigned)curr_time);
 
     /* Create an empty file to retrieve size */
     {
