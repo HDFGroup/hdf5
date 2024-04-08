@@ -1701,6 +1701,8 @@ Platforms Tested
       version to its list of compatible systems, along with the previous two
       releases.
 
+    Solaris 11.4                     GNU gcc
+
     Linux 5.16.14-200.fc35           GNU gcc (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
     #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
     Fedora35                         clang version 13.0.0 (Fedora 13.0.0-3.fc35)
