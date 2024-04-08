@@ -223,6 +223,8 @@ sub create_init ($) {
     my $desc;                   # Description of error message
     my $sect_name;              # Section of minor error messages
     my $sect_desc;              # Description of section
+    my $first_major = 0;        # Whether the first major error code was saved
+    my $first_minor = 0;        # Whether the first minor error code was saved
 
     # Rename previous file
 #    rename "${prefix}${file}", "${prefix}${file}~" or die "unable to make backup";
@@ -241,12 +243,22 @@ sub create_init ($) {
     print HEADER   "/* Major error codes */\n";
     print HEADER   "/*********************/\n\n";
     foreach $name (keys %major) {
-        print HEADER " "x(0*$indent),"assert(${name}_g==(-1));\n";
+        print HEADER " "x(0*$indent),"assert(${name}_g==H5I_INVALID_HID);\n";
         print HEADER " "x(0*$indent),"if((msg = H5E__create_msg(cls, H5E_MAJOR, \"${major{$name}}\"))==NULL)\n";
         print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, \"error message initialization failed\");\n";
         print HEADER " "x(0*$indent),"if((${name}_g = H5I_register(H5I_ERROR_MSG, msg, false))<0)\n";
         print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, \"can't register error message\");\n";
+        if ($first_major == 0) {
+            print HEADER " "x(0*$indent),"\n/* Remember first major error code ID */\n";
+            print HEADER " "x(0*$indent),"assert(H5E_first_maj_id_g==H5I_INVALID_HID);\n";
+            print HEADER " "x(0*$indent),"H5E_first_maj_id_g = ${name}_g;\n\n";
+            $first_major = 1;
+        }
+        $last_name = $name;
     }
+    print HEADER " "x(0*$indent),"\n/* Remember last major error code ID */\n";
+    print HEADER " "x(0*$indent),"assert(H5E_last_maj_id_g==H5I_INVALID_HID);\n";
+    print HEADER " "x(0*$indent),"H5E_last_maj_id_g = ${last_name}_g;\n\n";
 
     # Iterate over all the minor error sections
     print HEADER "\n/*********************/\n";
@@ -257,13 +269,24 @@ sub create_init ($) {
 
         # Iterate over all the minor errors in each section
         for $name ( @{$section_list{$sect_name}}) {
-            print HEADER " "x(0*$indent),"assert(${name}_g==(-1));\n";
+            print HEADER " "x(0*$indent),"assert(${name}_g==H5I_INVALID_HID);\n";
             print HEADER " "x(0*$indent),"if((msg = H5E__create_msg(cls, H5E_MINOR, \"${minor{$name}}\"))==NULL)\n";
             print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, \"error message initialization failed\");\n";
             print HEADER " "x(0*$indent),"if((${name}_g = H5I_register(H5I_ERROR_MSG, msg, true))<0)\n";
             print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, \"can't register error message\");\n";
+
+            if ($first_minor == 0) {
+                print HEADER " "x(0*$indent),"\n/* Remember first minor error code ID */\n";
+                print HEADER " "x(0*$indent),"assert(H5E_first_min_id_g==H5I_INVALID_HID);\n";
+                print HEADER " "x(0*$indent),"H5E_first_min_id_g = ${name}_g;\n\n";
+                $first_minor = 1;
+            }
+            $last_name = $name;
         }
     }
+    print HEADER " "x(0*$indent),"\n/* Remember last minor error code ID */\n";
+    print HEADER " "x(0*$indent),"assert(H5E_last_min_id_g==H5I_INVALID_HID);\n";
+    print HEADER " "x(0*$indent),"H5E_last_min_id_g = ${last_name}_g;\n";
 
     print_endprotect(*HEADER, $file);
 
@@ -299,7 +322,9 @@ sub create_term ($) {
     foreach $name (keys %major) {
         print HEADER " "x($indent),"\n${name}_g=";
     }
-    print HEADER " (-1);\n";
+    print HEADER " H5I_INVALID_HID;\n";
+    print HEADER " "x(0*$indent),"H5E_first_maj_id_g = H5I_INVALID_HID;\n\n";
+    print HEADER " "x(0*$indent),"H5E_last_maj_id_g = H5I_INVALID_HID;\n\n";
 
     # Iterate over all the minor error sections
     print HEADER "\n/* Reset minor error IDs */\n";
@@ -311,7 +336,9 @@ sub create_term ($) {
             print HEADER " "x($indent),"\n${name}_g=";
         }
     }
-    print HEADER " (-1);\n";
+    print HEADER " H5I_INVALID_HID;\n";
+    print HEADER " "x(0*$indent),"H5E_first_min_id_g = H5I_INVALID_HID;\n\n";
+    print HEADER " "x(0*$indent),"H5E_last_min_id_g = H5I_INVALID_HID;\n\n";
 
     print_endprotect(*HEADER, $file);
 

@@ -116,6 +116,12 @@ struct H5E_t {
 H5_DLLVAR H5E_t H5E_stack_g[1];
 #endif
 
+/* First & last major and minor error codes registered by the library */
+H5_DLLVAR hid_t H5E_first_maj_id_g;
+H5_DLLVAR hid_t H5E_last_maj_id_g;
+H5_DLLVAR hid_t H5E_first_min_id_g;
+H5_DLLVAR hid_t H5E_last_min_id_g;
+
 /******************************/
 /* Package Private Prototypes */
 /******************************/

@@ -143,6 +143,12 @@ static const H5E_t H5E_err_stack_def = {
     NULL /* auto_data */
 };
 
+/* First & last major and minor error codes registered by the library */
+hid_t H5E_first_maj_id_g = H5I_INVALID_HID;
+hid_t H5E_last_maj_id_g = H5I_INVALID_HID;
+hid_t H5E_first_min_id_g = H5I_INVALID_HID;
+hid_t H5E_last_min_id_g = H5I_INVALID_HID;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
