@@ -172,7 +172,7 @@ main(void)
 
     RAND_INC(T_ESTACK);
 
-    HDsignal(SIGABRT, &Abrt_Handler);
+    signal(SIGABRT, &Abrt_Handler);
 
     if (H5close() < 0)
         TEST_ERROR;
