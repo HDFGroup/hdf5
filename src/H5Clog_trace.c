@@ -240,7 +240,7 @@ H5C__log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int m
     /* Open log file and set it to be unbuffered */
     if (NULL == (trace_udata->outfile = fopen(file_name, "w")))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file");
-    HDsetbuf(trace_udata->outfile, NULL);
+    setbuf(trace_udata->outfile, NULL);
 
     /* Write the header */
     fprintf(trace_udata->outfile, "### HDF5 metadata cache trace file version 1 ###\n");

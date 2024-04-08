@@ -785,13 +785,13 @@ main(int argc, char *argv[])
     h5tools_init();
 
     /* To exit from h5watch for SIGTERM signal */
-    if (HDsignal(SIGTERM, catch_signal) == SIG_ERR) {
+    if (signal(SIGTERM, catch_signal) == SIG_ERR) {
         error_msg("An error occurred while setting a signal handler.\n");
         leave(EXIT_FAILURE);
     }
 
     /* To exit from h5watch for SIGINT signal */
-    if (HDsignal(SIGINT, catch_signal) == SIG_ERR) {
+    if (signal(SIGINT, catch_signal) == SIG_ERR) {
         error_msg("An error occurred while setting a signal handler.\n");
         leave(EXIT_FAILURE);
     }
