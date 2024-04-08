@@ -1672,7 +1672,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
         api_ctx_pushed = false;                                                                              \
     }                                                                                                        \
     if (H5_UNLIKELY(err_occurred))                                                                           \
-        (void)H5E_dump_api_stack();                                                                      \
+        (void)H5E_dump_api_stack();                                                                          \
     H5_API_UNLOCK                                                                                            \
     return (ret_value);                                                                                      \
     }                                                                                                        \
@@ -1685,7 +1685,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     H5_POP_FUNC                                                                                              \
     if (H5_UNLIKELY(err_occurred))                                                                           \
-        (void)H5E_dump_api_stack();                                                                      \
+        (void)H5E_dump_api_stack();                                                                          \
     H5_API_UNLOCK                                                                                            \
     return (ret_value);                                                                                      \
     }                                                                                                        \
@@ -1698,7 +1698,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     } /*end scope from end of FUNC_ENTER*/                                                                   \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     if (H5_UNLIKELY(err_occurred))                                                                           \
-        (void)H5E_dump_api_stack();                                                                      \
+        (void)H5E_dump_api_stack();                                                                          \
     H5_API_UNLOCK                                                                                            \
     return (ret_value);                                                                                      \
     }                                                                                                        \
@@ -1722,7 +1722,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
     if (H5_UNLIKELY(err_occurred))                                                                           \
-        (void)H5E_dump_api_stack();                                                                      \
+        (void)H5E_dump_api_stack();                                                                          \
     H5_API_UNLOCK                                                                                            \
     return (ret_value);                                                                                      \
     }                                                                                                        \

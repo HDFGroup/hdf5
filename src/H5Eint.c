@@ -894,7 +894,7 @@ done:
 herr_t
 H5E_dump_api_stack(void)
 {
-    H5E_t *estack = H5E__get_my_stack();
+    H5E_t *estack    = H5E__get_my_stack();
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR
