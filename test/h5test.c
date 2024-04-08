@@ -1784,7 +1784,7 @@ h5_send_message(const char *send, const char *arg1, const char *arg2)
 
     fclose(signalfile);
 
-    HDrename(TMP_SIGNAL_FILE, send);
+    rename(TMP_SIGNAL_FILE, send);
 } /* h5_send_message() */
 
 /*-------------------------------------------------------------------------
@@ -2099,8 +2099,8 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     }
 
     /* Compare each byte and fail if a difference is found */
-    HDrewind(f1ptr);
-    HDrewind(f2ptr);
+    rewind(f1ptr);
+    rewind(f2ptr);
     for (ii = 0; ii < f1size; ii++) {
         if (fread(&f1char, 1, 1, f1ptr) != 1) {
             ret_value = -1;
@@ -2216,7 +2216,7 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
 
     HDfseek(orig_ptr, 0, SEEK_END);
     fsize = (size_t)HDftell(orig_ptr);
-    HDrewind(orig_ptr);
+    rewind(orig_ptr);
 
     dest_ptr = fopen(dest, "wb");
     if (NULL == dest_ptr) {
