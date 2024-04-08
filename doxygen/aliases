@@ -243,7 +243,7 @@ ALIASES += ref_mdc_in_hdf5="<a href=\"https://portal.hdfgroup.org/display/HDF5/M
 ALIASES += ref_mdc_logging="<a href=\"https://portal.hdfgroup.org/display/HDF5/H5F_START_MDC_LOGGING\">Metadata Cache Logging</a>"
 ALIASES += ref_news_112="<a href=\"https://portal.hdfgroup.org/documentation/hdf5-docs/release_specifics/new_features_1_12.html\">New Features in HDF5 Release 1.12</a>"
 ALIASES += ref_h5ocopy="<a href=\"https://portal.hdfgroup.org/display/HDF5/Copying+Committed+Datatypes+with+H5Ocopy\">Copying Committed Datatypes with H5Ocopy()</a>"
-ALIASES += ref_sencode_fmt_change="<a href=\"https://portal.hdfgroup.org/pages/viewpage.action?pageId=58100093&preview=/58100093/58100094/encode_format_RFC.pdf\">RFC H5Secnode() / H5Sdecode() Format Change</a>"
+ALIASES += ref_sencode_fmt_change="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/H5Sencode_format.docx.pdf">RFC H5Secnode() / H5Sdecode() Format Change</a>"
 ALIASES += ref_vlen_strings="\Emph{Creating variable-length string datatypes}"
 ALIASES += ref_vol_doc="VOL documentation"
 
