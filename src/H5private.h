@@ -288,14 +288,6 @@
 #define SUCCEED 0
 #define FAIL    (-1)
 
-/* The HDF5 library uses the symbol `ERR` frequently.  So do
- * header files for libraries such as curses(3), terminfo(3), etc.
- * Remove its definition here to avoid clashes with HDF5.
- */
-#ifdef ERR
-#undef ERR
-#endif
-
 /* number of members in an array */
 #ifndef NELMTS
 #define NELMTS(X) (sizeof(X) / sizeof(X[0]))

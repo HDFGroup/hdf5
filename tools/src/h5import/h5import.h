@@ -26,13 +26,13 @@
 /* filename */
 #define OPT_o 1
 /* output filename */
-#define OPT_c 2  /* configuration filename */
-#define OPT_h 3  /* request for explanation */
-#define OPT_d 4  /* dimensions */
-#define OPT_p 5  /* pathname */
-#define OPT_t 6  /* data type */
-#define OPT_s 7  /* data size */
-#define ERR   20 /* invalid token */
+#define OPT_c         2  /* configuration filename */
+#define OPT_h         3  /* request for explanation */
+#define OPT_d         4  /* dimensions */
+#define OPT_p         5  /* pathname */
+#define OPT_t         6  /* data type */
+#define OPT_s         7  /* data size */
+#define INVALID_TOKEN 20 /* invalid token */
 
 #define MAX_GROUPS_IN_PATH   20
 #define MAX_PATH_NAME_LENGTH 255
@@ -130,49 +130,57 @@ static int state_table[15][8] = {
     /* token ordering: FILNAME      OPT_o   OPT_c  OPT_h  OPT_d  OPT_p  OPT_t  OPT_s   */
 
     /* state 0: start */
-    {1, ERR, ERR, 6, ERR, ERR, ERR, ERR},
+    {1, INVALID_TOKEN, INVALID_TOKEN, 6, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN},
 
     /* state 1: input files */
-    {ERR, ERR, 2, ERR, 7, ERR, ERR, ERR},
+    {INVALID_TOKEN, INVALID_TOKEN, 2, INVALID_TOKEN, 7, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN},
 
     /* state 2: -c[onfigfile] */
-    {3, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    {3, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN,
+     INVALID_TOKEN},
 
     /* state 3: configfile */
-    {1, 4, ERR, ERR, ERR, ERR, ERR, ERR},
+    {1, 4, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN},
 
     /* state 4: -o[utfile] */
-    {5, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    {5, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN,
+     INVALID_TOKEN},
 
     /* state 5: outfile */
-    {ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    {INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN,
+     INVALID_TOKEN},
 
     /* state 6: -h[elp] */
-    {ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    {INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN,
+     INVALID_TOKEN},
 
     /* state 7: -d[ims] */
-    {8, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    {8, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN,
+     INVALID_TOKEN},
 
     /* state 8: dimensions */
-    {1, 4, ERR, ERR, ERR, 9, 11, 13},
+    {1, 4, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, 9, 11, 13},
 
     /* state 9: -p[ath] */
-    {10, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    {10, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN,
+     INVALID_TOKEN},
 
     /* state 10: path name */
-    {1, 4, ERR, ERR, ERR, ERR, 11, 13},
+    {1, 4, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, 11, 13},
 
     /* state 11: -t[ype] */
-    {12, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    {12, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN,
+     INVALID_TOKEN},
 
     /* state 12: data type */
-    {1, 4, ERR, ERR, ERR, ERR, ERR, 13},
+    {1, 4, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, 13},
 
     /* state 13: -s[ize] */
-    {14, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    {14, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN,
+     INVALID_TOKEN},
 
     /* state 14: data size */
-    {1, 4, ERR, ERR, ERR, ERR, ERR, ERR}
+    {1, 4, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN, INVALID_TOKEN}
 
 };
 
