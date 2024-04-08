@@ -860,12 +860,10 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #define HDunsetenv(S) unsetenv(S)
 #endif
 
-#ifndef HDvasprintf
-#ifdef H5_HAVE_VASPRINTF
-#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
-#else
-H5_DLL int       HDvasprintf(char **bufp, const char *fmt, va_list _ap);
-#endif
+/* vasprintf() is GNU/BSD (not POSIX) and is not available everywhere */
+#ifndef H5_HAVE_VASPRINTF
+#define vasprintf(STRP, FMT, AP) H5_vasprintf(STRP, FMT, AP)
+H5_DLL int H5_vasprintf(char **strp, const char *fmt, va_list ap);
 #endif
 
 #ifndef HDwrite

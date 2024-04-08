@@ -337,7 +337,7 @@ H5E__get_stack(void)
 
         /* (It's not necessary to release this in this API, it is
          *      released by the "key destructor" set up in the H5TS
-         *      routines.  See calls to pthread_key_create() in H5TS.c -QAK)
+         *      routines.  See calls to pthread_key_create() in H5TS.c)
          */
         H5TS_set_thread_local_value(H5TS_errstk_key_g, (void *)estack);
     } /* end if */
@@ -1243,15 +1243,14 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
 
     /* Note that the variable-argument parsing for the format is identical in
      *      the H5E_printf_stack() routine - correct errors and make changes in both
-     *      places. -QAK
+     *      places.
      */
 
     /* Format the description */
     va_start(ap, fmt);
     va_started = true;
 
-    /* Use the vasprintf() routine, since it does what we're trying to do below */
-    if (HDvasprintf(&tmp, fmt, ap) < 0)
+    if (vasprintf(&tmp, fmt, ap) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Push the error on the stack */
@@ -1261,11 +1260,7 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
 done:
     if (va_started)
         va_end(ap);
-    /* Memory was allocated with HDvasprintf so it needs to be freed
-     * with free
-     */
-    if (tmp)
-        free(tmp);
+    free(tmp);
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Epush2() */

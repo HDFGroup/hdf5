@@ -643,15 +643,14 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
 
     /* Note that the variable-argument parsing for the format is identical in
      *      the H5Epush2() routine - correct errors and make changes in both
-     *      places. -QAK
+     *      places.
      */
 
     /* Start the variable-argument parsing */
     va_start(ap, fmt);
     va_started = true;
 
-    /* Use the vasprintf() routine, since it does what we're trying to do below */
-    if (HDvasprintf(&tmp, fmt, ap) < 0)
+    if (vasprintf(&tmp, fmt, ap) < 0)
         HGOTO_DONE(FAIL);
 
     /* Push the error on the stack */
@@ -661,11 +660,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
 done:
     if (va_started)
         va_end(ap);
-    /* Memory was allocated with HDvasprintf so it needs to be freed
-     * with free
-     */
-    if (tmp)
-        free(tmp);
+    free(tmp);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_printf_stack() */

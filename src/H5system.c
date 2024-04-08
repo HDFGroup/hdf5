@@ -64,24 +64,24 @@
 static bool H5_ntzset = false;
 
 #ifndef H5_HAVE_VASPRINTF
-/* HDvasprintf provides vasprintf-like function on targets where it is
+/* H5_vasprintf() provides vasprintf-like function on systems where it is
  * unavailable.
  */
 int
-HDvasprintf(char **bufp, const char *fmt, va_list _ap)
+H5_vasprintf(char **strp, const char *fmt, va_list ap)
 {
     char  *buf;   /* buffer to receive formatted string */
     size_t bufsz; /* size of buffer to allocate */
 
     for (bufsz = 32; (buf = malloc(bufsz)) != NULL;) {
         int     ret;
-        va_list ap;
+        va_list local_ap;
 
-        va_copy(ap, _ap);
-        ret = vsnprintf(buf, bufsz, fmt, ap);
-        va_end(ap);
+        va_copy(local_ap, ap);
+        ret = vsnprintf(buf, bufsz, fmt, local_ap);
+        va_end(local_ap);
         if (ret >= 0 && (size_t)ret < bufsz) {
-            *bufp = buf;
+            *strp = buf;
             return ret;
         }
         free(buf);
