@@ -4,10 +4,13 @@
 
 <h2 id="introduction-to-swmr">Introduction to SWMR</h2>
 <p>The Single-Writer / Multiple-Reader (SWMR) feature enables multiple processes to read an HDF5 file while it is being written to (by a single process) without using locks or requiring communication between processes.</p>
+<p><img src=tutr-swmr1.png alt="tutr-swmr1.png" width=500>
 <p>All communication between processes must be performed via the HDF5 file. The HDF5 file under SWMR access must reside on a system that complies with POSIX write() semantics.</p>
 <p>The basic engineering challenge for this to work was to ensure that the readers of an HDF5 file always see a coherent (though possibly not up to date) HDF5 file.</p>
 <p>The issue is that when writing data there is information in the metadata cache in addition to the physical file on disk:</p>
+<p><img src=tutr-swmr2.png alt="tutr-swmr2.png" width=500>
 <p>However, the readers can only see the state contained in the physical file:</p>
+<p><img src=tutr-swmr3.png alt="tutr-swmr3.png" width=500>
 <p>The SWMR solution implements dependencies on when the metadata can be flushed to the file. This ensures that metadata cache flush operations occur in the proper order, so that there will never be internal file pointers in the physical file that point to invalid (unflushed) file addresses.</p>
 <p>A beneficial side effect of using SWMR access is better fault tolerance. It is more difficult to corrupt a file when using SWMR.</p>
 <h2 id="documentation">Documentation</h2>
@@ -46,7 +49,8 @@ Call H5F_START_SWMR_WRITE to start SWMR access to the file.
 Periodically flush data.</p>
 <h4 id="example-code">Example Code:</h4>
 <p>Create the file using the latest file format property:</p>
-<p>   fapl = H5Pcreate (H5P_FILE_ACCESS);
+<p>
+   fapl = H5Pcreate (H5P_FILE_ACCESS);
    status = H5Pset_libver_bounds (fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
    fid = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 [Create objects (files, datasets, ...). Close any attributes and named datatype objects. Groups and datasets may remain open before starting SWMR access to them.]</p>
