@@ -790,17 +790,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDremove
 #define HDremove(S) remove(S)
 #endif
-#ifndef HDrename
-#define HDrename(OLD, NEW) rename(OLD, NEW)
-#endif
-#ifndef HDrewind
-#define HDrewind(F) rewind(F)
-#endif
 #ifndef HDrmdir
 #define HDrmdir(S) rmdir(S)
-#endif
-#ifndef HDsetbuf
-#define HDsetbuf(F, S) setbuf(F, S)
 #endif
 #ifndef HDsetenv
 #define HDsetenv(N, V, O) setenv(N, V, O)
@@ -816,9 +807,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDsigemptyset
 #define HDsigemptyset(S) sigemptyset(S)
-#endif
-#ifndef HDsignal
-#define HDsignal(N, F) signal(N, F)
 #endif
 #ifndef HDsleep
 #define HDsleep(N) sleep(N)
@@ -841,9 +829,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDstrtok_r
 #define HDstrtok_r(X, Y, Z) strtok_r(X, Y, Z)
-#endif
-#ifndef HDtmpfile
-#define HDtmpfile() tmpfile()
 #endif
 #ifndef HDunlink
 #define HDunlink(S) unlink(S)

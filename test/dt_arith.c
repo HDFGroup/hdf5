@@ -3261,7 +3261,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
      * The remainder of this function is executed only by the child if
      * HANDLE_SIGFPE is defined.
      */
-    HDsignal(SIGFPE, fpe_handler);
+    signal(SIGFPE, fpe_handler);
 
     /* What are the names of the source and destination types */
     if (H5Tequal(src, H5T_NATIVE_FLOAT)) {

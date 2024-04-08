@@ -245,7 +245,7 @@ H5C__log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mp
     /* Open log file and set it to be unbuffered */
     if (NULL == (json_udata->outfile = fopen(file_name, "w")))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file");
-    HDsetbuf(json_udata->outfile, NULL);
+    setbuf(json_udata->outfile, NULL);
 
 done:
     if (file_name)
