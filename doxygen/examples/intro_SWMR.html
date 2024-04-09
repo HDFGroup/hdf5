@@ -1,0 +1,103 @@
+<html>
+  <head>
+    <title>Introduction to Single-Writer_Multiple-Reader (SWMR)</title>
+
+<h2 id="introduction-to-swmr">Introduction to SWMR</h2>
+<p>The Single-Writer / Multiple-Reader (SWMR) feature enables multiple processes to read an HDF5 file while it is being written to (by a single process) without using locks or requiring communication between processes.</p>
+<p><img src=tutr-swmr1.png alt="tutr-swmr1.png" width=500>
+<p>All communication between processes must be performed via the HDF5 file. The HDF5 file under SWMR access must reside on a system that complies with POSIX write() semantics.</p>
+<p>The basic engineering challenge for this to work was to ensure that the readers of an HDF5 file always see a coherent (though possibly not up to date) HDF5 file.</p>
+<p>The issue is that when writing data there is information in the metadata cache in addition to the physical file on disk:</p>
+<p><img src=tutr-swmr2.png alt="tutr-swmr2.png" width=500>
+<p>However, the readers can only see the state contained in the physical file:</p>
+<p><img src=tutr-swmr3.png alt="tutr-swmr3.png" width=500>
+<p>The SWMR solution implements dependencies on when the metadata can be flushed to the file. This ensures that metadata cache flush operations occur in the proper order, so that there will never be internal file pointers in the physical file that point to invalid (unflushed) file addresses.</p>
+<p>A beneficial side effect of using SWMR access is better fault tolerance. It is more difficult to corrupt a file when using SWMR.</p>
+<h2 id="documentation">Documentation</h2>
+<h3 id="swmr-users-guide"><a href="https://docs.hdfgroup.org/hdf5/tn/HDF5_SWMR_User_Guide.pdf">SWMR User&#39;s Guide</a></h3>
+<h3 id="hdf5-library-apis">HDF5 Library APIs</h3>
+<ul>
+<li><a href="https://docs.hdfgroup.org/hdf5/develop/group___s_w_m_r.html#ga159be34fbe7e4a959589310ef0196dfe">H5F_START_SWMR_WRITE</a> — Enables SWMR writing mode for a file</li>
+<li><a href="https://docs.hdfgroup.org/hdf5/develop/group___h5_d_o.html#ga316caac160af15192e0c78228667341e">H5DO_APPEND</a> — Appends data to a dataset along a specified dimension</li>
+<li>H5P_SET_OBJECT_FLUSH_CB — Sets a callback function to invoke when an object flush occurs in the file</li>
+<li>H5P_GET_OBJECT_FLUSH_CB — Retrieves the object flush property values from the file access property list</li>
+<li>H5O_DISABLE_MDC_FLUSHES — Prevents metadata entries for an HDF5 object from being flushed from the metadata cache to storage</li>
+<li>H5O_ENABLE_MDC_FLUSHES — Enables flushing of dirty metadata entries from a file’s metadata cache</li>
+<li>H5O_ARE_MDC_FLUSHES_DISABLED — Determines if an HDF5 object has had flushes of metadata entries disabled</li>
+</ul>
+<h3 id="tools">Tools</h3>
+<ul>
+<li>h5watch — Outputs new records appended to a dataset as the dataset grows</li>
+<li>h5format_convert — Converts the layout format version and chunked indexing types of datasets created with HDF5-1.10 so that applications built with HDF5-1.8 can access them</li>
+<li>h5clear — Clears superblock status_flags field, removes metadata cache image, prints EOA and EOF, or sets EOA of a file</li>
+</ul>
+<h3 id="design-documents">Design Documents</h3>
+<p>Error while fetching page properties report data:</p>
+<h2 id="programming-model">Programming Model</h2>
+<p>Please be aware that the SWMR feature requires that an HDF5 file be created with the latest file format. See H5P_SET_LIBVER_BOUNDS for more information.</p>
+<p>To use SWMR follow the the general programming model for creating and accessing HDF5 files and objects along with the steps described below.</p>
+<h3 id="swmr-writer">SWMR Writer:</h3>
+<p>The SWMR writer either opens an existing file and objects or creates them as follows.</p>
+<p>Open an existing file:</p>
+<p>Call H5Fopen using the H5F_ACC_SWMR_WRITE flag.
+Begin writing datasets.
+Periodically flush data.
+Create a new file:</p>
+<p>Call H5Fcreate using the latest file format.
+Create groups, datasets and attributes, and then close the attributes.
+Call H5F_START_SWMR_WRITE to start SWMR access to the file.
+Periodically flush data.</p>
+<h4 id="example-code">Example Code:</h4>
+<p>Create the file using the latest file format property:</p>
+<p>
+   fapl = H5Pcreate (H5P_FILE_ACCESS);
+   status = H5Pset_libver_bounds (fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+   fid = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+[Create objects (files, datasets, ...). Close any attributes and named datatype objects. Groups and datasets may remain open before starting SWMR access to them.]</p>
+<p>Start SWMR access to the file:</p>
+<p>   status = H5Fstart_swmr_write (fid);
+Reopen the datasets and start writing, periodically flushing data:</p>
+<p>   status = H5Dwrite (dset_id, ...);
+   status = H5Dflush (dset_id);</p>
+<h3 id="swmr-reader">SWMR Reader:</h3>
+<p>The SWMR reader must continually poll for new data:</p>
+<p>Call H5Fopen using the H5F_ACC_SWMR_READ flag.
+Poll, checking the size of the dataset to see if there is new data available for reading.
+Read new data, if any.</p>
+<h4 id="example-code-1">Example Code:</h4>
+<p>Open the file using the SWMR read flag:</p>
+<p>   fid = H5Fopen (filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, H5P_DEFAULT);
+Open the dataset and then repeatedly poll the dataset, by getting the dimensions, reading new data, and refreshing:</p>
+<p>   dset_id = H5Dopen (...);
+   space_id = H5Dget_space (...);
+   while (...) {
+      status = H5Dread (dset_id, ...);
+      status = H5Drefresh (dset_id);
+      space_id = H5Dget_space (...);
+   }</p>
+<h2 id="limitations-and-scope">Limitations and Scope</h2>
+<p>An HDF5 file under SWMR access must reside on a system that complies with POSIX write() semantics. It is also limited in scope as follows:</p>
+<p>The writer process is only allowed to modify raw data of existing datasets by;</p>
+<p>Appending data along any unlimited dimension.
+Modifying existing data
+The following operations are not allowed (and the corresponding HDF5 files will fail):</p>
+<p>The writer cannot add new objects to the file.
+The writer cannot delete objects in the file.
+The writer cannot modify or append data with variable length, string or region reference datatypes.
+File space recycling is not allowed. As a result the size of a file modified by a SWMR writer may be larger than a file modified by a non-SWMR writer.</p>
+<h2 id="tools-for-working-with-swmr">Tools for Working with SWMR</h2>
+<p>Two new tools, h5watch and h5clear, are available for use with SWMR. The other HDF5 utilities have also been modified to recognize SWMR:</p>
+<p>The h5watch tool allows a user to monitor the growth of a dataset.
+The h5clear tool clears the status flags in the superblock of an HDF5 file.
+The rest of the HDF5 tools will exit gracefully but not work with SWMR otherwise.</p>
+<h2 id="programming-example">Programming Example</h2>
+<p>A good example of using SWMR is included with the HDF5 tests in the source code. You can run it while reading the file it creates. If you then interrupt the application and reader and look at the resulting file, you will see that the file is still valid. Follow these steps:</p>
+<p>Download the HDF5-1.10 source code to a local directory on a filesystem (that complies with POSIX write() semantics). Build the software. No special configuration options are needed to use SWMR.</p>
+<p>Invoke two command terminal windows. In one window go into the bin/ directory of the built binaries. In the other window go into the test/ directory of the HDF5-1.10 source code that was just built.</p>
+<p>In the window in the test/ directory compile and run use_append_chunk.c. The example writes a three dimensional dataset by planes (with chunks of size 1 x 256 x 256).</p>
+<p>In the other window (in the bin/ directory) run h5watch on the file created by use_append_chunk.c (use_append_chunk.h5). It should be run while use_append_chunk is executing and you will see valid data displayed with h5watch.</p>
+<p>Interrupt use_append_chunk while it is running, and stop h5watch.</p>
+<p>Use h5clear to clear the status flags in the superblock of the HDF5 file (use_append_chunk.h5).</p>
+<p>View the file with h5dump. You will see that it is a valid file even though the application did not close properly. It will contain data up to the point that it was interrupted.</p>
+
+</body></html>
