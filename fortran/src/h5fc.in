@@ -60,7 +60,7 @@ host_os="@host_os@"
 
 prog_name="`basename $0`"
 
-misc_args=""
+qargs=""
 compile_args=""
 link_args=""
 link_objs=""
