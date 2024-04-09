@@ -259,8 +259,7 @@ for arg in $@ ; do
 
     *)
       misc_args="$misc_args $qarg"
-
-	if [ -s "$arg" ] ; then
+      if [ -s "$arg" ] ; then
 	    ext=`expr "$arg" : '.*\(\..*\)'`
 	    if [ "$ext" = ".C" -o "$ext" = ".cxx" -o "$ext" = ".cpp" -o \
 		 "$ext" = ".cc" -o "$ext" = ".c" -o "$ext" = ".CC" ] ; then
@@ -283,11 +282,11 @@ for arg in $@ ; do
               compile_args="$compile_args $arg"
               link_args="$link_args $arg"
             fi
-	    else
-	        compile_args="$compile_args $arg"
-	        link_args="$link_args $arg"
-	    fi
-	;;
+      else
+	    compile_args="$compile_args $arg"
+	    link_args="$link_args $arg"
+      fi
+      ;;
   esac
 done
 
@@ -296,7 +295,7 @@ if test "x$do_compile" = "xyes"; then
     compile_args="-c $compile_args"
   fi
 
-  $SHOW $CXX -I$includedir $H5BLD_CPPFLAGS $CPPFLAGS $H5BLD_CXXFLAGS $CXXFLAGS $misc_args $compile_args
+  $SHOW $CXX -I$includedir $H5BLD_CPPFLAGS $CPPFLAGS $H5BLD_CXXFLAGS $CXXFLAGS $compile_args
   status=$?
 
   if test "$status" != "0"; then
