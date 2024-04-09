@@ -16,11 +16,12 @@ CONTENTS
 --------
         1. Obtaining HDF5
         2. Third-party Software Requirements
-        2.1. Zlib
-        2.2  Szip (optional)
-        2.3. MPI and MPI-IO
-
-
+        2.1 zlib
+        2.2 Szip (optional)
+        2.3 MPI and MPI-IO
+        3. HDF5 Source Code and Precompiled Binaries
+        4. Build and Install HDF5 on Unix and Mac OSX Platforms with Autotools
+        5. Build and Install HDF5 Libraries and Tools with CMake        
 
 *****************************************************************************
 
@@ -29,11 +30,11 @@ CONTENTS
         https://github.com/HDFGroup/hdf5.
 
 2. Third-party Software Requirements
-2.1. Zlib
+2.1. zlib
         The HDF5 library includes a predefined compression filter that
         uses the "deflate" method for chunked datasets. If zlib-1.1.2 or
         later is found, HDF5 will use it.  Otherwise, HDF5's predefined
-        compression method will degenerate to a no-op; the compression
+        compression method will be disabled; the compression
         filter will succeed but the data will not be compressed.
 
 2.2. Szip (optional)
@@ -41,7 +42,7 @@ CONTENTS
         uses the extended-Rice lossless compression algorithm for chunked
         datasets.
 
-        Building instructions are available with the Szip source code.
+        Szip source code includes build instructions.
 
         The HDF Group does not distribute separate Szip precompiled libraries,
         but the HDF5 pre-built binaries provided on The HDF Group download page
@@ -65,15 +66,12 @@ CONTENTS
 
 3. HDF5 Source Code and Precompiled Binaries
         The HDF Group provides source code and pre-compiled binaries from the
-        HDF5 github releases page:
+        HDF5 GitHub releases page:
 
         https://github.com/HDFGroup/hdf5/releases
 
-4. Build and Install HDF5 on Unix and Mac OSX Platforms with autotools
+4. Build and Install HDF5 on Unix and Mac OSX Platforms with Autotools
         see the release_docs/INSTALL_Autotools.txt file.
 
-5. Build and Install HDF5 Libraries and tools with CMake
+5. Build and Install HDF5 Libraries and Tools with CMake
         see the release_docs/INSTALL_CMake.txt file.
-
-
-
