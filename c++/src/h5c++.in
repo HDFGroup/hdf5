@@ -285,7 +285,7 @@ for arg in $@ ; do
 done
 link_args="$link_args $qargs"
 if test "x$do_compile" = "xyes"; then
-  if test "x$dash_c" == "x"; then
+  if test "x$dash_c" = "x"; then
     dash_c="-c"
   fi
   $SHOW $CXX -I$includedir $H5BLD_CPPFLAGS $CPPFLAGS $H5BLD_CXXFLAGS $CXXFLAGS $dash_c $qargs $compile_args

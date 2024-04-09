@@ -300,7 +300,7 @@ if test "$dash_c" = "-c" -a "$do_compile" = no -a "$do_link" = no ; then
 fi
 
 if test "x$do_compile" = "xyes"; then
-  if test "x$dash_c" == "x"; then
+  if test "x$dash_c" = "x"; then
     dash_c="-c"
   fi
   $SHOW $CC -I$includedir $H5BLD_CPPFLAGS $CPPFLAGS $H5BLD_CFLAGS $CFLAGS $dash_c $qargs $compile_args

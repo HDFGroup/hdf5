@@ -280,7 +280,7 @@ link_args="$link_args $qargs"
   fi
 
 if test "x$do_compile" = "xyes"; then
-  if test "x$dash_c" == "x"; then
+  if test "x$dash_c" = "x"; then
     dash_c="-c"
   fi
   $SHOW $FC $H5BLD_FCFLAGS $FCFLAGS ${F9XSUFFIXFLAG} ${fmodules} $dash_c $qargs $compile_args
