@@ -717,6 +717,49 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
             HGOTO_DONE(FAIL);
 
     /*
+     * Push the error if there's room.  Otherwise just forget it.
+     */
+    if (estack->nused < H5E_NSLOTS) {
+        if (H5E__set_stack_entry(&estack->slot[estack->nused], file, func, line, cls_id, maj_id, min_id, desc) < 0)
+            HGOTO_DONE(FAIL);
+        estack->nused++;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E__push_stack() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E__set_stack_entry
+ *
+ * Purpose:     Sets the information for a given stack entry.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E__set_stack_entry(H5E_error2_t *err_entry, const char *file, const char *func,
+    unsigned line, hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    /*
+     * WARNING: We cannot call HERROR() from within this function or else we
+     *		could enter infinite recursion.  Furthermore, we also cannot
+     *		call any other HDF5 macro or function which might call
+     *		HERROR().  HERROR() is called by HRETURN_ERROR() which could
+     *		be called by FUNC_ENTER().
+     */
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity check */
+    assert(err_entry);
+    assert(cls_id > 0);
+    assert(maj_id > 0);
+    assert(min_id > 0);
+
+    /*
      * Don't fail if arguments are bad.  Instead, substitute some default
      * value.
      */
@@ -727,40 +770,32 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
     if (!desc)
         desc = "No description given";
 
-    /*
-     * Push the error if there's room.  Otherwise just forget it.
-     */
-    assert(estack);
-
-    if (estack->nused < H5E_NSLOTS) {
-        /* Increment the IDs to indicate that they are used in this stack */
-        /* Note: don't waste time incrementing library internal error IDs */
-        if (cls_id != H5E_ERR_CLS_g)
-            if (H5I_inc_ref_noherr(cls_id, false) < 0)
-                HGOTO_DONE(FAIL);
-        estack->slot[estack->nused].cls_id = cls_id;
-        if (maj_id < H5E_first_maj_id_g || maj_id > H5E_last_maj_id_g)
-            if (H5I_inc_ref_noherr(maj_id, false) < 0)
-                HGOTO_DONE(FAIL);
-        estack->slot[estack->nused].maj_num = maj_id;
-        if (min_id < H5E_first_min_id_g || min_id > H5E_last_min_id_g)
-            if (H5I_inc_ref_noherr(min_id, false) < 0)
-                HGOTO_DONE(FAIL);
-        estack->slot[estack->nused].min_num = min_id;
-        /* The 'func' & 'file' strings are statically allocated (by the compiler)
-         * there's no need to duplicate them.
-         */
-        estack->slot[estack->nused].func_name = func;
-        estack->slot[estack->nused].file_name = file;
-        estack->slot[estack->nused].line      = line;
-        if (NULL == (estack->slot[estack->nused].desc = strdup(desc)))
+    /* Increment the IDs to indicate that they are used in this stack */
+    /* Note: don't waste time incrementing library internal error IDs */
+    if (cls_id != H5E_ERR_CLS_g)
+        if (H5I_inc_ref_noherr(cls_id, false) < 0)
             HGOTO_DONE(FAIL);
-        estack->nused++;
-    } /* end if */
+    err_entry->cls_id = cls_id;
+    if (maj_id < H5E_first_maj_id_g || maj_id > H5E_last_maj_id_g)
+        if (H5I_inc_ref_noherr(maj_id, false) < 0)
+            HGOTO_DONE(FAIL);
+    err_entry->maj_num = maj_id;
+    if (min_id < H5E_first_min_id_g || min_id > H5E_last_min_id_g)
+        if (H5I_inc_ref_noherr(min_id, false) < 0)
+            HGOTO_DONE(FAIL);
+    err_entry->min_num = min_id;
+    /* The 'func' & 'file' strings are statically allocated (by the compiler)
+     * there's no need to duplicate them.
+     */
+    err_entry->func_name = func;
+    err_entry->file_name = file;
+    err_entry->line      = line;
+    if (NULL == (err_entry->desc = strdup(desc)))
+        HGOTO_DONE(FAIL);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5E__push_stack() */
+} /* end H5E__set_stack_entry() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5E__clear_entries
