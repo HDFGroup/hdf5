@@ -720,7 +720,8 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
      * Push the error if there's room.  Otherwise just forget it.
      */
     if (estack->nused < H5E_NSLOTS) {
-        if (H5E__set_stack_entry(&estack->slot[estack->nused], file, func, line, cls_id, maj_id, min_id, desc) < 0)
+        if (H5E__set_stack_entry(&estack->slot[estack->nused], file, func, line, cls_id, maj_id, min_id,
+                                 desc) < 0)
             HGOTO_DONE(FAIL);
         estack->nused++;
     } /* end if */
@@ -739,8 +740,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E__set_stack_entry(H5E_error2_t *err_entry, const char *file, const char *func,
-    unsigned line, hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc)
+H5E__set_stack_entry(H5E_error2_t *err_entry, const char *file, const char *func, unsigned line, hid_t cls_id,
+                     hid_t maj_id, hid_t min_id, const char *desc)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

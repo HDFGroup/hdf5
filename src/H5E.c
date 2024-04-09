@@ -887,7 +887,9 @@ H5E__get_current_stack(void)
         new_error     = &(estack_copy->slot[u]);
 
         /* Set error stack entry */
-        if (H5E__set_stack_entry(new_error, current_error->file_name, current_error->func_name, current_error->line, current_error->cls_id, current_error->maj_num, current_error->min_num, current_error->desc) < 0)
+        if (H5E__set_stack_entry(new_error, current_error->file_name, current_error->func_name,
+                                 current_error->line, current_error->cls_id, current_error->maj_num,
+                                 current_error->min_num, current_error->desc) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, NULL, "can't set error entry");
     } /* end for */
 
@@ -986,7 +988,9 @@ H5E__set_current_stack(H5E_t *estack)
         new_error     = &(estack->slot[u]);
 
         /* Set error stack entry */
-        if (H5E__set_stack_entry(current_error, new_error->file_name, new_error->func_name, new_error->line, new_error->cls_id, new_error->maj_num, new_error->min_num, new_error->desc) < 0)
+        if (H5E__set_stack_entry(current_error, new_error->file_name, new_error->func_name, new_error->line,
+                                 new_error->cls_id, new_error->maj_num, new_error->min_num,
+                                 new_error->desc) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't set error entry");
     } /* end for */
 
@@ -1620,7 +1624,9 @@ H5E__append_stack(H5E_t *dst_stack, const H5E_t *src_stack)
         dst_error = &(dst_stack->slot[dst_stack->nused]);
 
         /* Set error stack entry */
-        if (H5E__set_stack_entry(dst_error, src_error->file_name, src_error->func_name, src_error->line, src_error->cls_id, src_error->maj_num, src_error->min_num, src_error->desc) < 0)
+        if (H5E__set_stack_entry(dst_error, src_error->file_name, src_error->func_name, src_error->line,
+                                 src_error->cls_id, src_error->maj_num, src_error->min_num,
+                                 src_error->desc) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't set error entry");
 
         /* Increment # of errors in destination stack */

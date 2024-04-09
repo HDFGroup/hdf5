@@ -125,12 +125,12 @@ H5_DLLVAR hid_t H5E_last_min_id_g;
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t  H5E__term_deprec_interface(void);
-H5_DLL void    H5E__set_default_auto(H5E_t *stk);
-H5_DLL herr_t  H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id,
-                               hid_t maj_id, hid_t min_id, const char *desc);
-H5_DLL herr_t H5E__set_stack_entry(H5E_error2_t *err_entry, const char *file, const char *func,
-    unsigned line, hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc);
+H5_DLL herr_t H5E__term_deprec_interface(void);
+H5_DLL void   H5E__set_default_auto(H5E_t *stk);
+H5_DLL herr_t H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id,
+                              hid_t maj_id, hid_t min_id, const char *desc);
+H5_DLL herr_t H5E__set_stack_entry(H5E_error2_t *err_entry, const char *file, const char *func, unsigned line,
+                                   hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc);
 H5_DLL ssize_t H5E__get_msg(const H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg, size_t size);
 H5_DLL herr_t  H5E__print(const H5E_t *estack, FILE *stream, bool bk_compat);
 H5_DLL herr_t  H5E__walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *op,
