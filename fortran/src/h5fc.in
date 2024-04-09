@@ -67,8 +67,7 @@ link_objs=""
 
 do_link="yes"
 do_compile="no"
-dash_o="no"
-dash_c="no"
+dash_c=""
 get_output_file="no"
 
 SHOW="eval"
@@ -183,12 +182,10 @@ for arg in $@ ; do
       fi
 
       do_link="no"
-      dash_c="yes"
+      dash_c="-c"
       ;;
     -o)
-      dash_o="yes"
-
-      if test "x$dash_c" = "xyes"; then
+      if test "x$dash_c" = "x-c"; then
         compile_args="$compile_args $arg"
       else
         link_args="$link_args $arg"
@@ -198,7 +195,7 @@ for arg in $@ ; do
       ;;
     -E|-M|-MT)
       compile_args="$compile_args $arg"
-      dash_c="yes"
+      dash_c="-c"
       do_link="no"
       ;;
     -l*)
@@ -233,50 +230,49 @@ for arg in $@ ; do
       usage
       ;;
     *\"*)
-      qarg="'"$arg"'"
-      misc_args="$misc_args $qarg"
+      tmp="'"$arg"'"
+      qargs="$qargs $tmp"
       ;;
     *\'*)
-      qarg='"'"$arg"'"'
-      misc_args="$misc_args $qarg"
+      tmp='"'"$arg"'"'
+      qargs="$qargs $tmp"
       ;;
     *)
-      misc_args="$misc_args $arg"
-      if [ -s "$arg" ] ; then
-	    ext=`expr "$arg" : '.*\(\..*\)'`
-	    if [ "$ext" = ".f" -o "$ext" = ".F" -o \
-                 "$ext" = ".for" -o "$ext" = ".FOR" -o \
-                 "$ext" = ".ftn" -o "$ext" = ".FTN" -o \
-                 "$ext" = ".f90" -o "$ext" = ".F90" -o \
-                 "$ext" = ".f95" -o "$ext" = ".F95" -o \
-                 "$ext" = ".f03" -o "$ext" = ".F03" -o \
-                 "$ext" = ".f08" -o "$ext" = ".F08" ] ; then
+	    if [ -s "$arg" ] ; then
+	      ext=`expr "$arg" : '.*\(\..*\)'`
+	      if [ "$ext" = ".f" -o "$ext" = ".F" -o \
+             "$ext" = ".for" -o "$ext" = ".FOR" -o \
+             "$ext" = ".ftn" -o "$ext" = ".FTN" -o \
+             "$ext" = ".f90" -o "$ext" = ".F90" -o \
+             "$ext" = ".f95" -o "$ext" = ".F95" -o \
+             "$ext" = ".f03" -o "$ext" = ".F03" -o \
+             "$ext" = ".f08" -o "$ext" = ".F08" ] ; then
 	        do_compile="yes"
 	        compile_args="$compile_args $arg"
 	        fname=`basename $arg $ext`
 	        link_objs="$link_objs $fname.o"
-	    elif [ "$ext" = ".o" ] ; then
-		if test "x$dash_c" = "xyes"  ; then
-	            compile_args="$compile_args $arg"
-                else
-	            do_link="yes"
-	            link_objs="$link_objs $arg"
-                fi
-            elif test "x$ext" = "x.a"; then
-              # This is an archive that we're linking in
-              libraries=" $libraries $arg "
-            else
-              compile_args="$compile_args $arg"
-              link_args="$link_args $arg"
-            fi
+	      elif [ "$ext" = ".o" ] ; then
+		      if test "x$dash_c" = "x-c"  ; then
+	          compile_args="$compile_args $arg"
+          else
+	          do_link="yes"
+	          link_objs="$link_objs $arg"
+          fi
+        elif test "x$ext" = "x.a"; then
+          # This is an archive that we're linking in
+          libraries=" $libraries $arg "
         else
-            compile_args="$compile_args $arg"
-            link_args="$link_args $arg"
+          compile_args="$compile_args $arg"
+          link_args="$link_args $arg"
         fi
-	;;
+	    else
+	      compile_args="$compile_args $arg"
+	      link_args="$link_args $arg"
+	    fi
+	    ;;
   esac
 done
-
+link_args="$link_args $qargs"
 # It's possible that there isn't a modules flag...
   fmodules=""
   if test -n "$F9XMODFLAG"; then
@@ -284,11 +280,8 @@ done
   fi
 
 if test "x$do_compile" = "xyes"; then
-  if test "x$dash_c" != "xyes"; then
-    compile_args="-c $compile_args"
-  fi
 
-  $SHOW $FC $H5BLD_FCFLAGS $FCFLAGS ${F9XSUFFIXFLAG} ${fmodules} $compile_args
+  $SHOW $FC $H5BLD_FCFLAGS $FCFLAGS ${F9XSUFFIXFLAG} ${fmodules} $dash_c $qargs $compile_args
   status=$?
 
   if test "$status" != "0"; then
