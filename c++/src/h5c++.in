@@ -60,7 +60,7 @@ host_os="@host_os@"
 
 prog_name="`basename $0`"
 
-qargs=""
+misc_args=""
 compile_args=""
 libraries=""
 link_args=""
@@ -69,7 +69,8 @@ clibpath=""
 
 do_link="yes"
 do_compile="no"
-dash_c=""
+dash_o="no"
+dash_c="no"
 get_output_file="no"
 
 SHOW="eval"
@@ -204,10 +205,12 @@ for arg in $@ ; do
       fi
 
       do_link="no"
-      dash_c="-c"
+      dash_c="yes"
       ;;
     -o)
-      if test "x$dash_c" = "x-c"; then
+      dash_o="yes"
+
+      if test "x$dash_c" = "xyes"; then
         compile_args="$compile_args $arg"
       else
         link_args="$link_args $arg"
@@ -217,7 +220,7 @@ for arg in $@ ; do
       ;;
     -E|-M|-MT)
       compile_args="$compile_args $arg"
-      dash_c="-c"
+      dash_c="yes"
       do_link="no"
       ;;
     -l*)
@@ -246,47 +249,54 @@ for arg in $@ ; do
       usage
       ;;
     *\"*)
-      tmp="'"$arg"'"
-      qargs="$qargs $tmp"
+      qarg="'"$arg"'"
+      misc_args="$misc_args $qarg"
       ;;
     *\'*)
-      tmp='"'"$arg"'"'
-      qargs="$qargs $tmp"
+      qarg='"'"$arg"'"'
+      misc_args="$misc_args $qarg"
       ;;
+
     *)
-      if [ -s "$arg" ] ; then
-	      ext=`expr "$arg" : '.*\(\..*\)'`
-	      if [ "$ext" = ".C" -o "$ext" = ".cxx" -o "$ext" = ".cpp" -o \
-		         "$ext" = ".cc" -o "$ext" = ".c" -o "$ext" = ".CC" ] ; then
+      misc_args="$misc_args $qarg"
+
+	if [ -s "$arg" ] ; then
+	    ext=`expr "$arg" : '.*\(\..*\)'`
+	    if [ "$ext" = ".C" -o "$ext" = ".cxx" -o "$ext" = ".cpp" -o \
+		 "$ext" = ".cc" -o "$ext" = ".c" -o "$ext" = ".CC" ] ; then
+
 	        do_compile="yes"
 	        compile_args="$compile_args $arg"
 	        fname=`basename $arg $ext`
 	        link_objs="$link_objs $fname.o"
-        elif [ "$ext" = ".o" ] ; then
-          if test "x$dash_c" = "x-c"  ; then
-	          compile_args="$compile_args $arg"
-          else
-	          do_link="yes"
-	          link_objs="$link_objs $arg"
-          fi
-        elif test "x$ext" = "x.a"; then
-          # This is an archive that we're linking in
-          libraries=" $libraries $arg "
-        else
-          compile_args="$compile_args $arg"
-          link_args="$link_args $arg"
-        fi
+	    elif [ "$ext" = ".o" ] ; then
+		if test "x$dash_c" = "xyes"  ; then
+	            compile_args="$compile_args $arg"
+                else
+	            do_link="yes"
+	            link_objs="$link_objs $arg"
+                fi
+            elif test "x$ext" = "x.a"; then
+              # This is an archive that we're linking in
+              libraries=" $libraries $arg "
+            else
+              compile_args="$compile_args $arg"
+              link_args="$link_args $arg"
+            fi
 	    else
-	      compile_args="$compile_args $arg"
-	      link_args="$link_args $arg"
+	        compile_args="$compile_args $arg"
+	        link_args="$link_args $arg"
 	    fi
-	    ;;
+	;;
   esac
 done
-link_args="$link_args $qargs"
-if test "x$do_compile" = "xyes"; then
 
-  $SHOW $CXX -I$includedir $H5BLD_CPPFLAGS $CPPFLAGS $H5BLD_CXXFLAGS $CXXFLAGS $dash_c $qargs $compile_args
+if test "x$do_compile" = "xyes"; then
+  if test "x$dash_c" != "xyes"; then
+    compile_args="-c $compile_args"
+  fi
+
+  $SHOW $CXX -I$includedir $H5BLD_CPPFLAGS $CPPFLAGS $H5BLD_CXXFLAGS $CXXFLAGS $misc_args $compile_args
   status=$?
 
   if test "$status" != "0"; then
