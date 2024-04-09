@@ -136,7 +136,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
         else if (rd_locks_remaining == 0)
             read = FALSE;
         else {
-            if ((HDrand() % 2) == 0)
+            if ((rand() % 2) == 0)
                 read = TRUE;
             else
                 read = FALSE;
@@ -152,7 +152,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
             rec_lock_depth = 1;
 
             while (rec_lock_depth > 0) {
-                if (rec_lock_depth >= max_rec_lock_depth || (HDrand() % 2) == 0) {
+                if (rec_lock_depth >= max_rec_lock_depth || (rand() % 2) == 0) {
                     result = H5TS__rw_unlock(rw_lock);
                     CHECK_I(result, "H5TS__rw_unlock");
 
@@ -180,7 +180,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
             rec_lock_depth = 1;
 
             while (rec_lock_depth > 0) {
-                if (rec_lock_depth >= max_rec_lock_depth || (HDrand() % 2) == 0) {
+                if (rec_lock_depth >= max_rec_lock_depth || (rand() % 2) == 0) {
                     result = H5TS__rw_unlock(rw_lock);
                     CHECK_I(result, "H5TS__rw_unlock");
 
