@@ -240,9 +240,8 @@ for arg in $@ ; do
       qarg='"'"$arg"'"'
       misc_args="$misc_args $qarg"
       ;;
-
-        *) misc_args="$misc_args $arg"
-	if [ -s "$arg" ] ; then
+    *) misc_args="$misc_args $arg"
+      if [ -s "$arg" ] ; then
 	    ext=`expr "$arg" : '.*\(\..*\)'`
 	    if [ "$ext" = ".f" -o "$ext" = ".F" -o \
                  "$ext" = ".for" -o "$ext" = ".FOR" -o \
@@ -269,10 +268,10 @@ for arg in $@ ; do
               compile_args="$compile_args $arg"
               link_args="$link_args $arg"
             fi
-	    else
-	        compile_args="$compile_args $arg"
-	        link_args="$link_args $arg"
-	    fi
+        else
+            compile_args="$compile_args $arg"
+            link_args="$link_args $arg"
+        fi
 	;;
   esac
 done
@@ -288,8 +287,7 @@ if test "x$do_compile" = "xyes"; then
     compile_args="-c $compile_args"
   fi
 
-
-  $SHOW $FC $H5BLD_FCFLAGS $FCFLAGS ${F9XSUFFIXFLAG} ${fmodules} $misc_args $compile_args
+  $SHOW $FC $H5BLD_FCFLAGS $FCFLAGS ${F9XSUFFIXFLAG} ${fmodules} $compile_args
   status=$?
 
   if test "$status" != "0"; then
