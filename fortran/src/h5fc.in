@@ -240,7 +240,8 @@ for arg in $@ ; do
       qarg='"'"$arg"'"'
       misc_args="$misc_args $qarg"
       ;;
-    *) misc_args="$misc_args $arg"
+    *)
+      misc_args="$misc_args $arg"
       if [ -s "$arg" ] ; then
 	    ext=`expr "$arg" : '.*\(\..*\)'`
 	    if [ "$ext" = ".f" -o "$ext" = ".F" -o \
