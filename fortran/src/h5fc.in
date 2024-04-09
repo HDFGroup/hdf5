@@ -67,8 +67,7 @@ link_objs=""
 
 do_link="yes"
 do_compile="no"
-dash_o="no"
-dash_c="no"
+dash_c=""
 get_output_file="no"
 
 SHOW="eval"
@@ -183,12 +182,10 @@ for arg in $@ ; do
       fi
 
       do_link="no"
-      dash_c="yes"
+      dash_c="-c"
       ;;
     -o)
-      dash_o="yes"
-
-      if test "x$dash_c" = "xyes"; then
+      if test "x$dash_c" = "x-c"; then
         compile_args="$compile_args $arg"
       else
         link_args="$link_args $arg"
@@ -198,7 +195,7 @@ for arg in $@ ; do
       ;;
     -E|-M|-MT)
       compile_args="$compile_args $arg"
-      dash_c="yes"
+      dash_c="-c"
       do_link="no"
       ;;
     -l*)
@@ -256,7 +253,7 @@ for arg in $@ ; do
 	        fname=`basename $arg $ext`
 	        link_objs="$link_objs $fname.o"
 	    elif [ "$ext" = ".o" ] ; then
-		if test "x$dash_c" = "xyes"  ; then
+		if test "x$dash_c" = "x-c"  ; then
 	            compile_args="$compile_args $arg"
                 else
 	            do_link="yes"
@@ -284,7 +281,7 @@ done
   fi
 
 if test "x$do_compile" = "xyes"; then
-  if test "x$dash_c" != "xyes"; then
+  if test "x$dash_c" != "x-c"; then
     compile_args="-c $compile_args"
   fi
 
