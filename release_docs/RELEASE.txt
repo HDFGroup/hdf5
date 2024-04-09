@@ -1071,7 +1071,7 @@ Known Problems
     23.11. If you are using an affected version of the NVidia compiler, the
     work-around is to set the optimization level to -O1.
 
-    https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045.
+    https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045
 
  -  CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
