@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.7349023</span>
+   &#160;<span id="projectnumber">1.15.0.b929dbd</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -114,11 +114,11 @@ $(function(){initNavTree('_v_d_s.html',''); initResizable(); });
 <p>The HDF5 Virtual Dataset (VDS) feature enables users to access data in a collection of HDF5 files as a single HDF5 dataset and to use the HDF5 APIs to work with that dataset.</p>
 <p>For example, your data may be collected into four files:</p>
 
-<p><img src="tutrvds-multimgs.png" ></center>
+<p><img src="tutrvds-multimgs.png" alt="tutrvds-multimgs.png" width=750></center>
 
 <p>You can map the datasets in the four files into a single VDS that can be accessed just like any other dataset:</p>
 
-<p><img src="tutrvds-snglimg.png" ></center>
+<p><img src="tutrvds-snglimg.png" alt="tutrvds-snglimg.png" width=500></center>
 
 <p>The mapping between a VDS and the HDF5 source datasets is persistent and transparent to an application. If a source file is missing the fill value will be displayed.</p>
 <p>See the Virtual (VDS) Documentation for complete details regarding the VDS feature.</p>
@@ -151,6 +151,7 @@ The number of source datasets is unlimited. However, there is a limit on the siz
 <p>Programming Examples
 Example 1
 This example creates three HDF5 files, each with a one-dimensional dataset of 6 elements. The datasets in these files are the source datasets that are then used to create a 4 x 6 Virtual Dataset with a fill value of -1. The first three rows of the VDS are mapped to the data from the three source datasets as shown below:</p>
+<p><img src="tutrvds-ex.png" alt="tutrvds-ex.png" width=500></p>
 <p>In this example the three source datasets are mapped to the VDS with this code:</p>
 <pre><code>src\_space = H5Screate\_simple (RANK1, dims, NULL);
 for (i = 0; i &lt; 3; i++) {
@@ -176,6 +177,7 @@ This example shows how to use a C-style printf statement for specifying multiple
 The h5dump utility can be used to view a VDS. The h5dump output for a VDS looks exactly like that for any other dataset. If h5dump cannot find a source dataset then the fill value will be displayed.</p>
 <p>You can determine that a dataset is a VDS by looking at its properties with h5dump -p. It will display each source dataset mapping, beginning with Mapping 0. Below is an excerpt of the output of h5dump -p on the vds.h5 file created in Example 1.You can see that the entire source file a.h5 is mapped to the first row of the /VDS dataset:</p>
 
+<p><img src="tutrvds-map.png" alt="tutrvds-map.png" width=650></p>
 </body></html>
  </div></div><!-- contents -->
 </div><!-- PageDoc -->

@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.7349023</span>
+   &#160;<span id="projectnumber">1.15.0.b929dbd</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -601,7 +601,7 @@ Functions</h2></td></tr>
 <p>Creates and returns a new ID type. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hash_size</td><td>Minimum hash table size (in entries) used to store IDs for the new type </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hash_size</td><td>Minimum hash table size (in entries) used to store IDs for the new type (unused in 1.8.13 and later) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">reserved</td><td>Number of reserved IDs for the new type </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">free_func</td><td>Function used to deallocate space for a single ID</td></tr>
   </table>
@@ -609,7 +609,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns the type identifier on success, negative on failure.</dd></dl>
 <p><a class="el" href="#gae10d4baa1335b2d1f1aecffb305e1613" title="Creates and returns a new ID type.">H5Iregister_type()</a> allocates space for a new ID type and returns an identifier for it.</p>
-<p>The <code>hash_size</code> parameter indicates the minimum size of the hash table used to store IDs in the new type.</p>
+<p>The <code>hash_size</code> parameter indicates the minimum size of the hash table used to store IDs in the new type. This parameter is unused in 1.8.13 and later, when the implementation of ID storage changed.</p>
 <p>The <code>reserved</code> parameter indicates the number of IDs in this new type to be reserved. Reserved IDs are valid IDs which are not associated with any storage within the library.</p>
 <p>The <code>free_func</code> parameter is a function pointer to a function which returns an herr_t and accepts a <code>void*</code>. The purpose of this function is to deallocate memory for a single ID. It will be called by <a class="el" href="#ga97966e203f0967fc19b38b93c2972c08" title="Deletes all identifiers of the given type.">H5Iclear_type()</a> and <a class="el" href="#gaabc75ed99fd6b206154b899fac64977e" title="Removes an identifier type and all identifiers within that type.">H5Idestroy_type()</a> on each ID. This function is NOT called by <a class="el" href="#gaa297aca26ed0383a6e126b92454c619a" title="Removes an ID from its type.">H5Iremove_verify()</a>. The <code>void*</code> will be the same pointer which was passed in to the <a class="el" href="#gab90ab765fa23e8ffbafa228d3c8e82c5" title="Registers an object under a type and returns an ID for it.">H5Iregister()</a> function. The <code>free_func</code> function should return 0 on success and -1 on failure.</p>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>

@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.7349023</span>
+   &#160;<span id="projectnumber">1.15.0.b929dbd</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -731,7 +731,7 @@ The changes to the file will be discarded when access is terminated unless backi
 <p>Additional parameters may be added to these functions in the future.</p>
 <dl class="section see"><dt>See also</dt><dd><a href="https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html">HDF5 File Image Operations</a> section for information on more advanced usage of the Memory file driver, and </dd>
 <dd>
-<a href="http://www.hdfgroup.org/HDF5/doc/Advanced/ModifiedRegionWrites/ModifiedRegionWrites.pdf">Modified Region Writes</a> section for information on how to set write operations so that only modified regions are written to storage.</dd></dl>
+<a href="https://docs.hdfgroup.org/archive/support/HDF5/doc/Advanced/ModifiedRegionWrites/ModifiedRegionWrites.pdf">Modified Region Writes</a> section for information on how to set write operations so that only modified regions are written to storage.</dd></dl>
 <h3><a class="anchor" id="subsubsec_file_alternate_drivers_family"></a>
 The Family Driver</h3>
 <p>HDF5 files can become quite large, and this can create problems on systems that do not support files larger than 2 gigabytes. The HDF5 file family mechanism is designed to solve the problems this creates by splitting the HDF5 file address space across several smaller files. This structure does not affect how metadata and raw data are stored: they are mixed in the address space just as they would be in a single, contiguous file.</p>
