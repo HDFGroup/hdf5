@@ -258,7 +258,7 @@ for arg in $@ ; do
       ;;
 
     *)
-      misc_args="$misc_args $qarg"
+      misc_args="$misc_args $arg"
       if [ -s "$arg" ] ; then
 	    ext=`expr "$arg" : '.*\(\..*\)'`
 	    if [ "$ext" = ".C" -o "$ext" = ".cxx" -o "$ext" = ".cpp" -o \

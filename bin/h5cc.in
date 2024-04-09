@@ -267,7 +267,7 @@ for arg in $@ ; do
       misc_args="$misc_args $qarg"
       ;;
     *)
-      misc_args="$misc_args $qarg"
+      misc_args="$misc_args $arg"
       if test -s "$arg"; then
         ext=`expr "$arg" : '.*\(\..*\)'`
 
