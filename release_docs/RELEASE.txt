@@ -829,7 +829,7 @@ Bug Fixes since HDF5-1.14.0 release
             HDF5 versions <= 1.14.3 contain a heap buffer overflow in
             H5Z__nbit_decompress_one_byte caused by the earlier use of an
             initialized pointer. This may result in Denial of Service or
-            potential code excution
+            potential code execution
 
         * CVE-2023-1114-001
             HDF5 library versions <=1.14.3 contain a heap buffer overflow in
