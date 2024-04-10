@@ -2039,6 +2039,21 @@ Known Problems
     compilation to fail. This is due to a bug in libtool that was fixed in 2012
     and released in 2.4.4 in 2014.
 
+    When the library detects and builds in support for the _Float16 datatype, an
+    issue has been observed on at least one MacOS 14 system where the library
+    fails to initialize due to not being able to detect the byte order of the
+    _Float16 type (https://github.com/HDFGroup/hdf5/issues/4310):
+
+        #5: H5Tinit_float.c line 308 in H5T__fix_order(): failed to detect byte order
+        major: Datatype
+        minor: Unable to initialize object
+
+    If this issue is encountered, support for the _Float16 type can be disabled
+    with a configuration option:
+
+        CMake:      HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16=OFF
+        Autotools:  --disable-nonstandard-feature-float16
+
     When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may
     also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur
     in the following tests:
@@ -2088,12 +2103,12 @@ Known Problems
 
         MPI_TEST_testphdf5_tldsc fails with cray-mpich 7.7 on cori and theta.
 
+    File space may not be released when overwriting or deleting certain nested
+    variable length or reference types.
+
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
     help@hdfgroup.org.
-
-    File space may not be released when overwriting or deleting certain nested
-    variable length or reference types.
 
 
 CMake vs. Autotools installations
