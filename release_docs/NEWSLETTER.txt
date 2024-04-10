@@ -17,7 +17,8 @@ This is a maintenance release with a few changes and updates:
   As a part of the _Float16 work, the type conversion code was overhauled,
   which has improved the performance of type conversion code. The speedup
   varies depending on the datatypes involved, but can be upwards of 10x
-  for compound types and 100x when converting floats to integers.
+  for compound types and 100x when converting floats to integers where the
+  library doesn't have a fast conversion path available from the compiler.
 
 * Added improvements for cloud-optimized HDF5
 
