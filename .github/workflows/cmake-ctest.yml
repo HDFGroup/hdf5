@@ -41,7 +41,7 @@ jobs:
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
         with:
-          version: "1.10.0"
+          version: "1.9.7"
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
