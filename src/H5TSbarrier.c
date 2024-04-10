@@ -39,18 +39,6 @@
 /* Local Macros */
 /****************/
 
-#ifndef H5_HAVE_PTHREAD_BARRIER
-/* Barrier initialization macro */
-#define H5TS_BARRIER_INIT                                                                                    \
-    {                                                                                                        \
-        PTHREAD_MUTEX_INITIALIZER,    /* mutex */                                                            \
-            PTHREAD_COND_INITIALIZER, /* cv */                                                               \
-            0,                        /* count */                                                            \
-            0,                        /* entered */                                                          \
-            0                         /* threshold */                                                        \
-    }
-#endif
-
 /******************/
 /* Local Typedefs */
 /******************/
@@ -71,10 +59,6 @@
 /* Local Variables */
 /*******************/
 
-/* Default value to initialize barriers */
-#ifndef H5_HAVE_PTHREAD_BARRIER
-static const H5TS_barrier_t H5TS_barrier_def = H5TS_BARRIER_INIT;
-#endif
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS__barrier_init
@@ -100,7 +84,12 @@ H5TS__barrier_init(H5TS_barrier_t *barrier, uint64_t count)
     if (H5_UNLIKELY(pthread_barrier_init(barrier, NULL, count)))
         HGOTO_DONE(FAIL);
 #else
-    memcpy(barrier, &H5TS_barrier_def, sizeof(H5TS_barrier_def));
+    /* Initialize fields to default values */
+    memset(barrier, 0, sizeof(*barrier));
+    if (H5_UNLIKELY(H5TS_mutex_init(&barrier->mutex, H5TS_MUTEX_TYPE_PLAIN) < 0))
+        HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(H5TS_cond_init(&barrier->cv) < 0))
+        HGOTO_DONE(FAIL);
 
     /* Set non-default fields */
     barrier->count = barrier->threshold = count;

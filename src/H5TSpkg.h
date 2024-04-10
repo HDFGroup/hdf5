@@ -43,19 +43,6 @@
 /* Package Private Typedefs */
 /****************************/
 
-/* Thread Barrier */
-#ifdef H5_HAVE_PTHREAD_BARRIER
-typedef pthread_barrier_t H5TS_barrier_t;
-#else
-typedef struct H5TS_barrier_t {
-    H5TS_mutex_t mutex;
-    H5TS_cond_t  cv;
-    uint64_t     count;
-    uint64_t     entered;
-    uint64_t     threshold;
-} H5TS_barrier_t;
-#endif
-
 #ifdef H5_HAVE_THREADSAFE
 /* Info for the global API lock */
 typedef struct H5TS_api_info_t {
@@ -255,11 +242,6 @@ H5_DLL herr_t H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock);
 H5_DLL herr_t H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock);
 H5_DLL herr_t H5TS__rw_unlock(H5TS_rw_lock_t *rw_lock);
 H5_DLL herr_t H5TS__rw_lock_destroy(H5TS_rw_lock_t *rw_lock);
-
-/* Barrier related function declarations */
-H5_DLL herr_t H5TS__barrier_init(H5TS_barrier_t *barrier, uint64_t count);
-H5_DLL herr_t H5TS__barrier_wait(H5TS_barrier_t *barrier);
-H5_DLL herr_t H5TS__barrier_destroy(H5TS_barrier_t *barrier);
 
 /* 'once' callbacks */
 #ifdef H5_HAVE_THREADSAFE
