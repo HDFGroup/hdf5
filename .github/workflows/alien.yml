@@ -1,0 +1,26 @@
+name: alien
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7 0 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: alien
+    steps:
+      - name: install
+        run:  |
+          sudo apt-get -q update
+          sudo apt install alien
+      - name: test
+        run:  |
+          curl -s -L -O https://github.com/HDFGroup/hdf5/releases/download/snapshot-1.14/snapshot-1.14-ubuntu-2204_gcc.rpm.tar.gz
+          tar zxvf snapshot-1.14-ubuntu-2204_gcc.rpm.tar.gz
+          cd hdf5
+          sudo alien HDF5-1.14.4.2-1.x86_64.rpm
+          sudo dpkg -i hdf5-1.14.4.2-2_amd64.deb
+          /HDF_Group/HDF5/1.14.4.2/bin/h5ls --help

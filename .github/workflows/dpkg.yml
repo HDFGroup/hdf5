@@ -1,0 +1,25 @@
+name: dpkg
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7 0 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: dpkg
+    steps:
+      - name: install
+        run:  |
+          sudo apt-get -q update
+          sudo apt install alien
+      - name: test
+        run:  |
+          curl -s -L -O https://github.com/HDFGroup/hdf5/releases/download/snapshot-1.14/snapshot-1.14-ubuntu-2204_gcc.deb.tar.gz
+          tar zxvf snapshot-1.14-ubuntu-2204_gcc.deb.tar.gz
+          cd hdf5
+          sudo dpkg -i HDF5-1.14.4.2-Linux.deb
+          /HDF_Group/HDF5/1.14.4.2/bin/h5ls --help
