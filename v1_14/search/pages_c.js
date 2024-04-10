@@ -58,5 +58,6 @@ var searchData=
   ['high_20level_20optimizations_55',['The HDF5 High Level Optimizations',['../_h5_d_o__u_g.html',1,'']]],
   ['high_20level_20packet_20table_56',['The HDF5 High Level Packet Table',['../_h5_p_t__u_g.html',1,'']]],
   ['high_20level_20table_57',['The HDF5 High Level Table',['../_h5_t_b__u_g.html',1,'']]],
-  ['hyperslab_58',['Writing by Contiguous Hyperslab',['../_intro_par_cont_hyperslab.html',1,'IntroParHDF5']]]
+  ['html_20files_58',['Images for html files',['../_h_t_m_l__i_m_g_s.html',1,'']]],
+  ['hyperslab_59',['Writing by Contiguous Hyperslab',['../_intro_par_cont_hyperslab.html',1,'IntroParHDF5']]]
 ];
