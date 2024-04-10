@@ -192,10 +192,6 @@ die "unable to read file: $NEWS\n" unless -r $file;
 my $CONFIGURE = $file;
 $CONFIGURE =~ s/[^\/]*$/..\/configure.ac/;
 die "unable to read file: $CONFIGURE\n" unless -r $file;
-# cpp_doc_config
-my $CPP_DOC_CONFIG = $file;
-$CPP_DOC_CONFIG =~ s/[^\/]*$/..\/c++\/src\/cpp_doc_config/;
-die "unable to read file: $CPP_DOC_CONFIG\n"  unless -r $file;
 my $H5_JAVA = $file;
 $H5_JAVA =~ s/[^\/]*$/..\/java\/src\/hdf\/hdf5lib\/H5.java/;
 die "unable to read file: $H5_JAVA\n" unless -r $file;
@@ -253,7 +249,6 @@ if ($set) {
   $RELEASE = "";
   $NEWS = "";
   $CONFIGURE = "";
-  $CPP_DOC_CONFIG = "";
   $LT_VERS = "";       
   $HDF5CONFIGCMAKE = "";
   @newver = @curver;
@@ -348,22 +343,6 @@ if ($NEWS) {
   close FILE;
 }
 
-# Update the c++/src/cpp_doc_config file
-if ($CPP_DOC_CONFIG) {
-  my $data = read_file($CPP_DOC_CONFIG);
-  my $sub_rel_ver_str = (
-     $newver[3] eq "" 
-     ? sprintf("%s", "") 
-     : sprintf("%s", "-".$newver[3].", currently under development")
-     );
-  my $version_string = sprintf("\"%d.%d.%d%s%s\"",
-                               @newver[0,1,2],
-                               $sub_rel_ver_str);
-  $data =~ s/PROJECT_NUMBER\s*=.*/PROJECT_NUMBER         = $version_string/;
-
-  write_file($CPP_DOC_CONFIG, $data);  
-}
-
 # Update the config/cmake/scripts/HDF5config.cmake file
 if ($HDF5CONFIGCMAKE) {
   my $data = read_file($HDF5CONFIGCMAKE);
@@ -427,7 +406,7 @@ if ($REPACK_LAYOUT_PLUGIN_VERSION) {
   write_file($REPACK_LAYOUT_PLUGIN_VERSION, $data);
 }
 
-# helper function to read the file for updating c++/src/cpp_doc_config,
+# helper function to read the file for updating
 # config/cmake/scripts/HDF5Config.cmake, and java files.
 # The version string in that file is not at the top, so the string replacement
 # is not for the first line, and reading/writing the entire file as one string
@@ -444,7 +423,7 @@ sub read_file {
     return $all;
 }
 
-# helper function to write the file for updating c++/src/cpp_doc_config, 
+# helper function to write the file for updating
 # config/cmake/scripts/HDF5config.cmake and java files.
 sub write_file {
     my ($filename, $content) = @_;
