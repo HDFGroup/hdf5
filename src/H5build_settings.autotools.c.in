@@ -95,6 +95,7 @@ const char H5build_settings[]=
     "                  Build HDF5 Tests: @HDF5_TESTS@\n"
     "                  Build HDF5 Tools: @HDF5_TOOLS@\n"
     "                   Build GIF Tools: @HDF5_HL_GIF_TOOLS@\n"
+    "                           Threads: @THREADS@\n"
     "                      Threadsafety: @THREADSAFE@\n"
     "               Default API mapping: @DEFAULT_API_VERSION@\n"
     "    With deprecated public symbols: @DEPRECATED_SYMBOLS@\n"

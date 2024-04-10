@@ -33,7 +33,7 @@
 #include "H5Eprivate.h" /* Error handling                      */
 #include "H5TSpkg.h"    /* Threadsafety                        */
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADS
 
 /****************/
 /* Local Macros */
@@ -418,4 +418,4 @@ done:
 #endif
 #endif
 
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADS */

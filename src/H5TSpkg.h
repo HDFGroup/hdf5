@@ -22,7 +22,7 @@
 #ifndef H5TSpkg_H
 #define H5TSpkg_H
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADS
 /* Get package's private header */
 #include "H5TSprivate.h"
 
@@ -56,6 +56,7 @@ typedef struct H5TS_barrier_t {
 } H5TS_barrier_t;
 #endif
 
+#ifdef H5_HAVE_THREADSAFE
 /* Info for the global API lock */
 typedef struct H5TS_api_info_t {
     /* API lock */
@@ -67,6 +68,7 @@ typedef struct H5TS_api_info_t {
     /* Count of # of attempts to acquire API lock */
     H5TS_atomic_uint_t attempt_lock_count;
 } H5TS_api_info_t;
+#endif /* H5_HAVE_THREADSAFE */
 
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
 /******************************************************************************
@@ -227,21 +229,25 @@ typedef struct H5TS_rw_lock_t {
 /* Package Private Variables */
 /*****************************/
 
+#ifdef H5_HAVE_THREADSAFE
 /* API threadsafety info */
 extern H5TS_api_info_t H5TS_api_info_p;
 
 /* Per-thread info */
 extern H5TS_key_t H5TS_thrd_info_key_g;
+#endif /* H5_HAVE_THREADSAFE */
 
 /******************************/
 /* Package Private Prototypes */
 /******************************/
+#ifdef H5_HAVE_THREADSAFE
 H5_DLL herr_t H5TS__init(void);
 H5_DLL herr_t H5TS__mutex_acquire(unsigned lock_count, bool *acquired);
 H5_DLL herr_t H5TS__mutex_release(unsigned *lock_count);
 H5_DLL herr_t H5TS__tinfo_init(void);
 H5_DLL void   H5TS__tinfo_destroy(void *tinfo_node);
 H5_DLL herr_t H5TS__tinfo_term(void);
+#endif /* H5_HAVE_THREADSAFE */
 
 /* Recursive R/W lock related function declarations */
 H5_DLL herr_t H5TS__rw_lock_init(H5TS_rw_lock_t *rw_lock);
@@ -256,6 +262,7 @@ H5_DLL herr_t H5TS__barrier_wait(H5TS_barrier_t *barrier);
 H5_DLL herr_t H5TS__barrier_destroy(H5TS_barrier_t *barrier);
 
 /* 'once' callbacks */
+#ifdef H5_HAVE_THREADSAFE
 #ifdef H5_HAVE_C11_THREADS
 H5_DLL void H5TS__c11_first_thread_init(void);
 #else
@@ -265,6 +272,7 @@ H5_DLL BOOL CALLBACK H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parame
 H5_DLL void H5TS__pthread_first_thread_init(void);
 #endif /* H5_HAVE_WIN_THREADS */
 #endif
+#endif /* H5_HAVE_THREADSAFE */
 
 #ifdef H5TS_TESTING
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
@@ -274,6 +282,6 @@ H5_DLL herr_t H5TS__rw_lock_print_stats(const char *header_str, H5TS_rw_lock_sta
 #endif
 #endif /* H5TS_TESTING */
 
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADS */
 
 #endif /* H5TSpkg_H */

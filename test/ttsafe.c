@@ -101,23 +101,12 @@ main(int argc, char *argv[])
 
     /* Tests are generally arranged from least to most complexity... */
     AddTest("is_threadsafe", tts_is_threadsafe, NULL, "library threadsafe status", NULL);
-#ifdef H5_HAVE_THREADSAFE
-    AddTest("thread_id", tts_thread_id, NULL, "thread IDs", NULL);
+#ifdef H5_HAVE_THREADS
     AddTest("thread_pool", tts_thread_pool, NULL, "thread pools", NULL);
 #ifndef H5_HAVE_STDATOMIC_H
     /* C11 atomics only tested when emulated */
     AddTest("atomics", tts_atomics, NULL, "emulation of C11 atomics", NULL);
-#endif /* H5_HAVE_PTHREAD_H */
-
-    AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
-    AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
-#ifdef H5_HAVE_PTHREAD_H
-    /* Thread cancellability only supported with pthreads ... */
-    AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test", NULL);
-#endif /* H5_HAVE_PTHREAD_H */
-    AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation", NULL);
-    AddTest("attr_vlen", tts_attr_vlen, cleanup_attr_vlen, "multi-file-attribute-vlen read", NULL);
-
+#endif /* H5_HAVE_STDATOMIC_H */
 #ifndef H5_HAVE_WIN_THREADS
     /* Recursive R/W locks */
     AddTest("rec_rwlock_1", tts_rec_rw_lock_smoke_check_1, NULL, "recursive R/W lock smoke check 1 -- basic",
@@ -130,6 +119,18 @@ main(int argc, char *argv[])
             "recursive R/W lock smoke check 4 -- mixed mob", NULL);
 #endif /* !H5_HAVE_WIN_THREADS */
 
+#ifdef H5_HAVE_THREADSAFE
+    AddTest("thread_id", tts_thread_id, NULL, "thread IDs", NULL);
+
+    AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
+    AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
+#ifdef H5_HAVE_PTHREAD_H
+    /* Thread cancellability only supported with pthreads ... */
+    AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test", NULL);
+#endif /* H5_HAVE_PTHREAD_H */
+    AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation", NULL);
+    AddTest("attr_vlen", tts_attr_vlen, cleanup_attr_vlen, "multi-file-attribute-vlen read", NULL);
+
     /* Developer API routine tests */
     AddTest("developer", tts_develop_api, NULL, "developer API routines", NULL);
 
@@ -138,6 +139,12 @@ main(int argc, char *argv[])
     printf("Most thread-safety tests skipped because THREADSAFE not enabled\n");
 
 #endif /* H5_HAVE_THREADSAFE */
+
+#else /* H5_HAVE_THREADS */
+
+    printf("Most threading tests skipped because THREADS not enabled\n");
+
+#endif /* H5_HAVE_THREADS */
 
     /* Display testing information */
     TestInfo(argv[0]);

@@ -93,9 +93,37 @@ if (H5_HAVE_PARALLEL)
   INCLUDE_DIRECTORIES (${MPI_C_INCLUDE_DIRS})
 endif ()
 
+# Determine if a threading package is available on this system
+option (HDF5_ENABLE_THREADS "Enable thread support" ON)
+set (THREADS_PREFER_PTHREAD_FLAG ON)
+find_package (Threads)
+if (Threads_FOUND)
+  set (H5_HAVE_THREADS 1)
+  set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+
+  # Determine which threading package to use
+  CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
+  if (HAVE_THREADS_H)
+    # When C11 threads are available, those are the top choice
+    set (H5_HAVE_C11_THREADS 1)
+  elseif (WIN32)
+    # When Win32 is available, we use those threads
+    set (H5_HAVE_WIN_THREADS 1)
+  else ()
+    if (NOT H5_HAVE_PTHREAD_H)
+      message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
+    endif ()
+  endif ()
+
+  # Check for compiler support for atomic variables
+  CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
+  if (HAVE_STDATOMIC_H)
+    set (H5_HAVE_STDATOMIC_H 1)
+  endif()
+endif ()
+
 #-----------------------------------------------------------------------------
 # Option to use threadsafe
-# Note: Currently CMake only allows configuring of threadsafe on WINDOWS.
 #-----------------------------------------------------------------------------
 option (HDF_ENABLE_THREADSAFE "Enable Threadsafety" OFF)
 if (HDF_ENABLE_THREADSAFE)
@@ -103,17 +131,13 @@ if (HDF_ENABLE_THREADSAFE)
   if (HDF_ENABLE_PARALLEL)
     message (FATAL " **** Parallel and Threadsafe options are mutually exclusive **** ")
   endif ()
-  if (WIN32)
-    set (H5_HAVE_WIN_THREADS 1)
-    set (H5_HAVE_THREADSAFE 1)
-  endif ()
-  set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-  set(THREADS_PREFER_PTHREAD_FLAG TRUE)
-  find_package(Threads REQUIRED)
+
+  # Check for threading package
   if (NOT Threads_FOUND)
-    message (STATUS " **** thread-safe package not found - threads still might work **** ")
+    message (FATAL_ERROR " **** thread-safety option requires a threading package and none was found **** ")
   endif ()
-  set (H5EX_HDF5_LINK_LIBS ${H5EX_HDF5_LINK_LIBS} Threads::Threads)
+
+  set (H5_HAVE_THREADSAFE 1)
 endif ()
 
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES 

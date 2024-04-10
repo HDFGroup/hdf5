@@ -59,9 +59,11 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
     if (!stream)
         stream = stderr;
 
-    fprintf(stream, "HDF5-DIAG: Function stack from %s ", H5_lib_vers_info_g);
+    fprintf(stream, "HDF5-DIAG: Function stack from %s", H5_lib_vers_info_g);
     /* try show the process or thread id in multiple processes cases*/
-    fprintf(stream, "thread %" PRIu64 ".", H5TS_thread_id());
+#ifdef H5_HAVE_THREADSAFE
+    fprintf(stream, " thread %" PRIu64 ".", H5TS_thread_id());
+#endif
     if (fstack && fstack->nused > 0)
         fprintf(stream, "  Back trace follows.");
     fputc('\n', stream);

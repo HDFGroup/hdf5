@@ -21,9 +21,12 @@
 #ifndef H5TSprivate_H_
 #define H5TSprivate_H_
 
+#ifdef H5_HAVE_THREADS
+
 #ifdef H5_HAVE_THREADSAFE
 /* Include package's public headers */
 #include "H5TSdevelop.h"
+#endif /* H5_HAVE_THREADSAFE */
 
 /**************************/
 /* Library Private Macros */
@@ -165,6 +168,7 @@ typedef struct {
 /* Library-private Function Prototypes */
 /***************************************/
 
+#ifdef H5_HAVE_THREADSAFE
 /* Library/thread init/term operations */
 H5_DLL void H5TS_term_package(void);
 
@@ -176,6 +180,7 @@ H5_DLL herr_t H5TS_api_unlock(void);
 H5_DLL uint64_t             H5TS_thread_id(void);
 H5_DLL struct H5CX_node_t **H5TS_get_api_ctx_ptr(void);
 H5_DLL struct H5E_t        *H5TS_get_err_stack(void);
+#endif /* H5_HAVE_THREADSAFE */
 
 /* 'Once' operationss */
 H5_DLL herr_t H5TS_once(H5TS_once_t *once, H5TS_once_init_func_t func);
@@ -230,11 +235,6 @@ H5_DLL unsigned H5TS_atomic_fetch_sub_uint(H5TS_atomic_uint_t *obj, unsigned arg
 H5_DLL void     H5TS_atomic_destroy_uint(H5TS_atomic_uint_t *obj);
 #endif /* H5_HAVE_STDATOMIC_H */
 
-#else /* H5_HAVE_THREADSAFE */
-
-/* Non-threadsafe code needs this */
-#define H5TS_thread_id() ((uint64_t)0)
-
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADS */
 
 #endif /* H5TSprivate_H_ */

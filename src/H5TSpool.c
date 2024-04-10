@@ -34,7 +34,7 @@
 #include "H5FLprivate.h" /* Free Lists                          */
 #include "H5TSpkg.h"     /* Threadsafety                        */
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADS
 
 /****************/
 /* Local Macros */
@@ -385,4 +385,4 @@ done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_pool_destroy() */
 
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADS */

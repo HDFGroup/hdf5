@@ -32,8 +32,6 @@
 #include "H5Eprivate.h" /* Error handling                      */
 #include "H5TSpkg.h"    /* Threadsafety                        */
 
-#ifdef H5_HAVE_THREADSAFE
-
 #ifdef H5_HAVE_WIN_THREADS
 
 /****************/
@@ -64,6 +62,7 @@ static herr_t H5TS__win32_thread_exit(void);
 /* Local Variables */
 /*******************/
 
+#ifdef H5_HAVE_THREADSAFE
 /*--------------------------------------------------------------------------
  * Function:    H5TS__win32_process_enter
  *
@@ -205,7 +204,6 @@ DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved)
     return fOkay;
 }
 #endif /* H5_HAVE_WIN32_API && H5_BUILT_AS_DYNAMIC_LIB */
+#endif /* H5_HAVE_THREADSAFE */
 
 #endif /* H5_HAVE_WIN_THREADS */
-
-#endif /* H5_HAVE_THREADSAFE */

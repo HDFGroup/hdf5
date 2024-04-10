@@ -325,6 +325,9 @@
 /* Define to 1 if the compiler supports the __builtin_expect() extension */
 #cmakedefine H5_HAVE_BUILTIN_EXPECT @H5_HAVE_BUILTIN_EXPECT@
 
+/* Define if we have thread support */
+# cmakedefine H5_HAVE_THREADS @H5_HAVE_THREADS@
+
 #if defined(_WIN32) && !defined(H5_BUILT_AS_DYNAMIC_LIB)
 /* Not supported on WIN32 platforms with static linking */
 /* #undef H5_HAVE_THREADSAFE */
@@ -359,6 +362,9 @@
 
 /* Define to 1 if you have Win32 threads */
 #cmakedefine H5_HAVE_WIN_THREADS @H5_HAVE_WIN_THREADS@
+
+/* Define to 1 if you have C11 threads */
+#cmakedefine H5_HAVE_C11_THREADS @H5_HAVE_C11_THREADS@
 
 /* Define if your system has Windows-style path name. */
 #cmakedefine H5_HAVE_WINDOW_PATH @H5_HAVE_WINDOW_PATH@

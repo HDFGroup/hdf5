@@ -32,7 +32,7 @@
 #include "H5Eprivate.h" /* Error handling                      */
 #include "H5TSpkg.h"    /* Threadsafety                        */
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADS
 
 #ifndef H5_HAVE_STDATOMIC_H
 
@@ -400,4 +400,4 @@ H5TS_atomic_destroy_uint(H5TS_atomic_uint_t *obj)
 
 #endif /* H5_HAVE_STDATOMIC_H */
 
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADS */

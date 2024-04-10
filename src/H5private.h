@@ -54,7 +54,7 @@
 #endif
 
 /* Include the threading header, if necessary */
-#if defined(H5_HAVE_THREADSAFE)
+#if defined(H5_HAVE_THREADS)
 /* C11 threads */
 #if defined(H5_HAVE_THREADS_H)
 #include <threads.h>
@@ -136,7 +136,7 @@
 #define NOGDI               /* Exclude Graphic Display Interface macros */
 
 /* InitOnceExecuteOnce() requires 0x0600 to work on MinGW w/ Win32 threads */
-#if defined(H5_HAVE_MINGW) && defined(H5_HAVE_THREADSAFE)
+#if defined(H5_HAVE_MINGW) && defined(H5_HAVE_THREADS)
 #if !defined(_WIN32_WINNT) || (_WIN32_WINNT < 0x0600)
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0600

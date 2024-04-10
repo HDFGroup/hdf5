@@ -2094,84 +2094,40 @@ AM_CONDITIONAL([BUILD_SHARED_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xye
 AC_CACHE_SAVE
 
 ## ----------------------------------------------------------------------
-## Enable thread-safe version of library (requires Pthreads on POSIX
-## systems). We usually pick up the system Pthreads library, so --with-pthread
+## Enable library-internal concurrency capabilities (threads, atomic operations,
+## mutual exclusion, condition variables, and thread-specific storage).
+##
+## Note, this is required for enabling the threadsafe API feature, but does
+## _not_ enable it, or provide threadsafety to applications calling HDF5 API
+## routines.  *Both* --enable-threads _and_ --enable-threadsafe must be provided
+## to enable threadsafety to applications.
+##
+## C11 threads (and atomics) are preferred and if available, will be chosen
+## over pthreads or Windows threading.
+##
+## We usually pick up the system Pthreads library, so --with-pthread
 ## is only necessary if you are using a custom Pthreads library or if
 ## your OS hides its implementation in an unusual location.
 ##
 ## On Windows, we use Win32 threads and no special configuration should be
 ## required to use them.
 ##
-AC_SUBST([THREADSAFE])
+AC_SUBST([THREADS])
 
-## Default is no thread-safety
-THREADSAFE=no
-
-AC_MSG_CHECKING([for thread safe support])
-AC_ARG_ENABLE([threadsafe],
-              [AS_HELP_STRING([--enable-threadsafe],
-                              [Enable thread-safe capability. Not compatible with the high-level library, Fortran, or C++ wrappers.
-                              [default=no]])],
-              [THREADSAFE=$enableval])
-
-## The high-level, C++, Fortran and Java interfaces are not compatible
-## with the thread-safety option because the lock is not hoisted
-## into the higher-level API calls.
-
-## --enable-threadsafe is incompatible with --enable-hl unless
-## --enable-unsupported has been specified on the configure line.
-##
-## Note that the high-level library is enabled by default so most
-## users will have to add --disable-hl to the configure options.
-if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${HDF5_HL}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
-    AC_MSG_ERROR([The thread-safe library is incompatible with the high-level library. --disable-hl can be used to prevent building the high-level library (recommended). Alternatively, --enable-unsupported will allow building the high-level library, though this configuration is not supported by The HDF Group.])
-  fi
-fi
-
-## The --enable-threadsafe flag is not compatible with --enable-cxx.
-## If the user tried to specify both flags, throw an error, unless
-## they also provided the --enable-unsupported flag.
-if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${HDF_CXX}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
-    AC_MSG_ERROR([--enable-cxx and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
-  fi
-fi
-
-## --enable-threadsafe is also incompatible with --enable-fortran unless
-## --enable-unsupported has been specified on the configure line.
-if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
-    AC_MSG_ERROR([--enable-fortran and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
-  fi
-fi
-
-## --enable-threadsafe is also incompatible with --enable-java unless
-## --enable-unsupported has been specified on the configure line.
-if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${HDF_JAVA}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
-    AC_MSG_ERROR([--enable-java and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
-  fi
+## Default is to attempt to enable thread support
+if test "X-$THREADS" = X- ; then
+  THREADS=yes
 fi
 
 
-case "X-$THREADSAFE" in
-  X-|X-no)
-    AC_MSG_RESULT([no])
-    ;;
-  X-yes)
-    THREADSAFE=yes
-    AC_MSG_RESULT([yes])
-    ;;
-  *)
-    AC_MSG_RESULT([error])
-    AC_MSG_ERROR([\'$enableval\' is not a valid threadsafe type])
-    ;;
-esac
+AC_ARG_ENABLE([threads],
+              [AS_HELP_STRING([--enable-threads],
+                              [Enable threads capability. A prerequisite for enabling threadsafe API calls.
+                              [default=yes]
+                              ])],
+              [THREADS=$enableval])
 
-if test "X$THREADSAFE" = "Xyes"; then
-    AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
-
+if test "X$THREADS" = "Xyes"; then
     ## Allow other thread packages instead of Pthreads
     allow_pthreads="yes"
 
@@ -2200,24 +2156,26 @@ if test "X$THREADSAFE" = "Xyes"; then
 
     ## Check for C11 threads, we want to use C11 threads unless the builder
     ## explicitly specifies --with-pthreads=(yes | path(s))
+    AC_SUBST([HAVE_C11_THREADS]) HAVE_C11_THREADS=no
     AC_CHECK_HEADERS([threads.h],[HAVE_THREADS_H="yes"],[HAVE_THREADS_H="no"])
     if test "x$HAVE_THREADS_H" = "xyes"; then
         # Default or no --> C11 threads
         if test "$withval" = "default" -o "$withval" = "no" ; then
             allow_pthreads="no"
             unset HAVE_PTHREAD
-            AC_DEFINE([HAVE_C11_THREADS], [1], [Define to 1 if you have C11 threads])
+            AC_DEFINE([HAVE_C11_THREADS], [yes], [Define to yes if you have C11 threads])
         fi
     fi
 
     ## If we're on MinGW, we want to use Win32 threads unless the builder
     ## explicitly specifies --with-pthreads=(yes | path(s))
+    AC_SUBST([HAVE_WIN_THREADS]) HAVE_WIN_THREADS=no
     if test -n "$HDF_MINGW" -a "$HDF_MINGW" = "yes" ; then
         # Default or no --> Win32 threads
         if test "$withval" = "default" -o "$withval" = "no" ; then
             allow_pthreads="no"
             unset HAVE_PTHREAD
-            AC_DEFINE([HAVE_WIN_THREADS], [1], [Define to 1 if you have win32 threads])
+            AC_DEFINE([HAVE_WIN_THREADS], [yes], [Define to yes if you have win32 threads])
         fi
     fi
 
@@ -2285,7 +2243,101 @@ if test "X$THREADSAFE" = "Xyes"; then
     ## Check for C11 atomics
     AC_CHECK_HEADERS([stdatomic.h],[HAVE_STDATOMIC_H="yes"],[HAVE_STDATOMIC_H="no"])
 
-fi # end of threadsafe processing
+fi # end of threads processing
+
+# Check to varify that a threading package was found
+AC_MSG_CHECKING([for threads support])
+if test "x$HAVE_PTHREAD" = "xno" -a "x$HAVE_WIN_THREADS" = "xno" -a "x$HAVE_C11_THREADS" = "xno"; then
+  THREADS=no
+fi
+
+case "X-$THREADS" in
+  X-no)
+    AC_MSG_RESULT([no])
+    ;;
+  X-yes)
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_THREADS], [1], [Define if we have internal threads support])
+    ;;
+  *)
+    AC_MSG_RESULT([error])
+    AC_MSG_ERROR([\'$enableval\' is not a valid threads setting])
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Enable thread-safe version of library (requires threads support)
+##
+AC_SUBST([THREADSAFE])
+
+## Default is no thread-safety
+THREADSAFE=no
+
+AC_MSG_CHECKING([for thread safe support])
+AC_ARG_ENABLE([threadsafe],
+              [AS_HELP_STRING([--enable-threadsafe],
+                              [Enable thread-safe capability. Not compatible with the high-level library, Fortran, or C++ wrappers.
+                              [default=no]])],
+              [THREADSAFE=$enableval])
+
+## The high-level, C++, Fortran and Java interfaces are not compatible
+## with the thread-safety option because the lock is not hoisted
+## into the higher-level API calls.
+
+## --enable-threadsafe is incompatible with --enable-hl unless
+## --enable-unsupported has been specified on the configure line.
+##
+## Note that the high-level library is enabled by default so most
+## users will have to add --disable-hl to the configure options.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF5_HL}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    AC_MSG_ERROR([The thread-safe library is incompatible with the high-level library. --disable-hl can be used to prevent building the high-level library (recommended). Alternatively, --enable-unsupported will allow building the high-level library, though this configuration is not supported by The HDF Group.])
+  fi
+fi
+
+## The --enable-threadsafe flag is not compatible with --enable-cxx.
+## If the user tried to specify both flags, throw an error, unless
+## they also provided the --enable-unsupported flag.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_CXX}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-cxx and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
+fi
+
+## --enable-threadsafe is also incompatible with --enable-fortran unless
+## --enable-unsupported has been specified on the configure line.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-fortran and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
+fi
+
+## --enable-threadsafe is also incompatible with --enable-java unless
+## --enable-unsupported has been specified on the configure line.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_JAVA}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-java and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
+fi
+
+if test "X${enable_threadsafe}" = "Xyes" -a "X$THREADS" = "Xno"; then
+    AC_MSG_ERROR([--enable-threadsafe given, but no threading package found.])
+fi
+
+case "X-$THREADSAFE" in
+  X-|X-no)
+    AC_MSG_RESULT([no])
+    ;;
+  X-yes)
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
+    ;;
+  *)
+    AC_MSG_RESULT([error])
+    AC_MSG_ERROR([\'$enableval\' is not a valid threadsafe type])
+    ;;
+esac
+
 
 ## ----------------------------------------------------------------------
 ## Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
@@ -3483,8 +3535,8 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
        ]
     )
 
-    # Checks for threadsafe operation
-    if test "x$HAVE_THREADSAFE" = "xno"; then
+    # Check for threads availability
+    if test "x$HAVE_THREADS" = "xno"; then
       AC_MSG_ERROR([Subfiling VFD requires thread operations support.])
     fi
 

@@ -1117,10 +1117,14 @@ h5_show_hostname(void)
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
         printf("MPI-process %d.", mpi_rank);
     }
+#ifdef H5_HAVE_THREADSAFE
     else
-        printf("thread 0.");
+        printf("thread %" PRIu64 ".", H5TS_thread_id());
+#endif
 #else
+#ifdef H5_HAVE_THREADSAFE
     printf("thread %" PRIu64 ".", H5TS_thread_id());
+#endif
 #endif
 #ifdef H5_HAVE_WIN32_API
 

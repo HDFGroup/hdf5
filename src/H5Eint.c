@@ -218,7 +218,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
         if (cls_ptr->lib_vers)
             eprint->cls.lib_vers = cls_ptr->lib_vers;
 
-        fprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
+        fprintf(stream, "%s-DIAG: Error detected in %s (%s)",
                 (cls_ptr->cls_name ? cls_ptr->cls_name : "(null)"),
                 (cls_ptr->lib_name ? cls_ptr->lib_name : "(null)"),
                 (cls_ptr->lib_vers ? cls_ptr->lib_vers : "(null)"));
@@ -233,16 +233,16 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
 
             if (mpi_initialized && !mpi_finalized) {
                 MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-                fprintf(stream, "MPI-process %d", mpi_rank);
+                fprintf(stream, " MPI-process %d", mpi_rank);
             } /* end if */
 #ifdef H5_HAVE_THREADSAFE
             else
-                fprintf(stream, "thread %" PRIu64, H5TS_thread_id());
+                fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
 #endif
         } /* end block */
 #else
 #ifdef H5_HAVE_THREADSAFE
-        fprintf(stream, "thread %" PRIu64, H5TS_thread_id());
+        fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
 #endif
 #endif
         fprintf(stream, ":\n");
@@ -346,7 +346,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         if (cls_ptr->lib_vers)
             eprint->cls.lib_vers = cls_ptr->lib_vers;
 
-        fprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
+        fprintf(stream, "%s-DIAG: Error detected in %s (%s)",
                 (cls_ptr->cls_name ? cls_ptr->cls_name : "(null)"),
                 (cls_ptr->lib_name ? cls_ptr->lib_name : "(null)"),
                 (cls_ptr->lib_vers ? cls_ptr->lib_vers : "(null)"));
@@ -361,13 +361,17 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
 
             if (mpi_initialized && !mpi_finalized) {
                 MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-                fprintf(stream, "MPI-process %d", mpi_rank);
+                fprintf(stream, " MPI-process %d", mpi_rank);
             } /* end if */
+#ifdef H5_HAVE_THREADSAFE
             else
-                fprintf(stream, "thread 0");
+                fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
+#endif
         } /* end block */
 #else
-        fprintf(stream, "thread %" PRIu64, H5TS_thread_id());
+#ifdef H5_HAVE_THREADSAFE
+        fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
+#endif
 #endif
         fprintf(stream, ":\n");
     } /* end if */

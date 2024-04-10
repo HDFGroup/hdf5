@@ -29,7 +29,7 @@
 
 #include "ttsafe.h"
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADS
 #ifndef H5_HAVE_WIN_THREADS
 
 #define MAX_NUM_THREADS 64
@@ -1133,5 +1133,5 @@ tts_rec_rw_lock_smoke_check_4(void)
         free(udata);
 } /* end tts_rec_rw_lock_smoke_check_4() */
 
-#endif /*H5_HAVE_WIN_THREADS*/
-#endif /*H5_HAVE_THREADSAFE*/
+#endif /* H5_HAVE_WIN_THREADS */
+#endif /* H5_HAVE_THREADS */

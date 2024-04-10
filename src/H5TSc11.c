@@ -32,9 +32,7 @@
 #include "H5Eprivate.h" /* Error handling                      */
 #include "H5TSpkg.h"    /* Threadsafety                        */
 
-#ifdef H5_HAVE_THREADSAFE
-
-#ifdef H5_HAVE_THREADS_H
+#ifdef H5_HAVE_C11_THREADS
 
 /****************/
 /* Local Macros */
@@ -60,6 +58,7 @@
 /* Local Variables */
 /*******************/
 
+#ifdef H5_HAVE_THREADSAFE
 /*--------------------------------------------------------------------------
  * Function:    H5TS__c11_first_thread_init
  *
@@ -81,7 +80,6 @@ H5TS__c11_first_thread_init(void)
 
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* end H5TS__c11_first_thread_init() */
-
-#endif /* H5_HAVE_THREADS_H */
-
 #endif /* H5_HAVE_THREADSAFE */
+
+#endif /* H5_HAVE_C11_THREADS */

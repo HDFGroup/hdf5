@@ -35,7 +35,7 @@
 #include "H5Eprivate.h" /* Error handling                      */
 #include "H5TSpkg.h"    /* Threadsafety                        */
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADS
 
 /****************/
 /* Local Macros */
@@ -739,4 +739,4 @@ done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__rw_unlock() */
 
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADS */

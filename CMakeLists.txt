@@ -742,6 +742,35 @@ if (H5_HAVE_PARALLEL)
   endif ()
 endif ()
 
+# Determine if a threading package is available on this system
+option (HDF5_ENABLE_THREADS "Enable thread support" ON)
+set (THREADS_PREFER_PTHREAD_FLAG ON)
+find_package (Threads)
+if (Threads_FOUND)
+  set (H5_HAVE_THREADS 1)
+  set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+
+  # Determine which threading package to use
+  CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
+  if (HAVE_THREADS_H)
+    # When C11 threads are available, those are the top choice
+    set (H5_HAVE_C11_THREADS 1)
+  elseif (WIN32)
+    # When Win32 is available, we use those threads
+    set (H5_HAVE_WIN_THREADS 1)
+  else ()
+    if (NOT H5_HAVE_PTHREAD_H)
+      message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
+    endif ()
+  endif ()
+
+  # Check for compiler support for atomic variables
+  CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
+  if (HAVE_STDATOMIC_H)
+    set (H5_HAVE_STDATOMIC_H 1)
+  endif()
+endif ()
+
 # Determine whether to build the HDF5 Subfiling VFD
 set (H5FD_SUBFILING_DIR ${HDF5_SRC_DIR}/H5FDsubfiling)
 set (HDF5_SRC_INCLUDE_DIRS
@@ -763,13 +792,8 @@ if (HDF5_ENABLE_SUBFILING_VFD)
     endif ()
   endif ()
 
-  if (NOT DEFINED Threads_FOUND)
-    set (THREADS_PREFER_PTHREAD_FLAG ON)
-    find_package (Threads REQUIRED)
-  endif ()
-
   # Subfiling requires thread operations
-  if (NOT ${Threads_FOUND})
+  if (NOT Threads_FOUND)
     message (FATAL_ERROR "Subfiling requires thread operations support")
   endif ()
 
@@ -777,12 +801,6 @@ if (HDF5_ENABLE_SUBFILING_VFD)
   # IOC VFD is currently only built when subfiling is enabled
   set (H5_HAVE_IOC_VFD 1)
 
-  # Run some configure checks for threading
-  set (CMAKE_EXTRA_INCLUDE_FILES pthread.h)
-  set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
-
-  unset (CMAKE_EXTRA_INCLUDE_FILES)
-  unset (CMAKE_REQUIRED_LIBRARIES)
   if(NOT H5_HAVE_SUBFILING_VFD EQUAL 1)
     set (HDF5_ENABLE_SUBFILING_VFD OFF CACHE BOOL "Build Parallel HDF5 Subfiling VFD" FORCE)
   endif()
@@ -879,6 +897,13 @@ if (HDF5_ENABLE_THREADSAFE)
       message (FATAL_ERROR " **** thread-safety option not supported with static library **** ")
     endif ()
   endif ()
+  if (HDF_ENABLE_PARALLEL)
+    if (NOT ALLOW_UNSUPPORTED)
+      message (FATAL_ERROR " **** Parallel and thread-safety options are not supported, override with ALLOW_UNSUPPORTED option **** ")
+    else ()
+      message (VERBOSE " **** Allowing unsupported parallel and thread-safety options **** ")
+    endif ()
+  endif ()
   if (HDF5_BUILD_FORTRAN)
     if (NOT ALLOW_UNSUPPORTED)
       message (FATAL_ERROR " **** Fortran and thread-safety options are not supported, override with ALLOW_UNSUPPORTED option **** ")
@@ -900,23 +925,13 @@ if (HDF5_ENABLE_THREADSAFE)
       message (VERBOSE " **** Allowing unsupported HL and thread-safety options **** ")
     endif ()
   endif ()
-  if (WIN32)
-    # When Win32 is available, we use those threads
-    set (H5_HAVE_WIN_THREADS 1)
-  else ()
-    if (NOT H5_HAVE_PTHREAD_H)
-      message (FATAL_ERROR " **** thread-safe option requires Win32 threads or Pthreads **** ")
-    endif ()
+
+  # Check for threading package
+  if (NOT Threads_FOUND)
+    message (FATAL_ERROR " **** thread-safety option requires a threading package and none was found **** ")
   endif ()
-  set (THREADS_PREFER_PTHREAD_FLAG ON)
-  find_package (Threads REQUIRED)
-  if (Threads_FOUND)
-    set (H5_HAVE_THREADSAFE 1)
-  endif ()
-  CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
-  if (HAVE_STDATOMIC_H)
-    set (H5_HAVE_STDATOMIC_H 1)
-  endif()
+
+  set (H5_HAVE_THREADSAFE 1)
 endif ()
 
 #-----------------------------------------------------------------------------
