@@ -12,9 +12,52 @@ This is a maintenance release with a few changes and updates:
   for improved performance when converting between 16-bit floating-point
   data and data of another HDF5 datatype.
 
-  (GitHub #4065, #2154)
+* Improved type conversion performance
 
+  As a part of the _Float16 work, the type conversion code was overhauled,
+  which has improved the performance of type conversion code. The speedup
+  varies depending on the datatypes involved, but can be upwards of 10x
+  for compound types and 100x when converting floats to integers where the
+  library doesn't have a fast conversion path available from the compiler.
+
+* Added improvements for cloud-optimized HDF5
+
+  As a part of our continued push to improve access to HDF5 files stored in the
+  cloud, we've added a few things to make working with cloudy HDF5 files more
+  efficient:
+
+  - Page buffering setup is now more tolarant of being used with HDF5 files
+    that did not use paged storage. This avoids having to open/close/re-open
+    the file to determine appropriate page buffering settings.
+
+  - Added support for temporary credentials with the read-only S3 VFD
+
+* Added build system improvements
+
+  We are always working to ensure that HDF5 can be built on a wide variety of
+  systems with the latest compilers. In this release, we've incorporated some
+  improvements, including:
+
+  - Further improvements to cross-compiling
+  - Support for the new standards-compliant MSVC preprocessor
+  - Better support for Cygwin and MinGW, particularly with the Autotools
+  - Many other build system tweaks
+
+  If you have a system that has problems building HDF5, please let us know on
+  the HDF Group Forum (https://forum.hdfgroup.org/)
+
+* Fixed many CVE issues
+
+  Many soon-to-be-reported CVE issues were fixed in this release. These are
+  similar to previously reported CVE issues in that they involve file parsing
+  errors that generally result in a segfault. They are usually rated as
+  medium severity by NIST. These issues do not have official CVE numbers yet.
+
+  With these fixes, HDF5 will once again be CVE-free.
+
+* Many other improvement and bugfixes!
+
+  Please see the full release notes for detailed information regarding this
+  release, including a detailed list of changes.
 ----------------------------------------------------------------------------
-Please see the full release notes for detailed information regarding this release,
-including a detailed list of changes.
 
