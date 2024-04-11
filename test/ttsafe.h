@@ -28,7 +28,6 @@
  * This file also needs to access the threadsafety testing code.
  */
 #define H5TS_FRIEND /*suppress error about including H5TSpkg      */
-#define H5TS_TESTING
 #include "H5TSpkg.h"
 
 /* Prototypes for the support routines */

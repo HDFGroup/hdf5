@@ -256,13 +256,11 @@ H5_DLL void H5TS__pthread_first_thread_init(void);
 #endif
 #endif /* H5_HAVE_THREADSAFE */
 
-#ifdef H5TS_TESTING
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
 H5_DLL herr_t H5TS__rw_lock_get_stats(H5TS_rw_lock_t *rw_lock, H5TS_rw_lock_stats_t *stats);
 H5_DLL herr_t H5TS__rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock);
 H5_DLL herr_t H5TS__rw_lock_print_stats(const char *header_str, H5TS_rw_lock_stats_t *stats);
 #endif
-#endif /* H5TS_TESTING */
 
 #endif /* H5_HAVE_THREADS */
 
