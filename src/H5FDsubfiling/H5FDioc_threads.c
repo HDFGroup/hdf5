@@ -115,31 +115,6 @@ initialize_ioc_threads(void *_sf_context)
                                 "can't allocate IOC data for IOC main thread");
     ioc_data->sf_context_id  = sf_context->sf_context_id;
     ioc_data->io_thread_pool = NULL;
-    ioc_data->io_queue       = (ioc_io_queue_t){/* magic               = */ H5FD_IOC__IO_Q_MAGIC,
-                                          /* q_head              = */ NULL,
-                                          /* q_tail              = */ NULL,
-                                          /* num_pending         = */ 0,
-                                          /* num_in_progress     = */ 0,
-                                          /* num_failed          = */ 0,
-                                          /* q_len               = */ 0,
-                                          /* req_counter         = */ 0,
-                                          /* q_mutex             = */
-                                          PTHREAD_MUTEX_INITIALIZER,
-#ifdef H5FD_IOC_COLLECT_STATS
-                                          /* max_q_len           = */ 0,
-                                          /* max_num_pending     = */ 0,
-                                          /* max_num_in_progress = */ 0,
-                                          /* ind_read_requests   = */ 0,
-                                          /* ind_write_requests  = */ 0,
-                                          /* truncate_requests   = */ 0,
-                                          /* get_eof_requests    = */ 0,
-                                          /* requests_queued     = */ 0,
-                                          /* requests_dispatched = */ 0,
-                                          /* requests_completed  = */ 0
-#endif
-    };
-
-    sf_context->ioc_data = ioc_data;
 
     /* Initialize atomic vars */
     H5TS_atomic_init_int(&ioc_data->sf_ioc_ready, 0);
@@ -147,12 +122,17 @@ initialize_ioc_threads(void *_sf_context)
     H5TS_atomic_init_int(&ioc_data->sf_io_ops_pending, 0);
     H5TS_atomic_init_int(&ioc_data->sf_work_pending, 0);
 
+    /* Initialize I/O queue */
+    memset(&ioc_data->io_queue, 0, sizeof(ioc_data->io_queue));
+    ioc_data->io_queue.magic = H5FD_IOC__IO_Q_MAGIC;
+    if (H5TS_mutex_init(&ioc_data->io_queue.q_mutex, H5TS_MUTEX_TYPE_PLAIN) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, (-1), "can't initialize IOC thread queue mutex");
+
+    sf_context->ioc_data = ioc_data;
+
 #ifdef H5FD_IOC_COLLECT_STATS
     t_start = MPI_Wtime();
 #endif
-
-    if (H5TS_mutex_init(&ioc_data->io_queue.q_mutex, H5TS_MUTEX_TYPE_PLAIN) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, (-1), "can't initialize IOC thread queue mutex");
 
     /* Allow experimentation with the number of helper threads */
     if ((env_value = getenv(H5FD_IOC_THREAD_POOL_SIZE)) != NULL) {
