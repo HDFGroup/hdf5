@@ -22,21 +22,61 @@
 
  @licend  The above is the entire license notice for the JavaScript code in this file
  */
+var once=1;
+function initResizable()
+{
+  var cookie_namespace = 'doxygen';
+  var sidenav,navtree,content,header,barWidth=6,desktop_vp=768,titleHeight;
 
-function initResizable() {
-  let sidenav,navtree,content,header,footer,barWidth=6;
-  const RESIZE_COOKIE_NAME = ''+'width';
+  function readSetting(cookie)
+  {
+    if (window.chrome) {
+      var val = localStorage.getItem(cookie_namespace+'_width');
+      if (val) return val;
+    } else {
+      var myCookie = cookie_namespace+"_"+cookie+"=";
+      if (document.cookie) {
+        var index = document.cookie.indexOf(myCookie);
+        if (index != -1) {
+          var valStart = index + myCookie.length;
+          var valEnd = document.cookie.indexOf(";", valStart);
+          if (valEnd == -1) {
+            valEnd = document.cookie.length;
+          }
+          var val = document.cookie.substring(valStart, valEnd);
+          return val;
+        }
+      }
+    }
+    return 250;
+  }
 
-  function resizeWidth() {
-    const sidenavWidth = $(sidenav).outerWidth();
+  function writeSetting(cookie, val)
+  {
+    if (window.chrome) {
+      localStorage.setItem(cookie_namespace+"_width",val);
+    } else {
+      var date = new Date();
+      date.setTime(date.getTime()+(10*365*24*60*60*1000)); // default expiration is one week
+      expiration = date.toGMTString();
+      document.cookie = cookie_namespace + "_" + cookie + "=" + val + "; SameSite=Lax; expires=" + expiration+"; path=/";
+    }
+  }
+
+  function resizeWidth()
+  {
+    var windowWidth = $(window).width() + "px";
+    var sidenavWidth = $(sidenav).outerWidth();
     content.css({marginLeft:parseInt(sidenavWidth)+"px"});
     if (typeof page_layout!=='undefined' && page_layout==1) {
       footer.css({marginLeft:parseInt(sidenavWidth)+"px"});
     }
-    Cookie.writeSetting(RESIZE_COOKIE_NAME,sidenavWidth-barWidth);
+    writeSetting('width',sidenavWidth-barWidth);
   }
 
-  function restoreWidth(navWidth) {
+  function restoreWidth(navWidth)
+  {
+    var windowWidth = $(window).width() + "px";
     content.css({marginLeft:parseInt(navWidth)+barWidth+"px"});
     if (typeof page_layout!=='undefined' && page_layout==1) {
       footer.css({marginLeft:parseInt(navWidth)+barWidth+"px"});
@@ -44,11 +84,12 @@ function initResizable() {
     sidenav.css({width:navWidth + "px"});
   }
 
-  function resizeHeight() {
-    const headerHeight = header.outerHeight();
-    const footerHeight = footer.outerHeight();
-    const windowHeight = $(window).height();
-    let contentHeight,navtreeHeight,sideNavHeight;
+  function resizeHeight()
+  {
+    var headerHeight = header.outerHeight();
+    var footerHeight = footer.outerHeight();
+    var windowHeight = $(window).height();
+    var contentHeight,navtreeHeight,sideNavHeight;
     if (typeof page_layout==='undefined' || page_layout==0) { /* DISABLE_INDEX=NO */
       contentHeight = windowHeight - headerHeight - footerHeight;
       navtreeHeight = contentHeight;
@@ -66,17 +107,19 @@ function initResizable() {
     }
   }
 
-  function collapseExpand() {
-    let newWidth;
+  function collapseExpand()
+  {
+    var newWidth;
     if (sidenav.width()>0) {
       newWidth=0;
-    } else {
-      const width = Cookie.readSetting(RESIZE_COOKIE_NAME,250);
+    }
+    else {
+      var width = readSetting('width');
       newWidth = (width>250 && width<$(window).width()) ? width : 250;
     }
     restoreWidth(newWidth);
-    const sidenavWidth = $(sidenav).outerWidth();
-    Cookie.writeSetting(RESIZE_COOKIE_NAME,sidenavWidth-barWidth);
+    var sidenavWidth = $(sidenav).outerWidth();
+    writeSetting('width',sidenavWidth-barWidth);
   }
 
   header  = $("#top");
@@ -84,26 +127,29 @@ function initResizable() {
   content = $("#doc-content");
   navtree = $("#nav-tree");
   footer  = $("#nav-path");
-  $(".side-nav-resizable").resizable({resize: () => resizeWidth() });
+  $(".side-nav-resizable").resizable({resize: function(e, ui) { resizeWidth(); } });
   $(sidenav).resizable({ minWidth: 0 });
-  $(window).resize(() => resizeHeight());
-  const device = navigator.userAgent.toLowerCase();
-  const touch_device = device.match(/(iphone|ipod|ipad|android)/);
+  $(window).resize(function() { resizeHeight(); });
+  var device = navigator.userAgent.toLowerCase();
+  var touch_device = device.match(/(iphone|ipod|ipad|android)/);
   if (touch_device) { /* wider split bar for touch only devices */
     $(sidenav).css({ paddingRight:'20px' });
     $('.ui-resizable-e').css({ width:'20px' });
     $('#nav-sync').css({ right:'34px' });
     barWidth=20;
   }
-  const width = Cookie.readSetting(RESIZE_COOKIE_NAME,250);
+  var width = readSetting('width');
   if (width) { restoreWidth(width); } else { resizeWidth(); }
   resizeHeight();
-  const url = location.href;
-  const i=url.indexOf("#");
+  var url = location.href;
+  var i=url.indexOf("#");
   if (i>=0) window.location.hash=url.substr(i);
-  const _preventDefault = (evt) => evt.preventDefault();
+  var _preventDefault = function(evt) { evt.preventDefault(); };
   $("#splitbar").bind("dragstart", _preventDefault).bind("selectstart", _preventDefault);
-  $(".ui-resizable-handle").dblclick(collapseExpand);
+  if (once) {
+    $(".ui-resizable-handle").dblclick(collapseExpand);
+    once=0
+  }
   $(window).on('load',resizeHeight);
 }
 /* @license-end */
