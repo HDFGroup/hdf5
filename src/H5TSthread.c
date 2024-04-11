@@ -132,7 +132,7 @@ done:
 /*--------------------------------------------------------------------------
  * Function: H5TS_thread_setcancelstate
  *
- * Purpose:  Set cancelability state for a thread
+ * Purpose:  Set cancellability state for a thread
  *
  * Return:   Non-negative on success / Negative on failure
  *
@@ -235,7 +235,7 @@ done:
 /*--------------------------------------------------------------------------
  * Function: H5TS_thread_setcancelstate
  *
- * Purpose:  Set cancelability state for a thread
+ * Purpose:  Set cancellability state for a thread
  *
  * Return:   Non-negative on success / Negative on failure
  *
@@ -323,7 +323,7 @@ done:
 /*--------------------------------------------------------------------------
  * Function: H5TS_thread_setcancelstate
  *
- * Purpose:  Set cancelability state for a thread
+ * Purpose:  Set cancellability state for a thread
  *
  * Return:   Non-negative on success / Negative on failure
  *

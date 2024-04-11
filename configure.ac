@@ -2141,7 +2141,7 @@ if test "X$THREADS" = "Xyes"; then
     ## The default is to use Pthreads when building with the Autotools, unless
     ## the compiler has C11 threads or we're building w/ MinGW.
     ##
-    ## Currrently C11 threads will take priority over Pthreads and Win32 threads
+    ## Currently C11 threads will take priority over Pthreads and Win32 threads
     ##
     AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
     AC_ARG_WITH([pthread],
@@ -2245,7 +2245,7 @@ if test "X$THREADS" = "Xyes"; then
 
 fi # end of threads processing
 
-# Check to varify that a threading package was found
+# Check to verify that a threading package was found
 AC_MSG_CHECKING([for threads support])
 if test "x$HAVE_PTHREAD" = "xno" -a "x$HAVE_WIN_THREADS" = "xno" -a "x$HAVE_C11_THREADS" = "xno"; then
   THREADS=no

@@ -35,7 +35,7 @@
 #define MAX_NUM_THREADS 64
 #define MAX_LOCK_CYCLES (10 * 1000 * 1000)
 
-/* structure used to configure test threads in the recurive
+/* structure used to configure test threads in the recursive
  * R/W/ lock tests.
  */
 /***********************************************************************
