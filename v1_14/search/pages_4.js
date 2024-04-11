@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['4_20and_20above_0',['DDL in BNF for HDF5 1.14.4 and above',['../_d_d_l_b_n_f114.html',1,'']]]
+  ['files_0',['Files',['../_files.html',1,'']]],
+  ['full_2dtext_20search_1',['Full-Text Search',['../_f_t_s.html',1,'']]],
+  ['functions_20with_20no_20access_20property_20list_20parameter_20that_20may_20generate_20metadata_20reads_2',['Functions with No Access Property List Parameter that May Generate Metadata Reads',['../maybe_metadata_reads.html',1,'']]]
 ];

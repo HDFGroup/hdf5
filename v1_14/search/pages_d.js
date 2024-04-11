@@ -1,19 +1,7 @@
 var searchData=
 [
-  ['i_20o_0',['Dataspaces and Partial I/O',['../_h5_s__u_g.html',1,'']]],
-  ['i_20o_20flow_20notes_1',['HDF5 Raw I/O Flow Notes',['../_i_o_f_l_o_w.html',1,'']]],
-  ['identifiers_2',['The HDF5 Identifiers',['../_h5_i__u_g.html',1,'']]],
-  ['image_20and_20palette_20specification_20version_201_202_3',['HDF5 Image and Palette Specification Version 1.2',['../_i_m_g.html',1,'']]],
-  ['images_4',['The HDF5 High Level Images',['../_h5_i_m__u_g.html',1,'']]],
-  ['images_20for_20html_20files_5',['Images for html files',['../_h_t_m_l__i_m_g_s.html',1,'']]],
-  ['in_20bnf_20for_20hdf5_201_2012_20through_20hdf5_201_2014_203_6',['DDL in BNF for HDF5 1.12 through HDF5 1.14.3',['../_d_d_l_b_n_f112.html',1,'']]],
-  ['in_20bnf_20for_20hdf5_201_2014_204_20and_20above_7',['DDL in BNF for HDF5 1.14.4 and above',['../_d_d_l_b_n_f114.html',1,'']]],
-  ['in_20bnf_20through_20hdf5_201_2010_8',['DDL in BNF through HDF5 1.10',['../_d_d_l_b_n_f110.html',1,'']]],
-  ['in_20groups_9',['Creating Datasets in Groups',['../_l_b_grp_dset.html',1,'LearnBasics']]],
-  ['in_20hdf5_10',['in HDF5',['../_t_n_m_d_c.html',1,'Metadata Caching in HDF5'],['../_h5_p__u_g.html',1,'Properties and Property Lists in HDF5']]],
-  ['introduction_20to_20hdf5_11',['Introduction to HDF5',['../_intro_h_d_f5.html',1,'']]],
-  ['introduction_20to_20parallel_20hdf5_12',['A Brief Introduction to Parallel HDF5',['../_intro_par_h_d_f5.html',1,'']]],
-  ['introduction_20to_20single_20writer_20multiple_20reader_20swmr_13',['Introduction to Single-Writer/Multiple-Reader (SWMR)',['../_s_w_m_r.html',1,'']]],
-  ['introduction_20to_20the_20virtual_20dataset_20vds_14',['Introduction to the Virtual Dataset - VDS',['../_v_d_s.html',1,'']]],
-  ['issues_15',['Programming Issues',['../_l_b_prog.html',1,'LearnBasics']]]
+  ['reading_20from_20and_20writing_20to_20a_20dataset_0',['Reading From and Writing To a Dataset',['../_l_b_dset_r_w.html',1,'LearnBasics']]],
+  ['reading_20from_20or_20writing_20to_20a_20subset_20of_20a_20dataset_1',['Reading From or Writing To a Subset of a Dataset',['../_l_b_dset_sub_r_w.html',1,'LearnBasics']]],
+  ['reference_20manual_20_28rm_29_20page_20template_2',['Reference Manual (RM) Page Template',['../_r_m_t.html',1,'']]],
+  ['rfcs_3',['RFCs',['../_r_f_c.html',1,'']]]
 ];
