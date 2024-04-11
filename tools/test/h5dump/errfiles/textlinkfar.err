@@ -1,4 +1,4 @@
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+HDF5-DIAG: Error detected in HDF5 (version (number)):
   #000: (file name) line (number) in H5Oopen(): unable to synchronously open object
     major: Object header
     minor: Can't open object
@@ -59,7 +59,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #019: (file name) line (number) in H5G__traverse_slink_cb(): component not found
     major: Symbol table
     minor: Object not found
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+HDF5-DIAG: Error detected in HDF5 (version (number)):
   #000: (file name) line (number) in H5G_loc_find(): can't find object
     major: Symbol table
     minor: Object not found
@@ -156,7 +156,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #031: (file name) line (number) in H5G__traverse_special(): too many links
     major: Links
     minor: Too many soft links in path
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+HDF5-DIAG: Error detected in HDF5 (version (number)):
   #000: (file name) line (number) in H5G_loc_find(): can't find object
     major: Symbol table
     minor: Object not found

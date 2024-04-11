@@ -1,4 +1,4 @@
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+HDF5-DIAG: Error detected in HDF5 (version (number)):
   #000: (file name) line (number) in H5Dopen2(): unable to synchronously open dataset
     major: Dataset
     minor: Can't open object
@@ -29,7 +29,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #009: (file name) line (number) in H5G__loc_find_cb(): object 'dset3' doesn't exist
     major: Symbol table
     minor: Object not found
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+HDF5-DIAG: Error detected in HDF5 (version (number)):
   #000: (file name) line (number) in H5Lget_info2(): unable to get link info
     major: Links
     minor: Can't get value

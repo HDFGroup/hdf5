@@ -1,4 +1,4 @@
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+HDF5-DIAG: Error detected in HDF5 (version (number)):
   #000: (file name) line (number) in H5Dcreate2(): unable to synchronously create dataset
     major: Dataset
     minor: Unable to create file
@@ -44,7 +44,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #014: (file name) line (number) in H5D__chunk_construct(): dimensionality of chunks doesn't match the dataspace
     major: Dataset
     minor: Bad value
-H5tools-DIAG: Error detected in HDF5:tools (version (number)) thread (IDs):
+H5tools-DIAG: Error detected in HDF5:tools (version (number)):
   #000: (file name) line (number) in do_copy_objects(): H5Dcreate2 failed
     major: Failure in tools library
     minor: function info

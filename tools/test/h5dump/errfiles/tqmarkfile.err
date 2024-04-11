@@ -1,4 +1,4 @@
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+HDF5-DIAG: Error detected in HDF5 (version (number)):
   #000: (file name) line (number) in H5Dopen2(): not found
     major: Dataset
     minor: Object not found
@@ -14,7 +14,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #004: (file name) line (number) in H5G_loc_find_cb(): object 'Dataset1' doesn't exist
     major: Symbol table
     minor: Object not found
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+HDF5-DIAG: Error detected in HDF5 (version (number)):
   #000: (file name) line (number) in H5Lget_info2(): unable to get link info
     major: Symbol table
     minor: Object not found
