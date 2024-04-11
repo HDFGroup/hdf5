@@ -17,10 +17,11 @@
 #ifndef H5_SUBFILING_COMMON_H
 #define H5_SUBFILING_COMMON_H
 
-#include "H5private.h"
-#include "H5FDprivate.h"
-#include "H5Iprivate.h"
-#include "H5Pprivate.h"
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5FDprivate.h" /* File Drivers                             */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5Pprivate.h"  /* Property lists                           */
+#include "H5TSprivate.h" /* Threads                                  */
 
 #include "H5FDsubfiling.h"
 #include "H5FDioc.h"

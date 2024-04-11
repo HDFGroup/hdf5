@@ -1236,10 +1236,10 @@ H5_DLL herr_t H5_trace_args(struct H5RS_str_t *rs, const char *type, va_list ap)
 /* global library version information string */
 extern char H5_lib_vers_info_g[];
 
+#ifdef H5_HAVE_THREADSAFE
+
 /* Lock headers */
 #include "H5TSprivate.h"
-
-#ifdef H5_HAVE_THREADSAFE
 
 /* Local variables for saving cancellation state */
 #define H5CANCEL_DECL int oldstate = 0;
