@@ -55,6 +55,13 @@ This is a maintenance release with a few changes and updates:
 
   With these fixes, HDF5 will once again be CVE-free.
 
+* The release tag in GitHub will be hdf5_1.14.4
+
+  We used to use tags with names like hdf5-1_14_3, but we've been informed
+  that dashes are forbidden in version strings by many package management
+  schemes. If a patch release is necessary, we'll simply append another
+  dot and number - e.g. hdf5_1.14.4.2 (instead of our previous hdf5-1_14_4-2).
+
 * Many other improvement and bugfixes!
 
   Please see the full release notes for detailed information regarding this
