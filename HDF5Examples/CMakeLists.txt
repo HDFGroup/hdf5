@@ -103,12 +103,12 @@ if (Threads_FOUND)
 
   # Determine which threading package to use
   CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
-  if (HAVE_THREADS_H)
-    # When C11 threads are available, those are the top choice
-    set (H5_HAVE_C11_THREADS 1)
-  elseif (WIN32)
+  if (WIN32)
     # When Win32 is available, we use those threads
     set (H5_HAVE_WIN_THREADS 1)
+  elseif (HAVE_THREADS_H)
+    # When C11 threads are available, those are the top choice
+    set (H5_HAVE_C11_THREADS 1)
   else ()
     if (NOT H5_HAVE_PTHREAD_H)
       message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
