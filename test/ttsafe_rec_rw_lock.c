@@ -623,7 +623,7 @@ tts_rec_rw_lock_smoke_check_2(void)
     uint64_t end_time  = H5_now_usec();
     uint64_t elap_time = (unsigned long long)(end_time - start_time);
     if (verbose)
-        fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
+        fprintf(stdout, "elapsed usec: %" PRIu64 ", usec per lock_cycle = %" PRIu64 "\n", elap_time,
                 (elap_time / (uint64_t)lock_cycles));
 #endif
 
@@ -829,7 +829,7 @@ tts_rec_rw_lock_smoke_check_3(void)
     uint64_t end_time  = H5_now_usec();
     uint64_t elap_time = (unsigned long long)(end_time - start_time);
     if (verbose)
-        fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
+        fprintf(stdout, "elapsed usec: %" PRIu64 ", usec per lock_cycle = %" PRIu64 "\n", elap_time,
                 (elap_time / (uint64_t)lock_cycles));
 #endif
 
@@ -1036,7 +1036,7 @@ tts_rec_rw_lock_smoke_check_4(void)
     uint64_t end_time  = H5_now_usec();
     uint64_t elap_time = (unsigned long long)(end_time - start_time);
     if (verbose)
-        fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
+        fprintf(stdout, "elapsed usec: %" PRIu64 ", usec per lock_cycle = %" PRIu64 "\n", elap_time,
                 (elap_time / (uint64_t)lock_cycles));
 #endif
 
