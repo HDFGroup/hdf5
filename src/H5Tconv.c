@@ -1869,7 +1869,7 @@ H5T__conv_b_b(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
                     d = (elmtno + olap) >= nelmts ? dbuf : dp;
                 } /* end else */
 #ifndef NDEBUG
-                /* I don't quite trust the overlap calculations yet --rpm */
+                /* I don't quite trust the overlap calculations yet  */
                 if (d == dbuf)
                     assert((dp >= sp && dp < sp + src->shared->size) ||
                            (sp >= dp && sp < dp + dst->shared->size));
@@ -4491,7 +4491,7 @@ H5T__conv_i_i(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
                     d = elmtno + olap >= nelmts ? dbuf : dp;
                 }
 #ifndef NDEBUG
-                /* I don't quite trust the overlap calculations yet --rpm */
+                /* I don't quite trust the overlap calculations yet  */
                 if (d == dbuf) {
                     assert((dp >= sp && dp < sp + src->shared->size) ||
                            (sp >= dp && sp < dp + dst->shared->size));
@@ -4964,7 +4964,7 @@ H5T__conv_f_f(const H5T_t *src_p, const H5T_t *dst_p, H5T_cdata_t *cdata, const 
                     d = elmtno + olap >= nelmts ? dbuf : dp;
                 }
 #ifndef NDEBUG
-                /* I don't quite trust the overlap calculations yet --rpm */
+                /* I don't quite trust the overlap calculations yet  */
                 if (d == dbuf) {
                     assert((dp >= sp && dp < sp + src_p->shared->size) ||
                            (sp >= dp && sp < dp + dst_p->shared->size));
@@ -5542,7 +5542,7 @@ H5T__conv_s_s(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                     d = elmtno + olap >= nelmts ? dbuf : dp;
                 }
 #ifndef NDEBUG
-                /* I don't quite trust the overlap calculations yet --rpm */
+                /* I don't quite trust the overlap calculations yet  */
                 if (src->shared->size == dst->shared->size || buf_stride) {
                     assert(s == d);
                 }
@@ -9007,7 +9007,7 @@ H5T__conv_f_i(const H5T_t *src_p, const H5T_t *dst_p, H5T_cdata_t *cdata, const 
                     d = elmtno + olap >= nelmts ? dbuf : dp;
                 }
 #ifndef NDEBUG
-                /* I don't quite trust the overlap calculations yet --rpm */
+                /* I don't quite trust the overlap calculations yet  */
                 if (d == dbuf) {
                     assert((dp >= sp && dp < sp + src_p->shared->size) ||
                            (sp >= dp && sp < dp + dst_p->shared->size));
@@ -9676,7 +9676,7 @@ H5T__conv_i_f(const H5T_t *src_p, const H5T_t *dst_p, H5T_cdata_t *cdata, const 
                     d = elmtno + olap >= nelmts ? dbuf : dp;
                 }
 #ifndef NDEBUG
-                /* I don't quite trust the overlap calculations yet --rpm */
+                /* I don't quite trust the overlap calculations yet  */
                 if (d == dbuf) {
                     assert((dp >= sp && dp < sp + src_p->shared->size) ||
                            (sp >= dp && sp < dp + dst_p->shared->size));
