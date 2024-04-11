@@ -26,7 +26,7 @@ This is a maintenance release with a few changes and updates:
   cloud, we've added a few things to make working with cloudy HDF5 files more
   efficient:
 
-  - Page buffering setup is now more tolarant of being used with HDF5 files
+  - Page buffering setup is now more tolerant of being used with HDF5 files
     that did not use paged storage. This avoids having to open/close/re-open
     the file to determine appropriate page buffering settings.
 
@@ -62,7 +62,7 @@ This is a maintenance release with a few changes and updates:
   schemes. If a patch release is necessary, we'll simply append another
   dot and number - e.g. hdf5_1.14.4.2 (instead of our previous hdf5-1_14_4-2).
 
-* Many other improvement and bugfixes!
+* Many other improvements and bugfixes!
 
   Please see the full release notes for detailed information regarding this
   release, including a detailed list of changes.
