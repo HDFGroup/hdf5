@@ -1377,7 +1377,7 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, bool try_lock)
     assert(ioc_data->io_queue.magic == H5FD_IOC__IO_Q_MAGIC);
 
     if (try_lock) {
-        bool   acquired;
+        bool acquired;
 
         H5TS_mutex_trylock(&ioc_data->io_queue.q_mutex, &acquired);
         if (!acquired)
