@@ -9031,7 +9031,7 @@ H5_DLL herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, uns
  *      must be created and maintained in the original style. This is HDF5's default
  *      behavior. If backward compatibility with pre-1.8.0 libraries is not a concern,
  *      greater efficiencies can be obtained with the new-format compact and indexed
- *      groups. See <a href="https://docs.hdfgroup.org/hdf5/v1_14/group___h5_g.html">Group
+ *      groups. See <a href="https://docs.hdfgroup.org/hdf5/v1_14_4/group___h5_g.html">Group
  *      implementations in HDF5</a> in the \ref H5G API introduction (at the bottom).\n
  *      H5Pset_local_heap_size_hint() is useful for tuning file size when files
  *      contain original-style groups with either zero members or very large
