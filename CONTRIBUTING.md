@@ -16,12 +16,12 @@ around 10 minutes.
 
 ## Table of Contents
 
-* [Workflow](#workflow)
-* [Acceptance criteria for a pull request](#criteria)
-* [Release Note](#releasenote)
-* [Check List](#checklist)
+* <a href="#workflow">Workflow</a>
+* <a href="#criteria">Acceptance criteria for a pull request</a>
+* <a href="#releasenote">Release Note</a>
+* <a href="#checklist">Check List</a>
 
-# Workflow <A NAME="workflow"></A>
+<h2 id="workflow">Workflow</h2>
 
 The process for contributing code to HDF5 is as follows:
 
@@ -41,7 +41,7 @@ Once a pull request is correctly formatted and passes **ALL** CI tests, it will 
 community members who can approve pull requests. The HDF Group developers will work with you to ensure that the pull request satisfies the acceptance
 criteria described in the next section.
 
-# Acceptance criteria for a pull request <A NAME="criteria"></A>
+<h2 id="criteria">Acceptance criteria for a pull request</h2>
 
 We appreciate every contribution we receive, but we may not accept them all.  Those that we *do* satisfy the following criteria:
 
@@ -84,7 +84,7 @@ application developers and not system administrators. Users who may find the REL
 application developers, library developers, and system administrators.
 
 
-# Release Note <A NAME="releasenote"></A>
+<h2 id="releasenote">Release Note</h2>
 
 * **Entry Syntax**
 The release note entry syntax is shown below.
@@ -112,7 +112,7 @@ You might also consider the following as you describe the solution:
         * Is there a workaround – a way for users design their software so as not to encounter the issue? If so, what is the workaround?
         * For a performance fix, how has the performance improved? Links to published documentation would be good.
 
-# Checklist <A NAME="checklist"></A>
+<h2 id="checklist">Checklist</h2>
 
 Please make sure that you check the items applicable to your pull request:
 
@@ -122,10 +122,10 @@ Please make sure that you check the items applicable to your pull request:
   * [ ] If changes were done to Autotools build, were they added to CMake and vice versa?
   * [ ] Is the pull request applicable to any other branches? If yes, which ones? Please document it in the GitHub issue.
   * [ ] Is the new code sufficiently documented for future maintenance?
-  * [ ] Does the new feature require a change to an existing API? See "API Compatibility Macros" document (https://docs.hdfgroup.org/hdf5/v1_14/api-compat-macros.html)
+  * [ ] Does the new feature require a change to an existing API? See "API Compatibility Macros" document (https://docs.hdfgroup.org/hdf5/v1_14_4/api-compat-macros.html)
 * Documentation
   * [ ] Was the change described in the release_docs/RELEASE.txt file?
-  * [ ] Was the new function documented in the corresponding public header file using [Doxygen](https://hdfgroup.github.io/hdf5/v1_14/_r_m_t.html)?
+  * [ ] Was the new function documented in the corresponding public header file using [Doxygen](https://hdfgroup.github.io/hdf5/v1_14_4/_r_m_t.html)?
   * [ ] Was new functionality documented for the HDF5 community (the level of documentation depends on the feature; ask us what would be appropriate)
 * Testing
   * [ ] Does the pull request have tests?

@@ -688,6 +688,7 @@ FILE_PATTERNS  = H5*public.h H5*module.h H5*develop.h H5FD*.h \
                  HDF*.java \
                  *.F90 \
                  *.dox \
+                 *.md \
                  H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5CommonFG.h H5CompType.h \
                  H5DataSet.h H5DataSpace.h H5DataType.h H5OcreatProp.h H5DaccProp.h H5DcreatProp.h \
                  H5DxferProp.h H5EnumType.h H5Exception.h H5FaccProp.h H5FcreatProp.h H5File.h \
@@ -708,8 +709,7 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = examples
-
+EXCLUDE                =
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
 # from the input.
@@ -734,6 +734,8 @@ EXCLUDE_PATTERNS      += */hl/fortran/test/*
 EXCLUDE_PATTERNS      += */hl/fortran/src/*.c
 EXCLUDE_PATTERNS      += */hl/fortran/src/*.h
 EXCLUDE_PATTERNS      += */HDF5Examples/FORTRAN/*
+EXCLUDE_PATTERNS      += */sanitizer/*
+
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the

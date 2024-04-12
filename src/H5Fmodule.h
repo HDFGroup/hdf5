@@ -235,10 +235,10 @@
  * Note that the root group, indicated above by /, was automatically created when the file was created.
  *
  * h5dump is described on the
- * <a href="https://docs.hdfgroup.org/hdf5/v1_14/_view_tools_view.html#subsecViewToolsViewContent_h5dump">
+ * <a href="https://docs.hdfgroup.org/hdf5/v1_14_4/_view_tools_view.html#subsecViewToolsViewContent_h5dump">
  * Tools</a>
  * page under
- * <a href="https://docs.hdfgroup.org/hdf5/v1_14/_view_tools_command.html">Command-line Tools</a>.
+ * <a href="https://docs.hdfgroup.org/hdf5/v1_14_4/_view_tools_command.html">Command-line Tools</a>.
  * The HDF5 DDL grammar is described in the document \ref DDLBNF114.
  *
  * \subsection subsec_file_summary File Function Summaries
@@ -712,7 +712,7 @@
  * If the application opens an HDF5 file without both determining the driver used to create the file
  * and setting up the use of that driver, the HDF5 Library will examine the superblock and the
  * driver definition block to identify the driver.
- * See the <a href="https://hdfgroup.github.io/hdf5/v1_14/_s_p_e_c.html">HDF5 File Format Specification</a>
+ * See the <a href="https://hdfgroup.github.io/hdf5/v1_14_4/_s_p_e_c.html">HDF5 File Format Specification</a>
  * for detailed descriptions of the superblock and the driver definition block.
  *
  * \subsubsection subsubsec_file_alternate_drivers_sec2 The POSIX (aka SEC2) Driver
