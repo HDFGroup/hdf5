@@ -1142,7 +1142,7 @@ H5_DLL herr_t H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate_ptr);
  *                          or NULL if that datum is not desired
  * \param[out] cur_num_entries_ptr Pointer to the location in which the current number of entries in
  *                                 the cache is to be returned, or NULL if that datum is not desired
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details H5Fget_mdc_size()  queries the metadata cache of the target file for the desired size
  *          information, and returns this information in the locations indicated by the pointer
@@ -1168,7 +1168,7 @@ H5_DLL herr_t H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
  * \brief Resets hit rate statistics counters for the target file
  *
  * \file_id
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details
  * \parblock
@@ -1683,7 +1683,7 @@ H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], u
  * \file_id
  * \param[out] image_addr Offset of the cache image if it exists, or #HADDR_UNDEF if it does not
  * \param[out] image_size Length of the cache image if it exists, or 0 if it does not
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details
  * \parblock
@@ -1771,7 +1771,7 @@ H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
  * \param[in] flag Logical flag for atomicity setting. Valid values are:
  *                 \li \c 1 -- Sets MPI file access to atomic mode.
  *                 \li \c 0 -- Sets MPI file access to nonatomic mode.
- * \returns \herr_t
+ * \return \herr_t
  *
  * \par Motivation
  * H5Fset_mpi_atomicity() is applicable only in parallel environments using MPI I/O.
@@ -1836,7 +1836,7 @@ H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
  * \param[out] flag Logical flag for atomicity setting. Valid values are:
  *                  \li 1 -- MPI file access is set to atomic mode.
  *                  \li 0 -- MPI file access is set to nonatomic mode.
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details H5Fget_mpi_atomicity() retrieves the current consistency semantics mode for
  *          data access for the file \p file_id.
