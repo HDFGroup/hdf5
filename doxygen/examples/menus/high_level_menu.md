@@ -1,4 +1,5 @@
-<b>High-level library</b>
+## High-level Library
+
 <br />
 The high-level HDF5 library includes several sets of convenience and standard-use APIs to 
 facilitate common HDF5 operations.
