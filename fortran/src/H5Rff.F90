@@ -75,6 +75,11 @@ MODULE H5R
      INTEGER(C_SIGNED_CHAR), DIMENSION(1:H5R_DSET_REG_REF_BUF_SIZE_F) :: ref
   END TYPE hdset_reg_ref_t_f03
 
+  TYPE, BIND(C) :: H5R_ref_t
+      INTEGER(C_INT8_T), DIMENSION(1:H5R_REF_BUF_SIZE_F) :: __data
+      INTEGER(C_INT64_T) :: align
+  END TYPE
+
   INTERFACE h5rget_object_type_f
      MODULE PROCEDURE h5rget_object_type_obj_f
   END INTERFACE
@@ -639,5 +644,42 @@ CONTAINS
     hdferr = h5rget_obj_type_c(loc_id, ref_type, ref, obj_type)
 
   END SUBROUTINE h5rget_obj_type_f
+
+!>
+!! \ingroup FH5R
+!!
+!! \brief Opens the HDF5 object referenced.
+!!
+!! \param ref_ptr  Pointer to reference to open, points object of TYPE(H5R_ref_t)
+!! \param rapl_id  Reference access property list identifier
+!! \param oapl_id  Object access property list identifier
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref  H5Ropen_object()
+!!
+  SUBROUTINE h5ropen_object_f(ref_ptr, rapl_id, oapl_id, hdferr)
+
+    IMPLICIT NONE
+
+    TYPE(C_PTR)                :: ref_ptr
+    INTEGER(HID_T), INTENT(IN) :: rapl_id
+    INTEGER(HID_T), INTENT(IN) :: oapl_id
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Ropen_object_f(ref_ptr, rapl_id, oapl_id) &
+            BIND(C, NAME='H5Ropen_object')
+         IMPORT :: C_PTR, C_INT
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR)   , VALUE :: ref_ptr
+         INTEGER(HID_T), VALUE :: rapl_id
+         INTEGER(HID_T), VALUE :: oapl_id
+       END FUNCTION H5Ropen_object_f
+    END INTERFACE
+
+    hdferr = INT(H5Ropen_object_f(ref_ptr, rapl_id, oapl_id))
+
+  END SUBROUTINE h5ropen_object_f
 
 END MODULE H5R

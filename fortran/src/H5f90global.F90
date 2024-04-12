@@ -45,6 +45,7 @@ MODULE H5GLOBAL
   ! values in the H5f90.h file.
   INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3
   INTEGER, PARAMETER :: H5O_TOKEN_BUF_LEN = 16 ! Matches C defined value in H5public.h
+  INTEGER, PARAMETER :: H5R_REF_BUF_SIZE_F = 64
 
 !> \addtogroup FH5R
 !> @{
