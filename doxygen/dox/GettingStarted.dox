@@ -42,10 +42,10 @@ Parallel HDF5, and the HDF5-1.10 VDS and SWMR new features:
 <table>
 <tr>
 <td style="background-color:#F5F5F5">
-<a href="https://docs.hdfgroup.org/hdf5/develop/high_level.html">Using the High Level APIs</a>
+[Using the High Level API](../examples/menus/high_level_menu.md)
 </td>
 <td>
-\ref H5LT    \ref H5IM    \ref H5TB    \ref H5PT    \ref H5DS
+The high-level HDF5 library includes several sets of convenience and standard-use APIs to facilitate common HDF5 operations.
 </td>
 </tr>
 <tr>
