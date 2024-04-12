@@ -69,7 +69,9 @@ For more information on the HDF5 versioning and backward and forward compatibili
     5. Verify the interface compatibility reports between the current source and the previous release on the Github [Snapshots](https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14) page.
         - The compatibility reports are produced by the CI and are viewable in the Github [Releases/snapshot](https://github.com/HDFGroup/hdf5/releases/tag/snapshot) section.
     6. Confirm the necessity of and approve of any interface-breaking changes. If any changes need to be reverted, task the developer who made the change to do so as soon as possible. If a change is reverted, return to the previous step and regenerate the compatibility report after the changes is made. Otherwise, continue to the next step.
-    7. Update the .so version numbers in the [config/lt_vers.am](https://github.com/HDFGroup/hdf5/blob/develop/config/lt_vers.am) file according to [libtool's library interface version](https://www.gnu.org/software/libtool/manual/libtool.html#Versioning) scheme. Run `./autogen.sh` to regenerate build system files and commit changes after the release branch has been created on the release branch.    
+    7. Update the .so version numbers in the [config/lt_vers.am](https://github.com/HDFGroup/hdf5/blob/develop/config/lt_vers.am) file in the support branch according to [libtool's library interface version](https://www.gnu.org/software/libtool/manual/libtool.html#Versioning) scheme. 
+        - See [Updating version info (Libtool)](https://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html#Updating-version-info) for rules to help update library version numbers. 
+    8. After the release branch has been created, run `./autogen.sh` to regenerate build system files on the release branch and commit changes.    
 
 6. Prepare Release Branch (Release Manager)
     1. Get the release branch ready for pre-release testing and packaging.
@@ -108,29 +110,29 @@ For more information on the HDF5 versioning and backward and forward compatibili
     3. Document the test procedure that will be used for this release on the new sub-page. 
     4. Schedule daily stand-up meetings or other regular checkpoints to assure progress on testing tasks, and inform testing team of your expectations.
     5. Schedule and enable daily automated regression testing of the release preparation branch (i.e. hdf5_X_Y_Z). Give the 'OK' to proceed once all required tests have verified that HDF5 is functioning as intended on all target operating environments. 
-    6. See [Updating version info (Libtool)](https://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html#Updating-version-info)  for rules to help update library version numbers. 
-    7. Select release build from workflow.
-    8. Choose the release branch
-    9. Change ‘Release version tag’ name to 'release'
-    10. Send a message to the hdf-forum indicating that a pre-release source package is available for testing at <e.g. gamma.hdfgroup.org/ftp/pub/outgoing/hdf5/{hdf5-X.Y.Z-pre<n>}> and that feedback from the user community on their test results is being accepted.
-    11. Contact paying clients who are interested in testing the pre-release source package and inform them that it is available for testing and that feedback on their test results of the pre-release is appreciated.
-    12. This should be automated and currently github binaries are not signed.
+    6. Select release build from workflow.
+    7. Choose the release branch
+    8. Change ‘Release version tag’ name to 'hdf5_X.Y.Z.P'
+        - P is some pre-release number.
+    9. Send a message to the HDF forum indicating that a pre-release source package is available for testing at <e.g. gamma.hdfgroup.org/ftp/pub/outgoing/hdf5/{hdf5-X.Y.Z-pre<n>}> and that feedback from the user community on their test results is being accepted.
+    10. Contact paying clients who are interested in testing the pre-release source package and inform them that it is available for testing and that feedback on their test results of the pre-release is appreciated.
+    11. This should be automated and currently github binaries are not signed.
         - Follow the [How to sign binaries with digital certificates(this is missing)]() work instructions to sign each windows and mac binary package with a digital certificate.
-    13. Once binaries are ready to be tested, send an e-mail notification or update the Confluence test dashboard page indicating source and binary test assignments and when results should be made available. 
-    14. Use the pre-release source packages to build and test HDF5 on assigned platforms by hand. Build both shared and static libraries, Fortran, C++, and szip, and any additional configurations required on specific remote platforms based on customer support needs.
-    15. Use the pre-release binary packages found in /mnt/scr1/pre-release/hdf5/vXYZ/pre<n>/binaries/{UNIX, Windows} to test according to the binary testing procedures for your assigned platforms. 
-    16. Scripted Testing: 
+    12. Once binaries are ready to be tested, send an e-mail notification or update the Confluence test dashboard page indicating source and binary test assignments and when results should be made available. 
+    13. Use the pre-release source packages to build and test HDF5 on assigned platforms by hand. Build both shared and static libraries, Fortran, C++, and szip, and any additional configurations required on specific remote platforms based on customer support needs.
+    14. Use the pre-release binary packages found in /mnt/scr1/pre-release/hdf5/vXYZ/pre<n>/binaries/{UNIX, Windows} to test according to the binary testing procedures for your assigned platforms. 
+    15. Scripted Testing: 
         - UNIX: [Scripted Binary Testing of HDF5 on UNIX systems (this is missing)]() 
         - Windows: [Testing HDF5 Binaries(this is missing)]() 
-    17. Manual Testing (i.e. verifying correct test outcomes via visual inspection): 
+    16. Manual Testing (i.e. verifying correct test outcomes via visual inspection): 
         - Use this if UNIX test script is not reporting correct results, yet binaries look OK. 
         - UNIX: [Manual Binary Testing of HDF5 on Unix systems (this is missing)]() 
-    18. Update the test results Confluence page with status/outcome of all test assignments.
-    19. If any test source (hdf-forum, clients, internal testers, automated regression suite) identifies any issues: 
+    17. Update the test results Confluence page with status/outcome of all test assignments.
+    18. If any test source (hdf-forum, clients, internal testers, automated regression suite) identifies any issues: 
         - a) Enter the issue in JIRA summarizing the failure if it is not already there. 
         - b) Decide whether or not to resolve the issue for this release, or to simply document it as a known issue for this release.
         - c) Document and assign action items resulting from a) or b), and monitor them to closure.
-    20. Decide if another cycle of pre-release testing should occur based on the issue reports received and the actions taken during this cycle. If another round of testing is required (i.e. there were significant issues in pre-release testing which resulted in code changes), go back to step 7.2. If no further testing is required (i.e. no code changes were made and issues were documented as known issues, or code changes were trivial, unit tested, and exhaustive testing is unneeded), then proceed.
+    19. Decide if another cycle of pre-release testing should occur based on the issue reports received and the actions taken during this cycle. If another round of testing is required (i.e. there were significant issues in pre-release testing which resulted in code changes), go back to step 7.2. If no further testing is required (i.e. no code changes were made and issues were documented as known issues, or code changes were trivial, unit tested, and exhaustive testing is unneeded), then proceed.
 
 
 8. Finalize Release Notes (Release Manager)
@@ -143,11 +145,14 @@ For more information on the HDF5 versioning and backward and forward compatibili
     3. Update Release Notes in **release** branch (Release Manager)
 
 9. Package and Distribute Release (Release Manager)
-    1. Select release build from workflow.
+    1. Run `bin/release` (similar to 8.2) and commit all the changed files.
+    2. Select release build from workflow.
         - Choose the release branch
-        - Change ‘Release version tag’ name to 'release' 
-    2. Review the release files in Github
-    3. Edit the Github Release and change status to Release
+        - Change ‘Release version tag’ name to 'hdf5_X.Y.Z' 
+        - Press "Run Workflow"
+    3. Review the release files in Github
+    4. Edit the Github Release and change status to Release
+        - Change status from Pre-release to Release
 
 10. Conduct Release Retrospective (Release Manager)
     1. Schedule time and solicit comments from retrospective
