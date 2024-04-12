@@ -280,8 +280,6 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id, const c
     H5FD_multi_fapl_t  fa;
     static const char *func = "H5Pset_fapl_split"; /* Function Name for error reporting */
 
-    /*NO TRACE*/
-
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
@@ -372,8 +370,6 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_f
     H5FD_multi_fapl_t  fa;
     static const char *func = "H5FDset_fapl_multi"; /* Function Name for error reporting */
 
-    /*NO TRACE*/
-
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
@@ -407,8 +403,6 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/, hid_t *memb_fapl 
     H5FD_multi_fapl_t        default_fa;
     H5FD_mem_t               mt;
     static const char       *func = "H5FDget_fapl_multi"; /* Function Name for error reporting */
-
-    /*NO TRACE*/
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);

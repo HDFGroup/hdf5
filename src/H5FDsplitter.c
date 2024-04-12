@@ -287,7 +287,6 @@ H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *vfd_config)
     herr_t                ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*#", fapl_id, vfd_config);
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -335,7 +334,6 @@ H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config /*out*/)
     herr_t                      ret_value    = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*#", fapl_id, config);
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 

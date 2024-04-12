@@ -86,7 +86,6 @@ H5Sencode1(hid_t obj_id, void *buf, size_t *nalloc)
     herr_t ret_value    = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*x*z", obj_id, buf, nalloc);
 
     /* Check argument and retrieve object */
     if (NULL == (dspace = (H5S_t *)H5I_object_verify(obj_id, H5I_DATASPACE)))

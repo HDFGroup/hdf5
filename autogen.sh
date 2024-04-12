@@ -44,9 +44,8 @@ echo
 # compilation.
 
 # Run trace script
-# The trace script adds H5TRACE macros to library source files.  It should
-# have no effect on files that don't have HDF5 API macros in them.
-echo "Running trace script:"
+# The trace script updates H5ARG_TRACE macros in library source files.
+echo "Running arg trace script:"
 bin/trace src/H5*.c || exit 1
 echo
 

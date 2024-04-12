@@ -140,7 +140,6 @@ H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iTc", plist_id, encoding);
 
     /* Check arguments */
     if (encoding <= H5T_CSET_ERROR || encoding >= H5T_NCSET)
@@ -174,7 +173,6 @@ H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Tc", plist_id, encoding);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_STRING_CREATE)))

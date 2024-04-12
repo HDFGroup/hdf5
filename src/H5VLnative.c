@@ -374,7 +374,6 @@ H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token)
     herr_t     ret_value    = SUCCEED;   /* Return value         */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ia*k", loc_id, addr, token);
 
     /* Check args */
     if (NULL == token)
@@ -468,7 +467,6 @@ H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr)
     herr_t     ret_value    = SUCCEED;   /* Return value         */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ik*a", loc_id, token, addr);
 
     /* Check args */
     if (NULL == addr)

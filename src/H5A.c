@@ -223,7 +223,6 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, h
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE6("i", "i*siiii", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id);
 
     /* Create the attribute synchronously */
     if ((ret_value =
@@ -255,8 +254,6 @@ H5Acreate_async(const char *app_file, const char *app_func, unsigned app_line, h
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE10("i", "*s*sIui*siiiii", app_file, app_func, app_line, loc_id, attr_name, type_id, space_id,
-              acpl_id, aapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -372,7 +369,6 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE8("i", "i*s*siiiii", loc_id, obj_name, attr_name, type_id, space_id, acpl_id, aapl_id, lapl_id);
 
     /* Create the attribute synchronously */
     if ((ret_value = H5A__create_by_name_api_common(loc_id, obj_name, attr_name, type_id, space_id, acpl_id,
@@ -404,8 +400,6 @@ H5Acreate_by_name_async(const char *app_file, const char *app_func, unsigned app
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE12("i", "*s*sIui*s*siiiiii", app_file, app_func, app_line, loc_id, obj_name, attr_name, type_id,
-              space_id, acpl_id, aapl_id, lapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -539,7 +533,6 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
     hid_t ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "i*si", loc_id, attr_name, aapl_id);
 
     /* Open the attribute synchronously */
     if ((ret_value = H5A__open_api_common(loc_id, attr_name, aapl_id, NULL, NULL)) < 0)
@@ -569,7 +562,6 @@ H5Aopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "*s*sIui*sii", app_file, app_func, app_line, loc_id, attr_name, aapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -667,7 +659,6 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t
     hid_t ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE5("i", "i*s*sii", loc_id, obj_name, attr_name, aapl_id, lapl_id);
 
     /* Open the attribute by name asynchronously */
     if ((ret_value =
@@ -698,8 +689,6 @@ H5Aopen_by_name_async(const char *app_file, const char *app_func, unsigned app_l
     hid_t          ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE9("i", "*s*sIui*s*siii", app_file, app_func, app_line, loc_id, obj_name, attr_name, aapl_id,
-             lapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -806,7 +795,6 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "i*sIiIohii", loc_id, obj_name, idx_type, order, n, aapl_id, lapl_id);
 
     /* Open the attribute by idx synchronously */
     if ((ret_value = H5A__open_by_idx_api_common(loc_id, obj_name, idx_type, order, n, aapl_id, lapl_id, NULL,
@@ -838,8 +826,6 @@ H5Aopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_li
     hid_t          ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE11("i", "*s*sIui*sIiIohiii", app_file, app_func, app_line, loc_id, obj_name, idx_type, order, n,
-              aapl_id, lapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -924,7 +910,6 @@ H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
     /* Synchronously write the data */
     if (H5A__write_api_common(attr_id, dtype_id, buf, NULL, NULL) < 0)
@@ -952,7 +937,6 @@ H5Awrite_async(const char *app_file, const char *app_func, unsigned app_line, hi
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*s*sIuii*xi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -1032,7 +1016,6 @@ H5Aread(hid_t attr_id, hid_t dtype_id, void *buf /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
     /* Synchronously read the data */
     if (H5A__read_api_common(attr_id, dtype_id, buf, NULL, NULL) < 0)
@@ -1060,7 +1043,6 @@ H5Aread_async(const char *app_file, const char *app_func, unsigned app_line, hid
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*s*sIuii*xi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -1106,7 +1088,6 @@ H5Aget_space(hid_t attr_id)
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", attr_id);
 
     /* Check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -1151,7 +1132,6 @@ H5Aget_type(hid_t attr_id)
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", attr_id);
 
     /* Check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -1199,7 +1179,6 @@ H5Aget_create_plist(hid_t attr_id)
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", attr_id);
 
     assert(H5P_LST_ATTRIBUTE_CREATE_ID_g != -1);
 
@@ -1253,7 +1232,6 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf /*out*/)
     ssize_t              ret_value     = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "iz*s", attr_id, buf_size, buf);
 
     /* check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -1304,7 +1282,6 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
     ssize_t              ret_value;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("Zs", "i*sIiIoh*szi", loc_id, obj_name, idx_type, order, n, name, size, lapl_id);
 
     /* Check args */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -1373,7 +1350,6 @@ H5Aget_storage_size(hid_t attr_id)
     hsize_t              ret_value;        /* Return value */
 
     FUNC_ENTER_API(0)
-    H5TRACE1("h", "i", attr_id);
 
     /* Check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -1412,7 +1388,6 @@ H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/)
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Ai", attr_id, ainfo);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -1454,7 +1429,6 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, H
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*s*s*Aii", loc_id, obj_name, attr_name, ainfo, lapl_id);
 
     /* Check args */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -1511,7 +1485,6 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIoh*Aii", loc_id, obj_name, idx_type, order, n, ainfo, lapl_id);
 
     /* Check args */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -1654,7 +1627,6 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*s*s", loc_id, old_name, new_name);
 
     /* Synchronously rename the attribute */
     if (H5A__rename_api_common(loc_id, old_name, new_name, NULL, NULL) < 0)
@@ -1682,7 +1654,6 @@ H5Arename_async(const char *app_file, const char *app_func, unsigned app_line, h
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*s*sIui*s*si", app_file, app_func, app_line, loc_id, old_name, new_name, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -1767,7 +1738,6 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*s*s*si", loc_id, obj_name, old_attr_name, new_attr_name, lapl_id);
 
     /* Synchronously rename the attribute */
     if (H5A__rename_by_name_api_common(loc_id, obj_name, old_attr_name, new_attr_name, lapl_id, NULL, NULL) <
@@ -1797,8 +1767,6 @@ H5Arename_by_name_async(const char *app_file, const char *app_func, unsigned app
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE9("e", "*s*sIui*s*s*sii", app_file, app_func, app_line, loc_id, obj_name, old_attr_name,
-             new_attr_name, lapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -1872,7 +1840,6 @@ H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *i
     herr_t                    ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "iIiIo*hAO*x", loc_id, idx_type, order, idx, op, op_data);
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -1960,7 +1927,6 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
     herr_t                    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*sIiIo*hAO*xi", loc_id, obj_name, idx_type, order, idx, op, op_data, lapl_id);
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -2026,7 +1992,6 @@ H5Adelete(hid_t loc_id, const char *name)
     herr_t                    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*s", loc_id, name);
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -2085,7 +2050,6 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid
     herr_t                    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -2155,7 +2119,6 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_ite
     herr_t                    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*sIiIohi", loc_id, obj_name, idx_type, order, n, lapl_id);
 
     /* check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -2212,7 +2175,6 @@ H5Aclose(hid_t attr_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", attr_id);
 
     /* Check arguments */
     if (H5I_ATTR != H5I_get_type(attr_id))
@@ -2247,7 +2209,6 @@ H5Aclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, attr_id, es_id);
 
     /* Check arguments */
     if (H5I_ATTR != H5I_get_type(attr_id))
@@ -2385,7 +2346,6 @@ H5Aexists(hid_t obj_id, const char *attr_name)
     htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("t", "i*s", obj_id, attr_name);
 
     /* Synchronously check if an attribute exists */
     exists = false;
@@ -2417,7 +2377,6 @@ H5Aexists_async(const char *app_file, const char *app_func, unsigned app_line, h
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*s*sIui*s*bi", app_file, app_func, app_line, obj_id, attr_name, attr_exists, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -2497,7 +2456,6 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid
     htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("t", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
 
     /* Synchronously check if an attribute exists */
     exists = false;
@@ -2530,8 +2488,6 @@ H5Aexists_by_name_async(const char *app_file, const char *app_func, unsigned app
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE9("e", "*s*sIui*s*s*bii", app_file, app_func, app_line, loc_id, obj_name, attr_name, attr_exists,
-             lapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)

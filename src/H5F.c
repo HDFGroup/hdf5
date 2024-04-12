@@ -116,7 +116,6 @@ H5Fget_create_plist(hid_t file_id)
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", file_id);
 
     /* check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
@@ -163,7 +162,6 @@ H5Fget_access_plist(hid_t file_id)
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", file_id);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
@@ -226,7 +224,6 @@ H5Fget_obj_count(hid_t file_id, unsigned types)
     ssize_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE2("Zs", "iIu", file_id, types);
 
     /* Check arguments */
     if (0 == (types & H5F_OBJ_ALL))
@@ -344,7 +341,6 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list /
     ssize_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE4("Zs", "iIuz*i", file_id, types, max_objs, oid_list);
 
     /* Check arguments */
     if (0 == (types & H5F_OBJ_ALL))
@@ -437,7 +433,6 @@ H5Fget_vfd_handle(hid_t file_id, hid_t fapl_id, void **file_handle /*out*/)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii**x", file_id, fapl_id, file_handle);
 
     /* Check args */
     if (!file_handle)
@@ -479,7 +474,6 @@ H5Fis_accessible(const char *filename, hid_t fapl_id)
     htri_t                    ret_value;             /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("t", "*si", filename, fapl_id);
 
     /* Check args */
     if (!filename || !*filename)
@@ -653,7 +647,6 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
 
     /* Create the file synchronously */
     if ((ret_value = H5F__create_api_common(filename, flags, fcpl_id, fapl_id, NULL)) < 0)
@@ -692,7 +685,6 @@ H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line, c
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE8("i", "*s*sIu*sIuiii", app_file, app_func, app_line, filename, flags, fcpl_id, fapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -829,7 +821,6 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "*sIui", filename, flags, fapl_id);
 
     /* Open the file synchronously */
     if ((ret_value = H5F__open_api_common(filename, flags, fapl_id, NULL)) < 0)
@@ -869,7 +860,6 @@ H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line, con
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "*s*sIu*sIuii", app_file, app_func, app_line, filename, flags, fapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -975,7 +965,6 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
     herr_t ret_value = SUCCEED; /* Return value     */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iFs", object_id, scope);
 
     /* Flush the file synchronously */
     if (H5F__flush_api_common(object_id, scope, NULL, NULL) < 0)
@@ -1005,7 +994,6 @@ H5Fflush_async(const char *app_file, const char *app_func, unsigned app_line, hi
     herr_t         ret_value = SUCCEED;         /* Return value     */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*s*sIuiFsi", app_file, app_func, app_line, object_id, scope, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -1047,7 +1035,6 @@ H5Fclose(hid_t file_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", file_id);
 
     /* Check arguments */
     if (H5I_FILE != H5I_get_type(file_id))
@@ -1082,7 +1069,6 @@ H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, file_id, es_id);
 
     /* Check arguments */
     if (H5I_FILE != H5I_get_type(file_id))
@@ -1143,7 +1129,6 @@ H5Fdelete(const char *filename, hid_t fapl_id)
     herr_t                    ret_value     = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "*si", filename, fapl_id);
 
     /* Check args */
     if (!filename || !*filename)
@@ -1212,7 +1197,6 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
     herr_t                     ret_value      = SUCCEED; /* Return value         */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*sii", loc_id, name, child_id, plist_id);
 
     /* Check arguments */
     loc_type = H5I_get_type(loc_id);
@@ -1329,7 +1313,6 @@ H5Funmount(hid_t loc_id, const char *name)
     herr_t                     ret_value = SUCCEED; /* Return value         */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*s", loc_id, name);
 
     /* Check arguments */
     loc_type = H5I_get_type(loc_id);
@@ -1466,7 +1449,6 @@ H5Freopen(hid_t file_id)
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", file_id);
 
     /* Reopen the file synchronously */
     if ((ret_value = H5F__reopen_api_common(file_id, NULL)) < 0)
@@ -1506,7 +1488,6 @@ H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line, h
     hid_t          ret_value;                   /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE5("i", "*s*sIuii", app_file, app_func, app_line, file_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -1567,7 +1548,6 @@ H5Fget_intent(hid_t file_id, unsigned *intent_flags /*out*/)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Iu", file_id, intent_flags);
 
     /* If no intent flags were passed in, exit quietly */
     if (intent_flags) {
@@ -1607,7 +1587,6 @@ H5Fget_fileno(hid_t file_id, unsigned long *fnumber /*out*/)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Ul", file_id, fnumber);
 
     /* If no fnumber pointer was passed in, exit quietly */
     if (fnumber) {
@@ -1650,7 +1629,6 @@ H5Fget_freespace(hid_t file_id)
     hssize_t                         ret_value;          /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE1("Hs", "i", file_id);
 
     /* Get the file object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
@@ -1692,7 +1670,6 @@ H5Fget_filesize(hid_t file_id, hsize_t *size /*out*/)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*h", file_id, size);
 
     /* Check args */
     if (!size)
@@ -1760,7 +1737,6 @@ H5Fget_file_image(hid_t file_id, void *buf /*out*/, size_t buf_len)
     ssize_t                          ret_value;     /* Return value             */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "i*xz", file_id, buf, buf_len);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -1807,7 +1783,6 @@ H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config /*out*/)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Cc", file_id, config);
 
     /* Check args */
     if ((NULL == config) || (config->version != H5AC__CURR_CACHE_CONFIG_VERSION))
@@ -1850,7 +1825,6 @@ H5Fset_mdc_config(hid_t file_id, const H5AC_cache_config_t *config_ptr)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Cc", file_id, config_ptr);
 
     /* Get the file object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
@@ -1890,7 +1864,6 @@ H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate /*out*/)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*d", file_id, hit_rate);
 
     /* Check args */
     if (NULL == hit_rate)
@@ -1935,7 +1908,6 @@ H5Fget_mdc_size(hid_t file_id, size_t *max_size /*out*/, size_t *min_clean_size 
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*z*z*z*Is", file_id, max_size, min_clean_size, cur_size, cur_num_entries);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -1985,7 +1957,6 @@ H5Freset_mdc_hit_rate_stats(hid_t file_id)
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", file_id);
 
     /* Get the file object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
@@ -2032,7 +2003,6 @@ H5Fget_name(hid_t obj_id, char *name /*out*/, size_t size)
     ssize_t              ret_value     = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "i*sz", obj_id, name, size);
 
     /* Check the type */
     type = H5I_get_type(obj_id);
@@ -2085,7 +2055,6 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo /*out*/)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*FI", obj_id, finfo);
 
     /* Check args */
     if (!finfo)
@@ -2134,7 +2103,6 @@ H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info /*out*/)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*!", file_id, info);
 
     /* Check args */
     if (!info)
@@ -2179,7 +2147,6 @@ H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects, H5F_sect_info
     ssize_t                          ret_value  = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE4("Zs", "iFmz*!", file_id, type, nsects, sect_info);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -2225,7 +2192,6 @@ H5Fclear_elink_file_cache(hid_t file_id)
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", file_id);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -2285,7 +2251,6 @@ H5Fstart_swmr_write(hid_t file_id)
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", file_id);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -2325,7 +2290,6 @@ H5Fstart_mdc_logging(hid_t file_id)
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", file_id);
 
     /* Sanity check */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -2362,7 +2326,6 @@ H5Fstop_mdc_logging(hid_t file_id)
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", file_id);
 
     /* Sanity check */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -2400,7 +2363,6 @@ H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled /*out*/, hbool_t *i
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*b*b", file_id, is_enabled, is_currently_logging);
 
     /* Sanity check */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -2441,7 +2403,6 @@ H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high)
     herr_t                           ret_value = SUCCEED; /* Return value 				*/
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iFvFv", file_id, low, high);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -2484,7 +2445,6 @@ H5Fformat_convert(hid_t file_id)
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", file_id);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -2523,7 +2483,6 @@ H5Freset_page_buffering_stats(hid_t file_id)
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", file_id);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -2561,7 +2520,6 @@ H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2] /*out*/, unsigne
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*Iu*Iu*Iu*Iu*Iu", file_id, accesses, hits, misses, evictions, bypasses);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -2608,7 +2566,6 @@ H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr /*out*/, hsize_t *image
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*a*h", file_id, image_addr, image_len);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -2646,7 +2603,6 @@ H5Fget_eoa(hid_t file_id, haddr_t *eoa /*out*/)
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*a", file_id, eoa);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -2689,7 +2645,6 @@ H5Fincrement_filesize(hid_t file_id, hsize_t increment)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ih", file_id, increment);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -2727,7 +2682,6 @@ H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize /*out*/)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*b", file_id, minimize);
 
     /* Check args */
     if (NULL == minimize)
@@ -2767,7 +2721,6 @@ H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ib", file_id, minimize);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))

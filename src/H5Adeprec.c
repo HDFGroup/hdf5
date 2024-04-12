@@ -108,7 +108,6 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t 
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE5("i", "i*siii", loc_id, name, type_id, space_id, acpl_id);
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -182,7 +181,6 @@ H5Aopen_name(hid_t loc_id, const char *name)
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE2("i", "i*s", loc_id, name);
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -247,7 +245,6 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE2("i", "iIu", loc_id, idx);
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -312,7 +309,6 @@ H5Aget_num_attrs(hid_t loc_id)
     int                    ret_value = -1;
 
     FUNC_ENTER_API((-1))
-    H5TRACE1("Is", "i", loc_id);
 
     loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
@@ -382,7 +378,6 @@ H5Aiterate1(hid_t loc_id, unsigned *attr_num /*in,out*/, H5A_operator1_t op, voi
     herr_t                           ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5_ITER_ERROR)
-    H5TRACE4("e", "i*IuAo*x", loc_id, attr_num, op, op_data);
 
     /* check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))

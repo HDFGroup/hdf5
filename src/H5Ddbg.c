@@ -66,7 +66,6 @@ H5Ddebug(hid_t dset_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", dset_id);
 
     /* Check args */
     if (NULL == (dset = (H5D_t *)H5VL_object_verify(dset_id, H5I_DATASET)))
