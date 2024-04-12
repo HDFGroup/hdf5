@@ -227,7 +227,7 @@ extern "C" {
  * \param[in] src_buf Source data buffer
  * \param[in,out] dst_buf Destination data buffer
  * \param[in,out] user_data Callback context
- * \returns Valid callback function return values are #H5T_CONV_ABORT,
+ * \return Valid callback function return values are #H5T_CONV_ABORT,
  *          #H5T_CONV_UNHANDLED and #H5T_CONV_HANDLED.
  *
  * \details If an exception like overflow happens during conversion, this
