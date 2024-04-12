@@ -167,7 +167,6 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t t
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*siiii", loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id);
 
     /* Commit the dataset synchronously */
     if ((ret_value = H5T__commit_api_common(loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id, NULL, NULL)) <
@@ -197,8 +196,6 @@ H5Tcommit_async(const char *app_file, const char *app_func, unsigned app_line, h
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE10("e", "*s*sIui*siiiii", app_file, app_func, app_line, loc_id, name, type_id, lcpl_id, tcpl_id,
-              tapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -324,7 +321,6 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iiii", loc_id, type_id, tcpl_id, tapl_id);
 
     /* Check arguments */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -579,7 +575,6 @@ H5Tcommitted(hid_t type_id)
     htri_t ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "i", type_id);
 
     /* Check arguments */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -691,7 +686,6 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "i*si", loc_id, name, tapl_id);
 
     /* Open the datatype synchronously */
     if ((ret_value = H5T__open_api_common(loc_id, name, tapl_id, NULL, NULL)) < 0)
@@ -722,7 +716,6 @@ H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, tapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -773,7 +766,6 @@ H5Tget_create_plist(hid_t dtype_id)
     hid_t  ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", dtype_id);
 
     /* Check arguments */
     if (NULL == (type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
@@ -833,7 +825,6 @@ H5Tflush(hid_t type_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -877,7 +868,6 @@ H5Trefresh(hid_t type_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))

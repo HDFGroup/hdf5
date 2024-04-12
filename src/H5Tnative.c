@@ -72,7 +72,6 @@ H5Tget_native_type(hid_t type_id, H5T_direction_t direction)
     hid_t  ret_value;        /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE2("i", "iTd", type_id, direction);
 
     /* Check arguments */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))

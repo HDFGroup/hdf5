@@ -10,6 +10,12 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
+
+##
+# Process H5ARG_TRACE() macros (defined in H5private.h) used in H5ES_insert(),
+# updating them with the caller's parameters, etc.
+##
+
 require 5.003;
 use warnings;
 $Source = "";
@@ -25,6 +31,10 @@ $Source = "";
 # are always lower case and should be used for common types.
 # Two-character strings begin with an upper-case letter which is
 # usually the same as the package name.
+#
+# These map to the types in H5trace.c (which should be updated if you add
+# a type here), so there are more types listed here than are used by the
+# existing macros.
 #
 %TypeString = ("haddr_t"                    => "a",
                "H5A_info_t"                 => "Ai",
@@ -210,294 +220,180 @@ $Source = "";
                "H5VL_request_status_t"      => "#",
               );
 
-
-##############################################################################
-# Maximum length of H5TRACE macro line
-# If the ColumnLimit in .clang-format is changed, this value will need to be updated
-#
-my $max_trace_macro_line_len = 110;
-
-
 ##############################################################################
 # Print an error message.
 #
 my $found_errors = 0;
 
 sub errmesg ($$@) {
-  my ($file, $func, @mesg) = @_;
-  my ($mesg) = join "", @mesg;
-  my ($lineno) = 1;
-  if ($Source =~ /(.*?\n)($func)/s) {
-    local $_ = $1;
-    $lineno = tr/\n/\n/;
-  }
+    my ($file, $func, @mesg) = @_;
+    my ($mesg) = join "", @mesg;
+    my ($lineno) = 1;
+    if ($Source =~ /(.*?\n)($func)/s) {
+        local $_ = $1;
+        $lineno = tr/\n/\n/;
+    }
 
-  $found_errors = 1;
+    $found_errors = 1;
 
-  print "$file: in function \`$func\':\n";
-  print "$file:$lineno: $mesg\n";
+    print "$file: in function \`$func\':\n";
+    print "$file:$lineno: $mesg\n";
 }
 
 ##############################################################################
-# Given a C data type return the type string that goes with it.
+# Given a C data type, return the type string that goes with it
 #
 sub argstring ($$$) {
-  my ($file, $func, $atype) = @_;
-  my ($ptr, $tstr, $array) = (0, "!", "");
-  my ($fq_atype);
+    my ($file, $func, $atype) = @_;
+    my ($ptr, $tstr, $array) = (0, "!", "");
+    my ($fq_atype);
 
-  # Normalize the data type by removing redundant white space,
-  # certain type qualifiers, and indirection.
-  $atype =~ s/^\bconst\b//;     # Leading const
-  $atype =~ s/\s*const\s*//;    # const after type, possibly in the middle of '*'s
-  $atype =~ s/^\bstatic\b//;
-  $atype =~ s/\bH5_ATTR_UNUSED\b//g;
-  $atype =~ s/\bH5_ATTR_DEPRECATED_USED\b//g;
-  $atype =~ s/\bH5_ATTR_NDEBUG_UNUSED\b//g;
-  $atype =~ s/\bH5_ATTR_DEBUG_API_USED\b//g;
-  $atype =~ s/\bH5_ATTR_PARALLEL_UNUSED\b//g;
-  $atype =~ s/\bH5_ATTR_PARALLEL_USED\b//g;
-  $atype =~ s/\s+/ /g;
-  $ptr = length $1 if  $atype =~ s/(\*+)//;
-  $atype =~ s/^\s+//;
-  $atype =~ s/\s+$//;
-  if ($atype =~ /(.*)\[(.*)\]$/) {
-    ($array, $atype) = ($2, $1);
+    # Normalize the data type by removing redundant white space,
+    # certain type qualifiers, and indirection.
+    $atype =~ s/^\bconst\b//;     # Leading const
+    $atype =~ s/\s*const\s*//;    # const after type, possibly in the middle of '*'s
+    $atype =~ s/^\bstatic\b//;
+    $atype =~ s/\bH5_ATTR_UNUSED\b//g;
+    $atype =~ s/\bH5_ATTR_DEPRECATED_USED\b//g;
+    $atype =~ s/\bH5_ATTR_NDEBUG_UNUSED\b//g;
+    $atype =~ s/\bH5_ATTR_PARALLEL_UNUSED\b//g;
+    $atype =~ s/\bH5_ATTR_PARALLEL_USED\b//g;
+    $atype =~ s/\s+/ /g;
+    $ptr = length $1 if  $atype =~ s/(\*+)//;
+    $atype =~ s/^\s+//;
     $atype =~ s/\s+$//;
-  }
-  $fq_atype = $atype . ('*' x $ptr);
+    if ($atype =~ /(.*)\[(.*)\]$/) {
+        ($array, $atype) = ($2, $1);
+        $atype =~ s/\s+$//;
+    }
+    $fq_atype = $atype . ('*' x $ptr);
 
-  if ($ptr>0 && exists $TypeString{$fq_atype}) {
-    $ptr = 0;
-    $tstr = $TypeString{$fq_atype};
-  } elsif ($ptr>0 && exists $TypeString{"$atype*"}) {
-    --$ptr;
-    $tstr = $TypeString{"$atype*"};
-  } elsif (!exists $TypeString{$atype}) {
-# Defer throwing error until type is actually used
-#    errmesg $file, $func, "untraceable type \`$atype", '*'x$ptr, "\'";
-  } else {
-    $tstr = $TypeString{$atype};
-  }
-  return ("*" x $ptr) . ($array ? "[$array]" : "") . $tstr;
+    if ($ptr>0 && exists $TypeString{$fq_atype}) {
+        $ptr = 0;
+        $tstr = $TypeString{$fq_atype};
+    } elsif ($ptr>0 && exists $TypeString{"$atype*"}) {
+        --$ptr;
+        $tstr = $TypeString{"$atype*"};
+    } elsif (!exists $TypeString{$atype}) {
+        # Defer throwing error until type is actually used
+        #    errmesg $file, $func, "untraceable type \`$atype", '*'x$ptr, "\'";
+    } else {
+        $tstr = $TypeString{$atype};
+    }
+    return ("*" x $ptr) . ($array ? "[$array]" : "") . $tstr;
 }
 
 ##############################################################################
 # Given information about an API function, rewrite that function with
 # updated tracing information.
 #
-my $file_api = 0;
 my $file_args = 0;
-my $total_api = 0;
 my $total_args = 0;
 sub rewrite_func ($$$$$) {
-  my ($file, $type, $name, $args, $body) = @_;
-  my ($arg, $trace, $argtrace);
-  my (@arg_name, @arg_str, @arg_type);
-  local $_;
+    my ($file, $type, $name, $args, $body) = @_;
+    my ($arg, $argtrace);
+    my (@arg_name, @arg_str, @arg_type);
+    local $_;
 
-  # Keep copy of original arguments
-  my $orig_args = $args;
+    # Keep copy of original arguments
+    my $orig_args = $args;
 
-  # Parse return value
-  my $rettype = argstring $file, $name, $type;
+    # Parse arguments
+    if ($args eq "void") {
+        $argtrace = "H5ARG_TRACE0(\"\")";
+    } else {
+        # Split arguments
+        #
+        # First remove:
+        #   * /*in*/, /*out*/, /*in_out*/, and /*in,out*/ comments
+        #   * preprocessor lines that start with #
+        #   * H5FL_TRACKING_PARAMS macros (free list code only)
+        #
+        # then split the function arguments on commas
+        $args =~ s/\/\*\s*in\s*\*\///g;  # Get rid of /*in*/
+        $args =~ s/\/\*\s*out\s*\*\///g; # Get rid of /*out*/
+        $args =~ s/\/\*\s*in,\s*out\s*\*\///g; # Get rid of /*in,out*/
+        $args =~ s/\/\*\s*in_out\s*\*\///g; # Get rid of /*in_out*/
+        $args =~ s/H5FL_TRACK_PARAMS//g; # Remove free list macro
+        $args =~ s/\n#.*?\n/\n/g;        # Remove lines beginning with '#'
+        my @args = split /,[\s\n]*/, $args;
+        my $argno = 0;
+        my %names;
 
-  # Parse arguments
-  if ($args eq "void") {
-    $trace = "H5TRACE0(\"$rettype\", \"\");\n";
-    $argtrace = "H5ARG_TRACE0(\"\")";
-  } else {
-    # Split arguments
-    #
-    # First remove:
-    #   * /*in*/, /*out*/, /*in_out*/, and /*in,out*/ comments
-    #   * preprocessor lines that start with #
-    #   * H5FL_TRACKING_PARAMS macros (free list code only)
-    #
-    # then split the function arguments on commas
-    $args =~ s/\/\*\s*in\s*\*\///g;  # Get rid of /*in*/
-    $args =~ s/\/\*\s*out\s*\*\///g; # Get rid of /*out*/
-    $args =~ s/\/\*\s*in,\s*out\s*\*\///g; # Get rid of /*in,out*/
-    $args =~ s/\/\*\s*in_out\s*\*\///g; # Get rid of /*in_out*/
-    $args =~ s/H5FL_TRACK_PARAMS//g; # Remove free list macro
-    $args =~ s/\n#.*?\n/\n/g;        # Remove lines beginning with '#'
-    my @args = split /,[\s\n]*/, $args;
-    my $argno = 0;
-    my %names;
-
-    for $arg (@args) {
-      if($arg=~/\w*\.{3}\w*/){  # Skip "..." for varargs parameter
-        next;
-      }
-      unless ($arg=~/^((\s*[a-z_A-Z](\w|\*)*\s+)+(\s*\*\s*|\s*const\s*|\s*volatile\s*)*)
-              ([a-z_A-Z]\w*)(\[.*?\])?\s*$/x) {
-        errmesg $file, $name, "unable to parse \`$arg\'";
-        goto error;
-      } else {
-        my ($atype, $aname, $array, $adir) = ($1, $5, $6, $8);
-        $names{$aname} = $argno++;
-        $adir ||= "in";
-        $atype =~ s/\s+$//;
-        push @arg_name, $aname;
-        push @arg_type, $atype;
-
-        if ($adir eq "out") {
-          push @arg_str, "x";
-        } else {
-          if (defined $array) {
-            $atype .= "*";
-            if ($array =~ /^\[\/\*([a-z_A-Z]\w*)\*\/\]$/) {
-              my $asize = $1;
-              if (exists $names{$asize}) {
-                $atype .= '[a' . $names{$asize} . ']';
-              } else {
-                warn "bad array size: $asize";
-                $atype .= "*";
-              }
+        for $arg (@args) {
+            if($arg=~/\w*\.{3}\w*/){  # Skip "..." for varargs parameter
+                next;
             }
-          }
-          push @arg_str, argstring $file, $name, $atype;
+            unless ($arg=~/^((\s*[a-z_A-Z](\w|\*)*\s+)+(\s*\*\s*|\s*const\s*|\s*restrict\s*|\s*volatile\s*)*)
+                      ([a-z_A-Z]\w*)(\[.*?\])?\s*$/x) {
+                errmesg $file, $name, "unable to parse \`$arg\'";
+                goto error;
+            } else {
+                my ($atype, $aname, $array, $adir) = ($1, $5, $6, $8);
+
+                $names{$aname} = $argno++;
+                $adir ||= "in";
+                $atype =~ s/\s+$//;
+                push @arg_name, $aname;
+                push @arg_type, $atype;
+
+                if ($adir eq "out") {
+                    push @arg_str, "x";
+                } else {
+                    if (defined $array) {
+                        $atype .= "*";
+                        if ($array =~ /^\[\/\*([a-z_A-Z]\w*)\*\/\]$/) {
+                            my $asize = $1;
+
+                            if (exists $names{$asize}) {
+                                $atype .= '[a' . $names{$asize} . ']';
+                            } else {
+                                warn "bad array size: $asize";
+                                $atype .= "*";
+                            }
+                        }
+                    }
+
+                    push @arg_str, argstring $file, $name, $atype;
+                }
+            }
         }
-      }
+
+        # Compose the trace macro
+        $argtrace = "H5ARG_TRACE" . scalar(@arg_str) . "(__func__, \"";
+        $argtrace .= join("", @arg_str) . "\"";
+
+        # Append arguments
+        for my $i (0 .. $#arg_name) {
+            $argtrace .= ", $arg_name[$i]";
+        }
+
+        # Append final ')' for macro
+        $argtrace .= ")";
     }
 
-    # Compose the trace macro
-    $trace = "H5TRACE" . scalar(@arg_str) . "(\"$rettype\", \"";
-    $argtrace = "H5ARG_TRACE" . scalar(@arg_str) . "(__func__, \"";
-    $trace .= join("", @arg_str) . "\"";
-    $argtrace .= join("", @arg_str) . "\"";
+    # Check for H5ARG_TRACE macros to update
+    if ( $body =~ /H5ARG_TRACE/ ) {
+        my $orig_body = $body;
 
-    # Add 4 for indenting the line
-    my $len = 4 + length($trace);
-
-    for my $i (0 .. $#arg_name) {
-      # Handle wrapping
-
-      # Be VERY careful here! clang-format and this script MUST agree
-      # on which lines get wrapped or there will be churn as each tries
-      # to undo the other's output.
-      #
-      # TWO cases must be handled:
-      # 1) The argument is that last one and ');' will be appended
-      # 2) The argument is NOT the last one and ',' will be appended
-      #
-      # NB: clang-format does NOT consider terminal newlines when
-      #     counting columns for the ColumnLimit
-      #
-      # The extra '2' added after $len includes the ', ' that would be
-      # added BEFORE the argument.
-      #
-      my $adjust = ($i + 1 == scalar(@arg_str)) ? 2 : 1;
-      my $len_if_added = $len + 2 + length($arg_name[$i]) + $adjust;
-
-      # Wrap lines that will be longer than the limit
-      if ($len_if_added > $max_trace_macro_line_len) {
-        # Wrap line, with indentation
-        $trace .= ",\n             ";
-        $len = 13;              # Set to 13, for indentation
-
-        # Indent an extra space to account for extra digit in 'H5TRACE' macro
-        if (scalar(@arg_str) >= 10) {
-          $trace .= " ";
-          $len++;
+        # Check for untraceable type (deferred until $argtrace used)
+        if ( $argtrace =~ /(^!)|([^*]!)/ ) {
+            errmesg $file, $name, "untraceable type in args";
+            print "args = '$orig_args'\n";
+            goto error;
         }
-      } else {
-        $trace .= ", ";
-        $len += 2;     # Add 2, for ', '
-      }
 
-      # Append argument
-      $trace .= "$arg_name[$i]";
-      $argtrace .= ", $arg_name[$i]";
+        # Update H5ARG_TRACE macro
+        $body =~ s/(H5ARG_TRACE(\d+\s*\(.*?\))?)/"$argtrace"/esg;
 
-      # Add length of appended argument name
-      $len += length($arg_name[$i]);
+        # Increment # of non-API routines modified if anything changed
+        if ($orig_body ne $body) {
+            $file_args++;
+        }
     }
 
-    # Append final ');' for macro
-    $trace .= ");\n";
-    $argtrace .= ")";
-  }
-
-  # Check for API / non-API routine name
-  if( $name =~ /H5[A-Z]{0,2}[a-z].*/) {
-      # The H5TRACE() statement, for API routines
-      if ($body =~ /\/\*[ \t]*NO[ \t]*TRACE[ \t]*\*\//) {
-        # Ignored due to NO TRACE comment.
-      } else {
-          # Check for known, but unsupported type
-          if ( $trace =~ /(^#)|([^*]#)/ ) {
-            # Check for unsupported return type
-            if ( $type =~ /(^#)|([^*]#)/ ) {
-              errmesg $file, $name, "unsupported type in return type\nAdd to TypeString hash in trace script and update H5_trace_args()";
-              print "type = '$type'\n";
-            }
-
-            # Check for unsupported argument type
-            $index = 0;
-            for (@arg_str) {
-              if ( $_ =~ /(^#)|([^*]#)/ ) {
-                errmesg $file, $name, "unsupported type in args\nAdd to TypeString hash in trace script and update H5_trace_args()";
-                print "type = $arg_type[$index]\n";
-              }
-              $index++;
-            }
-            goto error;
-          }
-
-          # Check for unknown (and therefore unsupported) type
-          if ( $trace =~ /(^!)|([^*]!)/ ) {
-            # Check for unsupported return type
-            if ( $type =~ /(^!)|([^*]!)/ ) {
-              errmesg $file, $name, "unknown type in return type\nAdd to TypeString hash in trace script and also update H5_trace_args() if used by value";
-              print "type = '$type'\n";
-            }
-
-            # Check for unsupported argument type
-            $index = 0;
-            for (@arg_str) {
-              if ( $_ =~ /(^!)|([^*]!)/ ) {
-                errmesg $file, $name, "unknown type in args\nAdd to TypeString hash in trace script and also update H5_trace_args() if used by value";
-                print "type = $arg_type[$index]\n";
-              }
-              $index++;
-            }
-            goto error;
-          }
-
-          if ($body =~ s/((\n[ \t]*)H5TRACE\d+\s*\(.*?\);)\n/"$2$trace"/es) {
-            # Replaced an H5TRACE macro.
-          } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\w*[ \t]*(\(.*?\))?;??)\n/"$1$2$trace"/es) {
-            # Added an H5TRACE macro after a FUNC_ENTER macro.
-          } else {
-            errmesg $file, $name, "unable to insert tracing information";
-            print "body = ", $body, "\n";
-            goto error;
-          }
-      }
-
-    #Increment # of API routines modified
-    $file_api++;
-  }
-
-  # Check for H5ARG_TRACE macros in non-API routines
-  if ( $body =~ /H5ARG_TRACE/ ) {
-      # Check for untraceable type (deferred until $argtrace used)
-      if ( $argtrace =~ /(^!)|([^*]!)/ ) {
-        errmesg $file, $name, "untraceable type in args";
-        print "args = '$orig_args'\n";
-        goto error;
-      }
-
-      # Replace / update H5ARG_TRACE macro.
-      $body =~ s/(H5ARG_TRACE(\d+\s*\(.*?\))?)/"$argtrace"/esg;
-
-    #Increment # of non-API routines modified
-    $file_args++;
-  }
-
- error:
-  return "\n$type\n$name($orig_args)\n$body";
+error:
+    return "\n$type\n$name($orig_args)\n$body";
 }
 
 ##############################################################################
@@ -505,41 +401,38 @@ sub rewrite_func ($$$$$) {
 # tracing information.
 #
 for $file (@ARGV) {
-  $file_api = 0;
-  $file_args = 0;
+    $file_args = 0;
 
-  # Ignore some files that do not need tracing macros
-  unless ($file eq "H5FDmulti.c" or $file eq "src/H5FDmulti.c" or $file eq "H5FDstdio.c" or $file eq "src/H5FDstdio.c" or $file eq "src/H5TS.c" or $file eq "src/H5TSmutex.c" or $file eq "src/H5FDperform.c") {
+    # Ignore the "external" source files that don't include H5private.h
+    unless ($file eq "H5FDmulti.c" or $file eq "src/H5FDmulti.c" or $file eq "H5FDstdio.c" or $file eq "src/H5FDstdio.c") {
 
-    # Snarf up the entire file
-    open SOURCE, $file or die "$file: $!\n";
-    $Source = join "", <SOURCE>;
-    close SOURCE;
+        # Snarf up the entire file
+        open SOURCE, $file or die "$file: $!\n";
+        $Source = join "", <SOURCE>;
+        close SOURCE;
 
-    # Make a copy of the original data
-    my $original = $Source;
+        # Make a copy of the original data
+        my $original = $Source;
 
-    # Make modifications
-    $Source =~ s/\n([A-Za-z]\w*(\s+[A-Za-z]\w*)*\s*\**)\n #type
-                     (H5[A-Z]{0,2}_?[a-zA-Z0-9_]\w*)      #name
-                     \s*\((.*?)\)\s*                      #args
-                     (\{.*?\n\}[^\n]*)                    #body
-                     /rewrite_func($file,$1,$3,$4,$5)/segx;
+        # Make modifications
+        $Source =~ s/\n([A-Za-z]\w*(\s+[A-Za-z]\w*)*\s*\**)\n #type
+                         (H5[A-Z]{0,2}_?[a-zA-Z0-9_]\w*)      #name
+                         \s*\((.*?)\)\s*                      #args
+                         (\{.*?\n\}[^\n]*)                    #body
+                         /rewrite_func($file,$1,$3,$4,$5)/segx;
 
-# If the source changed then print out the new version
-    if ($original ne $Source) {
-      printf "%s: instrumented %d API function%s and %d argument list%s\n",
-             $file, $file_api, (1 == $file_api ? "" : "s"),
-             $file_args, (1 == $file_args ? "" : "s");
-      rename $file, "$file~" or die "unable to make backup";
-      open SOURCE, ">$file" or die "unable to modify source";
-      print SOURCE $Source;
-      close SOURCE;
+        # If the source changed then print out the new version
+        if ($original ne $Source) {
+            printf "%s: Instrumented %d argument list%s\n",
+                    $file, $file_args, (1 == $file_args ? "" : "s");
+            rename $file, "$file~" or die "unable to make backup";
+            open SOURCE, ">$file" or die "unable to modify source";
+            print SOURCE $Source;
+            close SOURCE;
 
-      $total_api += $file_api;
-      $total_args += $file_args;
+            $total_args += $file_args;
+        }
     }
-  }
 }
 
 if ($found_errors eq 1) {
@@ -549,9 +442,8 @@ if ($found_errors eq 1) {
     printf "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
     exit 1;
 } else {
-    printf "Finished processing HDF5 API calls:\n";
-    printf "\tinstrumented %d API function%s and %d argument list%s\n",
-             $total_api, (1 == $total_api ? "" : "s"),
+    printf "Finished processing H5ES_insert() calls:\n";
+    printf "\tInstrumented %d argument list%s\n",
              $total_args, (1 == $total_args ? "" : "s");
 }
 

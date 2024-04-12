@@ -207,7 +207,6 @@ H5FDregister(const H5FD_class_t *cls)
     hid_t      ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "*FC", cls);
 
     /* Check arguments */
     if (!cls)
@@ -309,7 +308,6 @@ H5FDis_driver_registered_by_name(const char *driver_name)
     htri_t ret_value = false; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "*s", driver_name);
 
     /* Check if driver with this name is registered */
     if ((ret_value = H5FD_is_driver_registered_by_name(driver_name, NULL)) < 0)
@@ -337,7 +335,6 @@ H5FDis_driver_registered_by_value(H5FD_class_value_t driver_value)
     htri_t ret_value = false;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "DV", driver_value);
 
     /* Check if driver with this value is registered */
     if ((ret_value = H5FD_is_driver_registered_by_value(driver_value, NULL)) < 0)
@@ -365,7 +362,6 @@ H5FDunregister(hid_t driver_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", driver_id);
 
     /* Check arguments */
     if (NULL == H5I_object_verify(driver_id, H5I_VFL))
@@ -689,7 +685,6 @@ H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_t *ret_value = NULL;
 
     FUNC_ENTER_API_REENTER
-    H5TRACE4("*#", "*sIuia", name, flags, fapl_id, maxaddr);
 
     /* Check arguments */
     if (H5P_DEFAULT == fapl_id)
@@ -825,7 +820,6 @@ H5FDclose(H5FD_t *file)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE1("e", "*#", file);
 
     /* Check arguments */
     if (!file)
@@ -903,7 +897,6 @@ H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
     int ret_value = -1;
 
     FUNC_ENTER_API_REENTER
-    H5TRACE2("Is", "*#*#", f1, f2);
 
     /* Call private function */
     ret_value = H5FD_cmp(f1, f2);
@@ -972,7 +965,6 @@ H5FDquery(const H5FD_t *file, unsigned long *flags /*out*/)
     int ret_value = 0;
 
     FUNC_ENTER_API_REENTER
-    H5TRACE2("Is", "*#*Ul", file, flags);
 
     /* Check arguments */
     if (!file)
@@ -1065,7 +1057,6 @@ H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     haddr_t ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_API_REENTER
-    H5TRACE4("a", "*#Mtih", file, type, dxpl_id, size);
 
     /* Check arguments */
     if (!file)
@@ -1115,7 +1106,6 @@ H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t siz
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE5("e", "*#Mtiah", file, type, dxpl_id, addr, size);
 
     /* Check arguments */
     if (!file)
@@ -1158,7 +1148,6 @@ H5FDget_eoa(H5FD_t *file, H5FD_mem_t type)
     haddr_t ret_value;
 
     FUNC_ENTER_API_REENTER
-    H5TRACE2("a", "*#Mt", file, type);
 
     /* Check arguments */
     if (!file)
@@ -1206,7 +1195,6 @@ H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE3("e", "*#Mta", file, type, addr);
 
     /* Check arguments */
     if (!file)
@@ -1254,7 +1242,6 @@ H5FDget_eof(H5FD_t *file, H5FD_mem_t type)
     haddr_t ret_value;
 
     FUNC_ENTER_API_REENTER
-    H5TRACE2("a", "*#Mt", file, type);
 
     /* Check arguments */
     if (!file)
@@ -1404,7 +1391,6 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size
     herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE6("e", "*#Mtiaz*x", file, type, dxpl_id, addr, size, buf);
 
     /* Check arguments */
     if (!file)
@@ -1450,7 +1436,6 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
     herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE6("e", "*#Mtiaz*x", file, type, dxpl_id, addr, size, buf);
 
     /* Check arguments */
     if (!file)
@@ -1506,7 +1491,6 @@ H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
     herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE7("e", "*#iIu*Mt*a*z**x", file, dxpl_id, count, types, addrs, sizes, bufs);
 
     /* Check arguments */
     if (!file)
@@ -1582,7 +1566,6 @@ H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[]
     herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE7("e", "*#iIu*Mt*a*z**x", file, dxpl_id, count, types, addrs, sizes, bufs);
 
     /* Check arguments */
     if (!file)
@@ -1675,8 +1658,6 @@ H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
     herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE9("e", "*#MtiIu*i*i*a*z**x", file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
-             element_sizes, bufs);
 
     /* Check arguments */
     if (!file)
@@ -1772,8 +1753,6 @@ H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count
     herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE9("e", "*#MtiIu*i*i*a*z**x", file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
-             element_sizes, bufs);
 
     /* Check arguments */
     if (!file)
@@ -1876,8 +1855,6 @@ H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE9("e", "*#MtiIu*i*i*a*z**x", file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
-             element_sizes, bufs);
 
     /* Check arguments */
     if (!file)
@@ -1974,8 +1951,6 @@ H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE9("e", "*#MtiIu*i*i*a*z**x", file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
-             element_sizes, bufs);
 
     /* Check arguments */
     if (!file)
@@ -2072,8 +2047,6 @@ H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t c
     herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE9("e", "*#MtiIu*i*i*a*z**x", file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
-             element_sizes, bufs);
 
     /* Check arguments */
     if (!file)
@@ -2169,8 +2142,6 @@ H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t 
     herr_t ret_value = SUCCEED; /* Return value             */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE9("e", "*#MtiIu*i*i*a*z**x", file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
-             element_sizes, bufs);
 
     /* Check arguments */
     if (!file)
@@ -2236,7 +2207,6 @@ H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE3("e", "*#ib", file, dxpl_id, closing);
 
     /* Check arguments */
     if (!file)
@@ -2303,7 +2273,6 @@ H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE3("e", "*#ib", file, dxpl_id, closing);
 
     /* Check arguments */
     if (!file)
@@ -2369,7 +2338,6 @@ H5FDlock(H5FD_t *file, hbool_t rw)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE2("e", "*#b", file, rw);
 
     /* Check arguments */
     if (!file)
@@ -2428,7 +2396,6 @@ H5FDunlock(H5FD_t *file)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE1("e", "*#", file);
 
     /* Check arguments */
     if (!file)
@@ -2496,7 +2463,6 @@ H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void 
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_REENTER
-    H5TRACE5("e", "*#ULUL*x**x", file, op_code, flags, input, output);
 
     /* Check arguments */
     if (!file)
@@ -2613,7 +2579,6 @@ H5FDget_vfd_handle(H5FD_t *file, hid_t fapl_id, void **file_handle /*out*/)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API_REENTER
-    H5TRACE3("e", "*#i**x", file, fapl_id, file_handle);
 
     /* Check arguments */
     if (!file)
@@ -2757,7 +2722,6 @@ H5FDdriver_query(hid_t driver_id, unsigned long *flags /*out*/)
     herr_t        ret_value = SUCCEED; /* Return value                 */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Ul", driver_id, flags);
 
     /* Check arguments */
     if (NULL == flags)
@@ -2788,7 +2752,6 @@ H5FDdelete(const char *filename, hid_t fapl_id)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API_REENTER
-    H5TRACE2("e", "*si", filename, fapl_id);
 
     /* Check arguments */
     if (!filename || !*filename)

@@ -384,7 +384,6 @@ H5Eregister_class(const char *cls_name, const char *lib_name, const char *versio
     hid_t      ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "*s*s*s", cls_name, lib_name, version);
 
     /* Check arguments */
     if (cls_name == NULL || lib_name == NULL || version == NULL)
@@ -463,7 +462,6 @@ H5Eunregister_class(hid_t class_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", class_id);
 
     /* Check arguments */
     if (H5I_ERROR_CLASS != H5I_get_type(class_id))
@@ -528,7 +526,6 @@ H5Eget_class_name(hid_t class_id, char *name /*out*/, size_t size)
     ssize_t    ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "i*sz", class_id, name, size);
 
     /* Get the error class */
     if (NULL == (cls = (H5E_cls_t *)H5I_object_verify(class_id, H5I_ERROR_CLASS)))
@@ -626,7 +623,6 @@ H5Eclose_msg(hid_t err_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", err_id);
 
     /* Check arguments */
     if (H5I_ERROR_MSG != H5I_get_type(err_id))
@@ -683,7 +679,6 @@ H5Ecreate_msg(hid_t class_id, H5E_type_t msg_type, const char *msg_str)
     hid_t      ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "iEt*s", class_id, msg_type, msg_str);
 
     /* Check arguments */
     if (msg_type != H5E_MAJOR && msg_type != H5E_MINOR)
@@ -768,7 +763,6 @@ H5Eget_msg(hid_t msg_id, H5E_type_t *type /*out*/, char *msg_str /*out*/, size_t
     ssize_t    ret_value = -1; /* Return value */
 
     FUNC_ENTER_API_NOCLEAR((-1))
-    H5TRACE4("Zs", "i*Et*sz", msg_id, type, msg_str, size);
 
     /* Get the message object */
     if (NULL == (msg = (H5E_msg_t *)H5I_object_verify(msg_id, H5I_ERROR_MSG)))
@@ -799,7 +793,6 @@ H5Ecreate_stack(void)
     hid_t  ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE0("i", "");
 
     /* Allocate a new error stack */
     if (NULL == (stk = H5FL_CALLOC(H5E_t)))
@@ -835,7 +828,6 @@ H5Eget_current_stack(void)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5I_INVALID_HID)
-    H5TRACE0("i", "");
 
     /* Get the current stack */
     if (NULL == (stk = H5E__get_current_stack()))
@@ -928,7 +920,6 @@ H5Eset_current_stack(hid_t err_stack)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", err_stack);
 
     if (err_stack != H5E_DEFAULT) {
         if (NULL == (estack = (H5E_t *)H5I_object_verify(err_stack, H5I_ERROR_STACK)))
@@ -1013,7 +1004,6 @@ H5Eclose_stack(hid_t stack_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", stack_id);
 
     if (H5E_DEFAULT != stack_id) {
         /* Check arguments */
@@ -1076,7 +1066,6 @@ H5Eget_num(hid_t error_stack_id)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR((-1))
-    H5TRACE1("Zs", "i", error_stack_id);
 
     /* Need to check for errors */
     if (error_stack_id == H5E_DEFAULT) {
@@ -1137,7 +1126,6 @@ H5Epop(hid_t err_stack, size_t count)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE2("e", "iz", err_stack, count);
 
     /* Need to check for errors */
     if (err_stack == H5E_DEFAULT) {
@@ -1196,7 +1184,6 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE8("e", "i*s*sIuiii*s", err_stack, file, func, line, cls_id, maj_id, min_id, fmt);
 
     if (err_stack == H5E_DEFAULT)
         estack = NULL;
@@ -1255,7 +1242,6 @@ H5Eclear2(hid_t err_stack)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE1("e", "i", err_stack);
 
     /* Need to check for errors */
     if (err_stack == H5E_DEFAULT)
@@ -1295,7 +1281,6 @@ H5Eprint2(hid_t err_stack, FILE *stream)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    /*NO TRACE*/
 
     /* Print error stack */
     if ((ret_value = H5E__print2(err_stack, stream)) < 0)
@@ -1362,7 +1347,6 @@ H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t stack_func, voi
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    /*NO TRACE*/
 
     /* Need to check for errors */
     if (err_stack == H5E_DEFAULT) {
@@ -1408,7 +1392,6 @@ H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func /*out*/, void **client_data /*ou
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE3("e", "i*EA**x", estack_id, func, client_data);
 
     if (estack_id == H5E_DEFAULT) {
         if (NULL == (estack = H5E__get_my_stack()))
@@ -1467,7 +1450,6 @@ H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE3("e", "iEA*x", estack_id, func, client_data);
 
     if (estack_id == H5E_DEFAULT) {
         if (NULL == (estack = H5E__get_my_stack()))
@@ -1525,7 +1507,6 @@ H5Eauto_is_v2(hid_t estack_id, unsigned *is_stack)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE2("e", "i*Iu", estack_id, is_stack);
 
     if (estack_id == H5E_DEFAULT) {
         if (NULL == (estack = H5E__get_my_stack()))
@@ -1569,7 +1550,6 @@ H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_sta
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iib", dst_stack_id, src_stack_id, close_source_stack);
 
     /* Check args */
     if (NULL == (dst_stack = (H5E_t *)H5I_object_verify(dst_stack_id, H5I_ERROR_STACK)))

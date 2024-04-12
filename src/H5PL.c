@@ -77,7 +77,6 @@ H5PLset_loading_state(unsigned int plugin_control_mask)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "Iu", plugin_control_mask);
 
     /* Set the plugin control mask */
     if (H5PL__set_plugin_control_mask(plugin_control_mask) < 0)
@@ -109,7 +108,6 @@ H5PLget_loading_state(unsigned *plugin_control_mask /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*Iu", plugin_control_mask);
 
     if (NULL == plugin_control_mask)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_control_mask parameter cannot be NULL");
@@ -138,7 +136,6 @@ H5PLappend(const char *search_path)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*s", search_path);
 
     /* Check args */
     if (NULL == search_path)
@@ -170,7 +167,6 @@ H5PLprepend(const char *search_path)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*s", search_path);
 
     /* Check args */
     if (NULL == search_path)
@@ -203,7 +199,6 @@ H5PLreplace(const char *search_path, unsigned int idx)
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "*sIu", search_path, idx);
 
     /* Check args */
     if (NULL == search_path)
@@ -245,7 +240,6 @@ H5PLinsert(const char *search_path, unsigned int idx)
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "*sIu", search_path, idx);
 
     /* Check args */
     if (NULL == search_path)
@@ -287,7 +281,6 @@ H5PLremove(unsigned int idx)
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "Iu", idx);
 
     /* Check index */
     num_paths = H5PL__get_num_paths();
@@ -338,7 +331,6 @@ H5PLget(unsigned int idx, char *path_buf, size_t buf_size)
     ssize_t     ret_value = 0;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("Zs", "Iu*sz", idx, path_buf, buf_size);
 
     /* Check index */
     num_paths = H5PL__get_num_paths();
@@ -387,7 +379,6 @@ H5PLsize(unsigned int *num_paths)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*Iu", num_paths);
 
     /* Check arguments */
     if (!num_paths)

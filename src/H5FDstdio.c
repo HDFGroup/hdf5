@@ -292,8 +292,6 @@ H5Pset_fapl_stdio(hid_t fapl_id)
 {
     static const char *func = "H5FDset_fapl_stdio"; /*for error reporting*/
 
-    /*NO TRACE*/
-
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 

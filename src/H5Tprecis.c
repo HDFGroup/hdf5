@@ -47,7 +47,6 @@ H5Tget_precision(hid_t type_id)
     size_t ret_value;
 
     FUNC_ENTER_API(0)
-    H5TRACE1("z", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -124,7 +123,6 @@ H5Tset_precision(hid_t type_id, size_t prec)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iz", type_id, prec);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))

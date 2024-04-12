@@ -294,7 +294,6 @@ H5Mcreate(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id, 
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "i*siiiii", loc_id, name, key_type_id, val_type_id, lcpl_id, mcpl_id, mapl_id);
 
     /* Create the map synchronously */
     if ((ret_value = H5M__create_api_common(loc_id, name, key_type_id, val_type_id, lcpl_id, mcpl_id, mapl_id,
@@ -327,8 +326,6 @@ H5Mcreate_async(const char *app_file, const char *app_func, unsigned app_line, h
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE11("i", "*s*sIui*siiiiii", app_file, app_func, app_line, loc_id, name, key_type_id, val_type_id,
-              lcpl_id, mcpl_id, mapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -388,7 +385,6 @@ H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id, hid_t mcpl_id
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE5("i", "iiiii", loc_id, key_type_id, val_type_id, mcpl_id, mapl_id);
 
     /* Check arguments */
     if (H5P_DEFAULT == mcpl_id)
@@ -527,7 +523,6 @@ H5Mopen(hid_t loc_id, const char *name, hid_t mapl_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "i*si", loc_id, name, mapl_id);
 
     /* Open the map synchronously */
     if ((ret_value = H5M__open_api_common(loc_id, name, mapl_id, NULL, NULL)) < 0)
@@ -558,7 +553,6 @@ H5Mopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, mapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -600,7 +594,6 @@ H5Mclose(hid_t map_id)
     herr_t ret_value = SUCCEED; /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", map_id);
 
     /* Check args */
     if (H5I_MAP != H5I_get_type(map_id))
@@ -635,7 +628,6 @@ H5Mclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, map_id, es_id);
 
     /* Check args */
     if (H5I_MAP != H5I_get_type(map_id))
@@ -699,7 +691,6 @@ H5Mget_key_type(hid_t map_id)
     hid_t                ret_value = H5I_INVALID_HID; /* Return value         */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", map_id);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
@@ -744,7 +735,6 @@ H5Mget_val_type(hid_t map_id)
     hid_t                ret_value = H5I_INVALID_HID; /* Return value         */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", map_id);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
@@ -789,7 +779,6 @@ H5Mget_create_plist(hid_t map_id)
     hid_t                ret_value = H5I_INVALID_HID; /* Return value         */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", map_id);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
@@ -837,7 +826,6 @@ H5Mget_access_plist(hid_t map_id)
     hid_t                ret_value = H5I_INVALID_HID; /* Return value         */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", map_id);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
@@ -881,7 +869,6 @@ H5Mget_count(hid_t map_id, hsize_t *count /*out*/, hid_t dxpl_id)
     herr_t               ret_value = SUCCEED; /* Return value         */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("e", "i*hi", map_id, count, dxpl_id);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
@@ -988,7 +975,6 @@ H5Mput(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "ii*xi*xi", map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id);
 
     /* Add key-value pair to the map synchronously */
     if ((ret_value = H5M__put_api_common(map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, NULL,
@@ -1019,8 +1005,6 @@ H5Mput_async(const char *app_file, const char *app_func, unsigned app_line, hid_
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE10("e", "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id, key_mem_type_id, key,
-              val_mem_type_id, value, dxpl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -1123,7 +1107,6 @@ H5Mget(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "ii*xi*xi", map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id);
 
     /* Get key-value pair from the map synchronously */
     if ((ret_value = H5M__get_api_common(map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, NULL,
@@ -1154,8 +1137,6 @@ H5Mget_async(const char *app_file, const char *app_func, unsigned app_line, hid_
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE10("e", "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id, key_mem_type_id, key,
-              val_mem_type_id, value, dxpl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -1200,7 +1181,6 @@ H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, hbool_t *exists,
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "ii*x*bi", map_id, key_mem_type_id, key, exists, dxpl_id);
 
     /* Check arguments */
     if (key_mem_type_id < 0)
@@ -1275,7 +1255,6 @@ H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, 
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*hiMI*xi", map_id, idx, key_mem_type_id, op, op_data, dxpl_id);
 
     /* Check arguments */
     if (key_mem_type_id < 0)
@@ -1357,7 +1336,6 @@ H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *idx, hid_t key_m
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*s*hiMI*xii", loc_id, map_name, idx, key_mem_type_id, op, op_data, dxpl_id, lapl_id);
 
     /* Check arguments */
     if (!map_name)
@@ -1428,7 +1406,6 @@ H5Mdelete(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t dxpl_id)
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ii*xi", map_id, key_mem_type_id, key, dxpl_id);
 
     /* Check arguments */
     if (key_mem_type_id < 0)

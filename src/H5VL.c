@@ -84,7 +84,6 @@ H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE2("i", "*#i", cls, vipl_id);
 
     /* Check VOL initialization property list */
     if (H5P_DEFAULT == vipl_id)
@@ -123,7 +122,6 @@ H5VLregister_connector_by_name(const char *name, hid_t vipl_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE2("i", "*si", name, vipl_id);
 
     /* Check arguments */
     if (!name)
@@ -169,7 +167,6 @@ H5VLregister_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE2("i", "VCi", value, vipl_id);
 
     /* Check arguments */
     if (value < 0)
@@ -208,7 +205,6 @@ H5VLis_connector_registered_by_name(const char *name)
     htri_t ret_value = false; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "*s", name);
 
     /* Check if connector with this name is registered */
     if ((ret_value = H5VL__is_connector_registered_by_name(name)) < 0)
@@ -236,7 +232,6 @@ H5VLis_connector_registered_by_value(H5VL_class_value_t connector_value)
     htri_t ret_value = false;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "VC", connector_value);
 
     /* Check if connector with this value is registered */
     if ((ret_value = H5VL__is_connector_registered_by_value(connector_value)) < 0)
@@ -264,7 +259,6 @@ H5VLget_connector_id(hid_t obj_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", obj_id);
 
     /* Get connector ID */
     if ((ret_value = H5VL__get_connector_id(obj_id, true)) < 0)
@@ -294,7 +288,6 @@ H5VLget_connector_id_by_name(const char *name)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "*s", name);
 
     /* Get connector ID with this name */
     if ((ret_value = H5VL__get_connector_id_by_name(name, true)) < 0)
@@ -324,7 +317,6 @@ H5VLget_connector_id_by_value(H5VL_class_value_t connector_value)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "VC", connector_value);
 
     /* Get connector ID with this value */
     if ((ret_value = H5VL__get_connector_id_by_value(connector_value, true)) < 0)
@@ -355,7 +347,6 @@ H5VLpeek_connector_id_by_name(const char *name)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "*s", name);
 
     /* Get connector ID with this name */
     if ((ret_value = H5VL__peek_connector_id_by_name(name)) < 0)
@@ -386,7 +377,6 @@ H5VLpeek_connector_id_by_value(H5VL_class_value_t value)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "VC", value);
 
     /* Get connector ID with this value */
     if ((ret_value = H5VL__peek_connector_id_by_value(value)) < 0)
@@ -419,7 +409,6 @@ H5VLget_connector_name(hid_t obj_id, char *name /*out*/, size_t size)
     ssize_t ret_value = -1;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("Zs", "i*sz", obj_id, name, size);
 
     /* Call internal routine */
     if ((ret_value = H5VL__get_connector_name(obj_id, name, size)) < 0)
@@ -448,7 +437,6 @@ H5VLclose(hid_t vol_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", vol_id);
 
     /* Check args */
     if (NULL == H5I_object_verify(vol_id, H5I_VOL))
@@ -486,7 +474,6 @@ H5VLunregister_connector(hid_t vol_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", vol_id);
 
     /* Check arguments */
     if (NULL == H5I_object_verify(vol_id, H5I_VOL))
@@ -531,7 +518,6 @@ H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2)
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*Isii", cmp, connector_id1, connector_id2);
 
     /* Check args and get class pointers */
     if (NULL == (cls1 = (H5VL_class_t *)H5I_object_verify(connector_id1, H5I_VOL)))
@@ -572,7 +558,6 @@ H5VLwrap_register(void *obj, H5I_type_t type)
 
     /* Use FUNC_ENTER_API_NOINIT here, so the API context doesn't get reset */
     FUNC_ENTER_API_NOINIT
-    H5TRACE2("i", "*xIt", obj, type);
 
     /* Check args */
     /* Use a switch here for (hopefully) better performance than a series of
@@ -635,7 +620,6 @@ H5VLobject(hid_t id)
     void *ret_value; /* Return value */
 
     FUNC_ENTER_API(NULL)
-    H5TRACE1("*x", "i", id);
 
     /* Retrieve the object pointer for the ID */
     if (NULL == (ret_value = H5VL_object(id)))
@@ -662,7 +646,6 @@ H5VLobject_is_native(hid_t obj_id, hbool_t *is_native)
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*b", obj_id, is_native);
 
     if (!is_native)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "`is_native` argument is NULL");
@@ -698,7 +681,6 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
     hid_t          ret_value    = -1;   /* Return value            */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("i", "*xii", file_obj, connector_id, dtype_id);
 
     /* Check args */
     if (!file_obj)
@@ -769,7 +751,6 @@ H5VLretrieve_lib_state(void **state /*out*/)
 
     /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "**x", state);
 
     /* Check args */
     if (NULL == state)
@@ -803,7 +784,6 @@ H5VLstart_lib_state(void)
 
     /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
     FUNC_ENTER_API_NOINIT
-    H5TRACE0("e", "");
 
     /* Start a new library state */
     if (H5VL_start_lib_state() < 0)
@@ -833,7 +813,6 @@ H5VLrestore_lib_state(const void *state)
 
     /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "*x", state);
 
     /* Check args */
     if (NULL == state)
@@ -872,7 +851,6 @@ H5VLfinish_lib_state(void)
 
     /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
     FUNC_ENTER_API_NOINIT
-    H5TRACE0("e", "");
 
     /* Reset the library state */
     if (H5VL_finish_lib_state() < 0)
@@ -904,7 +882,6 @@ H5VLfree_lib_state(void *state)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*x", state);
 
     /* Check args */
     if (NULL == state)
@@ -937,7 +914,6 @@ H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t 
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iVSIs*UL", obj_id, subcls, opt_type, flags);
 
     /* Check args */
     if (NULL == flags)
@@ -988,7 +964,6 @@ H5VLregister_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "VS*s*Is", subcls, op_name, op_val);
 
     /* Check args */
     if (NULL == op_val)
@@ -1027,7 +1002,6 @@ H5VLfind_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val 
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "VS*s*Is", subcls, op_name, op_val);
 
     /* Check args */
     if (NULL == op_val)
@@ -1065,7 +1039,6 @@ H5VLunregister_opt_operation(H5VL_subclass_t subcls, const char *op_name)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "VS*s", subcls, op_name);
 
     /* Check args */
     if (NULL == op_name)
