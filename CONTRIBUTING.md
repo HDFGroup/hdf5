@@ -16,10 +16,10 @@ around 10 minutes.
 
 ## Table of Contents
 
-* <a ref="#workflow">Workflow</a>
-* <a ref="#criteria">Acceptance criteria for a pull request</a>
-* <a ref="#releasenote">Release Note</a>
-* <a ref="#checklist">Check List</a>
+* <a href="#workflow">Workflow</a>
+* <a href="#criteria">Acceptance criteria for a pull request</a>
+* <a href="#releasenote">Release Note</a>
+* <a href="#checklist">Check List</a>
 
 <h2 id="workflow">Workflow</h2>
 
