@@ -688,6 +688,7 @@ FILE_PATTERNS  = H5*public.h H5*module.h H5*develop.h H5FD*.h \
                  HDF*.java \
                  *.F90 \
                  *.dox \
+                 *.md \
                  H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5CommonFG.h H5CompType.h \
                  H5DataSet.h H5DataSpace.h H5DataType.h H5OcreatProp.h H5DaccProp.h H5DcreatProp.h \
                  H5DxferProp.h H5EnumType.h H5Exception.h H5FaccProp.h H5FcreatProp.h H5File.h \
