@@ -21,7 +21,7 @@ around 10 minutes.
 * [Release Note](#releasenote)
 * [Check List](#checklist)
 
-# Workflow <A NAME="workflow"></A>
+# Workflow <a name="workflow"></a>
 
 The process for contributing code to HDF5 is as follows:
 
@@ -84,7 +84,7 @@ application developers and not system administrators. Users who may find the REL
 application developers, library developers, and system administrators.
 
 
-# Release Note <A NAME="releasenote"></A>
+# Release Note <a name="releasenote"></a>
 
 * **Entry Syntax**
 The release note entry syntax is shown below.
@@ -112,7 +112,7 @@ You might also consider the following as you describe the solution:
         * Is there a workaround – a way for users design their software so as not to encounter the issue? If so, what is the workaround?
         * For a performance fix, how has the performance improved? Links to published documentation would be good.
 
-# Checklist <A NAME="checklist"></A>
+# Checklist <a name="checklist"></a>
 
 Please make sure that you check the items applicable to your pull request:
 
