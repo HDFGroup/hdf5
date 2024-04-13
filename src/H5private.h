@@ -1237,8 +1237,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 #define FUNC_ENTER_COMMON_NOERR(asrt) FUNC_ENTER_CHECK_NAME(asrt);
 
 /* Local variables for API routines */
-#define FUNC_ENTER_API_VARS                                                                                  \
-    H5CANCEL_DECL
+#define FUNC_ENTER_API_VARS H5CANCEL_DECL
 
 #define FUNC_ENTER_API_COMMON                                                                                \
     FUNC_ENTER_API_VARS                                                                                      \
