@@ -181,7 +181,7 @@ and an HDF5 path name in that file.</DD>
 <DL>
   <DT>File format</DT>
   <DD>HDF5 file format refers to the structure and organization of the HDF5 data
-    being stored within the file</DD>
+    being stored within the file.</DD>
 </DL>
 
 <DL>
