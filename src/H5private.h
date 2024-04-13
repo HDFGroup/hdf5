@@ -1539,7 +1539,6 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 #define FUNC_LEAVE_API_REENTER(ret_value)                                                                    \
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
-    FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     H5_POP_FUNC                                                                                              \
     if (H5_UNLIKELY(err_occurred))                                                                           \
         (void)H5E_dump_api_stack();                                                                          \

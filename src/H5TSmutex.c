@@ -94,7 +94,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_lock(H5TS_mutex_t *mutex) H5TS_NO_THREAD_SAFETY_ANALYSIS
+H5TS_mutex_lock(H5TS_mutex_t *mutex)
 {
     herr_t ret_value = SUCCEED;
 
@@ -117,7 +117,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired) H5TS_NO_THREAD_SAFETY_ANALYSIS
+H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired)
 {
     int    rc;
     herr_t ret_value = SUCCEED;
@@ -146,7 +146,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_unlock(H5TS_mutex_t *mutex) H5TS_NO_THREAD_SAFETY_ANALYSIS
+H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 {
     herr_t ret_value = SUCCEED;
 
@@ -211,7 +211,7 @@ H5TS_mutex_init(H5TS_mutex_t *mutex, int H5_ATTR_UNUSED type)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_lock(H5TS_mutex_t *mutex) H5TS_NO_THREAD_SAFETY_ANALYSIS
+H5TS_mutex_lock(H5TS_mutex_t *mutex)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -230,7 +230,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex) H5TS_NO_THREAD_SAFETY_ANALYSIS
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired) H5TS_NO_THREAD_SAFETY_ANALYSIS
+H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -249,7 +249,7 @@ H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired) H5TS_NO_THREAD_SAFETY_AN
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_unlock(H5TS_mutex_t *mutex) H5TS_NO_THREAD_SAFETY_ANALYSIS
+H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -327,7 +327,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_lock(H5TS_mutex_t *mutex) H5TS_NO_THREAD_SAFETY_ANALYSIS
+H5TS_mutex_lock(H5TS_mutex_t *mutex)
 {
     herr_t ret_value = SUCCEED;
 
@@ -350,7 +350,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired) H5TS_NO_THREAD_SAFETY_ANALYSIS
+H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired)
 {
     int    rc;
     herr_t ret_value = SUCCEED;
@@ -379,7 +379,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_mutex_unlock(H5TS_mutex_t *mutex) H5TS_NO_THREAD_SAFETY_ANALYSIS
+H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 {
     herr_t ret_value = SUCCEED;
 
