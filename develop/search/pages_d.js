@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['reading_20from_20and_20writing_20to_20a_20dataset_0',['Reading From and Writing To a Dataset',['../_l_b_dset_r_w.html',1,'LearnBasics']]],
-  ['reading_20from_20or_20writing_20to_20a_20subset_20of_20a_20dataset_1',['Reading From or Writing To a Subset of a Dataset',['../_l_b_dset_sub_r_w.html',1,'LearnBasics']]],
-  ['reference_20manual_20_28rm_29_20page_20template_2',['Reference Manual (RM) Page Template',['../_r_m_t.html',1,'']]],
-  ['rfcs_3',['RFCs',['../_r_f_c.html',1,'']]]
+  ['performance_0',['Performance',['../_performance.html',1,'']]],
+  ['programming_20issues_1',['Programming Issues',['../_l_b_prog.html',1,'LearnBasics']]],
+  ['properties_20and_20property_20lists_20in_20hdf5_2',['Properties and Property Lists in HDF5',['../_h5_p__u_g.html',1,'']]],
+  ['property_20lists_20basics_3',['Property Lists Basics',['../_l_b_props_list.html',1,'LearnBasics']]]
 ];
