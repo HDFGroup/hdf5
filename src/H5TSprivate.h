@@ -167,9 +167,9 @@ typedef pthread_barrier_t H5TS_barrier_t;
 typedef struct H5TS_barrier_t {
     H5TS_mutex_t mutex;
     H5TS_cond_t  cv;
-    uint64_t     count;
-    uint64_t     entered;
-    uint64_t     threshold;
+    unsigned     count;
+    unsigned     entered;
+    unsigned     threshold;
 } H5TS_barrier_t;
 #endif
 
@@ -249,7 +249,7 @@ H5_DLL void     H5TS_atomic_destroy_uint(H5TS_atomic_uint_t *obj);
 #endif /* H5_HAVE_STDATOMIC_H */
 
 /* Barrier related function declarations */
-H5_DLL herr_t H5TS__barrier_init(H5TS_barrier_t *barrier, uint64_t count);
+H5_DLL herr_t H5TS__barrier_init(H5TS_barrier_t *barrier, unsigned count);
 H5_DLL herr_t H5TS__barrier_wait(H5TS_barrier_t *barrier);
 H5_DLL herr_t H5TS__barrier_destroy(H5TS_barrier_t *barrier);
 

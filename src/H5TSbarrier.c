@@ -69,7 +69,7 @@
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS__barrier_init(H5TS_barrier_t *barrier, uint64_t count)
+H5TS__barrier_init(H5TS_barrier_t *barrier, unsigned count)
 {
     herr_t ret_value = SUCCEED;
 
@@ -104,7 +104,7 @@ done:
  * Purpose:     Wait at a barrier.
  *
  * Note:     	Similar to pthread_barrier_wait, a barrier may be re-used
- *		multiple times without intervening calls to H5TS_barrier_init.
+ *		multiple times without intervening calls to H5TS__barrier_init.
  *
  * Return:      Non-negative on success / Negative on failure
  *
