@@ -205,8 +205,8 @@ done:
 herr_t
 H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads)
 {
-    H5TS_pool_t *new_pool  = NULL; /* Newly created pool */
-    unsigned u;                    /* Local index variable */
+    H5TS_pool_t *new_pool = NULL; /* Newly created pool */
+    unsigned     u;               /* Local index variable */
     herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
