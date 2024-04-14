@@ -154,9 +154,9 @@ main(int argc, char *argv[])
     TestParseCmdLine(argc, argv);
 
     /* Perform requested testing */
-fprintf(stderr, "Before performing tests");
+    fprintf(stderr, "Before performing tests");
     PerformTests();
-fprintf(stderr, "After performing tests");
+    fprintf(stderr, "After performing tests");
 
     /* Display test summary, if requested */
     if (GetTestSummary())
