@@ -98,6 +98,7 @@ main(int argc, char *argv[])
 
     /* Initialize testing framework */
     TestInit(argv[0], NULL, NULL);
+SetTestVerbosity(VERBO_HI);
 
     /* Tests are generally arranged from least to most complexity... */
     AddTest("is_threadsafe", tts_is_threadsafe, NULL, "library threadsafe status", NULL);
