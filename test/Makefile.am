@@ -34,10 +34,10 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       test_vds_env.sh: vds_env
 #       test_vds_swmr.sh: vds_swmr*
 #       test_use_cases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
-#TEST_SCRIPT = test_abort_fail.sh test_check_version.sh test_error.sh \
-#    test_flush_refresh.sh test_external_env.sh test_libinfo.sh \
-#    test_links_env.sh test_swmr.sh test_vds_env.sh test_vds_swmr.sh \
-#    test_use_cases.sh
+TEST_SCRIPT = test_abort_fail.sh test_check_version.sh test_error.sh \
+    test_flush_refresh.sh test_external_env.sh test_libinfo.sh \
+    test_links_env.sh test_swmr.sh test_vds_env.sh test_vds_swmr.sh \
+    test_use_cases.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     external_env$(EXEEXT) filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
@@ -46,31 +46,30 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) swmr_start_write$(EXEEXT) \
     vds_env$(EXEEXT) vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
-#  TEST_SCRIPT += test_plugin.sh
+  TEST_SCRIPT += test_plugin.sh
   SCRIPT_DEPEND += filter_plugin$(EXEEXT) vfd_plugin $(EXEEXT) vol_plugin$(EXEEXT)
 endif
 if MIRROR_VFD_CONDITIONAL
-#  TEST_SCRIPT += test_mirror.sh
+  TEST_SCRIPT += test_mirror.sh
 endif
 
-check_SCRIPTS = #
+check_SCRIPTS = $(TEST_SCRIPT)
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
-TEST_PROG= ttsafe
-#TEST_PROG= testhdf5 \
-#           cache cache_api cache_image cache_tagging lheap ohdr \
-#           stab gheap evict_on_close farray earray btree2 fheap \
-#           accum hyperslab istore bittests dt_arith page_buffer \
-#           dtypes dsets chunk_info cmpd_dset mdset cmpd_dtransform filter_fail extend direct_chunk \
-#           external efc objcopy objcopy_ref links unlink twriteorder big mtime \
-#           fillval mount select_io_dset\
-#           flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
-#           enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
-#           dangle dtransform reserved cross_read freespace mf vds file_image \
-#           unregister cache_logging cork swmr vol timer event_set onion
+TEST_PROG= testhdf5 \
+           cache cache_api cache_image cache_tagging lheap ohdr \
+           stab gheap evict_on_close farray earray btree2 fheap \
+           accum hyperslab istore bittests dt_arith page_buffer \
+           dtypes dsets chunk_info cmpd_dset mdset cmpd_dtransform filter_fail extend direct_chunk \
+           external efc objcopy objcopy_ref links unlink twriteorder big mtime \
+           fillval mount select_io_dset\
+           flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
+           enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
+           dangle dtransform reserved cross_read freespace mf vds file_image \
+           unregister cache_logging cork swmr vol timer event_set onion
 
 # List programs to be built when testing here
 #
@@ -92,19 +91,18 @@ TEST_PROG= ttsafe
 #
 # Also build testmeta, which is used for the timing test. It builds quickly
 # and this lets automake keep all its test programs in one place.
-check_PROGRAMS=$(TEST_PROG)
-#check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
-#    testmeta accum_swmr_reader atomic_writer atomic_reader external_env \
-#    links_env filenotclosed del_many_dense_attrs flushrefresh \
-#    use_append_chunk use_append_chunk_mirror use_append_mchunks use_disable_mdc_flushes \
-#    swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
-#    swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
-#    vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer
+check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
+    testmeta accum_swmr_reader atomic_writer atomic_reader external_env \
+    links_env filenotclosed del_many_dense_attrs flushrefresh \
+    use_append_chunk use_append_chunk_mirror use_append_mchunks use_disable_mdc_flushes \
+    swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
+    swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
+    vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
-#  check_PROGRAMS+= filter_plugin vfd_plugin vol_plugin
+  check_PROGRAMS+= filter_plugin vfd_plugin vol_plugin
 endif
 if MIRROR_VFD_CONDITIONAL
-#  check_PROGRAMS+= mirror_vfd
+  check_PROGRAMS+= mirror_vfd
 endif
 
 # These programs generate test files for the tests.  They don't need to be

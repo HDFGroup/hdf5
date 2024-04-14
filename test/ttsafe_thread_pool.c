@@ -96,7 +96,6 @@ tts_thread_pool(void)
 {
     H5TS_pool_t *pool = NULL;
     herr_t       result;
-    fprintf(stderr, "Entering %s\n", __func__);
 
     /* Initialize the counter */
     result = H5TS_mutex_init(&counter_g.mutex, H5TS_MUTEX_TYPE_PLAIN);
@@ -116,118 +115,96 @@ tts_thread_pool(void)
     VERIFY(result, FAIL, "H5TS_pool_destroy");
 
     /* Create & destroy empty pool */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     result = H5TS_pool_create(&pool, NUM_THREADS);
     CHECK_I(result, "H5TS_pool_create");
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     result = H5TS_pool_destroy(pool);
     CHECK_I(result, "H5TS_pool_destroy");
 
     /* Create pool, add single 'noop' task, destroy pool */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     result = H5TS_pool_create(&pool, NUM_THREADS);
     CHECK_I(result, "H5TS_pool_create");
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     result = H5TS_pool_add_task(pool, noop_task, &counter_g);
     CHECK_I(result, "H5TS_pool_add_task");
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     result = H5TS_pool_destroy(pool);
     CHECK_I(result, "H5TS_pool_destroy");
 
     VERIFY(counter_g.val, 0, "noop");
 
     /* Create pool, add single 'incr' task, destroy pool */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     result = H5TS_pool_create(&pool, NUM_THREADS);
     CHECK_I(result, "H5TS_pool_create");
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     result = H5TS_pool_add_task(pool, incr_task, &counter_g);
     CHECK_I(result, "H5TS_pool_add_task");
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     result = H5TS_pool_destroy(pool);
     CHECK_I(result, "H5TS_pool_destroy");
 
     VERIFY(counter_g.val, 1, "single incr");
 
     /* Create pool, add pair of 'incr' & 'decr' tasks, destroy pool */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     counter_g.val = 10;
     result        = H5TS_pool_create(&pool, NUM_THREADS);
     CHECK_I(result, "H5TS_pool_create");
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     result = H5TS_pool_add_task(pool, incr_task, &counter_g);
     CHECK_I(result, "H5TS_pool_add_task");
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     result = H5TS_pool_add_task(pool, decr_task, &counter_g);
     CHECK_I(result, "H5TS_pool_add_task");
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     result = H5TS_pool_destroy(pool);
     CHECK_I(result, "H5TS_pool_destroy");
 
     VERIFY(counter_g.val, 10, "incr + decr");
 
     /* Create pool, add many 'incr' & 'decr' tasks, destroy pool */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     counter_g.val = 3;
     result        = H5TS_pool_create(&pool, NUM_THREADS);
     CHECK_I(result, "H5TS_pool_create");
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     for (unsigned u = 0; u < 200; u++) {
         result = H5TS_pool_add_task(pool, incr_task, &counter_g);
         CHECK_I(result, "H5TS_pool_add_task");
     }
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     for (unsigned u = 0; u < 100; u++) {
         result = H5TS_pool_add_task(pool, decr_task, &counter_g);
         CHECK_I(result, "H5TS_pool_add_task");
     }
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     result = H5TS_pool_destroy(pool);
     CHECK_I(result, "H5TS_pool_destroy");
 
     VERIFY(counter_g.val, 103, "200 incr + 100 decr");
 
     /* Create pool, add *lots* of 'incr' & 'decr' tasks, destroy pool */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     counter_g.val = 5;
     result        = H5TS_pool_create(&pool, NUM_THREADS);
     CHECK_I(result, "H5TS_pool_create");
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     for (unsigned u = 0; u < 2 * 1000 * 1000; u++) {
         result = H5TS_pool_add_task(pool, incr_task, &counter_g);
         CHECK_I(result, "H5TS_pool_add_task");
     }
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     for (unsigned u = 0; u < 1 * 1000 * 1000; u++) {
         result = H5TS_pool_add_task(pool, decr_task, &counter_g);
         CHECK_I(result, "H5TS_pool_add_task");
     }
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     result = H5TS_pool_destroy(pool);
     CHECK_I(result, "H5TS_pool_destroy");
 
     VERIFY(counter_g.val, 5 + (1000 * 1000), "2,000,000 incr + 1,000,000 decr");
 
     /* Destroy the counter's mutex */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     result = H5TS_mutex_destroy(&counter_g.mutex);
     CHECK_I(result, "H5TS_mutex_destroy");
 
-    fprintf(stderr, "Leaving %s\n", __func__);
 } /* end tts_thread_pool() */
 
 #endif /*H5_HAVE_THREADS*/

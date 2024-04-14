@@ -30,8 +30,7 @@ TESTS = $(TEST_PROG) $(TEST_SCRIPT) $(EXTRA_TEST)
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS =
-#REALTIMEOUTPUT = $(realtimeOutput)
-REALTIMEOUTPUT = yes
+REALTIMEOUTPUT = $(realtimeOutput)
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
@@ -147,9 +146,9 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
               else \
                  echo "Testing: $${tname} $(TEST_FLAGS)"; \
                  if test -n "$(REALTIMEOUTPUT)"; then \
-                    echo "Test log for $${tname} $(TEST_FLAGS)" ; \
+                    echo "Test log for $${tname} $(TEST_FLAGS)" | tee -a $${log}; \
                  else \
-                    echo "Test log for $${tname} $(TEST_FLAGS)" ; \
+                    echo "Test log for $${tname} $(TEST_FLAGS)" >> $${log}; \
                  fi; \
               fi; \
               if test -n "$(REALTIMEOUTPUT)"; then \
@@ -174,13 +173,13 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
               fi; \
               if test -n "$(REALTIMEOUTPUT)"; then \
                  srcdir="$(srcdir)" \
-                 $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS)  \
+                 $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) | tee -a $${log} 2>&1 \
                  && touch $(@:.chkexe_=.chkexe) || \
                  (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
                  (cat $${log} && false) || exit 1; \
               else \
                  srcdir="$(srcdir)" \
-                 $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS)  \
+                 $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
                  && touch $(@:.chkexe_=.chkexe) || \
                  (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
                  (cat $${log} && false) || exit 1; \
