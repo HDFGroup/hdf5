@@ -352,10 +352,12 @@ H5TS_pool_destroy(H5TS_pool_t *pool)
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Sanity checks */
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(NULL == pool))
         HGOTO_DONE(FAIL);
 
     /* Acquire the mutex for the pool */
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(H5TS_mutex_lock(&pool->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = true;
@@ -364,24 +366,29 @@ H5TS_pool_destroy(H5TS_pool_t *pool)
     pool->shutdown = true;
 
     /* Wake all the worker threads up */
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(H5TS_cond_broadcast(&pool->cond) < 0))
         HGOTO_DONE(FAIL);
 
     /* Release the pool's mutex */
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = false;
 
     /* Free pool */
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(H5TS__pool_free(pool) < 0))
         HGOTO_DONE(FAIL);
 
 done:
     /* Release the pool's mutex, if we're holding it */
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(have_mutex))
         if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
             ret_value = FAIL;
 
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_pool_destroy() */
 
