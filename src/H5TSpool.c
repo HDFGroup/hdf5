@@ -108,22 +108,27 @@ H5TS__pool_free(H5TS_pool_t *pool)
     assert(pool);
 
     /* Join all threads */
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     for (unsigned u = 0; u < pool->num_threads; u++)
         if (H5_UNLIKELY(H5TS_thread_join(pool->threads[u], NULL) < 0))
             HGOTO_DONE(FAIL);
 
     /* Destroy the pool's mutex and condition variable */
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(H5TS_mutex_destroy(&pool->mutex) < 0))
         HGOTO_DONE(FAIL);
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(H5TS_cond_destroy(&pool->cond) < 0))
         HGOTO_DONE(FAIL);
 
     /* Release memory */
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (pool->threads)
         H5FL_SEQ_FREE(H5TS_thread_t, pool->threads);
     H5FL_FREE(H5TS_pool_t, pool);
 
 done:
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__pool_free() */
 
@@ -196,7 +201,7 @@ done:
             ret_value = (H5TS_thread_ret_t)1;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_pool_create() */
+} /* end H5TS__pool_do() */
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS_pool_create
