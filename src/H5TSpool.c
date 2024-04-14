@@ -153,8 +153,8 @@ H5TS__pool_do(void *_pool)
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Nap while waiting for pool to become active (or shut down) */
-//    while (!(pool->active || pool->shutdown))
-//        usleep(10);
+    //    while (!(pool->active || pool->shutdown))
+    //        usleep(10);
 
     /* Acquire tasks and invoke them, until pool is shut down */
     fprintf(stderr, "%s:%u - pool->shutdown = %u\n", __func__, __LINE__, pool->shutdown);
