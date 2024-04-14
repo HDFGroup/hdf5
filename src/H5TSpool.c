@@ -241,7 +241,7 @@ H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads)
             HGOTO_DONE(FAIL);
 
     /* Check for error when starting threads */
-    if(u != new_pool->num_threads) {
+    if (u != new_pool->num_threads) {
         /* Set # of threads successfully created (for joining them, in free routine) */
         new_pool->num_threads = u;
         HGOTO_DONE(FAIL);
