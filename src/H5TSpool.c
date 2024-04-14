@@ -199,11 +199,13 @@ H5TS__pool_do(void *_pool)
     }
 
 done:
+    fprintf(stderr, "%s:%u - have_mutex = %u\n", __func__, __LINE__, have_mutex);
     /* Release the pool's mutex, if we're holding it */
     if (have_mutex)
         if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
             ret_value = (H5TS_thread_ret_t)1;
 
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__pool_do() */
 
