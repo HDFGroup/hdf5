@@ -206,6 +206,7 @@ herr_t
 H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads)
 {
     H5TS_pool_t *new_pool  = NULL; /* Newly created pool */
+    unsigned u;                    /* Local index variable */
     herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
@@ -235,7 +236,7 @@ H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads)
     new_pool->num_threads = num_threads;
 
     /* Start worker threads */
-    for (unsigned u = 0; u < num_threads; u++)
+    for (u = 0; u < num_threads; u++)
         /* Create thread, which immediately starts processing tasks */
         if (H5_UNLIKELY(H5TS_thread_create(&new_pool->threads[u], H5TS__pool_do, (void *)new_pool) < 0))
             HGOTO_DONE(FAIL);
