@@ -96,6 +96,7 @@ tts_thread_pool(void)
 {
     H5TS_pool_t *pool = NULL;
     herr_t       result;
+    fprintf(stderr, "Entering %s\n", __func__);
 
     /* Initialize the counter */
     result = H5TS_mutex_init(&counter_g.mutex, H5TS_MUTEX_TYPE_PLAIN);
@@ -205,6 +206,7 @@ tts_thread_pool(void)
     result = H5TS_mutex_destroy(&counter_g.mutex);
     CHECK_I(result, "H5TS_mutex_destroy");
 
+    fprintf(stderr, "Leaving %s\n", __func__);
 } /* end tts_thread_pool() */
 
 #endif /*H5_HAVE_THREADS*/
