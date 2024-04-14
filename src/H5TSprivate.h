@@ -150,7 +150,7 @@ typedef void (*H5TS_once_init_func_t)(void);
 typedef atomic_int  H5TS_atomic_int_t;
 typedef atomic_uint H5TS_atomic_uint_t;
 #else
-    typedef struct {
+typedef struct {
     H5TS_mutex_t mutex;
     int          value;
 } H5TS_atomic_int_t;
