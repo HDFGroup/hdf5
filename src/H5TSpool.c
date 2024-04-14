@@ -109,9 +109,11 @@ H5TS__pool_free(H5TS_pool_t *pool)
 
     /* Join all threads */
     fprintf(stderr, "%s:%u\n", __func__, __LINE__);
-    for (unsigned u = 0; u < pool->num_threads; u++)
+    for (unsigned u = 0; u < pool->num_threads; u++) {
+        fprintf(stderr, "%s:%u - u = %u\n", __func__, __LINE__, u);
         if (H5_UNLIKELY(H5TS_thread_join(pool->threads[u], NULL) < 0))
             HGOTO_DONE(FAIL);
+    }
 
     /* Destroy the pool's mutex and condition variable */
     fprintf(stderr, "%s:%u\n", __func__, __LINE__);
