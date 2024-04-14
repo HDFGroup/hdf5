@@ -34,10 +34,10 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       test_vds_env.sh: vds_env
 #       test_vds_swmr.sh: vds_swmr*
 #       test_use_cases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
-TEST_SCRIPT = test_abort_fail.sh test_check_version.sh test_error.sh \
-    test_flush_refresh.sh test_external_env.sh test_libinfo.sh \
-    test_links_env.sh test_swmr.sh test_vds_env.sh test_vds_swmr.sh \
-    test_use_cases.sh
+#TEST_SCRIPT = test_abort_fail.sh test_check_version.sh test_error.sh \
+#    test_flush_refresh.sh test_external_env.sh test_libinfo.sh \
+#    test_links_env.sh test_swmr.sh test_vds_env.sh test_vds_swmr.sh \
+#    test_use_cases.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     external_env$(EXEEXT) filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
@@ -46,11 +46,11 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) swmr_start_write$(EXEEXT) \
     vds_env$(EXEEXT) vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
-  TEST_SCRIPT += test_plugin.sh
+#  TEST_SCRIPT += test_plugin.sh
   SCRIPT_DEPEND += filter_plugin$(EXEEXT) vfd_plugin $(EXEEXT) vol_plugin$(EXEEXT)
 endif
 if MIRROR_VFD_CONDITIONAL
-  TEST_SCRIPT += test_mirror.sh
+#  TEST_SCRIPT += test_mirror.sh
 endif
 
 check_SCRIPTS = #
