@@ -56,7 +56,6 @@ tts_is_threadsafe(void)
     bool is_ts;
     bool should_be;
 
-    fprintf(stderr, "Entering %s\n", __func__);
 #ifdef H5_HAVE_THREADSAFE
     is_ts     = false;
     should_be = true;
@@ -70,7 +69,6 @@ tts_is_threadsafe(void)
 
     if (is_ts != should_be)
         TestErrPrintf("Thread-safety value incorrect - test failed\n");
-    fprintf(stderr, "Leaving %s\n", __func__);
 }
 
 /* Routine to generate attribute names for numeric values */
@@ -97,11 +95,9 @@ gen_name(int value)
 int
 main(int argc, char *argv[])
 {
-    fprintf(stderr, "Entering main()\n");
 
     /* Initialize testing framework */
     TestInit(argv[0], NULL, NULL);
-    SetTestVerbosity(VERBO_HI);
 
     /* Tests are generally arranged from least to most complexity... */
     AddTest("is_threadsafe", tts_is_threadsafe, NULL, "library threadsafe status", NULL);
@@ -157,9 +153,7 @@ main(int argc, char *argv[])
     TestParseCmdLine(argc, argv);
 
     /* Perform requested testing */
-    fprintf(stderr, "Before performing tests\n");
     PerformTests();
-    fprintf(stderr, "After performing tests\n");
 
     /* Display test summary, if requested */
     if (GetTestSummary())
