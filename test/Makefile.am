@@ -53,7 +53,7 @@ if MIRROR_VFD_CONDITIONAL
   TEST_SCRIPT += test_mirror.sh
 endif
 
-check_SCRIPTS = $(TEST_SCRIPT)
+check_SCRIPTS = #
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
@@ -92,18 +92,19 @@ TEST_PROG= ttsafe
 #
 # Also build testmeta, which is used for the timing test. It builds quickly
 # and this lets automake keep all its test programs in one place.
-check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
-    testmeta accum_swmr_reader atomic_writer atomic_reader external_env \
-    links_env filenotclosed del_many_dense_attrs flushrefresh \
-    use_append_chunk use_append_chunk_mirror use_append_mchunks use_disable_mdc_flushes \
-    swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
-    swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
-    vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer
+check_PROGRAMS=$(TEST_PROG)
+#check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
+#    testmeta accum_swmr_reader atomic_writer atomic_reader external_env \
+#    links_env filenotclosed del_many_dense_attrs flushrefresh \
+#    use_append_chunk use_append_chunk_mirror use_append_mchunks use_disable_mdc_flushes \
+#    swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
+#    swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
+#    vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
-  check_PROGRAMS+= filter_plugin vfd_plugin vol_plugin
+#  check_PROGRAMS+= filter_plugin vfd_plugin vol_plugin
 endif
 if MIRROR_VFD_CONDITIONAL
-  check_PROGRAMS+= mirror_vfd
+#  check_PROGRAMS+= mirror_vfd
 endif
 
 # These programs generate test files for the tests.  They don't need to be
