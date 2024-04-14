@@ -102,7 +102,7 @@ if (Threads_FOUND)
   set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 
   # Determine which threading package to use
-  CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
+  #CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
   if (WIN32)
     # When Win32 is available, we use those threads
     set (H5_HAVE_WIN_THREADS 1)

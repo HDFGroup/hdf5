@@ -2157,7 +2157,7 @@ if test "X$THREADS" = "Xyes"; then
     ## Check for C11 threads, we want to use C11 threads unless the builder
     ## explicitly specifies --with-pthreads=(yes | path(s))
     AC_SUBST([HAVE_C11_THREADS]) HAVE_C11_THREADS=no
-    AC_CHECK_HEADERS([threads.h],[HAVE_THREADS_H="yes"],[HAVE_THREADS_H="no"])
+    #AC_CHECK_HEADERS([threads.h],[HAVE_THREADS_H="yes"],[HAVE_THREADS_H="no"])
     if test "x$HAVE_THREADS_H" = "xyes"; then
         # Default or no --> C11 threads
         if test "$withval" = "default" -o "$withval" = "no" ; then
