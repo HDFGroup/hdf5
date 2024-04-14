@@ -131,8 +131,8 @@ typedef DWORD                  H5TS_thread_ret_t;
 typedef DWORD                  H5TS_key_t;
 typedef CRITICAL_SECTION       H5TS_CAPABILITY("mutex") H5TS_mutex_t;
 typedef CONDITION_VARIABLE     H5TS_cond_t;
-typedef PINIT_ONCE             H5TS_once_t;
-typedef PINIT_ONCE_FN          H5TS_once_init_func_t
+typedef INIT_ONCE              H5TS_once_t;
+typedef PINIT_ONCE_FN          H5TS_once_init_func_t;
 #else
 typedef pthread_t H5TS_thread_t;
 typedef void *(*H5TS_thread_start_func_t)(void *);
