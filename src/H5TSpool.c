@@ -157,6 +157,7 @@ H5TS__pool_do(void *_pool)
         usleep(10);
 
     /* Acquire tasks and invoke them, until pool is shut down */
+    fprintf(stderr, "%s:%u - pool->shutdown = %u\n", __func__, __LINE__, pool->shutdown);
     while (1) {
         /* Acquire the mutex for the pool */
         if (H5_UNLIKELY(H5TS_mutex_lock(&pool->mutex) < 0))
