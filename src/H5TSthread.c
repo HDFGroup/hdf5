@@ -174,7 +174,7 @@ H5TS_thread_create(H5TS_thread_t *thread, H5TS_thread_start_func_t func, void *u
      *       so you can't wait on it, making it unsuitable for the existing
      *       test code.
      */
-    if (H5_UNLIKELY(NULL == (*thread = CreateThread(NULL, 0, func, udata, 0, NULL)))
+    if (H5_UNLIKELY(NULL == (*thread = CreateThread(NULL, 0, func, udata, 0, NULL))))
         HGOTO_DONE(FAIL);
 
 done:
