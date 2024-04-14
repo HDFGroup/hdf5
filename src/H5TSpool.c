@@ -56,7 +56,6 @@ struct H5TS_pool_t {
     H5TS_mutex_t mutex; /* Mutex to control access to pool struct */
     H5TS_cond_t  cond;
 
-    bool           active;      /* Pool is active */
     bool           shutdown;    /* Pool is shutting down */
     unsigned       num_threads; /* # of threads in pool */
     H5TS_thread_t *threads;     /* Array of worker threads in pool */
@@ -108,29 +107,22 @@ H5TS__pool_free(H5TS_pool_t *pool)
     assert(pool);
 
     /* Join all threads */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
-    for (unsigned u = 0; u < pool->num_threads; u++) {
-        fprintf(stderr, "%s:%u - u = %u\n", __func__, __LINE__, u);
+    for (unsigned u = 0; u < pool->num_threads; u++)
         if (H5_UNLIKELY(H5TS_thread_join(pool->threads[u], NULL) < 0))
             HGOTO_DONE(FAIL);
-    }
 
     /* Destroy the pool's mutex and condition variable */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(H5TS_mutex_destroy(&pool->mutex) < 0))
         HGOTO_DONE(FAIL);
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(H5TS_cond_destroy(&pool->cond) < 0))
         HGOTO_DONE(FAIL);
 
     /* Release memory */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (pool->threads)
         H5FL_SEQ_FREE(H5TS_thread_t, pool->threads);
     H5FL_FREE(H5TS_pool_t, pool);
 
 done:
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__pool_free() */
 
@@ -152,12 +144,7 @@ H5TS__pool_do(void *_pool)
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
-    /* Nap while waiting for pool to become active (or shut down) */
-    //    while (!(pool->active || pool->shutdown))
-    //        usleep(10);
-
     /* Acquire tasks and invoke them, until pool is shut down */
-    fprintf(stderr, "%s:%u - pool->shutdown = %u\n", __func__, __LINE__, pool->shutdown);
     while (1) {
         /* Acquire the mutex for the pool */
         if (H5_UNLIKELY(H5TS_mutex_lock(&pool->mutex) < 0))
@@ -165,13 +152,11 @@ H5TS__pool_do(void *_pool)
         have_mutex = true;
 
         /* If queue is empty and pool is not shutting down, wait for a task */
-        fprintf(stderr, "%s:%u\n", __func__, __LINE__);
         while (NULL == pool->head && !pool->shutdown)
             if (H5_UNLIKELY(H5TS_cond_wait(&pool->cond, &pool->mutex) < 0))
                 HGOTO_DONE((H5TS_thread_ret_t)1);
 
         /* If there's a task, invoke it, else we're shutting down */
-        fprintf(stderr, "%s:%u - pool->head = %p\n", __func__, __LINE__, pool->head);
         if (NULL != pool->head) {
             H5TS_pool_task_t *task; /* Task to invoke */
 
@@ -200,13 +185,11 @@ H5TS__pool_do(void *_pool)
     }
 
 done:
-    fprintf(stderr, "%s:%u - have_mutex = %u\n", __func__, __LINE__, have_mutex);
     /* Release the pool's mutex, if we're holding it */
     if (have_mutex)
         if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
             ret_value = (H5TS_thread_ret_t)1;
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__pool_do() */
 
@@ -248,20 +231,21 @@ H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads)
     if (H5_UNLIKELY(NULL == (new_pool->threads = H5FL_SEQ_MALLOC(H5TS_thread_t, num_threads))))
         HGOTO_DONE(FAIL);
 
+    /* Set # of threads */
+    new_pool->num_threads = num_threads;
+
     /* Start worker threads */
-    for (unsigned u = 0; u < num_threads; u++) {
-        fprintf(stderr, "%s:%u - u = %u\n", __func__, __LINE__, u);
-        /* Create thread, which waits to process tasks until the pool is active */
+    for (unsigned u = 0; u < num_threads; u++)
+        /* Create thread, which immediately starts processing tasks */
         if (H5_UNLIKELY(H5TS_thread_create(&new_pool->threads[u], H5TS__pool_do, (void *)new_pool) < 0))
             HGOTO_DONE(FAIL);
 
-        /* Increment # of threads successfully created */
-        new_pool->num_threads++;
+    /* Check for error when starting threads */
+    if(u != new_pool->num_threads) {
+        /* Set # of threads successfully created (for joining them, in free routine) */
+        new_pool->num_threads = u;
+        HGOTO_DONE(FAIL);
     }
-    assert(num_threads == new_pool->num_threads);
-
-    /* Mark pool as active, so that threads start processing tasks */
-    new_pool->active = true;
 
     /* Set return value */
     *pool = new_pool;
@@ -365,12 +349,10 @@ H5TS_pool_destroy(H5TS_pool_t *pool)
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Sanity checks */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(NULL == pool))
         HGOTO_DONE(FAIL);
 
     /* Acquire the mutex for the pool */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(H5TS_mutex_lock(&pool->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = true;
@@ -379,29 +361,24 @@ H5TS_pool_destroy(H5TS_pool_t *pool)
     pool->shutdown = true;
 
     /* Wake all the worker threads up */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(H5TS_cond_broadcast(&pool->cond) < 0))
         HGOTO_DONE(FAIL);
 
     /* Release the pool's mutex */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
         HGOTO_DONE(FAIL);
     have_mutex = false;
 
     /* Free pool */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(H5TS__pool_free(pool) < 0))
         HGOTO_DONE(FAIL);
 
 done:
     /* Release the pool's mutex, if we're holding it */
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     if (H5_UNLIKELY(have_mutex))
         if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
             ret_value = FAIL;
 
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_pool_destroy() */
 
