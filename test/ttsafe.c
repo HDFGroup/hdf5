@@ -95,7 +95,7 @@ gen_name(int value)
 int
 main(int argc, char *argv[])
 {
-    fprintf(stderr, "Entering main()");
+    fprintf(stderr, "After performing tests\n");
 
     /* Initialize testing framework */
     TestInit(argv[0], NULL, NULL);
@@ -155,9 +155,9 @@ main(int argc, char *argv[])
     TestParseCmdLine(argc, argv);
 
     /* Perform requested testing */
-    fprintf(stderr, "Before performing tests");
+    fprintf(stderr, "Before performing tests\n");
     PerformTests();
-    fprintf(stderr, "After performing tests");
+    fprintf(stderr, "After performing tests\n");
 
     /* Display test summary, if requested */
     if (GetTestSummary())
