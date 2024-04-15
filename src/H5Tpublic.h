@@ -233,6 +233,7 @@ extern "C" {
  * \details If an exception like overflow happens during conversion, this
  *          function is called if it's registered through H5Pset_type_conv_cb().
  *
+ * \since 1.8.0
  */
 typedef H5T_conv_ret_t (*H5T_conv_except_func_t)(H5T_conv_except_t except_type, hid_t src_id, hid_t dst_id,
                                                  void *src_buf, void *dst_buf, void *user_data);

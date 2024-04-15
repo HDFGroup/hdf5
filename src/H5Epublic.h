@@ -176,6 +176,9 @@ extern "C" {
  * \param[in] client_data Pointer to client data in the format expected by the
  *                        user-defined function
  * \return \herr_t
+ *
+ * \since 1.8.0
+ *
  */
 typedef herr_t (*H5E_walk2_t)(unsigned n, const H5E_error2_t *err_desc, void *client_data);
 //! <!-- [H5E_walk2_t_snip] -->
@@ -188,6 +191,9 @@ typedef herr_t (*H5E_walk2_t)(unsigned n, const H5E_error2_t *err_desc, void *cl
  * \param[in] client_data Pointer to client data in the format expected by the
  *                        user-defined function
  * \return \herr_t
+ *
+ * \since 1.8.0
+ *
  */
 typedef herr_t (*H5E_auto2_t)(hid_t estack, void *client_data);
 //! <!-- [H5E_auto2_t_snip] -->
