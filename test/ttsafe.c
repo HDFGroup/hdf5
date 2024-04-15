@@ -55,6 +55,7 @@ tts_is_threadsafe(void)
 {
     bool is_ts;
     bool should_be;
+    fprintf(stderr, "%s: Entering\n", __func__);
 
 #ifdef H5_HAVE_THREADSAFE
     is_ts     = false;
@@ -69,6 +70,7 @@ tts_is_threadsafe(void)
 
     if (is_ts != should_be)
         TestErrPrintf("Thread-safety value incorrect - test failed\n");
+    fprintf(stderr, "%s: Leaving\n", __func__);
 }
 
 /* Routine to generate attribute names for numeric values */
@@ -95,7 +97,7 @@ gen_name(int value)
 int
 main(int argc, char *argv[])
 {
-    fprintf(stderr, "%s: Entering\n");
+    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Initialize testing framework */
     TestInit(argv[0], NULL, NULL);
