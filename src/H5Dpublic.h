@@ -191,6 +191,7 @@ typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim, const
  *          to indicate success, and a negative value to indicate failure.
  *
  * \since 1.10.2
+ *
  */
 typedef herr_t (*H5D_scatter_func_t)(const void **src_buf /*out*/, size_t *src_buf_bytes_used /*out*/,
                                      void *op_data);

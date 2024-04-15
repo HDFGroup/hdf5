@@ -53,6 +53,7 @@ typedef struct {
  *              attribute.
  *
  * \since 1.8.0
+ *
  */
 typedef herr_t (*H5A_operator2_t)(hid_t location_id /*in*/, const char *attr_name /*in*/,
                                   const H5A_info_t *ainfo /*in*/, void *op_data /*in,out*/);
