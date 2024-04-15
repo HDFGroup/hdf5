@@ -50,9 +50,9 @@ jobs:
         with:
           commit_sha: ${{ inputs.file_sha }}
           tag: "${{ inputs.use_tag }}"
-          force_push_tag: true
+          force_push_tag: false
+          tag_exists_error: false
           message: "Latest snapshot"
-        if: ${{ inputs.use_environ == 'snapshots' }}
 
       # Print result using the action output.
       - run: |
