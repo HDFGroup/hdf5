@@ -95,6 +95,7 @@ gen_name(int value)
 int
 main(int argc, char *argv[])
 {
+    fprintf(stderr, "%s: Entering\n");
 
     /* Initialize testing framework */
     TestInit(argv[0], NULL, NULL);

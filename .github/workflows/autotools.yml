@@ -27,26 +27,6 @@ permissions:
 # in parallel. We just have one job, but the matrix items defined below will
 # run in parallel.
 jobs:
-    call-workflow-special-autotools:
-      name: "Autotools Special Workflows"
-      uses: ./.github/workflows/main-auto-spc.yml
-
-    call-parallel-special-autotools:
-      name: "Autotools Parallel Special Workflows"
-      uses: ./.github/workflows/main-auto-par-spc.yml
-
-    call-debug-parallel-autotools:
-      name: "Autotools Parallel Workflows"
-      uses: ./.github/workflows/main-auto-par.yml
-      with:
-            build_mode: "debug"
-
-    call-release-parallel-autotools:
-      name: "Autotools Parallel Workflows"
-      uses: ./.github/workflows/main-auto-par.yml
-      with:
-            build_mode: "production"
-
     call-debug-thread-autotools:
       name: "Autotools Debug Thread-Safety Workflows"
       uses: ./.github/workflows/main-auto.yml
@@ -54,66 +34,3 @@ jobs:
             thread_safety: enable
             build_mode: "debug"
 
-    call-release-thread-autotools:
-      name: "Autotools Release Thread-Safety Workflows"
-      uses: ./.github/workflows/main-auto.yml
-      with:
-            thread_safety: enable
-            build_mode: "production"
-
-    call-debug-autotools:
-      name: "Autotools Debug Workflows"
-      uses: ./.github/workflows/main-auto.yml
-      with:
-            thread_safety: disable
-            build_mode: "debug"
-
-    call-release-autotools:
-      name: "Autotools Release Workflows"
-      uses: ./.github/workflows/main-auto.yml
-      with:
-            thread_safety: disable
-            build_mode: "production"
-
-    call-release-auto-intel:
-      name: "Autotools Intel Workflows"
-      uses: ./.github/workflows/intel-auto.yml
-      with:
-            build_mode: "production"
-
-    call-release-auto-nvhpc:
-      name: "Autotools nvhpc Workflows"
-      uses: ./.github/workflows/nvhpc-auto.yml
-      with:
-            build_mode: "production"
-
-    call-release-auto-aocc:
-      name: "Autotools aocc Workflows"
-      uses: ./.github/workflows/aocc-auto.yml
-      with:
-            build_mode: "production"
-
-    call-release-auto-cygwin:
-      name: "Autotools Cygwin Workflows"
-      uses: ./.github/workflows/cygwin-auto.yml
-      with:
-            build_mode: "production"
-
-    call-release-auto-julia:
-        name: "Autotools Julia Workflows"
-        uses: ./.github/workflows/julia-auto.yml
-        with:
-            build_mode: "production"
-            
-    call-release-auto-xpr:
-        name: "Autotools TestExpress Workflows"
-        uses: ./.github/workflows/testxpr-auto.yml
-
-#  workflow-msys2-autotools:
-#    name: "CMake msys2 Workflows"
-#    uses: ./.github/workflows/msys2-auto.yml
-#    with:
-#        build_mode: "production"
-#        build_option: "--enable-production"
-
-            
