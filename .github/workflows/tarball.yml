@@ -90,6 +90,7 @@ jobs:
         uses: actions/checkout@v4.1.1
         with:
           path: hdfsrc
+          ref: '${{needs.check_commits.outputs.branch_ref }}'
 
       - name: Install Autotools Dependencies (Linux, serial)
         run: |
