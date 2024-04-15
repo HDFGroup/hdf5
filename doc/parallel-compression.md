@@ -272,7 +272,7 @@ sized "pages" for better performance. However, note that using
 the paged aggregation feature will cause any setting from
 [H5Pset_alignment](https://hdfgroup.github.io/hdf5/develop/group___f_a_p_l.html#gab99d5af749aeb3896fd9e3ceb273677a)
 to be ignored. While an application should be able to get
-comparable performance effects by [setting the size of these pages](https://hdfgroup.github.io/develop/hdf5/group___f_c_p_l.html#gad012d7f3c2f1e1999eb1770aae3a4963) to be equal to the value that
+comparable performance effects by [setting the size of these pages](https://hdfgroup.github.io/hdf5/develop/group___f_c_p_l.html#gad012d7f3c2f1e1999eb1770aae3a4963) to be equal to the value that
 would have been set for [H5Pset_alignment](https://hdfgroup.github.io/hdf5/develop/group___f_a_p_l.html#gab99d5af749aeb3896fd9e3ceb273677a),
 this may not necessarily be the case and should be studied.
 
