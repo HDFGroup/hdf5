@@ -145,8 +145,8 @@ Following is example code for creating an access template in HDF5:
 \endcode
 
 The following example programs create an HDF5 file using Parallel HDF5:
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/C/H5PAR/ph5_file_create.c">C: file_create.c</a>
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/FORTRAN/H5PAR/ph5_f90_file_create.F90">F90: file_create.F90</a>
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_file_create.c">C: file_create.c</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_file_create.F90">F90: file_create.F90</a>
 
 
 \subsection subsec_pintro_create_dset Creating and Accessing a Dataset with PHDF5
@@ -226,8 +226,8 @@ The following code demonstrates a collective write using Parallel HDF5:
 \endcode
 
 The following example programs create an HDF5 dataset using Parallel HDF5:
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/C/H5PAR/ph5_dataset.c">C: dataset.c</a>
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/FORTRAN/H5PAR/ph5_f90_dataset.F90">F90: dataset.F90</a>
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_dataset.c">C: dataset.c</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_dataset.F90">F90: dataset.F90</a>
 
 
 \subsubsection subsec_pintro_hyperslabs Hyperslabs

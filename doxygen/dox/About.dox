@@ -23,7 +23,7 @@ Use Doxygen's <a href="https://www.doxygen.nl/manual/commands.html#cmdhtmlinclud
 special command to include existing plain HTML pages.
 
 An example from this documentation set can be seen
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/dox/FileFormatSpec.dox">here</a>.
+<a href="https://\SRCURL/doxygen/dox/FileFormatSpec.dox">here</a>.
 
 \subsection new_rm_entry Creating a New Reference Manual Entry
 
@@ -33,7 +33,7 @@ Please refer to the \ref RMT for guidance on how to create a new reference manua
 
 For each HDF5 module, such as \Code{H5F}, there is an examples source file called
 \Code{H5*_examples.c}. For example, the \Code{H5F} API examples are located in
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/examples/H5F_examples.c">
+<a href="https://\SRCURL/doxygen/examples/H5F_examples.c">
 <code>H5F_examples.c</code></a>. Examples are code blocks marked as Doxygen
 <a href="https://www.doxygen.nl/manual/commands.html#cmdsnippet">snippets</a>.
 For example, the source code for the H5Fcreate() API sample is located between
@@ -44,7 +44,7 @@ the
 //! <!-- [create] -->
 \endverbatim
 comments in
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/examples/H5F_examples.c">
+<a href="https://\SRCURL/doxygen/examples/H5F_examples.c">
 <code>H5F_examples.c</code></a>.
 
 Add a new API example by adding a new code block enclosed between matching
@@ -80,7 +80,7 @@ See Doxygen's <a href="https://www.doxygen.nl/manual/custcmd.html">Custom Comman
 as a general reference.
 
 All custom commands for this project are located in the
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/aliases"><tt>aliases</tt></a>
+<a href="https://\SRCURL/doxygen/aliases"><tt>aliases</tt></a>
 file in the <a href="https://github.com/HDFGroup/hdf5/tree/develop/doxygen"><tt>doxygen</tt></a>
 subdirectory of the <a href="https://github.com/HDFGroup/hdf5">main HDF5 repo</a>.
 
@@ -91,7 +91,7 @@ ask for help if unsure!
 
 For ease of reference, we define custom commands for each RFC in the <tt>RFCs</tt> section
 of the
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/aliases"><tt>aliases</tt></a>
+<a href="https://\SRCURL/doxygen/aliases"><tt>aliases</tt></a>
 file. For example the custom command \Code{ref_rfc20141210} can be used to insert a
 reference to "RFC: Virtual Object Layer". In other words, the markup
 \verbatim
@@ -102,7 +102,7 @@ yields a clickable link:
 \ref_rfc20141210
 
 To add a new RFC, add a custom command for the RFC to the
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/aliases"><tt>aliases</tt></a>
+<a href="https://\SRCURL/doxygen/aliases"><tt>aliases</tt></a>
 file. The naming convention for the custom command is \Code{ref_rfcYYYYMMDD},
 where \Code{YYYYMMDD} is the ID of the RFC. The URL is composed of the prefix
 \verbatim

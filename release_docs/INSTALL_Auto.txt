@@ -361,7 +361,7 @@ III. Full installation instructions for source distributions
         source code.  For additional configuration options and other details,
         see "API Compatibility Macros":
 
-            https://docs.hdfgroup.org/hdf5/develop/api-compat-macros.html
+            hdfgroup.github.io/hdf5/develop/api-compat-macros.html
 
    4. Building
         The library, confidence tests, and programs can be built by

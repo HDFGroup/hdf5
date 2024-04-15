@@ -997,7 +997,7 @@ In other words, it is an array of four elements, in which each element is a 3 by
 
 This dataset is much more complex. Also note that subsetting cannot be done on Array datatypes.
 
-See this <a href="https://docs.hdfgroup.org/hdf5/develop/_l_b_datatypes.html">section</a> for more information on the Array datatype.
+See this <a href="https://\DEVURL/_l_b_datatypes.html">section</a> for more information on the Array datatype.
 
 \subsubsection subsubsecViewToolsViewDtypes_objref Object Reference
 An Object Reference is a reference to an entire object (dataset, group, or named datatype).
