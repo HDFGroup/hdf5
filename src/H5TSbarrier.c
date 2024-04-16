@@ -113,7 +113,9 @@ done:
 herr_t
 H5TS__barrier_wait(H5TS_barrier_t *barrier)
 {
-#ifndef H5_HAVE_PTHREAD_BARRIER
+#ifdef H5_HAVE_PTHREAD_BARRIER
+    int ret;
+#else
     bool have_mutex = false;
 #endif
     herr_t ret_value = SUCCEED;
@@ -124,7 +126,8 @@ H5TS__barrier_wait(H5TS_barrier_t *barrier)
         HGOTO_DONE(FAIL);
 
 #ifdef H5_HAVE_PTHREAD_BARRIER
-    if (H5_UNLIKELY(pthread_barrier_wait(barrier)))
+    ret = pthread_barrier_wait(barrier);
+    if (H5_UNLIKELY(ret != 0 && ret != PTHREAD_BARRIER_SERIAL_THREAD))
         HGOTO_DONE(FAIL);
 #else
     /* Acquire the mutex for the barrier */
