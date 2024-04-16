@@ -114,7 +114,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 7. Choose the release branch
 8. Change ‘Release version tag’ name to 'hdf5_X.Y.Z.P'
     - P is some pre-release number.
-9. Send a message to the HDF forum indicating that a pre-release source package is available for testing at <e.g. gamma.hdfgroup.org/ftp/pub/outgoing/hdf5/{hdf5-X.Y.Z-P<n>}> and that feedback from the user community on their test results is being accepted.
+9. Send a message to the HDF forum indicating that a pre-release source package is available for testing at <e.g. gamma.hdfgroup.org/ftp/pub/outgoing/hdf5/{hdf5-X.Y.Z-pre<n>}> and that feedback from the user community on their test results is being accepted.
 10. Contact paying clients who are interested in testing the pre-release source package and inform them that it is available for testing and that feedback on their test results of the pre-release is appreciated.
 11. This should be automated and currently github binaries are not signed.
     - Follow the [How to sign binaries with digital certificates(this is missing)]() work instructions to sign each Windows and Mac binary package with a digital certificate.
