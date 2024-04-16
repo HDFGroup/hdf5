@@ -58,6 +58,7 @@ tts_dcreate(void)
 {
     /* thread definitions */
     H5TS_thread_t threads[NUM_THREAD];
+    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* HDF5 data definitions */
     hid_t  file    = H5I_INVALID_HID;
@@ -115,6 +116,7 @@ tts_dcreate(void)
     /* close remaining resources */
     status = H5Fclose(file);
     CHECK(status, FAIL, "H5Fclose");
+    fprintf(stderr, "%s: Leaving\n", __func__);
 } /* end tts_dcreate() */
 
 H5TS_THREAD_RETURN_TYPE

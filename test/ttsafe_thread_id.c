@@ -99,6 +99,7 @@ tts_thread_id(void)
     uint64_t      tid;
     int           i;
     herr_t        result;
+    fprintf(stderr, "%s: Entering\n", __func__);
 
     result = H5TS_mutex_init(&used_lock, H5TS_MUTEX_TYPE_PLAIN);
     CHECK_I(result, "H5TS_mutex_lock");
@@ -133,6 +134,7 @@ tts_thread_id(void)
     result = H5TS__barrier_destroy(&barrier);
     CHECK_I(result, "H5TS__barrier_destroy");
 
+    fprintf(stderr, "%s: Leaving\n", __func__);
 } /* end tts_thread_id() */
 
 #endif /*H5_HAVE_THREADSAFE*/
