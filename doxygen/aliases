@@ -7,6 +7,7 @@ ALIASES += ARCURL="docs.hdfgroup.org/hdf5"
 ALIASES += RFCURL="docs.hdfgroup.org/hdf5/rfc"
 ALIASES += DSPURL="portal.hdfgroup.org/display/HDF5"
 ALIASES += DOCURL="portal.hdfgroup.org/documentation/hdf5-docs"
+ALIASES += AEXURL="support.hdfgroup.org/ftp/HDF5/examples"
 # doxygen subdir (develop, v1_14)
 ALIASES += DOXURL="hdfgroup.github.io/hdf5/develop"
 #branch name (develop, hdf5_1_14)

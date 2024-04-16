@@ -54,9 +54,9 @@ HDF5 files can be obtained from various places such as \ref HDF5Examples and <a 
 Information Center</a>. Specifically, the following examples are used in this tutorial topic:
 \li HDF5 Files created from compiling the \ref LBExamples
 \li HDF5 Files on the \ref ExAPI page
-\li NPP JPSS files, <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/SVM01_npp_d20130524_t1255132_e1256374_b08146_c20130524192048864992_noaa_ops.h5.gz">SVM01_npp.. (gzipped)</a>
-and <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5.gz">SVM09_npp.. (gzipped)</a>
-\li HDF-EOS <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/OMI-Aura.he5">OMI-Aura file</a>
+\li NPP JPSS files, <a href="https://\AEXURL/files/tutorial/SVM01_npp_d20130524_t1255132_e1256374_b08146_c20130524192048864992_noaa_ops.h5.gz">SVM01_npp.. (gzipped)</a>
+and <a href="https://\AEXURL/files/tutorial/SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5.gz">SVM09_npp.. (gzipped)</a>
+\li HDF-EOS <a href="https://\AEXURL/files/tutorial/OMI-Aura.he5">OMI-Aura file</a>
 
 \section secViewToolsCommandTutor Tutorial Topics
 A variety of command-line tools are included in the HDF5 binary distribution. There are tools to view,
