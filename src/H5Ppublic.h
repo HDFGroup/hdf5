@@ -318,6 +318,9 @@ typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
  *
  * \details The H5P_prp_cb1_t() function describes the parameters used by the
  *          property create, copy and close callback functions.
+ *
+ * \since 1.8.0
+ *
  */
 typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
 //! <!-- [H5P_prp_cb1_t_snip] -->
@@ -334,6 +337,9 @@ typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
  *
  * \details The H5P_prp_cb2_t() function describes the parameters used by the
  *          property set, copy and delete callback functions.
+ *
+ * \since 1.8.0
+ *
  */
 typedef herr_t (*H5P_prp_cb2_t)(hid_t prop_id, const char *name, size_t size, void *value);
 //! <!-- [H5P_prp_cb2_t_snip] -->
@@ -383,6 +389,9 @@ typedef H5P_prp_cb1_t H5P_prp_copy_func_t;
  *         \c value1 and \c value2 are equal.
  *
  * \see H5Pregister(), H5Pinsert()
+ *
+ * \since 1.8.0
+ *
  */
 typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2, size_t size);
 //! <!-- [H5P_prp_compare_func_t_snip] -->
