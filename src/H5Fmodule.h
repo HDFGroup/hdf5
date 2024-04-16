@@ -888,7 +888,7 @@
  *
  * Additional parameters may be added to these functions in the future.
  *
- * @see <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html">
+ * @see <a href="https://\DOCURL/advanced_topics/file_image_ops.html">
  * HDF5 File Image Operations</a>
  * section for information on more advanced usage of the Memory file driver, and
  * @see <a

@@ -106,12 +106,12 @@ To add a new RFC, add a custom command for the RFC to the
 file. The naming convention for the custom command is \Code{ref_rfcYYYYMMDD},
 where \Code{YYYYMMDD} is the ID of the RFC. The URL is composed of the prefix
 \verbatim
-https://docs.hdfgroup.org/hdf5/rfc/
+https://\RFCURL/
 \endverbatim
 and the name of your RFC file, typically, a PDF file, i.e., the full URL would
 be
 \verbatim
-https://docs.hdfgroup.org/hdf5/rfc/my_great_rfc_name.pdf
+https://\RFCURL/my_great_rfc_name.pdf
 \endverbatim
 
 \subsection hosting How Do Updates and Changes Get Published?
