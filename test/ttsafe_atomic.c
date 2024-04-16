@@ -68,6 +68,7 @@ tts_atomics(void)
 {
     H5TS_pool_t *pool = NULL;
     herr_t       result;
+    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Initialize the counter */
     H5TS_atomic_init_int(&counter_g, 0);
@@ -174,6 +175,7 @@ tts_atomics(void)
     /* Destroy the atomic counter */
     H5TS_atomic_destroy_int(&counter_g);
 
+    fprintf(stderr, "%s: Leaving\n", __func__);
 } /* end tts_atomics() */
 
 #endif /* H5_HAVE_THREADS */
