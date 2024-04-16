@@ -161,7 +161,7 @@ H5_HLDLL herr_t H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t e
  *              from one datatype to another, and the filter pipeline to write the chunk.
  *              Developers should have experience with these processes before
  *              using this function. Please see
- *              <a href="https://portal.hdfgroup.org/display/HDF5/Using+the+Direct+Chunk+Write+Function">
+ *              <a href="https://\DSPURL/Using+the+Direct+Chunk+Write+Function">
  *              Using the Direct Chunk Write Function</a>
  *              for more information.
  *
