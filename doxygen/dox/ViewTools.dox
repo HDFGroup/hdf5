@@ -196,44 +196,29 @@ The following h5dump options can be helpful in viewing the content and structure
 <th>Comment</th>
 </tr>
 <tr>
-<td>-n, --contents
-</td>
-<td>Displays a list of the objects in a file
-</td>
-<td>See @ref subsubsecViewToolsViewContent_h5dumpEx1
-</td>
+<td>-n, --contents</td>
+<td>Displays a list of the objects in a file</td>
+<td>See @ref subsubsecViewToolsViewContent_h5dumpEx1</td>
 </tr>
 <tr>
-<td>-n 1, --contents=1
-</td>
-<td>Displays a list of the objects and attributes in a file
-</td>
-<td>See @ref subsubsecViewToolsViewAttr_h5dumpEx6
-</td>
+<td>-n 1, --contents=1</td>
+<td>Displays a list of the objects and attributes in a file</td>
+<td>See @ref subsubsecViewToolsViewAttr_h5dumpEx6</td>
 </tr>
 <tr>
-<td>-H, --header
-</td>
-<td>Displays header information only (no data)
-</td>
-<td>See @ref subsubsecViewToolsViewContent_h5dumpEx2
-</td>
+<td>-H, --header</td>
+<td>Displays header information only (no data)</td>
+<td>See @ref subsubsecViewToolsViewContent_h5dumpEx2</td>
 </tr>
 <tr>
-<td>-A 0, --onlyattr=0
-</td>
-<td>Suppresses the display of attributes
-</td>
-<td>See @ref subsubsecViewToolsViewContent_h5dumpEx2
-</td>
+<td>-A 0, --onlyattr=0</td>
+<td>Suppresses the display of attributes</td>
+<td>See @ref subsubsecViewToolsViewContent_h5dumpEx2</td>
 </tr>
 <tr>
-<td>-N P, --any_path=P
-</td>
-<td>Displays any object or attribute that matches path P
-</td>
-<td>See @ref subsubsecViewToolsViewAttr_h5dumpEx6
-</td>
+<td>-N P, --any_path=P</td>
+<td>Displays any object or attribute that matches path P</td>
+<td>See @ref subsubsecViewToolsViewAttr_h5dumpEx6</td>
 </tr>
 </table>
 
