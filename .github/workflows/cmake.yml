@@ -2,8 +2,6 @@ name: hdf5 dev cmake CI
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 on:
-  workflow_dispatch:
-  push:
   pull_request:
     branches: [ develop ]
     paths-ignore:
