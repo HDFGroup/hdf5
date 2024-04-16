@@ -56,7 +56,7 @@ tts_cancel(void)
     hid_t dataset;
     int   buffer;
     int   ret;
-    AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test", NULL);
+    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Initialize barrier */
     ret = H5TS__barrier_init(&barrier, 2);
