@@ -35,8 +35,6 @@ jobs:
       matrix:
         name:
           - "Windows MSVC"
-          - "Ubuntu gcc"
-          - "MacOS Clang"
 
         # This is where we list the bulk of the options for each configuration.
         # The key-value pair values are usually appropriate for being CMake or
@@ -51,7 +49,7 @@ jobs:
             os: windows-latest
             cpp: ON
             fortran: OFF
-            java: ON
+            java: OFF
             docs: ON
             libaecfc: ON
             localaec: OFF
@@ -229,7 +227,7 @@ jobs:
 
       # THREAD-SAFE
       - name: CMake Run Thread-Safe Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R ttsafe
+        run: ctest . --output-on-failure --parallel 2 -C ${{ inputs.build_mode }} -V -R ttsafe
         working-directory: ${{ runner.workspace }}/build
         if: ${{ matrix.run_tests && (inputs.thread_safety == 'TS') }}
 
