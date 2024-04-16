@@ -645,7 +645,7 @@ As the property list code will never resize a buffer, we do not discuss the imag
       int mod_ref_count;
  }
 </code></pre>
-<p>Example 1. Using a user data structure to communicate with an application</p>
+<p><strong>Example 1.</strong> Using a user data structure to communicate with an application</p>
 <p>We initialize an instance of the structure so that init_ptr points to the buffer to be shared, init_size contains the initial size of the buffer, and all other fields are initialized to either NULL or 0 as indicated by their type. We then pass a pointer to the instance of the user data structure to the HDF5 Library along with allocation callback functions constructed as follows:</p>
 
 <ul>
@@ -880,7 +880,7 @@ assert(udata.ref_count == 0);
 &lt;reinitialize udata, and repeat the above from the end of initialization onwards to write a new file image&gt;
 </code></pre>
 
-Example 7. Using H5Pset_file_image_callbacks with a static buffer</p>
+<strong>Example 7.</strong> Using H5Pset_file_image_callbacks with a static buffer</p>
 
 <p>If we can further arrange matters so that only the contents of the datasets in the HDF5 file image change, but not the structure of the file itself, we can optimize still further by re-using the image and changing only the contents of the datasets after the initial write to the buffer. The following pseudo code shows how this might be done. Note that the code assumes that buf already contains the image of the HDF5 file whose dataset contents are to be overwritten. Again, much error checking is omitted for clarity. Also, observe that the file image callbacks do not support the H5Pget_file_image() call.</p>
 
@@ -957,7 +957,7 @@ assert(udata.ref_count == 0);
 &lt;repeat the above from the end of initialization onwards to write new data to datasets in file image&gt;
 </code></pre>
 
-Example 8. Using H5Pset_file_image_callbacks where only the datasets change
+<strong>Example 8.</strong> Using H5Pset_file_image_callbacks where only the datasets change
 
 <p>Before we go on, we should note that the above pseudo code can be written more compactly, albeit with fewer sanity checks, using the H5LTopen_file_image() call. See the example below:</p>
 
@@ -974,7 +974,7 @@ file_id = H5LTopen_file_image(udata.image_ptr, udata.image_len, flags);
 &lt;repeat the above from the end of initialization onwards to write new data to datasets in file image&gt;
 </code></pre>
 
-<p>Example 9. Using H5LTopen_file_image where only the datasets change
+<p><strong>Example 9.</strong> Using H5LTopen_file_image where only the datasets change
 <p>The above pseudo code allows updates of a file image about as cheaply as possible. We assume the application has enough RAM for the image and that the HDF5 file structure is constant after the first write.</p>
 <p>While the scenario above is plausible, we will finish this section with a more general scenario. In the pseudo code below, we assume sufficient RAM to retain the HDF5 file image between uses, but we do not assume that the HDF5 file structure remains constant or that we can place a hard pper bound on the image size.</p>
 <p>Since we must use malloc, realloc, and free in this example, and since realloc can change the base address of a buffer, we must maintain two of ptr, size, and ref_count triples in the udata structure. The first triple is for the property list (which will never change the buffer), and the second triple is for the file driver. As shall be seen, this complicates the file image callbacks considerably. Note also that while we do not use H5Pget_file_image() in this example, we do include support for it in the file image callbacks. As usual, much error checking is omitted in favor of clarity.</p>
@@ -1218,7 +1218,7 @@ H5Pset_file_image(fapl_id, buf, buf_len);
 <h3 id="java-signatures-for-file-image-operations-api-calls">5. Java Signatures for File Image Operations API Calls</h3>
 
 <p>Potential Java function call signatures for the file image operation APIs are described in this section. These have not yet been implemented, and there are no immediate plans for implementation.</p>
-<p>Note that the H5LTopen_file_image() call is omitted. Our practice has been to not support high-level library calls in Java.</p>
+<p>Note that the H5LTopen_file_image() call is omitted.  We have not supported high-level library calls in Java.</p>
 
 <p><strong>H5Pset_file_image</strong></p>
 <p><code>int H5Pset_file_image(int fapl_id, const byte[] buf_ptr);</code></p>
