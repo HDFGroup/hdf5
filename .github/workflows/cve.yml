@@ -1,8 +1,6 @@
 name: cve dev
 
 on:
-  workflow_dispatch:
-  push:
   pull_request:
     branches: [ develop ]
     paths-ignore:
