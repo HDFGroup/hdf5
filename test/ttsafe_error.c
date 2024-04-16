@@ -64,7 +64,6 @@ tts_error(void)
     H5TS_thread_t threads[NUM_THREAD];
     int           value, i;
     herr_t        status;
-    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Must initialize these at runtime */
     expected_g[0].maj_num = H5E_DATASET;
@@ -156,7 +155,6 @@ tts_error(void)
 
     status = H5TS_mutex_destroy(&error_mutex_g);
     CHECK_I(status, "H5TS_mutex_destroy");
-    fprintf(stderr, "%s: Leaving\n", __func__);
 } /* end tts_error() */
 
 static H5TS_THREAD_RETURN_TYPE

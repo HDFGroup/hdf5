@@ -62,7 +62,6 @@ tts_attr_vlen(void)
     const char   *string_attr          = "2.0";           /* The attribute data */
     int           ret;                                    /* Return value */
     int           i;                                      /* Local index variable */
-    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Create the HDF5 test file */
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -115,7 +114,6 @@ tts_attr_vlen(void)
         if (H5TS_thread_join(threads[i], NULL) < 0)
             TestErrPrintf("thread %d failed to join", i);
 
-    fprintf(stderr, "%s: Leaving\n", __func__);
 } /* end tts_attr_vlen() */
 
 /* Start execution for each thread */

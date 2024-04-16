@@ -270,7 +270,6 @@ tts_rec_rw_lock_smoke_check_1(void)
     H5TS_rw_lock_stats_t stats;
 #endif
     H5TS_rw_lock_t rec_rw_lock;
-    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* 1) Initialize an instance of the recursive R/W lock. */
     result = H5TS__rw_lock_init(&rec_rw_lock);
@@ -511,7 +510,6 @@ tts_rec_rw_lock_smoke_check_1(void)
     /* 25) Shut down the recursive R/W lock. */
     result = H5TS__rw_lock_destroy(&rec_rw_lock);
     CHECK_I(result, "H5TS__rw_lock_destroy");
-    fprintf(stderr, "%s: Leaving\n", __func__);
 } /* end tts_rec_rw_lock_smoke_check_1() */
 
 /*
@@ -565,7 +563,6 @@ tts_rec_rw_lock_smoke_check_2(void)
     H5TS_rw_lock_stats_t expected;
 #endif
     H5TS_rw_lock_t rec_rw_lock;
-    fprintf(stderr, "%s: Entering\n", __func__);
 
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
     /* Reset expected stats fields to zero -- we will construct the expected
@@ -719,7 +716,6 @@ tts_rec_rw_lock_smoke_check_2(void)
     /* discard the udata if it exists */
     if (udata)
         free(udata);
-    fprintf(stderr, "%s: Leaving\n", __func__);
 } /* end tts_rec_rw_lock_smoke_check_2() */
 
 /*
@@ -773,7 +769,6 @@ tts_rec_rw_lock_smoke_check_3(void)
     H5TS_rw_lock_stats_t expected;
 #endif
     H5TS_rw_lock_t rec_rw_lock;
-    fprintf(stderr, "%s: Entering\n", __func__);
 
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
     /* Reset expected stats fields to zero -- we will construct the expected
@@ -926,7 +921,6 @@ tts_rec_rw_lock_smoke_check_3(void)
     /* discard the udata if it exists */
     if (udata)
         free(udata);
-    fprintf(stderr, "%s: Leaving\n", __func__);
 } /* end tts_rec_rw_lock_smoke_check_3() */
 
 /*
@@ -981,7 +975,6 @@ tts_rec_rw_lock_smoke_check_4(void)
     H5TS_rw_lock_stats_t expected;
 #endif
     H5TS_rw_lock_t rec_rw_lock;
-    fprintf(stderr, "%s: Entering\n", __func__);
 
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
     /* Reset expected stats fields to zero -- we will construct the expected
@@ -1138,7 +1131,6 @@ tts_rec_rw_lock_smoke_check_4(void)
     /* discard the udata if it exists */
     if (udata)
         free(udata);
-    fprintf(stderr, "%s: Leaving\n", __func__);
 } /* end tts_rec_rw_lock_smoke_check_4() */
 
 #endif /* H5_HAVE_WIN_THREADS */

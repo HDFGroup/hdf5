@@ -64,7 +64,6 @@ tts_acreate(void)
     herr_t status;
 
     ttsafe_name_data_t *attrib_data;
-    fprintf(stderr, "%s: Entering\n", __func__);
 
     /*
      * Create an HDF5 file using H5F_ACC_TRUNC access, default file
@@ -137,7 +136,6 @@ tts_acreate(void)
     CHECK(status, FAIL, "H5Dclose");
     status = H5Fclose(file);
     CHECK(status, FAIL, "H5Fclose");
-    fprintf(stderr, "%s: Leaving\n", __func__);
 } /* end tts_acreate() */
 
 H5TS_THREAD_RETURN_TYPE
