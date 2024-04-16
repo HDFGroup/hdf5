@@ -189,6 +189,8 @@ typedef uint32_t H5O_msg_crt_idx_t;
  *                        pointer provided with the H5Ovisit3() function call
  * \return \herr_t_iter
  *
+ * \since 1.12.0
+ *
  */
 typedef herr_t (*H5O_iterate2_t)(hid_t obj, const char *name, const H5O_info2_t *info, void *op_data);
 //! <!-- [H5O_iterate2_t_snip] -->
@@ -1749,6 +1751,8 @@ typedef struct H5O_info1_t {
  * \param[in,out] op_data User-defined pointer to data required by the application
  *                        in processing the object
  * \return \herr_t_iter
+ *
+ * \since 1.8.0
  *
  */
 typedef herr_t (*H5O_iterate1_t)(hid_t obj, const char *name, const H5O_info1_t *info, void *op_data);
