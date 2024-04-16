@@ -126,16 +126,22 @@ main(int argc, char *argv[])
     AddTest("thread_id", tts_thread_id, NULL, "thread IDs", NULL);
 
     AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 #ifdef H5_HAVE_PTHREAD_H
     /* Thread cancellability only supported with pthreads ... */
     AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test", NULL);
 #endif /* H5_HAVE_PTHREAD_H */
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation", NULL);
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     AddTest("attr_vlen", tts_attr_vlen, cleanup_attr_vlen, "multi-file-attribute-vlen read", NULL);
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Developer API routine tests */
     AddTest("developer", tts_develop_api, NULL, "developer API routines", NULL);
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
 #else /* H5_HAVE_THREADSAFE */
 
