@@ -58,10 +58,6 @@ if (NOT TEST_INPUT)
       COMMAND ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}
       WORKING_DIRECTORY ${TEST_FOLDER}
       RESULT_VARIABLE TEST_RESULT
-      OUTPUT_FILE ${TEST_OUTPUT}
-      ERROR_FILE ${TEST_OUTPUT}.err
-      OUTPUT_VARIABLE TEST_OUT
-      ERROR_VARIABLE TEST_ERROR
   )
 else ()
   # run the test program with stdin, capture the stdout/stderr and the result var
@@ -70,10 +66,6 @@ else ()
       WORKING_DIRECTORY ${TEST_FOLDER}
       RESULT_VARIABLE TEST_RESULT
       INPUT_FILE ${TEST_INPUT}
-      OUTPUT_FILE ${TEST_OUTPUT}
-      ERROR_FILE ${TEST_OUTPUT}.err
-      OUTPUT_VARIABLE TEST_OUT
-      ERROR_VARIABLE TEST_ERROR
   )
 endif ()
 

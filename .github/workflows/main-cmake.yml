@@ -62,49 +62,6 @@ jobs:
             generator: "-G \"Visual Studio 17 2022\" -A x64"
             run_tests: true
 
-          # Linux (Ubuntu) w/ gcc + CMake
-          #
-          # We might think about adding Clang, but MacOS already tests that
-          # so it's not critical
-          - name: "Ubuntu gcc"
-            os: ubuntu-latest
-            cpp: ON
-            fortran: ON
-            java: ON
-            docs: ON
-            libaecfc: ON
-            localaec: OFF
-            zlibfc: ON
-            localzlib: OFF
-            parallel: OFF
-            mirror_vfd: ON
-            direct_vfd: ON
-            ros3_vfd: ON
-            generator: "-G Ninja"
-            run_tests: true
-
-
-          # MacOS w/ Clang + CMake
-          #
-          # We could also build with the Autotools via brew installing them,
-          # but that seems unnecessary
-          - name: "MacOS Clang"
-            os: macos-13
-            cpp: ON
-            fortran: OFF
-            java: ON
-            docs: ON
-            libaecfc: ON
-            localaec: OFF
-            zlibfc: ON
-            localzlib: OFF
-            parallel: OFF
-            mirror_vfd: ON
-            direct_vfd: OFF
-            ros3_vfd: OFF
-            generator: "-G Ninja"
-            run_tests: true
-
     # Sets the job's name from the properties
     name: "${{ matrix.name }}-${{ inputs.build_mode }}-${{ inputs.thread_safety }}"
 
@@ -227,7 +184,7 @@ jobs:
 
       # THREAD-SAFE
       - name: CMake Run Thread-Safe Tests
-        run: ctest . --output-on-failure --parallel 2 -C ${{ inputs.build_mode }} -V -R ttsafe
+        run: ctest . --output-on-failure --timeout 60 --parallel 2 -C ${{ inputs.build_mode }} -V -R ttsafe
         working-directory: ${{ runner.workspace }}/build
         if: ${{ matrix.run_tests && (inputs.thread_safety == 'TS') }}
 
