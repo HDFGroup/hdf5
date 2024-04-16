@@ -116,7 +116,7 @@ H5TS__barrier_wait(H5TS_barrier_t *barrier)
 #ifdef H5_HAVE_PTHREAD_BARRIER
     int ret;
 #else
-    bool have_mutex = false;
+    bool have_mutex                     = false;
 #endif
     herr_t ret_value = SUCCEED;
 
