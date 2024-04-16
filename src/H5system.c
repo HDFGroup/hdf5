@@ -94,39 +94,6 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
 #endif /* H5_HAVE_VASPRINTF */
 
 /*-------------------------------------------------------------------------
- * Function:  HDrand/HDsrand
- *
- * Purpose:  Wrapper function for rand.  If rand_r exists on this system,
- *     use it.
- *
- *     Wrapper function for srand.  If rand_r is available, it will keep
- *     track of the seed locally instead of using srand() which modifies
- *     global state and can break other programs.
- *
- * Return:  Success:  Random number from 0 to RAND_MAX
- *
- *    Failure:  Cannot fail.
- *
- *-------------------------------------------------------------------------
- */
-#ifdef H5_HAVE_RAND_R
-
-static unsigned int g_seed = 42;
-
-int
-HDrand(void)
-{
-    return rand_r(&g_seed);
-}
-
-void
-HDsrand(unsigned int seed)
-{
-    g_seed = seed;
-}
-#endif /* H5_HAVE_RAND_R */
-
-/*-------------------------------------------------------------------------
  * Function:    Pflock
  *
  * Purpose:     Wrapper function for POSIX systems where flock(2) is not
@@ -223,12 +190,12 @@ H5_make_time(struct tm *tm)
 
     /* Initialize timezone information */
     if (!H5_ntzset) {
-        HDtzset();
+        tzset();
         H5_ntzset = true;
-    } /* end if */
+    }
 
     /* Perform base conversion */
-    if ((time_t)-1 == (the_time = HDmktime(tm)))
+    if ((time_t)-1 == (the_time = mktime(tm)))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCONVERT, FAIL, "badly formatted modification time message");
 
         /* Adjust for timezones */
@@ -689,7 +656,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
          * Unix: does not apply
          */
         if (H5_CHECK_ABS_DRIVE(name)) {
-            drive  = HDtoupper(name[0]) - 'A' + 1;
+            drive  = toupper(name[0]) - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
             strncpy(new_name, &name[2], name_len);
         }
@@ -1404,7 +1371,7 @@ H5_strcasestr(const char *haystack, const char *needle)
         const char *h = haystack;
         const char *n = needle;
         /* loop while lowercase strings match, or needle ends */
-        while (HDtolower(*h) == HDtolower(*n) && *n) {
+        while (tolower(*h) == tolower(*n) && *n) {
             h++;
             n++;
         }

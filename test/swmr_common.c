@@ -102,10 +102,10 @@ choose_dataset(void)
     unsigned offset; /* The "offset" of the dataset at that level */
 
     /* Determine level of dataset */
-    level = symbol_mapping[HDrandom() % NMAPPING];
+    level = symbol_mapping[rand() % NMAPPING];
 
     /* Determine the offset of the level */
-    offset = (unsigned)(HDrandom() % (int)symbol_count[level]);
+    offset = (unsigned)(rand() % (int)symbol_count[level]);
 
     return &symbol_info[level][offset];
 } /* end choose_dataset() */

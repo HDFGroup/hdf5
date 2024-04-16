@@ -11,8 +11,8 @@ Navigate back: \ref index "Main" / \ref GettingStarted / \ref ViewToolsCommand
 
 This tutorial illustrates how to use the HDF5 tools to examine NPP files from the JPSS project. The following files are discussed:
 \code
-SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5 (<a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5.gz">gzipped file</a>)
-SVM01_npp_d20130524_t1255132_e1256374_b08146_c20130524192048864992_noaa_ops.h5 (<a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/SVM01_npp_d20130524_t1255132_e1256374_b08146_c20130524192048864992_noaa_ops.h5.gz">gzipped file</a>)
+SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5 (<a href="https://\AEXURL/files/tutorial/SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5.gz">gzipped file</a>)
+SVM01_npp_d20130524_t1255132_e1256374_b08146_c20130524192048864992_noaa_ops.h5 (<a href="https://\AEXURL/files/tutorial/SVM01_npp_d20130524_t1255132_e1256374_b08146_c20130524192048864992_noaa_ops.h5.gz">gzipped file</a>)
 \endcode
 
 \section secViewToolsJPSSDeter Determining File Contents

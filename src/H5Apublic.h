@@ -42,7 +42,7 @@ typedef struct {
  * \param[in] ainfo The attribute's info struct
  * \param[in,out] op_data A pointer to the operator data passed into
  *                H5Aiterate2() or H5Aiterate_by_name()
- * \returns The return values from an operator are:
+ * \return The return values from an operator are:
  *          \li Zero causes the iterator to continue, returning zero when
  *              all attributes have been processed.
  *          \li Positive causes the iterator to immediately return that
@@ -51,6 +51,9 @@ typedef struct {
  *          \li Negative causes the iterator to immediately return that value,
  *              indicating failure. The iterator can be restarted at the next
  *              attribute.
+ *
+ * \since 1.8.0
+ *
  */
 typedef herr_t (*H5A_operator2_t)(hid_t location_id /*in*/, const char *attr_name /*in*/,
                                   const H5A_info_t *ainfo /*in*/, void *op_data /*in,out*/);
@@ -1098,7 +1101,7 @@ H5_DLL herr_t H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *
  * \param[in] attr_name The name of the current object attribute
  * \param[in,out] operator_data A pointer to the operator data passed into
  *                H5Aiterate1()
- * \returns The return values from an operator are:
+ * \return The return values from an operator are:
  *          \li Zero causes the iterator to continue, returning zero when
  *              all attributes have been processed.
  *          \li Positive causes the iterator to immediately return that

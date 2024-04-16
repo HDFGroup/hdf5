@@ -3080,7 +3080,7 @@ test__Float16(hid_t file)
     /* Initialize the data */
     for (size_t i = 0; i < DIM0; i++)
         for (size_t j = 0; j < DIM1; j++)
-            ipoints->arr[i][j] = (H5__Float16)(HDrand() / (double)RAND_MAX);
+            ipoints->arr[i][j] = (H5__Float16)(rand() / (double)RAND_MAX);
 
     /* Create the data space */
     dims[0] = DIM0;

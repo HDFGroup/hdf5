@@ -410,8 +410,11 @@ H5G_loc_find(const H5G_loc_t *loc, const char *name, H5G_loc_t *obj_loc /*out*/)
 
     /* Check args. */
     assert(loc);
-    assert(name && *name);
+    assert(name);
     assert(obj_loc);
+
+    if (!*name)
+        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "invalid object name");
 
     /* Set up user data for locating object */
     udata.loc = obj_loc;

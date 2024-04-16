@@ -920,7 +920,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
         goto error;
     for (i = 0; i < 1000; i++) {
         for (j = 0; j < 5; j++)
-            hs_offset[j] = (hsize_t)HDrand() % cur_size[j];
+            hs_offset[j] = (hsize_t)rand() % cur_size[j];
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0)
             goto error;
 
@@ -1073,7 +1073,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
         goto error;
     for (i = 0; i < 1000; i++) {
         for (j = 0, odd = 0; j < 5; j++) {
-            hs_offset[j] = (hsize_t)HDrand() % cur_size[j];
+            hs_offset[j] = (hsize_t)rand() % cur_size[j];
             odd += (int)(hs_offset[j] % 2);
         } /* end for */
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0)
@@ -1644,7 +1644,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
     for (i = 0; i < 1000; i++) {
         /* Set offset for random element */
         for (j = 0; j < 5; j++)
-            hs_offset[j] = (hsize_t)HDrand() % start_size[j];
+            hs_offset[j] = (hsize_t)rand() % start_size[j];
 
         /* Select the random element */
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0)
@@ -1705,7 +1705,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
     for (i = 0; i < 1000; i++) {
         /* Set offset for random element */
         for (j = 0, odd = 0; j < 5; j++) {
-            hs_offset[j] = (hsize_t)HDrand() % start_size[j];
+            hs_offset[j] = (hsize_t)rand() % start_size[j];
             odd += (unsigned)(hs_offset[j] % 2);
         } /* end for */
 
@@ -1750,7 +1750,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
     for (i = 0; i < 1000; i++) {
         /* Set offset for random element */
         for (j = 0, odd = 0; j < 5; j++) {
-            hs_offset[j] = (hsize_t)HDrand() % extend_size[j];
+            hs_offset[j] = (hsize_t)rand() % extend_size[j];
             if (hs_offset[j] >= start_size[j])
                 odd = 1;
             else
@@ -1796,7 +1796,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
     for (i = 0; i < 1000; i++) {
         /* Set offset for random element */
         for (j = 0, odd = 0; j < 5; j++) {
-            hs_offset[j] = (hsize_t)HDrand() % max_size[j];
+            hs_offset[j] = (hsize_t)rand() % max_size[j];
             if (hs_offset[j] >= start_size[j])
                 odd = 1;
             else
@@ -1844,7 +1844,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
     for (i = 0; i < 1000; i++) {
         /* Set offset for random element */
         for (j = 0, odd = 0; j < 5; j++) {
-            hs_offset[j] = (hsize_t)HDrand() % extend_size[j];
+            hs_offset[j] = (hsize_t)rand() % extend_size[j];
             if (hs_offset[j] >= start_size[j])
                 odd = 1;
             else
@@ -1952,7 +1952,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
     for (i = 0; i < 1000; i++) {
         /* Set offset for random element */
         for (j = 0, odd = 0; j < 5; j++) {
-            hs_offset[j] = (hsize_t)HDrand() % extend_size[j];
+            hs_offset[j] = (hsize_t)rand() % extend_size[j];
             if (hs_offset[j] >= start_size[j])
                 odd = 1;
             else

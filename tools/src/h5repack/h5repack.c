@@ -481,7 +481,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
              *-----------------------------------------------------------------
              */
 
-            buf = (void *)malloc((size_t)(nelmts * msize));
+            buf = (void *)calloc(1, (size_t)(nelmts * msize));
             if (buf == NULL) {
                 H5TOOLS_GOTO_ERROR((-1), "malloc failed");
             } /* end if */

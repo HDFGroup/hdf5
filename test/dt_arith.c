@@ -1039,7 +1039,7 @@ test_derived_flt(void)
     aligned = (int *)calloc((size_t)1, src_size);
 
     for (i = 0; i < nelmts * src_size; i++)
-        buf[i] = saved_buf[i] = (unsigned char)HDrand();
+        buf[i] = saved_buf[i] = (unsigned char)rand();
 
     /* Convert data from native integer to derived floating-point type.
      * The mantissa is big enough to retain the integer's precision. */
@@ -1199,7 +1199,7 @@ test_derived_flt(void)
     memset(saved_buf, 0, nelmts * src_size);
 
     for (i = 0; i < nelmts * src_size; i++)
-        buf[i] = saved_buf[i] = (unsigned char)HDrand();
+        buf[i] = saved_buf[i] = (unsigned char)rand();
 
     /* Convert data from the 2nd to the 1st derived floating-point type.
      * The mantissa and exponent of the 2nd type are big enough to retain
@@ -1520,7 +1520,7 @@ test_derived_integer(void)
     memset(saved_buf, 0, nelmts * src_size);
 
     for (i = 0; i < nelmts * src_size; i++)
-        buf[i] = saved_buf[i] = (unsigned char)HDrand();
+        buf[i] = saved_buf[i] = (unsigned char)rand();
 
     /* Convert data from the 1st to the 2nd derived integer type.
      * The precision of the 2nd type are big enough to retain
@@ -3261,7 +3261,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
      * The remainder of this function is executed only by the child if
      * HANDLE_SIGFPE is defined.
      */
-    HDsignal(SIGFPE, fpe_handler);
+    signal(SIGFPE, fpe_handler);
 
     /* What are the names of the source and destination types */
     if (H5Tequal(src, H5T_NATIVE_FLOAT)) {
@@ -4913,7 +4913,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         /*          Test library's default overflow handling:
          * Hardware usually doesn't handle overflows too gracefully. The
          * hardware conversion result during overflows is usually garbage
-         * so we must handle those cases differetly when checking results.
+         * so we must handle those cases differently when checking results.
          *
          *          Test user's exception handler when overflows:
          * Try to follow the except_func callback function to check if the
@@ -5978,7 +5978,7 @@ main(void)
     unsigned long nerrors = 0;
 
     /* Set the random # seed */
-    HDsrandom((unsigned)HDtime(NULL));
+    srand((unsigned)time(NULL));
 
     reset_hdf5();
 

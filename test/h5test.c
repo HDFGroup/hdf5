@@ -1784,7 +1784,7 @@ h5_send_message(const char *send, const char *arg1, const char *arg2)
 
     fclose(signalfile);
 
-    HDrename(TMP_SIGNAL_FILE, send);
+    rename(TMP_SIGNAL_FILE, send);
 } /* h5_send_message() */
 
 /*-------------------------------------------------------------------------
@@ -1820,18 +1820,18 @@ h5_wait_message(const char *waitfor)
     /* Start timer. If this function runs for too long (i.e.,
         expected signal is never received), it will
         return failure */
-    HDtime(&t0);
+    time(&t0);
 
     /* Wait for return signal from some other process */
     while ((returnfile = fopen(waitfor, "r")) == NULL) {
 
         /* make note of current time. */
-        HDtime(&t1);
+        time(&t1);
 
         /* If we've been waiting for a signal for too long, then
             it was likely never sent and we should fail rather
             than loop infinitely */
-        if (HDdifftime(t1, t0) > MESSAGE_TIMEOUT) {
+        if (difftime(t1, t0) > MESSAGE_TIMEOUT) {
             fprintf(stdout, "Error communicating between processes. Make sure test script is running.\n");
             TEST_ERROR;
         } /* end if */
@@ -2099,8 +2099,8 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     }
 
     /* Compare each byte and fail if a difference is found */
-    HDrewind(f1ptr);
-    HDrewind(f2ptr);
+    rewind(f1ptr);
+    rewind(f2ptr);
     for (ii = 0; ii < f1size; ii++) {
         if (fread(&f1char, 1, 1, f1ptr) != 1) {
             ret_value = -1;
@@ -2216,7 +2216,7 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
 
     HDfseek(orig_ptr, 0, SEEK_END);
     fsize = (size_t)HDftell(orig_ptr);
-    HDrewind(orig_ptr);
+    rewind(orig_ptr);
 
     dest_ptr = fopen(dest, "wb");
     if (NULL == dest_ptr) {

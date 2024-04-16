@@ -143,7 +143,7 @@ main(int argc, char **argv)
     n_tests_failed_g  = 0;
     n_tests_skipped_g = 0;
 
-    seed = (unsigned)HDtime(NULL);
+    seed = (unsigned)time(NULL);
     srand(seed);
 
     if (NULL == (test_path_prefix = getenv(HDF5_API_TEST_PATH_PREFIX)))

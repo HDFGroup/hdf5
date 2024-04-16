@@ -206,7 +206,7 @@ test(fill_t fill_style, const double splits[], bool verbose, bool use_rdcc)
                 hs_start[0] = k % 2 ? (k / 2) : (hsize_t)((hssize_t)cur_size[0] - (hssize_t)(k / 2));
                 break;
             case FILL_RANDOM:
-                for (j = HDrand() % (int)cur_size[0]; had[j]; j = (j + 1) % (int)cur_size[0])
+                for (j = rand() % (int)cur_size[0]; had[j]; j = (j + 1) % (int)cur_size[0])
                     /*void*/;
                 hs_start[0] = (hsize_t)j;
                 had[j]      = 1;

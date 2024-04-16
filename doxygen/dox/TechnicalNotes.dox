@@ -3,10 +3,13 @@
 \li \ref api-compat-macros
 \li \ref APPDBG
 \li \ref FMTDISC
+\li \ref FILEIMGOPS
 \li \ref FILTER
 \li \ref IOFLOW
 \li \ref TNMDC
 \li \ref MT
+\li \ref SWMR
+\li \ref VDS
 \li \ref VFL
 
  */
@@ -35,6 +38,12 @@
 
 */
 
+/** \page FILEIMGOPS HDF5 File Image Operations
+
+\htmlinclude FileImageOps.html
+
+*/
+
 /** \page FILTER HDF5 Filters
 
 \htmlinclude Filters.html
@@ -44,5 +53,17 @@
 /** \page APPDBG Debugging HDF5 Applications
 
 \htmlinclude DebuggingHDF5Applications.html
+
+*/
+
+/** \page SWMR Introduction to Single-Writer/Multiple-Reader (SWMR)
+
+\htmlinclude intro_SWMR.html
+
+*/
+
+/** \page VDS Introduction to the Virtual Dataset - VDS
+
+\htmlinclude intro_VDS.html
 
 */

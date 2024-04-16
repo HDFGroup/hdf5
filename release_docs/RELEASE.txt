@@ -169,15 +169,16 @@ New Features
 
     - Incorporated HDF5 examples repository into HDF5 library.
 
-      The HDF5Examples folder is equivalent to the repository hdf5-examples.
-      As such it can build and test the examples during library build or after
-      the library is installed. Previously, the hdf5-repository archives were
-      downloaded for packaging with the library. Now the examples can be built
+      The HDF5Examples folder is equivalent to the hdf5-examples repository.
+      This enables building and testing the examples
+      during the library build process or after the library has been installed.
+      Previously, the hdf5-examples archives were downloaded
+      for packaging with the library. Now the examples can be built
       and tested without a packaged install of the library.
 
-      However to maintain the ability to use the HDF5Examples with an installed
-      library, it is necessary to translate or synch the option names from those
-      used by the library to those used by the examples. The typical pattern is:
+      However, to maintain the ability to use the HDF5Examples with an installed
+      library, it is necessary to map the option names used by the library
+      to those used by the examples. The typical pattern is:
             <example option> = <library option>
             HDF_BUILD_FORTRAN = ${HDF5_BUILD_FORTRAN}
 
@@ -727,7 +728,7 @@ New Features
 Support for new platforms, languages and compilers
 ==================================================
     -
-    
+
 Bug Fixes since HDF5-1.14.0 release
 ===================================
     Configuration:
@@ -746,6 +747,225 @@ Bug Fixes since HDF5-1.14.0 release
 
     Library
     -------
+    - Fixed many (future) CVE issues
+
+      A partner organization corrected many potential security issues, which
+      were fixed and reported to us before submission to MITRE. These do
+      not have formal CVE issues assigned to them yet, so the numbers assigned
+      here are just placeholders. We will update the HDF5 1.14 CVE list (link
+      below) when official MITRE CVE tracking numbers are assigned.
+
+      These CVE issues are generally of the same form as other reported HDF5
+      CVE issues, and rely on the library failing while attempting to read
+      a malformed file. Most of them cause the library to segfault and will
+      probably be assigned "medium (~5/10)" scores by NIST, like the other
+      HDF5 CVE issues.
+
+      The issues that were reported to us have all been fixed in this release,
+      so HDF5 will continue to have no unfixed public CVE issues.
+
+      NOTE: HDF5 versions earlier than 1.14.4 should be considered vulnerable
+            to these issues and users should upgrade to 1.14.4 as soon as
+            possible. Note that it's possible to build the 1.14 library with
+            HDF5 1.8, 1.10, etc. API bindings for people who wish to enjoy
+            the benefits of a more secure library but don't want to upgrade
+            to the latest API. We will not be bringing the CVE fixes to earlier
+            versions of the library (they are no longer supported).
+
+      LIST OF CVE ISSUES FIXED IN THIS RELEASE:
+
+        * CVE-2024-0116-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5D__scatter_mem resulting in causing denial of service or potential
+            code execution
+
+        * CVE-2024-0112-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5S__point_deserialize resulting in the corruption of the
+            instruction pointer and causing denial of service or potential code
+            execution
+
+        * CVE-2024-0111-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5T__conv_struct_opt resulting in causing denial of service or
+            potential code execution
+
+        * CVE-2023-1208-002
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5O__mtime_new_encode resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1208-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5O__layout_encode resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1207-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5O__dtype_encode_helper causing denial of service or potential
+            code execution
+
+        * CVE-2023-1205-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5VM_array_fill resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1202-002
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5T__get_native_type resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1202-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5T__ref_mem_setnull resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1130-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5T_copy_reopen resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1125-001
+            HDF5 versions <= 1.14.3 contain a heap buffer overflow in
+            H5Z__nbit_decompress_one_byte caused by the earlier use of an
+            initialized pointer. This may result in Denial of Service or
+            potential code execution
+
+        * CVE-2023-1114-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5HG_read resulting in the corruption of the instruction pointer
+            and causing denial of service or potential code execution
+
+        * CVE-2023-1113-002
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5F_addr_decode_len resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1113-001
+            HDF5 versions <= 1.14.3 contain a heap buffer overflow caused by
+            the unsafe use of strdup in H5MM_xstrdup, resulting in denial of
+            service or potential code execution
+
+        * CVE-2023-1108-001
+            HDF5 versions <= 1.14.3 contain a out-of-bounds read operation in
+            H5FL_arr_malloc resulting in denial of service or potential code
+            execution
+
+        * CVE-2023-1104-004
+            HDF5 versions <= 1.14.3 contain a out-of-bounds read operation in
+            H5T_close_real resulting in denial of service or potential code
+            execution
+
+        * CVE-2023-1104-003
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow flaw
+            in the function H5HL__fl_deserialize resulting in denial of service
+            or potential code execution
+
+        * CVE-2023-1104-002
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5HL__fl_deserialize resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1104-001
+            HDF5 library versions <=1.14.3 contains a stack overflow in the
+            function H5E_printf_stack resulting in denial of service or
+            potential code execution
+
+        * CVE-2023-1023-001
+            HDF5 library versions <=1.14.3 heap buffer overflow in
+            H5VM_memcpyvv which may result in denial of service or code
+            execution
+
+        * CVE-2023-1019-001
+            HDF5 library versions <=1.14.3 contain a stack buffer overflow in
+            H5VM_memcpyvv resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1018-001
+            HDF5 library versions <=1.14.3 contain a memory corruption in
+            H5A__close resulting in the corruption of the instruction pointer
+            and causing denial of service or potential code execution
+
+        * CVE-2023-1017-002
+            HDF5 library versions <=1.14.3 may use an uninitialized value
+            H5A__attr_release_table resulting in denial of service
+
+        * CVE-2023-1017-001
+            HDF5 library versions <=1.14.3 may attempt to dereference
+            uninitialized values in h5tools_str_sprint, which will lead to
+            denial of service
+
+        * CVE-2023-1013-004
+            HDF5 versions <= 1.13.3 contain a stack buffer overflow in
+            H5HG_read resulting in denial of service or potential code
+            execution
+
+        * CVE-2023-1013-003
+            HDF5 library versions <=1.14.3 contain a buffer overrun in
+            H5Z__filter_fletcher32 resulting in the corruption of the
+            instruction pointer and causing denial of service or potential
+            code execution
+
+        * CVE-2023-1013-002
+            HDF5 library versions <=1.14.3 contain a buffer overrun in
+            H5O__linfo_decode resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1013-001
+            HDF5 library versions <=1.14.3 contain a buffer overrun in
+            H5Z__filter_scaleoffset resulting in the corruption of the
+            instruction pointer and causing denial of service or potential
+            code execution
+
+        * CVE-2023-1012-001
+            HDF5 library versions <=1.14.3 contain a stack buffer overflow in
+            H5R__decode_heap resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1010-001
+            HDF5 library versions <=1.14.3 contain a stack buffer overflow in
+            H5FL_arr_malloc resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1009-001
+            HDF5 library versions <=1.14.3 contain a stack buffer overflow in
+            H5FL_arr_malloc resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1006-004
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5A__attr_release_table resulting in the corruption of the
+            instruction pointer and causing denial of service or potential code
+            execution
+
+        * CVE-2023-1006-003
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5T__bit_find resulting in the corruption of the instruction pointer
+            and causing denial of service or potential code execution.
+
+        * CVE-2023-1006-002
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5HG_read resulting in the corruption of the instruction pointer
+            and causing denial of service or potential code execution
+
+        * CVE-2023-1006-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5HG__cache_heap_deserialize resulting in the corruption of the
+            instruction pointer and causing denial of service or potential code
+            execution
+
+      FULL OFFICIAL HDF5 CVE list (from mitre.org):
+
+        https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=HDF5
+
+      1.14.x CVE tracking list:
+
+        https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/CVE_list_1_14.md
+
+      HDF5 CVE regression test suite (includes proof-of-concept files):
+
+        https://github.com/HDFGroup/cve_hdf5
+
     - Fixed a divide-by-zero issue when a corrupt file sets the page size to 0
 
       If a corrupt file sets the page buffer size in the superblock to zero,
@@ -1814,12 +2034,27 @@ Platforms Tested
 Known Problems
 ==============
 
-    When building with the NAG Fortran compiler using the Autotools and libtool
+ -  When building with the NAG Fortran compiler using the Autotools and libtool
     2.4.2 or earlier, the -shared flag will be missing '-Wl,', which will cause
     compilation to fail. This is due to a bug in libtool that was fixed in 2012
     and released in 2.4.4 in 2014.
 
-    When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may
+ -  When the library detects and builds in support for the _Float16 datatype, an
+    issue has been observed on at least one MacOS 14 system where the library
+    fails to initialize due to not being able to detect the byte order of the
+    _Float16 type (https://github.com/HDFGroup/hdf5/issues/4310):
+
+        #5: H5Tinit_float.c line 308 in H5T__fix_order(): failed to detect byte order
+        major: Datatype
+        minor: Unable to initialize object
+
+    If this issue is encountered, support for the _Float16 type can be disabled
+    with a configuration option:
+
+        CMake:      HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16=OFF
+        Autotools:  --disable-nonstandard-feature-float16
+
+ -  When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may
     also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur
     in the following tests:
 
@@ -1828,42 +2063,40 @@ Known Problems
         H5TEST-testhdf5-base
         MPI_TEST_t_filters_parallel
 
-    Since these tests pass with an optimization level of -O1 (and -O0) and it is
-    currently unclear whether the test failures are due to issues in HDF5 or issues
-    in the 'nvc' compiler, the maximum optimization level for NVHPC has been set
-    to -O1 until the test failures can be resolved. Note that even at -O1 optimization
-    level, there still appears to be a sporadic test failure in the Java JUnit tests
-    that has occasionally been seen in JUnit-TestH5Pfapl and JUnit-TestH5D. It is also
-    unclear whether this is an issue in HDF5 or with the 'nvc' compiler. Finally, note
-    that NVHPC 23.9 will fail to compile the test/tselect.c test file with a compiler
-    error of 'use of undefined value' when the optimization level is -O2 or higher.
-    Nvidia is aware of this issue and has suggested lowering the optimization level to
-    -O1 for the time being:
-    https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045.
+    Sporadic failures (even with lower -O levels):
+        Java JUnit-TestH5Pfapl
+        Java JUnit-TestH5D
 
-    CMake files do not behave correctly with paths containing spaces.
+    Also, NVHPC will fail to compile the test/tselect.c test file with a compiler
+    error of 'use of undefined value' when the optimization level is -O2 or higher.
+
+    This is confirmed to be a bug in the nvc compiler that has been fixed as of
+    23.11. If you are using an affected version of the NVidia compiler, the
+    work-around is to set the optimization level to -O1.
+
+    https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045
+
+ -  CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.
 
-    At present, metadata cache images may not be generated by parallel
+ -  At present, metadata cache images may not be generated by parallel
     applications.  Parallel applications can read files with metadata cache
     images, but since this is a collective operation, a deadlock is possible
     if one or more processes do not participate.
 
-    CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
-    issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
-
-    The subsetting option in ph5diff currently will fail and should be avoided.
+ -  The subsetting option in ph5diff currently will fail and should be avoided.
     The subsetting option works correctly in serial h5diff.
 
-    Flang Fortran compilation will fail (last check version 17) due to not yet
+ -  Flang Fortran compilation will fail (last check version 17) due to not yet
     implemented: (1) derived type argument passed by value (H5VLff.F90),
     and (2) support for REAL with KIND = 2 in intrinsic SPACING used in testing.
 
-    Fortran tests HDF5_1_8.F90 and HDF5_F03.F90 will fail with Cray compilers greater than
-    version 16.0 due to a compiler bug. The latest version verified as failing was version 17.0.
+ -  Fortran tests HDF5_1_8.F90 and HDF5_F03.F90 will fail with Cray compilers
+    greater than version 16.0 due to a compiler bug. The latest version verified
+    as failing was version 17.0.
 
-    Several tests currently fail on certain platforms:
+ -  Several tests currently fail on certain platforms:
         MPI_TEST-t_bigio fails with spectrum-mpi on ppc64le platforms.
 
         MPI_TEST-t_subfiling_vfd and MPI_TEST_EXAMPLES-ph5_subfiling fail with
@@ -1871,12 +2104,12 @@ Known Problems
 
         MPI_TEST_testphdf5_tldsc fails with cray-mpich 7.7 on cori and theta.
 
-    Known problems in previous releases can be found in the HISTORY*.txt files
+ -  File space may not be released when overwriting or deleting certain nested
+    variable length or reference types.
+
+ -  Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
     help@hdfgroup.org.
-
-    File space may not be released when overwriting or deleting certain nested
-    variable length or reference types.
 
 
 CMake vs. Autotools installations

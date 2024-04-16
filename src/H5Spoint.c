@@ -1003,7 +1003,6 @@ H5Sget_select_elem_npoints(hid_t spaceid)
     hssize_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("Hs", "i", spaceid);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
@@ -1645,7 +1644,6 @@ H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoint
     herr_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ihh*[a2]h", spaceid, startpoint, numpoints, buf);
 
     /* Check args */
     if (NULL == buf)
@@ -2454,7 +2452,6 @@ H5Sselect_elements(hid_t spaceid, H5S_seloper_t op, size_t num_elem, const hsize
     herr_t ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iSsz*h", spaceid, op, num_elem, coord);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))

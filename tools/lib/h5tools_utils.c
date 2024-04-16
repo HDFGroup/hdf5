@@ -79,7 +79,7 @@ parallel_print(const char *format, ...)
                 /* Terminate the outbuff at the end of the previous output */
                 outBuff[outBuffOffset] = '\0';
 
-                overflow_file = HDtmpfile();
+                overflow_file = tmpfile();
                 if (overflow_file == NULL)
                     fprintf(rawerrorstream,
                             "warning: could not create overflow file.  Output may be truncated.\n");
