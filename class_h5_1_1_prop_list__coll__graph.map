@@ -1,4 +1,0 @@
-<map id="PropList" name="PropList">
-<area shape="rect" id="node1" title="Class PropList inherits from IdComponent and provides wrappers for the HDF5 generic property list." alt="" coords="23,81,97,108"/>
-<area shape="rect" id="node2" href="$class_h5_1_1_id_component.html" title="Class IdComponent provides wrappers of the C functions that operate on an HDF5 identifier." alt="" coords="5,5,115,32"/>
-</map>
