@@ -4,8 +4,10 @@ ALIASES += THG="The HDF Group"
 # Default URLs             (Note that md files do not use any aliases)
 ################################################################################
 ALIASES += ARCURL="docs.hdfgroup.org/hdf5"
-ALIASES += DOXURL="hdfgroup.github.io/hdf5/develop" #doxygen subdir
-ALIASES += SRCURL="github.com/HDFGroup/hdf5/blob/develop" #branch name
+# doxygen subdir (develop, v1_14)
+ALIASES += DOXURL="hdfgroup.github.io/hdf5/develop"
+#branch name (develop, hdf5_1_14)
+ALIASES += SRCURL="github.com/HDFGroup/hdf5/blob/develop"
 
 ################################################################################
 # Styling
