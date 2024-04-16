@@ -56,7 +56,6 @@ tts_cancel(void)
     hid_t dataset;
     int   buffer;
     int   ret;
-    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Initialize barrier */
     ret = H5TS__barrier_init(&barrier, 2);
@@ -90,7 +89,6 @@ tts_cancel(void)
 
     ret = H5TS__barrier_destroy(&barrier);
     CHECK_I(ret, "H5TS__barrier_destroy");
-    fprintf(stderr, "%s: Leaving\n", __func__);
 } /* end tts_cancel() */
 
 void *
