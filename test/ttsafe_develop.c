@@ -106,6 +106,7 @@ tts_develop_api(void)
     tts_develop_api_udata_t udata;
     unsigned                api_count_1 = 0, api_count_2 = 0;
     herr_t                  result;
+    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Check that API count increases with each API call */
     result = H5TSmutex_get_attempt_count(&api_count_1);
@@ -160,6 +161,7 @@ tts_develop_api(void)
     CHECK_I(result, "H5TSmutex_release");
     VERIFY(lock_count, 2, "H5TSmutex_release");
 
+    fprintf(stderr, "%s: Leaving\n", __func__);
 } /* end tts_develop_api() */
 
 #endif /*H5_HAVE_THREADSAFE*/
