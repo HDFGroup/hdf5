@@ -85,7 +85,7 @@
 #endif
 
 /* Atomics macros */
-#ifdef H5_HAVE_STDATOMIC_H
+#if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 /* atomic_int */
 #define H5TS_atomic_init_int(obj, desired)  atomic_init((obj), (desired))
 #define H5TS_atomic_load_int(obj)           atomic_load(obj)
@@ -146,7 +146,7 @@ typedef void (*H5TS_once_init_func_t)(void);
 #endif
 
 /* Atomics */
-#ifdef H5_HAVE_STDATOMIC_H
+#if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 typedef atomic_int  H5TS_atomic_int_t;
 typedef atomic_uint H5TS_atomic_uint_t;
 #else
@@ -230,7 +230,7 @@ H5_DLL herr_t H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t fun
 H5_DLL herr_t H5TS_pool_destroy(H5TS_pool_t *pool);
 
 /* Emulated C11 atomics */
-#ifndef H5_HAVE_STDATOMIC_H
+#if !(defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus))
 /* atomic_int */
 H5_DLL void H5TS_atomic_init_int(H5TS_atomic_int_t *obj, int desired);
 H5_DLL int  H5TS_atomic_load_int(H5TS_atomic_int_t *obj);
