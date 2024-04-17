@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.e7c3c99</span>
+   &#160;<span id="projectnumber">1.15.0.3fad116</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -533,7 +533,8 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 
 </div>
 </div>
@@ -563,9 +564,10 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd><ul>
 <li>Zero (<a class="el" href="_h5public_8h.html#a1224e2c3839ee7816a341ff890dc1004">H5_ITER_CONT</a>) causes the iterator to continue, returning zero when all elements have been processed. </li>
 <li>A positive value (<a class="el" href="_h5public_8h.html#a7c8ff9a774bfdfd77c1e0ab1df050b95">H5_ITER_STOP</a>) causes the iterator to immediately return that value, indicating short-circuit success. </li>
-<li>A negative (<a class="el" href="_h5public_8h.html#ab1c0edbebf4284b1383dafd1b6b6af0f">H5_ITER_ERROR</a>) causes the iterator to immediately return that value, indicating failure. </li>
+<li>A negative (<a class="el" href="_h5public_8h.html#ab1c0edbebf4284b1383dafd1b6b6af0f">H5_ITER_ERROR</a>) causes the iterator to immediately return that value, indicating failure.</li>
 </ul>
 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.14.0 </dd></dl>
 
 </div>
 </div>
@@ -591,7 +593,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p>The callback function should process, store, or otherwise make use of the data returned in dst_buf before it returns, because the buffer will be overwritten unless it is the last call to the callback. This function will be repeatedly called until all gathered elements have been passed to the callback in dst_buf. The callback function should return zero (0) to indicate success, and a negative value to indicate failure. </p>
+<p>The callback function should process, store, or otherwise make use of the data returned in dst_buf before it returns, because the buffer will be overwritten unless it is the last call to the callback. This function will be repeatedly called until all gathered elements have been passed to the callback in dst_buf. The callback function should return zero (0) to indicate success, and a negative value to indicate failure.</p>
+<dl class="section since"><dt>Since</dt><dd>1.10.2 </dd></dl>
 
 </div>
 </div>
@@ -621,9 +624,10 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd><ul>
 <li>Zero causes the iterator to continue, returning zero when the iteration is complete. </li>
 <li>A positive value causes the iterator to immediately return that positive value, indicating short-circuit success. </li>
-<li>A negative value causes the iterator to immediately return that value, indicating failure. </li>
+<li>A negative value causes the iterator to immediately return that value, indicating failure.</li>
 </ul>
 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.10.2 </dd></dl>
 
 </div>
 </div>
@@ -649,7 +653,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>herr_t</dd></dl>
-<p>The callback function should always return at least one element in <code>src_buf</code>, and must not return more elements than are remaining to be scattered. This function will be repeatedly called until all elements to be scattered have been returned. The callback function should return zero (0) to indicate success, and a negative value to indicate failure. </p>
+<p>The callback function should always return at least one element in <code>src_buf</code>, and must not return more elements than are remaining to be scattered. This function will be repeatedly called until all elements to be scattered have been returned. The callback function should return zero (0) to indicate success, and a negative value to indicate failure.</p>
+<dl class="section since"><dt>Since</dt><dd>1.10.2 </dd></dl>
 
 </div>
 </div>

@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.e7c3c99</span>
+   &#160;<span id="projectnumber">1.15.0.3fad116</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -173,7 +173,7 @@ Mute Error Stack</h3>
 <div class="line"><span class="stringliteral"> status = H5Fopen (......);</span></div>
 <div class="line"><span class="stringliteral"> ***  Restore previous error handler  ***</span></div>
 <div class="line"><span class="stringliteral"> H5Eset_auto2(error_stack, old_func, old_client_data);</span></div>
-<div class="ttc" id="a_h5_epublic_8h_html_a0109c84ac574ac24abe6f7c7acab3fca"><div class="ttname"><a href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a></div><div class="ttdeci">herr_t(* H5E_auto2_t)(hid_t estack, void *client_data)</div><div class="ttdoc">Callback function for H5Eset_auto2()</div><div class="ttdef"><b>Definition</b> H5Epublic.h:192</div></div>
+<div class="ttc" id="a_h5_epublic_8h_html_a0109c84ac574ac24abe6f7c7acab3fca"><div class="ttname"><a href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a></div><div class="ttdeci">herr_t(* H5E_auto2_t)(hid_t estack, void *client_data)</div><div class="ttdoc">Callback function for H5Eset_auto2()</div><div class="ttdef"><b>Definition</b> H5Epublic.h:198</div></div>
 <div class="ttc" id="agroup___h5_e_html_ga2eda33cbadd9be5bfddbaa91e863c936"><div class="ttname"><a href="group___h5_e.html#ga2eda33cbadd9be5bfddbaa91e863c936">H5Eget_auto2</a></div><div class="ttdeci">herr_t H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)</div><div class="ttdoc">Returns the settings for the automatic error stack traversal function and its data.</div></div>
 </div><!-- fragment --><p>Or automatic printing can be disabled altogether and error messages can be explicitly printed.</p>
 <p><em>Example: Disable automatic printing and explicitly print error messages</em> </p><div class="fragment"><div class="line">***  Turn off error handling permanently  ***</div>
