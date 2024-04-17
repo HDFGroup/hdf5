@@ -321,7 +321,8 @@ H5TS__tinfo_init(void)
 #ifdef H5_HAVE_WIN_THREADS
     if (H5_UNLIKELY(H5TS_key_create(&H5TS_thrd_info_key_g, NULL) < 0))
         ret_value = FAIL;
-    fprintf(stderr, "%s:%u - H5TS_thrd_info_key_g = %llu\n", __func__, __LINE__, (unsigned long long)H5TS_thrd_info_key_g);
+    fprintf(stderr, "%s:%u - H5TS_thrd_info_key_g = %llu\n", __func__, __LINE__,
+            (unsigned long long)H5TS_thrd_info_key_g);
 #else
     if (H5_UNLIKELY(H5TS_key_create(&H5TS_thrd_info_key_g, H5TS__tinfo_destroy) < 0))
         ret_value = FAIL;
@@ -389,7 +390,8 @@ H5TS__tinfo_create(void)
     /* Set up non-zero per-thread info */
     tinfo_node->info.id = new_id;                       /* ID */
     H5E__set_default_auto(&tinfo_node->info.err_stack); /* Error stack */
-    fprintf(stderr, "%s:%u - H5TS_thrd_info_key_g = %llu\n", __func__, __LINE__, (unsigned long long)H5TS_thrd_info_key_g);
+    fprintf(stderr, "%s:%u - H5TS_thrd_info_key_g = %llu\n", __func__, __LINE__,
+            (unsigned long long)H5TS_thrd_info_key_g);
 
     /* Set a thread-local pointer to the thread's info record */
     if (H5_UNLIKELY(H5TS_key_set_value(H5TS_thrd_info_key_g, tinfo_node))) {
@@ -465,7 +467,8 @@ H5TS_get_api_ctx_ptr(void)
     struct H5CX_node_t **ret_value;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-    fprintf(stderr, "%s: Entering, H5TS_thrd_info_key_g = %llu\n", __func__, (unsigned long long)H5TS_thrd_info_key_g);
+    fprintf(stderr, "%s: Entering, H5TS_thrd_info_key_g = %llu\n", __func__,
+            (unsigned long long)H5TS_thrd_info_key_g);
 
     /* Check if info for thread has been created */
     if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, (void **)&tinfo_node) < 0))
