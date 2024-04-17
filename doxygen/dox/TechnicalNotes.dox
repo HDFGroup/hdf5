@@ -10,6 +10,7 @@
 \li \ref MT
 \li \ref SWMR
 \li \ref VDS
+\li \ref RELVERSION
 \li \ref VFL
 
  */
@@ -23,6 +24,12 @@
 /** \page IOFLOW HDF5 Raw I/O Flow Notes
 
 \htmlinclude IOFlow.html
+
+*/
+
+/** \page RELVERSION HDF5 Library Release Version Numbers
+
+\htmlinclude LibraryReleaseVersionNumbers.html
 
 */
 
@@ -67,3 +74,4 @@
 \htmlinclude intro_VDS.html
 
 */
+
