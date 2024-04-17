@@ -67,7 +67,7 @@
 #endif
 
 /* C11 atomics */
-#ifdef H5_HAVE_STDATOMIC_H
+#if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 #include <stdatomic.h>
 #endif
 
