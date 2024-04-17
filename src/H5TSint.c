@@ -453,10 +453,12 @@ H5TS_get_api_ctx_ptr(void)
     struct H5CX_node_t **ret_value;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Check if info for thread has been created */
     if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, (void **)&tinfo_node) < 0))
         HGOTO_DONE(NULL);
+    fprintf(stderr, "%s:%u tinfo_node = %p\n", __func__i, tinfo_node);
     if (NULL == tinfo_node)
         /* Create thread info for this thread */
         if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
@@ -466,6 +468,7 @@ H5TS_get_api_ctx_ptr(void)
     ret_value = &tinfo_node->info.api_ctx_node_ptr;
 
 done:
+    fprintf(stderr, "%s: Leaving, ret_value = %p\n", __func__, ret_value);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_get_api_ctx_ptr() */
 

@@ -227,6 +227,7 @@ H5TS_key_get_value(H5TS_key_t key, void **value)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Get the value for this thread */
     if (H5_UNLIKELY(NULL == (*value = TlsGetValue(key))))
@@ -235,6 +236,7 @@ H5TS_key_get_value(H5TS_key_t key, void **value)
             HGOTO_DONE(FAIL);
 
 done:
+    fprintf(stderr, "%s: Leaving, *value = %p\n", __func__, *value);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_key_get_value() */
 
