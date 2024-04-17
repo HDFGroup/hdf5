@@ -382,7 +382,7 @@ H5TS__tinfo_create(void)
             HGOTO_DONE(NULL);
         tinfo_node->next = NULL;
     }
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
+    fprintf(stderr, "%s:%u - tinfo_node = %p\n", __func__, __LINE__, tinfo_node);
 
     /* Reset thread info struct */
     memset(tinfo_node, 0, sizeof(*tinfo_node));

@@ -205,12 +205,15 @@ H5TS_key_set_value(H5TS_key_t key, void *value)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Set the value for this thread */
+    fprintf(stderr, "%s:%u - key = %llu, value = %p\n", __func__, __LINE__, (unsigned long long)H5TS_thrd_info_key_g, value);
     if (H5_UNLIKELY(0 != TlsSetValue(key, (LPVOID)value)))
         HGOTO_DONE(FAIL);
 
 done:
+    fprintf(stderr, "%s: Leaving, ret_value = %d\n", __func__, ret_value);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_key_set_value() */
 
