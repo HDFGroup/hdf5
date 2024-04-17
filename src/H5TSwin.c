@@ -78,6 +78,7 @@ H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
     BOOL ret_value = TRUE;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Initialize H5TS package */
     if (H5_UNLIKELY(H5TS__init() < 0))

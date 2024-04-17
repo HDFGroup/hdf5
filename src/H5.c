@@ -140,8 +140,10 @@ H5_init_library(void)
     fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Run the library initialization routine, if it hasn't already run */
-    if (H5_INIT_GLOBAL || H5_TERM_GLOBAL)
+    if (H5_INIT_GLOBAL || H5_TERM_GLOBAL) {
+        fprintf(stderr, "%s: Already initialized\n", __func__);
         HGOTO_DONE(SUCCEED);
+    }
 
     /* Set the 'library initialized' flag as early as possible, to avoid
      * possible re-entrancy.
