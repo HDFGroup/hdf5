@@ -15,7 +15,7 @@ Section V:    Windows Configuration and Build
 For help with installing, questions can be posted to the HDF Forum or sent to the HDF Helpdesk:
 
    HDF Forum:     https://forum.hdfgroup.org/
-   HDF Helpdesk:  https://hdfgroup.atlassian.net/servicedesk/customer/portals
+   HDF Helpdesk:  https://help.hdfgroup.org/
 
 
 ========================================================================
@@ -359,7 +359,7 @@ III. Full installation instructions for source distributions
         source code.  For additional configuration options and other details,
         see "API Compatibility Macros":
 
-            hdfgroup.github.io/hdf5/develop/api-compat-macros.html
+            https://hdfgroup.github.io/hdf5/develop/api-compat-macros.html
 
    4. Building
         The library, confidence tests, and programs can be built by
@@ -490,7 +490,7 @@ IV. Using the Library
         For information on using HDF5 see the documentation, tutorials and examples
         found here:
 
-           https://portal.hdfgroup.org/display/HDF5/HDF5
+           https://portal.hdfgroup.org/documentation/index.html
 
         A summary of the features included in the built HDF5 installation can be found
         in the libhdf5.settings file in the same directory as the static and/or

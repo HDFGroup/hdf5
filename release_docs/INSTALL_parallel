@@ -44,7 +44,7 @@ and the parallel file system.
 For help with installing, questions can be posted to the HDF Forum or sent to the HDF Helpdesk:
 
    HDF Forum:     https://forum.hdfgroup.org/
-   HDF Helpdesk:  https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk
+   HDF Helpdesk:  https://help.hdfgroup.org/
 
 In your mail, please include the output of "uname -a". If you have run the
 "configure" command, attach the output of the command and the content of
