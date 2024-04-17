@@ -311,9 +311,11 @@ H5TS__tinfo_init(void)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
+    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Initialize the critical section for modifying the thread info globals */
     H5TS_mutex_init(&H5TS_tinfo_mtx_s, H5TS_MUTEX_TYPE_PLAIN);
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Initialize key for thread-specific API contexts */
 #ifdef H5_HAVE_WIN_THREADS
@@ -324,6 +326,7 @@ H5TS__tinfo_init(void)
         ret_value = FAIL;
 #endif
 
+    fprintf(stderr, "%s: Leaving, ret_value = %d\n", __func__, ret_value);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__tinfo_init() */
 
@@ -344,6 +347,7 @@ H5TS__tinfo_create(void)
     H5TS_tinfo_node_t *ret_value;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
+    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Acquire the lock for modifying the thread info globals */
     /* Note: Must use lock here also, since 'destroy' callback can be
@@ -391,6 +395,7 @@ H5TS__tinfo_create(void)
     ret_value = tinfo_node;
 
 done:
+    fprintf(stderr, "%s: Leaving, ret_value = %p\n", __func__, ret_value);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 }
 

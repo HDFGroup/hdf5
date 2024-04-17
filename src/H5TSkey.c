@@ -171,6 +171,7 @@ H5TS_key_create(H5TS_key_t *key, H5TS_key_destructor_func_t dtor)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Sanity check */
     if (H5_UNLIKELY(NULL == key))
@@ -185,6 +186,7 @@ H5TS_key_create(H5TS_key_t *key, H5TS_key_destructor_func_t dtor)
         HGOTO_DONE(FAIL);
 
 done:
+    fprintf(stderr, "%s: Leaving, ret_value = %d\n", __func__, ret_value);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_key_create() */
 
