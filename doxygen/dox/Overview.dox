@@ -25,9 +25,9 @@ documents cover a mix of tasks, concepts, and reference, to help a specific
      here:
      - <a href="https://\DOXURL/index.html">HDF5 <code>develop</code> branch (this site)</a>
      - <a href="https://hdfgroup.github.io/hdf5/v1_14/index.html">HDF5 1.14.x</a>
-     - <a href="https://docs.hdfgroup.org/hdf5/v1_12/index.html">HDF5 1.12.x</a>
-     - <a href="https://docs.hdfgroup.org/hdf5/v1_10/index.html">HDF5 1.10.x</a>
-     - <a href="https://docs.hdfgroup.org/hdf5/v1_8/index.html">HDF5 1.8.x</a>
+     - <a href="https://\HDFURL/v1_12/index.html">HDF5 1.12.x</a>
+     - <a href="https://\HDFURL/v1_10/index.html">HDF5 1.10.x</a>
+     - <a href="https://\HDFURL/v1_8/index.html">HDF5 1.8.x</a>
 
 \par Search
      If you are looking for a specific function, constant, type, etc., use the

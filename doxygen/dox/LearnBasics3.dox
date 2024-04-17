@@ -167,7 +167,7 @@ to a new with a new layout.
 
 \section secLBDsetLayoutSource Sources of Information
 <a href="https://\DOCURL/chunking_in_hdf5.html">Chunking in HDF5</a>
-(See the documentation on <a href="https://confluence.hdfgroup.org/display/HDF5/Advanced+Topics+in+HDF5">Advanced Topics in HDF5</a>)
+(See the documentation on <a href="https://\DOCURL/advanced_topics_list.html">Advanced Topics in HDF5</a>)
 \see \ref sec_plist in the HDF5 \ref UG.
 
 <hr>
