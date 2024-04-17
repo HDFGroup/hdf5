@@ -533,42 +533,6 @@ if (BUILD_STATIC_EXECS)
   endif ()
 endif ()
 
-option (HDF5_ENABLE_ANALYZER_TOOLS "enable the use of Clang tools" OFF)
-mark_as_advanced (HDF5_ENABLE_ANALYZER_TOOLS)
-if (HDF5_ENABLE_ANALYZER_TOOLS)
-  include (${HDF5_SOURCE_DIR}/config/sanitizer/tools.cmake)
-endif ()
-option (HDF5_ENABLE_SANITIZERS "execute the Clang sanitizer" OFF)
-mark_as_advanced (HDF5_ENABLE_SANITIZERS)
-if (HDF5_ENABLE_SANITIZERS)
-  include (${HDF5_SOURCE_DIR}/config/sanitizer/sanitizers.cmake)
-endif ()
-option (HDF5_ENABLE_FORMATTERS "format source files" OFF)
-mark_as_advanced (HDF5_ENABLE_FORMATTERS)
-if (HDF5_ENABLE_FORMATTERS)
-  include (${HDF5_SOURCE_DIR}/config/sanitizer/formatting.cmake)
-endif ()
-
-#-----------------------------------------------------------------------------
-# Option to use code coverage
-#-----------------------------------------------------------------------------
-option (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF)
-if (HDF5_ENABLE_COVERAGE)
-  include (${HDF5_SOURCE_DIR}/config/sanitizer/code-coverage.cmake)
-  if(CODE_COVERAGE AND CODE_COVERAGE_ADDED)
-    add_code_coverage () # Adds instrumentation to all targets
-  else ()
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g --coverage -O0 -fprofile-arcs -ftest-coverage")
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-      set (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
-      link_libraries (gcov)
-    else ()
-      set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
-    endif ()
-  endif ()
-endif ()
-
 #-----------------------------------------------------------------------------
 # Option to indicate using a memory checker
 #-----------------------------------------------------------------------------
@@ -1172,6 +1136,42 @@ if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR
     include (${HDF_RESOURCES_DIR}/HDF5ExampleCache.cmake)
     set (HDF5_VERSION ${HDF5_PACKAGE_VERSION})
     add_subdirectory (HDF5Examples)
+  endif ()
+endif ()
+
+option (HDF5_ENABLE_ANALYZER_TOOLS "enable the use of Clang tools" OFF)
+mark_as_advanced (HDF5_ENABLE_ANALYZER_TOOLS)
+if (HDF5_ENABLE_ANALYZER_TOOLS)
+  include (${HDF5_SOURCE_DIR}/config/sanitizer/tools.cmake)
+endif ()
+option (HDF5_ENABLE_SANITIZERS "execute the Clang sanitizer" OFF)
+mark_as_advanced (HDF5_ENABLE_SANITIZERS)
+if (HDF5_ENABLE_SANITIZERS)
+  include (${HDF5_SOURCE_DIR}/config/sanitizer/sanitizers.cmake)
+endif ()
+option (HDF5_ENABLE_FORMATTERS "format source files" OFF)
+mark_as_advanced (HDF5_ENABLE_FORMATTERS)
+if (HDF5_ENABLE_FORMATTERS)
+  include (${HDF5_SOURCE_DIR}/config/sanitizer/formatting.cmake)
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to use code coverage
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF)
+if (HDF5_ENABLE_COVERAGE)
+  include (${HDF5_SOURCE_DIR}/config/sanitizer/code-coverage.cmake)
+  if(CODE_COVERAGE AND CODE_COVERAGE_ADDED)
+    add_code_coverage () # Adds instrumentation to all targets
+  else ()
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g --coverage -O0 -fprofile-arcs -ftest-coverage")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+      set (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
+      link_libraries (gcov)
+    else ()
+      set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+    endif ()
   endif ()
 endif ()
 
