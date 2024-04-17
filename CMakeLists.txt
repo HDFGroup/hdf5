@@ -758,10 +758,10 @@ if (Threads_FOUND)
   elseif (HAVE_THREADS_H)
     # When C11 threads are available, those are the top choice
     set (H5_HAVE_C11_THREADS 1)
+  elseif (THREADS_HAVE_PTHREAD_ARG)
+    set (H5_HAVE_PTHREAD_H 1)
   else ()
-    if (NOT H5_HAVE_PTHREAD_H)
-      message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
-    endif ()
+    message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
   endif ()
 
   # Check for compiler support for atomic variables
