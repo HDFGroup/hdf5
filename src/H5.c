@@ -137,13 +137,10 @@ H5_init_library(void)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
-    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Run the library initialization routine, if it hasn't already run */
-    if (H5_INIT_GLOBAL || H5_TERM_GLOBAL) {
-        fprintf(stderr, "%s: Already initialized\n", __func__);
+    if (H5_INIT_GLOBAL || H5_TERM_GLOBAL)
         HGOTO_DONE(SUCCEED);
-    }
 
     /* Set the 'library initialized' flag as early as possible, to avoid
      * possible re-entrancy.
@@ -277,7 +274,6 @@ H5_init_library(void)
     H5__debug_mask(getenv("HDF5_DEBUG"));
 
 done:
-    fprintf(stderr, "%s: Leaving\n", __func__);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_init_library() */
 

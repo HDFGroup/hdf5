@@ -115,7 +115,6 @@ H5TS__init(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
-    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Initialize the global API lock info */
     if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_api_info_p.api_mutex, H5TS_MUTEX_TYPE_RECURSIVE) < 0))
@@ -311,24 +310,19 @@ H5TS__tinfo_init(void)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
-    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Initialize the critical section for modifying the thread info globals */
     H5TS_mutex_init(&H5TS_tinfo_mtx_s, H5TS_MUTEX_TYPE_PLAIN);
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Initialize key for thread-specific API contexts */
 #ifdef H5_HAVE_WIN_THREADS
     if (H5_UNLIKELY(H5TS_key_create(&H5TS_thrd_info_key_g, NULL) < 0))
         ret_value = FAIL;
-    fprintf(stderr, "%s:%u - H5TS_thrd_info_key_g = %llu\n", __func__, __LINE__,
-            (unsigned long long)H5TS_thrd_info_key_g);
 #else
     if (H5_UNLIKELY(H5TS_key_create(&H5TS_thrd_info_key_g, H5TS__tinfo_destroy) < 0))
         ret_value = FAIL;
 #endif
 
-    fprintf(stderr, "%s: Leaving, ret_value = %d\n", __func__, ret_value);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__tinfo_init() */
 
@@ -349,7 +343,6 @@ H5TS__tinfo_create(void)
     H5TS_tinfo_node_t *ret_value;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
-    fprintf(stderr, "%s: Entering\n", __func__);
 
     /* Acquire the lock for modifying the thread info globals */
     /* Note: Must use lock here also, since 'destroy' callback can be
@@ -357,12 +350,10 @@ H5TS__tinfo_create(void)
      */
     if (H5_UNLIKELY(H5TS_mutex_lock(&H5TS_tinfo_mtx_s) < 0))
         HGOTO_DONE(NULL);
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Reuse an info struct that's on the free list if possible */
     if (NULL != (tinfo_node = H5TS_tinfo_next_free_s))
         H5TS_tinfo_next_free_s = tinfo_node->next;
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Always use unique ID value for each thread, even when recycling a
      * H5TS_tinfo_node_t from the free list.
@@ -374,7 +365,6 @@ H5TS__tinfo_create(void)
     /* Release the lock for modifying the thread info globals */
     if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_tinfo_mtx_s) < 0))
         HGOTO_DONE(NULL);
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* If a new info record is needed, allocate it */
     if (NULL == tinfo_node) {
@@ -382,7 +372,6 @@ H5TS__tinfo_create(void)
             HGOTO_DONE(NULL);
         tinfo_node->next = NULL;
     }
-    fprintf(stderr, "%s:%u - tinfo_node = %p\n", __func__, __LINE__, tinfo_node);
 
     /* Reset thread info struct */
     memset(tinfo_node, 0, sizeof(*tinfo_node));
@@ -390,21 +379,17 @@ H5TS__tinfo_create(void)
     /* Set up non-zero per-thread info */
     tinfo_node->info.id = new_id;                       /* ID */
     H5E__set_default_auto(&tinfo_node->info.err_stack); /* Error stack */
-    fprintf(stderr, "%s:%u - H5TS_thrd_info_key_g = %llu\n", __func__, __LINE__,
-            (unsigned long long)H5TS_thrd_info_key_g);
 
     /* Set a thread-local pointer to the thread's info record */
     if (H5_UNLIKELY(H5TS_key_set_value(H5TS_thrd_info_key_g, tinfo_node))) {
         H5TS__tinfo_destroy(tinfo_node);
         HGOTO_DONE(NULL);
     }
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Success */
     ret_value = tinfo_node;
 
 done:
-    fprintf(stderr, "%s: Leaving, ret_value = %p\n", __func__, ret_value);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 }
 
@@ -467,13 +452,10 @@ H5TS_get_api_ctx_ptr(void)
     struct H5CX_node_t **ret_value;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-    fprintf(stderr, "%s: Entering, H5TS_thrd_info_key_g = %llu\n", __func__,
-            (unsigned long long)H5TS_thrd_info_key_g);
 
     /* Check if info for thread has been created */
     if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, (void **)&tinfo_node) < 0))
         HGOTO_DONE(NULL);
-    fprintf(stderr, "%s:%u tinfo_node = %p\n", __func__, __LINE__, tinfo_node);
     if (NULL == tinfo_node)
         /* Create thread info for this thread */
         if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
@@ -483,7 +465,6 @@ H5TS_get_api_ctx_ptr(void)
     ret_value = &tinfo_node->info.api_ctx_node_ptr;
 
 done:
-    fprintf(stderr, "%s: Leaving, ret_value = %p\n", __func__, ret_value);
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_get_api_ctx_ptr() */
 
