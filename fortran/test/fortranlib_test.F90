@@ -142,12 +142,17 @@ PROGRAM fortranlibtest
 !      '========================================='
 
   ret_total_error = 0
+  CALL genreftest(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' General References test', total_error)
+
+  ret_total_error = 0
   CALL refobjtest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Reference to object test', total_error)
 
   ret_total_error = 0
   CALL refregtest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Reference to dataset region test', total_error)
+
 
 !
 !      '========================================='

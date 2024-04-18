@@ -76,7 +76,7 @@ MODULE H5R
   END TYPE hdset_reg_ref_t_f03
 
   TYPE, BIND(C) :: H5R_ref_t
-      INTEGER(C_INT8_T), DIMENSION(1:H5R_REF_BUF_SIZE_F) :: __data
+      INTEGER(C_INT8_T), DIMENSION(1:H5R_REF_BUF_SIZE_F) :: data
       INTEGER(C_INT64_T) :: align
   END TYPE
 
@@ -655,7 +655,7 @@ CONTAINS
 !! \param oapl_id  Object access property list identifier
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref  H5Ropen_object()
+!! See C API: @ref H5Ropen_object()
 !!
   SUBROUTINE h5ropen_object_f(ref_ptr, rapl_id, oapl_id, hdferr)
 
@@ -664,10 +664,10 @@ CONTAINS
     TYPE(C_PTR)                :: ref_ptr
     INTEGER(HID_T), INTENT(IN) :: rapl_id
     INTEGER(HID_T), INTENT(IN) :: oapl_id
-    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER, INTENT(OUT)       :: hdferr
 
     INTERFACE
-       INTEGER(C_INT) FUNCTION H5Ropen_object_f(ref_ptr, rapl_id, oapl_id) &
+       INTEGER(C_INT) FUNCTION H5Ropen_object(ref_ptr, rapl_id, oapl_id) &
             BIND(C, NAME='H5Ropen_object')
          IMPORT :: C_PTR, C_INT
          IMPORT :: HID_T
@@ -675,11 +675,78 @@ CONTAINS
          TYPE(C_PTR)   , VALUE :: ref_ptr
          INTEGER(HID_T), VALUE :: rapl_id
          INTEGER(HID_T), VALUE :: oapl_id
-       END FUNCTION H5Ropen_object_f
+       END FUNCTION H5Ropen_object
     END INTERFACE
 
-    hdferr = INT(H5Ropen_object_f(ref_ptr, rapl_id, oapl_id))
+    hdferr = INT(H5Ropen_object(ref_ptr, rapl_id, oapl_id))
 
   END SUBROUTINE h5ropen_object_f
+
+!>
+!! \ingroup FH5R
+!!
+!! \brief Copies an existing reference.
+!!
+!! \param src_ref_ptr Pointer to reference to copy, of TYPE(H5R_ref_t)
+!! \param dst_ref_ptr Pointer to output reference, of TYPE(H5R_ref_t)
+!! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5Rcopy()
+!!
+  SUBROUTINE h5rcopy_f(src_ref_ptr, dst_ref_ptr, hdferr)
+
+    IMPLICIT NONE
+
+    TYPE(C_PTR) :: src_ref_ptr
+    TYPE(C_PTR) :: dst_ref_ptr
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Rcopy(src_ref_ptr, dst_ref_ptr) &
+            BIND(C, NAME='H5Rcopy')
+         IMPORT :: C_PTR, C_INT
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: src_ref_ptr
+         TYPE(C_PTR), VALUE :: dst_ref_ptr
+       END FUNCTION H5Rcopy
+    END INTERFACE
+
+    hdferr = INT(H5Rcopy(src_ref_ptr, dst_ref_ptr))
+
+  END SUBROUTINE h5rcopy_f
+
+!>
+!! \ingroup FH5R
+!!
+!! \brief Retrieves the type of a reference.
+!!
+!! \param ref_ptr Pointer to reference to copy, of TYPE(H5R_ref_t)
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Rget_type()
+!!
+  SUBROUTINE h5rget_type_f(ref_ptr, ref_type, hdferr)
+
+    IMPLICIT NONE
+
+    TYPE(C_PTR) :: ref_ptr
+    INTEGER, INTENT(OUT) :: ref_type
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Rget_type(ref_ptr) &
+            BIND(C, NAME='H5Rget_type')
+         IMPORT :: C_PTR, C_INT
+         IMPLICIT NONE
+         TYPE(C_PTR) :: ref_ptr
+       END FUNCTION H5Rget_type
+    END INTERFACE
+
+    ref_type = INT(H5Rget_type(ref_ptr))
+
+    hdferr = 0
+    IF(ref_type .EQ. H5R_BADTYPE_F) hdferr = -1
+
+  END SUBROUTINE h5rget_type_f
 
 END MODULE H5R
