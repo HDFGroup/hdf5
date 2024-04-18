@@ -48,15 +48,15 @@ Navigate back: \ref index "Main" / \ref GettingStarted
 
 \section secViewToolsCommandObtain Obtain Tools and Files (Optional)
 Pre-built binaries for Linux and Windows are distributed within the respective HDF5 binary release
-packages, which can be obtained from the <a href="https://portal.hdfgroup.org/downloads/index.html">Download HDF5</a> page.
+packages, which can be obtained from the <a href="https://\DWNURL/index.html">Download HDF5</a> page.
 
 HDF5 files can be obtained from various places such as \ref HDF5Examples and <a href="http://www.hdfeos.org/">HDF-EOS and Tools and
 Information Center</a>. Specifically, the following examples are used in this tutorial topic:
 \li HDF5 Files created from compiling the \ref LBExamples
 \li HDF5 Files on the \ref ExAPI page
-\li NPP JPSS files, <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/SVM01_npp_d20130524_t1255132_e1256374_b08146_c20130524192048864992_noaa_ops.h5.gz">SVM01_npp.. (gzipped)</a>
-and <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5.gz">SVM09_npp.. (gzipped)</a>
-\li HDF-EOS <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/OMI-Aura.he5">OMI-Aura file</a>
+\li NPP JPSS files, <a href="https://\AEXURL/files/tutorial/SVM01_npp_d20130524_t1255132_e1256374_b08146_c20130524192048864992_noaa_ops.h5.gz">SVM01_npp.. (gzipped)</a>
+and <a href="https://\AEXURL/files/tutorial/SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5.gz">SVM09_npp.. (gzipped)</a>
+\li HDF-EOS <a href="https://\AEXURL/files/tutorial/OMI-Aura.he5">OMI-Aura file</a>
 
 \section secViewToolsCommandTutor Tutorial Topics
 A variety of command-line tools are included in the HDF5 binary distribution. There are tools to view,
@@ -196,44 +196,29 @@ The following h5dump options can be helpful in viewing the content and structure
 <th>Comment</th>
 </tr>
 <tr>
-<td>-n, --contents
-</td>
-<td>Displays a list of the objects in a file
-</td>
-<td>See @ref subsubsecViewToolsViewContent_h5dumpEx1
-</td>
+<td>-n, --contents</td>
+<td>Displays a list of the objects in a file</td>
+<td>See @ref subsubsecViewToolsViewContent_h5dumpEx1</td>
 </tr>
 <tr>
-<td>-n 1, --contents=1
-</td>
-<td>Displays a list of the objects and attributes in a file
-</td>
-<td>See @ref subsubsecViewToolsViewAttr_h5dumpEx6
-</td>
+<td>-n 1, --contents=1</td>
+<td>Displays a list of the objects and attributes in a file</td>
+<td>See @ref subsubsecViewToolsViewAttr_h5dumpEx6</td>
 </tr>
 <tr>
-<td>-H, --header
-</td>
-<td>Displays header information only (no data)
-</td>
-<td>See @ref subsubsecViewToolsViewContent_h5dumpEx2
-</td>
+<td>-H, --header</td>
+<td>Displays header information only (no data)</td>
+<td>See @ref subsubsecViewToolsViewContent_h5dumpEx2</td>
 </tr>
 <tr>
-<td>-A 0, --onlyattr=0
-</td>
-<td>Suppresses the display of attributes
-</td>
-<td>See @ref subsubsecViewToolsViewContent_h5dumpEx2
-</td>
+<td>-A 0, --onlyattr=0</td>
+<td>Suppresses the display of attributes</td>
+<td>See @ref subsubsecViewToolsViewContent_h5dumpEx2</td>
 </tr>
 <tr>
-<td>-N P, --any_path=P
-</td>
-<td>Displays any object or attribute that matches path P
-</td>
-<td>See @ref subsubsecViewToolsViewAttr_h5dumpEx6
-</td>
+<td>-N P, --any_path=P</td>
+<td>Displays any object or attribute that matches path P</td>
+<td>See @ref subsubsecViewToolsViewAttr_h5dumpEx6</td>
 </tr>
 </table>
 
@@ -997,7 +982,7 @@ In other words, it is an array of four elements, in which each element is a 3 by
 
 This dataset is much more complex. Also note that subsetting cannot be done on Array datatypes.
 
-See this <a href="https://docs.hdfgroup.org/hdf5/develop/_l_b_datatypes.html">section</a> for more information on the Array datatype.
+See this <a href="https://\DOXURL/_l_b_datatypes.html">section</a> for more information on the Array datatype.
 
 \subsubsection subsubsecViewToolsViewDtypes_objref Object Reference
 An Object Reference is a reference to an entire object (dataset, group, or named datatype).

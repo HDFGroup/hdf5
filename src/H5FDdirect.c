@@ -263,7 +263,6 @@ H5Pset_fapl_direct(hid_t fapl_id, size_t boundary, size_t block_size, size_t cbu
     herr_t             ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "izzz", fapl_id, boundary, block_size, cbuf_size);
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
@@ -298,7 +297,6 @@ H5Pget_fapl_direct(hid_t fapl_id, size_t *boundary /*out*/, size_t *block_size /
     herr_t                    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*z*z*z", fapl_id, boundary, block_size, cbuf_size);
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");

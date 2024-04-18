@@ -281,7 +281,6 @@ H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out)
     herr_t                        ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*!", fapl_id, fa_out);
 
     if (NULL == fa_out)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL info-out pointer");
@@ -323,7 +322,6 @@ H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
     herr_t          ret_value      = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*!", fapl_id, fa);
 
     if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not a valid FAPL ID");
@@ -1667,7 +1665,6 @@ H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, uint64_t *revi
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*si*UL", filename, fapl_id, revision_count);
 
     /* Check args */
     if (!filename || !strcmp(filename, ""))

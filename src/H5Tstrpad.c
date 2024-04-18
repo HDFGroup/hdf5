@@ -43,7 +43,6 @@ H5Tget_strpad(hid_t type_id)
     H5T_str_t ret_value;
 
     FUNC_ENTER_API(H5T_STR_ERROR)
-    H5TRACE1("Tz", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -92,7 +91,6 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iTz", type_id, strpad);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))

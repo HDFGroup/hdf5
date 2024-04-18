@@ -93,7 +93,6 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo /*out*/)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*!", obj_id, finfo);
 
     /* Check args */
     if (!finfo)
@@ -149,7 +148,6 @@ H5Fis_hdf5(const char *name)
     htri_t                    ret_value;             /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE1("t", "*s", name);
 
     /* Check args and all the boring stuff. */
     if (!name || !*name)
@@ -214,7 +212,6 @@ H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
     herr_t                           ret_value = SUCCEED;           /* Return value                 */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ib", file_id, latest_format);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))

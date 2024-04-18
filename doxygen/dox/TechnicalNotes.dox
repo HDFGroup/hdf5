@@ -3,12 +3,14 @@
 \li \ref api-compat-macros
 \li \ref APPDBG
 \li \ref FMTDISC
+\li \ref FILEIMGOPS
 \li \ref FILTER
 \li \ref IOFLOW
 \li \ref TNMDC
 \li \ref MT
 \li \ref SWMR
 \li \ref VDS
+\li \ref RELVERSION
 \li \ref VFL
 
  */
@@ -25,6 +27,12 @@
 
 */
 
+/** \page RELVERSION HDF5 Library Release Version Numbers
+
+\htmlinclude LibraryReleaseVersionNumbers.html
+
+*/
+
 /** \page VFL HDF5 Virtual File Layer
 
 \htmlinclude VFL.html
@@ -34,6 +42,12 @@
 /** \page FMTDISC HDF5 File Format Discussion
 
 \htmlinclude FileFormat.html
+
+*/
+
+/** \page FILEIMGOPS HDF5 File Image Operations
+
+\htmlinclude FileImageOps.html
 
 */
 
@@ -60,3 +74,4 @@
 \htmlinclude intro_VDS.html
 
 */
+

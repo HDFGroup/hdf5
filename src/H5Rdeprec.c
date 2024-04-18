@@ -254,7 +254,6 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
     H5G_obj_t              ret_value;         /* Return value */
 
     FUNC_ENTER_API(H5G_UNKNOWN)
-    H5TRACE3("Go", "iRt*x", id, ref_type, ref);
 
     /* Check args */
     if (buf == NULL)
@@ -329,7 +328,6 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "iRt*x", obj_id, ref_type, ref);
 
     /* Check args */
     if (buf == NULL)
@@ -408,7 +406,6 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
     herr_t         ret_value         = SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*xi*sRti", ref, loc_id, name, ref_type, space_id);
 
     /* Check args */
     if (buf == NULL)
@@ -527,7 +524,6 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref, H5O_type_t *obj
     herr_t                 ret_value         = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iRt*x*Ot", id, ref_type, ref, obj_type);
 
     /* Check args */
     if (buf == NULL)
@@ -599,7 +595,6 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *re
     hid_t                ret_value         = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE4("i", "iiRt*x", obj_id, oapl_id, ref_type, ref);
 
     /* Check args */
     if (oapl_id < 0)
@@ -682,7 +677,6 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
     hid_t ret_value;                        /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "iRt*x", id, ref_type, ref);
 
     /* Check args */
     if (buf == NULL)
@@ -765,7 +759,6 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name /*out*/, 
     ssize_t                ret_value    = -1;                         /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE5("Zs", "iRt*x*sz", id, ref_type, ref, name, size);
 
     /* Check args */
     if (buf == NULL)

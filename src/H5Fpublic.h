@@ -1956,10 +1956,8 @@ H5_DLL herr_t H5Fget_info1(hid_t obj_id, H5F_info1_t *file_info);
  *
  * \return \herr_t
  *
- * \deprecated When?
- *
- * \todo In which version was this function introduced?
- * \todo In which version was this function deprecated?
+ * \since 1.10.1
+ * \deprecated 1.10.2 Deprecated in favor of the function H5Fset_libver_bounds()
  *
  */
 H5_DLL herr_t H5Fset_latest_format(hid_t file_id, hbool_t latest_format);
@@ -1972,12 +1970,10 @@ H5_DLL herr_t H5Fset_latest_format(hid_t file_id, hbool_t latest_format);
  *
  * \return \htri_t
  *
- * \deprecated When?
- *
  * \details H5Fis_hdf5() determines whether a file is in the HDF5 format.
  *
- * \todo In which version was this function deprecated?
- * \todo In which version was this function introduced?
+ * \since 1.0.0
+ * \deprecated 1.12.0 Deprecated in favor of the function H5Fis_accessible()
  *
  */
 H5_DLL htri_t H5Fis_hdf5(const char *file_name);

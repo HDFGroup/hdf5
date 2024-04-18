@@ -541,6 +541,8 @@ H5_DLL hssize_t H5Sget_select_elem_npoints(hid_t spaceid);
  * \param[in] numpoints   Number of element points to get
  * \param[out] buf        List of element points selected
  *
+ * \return \herr_t
+ *
  * \details H5Sget_select_elem_pointlist() returns the list of element
  *          points in the current dataspace selection \p space_id. Starting
  *          with the \p startpoint in the list of points, \p numpoints
