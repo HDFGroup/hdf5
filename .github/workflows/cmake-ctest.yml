@@ -505,7 +505,7 @@ jobs:
         id: setup-fortran
         with:
           compiler: intel
-          version: '2023.2'
+          version: '2024.1'
 
       - name: Set file base name (Linux_intel)
         id: set-file-base
