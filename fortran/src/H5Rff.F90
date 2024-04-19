@@ -720,8 +720,9 @@ CONTAINS
 !!
 !! \brief Retrieves the type of a reference.
 !!
-!! \param ref_ptr Pointer to reference to copy, of TYPE(H5R_ref_t)
-!! \param hdferr  \fortran_error
+!! \param ref_ptr  Pointer to reference to copy, of TYPE(H5R_ref_t)
+!! \param ref_type A reference type
+!! \param hdferr   \fortran_error
 !!
 !! See C API: @ref H5Rget_type()
 !!
