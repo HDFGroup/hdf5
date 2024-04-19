@@ -21,6 +21,10 @@
  * file. This is reflected in the source (H5FDmirror.c) of the Mirror driver.
  */
 
+#include "mirror_remote.h"
+
+#ifdef H5_HAVE_MIRROR_VFD
+
 /*
  * This file needs to access private information from the H5FD package.
  * This file also needs to access the file testing code.
@@ -28,10 +32,6 @@
 #define H5FD_FRIEND /*suppress error about including H5FDpkg   */
 #define H5FD_TESTING
 #include "H5FDpkg.h" /* File Drivers         */
-
-#include "mirror_remote.h"
-
-#ifdef H5_HAVE_MIRROR_VFD
 
 #define HEXDUMP_XMITS 1     /* Toggle whether to print xmit bytes-blob */
                             /* in detailed logging  */
