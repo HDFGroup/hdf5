@@ -81,7 +81,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - `$ git checkout hdf5_X_Y`
     - `$ git checkout -b hdf5_X_Y_Z`
     - or create the new branch in GitHub GUI.
-4. Check that required CMake files point to the specific versions of the third-party software (szip and zlib) that they depend on.
+4. Check that required CMake files point to the specific versions of the third-party software (szip, zlib and plugins) that they depend on.
     - Update as needed.
 5. Change the **support** branch to X.Y.{Z+1}-1 using the [bin/h5vers](https://github.com/HDFGroup/hdf5/blob/develop/bin/h5vers) script: 
     - `$ git checkout hdf5_X_Y`
