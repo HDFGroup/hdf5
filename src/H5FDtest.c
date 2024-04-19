@@ -420,6 +420,60 @@ done:
 } /* end H5FDtruncate_test() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FDlock_test()
+ *
+ * Purpose:	Wrapper for using H5FDlock() in internal tests.  Pushes
+ *              an API context, so that the internal routines will have
+ *              one to get values from.
+ *
+ *              This function is only intended for use in the test code.
+ *
+ * Return:	Value from underlying routine
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDlock_test(H5FD_t *file, hbool_t rw)
+{
+    herr_t ret_value;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Call developer routine */
+    ret_value = H5FDlock(file, rw);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDlock_test() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDunlock_test()
+ *
+ * Purpose:	Wrapper for using H5FDunlock() in internal tests.  Pushes
+ *              an API context, so that the internal routines will have
+ *              one to get values from.
+ *
+ *              This function is only intended for use in the test code.
+ *
+ * Return:	Value from underlying routine
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDunlock_test(H5FD_t *file)
+{
+    herr_t ret_value;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Call developer routine */
+    ret_value = H5FDunlock(file);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDunlock_test() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5FDctl_test()
  *
  * Purpose:	Wrapper for using H5FDctl() in internal tests.  Pushes

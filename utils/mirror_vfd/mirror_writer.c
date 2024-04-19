@@ -220,23 +220,16 @@ error:
 static int
 session_stop(struct mirror_session *session)
 {
-    bool api_ctx_pushed = false; /* Whether API context pushed   */
     int  ret_value      = 0;
 
     assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "session_stop()");
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        ret_value--;
-    else
-        api_ctx_pushed = true;
-
     /* Close HDF5 file if it is still open (probably in error) */
     if (session->file) {
         mirror_log(session->loginfo, V_WARN, "HDF5 file still open at cleanup");
-        if (H5FDclose(session->file) < 0) {
+        if (H5FDclose_test(session->file) < 0) {
             mirror_log(session->loginfo, V_ERR, "H5FDclose() during cleanup!");
             ret_value--;
         }
@@ -254,9 +247,6 @@ session_stop(struct mirror_session *session)
     /* Invalidate and release structure */
     session->magic++;
     free(session);
-
-    if (api_ctx_pushed)
-        H5CX_pop(false);
 
     return ret_value;
 } /* end session_stop() */
@@ -406,17 +396,9 @@ reply_error(struct mirror_session *session, const char *msg)
 static int
 do_close(struct mirror_session *session)
 {
-    bool api_ctx_pushed = false; /* Whether API context pushed   */
-
     assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "do_close()");
-
-    /* Push API context */
-    if (H5CX_push() < 0)
-        return -1;
-    else
-        api_ctx_pushed = true;
 
     if (NULL == session->file) {
         mirror_log(session->loginfo, V_ERR, "no file to close!");
@@ -424,7 +406,7 @@ do_close(struct mirror_session *session)
         return -1;
     }
 
-    if (H5FDclose(session->file) < 0) {
+    if (H5FDclose_test(session->file) < 0) {
         mirror_log(session->loginfo, V_ERR, "H5FDclose()");
         reply_error(session, "H5FDclose()");
         return -1;
@@ -436,9 +418,6 @@ do_close(struct mirror_session *session)
         reply_error(session, "ok reply failed; session contaminated");
         return -1;
     }
-
-    if (api_ctx_pushed)
-        H5CX_pop(false);
 
     return 0;
 } /* end do_close() */
@@ -456,17 +435,10 @@ do_lock(struct mirror_session *session, const unsigned char *xmit_buf)
 {
     size_t                  decode_ret = 0;
     H5FD_mirror_xmit_lock_t xmit_lock;
-    bool                    api_ctx_pushed = false; /* Whether API context pushed   */
 
     assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
 
     mirror_log(session->loginfo, V_INFO, "do_lock()");
-
-    /* Push API context */
-    if (H5CX_push() < 0)
-        return -1;
-    else
-        api_ctx_pushed = true;
 
     decode_ret = H5FD_mirror_xmit_decode_lock(&xmit_lock, xmit_buf);
     if (H5FD_MIRROR_XMIT_LOCK_SIZE != decode_ret) {
@@ -482,7 +454,7 @@ do_lock(struct mirror_session *session, const unsigned char *xmit_buf)
     }
     mirror_log(session->loginfo, V_INFO, "lock rw: (%d)", xmit_lock.rw);
 
-    if (H5FDlock(session->file, (bool)xmit_lock.rw) < 0) {
+    if (H5FDlock_test(session->file, (bool)xmit_lock.rw) < 0) {
         mirror_log(session->loginfo, V_ERR, "H5FDlock()");
         reply_error(session, "remote H5FDlock() failure");
         return -1;
@@ -493,9 +465,6 @@ do_lock(struct mirror_session *session, const unsigned char *xmit_buf)
         reply_error(session, "ok reply failed; session contaminated");
         return -1;
     }
-
-    if (api_ctx_pushed)
-        H5CX_pop(false);
 
     return 0;
 } /* end do_lock() */
@@ -514,7 +483,6 @@ do_open(struct mirror_session *session, const H5FD_mirror_xmit_open_t *xmit_open
     hid_t    fapl_id        = H5I_INVALID_HID;
     unsigned _flags         = 0;
     haddr_t  _maxaddr       = HADDR_UNDEF;
-    bool     api_ctx_pushed = false; /* Whether API context pushed   */
 
     assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_open &&
            true == H5FD_mirror_xmit_is_open(xmit_open));
@@ -564,13 +532,7 @@ do_open(struct mirror_session *session, const H5FD_mirror_xmit_open_t *xmit_open
         goto error;
     }
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        goto error;
-    else
-        api_ctx_pushed = true;
-
-    session->file = H5FDopen(xmit_open->filename, _flags, fapl_id, _maxaddr);
+    session->file = H5FDopen_test(xmit_open->filename, _flags, fapl_id, _maxaddr);
     if (NULL == session->file) {
         mirror_log(session->loginfo, V_ERR, "H5FDopen()");
         reply_error(session, "remote H5FDopen() failure");
@@ -590,15 +552,9 @@ do_open(struct mirror_session *session, const H5FD_mirror_xmit_open_t *xmit_open
         return -1;
     }
 
-    if (api_ctx_pushed)
-        H5CX_pop(false);
-
     return 0;
 
 error:
-    if (api_ctx_pushed)
-        H5CX_pop(false);
-
     if (fapl_id > 0) {
         H5E_BEGIN_TRY
         {
@@ -622,17 +578,10 @@ do_set_eoa(struct mirror_session *session, const unsigned char *xmit_buf)
 {
     size_t                 decode_ret = 0;
     H5FD_mirror_xmit_eoa_t xmit_seoa;
-    bool                   api_ctx_pushed = false; /* Whether API context pushed   */
 
     assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
 
     mirror_log(session->loginfo, V_INFO, "do_set_eoa()");
-
-    /* Push API context */
-    if (H5CX_push() < 0)
-        return -1;
-    else
-        api_ctx_pushed = true;
 
     decode_ret = H5FD_mirror_xmit_decode_set_eoa(&xmit_seoa, xmit_buf);
     if (H5FD_MIRROR_XMIT_EOA_SIZE != decode_ret) {
@@ -649,7 +598,7 @@ do_set_eoa(struct mirror_session *session, const unsigned char *xmit_buf)
 
     mirror_log(session->loginfo, V_INFO, "set EOA addr %d", xmit_seoa.eoa_addr);
 
-    if (H5FDset_eoa(session->file, (H5FD_mem_t)xmit_seoa.type, (haddr_t)xmit_seoa.eoa_addr) < 0) {
+    if (H5FDset_eoa_test(session->file, (H5FD_mem_t)xmit_seoa.type, (haddr_t)xmit_seoa.eoa_addr) < 0) {
         mirror_log(session->loginfo, V_ERR, "H5FDset_eoa()");
         reply_error(session, "remote H5FDset_eoa() failure");
         return -1;
@@ -660,9 +609,6 @@ do_set_eoa(struct mirror_session *session, const unsigned char *xmit_buf)
         reply_error(session, "ok reply failed; session contaminated");
         return -1;
     }
-
-    if (api_ctx_pushed)
-        H5CX_pop(false);
 
     return 0;
 } /* end do_set_eoa() */
@@ -678,20 +624,12 @@ do_set_eoa(struct mirror_session *session, const unsigned char *xmit_buf)
 static int
 do_truncate(struct mirror_session *session)
 {
-    bool api_ctx_pushed = false; /* Whether API context pushed   */
-
     assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "do_truncate()");
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        return -1;
-    else
-        api_ctx_pushed = true;
-
     /* default DXPL ID (0), 0 for "false" closing -- both probably unused */
-    if (H5FDtruncate(session->file, 0, 0) < 0) {
+    if (H5FDtruncate_test(session->file, 0, 0) < 0) {
         mirror_log(session->loginfo, V_ERR, "H5FDtruncate()");
         reply_error(session, "remote H5FDtruncate() failure");
         return -1;
@@ -702,9 +640,6 @@ do_truncate(struct mirror_session *session)
         reply_error(session, "ok reply failed; session contaminated");
         return -1;
     }
-
-    if (api_ctx_pushed)
-        H5CX_pop(false);
 
     return 0;
 } /* end do_truncate() */
@@ -720,19 +655,11 @@ do_truncate(struct mirror_session *session)
 static int
 do_unlock(struct mirror_session *session)
 {
-    bool api_ctx_pushed = false; /* Whether API context pushed   */
-
     assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "do_unlock()");
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        return -1;
-    else
-        api_ctx_pushed = true;
-
-    if (H5FDunlock(session->file) < 0) {
+    if (H5FDunlock_test(session->file) < 0) {
         mirror_log(session->loginfo, V_ERR, "H5FDunlock()");
         reply_error(session, "remote H5FDunlock() failure");
         return -1;
@@ -743,9 +670,6 @@ do_unlock(struct mirror_session *session)
         reply_error(session, "ok reply failed; session contaminated");
         return -1;
     }
-
-    if (api_ctx_pushed)
-        H5CX_pop(false);
 
     return 0;
 } /* end do_unlock() */
@@ -774,7 +698,6 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
     char                    *buf               = NULL;
     ssize_t                  nbytes_in_packet  = 0;
     H5FD_mirror_xmit_write_t xmit_write;
-    bool                     api_ctx_pushed = false; /* Whether API context pushed   */
 
     assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
 
@@ -820,12 +743,6 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
 
     mirror_log(session->loginfo, V_INFO, "to write %zu bytes at %zu", xmit_write.size, addr);
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        return -1;
-    else
-        api_ctx_pushed = true;
-
     /* The given write may be:
      * 1. larger than the allowed single buffer size
      * 2. larger than the native size_t of this system
@@ -851,7 +768,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
         mirror_log(session->loginfo, V_INFO, "writing %zd bytes at %zu", nbytes_in_packet,
                    (addr + sum_bytes_written));
 
-        if (H5FDwrite(session->file, type, H5P_DEFAULT, (addr + sum_bytes_written), (size_t)nbytes_in_packet,
+        if (H5FDwrite_test(session->file, type, H5P_DEFAULT, (addr + sum_bytes_written), (size_t)nbytes_in_packet,
                       buf) < 0) {
             mirror_log(session->loginfo, V_ERR, "H5FDwrite()");
             reply_error(session, "remote H5FDwrite() failure");
@@ -870,9 +787,6 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
         reply_error(session, "ok reply failed; session contaminated");
         return -1;
     }
-
-    if (api_ctx_pushed)
-        H5CX_pop(false);
 
     return 0;
 } /* end do_write() */

@@ -69,6 +69,8 @@ H5_DLL herr_t  H5FDwrite_selection_test(H5FD_t *file, H5FD_mem_t type, hid_t dxp
                                         hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[],
                                         size_t element_sizes[], const void *bufs[]);
 H5_DLL herr_t  H5FDtruncate_test(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
+H5_DLL herr_t  H5FDlock_test(H5FD_t *file, hbool_t rw);
+H5_DLL herr_t  H5FDunlock_test(H5FD_t *file);
 H5_DLL herr_t  H5FDctl_test(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output);
 H5_DLL bool    H5FD__supports_swmr_test(const char *vfd_name);
 #endif /* H5FD_TESTING */

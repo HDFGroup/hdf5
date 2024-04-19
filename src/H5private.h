@@ -1652,7 +1652,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 /* Compile-time "assert" macro */
 #define HDcompile_assert(e) ((void)sizeof(char[!!(e) ? 1 : -1]))
 /* Variants that are correct, but generate compile-time warnings in some circumstances:
-#define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)
+  #define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)
   #define HDcompile_assert(e)     do { typedef struct { unsigned int b: (e); } x; } while(0)
 */
 
