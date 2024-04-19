@@ -693,7 +693,7 @@ did = H5Dopen (file_id, "/foo/boo/moo"); /* absolute path */
 <hr>
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBCompiling Compiling HDF5 Applications
+/** @page LBCompiling Compiling HDF5 Applications
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -1003,11 +1003,9 @@ There are log files for the configure, test, and build.
 <hr>
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBTraining Training Videos
-Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
-<hr>
+*/
 
-<a href="https://confluence.hdfgroup.org/display/HDF5/Training+Videos">Training Videos</a>
+/ref LBTraining
 
 <hr>
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
