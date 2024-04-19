@@ -220,7 +220,7 @@ error:
 static int
 session_stop(struct mirror_session *session)
 {
-    int  ret_value      = 0;
+    int ret_value = 0;
 
     assert(session && (session->magic == MW_SESSION_MAGIC));
 
@@ -480,9 +480,9 @@ do_lock(struct mirror_session *session, const unsigned char *xmit_buf)
 static int
 do_open(struct mirror_session *session, const H5FD_mirror_xmit_open_t *xmit_open)
 {
-    hid_t    fapl_id        = H5I_INVALID_HID;
-    unsigned _flags         = 0;
-    haddr_t  _maxaddr       = HADDR_UNDEF;
+    hid_t    fapl_id  = H5I_INVALID_HID;
+    unsigned _flags   = 0;
+    haddr_t  _maxaddr = HADDR_UNDEF;
 
     assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_open &&
            true == H5FD_mirror_xmit_is_open(xmit_open));
@@ -768,8 +768,8 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
         mirror_log(session->loginfo, V_INFO, "writing %zd bytes at %zu", nbytes_in_packet,
                    (addr + sum_bytes_written));
 
-        if (H5FDwrite_test(session->file, type, H5P_DEFAULT, (addr + sum_bytes_written), (size_t)nbytes_in_packet,
-                      buf) < 0) {
+        if (H5FDwrite_test(session->file, type, H5P_DEFAULT, (addr + sum_bytes_written),
+                           (size_t)nbytes_in_packet, buf) < 0) {
             mirror_log(session->loginfo, V_ERR, "H5FDwrite()");
             reply_error(session, "remote H5FDwrite() failure");
             return -1;
