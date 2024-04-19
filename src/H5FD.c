@@ -684,7 +684,7 @@ H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_t *ret_value = NULL;
 
-    FUNC_ENTER_API(NULL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (H5P_DEFAULT == fapl_id)
@@ -697,7 +697,7 @@ H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to open file");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -819,7 +819,7 @@ H5FDclose(H5FD_t *file)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -832,7 +832,7 @@ H5FDclose(H5FD_t *file)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDclose() */
 
 /*-------------------------------------------------------------------------
@@ -896,13 +896,12 @@ H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
 {
     int ret_value = -1;
 
-    FUNC_ENTER_API(-1) /* return value is arbitrary */
+    FUNC_ENTER_API_REENTER
 
     /* Call private function */
     ret_value = H5FD_cmp(f1, f2);
 
-done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDcmp() */
 
 /*-------------------------------------------------------------------------
@@ -965,7 +964,7 @@ H5FDquery(const H5FD_t *file, unsigned long *flags /*out*/)
 {
     int ret_value = 0;
 
-    FUNC_ENTER_API((-1))
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -980,7 +979,7 @@ H5FDquery(const H5FD_t *file, unsigned long *flags /*out*/)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, (-1), "unable to query feature flags");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -1057,7 +1056,7 @@ H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 {
     haddr_t ret_value = HADDR_UNDEF;
 
-    FUNC_ENTER_API(HADDR_UNDEF)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -1084,7 +1083,7 @@ H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     ret_value += file->base_addr;
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDalloc() */
 
 /*-------------------------------------------------------------------------
@@ -1106,7 +1105,7 @@ H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t siz
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -1129,7 +1128,7 @@ H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t siz
         HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "file deallocation request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDfree() */
 
 /*-------------------------------------------------------------------------
@@ -1148,7 +1147,7 @@ H5FDget_eoa(H5FD_t *file, H5FD_mem_t type)
 {
     haddr_t ret_value;
 
-    FUNC_ENTER_API(HADDR_UNDEF)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -1166,7 +1165,7 @@ H5FDget_eoa(H5FD_t *file, H5FD_mem_t type)
     ret_value += file->base_addr;
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDget_eoa() */
 
 /*-------------------------------------------------------------------------
@@ -1195,7 +1194,7 @@ H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -1213,7 +1212,7 @@ H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file set eoa request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDset_eoa() */
 
 /*-------------------------------------------------------------------------
@@ -1242,7 +1241,7 @@ H5FDget_eof(H5FD_t *file, H5FD_mem_t type)
 {
     haddr_t ret_value;
 
-    FUNC_ENTER_API(HADDR_UNDEF)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -1258,7 +1257,7 @@ H5FDget_eof(H5FD_t *file, H5FD_mem_t type)
     ret_value += file->base_addr;
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDget_eof() */
 
 /*-------------------------------------------------------------------------
@@ -1391,7 +1390,7 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -1416,7 +1415,7 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file read request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDread() */
 
 /*-------------------------------------------------------------------------
@@ -1436,7 +1435,7 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -1461,7 +1460,7 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDwrite() */
 
 /*-------------------------------------------------------------------------
@@ -1491,7 +1490,7 @@ H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -1538,7 +1537,7 @@ H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file vector read request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDread_vector() */
 
 /*-------------------------------------------------------------------------
@@ -1566,7 +1565,7 @@ H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[]
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -1611,7 +1610,7 @@ H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[]
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file vector write request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDwrite_vector() */
 
 /*-------------------------------------------------------------------------
@@ -1658,7 +1657,7 @@ H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -1708,7 +1707,7 @@ H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDread_selection() */
 
 /*-------------------------------------------------------------------------
@@ -1753,7 +1752,7 @@ H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -1804,7 +1803,7 @@ H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDwrite_selection() */
 
 /*-------------------------------------------------------------------------
@@ -1855,7 +1854,7 @@ H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -1902,7 +1901,7 @@ H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDread_vector_from_selection() */
 
 /*-------------------------------------------------------------------------
@@ -1951,7 +1950,7 @@ H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -1998,7 +1997,7 @@ H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDwrite_vector_from_selection() */
 
 /*-------------------------------------------------------------------------
@@ -2047,7 +2046,7 @@ H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t c
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -2094,7 +2093,7 @@ H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t c
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDread_from_selection() */
 
 /*-------------------------------------------------------------------------
@@ -2142,7 +2141,7 @@ H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t 
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -2189,7 +2188,7 @@ H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t 
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDwrite_from_selection() */
 
 /*-------------------------------------------------------------------------
@@ -2207,7 +2206,7 @@ H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -2228,7 +2227,7 @@ H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
         HGOTO_ERROR(H5E_VFL, H5E_CANTFLUSH, FAIL, "file flush request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDflush() */
 
 /*-------------------------------------------------------------------------
@@ -2273,7 +2272,7 @@ H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -2293,7 +2292,7 @@ H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
         HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "file flush request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDtruncate() */
 
 /*-------------------------------------------------------------------------
@@ -2338,7 +2337,7 @@ H5FDlock(H5FD_t *file, hbool_t rw)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -2351,7 +2350,7 @@ H5FDlock(H5FD_t *file, hbool_t rw)
         HGOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "file lock request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDlock() */
 
 /*-------------------------------------------------------------------------
@@ -2396,7 +2395,7 @@ H5FDunlock(H5FD_t *file)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -2409,7 +2408,7 @@ H5FDunlock(H5FD_t *file)
         HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "file unlock request failed");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDunlock() */
 
 /*-------------------------------------------------------------------------
@@ -2463,7 +2462,7 @@ H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void 
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -2482,9 +2481,7 @@ H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void 
         HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed");
 
 done:
-
-    FUNC_LEAVE_API(ret_value)
-
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDctl() */
 
 /*-------------------------------------------------------------------------
@@ -2581,7 +2578,7 @@ H5FDget_vfd_handle(H5FD_t *file, hid_t fapl_id, void **file_handle /*out*/)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!file)
@@ -2603,7 +2600,7 @@ done:
             *file_handle = NULL;
     }
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDget_vfd_handle() */
 
 /*--------------------------------------------------------------------------
@@ -2754,7 +2751,7 @@ H5FDdelete(const char *filename, hid_t fapl_id)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_REENTER
 
     /* Check arguments */
     if (!filename || !*filename)
@@ -2770,5 +2767,5 @@ H5FDdelete(const char *filename, hid_t fapl_id)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5FDdelete() */

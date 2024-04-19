@@ -1115,7 +1115,7 @@ H5allocate_memory(size_t size, bool clear)
 {
     void *ret_value = NULL;
 
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API_REENTER
 
     if (0 == size)
         return NULL;
@@ -1125,7 +1125,7 @@ H5allocate_memory(size_t size, bool clear)
     else
         ret_value = H5MM_malloc(size);
 
-    FUNC_LEAVE_API_NOINIT(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5allocate_memory() */
 
 /*-------------------------------------------------------------------------
@@ -1157,11 +1157,11 @@ H5resize_memory(void *mem, size_t size)
 {
     void *ret_value = NULL;
 
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API_REENTER
 
     ret_value = H5MM_realloc(mem, size);
 
-    FUNC_LEAVE_API_NOINIT(ret_value)
+    FUNC_LEAVE_API_REENTER(ret_value)
 } /* end H5resize_memory() */
 
 /*-------------------------------------------------------------------------
@@ -1179,12 +1179,12 @@ H5resize_memory(void *mem, size_t size)
 herr_t
 H5free_memory(void *mem)
 {
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API_REENTER
 
     /* At this time, it is impossible for this to fail. */
     H5MM_xfree(mem);
 
-    FUNC_LEAVE_API_NOINIT(SUCCEED)
+    FUNC_LEAVE_API_REENTER(SUCCEED)
 } /* end H5free_memory() */
 
 /*-------------------------------------------------------------------------
