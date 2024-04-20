@@ -120,7 +120,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - Follow the [How to sign binaries with digital certificates(this is missing)]() work instructions to sign each Windows and Mac binary package with a digital certificate.
 12. Once binaries are ready to be tested, send an e-mail notification or update the Confluence test dashboard page indicating source and binary test assignments and when results should be made available. 
 13. Use the pre-release source packages to build and test HDF5 on assigned platforms by hand. Build both shared and static libraries, Fortran, C++, and szip, and any additional configurations required on specific remote platforms based on customer support needs.
-14. Use the pre-release binary packages found in /mnt/scr1/pre-release/hdf5/vXYZ/pre<n>/binaries/{UNIX, Windows} to test according to the binary testing procedures for your assigned platforms. 
+14. Use the pre-release binary packages found in /mnt/scr1/pre-release/hdf5/vXYZ/pre-\<n\>/binaries/{UNIX, Windows} to test according to the binary testing procedures for your assigned platforms. 
 15. Scripted Testing: 
     - UNIX: [Scripted Binary Testing of HDF5 on UNIX systems (this is missing)]() 
     - Windows: [Testing HDF5 Binaries(this is missing)]() 
