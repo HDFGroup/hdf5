@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.4224aa0</span>
+   &#160;<span id="projectnumber">1.15.0.1d1c040</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -107,12 +107,12 @@ $(document).ready(function(){initNavTree('md_fortran_2src_2_r_e_a_d_m_e.html',''
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>This directory contains Fortran APIs for HDF5 Library functionality. A complete list of implemented Fortran subroutines can be found in the HDF5 Reference Manual.</p>
-<h1><a class="anchor" id="autotoc_md77"></a>
+<h1><a class="anchor" id="autotoc_md79"></a>
 About the source code organization</h1>
 <p>The Fortran APIs are organized in modules parallel to the HDF5 Interfaces. Each module is in a separate file with the name H5*ff.F90. Corresponding C stubs are in the H5*f.c files. For example, the Fortran File APIs are in the file <a class="el" href="_h5_fff_8_f90.html">H5Fff.F90</a>, and the corresponding C stubs are in the file H5Ff.c.</p>
 <p>Each module contains Fortran definitions of the constants, interfaces to the subroutines if needed, and the subroutines themselves.</p>
 <p>It is crucial for users to use constant names in their programs instead of the numerical values, as the constant names have values which are subject to change without notice.</p>
-<h1><a class="anchor" id="autotoc_md78"></a>
+<h1><a class="anchor" id="autotoc_md80"></a>
 Quick overview of the Fortran APIs</h1>
 <ul>
 <li>An in-depth description of each Fortran API and its parameters can be found in the HDF5 Reference Manual. They tend to be summarized from the C descriptions.</li>
@@ -140,7 +140,7 @@ hdferr, dset_creation_prp, link_creation_prp, dset_access_prop)
 <li>When a C application reads data stored by a Fortran program, the data appears to be transposed. This is because C and Fortran have different storage orders (row-major and column-major, respectively). For instance, if a Fortran program writes a 4x6 two-dimensional dataset to a file, a C program will read it into memory as a 6x4 two-dimensional dataset. The HDF5 C utilities h5dump and h5ls display transposed data if it was written from a Fortran program.</li>
 <li>It is important to note that in Fortran, the indexing of arrays starts at 1.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md79"></a>
+<h1><a class="anchor" id="autotoc_md81"></a>
 FOR DEVELOPERS</h1>
 <ul>
 <li><p class="startli">The build system generates APIs compatible with Fortran 90 to handle the backward compatibility of the older F90 APIs. During the configuration process, the build system determines all valid integer and real KINDs, as well as the maximum decimal precision for reals and floats in both Fortran and C. To determine all the available kinds, the Fortran program <em>PROGRAM FC_AVAIL_KINDS</em> is used, which is located in <a class="el" href="aclocal__fc_8f90.html">aclocal_fc.f90</a>. The available KINDs are stored in H5config_f.inc, a file processed during configuration time from H5config_f.inc.in. Each program in <a class="el" href="aclocal__fc_8f90.html">m4/aclocal_fc.f90</a> is enclosed with a "!---START-----+" line and a "!---END-------+" line, which are used as markers to isolate each test program for the build systems.</p>
@@ -148,7 +148,7 @@ FOR DEVELOPERS</h1>
 </li>
 </ul>
 <p><img src="./FortBuildFlow.svg" alt="Figure 1: During the configure and build phases, Fortran files are generated and compiled. This overview explains the flow steps of the build process." style="pointer-events: none;" class="inline"/></p>
-<h2><a class="anchor" id="autotoc_md80"></a>
+<h2><a class="anchor" id="autotoc_md82"></a>
 Procedure to add a new function</h2>
 <blockquote class="doxtable">
 <p>&zwj;[!IMPORTANT] <br  />
@@ -160,7 +160,7 @@ Procedure to add a new function</h2>
 <li>Edit the fortran/src/H5f90proto.h file</li>
 <li>Add the new function to fortran/src/hdf5_fortrandll.def.in</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md81"></a>
+<h2><a class="anchor" id="autotoc_md83"></a>
 Procedure for passing C variables to Fortran</h2>
 <p>(1) Find the C struct name you are interested in: </p><pre class="fragment">    (a) src/H5public.h if it is a generic type, i.e. H5_*
         or
@@ -174,7 +174,7 @@ Procedure for passing C variables to Fortran</h2>
 <p>&zwj;[!NOTE] <br  />
  To add a default C value argument, do steps (2a) and (4). </p>
 </blockquote>
-<h2><a class="anchor" id="autotoc_md82"></a>
+<h2><a class="anchor" id="autotoc_md84"></a>
 Procedure for adding a new file to the repository</h2>
 <p>Add the name of the file to the: (1) Makefile.am located in the same directory as the new file. (2) CMakeLists.txt located in the same directory as the new file. </p>
 </div></div><!-- contents -->
