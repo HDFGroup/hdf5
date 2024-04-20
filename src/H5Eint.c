@@ -767,7 +767,7 @@ H5E__set_stack_entry(H5E_error2_t *err_entry, const char *file, const char *func
     if (!desc)
         desc = "No description given";
 
-        /* Increment the IDs to indicate that they are used in this stack */
+    /* Increment the IDs to indicate that they are used in this stack */
     /* Note: don't waste time incrementing library internal error IDs */
     if (cls_id != H5E_ERR_CLS_g)
         if (H5I_inc_ref_noherr(cls_id, false) < 0)
@@ -781,14 +781,14 @@ H5E__set_stack_entry(H5E_error2_t *err_entry, const char *file, const char *func
         if (H5I_inc_ref_noherr(min_id, false) < 0)
             HGOTO_DONE(FAIL);
     err_entry->min_num = min_id;
-        /* The 'func' & 'file' strings are statically allocated (by the compiler)
-         * there's no need to duplicate them.
-         */
+    /* The 'func' & 'file' strings are statically allocated (by the compiler)
+     * there's no need to duplicate them.
+     */
     err_entry->func_name = func;
     err_entry->file_name = file;
     err_entry->line      = line;
     if (NULL == (err_entry->desc = strdup(desc)))
-            HGOTO_DONE(FAIL);
+        HGOTO_DONE(FAIL);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -825,14 +825,14 @@ H5E__clear_entries(H5E_t *estack, size_t nentries)
         /* (In reverse order that they were incremented, so that reference counts work well) */
         /* Note: don't decrement library internal error IDs, since they weren't incremented */
         if (error->min_num < H5E_first_min_id_g || error->min_num > H5E_last_min_id_g)
-        if (H5I_dec_ref(error->min_num) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message");
+            if (H5I_dec_ref(error->min_num) < 0)
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message");
         if (error->maj_num < H5E_first_maj_id_g || error->maj_num > H5E_last_maj_id_g)
-        if (H5I_dec_ref(error->maj_num) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message");
+            if (H5I_dec_ref(error->maj_num) < 0)
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message");
         if (error->cls_id != H5E_ERR_CLS_g)
-        if (H5I_dec_ref(error->cls_id) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error class");
+            if (H5I_dec_ref(error->cls_id) < 0)
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error class");
 
         /* Release strings */
         /* The 'func' & 'file' strings are statically allocated (by the compiler)
@@ -931,20 +931,20 @@ H5E_dump_api_stack(void)
 
     FUNC_ENTER_NOAPI_NOERR
 
-        assert(estack);
+    assert(estack);
 
 #ifdef H5_NO_DEPRECATED_SYMBOLS
+    if (estack->auto_op.func2)
+        (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
+#else  /* H5_NO_DEPRECATED_SYMBOLS */
+    if (estack->auto_op.vers == 1) {
+        if (estack->auto_op.func1)
+            (void)((estack->auto_op.func1)(estack->auto_data));
+    } /* end if */
+    else {
         if (estack->auto_op.func2)
             (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
-#else  /* H5_NO_DEPRECATED_SYMBOLS */
-        if (estack->auto_op.vers == 1) {
-            if (estack->auto_op.func1)
-                (void)((estack->auto_op.func1)(estack->auto_data));
-        } /* end if */
-        else {
-            if (estack->auto_op.func2)
-                (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
-        } /* end else */
+    } /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     FUNC_LEAVE_NOAPI(ret_value)
