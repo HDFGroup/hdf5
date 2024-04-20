@@ -117,7 +117,13 @@ struct H5E_t {
  * The current error stack.
  */
 H5_DLLVAR H5E_t H5E_stack_g[1];
-#endif /* H5_HAVE_THREADSAFE */
+#endif
+
+/* First & last major and minor error codes registered by the library */
+H5_DLLVAR hid_t H5E_first_maj_id_g;
+H5_DLLVAR hid_t H5E_last_maj_id_g;
+H5_DLLVAR hid_t H5E_first_min_id_g;
+H5_DLLVAR hid_t H5E_last_min_id_g;
 
 /******************************/
 /* Package Private Prototypes */
@@ -128,6 +134,8 @@ H5_DLL H5E_t *H5E__get_stack(void);
 #endif /* H5_HAVE_THREADSAFE */
 H5_DLL herr_t  H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id,
                                hid_t maj_id, hid_t min_id, const char *desc);
+H5_DLL herr_t H5E__set_stack_entry(H5E_error2_t *err_entry, const char *file, const char *func, unsigned line,
+                                   hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc);
 H5_DLL ssize_t H5E__get_msg(const H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg, size_t size);
 H5_DLL herr_t  H5E__print(const H5E_t *estack, FILE *stream, bool bk_compat);
 H5_DLL herr_t  H5E__walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *op,
