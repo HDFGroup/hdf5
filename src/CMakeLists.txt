@@ -964,6 +964,17 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5SMpkg.h
     ${HDF5_SRC_DIR}/H5SMprivate.h
 
+    ${HDF5_SRC_DIR}/H5Tconv.h
+    ${HDF5_SRC_DIR}/H5Tconv_array.h
+    ${HDF5_SRC_DIR}/H5Tconv_bitfield.h
+    ${HDF5_SRC_DIR}/H5Tconv_compound.h
+    ${HDF5_SRC_DIR}/H5Tconv_enum.h
+    ${HDF5_SRC_DIR}/H5Tconv_float.h
+    ${HDF5_SRC_DIR}/H5Tconv_integer.h
+    ${HDF5_SRC_DIR}/H5Tconv_macros.h
+    ${HDF5_SRC_DIR}/H5Tconv_reference.h
+    ${HDF5_SRC_DIR}/H5Tconv_string.h
+    ${HDF5_SRC_DIR}/H5Tconv_vlen.h
     ${HDF5_SRC_DIR}/H5Tpkg.h
     ${HDF5_SRC_DIR}/H5Tprivate.h
 
