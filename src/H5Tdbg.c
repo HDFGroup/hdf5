@@ -61,7 +61,7 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:    H5T__print_stats
+ * Function:    H5T__print_path_stats
  *
  * Purpose:     Print statistics about a conversion path.  Statistics are
  *              printed only if all the following conditions are true:
@@ -80,7 +80,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*in,out*/)
+H5T__print_path_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*in,out*/)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -124,7 +124,7 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*i
 #endif
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5T__print_stats() */
+} /* end H5T__print_path_stats() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T_debug
