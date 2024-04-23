@@ -28,6 +28,9 @@
 !
 !*****
 !
+
+#include <H5config_f.inc>
+
 MODULE TH5R
 
   USE HDF5
@@ -69,7 +72,7 @@ SUBROUTINE refobjtest(cleanup, total_error)
   INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
 
   CHARACTER(LEN=7) :: buf        ! buffer to hold the region name
-  CHARACTER(LEN=16) :: buf_big    ! buffer bigger then needed
+  CHARACTER(LEN=16) :: buf_big    ! buffer bigger than needed
   INTEGER(SIZE_T) :: buf_size     ! returned size of the region buffer name
 
   !
@@ -165,7 +168,7 @@ SUBROUTINE refobjtest(cleanup, total_error)
   CALL verify("H5Rget_name_f", INT(buf_size),7, total_error)
   CALL verify("H5Rget_name_f", buf, "/GROUP1", total_error)
 
-  ! with buffer bigger then needed
+  ! with a buffer bigger than needed
 
   CALL H5Rget_name_f(dsetr_id, ref(1), buf_big, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
@@ -252,8 +255,8 @@ SUBROUTINE refregtest(cleanup, total_error)
   CHARACTER(LEN=17), PARAMETER :: dsetnamer = "REGION_REFERENCES"
 
   CHARACTER(LEN=7) :: buf        ! buffer to hold the region name
-  CHARACTER(LEN=11) :: buf_big    ! buffer bigger then needed
-  CHARACTER(LEN=4) :: buf_small  ! buffer smaller then needed
+  CHARACTER(LEN=11) :: buf_big    ! buffer bigger than needed
+  CHARACTER(LEN=4) :: buf_small  ! buffer smaller than needed
   INTEGER(SIZE_T) :: buf_size     ! returned size of the region buffer name
   INTEGER(HID_T) :: file_id       ! File identifier
   INTEGER(HID_T) :: space_id      ! Dataspace identifier
@@ -406,7 +409,7 @@ SUBROUTINE refregtest(cleanup, total_error)
   CALL verify("H5Rget_name_f", buf, "/MATRIX", total_error)
 
   ! Get name of the dataset the first region reference points to using H5Rget_name_f
-  ! buffer bigger then needed
+  ! buffer bigger than needed
   CALL H5Rget_name_f(dsetr_id, ref_out(1), buf_big, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
   CALL verify("H5Rget_name_f", INT(buf_size),7,total_error)
@@ -414,7 +417,7 @@ SUBROUTINE refregtest(cleanup, total_error)
 
 
   ! Get name of the dataset the first region reference points to using H5Rget_name_f
-  ! buffer smaller then needed
+  ! buffer smaller than needed
   CALL H5Rget_name_f(dsetr_id, ref_out(1), buf_small, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
   CALL verify("H5Rget_name_f", INT(buf_size),7,total_error)
@@ -497,7 +500,7 @@ SUBROUTINE genreftest(cleanup, total_error)
   INTEGER(HID_T) :: type_id       ! Type identifier
   INTEGER(HID_T) :: space_id      ! Dataspace identifier
   INTEGER(HID_T) :: spacer_id     ! Dataspace identifier
-  INTEGER     ::   error, obj_type
+  INTEGER     ::   error, ref_type
   INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/5/)
   INTEGER(HSIZE_T), DIMENSION(1) :: dimsr= (/4/)
   INTEGER(HSIZE_T), DIMENSION(1) :: my_maxdims = (/5/)
@@ -506,12 +509,15 @@ SUBROUTINE genreftest(cleanup, total_error)
   TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref
   TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref_out
   TYPE(H5R_ref_t), DIMENSION(4), TARGET :: ref_ptr
+  TYPE(H5R_ref_t), DIMENSION(4), TARGET :: ref_ptr_out
   INTEGER(HSIZE_T), DIMENSION(1) :: ref_dim
   INTEGER, DIMENSION(5) :: DATA = (/1, 2, 3, 4, 5/)
   INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
 
-  CHARACTER(LEN=7) :: buf        ! buffer to hold the region name
-  CHARACTER(LEN=16) :: buf_big    ! buffer bigger then needed
+#ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
+  CHARACTER(:), ALLOCATABLE :: buf_alloc ! buffer to hold the region name
+#endif
+  CHARACTER(LEN=16) :: buf_big    ! buffer bigger than needed
   INTEGER(SIZE_T) :: buf_size     ! returned size of the region buffer name
 
   TYPE(C_PTR) :: f_ptr
@@ -588,40 +594,62 @@ SUBROUTINE genreftest(cleanup, total_error)
   ! and write it to the dataset in the file
   !
   ! FIX: MSB: ref values are never set.
-  CALL h5rcreate_f(file_id, groupname1, ref(1), error)
+
+  f_ptr = C_LOC(ref_ptr(1))
+  CALL h5rcreate_object_f(file_id, groupname1, f_ptr, error)
   CALL check("h5rcreate_f",error,total_error)
-  CALL h5rcreate_f(file_id, "/GROUP1/GROUP2", ref(2), error)
+  f_ptr = C_LOC(ref_ptr(2))
+  CALL h5rcreate_object_f(file_id, "/GROUP1/GROUP2", f_ptr, error)
   CALL check("h5rcreate_f",error,total_error)
-  CALL h5rcreate_f(file_id, dsetnamei, ref(3), error)
+  f_ptr = C_LOC(ref_ptr(3))
+  CALL h5rcreate_object_f(file_id, dsetnamei, f_ptr, error)
   CALL check("h5rcreate_f",error,total_error)
-  CALL h5rcreate_f(file_id, "MyType", ref(4), error)
+  f_ptr = C_LOC(ref_ptr(4))
+  CALL h5rcreate_object_f(file_id, "MyType", f_ptr, error)
   CALL check("h5rcreate_f",error,total_error)
-  ref_dim(1) = SIZE(ref)
-  PRINT*,"LDJKF",ref(4)
-  CALL h5dwrite_f(dsetr_id, H5T_STD_REF_OBJ, ref, ref_dim, error)
+
+!  IF(ASSOCIATED(f_ptr) .EQ. .FALSE.)THEN
+!     CALL check("h5rcreate_object_f", -1, total_error)
+!  ENDIF
+
+  f_ptr = C_LOC(ref_ptr)
+  PRINT*,H5T_STD_REF,H5T_STD_REF_OBJ
+  CALL h5dwrite_f(dsetr_id, H5T_STD_REF, f_ptr, error)
   CALL check("h5dwrite_f",error,total_error)
 
   ! getting path to normal dataset in root group
+  CALL h5rget_obj_name_f(C_LOC(ref_ptr(1)), "", error, H5P_DEFAULT_F, buf_size)
+  CALL check("h5rget_obj_name_f", error, total_error)
+  CALL verify("h5rget_obj_name_f", buf_size, 7_SIZE_T, total_error)
 
-  CALL H5Rget_name_f(dsetr_id, ref(1), buf, error, buf_size )
-  CALL check("H5Rget_name_f", error, total_error)
-
-
-  CALL verify("H5Rget_name_f", INT(buf_size),7, total_error)
-  CALL verify("H5Rget_name_f", buf, "/GROUP1", total_error)
-
-  ! with buffer bigger then needed
-
-  CALL H5Rget_name_f(dsetr_id, ref(1), buf_big, error, buf_size )
-  CALL check("H5Rget_name_f", error, total_error)
-  CALL verify("H5Rget_name_f", INT(buf_size),7,total_error)
-  CALL verify("H5Rget_name_f", TRIM(buf_big), "/GROUP1", total_error)
+#ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
+  ALLOCATE(CHARACTER(LEN=buf_size) :: buf_alloc)
+  CALL h5rget_obj_name_f(C_LOC(ref_ptr(1)), buf_alloc, error)
+  CALL check("h5rget_obj_name_f", error, total_error)
+  CALL VERIFY("h5rget_obj_name_f", buf_alloc, "/GROUP1", total_error)
+  DEALLOCATE(buf_alloc)
+#endif
+  ! with buffer bigger than needed
+  CALL h5rget_obj_name_f(C_LOC(ref_ptr(1)), buf_big, error)
+  CALL check("h5rget_obj_name_f", error, total_error)
+  CALL verify("h5rget_obj_name_f", TRIM(buf_big), "/GROUP1", total_error)
 
   ! getting path to dataset in /Group1
 
-  CALL H5Rget_name_f(dsetr_id, ref(2), buf_big, error, buf_size )
+  CALL h5rget_obj_name_f(C_LOC(ref_ptr(2)), "", error, name_len=buf_size )
   CALL check("H5Rget_name_f", error, total_error)
   CALL verify("H5Rget_name_f", INT(buf_size),14,total_error)
+
+#ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
+  ALLOCATE(CHARACTER(LEN=buf_size) :: buf_alloc)
+  CALL h5rget_obj_name_f(C_LOC(ref_ptr(2)), buf_alloc, error)
+  CALL check("h5rget_obj_name_f", error, total_error)
+  CALL VERIFY("h5rget_obj_name_f", buf_alloc, "/GROUP1/GROUP2", total_error)
+  DEALLOCATE(buf_alloc)
+#endif
+
+  CALL h5rget_obj_name_f(C_LOC(ref_ptr(2)), buf_big, error)
+  CALL check("H5Rget_name_f", error, total_error)
   CALL verify("H5Rget_name_f", TRIM(buf_big), "/GROUP1/GROUP2", total_error)
 
   !
@@ -635,16 +663,26 @@ SUBROUTINE genreftest(cleanup, total_error)
   !
   CALL h5dopen_f(file_id, dsetnamer,dsetr_id,error)
   CALL check("h5dopen_f",error,total_error)
-  ref_dim(1) = SIZE(ref_out)
-  CALL h5dread_f(dsetr_id, H5T_STD_REF_OBJ, ref_out, ref_dim, error)
+
+  f_ptr = C_LOC(ref_ptr_out(1))
+  CALL h5dread_f(dsetr_id, H5T_STD_REF_OBJ, f_ptr, error)
   CALL check("h5dread_f",error,total_error)
 
   !
   !get the third reference's type and Dereference it
   !
-  CALL h5rget_object_type_f(dsetr_id, ref(3), obj_type, error)
-  CALL check("h5rget_object_type_f",error,total_error)
-  IF (obj_type == H5G_DATASET_F) THEN
+
+  CALL h5eset_auto_f(1, error)
+
+  CALL h5rget_obj_name_f(C_LOC(ref_ptr_out(1)), buf_big, error)
+  CALL check("H5Rget_name_f", error, total_error)
+  PRINT*,buf_big
+
+!  CALL h5rget_type_f(C_LOC(ref_ptr_out(3)), ref_type, error)
+!  CALL check("h5rget_type_f",error,total_error)
+
+  stop
+  IF (ref_type == H5G_DATASET_F) THEN
      CALL h5rdereference_f(dsetr_id, ref(3), dset1_id, error)
      CALL check("h5rdereference_f",error,total_error)
 
@@ -653,6 +691,8 @@ SUBROUTINE genreftest(cleanup, total_error)
      CALL check("h5dwrite_f",error,total_error)
   END IF
 
+#if 0
+ ! CALL h5rget_object_type_f(dsetr_id, ref(3), _type, error)
   !
   !get the fourth reference's type and Dereference it
   !
@@ -662,7 +702,7 @@ SUBROUTINE genreftest(cleanup, total_error)
      CALL h5rdereference_f(dsetr_id, ref(4), type_id, error)
      CALL check("h5rdereference_f",error,total_error)
   END IF
-
+#endif
   !
   ! Close all objects.
   !

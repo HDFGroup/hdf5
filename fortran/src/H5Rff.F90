@@ -48,6 +48,8 @@
 MODULE H5R
 
   USE H5GLOBAL
+  USE H5fortkit
+
   IMPLICIT NONE
 
   ! If you change the value of these parameters, do not forget to change corresponding
@@ -66,7 +68,7 @@ MODULE H5R
 
   PRIVATE h5rget_object_type_obj_f
   PRIVATE h5rget_region_region_f, h5rget_region_ptr_f
-  PRIVATE h5rcreate_object_f, h5rcreate_region_f, h5rcreate_ptr_f
+  PRIVATE h5rcreate_object_deprec_f, h5rcreate_region_deprec_f, h5rcreate_ptr_f
   PRIVATE h5rdereference_object_f, h5rdereference_region_f, h5rdereference_ptr_f
   PRIVATE h5rget_name_object_f, h5rget_name_region_f, h5rget_name_ptr_f
 
@@ -92,9 +94,9 @@ MODULE H5R
   END INTERFACE
 
   INTERFACE h5rcreate_f
-     MODULE PROCEDURE h5rcreate_ptr_f    ! F2003
-     MODULE PROCEDURE h5rcreate_object_f ! obsolete
-     MODULE PROCEDURE h5rcreate_region_f ! obsolete
+     MODULE PROCEDURE h5rcreate_ptr_f           ! F2003
+     MODULE PROCEDURE h5rcreate_object_deprec_f ! obsolete
+     MODULE PROCEDURE h5rcreate_region_deprec_f ! obsolete
   END INTERFACE
 
   INTERFACE h5rdereference_f
@@ -299,7 +301,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Rcreate_object()
 !!
-  SUBROUTINE h5rcreate_object_f(loc_id, name, ref, hdferr)
+  SUBROUTINE h5rcreate_object_deprec_f(loc_id, name, ref, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -315,7 +317,7 @@ CONTAINS
 
     hdferr = h5rcreate_ptr_c(f_ptr, loc_id, name, namelen, INT(0), INT(-1,HID_T))
 
-  END SUBROUTINE h5rcreate_object_f
+  END SUBROUTINE h5rcreate_object_deprec_f
 
 !>
 !! \ingroup FH5R
@@ -332,7 +334,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Rcreate_region()
 !!
-  SUBROUTINE h5rcreate_region_f(loc_id, name, space_id, ref, hdferr)
+  SUBROUTINE h5rcreate_region_deprec_f(loc_id, name, space_id, ref, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     CHARACTER(LEN=*), INTENT(IN) :: name
@@ -360,7 +362,7 @@ CONTAINS
     hdferr = h5rcreate_region_c(ref_f, loc_id, name, namelen, space_id )
     ref%ref = ref_f
 
-  END SUBROUTINE h5rcreate_region_f
+  END SUBROUTINE h5rcreate_region_deprec_f
 
 !>
 !! \ingroup FH5R
@@ -644,32 +646,36 @@ CONTAINS
     hdferr = h5rget_obj_type_c(loc_id, ref_type, ref, obj_type)
 
   END SUBROUTINE h5rget_obj_type_f
-
 !>
 !! \ingroup FH5R
 !!
 !! \brief Opens the HDF5 object referenced.
 !!
 !! \param ref_ptr  Pointer to reference to open, points object of TYPE(H5R_ref_t)
+!! \param loc_id   Object identifier
+!! \param hdferr   \fortran_error
 !! \param rapl_id  Reference access property list identifier
 !! \param oapl_id  Object access property list identifier
-!! \param hdferr   \fortran_error
 !!
 !! See C API: @ref H5Ropen_object()
 !!
-  SUBROUTINE h5ropen_object_f(ref_ptr, rapl_id, oapl_id, hdferr)
+  SUBROUTINE h5ropen_object_f(ref_ptr, obj_id, hdferr, rapl_id, oapl_id)
 
     IMPLICIT NONE
 
-    TYPE(C_PTR)                :: ref_ptr
-    INTEGER(HID_T), INTENT(IN) :: rapl_id
-    INTEGER(HID_T), INTENT(IN) :: oapl_id
-    INTEGER, INTENT(OUT)       :: hdferr
+    TYPE(C_PTR)                           :: ref_ptr
+    INTEGER(HID_T)          , INTENT(OUT) :: obj_id
+    INTEGER                 , INTENT(OUT) :: hdferr
+    INTEGER(HID_T), OPTIONAL, INTENT(IN)  :: rapl_id
+    INTEGER(HID_T), OPTIONAL, INTENT(IN)  :: oapl_id
+
+    INTEGER(HID_T)  :: rapl_id_default
+    INTEGER(HID_T)  :: oapl_id_default
 
     INTERFACE
-       INTEGER(C_INT) FUNCTION H5Ropen_object(ref_ptr, rapl_id, oapl_id) &
+       INTEGER(HID_T) FUNCTION H5Ropen_object(ref_ptr, rapl_id, oapl_id) &
             BIND(C, NAME='H5Ropen_object')
-         IMPORT :: C_PTR, C_INT
+         IMPORT :: C_PTR
          IMPORT :: HID_T
          IMPLICIT NONE
          TYPE(C_PTR)   , VALUE :: ref_ptr
@@ -678,10 +684,115 @@ CONTAINS
        END FUNCTION H5Ropen_object
     END INTERFACE
 
-    hdferr = INT(H5Ropen_object(ref_ptr, rapl_id, oapl_id))
+    rapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(rapl_id)) rapl_id_default = rapl_id
+    oapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(oapl_id)) oapl_id_default = oapl_id
+
+    obj_id = H5Ropen_object(ref_ptr, rapl_id_default, oapl_id_default)
+
+    hdferr = 0
+    IF(obj_id.LT.0) hdferr = -1
 
   END SUBROUTINE h5ropen_object_f
+!>
+!! \ingroup FH5R
+!!
+!! \brief Opens the HDF5 attribute referenced.
+!!
+!! \param ref_ptr  Pointer to reference to open, points object of TYPE(H5R_ref_t)
+!! \param loc_id   Object identifier
+!! \param hdferr   \fortran_error
+!! \param rapl_id  Reference access property list identifier
+!! \param aapl_id  Attribute access property list identifier
+!!
+!! See C API: @ref H5Ropen_attr()
+!!
+  SUBROUTINE h5ropen_attr_f(ref_ptr, obj_id, hdferr, rapl_id, aapl_id)
 
+    IMPLICIT NONE
+
+    TYPE(C_PTR)                           :: ref_ptr
+    INTEGER(HID_T)          , INTENT(OUT) :: obj_id
+    INTEGER                 , INTENT(OUT) :: hdferr
+    INTEGER(HID_T), OPTIONAL, INTENT(IN)  :: rapl_id
+    INTEGER(HID_T), OPTIONAL, INTENT(IN)  :: aapl_id
+
+    INTEGER(HID_T)  :: rapl_id_default
+    INTEGER(HID_T)  :: aapl_id_default
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Ropen_attr(ref_ptr, rapl_id, aapl_id) &
+            BIND(C, NAME='H5Ropen_attr')
+         IMPORT :: C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR)   , VALUE :: ref_ptr
+         INTEGER(HID_T), VALUE :: rapl_id
+         INTEGER(HID_T), VALUE :: aapl_id
+       END FUNCTION H5Ropen_attr
+    END INTERFACE
+
+    rapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(rapl_id)) rapl_id_default = rapl_id
+    aapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
+
+    obj_id = H5Ropen_attr(ref_ptr, rapl_id_default, aapl_id_default)
+
+    hdferr = 0
+    IF(obj_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5ropen_attr_f
+!>
+!! \ingroup FH5R
+!!
+!! \brief Sets up a dataspace and selection as specified by a region reference.
+!!
+!! \param ref_ptr  Pointer to reference to open, points object of TYPE(H5R_ref_t)
+!! \param space_id Dataspace identifier
+!! \param hdferr   \fortran_error
+!! \param rapl_id  Reference access property list identifier
+!! \param oapl_id  Object access property list identifier
+!!
+!! See C API: @ref H5Ropen_region()
+!!
+  SUBROUTINE h5ropen_region_f(ref_ptr, space_id, hdferr, rapl_id, oapl_id)
+
+    IMPLICIT NONE
+
+    TYPE(C_PTR)                           :: ref_ptr
+    INTEGER(HID_T)          , INTENT(OUT) :: space_id
+    INTEGER                 , INTENT(OUT) :: hdferr
+    INTEGER(HID_T), OPTIONAL, INTENT(IN)  :: rapl_id
+    INTEGER(HID_T), OPTIONAL, INTENT(IN)  :: oapl_id
+
+    INTEGER(HID_T)  :: rapl_id_default
+    INTEGER(HID_T)  :: oapl_id_default
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Ropen_region(ref_ptr, rapl_id, oapl_id) &
+            BIND(C, NAME='H5Ropen_region')
+         IMPORT :: C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR)   , VALUE :: ref_ptr
+         INTEGER(HID_T), VALUE :: rapl_id
+         INTEGER(HID_T), VALUE :: oapl_id
+       END FUNCTION H5Ropen_region
+    END INTERFACE
+
+    rapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(rapl_id)) rapl_id_default = rapl_id
+    oapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(oapl_id)) oapl_id_default = oapl_id
+
+    space_id = H5Ropen_region(ref_ptr, rapl_id_default, oapl_id_default)
+
+    hdferr = 0
+    IF(space_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5ropen_region_f
 !>
 !! \ingroup FH5R
 !!
@@ -739,7 +850,7 @@ CONTAINS
             BIND(C, NAME='H5Rget_type')
          IMPORT :: C_PTR, C_INT
          IMPLICIT NONE
-         TYPE(C_PTR) :: ref_ptr
+         TYPE(C_PTR), VALUE :: ref_ptr
        END FUNCTION H5Rget_type
     END INTERFACE
 
@@ -749,5 +860,149 @@ CONTAINS
     IF(ref_type .EQ. H5R_BADTYPE_F) hdferr = -1
 
   END SUBROUTINE h5rget_type_f
+
+!>
+!! \ingroup FH5R
+!!
+!! \brief Closes a reference.
+!!
+!! \param ref_ptr Pointer to reference, of TYPE(H5R_ref_t)
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Rdestroy()
+!!
+  SUBROUTINE h5rdestroy_f(ref_ptr, hdferr)
+
+    IMPLICIT NONE
+
+    TYPE(C_PTR) :: ref_ptr
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Rdestroy(ref_ptr) &
+            BIND(C, NAME='H5Rdestroy')
+         IMPORT :: C_PTR, C_INT
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: ref_ptr
+       END FUNCTION H5Rdestroy
+    END INTERFACE
+
+    hdferr = INT(H5Rdestroy(ref_ptr))
+
+  END SUBROUTINE h5rdestroy_f
+
+!>
+!! \ingroup FH5R
+!!
+!! \brief Creates a reference.
+!!
+!! \attention  \fortran_approved
+!!
+!! \param loc_id   Location identifier.
+!! \param name     Name of the dataset at the specified location.
+!! \param ref      Reference created by the function call.
+!! \param hdferr   \fortran_error
+!! \param space_id Dataspace identifier that describes selected region.
+!!
+#ifdef H5_DOXYGEN
+!! See C API: @ref H5Rcreate_object()
+!!
+  SUBROUTINE h5rcreate_object_f(&
+#else
+  SUBROUTINE h5rcreate_object_f(&
+#endif
+       loc_id, name, ref, hdferr, oapl_id)
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    TYPE(C_PTR)                  :: ref
+    INTEGER       , INTENT(OUT)  :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: oapl_id
+
+    INTEGER(HID_T) :: oapl_id_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Rcreate_object(loc_id, c_name, oapl_id_default, ref) &
+            BIND(C, NAME='H5Rcreate_object')
+         IMPORT :: C_PTR, C_INT, C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: c_name
+         INTEGER(HID_T), VALUE :: oapl_id_default
+         TYPE(C_PTR), VALUE :: ref
+       END FUNCTION H5Rcreate_object
+    END INTERFACE
+
+    c_name  = TRIM(name)//C_NULL_CHAR
+
+    oapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(oapl_id)) oapl_id_default = oapl_id
+
+    hdferr = INT(H5Rcreate_object(loc_id, c_name, oapl_id_default, ref))
+
+#ifdef H5_DOXYGEN
+  END SUBROUTINE h5rcreate_object_f
+#else
+  END SUBROUTINE h5rcreate_object_f
+#endif
+!>
+!! \ingroup FH5R
+!!
+!! \brief Retrieves the object name for a referenced object.
+!!
+!! \param name     Buffer to place the file name of the reference
+!! \param ref_ptr  Pointer to reference to query
+!! \param hdferr   \fortran_error
+!! \param rapl_id  Reference access property list identifier
+!! \param name_len Maximum length of the name to retrieve
+!!
+  SUBROUTINE h5rget_obj_name_f( ref_ptr, name, hdferr, rapl_id, name_len)
+
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
+    IMPLICIT NONE
+    TYPE(C_PTR)                :: ref_ptr
+    CHARACTER(LEN=*)           :: name
+    INTEGER      , INTENT(OUT) :: hdferr
+    INTEGER(SIZE_T), INTENT(OUT), OPTIONAL :: name_len
+    INTEGER(HID_T) , INTENT(IN) , OPTIONAL :: rapl_id
+
+    CHARACTER(LEN=1,KIND=C_CHAR), DIMENSION(1:LEN(name)+1), TARGET :: c_name
+    INTEGER(HID_T) :: rapl_id_default
+    INTEGER(SIZE_T) :: l
+
+    INTERFACE
+       INTEGER FUNCTION H5Rget_obj_name(ref_ptr, rapl_id, name, size_default) &
+            BIND(C, NAME='H5Rget_obj_name')
+         IMPORT :: c_char, c_ptr
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: ref_ptr
+         INTEGER(HID_T), VALUE :: rapl_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(SIZE_T), VALUE :: size_default
+       END FUNCTION H5Rget_obj_name
+    END INTERFACE
+
+    rapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(rapl_id)) rapl_id_default = rapl_id
+
+    hdferr = 0
+    IF(PRESENT(name_len))THEN
+       c_name(1:1)(1:1) = C_NULL_CHAR
+       name_len = H5Rget_obj_name(ref_ptr, rapl_id_default, c_name, 1_SIZE_T)
+       IF(name_len.LT.0_SIZE_T) hdferr = H5I_INVALID_HID_F
+    ELSE
+       l = INT(LEN(name)+1,SIZE_T)
+       IF(H5Rget_obj_name(ref_ptr, rapl_id_default, c_name, l) .LT. 0_SIZE_T)THEN
+          hdferr = H5I_INVALID_HID_F
+       ELSE
+          CALL HD5c2fstring(name, c_name, LEN(name,KIND=SIZE_T), LEN(name,KIND=SIZE_T)+1_SIZE_T )
+       ENDIF
+    ENDIF
+
+  END SUBROUTINE h5rget_obj_name_f
 
 END MODULE H5R

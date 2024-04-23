@@ -541,7 +541,7 @@ H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  *
  * \param[in] ref_ptr  Pointer to reference to query
  * \rapl_id
- * \param[in,out] name Buffer to place the file name of the reference
+ * \param[in,out] name Buffer to place the object name of the reference
  * \param[in] size     Size of the \p name buffer
  *
  * \return Returns the length of the name if successful, returning
@@ -765,6 +765,9 @@ H5_DLL hid_t H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
  *
  * \return \herr_t
  *
+ * \deprecated As of HDF5-1.12, this function has been deprecated in favor of
+ *             H5Rcreate_object(), H5Rcreate_region() and H5Rcreate_attr().
+ *
  * \details H5Rcreate() creates the reference, \p ref, of the type specified in
  *          \p ref_type, pointing to the object \p name located at \p loc_id.
  *
@@ -854,6 +857,10 @@ H5_DLL herr_t H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref, H
  * \return Returns identifier of referenced object if successful; otherwise
  *         returns a negative value.
  *
+ * \deprecated As of HDF5-1.12, this function and H5Rdereference1() have been
+ *             deprecated in favor of H5Ropen_attr(), H5Ropen_object()
+ *             and H5Ropen_region().
+ *
  * \details Given a reference, \p ref, to an object or a region in an object,
  *          H5Rdereference2() opens that object and returns an identifier.
  *
@@ -934,6 +941,9 @@ H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
  * \return Returns the length of the name if successful, returning 0 (zero) if
  *         no name is associated with the identifier. Otherwise returns a
  *         negative value.
+ *
+ * \deprecated As of HDF5-1.12, this function has been deprecated in favor of
+ *             H5Rget_file_name(), H5Rget_obj_name() and H5Rget_attr_name().
  *
  * \details H5Rget_name() retrieves a name for the object identified by \p ref.\n
  *          \p loc_id is used to identify the file containing the reference. It

@@ -319,6 +319,7 @@ CONTAINS
     H5T_STD_B64LE  = integer_types(25)
     H5T_FORTRAN_S1 = integer_types(26)
     H5T_C_S1       = integer_types(27)
+    H5T_STD_REF    = integer_types(28)
 
     error = error + h5init_flags_c(H5D_flags, &
          H5D_size_flags, &

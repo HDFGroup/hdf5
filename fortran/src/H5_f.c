@@ -298,7 +298,8 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
         return ret_value;
     if ((integertypes[26] = (hid_t_f)H5Tcopy(H5T_C_S1)) < 0)
         return ret_value;
-
+    if ((integertypes[27] = (hid_t_f)H5Tcopy(H5T_STD_REF)) < 0)
+        return ret_value;
     /*
      *  Define Fortran H5T_STRING type to store non-fixed size strings
      */
