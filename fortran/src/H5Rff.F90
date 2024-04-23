@@ -899,10 +899,10 @@ CONTAINS
 !! \attention  \fortran_approved
 !!
 !! \param loc_id   Location identifier.
-!! \param name     Name of the dataset at the specified location.
-!! \param ref      Reference created by the function call.
+!! \param name     Name of the dataset at the specified location
+!! \param ref      Reference created by the function call
 !! \param hdferr   \fortran_error
-!! \param space_id Dataspace identifier that describes selected region.
+!! \param oapl_id  Object access property list identifier
 !!
 #ifdef H5_DOXYGEN
 !! See C API: @ref H5Rcreate_object()
@@ -948,6 +948,57 @@ CONTAINS
 #else
   END SUBROUTINE h5rcreate_object_f
 #endif
+!>
+!! \ingroup FH5R
+!!
+!! \brief Creates a region reference.
+!!
+!! \attention  \fortran_approved
+!!
+!! \param loc_id   Location identifier
+!! \param name     Name of object
+!! \param space_id Dataspace identifier
+!! \param ref_ptr  Pointer to reference
+!! \param hdferr   \fortran_error
+!! \param oapl_id  Object access property list identifier
+!!
+!! See C API: @ref H5Rcreate_region()
+!!
+  SUBROUTINE h5rcreate_region_f(loc_id, name, space_id, ref_ptr, hdferr, oapl_id)
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    INTEGER(HID_T)  , INTENT(IN) :: space_id
+    TYPE(C_PTR)                  :: ref_ptr
+    INTEGER        , INTENT(OUT) :: hdferr
+    INTEGER(HID_T) , INTENT(IN), OPTIONAL :: oapl_id
+
+    INTEGER(HID_T) :: oapl_id_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Rcreate_region(loc_id, c_name, space_id, oapl_id_default, ref_ptr) &
+            BIND(C, NAME='H5Rcreate_region')
+         IMPORT :: C_PTR, C_INT, C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: c_name
+         INTEGER(HID_T), VALUE :: space_id
+         INTEGER(HID_T), VALUE :: oapl_id_default
+         TYPE(C_PTR), VALUE :: ref_ptr
+       END FUNCTION H5Rcreate_region
+    END INTERFACE
+
+    c_name  = TRIM(name)//C_NULL_CHAR
+
+    oapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(oapl_id)) oapl_id_default = oapl_id
+
+    hdferr = INT(H5Rcreate_region(loc_id, c_name, space_id, oapl_id_default, ref_ptr))
+
+  END SUBROUTINE h5rcreate_region_f
 !>
 !! \ingroup FH5R
 !!
