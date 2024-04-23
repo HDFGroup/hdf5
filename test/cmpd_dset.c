@@ -15,6 +15,7 @@
 
 #define H5T_FRIEND  /*suppress error about including H5Tpkg      */
 #include "H5Tpkg.h" /*to turn off hardware conversions*/
+#include "H5Tconv_compound.h"
 #include "H5Iprivate.h"
 
 #include "h5test.h"
