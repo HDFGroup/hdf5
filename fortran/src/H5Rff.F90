@@ -652,7 +652,7 @@ CONTAINS
 !! \brief Opens the HDF5 object referenced.
 !!
 !! \param ref_ptr  Pointer to reference to open, points object of TYPE(H5R_ref_t)
-!! \param loc_id   Object identifier
+!! \param obj_id   Object identifier
 !! \param hdferr   \fortran_error
 !! \param rapl_id  Reference access property list identifier
 !! \param oapl_id  Object access property list identifier
@@ -701,7 +701,7 @@ CONTAINS
 !! \brief Opens the HDF5 attribute referenced.
 !!
 !! \param ref_ptr  Pointer to reference to open, points object of TYPE(H5R_ref_t)
-!! \param loc_id   Object identifier
+!! \param obj_id   Object identifier
 !! \param hdferr   \fortran_error
 !! \param rapl_id  Reference access property list identifier
 !! \param aapl_id  Attribute access property list identifier
