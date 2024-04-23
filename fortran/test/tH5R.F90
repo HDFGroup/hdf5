@@ -511,7 +511,7 @@ SUBROUTINE genreftest(cleanup, total_error)
   TYPE(H5R_ref_t), DIMENSION(4), TARGET :: ref_ptr
   TYPE(H5R_ref_t), DIMENSION(4), TARGET :: ref_ptr_out
   INTEGER(HSIZE_T), DIMENSION(1) :: ref_dim
-  INTEGER, DIMENSION(5) :: DATA = (/1, 2, 3, 4, 5/)
+  INTEGER, DIMENSION(5), TARGET :: DATA = (/1, 2, 3, 4, 5/)
   INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
 
 #ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
@@ -563,7 +563,7 @@ SUBROUTINE genreftest(cleanup, total_error)
   !
   ! Create dataset to store references to the objects
   !
-  CALL h5dcreate_f(file_id, dsetnamer, H5T_STD_REF_OBJ, spacer_id, &
+  CALL h5dcreate_f(file_id, dsetnamer, H5T_STD_REF, spacer_id, &
        dsetr_id, error)
   CALL check("h5dcreate_f",error,total_error)
   !
@@ -608,16 +608,13 @@ SUBROUTINE genreftest(cleanup, total_error)
   CALL h5rcreate_object_f(file_id, "MyType", f_ptr, error)
   CALL check("h5rcreate_f",error,total_error)
 
-!  IF(ASSOCIATED(f_ptr) .EQ. .FALSE.)THEN
-!     CALL check("h5rcreate_object_f", -1, total_error)
-!  ENDIF
-
-  f_ptr = C_LOC(ref_ptr)
-  PRINT*,H5T_STD_REF,H5T_STD_REF_OBJ
+  f_ptr = C_LOC(ref_ptr(1))
   CALL h5dwrite_f(dsetr_id, H5T_STD_REF, f_ptr, error)
   CALL check("h5dwrite_f",error,total_error)
 
-  ! getting path to normal dataset in root group
+  CALL h5rget_obj_name_f(C_LOC(ref_ptr(3)), "", error, H5P_DEFAULT_F, buf_size)
+  CALL check("h5rget_obj_name_f", error, total_error)
+  CALL verify("h5rget_obj_name_f", buf_size, LEN(dsetnamei,KIND=SIZE_T)+1, total_error)
   CALL h5rget_obj_name_f(C_LOC(ref_ptr(1)), "", error, H5P_DEFAULT_F, buf_size)
   CALL check("h5rget_obj_name_f", error, total_error)
   CALL verify("h5rget_obj_name_f", buf_size, 7_SIZE_T, total_error)
@@ -665,22 +662,43 @@ SUBROUTINE genreftest(cleanup, total_error)
   CALL check("h5dopen_f",error,total_error)
 
   f_ptr = C_LOC(ref_ptr_out(1))
-  CALL h5dread_f(dsetr_id, H5T_STD_REF_OBJ, f_ptr, error)
+  CALL h5dread_f(dsetr_id, H5T_STD_REF, f_ptr, error)
   CALL check("h5dread_f",error,total_error)
 
   !
   !get the third reference's type and Dereference it
   !
 
-  CALL h5eset_auto_f(1, error)
-
   CALL h5rget_obj_name_f(C_LOC(ref_ptr_out(1)), buf_big, error)
   CALL check("H5Rget_name_f", error, total_error)
-  PRINT*,buf_big
+  CALL verify("H5Rget_name_f", TRIM(buf_big), "/GROUP1", total_error)
+  CALL h5rget_obj_name_f(C_LOC(ref_ptr_out(2)), buf_big, error)
+  CALL check("H5Rget_name_f", error, total_error)
+  CALL verify("H5Rget_name_f", TRIM(buf_big), "/GROUP1/GROUP2", total_error)
+  CALL h5rget_obj_name_f(C_LOC(ref_ptr_out(3)), buf_big, error)
+  CALL check("H5Rget_name_f", error, total_error)
+  CALL verify("H5Rget_name_f1", TRIM(buf_big), "/"//dsetnamei, total_error)
+  CALL h5rget_obj_name_f(C_LOC(ref_ptr_out(4)), buf_big, error)
+  CALL check("H5Rget_name_f", error, total_error)
+  CALL verify("H5Rget_name_f2", TRIM(buf_big), "/"//"MyType", total_error)
 
-!  CALL h5rget_type_f(C_LOC(ref_ptr_out(3)), ref_type, error)
-!  CALL check("h5rget_type_f",error,total_error)
+  CALL h5rget_type_f(C_LOC(ref_ptr_out(1)), ref_type, error)
+  CALL check("h5rget_type_f", error, total_error)
+  CALL verify("h5rget_type_f", ref_type, H5R_OBJECT2_F, total_error)
 
+  IF (ref_type == H5R_OBJECT2_F) THEN
+    CALL h5ropen_object_f(C_LOC(ref_ptr_out(3)), dset1_id, error, H5P_DEFAULT_F)
+    CALL check("h5ropen_object_f", error, total_error)
+
+    CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, C_LOC(data(1)), error)
+    CALL check("h5dwrite_f",error,total_error)
+
+    CALL h5rdestroy_f(C_LOC(ref_ptr_out(3)), error)
+    CALL check("h5rdestroy_f", error, total_error)
+  END IF
+
+
+ ! CALL h5eset_auto_f(1, error)
   stop
   IF (ref_type == H5G_DATASET_F) THEN
      CALL h5rdereference_f(dsetr_id, ref(3), dset1_id, error)
