@@ -557,6 +557,7 @@ FORTRAN
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_intatt.c">C</a>
 <a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_intatt_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_IntegerAttribute.java">Java</a>
 <a href="https://github.com/HDFGroup/hdfview/blob/master/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_IntegerAttribute.java">JavaObj</a>
   MATLAB  PyHigh  PyLow
 </td>
