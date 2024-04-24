@@ -1,4 +1,4 @@
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+HDF5-DIAG: Error detected in HDF5 (version (number)):
   #000: (file name) line (number) in H5Topen2(): unable to open named datatype synchronously
     major: Datatype
     minor: Can't open object
