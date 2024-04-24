@@ -320,7 +320,7 @@
 <td>deprecated</td>
 </tr>
 <tr>
-<td>#H5Ovisit by name1</td>
+<td>#H5Ovisit_by_name1</td>
 <td>deprecated</td>
 </tr>
 <tr>
@@ -328,7 +328,7 @@
 <td>deprecated</td>
 </tr>
 <tr>
-<td>#H5Ovisit by name2</td>
+<td>#H5Ovisit_by_name2</td>
 <td>deprecated</td>
 </tr>
 </table>
