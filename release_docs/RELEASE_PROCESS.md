@@ -43,7 +43,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - Document any new known issues at the top of the list.
 3. Update the TESTED CONFIGURATION FEATURES SUMMARY in [RELEASE.txt](https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs/RELEASE.txt) to correspond to features and options that have been tested during the maintenance period by the automated daily regression tests. 
     - **See: Testing/Testing Systems(this is a page in confluence)**
-4. Update current compiler information for each platform in the PLATFORMS TESTED section of [RELEASE.txt](https://github.com/HDFGroup/hdf5/blob/hdff5_1_14/release_docs/RELEASE.txt).
+4. Update current compiler information for each platform in the PLATFORMS TESTED section of [RELEASE.txt](https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs/RELEASE.txt).
 5. Review the [RELEASE.txt](https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs/RELEASE.txt) for formatting and language to verify that it corresponds to guidelines found in **[Writing Notes in a RELEASE.txt(this is missing)]()** File.
 6. Review and update, if needed, the [README](https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/README.md) and [COPYING](https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/COPYING) files.
 7. Review and update all INSTALL_* files in [release_docs](https://github.com/HDFGroup/hdf5/tree/hdf5_1_14/release_docs), if needed.
