@@ -328,6 +328,9 @@
 /* Define to 1 if you have the <szlib.h> header file. */
 #cmakedefine H5_HAVE_SZLIB_H @H5_HAVE_SZLIB_H@
 
+/* Define to 1 if the compiler supports the __builtin_expect() extension */
+#cmakedefine H5_HAVE_BUILTIN_EXPECT @H5_HAVE_BUILTIN_EXPECT@
+
 #if defined(_WIN32) && !defined(H5_BUILT_AS_DYNAMIC_LIB)
 /* Not supported on WIN32 platforms with static linking */
 /* #undef H5_HAVE_THREADSAFE */
