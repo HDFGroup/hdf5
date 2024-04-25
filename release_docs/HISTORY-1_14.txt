@@ -3,12 +3,1404 @@ HDF5 History
 
 This file contains development history of the HDF5 1.14 branch
 
+05. 	 Release Information for hdf5-1.14.4
 04.      Release Information for hdf5-1.14.3
 03.      Release Information for hdf5-1.14.2
 02.      Release Information for hdf5-1.14.1
 01.      Release Information for hdf5-1.14.0
 
 [Search on the string '%%%%' for section breaks of each release.]
+
+%%%%1.14.4%%%%
+
+HDF5 version 1.14.4-2 released on 2024-04-15
+================================================================================
+
+
+INTRODUCTION
+============
+
+This document describes the differences between this release and the previous
+HDF5 release. It contains information on the platforms tested and known
+problems in this release. For more details check the HISTORY*.txt files in the
+HDF5 source.
+
+Note that documentation in the links below will be updated at the time of each
+final release.
+
+Links to HDF5 documentation can be found on:
+
+     https://portal.hdfgroup.org/documentation/
+
+The official HDF5 releases can be obtained from:
+
+     https://www.hdfgroup.org/downloads/hdf5/
+
+Changes from release to release and new features in the HDF5-1.14.x release series
+can be found at:
+
+     https://portal.hdfgroup.org/documentation/hdf5-docs/release_specific_info.html
+
+If you have any questions or comments, please send them to the HDF Help Desk:
+
+     help@hdfgroup.org
+
+
+CONTENTS
+========
+
+- New Features
+- Support for new platforms and languages
+- Bug Fixes since HDF5-1.14.3
+- Platforms Tested
+- Known Problems
+- CMake vs. Autotools installations
+
+
+New Features
+============
+
+    Configuration:
+    -------------
+    - Added configure options for enabling/disabling non-standard programming
+      language features
+
+      * Added a new configuration option that allows enabling or disabling of
+        support for features that are extensions to programming languages, such
+        as support for the _Float16 datatype:
+
+          CMake:      HDF5_ENABLE_NONSTANDARD_FEATURES (ON/OFF) (Default: ON)
+          Autotools:  --enable-nonstandard-features    (yes/no) (Default: yes)
+
+        When this option is enabled, configure time checks are still performed
+        to ensure that a feature can be used properly, but these checks may not
+        be sufficient when compiler support for a feature is incomplete or broken,
+        resulting in library build failures. When set to OFF/no, this option
+        provides a way to disable support for all non-standard features to avoid
+        these issues. Individual features can still be re-enabled with their
+        respective configuration options.
+
+      * Added a new configuration option that allows enabling or disabling of
+        support for the _Float16 C datatype:
+
+          CMake:      HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 (ON/OFF) (Default: ON)
+          Autotools:  --enable-nonstandard-feature-float16    (yes/no) (Default: yes)
+
+        While support for the _Float16 C datatype can generally be detected and
+        used properly, some compilers have incomplete support for the datatype
+        and will pass configure time checks while still failing to build HDF5.
+        This option provides a way to disable support for the _Float16 datatype
+        when the compiler doesn't have the proper support for it.
+
+    - Deprecate bin/cmakehdf5 script
+
+      With the improvements made in CMake since version 3.23 and the addition
+      of CMake preset files, this script is no longer necessary.
+
+      See INSTALL_CMake.txt file, Section X: Using CMakePresets.json for compiling
+
+    - Overhauled LFS support checks
+
+      In 2024, we can assume that Large File Support (LFS) exists on all
+      systems we support, though it may require flags to enable it,
+      particularly when building 32-bit binaries. The HDF5 source does
+      not use any of the 64-bit specific API calls (e.g., ftello64)
+      or explicit 64-bit offsets via off64_t.
+
+      Autotools
+
+      * We now use AC_SYS_LARGEFILE to determine how to support LFS. We
+        previously used a custom m4 script for this.
+
+      CMake
+
+      * The HDF_ENABLE_LARGE_FILE option (advanced) has been removed
+      * We no longer run a test program to determine if LFS works, which
+        will help with cross-compiling
+      * On Linux we now unilaterally set -D_LARGEFILE_SOURCE and
+        -D_FILE_OFFSET_BITS=64, regardless of 32/64 bit system. CMake
+        doesn't offer a nice equivalent to AC_SYS_LARGEFILE and since
+        those options do nothing on 64-bit systems, this seems safe and
+        covers all our bases. We don't set -D_LARGEFILE64_SOURCE since
+        we don't use any of the POSIX 64-bit specific API calls like
+        ftello64, as noted above.
+      * We didn't test for LFS support on non-Linux platforms. We've added
+        comments for how LFS should probably be supported on AIX and Solaris,
+        which seem to be alive, though uncommon. PRs would be appreciated if
+        anyone wishes to test this.
+
+      This overhaul also fixes GitHub #2395, which points out that the LFS flags
+      used when building with CMake differ based on whether CMake has been
+      run before. The LFS check program that caused this problem no longer exists.
+
+    - The CMake HDF5_ENABLE_DEBUG_H5B option has been removed
+
+      This enabled some additional version-1 B-tree checks. These have been
+      removed so the option is no longer necessary.
+
+      This option was CMake-only and marked as advanced.
+
+    - New option for building with static CRT in Windows
+
+      The following option has been added:
+        HDF5_BUILD_STATIC_CRT_LIBS    "Build With Static Windows CRT Libraries"          OFF
+      Because our minimum CMake is 3.18, the macro to change runtime flags no longer
+      works as CMake changed the default behavior in CMake 3.15.
+
+      Fixes GitHub issue #3984
+
+    - Added support for the new MSVC preprocessor
+
+      Microsoft added support for a new, standards-conformant preprocessor
+      to MSVC, which can be enabled with the /Zc:preprocessor option. This
+      preprocessor would trip over our HDopen() variadic function-like
+      macro, which uses a feature that only works with the legacy preprocessor.
+
+      ifdefs have been added that select the correct HDopen() form and
+      allow building HDF5 with the /Zc:preprocessor option.
+
+      The HDopen() macro is located in an internal header file and only
+      affects building the HDF5 library from source.
+
+      Fixes GitHub #2515
+
+    - Renamed HDF5_ENABLE_USING_MEMCHECKER to HDF5_USING_ANALYSIS_TOOL
+
+      The HDF5_USING_ANALYSIS_TOOL is used to indicate to test macros that
+      an analysis tool is being used and that the tests should not use
+      the runTest.cmake macros and it's variations. The analysis tools,
+      like valgrind, test the macro code instead of the program under test.
+
+      HDF5_ENABLE_USING_MEMCHECKER is still used for controlling the HDF5
+      define, H5_USING_MEMCHECKER.
+
+    - New option for building and naming tools in CMake
+
+      The following option has been added:
+        HDF5_BUILD_STATIC_TOOLS    "Build Static Tools Not Shared Tools"          OFF
+
+      The default will build shared tools unless BUILD_SHARED_LIBS = OFF.
+      Tools will no longer have "-shared" as only one set of tools will be created.
+
+    - Incorporated HDF5 examples repository into HDF5 library.
+
+      The HDF5Examples folder is equivalent to the hdf5-examples repository.
+      This enables building and testing the examples
+      during the library build process or after the library has been installed.
+      Previously, the hdf5-examples archives were downloaded
+      for packaging with the library. Now the examples can be built
+      and tested without a packaged install of the library.
+
+      However, to maintain the ability to use the HDF5Examples with an installed
+      library, it is necessary to map the option names used by the library
+      to those used by the examples. The typical pattern is:
+            <example option> = <library option>
+            HDF_BUILD_FORTRAN = ${HDF5_BUILD_FORTRAN}
+
+    - Added new option for CMake to mark tests as SKIPPED.
+
+      HDF5_DISABLE_TESTS_REGEX is a REGEX string that will be checked with
+      test names and if there is a match then that test's property will be
+      set to DISABLED. HDF5_DISABLE_TESTS_REGEX can be initialized on the
+      command line: "-DHDF5_DISABLE_TESTS_REGEX:STRING=<regex>"
+      See CMake documentation for regex-specification.
+
+    - Added defaults to CMake for long double conversion checks
+
+      HDF5 performs a couple of checks at build time to see if long double
+      values can be converted correctly (IBM's Power architecture uses a
+      special format for long doubles). These checks were performed using
+      TRY_RUN, which is a problem when cross-compiling.
+
+      These checks now use default values appropriate for most non-Power
+      systems when cross-compiling. The cache values can be pre-set if
+      necessary, which will preempt both the TRY_RUN and the default.
+
+      Affected values:
+        H5_LDOUBLE_TO_LONG_SPECIAL      (default no)
+        H5_LONG_TO_LDOUBLE_SPECIAL      (default no)
+        H5_LDOUBLE_TO_LLONG_ACCURATE    (default yes)
+        H5_LLONG_TO_LDOUBLE_CORRECT     (default yes)
+        H5_DISABLE_SOME_LDOUBLE_CONV    (default no)
+
+      Fixes GitHub #3585
+
+
+    Library:
+    --------
+    - Relaxed behavior of H5Pset_page_buffer_size() when opening files
+
+      This API call sets the size of a file's page buffer cache. This call
+      was extremely strict about matching its parameters to the file strategy
+      and page size used to create the file, requiring a separate open of the
+      file to obtain these parameters.
+
+      These requirements have been relaxed when using the fapl to open
+      a previously-created file:
+
+      * When opening a file that does not use the H5F_FSPACE_STRATEGY_PAGE
+        strategy, the setting is ignored and the file will be opened, but
+        without a page buffer cache. This was previously an error.
+
+      * When opening a file that has a page size larger than the desired
+        page buffer cache size, the page buffer cache size will be increased
+        to the file's page size. This was previously an error.
+
+      The behavior when creating a file using H5Pset_page_buffer_size() is
+      unchanged.
+
+      Fixes GitHub issue #3382
+
+    - Added support for _Float16 16-bit half-precision floating-point datatype
+
+      Support for the _Float16 C datatype has been added on platforms where:
+
+        - The _Float16 datatype and its associated macros (FLT16_MIN, FLT16_MAX,
+          FLT16_EPSILON, etc.) are available
+        - A simple test program that converts between the _Float16 datatype and
+          other datatypes with casts can be successfully compiled and run at
+          configure time. Some compilers appear to be buggy or feature-incomplete
+          in this regard and will generate calls to compiler-internal functions
+          for converting between the _Float16 datatype and other datatypes, but
+          will not link these functions into the build, resulting in build
+          failures.
+
+      The following new macros have been added:
+
+        H5_HAVE__FLOAT16 - This macro is defined in H5pubconf.h and will have
+                           the value 1 if support for the _Float16 datatype is
+                           available. It will not be defined otherwise.
+
+        H5_SIZEOF__FLOAT16 - This macro is defined in H5pubconf.h and will have
+                             a value corresponding to the size of the _Float16
+                             datatype, as computed by sizeof(). It will have the
+                             value 0 if support for the _Float16 datatype is not
+                             available.
+
+        H5_HAVE_FABSF16 - This macro is defined in H5pubconf.h and will have the
+                          value 1 if the fabsf16 function is available for use.
+
+        H5_LDOUBLE_TO_FLOAT16_CORRECT - This macro is defined in H5pubconf.h and
+                                        will have the value 1 if the platform can
+                                        correctly convert long double values to
+                                        _Float16. Some compilers have issues with
+                                        this.
+
+        H5T_NATIVE_FLOAT16 - This macro maps to the ID of an HDF5 datatype representing
+                             the native C _Float16 datatype for the platform. If
+                             support for the _Float16 datatype is not available, the
+                             macro will map to H5I_INVALID_HID and should not be used.
+
+        H5T_IEEE_F16BE - This macro maps to the ID of an HDF5 datatype representing
+                         a big-endian IEEE 754 16-bit floating-point datatype. This
+                         datatype is available regardless of whether _Float16 support
+                         is available or not.
+
+        H5T_IEEE_F16LE - This macro maps to the ID of an HDF5 datatype representing
+                         a little-endian IEEE 754 16-bit floating-point datatype.
+                         This datatype is available regardless of whether _Float16
+                         support is available or not.
+
+      The following new hard datatype conversion paths have been added, but
+      will only be used when _Float16 support is available:
+
+        H5T_NATIVE_SCHAR <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_UCHAR <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_SHORT <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_USHORT <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_INT <-> H5T_NATIVE_FLOAT16   | H5T_NATIVE_UINT <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_LONG <-> H5T_NATIVE_FLOAT16  | H5T_NATIVE_ULONG <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_LLONG <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_ULLONG <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_FLOAT <-> H5T_NATIVE_FLOAT16 | H5T_NATIVE_DOUBLE <-> H5T_NATIVE_FLOAT16
+        H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_FLOAT16
+
+      The H5T_NATIVE_LDOUBLE -> H5T_NATIVE_FLOAT16 hard conversion path will only
+      be available and used if H5_LDOUBLE_TO_FLOAT16_CORRECT has a value of 1. Otherwise,
+      the conversion will be emulated in software by the library.
+
+      Note that in the absence of any compiler flags for architecture-specific
+      tuning, the generated code for datatype conversions with the _Float16 type
+      may perform conversions by first promoting the type to float. Use of
+      architecture-specific tuning compiler flags may instead allow for the
+      generation of specialized instructions, such as AVX512-FP16 instructions,
+      if available.
+
+    - Made several improvements to the datatype conversion code
+
+      * The datatype conversion code was refactored to use pointers to
+        H5T_t datatype structures internally rather than IDs wrapping
+        the pointers to those structures. These IDs are needed if an
+        application-registered conversion function or conversion exception
+        function are involved during the conversion process. For simplicity,
+        the conversion code simply passed these IDs down and let the internal
+        code unwrap the IDs as necessary when needing to access the wrapped
+        H5T_t structures. However, this could cause a significant amount of
+        repeated ID lookups for compound datatypes and other container-like
+        datatypes. The code now passes down pointers to the datatype
+        structures and only creates IDs to wrap those pointers as necessary.
+        Quick testing showed an average ~3x to ~10x improvement in performance
+        of conversions on container-like datatypes, depending on the
+        complexity of the datatype.
+
+      * A conversion "context" structure was added to hold information about
+        the current conversion being performed. This allows conversions on
+        container-like datatypes to be optimized better by skipping certain
+        portions of the conversion process that remain relatively constant
+        when multiple elements of the container-like datatype are being
+        converted.
+
+      * After refactoring the datatype conversion code to use pointers
+        internally rather than IDs, several copies of datatypes that were
+        made by higher levels of the library were able to be removed. The
+        internal IDs that were previously registered to wrap those copied
+        datatypes were also able to be removed.
+
+    - Implemented optimized support for vector I/O in the Subfiling VFD
+
+      Previously, the Subfiling VFD would handle vector I/O requests by
+      breaking them down into individual I/O requests, one for each entry
+      in the I/O vectors provided. This could result in poor I/O performance
+      for features in HDF5 that utilize vector I/O, such as parallel I/O
+      to filtered datasets. The Subfiling VFD now properly handles vector
+      I/O requests in their entirety, resulting in fewer I/O calls, improved
+      vector I/O performance and improved vector I/O memory efficiency.
+
+    - Added support for in-place type conversion in most cases
+
+      In-place type conversion allows the library to perform type conversion
+      without an intermediate type conversion buffer.  This can improve
+      performance by allowing I/O in a single operation over the entire
+      selection instead of being limited by the size of the intermediate buffer.
+      Implemented for I/O on contiguous and chunked datasets when the selection
+      is contiguous in memory and when the memory datatype is not smaller than
+      the file datatype.
+
+    - Changed selection I/O to be on by default when using the MPIO file driver
+
+    - Added support for selection I/O in the MPIO file driver
+
+      Previously, only vector I/O operations were supported.  Support for
+      selection I/O should improve performance and reduce memory uses in some
+      cases.
+
+    - Changed the error handling for a not found path in the find plugin process.
+
+      While attempting to load a plugin the HDF5 library will fail if one of the
+      directories in the plugin paths does not exist, even if there are more paths
+      to check. Instead of exiting the function with an error, just logged the error
+      and continue processing the list of paths to check.
+
+    - Implemented support for temporary security credentials for the Read-Only
+      S3 (ROS3) file driver.
+
+      When using temporary security credentials, one also needs to specify a
+      session/security token next to the access key id and secret access key.
+      This token can be specified by the new API function H5Pset_fapl_ros3_token().
+      The API function H5Pget_fapl_ros3_token() can be used to retrieve
+      the currently set token.
+
+    - Added a Subfiling VFD configuration file prefix environment variable
+
+      The Subfiling VFD now checks for values set in a new environment
+      variable "H5FD_SUBFILING_CONFIG_FILE_PREFIX" to determine if the
+      application has specified a pathname prefix to apply to the file
+      path for its configuration file. For example, this can be useful
+      for cases where the application wishes to write subfiles to a
+      machine's node-local storage while placing the subfiling configuration
+      file on a file system readable by all machine nodes.
+
+    - Added H5Pset_selection_io(), H5Pget_selection_io(), and
+      H5Pget_no_selection_io_cause() API functions to manage the selection I/O
+      feature.  This can be used to enable collective I/O with type conversion,
+      or it can be used with custom VFDs that support vector or selection I/O.
+
+    - Added H5Pset_modify_write_buf() and H5Pget_modify_write_buf() API
+      functions to allow the library to modify the contents of write buffers, in
+      order to avoid malloc/memcpy.  Currently only used for type conversion
+      with selection I/O.
+
+
+    Parallel Library:
+    -----------------
+    -
+
+
+    Fortran Library:
+    ----------------
+    - Added Fortran H5E APIs:
+      h5eregister_class_f, h5eunregister_class_f, h5ecreate_msg_f, h5eclose_msg_f
+      h5eget_msg_f, h5epush_f, h5eget_num_f, h5ewalk_f, h5eget_class_name_f,
+      h5eappend_stack_f, h5eget_current_stack_f, h5eset_current_stack_f, h5ecreate_stack_f,
+      h5eclose_stack_f, h5epop_f, h5eprint_f (C h5eprint v2 signature)
+
+    - Added API support for Fortran MPI_F08 module definitions:
+      Adds support for MPI's MPI_F08 module datatypes: type(MPI_COMM) and type(MPI_INFO) for HDF5 APIs:
+      H5PSET_FAPL_MPIO_F, H5PGET_FAPL_MPIO_F, H5PSET_MPI_PARAMS_F, H5PGET_MPI_PARAMS_F
+      Ref. #3951
+
+    - Added Fortran APIs:
+      H5FGET_INTENT_F, H5SSEL_ITER_CREATE_F, H5SSEL_ITER_GET_SEQ_LIST_F,
+      H5SSEL_ITER_CLOSE_F, H5S_mp_H5SSEL_ITER_RESET_F
+
+    - Added Fortran Parameters:
+      H5S_SEL_ITER_GET_SEQ_LIST_SORTED_F, H5S_SEL_ITER_SHARE_WITH_DATASPACE_F
+
+    - Added Fortran Parameters:
+      H5S_BLOCK_F and H5S_PLIST_F
+
+    - The configuration definitions file, H5config_f.inc, is now installed
+      and the HDF5 version number has been added to it.
+
+    - Added Fortran APIs:
+      h5fdelete_f
+
+    - Added Fortran APIs:
+      h5vlnative_addr_to_token_f and h5vlnative_token_to_address_f
+
+
+    C++ Library:
+    ------------
+    -
+
+
+    Java Library:
+    -------------
+    -
+
+
+    Tools:
+    ------
+    -
+
+
+    High-Level APIs:
+    ----------------
+    -
+
+
+    C Packet Table API:
+    -------------------
+    -
+
+
+    Internal header file:
+    ---------------------
+    -
+
+
+    Documentation:
+    --------------
+    -
+
+
+Support for new platforms, languages and compilers
+==================================================
+    -
+
+
+Bug Fixes since HDF5-1.14.3 release
+===================================
+    Configuration:
+    -------------
+    - Fix Autotools -Werror cleanup
+
+      The Autotools temporarily scrub -Werror(=whatever) from CFLAGS, etc.
+      so configure checks don't trip over warnings generated by configure
+      check programs. The sed line originally only scrubbed -Werror but not
+      -Werror=something, which would cause errors when the '=something' was
+      left behind in CFLAGS.
+
+      The sed line has been updated to handle -Werror=something lines.
+
+      Fixes one issue raised in #3872
+
+    Library
+    -------
+    - Fixed many (future) CVE issues
+
+      A partner organization corrected many potential security issues, which
+      were fixed and reported to us before submission to MITRE. These do
+      not have formal CVE issues assigned to them yet, so the numbers assigned
+      here are just placeholders. We will update the HDF5 1.14 CVE list (link
+      below) when official MITRE CVE tracking numbers are assigned.
+
+      These CVE issues are generally of the same form as other reported HDF5
+      CVE issues, and rely on the library failing while attempting to read
+      a malformed file. Most of them cause the library to segfault and will
+      probably be assigned "medium (~5/10)" scores by NIST, like the other
+      HDF5 CVE issues.
+
+      The issues that were reported to us have all been fixed in this release,
+      so HDF5 will continue to have no unfixed public CVE issues.
+
+      NOTE: HDF5 versions earlier than 1.14.4 should be considered vulnerable
+            to these issues and users should upgrade to 1.14.4 as soon as
+            possible. Note that it's possible to build the 1.14 library with
+            HDF5 1.8, 1.10, etc. API bindings for people who wish to enjoy
+            the benefits of a more secure library but don't want to upgrade
+            to the latest API. We will not be bringing the CVE fixes to earlier
+            versions of the library (they are no longer supported).
+
+      LIST OF CVE ISSUES FIXED IN THIS RELEASE:
+
+        * CVE-2024-0116-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5D__scatter_mem resulting in causing denial of service or potential
+            code execution
+
+        * CVE-2024-0112-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5S__point_deserialize resulting in the corruption of the
+            instruction pointer and causing denial of service or potential code
+            execution
+
+        * CVE-2024-0111-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5T__conv_struct_opt resulting in causing denial of service or
+            potential code execution
+
+        * CVE-2023-1208-002
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5O__mtime_new_encode resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1208-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5O__layout_encode resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1207-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5O__dtype_encode_helper causing denial of service or potential
+            code execution
+
+        * CVE-2023-1205-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5VM_array_fill resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1202-002
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5T__get_native_type resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1202-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5T__ref_mem_setnull resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1130-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5T_copy_reopen resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1125-001
+            HDF5 versions <= 1.14.3 contain a heap buffer overflow in
+            H5Z__nbit_decompress_one_byte caused by the earlier use of an
+            initialized pointer. This may result in Denial of Service or
+            potential code execution
+
+        * CVE-2023-1114-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5HG_read resulting in the corruption of the instruction pointer
+            and causing denial of service or potential code execution
+
+        * CVE-2023-1113-002
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5F_addr_decode_len resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1113-001
+            HDF5 versions <= 1.14.3 contain a heap buffer overflow caused by
+            the unsafe use of strdup in H5MM_xstrdup, resulting in denial of
+            service or potential code execution
+
+        * CVE-2023-1108-001
+            HDF5 versions <= 1.14.3 contain a out-of-bounds read operation in
+            H5FL_arr_malloc resulting in denial of service or potential code
+            execution
+
+        * CVE-2023-1104-004
+            HDF5 versions <= 1.14.3 contain a out-of-bounds read operation in
+            H5T_close_real resulting in denial of service or potential code
+            execution
+
+        * CVE-2023-1104-003
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow flaw
+            in the function H5HL__fl_deserialize resulting in denial of service
+            or potential code execution
+
+        * CVE-2023-1104-002
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5HL__fl_deserialize resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1104-001
+            HDF5 library versions <=1.14.3 contains a stack overflow in the
+            function H5E_printf_stack resulting in denial of service or
+            potential code execution
+
+        * CVE-2023-1023-001
+            HDF5 library versions <=1.14.3 heap buffer overflow in
+            H5VM_memcpyvv which may result in denial of service or code
+            execution
+
+        * CVE-2023-1019-001
+            HDF5 library versions <=1.14.3 contain a stack buffer overflow in
+            H5VM_memcpyvv resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1018-001
+            HDF5 library versions <=1.14.3 contain a memory corruption in
+            H5A__close resulting in the corruption of the instruction pointer
+            and causing denial of service or potential code execution
+
+        * CVE-2023-1017-002
+            HDF5 library versions <=1.14.3 may use an uninitialized value
+            H5A__attr_release_table resulting in denial of service
+
+        * CVE-2023-1017-001
+            HDF5 library versions <=1.14.3 may attempt to dereference
+            uninitialized values in h5tools_str_sprint, which will lead to
+            denial of service
+
+        * CVE-2023-1013-004
+            HDF5 versions <= 1.13.3 contain a stack buffer overflow in
+            H5HG_read resulting in denial of service or potential code
+            execution
+
+        * CVE-2023-1013-003
+            HDF5 library versions <=1.14.3 contain a buffer overrun in
+            H5Z__filter_fletcher32 resulting in the corruption of the
+            instruction pointer and causing denial of service or potential
+            code execution
+
+        * CVE-2023-1013-002
+            HDF5 library versions <=1.14.3 contain a buffer overrun in
+            H5O__linfo_decode resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1013-001
+            HDF5 library versions <=1.14.3 contain a buffer overrun in
+            H5Z__filter_scaleoffset resulting in the corruption of the
+            instruction pointer and causing denial of service or potential
+            code execution
+
+        * CVE-2023-1012-001
+            HDF5 library versions <=1.14.3 contain a stack buffer overflow in
+            H5R__decode_heap resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1010-001
+            HDF5 library versions <=1.14.3 contain a stack buffer overflow in
+            H5FL_arr_malloc resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1009-001
+            HDF5 library versions <=1.14.3 contain a stack buffer overflow in
+            H5FL_arr_malloc resulting in the corruption of the instruction
+            pointer and causing denial of service or potential code execution
+
+        * CVE-2023-1006-004
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5A__attr_release_table resulting in the corruption of the
+            instruction pointer and causing denial of service or potential code
+            execution
+
+        * CVE-2023-1006-003
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5T__bit_find resulting in the corruption of the instruction pointer
+            and causing denial of service or potential code execution.
+
+        * CVE-2023-1006-002
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5HG_read resulting in the corruption of the instruction pointer
+            and causing denial of service or potential code execution
+
+        * CVE-2023-1006-001
+            HDF5 library versions <=1.14.3 contain a heap buffer overflow in
+            H5HG__cache_heap_deserialize resulting in the corruption of the
+            instruction pointer and causing denial of service or potential code
+            execution
+
+      FULL OFFICIAL HDF5 CVE list (from mitre.org):
+
+        https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=HDF5
+
+      1.14.x CVE tracking list:
+
+        https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/CVE_list_1_14.md
+
+      HDF5 CVE regression test suite (includes proof-of-concept files):
+
+        https://github.com/HDFGroup/cve_hdf5
+
+    - Fixed a divide-by-zero issue when a corrupt file sets the page size to 0
+
+      If a corrupt file sets the page buffer size in the superblock to zero,
+      the library could attempt to divide by zero when allocating space in
+      the file. The library now checks for valid page buffer sizes when
+      reading the superblock message.
+
+      Fixes oss-fuzz issue 58762
+
+    - Fixed a bug when using array datatypes with certain parent types
+
+      Array datatype conversion would never use a background buffer, even if the
+      array's parent type (what the array is an array of) required a background
+      buffer for conversion. This resulted in crashes in some cases when using
+      an array of compound, variable length, or reference datatypes. Array types
+      now use a background buffer if needed by the parent type.
+
+    - Fixed potential buffer read overflows in H5PB_read
+
+      H5PB_read previously did not account for the fact that the size of the
+      read it's performing could overflow the page buffer pointer, depending
+      on the calculated offset for the read. This has been fixed by adjusting
+      the size of the read if it's determined that it would overflow the page.
+
+    - Fixed CVE-2017-17507
+
+      This CVE was previously declared fixed, but later testing with a static
+      build of HDF5 showed that it was not fixed.
+
+      When parsing a malformed (fuzzed) compound type containing variable-length
+      string members, the library could produce a segmentation fault, crashing
+      the library.
+
+      This was fixed after GitHub PR #4234
+
+      Fixes GitHub issue #3446
+
+    - Fixed a cache assert with very large metadata objects
+
+      If the library tries to load a metadata object that is above a
+      certain size, this would trip an assert in debug builds. This could
+      happen if you create a very large number of links in an old-style
+      group that uses local heaps.
+
+      There is no need for this assert. The library's metadata cache
+      can handle large objects. The assert has been removed.
+
+      Fixes GitHub #3762
+
+    - Fixed an issue with the Subfiling VFD and multiple opens of a
+      file
+
+      An issue with the way the Subfiling VFD handles multiple opens
+      of the same file caused the file structures for the extra opens
+      to occasionally get mapped to an incorrect subfiling context
+      object. The VFD now correctly maps the file structures for
+      additional opens of an already open file to the same context
+      object.
+
+    - Fixed a bug that causes the library to incorrectly identify
+      the endian-ness of 16-bit and smaller C floating-point datatypes
+
+      When detecting the endian-ness of an in-memory C floating-point
+      datatype, the library previously always assumed that the type
+      was at least 32 bits in size. This resulted in invalid memory
+      accesses and would usually cause the library to identify the
+      datatype as having an endian-ness of H5T_ORDER_VAX. This has
+      now been fixed.
+
+    - Fixed a bug that causes an invalid memory access issue when
+      converting 16-bit floating-point values to integers with the
+      library's software conversion function
+
+      The H5T__conv_f_i function previously always assumed that
+      floating-point values were at least 32 bits in size and would
+      access invalid memory when attempting to convert 16-bit
+      floating-point values to integers. To fix this, parts of the
+      H5T__conv_f_i function had to be rewritten, which also resulted
+      in a significant speedup when converting floating-point values
+      to integers where the library does not have a hard conversion
+      path. This is the case for any floating-point values with a
+      datatype not represented by H5T_NATIVE_FLOAT16 (if _Float16 is
+      supported), H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE or
+      H5T_NATIVE_LDOUBLE.
+
+    - Fixed a bug that can cause incorrect data when overflows occur
+      while converting integer values to floating-point values with
+      the library's software conversion function
+
+      The H5T__conv_i_f function had a bug which previously caused it
+      to return incorrect data when an overflow occurs and an application's
+      conversion exception callback function decides not to handle the
+      overflow. Rather than return positive infinity, the library would
+      return truncated data. This has now been fixed.
+
+    - Corrected H5Soffset_simple() when offset is NULL
+
+      The reference manual states that the offset parameter of H5Soffset_simple()
+      can be set to NULL to reset the offset of a simple dataspace to 0. This
+      has never been true, and passing NULL was regarded as an error.
+
+      The library will now accept NULL for the offset parameter and will
+      correctly set the offset to zero.
+
+      Fixes HDFFV-9299
+
+    - Fixed an issue where the Subfiling VFD's context object cache could
+      grow too large
+
+      The Subfiling VFD keeps a cache of its internal context objects to
+      speed up access to a context object for a particular file, as well
+      as access to that object across multiple opens of the same file.
+      However, opening a large amount of files with the Subfiling VFD over
+      the course of an application's lifetime could cause this cache to grow
+      too large and result in the application running out of available MPI
+      communicator objects. On file close, the Subfiling VFD now simply
+      evicts context objects out of its cache and frees them. It is assumed
+      that multiple opens of a file will be a less common use case for the
+      Subfiling VFD, but this can be revisited if it proves to be an issue
+      for performance.
+
+    - Fixed error when overwriting certain nested variable length types
+
+      Previously, when using a datatype that included a variable length type
+      within a compound or array within another variable length type, and
+      overwriting data with a shorter (top level) variable length sequence, an
+      error could occur. This has been fixed.
+
+    - Take user block into account in H5Dchunk_iter() and H5Dget_chunk_info()
+
+      The address reported by the following functions did not correctly
+      take the user block into account:
+
+        * H5Dchunk_iter()              <-- addr passed to callback
+        * H5Dget_chunk_info()          <-- addr parameter
+        * H5Dget_chunk_info_by_coord() <-- addr parameter
+
+      This means that these functions reported logical HDF5 file addresses,
+      which would only be equal to the physical addresses when there is no
+      user block prepended to the HDF5 file. This is unfortunate, as the
+      primary use of these functions is to get physical addresses in order
+      to directly access the chunks.
+
+      The listed functions now correctly take the user block into account,
+      so they will emit physical addresses that can be used to directly
+      access the chunks.
+
+      Fixes #3003
+
+    - Fixed asserts raised by large values of H5Pset_est_link_info() parameters
+
+      If large values for est_num_entries and/or est_name_len were passed
+      to H5Pset_est_link_info(), the library would attempt to create an
+      object header NIL message to reserve enough space to hold the links in
+      compact form (i.e., concatenated), which could exceed allowable object
+      header message size limits and trip asserts in the library.
+
+      This bug only occurred when using the HDF5 1.8 file format or later and
+      required the product of the two values to be ~64k more than the size
+      of any links written to the group, which would cause the library to
+      write out a too-large NIL spacer message to reserve the space for the
+      unwritten links.
+
+      The library now inspects the phase change values to see if the dataset
+      is likely to be compact and checks the size to ensure any NIL spacer
+      messages won't be larger than the library allows.
+
+      Fixes GitHub #1632
+
+    - Fixed a bug where H5Tset_fields does not account for any offset
+      set for a floating-point datatype when determining if values set
+      for spos, epos, esize, mpos and msize make sense for the datatype
+
+      Previously, H5Tset_fields did not take datatype offsets into account
+      when determining if the values set make sense for the datatype.
+      This would cause the function to fail when the precision for a
+      datatype is correctly set such that the offset bits are not included.
+      This has now been fixed.
+
+    - Fixed H5Fget_access_plist so that it returns the file locking
+      settings for a file
+
+      When H5Fget_access_plist (and the internal H5F_get_access_plist)
+      is called on a file, the returned File Access Property List has
+      the library's default file locking settings rather than any
+      settings set for the file. This causes two problems:
+
+        - Opening an HDF5 file through an external link using H5Gopen,
+          H5Dopen, etc. with H5P_DEFAULT for the Dataset/Group/etc.
+          Access Property List will cause the external file to be opened
+          with the library's default file locking settings rather than
+          inheriting them from the parent file. This can be surprising
+          when a file is opened with file locking disabled, but its
+          external files are opened with file locking enabled.
+
+        - An application cannot make use of the H5Pset_elink_fapl
+          function to match file locking settings between an external
+          file and its parent file without knowing the correct setting
+          ahead of time, as calling H5Fget_access_plist on the parent
+          file will not return the correct settings.
+
+      This has been fixed by copying a file's file locking settings
+      into the newly-created File Access Property List in H5F_get_access_plist.
+
+      This fix partially addresses GitHub issue #4011
+
+    - Memory usage growth issue
+
+      Starting with the HDF5 1.12.1 release, an issue (GitHub issue #1256)
+      was observed where running a simple program that has a loop of opening
+      a file, reading from an object with a variable-length datatype and
+      then closing the file would result in the process fairly quickly
+      running out of memory. Upon further investigation, it was determined
+      that this memory was being kept around in the library's datatype
+      conversion pathway cache that is used to speed up datatype conversions
+      which are repeatedly used within an HDF5 application's lifecycle. For
+      conversions involving variable-length or reference datatypes, each of
+      these cached pathway entries keeps a reference to its associated file
+      for later use. Since the file was being closed and reopened on each
+      loop iteration, and since the library compares for equality between
+      instances of opened files (rather than equality of the actual files)
+      when determining if it can reuse a cached conversion pathway, it was
+      determining that no cached conversion pathways could be reused and was
+      creating a new cache entry on each loop iteration during I/O. This
+      would lead to constant growth of that cache and the memory it consumed,
+      as well as constant growth of the memory consumed by each cached entry
+      for the reference to its associated file.
+
+      To fix this issue, the library now removes any cached datatype
+      conversion path entries for variable-length or reference datatypes
+      associated with a particular file when that file is closed.
+
+      Fixes GitHub #1256
+
+    - Suppressed floating-point exceptions in H5T init code
+
+      The floating-point datatype initialization code in H5Tinit_float.c
+      could raise FE_INVALID exceptions while munging bits and performing
+      comparisons that might involve NaN. This was not a problem when the
+      initialization code was executed in H5detect at compile time (prior
+      to 1.14.3), but now that the code is executed at library startup
+      (1.14.3+), these exceptions can be caught by user code, as is the
+      default in the NAG Fortran compiler.
+
+      Starting in 1.14.4, we now suppress floating-point exceptions while
+      initializing the floating-point types and clear FE_INVALID before
+      restoring the original environment.
+
+      Fixes GitHub #3831
+
+    - Fixed a file handle leak in the core VFD
+
+      When opening a file with the core VFD and a file image, if the file
+      already exists, the file check would leak the POSIX file handle.
+
+      Fixes GitHub issue #635
+
+    - Dropped support for MPI-2
+
+      The MPI-2 supporting artifacts have been removed due to the cessation
+      of MPI-2 maintenance and testing since version HDF5 1.12.
+
+
+    - Fixed a segfault when using a user-defined conversion function between compound datatypes
+
+      During type info initialization for compound datatype conversion, the library checked if the
+      datatypes are subsets of one another in order to perform special conversion handling. 
+      This check uses information that is only defined if a library conversion function is in use. 
+      The library now skips this check for user-defined conversion functions.
+
+      Fixes Github issue #3840
+
+    Java Library
+    ------------
+    -
+
+
+    Configuration
+    -------------
+    - Changed default of 'Error on HDF5 doxygen warnings' DOXYGEN_WARN_AS_ERROR option.
+
+      The default setting of DOXYGEN_WARN_AS_ERROR to 'FAIL_ON_WARNINGS' has been changed
+      to 'NO'. It was decided that the setting was too aggressive and should be a user choice.
+      The github actions and scripts have been updated to reflect this.
+
+        * HDF5_ENABLE_DOXY_WARNINGS: ON/OFF (Default: OFF)
+        * --enable-doxygen-errors: enable/disable (Default: disable)
+
+    - Removed an Autotools configure hack that causes problems on MacOS
+
+      A sed line in configure.ac was added in the past to paper over some
+      problems with older versions of the Autotools that would add incorrect
+      linker flags. This hack is not needed with recent versions of the
+      Autotools and the sed line errors on MacOS (though this was a silent
+      error that didn't break the build) so the hack has been removed.
+
+      Fixes GitHub issue #3843
+
+    - Fixed an issue where the h5tools_test_utils test program was being
+      installed on the system for Autotools builds of HDF5
+
+      The h5tools_test_utils test program was mistakenly added to bin_PROGRAMS
+      in its Makefile.am configuration file, causing the executable to be
+      installed on the system. The executable is now added to noinst_PROGRAMS
+      instead and will no longer be installed on the system for Autotools builds
+      of HDF5. The CMake configuration code already avoids installing the
+      executable on the system.
+
+
+    Tools
+    -----
+    - Renamed h5fuse.sh to h5fuse
+
+      Addresses Discussion #3791
+
+
+    Performance
+    -------------
+    -
+
+
+    Fortran API
+    -----------
+    - Fixed: HDF5 fails to compile with -Werror=lto-type-mismatch
+
+      Removed the use of the offending C stub wrapper.
+
+      Fixes GitHub issue #3987
+
+
+    High-Level Library
+    ------------------
+    - Fixed a memory leak in H5LTopen_file_image with H5LT_FILE_IMAGE_DONT_COPY flag
+
+      When the H5LT_FILE_IMAGE_DONT_COPY flag is passed to H5LTopen_file_image, the
+      internally-allocated udata structure gets leaked as the core file driver doesn't
+      have a way to determine when or if it needs to call the "udata_free" callback.
+      This has been fixed by freeing the udata structure when the "image_free" callback
+      gets made during file close, where the file is holding the last reference to the
+      udata structure.
+
+      Fixes GitHub issue #827
+
+
+    Fortran High-Level APIs
+    -----------------------
+    -
+
+
+    Documentation
+    -------------
+    -
+
+
+    F90 APIs
+    --------
+    -
+
+
+    C++ APIs
+    --------
+    - 
+
+
+    Testing
+    -------
+    - Fixed a bug in the dt_arith test when H5_WANT_DCONV_EXCEPTION is not
+      defined
+
+      The dt_arith test program's test_particular_fp_integer sub-test tries
+      to ensure that the library correctly raises a datatype conversion
+      exception when converting a floating-point value to an integer overflows.
+      However, this test would run even when H5_WANT_DCONV_EXCEPTION isn't
+      defined, causing the test to fail due to the library not raising
+      datatype conversion exceptions. This has now been fixed by not running
+      the test when H5_WANT_DCONV_EXCEPTION is not defined.
+
+    - Fixed a testing failure in testphdf5 on Cray machines
+
+      On some Cray machines, what appears to be a bug in Cray MPICH was causing
+      calls to H5Fis_accessible to create a 0-byte file with strange Unix
+      permissions. This was causing an H5Fdelete file deletion test in the
+      testphdf5 program to fail due to a just-deleted HDF5 file appearing to
+      still be accessible on the file system. The issue in Cray MPICH has been
+      worked around for the time being by resetting the MPI_Info object on the
+      File Access Property List used to MPI_INFO_NULL before passing it to the
+      H5Fis_accessible call.
+
+    - A bug was fixed in the HDF5 API test random datatype generation code
+
+      A bug in the random datatype generation code could cause test failures
+      when trying to generate an enumeration datatype that has duplicated
+      name/value pairs in it. This has now been fixed.
+
+    - A bug was fixed in the HDF5 API test VOL connector registration checking code
+
+      The HDF5 API test code checks to see if the VOL connector specified by the
+      HDF5_VOL_CONNECTOR environment variable (if any) is registered with the library
+      before attempting to run tests with it so that testing can be skipped and an
+      error can be returned when a VOL connector fails to register successfully.
+      Previously, this code didn't account for VOL connectors that specify extra
+      configuration information in the HDF5_VOL_CONNECTOR environment variable and
+      would incorrectly report that the specified VOL connector isn't registered
+      due to including the configuration information as part of the VOL connector
+      name being checked for registration status. This has now been fixed.
+
+   - Fixed Fortran 2003 test with gfortran-v13, optimization levels O2,O3
+
+     Fixes failing Fortran 2003 test with gfortran, optimization level O2,O3
+     with -fdefault-real-16. Fixes GH #2928.
+
+
+Platforms Tested
+===================
+
+    - HDF5 supports the latest macOS versions, including the current and two
+      preceding releases. As new major macOS versions become available, HDF5
+      will discontinue  support for the  oldest  version and add  the latest
+      version to its list of compatible systems, along with the previous two
+      releases.
+
+    Linux 5.16.14-200.fc35           GNU gcc (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
+    #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
+    Fedora35                         clang version 13.0.0 (Fedora 13.0.0-3.fc35)
+                                     (cmake and autotools)
+
+    Linux 5.19.0-1023-aws            GNU gcc, gfortran, g++
+    #24-Ubuntu SMP x86_64 GNU/Linux  (Ubuntu 11.3.0-1ubuntu1~22.04) 11.3.0
+    Ubuntu 22.04                     Ubuntu clang version 14.0.0-1ubuntu1
+                                     Intel(R) oneAPI DPC++/C++ Compiler 2023.1.0
+                                     ifort (IFORT) 2021.9.0 20230302
+                                     (cmake and autotools)
+
+    Linux 5.14.21-cray_shasta_c      cray-mpich/8.1.23
+    #1 SMP x86_64 GNU/Linux              cce/15.0.0
+    (frontier)                           gcc/12.2.0
+                                     (cmake)
+
+    Linux 5.11.0-34-generic          GNU gcc (GCC) 9.4.0-1ubuntu1
+    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 9.4.0-1ubuntu1
+    Ubuntu 20.04                     Ubuntu clang version 10.0.0-4ubuntu1
+                                     Intel(R) oneAPI DPC++/C++ Compiler 2023.1.0
+                                     ifort (IFORT) 2021.9.0 20230302
+                                     (cmake and autotools)
+
+    Linux 4.14.0-115.35.1.1chaos     aue/openmpi/4.1.4-arm-22.1.0.12
+    #1 SMP aarch64 GNU/Linux             Arm C/C++/Fortran Compiler version 22.1
+    (stria)                              (based on LLVM 13.0.1)
+                                     (cmake)
+
+    Linux 4.14.0-115.35.1.3chaos     spectrum-mpi/rolling-release
+    #1 SMP ppc64le GNU/Linux             clang 12.0.1
+    (vortex)                             GCC 8.3.1
+                                         XL 2021.09.22
+                                     (cmake)
+
+    Linux-4.14.0-115.21.2            spectrum-mpi/rolling-release
+    #1 SMP ppc64le GNU/Linux             clang 12.0.1, 14.0.5
+    (lassen)                             GCC 8.3.1
+                                         XL 16.1.1.2, 2021.09.22, 2022.08.05
+                                     (cmake)
+
+    Linux-4.12.14-197.99-default     cray-mpich/7.7.14
+    #1 SMP x86_64 GNU/Linux              cce 12.0.3
+    (theta)                              GCC 11.2.0
+                                         llvm 9.0
+                                         Intel 19.1.2
+
+    Linux 3.10.0-1160.36.2.el7.ppc64 gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+    #1 SMP ppc64be GNU/Linux         g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+    Power8 (echidna)                 GNU Fortran (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+
+    Linux 3.10.0-1160.24.1.el7       GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux          compilers:
+    Centos7                              Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+    (jelly/kituo/moohan)                 Version 4.9.3, Version 7.2.0, Version 8.3.0,
+                                         Version 9.1.0, Version 10.2.0
+                                     Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                     compilers:
+                                         Version 17.0.0.098 Build 20160721
+                                     GNU C (gcc) and C++ (g++) 4.8.5 compilers
+                                         with NAG Fortran Compiler Release 7.1(Hanzomon)
+                                     Intel(R) C (icc) and C++ (icpc) 17.0.0.098 compilers
+                                         with NAG Fortran Compiler Release 7.1(Hanzomon)
+                                     MPICH 3.1.4 compiled with GCC 4.9.3
+                                     MPICH 3.3 compiled with GCC 7.2.0
+                                     OpenMPI 3.1.3 compiled with GCC 7.2.0 and 4.1.2
+                                         compiled with GCC 9.1.0
+                                     PGI C, Fortran, C++ for 64-bit target on
+                                     x86_64;
+                                         Versions 18.4.0 and 19.10-0
+                                     NVIDIA nvc, nvfortran and nvc++ version 22.5-0
+                                     (autotools and cmake)
+
+
+    Linux-3.10.0-1160.0.0.1chaos     openmpi-4.1.2
+    #1 SMP x86_64 GNU/Linux              clang 6.0.0, 11.0.1
+    (quartz)                             GCC 7.3.0, 8.1.0
+                                         Intel 19.0.4, 2022.2, oneapi.2022.2
+
+    Linux-3.10.0-1160.90.1.1chaos    openmpi/4.1
+    #1 SMP x86_64 GNU/Linux              GCC 7.2.0
+    (skybridge)                          Intel/19.1
+                                     (cmake)
+
+    Linux-3.10.0-1160.90.1.1chaos    openmpi/4.1
+    #1 SMP x86_64 GNU/Linux              GCC 7.2.0
+    (attaway)                            Intel/19.1
+                                     (cmake)
+
+    Linux-3.10.0-1160.90.1.1chaos    openmpi-intel/4.1
+    #1 SMP x86_64 GNU/Linux              Intel/19.1.2, 21.3.0 and 22.2.0
+    (chama)                          (cmake)
+
+    macOS Apple M1 11.6              Apple clang version 12.0.5 (clang-1205.0.22.11)
+    Darwin 20.6.0 arm64              gfortran GNU Fortran (Homebrew GCC 11.2.0) 11.1.0
+    (macmini-m1)                     Intel icc/icpc/ifort version 2021.3.0 202106092021.3.0 20210609
+
+    macOS Big Sur 11.3.1             Apple clang version 12.0.5 (clang-1205.0.22.9)
+    Darwin 20.4.0 x86_64             gfortran GNU Fortran (Homebrew GCC 10.2.0_3) 10.2.0
+    (bigsur-1)                       Intel icc/icpc/ifort version 2021.2.0 20210228
+
+    Mac OS X El Capitan 10.11.6      Apple clang version 7.3.0 from Xcode 7.3
+    64-bit                           gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011test)                    Intel icc/icpc/ifort version 16.0.2
+
+    Linux 2.6.32-573.22.1.el6        GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux          compilers:
+    Centos6                              Version 4.4.7 20120313
+    (platypus)                           Version 4.9.3, 5.3.0, 6.2.0
+                                     MPICH 3.1.4 compiled with GCC 4.9.3
+                                     PGI C, Fortran, C++ for 64-bit target on
+                                     x86_64;
+                                         Version 19.10-0
+
+    Windows 10 x64                  Visual Studio 2019 w/ clang 12.0.0
+                                        with MSVC-like command-line (C/C++ only - cmake)
+                                    Visual Studio 2019 w/ Intel (C/C++ only - cmake)
+                                    Visual Studio 2022 w/ clang 15.0.1
+                                        with MSVC-like command-line (C/C++ only - cmake)
+                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2023 (cmake)
+                                    Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
+
+
+Known Problems
+==============
+
+ -  When building with the NAG Fortran compiler using the Autotools and libtool
+    2.4.2 or earlier, the -shared flag will be missing '-Wl,', which will cause
+    compilation to fail. This is due to a bug in libtool that was fixed in 2012
+    and released in 2.4.4 in 2014.
+
+ -  When the library detects and builds in support for the _Float16 datatype, an
+    issue has been observed on at least one MacOS 14 system where the library
+    fails to initialize due to not being able to detect the byte order of the
+    _Float16 type (https://github.com/HDFGroup/hdf5/issues/4310):
+
+        #5: H5Tinit_float.c line 308 in H5T__fix_order(): failed to detect byte order
+        major: Datatype
+        minor: Unable to initialize object
+
+    If this issue is encountered, support for the _Float16 type can be disabled
+    with a configuration option:
+
+        CMake:      HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16=OFF
+        Autotools:  --disable-nonstandard-feature-float16
+
+ -  When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may
+    also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur
+    in the following tests:
+
+        H5PLUGIN-filter_plugin
+        H5TEST-flush2
+        H5TEST-testhdf5-base
+        MPI_TEST_t_filters_parallel
+
+    Sporadic failures (even with lower -O levels):
+        Java JUnit-TestH5Pfapl
+        Java JUnit-TestH5D
+
+    Also, NVHPC will fail to compile the test/tselect.c test file with a compiler
+    error of 'use of undefined value' when the optimization level is -O2 or higher.
+
+    This is confirmed to be a bug in the nvc compiler that has been fixed as of
+    23.11. If you are using an affected version of the NVidia compiler, the
+    work-around is to set the optimization level to -O1.
+
+    https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045
+
+ -  CMake files do not behave correctly with paths containing spaces.
+    Do not use spaces in paths because the required escaping for handling spaces
+    results in very complex and fragile build files.
+
+ -  At present, metadata cache images may not be generated by parallel
+    applications.  Parallel applications can read files with metadata cache
+    images, but since this is a collective operation, a deadlock is possible
+    if one or more processes do not participate.
+
+ -  The subsetting option in ph5diff currently will fail and should be avoided.
+    The subsetting option works correctly in serial h5diff.
+
+ -  Flang Fortran compilation will fail (last check version 17) due to not yet
+    implemented: (1) derived type argument passed by value (H5VLff.F90),
+    and (2) support for REAL with KIND = 2 in intrinsic SPACING used in testing.
+
+ -  Fortran tests HDF5_1_8.F90 and HDF5_F03.F90 will fail with Cray compilers
+    greater than version 16.0 due to a compiler bug. The latest version verified
+    as failing was version 17.0.
+
+ -  Several tests currently fail on certain platforms:
+        MPI_TEST-t_bigio fails with spectrum-mpi on ppc64le platforms.
+
+        MPI_TEST-t_subfiling_vfd and MPI_TEST_EXAMPLES-ph5_subfiling fail with
+        cray-mpich on theta and with XL compilers on ppc64le platforms.
+
+        MPI_TEST_testphdf5_tldsc fails with cray-mpich 7.7 on cori and theta.
+
+ -  File space may not be released when overwriting or deleting certain nested
+    variable length or reference types.
+
+ -  Known problems in previous releases can be found in the HISTORY*.txt files
+    in the HDF5 source. Please report any new problems found to
+    help@hdfgroup.org.
+
+
+CMake vs. Autotools installations
+=================================
+While both build systems produce similar results, there are differences.
+Each system produces the same set of folders on Linux (only CMake works
+on standard Windows); bin, include, lib and share. Autotools places the
+COPYING and RELEASE.txt file in the root folder, CMake places them in
+the share folder.
+
+The bin folder contains the tools and the build scripts. Additionally, CMake
+creates dynamic versions of the tools with the suffix "-shared". Autotools
+installs one set of tools depending on the "--enable-shared" configuration
+option.
+  build scripts
+  -------------
+  Autotools: h5c++, h5cc, h5fc
+  CMake: h5c++, h5cc, h5hlc++, h5hlcc
+
+The include folder holds the header files and the fortran mod files. CMake
+places the fortran mod files into separate shared and static subfolders,
+while Autotools places one set of mod files into the include folder. Because
+CMake produces a tools library, the header files for tools will appear in
+the include folder.
+
+The lib folder contains the library files, and CMake adds the pkgconfig
+subfolder with the hdf5*.pc files used by the bin/build scripts created by
+the CMake build. CMake separates the C interface code from the fortran code by
+creating C-stub libraries for each Fortran library. In addition, only CMake
+installs the tools library. The names of the szip libraries are different
+between the build systems.
+
+The share folder will have the most differences because CMake builds include
+a number of CMake specific files for support of CMake's find_package and support
+for the HDF5 Examples CMake project.
+
+The issues with the gif tool are:
+    HDFFV-10592 CVE-2018-17433
+    HDFFV-10593 CVE-2018-17436
+    HDFFV-11048 CVE-2020-10809
+These CVE issues have not yet been addressed and are avoided by not building
+the gif tool by default. Enable building the High-Level tools with these options:
+    autotools:   --enable-hlgiftools
+    cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON
+
 
 %%%%1.14.3%%%%
 
