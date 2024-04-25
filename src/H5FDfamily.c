@@ -336,7 +336,6 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t msize, hid_t memb_fapl_id)
     H5P_genplist_t    *plist; /* Property list pointer */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ihi", fapl_id, msize, memb_fapl_id);
 
     /* Check arguments */
     if (true != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
@@ -382,7 +381,6 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *msize /*out*/, hid_t *memb_fapl_id /*
     herr_t                    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*h*i", fapl_id, msize, memb_fapl_id);
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");

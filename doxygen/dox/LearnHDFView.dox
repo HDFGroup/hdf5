@@ -7,8 +7,8 @@ This tutorial enables you to get a feel for HDF5 by using the HDFView browser. I
 any programming experience.
 
 \section sec_learn_hv_install HDFView Installation
-\li Download and install HDFView. It can be downloaded from the <a href="https://portal.hdfgroup.org/downloads/hdfview/hdfview3_3_1.html">Download HDFView</a> page.
-\li Obtain the  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> text file, used in the tutorial.
+\li Download and install HDFView. It can be downloaded from the <a href="https://\DWNURL/hdfview/hdfview3_3_1.html">Download HDFView</a> page.
+\li Obtain the  <a href="https://\AEXURL/files/tutorial/storm1.txt">storm1.txt</a> text file, used in the tutorial.
 
 \section sec_learn_hv_begin Begin Tutorial
 Once you have HDFView installed, bring it up and you are ready to begin the tutorial.
@@ -113,11 +113,11 @@ Datatype information as is):
 </table>
 </li>
 <li>Double left click on the <em>Storm</em> dataset in the tree view. A window with an empty spreadsheet pops open.</li>
-<li>Copy the data from the <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> file into the dataset.
+<li>Copy the data from the <a href="https://\AEXURL/files/tutorial/storm1.txt">storm1.txt</a> file into the dataset.
 
-If you downloaded <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a>,
+If you downloaded <a href="https://\AEXURL/files/tutorial/storm1.txt">storm1.txt</a>,
 then click on the <em>Import/Export Data</em> menu and select <em>Import Data from -> Text File</em>.
-Specify a location, select <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a>
+Specify a location, select <a href="https://\AEXURL/files/tutorial/storm1.txt">storm1.txt</a>
 and click on the <em>Open</em> button. Answer <em>Yes</em> in the dialog box that
 pops up (which asks if you wish to paste the selected data).
 
@@ -246,7 +246,7 @@ in the file).
 
 Please note that the chunk sizes used in this topic are for demonstration purposes only. For
 information on chunking and specifying an appropriate chunk size, see the
-<a href="https://portal.hdfgroup.org/documentation/hdf5-docs/chunking_in_hdf5.html">Chunking in HDF5</a> documentation.
+<a href="https://\DOCURL/chunking_in_hdf5.html">Chunking in HDF5</a> documentation.
 
 Also see the HDF5 Tutorial topic on \ref secLBComDsetCreate.
 <ul>
@@ -317,8 +317,8 @@ You will see the <em>Another Storm</em> dataset in the <em>Image</em> group:
 </tr>
 </table>
 </li>
-<li>Copy the data from the <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> file into the dataset. (See the previous topic for copying
-<a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> into a dataset.)</li>
+<li>Copy the data from the <a href="https://\AEXURL/files/tutorial/storm1.txt">storm1.txt</a> file into the dataset. (See the previous topic for copying
+<a href="https://\AEXURL/files/tutorial/storm1.txt">storm1.txt</a> into a dataset.)</li>
 <li><em>Table -> Close</em>, and save the data.</li>
 <li>Right click on <em>Another Storm</em>, and select <em>Open As</em>.</li>
 <li>Select the <em>Image</em> button in the Dataset Selection window that pops up. Click the <em>Ok</em> button at the
@@ -375,7 +375,7 @@ Add data to the <em>Storm Image</em> dataset as was shown previously:
 <li>Right click on <em>Storm Image</em>, and select <em>Open As</em> to open the Dataset Selection window.</li>
 <li>Click on the <em>Spreadsheet</em> button at the top left of the Dataset Selection window to view the image
 as a spreadsheet.</li>
-<li>Copy the data from the <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> file into the dataset.</li>
+<li>Copy the data from the <a href="https://\AEXURL/files/tutorial/storm1.txt">storm1.txt</a> file into the dataset.</li>
 <li>Close the dataset and save the data.</li>
 </ul>
 </li>

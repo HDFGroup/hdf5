@@ -69,7 +69,7 @@ test_skiplist_init(void)
     CHECK_PTR(rev_sort_rand_num, "malloc");
 
     /* Initialize random number seed */
-    curr_time = HDtime(NULL);
+    curr_time = time(NULL);
     HDsrandom((unsigned)curr_time);
 
     /* Create randomized set of numbers */

@@ -138,6 +138,8 @@ typedef enum H5D_vds_view_t {
  *
  * \return \herr_t
  *
+ * \since 1.10.0
+ *
  */
 typedef herr_t (*H5D_append_cb_t)(hid_t dataset_id, hsize_t *cur_dims, void *op_data);
 //! <!-- [H5D_append_cb_t_snip] -->
@@ -155,6 +157,8 @@ typedef herr_t (*H5D_append_cb_t)(hid_t dataset_id, hsize_t *cur_dims, void *op_
  * \param[in,out] operator_data Pointer to any user-defined data associated with
  *                the operation
  * \return \herr_t_iter
+ *
+ * \since 1.10.2
  *
  */
 typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point,
@@ -186,6 +190,8 @@ typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim, const
  *          been returned. The callback function should return zero (0)
  *          to indicate success, and a negative value to indicate failure.
  *
+ * \since 1.10.2
+ *
  */
 typedef herr_t (*H5D_scatter_func_t)(const void **src_buf /*out*/, size_t *src_buf_bytes_used /*out*/,
                                      void *op_data);
@@ -204,7 +210,7 @@ typedef herr_t (*H5D_scatter_func_t)(const void **src_buf /*out*/, size_t *src_b
  * \param[in,out] op_data User-defined pointer to data required by the callback
  *                        function; a pass-through of the \p op_data pointer
  *                        provided with the H5Dgather() function call.
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details The callback function should process, store, or otherwise make use
  *          of the data returned in dst_buf before it returns, because the
@@ -213,6 +219,8 @@ typedef herr_t (*H5D_scatter_func_t)(const void **src_buf /*out*/, size_t *src_b
  *          elements have been passed to the callback in dst_buf. The callback
  *          function should return zero (0) to indicate success, and a negative
  *          value to indicate failure.
+ *
+ * \since 1.10.2
  *
  */
 typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_used, void *op_data);
@@ -228,12 +236,15 @@ typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_us
  * \param[in]     size        Chunk size in bytes, 0 if the chunk does not exist
  * \param[in,out] op_data     Pointer to any user-defined data associated with
  *                            the operation.
- * \returns \li Zero (#H5_ITER_CONT) causes the iterator to continue, returning
+ * \return \li Zero (#H5_ITER_CONT) causes the iterator to continue, returning
  *              zero when all elements have been processed.
  *          \li A positive value (#H5_ITER_STOP) causes the iterator to
  *              immediately return that value, indicating short-circuit success.
  *          \li A negative (#H5_ITER_ERROR) causes the iterator to immediately
  *              return that value, indicating failure.
+ *
+ * \since 1.14.0
+ *
  */
 typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, unsigned filter_mask, haddr_t addr, hsize_t size,
                                    void *op_data);

@@ -223,12 +223,12 @@ H5_make_time(struct tm *tm)
 
     /* Initialize timezone information */
     if (!H5_ntzset) {
-        HDtzset();
+        tzset();
         H5_ntzset = true;
-    } /* end if */
+    }
 
     /* Perform base conversion */
-    if ((time_t)-1 == (the_time = HDmktime(tm)))
+    if ((time_t)-1 == (the_time = mktime(tm)))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCONVERT, FAIL, "badly formatted modification time message");
 
         /* Adjust for timezones */
@@ -689,7 +689,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
          * Unix: does not apply
          */
         if (H5_CHECK_ABS_DRIVE(name)) {
-            drive  = HDtoupper(name[0]) - 'A' + 1;
+            drive  = toupper(name[0]) - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
             strncpy(new_name, &name[2], name_len);
         }
@@ -1404,7 +1404,7 @@ H5_strcasestr(const char *haystack, const char *needle)
         const char *h = haystack;
         const char *n = needle;
         /* loop while lowercase strings match, or needle ends */
-        while (HDtolower(*h) == HDtolower(*n) && *n) {
+        while (tolower(*h) == tolower(*n) && *n) {
             h++;
             n++;
         }

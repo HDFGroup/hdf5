@@ -220,7 +220,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
         fprintf(stderr, "Reading records\n");
 
     /* Get the starting time */
-    start_time = HDtime(NULL);
+    start_time = time(NULL);
 
     /* Read records */
     for (u = 0; u < nrecords; u++) {
@@ -257,7 +257,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
             } /* end if */
 
             /* Check for timeout */
-            if (HDtime(NULL) >= (time_t)(start_time + (time_t)TIMEOUT)) {
+            if (time(NULL) >= (time_t)(start_time + (time_t)TIMEOUT)) {
                 fprintf(stderr, "Reader timed out\n");
                 return -1;
             } /* end if */

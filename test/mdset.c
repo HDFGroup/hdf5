@@ -646,7 +646,7 @@ main(void)
     fapl_id = h5_fileaccess();
 
     /* Initialize random number seed */
-    HDsrandom((unsigned)HDtime(NULL));
+    HDsrandom((unsigned)time(NULL));
 
     /* Fill dset_name array */
     for (i = 0; i < MAX_DSETS; i++) {

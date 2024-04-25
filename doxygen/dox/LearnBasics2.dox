@@ -468,7 +468,7 @@ If the offset were 1x1 (instead of 1x2), then the selection can be made:
 </table>
 
 The selections above were tested with the
-<a href="https://support.hdfgroup.org/ftp/HDF5/examples/howto/subset/h5_subsetbk.c">h5_subsetbk.c</a>
+<a href="https://\AEXURL/howto/subset/h5_subsetbk.c">h5_subsetbk.c</a>
 example code. The memory dataspace was defined as one-dimensional.
 
 \subsection subsecLBDsetSubRWProgRem Remarks

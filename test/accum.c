@@ -1920,7 +1920,7 @@ test_random_write(H5F_t *f)
     TESTING("random writes to accumulator");
 
     /* Choose random # seed */
-    seed = (unsigned)HDtime(NULL);
+    seed = (unsigned)time(NULL);
 #if 0
 /* seed = (unsigned)1155438845; */
 fprintf(stderr, "Random # seed was: %u\n", seed);

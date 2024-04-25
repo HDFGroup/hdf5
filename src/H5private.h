@@ -203,12 +203,6 @@
 #       define H5_ATTR_DEPRECATED_USED /*void*/
 #   endif
 
-#   ifdef H5_DEBUG_API
-#       define H5_ATTR_DEBUG_API_USED /*void*/
-#   else
-#       define H5_ATTR_DEBUG_API_USED H5_ATTR_UNUSED
-#   endif
-
 #   ifndef NDEBUG
 #       define H5_ATTR_NDEBUG_UNUSED /*void*/
 #   else
@@ -247,7 +241,6 @@
 #   define H5_ATTR_FORMAT(X, Y, Z) /*void*/
 #   define H5_ATTR_UNUSED          /*void*/
 #   define H5_ATTR_NDEBUG_UNUSED   /*void*/
-#   define H5_ATTR_DEBUG_API_USED  /*void*/
 #   define H5_ATTR_DEPRECATED_USED /*void*/
 #   define H5_ATTR_PARALLEL_UNUSED /*void*/
 #   define H5_ATTR_PARALLEL_USED   /*void*/
@@ -287,14 +280,6 @@
  */
 #define SUCCEED 0
 #define FAIL    (-1)
-
-/* The HDF5 library uses the symbol `ERR` frequently.  So do
- * header files for libraries such as curses(3), terminfo(3), etc.
- * Remove its definition here to avoid clashes with HDF5.
- */
-#ifdef ERR
-#undef ERR
-#endif
 
 /* number of members in an array */
 #ifndef NELMTS
@@ -685,14 +670,8 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDaccess
 #define HDaccess(F, M) access(F, M)
 #endif
-#ifndef HDasctime
-#define HDasctime(T) asctime(T)
-#endif
 #ifndef HDchdir
 #define HDchdir(S) chdir(S)
-#endif
-#ifndef HDclock
-#define HDclock() clock()
 #endif
 #ifndef HDclose
 #define HDclose(F) close(F)
@@ -702,12 +681,6 @@ typedef off_t       h5_stat_size_t;
 #endif
 #ifndef HDcreat
 #define HDcreat(S, M) creat(S, M)
-#endif
-#ifndef HDctime
-#define HDctime(T) ctime(T)
-#endif
-#ifndef HDdifftime
-#define HDdifftime(X, Y) difftime(X, Y)
 #endif
 #ifndef HDfdopen
 #define HDfdopen(N, S) fdopen(N, S)
@@ -771,14 +744,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDgettimeofday
 #define HDgettimeofday(S, P) gettimeofday(S, P)
 #endif
-#ifndef HDgmtime
-#define HDgmtime(T) gmtime(T)
-#endif
 #ifndef HDisatty
 #define HDisatty(F) isatty(F)
-#endif
-#ifndef HDlocaltime
-#define HDlocaltime(T) localtime(T)
 #endif
 #ifndef HDlseek
 #define HDlseek(F, O, W) lseek(F, O, W)
@@ -788,9 +755,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDmkdir
 #define HDmkdir(S, M) mkdir(S, M)
-#endif
-#ifndef HDmktime
-#define HDmktime(T) mktime(T)
 #endif
 #ifndef HDnanosleep
 #define HDnanosleep(N, O) nanosleep(N, O)
@@ -859,17 +823,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDremove
 #define HDremove(S) remove(S)
 #endif
-#ifndef HDrename
-#define HDrename(OLD, NEW) rename(OLD, NEW)
-#endif
-#ifndef HDrewind
-#define HDrewind(F) rewind(F)
-#endif
 #ifndef HDrmdir
 #define HDrmdir(S) rmdir(S)
-#endif
-#ifndef HDsetbuf
-#define HDsetbuf(F, S) setbuf(F, S)
 #endif
 #ifndef HDsetenv
 #define HDsetenv(N, V, O) setenv(N, V, O)
@@ -885,9 +840,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDsigemptyset
 #define HDsigemptyset(S) sigemptyset(S)
-#endif
-#ifndef HDsignal
-#define HDsignal(N, F) signal(N, F)
 #endif
 #ifndef HDsleep
 #define HDsleep(N) sleep(N)
@@ -910,21 +862,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDstrtok_r
 #define HDstrtok_r(X, Y, Z) strtok_r(X, Y, Z)
-#endif
-#ifndef HDtime
-#define HDtime(T) time(T)
-#endif
-#ifndef HDtmpfile
-#define HDtmpfile() tmpfile()
-#endif
-#ifndef HDtolower
-#define HDtolower(C) tolower(C)
-#endif
-#ifndef HDtoupper
-#define HDtoupper(C) toupper(C)
-#endif
-#ifndef HDtzset
-#define HDtzset() tzset()
 #endif
 #ifndef HDunlink
 #define HDunlink(S) unlink(S)
@@ -1147,93 +1084,16 @@ extern H5_debug_t H5_debug_g;
 extern const char H5build_settings[];
 
 /*-------------------------------------------------------------------------
- * Purpose: These macros are inserted automatically just after the
- *          FUNC_ENTER() macro of API functions and are used to trace
- *          application program execution. Unless H5_DEBUG_API has been
- *          defined they are no-ops.
+ * Purpose: These macros are used to track arguments in event sets and are
+ *          inserted automatically into H5ES_insert() by the bin/trace script
  *
- * Arguments:   R  - Return type encoded as a string
+ * Arguments:   C  - Caller
  *              T  - Argument types encoded as a string
  *              A0-An  - Arguments.  The number at the end of the macro name
  *                                   indicates the number of arguments.
  *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_DEBUG_API
-
-#define H5TRACE_DECL                                                                                         \
-    const char *RTYPE = NULL;                                                                                \
-    double      CALLTIME;
-
-#define H5TRACE0(R, T)                                                                                       \
-    RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T)
-#define H5TRACE1(R, T, A0)                                                                                   \
-    RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0)
-#define H5TRACE2(R, T, A0, A1)                                                                               \
-    RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1)
-#define H5TRACE3(R, T, A0, A1, A2)                                                                           \
-    RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2)
-#define H5TRACE4(R, T, A0, A1, A2, A3)                                                                       \
-    RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3)
-#define H5TRACE5(R, T, A0, A1, A2, A3, A4)                                                                   \
-    RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4)
-#define H5TRACE6(R, T, A0, A1, A2, A3, A4, A5)                                                               \
-    RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5)
-#define H5TRACE7(R, T, A0, A1, A2, A3, A4, A5, A6)                                                           \
-    RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6)
-#define H5TRACE8(R, T, A0, A1, A2, A3, A4, A5, A6, A7)                                                       \
-    RTYPE = R;                                                                                               \
-    CALLTIME =                                                                                               \
-        H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6, #A7, A7)
-#define H5TRACE9(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8)                                                   \
-    RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6,    \
-                        #A7, A7, #A8, A8)
-#define H5TRACE10(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)                                              \
-    RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6,    \
-                        #A7, A7, #A8, A8, #A9, A9)
-#define H5TRACE11(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)                                         \
-    RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6,    \
-                        #A7, A7, #A8, A8, #A9, A9, #A10, A10)
-#define H5TRACE12(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11)                                    \
-    RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6,    \
-                        #A7, A7, #A8, A8, #A9, A9, #A10, A10, #A11, A11)
-
-#define H5TRACE_RETURN(V)                                                                                    \
-    if (RTYPE) {                                                                                             \
-        H5_trace(&CALLTIME, __func__, RTYPE, NULL, V);                                                       \
-        RTYPE = NULL;                                                                                        \
-    }
-#else
-#define H5TRACE_DECL                                                      /*void*/
-#define H5TRACE0(R, T)                                                    /*void*/
-#define H5TRACE1(R, T, A0)                                                /*void*/
-#define H5TRACE2(R, T, A0, A1)                                            /*void*/
-#define H5TRACE3(R, T, A0, A1, A2)                                        /*void*/
-#define H5TRACE4(R, T, A0, A1, A2, A3)                                    /*void*/
-#define H5TRACE5(R, T, A0, A1, A2, A3, A4)                                /*void*/
-#define H5TRACE6(R, T, A0, A1, A2, A3, A4, A5)                            /*void*/
-#define H5TRACE7(R, T, A0, A1, A2, A3, A4, A5, A6)                        /*void*/
-#define H5TRACE8(R, T, A0, A1, A2, A3, A4, A5, A6, A7)                    /*void*/
-#define H5TRACE9(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8)                /*void*/
-#define H5TRACE10(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)           /*void*/
-#define H5TRACE11(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)      /*void*/
-#define H5TRACE12(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) /*void*/
-#define H5TRACE_RETURN(V)                                                 /*void*/
-#endif                                                                    /* H5_DEBUG_API */
-
-/* Argument tracing macros (defined all the time) */
 #define H5ARG_TRACE0(C, T)                         C, T
 #define H5ARG_TRACE1(C, T, A0)                     C, T, #A0, A0
 #define H5ARG_TRACE2(C, T, A0, A1)                 C, T, #A0, A0, #A1, A1
@@ -1427,11 +1287,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     H5_API_UNSET_CANCEL                                                                                      \
     H5_API_LOCK
 
-/* Local variables for API routines */
-#define FUNC_ENTER_API_VARS H5TRACE_DECL
-
 #define FUNC_ENTER_API_COMMON                                                                                \
-    FUNC_ENTER_API_VARS                                                                                      \
     FUNC_ENTER_COMMON(H5_IS_API(__func__));                                                                  \
     FUNC_ENTER_API_THREADSAFE;
 
@@ -1506,7 +1362,6 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
         {                                                                                                    \
             {                                                                                                \
                 {                                                                                            \
-                    FUNC_ENTER_API_VARS                                                                      \
                     FUNC_ENTER_COMMON_NOERR(H5_IS_API(__func__));                                            \
                     FUNC_ENTER_API_THREADSAFE;                                                               \
                     {
@@ -1699,12 +1554,9 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     H5_API_UNLOCK                                                                                            \
     H5_API_SET_CANCEL
 
-#define FUNC_LEAVE_API_COMMON(ret_value) H5TRACE_RETURN(ret_value);
-
 #define FUNC_LEAVE_API(ret_value)                                                                            \
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
-    FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     if (api_ctx_pushed) {                                                                                    \
         (void)H5CX_pop(true);                                                                                \
         api_ctx_pushed = false;                                                                              \
@@ -1721,7 +1573,6 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 #define FUNC_LEAVE_API_NOINIT(ret_value)                                                                     \
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
-    FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
         (void)H5E_dump_api_stack(true);                                                                      \
@@ -1735,7 +1586,6 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 #define FUNC_LEAVE_API_NOFS(ret_value)                                                                       \
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
-    FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
     }                                                                                                        \

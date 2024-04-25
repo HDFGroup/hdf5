@@ -71,7 +71,13 @@
 
 <DL>
   <DT>Compact layout</DT>
-  <DD></DD>
+  <DD>
+    <P>A dataset storage layout where the dataset elements are stored in the
+     object header of the dataset. This layout is suitable for very small
+     datasets that can easily fit in the object header.</P>
+    <P>Compact layout can improve storage and access performance for files
+     that have many very small datasets.</P>
+</DD>
 </DL>
 
 <DL>
@@ -174,17 +180,20 @@ and an HDF5 path name in that file.</DD>
 
 <DL>
   <DT>File format</DT>
-  <DD></DD>
+  <DD>HDF5 file format refers to the structure and organization of the HDF5 data
+    being stored within the file.</DD>
 </DL>
 
 <DL>
   <DT>Fill value</DT>
-  <DD></DD>
+  <DD>A default value assigned to data elements that have not yet been written.</DD>
 </DL>
 
 <DL>
   <DT>Filter</DT>
-  <DD></DD>
+  <DD>
+    Filters are optional stages that can be inserted in the data pipeline to implement
+    compression and error checking. User applications may also add custom filters.</DD>
 </DL>
 
 \section GLS_G G

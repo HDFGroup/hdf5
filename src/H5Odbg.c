@@ -307,16 +307,16 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
             char       buf[128]; /* Buffer for formatting time info */
 
             /* Time fields */
-            tm = HDlocaltime(&oh->atime);
+            tm = localtime(&oh->atime);
             strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Access Time:", buf);
-            tm = HDlocaltime(&oh->mtime);
+            tm = localtime(&oh->mtime);
             strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Modification Time:", buf);
-            tm = HDlocaltime(&oh->ctime);
+            tm = localtime(&oh->ctime);
             strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Change Time:", buf);
-            tm = HDlocaltime(&oh->btime);
+            tm = localtime(&oh->btime);
             strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Birth Time:", buf);
         } /* end if */

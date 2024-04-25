@@ -126,9 +126,9 @@ main(int ac, char **av)
     (void)_CrtSetReportHook2(_CRT_RPTHOOK_INSTALL, handle_crt_abort);
 #endif
     parse(ac, av);
-    HDsignal(SIGABRT, &abort_intercept);
+    signal(SIGABRT, &abort_intercept);
     H5check_version(major, minor, release);
-    HDsignal(SIGABRT, SIG_DFL);
+    signal(SIGABRT, SIG_DFL);
 #ifdef H5_HAVE_WIN32_API
     (void)_CrtSetReportHook2(_CRT_RPTHOOK_REMOVE, handle_crt_abort);
 #endif

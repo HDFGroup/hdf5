@@ -89,7 +89,7 @@ main(void)
     h5_reset();
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
 
-    HDsrand((unsigned)HDtime(NULL));
+    HDsrand((unsigned)time(NULL));
 
     TESTING("library shutdown with reference count > 1");
 
@@ -172,7 +172,7 @@ main(void)
 
     RAND_INC(T_ESTACK);
 
-    HDsignal(SIGABRT, &Abrt_Handler);
+    signal(SIGABRT, &Abrt_Handler);
 
     if (H5close() < 0)
         TEST_ERROR;

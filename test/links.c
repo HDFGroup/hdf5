@@ -1770,8 +1770,8 @@ test_move_preserves(hid_t fapl_id, bool new_format)
     old_modification_time = oinfo.mtime;
 
     /* If this test happens too quickly, the times will all be the same.  Make sure the time changes. */
-    curr_time = HDtime(NULL);
-    while (HDtime(NULL) <= curr_time)
+    curr_time = time(NULL);
+    while (time(NULL) <= curr_time)
         ;
 
     /* Close the file and reopen it */
@@ -2603,8 +2603,8 @@ test_move_preserves_deprec(hid_t fapl_id, bool new_format)
     old_modification_time = oinfo.mtime;
 
     /* If this test happens too quickly, the times will all be the same.  Make sure the time changes. */
-    curr_time = HDtime(NULL);
-    while (HDtime(NULL) <= curr_time)
+    curr_time = time(NULL);
+    while (time(NULL) <= curr_time)
         ;
 
     /* Close the file and reopen it */

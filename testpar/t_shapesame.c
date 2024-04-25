@@ -4283,8 +4283,8 @@ main(int argc, char **argv)
 
 #ifndef H5_HAVE_WIN32_API
     /* Un-buffer the stdout and stderr */
-    HDsetbuf(stderr, NULL);
-    HDsetbuf(stdout, NULL);
+    setbuf(stderr, NULL);
+    setbuf(stdout, NULL);
 #endif
 
 #ifdef H5_HAVE_TEST_API
