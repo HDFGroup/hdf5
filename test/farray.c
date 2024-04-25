@@ -1149,7 +1149,7 @@ fiter_rnd_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_par
             size_t  swap_idx; /* Location to swap with when shuffling */
             hsize_t temp_idx; /* Temporary index */
 
-            swap_idx             = ((size_t)rand() % ((size_t)cnt - u)) + u;
+            swap_idx             = ((size_t)HDrandom() % ((size_t)cnt - u)) + u;
             temp_idx             = fiter->idx[u];
             fiter->idx[u]        = fiter->idx[swap_idx];
             fiter->idx[swap_idx] = temp_idx;
@@ -1628,6 +1628,7 @@ main(void)
     farray_iter_type_t  curr_iter;                 /* Current iteration type being worked on */
     hid_t               fapl    = H5I_INVALID_HID; /* File access property list for data files */
     unsigned            nerrors = 0;               /* Cumulative error count */
+    time_t              curr_time;                 /* Current time, for seeding random number generator */
     int                 ExpressMode;               /* Test express value */
     bool                api_ctx_pushed = false;    /* Whether API context pushed */
 
@@ -1647,7 +1648,8 @@ main(void)
     api_ctx_pushed = true;
 
     /* Seed random #'s */
-    srand((unsigned)time(NULL));
+    curr_time = time(NULL);
+    HDsrandom((unsigned)curr_time);
 
     /* Create an empty file to retrieve size */
     {
