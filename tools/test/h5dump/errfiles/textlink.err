@@ -1,4 +1,4 @@
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+HDF5-DIAG: Error detected in HDF5 (version (number)):
   #000: (file name) line (number) in H5Oopen(): unable to synchronously open object
     major: Object header
     minor: Can't open object
@@ -35,7 +35,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #011: (file name) line (number) in H5L__extern_traverse(): unable to open external file, external link file name = 'filename'
     major: Links
     minor: Unable to open file
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+HDF5-DIAG: Error detected in HDF5 (version (number)):
   #000: (file name) line (number) in H5Oopen(): unable to synchronously open object
     major: Object header
     minor: Can't open object

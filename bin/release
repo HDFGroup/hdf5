@@ -455,7 +455,7 @@ cp -p Makefile.dist Makefile
 
 # Update README.md and release_docs/RELEASE.txt with release information in
 # line 1.
-for f in README.md release_docs/RELEASE.txt; do
+for f in README.md release_docs/RELEASE.txt release_docs/NEWSLETTER.txt; do
     echo "HDF5 version $VERS released on $release_date" >$f.x
     sed -e 1d $f >>$f.x
     mv $f.x $f

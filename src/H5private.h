@@ -1538,7 +1538,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     }                                                                                                        \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
-        (void)H5E_dump_api_stack(true);                                                                      \
+        (void)H5E_dump_api_stack();                                                                          \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
     }                                                                                                        \
@@ -1562,7 +1562,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
     if (err_occurred)                                                                                        \
-        (void)H5E_dump_api_stack(true);                                                                      \
+        (void)H5E_dump_api_stack();                                                                          \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
     }                                                                                                        \
@@ -1585,7 +1585,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
     if (err_occurred)                                                                                        \
-        (void)H5E_dump_api_stack(true);                                                                      \
+        (void)H5E_dump_api_stack();                                                                          \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
     }                                                                                                        \
