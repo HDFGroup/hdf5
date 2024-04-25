@@ -160,13 +160,15 @@
 #include "uthash.h"
 
 /*
- * NT doesn't define SIGBUS, but since NT only runs on processors
- * that do not have alignment constraints a SIGBUS would never be
- * raised, so we just replace it with SIGILL (which also should
- * never be raised by the hdf5 library).
+ * Does the compiler support the __builtin_expect() syntax?
+ * It's not a problem if not.
  */
-#ifndef SIGBUS
-#define SIGBUS SIGILL
+#if H5_HAVE_BUILTIN_EXPECT
+#define H5_LIKELY(expression)   __builtin_expect(!!(expression), 1)
+#define H5_UNLIKELY(expression) __builtin_expect(!!(expression), 0)
+#else
+#define H5_LIKELY(expression)   (expression)
+#define H5_UNLIKELY(expression) (expression)
 #endif
 
 /*
@@ -1257,7 +1259,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     {                                                                                                        \
         static bool func_check = false;                                                                      \
                                                                                                              \
-        if (!func_check) {                                                                                   \
+        if (H5_UNLIKELY(!func_check)) {                                                                      \
             /* Check function naming status */                                                               \
             assert(asrt &&                                                                                   \
                    "Function naming conventions are incorrect - check H5_IS_API|PUB|PRIV|PKG macros in "     \
@@ -1293,8 +1295,8 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 
 #define FUNC_ENTER_API_INIT(err)                                                                             \
     /* Initialize the library */                                                                             \
-    if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {                                                                \
-        if (H5_init_library() < 0)                                                                           \
+    if (H5_UNLIKELY(!H5_INIT_GLOBAL && !H5_TERM_GLOBAL)) {                                                   \
+        if (H5_UNLIKELY(H5_init_library() < 0))                                                              \
             HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "library initialization failed");                       \
     }
 
@@ -1303,7 +1305,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     H5_PUSH_FUNC                                                                                             \
                                                                                                              \
     /* Push the API context */                                                                               \
-    if (H5CX_push() < 0)                                                                                     \
+    if (H5_UNLIKELY(H5CX_push() < 0))                                                                        \
         HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context");                                    \
     else                                                                                                     \
         api_ctx_pushed = true;
@@ -1452,7 +1454,6 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 #define FUNC_ENTER_NOAPI_NOFS                                                                                \
     {                                                                                                        \
         FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
-                                                                                                             \
         {
 
 /*
@@ -1557,12 +1558,12 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 #define FUNC_LEAVE_API(ret_value)                                                                            \
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
-    if (api_ctx_pushed) {                                                                                    \
+    if (H5_LIKELY(api_ctx_pushed)) {                                                                         \
         (void)H5CX_pop(true);                                                                                \
         api_ctx_pushed = false;                                                                              \
     }                                                                                                        \
     H5_POP_FUNC                                                                                              \
-    if (err_occurred)                                                                                        \
+    if (H5_UNLIKELY(err_occurred))                                                                           \
         (void)H5E_dump_api_stack();                                                                          \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
@@ -1574,7 +1575,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
     H5_POP_FUNC                                                                                              \
-    if (err_occurred)                                                                                        \
+    if (H5_UNLIKELY(err_occurred))                                                                           \
         (void)H5E_dump_api_stack();                                                                          \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
@@ -1597,7 +1598,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 #define FUNC_LEAVE_API_NOPUSH(ret_value)                                                                     \
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
-    if (err_occurred)                                                                                        \
+    if (H5_UNLIKELY(err_occurred))                                                                           \
         (void)H5E_dump_api_stack();                                                                          \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \

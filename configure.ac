@@ -2418,6 +2418,14 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[int __attribute__((unused)) x]])],
                  AC_MSG_RESULT([yes])],
                [AC_MSG_RESULT([no])])
 
+AC_MSG_CHECKING([if compiler supports the __builtin_expect() extension])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[void *ptr = (void*) 0;
+               if (__builtin_expect (ptr != (void*) 0, 1)) return 0;]])],
+  [AC_DEFINE([HAVE_BUILTIN_EXPECT], [1],
+          [Define if supports __builtin_expect() extension])
+    AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])])
+
 ## ----------------------------------------------------------------------
 ## Remove old ways of determining debug/production build.
 ## These were used in 1.8.x and earlier. We should probably keep these checks
