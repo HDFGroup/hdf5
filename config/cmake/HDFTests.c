@@ -15,6 +15,21 @@
 #define SIMPLE_TEST(x) int main(void){ x; return 0; }
 
 
+#ifdef HAVE_BUILTIN_EXPECT
+
+int
+main ()
+{
+    void *ptr = (void*) 0;
+
+    if (__builtin_expect (ptr != (void*) 0, 1))
+        return 0;
+
+    return 0;
+}
+
+#endif /* HAVE_BUILTIN_EXPECT */
+
 #ifdef HAVE_ATTRIBUTE
 
 int
