@@ -106,6 +106,7 @@ test_reference_params(void)
     ssize_t      name_size;              /* Size of reference name           */
     bool         vol_is_native;
     herr_t       ret; /* Generic return value             */
+    htri_t       is_equal;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Reference Parameters\n"));
@@ -307,16 +308,16 @@ test_reference_params(void)
     /* Test parameters to H5Requal */
     H5E_BEGIN_TRY
     {
-        ret = H5Requal(NULL, &rbuf[0]);
+        is_equal = H5Requal(NULL, &rbuf[0]);
     }
     H5E_END_TRY
-    VERIFY(ret, FAIL, "H5Requal ref1");
+    VERIFY(is_equal, FAIL, "H5Requal ref1");
     H5E_BEGIN_TRY
     {
-        ret = H5Requal(&rbuf[0], NULL);
+        is_equal = H5Requal(&rbuf[0], NULL);
     }
     H5E_END_TRY
-    VERIFY(ret, FAIL, "H5Requal ref2");
+    VERIFY(is_equal, FAIL, "H5Requal ref2");
 
     /* Test parameters to H5Rcopy */
     H5E_BEGIN_TRY
@@ -440,6 +441,7 @@ test_reference_obj(void)
     hid_t      dapl_id; /* Dataset access property list     */
     H5R_ref_t *wbuf,    /* buffer to write to disk          */
         *rbuf;          /* buffer read from disk            */
+    H5R_ref_t *wbuf_cp; /* copy buffer                      */
     unsigned  *ibuf, *obuf;
     unsigned   i, j;     /* Counters                         */
     H5O_type_t obj_type; /* Object type                      */
@@ -550,6 +552,24 @@ test_reference_obj(void)
     ret = H5Rget_obj_type3(&wbuf[3], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_NAMED_DATATYPE, "H5Rget_obj_type3");
+
+    /* Check copying a reference */
+    wbuf_cp = calloc(sizeof(H5R_ref_t), 1);
+    ret = H5Rcopy(&wbuf[0], &wbuf_cp[0]);
+    CHECK(ret, FAIL, "H5Rcopy");
+
+    /* Check if references are equal */
+    htri_t is_equal = H5Requal(&wbuf[0], &wbuf_cp[0]);
+    CHECK(is_equal, FAIL, "H5Requal");
+    VERIFY(is_equal, TRUE, "H5Requal");
+
+    is_equal = H5Requal(&wbuf[0], &wbuf[2]);
+    CHECK(is_equal, FAIL, "H5Requal");
+    VERIFY(is_equal, FALSE, "H5Requal");
+
+    ret = H5Rdestroy(&wbuf_cp[0]);
+    CHECK(ret, FAIL, "H5Rdestroy");
+    free(wbuf_cp);
 
     /* Write selection to disk */
     ret = H5Dwrite(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);

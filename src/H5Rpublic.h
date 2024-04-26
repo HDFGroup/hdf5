@@ -140,8 +140,9 @@ extern "C" {
  *          \ref H5R_ref_t is defined in H5Rpublic.h as:
  *          \snippet this H5R_ref_t_snip
  *
- *          H5Rdestroy() should be used to release the resource from the
- *          reference.
+ *          The function returns a \p ref_ptr pointer, which must be released
+ *          using H5Rdestroy() to avoid resource leaks and possible HDF5
+ *          library shutdown issues.
  *
  * \since 1.12.0
  *
@@ -178,8 +179,9 @@ H5_DLL herr_t H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5
  *          \ref H5R_ref_t is defined in H5Rpublic.h as:
  *          \snippet this H5R_ref_t_snip
  *
- *          H5Rdestroy() should be used to release the resource from the
- *          reference.
+ *          The function returns a \p ref_ptr pointer, which must be released
+ *          using H5Rdestroy() to avoid resource leaks and possible HDF5
+ *          library shutdown issues.
  *
  * \since 1.12.0
  *
@@ -217,8 +219,9 @@ H5_DLL herr_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, h
  *          \ref H5R_ref_t is defined in H5Rpublic.h as:
  *          \snippet this H5R_ref_t_snip
  *
- *          H5Rdestroy() should be used to release the resource from the
- *          reference.
+ *          The function returns a \p ref_ptr pointer, which must be released
+ *          using H5Rdestroy() to avoid resource leaks and possible HDF5
+ *          library shutdown issues.
  *
  * \since 1.12.0
  *
@@ -316,6 +319,10 @@ H5_DLL htri_t H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr);
  * \details H5Rcopy() creates a copy of an existing reference.
  *          \p src_ref_ptr points to the reference to copy, and \p dst_ref_ptr is the
  *          pointer to the destination reference.
+ *
+ *          The function returns a \p dst_ref_ptr pointer, which must be released
+ *          using H5Rdestroy() to avoid resource leaks and possible HDF5
+ *          library shutdown issues.
  *
  * \since 1.12.0
  *

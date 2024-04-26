@@ -747,6 +747,13 @@ Bug Fixes since HDF5-1.14.0 release
 
     Library
     -------
+
+
+    - Fixed function H5Requal actually to compare the reference pointers
+
+      Fixed an issue with H5Requal always returning true because the
+      function was only comparing the ref2_ptr to itself.
+
     - Fixed many (future) CVE issues
 
       A partner organization corrected many potential security issues, which

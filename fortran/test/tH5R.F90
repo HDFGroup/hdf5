@@ -480,7 +480,7 @@ SUBROUTINE refregtest(cleanup, total_error)
 
 END SUBROUTINE refregtest
 
-SUBROUTINE genreftest(cleanup, total_error)
+SUBROUTINE reftest3(cleanup, total_error)
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(INOUT) :: total_error
@@ -491,6 +491,7 @@ SUBROUTINE genreftest(cleanup, total_error)
   CHARACTER(LEN=17), PARAMETER :: dsetnamer = "OBJECT_REFERENCES"
   CHARACTER(LEN=6), PARAMETER :: groupname1 = "GROUP1"
   CHARACTER(LEN=6), PARAMETER :: groupname2 = "GROUP2"
+  INTEGER, PARAMETER :: ref_size = 6
 
   INTEGER(HID_T) :: file_id       ! File identifier
   INTEGER(HID_T) :: grp1_id       ! Group identifier
@@ -500,31 +501,40 @@ SUBROUTINE genreftest(cleanup, total_error)
   INTEGER(HID_T) :: type_id       ! Type identifier
   INTEGER(HID_T) :: space_id      ! Dataspace identifier
   INTEGER(HID_T) :: spacer_id     ! Dataspace identifier
+  INTEGER(HID_T) :: sid, sid2, aid, dspace_id, dspace_id1
   INTEGER     ::   error, ref_type
   INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/5/)
-  INTEGER(HSIZE_T), DIMENSION(1) :: dimsr= (/4/)
+  INTEGER(HSIZE_T), DIMENSION(1) :: dimsr= (/ref_size/)
   INTEGER(HSIZE_T), DIMENSION(1) :: my_maxdims = (/5/)
   INTEGER :: rank = 1
   INTEGER :: rankr = 1
+  INTEGER :: i
   TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref
   TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref_out
-  TYPE(H5R_ref_t), DIMENSION(4), TARGET :: ref_ptr
-  TYPE(H5R_ref_t), DIMENSION(4), TARGET :: ref_ptr_out
+  TYPE(H5R_ref_t), DIMENSION(ref_size), TARGET :: ref_ptr
+  TYPE(H5R_ref_t), DIMENSION(2), TARGET :: ref_ptr2
+  TYPE(H5R_ref_t), DIMENSION(ref_size), TARGET :: ref_ptr_out
+  TYPE(H5R_ref_t), TARGET :: ref_ptr_cp
   INTEGER(HSIZE_T), DIMENSION(1) :: ref_dim
   INTEGER, DIMENSION(5), TARGET :: DATA = (/1, 2, 3, 4, 5/)
+  INTEGER, DIMENSION(2), TARGET :: data_pt = (/100,500/)
   INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
+  INTEGER(HSIZE_T), DIMENSION(1) :: dimspt
+  INTEGER(HSIZE_T), DIMENSION(1:2) :: coord
 
 #ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
   CHARACTER(:), ALLOCATABLE :: buf_alloc ! buffer to hold the region name
 #endif
   CHARACTER(LEN=16) :: buf_big    ! buffer bigger than needed
   INTEGER(SIZE_T) :: buf_size     ! returned size of the region buffer name
-
+  INTEGER, TARGET :: a_data
   TYPE(C_PTR) :: f_ptr
+  LOGICAL :: ref_eq
+  INTEGER(hssize_t) :: num_points_ret
 
   !
-  !Create a new file with Default file access and
-  !file creation properties .
+  ! Create a new file with Default file access and
+  ! file creation properties.
   !
   CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
   IF (error .NE. 0) THEN
@@ -545,6 +555,16 @@ SUBROUTINE genreftest(cleanup, total_error)
   !
   CALL h5gcreate_f(grp1_id, groupname2, grp2_id, error)
   CALL check("h5gcreate_f",error,total_error)
+
+  CALL H5Screate_f(H5S_SCALAR_F, sid, error)
+  CALL check("H5Screate_f",error,total_error)
+  CALL H5Acreate_f(grp2_id, "ATTR1", H5T_NATIVE_INTEGER, sid, aid, error)
+  CALL check("H5Acreate_f",error,total_error)
+
+  a_data = 20
+  f_ptr = C_LOC(a_data)
+  CALL H5Awrite_f(aid, H5T_NATIVE_INTEGER, f_ptr, error)
+  CALL check("H5Awrite_f",error,total_error)
 
   !
   ! Create dataspaces for datasets
@@ -588,7 +608,10 @@ SUBROUTINE genreftest(cleanup, total_error)
   CALL check("h5gclose_f",error,total_error)
   CALL h5gclose_f(grp2_id, error)
   CALL check("h5gclose_f",error,total_error)
-
+  CALL h5aclose_f(aid,error)
+  CALL check("H5Aclose_f",error,total_error)
+  CALL h5sclose_f(sid,error)
+  CALL check("H5Sclose_f",error,total_error)
   !
   ! Create references to two groups, integer dataset and shared datatype
   ! and write it to the dataset in the file
@@ -608,9 +631,35 @@ SUBROUTINE genreftest(cleanup, total_error)
   CALL h5rcreate_object_f(file_id, "MyType", f_ptr, error)
   CALL check("h5rcreate_f",error,total_error)
 
+  !CALL h5eset_auto_f(1, error)
+  f_ptr = C_LOC(ref_ptr(5))
+  CALL h5rcreate_attr_f(file_id, dsetnamei, "ATTR1", f_ptr, error, H5P_DEFAULT_F)
+  CALL check("h5rcreate_attr_f",error,total_error)
+
+  f_ptr = C_LOC(ref_ptr2(2))
+
+  dimspt(1) = 2
+  CALL h5screate_simple_f(1, dimspt, sid2, error)
+  CALL check("h5screate_simple_f",error,total_error)
+
+  coord(1) = 1 !1
+  coord(2) = 5 ! dims(1)
+  !CALL h5sselect_elements_f(sid2, H5S_SELECT_SET_F, 1, SIZE(coord,KIND=SIZE_T), coord, error)
+  CALL h5sselect_elements_f(sid2, H5S_SELECT_SET_F, 1, 2_SIZE_T, coord, error)
+  CALL check("h5sselect_elements_f",error,total_error)
+
+  f_ptr = C_LOC(ref_ptr(6))
+  CALL h5rcreate_region_f(file_id, dsetnamei, sid2, f_ptr, error)
+  CALL check("h5rcreate_region_f",error,total_error)
+  CALL h5rget_obj_name_f(C_LOC(ref_ptr(6)), buf_big, error)
+
   f_ptr = C_LOC(ref_ptr(1))
   CALL h5dwrite_f(dsetr_id, H5T_STD_REF, f_ptr, error)
   CALL check("h5dwrite_f",error,total_error)
+
+!  f_ptr = C_LOC(ref_ptr2(1))
+!  CALL h5dwrite_f(dsetr_id, H5T_STD_REF, f_ptr, error)
+!  CALL check("h5dwrite_f",error,total_error)
 
   CALL h5rget_obj_name_f(C_LOC(ref_ptr(3)), "", error, H5P_DEFAULT_F, buf_size)
   CALL check("h5rget_obj_name_f", error, total_error)
@@ -649,12 +698,52 @@ SUBROUTINE genreftest(cleanup, total_error)
   CALL check("H5Rget_name_f", error, total_error)
   CALL verify("H5Rget_name_f", TRIM(buf_big), "/GROUP1/GROUP2", total_error)
 
+  ! CHECK COPYING REF
+
+  f_ptr =  C_LOC(ref_ptr_cp)
+  CALL h5rcopy_f(C_LOC(ref_ptr(3)), f_ptr, error)
+  CALL check("h5rcopy_f", error, total_error)
+
+  ! GET FILE NAME
+  CALL h5rget_file_name_f(f_ptr, "", error, buf_size)
+  CALL check("h5rget_file_name_f", error, total_error)
+  CALL verify("h5rget_file_name_f", buf_size, LEN_TRIM(fix_filename,KIND=SIZE_T), total_error)
+
+#ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
+  ALLOCATE(CHARACTER(LEN=buf_size) :: buf_alloc)
+  CALL h5rget_file_name_f(f_ptr, buf_alloc, error)
+  CALL check("h5rget_file_name_f", error, total_error)
+  CALL VERIFY("h5rget_file_name_f", buf_alloc, TRIM(fix_filename), total_error)
+  DEALLOCATE(buf_alloc)
+#endif
+
+  ! Check with buffer bigger than needed
+  CALL h5rget_file_name_f(C_LOC(ref_ptr_cp), buf_big, error)
+  CALL check("h5rget_file_name_f", error, total_error)
+  CALL verify("h5rget_file_name_f", TRIM(buf_big), TRIM(fix_filename), total_error)
+
+  ! CHECK EQUAL API
+  CALL h5requal_f(C_LOC(ref_ptr(3)), f_ptr, ref_eq, error)
+  CALL check("h5requal_f", error, total_error)
+  CALL VERIFY("h5requal_f", ref_eq, .TRUE., total_error)
+
+  CALL h5requal_f(C_LOC(ref_ptr(1)), C_LOC(ref_ptr(3)), ref_eq, error)
+  CALL check("h5requal_f", error, total_error)
+  CALL VERIFY("h5requal_f", ref_eq, .FALSE., total_error)
+
+  CALL h5rdestroy_f(f_ptr, error)
+  CALL check("h5rdestroy_f", error, total_error)
+
   !
   !Close the dataset
   !
   CALL h5dclose_f(dsetr_id, error)
   CALL check("h5dclose_f",error,total_error)
 
+  DO i = 1, ref_size
+     CALL h5rdestroy_f(C_LOC(ref_ptr(i)), error)
+     CALL check("h5rdestroy_f", error, total_error)
+  END DO
   !
   ! Reopen the dataset with object references
   !
@@ -668,7 +757,6 @@ SUBROUTINE genreftest(cleanup, total_error)
   !
   !get the third reference's type and Dereference it
   !
-
   CALL h5rget_obj_name_f(C_LOC(ref_ptr_out(1)), buf_big, error)
   CALL check("H5Rget_name_f", error, total_error)
   CALL verify("H5Rget_name_f", TRIM(buf_big), "/GROUP1", total_error)
@@ -681,7 +769,6 @@ SUBROUTINE genreftest(cleanup, total_error)
   CALL h5rget_obj_name_f(C_LOC(ref_ptr_out(4)), buf_big, error)
   CALL check("H5Rget_name_f", error, total_error)
   CALL verify("H5Rget_name_f2", TRIM(buf_big), "/"//"MyType", total_error)
-
   CALL h5rget_type_f(C_LOC(ref_ptr_out(1)), ref_type, error)
   CALL check("h5rget_type_f", error, total_error)
   CALL verify("h5rget_type_f", ref_type, H5R_OBJECT2_F, total_error)
@@ -695,11 +782,53 @@ SUBROUTINE genreftest(cleanup, total_error)
 
     CALL h5rdestroy_f(C_LOC(ref_ptr_out(3)), error)
     CALL check("h5rdestroy_f", error, total_error)
+
+    CALL h5oclose_f(dset1_id, error)
+    CALL check("h5oclose_f1",error,total_error)
+
   END IF
 
+  CALL h5rget_type_f(C_LOC(ref_ptr_out(6)), ref_type, error)
+  CALL check("h5rget_type_f", error, total_error)
+  CALL VERIFY("h5rget_type_f", ref_type, H5R_DATASET_REGION2_F, total_error)
+
+  IF(ref_type .EQ. H5R_DATASET_REGION2_F)THEN
+    CALL h5ropen_object_f(C_LOC(ref_ptr_out(6)), dset1_id, error, H5P_DEFAULT_F)
+
+    CALL H5Dget_space_f(dset1_id, dspace_id1, error)
+    CALL check("H5Dget_space_f",error,total_error)
+    CALL H5Sget_simple_extent_npoints_f(dspace_id1, num_points_ret, error)
+    CALL VERIFY("H5Sget_simple_extent_npoints_f", num_points_ret, dims(1), total_error)
+
+    CALL h5ropen_region_f(C_LOC(ref_ptr_out(6)), dspace_id, error, H5P_DEFAULT_F)
+    CALL check("h5ropen_object_f", error, total_error)
+
+    CALL h5sget_select_elem_npoints_f(dspace_id, num_points_ret, error)
+    CALL check("h5sget_select_elem_npoints_f",error,total_error)
+    CALL VERIFY("h5sget_simple_extent_npoints_f", num_points_ret, 2_HSIZE_T, total_error)
+
+    coord = -1
+    CALL H5Sget_select_elem_pointlist_f(dspace_id, 0_hsize_t, 2_hsize_t, coord, error)
+    PRINT*,coord
+
+   ! CALL h5rget_region_f(dset1_id, C_LOC(ref_ptr_out(6))
+
+!    CALL h5dopen(file_id, dsetnamei, did, error)
+    CALL h5eset_auto_f(1, error)
+    PRINT*,data_pt(:)
+    f_ptr =  C_LOC(data_pt(1))
+    CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, f_ptr, error, H5S_ALL_F, dspace_id)
+    CALL check("h5dwrite_f",error,total_error)
+
+    CALL h5rdestroy_f(C_LOC(ref_ptr_out(6)), error)
+    CALL check("h5rdestroy_f", error, total_error)
+
+    CALL h5oclose_f(dset1_id, error)
+    CALL check("h5oclose_f",error,total_error)
+  END IF
+  stop
 
  ! CALL h5eset_auto_f(1, error)
-  stop
   IF (ref_type == H5G_DATASET_F) THEN
      CALL h5rdereference_f(dsetr_id, ref(3), dset1_id, error)
      CALL check("h5rdereference_f",error,total_error)
@@ -708,6 +837,7 @@ SUBROUTINE genreftest(cleanup, total_error)
      CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, DATA, data_dims, error)
      CALL check("h5dwrite_f",error,total_error)
   END IF
+
 
 #if 0
  ! CALL h5rget_object_type_f(dsetr_id, ref(3), _type, error)
@@ -724,20 +854,25 @@ SUBROUTINE genreftest(cleanup, total_error)
   !
   ! Close all objects.
   !
-  CALL h5dclose_f(dset1_id, error)
-  CALL check("h5dclose_f",error,total_error)
-  CALL h5tclose_f(type_id, error)
-  CALL check("h5tclose_f",error,total_error)
+!  CALL h5dclose_f(dset1_id, error)
+!  CALL check("h5dclose_f",error,total_error)
+!  CALL h5tclose_f(type_id, error)
+!  CALL check("h5tclose_f",error,total_error)
 
   CALL h5dclose_f(dsetr_id, error)
   CALL check("h5dclose_f",error,total_error)
   CALL h5fclose_f(file_id, error)
   CALL check("h5fclose_f",error,total_error)
 
-  IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
-  CALL check("h5_cleanup_f", error, total_error)
+  DO i = 1, 4
+     CALL h5rdestroy_f(C_LOC(ref_ptr_out(i)), error)
+     CALL check("h5rdestroy_f", error, total_error)
+  END DO
+
+!  IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+!  CALL check("h5_cleanup_f", error, total_error)
   RETURN
 
-END SUBROUTINE genreftest
+END SUBROUTINE reftest3
 
 END MODULE TH5R

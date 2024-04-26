@@ -142,8 +142,8 @@ PROGRAM fortranlibtest
 !      '========================================='
 
   ret_total_error = 0
-  CALL genreftest(cleanup, ret_total_error)
-  CALL write_test_status(ret_total_error, ' General References test', total_error)
+  CALL reftest3(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Version 3 References test', total_error)
 
   ret_total_error = 0
   CALL refobjtest(cleanup, ret_total_error)
