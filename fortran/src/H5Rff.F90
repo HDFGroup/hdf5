@@ -946,14 +946,9 @@ CONTAINS
 !! \param hdferr   \fortran_error
 !! \param oapl_id  Object access property list identifier
 !!
-#ifdef H5_DOXYGEN
 !! See C API: @ref H5Rcreate_object()
 !!
-  SUBROUTINE h5rcreate_object_f(&
-#else
-  SUBROUTINE h5rcreate_object_f(&
-#endif
-       loc_id, name, ref, hdferr, oapl_id)
+  SUBROUTINE h5rcreate_object_f(loc_id, name, ref, hdferr, oapl_id)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN) :: loc_id
@@ -985,11 +980,7 @@ CONTAINS
 
     hdferr = INT(H5Rcreate_object(loc_id, c_name, oapl_id_default, ref))
 
-#ifdef H5_DOXYGEN
   END SUBROUTINE h5rcreate_object_f
-#else
-  END SUBROUTINE h5rcreate_object_f
-#endif
 !>
 !! \ingroup FH5R
 !!
