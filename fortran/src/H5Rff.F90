@@ -831,6 +831,7 @@ CONTAINS
 !!
 !! \param ref1_ptr Pointer to reference to compare, of TYPE(H5R_ref_t)
 !! \param ref2_ptr Pointer to reference to compare, of TYPE(H5R_ref_t)
+!! \param equal    If reference are equal
 !! \param hdferr   \fortran_error
 !!
 !! See C API: @ref H5Requal()
@@ -1195,10 +1196,10 @@ CONTAINS
 !!
 !! \brief Retrieves the file name for a referenced object.
 !!
-!! \param ref_ptr Pointer to reference to query
-!! \param name    Buffer to place the file name of the reference
-!! \param hdferr  \fortran_error
-!! \param size    The size of the name buffer
+!! \param ref_ptr  Pointer to reference to query
+!! \param name     Buffer to place the file name of the reference
+!! \param hdferr   \fortran_error
+!! \param name_len The size of the name buffer
 !!
 !! See C API: @ref H5Rget_file_name()
 !!
