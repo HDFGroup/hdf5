@@ -555,7 +555,7 @@ test_reference_obj(void)
 
     /* Check copying a reference */
     wbuf_cp = calloc(sizeof(H5R_ref_t), 1);
-    ret = H5Rcopy(&wbuf[0], &wbuf_cp[0]);
+    ret     = H5Rcopy(&wbuf[0], &wbuf_cp[0]);
     CHECK(ret, FAIL, "H5Rcopy");
 
     /* Check if references are equal */
