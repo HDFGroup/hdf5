@@ -749,7 +749,7 @@ Bug Fixes since HDF5-1.14.0 release
     -------
     - Fixed infinite loop closing library issue when h5dump with a user provided test file
 
-      The library's metdata cache calls the "get_final_load_size" client callback
+      The library's metadata cache calls the "get_final_load_size" client callback
       to find out the actual size of the object header.  As the size obtained
       exceeds the file's EOA, it throws an error but the object header structure
       allocated through the client callback is not freed hence causing the 
@@ -757,7 +757,7 @@ Bug Fixes since HDF5-1.14.0 release
 
       (1) Free the structure allocated in the object header client callback after 
       saving the needed information in udata. (2) Deserialize the object header
-      prefix in the object header's "deserialize" calback regardless.
+      prefix in the object header's "deserialize" callback regardless.
 
       Fixes GitHub #3790
 
