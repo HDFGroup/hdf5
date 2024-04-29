@@ -519,7 +519,8 @@ H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *ob
  *
  * \param[in] ref_ptr  Pointer to reference to query
  * \param[in,out] name Buffer to place the file name of the reference
- * \param[in] size     Size of the \p name buffer
+ * \param[in] size     Size of the \p name buffer. When the size is passed in,
+ *                     the \c NULL terminator needs to be included.
  *
  * \return Returns the length of the name if successful, otherwise, a negative value.
  *
@@ -531,7 +532,8 @@ H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *ob
  *          application. If the length of the name, which determines
  *          the required value of size, is unknown, a preliminary
  *          H5Rget_file_name() call can be made. The return value of this
- *          call will be the size of the file name. That value can then be
+ *          call will be the size of the file name (the size does not include
+ *          the \p NULL terminator). That value can then be
  *          passed in for size in the second call to H5Rget_file_name(),
  *          which will retrieve the actual name.
  *
@@ -549,7 +551,8 @@ H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  * \param[in] ref_ptr  Pointer to reference to query
  * \rapl_id
  * \param[in,out] name Buffer to place the object name of the reference
- * \param[in] size     Size of the \p name buffer
+ * \param[in] size     Size of the \p name buffer. When the size is passed in,
+ *                     the \c NULL terminator needs to be included.
  *
  * \return Returns the length of the name if successful, returning
  *          0 (zero) if no name is associated with the identifier. Otherwise
@@ -608,7 +611,8 @@ H5_DLL ssize_t H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *name, si
  *          application. If the length of the name, which determines
  *          the required value of \p size, is unknown, a preliminary
  *          H5Rget_attr_name() call can be made. The return value of this
- *          call will be the size of the attribute name. That value can then
+ *          call will be the size of the attribute name (the size \Bold{does} include
+ *          the \p NULL terminator). That value can then
  *          be passed in for size in the second call to H5Rget_attr_name(),
  *          which will retrieve the actual name.
  *

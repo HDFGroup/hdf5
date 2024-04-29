@@ -165,7 +165,7 @@ SUBROUTINE refobjtest(cleanup, total_error)
   CALL check("H5Rget_name_f", error, total_error)
 
 
-  CALL verify("H5Rget_name_f", INT(buf_size),7, total_error)
+  CALL VERIFY("H5Rget_name_f", INT(buf_size),LEN("/"//groupname1), total_error)
   CALL verify("H5Rget_name_f", buf, "/GROUP1", total_error)
 
   ! with a buffer bigger than needed
@@ -489,6 +489,7 @@ SUBROUTINE v3reftest(cleanup, total_error)
   CHARACTER(LEN=17), PARAMETER :: dsetnamer  = "OBJECT_REFERENCES"
   CHARACTER(LEN=6) , PARAMETER :: groupname1 = "GROUP1"
   CHARACTER(LEN=6) , PARAMETER :: groupname2 = "GROUP2"
+  CHARACTER(LEN=5) , PARAMETER :: attrname = "ATTR1"
   INTEGER          , PARAMETER :: ref_size = 6
   INTEGER          , PARAMETER :: arr_size = 5
   INTEGER          , PARAMETER :: rank = 1
@@ -554,7 +555,7 @@ SUBROUTINE v3reftest(cleanup, total_error)
 
   CALL H5Screate_f(H5S_SCALAR_F, sid, error)
   CALL check("H5Screate_f",error,total_error)
-  CALL H5Acreate_f(grp2_id, "ATTR1", H5T_NATIVE_INTEGER, sid, aid, error)
+  CALL H5Acreate_f(grp2_id, attrname, H5T_NATIVE_INTEGER, sid, aid, error)
   CALL check("H5Acreate_f",error,total_error)
 
   !
@@ -610,15 +611,14 @@ SUBROUTINE v3reftest(cleanup, total_error)
   CALL h5sclose_f(sid,error)
   CALL check("H5Sclose_f",error,total_error)
   !
-  ! Create references to two groups, integer dataset and shared datatype
-  ! and write it to the dataset in the file
+  ! Create references to two groups, integer dataset, point selection and
+  ! shared datatype and write it to the dataset in the file
   !
-
   f_ptr = C_LOC(ref_ptr(1))
   CALL h5rcreate_object_f(file_id, groupname1, f_ptr, error)
   CALL check("h5rcreate_f",error,total_error)
   f_ptr = C_LOC(ref_ptr(2))
-  CALL h5rcreate_object_f(file_id, "/GROUP1/GROUP2", f_ptr, error)
+  CALL h5rcreate_object_f(file_id, "/"//groupname1//"/"//groupname2, f_ptr, error)
   CALL check("h5rcreate_f",error,total_error)
   f_ptr = C_LOC(ref_ptr(3))
   CALL h5rcreate_object_f(file_id, dsetnamei, f_ptr, error)
@@ -628,7 +628,7 @@ SUBROUTINE v3reftest(cleanup, total_error)
   CALL check("h5rcreate_f",error,total_error)
 
   f_ptr = C_LOC(ref_ptr(5))
-  CALL h5rcreate_attr_f(file_id, "/GROUP1/GROUP2", "ATTR1", f_ptr, error, H5P_DEFAULT_F)
+  CALL h5rcreate_attr_f(file_id, "/"//groupname1//"/"//groupname2, attrname, f_ptr, error, H5P_DEFAULT_F)
   CALL check("h5rcreate_attr_f",error,total_error)
 
   CALL h5screate_simple_f(1, dimspt, sid2, error)
@@ -659,31 +659,30 @@ SUBROUTINE v3reftest(cleanup, total_error)
   ALLOCATE(CHARACTER(LEN=buf_size) :: buf_alloc)
   CALL h5rget_obj_name_f(C_LOC(ref_ptr(1)), buf_alloc, error)
   CALL check("h5rget_obj_name_f", error, total_error)
-  CALL VERIFY("h5rget_obj_name_f", buf_alloc, "/GROUP1", total_error)
+  CALL VERIFY("h5rget_obj_name_f", buf_alloc, "/"//groupname1, total_error)
   DEALLOCATE(buf_alloc)
 #endif
   ! with buffer bigger than needed
   CALL h5rget_obj_name_f(C_LOC(ref_ptr(1)), buf_big, error)
   CALL check("h5rget_obj_name_f", error, total_error)
-  CALL verify("h5rget_obj_name_f", TRIM(buf_big), "/GROUP1", total_error)
+  CALL verify("h5rget_obj_name_f", TRIM(buf_big), "/"//groupname1, total_error)
 
-  ! getting path to dataset in /Group1
-
+  ! getting path to dataset
   CALL h5rget_obj_name_f(C_LOC(ref_ptr(2)), "", error, name_len=buf_size )
   CALL check("H5Rget_name_f", error, total_error)
-  CALL verify("H5Rget_name_f", INT(buf_size),14,total_error)
+  CALL verify("H5Rget_name_f2", INT(buf_size),LEN("/"//groupname1//"/"//groupname2),total_error)
 
 #ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
   ALLOCATE(CHARACTER(LEN=buf_size) :: buf_alloc)
   CALL h5rget_obj_name_f(C_LOC(ref_ptr(2)), buf_alloc, error)
   CALL check("h5rget_obj_name_f", error, total_error)
-  CALL VERIFY("h5rget_obj_name_f", buf_alloc, "/GROUP1/GROUP2", total_error)
+  CALL VERIFY("h5rget_obj_name_f", buf_alloc, "/"//groupname1//"/"//groupname2, total_error)
   DEALLOCATE(buf_alloc)
 #endif
 
   CALL h5rget_obj_name_f(C_LOC(ref_ptr(2)), buf_big, error)
   CALL check("H5Rget_name_f", error, total_error)
-  CALL verify("H5Rget_name_f", TRIM(buf_big), "/GROUP1/GROUP2", total_error)
+  CALL verify("H5Rget_name_f", TRIM(buf_big), "/"//groupname1//"/"//groupname2, total_error)
 
   ! CHECK COPYING REF
 
@@ -722,7 +721,7 @@ SUBROUTINE v3reftest(cleanup, total_error)
   CALL check("h5rdestroy_f", error, total_error)
 
   !
-  !Close the dataset
+  ! Close the dataset
   !
   CALL h5dclose_f(dsetr_id, error)
   CALL check("h5dclose_f",error,total_error)
@@ -737,19 +736,20 @@ SUBROUTINE v3reftest(cleanup, total_error)
   CALL h5dopen_f(file_id, dsetnamer,dsetr_id,error)
   CALL check("h5dopen_f",error,total_error)
 
+  ! Read the references dataset
   f_ptr = C_LOC(ref_ptr_read(1))
   CALL h5dread_f(dsetr_id, H5T_STD_REF, f_ptr, error)
   CALL check("h5dread_f",error,total_error)
 
   !
-  !get the third reference's type and Dereference it
+  ! Get infomation about the references read and check for correctness
   !
   CALL h5rget_obj_name_f(C_LOC(ref_ptr_read(1)), buf_big, error)
   CALL check("h5rget_obj_name_f", error, total_error)
-  CALL verify("h5rget_obj_name_f", TRIM(buf_big), "/GROUP1", total_error)
+  CALL verify("h5rget_obj_name_f", TRIM(buf_big), "/"//groupname1, total_error)
   CALL h5rget_obj_name_f(C_LOC(ref_ptr_read(2)), buf_big, error)
   CALL check("h5rget_obj_name_f", error, total_error)
-  CALL verify("h5rget_obj_name_f", TRIM(buf_big), "/GROUP1/GROUP2", total_error)
+  CALL verify("h5rget_obj_name_f", TRIM(buf_big), "/"//groupname1//"/"//groupname2, total_error)
   CALL h5rget_obj_name_f(C_LOC(ref_ptr_read(3)), buf_big, error)
   CALL check("h5rget_obj_name_f", error, total_error)
   CALL verify("h5rget_obj_name_f", TRIM(buf_big), "/"//dsetnamei, total_error)
@@ -757,16 +757,20 @@ SUBROUTINE v3reftest(cleanup, total_error)
   CALL check("h5rget_obj_name_f", error, total_error)
   CALL verify("h5rget_obj_name_f", TRIM(buf_big), "/"//"MyType", total_error)
 
+  CALL h5rget_attr_name_f(C_LOC(ref_ptr_read(5)), buf_big, error, buf_size)
+  CALL check("h5rget_attr_name_f", error, total_error)
+  CALL VERIFY("h5rget_attr_name_f", buf_size, LEN(attrname, KIND=SIZE_T), total_error)
+
   CALL h5rget_attr_name_f(C_LOC(ref_ptr_read(5)), buf_big, error)
   CALL check("h5rget_attr_name_f", error, total_error)
-  CALL verify("h5rget_attr_name_f", TRIM(buf_big), "ATTR1", total_error)
+  CALL verify("h5rget_attr_name_f", TRIM(buf_big), attrname, total_error)
 
   CALL h5ropen_attr_f( C_LOC(ref_ptr_read(5)), aid2, error, H5P_DEFAULT_F, H5P_DEFAULT_F )
   CALL check("h5ropen_attr_f",error,total_error)
 
   CALL h5aget_name_f(aid2, 16_size_t, buf_big, error)
   CALL check("h5aget_name_f",error,total_error)
-  CALL verify("h5aget_name_f", TRIM(buf_big), "ATTR1", total_error)
+  CALL verify("h5aget_name_f", TRIM(buf_big), attrname, total_error)
 
   CALL h5aclose_f(aid2, error)
   CALL check("h5aclose_f", error, total_error)
@@ -817,6 +821,12 @@ SUBROUTINE v3reftest(cleanup, total_error)
 
      CALL h5rdestroy_f(C_LOC(ref_ptr_read(6)), error)
      CALL check("h5rdestroy_f", error, total_error)
+
+     f_ptr = C_LOC(data(1))
+     CALL h5dread_f(dset1_id, H5T_NATIVE_INTEGER, f_ptr, error)
+     CALL check("h5dread_f", error, total_error)
+     CALL VERIFY("h5dread_f", DATA(1), data_write(1), total_error)
+     CALL VERIFY("h5dread_f", DATA(5), data_write(2), total_error)
 
      CALL h5oclose_f(dset1_id, error)
      CALL check("h5oclose_f",error,total_error)
