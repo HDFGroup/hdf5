@@ -527,15 +527,7 @@ H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *ob
  * \details H5Rget_file_name() retrieves the file name for the object,
  *          region or attribute reference pointed to by \p ref_ptr.
  *
- *          Up to \p size characters of the name are returned in \p name;
- *          additional characters, if any, are not returned to the user
- *          application. If the length of the name, which determines
- *          the required value of size, is unknown, a preliminary
- *          H5Rget_file_name() call can be made. The return value of this
- *          call will be the size of the file name (the size does not include
- *          the \p NULL terminator). That value can then be
- *          passed in for size in the second call to H5Rget_file_name(),
- *          which will retrieve the actual name.
+ *          \details_namelen{file,H5Rget_file_name}
  *
  * \since 1.12.0
  *
@@ -566,16 +558,7 @@ H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  *          be used to access external files that the reference points to
  *          (through a file access property list).
  *
- *          Up to size characters of the name are returned in \p name; additional
- *          characters, if any, are not returned to the user application. If
- *          the length of the name, which determines the required value of
- *          \p size, is unknown, a preliminary call to H5Rget_obj_name() call
- *          can be made. The return value of this call will be the size of the
- *          object name. That value can then be passed in for \p size in the
- *          second call to H5Rget_obj_name(), which will retrieve the actual
- *          name. If there is no name associated with the object identifier
- *          or if the name is NULL, H5Rget_obj_name() returns the size of
- *          the name buffer (the size does not include the \c \0 terminator).
+ *          \details_namelen{object,H5Rget_obj_name}
  *
  *          If \p ref_ptr is an object reference, \p name will be returned with
  *          a name for the referenced object. If \p ref_ptr is a dataset region
@@ -606,15 +589,7 @@ H5_DLL ssize_t H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *name, si
  * \details H5Rget_attr_name() retrieves the attribute name for the
  *          attribute reference pointed to by \p ref_ptr.
  *
- *          Up to size characters of the name are returned in \p name;
- *          additional characters, if any, are not returned to the user
- *          application. If the length of the name, which determines
- *          the required value of \p size, is unknown, a preliminary
- *          H5Rget_attr_name() call can be made. The return value of this
- *          call will be the size of the attribute name (the size \Bold{does} include
- *          the \p NULL terminator). That value can then
- *          be passed in for size in the second call to H5Rget_attr_name(),
- *          which will retrieve the actual name.
+ *          \details_namelen_plusone{attribute,H5Rget_attr_name}
  *
  * \since 1.12.0
  *
@@ -973,23 +948,10 @@ H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
  *          reference, \p name will contain a name for the object containing the
  *          referenced region.
  *
- *          Up to \p size characters of the name are returned in \p name;
- *          additional characters, if any, are not returned to the user
- *          application.
+ *          \details_namelen{,H5Rget_name}
  *
- *          If the length of the name, which determines the required value of \p
- *          size, is unknown, a preliminary H5Rget_name() call can be made. The
- *          return value of this call will be the size of the object name. That
- *          value can then be assigned to \p size for a second H5Rget_name()
- *          call, which will retrieve the actual name.
- *
- *          If there is no name associated with the object identifier or if the
- *          \p name is \c NULL, H5Rget_name() returns the size of the \p name
- *          buffer (the size does not include the \p NULL terminator).
- *
- *          Note that an object in an HDF5 file may have multiple paths if there
- *          are multiple links pointing to it. This function may return any one
- *          of these paths.
+ *          \note An object in an HDF5 file may have multiple paths if multiple
+ *          links point to it. This function may return any one of these paths.
  *
  * \since 1.8.0
  */
