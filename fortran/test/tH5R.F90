@@ -742,7 +742,7 @@ SUBROUTINE v3reftest(cleanup, total_error)
   CALL check("h5dread_f",error,total_error)
 
   !
-  ! Get infomation about the references read and check for correctness
+  ! Get information about the references read and check for correctness
   !
   CALL h5rget_obj_name_f(C_LOC(ref_ptr_read(1)), buf_big, error)
   CALL check("h5rget_obj_name_f", error, total_error)
