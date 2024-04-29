@@ -446,6 +446,8 @@ test_reference_obj(void)
     unsigned   i, j;     /* Counters                         */
     H5O_type_t obj_type; /* Object type                      */
     herr_t     ret;      /* Generic return value             */
+    ssize_t    namelen;    /* String buffer size return value  */
+    char       buf[100];
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Object Reference Functions\n"));
@@ -598,6 +600,23 @@ test_reference_obj(void)
     /* Read selection from disk */
     ret = H5Dread(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
     CHECK(ret, FAIL, "H5Dread");
+
+    /* Check file name for reference */
+    namelen = H5Rget_file_name(&rbuf[0], NULL, 0);
+    CHECK(namelen, FAIL, "H5Dget_file_name");
+    VERIFY(namelen, strlen(FILE_REF_OBJ), "H5Dget_file_name");
+
+    /* Make sure size parameter is ignored */
+    namelen = H5Rget_file_name(&rbuf[0], NULL, 200);
+    CHECK(namelen, FAIL, "H5Dget_file_name");
+    VERIFY(namelen, strlen(FILE_REF_OBJ), "H5Dget_file_name");
+
+    /* Get the file name for the reference */
+    namelen = H5Rget_file_name(&rbuf[0], (char *)buf, sizeof(buf));
+    CHECK(namelen, FAIL, "H5Dget_file_name");
+
+    ret = !((strcmp(buf, FILE_REF_OBJ) == 0) && (namelen == strlen(FILE_REF_OBJ)));
+    CHECK(ret, FAIL, "H5Literate");
 
     /* Open dataset object */
     dset2 = H5Ropen_object(&rbuf[0], H5P_DEFAULT, dapl_id);
