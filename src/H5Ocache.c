@@ -190,7 +190,7 @@ H5O__cache_get_final_load_size(const void *image, size_t image_len, void *_udata
     /* Set the final size for the cache image */
     *actual_len = udata->chunk0_size + (size_t)H5O_SIZEOF_HDR(udata->oh);
 
-    /* Save the oh version to be used later in verify_chksum callback 
+    /* Save the oh version to be used later in verify_chksum callback
        because oh will be freed before leaving this routine */
     udata->oh_version = udata->oh->version;
 
@@ -234,7 +234,7 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
         H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
         if (stored_chksum != computed_chksum)
-            ret_value      = false;
+            ret_value = false;
     }
     else
         assert(!(udata->common.file_intent & H5F_ACC_SWMR_WRITE));
@@ -1136,7 +1136,7 @@ H5O__prefix_deserialize(const uint8_t *_image, size_t len, H5O_cache_ud_t *udata
 
     /* Save the object header for later use in 'deserialize' callback */
     udata->oh = oh;
-    oh = NULL;
+    oh        = NULL;
 
 done:
     /* Release the [possibly partially initialized] object header on errors */
