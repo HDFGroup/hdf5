@@ -21,6 +21,9 @@ directories and files, an HDF5 object in an HDF5 file is often referred to by it
 
 \li <code style="background-color:whitesmoke;">/foo/zoo</code>  signifies a member of the group foo, which in turn is a member of the root group.
 
+<hr>
+Next Chapter \ref LBAPI
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 @page LBAPI The HDF5 API
@@ -135,6 +138,9 @@ The APIs are listed below:
 </tr>
 </table>
 
+<hr>
+Previous Chapter \ref LBFileOrg - Next Chapter \ref LBProg
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 @page LBProg Programming Issues
@@ -202,6 +208,9 @@ Java:     Add <code>"import hdf.hdf5lib.H5;
                      import hdf.hdf5lib.HDF5Constants;"</code>
 </li>
 </ul>
+
+<hr>
+Previous Chapter \ref LBAPI - Next Chapter \ref LBFileCreate
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
@@ -394,6 +403,9 @@ The simplified DDL for file definition is as follows:
 
         <group_member> ::= <group> | <dataset>
 \endcode
+
+<hr>
+Previous Chapter \ref LBProg - Next Chapter \ref LBDsetCreate
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
@@ -712,6 +724,9 @@ The following is the simplified DDL dataset definition:
 \endcode
 
 <hr>
+
+Previous Chapter \ref LBFileCreate - Next Chapter \ref LBDsetRW
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 @page LBDsetRW Reading From and Writing To a Dataset
@@ -852,6 +867,8 @@ Shown below is the contents of dsetf.h5 (created by the FORTRAN program).
 \endcode
 
 <hr>
+Previous Chapter \ref LBDsetCreate - Next Chapter \ref LBAttrCreate
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 @page LBAttrCreate Creating an Attribute
@@ -1018,6 +1035,8 @@ ATTRIBUTE "attr" {
 \endcode
 
 <hr>
+Previous Chapter \ref LBDsetRW - Next Chapter \ref LBGrpCreate
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 */
