@@ -446,7 +446,7 @@ test_reference_obj(void)
     unsigned   i, j;     /* Counters                         */
     H5O_type_t obj_type; /* Object type                      */
     herr_t     ret;      /* Generic return value             */
-    ssize_t    namelen;    /* String buffer size return value  */
+    ssize_t    namelen;  /* String buffer size return value  */
     char       buf[100];
 
     /* Output message about test being performed */
