@@ -25,6 +25,7 @@
       file_space.ddl
       filter_fail.ddl
       non_existing.ddl
+      infinite_loop.ddl
       packedbits.ddl
       tall-1.ddl
       tall-2.ddl
@@ -298,6 +299,7 @@
       tfpformat.h5
       tfvalues.h5
       tgroup.h5
+      3790_infinite_loop.h5
       tgrp_comments.h5
       tgrpnullspace.h5
       thlink.h5
@@ -371,6 +373,7 @@
   set (HDF5_ERROR_REFERENCE_TEST_FILES
       filter_fail.err
       non_existing.err
+      infinite_loop.err
       tall-1.err
       tall-2A.err
       tall-2A0.err
@@ -1422,6 +1425,9 @@
 
   # test for non-existing file
   ADD_H5_TEST (non_existing 1 --enable-error-stack tgroup.h5 non_existing.h5)
+
+  # test to verify github issue#3790: infinite loop closing library
+  ADD_H5_TEST (infinite_loop 1 3790_infinite_loop.h5)
 
   # test to verify HDFFV-10333: error similar to H5O_attr_decode in the jira issue
   ADD_H5_TEST (err_attr_dspace 1 err_attr_dspace.h5)
