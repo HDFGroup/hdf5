@@ -6205,7 +6205,7 @@ H5_DLL herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count /*out*/);
  *                   (0 ≤ \p index < \p count), where \p count is the
  *                   number of mappings returned by H5Pget_virtual_count().
  * \param[out] name  A buffer containing the name of the source dataset
- * \param[in]  size  The size, in bytes, of the name buffer. Must be the
+ * \param[in]  size  The size, in bytes, of the \p name buffer. Must be the
  *                   size of the dataset name in bytes plus 1 for a NULL
  *                   terminator
  *
