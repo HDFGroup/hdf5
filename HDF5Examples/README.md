@@ -48,15 +48,15 @@ HDF5 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
 Full Documentation and Programming Resources for this HDF5 can be found at
 
-   https://support.hdfgroup.org/hdf5/documentation/index.html
+   https://support.hdfgroup.org/documentation/hdf5/index.html
 
 Periodically development code snapshots are provided at the following URL:
     
-   https://github.com/HDFGroup/hdf5/releases/tag/snapshot/
+   https://github.com/HDFGroup/hdf5/releases/download/snapshot/
 
 Source packages for current and previous releases are located at:
     
-   https://support.hdfgroup.org/hdf5/releases/downloads
+   https://support.hdfgroup.org/downloads/hdf5
 
 Development code is available at our Github location:
     
