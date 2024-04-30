@@ -254,7 +254,7 @@ H5_DLL hid_t H5Iget_file_id(hid_t id);
  * \details Up to size characters of the name are returned in \p name;
  *          additional characters, if any, are not returned to the user
  *          application.
- * 
+ *
  *          \details_namelen{object,H5Iget_name}
  *
  *          If the object identified by \p id is an attribute, as determined
