@@ -21,7 +21,7 @@ ALIASES += DOXURL="hdfgroup.github.io/hdf5/develop"
 #branch name (develop, hdf5_1_14)
 ALIASES += SRCURL="github.com/HDFGroup/hdf5/blob/develop"
 #Other projects that contribute to HDF5
-ALIASES += PRJURL="\HDFURL/projects/">
+ALIASES += PRJURL="\HDFURL/projects"
 ALIASES += HVURL="github.com/HDFGroup/hdfview/blob/master"
 ################################################################################
 # Styling

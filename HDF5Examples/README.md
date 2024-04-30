@@ -52,7 +52,7 @@ Full Documentation and Programming Resources for this HDF5 can be found at
 
 Periodically development code snapshots are provided at the following URL:
     
-   https://github.com/HDFGroup/hdf5/releases/download/snapshot/
+   https://github.com/HDFGroup/hdf5/releases/tag/snapshot/
 
 Source packages for current and previous releases are located at:
     
