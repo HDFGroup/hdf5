@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.1d3b224</span>
+   &#160;<span id="projectnumber">1.15.0.667b607</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -532,7 +532,8 @@ Variable-length datatype APIs</h3>
 </div><!-- fragment --><p>The <em>type_id</em> must be the datatype stored in the buffer, <em>space_id</em> describes the selection for the memory buffer to free the VL datatypes within, <em>plist_id</em> is the dataset transfer property list which was used for the I/O transfer to create the buffer, and <em>buf</em> is the pointer to the buffer to free the VL memory within. The VL structures (<a class="el" href="structhvl__t.html">hvl_t</a>) in the user's buffer are modified to zero out the VL information after it has been freed.</p>
 <p>If nested VL datatypes were used to create the buffer, this routine frees them from the bottom up, releasing all the memory without creating memory leaks.</p>
 <hr  />
-<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_getting_started.html">Getting Started with HDF5</a> / <a class="el" href="_learn_basics.html">Learning the Basics</a> </p>
+<p> Previous Chapter <a class="el" href="_l_b_dset_sub_r_w.html">Reading From or Writing To a Subset of a Dataset</a> - Next Chapter <a class="el" href="_l_b_props_list.html">Property Lists Basics</a></p>
+<p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_getting_started.html">Getting Started with HDF5</a> / <a class="el" href="_learn_basics.html">Learning the Basics</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
