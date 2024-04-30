@@ -1,4 +1,3 @@
-!> @defgroup FH5R Fortran References (H5R) Interface
 !!
 !! @see H5R, C-API
 !!
