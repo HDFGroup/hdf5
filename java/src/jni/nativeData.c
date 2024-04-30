@@ -11,11 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- *  For details of the HDF libraries, see the HDF Documentation at:
- *    https://portal.hdfgroup.org/documentation/index.html
- *
- */
-/*
  *  This module contains the implementation of all the native methods
  *  used for number conversion.  This is represented by the Java
  *  class HDFNativeData.

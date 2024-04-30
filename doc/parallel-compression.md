@@ -131,7 +131,7 @@ with a value of `H5D_FILL_TIME_NEVER` in order to disable writing of
 the fill value to dataset chunks, but this isn't ideal if the
 application actually wishes to make use of fill values. 
 
-With [improvements made](https://www.hdfgroup.org/2022/03/parallel-compression-improvements-in-hdf5-1-13-1/)
+With [improvements made](https://support.hdfgroup.org/documentation/hdf5/parallel-compression-improvements-in-hdf5-1-13-1/)
 to the parallel compression feature for the HDF5 1.13.1 release,
 "incremental" file space allocation is now the default for datasets
 created in parallel *only if they have filters applied to them*.
@@ -154,7 +154,7 @@ optimal performance out of the parallel compression feature.
 
 ### Begin with a good chunking strategy
 
-[Starting with a good chunking strategy](https://portal.hdfgroup.org/documentation/hdf5-docs/chunking_in_hdf5.html)
+[Starting with a good chunking strategy](https://support.hdfgroup.org/documentation/hdf5/chunking_in_hdf5.html)
 will generally have the largest impact on overall application
 performance. The different chunking parameters can be difficult
 to fine-tune, but it is essential to start with a well-performing
@@ -166,7 +166,7 @@ chosen chunk size becomes a very important factor when compression
 is involved, as data chunks have to be completely read and
 re-written to perform partial writes to the chunk.
 
-[Improving I/O performance with HDF5 compressed datasets](https://docs.hdfgroup.org/archive/support/HDF5/doc/TechNotes/TechNote-HDF5-ImprovingIOPerformanceCompressedDatasets.pdf)
+[Improving I/O performance with HDF5 compressed datasets](https://support.hdfgroup.org/documentation/hdf5/TechNotes/TechNote-HDF5-ImprovingIOPerformanceCompressedDatasets.pdf)
 is a useful reference for more information on getting good
 performance when using a chunked dataset layout.
 

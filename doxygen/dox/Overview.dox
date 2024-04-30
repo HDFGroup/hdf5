@@ -21,14 +21,10 @@ documents cover a mix of tasks, concepts, and reference, to help a specific
 <em>audience</em> succeed.
 
 \par Versions
-     Version-specific documentation (see the version in the title area) can be found
-     here:
+     Development and released documentation can be found at the following locations:
      - <a href="https://\DOXURL/index.html">HDF5 <code>develop</code> branch (this site)</a>
-     - <a href="https://hdfgroup.github.io/hdf5/v1_14/index.html">HDF5 1.14.x</a>
-     - <a href="https://\HDFURL/v1_14/index.html">HDF5 1.14.4</a>
-     - <a href="https://\HDFURL/v1_12/index.html">HDF5 1.12.3</a>
-     - <a href="https://\HDFURL/v1_10/index.html">HDF5 1.10.11</a>
-     - <a href="https://\HDFURL/v1_8/index.html">HDF5 1.8.23</a>
+     - <a href="https://\DOXURL/v1_14/index.html">HDF5 1.14.x</a>
+     - <a href="https://\HDFURL/v1_14_4/index.html">Last HDF5 release, 1.14.4</a>
 
 \par Search
      If you are looking for a specific function, constant, type, etc., use the
