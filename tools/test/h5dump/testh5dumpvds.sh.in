@@ -318,7 +318,7 @@ TOOLTEST3() {
     STDERR_FILTER $actual_err
 
     # Extract file name, line number, version and thread IDs because they may be different
-    sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+    sed -e 's/ thread [0-9]*//' -e 's/: .*\.c /: (file name) /' \
         -e 's/line [0-9]*/line (number)/' \
         -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
         -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
@@ -376,7 +376,7 @@ TOOLTEST4() {
     STDERR_FILTER $actual_err
 
     # Extract file name, line number, version and thread IDs because they may be different
-    sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+    sed -e 's/ thread [0-9]*//' -e 's/: .*\.c /: (file name) /' \
         -e 's/line [0-9]*/line (number)/' \
         -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
         -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \

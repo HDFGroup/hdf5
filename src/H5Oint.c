@@ -976,7 +976,7 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, bool pin_all_chunks)
     udata.v1_pfx_nmesgs           = 0;
     udata.chunk0_size             = 0;
     udata.oh                      = NULL;
-    udata.free_oh                 = false;
+    udata.oh_version              = 0;
     udata.common.f                = loc->file;
     udata.common.file_intent      = file_intent;
     udata.common.merged_null_msgs = 0;

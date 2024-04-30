@@ -754,11 +754,24 @@ Bug Fixes since HDF5-1.14.0 release
     Library
     -------
 
-
     - Fixed function H5Requal actually to compare the reference pointers
 
       Fixed an issue with H5Requal always returning true because the
       function was only comparing the ref2_ptr to itself.
+
+    - Fixed infinite loop closing library issue when h5dump with a user provided test file
+
+      The library's metadata cache calls the "get_final_load_size" client callback
+      to find out the actual size of the object header.  As the size obtained
+      exceeds the file's EOA, it throws an error but the object header structure
+      allocated through the client callback is not freed hence causing the 
+      issue described.
+
+      (1) Free the structure allocated in the object header client callback after 
+      saving the needed information in udata. (2) Deserialize the object header
+      prefix in the object header's "deserialize" callback regardless.
+
+      Fixes GitHub #3790
 
     - Fixed many (future) CVE issues
 

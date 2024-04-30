@@ -1543,7 +1543,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_OPTIMIZE_OUTPUT_FOR_C=YES
   DOXYGEN_MACRO_EXPANSION=YES
   DOXYGEN_OUTPUT_DIRECTORY=hdf5lib_docs
-  DOXYGEN_EXAMPLES_DIRECTORY='$(SRCDIR)/doxygen/dox/cookbook $(SRCDIR)/doxygen/examples $(SRCDIR)/src $(SRCDIR)/examples $(SRCDIR)/test'
+  DOXYGEN_EXAMPLES_DIRECTORY='$(SRCDIR)/doxygen/dox/cookbook $(SRCDIR)/doxygen/examples $(SRCDIR)/src $(SRCDIR)/release_docs $(SRCDIR)/test'
   DOXYGEN_LAYOUT_FILE='$(SRCDIR)/doxygen/hdf5doxy_layout.xml'
   DOXYGEN_HTML_HEADER='$(SRCDIR)/doxygen/hdf5_header.html'
   DOXYGEN_HTML_FOOTER='$(SRCDIR)/doxygen/hdf5_footer.html'
@@ -2416,6 +2416,14 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[int __attribute__((unused)) x]])],
                          [Define if the __attribute__(()) extension is present])
                  AC_MSG_RESULT([yes])],
                [AC_MSG_RESULT([no])])
+
+AC_MSG_CHECKING([if compiler supports the __builtin_expect() extension])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[void *ptr = (void*) 0;
+               if (__builtin_expect (ptr != (void*) 0, 1)) return 0;]])],
+  [AC_DEFINE([HAVE_BUILTIN_EXPECT], [1],
+          [Define if supports __builtin_expect() extension])
+    AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])])
 
 ## ----------------------------------------------------------------------
 ## Remove old ways of determining debug/production build.

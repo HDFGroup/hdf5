@@ -138,6 +138,7 @@ $SRC_H5DUMP_TESTFILES/tfloat16_be.h5
 $SRC_H5DUMP_TESTFILES/tfpformat.h5
 $SRC_H5DUMP_TESTFILES/tfvalues.h5
 $SRC_H5DUMP_TESTFILES/tgroup.h5
+$SRC_H5DUMP_TESTFILES/3790_infinite_loop.h5
 $SRC_H5DUMP_TESTFILES/tgrp_comments.h5
 $SRC_H5DUMP_TESTFILES/tgrpnullspace.h5
 $SRC_H5DUMP_TESTFILES/thlink.h5
@@ -200,6 +201,7 @@ $SRC_H5DUMP_OUTFILES/charsets.ddl
 $SRC_H5DUMP_OUTFILES/file_space.ddl
 $SRC_H5DUMP_OUTFILES/filter_fail.ddl
 $SRC_H5DUMP_OUTFILES/non_existing.ddl
+$SRC_H5DUMP_OUTFILES/infinite_loop.ddl
 $SRC_H5DUMP_OUTFILES/packedbits.ddl
 $SRC_H5DUMP_OUTFILES/tall-1.ddl
 $SRC_H5DUMP_OUTFILES/tall-2.ddl
@@ -395,6 +397,7 @@ $SRC_H5DUMP_EXPFILES/twithddlfile.exp
 LIST_ERROR_TEST_FILES="
 ${SRC_H5DUMP_ERRORFILES}/filter_fail.err
 ${SRC_H5DUMP_ERRORFILES}/non_existing.err
+${SRC_H5DUMP_ERRORFILES}/infinite_loop.err
 ${SRC_H5DUMP_ERRORFILES}/tall-1.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2A.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2A0.err
@@ -796,7 +799,7 @@ TOOLTEST3() {
     STDERR_FILTER $actual_err
 
     # Extract file name, line number, version and thread IDs because they may be different
-    sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+    sed -e 's/ thread [0-9]*//' -e 's/: .*\.c /: (file name) /' \
         -e 's/line [0-9]*/line (number)/' \
         -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
         -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
@@ -854,7 +857,7 @@ TOOLTEST4() {
     STDERR_FILTER $actual_err
 
     # Extract file name, line number, version and thread IDs because they may be different
-    sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+    sed -e 's/ thread [0-9]*//' -e 's/: .*\.c /: (file name) /' \
         -e 's/line [0-9]*/line (number)/' \
         -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
         -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
@@ -919,7 +922,7 @@ TOOLTEST5() {
     STDERR_FILTER $actual_err
 
     # Extract file name, line number, version and thread IDs because they may be different
-    sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+    sed -e 's/ thread [0-9]*//' -e 's/: .*\.c /: (file name) /' \
         -e 's/line [0-9]*/line (number)/' \
         -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
         -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
@@ -1560,6 +1563,9 @@ TOOLTEST2 tall-6.exp --enable-error-stack -y -o tall-6.txt -d /g1/g1.1/dset1.1.1
 
 # test for non-existing file
 TOOLTEST3 non_existing.ddl --enable-error-stack tgroup.h5 non_existing.h5
+
+# test to verify github issue #3790: infinite loop closing library
+TOOLTEST4 infinite_loop.ddl 3790_infinite_loop.h5
 
 # test to verify HDFFV-10333: error similar to H5O_attr_decode in the jira issue
 TOOLTEST err_attr_dspace.ddl err_attr_dspace.h5

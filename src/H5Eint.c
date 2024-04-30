@@ -218,7 +218,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
         if (cls_ptr->lib_vers)
             eprint->cls.lib_vers = cls_ptr->lib_vers;
 
-        fprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
+        fprintf(stream, "%s-DIAG: Error detected in %s (%s)",
                 (cls_ptr->cls_name ? cls_ptr->cls_name : "(null)"),
                 (cls_ptr->lib_name ? cls_ptr->lib_name : "(null)"),
                 (cls_ptr->lib_vers ? cls_ptr->lib_vers : "(null)"));
@@ -233,13 +233,17 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
 
             if (mpi_initialized && !mpi_finalized) {
                 MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-                fprintf(stream, "MPI-process %d", mpi_rank);
+                fprintf(stream, " MPI-process %d", mpi_rank);
             } /* end if */
+#ifdef H5_HAVE_THREADSAFE
             else
-                fprintf(stream, "thread 0");
+                fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
+#endif
         } /* end block */
 #else
-        fprintf(stream, "thread %" PRIu64, H5TS_thread_id());
+#ifdef H5_HAVE_THREADSAFE
+        fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
+#endif
 #endif
         fprintf(stream, ":\n");
     } /* end if */
@@ -342,7 +346,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         if (cls_ptr->lib_vers)
             eprint->cls.lib_vers = cls_ptr->lib_vers;
 
-        fprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
+        fprintf(stream, "%s-DIAG: Error detected in %s (%s)",
                 (cls_ptr->cls_name ? cls_ptr->cls_name : "(null)"),
                 (cls_ptr->lib_name ? cls_ptr->lib_name : "(null)"),
                 (cls_ptr->lib_vers ? cls_ptr->lib_vers : "(null)"));
@@ -357,13 +361,17 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
 
             if (mpi_initialized && !mpi_finalized) {
                 MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-                fprintf(stream, "MPI-process %d", mpi_rank);
+                fprintf(stream, " MPI-process %d", mpi_rank);
             } /* end if */
+#ifdef H5_HAVE_THREADSAFE
             else
-                fprintf(stream, "thread 0");
+                fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
+#endif
         } /* end block */
 #else
-        fprintf(stream, "thread %" PRIu64, H5TS_thread_id());
+#ifdef H5_HAVE_THREADSAFE
+        fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
+#endif
 #endif
         fprintf(stream, ":\n");
     } /* end if */
@@ -713,6 +721,50 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
             HGOTO_DONE(FAIL);
 
     /*
+     * Push the error if there's room.  Otherwise just forget it.
+     */
+    if (estack->nused < H5E_NSLOTS) {
+        if (H5E__set_stack_entry(&estack->slot[estack->nused], file, func, line, cls_id, maj_id, min_id,
+                                 desc) < 0)
+            HGOTO_DONE(FAIL);
+        estack->nused++;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E__push_stack() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E__set_stack_entry
+ *
+ * Purpose:     Sets the information for a given stack entry.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E__set_stack_entry(H5E_error2_t *err_entry, const char *file, const char *func, unsigned line, hid_t cls_id,
+                     hid_t maj_id, hid_t min_id, const char *desc)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    /*
+     * WARNING: We cannot call HERROR() from within this function or else we
+     *		could enter infinite recursion.  Furthermore, we also cannot
+     *		call any other HDF5 macro or function which might call
+     *		HERROR().  HERROR() is called by HRETURN_ERROR() which could
+     *		be called by FUNC_ENTER().
+     */
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity check */
+    assert(err_entry);
+    assert(cls_id > 0);
+    assert(maj_id > 0);
+    assert(min_id > 0);
+
+    /*
      * Don't fail if arguments are bad.  Instead, substitute some default
      * value.
      */
@@ -723,36 +775,32 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
     if (!desc)
         desc = "No description given";
 
-    /*
-     * Push the error if there's room.  Otherwise just forget it.
-     */
-    assert(estack);
-
-    if (estack->nused < H5E_NSLOTS) {
-        /* Increment the IDs to indicate that they are used in this stack */
+    /* Increment the IDs to indicate that they are used in this stack */
+    /* Note: don't waste time incrementing library internal error IDs */
+    if (cls_id != H5E_ERR_CLS_g)
         if (H5I_inc_ref_noherr(cls_id, false) < 0)
             HGOTO_DONE(FAIL);
-        estack->slot[estack->nused].cls_id = cls_id;
+    err_entry->cls_id = cls_id;
+    if (maj_id < H5E_first_maj_id_g || maj_id > H5E_last_maj_id_g)
         if (H5I_inc_ref_noherr(maj_id, false) < 0)
             HGOTO_DONE(FAIL);
-        estack->slot[estack->nused].maj_num = maj_id;
+    err_entry->maj_num = maj_id;
+    if (min_id < H5E_first_min_id_g || min_id > H5E_last_min_id_g)
         if (H5I_inc_ref_noherr(min_id, false) < 0)
             HGOTO_DONE(FAIL);
-        estack->slot[estack->nused].min_num = min_id;
-        /* The 'func' & 'file' strings are statically allocated (by the compiler)
-         * there's no need to duplicate them.
-         */
-        estack->slot[estack->nused].func_name = func;
-        estack->slot[estack->nused].file_name = file;
-        estack->slot[estack->nused].line      = line;
-        if (NULL == (estack->slot[estack->nused].desc = H5MM_xstrdup(desc)))
-            HGOTO_DONE(FAIL);
-        estack->nused++;
-    } /* end if */
+    err_entry->min_num = min_id;
+    /* The 'func' & 'file' strings are statically allocated (by the compiler)
+     * there's no need to duplicate them.
+     */
+    err_entry->func_name = func;
+    err_entry->file_name = file;
+    err_entry->line      = line;
+    if (NULL == (err_entry->desc = strdup(desc)))
+        HGOTO_DONE(FAIL);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5E__push_stack() */
+} /* end H5E__set_stack_entry() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5E__clear_entries
@@ -783,12 +831,16 @@ H5E__clear_entries(H5E_t *estack, size_t nentries)
 
         /* Decrement the IDs to indicate that they are no longer used by this stack */
         /* (In reverse order that they were incremented, so that reference counts work well) */
-        if (H5I_dec_ref(error->min_num) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message");
-        if (H5I_dec_ref(error->maj_num) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message");
-        if (H5I_dec_ref(error->cls_id) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error class");
+        /* Note: don't decrement library internal error IDs, since they weren't incremented */
+        if (error->min_num < H5E_first_min_id_g || error->min_num > H5E_last_min_id_g)
+            if (H5I_dec_ref(error->min_num) < 0)
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message");
+        if (error->maj_num < H5E_first_maj_id_g || error->maj_num > H5E_last_maj_id_g)
+            if (H5I_dec_ref(error->maj_num) < 0)
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message");
+        if (error->cls_id != H5E_ERR_CLS_g)
+            if (H5I_dec_ref(error->cls_id) < 0)
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error class");
 
         /* Release strings */
         /* The 'func' & 'file' strings are statically allocated (by the compiler)
@@ -880,32 +932,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_dump_api_stack(bool is_api)
+H5E_dump_api_stack(void)
 {
+    H5E_t *estack    = H5E__get_my_stack();
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR
 
-    /* Only dump the error stack during an API call */
-    if (is_api) {
-        H5E_t *estack = H5E__get_my_stack();
-
-        assert(estack);
+    assert(estack);
 
 #ifdef H5_NO_DEPRECATED_SYMBOLS
+    if (estack->auto_op.func2)
+        (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
+#else  /* H5_NO_DEPRECATED_SYMBOLS */
+    if (estack->auto_op.vers == 1) {
+        if (estack->auto_op.func1)
+            (void)((estack->auto_op.func1)(estack->auto_data));
+    } /* end if */
+    else {
         if (estack->auto_op.func2)
             (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
-#else  /* H5_NO_DEPRECATED_SYMBOLS */
-        if (estack->auto_op.vers == 1) {
-            if (estack->auto_op.func1)
-                (void)((estack->auto_op.func1)(estack->auto_data));
-        } /* end if */
-        else {
-            if (estack->auto_op.func2)
-                (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
-        } /* end else */
+    } /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-    }  /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_dump_api_stack() */

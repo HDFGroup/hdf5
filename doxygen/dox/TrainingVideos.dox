@@ -1,0 +1,50 @@
+/** @page LBTraining Training Videos
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+<br>
+<table>
+<tr>
+<td>[**HDF5 Introduction**](https://youtu.be/S74Kc8QYDac)</td>
+</tr>
+</table>
+
+## Core Topics
+
+<table>
+<tr>
+<td>[**Data Model and Basic Usage, Core Topic #1**](https://youtu.be/vKuthH200eI)</td>
+<td>[**Datasets, Core Topic #2**](https://youtu.be/2oDXgecMMfo)</td>
+<td>[**Attributes, Core Topic #3**](https://youtu.be/d_P6LhmzmWQ)</td>
+</tr>
+<tr>
+<td>[**Groups and Links, Core Topic #4**](https://youtu.be/29J_FxPEDxo)</td>
+<td>[**Discovering File Structure, Core Topic #5**](https://youtu.be/rIl1Gz8zh-8)</td>
+<td>[**Partial IO, Core Topic #6**](https://youtu.be/RuzwPCFGBRE)</td>
+</tr>
+<tr>
+<td>[**Compound Datatype, Core Topic #7**](https://youtu.be/NXWwjrPdACY)</td>
+<td></td>
+<td></td>
+</tr>
+</table>
+
+## Advanced Topics:
+
+<table>
+<tr>
+<td>[**Dataset Storage Layouts, Advanced Topic #1**](https://youtu.be/mOTpu5KDpj8)</td>
+<td>[**Using Compression and Filters, Advanced Topic #2**](https://youtu.be/TvnDV-U9T4k)</td>
+<td>[**Using Command Line Tools, Advanced Topic #3**](https://youtu.be/CPIO1lmRkdM)</td>
+</tr>
+</table>
+
+<hr>
+Previous Chapter \ref LBCompiling
+
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+*/
+
+
+
