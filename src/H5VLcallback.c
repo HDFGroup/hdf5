@@ -3806,7 +3806,7 @@ H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned
                  * Otherwise, if no VOL connectors are available, throw
                  * error from original file open failure.
                  */
-                H5E_clear_stack(NULL);
+                H5E_clear_stack();
 
                 if (NULL == (ret_value = H5VL__file_open(find_connector_ud.cls, name, flags,
                                                          find_connector_ud.fapl_id, dxpl_id, req)))

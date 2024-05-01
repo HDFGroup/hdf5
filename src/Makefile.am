@@ -183,9 +183,9 @@ settings_DATA=libhdf5.settings
 
 # Error header generation
 #
-# Actually, H5Einit.h, H5Eterm.h, H5Edefin.h and H5Epubgen.h all
-# depend on H5err.txt, but the perl script generates them all, so just
-# list one here.
+# Actually, H5Einit.h, H5Eterm.h, H5Edefin.h, H5Emajdef.h, H5Emindef.h,
+# and H5Epubgen.h all depend on H5err.txt, but the perl script generates them
+# all, so just list one here.
 $(top_srcdir)/src/H5Edefin.h: $(top_srcdir)/src/H5err.txt
 	perl $(top_srcdir)/bin/make_err $?
 
