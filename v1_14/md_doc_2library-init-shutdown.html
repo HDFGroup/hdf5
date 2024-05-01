@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.14.5.ec0d341</span>
+   &#160;<span id="projectnumber">1.14.5.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -106,20 +106,20 @@ $(document).ready(function(){initNavTree('md_doc_2library-init-shutdown.html',''
   <div class="headertitle"><div class="title">HDF5 Library initialization and shutdown</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md85"></a> </p>
-<h1><a class="anchor" id="autotoc_md86"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md49"></a> </p>
+<h1><a class="anchor" id="autotoc_md50"></a>
 Application perspective</h1>
-<h2><a class="anchor" id="autotoc_md87"></a>
+<h2><a class="anchor" id="autotoc_md51"></a>
 Implicit initialization and shutdown</h2>
 <p>When a developer exports a new symbol as part of the HDF5 library, they should make sure that an application cannot enter the library in an uninitialized state through a new API function, or read an uninitialized value from a non-function HDF5 symbol.</p>
 <p>The HDF5 library initializes itself when an application either enters the library through an API function call such as <code>H5Fopen</code>, or when an application evaluates an HDF5 symbol that represents either a property-list identifier such as <code>H5F_ACC_RDONLY</code> or <code>H5F_ACC_RDWR</code>, a property-list class identifier such as <code>H5P_FILE_ACCESS</code>, a VFD identifier such as <code>H5FD_FAMILY</code> or <code>H5FD_SEC2</code>, or a type identifier such as <code>H5T_NATIVE_INT64</code>.</p>
 <p>The library sets a flag when initialization occurs and as long as the flag is set, skips initialization.</p>
 <p>The library provides a couple of macros that initialize the library as necessary. The library is initialized as a side-effect of the <code>FUNC_ENTER_API*</code> macros used at the top of most API functions. HDF5 library symbols other than functions are provided through <code>#define</code>s that use <code>H5OPEN</code> to introduce a library-initialization call (<code>H5open</code>) at each site where a non-function symbol is used.</p>
 <p>Ordinarily the library registers an <code>atexit(3)</code> handler to shut itself down when the application exits.</p>
-<h2><a class="anchor" id="autotoc_md88"></a>
+<h2><a class="anchor" id="autotoc_md52"></a>
 Explicit initialization and shutdown</h2>
 <p>An application may use an API call, <code>H5open</code>, to explicitly initialize the library. <code>H5close</code> explicitly shuts down the library.</p>
-<h1><a class="anchor" id="autotoc_md89"></a>
+<h1><a class="anchor" id="autotoc_md53"></a>
 Library internals perspective</h1>
 <p>No matter how library initializion begins, eventually the internal function <code>H5_init_library</code> will be called. <code>H5_init_library</code> is responsible for calling the initializers for every internal HDF5 library module (aka "package") in the correct order so that no module is initialized before its prerequisite modules. A table in <code>H5_init_library</code> establishes the order of initialization. If a developer adds a module to the library that it is appropriate to initialize with the rest of the library, then they should insert its initializer into the right place in the table.</p>
 <p><code>H5_term_library</code> drives library shutdown. Library shutdown is table-driven, too. If a developer adds a module that needs to release resources during library shutdown, then they should add a call at the right place to the shutdown table. Note that some entries in the shutdown table are marked as "barriers," and if a new module should only be shutdown <em>strictly after</em> the preceding modules, then it should be marked as a barrier. See the comments in <code>H5_term_library</code> for more information. </p>

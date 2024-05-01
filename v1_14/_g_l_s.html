@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.14.5.ec0d341</span>
+   &#160;<span id="projectnumber">1.14.5.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -157,7 +157,12 @@ C</h1>
 </dl>
 <dl>
 <dt>Compact layout </dt>
-<dd></dd>
+<dd><p class="startdd"></p>
+<p class="interdd">A dataset storage layout where the dataset elements are stored in the object header of the dataset. This layout is suitable for very small datasets that can easily fit in the object header.</p>
+<p class="interdd"></p>
+<p class="interdd">Compact layout can improve storage and access performance for files that have many very small datasets.</p>
+<p class="enddd"></p>
+</dd>
 </dl>
 <dl>
 <dt>Compound datatype </dt>
@@ -251,15 +256,15 @@ A (logical) container for HDF5 objects. </li>
 </dl>
 <dl>
 <dt>File format </dt>
-<dd></dd>
+<dd>HDF5 file format refers to the structure and organization of the HDF5 data being stored within the file. </dd>
 </dl>
 <dl>
 <dt>Fill value </dt>
-<dd></dd>
+<dd>A default value assigned to data elements that have not yet been written. </dd>
 </dl>
 <dl>
 <dt>Filter </dt>
-<dd></dd>
+<dd>Filters are optional stages that can be inserted in the data pipeline to implement compression and error checking. User applications may also add custom filters. </dd>
 </dl>
 <h1><a class="anchor" id="GLS_G"></a>
 G</h1>

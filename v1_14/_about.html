@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.14.5.ec0d341</span>
+   &#160;<span id="projectnumber">1.14.5.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -190,8 +190,8 @@ Adding a New RFC or Referencing an Existing RFC</h2>
 <p>For ease of reference, we define custom commands for each RFC in the <code>RFCs</code> section of the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/doxygen/aliases"><code>aliases</code></a> file. For example the custom command <code>ref_rfc20141210</code> can be used to insert a reference to "RFC: Virtual Object Layer". In other words, the markup </p><pre class="fragment">\ref_rfc20141210
 </pre><p> yields a clickable link:</p>
 <p><a href="https://docs.hdfgroup.org/hdf5/rfc/HDF5-VDS-requirements-use-cases-2014-12-10.pdf">HDF5 Virtual Dataset</a></p>
-<p>To add a new RFC, add a custom command for the RFC to the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/doxygen/aliases"><code>aliases</code></a> file. The naming convention for the custom command is <code>ref_rfcYYYYMMDD</code>, where <code>YYYYMMDD</code> is the ID of the RFC. The URL is composed of the prefix </p><pre class="fragment">https://docs.hdfgroup.org/hdf5/rfc/
-</pre><p> and the name of your RFC file, typically, a PDF file, i.e., the full URL would be </p><pre class="fragment">https://docs.hdfgroup.org/hdf5/rfc/my_great_rfc_name.pdf
+<p>To add a new RFC, add a custom command for the RFC to the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/doxygen/aliases"><code>aliases</code></a> file. The naming convention for the custom command is <code>ref_rfcYYYYMMDD</code>, where <code>YYYYMMDD</code> is the ID of the RFC. The URL is composed of the prefix </p><pre class="fragment">https://\RFCURL/
+</pre><p> and the name of your RFC file, typically, a PDF file, i.e., the full URL would be </p><pre class="fragment">https://\RFCURL/my_great_rfc_name.pdf
 </pre><h2><a class="anchor" id="hosting"></a>
 How Do Updates and Changes Get Published?</h2>
 <p>Currently, the files underlying this documentation website are stored in an bucket on AWS S3. The top-level bucket is </p><pre>s3://docs.hdfgroup.org/hdf5/</pre><p> There are folders for the <code>development</code> branch and all supported release version.</p>
