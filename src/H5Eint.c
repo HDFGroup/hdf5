@@ -204,9 +204,7 @@ static const H5I_class_t H5I_ERRSTK_CLS[1] = {{
 }};
 
 /* Library's error class */
-static const H5E_cls_t H5E_err_cls_s = {
-    false, H5E_CLS_NAME, H5E_CLS_LIB_NAME, H5_VERS_STR
-};
+static const H5E_cls_t H5E_err_cls_s = {false, H5E_CLS_NAME, H5E_CLS_LIB_NAME, H5_VERS_STR};
 
 /* Major error messages */
 static H5E_msg_t H5E_maj_msg_s[H5E_NUM_MAJ_ERRORS] = {
@@ -232,7 +230,7 @@ static H5E_msg_t H5E_min_msg_s[H5E_NUM_MIN_ERRORS] = {
 herr_t
 H5E_init(void)
 {
-    herr_t     ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -540,7 +538,7 @@ H5E__free_msg(H5E_msg_t *msg)
 
     /* Free resources */
     msg->msg = H5MM_xfree_const(msg->msg);
-    msg = H5FL_FREE(H5E_msg_t, msg);
+    msg      = H5FL_FREE(H5E_msg_t, msg);
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5E__free_msg() */
@@ -599,8 +597,8 @@ H5E__create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg_str)
 
     /* Fill new message object */
     msg->app_msg = true;
-    msg->cls  = cls;
-    msg->type = msg_type;
+    msg->cls     = cls;
+    msg->type    = msg_type;
     if (NULL == (msg->msg = strdup(msg_str)))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, NULL, "memory allocation failed");
 
@@ -628,10 +626,10 @@ done:
 H5E_stack_t *
 H5E__get_current_stack(void)
 {
-    H5E_stack_t   *current_stack;      /* Pointer to the current error stack */
-    H5E_stack_t   *estack_copy = NULL; /* Pointer to new error stack to return */
-    unsigned u;                  /* Local index variable */
-    H5E_stack_t   *ret_value = NULL;   /* Return value */
+    H5E_stack_t *current_stack;      /* Pointer to the current error stack */
+    H5E_stack_t *estack_copy = NULL; /* Pointer to new error stack to return */
+    unsigned     u;                  /* Local index variable */
+    H5E_stack_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -679,9 +677,9 @@ done:
 herr_t
 H5E__set_current_stack(H5E_stack_t *estack)
 {
-    H5E_stack_t   *current_stack;       /* Default error stack */
-    unsigned u;                   /* Local index variable */
-    herr_t   ret_value = SUCCEED; /* Return value */
+    H5E_stack_t *current_stack;       /* Default error stack */
+    unsigned     u;                   /* Local index variable */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -764,7 +762,7 @@ herr_t
 H5E__print2(hid_t err_stack, FILE *stream)
 {
     H5E_stack_t *estack;              /* Error stack to operate on */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -922,15 +920,15 @@ H5E__get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
 static herr_t
 H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
 {
-    H5E_print_t *eprint = (H5E_print_t *)client_data;
-    FILE        *stream;                             /* I/O stream to print output to */
-    const H5E_cls_t   *cls_ptr;                      /* Pointer to error class */
-    H5E_msg_t   *maj_ptr;                            /* Pointer to major error info */
-    H5E_msg_t   *min_ptr;                            /* Pointer to minor error info */
-    const char  *maj_str   = "No major description"; /* Major error description */
-    const char  *min_str   = "No minor description"; /* Minor error description */
-    bool         have_desc = true;                   /* Flag to indicate whether the error has a "real" description */
-    herr_t       ret_value = SUCCEED;
+    H5E_print_t     *eprint = (H5E_print_t *)client_data;
+    FILE            *stream;                             /* I/O stream to print output to */
+    const H5E_cls_t *cls_ptr;                            /* Pointer to error class */
+    H5E_msg_t       *maj_ptr;                            /* Pointer to major error info */
+    H5E_msg_t       *min_ptr;                            /* Pointer to minor error info */
+    const char      *maj_str   = "No major description"; /* Major error description */
+    const char      *min_str   = "No minor description"; /* Minor error description */
+    bool             have_desc = true; /* Flag to indicate whether the error has a "real" description */
+    herr_t           ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1052,7 +1050,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     H5E_msg_t   *min_ptr;                            /* Pointer to minor error info */
     const char  *maj_str   = "No major description"; /* Major error description */
     const char  *min_str   = "No minor description"; /* Minor error description */
-    bool         have_desc = true;                   /* Flag to indicate whether the error has a "real" description */
+    bool         have_desc = true; /* Flag to indicate whether the error has a "real" description */
     herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -1293,8 +1291,8 @@ H5E__walk(const H5E_stack_t *estack, H5E_direction_t direction, const H5E_walk_o
             else {
                 H5_CHECK_OVERFLOW(estack->nused - 1, size_t, int);
                 for (i = (int)(estack->nused - 1); i >= 0 && ret_value == H5_ITER_CONT; i--)
-                    ret_value = (op->u.func2)((unsigned)(estack->nused - (size_t)(i + 1)), &estack->entries[i].err,
-                                              client_data);
+                    ret_value = (op->u.func2)((unsigned)(estack->nused - (size_t)(i + 1)),
+                                              &estack->entries[i].err, client_data);
             } /* end else */
 
             if (ret_value < 0)
@@ -1377,8 +1375,8 @@ H5E__set_auto(H5E_stack_t *estack, const H5E_auto_op_t *op, void *client_data)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_printf_stack(const char *file, const char *func, unsigned line,
-                     hid_t maj_id, hid_t min_id, const char *fmt, ...)
+H5E_printf_stack(const char *file, const char *func, unsigned line, hid_t maj_id, hid_t min_id,
+                 const char *fmt, ...)
 {
     va_list ap;                   /* Varargs info */
     bool    va_started = false;   /* Whether the variable argument list is open */
@@ -1436,9 +1434,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E__push_stack(H5E_stack_t *estack, bool app_entry, const char *file,
-                const char *func, unsigned line, hid_t cls_id, hid_t maj_id,
-                hid_t min_id, const char *fmt, va_list *ap)
+H5E__push_stack(H5E_stack_t *estack, bool app_entry, const char *file, const char *func, unsigned line,
+                hid_t cls_id, hid_t maj_id, hid_t min_id, const char *fmt, va_list *ap)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1466,8 +1463,8 @@ H5E__push_stack(H5E_stack_t *estack, bool app_entry, const char *file,
      */
     if (estack->nused < H5E_MAX_ENTRIES) {
         estack->entries[estack->nused].app_entry = app_entry;
-        if (H5E__set_stack_entry(&estack->entries[estack->nused].err, file, func, line, cls_id, maj_id, min_id,
-                                 fmt, ap) < 0)
+        if (H5E__set_stack_entry(&estack->entries[estack->nused].err, file, func, line, cls_id, maj_id,
+                                 min_id, fmt, ap) < 0)
             HGOTO_DONE(FAIL);
         estack->nused++;
     } /* end if */
@@ -1576,7 +1573,7 @@ H5E__set_stack_entry(H5E_error2_t *err_entry, const char *file, const char *func
 
     /* Set the entry fields */
     /* NOTE: non-library IDs have already been incremented */
-    err_entry->cls_id = cls_id;
+    err_entry->cls_id  = cls_id;
     err_entry->maj_num = maj_id;
     err_entry->min_num = min_id;
     /* The 'func' & 'file' strings are either statically allocated (by the
@@ -1615,8 +1612,8 @@ done:
 static herr_t
 H5E__clear_entries(H5E_stack_t *estack, size_t nentries)
 {
-    unsigned      u;                   /* Local index variable */
-    herr_t        ret_value = SUCCEED; /* Return value */
+    unsigned u;                   /* Local index variable */
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1626,7 +1623,7 @@ H5E__clear_entries(H5E_stack_t *estack, size_t nentries)
 
     /* Empty the error stack from the top down */
     for (u = 0; nentries > 0; nentries--, u++) {
-        H5E_entry_t *error;     /* Pointer to error stack entry to clear */
+        H5E_entry_t *error; /* Pointer to error stack entry to clear */
 
         error = &(estack->entries[estack->nused - (u + 1)]);
 
@@ -1653,7 +1650,7 @@ H5E__clear_entries(H5E_stack_t *estack, size_t nentries)
         }
         error->err.file_name = NULL;
         error->err.func_name = NULL;
-        error->err.desc = (const char *)H5MM_xfree_const(error->err.desc);
+        error->err.desc      = (const char *)H5MM_xfree_const(error->err.desc);
     }
 
     /* Decrement number of errors on stack */
@@ -1676,7 +1673,7 @@ herr_t
 H5E_clear_stack(void)
 {
     H5E_stack_t *estack;              /* Error stack to clear */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1766,7 +1763,7 @@ herr_t
 H5E_dump_api_stack(void)
 {
     H5E_stack_t *estack    = H5E__get_my_stack();
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR
 

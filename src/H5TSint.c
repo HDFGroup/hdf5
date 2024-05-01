@@ -61,7 +61,7 @@
 typedef struct H5TS_thread_info_t {
     uint64_t            id;               /* Unique ID for each thread */
     struct H5CX_node_t *api_ctx_node_ptr; /* Pointer to an API context node */
-    H5E_stack_t               err_stack;        /* Error stack */
+    H5E_stack_t         err_stack;        /* Error stack */
 } H5TS_thread_info_t;
 
 /* An H5TS_tinfo_node_t is a thread info that is available for reuse */

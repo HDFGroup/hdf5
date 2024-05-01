@@ -28,7 +28,7 @@
  */
 #define HERROR(maj_id, min_id, ...)                                                                          \
     do {                                                                                                     \
-        H5E_printf_stack(__FILE__, __func__, __LINE__, maj_id, min_id, __VA_ARGS__);    \
+        H5E_printf_stack(__FILE__, __func__, __LINE__, maj_id, min_id, __VA_ARGS__);                         \
     } while (0)
 
 /*
@@ -182,8 +182,8 @@ extern int  H5E_mpi_error_str_len;
 
 /* Library-private functions defined in H5E package */
 H5_DLL herr_t H5E_init(void);
-H5_DLL herr_t H5E_printf_stack(const char *file, const char *func, unsigned line,
-                               hid_t maj_idx, hid_t min_idx, const char *fmt, ...) H5_ATTR_FORMAT(printf, 6, 7);
+H5_DLL herr_t H5E_printf_stack(const char *file, const char *func, unsigned line, hid_t maj_idx,
+                               hid_t min_idx, const char *fmt, ...) H5_ATTR_FORMAT(printf, 6, 7);
 H5_DLL herr_t H5E_clear_stack(void);
 H5_DLL herr_t H5E_dump_api_stack(void);
 
