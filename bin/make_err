@@ -47,7 +47,7 @@ sub print_warning ($) {
     my $fh = shift;
 
     print $fh "\n/* Generated automatically by bin/make_err -- do not edit */\n";
-    print $fh "/* Add new errors to H5err.txt file */\n\n";
+    print $fh "/* Add new errors to H5err.txt file */\n";
 }
 
 ##############################################################################
