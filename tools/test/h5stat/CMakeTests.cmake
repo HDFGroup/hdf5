@@ -52,17 +52,6 @@
       h5stat_numattrs3
       h5stat_numattrs4
   )
-  set (HDF5_REFERENCE_ERR_FILES
-      h5stat_err_refcount
-      h5stat_err_old_layout
-      h5stat_err_old_fill
-      h5stat_err1_dims
-      h5stat_err1_links
-      h5stat_err1_numattrs
-      h5stat_err2_numattrs
-      h5stat_notexist
-      h5stat_nofile
-  )
   set (HDF5_REFERENCE_TEST_FILES
       h5stat_err_refcount.h5
       h5stat_err_old_layout.h5
@@ -76,10 +65,6 @@
 
   foreach (ddl_file ${HDF5_REFERENCE_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${ddl_file}.ddl" "${PROJECT_BINARY_DIR}/${ddl_file}.ddl" "h5stat_files")
-  endforeach ()
-
-  foreach (h5_file ${HDF5_REFERENCE_ERR_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_file}.err" "${PROJECT_BINARY_DIR}/${h5_file}.err" "h5stat_files")
   endforeach ()
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
