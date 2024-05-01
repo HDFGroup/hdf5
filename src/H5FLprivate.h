@@ -152,8 +152,7 @@ typedef struct H5FL_blk_head_t {
 #define H5FL_BLK_FREE(t, blk) (uint8_t *)H5FL_blk_free(&(H5FL_BLK_NAME(t)), blk)
 
 /* Re-allocate a block of type 't' */
-#define H5FL_BLK_REALLOC(t, blk, new_size)                                                                   \
-    (uint8_t *)H5FL_blk_realloc(&(H5FL_BLK_NAME(t)), (blk), (new_size))
+#define H5FL_BLK_REALLOC(t, blk, new_size) (uint8_t *)H5FL_blk_realloc(&(H5FL_BLK_NAME(t)), (blk), (new_size))
 
 /* Check if there is a free block available to reuse */
 #define H5FL_BLK_AVAIL(t, size) H5FL_blk_free_block_avail(&(H5FL_BLK_NAME(t)), size)
@@ -235,8 +234,7 @@ typedef struct H5FL_arr_head_t {
 #define H5FL_ARR_FREE(t, obj) (t *)H5FL_arr_free(&(H5FL_ARR_NAME(t)), obj)
 
 /* Re-allocate an array of type 't' */
-#define H5FL_ARR_REALLOC(t, obj, new_elem)                                                                   \
-    H5FL_arr_realloc(&(H5FL_ARR_NAME(t)), obj, (new_elem))
+#define H5FL_ARR_REALLOC(t, obj, new_elem) H5FL_arr_realloc(&(H5FL_ARR_NAME(t)), obj, (new_elem))
 
 #else /* H5_NO_ARR_FREE_LISTS */
 /* Common macro for H5FL_ARR_DEFINE & H5FL_ARR_DEFINE_STATIC (and H5FL_BARR variants) */
@@ -290,8 +288,7 @@ typedef struct H5FL_seq_head_t {
 #define H5FL_SEQ_FREE(t, obj) (t *)H5FL_seq_free(&(H5FL_SEQ_NAME(t)), obj)
 
 /* Re-allocate a sequence of type 't' */
-#define H5FL_SEQ_REALLOC(t, obj, new_elem)                                                                   \
-    (t *)H5FL_seq_realloc(&(H5FL_SEQ_NAME(t)), obj, (new_elem))
+#define H5FL_SEQ_REALLOC(t, obj, new_elem) (t *)H5FL_seq_realloc(&(H5FL_SEQ_NAME(t)), obj, (new_elem))
 
 #else /* H5_NO_SEQ_FREE_LISTS */
 /* Common macro for H5FL_SEQ_DEFINE & H5FL_SEQ_DEFINE_STATIC */

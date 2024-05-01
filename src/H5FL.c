@@ -762,8 +762,7 @@ H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size)
         assert(free_list);
 
         /* Allocate new node, with room for the page info header and the actual page data */
-        if (NULL ==
-            (temp = (H5FL_blk_list_t *)H5FL__malloc(sizeof(H5FL_blk_list_t) + size)))
+        if (NULL == (temp = (H5FL_blk_list_t *)H5FL__malloc(sizeof(H5FL_blk_list_t) + size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for chunk");
 
         /* Increment the number of blocks of this size */
@@ -934,7 +933,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
         } /* end if */
         else
             ret_value = block;
-    }     /* end if */
+    } /* end if */
     /* Not re-allocating, just allocate a fresh block */
     else
         ret_value = H5FL_blk_malloc(head, new_size);
