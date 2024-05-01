@@ -439,7 +439,7 @@ H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer");
 
     /* Compare references */
-    if ((ret_value = H5R__equal((const H5R_ref_priv_t *)ref2_ptr, (const H5R_ref_priv_t *)ref2_ptr)) < 0)
+    if ((ret_value = H5R__equal((const H5R_ref_priv_t *)ref1_ptr, (const H5R_ref_priv_t *)ref2_ptr)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOMPARE, FAIL, "cannot compare references");
 
 done:

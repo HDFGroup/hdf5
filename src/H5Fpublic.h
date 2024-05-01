@@ -1199,7 +1199,9 @@ H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
  *
  * \obj_id
  * \param[out] name Buffer for the file name
- * \param[in] size Size, in bytes, of the \p name buffer
+ * \param[in]  size The size, in bytes, of the \p name buffer. Must be the
+ *                  size of the file name in bytes plus 1 for a NULL
+ *                  terminator
  *
  * \return Returns the length of the file name if successful; otherwise returns
  *         a negative value.
@@ -1212,17 +1214,7 @@ H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
  *          additional characters, if any, are not returned to the user
  *          application.
  *
- *          If the length of the name, which determines the required value of
- *          size, is unknown, a preliminary H5Fget_name() call can be made by
- *          setting \p name to NULL. The return value of this call will be the
- *          size of the file name; that value plus one (1) can then be assigned
- *          to size for a second H5Fget_name() call, which will retrieve the
- *          actual name. (The value passed in with the parameter \p size must
- *          be one greater than size in bytes of the actual name in order to
- *          accommodate the null terminator; if \p size is set to the exact
- *          size of the name, the last byte passed back will contain the null
- *          terminator and the last character will be missing from the name
- *          passed back to the calling application.)
+ *          \details_namelen{file,H5Fget_name}
  *
  *          If an error occurs, the buffer pointed to by \p name is unchanged
  *          and the function returns a negative value.

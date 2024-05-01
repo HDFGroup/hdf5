@@ -312,7 +312,7 @@ CONTAINS
 !! \brief Gets the list of element points currently selected.
 !!
 !! \param space_id   Dataspace identifier.
-!! \param startpoint Element point to start with.
+!! \param startpoint Element point to start with, \Bold{0-based indices}.
 !! \param num_points Number of element points to get.
 !! \param buf        Buffer with element points selected.
 !! \param hdferr     \fortran_error
