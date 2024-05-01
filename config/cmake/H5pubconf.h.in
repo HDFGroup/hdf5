@@ -107,9 +107,6 @@
 /* Define to 1 if you have the `clock_gettime' function. */
 #cmakedefine H5_HAVE_CLOCK_GETTIME @H5_HAVE_CLOCK_GETTIME@
 
-/* Define if the function stack tracing code is to be compiled in */
-#cmakedefine H5_HAVE_CODESTACK @H5_HAVE_CODESTACK@
-
 /* Define to 1 if you have the <curl/curl.h> header file. */
 #cmakedefine H5_HAVE_CURL_CURL_H @H5_HAVE_CURL_H@
 

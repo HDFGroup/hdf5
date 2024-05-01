@@ -196,11 +196,6 @@ typedef struct H5CX_t {
     /* Internal: Metadata cache info */
     H5AC_ring_t ring; /* Current metadata cache ring for entries */
 
-#ifdef H5_HAVE_CODESTACK
-    /* Internal: Function stack info */
-    H5CS_t fstack; /* Current function stack for an API operation */
-#endif
-
 #ifdef H5_HAVE_PARALLEL
     /* Internal: Parallel I/O settings */
     bool         coll_metadata_read; /* Whether to use collective I/O for metadata read */
@@ -1676,34 +1671,7 @@ H5CX_get_ring(void)
     FUNC_LEAVE_NOAPI(ring)
 } /* end H5CX_get_ring() */
 
-#ifdef H5_HAVE_CODESTACK
-/*-------------------------------------------------------------------------
- * Function:    H5CX_get_fstack
- *
- * Purpose:     Retrieves the function stack for the current API call context.
- *
- * Return:      Non-NULL on success / NULL on failure
- *
- *-------------------------------------------------------------------------
- */
-H5CS_t *
-H5CX_get_fstack(void)
-{
-    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
-
-    FUNC_ENTER_NOAPI_NOERR_NOFS
-
-    /* Sanity check */
-    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
-    assert(head && *head);
-
-    /* Return value */
-    FUNC_LEAVE_NOAPI_NOFS(&(*head)->ctx.fstack)
-} /* end H5CX_get_fstack() */
-#endif
-
 #ifdef H5_HAVE_PARALLEL
-
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_coll_metadata_read
  *

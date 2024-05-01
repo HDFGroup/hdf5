@@ -70,7 +70,6 @@ typedef struct H5TS_rec_entry_count {
 /********************/
 /* Local Prototypes */
 /********************/
-static void H5TS__key_destructor(void *key_val);
 
 /*********************/
 /* Package Variables */
@@ -83,30 +82,6 @@ static void H5TS__key_destructor(void *key_val);
 /*******************/
 /* Local Variables */
 /*******************/
-
-/*--------------------------------------------------------------------------
- * Function:    H5TS__key_destructor
- *
- * Purpose:     Frees the memory for a key.  Called by each thread as it exits.
- *              Currently all the thread-specific information for all keys are
- *              simple structures allocated with malloc, so we can free them
- *              all uniformly.
- *
- * Return:      None
- *
- *--------------------------------------------------------------------------
- */
-static void
-H5TS__key_destructor(void *key_val)
-{
-    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
-
-    /* Use free here instead of H5MM_xfree(), to avoid calling the H5CS routines */
-    if (NULL != key_val)
-        free(key_val);
-
-    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
-} /* end H5TS__key_destructor() */
 
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
 /*--------------------------------------------------------------------------
@@ -510,7 +485,7 @@ H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock)
 
     /* If there is no thread-specific data for this thread, set it up */
     if (!rw_lock->is_key_registered) {
-        if (H5_UNLIKELY(H5TS_key_create(&rw_lock->rec_read_lock_count_key, H5TS__key_destructor) < 0))
+        if (H5_UNLIKELY(H5TS_key_create(&rw_lock->rec_read_lock_count_key, free) < 0))
             HGOTO_DONE(FAIL);
         rw_lock->is_key_registered = true;
         count                      = NULL;

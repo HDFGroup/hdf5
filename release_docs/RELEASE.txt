@@ -47,6 +47,16 @@ New Features
 
     Configuration:
     -------------
+    - Removed "function/code stack" debugging configuration option:
+
+          CMake:      HDF5_ENABLE_CODESTACK
+          Autotools:  --enable-codestack
+
+      This was used to debug memory leaks internal to the library, but has been
+      broken for >1.5 years and is now easily replaced with third-party tools
+      (e.g. libbacktrace: https://github.com/ianlancetaylor/libbacktrace) on an
+      as-needed basis when debugging an issue.
+
     - Added configure options for enabling/disabling non-standard programming
       language features
 
@@ -351,7 +361,7 @@ New Features
       CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
       that allow users to specify common configure options and share them with others.
       HDF added a CMakePresets.json file of a typical configuration and support
-      file, config/cmake-presets/hidden-presets.json. 
+      file, config/cmake-presets/hidden-presets.json.
       Also added a section to INSTALL_CMake.txt with very basic explanation of the
       process to use CMakePresets.
 
@@ -533,7 +543,7 @@ New Features
       to filtered datasets. The Subfiling VFD now properly handles vector
       I/O requests in their entirety, resulting in fewer I/O calls, improved
       vector I/O performance and improved vector I/O memory efficiency.
-    
+
     - Added a simple cache to the read-only S3 (ros3) VFD
 
       The read-only S3 VFD now caches the first N bytes of a file stored
