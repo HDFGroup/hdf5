@@ -220,7 +220,7 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
     H5O_cache_ud_t *udata     = (H5O_cache_ud_t *)_udata; /* User data for callback */
     htri_t          ret_value = true;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     assert(image);
     assert(udata);
@@ -231,7 +231,8 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
         uint32_t computed_chksum; /* Computed metadata checksum value */
 
         /* Get stored and computed checksums */
-        H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+        if (H5F_get_checksums(image, len, &stored_chksum, &computed_chksum) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get checksums");
 
         if (stored_chksum != computed_chksum)
             ret_value = false;
@@ -239,6 +240,7 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
     else
         assert(!(udata->common.file_intent & H5F_ACC_SWMR_WRITE));
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_verify_chksum() */
 
@@ -624,7 +626,7 @@ H5O__cache_chk_verify_chksum(const void *_image, size_t len, void *_udata)
     H5O_chk_cache_ud_t *udata     = (H5O_chk_cache_ud_t *)_udata; /* User data for callback */
     htri_t              ret_value = true;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     assert(image);
 
@@ -634,12 +636,14 @@ H5O__cache_chk_verify_chksum(const void *_image, size_t len, void *_udata)
         uint32_t computed_chksum; /* Computed metadata checksum value */
 
         /* Get stored and computed checksums */
-        H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+        if (H5F_get_checksums(image, len, &stored_chksum, &computed_chksum) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get checksums");
 
         if (stored_chksum != computed_chksum)
             ret_value = false;
     }
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_chk_verify_chksum() */
 
