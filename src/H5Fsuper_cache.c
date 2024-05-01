@@ -371,7 +371,7 @@ H5F__cache_superblock_verify_chksum(const void *_image, size_t len, void *_udata
     uint32_t                   computed_chksum; /* Computed metadata checksum value */
     htri_t                     ret_value = true;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     assert(image);
     assert(udata);
@@ -380,12 +380,14 @@ H5F__cache_superblock_verify_chksum(const void *_image, size_t len, void *_udata
     if (udata->super_vers >= HDF5_SUPERBLOCK_VERSION_2) {
 
         /* Get stored and computed checksums */
-        H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+        if (H5F_get_checksums(image, len, &stored_chksum, &computed_chksum) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get checksums");
 
         if (stored_chksum != computed_chksum)
             ret_value = false;
     }
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__cache_superblock_verify_chksum() */
 
