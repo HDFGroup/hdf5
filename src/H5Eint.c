@@ -206,17 +206,11 @@ static const H5I_class_t H5I_ERRSTK_CLS[1] = {{
 /* Library's error class */
 static const H5E_cls_t H5E_err_cls_s = {false, H5E_CLS_NAME, H5E_CLS_LIB_NAME, H5_VERS_STR};
 
-/* Major error messages */
-static H5E_msg_t H5E_maj_msg_s[H5E_NUM_MAJ_ERRORS] = {
 /* Include the automatically generated major error message definitions */
 #include "H5Emajdef.h"
-};
 
-/* Minor error messages */
-static H5E_msg_t H5E_min_msg_s[H5E_NUM_MIN_ERRORS] = {
 /* Include the automatically generated minor error message definitions */
 #include "H5Emindef.h"
-};
 
 /*-------------------------------------------------------------------------
  * Function:    H5E_init
