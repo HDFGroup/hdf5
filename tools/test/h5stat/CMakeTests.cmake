@@ -153,6 +153,36 @@
     endif ()
   endmacro ()
 
+  macro (ADD_H5_CMP_TEST resultfile resultcode errtext)
+    # If using memchecker add tests without using scripts
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
+      if (${resultcode})
+        set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
+      endif ()
+    else (HDF5_USING_ANALYSIS_TOOL)
+      add_test (
+          NAME H5STAT-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_ERRREF=${errtext}"
+              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+      )
+    endif ()
+    set_tests_properties (H5STAT-${resultfile} PROPERTIES
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+    )
+    if ("H5STAT-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5STAT-${resultfile} PROPERTIES DISABLED true)
+    endif ()
+  endmacro ()
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S                                            ###
@@ -164,8 +194,8 @@
   ADD_H5_TEST (h5stat_help2 0 --help)
 
 # Test when h5stat a file that does not exist
-  ADD_H5_TEST (h5stat_notexist 1 notexist.h5)
-  ADD_H5_TEST (h5stat_nofile 1 '')
+  ADD_H5_CMP_TEST (h5stat_notexist 1 "unable to open file" notexist.h5)
+  ADD_H5_CMP_TEST (h5stat_nofile 1 "missing file name" '')
 
 # Test file with groups, compressed datasets, user-applied filters, etc.
 # h5stat_filters.h5 is a copy of ../../testfiles/tfilters.h5 as of release 1.8.0-alpha4
