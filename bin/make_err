@@ -237,9 +237,11 @@ sub create_majdef ($) {
     print HEADER "\n/***********************************/\n";
     print HEADER   "/* Major error message definitions */\n";
     print HEADER   "/***********************************/\n\n";
+    print HEADER   "/* clang-format off */\n";
     foreach $name (sort keys %major) {
         printf HEADER "static const H5E_msg_t ${name}_msg_s = {false, \"${major{$name}}\", H5E_MAJOR, &H5E_err_cls_s};\n";
     }
+    print HEADER   "/* clang-format on */\n";
 
     print_endprotect(*HEADER, $file);
 
@@ -272,6 +274,7 @@ sub create_mindef ($) {
     print HEADER "\n/***********************************/\n";
     print HEADER   "/* Minor error message definitions */\n";
     print HEADER   "/***********************************/\n\n";
+    print HEADER   "/* clang-format off */\n";
     foreach $sect_name (sort keys %section) {
         print HEADER "\n/* $sect_name: $section{$sect_name} */\n";
 
@@ -280,6 +283,7 @@ sub create_mindef ($) {
             printf HEADER "static const H5E_msg_t ${name}_msg_s = {false, \"${minor{$name}}\", H5E_MINOR, &H5E_err_cls_s};\n";
         }
     }
+    print HEADER   "/* clang-format on */\n";
 
     print_endprotect(*HEADER, $file);
 
