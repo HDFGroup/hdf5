@@ -13,7 +13,6 @@
 /* Generated automatically by bin/make_err -- do not edit */
 /* Add new errors to H5err.txt file */
 
-
 #ifndef H5Emajdef_H
 #define H5Emajdef_H
 
