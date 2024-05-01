@@ -1580,8 +1580,16 @@ H5E__set_stack_entry(H5E_error2_t *err_entry, const char *file, const char *func
     if (ap) {
         char *desc = NULL;
 
+        /* GCC complains about the 'fmt' parameter, but it's either from static
+         * strings in the library, which we know are OK, or from application
+         * error push calls, and the application should be sanity checking their
+         * strings.
+         */
+        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
         if (HDvasprintf(&desc, fmt, *ap) < 0)
             HGOTO_DONE(FAIL);
+        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
+
         err_entry->desc = desc;
     }
     else {
