@@ -849,7 +849,6 @@ H5E__set_default_auto(H5E_stack_t *stk)
 
     stk->auto_data = NULL;
 
-
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5E__set_default_auto() */
 
@@ -926,15 +925,15 @@ H5E__get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
 static herr_t
 H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
 {
-    H5E_print_t *eprint = (H5E_print_t *)client_data;
-    FILE        *stream;                             /* I/O stream to print output to */
+    H5E_print_t     *eprint = (H5E_print_t *)client_data;
+    FILE            *stream;                             /* I/O stream to print output to */
     const H5E_cls_t *cls_ptr;                            /* Pointer to error class */
-    H5E_msg_t   *maj_ptr;                            /* Pointer to major error info */
-    H5E_msg_t   *min_ptr;                            /* Pointer to minor error info */
-    const char  *maj_str   = "No major description"; /* Major error description */
-    const char  *min_str   = "No minor description"; /* Minor error description */
+    H5E_msg_t       *maj_ptr;                            /* Pointer to major error info */
+    H5E_msg_t       *min_ptr;                            /* Pointer to minor error info */
+    const char      *maj_str   = "No major description"; /* Major error description */
+    const char      *min_str   = "No minor description"; /* Minor error description */
     bool             have_desc = true; /* Flag to indicate whether the error has a "real" description */
-    herr_t       ret_value = SUCCEED;
+    herr_t           ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1579,7 +1578,7 @@ H5E__set_stack_entry(H5E_error2_t *err_entry, const char *file, const char *func
 
     /* Set the entry fields */
     /* NOTE: non-library IDs have already been incremented */
-    err_entry->cls_id = cls_id;
+    err_entry->cls_id  = cls_id;
     err_entry->maj_num = maj_id;
     err_entry->min_num = min_id;
     /* The 'func' & 'file' strings are either statically allocated (by the
@@ -1599,7 +1598,7 @@ H5E__set_stack_entry(H5E_error2_t *err_entry, const char *file, const char *func
          */
         H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
         if (HDvasprintf(&desc, fmt, *ap) < 0)
-        HGOTO_DONE(FAIL);
+            HGOTO_DONE(FAIL);
         H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
         err_entry->desc = desc;
@@ -1626,8 +1625,8 @@ done:
 static herr_t
 H5E__clear_entries(H5E_stack_t *estack, size_t nentries)
 {
-    unsigned      u;                   /* Local index variable */
-    herr_t        ret_value = SUCCEED; /* Return value */
+    unsigned u;                   /* Local index variable */
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1687,7 +1686,7 @@ herr_t
 H5E_clear_stack(void)
 {
     H5E_stack_t *estack;              /* Error stack to clear */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1777,7 +1776,7 @@ herr_t
 H5E_dump_api_stack(void)
 {
     H5E_stack_t *estack    = H5E__get_my_stack();
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR
 

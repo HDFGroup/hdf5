@@ -98,7 +98,7 @@ typedef struct H5E_cls_t {
 typedef struct H5E_msg_t {
     bool             app_msg; /* Whether the message came from app */
     const char      *msg;     /* Message for error */
-    H5E_type_t type; /* Type of error (major or minor) */
+    H5E_type_t       type;    /* Type of error (major or minor) */
     const H5E_cls_t *cls;     /* Which error class this message belongs to */
 } H5E_msg_t;
 
@@ -112,8 +112,8 @@ typedef struct H5E_entry_t {
 typedef struct H5E_stack_t {
     size_t        nused;                    /* Num entries currently on stack  */
     H5E_entry_t   entries[H5E_MAX_ENTRIES]; /* Array of error entries */
-    H5E_auto_op_t auto_op;          /* Operator for 'automatic' error reporting */
-    void         *auto_data;        /* Callback data for 'automatic error reporting */
+    H5E_auto_op_t auto_op;                  /* Operator for 'automatic' error reporting */
+    void         *auto_data;                /* Callback data for 'automatic error reporting */
 } H5E_stack_t;
 
 /*****************************/
@@ -142,7 +142,7 @@ H5_DLL H5E_stack_t *H5E__get_stack(void);
 H5_DLL H5E_cls_t   *H5E__register_class(const char *cls_name, const char *lib_name, const char *version);
 H5_DLL ssize_t      H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size);
 H5_DLL H5E_msg_t   *H5E__create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg);
-H5_DLL ssize_t H5E__get_msg(const H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg, size_t size);
+H5_DLL ssize_t      H5E__get_msg(const H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg, size_t size);
 H5_DLL void         H5E__set_default_auto(H5E_stack_t *stk);
 H5_DLL H5E_stack_t *H5E__get_current_stack(void);
 H5_DLL herr_t       H5E__set_current_stack(H5E_stack_t *estack);
@@ -153,7 +153,7 @@ H5_DLL herr_t       H5E__push_stack(H5E_stack_t *estack, bool app_entry, const c
 H5_DLL herr_t       H5E__print(const H5E_stack_t *estack, FILE *stream, bool bk_compat);
 H5_DLL herr_t       H5E__print2(hid_t err_stack, FILE *stream);
 H5_DLL herr_t       H5E__walk(const H5E_stack_t *estack, H5E_direction_t direction, const H5E_walk_op_t *op,
-                         void *client_data);
+                              void *client_data);
 H5_DLL herr_t       H5E__get_auto(const H5E_stack_t *estack, H5E_auto_op_t *op, void **client_data);
 H5_DLL herr_t       H5E__set_auto(H5E_stack_t *estack, const H5E_auto_op_t *op, void *client_data);
 H5_DLL herr_t       H5E__pop(H5E_stack_t *err_stack, size_t count);

@@ -292,7 +292,7 @@ hid_t
 H5Ecreate_stack(void)
 {
     H5E_stack_t *stk;                         /* Error stack */
-    hid_t  ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t        ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
 
@@ -326,7 +326,7 @@ hid_t
 H5Eget_current_stack(void)
 {
     H5E_stack_t *stk;                         /* Error stack */
-    hid_t  ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t        ret_value = H5I_INVALID_HID; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5I_INVALID_HID)
@@ -357,7 +357,7 @@ herr_t
 H5Eset_current_stack(hid_t err_stack)
 {
     H5E_stack_t *estack;
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -428,7 +428,7 @@ ssize_t
 H5Eget_num(hid_t error_stack_id)
 {
     H5E_stack_t *estack;    /* Error stack to operate on */
-    ssize_t ret_value; /* Return value */
+    ssize_t      ret_value; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR((-1))
@@ -468,7 +468,7 @@ herr_t
 H5Epop(hid_t err_stack, size_t count)
 {
     H5E_stack_t *estack;
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
@@ -523,11 +523,11 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
          hid_t min_id, const char *fmt, ...)
 {
     H5E_stack_t *estack;              /* Pointer to error stack to modify */
-    va_list ap;                   /* Varargs info */
-    bool    va_started = false;   /* Whether the variable argument list is open */
+    va_list      ap;                  /* Varargs info */
+    bool         va_started = false;  /* Whether the variable argument list is open */
     const char  *tmp_file;            /* Copy of the file name */
     const char  *tmp_func;            /* Copy of the function name */
-    herr_t  ret_value  = SUCCEED; /* Return value */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
@@ -593,7 +593,7 @@ herr_t
 H5Eclear2(hid_t err_stack)
 {
     H5E_stack_t *estack;              /* Error stack to operate on */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
@@ -820,7 +820,7 @@ herr_t
 H5Eauto_is_v2(hid_t estack_id, unsigned *is_stack)
 {
     H5E_stack_t *estack;              /* Error stack to operate on */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
@@ -863,7 +863,7 @@ herr_t
 H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_stack)
 {
     H5E_stack_t *dst_stack, *src_stack; /* Error stacks */
-    herr_t ret_value = SUCCEED;   /* Return value */
+    herr_t       ret_value = SUCCEED;   /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API(FAIL)

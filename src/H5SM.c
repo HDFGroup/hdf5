@@ -1338,8 +1338,8 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, bool def
             } /* end if */
             else
                 H5E_clear_stack(); /*ignore error*/
-        }                              /* end else */
-    }                                  /* end else */
+        }                          /* end else */
+    }                              /* end else */
 
     if (found) {
         /* If the message was found, it's shared in the heap (now).  Set up a
