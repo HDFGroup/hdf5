@@ -122,7 +122,7 @@
     endif ()
   endmacro ()
 
-  macro (ADD_H5_ERR_TEST resultfile resultcode)
+  macro (ADD_H5_ERR_TEST resultfile resultcode errtext)
     # If using memchecker add tests without using scripts
     if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
@@ -135,13 +135,14 @@
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
-              -D "TEST_ARGS=${ARGN}"
+              -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.mty"
-              -D "TEST_ERRREF=${resultfile}.err"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+              -D "TEST_ERRREF=${errtext}"
+              -D "TEST_SKIP_COMPARE=true"
+              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
     endif ()
     set_tests_properties (H5STAT-${resultfile} PROPERTIES
@@ -191,7 +192,7 @@
 #   -g -l 8
 #   --links=8
 #   --links=20 -g
-  ADD_H5_ERR_TEST (h5stat_err1_links 1 -l 0 h5stat_threshold.h5)
+  ADD_H5_ERR_TEST (h5stat_err1_links 1 "Invalid threshold for small groups" -l 0 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_links1 0 -g -l 8 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_links2 0 --links=8 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_links3 0 --links=20 -g h5stat_threshold.h5)
@@ -206,7 +207,7 @@
 #   -d --dims=-1 (incorrect threshold value)
 #   -gd -m 5
 #   -d --di=15
-  ADD_H5_ERR_TEST (h5stat_err1_dims 1 -d --dims=-1 h5stat_threshold.h5)
+  ADD_H5_ERR_TEST (h5stat_err1_dims 1 "Invalid threshold for small datasets" -d --dims=-1 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_dims1 0 -gd -m 5 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_dims2 0 -d --dims=15 h5stat_threshold.h5)
 #
@@ -216,8 +217,8 @@
 #   -AS -a 10
 #   -a 1
 #   -A --numattrs=25
-  ADD_H5_ERR_TEST (h5stat_err1_numattrs 1 -a -2 h5stat_threshold.h5)
-  ADD_H5_ERR_TEST (h5stat_err2_numattrs 1 --numattrs h5stat_threshold.h5)
+  ADD_H5_ERR_TEST (h5stat_err1_numattrs 1 "Invalid threshold for small # of attributes" -a -2 h5stat_threshold.h5)
+  ADD_H5_ERR_TEST (h5stat_err2_numattrs 1 "Invalid threshold for small # of attributes" --numattrs h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_numattrs1 0 -AS -a 10 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_numattrs2 0 -a 1 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_numattrs3 0 -A --numattrs=25 h5stat_threshold.h5)
