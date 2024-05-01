@@ -298,7 +298,8 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
         return ret_value;
     if ((integertypes[26] = (hid_t_f)H5Tcopy(H5T_C_S1)) < 0)
         return ret_value;
-
+    if ((integertypes[27] = (hid_t_f)H5Tcopy(H5T_STD_REF)) < 0)
+        return ret_value;
     /*
      *  Define Fortran H5T_STRING type to store non-fixed size strings
      */
@@ -766,6 +767,13 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
      */
     h5r_flags[0] = (int_f)H5R_OBJECT;
     h5r_flags[1] = (int_f)H5R_DATASET_REGION;
+    h5r_flags[2] = (int_f)H5R_BADTYPE;
+    h5r_flags[3] = (int_f)H5R_OBJECT1;
+    h5r_flags[4] = (int_f)H5R_DATASET_REGION1;
+    h5r_flags[5] = (int_f)H5R_OBJECT2;
+    h5r_flags[6] = (int_f)H5R_DATASET_REGION2;
+    h5r_flags[7] = (int_f)H5R_ATTR;
+    h5r_flags[8] = (int_f)H5R_MAXTYPE;
 
     /*
      *  H5S flags

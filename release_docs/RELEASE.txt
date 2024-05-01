@@ -410,6 +410,13 @@ New Features
 
     Fortran Library:
     ----------------
+
+    - Add Fortran H5R APIs:
+      h5rcreate_attr_f, h5rcreate_object_f, h5rcreate_region_f,
+      h5ropen_attr_f, h5ropen_object_f, h5ropen_region_f,
+      h5rget_file_name_f, h5rget_attr_name_f, h5rget_obj_name_f,
+      h5rcopy_f, h5requal_f, h5rdestroy_f, h5rget_type_f
+
     - Added Fortran H5E APIs:
       h5eregister_class_f, h5eunregister_class_f, h5ecreate_msg_f, h5eclose_msg_f
       h5eget_msg_f, h5epush_f, h5eget_num_f, h5ewalk_f, h5eget_class_name_f,
@@ -499,6 +506,12 @@ Bug Fixes since HDF5-1.14.3 release
 
     Library
     -------
+
+    - Fixed function H5Requal actually to compare the reference pointers
+
+      Fixed an issue with H5Requal always returning true because the
+      function was only comparing the ref2_ptr to itself.
+
     - Fixed infinite loop closing library issue when h5dump with a user provided test file
 
       The library's metadata cache calls the "get_final_load_size" client callback

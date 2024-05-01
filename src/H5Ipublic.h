@@ -243,8 +243,9 @@ H5_DLL hid_t H5Iget_file_id(hid_t id);
  *
  * \obj_id{id}
  * \param[out] name A buffer for the name associated with the identifier
- * \param[in] size The size of the \p name buffer; usually the size of
- *                 the name in bytes plus 1 for a NULL terminator
+ * \param[in]  size The size, in bytes, of the \p name buffer. Must be the
+ *                  size of the object name in bytes plus 1 for a NULL
+ *                  terminator
  *
  * \return ssize_t
  *
@@ -254,12 +255,7 @@ H5_DLL hid_t H5Iget_file_id(hid_t id);
  *          additional characters, if any, are not returned to the user
  *          application.
  *
- *          If the length of the name, which determines the required value of
- *          \p size, is unknown, a preliminary H5Iget_name() call can be made.
- *          The return value of this call will be the size in bytes of the
- *          object name. That value, plus 1 for a NULL terminator, is then
- *          assigned to size for a second H5Iget_name() call, which will
- *          retrieve the actual name.
+ *          \details_namelen{object,H5Iget_name}
  *
  *          If the object identified by \p id is an attribute, as determined
  *          via H5Iget_type(), H5Iget_name() retrieves the name of the object
