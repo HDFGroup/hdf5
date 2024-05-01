@@ -6205,7 +6205,7 @@ H5_DLL herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count /*out*/);
  *                   (0 ≤ \p index < \p count), where \p count is the
  *                   number of mappings returned by H5Pget_virtual_count().
  * \param[out] name  A buffer containing the name of the source dataset
- * \param[in]  size  The size, in bytes, of the name buffer. Must be the
+ * \param[in]  size  The size, in bytes, of the \p name buffer. Must be the
  *                   size of the dataset name in bytes plus 1 for a NULL
  *                   terminator
  *
@@ -6222,14 +6222,7 @@ H5_DLL herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count /*out*/);
  *          \p name; additional characters, if any, are not returned to
  *          the user application.
  *
- *          If the length of the dataset name, which determines the
- *          required value of \p size, is unknown, a preliminary call
- *          to H5Pget_virtual_dsetname() with the last two parameters
- *          set to NULL and zero respectively can be made. The return
- *          value of this call will be the size in bytes of the dataset
- *          name. That value, plus 1 for a NULL terminator, must then be
- *          assigned to \p size for a second H5Pget_virtual_dsetname()
- *          call, which will retrieve the actual dataset name.
+ *          \details_namelen{dataset,H5Pget_virtual_dsetname}
  *
  * \see_virtual
  *
@@ -6266,14 +6259,7 @@ H5_DLL ssize_t H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name /
  *          \p name; additional characters, if any, are not returned to
  *          the user application.
  *
- *          If the length of the filename, which determines the required
- *          value of \p size, is unknown, a preliminary call to
- *          H5Pget_virtual_filename() with the last two parameters set
- *          to NULL and zero respectively can be made. The return value
- *          of this call will be the size in bytes of the filename. That
- *          value, plus 1 for a NULL terminator, must then be assigned to
- *          \p size for a second H5Pget_virtual_filename() call, which
- *          will retrieve the actual filename.
+ *          \details_namelen{file,H5Pget_virtual_filename}
  *
  * \see_virtual
  *
