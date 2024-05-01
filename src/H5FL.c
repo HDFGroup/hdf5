@@ -933,7 +933,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
         } /* end if */
         else
             ret_value = block;
-        } /* end if */
+    } /* end if */
     /* Not re-allocating, just allocate a fresh block */
     else
         ret_value = H5FL_blk_malloc(head, new_size);
