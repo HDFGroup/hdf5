@@ -89,6 +89,10 @@
  */
 #define H5_VERS_SUBRELEASE ""
 /**
+ * Short version string
+ */
+#define H5_VERS_STR "1.15.0"
+/**
  * Full version string
  */
 #define H5_VERS_INFO "HDF5 library version: 1.15.0"

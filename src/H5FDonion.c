@@ -468,7 +468,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 
     if ((true == file->is_open_rw) && (H5FD__onion_merge_revision_index_into_archival_index(
                                            file->rev_index, &file->curr_rev_record.archival_index) < 0))
-        HGOTO_ERROR(H5E_VFL, H5E_INTERNAL, FAIL, "unable to update index to write");
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "unable to update index to write");
 
     if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_REVISION_RECORD + (size_t)rec->comment_size +
                                    (H5FD_ONION_ENCODED_SIZE_INDEX_ENTRY * rec->archival_index.n_entries))))

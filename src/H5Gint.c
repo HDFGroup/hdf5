@@ -439,7 +439,7 @@ H5G_open(const H5G_loc_t *loc)
     if ((shared_fo = (H5G_shared_t *)H5FO_opened(grp->oloc.file, grp->oloc.addr)) == NULL) {
 
         /* Clear any errors from H5FO_opened() */
-        H5E_clear_stack(NULL);
+        H5E_clear_stack();
 
         /* Open the group object */
         if (H5G__open_oid(grp) < 0)

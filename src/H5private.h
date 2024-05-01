@@ -1271,7 +1271,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
             FUNC_ENTER_API_INIT(err);                                                                        \
             FUNC_ENTER_API_PUSH(err);                                                                        \
             /* Clear thread error stack entering public functions */                                         \
-            H5E_clear_stack(NULL);                                                                           \
+            H5E_clear_stack();                                                                           \
             {
 
 /*
