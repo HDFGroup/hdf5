@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.b23affc</span>
+   &#160;<span id="projectnumber">1.15.0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -256,6 +256,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___h5_r.html#gad5b7b117cfaea90d1e4786304c58c55c" title="Copies an existing reference.">H5Rcopy()</a> creates a copy of an existing reference. <code>src_ref_ptr</code> points to the reference to copy, and <code>dst_ref_ptr</code> is the pointer to the destination reference.</p>
+<p>The function returns a <code>dst_ref_ptr</code> pointer, which must be released using <a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy()</a> to avoid resource leaks and possible HDF5 library shutdown issues.</p>
 <dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
@@ -317,6 +318,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000083">Deprecated:</a></b></dt><dd>As of HDF5-1.12, this function has been deprecated in favor of <a class="el" href="group___h5_r.html#gad0fb6ec99ecefa602756a5682addfc69" title="Creates an object reference.">H5Rcreate_object()</a>, <a class="el" href="group___h5_r.html#ga60134eb917afbe89aa23eb25a30d249b" title="Creates a region reference.">H5Rcreate_region()</a> and <a class="el" href="group___h5_r.html#gacae1bf2263befeac54d81f27995721f8" title="Creates an attribute reference.">H5Rcreate_attr()</a>.</dd></dl>
 <p><a class="el" href="group___h5_r.html#ga0ac6997b5de26b11d91a95de2869950d" title="Creates a reference.">H5Rcreate()</a> creates the reference, <code>ref</code>, of the type specified in <code>ref_type</code>, pointing to the object <code>name</code> located at <code>loc_id</code>.</p>
 <p>The HDF5 library maps the void type specified above for <code>ref</code> to the type specified in <code>ref_type</code>, which will be one of the following: </p><div class="fragment"><div class="line"> </div>
 <div class="line"><span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
@@ -411,7 +413,7 @@ Functions</h2></td></tr>
 <div class="line">} <a class="code hl_struct" href="struct_h5_r__ref__t.html">H5R_ref_t</a>;</div>
 <div class="ttc" id="a_h5_rpublic_8h_html_a30e65b87f330f177dc5ae434104af580"><div class="ttname"><a href="_h5_rpublic_8h.html#a30e65b87f330f177dc5ae434104af580">H5R_REF_BUF_SIZE</a></div><div class="ttdeci">#define H5R_REF_BUF_SIZE</div><div class="ttdef"><b>Definition</b> H5Rpublic.h:38</div></div>
 <div class="ttc" id="astruct_h5_r__ref__t_html"><div class="ttname"><a href="struct_h5_r__ref__t.html">H5R_ref_t</a></div><div class="ttdef"><b>Definition</b> H5Rpublic.h:97</div></div>
-</div><!-- fragment --><p><a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy()</a> should be used to release the resource from the reference.</p>
+</div><!-- fragment --><p>The function returns a <code>ref_ptr</code> pointer, which must be released using <a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy()</a> to avoid resource leaks and possible HDF5 library shutdown issues.</p>
 <dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
@@ -475,7 +477,7 @@ Functions</h2></td></tr>
 <div class="line">        int64_t align;                    </div>
 <div class="line">    } u;</div>
 <div class="line">} <a class="code hl_struct" href="struct_h5_r__ref__t.html">H5R_ref_t</a>;</div>
-</div><!-- fragment --><p><a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy()</a> should be used to release the resource from the reference.</p>
+</div><!-- fragment --><p>The function returns a <code>ref_ptr</code> pointer, which must be released using <a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy()</a> to avoid resource leaks and possible HDF5 library shutdown issues.</p>
 <dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
@@ -547,7 +549,7 @@ Functions</h2></td></tr>
 <div class="line">        int64_t align;                    </div>
 <div class="line">    } u;</div>
 <div class="line">} <a class="code hl_struct" href="struct_h5_r__ref__t.html">H5R_ref_t</a>;</div>
-</div><!-- fragment --><p><a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy()</a> should be used to release the resource from the reference.</p>
+</div><!-- fragment --><p>The function returns a <code>ref_ptr</code> pointer, which must be released using <a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy()</a> to avoid resource leaks and possible HDF5 library shutdown issues.</p>
 <dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
@@ -658,6 +660,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns identifier of referenced object if successful; otherwise returns a negative value.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000084">Deprecated:</a></b></dt><dd>As of HDF5-1.12, this function and <a class="el" href="group___h5_r.html#gafe7bbbc168c4836949c4c0b092654c45" title="Opens the HDF5 object referenced.">H5Rdereference1()</a> have been deprecated in favor of <a class="el" href="group___h5_r.html#ga2a00d73b9a13b9069d0ad39225dd9f71" title="Opens the HDF5 attribute referenced.">H5Ropen_attr()</a>, <a class="el" href="group___h5_r.html#gaa6692bd3a5b490c8db05b90a5888d0dd" title="Opens the HDF5 object referenced.">H5Ropen_object()</a> and <a class="el" href="group___h5_r.html#ga400154b014acd1736bae9a127f4e9a1a" title="Sets up a dataspace and selection as specified by a region reference.">H5Ropen_region()</a>.</dd></dl>
 <p>Given a reference, <code>ref</code>, to an object or a region in an object, <a class="el" href="group___h5_r.html#ga9b09586f7b6ec708434dd8f95f58a9b7" title="Opens the HDF5 object referenced.">H5Rdereference2()</a> opens that object and returns an identifier.</p>
 <p>The parameter <code>obj_id</code> must be a valid identifier for the HDF5 file containing the referenced object or for any object in that HDF5 file.</p>
 <p>The parameter <code>oapl_id</code> is an object access property list identifier for the referenced object. The access property list must be of the same type as the object being referenced, that is a group, dataset, or datatype property list.</p>
@@ -799,7 +802,9 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns the length of the name if successful, otherwise, a negative value.</dd></dl>
 <p><a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a> retrieves the attribute name for the attribute reference pointed to by <code>ref_ptr</code>.</p>
-<p>Up to size characters of the name are returned in <code>name</code>; additional characters, if any, are not returned to the user application. If the length of the name, which determines the required value of <code>size</code>, is unknown, a preliminary <a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a> call can be made. The return value of this call will be the size of the attribute name. That value can then be passed in for size in the second call to <a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a>, which will retrieve the actual name.</p>
+<p>Up to <code>size</code> characters of the attribute name are returned in <code>name</code>; additional characters, if any, are not returned to the user application.<br  />
+<br  />
+ If the length of the attribute name, which determines the required value of <code>size</code>, is unknown, a preliminary call to <a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a> with the last two parameters set to NULL and zero respectively can be made. The return value of this call will be the size in bytes of the attribute name plus 1 for a NULL terminator. That value must then be assigned to <code>size</code> for a second <a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a> call, which will retrieve the actual attribute name.</p>
 <dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
@@ -842,13 +847,15 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">ref_ptr</td><td>Pointer to reference to query </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">name</td><td>Buffer to place the file name of the reference </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Size of the <code>name</code> buffer</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Size of the <code>name</code> buffer. When the size is passed in, the <code>NULL</code> terminator needs to be included.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns the length of the name if successful, otherwise, a negative value.</dd></dl>
 <p><a class="el" href="group___h5_r.html#ga659d950e37122a59d50612b407a48900" title="Retrieves the file name for a referenced object.">H5Rget_file_name()</a> retrieves the file name for the object, region or attribute reference pointed to by <code>ref_ptr</code>.</p>
-<p>Up to <code>size</code> characters of the name are returned in <code>name</code>; additional characters, if any, are not returned to the user application. If the length of the name, which determines the required value of size, is unknown, a preliminary <a class="el" href="group___h5_r.html#ga659d950e37122a59d50612b407a48900" title="Retrieves the file name for a referenced object.">H5Rget_file_name()</a> call can be made. The return value of this call will be the size of the file name. That value can then be passed in for size in the second call to <a class="el" href="group___h5_r.html#ga659d950e37122a59d50612b407a48900" title="Retrieves the file name for a referenced object.">H5Rget_file_name()</a>, which will retrieve the actual name.</p>
+<p>Up to <code>size</code> characters of the file name are returned in <code>name</code>; additional characters, if any, are not returned to the user application.<br  />
+<br  />
+ If the length of the file name, which determines the required value of <code>size</code>, is unknown, a preliminary call to <a class="el" href="group___h5_r.html#ga659d950e37122a59d50612b407a48900" title="Retrieves the file name for a referenced object.">H5Rget_file_name()</a> with the last two parameters set to NULL and zero respectively can be made. The return value of this call will be the size in bytes of the file name. That value, plus 1 for a NULL terminator, must then be assigned to <code>size</code> for a second <a class="el" href="group___h5_r.html#ga659d950e37122a59d50612b407a48900" title="Retrieves the file name for a referenced object.">H5Rget_file_name()</a> call, which will retrieve the actual file name.</p>
 <dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
@@ -910,6 +917,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns the length of the name if successful, returning 0 (zero) if no name is associated with the identifier. Otherwise returns a negative value.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000085">Deprecated:</a></b></dt><dd>As of HDF5-1.12, this function has been deprecated in favor of <a class="el" href="group___h5_r.html#ga659d950e37122a59d50612b407a48900" title="Retrieves the file name for a referenced object.">H5Rget_file_name()</a>, <a class="el" href="group___h5_r.html#gac5a0a3a874cd3c4dc630579521539bb6" title="Retrieves the object name for a referenced object.">H5Rget_obj_name()</a> and <a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a>.</dd></dl>
 <p><a class="el" href="group___h5_r.html#ga4c112c388f697324270fd085100dccaa" title="Retrieves a name for a referenced object.">H5Rget_name()</a> retrieves a name for the object identified by <code>ref</code>.<br  />
  <code>loc_id</code> is used to identify the file containing the reference. It can be the file identifier for the file containing the reference or an identifier for any object in that file.</p>
 <p><a class="el" href="_h5_rpublic_8h.html#a7d148ddc165e65b01efabfd738ac056e">H5R_type_t</a> is the reference type of <code>ref</code>. Valid values include the following: </p><div class="fragment"><div class="line"> </div>
@@ -924,10 +932,10 @@ Functions</h2></td></tr>
 <div class="line">} <a class="code hl_enumeration" href="_h5_rpublic_8h.html#a7d148ddc165e65b01efabfd738ac056e">H5R_type_t</a>;</div>
 </div><!-- fragment --><p><code>ref</code> is the reference for which the target object's name is sought.</p>
 <p>If <code>ref</code> is an object reference, <code>name</code> will be returned with a name for the referenced object. If <code>ref</code> is a dataset region reference, <code>name</code> will contain a name for the object containing the referenced region.</p>
-<p>Up to <code>size</code> characters of the name are returned in <code>name</code>; additional characters, if any, are not returned to the user application.</p>
-<p>If the length of the name, which determines the required value of <code>size</code>, is unknown, a preliminary <a class="el" href="group___h5_r.html#ga4c112c388f697324270fd085100dccaa" title="Retrieves a name for a referenced object.">H5Rget_name()</a> call can be made. The return value of this call will be the size of the object name. That value can then be assigned to <code>size</code> for a second <a class="el" href="group___h5_r.html#ga4c112c388f697324270fd085100dccaa" title="Retrieves a name for a referenced object.">H5Rget_name()</a> call, which will retrieve the actual name.</p>
-<p>If there is no name associated with the object identifier or if the <code>name</code> is <code>NULL</code>, <a class="el" href="group___h5_r.html#ga4c112c388f697324270fd085100dccaa" title="Retrieves a name for a referenced object.">H5Rget_name()</a> returns the size of the <code>name</code> buffer (the size does not include the <code>NULL</code> terminator).</p>
-<p>Note that an object in an HDF5 file may have multiple paths if there are multiple links pointing to it. This function may return any one of these paths.</p>
+<p>Up to <code>size</code> characters of the name are returned in <code>name</code>; additional characters, if any, are not returned to the user application.<br  />
+<br  />
+ If the length of the name, which determines the required value of <code>size</code>, is unknown, a preliminary call to <a class="el" href="group___h5_r.html#ga4c112c388f697324270fd085100dccaa" title="Retrieves a name for a referenced object.">H5Rget_name()</a> with the last two parameters set to NULL and zero respectively can be made. The return value of this call will be the size in bytes of the name. That value, plus 1 for a NULL terminator, must then be assigned to <code>size</code> for a second <a class="el" href="group___h5_r.html#ga4c112c388f697324270fd085100dccaa" title="Retrieves a name for a referenced object.">H5Rget_name()</a> call, which will retrieve the actual name.</p>
+<dl class="section note"><dt>Note</dt><dd>An object in an HDF5 file may have multiple paths if multiple links point to it. This function may return any one of these paths.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
@@ -976,15 +984,17 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">ref_ptr</td><td>Pointer to reference to query </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">rapl_id</td><td>Reference access property list identifier </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">name</td><td>Buffer to place the file name of the reference </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Size of the <code>name</code> buffer</td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">name</td><td>Buffer to place the object name of the reference </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Size of the <code>name</code> buffer. When the size is passed in, the <code>NULL</code> terminator needs to be included.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns the length of the name if successful, returning 0 (zero) if no name is associated with the identifier. Otherwise returns a negative value.</dd></dl>
 <p><a class="el" href="group___h5_r.html#gac5a0a3a874cd3c4dc630579521539bb6" title="Retrieves the object name for a referenced object.">H5Rget_obj_name()</a> retrieves the object name for the object, region or attribute reference pointed to by <code>ref_ptr</code>.</p>
 <p>The parameter <code>rapl_id</code> is a reference access property list identifier for the reference. The access property list can be used to access external files that the reference points to (through a file access property list).</p>
-<p>Up to size characters of the name are returned in <code>name</code>; additional characters, if any, are not returned to the user application. If the length of the name, which determines the required value of <code>size</code>, is unknown, a preliminary call to <a class="el" href="group___h5_r.html#gac5a0a3a874cd3c4dc630579521539bb6" title="Retrieves the object name for a referenced object.">H5Rget_obj_name()</a> call can be made. The return value of this call will be the size of the object name. That value can then be passed in for <code>size</code> in the second call to <a class="el" href="group___h5_r.html#gac5a0a3a874cd3c4dc630579521539bb6" title="Retrieves the object name for a referenced object.">H5Rget_obj_name()</a>, which will retrieve the actual name. If there is no name associated with the object identifier or if the name is NULL, <a class="el" href="group___h5_r.html#gac5a0a3a874cd3c4dc630579521539bb6" title="Retrieves the object name for a referenced object.">H5Rget_obj_name()</a> returns the size of the name buffer (the size does not include the <code>\0</code> terminator).</p>
+<p>Up to <code>size</code> characters of the object name are returned in <code>name</code>; additional characters, if any, are not returned to the user application.<br  />
+<br  />
+ If the length of the object name, which determines the required value of <code>size</code>, is unknown, a preliminary call to <a class="el" href="group___h5_r.html#gac5a0a3a874cd3c4dc630579521539bb6" title="Retrieves the object name for a referenced object.">H5Rget_obj_name()</a> with the last two parameters set to NULL and zero respectively can be made. The return value of this call will be the size in bytes of the object name. That value, plus 1 for a NULL terminator, must then be assigned to <code>size</code> for a second <a class="el" href="group___h5_r.html#gac5a0a3a874cd3c4dc630579521539bb6" title="Retrieves the object name for a referenced object.">H5Rget_obj_name()</a> call, which will retrieve the actual object name.</p>
 <p>If <code>ref_ptr</code> is an object reference, <code>name</code> will be returned with a name for the referenced object. If <code>ref_ptr</code> is a dataset region reference, <code>name</code> will contain a name for the object containing the referenced region. If <code>ref_ptr</code> is an attribute reference, <code>name</code> will contain a name for the object the attribute is attached to. Note that an object in an HDF5 file may have multiple paths if there are multiple links pointing to it. This function may return any one of these paths.</p>
 <dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 

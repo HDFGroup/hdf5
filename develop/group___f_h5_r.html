@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.7"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>HDF5: Fortran References (H5R) Interface</title>
+<title>HDF5: FH5R</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.b23affc</span>
+   &#160;<span id="projectnumber">1.15.0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -108,14 +108,11 @@ $(document).ready(function(){initNavTree('group___f_h5_r.html',''); initResizabl
 <a href="#nested-classes">Data Types</a> &#124;
 <a href="#func-members">Functions/Subroutines</a> &#124;
 <a href="#var-members">Variables</a>  </div>
-  <div class="headertitle"><div class="title">Fortran References (H5R) Interface</div></div>
+  <div class="headertitle"><div class="title">FH5R</div></div>
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p><a class="el" href="structh5global_1_1hobj__ref__t__f.html">hobj_ref_t_f</a> derived type </p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_r.html">References (H5R)</a>, C-API</dd>
-<dd>
-<a class="el" href="_h5_r__u_g.html">The HDF5 References</a>, User Guide </dd></dl>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Modules</h2></td></tr>
@@ -148,6 +145,45 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:ga923261ee0548ac9dcd7c1cf062453d78"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#ga923261ee0548ac9dcd7c1cf062453d78">h5rget_obj_type_f</a> (loc_id, ref_type, ref, obj_type, hdferr)</td></tr>
 <tr class="memdesc:ga923261ee0548ac9dcd7c1cf062453d78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the type of object that an object reference points to.  <br /></td></tr>
 <tr class="separator:ga923261ee0548ac9dcd7c1cf062453d78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa10230de290e480ca6133f0a3cd59a4c"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#gaa10230de290e480ca6133f0a3cd59a4c">h5ropen_object_f</a> (ref_ptr, obj_id, hdferr, rapl_id, oapl_id)</td></tr>
+<tr class="memdesc:gaa10230de290e480ca6133f0a3cd59a4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opens the HDF5 object referenced.  <br /></td></tr>
+<tr class="separator:gaa10230de290e480ca6133f0a3cd59a4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3817e98b73008def02a87be60a771835"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#ga3817e98b73008def02a87be60a771835">h5ropen_attr_f</a> (ref_ptr, obj_id, hdferr, rapl_id, aapl_id)</td></tr>
+<tr class="memdesc:ga3817e98b73008def02a87be60a771835"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opens the HDF5 attribute referenced.  <br /></td></tr>
+<tr class="separator:ga3817e98b73008def02a87be60a771835"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1510f10e0def7269f7358ebf0c4ff226"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#ga1510f10e0def7269f7358ebf0c4ff226">h5ropen_region_f</a> (ref_ptr, space_id, hdferr, rapl_id, oapl_id)</td></tr>
+<tr class="memdesc:ga1510f10e0def7269f7358ebf0c4ff226"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up a dataspace and selection as specified by a region reference.  <br /></td></tr>
+<tr class="separator:ga1510f10e0def7269f7358ebf0c4ff226"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf692d97454edf87f2bc5a6882f894041"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#gaf692d97454edf87f2bc5a6882f894041">h5rcopy_f</a> (src_ref_ptr, dst_ref_ptr, hdferr)</td></tr>
+<tr class="memdesc:gaf692d97454edf87f2bc5a6882f894041"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies an existing reference.  <br /></td></tr>
+<tr class="separator:gaf692d97454edf87f2bc5a6882f894041"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga63effc2cbe4e86b82b3ba6259f1da5dc"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#ga63effc2cbe4e86b82b3ba6259f1da5dc">h5requal_f</a> (ref1_ptr, ref2_ptr, equal, hdferr)</td></tr>
+<tr class="memdesc:ga63effc2cbe4e86b82b3ba6259f1da5dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether two references are equal.  <br /></td></tr>
+<tr class="separator:ga63effc2cbe4e86b82b3ba6259f1da5dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gacbfe419e0c8216296f441e29e4be3d2a"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#gacbfe419e0c8216296f441e29e4be3d2a">h5rget_type_f</a> (ref_ptr, ref_type, hdferr)</td></tr>
+<tr class="memdesc:gacbfe419e0c8216296f441e29e4be3d2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the type of a reference.  <br /></td></tr>
+<tr class="separator:gacbfe419e0c8216296f441e29e4be3d2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa3747b5b431a931ef99e86b653ac4619"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#gaa3747b5b431a931ef99e86b653ac4619">h5rdestroy_f</a> (ref_ptr, hdferr)</td></tr>
+<tr class="memdesc:gaa3747b5b431a931ef99e86b653ac4619"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes a reference.  <br /></td></tr>
+<tr class="separator:gaa3747b5b431a931ef99e86b653ac4619"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5a7793593fd33b470d0c541eb8c98850"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#ga5a7793593fd33b470d0c541eb8c98850">h5rcreate_object_f</a> (loc_id, name, ref, hdferr, oapl_id)</td></tr>
+<tr class="memdesc:ga5a7793593fd33b470d0c541eb8c98850"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a reference.  <br /></td></tr>
+<tr class="separator:ga5a7793593fd33b470d0c541eb8c98850"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaca221946ff02badd4c386ba4030048e9"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#gaca221946ff02badd4c386ba4030048e9">h5rcreate_region_f</a> (loc_id, name, space_id, ref_ptr, hdferr, oapl_id)</td></tr>
+<tr class="memdesc:gaca221946ff02badd4c386ba4030048e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a region reference.  <br /></td></tr>
+<tr class="separator:gaca221946ff02badd4c386ba4030048e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga67b81598bf40440ebdf0b7746b626121"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#ga67b81598bf40440ebdf0b7746b626121">h5rcreate_attr_f</a> (loc_id, name, attr_name, ref_ptr, hdferr, oapl_id)</td></tr>
+<tr class="memdesc:ga67b81598bf40440ebdf0b7746b626121"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an attribute reference.  <br /></td></tr>
+<tr class="separator:ga67b81598bf40440ebdf0b7746b626121"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa07215d205aac295ed592205c2eee06f"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#gaa07215d205aac295ed592205c2eee06f">h5rget_obj_name_f</a> (ref_ptr, name, hdferr, rapl_id, name_len)</td></tr>
+<tr class="memdesc:gaa07215d205aac295ed592205c2eee06f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the object name for a referenced object.  <br /></td></tr>
+<tr class="separator:gaa07215d205aac295ed592205c2eee06f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafdd9737f63f077747568c5ea7047b228"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#gafdd9737f63f077747568c5ea7047b228">h5rget_attr_name_f</a> (ref_ptr, name, hdferr, name_len)</td></tr>
+<tr class="memdesc:gafdd9737f63f077747568c5ea7047b228"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the attribute name for a referenced object.  <br /></td></tr>
+<tr class="separator:gafdd9737f63f077747568c5ea7047b228"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae460bc646327149ec8d296603e90fda9"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#gae460bc646327149ec8d296603e90fda9">h5rget_file_name_f</a> (ref_ptr, name, hdferr, name_len)</td></tr>
+<tr class="memdesc:gae460bc646327149ec8d296603e90fda9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the file name for a referenced object.  <br /></td></tr>
+<tr class="separator:gae460bc646327149ec8d296603e90fda9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -161,8 +197,141 @@ Variables</h2></td></tr>
 <tr class="memitem:gafb7bb409a5e22515c410d4b7b56a8a71"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#gafb7bb409a5e22515c410d4b7b56a8a71">h5r_dataset_region_f</a></td></tr>
 <tr class="memdesc:gafb7bb409a5e22515c410d4b7b56a8a71"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5R_DATASET_REGION.  <br /></td></tr>
 <tr class="separator:gafb7bb409a5e22515c410d4b7b56a8a71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8a9f8f5e869a4f9db2f27a122b9b2b00"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#ga8a9f8f5e869a4f9db2f27a122b9b2b00">h5r_badtype_f</a></td></tr>
+<tr class="memdesc:ga8a9f8f5e869a4f9db2f27a122b9b2b00"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5R_BADTYPE.  <br /></td></tr>
+<tr class="separator:ga8a9f8f5e869a4f9db2f27a122b9b2b00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7ace7540f08c7009a74a2f65c636da5c"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#ga7ace7540f08c7009a74a2f65c636da5c">h5r_object1_f</a></td></tr>
+<tr class="memdesc:ga7ace7540f08c7009a74a2f65c636da5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5R_OBJECT1.  <br /></td></tr>
+<tr class="separator:ga7ace7540f08c7009a74a2f65c636da5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa1e64ed564f02c7e69349dd118d108e3"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#gaa1e64ed564f02c7e69349dd118d108e3">h5r_dataset_region1_f</a></td></tr>
+<tr class="memdesc:gaa1e64ed564f02c7e69349dd118d108e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5R_DATASET_REGION1.  <br /></td></tr>
+<tr class="separator:gaa1e64ed564f02c7e69349dd118d108e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga94b76db7d7f0c1cc31b13e990640cc18"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#ga94b76db7d7f0c1cc31b13e990640cc18">h5r_object2_f</a></td></tr>
+<tr class="memdesc:ga94b76db7d7f0c1cc31b13e990640cc18"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5R_OBJECT2.  <br /></td></tr>
+<tr class="separator:ga94b76db7d7f0c1cc31b13e990640cc18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gadaec3c3bc844c74d5dd62b1661a15173"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#gadaec3c3bc844c74d5dd62b1661a15173">h5r_dataset_region2_f</a></td></tr>
+<tr class="memdesc:gadaec3c3bc844c74d5dd62b1661a15173"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5R_DATASET_REGION2.  <br /></td></tr>
+<tr class="separator:gadaec3c3bc844c74d5dd62b1661a15173"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0a9ece411575ff3569f05458e0b4aeda"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#ga0a9ece411575ff3569f05458e0b4aeda">h5r_attr_f</a></td></tr>
+<tr class="memdesc:ga0a9ece411575ff3569f05458e0b4aeda"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5R_ATTR.  <br /></td></tr>
+<tr class="separator:ga0a9ece411575ff3569f05458e0b4aeda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga10389d2acd5bdb562536d0bf600c9ec4"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_r.html#ga10389d2acd5bdb562536d0bf600c9ec4">h5r_maxtype_f</a></td></tr>
+<tr class="memdesc:ga10389d2acd5bdb562536d0bf600c9ec4"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5R_MAXTYPE.  <br /></td></tr>
+<tr class="separator:ga10389d2acd5bdb562536d0bf600c9ec4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function/Subroutine Documentation</h2>
+<a id="gaf692d97454edf87f2bc5a6882f894041" name="gaf692d97454edf87f2bc5a6882f894041"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf692d97454edf87f2bc5a6882f894041">&#9670;&#160;</a></span>h5rcopy_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5rcopy_f </td>
+          <td>(</td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>src_ref_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>dst_ref_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copies an existing reference. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src_ref_ptr</td><td>Pointer to reference to copy, of TYPE(H5R_ref_t) </td></tr>
+    <tr><td class="paramname">dst_ref_ptr</td><td>Pointer to output reference, of TYPE(H5R_ref_t) </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_r.html#gad5b7b117cfaea90d1e4786304c58c55c">H5Rcopy()</a> </p>
+
+</div>
+</div>
+<a id="ga67b81598bf40440ebdf0b7746b626121" name="ga67b81598bf40440ebdf0b7746b626121"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga67b81598bf40440ebdf0b7746b626121">&#9670;&#160;</a></span>h5rcreate_attr_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5rcreate_attr_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>loc_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in)&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in)&#160;</td>
+          <td class="paramname"><em>attr_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>ref_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in), optional&#160;</td>
+          <td class="paramname"><em>oapl_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates an attribute reference. </p>
+<dl class="section attention"><dt>Attention</dt><dd>The preferred API, Fortran 2003 version.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">loc_id</td><td>Location identifier </td></tr>
+    <tr><td class="paramname">name</td><td>Name of object </td></tr>
+    <tr><td class="paramname">attr_name</td><td>Name of attribute </td></tr>
+    <tr><td class="paramname">ref_ptr</td><td>Pointer to reference </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">oapl_id</td><td>Object access property list identifier</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_r.html#gacae1bf2263befeac54d81f27995721f8">H5Rcreate_attr()</a> </p>
+
+</div>
+</div>
 <a id="gab353c178fef510803be41898fb1cc4fc" name="gab353c178fef510803be41898fb1cc4fc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gab353c178fef510803be41898fb1cc4fc">&#9670;&#160;</a></span>h5rcreate_f()</h2>
 
@@ -233,6 +402,326 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="ga5a7793593fd33b470d0c541eb8c98850" name="ga5a7793593fd33b470d0c541eb8c98850"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5a7793593fd33b470d0c541eb8c98850">&#9670;&#160;</a></span>h5rcreate_object_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5rcreate_object_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>loc_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in)&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>ref</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in), optional&#160;</td>
+          <td class="paramname"><em>oapl_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a reference. </p>
+<dl class="section attention"><dt>Attention</dt><dd>The preferred API, Fortran 2003 version.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">loc_id</td><td>Location identifier. </td></tr>
+    <tr><td class="paramname">name</td><td>Name of the dataset at the specified location </td></tr>
+    <tr><td class="paramname">ref</td><td>Reference created by the function call </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">oapl_id</td><td>Object access property list identifier</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_r.html#gad0fb6ec99ecefa602756a5682addfc69">H5Rcreate_object()</a> </p>
+
+</div>
+</div>
+<a id="gaca221946ff02badd4c386ba4030048e9" name="gaca221946ff02badd4c386ba4030048e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaca221946ff02badd4c386ba4030048e9">&#9670;&#160;</a></span>h5rcreate_region_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5rcreate_region_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>loc_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in)&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>space_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>ref_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in), optional&#160;</td>
+          <td class="paramname"><em>oapl_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a region reference. </p>
+<dl class="section attention"><dt>Attention</dt><dd>The preferred API, Fortran 2003 version.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">loc_id</td><td>Location identifier </td></tr>
+    <tr><td class="paramname">name</td><td>Name of object </td></tr>
+    <tr><td class="paramname">space_id</td><td>Dataspace identifier </td></tr>
+    <tr><td class="paramname">ref_ptr</td><td>Pointer to reference </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">oapl_id</td><td>Object access property list identifier</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_r.html#ga60134eb917afbe89aa23eb25a30d249b">H5Rcreate_region()</a> </p>
+
+</div>
+</div>
+<a id="gaa3747b5b431a931ef99e86b653ac4619" name="gaa3747b5b431a931ef99e86b653ac4619"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa3747b5b431a931ef99e86b653ac4619">&#9670;&#160;</a></span>h5rdestroy_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5rdestroy_f </td>
+          <td>(</td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>ref_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Closes a reference. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ref_ptr</td><td>Pointer to reference, of TYPE(H5R_ref_t) </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095">H5Rdestroy()</a> </p>
+
+</div>
+</div>
+<a id="ga63effc2cbe4e86b82b3ba6259f1da5dc" name="ga63effc2cbe4e86b82b3ba6259f1da5dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga63effc2cbe4e86b82b3ba6259f1da5dc">&#9670;&#160;</a></span>h5requal_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5requal_f </td>
+          <td>(</td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>ref1_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>ref2_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">logical, intent(out)&#160;</td>
+          <td class="paramname"><em>equal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Determines whether two references are equal. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ref1_ptr</td><td>Pointer to reference to compare, of TYPE(H5R_ref_t) </td></tr>
+    <tr><td class="paramname">ref2_ptr</td><td>Pointer to reference to compare, of TYPE(H5R_ref_t) </td></tr>
+    <tr><td class="paramname">equal</td><td>If reference are equal </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_r.html#ga8d7dac2c604356f2fc657f36a201aea0">H5Requal()</a> </p>
+
+</div>
+</div>
+<a id="gafdd9737f63f077747568c5ea7047b228" name="gafdd9737f63f077747568c5ea7047b228"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafdd9737f63f077747568c5ea7047b228">&#9670;&#160;</a></span>h5rget_attr_name_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5rget_attr_name_f </td>
+          <td>(</td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>ref_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*)&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(size_t), intent(out), optional&#160;</td>
+          <td class="paramname"><em>name_len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the attribute name for a referenced object. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ref_ptr</td><td>Pointer to reference to query </td></tr>
+    <tr><td class="paramname">name</td><td>Buffer to place the attribute name of the reference </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">name_len</td><td>Maximum length of the name to retrieve </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gae460bc646327149ec8d296603e90fda9" name="gae460bc646327149ec8d296603e90fda9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae460bc646327149ec8d296603e90fda9">&#9670;&#160;</a></span>h5rget_file_name_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5rget_file_name_f </td>
+          <td>(</td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>ref_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*)&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(size_t), intent(out), optional&#160;</td>
+          <td class="paramname"><em>name_len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the file name for a referenced object. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ref_ptr</td><td>Pointer to reference to query </td></tr>
+    <tr><td class="paramname">name</td><td>Buffer to place the file name of the reference </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">name_len</td><td>The size of the name buffer</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_r.html#ga659d950e37122a59d50612b407a48900">H5Rget_file_name()</a> </p>
+
+</div>
+</div>
 <a id="gaa74e6c3a73a025cd4872990bbeba2871" name="gaa74e6c3a73a025cd4872990bbeba2871"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gaa74e6c3a73a025cd4872990bbeba2871">&#9670;&#160;</a></span>h5rget_name_f()</h2>
 
@@ -293,6 +782,64 @@ Variables</h2></td></tr>
     <tr><td class="paramname">name</td><td>A name associated with the referenced object or dataset ptr. </td></tr>
     <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
     <tr><td class="paramname">size</td><td>The size of the name buffer, returning 0 (zero) if no name is associated with the identifier. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gaa07215d205aac295ed592205c2eee06f" name="gaa07215d205aac295ed592205c2eee06f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa07215d205aac295ed592205c2eee06f">&#9670;&#160;</a></span>h5rget_obj_name_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5rget_obj_name_f </td>
+          <td>(</td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>ref_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*)&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in), optional&#160;</td>
+          <td class="paramname"><em>rapl_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(size_t), intent(out), optional&#160;</td>
+          <td class="paramname"><em>name_len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the object name for a referenced object. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ref_ptr</td><td>Pointer to reference to query </td></tr>
+    <tr><td class="paramname">name</td><td>Buffer to place the file name of the reference </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">rapl_id</td><td>Reference access property list identifier </td></tr>
+    <tr><td class="paramname">name_len</td><td>Maximum length of the name to retrieve </td></tr>
   </table>
   </dd>
 </dl>
@@ -475,7 +1022,293 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="gacbfe419e0c8216296f441e29e4be3d2a" name="gacbfe419e0c8216296f441e29e4be3d2a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gacbfe419e0c8216296f441e29e4be3d2a">&#9670;&#160;</a></span>h5rget_type_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5rget_type_f </td>
+          <td>(</td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>ref_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>ref_type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the type of a reference. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ref_ptr</td><td>Pointer to reference to copy, of TYPE(H5R_ref_t) </td></tr>
+    <tr><td class="paramname">ref_type</td><td>A reference type </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_r.html#ga56989d33835ec289269d366dc28aa4ad">H5Rget_type()</a> </p>
+
+</div>
+</div>
+<a id="ga3817e98b73008def02a87be60a771835" name="ga3817e98b73008def02a87be60a771835"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3817e98b73008def02a87be60a771835">&#9670;&#160;</a></span>h5ropen_attr_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5ropen_attr_f </td>
+          <td>(</td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>ref_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(out)&#160;</td>
+          <td class="paramname"><em>obj_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in), optional&#160;</td>
+          <td class="paramname"><em>rapl_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in), optional&#160;</td>
+          <td class="paramname"><em>aapl_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Opens the HDF5 attribute referenced. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ref_ptr</td><td>Pointer to reference to open, points object of TYPE(H5R_ref_t) </td></tr>
+    <tr><td class="paramname">obj_id</td><td>Object identifier </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">rapl_id</td><td>Reference access property list identifier </td></tr>
+    <tr><td class="paramname">aapl_id</td><td>Attribute access property list identifier</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_r.html#ga2a00d73b9a13b9069d0ad39225dd9f71">H5Ropen_attr()</a> </p>
+
+</div>
+</div>
+<a id="gaa10230de290e480ca6133f0a3cd59a4c" name="gaa10230de290e480ca6133f0a3cd59a4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa10230de290e480ca6133f0a3cd59a4c">&#9670;&#160;</a></span>h5ropen_object_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5ropen_object_f </td>
+          <td>(</td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>ref_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(out)&#160;</td>
+          <td class="paramname"><em>obj_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in), optional&#160;</td>
+          <td class="paramname"><em>rapl_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in), optional&#160;</td>
+          <td class="paramname"><em>oapl_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Opens the HDF5 object referenced. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ref_ptr</td><td>Pointer to reference to open, points object of TYPE(H5R_ref_t) </td></tr>
+    <tr><td class="paramname">obj_id</td><td>Object identifier </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">rapl_id</td><td>Reference access property list identifier </td></tr>
+    <tr><td class="paramname">oapl_id</td><td>Object access property list identifier</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_r.html#gaa6692bd3a5b490c8db05b90a5888d0dd">H5Ropen_object()</a> </p>
+
+</div>
+</div>
+<a id="ga1510f10e0def7269f7358ebf0c4ff226" name="ga1510f10e0def7269f7358ebf0c4ff226"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1510f10e0def7269f7358ebf0c4ff226">&#9670;&#160;</a></span>h5ropen_region_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5ropen_region_f </td>
+          <td>(</td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>ref_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(out)&#160;</td>
+          <td class="paramname"><em>space_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in), optional&#160;</td>
+          <td class="paramname"><em>rapl_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in), optional&#160;</td>
+          <td class="paramname"><em>oapl_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets up a dataspace and selection as specified by a region reference. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ref_ptr</td><td>Pointer to reference to open, points object of TYPE(H5R_ref_t) </td></tr>
+    <tr><td class="paramname">space_id</td><td>Dataspace identifier </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">rapl_id</td><td>Reference access property list identifier </td></tr>
+    <tr><td class="paramname">oapl_id</td><td>Object access property list identifier</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_r.html#ga400154b014acd1736bae9a127f4e9a1a">H5Ropen_region()</a> </p>
+
+</div>
+</div>
 <h2 class="groupheader">Variable Documentation</h2>
+<a id="ga0a9ece411575ff3569f05458e0b4aeda" name="ga0a9ece411575ff3569f05458e0b4aeda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0a9ece411575ff3569f05458e0b4aeda">&#9670;&#160;</a></span>h5r_attr_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5r_attr_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5R_ATTR. </p>
+
+</div>
+</div>
+<a id="ga8a9f8f5e869a4f9db2f27a122b9b2b00" name="ga8a9f8f5e869a4f9db2f27a122b9b2b00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8a9f8f5e869a4f9db2f27a122b9b2b00">&#9670;&#160;</a></span>h5r_badtype_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5r_badtype_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5R_BADTYPE. </p>
+
+</div>
+</div>
+<a id="gaa1e64ed564f02c7e69349dd118d108e3" name="gaa1e64ed564f02c7e69349dd118d108e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa1e64ed564f02c7e69349dd118d108e3">&#9670;&#160;</a></span>h5r_dataset_region1_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5r_dataset_region1_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5R_DATASET_REGION1. </p>
+
+</div>
+</div>
+<a id="gadaec3c3bc844c74d5dd62b1661a15173" name="gadaec3c3bc844c74d5dd62b1661a15173"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gadaec3c3bc844c74d5dd62b1661a15173">&#9670;&#160;</a></span>h5r_dataset_region2_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5r_dataset_region2_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5R_DATASET_REGION2. </p>
+
+</div>
+</div>
 <a id="gafb7bb409a5e22515c410d4b7b56a8a71" name="gafb7bb409a5e22515c410d4b7b56a8a71"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gafb7bb409a5e22515c410d4b7b56a8a71">&#9670;&#160;</a></span>h5r_dataset_region_f</h2>
 
@@ -489,6 +1322,54 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>H5R_DATASET_REGION. </p>
+
+</div>
+</div>
+<a id="ga10389d2acd5bdb562536d0bf600c9ec4" name="ga10389d2acd5bdb562536d0bf600c9ec4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga10389d2acd5bdb562536d0bf600c9ec4">&#9670;&#160;</a></span>h5r_maxtype_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5r_maxtype_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5R_MAXTYPE. </p>
+
+</div>
+</div>
+<a id="ga7ace7540f08c7009a74a2f65c636da5c" name="ga7ace7540f08c7009a74a2f65c636da5c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7ace7540f08c7009a74a2f65c636da5c">&#9670;&#160;</a></span>h5r_object1_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5r_object1_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5R_OBJECT1. </p>
+
+</div>
+</div>
+<a id="ga94b76db7d7f0c1cc31b13e990640cc18" name="ga94b76db7d7f0c1cc31b13e990640cc18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga94b76db7d7f0c1cc31b13e990640cc18">&#9670;&#160;</a></span>h5r_object2_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5r_object2_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5R_OBJECT2. </p>
 
 </div>
 </div>
