@@ -108,7 +108,6 @@ const char H5build_settings[]=
     "    Packages w/ extra debug output: @INTERNAL_DEBUG_OUTPUT@\n"
     "                       API tracing: @HDF5_ENABLE_TRACE@\n"
     "              Using memory checker: @HDF5_ENABLE_USING_MEMCHECKER@\n"
-    "            Function stack tracing: @HDF5_ENABLE_CODESTACK@\n"
     "                  Use file locking: @HDF5_FILE_LOCKING_SETTING@\n"
     "         Strict file format checks: @HDF5_STRICT_FORMAT_CHECKS@\n"
     "      Optimization instrumentation: @HDF5_Enable_Instrument@\n"
