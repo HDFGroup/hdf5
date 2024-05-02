@@ -4231,7 +4231,6 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     uint32_t    count = 0;
     size_t      sizes[4];
     H5FD_mem_t  types[2];
-
     haddr_t     *tt_addrs = NULL; /* For storing addrs */
     const void **tt_bufs  = NULL; /* For storing buf pointers */
 
@@ -4628,6 +4627,9 @@ test_vector_io(int mpi_rank, int mpi_size)
     nerrs += vector_write_test_7(13, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
                                  H5FD_SUBFILING_NAME);
 #endif
+
+    /* discard the file image buffers */
+    free_file_images();
 
     nerrors += (int)nerrs;
 
@@ -5959,7 +5961,6 @@ test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
     hid_t   file_spaces[2] = {H5I_INVALID_HID, H5I_INVALID_HID}; /* file dataspaces vector */
     hsize_t dims1[1];                                            /* 1d dimension sizes */
     hsize_t dims2[2];                                            /* 2d dimension sizes */
-
     H5FD_mem_t type;                                          /* File type */
     haddr_t    addrs[2];                                      /* File allocation address */
     size_t     element_sizes[2] = {sizeof(int), sizeof(int)}; /* Element size */
@@ -6059,18 +6060,30 @@ test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
     }
 
     /* Free the buffers */
-    if (wbuf1)
+    if (wbuf1) {
         free(wbuf1);
-    if (wbuf2)
+        wbuf1 = NULL;
+    }
+    if (wbuf2) {
         free(wbuf2);
-    if (fbuf1)
+        wbuf2 = NULL;
+    }
+    if (fbuf1) {
         free(fbuf1);
-    if (fbuf2)
+        fbuf1 = NULL;
+    }
+    if (fbuf2) {
         free(fbuf2);
-    if (erbuf1)
+        fbuf2 = NULL;
+    }
+    if (erbuf1) {
         free(erbuf1);
-    if (erbuf2)
+        erbuf1 = NULL;
+    }
+    if (erbuf2) {
         free(erbuf2);
+        erbuf2 = NULL;
+    }
 
     CHECK_PASSED();
 
@@ -6089,7 +6102,6 @@ test_selection_io(int mpi_rank, int mpi_size)
     hid_t    fapl = H5I_INVALID_HID; /* File access property list */
     char     filename[1024];         /* Test file name */
     unsigned flags = 0;              /* File access flags */
-
     unsigned collective;                      /* Types of I/O for testing */
     hid_t    dxpl          = H5I_INVALID_HID; /* Dataset transfer property list */
     hid_t    def_dxpl      = H5I_INVALID_HID; /* dxpl: independent access */
@@ -6308,9 +6320,6 @@ finish:
             printf("Parallel vfd tests finished with no errors\n");
         printf("===================================\n");
     }
-
-    /* discard the file image buffers */
-    free_file_images();
 
     /* close HDF5 library */
     H5close();
