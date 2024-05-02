@@ -233,7 +233,6 @@ if (NOT TEST_SKIP_COMPARE)
     file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
     list (LENGTH TEST_STREAM test_len)
     if (test_len GREATER 0)
-
       if (NOT TEST_SORT_COMPARE)
         # now compare the output with the reference
         execute_process (

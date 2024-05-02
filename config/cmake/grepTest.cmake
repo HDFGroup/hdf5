@@ -90,6 +90,13 @@ if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   endif ()
 endif ()
 
+if (TEST_REF_FILTER)
+  #message (STATUS "TEST_REF_FILTER: ${TEST_APPEND}${TEST_REF_FILTER}")
+  file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
+  string (REGEX REPLACE "${TEST_REF_APPEND}" "${TEST_REF_FILTER}" TEST_STREAM "${TEST_STREAM}")
+  file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
+endif ()
+
 # if the TEST_ERRREF exists grep the error output with the error reference
 set (TEST_ERRREF_RESULT 0)
 if (TEST_ERRREF)
@@ -107,14 +114,13 @@ if (TEST_ERRREF)
     endif ()
   endif ()
 
-  #always compare output file to reference unless this must be skipped
+  # compare output files to references unless this must be skipped
   set (TEST_COMPARE_RESULT 0)
   if (NOT TEST_SKIP_COMPARE)
     if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
       file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
       list (LENGTH TEST_STREAM test_len)
       if (test_len GREATER 0)
-
         if (NOT TEST_SORT_COMPARE)
           # now compare the output with the reference
           execute_process (
@@ -137,7 +143,14 @@ if (TEST_ERRREF)
           list (LENGTH test_act len_act)
           file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} test_ref)
           list (LENGTH test_ref len_ref)
+          if (NOT len_act EQUAL len_ref)
+            set (TEST_COMPARE_RESULT 1)
+          endif ()
           if (len_act GREATER 0 AND len_ref GREATER 0)
+            if (TEST_SORT_COMPARE)
+              list (SORT test_act)
+              list (SORT test_ref)
+            endif ()
             math (EXPR _FP_LEN "${len_ref} - 1")
             foreach (line RANGE 0 ${_FP_LEN})
               list (GET test_act ${line} str_act)
