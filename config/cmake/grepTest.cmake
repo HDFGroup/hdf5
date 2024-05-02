@@ -109,6 +109,13 @@ if (TEST_ERRREF)
       string (REGEX MATCH "${TEST_ERRREF}" TEST_MATCH ${TEST_ERR_STREAM})
       string (COMPARE EQUAL "${TEST_ERRREF}" "${TEST_MATCH}" TEST_ERRREF_RESULT)
       if (NOT TEST_ERRREF_RESULT)
+        # dump the output unless nodisplay option is set
+        if (NOT TEST_NO_DISPLAY)
+          execute_process (
+              COMMAND ${CMAKE_COMMAND} -E echo ${TEST_ERR_STREAM}
+              RESULT_VARIABLE TEST_ERRREF_RESULT
+          )
+        endif ()
         message (FATAL_ERROR "Failed: The error output of ${TEST_PROGRAM} did not contain ${TEST_ERRREF}")
       endif ()
     endif ()
