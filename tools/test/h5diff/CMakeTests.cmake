@@ -514,7 +514,7 @@
     endif ()
   endmacro ()
 
-  macro (ADD_PH5_CMP_TEST resultfile resultcode resultcheck)
+  macro (ADD_PH5_CMP_TEST resultfile resultcode result_errcheck)
     # If using memchecker add tests without using scripts
     if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME MPI_TEST_H5DIFF-${resultfile} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARGN})
