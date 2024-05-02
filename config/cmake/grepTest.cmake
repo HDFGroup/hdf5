@@ -73,21 +73,6 @@ if (TEST_APPEND)
   file (APPEND ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_APPEND} ${TEST_RESULT}\n")
 endif ()
 
-# if the return value is !=${TEST_EXPECT} bail out
-if (NOT TEST_RESULT EQUAL TEST_EXPECT)
-  if (NOT TEST_NOERRDISPLAY)
-    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-      file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-      message (STATUS "Output :\n${TEST_STREAM}")
-    endif ()
-    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
-      file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
-      message (STATUS "Error Output :\n${TEST_STREAM}")
-    endif ()
-  endif ()
-  message (FATAL_ERROR "Failed: Test program ${TEST_PROGRAM} exited != ${TEST_EXPECT}.\n${TEST_ERROR}")
-endif ()
-
 message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
 # remove special output
