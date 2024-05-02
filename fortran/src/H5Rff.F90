@@ -1111,7 +1111,7 @@ CONTAINS
     INTEGER(SIZE_T) :: l
 
     INTERFACE
-       INTEGER FUNCTION H5Rget_obj_name(ref_ptr, rapl_id, name, size_default) &
+       INTEGER(SIZE_T) FUNCTION H5Rget_obj_name(ref_ptr, rapl_id, name, size_default) &
             BIND(C, NAME='H5Rget_obj_name')
          IMPORT :: c_char, c_ptr
          IMPORT :: HID_T, SIZE_T
@@ -1164,7 +1164,7 @@ CONTAINS
     INTEGER(SIZE_T) :: l
 
     INTERFACE
-       INTEGER FUNCTION H5Rget_attr_name(ref_ptr, name, size_default) &
+       INTEGER(SIZE_T) FUNCTION H5Rget_attr_name(ref_ptr, name, size_default) &
             BIND(C, NAME='H5Rget_attr_name')
          IMPORT :: c_char, c_ptr
          IMPORT :: HID_T, SIZE_T
@@ -1217,7 +1217,7 @@ CONTAINS
     INTEGER(SIZE_T) :: l
 
     INTERFACE
-       INTEGER FUNCTION H5Rget_file_name(ref_ptr, name, size_default) &
+       INTEGER(SIZE_T) FUNCTION H5Rget_file_name(ref_ptr, name, size_default) &
             BIND(C, NAME='H5Rget_file_name')
          IMPORT :: c_char, c_ptr
          IMPORT :: HID_T, SIZE_T
