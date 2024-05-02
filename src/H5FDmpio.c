@@ -1804,7 +1804,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
             /* Determine size of this vector element */
             if (!fixed_size) {
                 if ((*s_sizes)[i] == 0) {
-                    assert(vector_was_sorted);
+                    assert(*vector_was_sorted);
                     assert(i > 0);
                     fixed_size = true;
                     size       = sizes[i - 1];
@@ -1951,7 +1951,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
 done:
     /* free sorted vectors if they exist */
-    if (!vector_was_sorted)
+    if (!*vector_was_sorted)
         if (s_types) {
             free(s_types);
             s_types = NULL;
