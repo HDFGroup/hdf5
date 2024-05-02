@@ -30,7 +30,6 @@
 
   set (LIST_OTHER_TEST_FILES
       h5copy_misc1.out
-      h5copy_misc1.err
       tudfilter.h5.txt
       tudfilter.h5_ERR.txt
       h5copy_plugin_fail_ERR.out.h5.txt
