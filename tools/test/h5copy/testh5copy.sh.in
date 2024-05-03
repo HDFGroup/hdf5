@@ -78,6 +78,7 @@ CP='cp'
 DIRNAME='dirname'
 LS='ls'
 AWK='awk'
+GREP='grep'
 
 nerrors=0
 verbose=yes
