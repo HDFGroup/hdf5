@@ -497,7 +497,8 @@ COPY_TESTFILES_TO_TESTDIR
 # h5format_convert nonexist.h5  (no options, file does not exist)
 TOOLTEST_OUT h5fc_help.ddl '' --help
 TOOLTEST_OUT h5fc_nooption.ddl ''
-TOOLTEST_GREP h5fc_nonexistfile.ddl "unable to open file"
+TOOLTEST_ERR h5fc_nonexistfile.ddl nonexist.h5
+#TOOLTEST_GREP h5fc_nonexistfile.ddl "unable to open file"
 #
 #
 # h5format_convert -d old_h5fc_ext_none.h5 (just -d option, file exists)
