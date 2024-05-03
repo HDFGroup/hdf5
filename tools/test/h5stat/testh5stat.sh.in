@@ -231,11 +231,11 @@ GREPTEST()
         outputfile=$4
     fi
 
-    # Run test.
-    TESTING $H5COPY $@
-    (
-        $RUNSERIAL $H5COPY_BIN $@
-    ) > $actual 2> $actual_err
+   TESTING $STAT $@
+   (
+      cd $TESTDIR
+      $RUNSERIAL $STAT_BIN $@
+   ) >$actual 2>$actual_err
     RET=$?
 
     if [ "$txttype" = "ERRTXT" ]; then
