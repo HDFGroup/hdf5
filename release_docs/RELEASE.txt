@@ -47,6 +47,16 @@ New Features
 
     Configuration:
     -------------
+    - Removed "function/code stack" debugging configuration option:
+
+          CMake:      HDF5_ENABLE_CODESTACK
+          Autotools:  --enable-codestack
+
+      This was used to debug memory leaks internal to the library, but has been
+      broken for >1.5 years and is now easily replaced with third-party tools
+      (e.g. libbacktrace: https://github.com/ianlancetaylor/libbacktrace) on an
+      as-needed basis when debugging an issue.
+
     - Added configure options for enabling/disabling non-standard programming
       language features
 

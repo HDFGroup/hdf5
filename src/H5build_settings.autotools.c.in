@@ -109,7 +109,6 @@ const char H5build_settings[]=
     "    Packages w/ extra debug output: @INTERNAL_DEBUG_OUTPUT@\n"
     "                       API tracing: @TRACE_API@\n"
     "              Using memory checker: @USINGMEMCHECKER@\n"
-    "            Function stack tracing: @CODESTACK@\n"
     "                  Use file locking: @DESIRED_FILE_LOCKING@\n"
     "         Strict file format checks: @STRICT_FORMAT_CHECKS@\n"
     "      Optimization instrumentation: @INSTRUMENT_LIBRARY@\n"
