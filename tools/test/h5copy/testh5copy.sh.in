@@ -419,87 +419,6 @@ GREPTEST()
     fi
 }
 
-# Compare the two text files
-# PASS if same
-# FAIL if different, and show the diff
-#
-# Assumed arguments:
-# $1 is text file1 (expected output)
-# $2 is text file2 (actual output)
-CMP_OUTPUT()
-{
-    expect=$1
-    actual=$2
-
-    VERIFY_OUTPUT $@
-    if [ ! -f $expect ]; then
-        # Create the expect file if it doesn't yet exist.
-        echo " CREATED"
-        cp $actual $expect
-        echo "    Expected result (*.ddl) missing"
-        nerrors="`expr $nerrors + 1`"
-    elif $CMP $expect $actual; then
-        echo " PASSED"
-    else
-        echo "*FAILED*"
-        echo "    Expected output differs from actual output"
-        nerrors="`expr $nerrors + 1`"
-        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
-    fi
-}
-
-TOOLTEST_FAIL()
-{
-    expectout="$TESTDIR/$1"
-    expecterr="$TESTDIR/`basename $1 .out`.err"
-    actualout="$TESTDIR/$1.actualout"
-    actualerr="$TESTDIR/$1.actualerr"
-    actualout_sav=${actualout}-sav
-    actualerr_sav=${actualerr}-sav
-    shift
-    if [ "$1" = -i ]; then
-        inputfile=$2
-    fi
-
-    if [ "$3" = -o ]; then
-        outputfile=$4
-    fi
-
-    TESTING $H5COPY $@
-    (
-        #echo "#############################"
-        #echo " output for '$H5COPY $@'"
-        #echo "#############################"
-        $RUNSERIAL $H5COPY_BIN $@
-    ) > $actualout 2> $actualerr
-    RET=$?
-
-    # save actualout and actualerr in case they are needed later.
-    cp $actualout $actualout_sav
-    STDOUT_FILTER $actualout
-    cp $actualerr $actualerr_sav
-    STDERR_FILTER $actualerr
-    if [ $RET != 0 ]; then
-        echo " PASSED"
-        # Verifying output text from h5copy
-        if [ "$expectout" != "SKIP" ]; then
-            CMP_OUTPUT $expecterr $actualerr
-        fi
-    else
-        echo "*FAILED*"
-        echo "failed result is:"
-        cat $actualout
-        nerrors="`expr $nerrors + 1`"
-    fi
-
-
-    # Clean up output file
-    if test -z "$HDF5_NOCLEANUP"; then
-        rm -f $actualout $actualerr $actualout_sav $actualerr_sav $outputfile
-    fi
-}
-
-
 # Call the h5diff tool
 #
 H5DIFFTEST()
@@ -508,22 +427,6 @@ H5DIFFTEST()
     $RUNSERIAL $H5DIFF_BIN -q "$@"
     RET=$?
     if [ $RET != 0 ] ; then
-        echo "*FAILED*"
-        nerrors="`expr $nerrors + 1`"
-    else
-        echo " PASSED"
-    fi
-}
-
-# Call the h5diff tool with a call that is expected to fail
-#
-H5DIFFTEST_FAIL()
-{
-    VERIFY  $@
-    $RUNSERIAL $H5DIFF_BIN -q "$@"
-    RET=$?
-
-    if [ $h5haveexitcode = 'yes' -a $RET != 1 ] ; then
         echo "*FAILED*"
         nerrors="`expr $nerrors + 1`"
     else
