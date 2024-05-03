@@ -372,7 +372,7 @@ TOOLTEST_GREP() {
     cp $actual_err $actual_err_sav
 
     # Compare output
-    $GREP "$expectdata" $actualerr > /dev/null
+    $GREP "$expectdata" $actual_err > /dev/null
     if [ $? -eq 0 ]; then
         echo " PASSED"
     else
