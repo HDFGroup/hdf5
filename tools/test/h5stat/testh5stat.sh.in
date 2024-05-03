@@ -74,18 +74,6 @@ $SRC_H5STAT_TESTFILES/h5stat_idx.h5
 $SRC_H5STAT_TESTFILES/h5stat_threshold.h5
 "
 
-LIST_ERR_TEST_FILES="
-$SRC_H5STAT_OUTFILES/h5stat_err_refcount.err
-$SRC_H5STAT_OUTFILES/h5stat_err_old_layout.err
-$SRC_H5STAT_OUTFILES/h5stat_err_old_fill.err
-$SRC_H5STAT_OUTFILES/h5stat_err1_links.err
-$SRC_H5STAT_OUTFILES/h5stat_err1_dims.err
-$SRC_H5STAT_OUTFILES/h5stat_err1_numattrs.err
-$SRC_H5STAT_OUTFILES/h5stat_err2_numattrs.err
-$SRC_H5STAT_OUTFILES/h5stat_notexist.err
-$SRC_H5STAT_OUTFILES/h5stat_nofile.err
-"
-
 LIST_OTHER_TEST_FILES="
 $SRC_H5STAT_OUTFILES/h5stat_err_refcount.ddl
 $SRC_H5STAT_OUTFILES/h5stat_err_old_layout.ddl
@@ -123,7 +111,7 @@ $SRC_H5STAT_OUTFILES/h5stat_numattrs4.ddl
 #
 # copy test files and expected output files from source dirs to test dir
 #
-COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_ERR_TEST_FILES $LIST_OTHER_TEST_FILES"
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES"
 
 COPY_TESTFILES_TO_TESTDIR()
 {
@@ -187,7 +175,6 @@ TESTING() {
 #
 TOOLTEST() {
    expect="$TESTDIR/$1"
-   expect_err="$TESTDIR/`basename $1 .ddl`.err"
    actual="$TESTDIR/`basename $1 .ddl`.out"
    actual_err="$TESTDIR/`basename $1 .ddl`.out.err"
    actual_sav=${actual}-sav
@@ -207,17 +194,7 @@ TOOLTEST() {
    cp $actual_err $actual_err_sav
    STDERR_FILTER $actual_err
 
-   if [ ! -f $expect ]; then
-      # Compare error files if the expect file doesn't exist.
-      if $CMP $expect_err $actual_err; then
-         echo " PASSED"
-      else
-         echo "*FAILED*"
-         echo "    Expected result (*.err) differs from actual result (*.out.err)"
-         nerrors="`expr $nerrors + 1`"
-         test yes = "$verbose" && $DIFF $expect_err $actual_err |sed 's/^/    /'
-      fi
-   elif $CMP $expect $actual; then
+   if $CMP $expect $actual; then
       echo " PASSED"
    else
       echo "*FAILED*"
