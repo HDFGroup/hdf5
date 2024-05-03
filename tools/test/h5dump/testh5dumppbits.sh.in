@@ -133,26 +133,10 @@ $SRC_H5DUMP_OUTFILES/pbits/tpbitsSignedLongLong16.ddl
 $SRC_H5DUMP_OUTFILES/pbits/tpbitsUnsignedLongLong16.ddl
 "
 
-LIST_ERROR_TEST_FILES="
-${SRC_H5DUMP_ERRORFILES}/pbits/tnofilename-with-packed-bits.err
-${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsCharLengthExceeded.err
-${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsCharOffsetExceeded.err
-${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsIncomplete.err
-${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsIntLengthExceeded.err
-${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsIntOffsetExceeded.err
-${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsLengthExceeded.err
-${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsLengthPositive.err
-${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsLongLengthExceeded.err
-${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsLongOffsetExceeded.err
-${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsMaxExceeded.err
-${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsOffsetExceeded.err
-${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsOffsetNegative.err
-"
-
 #
 # copy test files and expected output files from source dirs to test dir
 #
-COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES $LIST_ERROR_TEST_FILES"
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES"
 
 COPY_TESTFILES_TO_TESTDIR()
 {
@@ -431,6 +415,44 @@ TOOLTEST4() {
 
 }
 
+# Call the h5dump tool and grep for a value
+# txttype ERRTXT greps test error output, otherwise greps test output
+GREPTEST()
+{
+    txttype=$1
+    expectdata=$2
+    actual=$TESTDIR/$3
+    actual_err="$TESTDIR/`basename $3 .ddl`.oerr"
+    shift
+    shift
+    shift
+
+    # Run test.
+    TESTING $DUMPER -p $@
+    (
+        cd $TESTDIR
+        $ENVCMD $RUNSERIAL $DUMPER_BIN -p "$@"
+    ) >$actual 2>$actual_err
+
+    if [ "$txttype" = "ERRTXT" ]; then
+        $GREP "$expectdata" $actual_err > /dev/null
+    else
+        $GREP "$expectdata" $actual > /dev/null
+    fi
+
+    if [ $? -eq 0 ]; then
+        echo " PASSED"
+    else
+        echo " FAILED"
+        nerrors="`expr $nerrors + 1`"
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+        rm -f $actual $actual_err
+    fi
+}
+
 # Print a "SKIP" message
 SKIP() {
    TESTING $DUMPER $@
@@ -511,7 +533,7 @@ COPY_TESTFILES_TO_TESTDIR
 
 # test failure handling
 # Missing file name
-TOOLTEST tnofilename-with-packed-bits.ddl --enable-error-stack
+GREPTEST ERRTXT "missing file name" tnofilename-with-packed-bits.ddl --enable-error-stack
 # Limits:
 # Maximum number of packed bits is 8 (for now).
 # Maximum integer size is 64 (for now).
@@ -570,23 +592,23 @@ TOOLTEST tpbitsCompound.ddl --enable-error-stack -d /dset1 -M 0,1,1,1 tcompound.
 TOOLTEST tpbitsArray.ddl --enable-error-stack -d /Dataset1 -M 0,1,1,1 tarray1.h5
 # Test Error handling.
 # Too many packed bits requested. Max is 8 for now.
-TOOLTEST tpbitsMaxExceeded.ddl --enable-error-stack -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5
+GREPTEST ERRTXT "Too many masks requested" tpbitsMaxExceeded.ddl --enable-error-stack -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5
 # Offset too large. Max is 7 (8-1) for now.
-TOOLTEST tpbitsOffsetExceeded.ddl --enable-error-stack -d /DS08BITS -M 64,1 packedbits.h5
+GREPTEST ERRTXT "must be between 0 and 63" tpbitsOffsetExceeded.ddl --enable-error-stack -d /DS08BITS -M 64,1 packedbits.h5
 TOOLTEST tpbitsCharOffsetExceeded.ddl --enable-error-stack -d /DS08BITS -M 8,1 packedbits.h5
 TOOLTEST tpbitsIntOffsetExceeded.ddl --enable-error-stack -d /DS16BITS -M 16,1 packedbits.h5
 TOOLTEST tpbitsLongOffsetExceeded.ddl --enable-error-stack -d /DS32BITS -M 32,1 packedbits.h5
 # Bad offset, must not be negative.
-TOOLTEST tpbitsOffsetNegative.ddl --enable-error-stack -d /DS08BITS -M -1,1 packedbits.h5
+GREPTEST ERRTXT "Bad mask list" tpbitsOffsetNegative.ddl --enable-error-stack -d /DS08BITS -M -1,1 packedbits.h5
 # Bad length, must not be positive.
-TOOLTEST tpbitsLengthPositive.ddl --enable-error-stack -d /DS08BITS -M 4,0 packedbits.h5
+GREPTEST ERRTXT "must be positive" tpbitsLengthPositive.ddl --enable-error-stack -d /DS08BITS -M 4,0 packedbits.h5
 # Offset+Length is too large. Max is 8 for now.
-TOOLTEST tpbitsLengthExceeded.ddl --enable-error-stack -d /DS08BITS -M 37,28 packedbits.h5
+GREPTEST ERRTXT "too large" tpbitsLengthExceeded.ddl --enable-error-stack -d /DS08BITS -M 37,28 packedbits.h5
 TOOLTEST tpbitsCharLengthExceeded.ddl --enable-error-stack -d /DS08BITS -M 2,7 packedbits.h5
 TOOLTEST tpbitsIntLengthExceeded.ddl --enable-error-stack -d /DS16BITS -M 10,7 packedbits.h5
 TOOLTEST tpbitsLongLengthExceeded.ddl --enable-error-stack -d /DS32BITS -M 26,7 packedbits.h5
 # Incomplete pair of packed bits request.
-TOOLTEST tpbitsIncomplete.ddl --enable-error-stack -d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5
+GREPTEST ERRTXT "Bad mask list" tpbitsIncomplete.ddl --enable-error-stack -d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

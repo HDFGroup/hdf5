@@ -59,7 +59,6 @@ $SRC_H5COPY_TESTFILES/h5copy_extlinks_trg.h5
 # List of expect files that will be copied over to local test dir
 LIST_OTHER_TEST_FILES="
 $SRC_H5COPY_OUTFILES/h5copy_misc1.out
-$SRC_H5COPY_OUTFILES/h5copy_misc1.err
 $SRC_H5COPY_OUTFILES/h5copy_help1.ddl
 $SRC_H5COPY_OUTFILES/h5copy_help2.ddl
 "
@@ -373,6 +372,53 @@ TOOLTEST_SAME()
 }
 
 
+# Call the h5copy tool and grep for a value
+# txttype ERRTXT greps test error output, otherwise greps test output
+GREPTEST()
+{
+    txttype=$1
+    expectdata=$2
+    expectout="$TESTDIR/$3"
+    expecterr="$TESTDIR/`basename $3 .out`.err"
+    actualout="$TESTDIR/$3.actualout"
+    actualerr="$TESTDIR/$3.actualerr"
+    shift
+    shift
+    shift
+    if [ "$1" = -i ]; then
+        inputfile=$2
+    fi
+
+    if [ "$3" = -o ]; then
+        outputfile=$4
+    fi
+
+    # Run test.
+    TESTING $H5COPY $@
+    (
+        $RUNSERIAL $H5COPY_BIN $@
+    ) > $actualout 2> $actualerr
+    RET=$?
+
+    if [ "$txttype" = "ERRTXT" ]; then
+        $GREP "$expectdata" $actualerr > /dev/null
+    else
+        $GREP "$expectdata" $actualout > /dev/null
+    fi
+
+    if [ $? -eq 0 ]; then
+        echo " PASSED"
+    else
+        echo " FAILED"
+        nerrors="`expr $nerrors + 1`"
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+        rm -f $actual $actual_err
+    fi
+}
+
 # Compare the two text files
 # PASS if same
 # FAIL if different, and show the diff
@@ -630,7 +676,7 @@ TEST_MISC()
     TESTFILE="$TESTDIR/h5copytst.h5"
 
     echo "Test copying object into group which doesn't exist, without -p"
-    TOOLTEST_FAIL h5copy_misc1.out -i $TESTFILE -o $TESTDIR/h5copy_misc1.out.h5 -v -s /simple  -d /g1/g2/simple
+    GREPTEST ERRTXT "h5copy error" h5copy_misc1.out -i $TESTFILE -o $TESTDIR/h5copy_misc1.out.h5 -v -s /simple  -d /g1/g2/simple
 
     echo "Test copying objects to the same file "
     TOOLTEST_SAME -i $TESTFILE -o $TESTDIR/samefile1.out.h5 /simple /simple_cp
