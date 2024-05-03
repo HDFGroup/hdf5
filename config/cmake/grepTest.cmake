@@ -11,6 +11,7 @@
 #
 # grepTest.cmake executes a command and captures the output in a file. File is then compared
 # against a reference file. Exit status of command can also be compared.
+cmake_policy(SET CMP0007 NEW)
 
 # arguments checking
 if (NOT TEST_PROGRAM)
@@ -67,6 +68,11 @@ execute_process (
 
 message (STATUS "COMMAND Result: ${TEST_RESULT}")
 
+# append the test result status with a predefined text
+if (TEST_APPEND)
+  file (APPEND ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_APPEND} ${TEST_RESULT}\n")
+endif ()
+
 message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
 # remove special output
@@ -75,13 +81,20 @@ if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   string (FIND "${TEST_STREAM}" "_pmi_alps" TEST_FIND_RESULT)
   if (TEST_FIND_RESULT GREATER -1)
     string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
   endif ()
   string (FIND "${TEST_STREAM}" "ulimit -s" TEST_FIND_RESULT)
   if (TEST_FIND_RESULT GREATER -1)
     string (REGEX REPLACE "^.*ulimit -s[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
   endif ()
+endif ()
+
+if (TEST_REF_FILTER)
+  #message (STATUS "TEST_REF_FILTER: ${TEST_APPEND}${TEST_REF_FILTER}")
+  file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
+  string (REGEX REPLACE "${TEST_REF_APPEND}" "${TEST_REF_FILTER}" TEST_STREAM "${TEST_STREAM}")
+  file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
 endif ()
 
 # if the TEST_ERRREF exists grep the error output with the error reference
@@ -96,26 +109,25 @@ if (TEST_ERRREF)
       string (REGEX MATCH "${TEST_ERRREF}" TEST_MATCH ${TEST_ERR_STREAM})
       string (COMPARE EQUAL "${TEST_ERRREF}" "${TEST_MATCH}" TEST_ERRREF_RESULT)
       if (NOT TEST_ERRREF_RESULT)
+        # dump the output unless nodisplay option is set
+        if (NOT TEST_NO_DISPLAY)
+          execute_process (
+              COMMAND ${CMAKE_COMMAND} -E echo ${TEST_ERR_STREAM}
+              RESULT_VARIABLE TEST_ERRREF_RESULT
+          )
+        endif ()
         message (FATAL_ERROR "Failed: The error output of ${TEST_PROGRAM} did not contain ${TEST_ERRREF}")
       endif ()
     endif ()
   endif ()
 
-  #always compare output file to reference unless this must be skipped
+  # compare output files to references unless this must be skipped
   set (TEST_COMPARE_RESULT 0)
   if (NOT TEST_SKIP_COMPARE)
     if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
       file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
       list (LENGTH TEST_STREAM test_len)
       if (test_len GREATER 0)
-        if (WIN32)
-          configure_file(${TEST_FOLDER}/${TEST_REFERENCE} ${TEST_FOLDER}/${TEST_REFERENCE}.tmp NEWLINE_STYLE CRLF)
-          if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}.tmp")
-            file(RENAME ${TEST_FOLDER}/${TEST_REFERENCE}.tmp ${TEST_FOLDER}/${TEST_REFERENCE})
-          endif ()
-          #file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
-          #file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
-        endif ()
         if (NOT TEST_SORT_COMPARE)
           # now compare the output with the reference
           execute_process (
@@ -138,7 +150,14 @@ if (TEST_ERRREF)
           list (LENGTH test_act len_act)
           file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} test_ref)
           list (LENGTH test_ref len_ref)
+          if (NOT len_act EQUAL len_ref)
+            set (TEST_COMPARE_RESULT 1)
+          endif ()
           if (len_act GREATER 0 AND len_ref GREATER 0)
+            if (TEST_SORT_COMPARE)
+              list (SORT test_act)
+              list (SORT test_ref)
+            endif ()
             math (EXPR _FP_LEN "${len_ref} - 1")
             foreach (line RANGE 0 ${_FP_LEN})
               list (GET test_act ${line} str_act)
@@ -200,7 +219,7 @@ if (TEST_FILTER)
 endif ()
 
 if (NOT DEFINED ENV{HDF5_NOCLEANUP})
-  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}" AND NOT TEST_SAVE)
     file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
   endif ()
 
