@@ -17,6 +17,7 @@ srcdir=@srcdir@
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 HAVE__FLOAT16="@HAVE__FLOAT16@"
+HAVE_COMPLEX_NUMBERS="@HAVE_COMPLEX_NUMBERS@"
 WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
 
 TESTNAME=h5ls
@@ -70,6 +71,8 @@ $SRC_H5DUMP_TESTFILES/tall.h5
 $SRC_H5DUMP_TESTFILES/tarray1.h5
 $SRC_H5DUMP_TESTFILES/tattr2.h5
 $SRC_H5DUMP_TESTFILES/tattrreg.h5
+$SRC_H5DUMP_TESTFILES/tcomplex.h5
+$SRC_H5DUMP_TESTFILES/tcomplex_be.h5
 $SRC_H5DUMP_TESTFILES/tcompound.h5
 $SRC_H5DUMP_TESTFILES/tdatareg.h5
 $SRC_H5DUMP_TESTFILES/tdset.h5
@@ -106,6 +109,10 @@ $SRC_H5LS_OUTFILES/tattr2.ls
 $SRC_H5LS_OUTFILES/tattrreg_le.ls
 $SRC_H5LS_OUTFILES/tattrreg_be.ls
 $SRC_H5LS_OUTFILES/tcomp-1.ls
+$SRC_H5LS_OUTFILES/tcomplex.ls
+$SRC_H5LS_OUTFILES/tcomplex_be.ls
+$SRC_H5LS_OUTFILES/tcomplex_be_nosupport.ls
+$SRC_H5LS_OUTFILES/tcomplex_nosupport.ls
 $SRC_H5LS_OUTFILES/tdataregbe.ls
 $SRC_H5LS_OUTFILES/tdataregle.ls
 $SRC_H5LS_OUTFILES/tdset-1.ls
@@ -369,6 +376,21 @@ if test $HAVE__FLOAT16 = "yes" ; then
 else
   TOOLTEST tfloat16_nosupport.ls 0 -w80 -v tfloat16.h5
   TOOLTEST tfloat16_be_nosupport.ls 0 -w80 -v tfloat16_be.h5
+fi
+
+# test for complex numbers
+if test $HAVE_COMPLEX_NUMBERS = "yes" ; then
+  if test $WORDS_BIGENDIAN = "yes" ; then
+    TOOLTEST tcomplex_be.ls 0 -w80 -v tcomplex_be.h5
+  else
+    TOOLTEST tcomplex.ls 0 -w80 -v tcomplex.h5
+  fi
+else
+  if test $WORDS_BIGENDIAN = "yes" ; then
+    TOOLTEST tcomplex_be_nosupport.ls 0 -w80 -v tcomplex_be.h5
+  else
+    TOOLTEST tcomplex_nosupport.ls 0 -w80 -v tcomplex.h5
+  fi
 fi
 
 # test for wildcards in filename (does not work with cmake)

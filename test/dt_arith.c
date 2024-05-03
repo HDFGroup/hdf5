@@ -42,7 +42,7 @@
 #endif
 #define SET_ALIGNMENT(TYPE, VAL) H5T_NATIVE_##TYPE##_ALIGN_g = MAX(H5T_NATIVE_##TYPE##_ALIGN_g, VAL)
 
-static const char *FILENAME[] = {"dt_arith1", "dt_arith2", NULL};
+static const char *FILENAME[] = {"dt_arith1", "dt_arith2", "dt_arith3", NULL};
 
 /*
  * Count up or down depending on whether the machine is big endian or little
@@ -66,8 +66,28 @@ typedef enum dtype_t {
     FLT_FLOAT,
     FLT_DOUBLE,
     FLT_LDOUBLE,
+    FLT_COMPLEX,
+    DBL_COMPLEX,
+    LDBL_COMPLEX,
     OTHER
 } dtype_t;
+
+typedef enum conv_func_ret_t {
+    CONV_ERROR = -1, /* Failure during conversion */
+    CONV_SUCCESS,    /* Converted without overflow or underflow */
+    CONV_OVERFLOW,   /* Converted with overflow */
+    CONV_UNDERFLOW,  /* Converted with underflow */
+
+    /* Complex number overflow/underflow values */
+    CONV_OVERFLOW_REAL,  /* Converted with overflow on real part */
+    CONV_OVERFLOW_IMAG,  /* Converted with overflow on imaginary part */
+    CONV_OVERFLOW_BOTH,  /* Converted with overflow on real and imaginary parts */
+    CONV_UNDERFLOW_REAL, /* Converted with underflow on real part */
+    CONV_UNDERFLOW_IMAG, /* Converted with underflow on imaginary part */
+    CONV_UNDERFLOW_BOTH, /* Converted with underflow on real and imaginary parts */
+    CONV_OVERUNDER,      /* Converted with overflow on real part and underflow on imaginary part */
+    CONV_UNDEROVER,      /* Converted with underflow on real part and overflow on imaginary part */
+} conv_func_ret_t;
 
 /*
  * Although we check whether a floating point overflow generates a SIGFPE and
@@ -446,6 +466,11 @@ reset_hdf5(void)
 #ifdef H5_HAVE__FLOAT16
     SET_ALIGNMENT(FLOAT16, H5_SIZEOF__FLOAT16);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    SET_ALIGNMENT(FLOAT_COMPLEX, H5_SIZEOF_FLOAT_COMPLEX);
+    SET_ALIGNMENT(DOUBLE_COMPLEX, H5_SIZEOF_DOUBLE_COMPLEX);
+    SET_ALIGNMENT(LDOUBLE_COMPLEX, H5_SIZEOF_LONG_DOUBLE_COMPLEX);
+#endif
 #endif
 }
 
@@ -646,6 +671,17 @@ test_particular_fp_integer(void)
     size_t         src_size3;
     size_t         dst_size3;
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    unsigned char *buf4       = NULL;
+    unsigned char *saved_buf4 = NULL;
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+    H5_float_complex src_fc = (H5_float_complex)INT_MAX;
+#else
+    H5_float_complex src_fc = H5_CMPLXF(INT_MAX, 0.0F);
+#endif
+    size_t src_size4;
+    size_t dst_size4;
+#endif
 #endif
 
     TESTING("hard particular floating number -> integer conversions");
@@ -754,7 +790,7 @@ test_particular_fp_integer(void)
     }
 
 #ifdef H5_HAVE__FLOAT16
-    /* Test conversion from _Float16 (the value is INT_MAX) to int. */
+    /* Test conversion from _Float16 (the value is SHRT_MAX) to short. */
     src_size3  = H5Tget_size(H5T_NATIVE_FLOAT16);
     dst_size3  = H5Tget_size(H5T_NATIVE_SHORT);
     buf3       = (unsigned char *)calloc((size_t)1, (size_t)MAX(src_size3, dst_size3));
@@ -797,8 +833,60 @@ test_particular_fp_integer(void)
         memcpy(&y, buf3, dst_size3);
         printf(" %29d\n", (int)y);
     }
-#endif
-#endif
+#endif /* H5_HAVE__FLOAT16 */
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    /* Test conversion from float complex (the value is INT_MAX) to int. */
+    src_size4  = H5Tget_size(H5T_NATIVE_FLOAT_COMPLEX);
+    dst_size4  = H5Tget_size(H5T_NATIVE_INT);
+    buf4       = (unsigned char *)calloc((size_t)1, (size_t)MAX(src_size4, dst_size4));
+    saved_buf4 = (unsigned char *)calloc((size_t)1, (size_t)MAX(src_size4, dst_size4));
+    memcpy(buf4, &src_fc, src_size4);
+    memcpy(saved_buf4, &src_fc, src_size4);
+
+    /* signal exception handling function that the destination is "int". */
+    flag = 0;
+
+    /* Do conversion */
+    if (H5Tconvert(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_INT, (size_t)1, buf4, NULL, dxpl_id) < 0) {
+        H5_FAILED();
+        printf("Can't convert data\n");
+        goto error;
+    }
+
+    memcpy(&dst_i, buf4, dst_size4);
+
+    /* Print errors */
+    if (dst_i != fill_value) {
+        H5_float_complex x = H5_CMPLXF(0.0F, 0.0F);
+        unsigned char   *buf_ptr;
+        int              y;
+
+        if (0 == fails_this_test++)
+            H5_FAILED();
+
+        printf("    test float complex to int:\n");
+        printf("        src = ");
+        buf_ptr = saved_buf4;
+        for (j = 0; j < src_size4 / 2; j++)
+            printf(" %02x", buf_ptr[ENDIAN(src_size4 / 2, j, endian)]);
+        buf_ptr += src_size4 / 2;
+        for (j = 0; j < src_size4 / 2; j++)
+            printf(" %02x", buf_ptr[ENDIAN(src_size4 / 2, j, endian)]);
+
+        memcpy(&x, saved_buf4, src_size4);
+        printf(" %29.20e%+29.20ei\n", (double)crealf(x), (double)cimagf(x));
+
+        printf("        dst = ");
+        for (j = 0; j < dst_size4; j++)
+            printf(" %02x", buf4[ENDIAN(dst_size4, j, endian)]);
+
+        memcpy(&y, buf4, dst_size4);
+        printf(" %29d\n", y);
+    }
+#endif /* H5_HAVE_COMPLEX_NUMBERS */
+
+#endif /* H5_WANT_DCONV_EXCEPTION */
 
     if (fails_this_test)
         goto error;
@@ -819,6 +907,10 @@ test_particular_fp_integer(void)
     if (buf3)
         free(buf3);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    if (buf4)
+        free(buf4);
+#endif
 #endif
 
     if (saved_buf1)
@@ -830,6 +922,10 @@ test_particular_fp_integer(void)
 #ifdef H5_HAVE__FLOAT16
     if (saved_buf3)
         free(saved_buf3);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    if (saved_buf4)
+        free(saved_buf4);
 #endif
 #endif
 
@@ -853,6 +949,10 @@ error:
     if (buf3)
         free(buf3);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    if (buf4)
+        free(buf4);
+#endif
 #endif
 
     if (saved_buf1)
@@ -864,6 +964,10 @@ error:
 #ifdef H5_HAVE__FLOAT16
     if (saved_buf3)
         free(saved_buf3);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    if (saved_buf4)
+        free(saved_buf4);
 #endif
 #endif
 
@@ -983,7 +1087,7 @@ test_derived_flt(void)
 
     if (H5Tcommit2(file, "new float type 1", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) {
         H5_FAILED();
-        printf("Can't set inpad\n");
+        printf("Can't commit datatype\n");
         goto error;
     }
     if (H5Tclose(tid1) < 0) {
@@ -1286,6 +1390,12 @@ test_derived_flt(void)
         printf("Can't close file\n");
         goto error;
     } /* end if */
+
+    if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
+        H5_FAILED();
+        printf("Can't delete file\n");
+        goto error;
+    }
 
     PASSED();
 
@@ -1594,6 +1704,12 @@ test_derived_integer(void)
         goto error;
     } /* end if */
 
+    if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
+        H5_FAILED();
+        printf("Can't delete file\n");
+        goto error;
+    }
+
     free(buf);
     free(saved_buf);
 
@@ -1625,6 +1741,292 @@ error:
     h5_restore_err();
 
     reset_hdf5(); /*print statistics*/
+
+    return MAX((int)fails_this_test, 1);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_derived_complex
+ *
+ * Purpose:     Tests user-defined and query functions of complex number
+ *              types.
+ *
+ * Return:      Success:    0
+ *              Failure:    number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_derived_complex(void)
+{
+    unsigned char *buf             = NULL;
+    unsigned char *saved_buf       = NULL;
+    unsigned int   fails_this_test = 0;
+    const size_t   max_fails       = 40;
+    size_t         spos, epos, esize, mpos, msize, size;
+    size_t         src_size;
+    size_t         nelmts  = NTESTELEM;
+    hid_t          file    = H5I_INVALID_HID;
+    hid_t          dxpl_id = H5I_INVALID_HID;
+    hid_t          tid     = H5I_INVALID_HID;
+    hid_t          flt_tid = H5I_INVALID_HID;
+    char           filename[1024];
+    char           str[256];
+    int           *aligned = NULL;
+    int            endian;
+
+    TESTING("user-defined and query functions of complex number types");
+
+    /* Create File */
+    h5_fixname(FILENAME[2], H5P_DEFAULT, filename, sizeof filename);
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't create file\n");
+        goto error;
+    }
+
+    if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) {
+        H5_FAILED();
+        printf("Can't create data transfer property list\n");
+        goto error;
+    }
+
+    /*------------------------------------------------------------------------
+     *                   derived floating-point type
+     * size=7 byte, precision=42 bits, offset=3 bits, mantissa size=31 bits,
+     * mantissa position=3, exponent size=10 bits, exponent position=34,
+     * exponent bias=511.  It can be illustrated in little-endian order as
+     *
+     *          6       5       4       3       2       1       0
+     *    ???????? ???SEEEE EEEEEEMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMM???
+     *
+     * To create a new floating-point type, the following properties must be
+     * set in the order of
+     *   set fields -> set offset -> set precision -> set size.
+     * All these properties must be set before the type can function. Other
+     * properties can be set anytime.  Derived type size cannot be expanded
+     * bigger than original size but can be decreased.  There should be no
+     * holes among the significant bits.  Exponent bias usually is set
+     * 2^(n-1)-1, where n is the exponent size.
+     *-----------------------------------------------------------------------*/
+    if ((flt_tid = H5Tcopy(H5T_IEEE_F64LE)) < 0) {
+        H5_FAILED();
+        printf("Can't copy data type\n");
+        goto error;
+    }
+    if (H5Tset_fields(flt_tid, (size_t)44, (size_t)34, (size_t)10, (size_t)3, (size_t)31) < 0) {
+        H5_FAILED();
+        printf("Can't set fields\n");
+        goto error;
+    }
+    if (H5Tset_offset(flt_tid, (size_t)3) < 0) {
+        H5_FAILED();
+        printf("Can't set offset\n");
+        goto error;
+    }
+    if (H5Tset_precision(flt_tid, (size_t)42) < 0) {
+        H5_FAILED();
+        printf("Can't set precision 1\n");
+        goto error;
+    }
+    if (H5Tset_size(flt_tid, (size_t)7) < 0) {
+        H5_FAILED();
+        printf("Can't set size\n");
+        goto error;
+    }
+    if (H5Tset_ebias(flt_tid, (size_t)511) < 0) {
+        H5_FAILED();
+        printf("Can't set exponent bias\n");
+        goto error;
+    }
+    if (H5Tset_pad(flt_tid, H5T_PAD_ZERO, H5T_PAD_ZERO) < 0) {
+        H5_FAILED();
+        printf("Can't set padding\n");
+        goto error;
+    }
+
+    /* Create complex number type from derived floating-point type */
+    if ((tid = H5Tcomplex_create(flt_tid)) < 0) {
+        H5_FAILED();
+        printf("Can't create complex number type\n");
+        goto error;
+    }
+
+    if (H5Tcommit2(file, "new complex number type 1", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) {
+        H5_FAILED();
+        printf("Can't commit datatype\n");
+        goto error;
+    }
+    if (H5Tclose(tid) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if ((tid = H5Topen2(file, "new complex number type 1", H5P_DEFAULT)) < 0)
+        FAIL_PUTS_ERROR("Can't open datatype");
+    if (H5Tget_fields(tid, &spos, &epos, &esize, &mpos, &msize) < 0) {
+        H5_FAILED();
+        printf("Can't get fields\n");
+        goto error;
+    }
+    if (spos != 44 || epos != 34 || esize != 10 || mpos != 3 || msize != 31) {
+        H5_FAILED();
+        printf("Wrong field values\n");
+        goto error;
+    }
+    if (H5Tget_precision(tid) != 42) {
+        H5_FAILED();
+        printf("Can't get precision or wrong precision\n");
+        goto error;
+    }
+    if (H5Tget_offset(tid) != 3) {
+        H5_FAILED();
+        printf("Can't get offset or wrong offset\n");
+        goto error;
+    }
+    if ((size = H5Tget_size(tid)) != 14) { /* Size of complex number type is 2 * floating-point type size */
+        H5_FAILED();
+        printf("Can't get size or wrong size\n");
+        goto error;
+    }
+    if (H5Tget_ebias(tid) != 511) {
+        H5_FAILED();
+        printf("Can't get exponent bias or wrong bias\n");
+        goto error;
+    }
+
+    /* Convert data from native integer to the derived complex number type.
+     * Then convert data from the complex number type back to native integer.
+     * Compare the final data with the original data.
+     */
+    src_size  = H5Tget_size(H5T_NATIVE_INT);
+    endian    = H5Tget_order(H5T_NATIVE_INT);
+    buf       = malloc(nelmts * (MAX(src_size, size)));
+    saved_buf = malloc(nelmts * src_size);
+    aligned   = calloc((size_t)1, src_size);
+    memset(buf, 0, nelmts * MAX(src_size, size));
+    memset(saved_buf, 0, nelmts * src_size);
+
+    for (size_t i = 0; i < nelmts * src_size; i++)
+        buf[i] = saved_buf[i] = (unsigned char)rand();
+
+    if (H5Tconvert(H5T_NATIVE_INT, tid, nelmts, buf, NULL, dxpl_id) < 0) {
+        H5_FAILED();
+        printf("Can't convert data\n");
+        goto error;
+    }
+    if (H5Tconvert(tid, H5T_NATIVE_INT, nelmts, buf, NULL, dxpl_id) < 0) {
+        H5_FAILED();
+        printf("Can't convert data\n");
+        goto error;
+    }
+
+    /* Are the values still the same?*/
+    for (size_t i = 0; i < nelmts; i++) {
+        size_t j;
+
+        for (j = 0; j < src_size; j++)
+            if (buf[i * src_size + j] != saved_buf[i * src_size + j])
+                break;
+        if (j == src_size)
+            continue; /*no error*/
+
+        /* Print errors */
+        if (0 == fails_this_test++) {
+            snprintf(str, sizeof(str),
+                     "\nTesting conversions between random integers and derived complex number type");
+            printf("%-70s", str);
+            fflush(stdout);
+            H5_FAILED();
+        }
+        printf("    test %u elmt %u: \n", 1, (unsigned)i);
+
+        printf("        src = ");
+        for (j = 0; j < src_size; j++)
+            printf(" %02x", saved_buf[i * src_size + ENDIAN(src_size, j, endian)]);
+
+        memcpy(aligned, saved_buf + i * sizeof(int), sizeof(int));
+        printf(" %29d\n", *aligned);
+
+        printf("        dst = ");
+        for (j = 0; j < src_size; j++)
+            printf(" %02x", buf[i * src_size + ENDIAN(src_size, j, endian)]);
+
+        memcpy(aligned, buf + i * sizeof(int), sizeof(int));
+        printf(" %29d\n", *aligned);
+
+        if (fails_this_test >= max_fails) {
+            puts("    maximum failures reached, aborting test...");
+            goto error;
+        }
+    }
+
+    fails_this_test = 0;
+    free(buf);
+    free(saved_buf);
+    free(aligned);
+    buf       = NULL;
+    saved_buf = NULL;
+    aligned   = NULL;
+
+    if (H5Tclose(flt_tid) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if (H5Tclose(tid) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if (H5Pclose(dxpl_id) < 0) {
+        H5_FAILED();
+        printf("Can't close property list\n");
+        goto error;
+    }
+
+    if (H5Fclose(file) < 0) {
+        H5_FAILED();
+        printf("Can't close file\n");
+        goto error;
+    }
+
+    if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
+        H5_FAILED();
+        printf("Can't delete file\n");
+        goto error;
+    }
+
+    PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
+    reset_hdf5();
+
+    return 0;
+
+error:
+    free(buf);
+    free(saved_buf);
+    free(aligned);
+
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(flt_tid);
+        H5Tclose(tid);
+        H5Pclose(dxpl_id);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
+    reset_hdf5();
 
     return MAX((int)fails_this_test, 1);
 }
@@ -1887,6 +2289,9 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_FLOAT:
                 case FLT_DOUBLE:
                 case FLT_LDOUBLE:
+                case FLT_COMPLEX:
+                case DBL_COMPLEX:
+                case LDBL_COMPLEX:
                 case OTHER:
                 default:
                     assert(0 && "Unknown type");
@@ -1940,6 +2345,9 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_FLOAT:
                 case FLT_DOUBLE:
                 case FLT_LDOUBLE:
+                case FLT_COMPLEX:
+                case DBL_COMPLEX:
+                case LDBL_COMPLEX:
                 case OTHER:
                 default:
                     assert(0 && "Unknown type");
@@ -1993,6 +2401,9 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_FLOAT:
                 case FLT_DOUBLE:
                 case FLT_LDOUBLE:
+                case FLT_COMPLEX:
+                case DBL_COMPLEX:
+                case LDBL_COMPLEX:
                 case OTHER:
                 default:
                     assert(0 && "Unknown type");
@@ -2046,6 +2457,9 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_FLOAT:
                 case FLT_DOUBLE:
                 case FLT_LDOUBLE:
+                case FLT_COMPLEX:
+                case DBL_COMPLEX:
+                case LDBL_COMPLEX:
                 case OTHER:
                 default:
                     assert(0 && "Unknown type");
@@ -2099,6 +2513,9 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_FLOAT:
                 case FLT_DOUBLE:
                 case FLT_LDOUBLE:
+                case FLT_COMPLEX:
+                case DBL_COMPLEX:
+                case LDBL_COMPLEX:
                 case OTHER:
                 default:
                     assert(0 && "Unknown type");
@@ -2152,6 +2569,9 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_FLOAT:
                 case FLT_DOUBLE:
                 case FLT_LDOUBLE:
+                case FLT_COMPLEX:
+                case DBL_COMPLEX:
+                case LDBL_COMPLEX:
                 case OTHER:
                 default:
                     assert(0 && "Unknown type");
@@ -2205,6 +2625,9 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_FLOAT:
                 case FLT_DOUBLE:
                 case FLT_LDOUBLE:
+                case FLT_COMPLEX:
+                case DBL_COMPLEX:
+                case LDBL_COMPLEX:
                 case OTHER:
                 default:
                     assert(0 && "Unknown type");
@@ -2258,6 +2681,9 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_FLOAT:
                 case FLT_DOUBLE:
                 case FLT_LDOUBLE:
+                case FLT_COMPLEX:
+                case DBL_COMPLEX:
+                case LDBL_COMPLEX:
                 case OTHER:
                 default:
                     assert(0 && "Unknown type");
@@ -2311,6 +2737,9 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_FLOAT:
                 case FLT_DOUBLE:
                 case FLT_LDOUBLE:
+                case FLT_COMPLEX:
+                case DBL_COMPLEX:
+                case LDBL_COMPLEX:
                 case OTHER:
                 default:
                     assert(0 && "Unknown type");
@@ -2364,6 +2793,9 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_FLOAT:
                 case FLT_DOUBLE:
                 case FLT_LDOUBLE:
+                case FLT_COMPLEX:
+                case DBL_COMPLEX:
+                case LDBL_COMPLEX:
                 case OTHER:
                 default:
                     assert(0 && "Unknown type");
@@ -2547,6 +2979,9 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_FLOAT:
             case FLT_DOUBLE:
             case FLT_LDOUBLE:
+            case FLT_COMPLEX:
+            case DBL_COMPLEX:
+            case LDBL_COMPLEX:
             case OTHER:
             default:
                 assert(0 && "Unknown type");
@@ -2602,6 +3037,9 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_FLOAT:
             case FLT_DOUBLE:
             case FLT_LDOUBLE:
+            case FLT_COMPLEX:
+            case DBL_COMPLEX:
+            case LDBL_COMPLEX:
             case OTHER:
             default:
                 assert(0 && "Unknown type");
@@ -2647,6 +3085,9 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_FLOAT:
             case FLT_DOUBLE:
             case FLT_LDOUBLE:
+            case FLT_COMPLEX:
+            case DBL_COMPLEX:
+            case LDBL_COMPLEX:
             case OTHER:
             default:
                 assert(0 && "Unknown type");
@@ -2785,6 +3226,51 @@ my_isnan(dtype_t type, void *val)
         assert(0 && "Should not reach this point!");
 #endif
     }
+    else if (FLT_COMPLEX == type) {
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        H5_float_complex x;
+        float            x_real, x_imag;
+        memcpy(&x, val, sizeof(H5_float_complex));
+        x_real = crealf(x);
+        x_imag = cimagf(x);
+        if (isinf(x_real) || isinf(x_imag))
+            retval = 0;
+        else
+            retval = isnan(x_real) || isnan(x_imag);
+#else
+        assert(0 && "Should not reach this point!");
+#endif
+    }
+    else if (DBL_COMPLEX == type) {
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        H5_double_complex x;
+        double            x_real, x_imag;
+        memcpy(&x, val, sizeof(H5_double_complex));
+        x_real = creal(x);
+        x_imag = cimag(x);
+        if (isinf(x_real) || isinf(x_imag))
+            retval = 0;
+        else
+            retval = isnan(x_real) || isnan(x_imag);
+#else
+        assert(0 && "Should not reach this point!");
+#endif
+    }
+    else if (LDBL_COMPLEX == type) {
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        H5_ldouble_complex x;
+        long double        x_real, x_imag;
+        memcpy(&x, val, sizeof(H5_ldouble_complex));
+        x_real = creall(x);
+        x_imag = cimagl(x);
+        if (isinf(x_real) || isinf(x_imag))
+            retval = 0;
+        else
+            retval = isnan(x_real) || isnan(x_imag);
+#else
+        assert(0 && "Should not reach this point!");
+#endif
+    }
     else {
         return 0;
     }
@@ -2820,6 +3306,39 @@ my_isnan(dtype_t type, void *val)
 
             memcpy(&x, val, sizeof(H5__Float16));
             snprintf(s, sizeof(s), "%g", (double)x);
+#else
+            assert(0 && "Should not reach this point!");
+#endif
+        }
+        else if (FLT_COMPLEX == type) {
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            H5_float_complex x;
+            float            x_real;
+            memcpy(&x, val, sizeof(H5_float_complex));
+            x_real = crealf(x);
+            snprintf(s, sizeof(s), "%g", (double)x_real);
+#else
+            assert(0 && "Should not reach this point!");
+#endif
+        }
+        else if (DBL_COMPLEX == type) {
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            H5_double_complex x;
+            double            x_real;
+            memcpy(&x, val, sizeof(H5_double_complex));
+            x_real = creal(x);
+            snprintf(s, sizeof(s), "%g", x_real);
+#else
+            assert(0 && "Should not reach this point!");
+#endif
+        }
+        else if (LDBL_COMPLEX == type) {
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            H5_ldouble_complex x;
+            long double        x_real;
+            memcpy(&x, val, sizeof(H5_ldouble_complex));
+            x_real = creall(x);
+            snprintf(s, sizeof(s), "%Lg", x_real);
 #else
             assert(0 && "Should not reach this point!");
 #endif
@@ -2873,19 +3392,16 @@ my_isinf(int endian, const unsigned char *val, size_t size, size_t mpos, size_t 
  *              overflow and underflow when the destination type is a type
  *              with a smaller width than _Float16.
  *
- * Return:      -1 on failure
- *              0 on success without overflow or underflow
- *              1 on overflow
- *              2 on underflow
+ * Return:      enum conv_func_ret_t value
  *
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE__FLOAT16
-static int
+static conv_func_ret_t
 test_conv_flt_1_hw_conv_from_flt16(void *hw_dst, unsigned char *src_buf, size_t idx, dtype_t dst_type)
 {
-    H5__Float16 aligned;
-    int         ret = 0;
+    H5__Float16     aligned;
+    conv_func_ret_t ret = CONV_SUCCESS;
 
     memcpy(&aligned, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
 
@@ -2904,6 +3420,39 @@ test_conv_flt_1_hw_conv_from_flt16(void *hw_dst, unsigned char *src_buf, size_t 
             *((long double *)hw_dst) = (long double)aligned;
             break;
 #endif
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+        case FLT_COMPLEX:
+            *((H5_float_complex *)hw_dst) = (H5_float_complex)aligned;
+            break;
+        case DBL_COMPLEX:
+            *((H5_double_complex *)hw_dst) = (H5_double_complex)aligned;
+            break;
+        case LDBL_COMPLEX:
+            *((H5_ldouble_complex *)hw_dst) = (H5_ldouble_complex)aligned;
+            break;
+#else  /* H5_HAVE_C99_COMPLEX_NUMBERS */
+        case FLT_COMPLEX:
+            *((H5_float_complex *)hw_dst) = H5_CMPLXF(aligned, 0.0F);
+            break;
+        case DBL_COMPLEX:
+            *((H5_double_complex *)hw_dst) = H5_CMPLX(aligned, 0.0);
+            break;
+        case LDBL_COMPLEX:
+            *((H5_ldouble_complex *)hw_dst) = H5_CMPLXL(aligned, 0.0L);
+            break;
+#endif /* H5_HAVE_C99_COMPLEX_NUMBERS */
+#else  /* H5_HAVE_COMPLEX_NUMBERS */
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = CONV_ERROR;
+            goto done;
+#endif /* H5_HAVE_COMPLEX_NUMBERS */
+
         case INT_SCHAR:
         case INT_UCHAR:
         case INT_SHORT:
@@ -2918,7 +3467,7 @@ test_conv_flt_1_hw_conv_from_flt16(void *hw_dst, unsigned char *src_buf, size_t 
         default:
             H5_FAILED();
             printf("invalid destination conversion datatype");
-            ret = -1;
+            ret = CONV_ERROR;
             goto done;
     }
 
@@ -2935,18 +3484,15 @@ done:
  *              overflow and underflow when the destination type is a
  *              type with a smaller width than float.
  *
- * Return:      -1 on failure
- *              0 on success without overflow or underflow
- *              1 on overflow
- *              2 on underflow
+ * Return:      enum conv_func_ret_t value
  *
  *-------------------------------------------------------------------------
  */
-static int
+static conv_func_ret_t
 test_conv_flt_1_hw_conv_from_flt(void *hw_dst, unsigned char *src_buf, size_t idx, dtype_t dst_type)
 {
-    float aligned;
-    int   ret = 0;
+    float           aligned;
+    conv_func_ret_t ret = CONV_SUCCESS;
 
     memcpy(&aligned, src_buf + idx * sizeof(float), sizeof(float));
 
@@ -2971,13 +3517,51 @@ test_conv_flt_1_hw_conv_from_flt(void *hw_dst, unsigned char *src_buf, size_t id
 
             /* Check for overflow and underflow */
             if (fabsf(aligned) > (float)FLT16_MAX)
-                ret = 1;
+                ret = CONV_OVERFLOW;
             else if (fabsf(aligned) < (float)FLT16_MIN)
-                ret = 2;
+                ret = CONV_UNDERFLOW;
 
             H5_GCC_CLANG_DIAG_ON("pedantic")
             break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = CONV_ERROR;
+            goto done;
 #endif
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+        case FLT_COMPLEX:
+            *((H5_float_complex *)hw_dst) = (H5_float_complex)aligned;
+            break;
+        case DBL_COMPLEX:
+            *((H5_double_complex *)hw_dst) = (H5_double_complex)aligned;
+            break;
+        case LDBL_COMPLEX:
+            *((H5_ldouble_complex *)hw_dst) = (H5_ldouble_complex)aligned;
+            break;
+#else  /* H5_HAVE_C99_COMPLEX_NUMBERS */
+        case FLT_COMPLEX:
+            *((H5_float_complex *)hw_dst) = H5_CMPLXF(aligned, 0.0F);
+            break;
+        case DBL_COMPLEX:
+            *((H5_double_complex *)hw_dst) = H5_CMPLX(aligned, 0.0);
+            break;
+        case LDBL_COMPLEX:
+            *((H5_ldouble_complex *)hw_dst) = H5_CMPLXL(aligned, 0.0L);
+            break;
+#endif /* H5_HAVE_C99_COMPLEX_NUMBERS */
+#else  /* H5_HAVE_COMPLEX_NUMBERS */
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = CONV_ERROR;
+            goto done;
+#endif /* H5_HAVE_COMPLEX_NUMBERS */
+
         case INT_SCHAR:
         case INT_UCHAR:
         case INT_SHORT:
@@ -2992,7 +3576,7 @@ test_conv_flt_1_hw_conv_from_flt(void *hw_dst, unsigned char *src_buf, size_t id
         default:
             H5_FAILED();
             printf("invalid destination conversion datatype");
-            ret = -1;
+            ret = CONV_ERROR;
             goto done;
     }
 
@@ -3008,18 +3592,15 @@ done:
  *              overflow and underflow when the destination type is a
  *              type with a smaller width than double.
  *
- * Return:      -1 on failure
- *              0 on success without overflow or underflow
- *              1 on overflow
- *              2 on underflow
+ * Return:      enum conv_func_ret_t value
  *
  *-------------------------------------------------------------------------
  */
-static int
+static conv_func_ret_t
 test_conv_flt_1_hw_conv_from_double(void *hw_dst, unsigned char *src_buf, size_t idx, dtype_t dst_type)
 {
-    double aligned;
-    int    ret = 0;
+    double          aligned;
+    conv_func_ret_t ret = CONV_SUCCESS;
 
     memcpy(&aligned, src_buf + idx * sizeof(double), sizeof(double));
 
@@ -3029,9 +3610,9 @@ test_conv_flt_1_hw_conv_from_double(void *hw_dst, unsigned char *src_buf, size_t
 
             /* Check for overflow and underflow */
             if (fabs(aligned) > (double)FLT_MAX)
-                ret = 1;
+                ret = CONV_OVERFLOW;
             else if (fabs(aligned) < (double)FLT_MIN)
-                ret = 2;
+                ret = CONV_UNDERFLOW;
 
             break;
         case FLT_DOUBLE:
@@ -3051,12 +3632,55 @@ test_conv_flt_1_hw_conv_from_double(void *hw_dst, unsigned char *src_buf, size_t
 
             /* Check for overflow and underflow */
             if (fabs(aligned) > (double)FLT16_MAX)
-                ret = 1;
+                ret = CONV_OVERFLOW;
             else if (fabs(aligned) < (double)FLT16_MIN)
-                ret = 2;
+                ret = CONV_UNDERFLOW;
 
             H5_GCC_CLANG_DIAG_ON("pedantic")
             break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = CONV_ERROR;
+            goto done;
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        case FLT_COMPLEX:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5_float_complex *)hw_dst) = (H5_float_complex)aligned;
+#else
+            *((H5_float_complex *)hw_dst)   = H5_CMPLXF(aligned, 0.0F);
+#endif
+
+            /* Check for overflow and underflow */
+            if (fabs(aligned) > (double)FLT_MAX)
+                ret = CONV_OVERFLOW_REAL;
+            else if (fabs(aligned) < (double)FLT_MIN)
+                ret = CONV_UNDERFLOW_REAL;
+
+            break;
+        case DBL_COMPLEX:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5_double_complex *)hw_dst) = (H5_double_complex)aligned;
+#else
+            *((H5_double_complex *)hw_dst)  = H5_CMPLX(aligned, 0.0);
+#endif
+            break;
+        case LDBL_COMPLEX:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5_ldouble_complex *)hw_dst) = (H5_ldouble_complex)aligned;
+#else
+            *((H5_ldouble_complex *)hw_dst) = H5_CMPLXL(aligned, 0.0L);
+#endif
+            break;
+#else
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = CONV_ERROR;
+            goto done;
 #endif
         case INT_SCHAR:
         case INT_UCHAR:
@@ -3072,7 +3696,7 @@ test_conv_flt_1_hw_conv_from_double(void *hw_dst, unsigned char *src_buf, size_t
         default:
             H5_FAILED();
             printf("invalid destination conversion datatype");
-            ret = -1;
+            ret = CONV_ERROR;
             goto done;
     }
 
@@ -3088,19 +3712,16 @@ done:
  *              for overflow and underflow when the destination type is a
  *              type with a smaller width than long double.
  *
- * Return:      -1 on failure
- *              0 on success without overflow or underflow
- *              1 on overflow
- *              2 on underflow
+ * Return:      enum conv_func_ret_t value
  *
  *-------------------------------------------------------------------------
  */
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-static int
+static conv_func_ret_t
 test_conv_flt_1_hw_conv_from_ldouble(void *hw_dst, unsigned char *src_buf, size_t idx, dtype_t dst_type)
 {
-    long double aligned;
-    int         ret = 0;
+    long double     aligned;
+    conv_func_ret_t ret = CONV_SUCCESS;
 
     memcpy(&aligned, src_buf + idx * sizeof(long double), sizeof(long double));
 
@@ -3110,9 +3731,9 @@ test_conv_flt_1_hw_conv_from_ldouble(void *hw_dst, unsigned char *src_buf, size_
 
             /* Check for overflow and underflow */
             if (fabsl(aligned) > (long double)FLT_MAX)
-                ret = 1;
+                ret = CONV_OVERFLOW;
             else if (fabsl(aligned) < (long double)FLT_MIN)
-                ret = 2;
+                ret = CONV_UNDERFLOW;
 
             break;
         case FLT_DOUBLE:
@@ -3120,9 +3741,9 @@ test_conv_flt_1_hw_conv_from_ldouble(void *hw_dst, unsigned char *src_buf, size_
 
             /* Check for overflow and underflow */
             if (fabsl(aligned) > (long double)DBL_MAX)
-                ret = 1;
+                ret = CONV_OVERFLOW;
             else if (fabsl(aligned) < (long double)DBL_MIN)
-                ret = 2;
+                ret = CONV_UNDERFLOW;
 
             break;
         case FLT_LDOUBLE:
@@ -3137,12 +3758,62 @@ test_conv_flt_1_hw_conv_from_ldouble(void *hw_dst, unsigned char *src_buf, size_
 
             /* Check for overflow and underflow */
             if (fabsl(aligned) > (long double)FLT16_MAX)
-                ret = 1;
+                ret = CONV_OVERFLOW;
             else if (fabsl(aligned) < (long double)FLT16_MIN)
-                ret = 2;
+                ret = CONV_UNDERFLOW;
 
             H5_GCC_CLANG_DIAG_ON("pedantic")
             break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = CONV_ERROR;
+            goto done;
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        case FLT_COMPLEX:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5_float_complex *)hw_dst) = (H5_float_complex)aligned;
+#else
+            *((H5_float_complex *)hw_dst)   = H5_CMPLXF(aligned, 0.0F);
+#endif
+
+            /* Check for overflow and underflow */
+            if (fabsl(aligned) > (long double)FLT_MAX)
+                ret = CONV_OVERFLOW_REAL;
+            else if (fabsl(aligned) < (long double)FLT_MIN)
+                ret = CONV_UNDERFLOW_REAL;
+
+            break;
+        case DBL_COMPLEX:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5_double_complex *)hw_dst) = (H5_double_complex)aligned;
+#else
+            *((H5_double_complex *)hw_dst)  = H5_CMPLX(aligned, 0.0);
+#endif
+
+            /* Check for overflow and underflow */
+            if (fabsl(aligned) > (long double)DBL_MAX)
+                ret = CONV_OVERFLOW_REAL;
+            else if (fabsl(aligned) < (long double)DBL_MIN)
+                ret = CONV_UNDERFLOW_REAL;
+
+            break;
+        case LDBL_COMPLEX:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5_ldouble_complex *)hw_dst) = (H5_ldouble_complex)aligned;
+#else
+            *((H5_ldouble_complex *)hw_dst) = H5_CMPLXL(aligned, 0.0L);
+#endif
+            break;
+#else
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = CONV_ERROR;
+            goto done;
 #endif
         case INT_SCHAR:
         case INT_UCHAR:
@@ -3158,7 +3829,7 @@ test_conv_flt_1_hw_conv_from_ldouble(void *hw_dst, unsigned char *src_buf, size_
         default:
             H5_FAILED();
             printf("invalid destination conversion datatype");
-            ret = -1;
+            ret = CONV_ERROR;
             goto done;
     }
 
@@ -3167,13 +3838,495 @@ done:
 }
 #endif
 
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_flt_1_hw_conv_from_fcomplex
+ *
+ * Purpose:     Helper function for test_conv_flt_1 to perform conversion
+ *              from float _Complex / _Fcomplex to another type by casting.
+ *              Also checks for overflow and underflow when the destination
+ *              type is a type with a smaller width than float.
+ *
+ * Return:      enum conv_func_ret_t value
+ *
+ *-------------------------------------------------------------------------
+ */
+static conv_func_ret_t
+test_conv_flt_1_hw_conv_from_fcomplex(void *hw_dst, unsigned char *src_buf, size_t idx, dtype_t dst_type)
+{
+    H5_float_complex aligned;
+    conv_func_ret_t  ret = CONV_SUCCESS;
+
+    memcpy(&aligned, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
+
+    switch (dst_type) {
+        case FLT_FLOAT:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((float *)hw_dst) = (float)aligned;
+#else
+            *((float *)hw_dst)       = crealf(aligned);
+#endif
+            break;
+        case FLT_DOUBLE:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((double *)hw_dst) = (double)aligned;
+#else
+            *((double *)hw_dst)      = (double)crealf(aligned);
+#endif
+            break;
+        case FLT_LDOUBLE:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((long double *)hw_dst) = (long double)aligned;
+#else
+            *((long double *)hw_dst) = (long double)crealf(aligned);
+#endif
+            break;
+        case FLT_FLOAT16:
+#ifdef H5_HAVE__FLOAT16
+        {
+            float real_val = crealf(aligned);
+
+            /* Suppress warning about non-standard floating-point literal suffix */
+            H5_GCC_CLANG_DIAG_OFF("pedantic")
+
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
+#else
+            *((H5__Float16 *)hw_dst)        = (H5__Float16)real_val;
+#endif
+
+            /* Check for overflow and underflow */
+            if (fabsf(real_val) > (float)FLT16_MAX)
+                ret = CONV_OVERFLOW;
+            else if (fabsf(real_val) < (float)FLT16_MIN)
+                ret = CONV_UNDERFLOW;
+
+            H5_GCC_CLANG_DIAG_ON("pedantic")
+            break;
+        }
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = CONV_ERROR;
+            goto done;
+#endif
+        case FLT_COMPLEX:
+            *((H5_float_complex *)hw_dst) = aligned;
+            break;
+        case DBL_COMPLEX:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5_double_complex *)hw_dst) = (H5_double_complex)aligned;
+#else
+            *((H5_double_complex *)hw_dst) = H5_CMPLX((double)crealf(aligned), (double)cimagf(aligned));
+#endif
+            break;
+        case LDBL_COMPLEX:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5_ldouble_complex *)hw_dst) = (H5_ldouble_complex)aligned;
+#else
+            *((H5_ldouble_complex *)hw_dst) =
+                H5_CMPLXL((long double)crealf(aligned), (long double)crealf(aligned));
+#endif
+            break;
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = CONV_ERROR;
+            goto done;
+    }
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_flt_1_hw_conv_from_dcomplex
+ *
+ * Purpose:     Helper function for test_conv_flt_1 to perform conversion
+ *              from double _Complex / _Dcomplex to another type by
+ *              casting. Also checks for overflow and underflow when the
+ *              destination type is a type with a smaller width than
+ *              double.
+ *
+ * Return:      enum conv_func_ret_t value
+ *
+ *-------------------------------------------------------------------------
+ */
+static conv_func_ret_t
+test_conv_flt_1_hw_conv_from_dcomplex(void *hw_dst, unsigned char *src_buf, size_t idx, dtype_t dst_type)
+{
+    H5_double_complex aligned;
+    double            real_val, imag_val;
+    conv_func_ret_t   ret = CONV_SUCCESS;
+
+    memcpy(&aligned, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
+
+    switch (dst_type) {
+        case FLT_FLOAT:
+            real_val = creal(aligned);
+
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((float *)hw_dst) = (float)aligned;
+#else
+            *((float *)hw_dst)       = (float)real_val;
+#endif
+
+            /* Check for overflow and underflow */
+            if (fabs(real_val) > (double)FLT_MAX)
+                ret = CONV_OVERFLOW;
+            else if (fabs(real_val) < (double)FLT_MIN)
+                ret = CONV_UNDERFLOW;
+
+            break;
+        case FLT_DOUBLE:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((double *)hw_dst) = (double)aligned;
+#else
+            *((double *)hw_dst)      = (double)creal(aligned);
+#endif
+            break;
+        case FLT_LDOUBLE:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((long double *)hw_dst) = (long double)aligned;
+#else
+            *((long double *)hw_dst) = (long double)creal(aligned);
+#endif
+            break;
+        case FLT_FLOAT16:
+#ifdef H5_HAVE__FLOAT16
+            /* Suppress warning about non-standard floating-point literal suffix */
+            H5_GCC_CLANG_DIAG_OFF("pedantic")
+
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
+#else
+            *((H5__Float16 *)hw_dst)        = (H5__Float16)creal(aligned);
+#endif
+
+            /* Check for overflow and underflow */
+            real_val = creal(aligned);
+            if (fabs(real_val) > (double)FLT16_MAX)
+                ret = CONV_OVERFLOW;
+            else if (fabs(real_val) < (double)FLT16_MIN)
+                ret = CONV_UNDERFLOW;
+
+            H5_GCC_CLANG_DIAG_ON("pedantic")
+            break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = CONV_ERROR;
+            goto done;
+#endif
+        case FLT_COMPLEX: {
+            bool real_over = false, real_under = false;
+            bool imag_over = false, imag_under = false;
+
+            real_val = creal(aligned);
+            imag_val = cimag(aligned);
+
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5_float_complex *)hw_dst) = (H5_float_complex)aligned;
+#else
+            *((H5_float_complex *)hw_dst) = H5_CMPLXF((float)real_val, (float)imag_val);
+#endif
+
+            /* Check for overflow and underflow */
+            if (fabs(real_val) > (double)FLT_MAX)
+                real_over = true;
+            else if (fabs(real_val) < (double)FLT_MIN)
+                real_under = true;
+            if (fabs(imag_val) > (double)FLT_MAX)
+                imag_over = true;
+            else if (fabs(imag_val) < (double)FLT_MIN)
+                imag_under = true;
+
+            if (real_over) {
+                if (imag_over)
+                    ret = CONV_OVERFLOW_BOTH;
+                else if (imag_under)
+                    ret = CONV_OVERUNDER;
+                else
+                    ret = CONV_OVERFLOW_REAL;
+            }
+            else if (real_under) {
+                if (imag_over)
+                    ret = CONV_UNDEROVER;
+                else if (imag_under)
+                    ret = CONV_UNDERFLOW_BOTH;
+                else
+                    ret = CONV_UNDERFLOW_REAL;
+            }
+            else if (imag_over)
+                ret = CONV_OVERFLOW_IMAG;
+            else if (imag_under)
+                ret = CONV_UNDERFLOW_IMAG;
+
+            break;
+        }
+        case DBL_COMPLEX:
+            *((H5_double_complex *)hw_dst) = aligned;
+            break;
+        case LDBL_COMPLEX:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5_ldouble_complex *)hw_dst) = (H5_ldouble_complex)aligned;
+#else
+            *((H5_ldouble_complex *)hw_dst) =
+                H5_CMPLXL((long double)creal(aligned), (long double)cimag(aligned));
+#endif
+            break;
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = CONV_ERROR;
+            goto done;
+    }
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_flt_1_hw_conv_from_lcomplex
+ *
+ * Purpose:     Helper function for test_conv_flt_1 to perform conversion
+ *              from long double _Complex / _Lcomplex to another type by
+ *              casting. Also checks for overflow and underflow when the
+ *              destination type is a type with a smaller width than
+ *              long double.
+ *
+ * Return:      enum conv_func_ret_t value
+ *
+ *-------------------------------------------------------------------------
+ */
+static conv_func_ret_t
+test_conv_flt_1_hw_conv_from_lcomplex(void *hw_dst, unsigned char *src_buf, size_t idx, dtype_t dst_type)
+{
+    H5_ldouble_complex aligned;
+    long double        real_val, imag_val;
+    conv_func_ret_t    ret = CONV_SUCCESS;
+
+    memcpy(&aligned, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
+
+    switch (dst_type) {
+        case FLT_FLOAT:
+            real_val = creall(aligned);
+
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((float *)hw_dst) = (float)aligned;
+#else
+            *((float *)hw_dst)       = (float)real_val;
+#endif
+
+            /* Check for overflow and underflow */
+            if (fabsl(real_val) > (long double)FLT_MAX)
+                ret = CONV_OVERFLOW;
+            else if (fabsl(real_val) < (long double)FLT_MIN)
+                ret = CONV_UNDERFLOW;
+
+            break;
+        case FLT_DOUBLE:
+            real_val = creall(aligned);
+
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((double *)hw_dst) = (double)aligned;
+#else
+            *((double *)hw_dst)      = (double)real_val;
+#endif
+
+            /* Check for overflow and underflow */
+            if (fabsl(real_val) > (long double)DBL_MAX)
+                ret = CONV_OVERFLOW;
+            else if (fabsl(real_val) < (long double)DBL_MIN)
+                ret = CONV_UNDERFLOW;
+
+            break;
+        case FLT_LDOUBLE:
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((long double *)hw_dst) = (long double)aligned;
+#else
+            *((long double *)hw_dst) = (long double)creall(aligned);
+#endif
+            break;
+        case FLT_FLOAT16:
+#ifdef H5_HAVE__FLOAT16
+            /* Suppress warning about non-standard floating-point literal suffix */
+            H5_GCC_CLANG_DIAG_OFF("pedantic")
+
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
+#else
+            *((H5__Float16 *)hw_dst)        = (H5__Float16)creall(aligned);
+#endif
+
+            /* Check for overflow and underflow */
+            real_val = creall(aligned);
+            if (fabsl(real_val) > (long double)FLT16_MAX)
+                ret = CONV_OVERFLOW;
+            else if (fabsl(real_val) < (long double)FLT16_MIN)
+                ret = CONV_UNDERFLOW;
+
+            H5_GCC_CLANG_DIAG_ON("pedantic")
+            break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = CONV_ERROR;
+            goto done;
+#endif
+        case FLT_COMPLEX: {
+            bool real_over = false, real_under = false;
+            bool imag_over = false, imag_under = false;
+
+            real_val = creall(aligned);
+            imag_val = cimagl(aligned);
+
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5_float_complex *)hw_dst) = (H5_float_complex)aligned;
+#else
+            *((H5_float_complex *)hw_dst)  = H5_CMPLXF((float)real_val, (float)imag_val);
+#endif
+
+            /* Check for overflow and underflow */
+            if (fabsl(real_val) > (long double)FLT_MAX)
+                real_over = true;
+            else if (fabsl(real_val) < (long double)FLT_MIN)
+                real_under = true;
+            if (fabsl(imag_val) > (long double)FLT_MAX)
+                imag_over = true;
+            else if (fabsl(imag_val) < (long double)FLT_MIN)
+                imag_under = true;
+
+            if (real_over) {
+                if (imag_over)
+                    ret = CONV_OVERFLOW_BOTH;
+                else if (imag_under)
+                    ret = CONV_OVERUNDER;
+                else
+                    ret = CONV_OVERFLOW_REAL;
+            }
+            else if (real_under) {
+                if (imag_over)
+                    ret = CONV_UNDEROVER;
+                else if (imag_under)
+                    ret = CONV_UNDERFLOW_BOTH;
+                else
+                    ret = CONV_UNDERFLOW_REAL;
+            }
+            else if (imag_over)
+                ret = CONV_OVERFLOW_IMAG;
+            else if (imag_under)
+                ret = CONV_UNDERFLOW_IMAG;
+
+            break;
+        }
+        case DBL_COMPLEX: {
+            bool real_over = false, real_under = false;
+            bool imag_over = false, imag_under = false;
+
+            real_val = creall(aligned);
+            imag_val = cimagl(aligned);
+
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            *((H5_double_complex *)hw_dst) = (H5_double_complex)aligned;
+#else
+            *((H5_double_complex *)hw_dst) = H5_CMPLX((double)real_val, (double)imag_val);
+#endif
+
+            /* Check for overflow and underflow */
+            if (fabsl(real_val) > (long double)DBL_MAX)
+                real_over = true;
+            else if (fabsl(real_val) < (long double)DBL_MIN)
+                real_under = true;
+            if (fabsl(imag_val) > (long double)DBL_MAX)
+                imag_over = true;
+            else if (fabsl(imag_val) < (long double)DBL_MIN)
+                imag_under = true;
+
+            if (real_over) {
+                if (imag_over)
+                    ret = CONV_OVERFLOW_BOTH;
+                else if (imag_under)
+                    ret = CONV_OVERUNDER;
+                else
+                    ret = CONV_OVERFLOW_REAL;
+            }
+            else if (real_under) {
+                if (imag_over)
+                    ret = CONV_UNDEROVER;
+                else if (imag_under)
+                    ret = CONV_UNDERFLOW_BOTH;
+                else
+                    ret = CONV_UNDERFLOW_REAL;
+            }
+            else if (imag_over)
+                ret = CONV_OVERFLOW_IMAG;
+            else if (imag_under)
+                ret = CONV_UNDERFLOW_IMAG;
+
+            break;
+        }
+        case LDBL_COMPLEX:
+            *((H5_ldouble_complex *)hw_dst) = aligned;
+            break;
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = CONV_ERROR;
+            goto done;
+    }
+
+done:
+    return ret;
+}
+#endif /* H5_HAVE_COMPLEX_NUMBERS */
+
 /*-------------------------------------------------------------------------
  * Function:    test_conv_flt_1
  *
  * Purpose:    Test conversion of floating point values from SRC to
- *             DST.  These types should be H5T_NATIVE_FLOAT,
- *             H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE or H5T_NATIVE_FLOAT16,
- *             if available.
+ *             DST. These types should be one of the following:
+ *
+ *             H5T_NATIVE_FLOAT16 (if available)
+ *             H5T_NATIVE_FLOAT
+ *             H5T_NATIVE_DOUBLE
+ *             H5T_NATIVE_LDOUBLE
+ *             H5T_NATIVE_FLOAT_COMPLEX (if available)
+ *             H5T_NATIVE_DOUBLE_COMPLEX (if available)
+ *             H5T_NATIVE_LDOUBLE_COMPLEX (if available)
  *
  * Return:    Success:    0
  *            Failure:    number of errors
@@ -3194,8 +4347,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     unsigned char *buf   = NULL;         /*buffer for conversion    */
     unsigned char *saved = NULL;         /*original values    */
     char           str[256];             /*hello string        */
-    void          *aligned = NULL;       /*aligned buffer    */
-    void          *hw_p    = NULL;
+    void          *hw_p = NULL;
     float          hw_f; /*hardware-converted     */
     double         hw_d; /*hardware-converted    */
 #ifdef H5_HAVE__FLOAT16
@@ -3203,6 +4355,11 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 #endif
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
     long double hw_ld; /*hardware-converted    */
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    H5_ldouble_complex hw_ldouble_complex;
+    H5_double_complex  hw_double_complex;
+    H5_float_complex   hw_float_complex;
 #endif
     unsigned char *hw = NULL;    /*ptr to hardware-conv'd*/
     int            underflow;    /*underflow occurred    */
@@ -3284,6 +4441,20 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
         src_type      = FLT_FLOAT16;
     }
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    else if (H5Tequal(src, H5T_NATIVE_FLOAT_COMPLEX)) {
+        src_type_name = "float _Complex";
+        src_type      = FLT_COMPLEX;
+    }
+    else if (H5Tequal(src, H5T_NATIVE_DOUBLE_COMPLEX)) {
+        src_type_name = "double _Complex";
+        src_type      = DBL_COMPLEX;
+    }
+    else if (H5Tequal(src, H5T_NATIVE_LDOUBLE_COMPLEX)) {
+        src_type_name = "long double _Complex";
+        src_type      = LDBL_COMPLEX;
+    }
+#endif
     else {
         src_type_name = "UNKNOWN";
         src_type      = OTHER;
@@ -3307,6 +4478,20 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     else if (H5Tequal(dst, H5T_NATIVE_FLOAT16)) {
         dst_type_name = "_Float16";
         dst_type      = FLT_FLOAT16;
+    }
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    else if (H5Tequal(dst, H5T_NATIVE_FLOAT_COMPLEX)) {
+        dst_type_name = "float _Complex";
+        dst_type      = FLT_COMPLEX;
+    }
+    else if (H5Tequal(dst, H5T_NATIVE_DOUBLE_COMPLEX)) {
+        dst_type_name = "double _Complex";
+        dst_type      = DBL_COMPLEX;
+    }
+    else if (H5Tequal(dst, H5T_NATIVE_LDOUBLE_COMPLEX)) {
+        dst_type_name = "long double _Complex";
+        dst_type      = LDBL_COMPLEX;
     }
 #endif
     else {
@@ -3364,9 +4549,6 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     sendian = H5Tget_order(src);
     dendian = H5Tget_order(dst);
 
-    /* Allocate buffers */
-    aligned = calloc((size_t)1, MAX(sizeof(long double), sizeof(double)));
-
     /* Allocate and initialize the source buffer through macro INIT_FP_NORM or INIT_FP_SPECIAL.
      * The BUF will be used for the conversion while the SAVED buffer will be used for
      * the comparison later.  INIT_FP_NORM will fill in the buffer with regular values like
@@ -3407,6 +4589,32 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                 assert(0 && "Should not reach this point!");
 #endif
             }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            else if (src_type == FLT_COMPLEX) {
+                size_t part_size = src_size / 2;
+                INIT_FP_NORM(float, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP, part_size, dst_size,
+                             buf, saved, nelmts);
+                /* Treat float buffer as float _Complex buffer of nelmts / 2 elements */
+                assert(nelmts % 2 == 0);
+                nelmts /= 2;
+            }
+            else if (src_type == DBL_COMPLEX) {
+                size_t part_size = src_size / 2;
+                INIT_FP_NORM(double, DBL_MAX, DBL_MIN, DBL_MAX_10_EXP, DBL_MIN_10_EXP, part_size, dst_size,
+                             buf, saved, nelmts);
+                /* Treat double buffer as double _Complex buffer of nelmts / 2 elements */
+                assert(nelmts % 2 == 0);
+                nelmts /= 2;
+            }
+            else if (src_type == LDBL_COMPLEX) {
+                size_t part_size = src_size / 2;
+                INIT_FP_NORM(long double, LDBL_MAX, LDBL_MIN, LDBL_MAX_10_EXP, LDBL_MIN_10_EXP, part_size,
+                             dst_size, buf, saved, nelmts);
+                /* Treat long double buffer as long double _Complex buffer of nelmts / 2 elements */
+                assert(nelmts % 2 == 0);
+                nelmts /= 2;
+            }
+#endif
             else
                 goto error;
 
@@ -3434,6 +4642,32 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                 assert(0 && "Should not reach this point!");
 #endif
             }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            else if (src_type == FLT_COMPLEX) {
+                size_t part_size = src_size / 2;
+                INIT_FP_DENORM(float, FLT_MANT_DIG, part_size, src_nbits, sendian, dst_size, buf, saved,
+                               nelmts);
+                /* Treat float buffer as float _Complex buffer of nelmts / 2 elements */
+                assert(nelmts % 2 == 0);
+                nelmts /= 2;
+            }
+            else if (src_type == DBL_COMPLEX) {
+                size_t part_size = src_size / 2;
+                INIT_FP_DENORM(double, DBL_MANT_DIG, part_size, src_nbits, sendian, dst_size, buf, saved,
+                               nelmts);
+                /* Treat double buffer as double _Complex buffer of nelmts / 2 elements */
+                assert(nelmts % 2 == 0);
+                nelmts /= 2;
+            }
+            else if (src_type == LDBL_COMPLEX) {
+                size_t part_size = src_size / 2;
+                INIT_FP_DENORM(long double, LDBL_MANT_DIG, part_size, src_nbits, sendian, dst_size, buf,
+                               saved, nelmts);
+                /* Treat long double buffer as long double _Complex buffer of nelmts / 2 elements */
+                assert(nelmts % 2 == 0);
+                nelmts /= 2;
+            }
+#endif
             else
                 goto error;
 
@@ -3458,6 +4692,29 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                 assert(0 && "Should not reach this point!");
 #endif
             }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            else if (src_type == FLT_COMPLEX) {
+                size_t part_size = src_size / 2;
+                INIT_FP_SPECIAL(part_size, src_nbits, sendian, FLT_MANT_DIG, dst_size, buf, saved, nelmts);
+                /* Treat float buffer as float _Complex buffer of nelmts / 2 elements */
+                assert(nelmts % 2 == 0);
+                nelmts /= 2;
+            }
+            else if (src_type == DBL_COMPLEX) {
+                size_t part_size = src_size / 2;
+                INIT_FP_SPECIAL(part_size, src_nbits, sendian, DBL_MANT_DIG, dst_size, buf, saved, nelmts);
+                /* Treat double buffer as double _Complex buffer of nelmts / 2 elements */
+                assert(nelmts % 2 == 0);
+                nelmts /= 2;
+            }
+            else if (src_type == LDBL_COMPLEX) {
+                size_t part_size = src_size / 2;
+                INIT_FP_SPECIAL(part_size, src_nbits, sendian, LDBL_MANT_DIG, dst_size, buf, saved, nelmts);
+                /* Treat long double buffer as long double _Complex buffer of nelmts / 2 elements */
+                assert(nelmts % 2 == 0);
+                nelmts /= 2;
+            }
+#endif
             else
                 goto error;
 
@@ -3483,6 +4740,14 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     else if (FLT_FLOAT16 == dst_type)
         hw_p = &hw_half;
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    else if (FLT_COMPLEX == dst_type)
+        hw_p = &hw_float_complex;
+    else if (DBL_COMPLEX == dst_type)
+        hw_p = &hw_double_complex;
+    else if (LDBL_COMPLEX == dst_type)
+        hw_p = &hw_ldouble_complex;
+#endif
     else
         goto error;
 
@@ -3491,7 +4756,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 
     /* Check the software results against the hardware */
     for (j = 0; j < nelmts; j++) {
-        int conv_ret = -1;
+        conv_func_ret_t conv_ret = CONV_ERROR;
 
         hw_f = 911.0F;
         hw_d = 911.0;
@@ -3500,6 +4765,11 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 #endif
 #ifdef H5_HAVE__FLOAT16
         hw_half = 911.0;
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        hw_float_complex   = H5_CMPLXF(911.0F, 911.0F);
+        hw_double_complex  = H5_CMPLX(911.0, 911.0);
+        hw_ldouble_complex = H5_CMPLXL(911.0L, 911.0L);
 #endif
 
         /* The hardware conversion */
@@ -3520,12 +4790,27 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             conv_ret = test_conv_flt_1_hw_conv_from_ldouble(hw_p, saved, j, dst_type);
         }
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        else if (FLT_COMPLEX == src_type) {
+            conv_ret = test_conv_flt_1_hw_conv_from_fcomplex(hw_p, saved, j, dst_type);
+        }
+        else if (DBL_COMPLEX == src_type) {
+            conv_ret = test_conv_flt_1_hw_conv_from_dcomplex(hw_p, saved, j, dst_type);
+        }
+        else if (LDBL_COMPLEX == src_type) {
+            conv_ret = test_conv_flt_1_hw_conv_from_lcomplex(hw_p, saved, j, dst_type);
+        }
+#endif
 
-        if (conv_ret < 0)
+        if (conv_ret == CONV_ERROR)
             goto error;
 
-        overflow  = (conv_ret == 1);
-        underflow = (conv_ret == 2);
+        overflow =
+            (conv_ret == CONV_OVERFLOW || conv_ret == CONV_OVERFLOW_REAL || conv_ret == CONV_OVERFLOW_IMAG ||
+             conv_ret == CONV_OVERFLOW_BOTH || conv_ret == CONV_OVERUNDER || conv_ret == CONV_UNDEROVER);
+        underflow = (conv_ret == CONV_UNDERFLOW || conv_ret == CONV_UNDERFLOW_REAL ||
+                     conv_ret == CONV_UNDERFLOW_IMAG || conv_ret == CONV_UNDERFLOW_BOTH ||
+                     conv_ret == CONV_OVERUNDER || conv_ret == CONV_UNDEROVER);
 
         /* For Intel machines, the size of "long double" is 12 bytes, precision
          * is 80 bits; for Intel IA64 and AMD processors, the size of "long double"
@@ -3533,19 +4818,62 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
          * last few unused bytes may have garbage in them.  Clean them out with
          * 0s before compare the values.
          */
-        if (sendian == H5T_ORDER_LE && dst_type == FLT_LDOUBLE) {
-            size_t q;
-
-            for (q = dst_nbits / 8; q < dst_size; q++) {
-                buf[j * dst_size + q] = 0x00;
-                hw[q]                 = 0x00;
+        if (sendian == H5T_ORDER_LE) {
+            if (dst_type == FLT_LDOUBLE) {
+                for (size_t q = dst_nbits / 8; q < dst_size; q++) {
+                    buf[j * dst_size + q] = 0x00;
+                    hw[q]                 = 0x00;
+                }
+            }
+            else if (dst_type == LDBL_COMPLEX) {
+                uint8_t *cur_buf   = buf + j * dst_size;
+                uint8_t *cur_hw    = hw;
+                size_t   part_size = dst_size / 2;
+                for (size_t q = dst_nbits / 8; q < part_size; q++) {
+                    cur_buf[q] = 0x00;
+                    cur_hw[q]  = 0x00;
+                }
+                cur_buf += part_size;
+                cur_hw += part_size;
+                for (size_t q = dst_nbits / 8; q < part_size; q++) {
+                    cur_buf[q] = 0x00;
+                    cur_hw[q]  = 0x00;
+                }
             }
         }
 
         /* Are the two results the same? */
-        for (k = (dst_size - (dst_nbits / 8)); k < dst_size; k++)
-            if (buf[j * dst_size + k] != hw[k])
-                break;
+        if (dst_type != FLT_COMPLEX && dst_type != DBL_COMPLEX && dst_type != LDBL_COMPLEX) {
+            for (k = (dst_size - (dst_nbits / 8)); k < dst_size; k++)
+                if (buf[j * dst_size + k] != hw[k])
+                    break;
+        }
+        else {
+            size_t part_size = dst_size / 2;
+
+            /* Compare real part */
+            for (k = (part_size - (dst_nbits / 8)); k < part_size; k++)
+                if (buf[j * dst_size + k] != hw[k])
+                    break;
+            if (k == part_size) {
+                /* Compare imaginary part */
+                if (src_type == FLT_COMPLEX || src_type == DBL_COMPLEX || src_type == LDBL_COMPLEX) {
+                    for (k = (dst_size - (dst_nbits / 8)); k < dst_size; k++)
+                        if (buf[j * dst_size + k] != hw[k])
+                            break;
+                }
+                else {
+                    /* Imaginary part should have been zeroed out. Hardware value
+                     * could be a positive or negative zero, so we'll just check
+                     * the buffer value for simplicity.
+                     */
+                    for (k = (dst_size - (dst_nbits / 8)); k < dst_size; k++)
+                        if (buf[j * dst_size + k] != 0x00)
+                            break;
+                }
+            }
+        }
+
         if (k == dst_size)
             continue; /*no error*/
 
@@ -3574,6 +4902,20 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             continue;
         }
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        else if (FLT_COMPLEX == dst_type && my_isnan(dst_type, buf + j * sizeof(H5_float_complex)) &&
+                 my_isnan(dst_type, hw)) {
+            continue;
+        }
+        else if (DBL_COMPLEX == dst_type && my_isnan(dst_type, buf + j * sizeof(H5_double_complex)) &&
+                 my_isnan(dst_type, hw)) {
+            continue;
+        }
+        else if (LDBL_COMPLEX == dst_type && my_isnan(dst_type, buf + j * sizeof(H5_ldouble_complex)) &&
+                 my_isnan(dst_type, hw)) {
+            continue;
+        }
+#endif
 
         /*
          * Assume same if hardware result is NaN.  This is because the
@@ -3597,8 +4939,8 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
          * the SGI compiler assigns the dst's maximal value.
          */
         {
-            double check_mant[2];
-            int    check_expo[2];
+            double check_mant[4] = {0.0, 0.0, 0.0, 0.0};
+            int    check_expo[4] = {0, 0, 0, 0};
 
             if (FLT_FLOAT == dst_type) {
                 float x = 0.0F;
@@ -3657,11 +4999,165 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                 assert(0 && "Should not reach this point!");
 #endif
             }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            else if (FLT_COMPLEX == dst_type) {
+                H5_float_complex fc;
+                float            real_val, hw_real_val;
+                float            imag_val, hw_imag_val;
+                bool             val_passes = true;
+
+                memcpy(&fc, &buf[j * dst_size], sizeof(H5_float_complex));
+                real_val    = crealf(fc);
+                imag_val    = cimagf(fc);
+                hw_real_val = crealf(hw_float_complex);
+                hw_imag_val = cimagf(hw_float_complex);
+
+                if (underflow) {
+                    /* Check real part against hardware */
+                    if (conv_ret == CONV_UNDERFLOW_REAL || conv_ret == CONV_UNDERFLOW_BOTH ||
+                        conv_ret == CONV_UNDEROVER)
+                        if (fabsf(real_val) > FLT_MIN || fabsf(hw_real_val) > FLT_MIN)
+                            val_passes = false;
+
+                    /* Check imaginary part against hardware */
+                    if (conv_ret == CONV_UNDERFLOW_IMAG || conv_ret == CONV_UNDERFLOW_BOTH ||
+                        conv_ret == CONV_OVERUNDER)
+                        if (fabsf(imag_val) > FLT_MIN || fabsf(hw_imag_val) > FLT_MIN)
+                            val_passes = false;
+                }
+
+                if (overflow) {
+                    /* Check real part against hardware */
+                    if (conv_ret == CONV_OVERFLOW_REAL || conv_ret == CONV_OVERFLOW_BOTH ||
+                        conv_ret == CONV_OVERUNDER)
+                        if (!my_isinf(dendian, buf + j * sizeof(H5_float_complex), dst_size / 2, dst_mpos,
+                                      dst_msize, dst_epos, dst_esize))
+                            val_passes = false;
+
+                    /* Check imaginary part against hardware */
+                    if (conv_ret == CONV_OVERFLOW_IMAG || conv_ret == CONV_OVERFLOW_BOTH ||
+                        conv_ret == CONV_UNDEROVER)
+                        if (!my_isinf(dendian, buf + (j * sizeof(H5_float_complex)) + (dst_size / 2),
+                                      dst_size / 2, dst_mpos, dst_msize, dst_epos, dst_esize))
+                            val_passes = false;
+                }
+
+                if (val_passes)
+                    continue; /* matching pairs all underflowed or overflowed, no error */
+
+                check_mant[0] = (double)frexpf(real_val, check_expo + 0);
+                check_mant[1] = (double)frexpf(hw_real_val, check_expo + 1);
+                check_mant[2] = (double)frexpf(imag_val, check_expo + 2);
+                check_mant[3] = (double)frexpf(hw_imag_val, check_expo + 3);
+            }
+            else if (DBL_COMPLEX == dst_type) {
+                H5_double_complex dc;
+                double            real_val, hw_real_val;
+                double            imag_val, hw_imag_val;
+                bool              val_passes = true;
+
+                memcpy(&dc, &buf[j * dst_size], sizeof(H5_double_complex));
+                real_val    = creal(dc);
+                imag_val    = cimag(dc);
+                hw_real_val = creal(hw_double_complex);
+                hw_imag_val = cimag(hw_double_complex);
+
+                if (underflow) {
+                    /* Check real part against hardware */
+                    if (conv_ret == CONV_UNDERFLOW_REAL || conv_ret == CONV_UNDERFLOW_BOTH ||
+                        conv_ret == CONV_UNDEROVER)
+                        if (fabs(real_val) > DBL_MIN || fabs(hw_real_val) > DBL_MIN)
+                            val_passes = false;
+
+                    /* Check imaginary part against hardware */
+                    if (conv_ret == CONV_UNDERFLOW_IMAG || conv_ret == CONV_UNDERFLOW_BOTH ||
+                        conv_ret == CONV_OVERUNDER)
+                        if (fabs(imag_val) > DBL_MIN || fabs(hw_imag_val) > DBL_MIN)
+                            val_passes = false;
+                }
+
+                if (overflow) {
+                    /* Check real part against hardware */
+                    if (conv_ret == CONV_OVERFLOW_REAL || conv_ret == CONV_OVERFLOW_BOTH ||
+                        conv_ret == CONV_OVERUNDER)
+                        if (!my_isinf(dendian, buf + j * sizeof(H5_double_complex), dst_size / 2, dst_mpos,
+                                      dst_msize, dst_epos, dst_esize))
+                            val_passes = false;
+
+                    /* Check imaginary part against hardware */
+                    if (conv_ret == CONV_OVERFLOW_IMAG || conv_ret == CONV_OVERFLOW_BOTH ||
+                        conv_ret == CONV_UNDEROVER)
+                        if (!my_isinf(dendian, buf + (j * sizeof(H5_double_complex)) + (dst_size / 2),
+                                      dst_size / 2, dst_mpos, dst_msize, dst_epos, dst_esize))
+                            val_passes = false;
+                }
+
+                if (val_passes)
+                    continue; /* matching pairs all underflowed or overflowed, no error */
+
+                check_mant[0] = frexp(real_val, check_expo + 0);
+                check_mant[1] = frexp(hw_real_val, check_expo + 1);
+                check_mant[2] = frexp(imag_val, check_expo + 2);
+                check_mant[3] = frexp(hw_imag_val, check_expo + 3);
+            }
+            else if (LDBL_COMPLEX == dst_type) {
+                H5_ldouble_complex ldc;
+                long double        real_val, hw_real_val;
+                long double        imag_val, hw_imag_val;
+
+                memcpy(&ldc, &buf[j * dst_size], sizeof(H5_ldouble_complex));
+                real_val    = creall(ldc);
+                imag_val    = cimagl(ldc);
+                hw_real_val = creall(hw_ldouble_complex);
+                hw_imag_val = cimagl(hw_ldouble_complex);
+
+                /* dst is largest float, no need to check underflow. */
+                check_mant[0] = (double)frexpl(real_val, check_expo + 0);
+                check_mant[1] = (double)frexpl(hw_real_val, check_expo + 1);
+                check_mant[2] = (double)frexpl(imag_val, check_expo + 2);
+                check_mant[3] = (double)frexpl(hw_imag_val, check_expo + 3);
+            }
+#endif
             else
                 goto error;
 
             /* Special check for denormalized values */
-            if (check_expo[0] < (-(int)dst_ebias) || check_expo[1] < (-(int)dst_ebias)) {
+            if (FLT_COMPLEX == dst_type || DBL_COMPLEX == dst_type || LDBL_COMPLEX == dst_type) {
+                if (check_expo[0] < (-(int)dst_ebias) || check_expo[1] < (-(int)dst_ebias) ||
+                    check_expo[2] < (-(int)dst_ebias) || check_expo[3] < (-(int)dst_ebias)) {
+                    double epsilon_real   = 1.0;
+                    double epsilon_imag   = 1.0;
+                    int    expo_diff_real = check_expo[0] - check_expo[1];
+                    int    expo_diff_imag = check_expo[2] - check_expo[3];
+                    int    valid_bits_real =
+                        (int)((dst_ebias + dst_msize) + (size_t)MIN(check_expo[0], check_expo[1])) - 1;
+                    int valid_bits_imag =
+                        (int)((dst_ebias + dst_msize) + (size_t)MIN(check_expo[2], check_expo[3])) - 1;
+
+                    /* Re-scale the mantissas based on any exponent difference */
+                    if (expo_diff_real != 0)
+                        check_mant[0] = ldexp(check_mant[0], expo_diff_real);
+                    if (expo_diff_imag != 0)
+                        check_mant[2] = ldexp(check_mant[2], expo_diff_imag);
+
+                    /* Compute the proper epsilon */
+                    epsilon_real = ldexp(epsilon_real, -valid_bits_real);
+                    epsilon_imag = ldexp(epsilon_imag, -valid_bits_imag);
+
+                    /* Check for "close enough" fit with scaled epsilon value */
+                    if (fabs(check_mant[0] - check_mant[1]) <= epsilon_real &&
+                        fabs(check_mant[2] - check_mant[3]) <= epsilon_imag)
+                        continue;
+                }
+                else {
+                    if ((check_expo[0] == check_expo[1] &&
+                         fabs(check_mant[0] - check_mant[1]) < (double)FP_EPSILON) &&
+                        (check_expo[2] == check_expo[3] &&
+                         fabs(check_mant[2] - check_mant[3]) < (double)FP_EPSILON))
+                        continue;
+                }
+            }
+            else if (check_expo[0] < (-(int)dst_ebias) || check_expo[1] < (-(int)dst_ebias)) {
                 int expo_diff = check_expo[0] - check_expo[1];
                 int valid_bits =
                     (int)((dst_ebias + dst_msize) + (size_t)MIN(check_expo[0], check_expo[1])) - 1;
@@ -3696,8 +5192,19 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
         printf("    elmt %u\n", (unsigned)j);
 
         printf("        src =");
-        for (k = 0; k < src_size; k++)
-            printf(" %02x", saved[j * src_size + ENDIAN(src_size, k, sendian)]);
+        if (FLT_COMPLEX == src_type || DBL_COMPLEX == src_type || LDBL_COMPLEX == src_type) {
+            unsigned char *saved_ptr = saved + (j * src_size);
+            size_t         part_size = src_size / 2;
+            for (k = 0; k < part_size; k++)
+                printf(" %02x", saved_ptr[ENDIAN(part_size, k, sendian)]);
+            saved_ptr += part_size;
+            for (k = 0; k < part_size; k++)
+                printf(" %02x", saved_ptr[ENDIAN(part_size, k, sendian)]);
+        }
+        else {
+            for (k = 0; k < src_size; k++)
+                printf(" %02x", saved[j * src_size + ENDIAN(src_size, k, sendian)]);
+        }
         printf("%*s", (int)(3 * MAX(0, (ssize_t)dst_size - (ssize_t)src_size)), "");
         if (FLT_FLOAT == src_type) {
             float x = 0.0F;
@@ -3725,12 +5232,40 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             assert(0 && "Should not reach this point!");
 #endif
         }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        else if (FLT_COMPLEX == src_type) {
+            H5_float_complex fc;
+            memcpy(&fc, &saved[j * src_size], sizeof(H5_float_complex));
+            printf(" %29.20e%+.20ei\n", (double)crealf(fc), (double)cimagf(fc));
+        }
+        else if (DBL_COMPLEX == src_type) {
+            H5_double_complex dc;
+            memcpy(&dc, &saved[j * src_size], sizeof(H5_double_complex));
+            printf(" %29.20e%+.20ei\n", creal(dc), cimag(dc));
+        }
+        else if (LDBL_COMPLEX == src_type) {
+            H5_ldouble_complex ldc;
+            memcpy(&ldc, &saved[j * src_size], sizeof(H5_ldouble_complex));
+            printf(" %29.20Le%+.20Lei\n", creall(ldc), cimagl(ldc));
+        }
+#endif
         else
             goto error;
 
         printf("        dst =");
-        for (k = 0; k < dst_size; k++)
-            printf(" %02x", buf[j * dst_size + ENDIAN(dst_size, k, dendian)]);
+        if (FLT_COMPLEX == dst_type || DBL_COMPLEX == dst_type || LDBL_COMPLEX == dst_type) {
+            unsigned char *buf_ptr   = buf + (j * dst_size);
+            size_t         part_size = dst_size / 2;
+            for (k = 0; k < part_size; k++)
+                printf(" %02x", buf_ptr[ENDIAN(part_size, k, dendian)]);
+            buf_ptr += part_size;
+            for (k = 0; k < part_size; k++)
+                printf(" %02x", buf_ptr[ENDIAN(part_size, k, dendian)]);
+        }
+        else {
+            for (k = 0; k < dst_size; k++)
+                printf(" %02x", buf[j * dst_size + ENDIAN(dst_size, k, dendian)]);
+        }
         printf("%*s", (int)(3 * MAX(0, (ssize_t)src_size - (ssize_t)dst_size)), "");
         if (FLT_FLOAT == dst_type) {
             float x = 0.0F;
@@ -3743,13 +5278,13 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             printf(" %29.20e\n", x);
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
         }
-        else if (FLT_LDOUBLE == src_type) {
+        else if (FLT_LDOUBLE == dst_type) {
             long double x = 0.0L;
             memcpy(&x, &buf[j * dst_size], sizeof(long double));
             fprintf(stdout, " %29.20Le\n", x);
 #endif
         }
-        else if (FLT_FLOAT16 == src_type) {
+        else if (FLT_FLOAT16 == dst_type) {
 #ifdef H5_HAVE__FLOAT16
             H5__Float16 x;
             memcpy(&x, &buf[j * dst_size], sizeof(H5__Float16));
@@ -3758,12 +5293,40 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             assert(0 && "Should not reach this point!");
 #endif
         }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        else if (FLT_COMPLEX == dst_type) {
+            H5_float_complex fc;
+            memcpy(&fc, &buf[j * dst_size], sizeof(H5_float_complex));
+            printf(" %29.20e%+.20ei\n", (double)crealf(fc), (double)cimagf(fc));
+        }
+        else if (DBL_COMPLEX == dst_type) {
+            H5_double_complex dc;
+            memcpy(&dc, &buf[j * dst_size], sizeof(H5_double_complex));
+            printf(" %29.20e%+.20ei\n", creal(dc), cimag(dc));
+        }
+        else if (LDBL_COMPLEX == dst_type) {
+            H5_ldouble_complex ldc;
+            memcpy(&ldc, &buf[j * dst_size], sizeof(H5_ldouble_complex));
+            printf(" %29.20Le%+.20Lei\n", creall(ldc), cimagl(ldc));
+        }
+#endif
         else
             goto error;
 
         printf("        ans =");
-        for (k = 0; k < dst_size; k++)
-            printf(" %02x", hw[ENDIAN(dst_size, k, dendian)]);
+        if (FLT_COMPLEX == dst_type || DBL_COMPLEX == dst_type || LDBL_COMPLEX == dst_type) {
+            unsigned char *hw_tmp_ptr = hw;
+            size_t         part_size  = dst_size / 2;
+            for (k = 0; k < part_size; k++)
+                printf(" %02x", hw_tmp_ptr[ENDIAN(part_size, k, dendian)]);
+            hw_tmp_ptr += part_size;
+            for (k = 0; k < part_size; k++)
+                printf(" %02x", hw_tmp_ptr[ENDIAN(part_size, k, dendian)]);
+        }
+        else {
+            for (k = 0; k < dst_size; k++)
+                printf(" %02x", hw[ENDIAN(dst_size, k, dendian)]);
+        }
         printf("%*s", (int)(3 * MAX(0, (ssize_t)src_size - (ssize_t)dst_size)), "");
         if (FLT_FLOAT == dst_type)
             printf(" %29.20e\n", (double)hw_f);
@@ -3776,6 +5339,14 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 #ifdef H5_HAVE__FLOAT16
         else if (FLT_FLOAT16 == dst_type)
             printf(" %29.20e\n", (double)hw_half);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        else if (FLT_COMPLEX == dst_type)
+            printf(" %29.20e%+.20ei\n", (double)crealf(hw_float_complex), (double)cimagf(hw_float_complex));
+        else if (DBL_COMPLEX == dst_type)
+            printf(" %29.20e%+.20ei\n", creal(hw_double_complex), cimag(hw_double_complex));
+        else if (LDBL_COMPLEX == dst_type)
+            printf(" %29.20Le%+.20Lei\n", creall(hw_ldouble_complex), cimagl(hw_ldouble_complex));
 #endif
         else
             goto error;
@@ -3801,8 +5372,6 @@ done:
         aligned_free(buf);
     if (saved)
         aligned_free(saved);
-    if (aligned)
-        free(aligned);
     fflush(stdout);
 #ifdef HANDLE_SIGFPE
     if (run_test == TEST_NOOP || run_test == TEST_NORMAL)
@@ -3830,8 +5399,6 @@ error:
         aligned_free(buf);
     if (saved)
         aligned_free(saved);
-    if (aligned)
-        free(aligned);
     fflush(stdout);
 #ifdef HANDLE_SIGFPE
     if (run_test == TEST_NOOP || run_test == TEST_NORMAL)
@@ -3853,6 +5420,1988 @@ error:
     return 1;
 #endif
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_schar
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to signed char by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_schar(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    signed char aligned;
+    int         ret = 0;
+
+    memset(&aligned, 0, sizeof(signed char));
+
+    switch (src_type) {
+        case FLT_FLOAT16: {
+#ifdef H5_HAVE__FLOAT16
+            H5__Float16 f16;
+            memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            aligned = (signed char)f16;
+            break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        }
+        case FLT_FLOAT: {
+            float f;
+            memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
+            aligned = (signed char)f;
+            break;
+        }
+        case FLT_DOUBLE: {
+            double d;
+            memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
+            aligned = (signed char)d;
+            break;
+        }
+        case FLT_LDOUBLE: {
+            long double ld;
+            memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
+            aligned = (signed char)ld;
+            break;
+        }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        case FLT_COMPLEX: {
+            H5_float_complex fc;
+            memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (signed char)fc;
+#else
+            aligned = (signed char)crealf(fc);
+#endif
+            break;
+        }
+        case DBL_COMPLEX: {
+            H5_double_complex dc;
+            memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (signed char)dc;
+#else
+            aligned = (signed char)creal(dc);
+#endif
+            break;
+        }
+        case LDBL_COMPLEX: {
+            H5_ldouble_complex ldc;
+            memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (signed char)ldc;
+#else
+            aligned = (signed char)creall(ldc);
+#endif
+            break;
+        }
+#else
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((signed char *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_uchar
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to unsigned char by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_uchar(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    unsigned char aligned;
+    int           ret = 0;
+
+    memset(&aligned, 0, sizeof(unsigned char));
+
+    switch (src_type) {
+        case FLT_FLOAT16: {
+#ifdef H5_HAVE__FLOAT16
+            H5__Float16 f16;
+            memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            aligned = (unsigned char)f16;
+            break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        }
+        case FLT_FLOAT: {
+            float f;
+            memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
+            aligned = (unsigned char)f;
+            break;
+        }
+        case FLT_DOUBLE: {
+            double d;
+            memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
+            aligned = (unsigned char)d;
+            break;
+        }
+        case FLT_LDOUBLE: {
+            long double ld;
+            memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
+            aligned = (unsigned char)ld;
+            break;
+        }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        case FLT_COMPLEX: {
+            H5_float_complex fc;
+            memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned char)fc;
+#else
+            aligned = (unsigned char)crealf(fc);
+#endif
+            break;
+        }
+        case DBL_COMPLEX: {
+            H5_double_complex dc;
+            memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned char)dc;
+#else
+            aligned = (unsigned char)creal(dc);
+#endif
+            break;
+        }
+        case LDBL_COMPLEX: {
+            H5_ldouble_complex ldc;
+            memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned char)ldc;
+#else
+            aligned = (unsigned char)creall(ldc);
+#endif
+            break;
+        }
+#else
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((unsigned char *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_short
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to short by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_short(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    short aligned;
+    int   ret = 0;
+
+    memset(&aligned, 0, sizeof(short));
+
+    switch (src_type) {
+        case FLT_FLOAT16: {
+#ifdef H5_HAVE__FLOAT16
+            H5__Float16 f16;
+            memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            aligned = (short)f16;
+            break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        }
+        case FLT_FLOAT: {
+            float f;
+            memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
+            aligned = (short)f;
+            break;
+        }
+        case FLT_DOUBLE: {
+            double d;
+            memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
+            aligned = (short)d;
+            break;
+        }
+        case FLT_LDOUBLE: {
+            long double ld;
+            memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
+            aligned = (short)ld;
+            break;
+        }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        case FLT_COMPLEX: {
+            H5_float_complex fc;
+            memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (short)fc;
+#else
+            aligned = (short)crealf(fc);
+#endif
+            break;
+        }
+        case DBL_COMPLEX: {
+            H5_double_complex dc;
+            memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (short)dc;
+#else
+            aligned = (short)creal(dc);
+#endif
+            break;
+        }
+        case LDBL_COMPLEX: {
+            H5_ldouble_complex ldc;
+            memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (short)ldc;
+#else
+            aligned = (short)creall(ldc);
+#endif
+            break;
+        }
+#else
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((short *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_ushort
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to unsigned short by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_ushort(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    unsigned short aligned;
+    int            ret = 0;
+
+    memset(&aligned, 0, sizeof(unsigned short));
+
+    switch (src_type) {
+        case FLT_FLOAT16: {
+#ifdef H5_HAVE__FLOAT16
+            H5__Float16 f16;
+            memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            aligned = (unsigned short)f16;
+            break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        }
+        case FLT_FLOAT: {
+            float f;
+            memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
+            aligned = (unsigned short)f;
+            break;
+        }
+        case FLT_DOUBLE: {
+            double d;
+            memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
+            aligned = (unsigned short)d;
+            break;
+        }
+        case FLT_LDOUBLE: {
+            long double ld;
+            memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
+            aligned = (unsigned short)ld;
+            break;
+        }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        case FLT_COMPLEX: {
+            H5_float_complex fc;
+            memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned short)fc;
+#else
+            aligned = (unsigned short)crealf(fc);
+#endif
+            break;
+        }
+        case DBL_COMPLEX: {
+            H5_double_complex dc;
+            memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned short)dc;
+#else
+            aligned = (unsigned short)creal(dc);
+#endif
+            break;
+        }
+        case LDBL_COMPLEX: {
+            H5_ldouble_complex ldc;
+            memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned short)ldc;
+#else
+            aligned = (unsigned short)creall(ldc);
+#endif
+            break;
+        }
+#else
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((unsigned short *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_int
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to int by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_int(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    int aligned;
+    int ret = 0;
+
+    memset(&aligned, 0, sizeof(int));
+
+    switch (src_type) {
+        case FLT_FLOAT16: {
+#ifdef H5_HAVE__FLOAT16
+            H5__Float16 f16;
+            memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            aligned = (int)f16;
+            break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        }
+        case FLT_FLOAT: {
+            float f;
+            memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
+            aligned = (int)f;
+            break;
+        }
+        case FLT_DOUBLE: {
+            double d;
+            memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
+            aligned = (int)d;
+            break;
+        }
+        case FLT_LDOUBLE: {
+            long double ld;
+            memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
+            aligned = (int)ld;
+            break;
+        }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        case FLT_COMPLEX: {
+            H5_float_complex fc;
+            memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (int)fc;
+#else
+            aligned = (int)crealf(fc);
+#endif
+            break;
+        }
+        case DBL_COMPLEX: {
+            H5_double_complex dc;
+            memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (int)dc;
+#else
+            aligned = (int)creal(dc);
+#endif
+            break;
+        }
+        case LDBL_COMPLEX: {
+            H5_ldouble_complex ldc;
+            memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (int)ldc;
+#else
+            aligned = (int)creall(ldc);
+#endif
+            break;
+        }
+#else
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((int *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_uint
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to unsigned int by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_uint(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    unsigned int aligned;
+    int          ret = 0;
+
+    memset(&aligned, 0, sizeof(unsigned int));
+
+    switch (src_type) {
+        case FLT_FLOAT16: {
+#ifdef H5_HAVE__FLOAT16
+            H5__Float16 f16;
+            memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            aligned = (unsigned int)f16;
+            break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        }
+        case FLT_FLOAT: {
+            float f;
+            memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
+            aligned = (unsigned int)f;
+            break;
+        }
+        case FLT_DOUBLE: {
+            double d;
+            memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
+            aligned = (unsigned int)d;
+            break;
+        }
+        case FLT_LDOUBLE: {
+            long double ld;
+            memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
+            aligned = (unsigned int)ld;
+            break;
+        }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        case FLT_COMPLEX: {
+            H5_float_complex fc;
+            memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned int)fc;
+#else
+            aligned = (unsigned int)crealf(fc);
+#endif
+            break;
+        }
+        case DBL_COMPLEX: {
+            H5_double_complex dc;
+            memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned int)dc;
+#else
+            aligned = (unsigned int)creal(dc);
+#endif
+            break;
+        }
+        case LDBL_COMPLEX: {
+            H5_ldouble_complex ldc;
+            memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned int)ldc;
+#else
+            aligned = (unsigned int)creall(ldc);
+#endif
+            break;
+        }
+#else
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((unsigned int *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_long
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to long by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_long(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    long aligned;
+    int  ret = 0;
+
+    memset(&aligned, 0, sizeof(long));
+
+    switch (src_type) {
+        case FLT_FLOAT16: {
+#ifdef H5_HAVE__FLOAT16
+            H5__Float16 f16;
+            memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            aligned = (long)f16;
+            break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        }
+        case FLT_FLOAT: {
+            float f;
+            memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
+            aligned = (long)f;
+            break;
+        }
+        case FLT_DOUBLE: {
+            double d;
+            memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
+            aligned = (long)d;
+            break;
+        }
+        case FLT_LDOUBLE: {
+            long double ld;
+            memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
+            aligned = (long)ld;
+            break;
+        }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        case FLT_COMPLEX: {
+            H5_float_complex fc;
+            memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (long)fc;
+#else
+            aligned = (long)crealf(fc);
+#endif
+            break;
+        }
+        case DBL_COMPLEX: {
+            H5_double_complex dc;
+            memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (long)dc;
+#else
+            aligned = (long)creal(dc);
+#endif
+            break;
+        }
+        case LDBL_COMPLEX: {
+            H5_ldouble_complex ldc;
+            memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (long)ldc;
+#else
+            aligned = (long)creall(ldc);
+#endif
+            break;
+        }
+#else
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((long *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_ulong
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to unsigned long by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_ulong(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    unsigned long aligned;
+    int           ret = 0;
+
+    memset(&aligned, 0, sizeof(unsigned long));
+
+    switch (src_type) {
+        case FLT_FLOAT16: {
+#ifdef H5_HAVE__FLOAT16
+            H5__Float16 f16;
+            memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            aligned = (unsigned long)f16;
+            break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        }
+        case FLT_FLOAT: {
+            float f;
+            memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
+            aligned = (unsigned long)f;
+            break;
+        }
+        case FLT_DOUBLE: {
+            double d;
+            memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
+            aligned = (unsigned long)d;
+            break;
+        }
+        case FLT_LDOUBLE: {
+            long double ld;
+            memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
+            aligned = (unsigned long)ld;
+            break;
+        }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        case FLT_COMPLEX: {
+            H5_float_complex fc;
+            memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned long)fc;
+#else
+            aligned = (unsigned long)crealf(fc);
+#endif
+            break;
+        }
+        case DBL_COMPLEX: {
+            H5_double_complex dc;
+            memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned long)dc;
+#else
+            aligned = (unsigned long)creal(dc);
+#endif
+            break;
+        }
+        case LDBL_COMPLEX: {
+            H5_ldouble_complex ldc;
+            memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned long)ldc;
+#else
+            aligned = (unsigned long)creall(ldc);
+#endif
+            break;
+        }
+#else
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((unsigned long *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_llong
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to long long by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_llong(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    long long aligned;
+    int       ret = 0;
+
+    memset(&aligned, 0, sizeof(long long));
+
+    switch (src_type) {
+        case FLT_FLOAT16: {
+#ifdef H5_HAVE__FLOAT16
+            H5__Float16 f16;
+            memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            aligned = (long long)f16;
+            break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        }
+        case FLT_FLOAT: {
+            float f;
+            memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
+            aligned = (long long)f;
+            break;
+        }
+        case FLT_DOUBLE: {
+            double d;
+            memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
+            aligned = (long long)d;
+            break;
+        }
+        case FLT_LDOUBLE: {
+            long double ld;
+            memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
+            aligned = (long long)ld;
+            break;
+        }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        case FLT_COMPLEX: {
+            H5_float_complex fc;
+            memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (long long)fc;
+#else
+            aligned = (long long)crealf(fc);
+#endif
+            break;
+        }
+        case DBL_COMPLEX: {
+            H5_double_complex dc;
+            memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (long long)dc;
+#else
+            aligned = (long long)creal(dc);
+#endif
+            break;
+        }
+        case LDBL_COMPLEX: {
+            H5_ldouble_complex ldc;
+            memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (long long)ldc;
+#else
+            aligned = (long long)creall(ldc);
+#endif
+            break;
+        }
+#else
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((long long *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_ullong
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to unsigned long long by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_ullong(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    unsigned long long aligned;
+    int                ret = 0;
+
+    memset(&aligned, 0, sizeof(unsigned long long));
+
+    switch (src_type) {
+        case FLT_FLOAT16: {
+#ifdef H5_HAVE__FLOAT16
+            H5__Float16 f16;
+            memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            aligned = (unsigned long long)f16;
+            break;
+#else
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        }
+        case FLT_FLOAT: {
+            float f;
+            memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
+            aligned = (unsigned long long)f;
+            break;
+        }
+        case FLT_DOUBLE: {
+            double d;
+            memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
+            aligned = (unsigned long long)d;
+            break;
+        }
+        case FLT_LDOUBLE: {
+            long double ld;
+            memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
+            aligned = (unsigned long long)ld;
+            break;
+        }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        case FLT_COMPLEX: {
+            H5_float_complex fc;
+            memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned long long)fc;
+#else
+            aligned = (unsigned long long)crealf(fc);
+#endif
+            break;
+        }
+        case DBL_COMPLEX: {
+            H5_double_complex dc;
+            memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned long long)dc;
+#else
+            aligned = (unsigned long long)creal(dc);
+#endif
+            break;
+        }
+        case LDBL_COMPLEX: {
+            H5_ldouble_complex ldc;
+            memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (unsigned long long)ldc;
+#else
+            aligned = (unsigned long long)creall(ldc);
+#endif
+            break;
+        }
+#else
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+#endif
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((unsigned long long *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_flt16
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to _Float16 by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5_HAVE__FLOAT16
+static int
+test_conv_int_fp_conv_to_flt16(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    H5__Float16 aligned;
+    int         ret = 0;
+
+    memset(&aligned, 0, sizeof(H5__Float16));
+
+    switch (src_type) {
+        case INT_SCHAR: {
+            signed char c;
+            memcpy(&c, src_buf + idx * sizeof(signed char), sizeof(signed char));
+            aligned = (H5__Float16)c;
+            break;
+        }
+        case INT_UCHAR: {
+            unsigned char uc;
+            memcpy(&uc, src_buf + idx * sizeof(unsigned char), sizeof(unsigned char));
+            aligned = (H5__Float16)uc;
+            break;
+        }
+        case INT_SHORT: {
+            short s;
+            memcpy(&s, src_buf + idx * sizeof(short), sizeof(short));
+            aligned = (H5__Float16)s;
+            break;
+        }
+        case INT_USHORT: {
+            unsigned short us;
+            memcpy(&us, src_buf + idx * sizeof(unsigned short), sizeof(unsigned short));
+            aligned = (H5__Float16)us;
+            break;
+        }
+        case INT_INT: {
+            int i;
+            memcpy(&i, src_buf + idx * sizeof(int), sizeof(int));
+            aligned = (H5__Float16)i;
+            break;
+        }
+        case INT_UINT: {
+            unsigned int ui;
+            memcpy(&ui, src_buf + idx * sizeof(unsigned int), sizeof(unsigned int));
+            aligned = (H5__Float16)ui;
+            break;
+        }
+        case INT_LONG: {
+            long l;
+            memcpy(&l, src_buf + idx * sizeof(long), sizeof(long));
+            aligned = (H5__Float16)l;
+            break;
+        }
+        case INT_ULONG: {
+            unsigned long ul;
+            memcpy(&ul, src_buf + idx * sizeof(unsigned long), sizeof(unsigned long));
+            aligned = (H5__Float16)ul;
+            break;
+        }
+        case INT_LLONG: {
+            long long ll;
+            memcpy(&ll, src_buf + idx * sizeof(long long), sizeof(long long));
+            aligned = (H5__Float16)ll;
+            break;
+        }
+        case INT_ULLONG: {
+            unsigned long long ull;
+            memcpy(&ull, src_buf + idx * sizeof(unsigned long long), sizeof(unsigned long long));
+            aligned = (H5__Float16)ull;
+            break;
+        }
+        case FLT_FLOAT16:
+        case FLT_FLOAT:
+        case FLT_DOUBLE:
+        case FLT_LDOUBLE:
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((H5__Float16 *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+#endif
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_flt
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to float by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_flt(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    float aligned;
+    int   ret = 0;
+
+    memset(&aligned, 0, sizeof(float));
+
+    switch (src_type) {
+        case INT_SCHAR: {
+            signed char c;
+            memcpy(&c, src_buf + idx * sizeof(signed char), sizeof(signed char));
+            aligned = (float)c;
+            break;
+        }
+        case INT_UCHAR: {
+            unsigned char uc;
+            memcpy(&uc, src_buf + idx * sizeof(unsigned char), sizeof(unsigned char));
+            aligned = (float)uc;
+            break;
+        }
+        case INT_SHORT: {
+            short s;
+            memcpy(&s, src_buf + idx * sizeof(short), sizeof(short));
+            aligned = (float)s;
+            break;
+        }
+        case INT_USHORT: {
+            unsigned short us;
+            memcpy(&us, src_buf + idx * sizeof(unsigned short), sizeof(unsigned short));
+            aligned = (float)us;
+            break;
+        }
+        case INT_INT: {
+            int i;
+            memcpy(&i, src_buf + idx * sizeof(int), sizeof(int));
+            aligned = (float)i;
+            break;
+        }
+        case INT_UINT: {
+            unsigned int ui;
+            memcpy(&ui, src_buf + idx * sizeof(unsigned int), sizeof(unsigned int));
+            aligned = (float)ui;
+            break;
+        }
+        case INT_LONG: {
+            long l;
+            memcpy(&l, src_buf + idx * sizeof(long), sizeof(long));
+            aligned = (float)l;
+            break;
+        }
+        case INT_ULONG: {
+            unsigned long ul;
+            memcpy(&ul, src_buf + idx * sizeof(unsigned long), sizeof(unsigned long));
+            aligned = (float)ul;
+            break;
+        }
+        case INT_LLONG: {
+            long long ll;
+            memcpy(&ll, src_buf + idx * sizeof(long long), sizeof(long long));
+            aligned = (float)ll;
+            break;
+        }
+        case INT_ULLONG: {
+            unsigned long long ull;
+            memcpy(&ull, src_buf + idx * sizeof(unsigned long long), sizeof(unsigned long long));
+            aligned = (float)ull;
+            break;
+        }
+        case FLT_FLOAT16:
+        case FLT_FLOAT:
+        case FLT_DOUBLE:
+        case FLT_LDOUBLE:
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((float *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_double
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to double by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_double(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    double aligned;
+    int    ret = 0;
+
+    memset(&aligned, 0, sizeof(double));
+
+    switch (src_type) {
+        case INT_SCHAR: {
+            signed char c;
+            memcpy(&c, src_buf + idx * sizeof(signed char), sizeof(signed char));
+            aligned = (double)c;
+            break;
+        }
+        case INT_UCHAR: {
+            unsigned char uc;
+            memcpy(&uc, src_buf + idx * sizeof(unsigned char), sizeof(unsigned char));
+            aligned = (double)uc;
+            break;
+        }
+        case INT_SHORT: {
+            short s;
+            memcpy(&s, src_buf + idx * sizeof(short), sizeof(short));
+            aligned = (double)s;
+            break;
+        }
+        case INT_USHORT: {
+            unsigned short us;
+            memcpy(&us, src_buf + idx * sizeof(unsigned short), sizeof(unsigned short));
+            aligned = (double)us;
+            break;
+        }
+        case INT_INT: {
+            int i;
+            memcpy(&i, src_buf + idx * sizeof(int), sizeof(int));
+            aligned = (double)i;
+            break;
+        }
+        case INT_UINT: {
+            unsigned int ui;
+            memcpy(&ui, src_buf + idx * sizeof(unsigned int), sizeof(unsigned int));
+            aligned = (double)ui;
+            break;
+        }
+        case INT_LONG: {
+            long l;
+            memcpy(&l, src_buf + idx * sizeof(long), sizeof(long));
+            aligned = (double)l;
+            break;
+        }
+        case INT_ULONG: {
+            unsigned long ul;
+            memcpy(&ul, src_buf + idx * sizeof(unsigned long), sizeof(unsigned long));
+            aligned = (double)ul;
+            break;
+        }
+        case INT_LLONG: {
+            long long ll;
+            memcpy(&ll, src_buf + idx * sizeof(long long), sizeof(long long));
+            aligned = (double)ll;
+            break;
+        }
+        case INT_ULLONG: {
+            unsigned long long ull;
+            memcpy(&ull, src_buf + idx * sizeof(unsigned long long), sizeof(unsigned long long));
+            aligned = (double)ull;
+            break;
+        }
+        case FLT_FLOAT16:
+        case FLT_FLOAT:
+        case FLT_DOUBLE:
+        case FLT_LDOUBLE:
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((double *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_ldouble
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to long double by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_ldouble(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    long double aligned;
+    int         ret = 0;
+
+    memset(&aligned, 0, sizeof(long double));
+
+    switch (src_type) {
+        case INT_SCHAR: {
+            signed char c;
+            memcpy(&c, src_buf + idx * sizeof(signed char), sizeof(signed char));
+            aligned = (long double)c;
+            break;
+        }
+        case INT_UCHAR: {
+            unsigned char uc;
+            memcpy(&uc, src_buf + idx * sizeof(unsigned char), sizeof(unsigned char));
+            aligned = (long double)uc;
+            break;
+        }
+        case INT_SHORT: {
+            short s;
+            memcpy(&s, src_buf + idx * sizeof(short), sizeof(short));
+            aligned = (long double)s;
+            break;
+        }
+        case INT_USHORT: {
+            unsigned short us;
+            memcpy(&us, src_buf + idx * sizeof(unsigned short), sizeof(unsigned short));
+            aligned = (long double)us;
+            break;
+        }
+        case INT_INT: {
+            int i;
+            memcpy(&i, src_buf + idx * sizeof(int), sizeof(int));
+            aligned = (long double)i;
+            break;
+        }
+        case INT_UINT: {
+            unsigned int ui;
+            memcpy(&ui, src_buf + idx * sizeof(unsigned int), sizeof(unsigned int));
+            aligned = (long double)ui;
+            break;
+        }
+        case INT_LONG: {
+            long l;
+            memcpy(&l, src_buf + idx * sizeof(long), sizeof(long));
+            aligned = (long double)l;
+            break;
+        }
+        case INT_ULONG: {
+            unsigned long ul;
+            memcpy(&ul, src_buf + idx * sizeof(unsigned long), sizeof(unsigned long));
+            aligned = (long double)ul;
+            break;
+        }
+        case INT_LLONG: {
+            long long ll;
+            memcpy(&ll, src_buf + idx * sizeof(long long), sizeof(long long));
+            aligned = (long double)ll;
+            break;
+        }
+        case INT_ULLONG: {
+            unsigned long long ull;
+            memcpy(&ull, src_buf + idx * sizeof(unsigned long long), sizeof(unsigned long long));
+            aligned = (long double)ull;
+            break;
+        }
+        case FLT_FLOAT16:
+        case FLT_FLOAT:
+        case FLT_DOUBLE:
+        case FLT_LDOUBLE:
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((long double *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_fcomplex
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to float _Complex / _Fcomplex by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_fcomplex(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    H5_float_complex aligned;
+    int              ret = 0;
+
+    memset(&aligned, 0, sizeof(H5_float_complex));
+
+    switch (src_type) {
+        case INT_SCHAR: {
+            signed char c;
+            memcpy(&c, src_buf + idx * sizeof(signed char), sizeof(signed char));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_float_complex)c;
+#else
+            aligned = H5_CMPLXF(c, 0.0F);
+#endif
+            break;
+        }
+        case INT_UCHAR: {
+            unsigned char uc;
+            memcpy(&uc, src_buf + idx * sizeof(unsigned char), sizeof(unsigned char));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_float_complex)uc;
+#else
+            aligned = H5_CMPLXF(uc, 0.0F);
+#endif
+            break;
+        }
+        case INT_SHORT: {
+            short s;
+            memcpy(&s, src_buf + idx * sizeof(short), sizeof(short));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_float_complex)s;
+#else
+            aligned = H5_CMPLXF(s, 0.0F);
+#endif
+            break;
+        }
+        case INT_USHORT: {
+            unsigned short us;
+            memcpy(&us, src_buf + idx * sizeof(unsigned short), sizeof(unsigned short));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_float_complex)us;
+#else
+            aligned = H5_CMPLXF(us, 0.0F);
+#endif
+            break;
+        }
+        case INT_INT: {
+            int i;
+            memcpy(&i, src_buf + idx * sizeof(int), sizeof(int));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_float_complex)i;
+#else
+            aligned = H5_CMPLXF(i, 0.0F);
+#endif
+            break;
+        }
+        case INT_UINT: {
+            unsigned int ui;
+            memcpy(&ui, src_buf + idx * sizeof(unsigned int), sizeof(unsigned int));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_float_complex)ui;
+#else
+            aligned = H5_CMPLXF(ui, 0.0F);
+#endif
+            break;
+        }
+        case INT_LONG: {
+            long l;
+            memcpy(&l, src_buf + idx * sizeof(long), sizeof(long));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_float_complex)l;
+#else
+            aligned = H5_CMPLXF(l, 0.0F);
+#endif
+            break;
+        }
+        case INT_ULONG: {
+            unsigned long ul;
+            memcpy(&ul, src_buf + idx * sizeof(unsigned long), sizeof(unsigned long));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_float_complex)ul;
+#else
+            aligned = H5_CMPLXF(ul, 0.0F);
+#endif
+            break;
+        }
+        case INT_LLONG: {
+            long long ll;
+            memcpy(&ll, src_buf + idx * sizeof(long long), sizeof(long long));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_float_complex)ll;
+#else
+            aligned = H5_CMPLXF(ll, 0.0F);
+#endif
+            break;
+        }
+        case INT_ULLONG: {
+            unsigned long long ull;
+            memcpy(&ull, src_buf + idx * sizeof(unsigned long long), sizeof(unsigned long long));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_float_complex)ull;
+#else
+            aligned = H5_CMPLXF(ull, 0.0F);
+#endif
+            break;
+        }
+        case FLT_FLOAT16:
+        case FLT_FLOAT:
+        case FLT_DOUBLE:
+        case FLT_LDOUBLE:
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((H5_float_complex *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_dcomplex
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to double _Complex / _Dcomplex by casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_dcomplex(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    H5_double_complex aligned;
+    int               ret = 0;
+
+    memset(&aligned, 0, sizeof(H5_double_complex));
+
+    switch (src_type) {
+        case INT_SCHAR: {
+            signed char c;
+            memcpy(&c, src_buf + idx * sizeof(signed char), sizeof(signed char));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_double_complex)c;
+#else
+            aligned = H5_CMPLX(c, 0.0);
+#endif
+            break;
+        }
+        case INT_UCHAR: {
+            unsigned char uc;
+            memcpy(&uc, src_buf + idx * sizeof(unsigned char), sizeof(unsigned char));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_double_complex)uc;
+#else
+            aligned = H5_CMPLX(uc, 0.0);
+#endif
+            break;
+        }
+        case INT_SHORT: {
+            short s;
+            memcpy(&s, src_buf + idx * sizeof(short), sizeof(short));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_double_complex)s;
+#else
+            aligned = H5_CMPLX(s, 0.0);
+#endif
+            break;
+        }
+        case INT_USHORT: {
+            unsigned short us;
+            memcpy(&us, src_buf + idx * sizeof(unsigned short), sizeof(unsigned short));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_double_complex)us;
+#else
+            aligned = H5_CMPLX(us, 0.0);
+#endif
+            break;
+        }
+        case INT_INT: {
+            int i;
+            memcpy(&i, src_buf + idx * sizeof(int), sizeof(int));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_double_complex)i;
+#else
+            aligned = H5_CMPLX(i, 0.0);
+#endif
+            break;
+        }
+        case INT_UINT: {
+            unsigned int ui;
+            memcpy(&ui, src_buf + idx * sizeof(unsigned int), sizeof(unsigned int));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_double_complex)ui;
+#else
+            aligned = H5_CMPLX(ui, 0.0);
+#endif
+            break;
+        }
+        case INT_LONG: {
+            long l;
+            memcpy(&l, src_buf + idx * sizeof(long), sizeof(long));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_double_complex)l;
+#else
+            aligned = H5_CMPLX(l, 0.0);
+#endif
+            break;
+        }
+        case INT_ULONG: {
+            unsigned long ul;
+            memcpy(&ul, src_buf + idx * sizeof(unsigned long), sizeof(unsigned long));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_double_complex)ul;
+#else
+            aligned = H5_CMPLX(ul, 0.0);
+#endif
+            break;
+        }
+        case INT_LLONG: {
+            long long ll;
+            memcpy(&ll, src_buf + idx * sizeof(long long), sizeof(long long));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_double_complex)ll;
+#else
+            aligned = H5_CMPLX(ll, 0.0);
+#endif
+            break;
+        }
+        case INT_ULLONG: {
+            unsigned long long ull;
+            memcpy(&ull, src_buf + idx * sizeof(unsigned long long), sizeof(unsigned long long));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_double_complex)ull;
+#else
+            aligned = H5_CMPLX(ull, 0.0);
+#endif
+            break;
+        }
+        case FLT_FLOAT16:
+        case FLT_FLOAT:
+        case FLT_DOUBLE:
+        case FLT_LDOUBLE:
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((H5_double_complex *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_int_fp_conv_to_lcomplex
+ *
+ * Purpose:     Helper function for test_conv_int_fp to perform conversion
+ *              from a datatype to long double _Complex / _Lcomplex by
+ *              casting.
+ *
+ * Return:      -1 on failure
+ *              0 on success
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_fp_conv_to_lcomplex(void *hw_p, unsigned char *src_buf, size_t idx, dtype_t src_type)
+{
+    H5_ldouble_complex aligned;
+    int                ret = 0;
+
+    memset(&aligned, 0, sizeof(H5_ldouble_complex));
+
+    switch (src_type) {
+        case INT_SCHAR: {
+            signed char c;
+            memcpy(&c, src_buf + idx * sizeof(signed char), sizeof(signed char));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_ldouble_complex)c;
+#else
+            aligned = H5_CMPLXL(c, 0.0L);
+#endif
+            break;
+        }
+        case INT_UCHAR: {
+            unsigned char uc;
+            memcpy(&uc, src_buf + idx * sizeof(unsigned char), sizeof(unsigned char));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_ldouble_complex)uc;
+#else
+            aligned = H5_CMPLXL(uc, 0.0L);
+#endif
+            break;
+        }
+        case INT_SHORT: {
+            short s;
+            memcpy(&s, src_buf + idx * sizeof(short), sizeof(short));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_ldouble_complex)s;
+#else
+            aligned = H5_CMPLXL(s, 0.0L);
+#endif
+            break;
+        }
+        case INT_USHORT: {
+            unsigned short us;
+            memcpy(&us, src_buf + idx * sizeof(unsigned short), sizeof(unsigned short));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_ldouble_complex)us;
+#else
+            aligned = H5_CMPLXL(us, 0.0L);
+#endif
+            break;
+        }
+        case INT_INT: {
+            int i;
+            memcpy(&i, src_buf + idx * sizeof(int), sizeof(int));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_ldouble_complex)i;
+#else
+            aligned = H5_CMPLXL(i, 0.0L);
+#endif
+            break;
+        }
+        case INT_UINT: {
+            unsigned int ui;
+            memcpy(&ui, src_buf + idx * sizeof(unsigned int), sizeof(unsigned int));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_ldouble_complex)ui;
+#else
+            aligned = H5_CMPLXL(ui, 0.0L);
+#endif
+            break;
+        }
+        case INT_LONG: {
+            long l;
+            memcpy(&l, src_buf + idx * sizeof(long), sizeof(long));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_ldouble_complex)l;
+#else
+            aligned = H5_CMPLXL(l, 0.0L);
+#endif
+            break;
+        }
+        case INT_ULONG: {
+            unsigned long ul;
+            memcpy(&ul, src_buf + idx * sizeof(unsigned long), sizeof(unsigned long));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_ldouble_complex)ul;
+#else
+            aligned = H5_CMPLXL(ul, 0.0L);
+#endif
+            break;
+        }
+        case INT_LLONG: {
+            long long ll;
+            memcpy(&ll, src_buf + idx * sizeof(long long), sizeof(long long));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_ldouble_complex)ll;
+#else
+            aligned = H5_CMPLXL(ll, 0.0L);
+#endif
+            break;
+        }
+        case INT_ULLONG: {
+            unsigned long long ull;
+            memcpy(&ull, src_buf + idx * sizeof(unsigned long long), sizeof(unsigned long long));
+#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
+            aligned = (H5_ldouble_complex)ull;
+#else
+            aligned = H5_CMPLXL(ull, 0.0L);
+#endif
+            break;
+        }
+        case FLT_FLOAT16:
+        case FLT_FLOAT:
+        case FLT_DOUBLE:
+        case FLT_LDOUBLE:
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+    *((H5_ldouble_complex *)hw_p) = aligned;
+
+done:
+    return ret;
+}
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:    test_conv_int_fp
@@ -3899,7 +7448,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     unsigned char          dst_bits[32];            /*dest value in LE order*/
     size_t                 src_nbits;               /*source length in bits    */
     size_t                 dst_nbits;               /*dst length in bits    */
-    void                  *aligned    = NULL;       /*aligned temp buffer    */
+    void                  *hw_p       = NULL;
     float                  hw_float   = 0;
     double                 hw_double  = 0;
     long double            hw_ldouble = 0;
@@ -3915,6 +7464,11 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     unsigned long long     hw_ullong  = 0;
 #ifdef H5_HAVE__FLOAT16
     H5__Float16 hw_half;
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    H5_ldouble_complex hw_ldouble_complex;
+    H5_double_complex  hw_double_complex;
+    H5_float_complex   hw_float_complex;
 #endif
 
     /* What is the name of the source type */
@@ -3976,6 +7530,20 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     else if (H5Tequal(src, H5T_NATIVE_FLOAT16)) {
         src_type_name = "_Float16";
         src_type      = FLT_FLOAT16;
+    }
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    else if (H5Tequal(src, H5T_NATIVE_FLOAT_COMPLEX)) {
+        src_type_name = "float _Complex";
+        src_type      = FLT_COMPLEX;
+    }
+    else if (H5Tequal(src, H5T_NATIVE_DOUBLE_COMPLEX)) {
+        src_type_name = "double _Complex";
+        src_type      = DBL_COMPLEX;
+    }
+    else if (H5Tequal(src, H5T_NATIVE_LDOUBLE_COMPLEX)) {
+        src_type_name = "long double _Complex";
+        src_type      = LDBL_COMPLEX;
     }
 #endif
     else {
@@ -4044,6 +7612,20 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         dst_type      = FLT_FLOAT16;
     }
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    else if (H5Tequal(dst, H5T_NATIVE_FLOAT_COMPLEX)) {
+        dst_type_name = "float _Complex";
+        dst_type      = FLT_COMPLEX;
+    }
+    else if (H5Tequal(dst, H5T_NATIVE_DOUBLE_COMPLEX)) {
+        dst_type_name = "double _Complex";
+        dst_type      = DBL_COMPLEX;
+    }
+    else if (H5Tequal(dst, H5T_NATIVE_LDOUBLE_COMPLEX)) {
+        dst_type_name = "long double _Complex";
+        dst_type      = LDBL_COMPLEX;
+    }
+#endif
     else {
         dst_type_name = "UNKNOWN";
         dst_type      = OTHER;
@@ -4062,7 +7644,8 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
          INT_INT == src_type || INT_UINT == src_type || INT_LONG == src_type || INT_ULONG == src_type ||
          INT_LLONG == src_type || INT_ULLONG == src_type) &&
         (FLT_FLOAT != dst_type && FLT_DOUBLE != dst_type && FLT_LDOUBLE != dst_type &&
-         FLT_FLOAT16 != dst_type)) {
+         FLT_FLOAT16 != dst_type && FLT_COMPLEX != dst_type && DBL_COMPLEX != dst_type &&
+         LDBL_COMPLEX != dst_type)) {
         snprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, src_type_name, dst_type_name);
         printf("%-70s", str);
         H5_FAILED();
@@ -4071,7 +7654,8 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     }
 
     if ((FLT_FLOAT == src_type || FLT_DOUBLE == src_type || FLT_LDOUBLE == src_type ||
-         FLT_FLOAT16 == src_type) &&
+         FLT_FLOAT16 == src_type || FLT_COMPLEX == src_type || DBL_COMPLEX == src_type ||
+         LDBL_COMPLEX == src_type) &&
         (INT_SCHAR != dst_type && INT_UCHAR != dst_type && INT_SHORT != dst_type && INT_USHORT != dst_type &&
          INT_INT != dst_type && INT_UINT != dst_type && INT_LONG != dst_type && INT_ULONG != dst_type &&
          INT_LLONG != dst_type && INT_ULLONG != dst_type)) {
@@ -4112,7 +7696,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     dst_size  = H5Tget_size(dst);
     src_nbits = H5Tget_precision(src); /* not 8*src_size, esp on J90 - QAK */
     dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
-    aligned   = calloc((size_t)1, MAX(sizeof(long double), sizeof(long long)));
+
 #ifdef SHOW_OVERFLOWS
     noverflows_g = 0;
 #endif
@@ -4122,6 +7706,9 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
      * have garbage causing wrong value comparison.
      */
     memset(&hw_ldouble, 0, sizeof(long double));
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    memset(&hw_ldouble_complex, 0, sizeof(H5_ldouble_complex));
+#endif
 
     /* Create a dataset transfer property list and datatype conversion
      * exception handler function and pass in fill value.  This is mainly
@@ -4147,8 +7734,8 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     }
 
     /* Allocate and initialize the source buffer through macro INIT_INTEGER if the source is integer,
-     * INIT_FP_NORM if floating-point.  The BUF will be used for the conversion while the SAVED buffer
-     * will be used for the comparison later.
+     * INIT_FP_NORM if floating-point or complex.  The BUF will be used for the conversion while the
+     * SAVED buffer will be used for the comparison later.
      */
     if (src_type == INT_SCHAR) {
         INIT_INTEGER(signed char, SCHAR_MAX, SCHAR_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
@@ -4245,6 +7832,63 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         assert(0 && "Should not reach this point!");
 #endif
     }
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    else if (src_type == FLT_COMPLEX) {
+        size_t part_size = src_size / 2;
+
+        if (run_test == TEST_NORMAL) {
+            INIT_FP_NORM(float, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP, part_size, dst_size, buf,
+                         saved, nelmts);
+        }
+        else if (run_test == TEST_DENORM) {
+            INIT_FP_DENORM(float, FLT_MANT_DIG, part_size, src_nbits, sendian, dst_size, buf, saved, nelmts);
+        }
+        else {
+            INIT_FP_SPECIAL(part_size, src_nbits, sendian, FLT_MANT_DIG, dst_size, buf, saved, nelmts);
+        }
+
+        /* Treat float buffer as float _Complex buffer of nelmts / 2 elements */
+        assert(nelmts % 2 == 0);
+        nelmts /= 2;
+    }
+    else if (src_type == DBL_COMPLEX) {
+        size_t part_size = src_size / 2;
+
+        if (run_test == TEST_NORMAL) {
+            INIT_FP_NORM(double, DBL_MAX, DBL_MIN, DBL_MAX_10_EXP, DBL_MIN_10_EXP, part_size, dst_size, buf,
+                         saved, nelmts);
+        }
+        else if (run_test == TEST_DENORM) {
+            INIT_FP_DENORM(double, DBL_MANT_DIG, part_size, src_nbits, sendian, dst_size, buf, saved, nelmts);
+        }
+        else {
+            INIT_FP_SPECIAL(part_size, src_nbits, sendian, DBL_MANT_DIG, dst_size, buf, saved, nelmts);
+        }
+
+        /* Treat double buffer as double _Complex buffer of nelmts / 2 elements */
+        assert(nelmts % 2 == 0);
+        nelmts /= 2;
+    }
+    else if (src_type == LDBL_COMPLEX) {
+        size_t part_size = src_size / 2;
+
+        if (run_test == TEST_NORMAL) {
+            INIT_FP_NORM(long double, LDBL_MAX, LDBL_MIN, LDBL_MAX_10_EXP, LDBL_MIN_10_EXP, part_size,
+                         dst_size, buf, saved, nelmts);
+        }
+        else if (run_test == TEST_DENORM) {
+            INIT_FP_DENORM(long double, LDBL_MANT_DIG, part_size, src_nbits, sendian, dst_size, buf, saved,
+                           nelmts);
+        }
+        else {
+            INIT_FP_SPECIAL(part_size, src_nbits, sendian, LDBL_MANT_DIG, dst_size, buf, saved, nelmts);
+        }
+
+        /* Treat long double buffer as long double _Complex buffer of nelmts / 2 elements */
+        assert(nelmts % 2 == 0);
+        nelmts /= 2;
+    }
+#endif
     else
         goto error;
 
@@ -4252,619 +7896,170 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     if (H5Tconvert(src, dst, nelmts, buf, NULL, dxpl_id) < 0)
         goto error;
 
+    /* Set pointer to matching type for hardware conversion */
+    switch (dst_type) {
+        case INT_SCHAR:
+            hw_p = &hw_schar;
+            break;
+        case INT_UCHAR:
+            hw_p = &hw_uchar;
+            break;
+        case INT_SHORT:
+            hw_p = &hw_short;
+            break;
+        case INT_USHORT:
+            hw_p = &hw_ushort;
+            break;
+        case INT_INT:
+            hw_p = &hw_int;
+            break;
+        case INT_UINT:
+            hw_p = &hw_uint;
+            break;
+        case INT_LONG:
+            hw_p = &hw_long;
+            break;
+        case INT_ULONG:
+            hw_p = &hw_ulong;
+            break;
+        case INT_LLONG:
+            hw_p = &hw_llong;
+            break;
+        case INT_ULLONG:
+            hw_p = &hw_ullong;
+            break;
+        case FLT_FLOAT16:
+#ifdef H5_HAVE__FLOAT16
+            hw_p = &hw_half;
+            break;
+#else
+            H5_FAILED();
+            printf("invalid destination datatype\n");
+            goto error;
+#endif
+        case FLT_FLOAT:
+            hw_p = &hw_float;
+            break;
+        case FLT_DOUBLE:
+            hw_p = &hw_double;
+            break;
+        case FLT_LDOUBLE:
+            hw_p = &hw_ldouble;
+            break;
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        case FLT_COMPLEX:
+            hw_p = &hw_float_complex;
+            break;
+        case DBL_COMPLEX:
+            hw_p = &hw_double_complex;
+            break;
+        case LDBL_COMPLEX:
+            hw_p = &hw_ldouble_complex;
+            break;
+#else
+        case FLT_COMPLEX:
+        case DBL_COMPLEX:
+        case LDBL_COMPLEX:
+            H5_FAILED();
+            printf("invalid destination datatype\n");
+            goto error;
+#endif
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination datatype\n");
+            goto error;
+    }
+
+    /* Set convenience pointer for indexing into bytes of matching type */
+    hw = (unsigned char *)hw_p;
+
     /* Check the results from the library against hardware */
     for (j = 0; j < nelmts; j++) {
+        int conv_ret = -1;
+
         if (FLT_FLOAT == src_type || FLT_DOUBLE == src_type || FLT_LDOUBLE == src_type ||
-            FLT_FLOAT16 == src_type)
+            FLT_FLOAT16 == src_type || FLT_COMPLEX == src_type || DBL_COMPLEX == src_type ||
+            LDBL_COMPLEX == src_type)
             if (my_isnan(src_type, saved + j * src_size))
                 continue;
 
-        if (FLT_FLOAT == dst_type) {
-            hw = (unsigned char *)&hw_float;
-            switch (src_type) {
-                case INT_SCHAR:
-                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
-                    hw_float = (float)(*((signed char *)aligned));
-                    break;
-                case INT_UCHAR:
-                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
-                    hw_float = (float)(*((unsigned char *)aligned));
-                    break;
-                case INT_SHORT:
-                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
-                    hw_float = (float)(*((short *)aligned));
-                    break;
-                case INT_USHORT:
-                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
-                    hw_float = (float)(*((unsigned short *)aligned));
-                    break;
-                case INT_INT:
-                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
-                    hw_float = (float)(*((int *)aligned));
-                    break;
-                case INT_UINT:
-                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
-                    hw_float = (float)(*((unsigned *)aligned));
-                    break;
-                case INT_LONG:
-                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
-                    hw_float = (float)(*((long *)aligned));
-                    break;
-                case INT_ULONG:
-                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
-                    hw_float = (float)(*((unsigned long *)aligned));
-                    break;
-                case INT_LLONG:
-                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
-                    hw_float = (float)(*((long long *)aligned));
-                    break;
-                case INT_ULLONG:
-                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
-                    hw_float = (float)(*((unsigned long long *)aligned));
-                    break;
-                case FLT_FLOAT16:
-                case FLT_FLOAT:
-                case FLT_DOUBLE:
-                case FLT_LDOUBLE:
-                case OTHER:
-                default:
-                    assert(0 && "Unknown type");
-                    break;
-            }
-        }
-        else if (FLT_DOUBLE == dst_type) {
-            hw = (unsigned char *)&hw_double;
-            switch (src_type) {
-                case INT_SCHAR:
-                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
-                    hw_double = (double)(*((signed char *)aligned));
-                    break;
-                case INT_UCHAR:
-                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
-                    hw_double = (double)(*((unsigned char *)aligned));
-                    break;
-                case INT_SHORT:
-                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
-                    hw_double = (double)(*((short *)aligned));
-                    break;
-                case INT_USHORT:
-                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
-                    hw_double = (double)(*((unsigned short *)aligned));
-                    break;
-                case INT_INT:
-                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
-                    hw_double = (double)(*((int *)aligned));
-                    break;
-                case INT_UINT:
-                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
-                    hw_double = (double)(*((unsigned *)aligned));
-                    break;
-                case INT_LONG:
-                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
-                    hw_double = (double)(*((long *)aligned));
-                    break;
-                case INT_ULONG:
-                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
-                    hw_double = (double)(*((unsigned long *)aligned));
-                    break;
-                case INT_LLONG:
-                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
-                    hw_double = (double)(*((long long *)aligned));
-                    break;
-                case INT_ULLONG:
-                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
-                    hw_double = (double)(*((unsigned long long *)aligned));
-                    break;
-                case FLT_FLOAT16:
-                case FLT_FLOAT:
-                case FLT_DOUBLE:
-                case FLT_LDOUBLE:
-                case OTHER:
-                default:
-                    assert(0 && "Unknown type");
-                    break;
-            }
-        }
-        else if (FLT_LDOUBLE == dst_type) {
-            hw = (unsigned char *)&hw_ldouble;
-            switch (src_type) {
-                case INT_SCHAR:
-                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
-                    hw_ldouble = (long double)(*((signed char *)aligned));
-                    break;
-                case INT_UCHAR:
-                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
-                    hw_ldouble = (long double)(*((unsigned char *)aligned));
-                    break;
-                case INT_SHORT:
-                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
-                    hw_ldouble = (long double)(*((short *)aligned));
-                    break;
-                case INT_USHORT:
-                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
-                    hw_ldouble = (long double)(*((unsigned short *)aligned));
-                    break;
-                case INT_INT:
-                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
-                    hw_ldouble = (long double)(*((int *)aligned));
-                    break;
-                case INT_UINT:
-                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
-                    hw_ldouble = (long double)(*((unsigned *)aligned));
-                    break;
-                case INT_LONG:
-                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
-                    hw_ldouble = (long double)(*((long *)aligned));
-                    break;
-                case INT_ULONG:
-                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
-                    hw_ldouble = (long double)(*((unsigned long *)aligned));
-                    break;
-                case INT_LLONG:
-                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
-                    hw_ldouble = (long double)(*((long long *)aligned));
-                    break;
-                case INT_ULLONG:
-                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
-                    hw_ldouble = (long double)(*((unsigned long long *)aligned));
-                    break;
-                case FLT_FLOAT16:
-                case FLT_FLOAT:
-                case FLT_DOUBLE:
-                case FLT_LDOUBLE:
-                case OTHER:
-                default:
-                    assert(0 && "Unknown type");
-                    break;
-            }
-        }
-        else if (FLT_FLOAT16 == dst_type) {
+        switch (dst_type) {
+            case INT_SCHAR:
+                conv_ret = test_conv_int_fp_conv_to_schar(hw_p, saved, j, src_type);
+                break;
+            case INT_UCHAR:
+                conv_ret = test_conv_int_fp_conv_to_uchar(hw_p, saved, j, src_type);
+                break;
+            case INT_SHORT:
+                conv_ret = test_conv_int_fp_conv_to_short(hw_p, saved, j, src_type);
+                break;
+            case INT_USHORT:
+                conv_ret = test_conv_int_fp_conv_to_ushort(hw_p, saved, j, src_type);
+                break;
+            case INT_INT:
+                conv_ret = test_conv_int_fp_conv_to_int(hw_p, saved, j, src_type);
+                break;
+            case INT_UINT:
+                conv_ret = test_conv_int_fp_conv_to_uint(hw_p, saved, j, src_type);
+                break;
+            case INT_LONG:
+                conv_ret = test_conv_int_fp_conv_to_long(hw_p, saved, j, src_type);
+                break;
+            case INT_ULONG:
+                conv_ret = test_conv_int_fp_conv_to_ulong(hw_p, saved, j, src_type);
+                break;
+            case INT_LLONG:
+                conv_ret = test_conv_int_fp_conv_to_llong(hw_p, saved, j, src_type);
+                break;
+            case INT_ULLONG:
+                conv_ret = test_conv_int_fp_conv_to_ullong(hw_p, saved, j, src_type);
+                break;
+            case FLT_FLOAT16:
 #ifdef H5_HAVE__FLOAT16
-            hw = (unsigned char *)&hw_half;
-            switch (src_type) {
-                case INT_SCHAR:
-                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
-                    hw_half = (H5__Float16)(*((signed char *)aligned));
-                    break;
-                case INT_UCHAR:
-                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
-                    hw_half = (H5__Float16)(*((unsigned char *)aligned));
-                    break;
-                case INT_SHORT:
-                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
-                    hw_half = (H5__Float16)(*((short *)aligned));
-                    break;
-                case INT_USHORT:
-                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
-                    hw_half = (H5__Float16)(*((unsigned short *)aligned));
-                    break;
-                case INT_INT:
-                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
-                    hw_half = (H5__Float16)(*((int *)aligned));
-                    break;
-                case INT_UINT:
-                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
-                    hw_half = (H5__Float16)(*((unsigned *)aligned));
-                    break;
-                case INT_LONG:
-                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
-                    hw_half = (H5__Float16)(*((long *)aligned));
-                    break;
-                case INT_ULONG:
-                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
-                    hw_half = (H5__Float16)(*((unsigned long *)aligned));
-                    break;
-                case INT_LLONG:
-                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
-                    hw_half = (H5__Float16)(*((long long *)aligned));
-                    break;
-                case INT_ULLONG:
-                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
-                    hw_half = (H5__Float16)(*((unsigned long long *)aligned));
-                    break;
-                case FLT_FLOAT16:
-                case FLT_FLOAT:
-                case FLT_DOUBLE:
-                case FLT_LDOUBLE:
-                case OTHER:
-                default:
-                    assert(0 && "Unknown type");
-                    break;
-            }
+                conv_ret = test_conv_int_fp_conv_to_flt16(hw_p, saved, j, src_type);
+                break;
 #else
-            assert(0 && "Should not reach this point!");
+                H5_FAILED();
+                printf("invalid destination datatype\n");
+                goto error;
 #endif
-        }
-        else if (INT_SCHAR == dst_type) {
-            hw = (unsigned char *)&hw_schar;
-            switch (src_type) {
-                case FLT_FLOAT:
-                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
-                    hw_schar = (signed char)(*((float *)aligned));
-                    break;
-                case FLT_DOUBLE:
-                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
-                    hw_schar = (signed char)(*((double *)aligned));
-                    break;
-                case FLT_LDOUBLE:
-                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
-                    hw_schar = (signed char)(*((long double *)aligned));
-                    break;
-                case FLT_FLOAT16:
-#ifdef H5_HAVE__FLOAT16
-                    memcpy(aligned, saved + j * sizeof(H5__Float16), sizeof(H5__Float16));
-                    hw_schar = (signed char)(*((H5__Float16 *)aligned));
-                    break;
+            case FLT_FLOAT:
+                conv_ret = test_conv_int_fp_conv_to_flt(hw_p, saved, j, src_type);
+                break;
+            case FLT_DOUBLE:
+                conv_ret = test_conv_int_fp_conv_to_double(hw_p, saved, j, src_type);
+                break;
+            case FLT_LDOUBLE:
+                conv_ret = test_conv_int_fp_conv_to_ldouble(hw_p, saved, j, src_type);
+                break;
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            case FLT_COMPLEX:
+                conv_ret = test_conv_int_fp_conv_to_fcomplex(hw_p, saved, j, src_type);
+                break;
+            case DBL_COMPLEX:
+                conv_ret = test_conv_int_fp_conv_to_dcomplex(hw_p, saved, j, src_type);
+                break;
+            case LDBL_COMPLEX:
+                conv_ret = test_conv_int_fp_conv_to_lcomplex(hw_p, saved, j, src_type);
+                break;
 #else
-                    assert(0 && "Should not reach this point!");
+            case FLT_COMPLEX:
+            case DBL_COMPLEX:
+            case LDBL_COMPLEX:
+                H5_FAILED();
+                printf("invalid destination datatype\n");
+                goto error;
 #endif
-                case INT_SCHAR:
-                case INT_UCHAR:
-                case INT_SHORT:
-                case INT_USHORT:
-                case INT_INT:
-                case INT_UINT:
-                case INT_LONG:
-                case INT_ULONG:
-                case INT_LLONG:
-                case INT_ULLONG:
-                case OTHER:
-                default:
-                    assert(0 && "Unknown type");
-                    break;
-            }
+            case OTHER:
+            default:
+                H5_FAILED();
+                printf("invalid destination datatype\n");
+                goto error;
         }
-        else if (INT_UCHAR == dst_type) {
-            hw = (unsigned char *)&hw_uchar;
-            switch (src_type) {
-                case FLT_FLOAT:
-                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
-                    hw_uchar = (unsigned char)(*((float *)aligned));
-                    break;
-                case FLT_DOUBLE:
-                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
-                    hw_uchar = (unsigned char)(*((double *)aligned));
-                    break;
-                case FLT_LDOUBLE:
-                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
-                    hw_uchar = (unsigned char)(*((long double *)aligned));
-                    break;
-                case FLT_FLOAT16:
-#ifdef H5_HAVE__FLOAT16
-                    memcpy(aligned, saved + j * sizeof(H5__Float16), sizeof(H5__Float16));
-                    hw_uchar = (unsigned char)(*((H5__Float16 *)aligned));
-                    break;
-#else
-                    assert(0 && "Should not reach this point!");
-#endif
-                case INT_SCHAR:
-                case INT_UCHAR:
-                case INT_SHORT:
-                case INT_USHORT:
-                case INT_INT:
-                case INT_UINT:
-                case INT_LONG:
-                case INT_ULONG:
-                case INT_LLONG:
-                case INT_ULLONG:
-                case OTHER:
-                default:
-                    assert(0 && "Unknown type");
-                    break;
-            }
-        }
-        else if (INT_SHORT == dst_type) {
-            hw = (unsigned char *)&hw_short;
-            switch (src_type) {
-                case FLT_FLOAT:
-                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
-                    hw_short = (short)(*((float *)aligned));
-                    break;
-                case FLT_DOUBLE:
-                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
-                    hw_short = (short)(*((double *)aligned));
-                    break;
-                case FLT_LDOUBLE:
-                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
-                    hw_short = (short)(*((long double *)aligned));
-                    break;
-                case FLT_FLOAT16:
-#ifdef H5_HAVE__FLOAT16
-                    memcpy(aligned, saved + j * sizeof(H5__Float16), sizeof(H5__Float16));
-                    hw_short = (short)(*((H5__Float16 *)aligned));
-                    break;
-#else
-                    assert(0 && "Should not reach this point!");
-#endif
-                case INT_SCHAR:
-                case INT_UCHAR:
-                case INT_SHORT:
-                case INT_USHORT:
-                case INT_INT:
-                case INT_UINT:
-                case INT_LONG:
-                case INT_ULONG:
-                case INT_LLONG:
-                case INT_ULLONG:
-                case OTHER:
-                default:
-                    assert(0 && "Unknown type");
-                    break;
-            }
-        }
-        else if (INT_USHORT == dst_type) {
-            hw = (unsigned char *)&hw_ushort;
-            switch (src_type) {
-                case FLT_FLOAT:
-                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
-                    hw_ushort = (unsigned short)(*((float *)aligned));
-                    break;
-                case FLT_DOUBLE:
-                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
-                    hw_ushort = (unsigned short)(*((double *)aligned));
-                    break;
-                case FLT_LDOUBLE:
-                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
-                    hw_ushort = (unsigned short)(*((long double *)aligned));
-                    break;
-                case FLT_FLOAT16:
-#ifdef H5_HAVE__FLOAT16
-                    memcpy(aligned, saved + j * sizeof(H5__Float16), sizeof(H5__Float16));
-                    hw_ushort = (unsigned short)(*((H5__Float16 *)aligned));
-                    break;
-#else
-                    assert(0 && "Should not reach this point!");
-#endif
-                case INT_SCHAR:
-                case INT_UCHAR:
-                case INT_SHORT:
-                case INT_USHORT:
-                case INT_INT:
-                case INT_UINT:
-                case INT_LONG:
-                case INT_ULONG:
-                case INT_LLONG:
-                case INT_ULLONG:
-                case OTHER:
-                default:
-                    assert(0 && "Unknown type");
-                    break;
-            }
-        }
-        else if (INT_INT == dst_type) {
-            hw = (unsigned char *)&hw_int;
-            switch (src_type) {
-                case FLT_FLOAT:
-                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
-                    hw_int = (int)(*((float *)aligned));
-                    break;
-                case FLT_DOUBLE:
-                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
-                    hw_int = (int)(*((double *)aligned));
-                    break;
-                case FLT_LDOUBLE:
-                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
-                    hw_int = (int)(*((long double *)aligned));
-                    break;
-                case FLT_FLOAT16:
-#ifdef H5_HAVE__FLOAT16
-                    memcpy(aligned, saved + j * sizeof(H5__Float16), sizeof(H5__Float16));
-                    hw_int = (int)(*((H5__Float16 *)aligned));
-                    break;
-#else
-                    assert(0 && "Should not reach this point!");
-#endif
-                case INT_SCHAR:
-                case INT_UCHAR:
-                case INT_SHORT:
-                case INT_USHORT:
-                case INT_INT:
-                case INT_UINT:
-                case INT_LONG:
-                case INT_ULONG:
-                case INT_LLONG:
-                case INT_ULLONG:
-                case OTHER:
-                default:
-                    assert(0 && "Unknown type");
-                    break;
-            }
-        }
-        else if (INT_UINT == dst_type) {
-            hw = (unsigned char *)&hw_uint;
-            switch (src_type) {
-                case FLT_FLOAT:
-                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
-                    hw_uint = (unsigned int)(*((float *)aligned));
-                    break;
-                case FLT_DOUBLE:
-                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
-                    hw_uint = (unsigned int)(*((double *)aligned));
-                    break;
-                case FLT_LDOUBLE:
-                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
-                    hw_uint = (unsigned int)(*((long double *)aligned));
-                    break;
-                case FLT_FLOAT16:
-#ifdef H5_HAVE__FLOAT16
-                    memcpy(aligned, saved + j * sizeof(H5__Float16), sizeof(H5__Float16));
-                    hw_uint = (unsigned int)(*((H5__Float16 *)aligned));
-                    break;
-#else
-                    assert(0 && "Should not reach this point!");
-#endif
-                case INT_SCHAR:
-                case INT_UCHAR:
-                case INT_SHORT:
-                case INT_USHORT:
-                case INT_INT:
-                case INT_UINT:
-                case INT_LONG:
-                case INT_ULONG:
-                case INT_LLONG:
-                case INT_ULLONG:
-                case OTHER:
-                default:
-                    assert(0 && "Unknown type");
-                    break;
-            }
-        }
-        else if (INT_LONG == dst_type) {
-            hw = (unsigned char *)&hw_long;
-            switch (src_type) {
-                case FLT_FLOAT:
-                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
-                    hw_long = (long)(*((float *)aligned));
-                    break;
-                case FLT_DOUBLE:
-                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
-                    hw_long = (long)(*((double *)aligned));
-                    break;
-                case FLT_LDOUBLE:
-                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
-                    hw_long = (long)(*((long double *)aligned));
-                    break;
-                case FLT_FLOAT16:
-#ifdef H5_HAVE__FLOAT16
-                    memcpy(aligned, saved + j * sizeof(H5__Float16), sizeof(H5__Float16));
-                    hw_long = (long)(*((H5__Float16 *)aligned));
-                    break;
-#else
-                    assert(0 && "Should not reach this point!");
-#endif
-                case INT_SCHAR:
-                case INT_UCHAR:
-                case INT_SHORT:
-                case INT_USHORT:
-                case INT_INT:
-                case INT_UINT:
-                case INT_LONG:
-                case INT_ULONG:
-                case INT_LLONG:
-                case INT_ULLONG:
-                case OTHER:
-                default:
-                    assert(0 && "Unknown type");
-                    break;
-            }
-        }
-        else if (INT_ULONG == dst_type) {
-            hw = (unsigned char *)&hw_ulong;
-            switch (src_type) {
-                case FLT_FLOAT:
-                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
-                    hw_ulong = (unsigned long)(*((float *)aligned));
-                    break;
-                case FLT_DOUBLE:
-                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
-                    hw_ulong = (unsigned long)(*((double *)aligned));
-                    break;
-                case FLT_LDOUBLE:
-                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
-                    hw_ulong = (unsigned long)(*((long double *)aligned));
-                    break;
-                case FLT_FLOAT16:
-#ifdef H5_HAVE__FLOAT16
-                    memcpy(aligned, saved + j * sizeof(H5__Float16), sizeof(H5__Float16));
-                    hw_ulong = (unsigned long)(*((H5__Float16 *)aligned));
-                    break;
-#else
-                    assert(0 && "Should not reach this point!");
-#endif
-                case INT_SCHAR:
-                case INT_UCHAR:
-                case INT_SHORT:
-                case INT_USHORT:
-                case INT_INT:
-                case INT_UINT:
-                case INT_LONG:
-                case INT_ULONG:
-                case INT_LLONG:
-                case INT_ULLONG:
-                case OTHER:
-                default:
-                    assert(0 && "Unknown type");
-                    break;
-            }
-        }
-        else if (INT_LLONG == dst_type) {
-            hw = (unsigned char *)&hw_llong;
-            switch (src_type) {
-                case FLT_FLOAT:
-                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
-                    hw_llong = (long long)(*((float *)aligned));
-                    break;
-                case FLT_DOUBLE:
-                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
-                    hw_llong = (long long)(*((double *)aligned));
-                    break;
-                case FLT_LDOUBLE:
-                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
-                    hw_llong = (long long)(*((long double *)aligned));
-                    break;
-                case FLT_FLOAT16:
-#ifdef H5_HAVE__FLOAT16
-                    memcpy(aligned, saved + j * sizeof(H5__Float16), sizeof(H5__Float16));
-                    hw_llong = (long long)(*((H5__Float16 *)aligned));
-                    break;
-#else
-                    assert(0 && "Should not reach this point!");
-#endif
-                case INT_SCHAR:
-                case INT_UCHAR:
-                case INT_SHORT:
-                case INT_USHORT:
-                case INT_INT:
-                case INT_UINT:
-                case INT_LONG:
-                case INT_ULONG:
-                case INT_LLONG:
-                case INT_ULLONG:
-                case OTHER:
-                default:
-                    assert(0 && "Unknown type");
-                    break;
-            }
-        }
-        else if (INT_ULLONG == dst_type) {
-            hw = (unsigned char *)&hw_ullong;
-            switch (src_type) {
-                case FLT_FLOAT:
-                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
-                    hw_ullong = (unsigned long long)(*((float *)aligned));
-                    break;
-                case FLT_DOUBLE:
-                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
-                    hw_ullong = (unsigned long long)(*((double *)aligned));
-                    break;
-                case FLT_LDOUBLE:
-                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
-                    hw_ullong = (unsigned long long)(*((long double *)aligned));
-                    break;
-                case FLT_FLOAT16:
-#ifdef H5_HAVE__FLOAT16
-                    memcpy(aligned, saved + j * sizeof(H5__Float16), sizeof(H5__Float16));
-                    hw_ullong = (unsigned long long)(*((H5__Float16 *)aligned));
-                    break;
-#else
-                    assert(0 && "Should not reach this point!");
-#endif
-                case INT_SCHAR:
-                case INT_UCHAR:
-                case INT_SHORT:
-                case INT_USHORT:
-                case INT_INT:
-                case INT_UINT:
-                case INT_LONG:
-                case INT_ULONG:
-                case INT_LLONG:
-                case INT_ULLONG:
-                case OTHER:
-                default:
-                    assert(0 && "Unknown type");
-                    break;
-            }
-        }
+
+        if (conv_ret < 0)
+            goto error;
 
         /* Make certain that there isn't some weird number of destination bits */
         assert(dst_nbits % 8 == 0);
@@ -4875,17 +8070,46 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
          * bytes may have garbage in them.  Clean them out with 0s before compare
          * the values.
          */
-        if (dendian == H5T_ORDER_LE && dst_type == FLT_LDOUBLE) {
-            size_t q;
-
-            for (q = dst_nbits / 8; q < dst_size; q++)
-                buf[j * dst_size + q] = 0x00;
+        if (dendian == H5T_ORDER_LE) {
+            if (dst_type == FLT_LDOUBLE) {
+                for (size_t q = dst_nbits / 8; q < dst_size; q++)
+                    buf[j * dst_size + q] = 0x00;
+            }
+            else if (dst_type == LDBL_COMPLEX) {
+                uint8_t *cur       = buf + j * dst_size;
+                size_t   part_size = dst_size / 2;
+                for (size_t q = dst_nbits / 8; q < part_size; q++)
+                    cur[q] = 0x00;
+                cur += part_size;
+                for (size_t q = dst_nbits / 8; q < part_size; q++)
+                    cur[q] = 0x00;
+            }
         }
 
         /* Are the two results the same? */
-        for (k = (dst_size - (dst_nbits / 8)); k < dst_size; k++)
-            if (buf[j * dst_size + k] != hw[k])
-                break;
+        if (dst_type != FLT_COMPLEX && dst_type != DBL_COMPLEX && dst_type != LDBL_COMPLEX) {
+            for (k = (dst_size - (dst_nbits / 8)); k < dst_size; k++)
+                if (buf[j * dst_size + k] != hw[k])
+                    break;
+        }
+        else {
+            size_t part_size = dst_size / 2;
+
+            /* Compare real part */
+            for (k = (part_size - (dst_nbits / 8)); k < part_size; k++)
+                if (buf[j * dst_size + k] != hw[k])
+                    break;
+            if (k == part_size) {
+                /* Imaginary part should have been zeroed out. Hardware value
+                 * could be a positive or negative zero, so we'll just check
+                 * the buffer value for simplicity.
+                 */
+                for (k = (dst_size - (dst_nbits / 8)); k < dst_size; k++)
+                    if (buf[j * dst_size + k] != 0x00)
+                        break;
+            }
+        }
+
         if (k == dst_size)
             continue; /*no error*/
 
@@ -4902,13 +8126,39 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 src_bits[k + 1] = saved[j * src_size + (src_size - 1) - k];
             }
         }
+        else if (FLT_COMPLEX == src_type || DBL_COMPLEX == src_type || LDBL_COMPLEX == src_type) {
+            unsigned char *src_bits_p = src_bits;
+            unsigned char *saved_p    = saved + (j * src_size);
+            size_t         part_size  = src_size / 2;
+
+            for (k = 0; k < part_size; k++)
+                src_bits_p[part_size - (k + 1)] = saved_p[ENDIAN(part_size, k, sendian)];
+            src_bits_p += part_size;
+            saved_p += part_size;
+            for (k = 0; k < part_size; k++)
+                src_bits_p[part_size - (k + 1)] = saved_p[ENDIAN(part_size, k, sendian)];
+        }
         else {
             for (k = 0; k < src_size; k++)
                 src_bits[src_size - (k + 1)] = saved[j * src_size + ENDIAN(src_size, k, sendian)];
         }
 
-        for (k = 0; k < dst_size; k++)
-            dst_bits[dst_size - (k + 1)] = buf[j * dst_size + ENDIAN(dst_size, k, dendian)];
+        if (FLT_COMPLEX == dst_type || DBL_COMPLEX == dst_type || LDBL_COMPLEX == dst_type) {
+            unsigned char *dst_bits_p = dst_bits;
+            unsigned char *buf_p      = buf + (j * dst_size);
+            size_t         part_size  = dst_size / 2;
+
+            for (k = 0; k < part_size; k++)
+                dst_bits_p[part_size - (k + 1)] = buf_p[ENDIAN(part_size, k, dendian)];
+            dst_bits_p += part_size;
+            buf_p += part_size;
+            for (k = 0; k < part_size; k++)
+                dst_bits_p[part_size - (k + 1)] = buf_p[ENDIAN(part_size, k, dendian)];
+        }
+        else {
+            for (k = 0; k < dst_size; k++)
+                dst_bits[dst_size - (k + 1)] = buf[j * dst_size + ENDIAN(dst_size, k, dendian)];
+        }
 
         /*          Test library's default overflow handling:
          * Hardware usually doesn't handle overflows too gracefully. The
@@ -4920,7 +8170,8 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
          * desired value was set.
          */
         if ((FLT_FLOAT == src_type || FLT_DOUBLE == src_type || FLT_LDOUBLE == src_type ||
-             FLT_FLOAT16 == src_type) &&
+             FLT_FLOAT16 == src_type || FLT_COMPLEX == src_type || DBL_COMPLEX == src_type ||
+             LDBL_COMPLEX == src_type) &&
             (INT_SCHAR == dst_type || INT_SHORT == dst_type || INT_INT == dst_type || INT_LONG == dst_type ||
              INT_LLONG == dst_type)) {
             if (0 == H5T__bit_get_d(src_bits, src_nbits - 1, (size_t)1) &&
@@ -4961,7 +8212,8 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         }
 
         if ((FLT_FLOAT == src_type || FLT_DOUBLE == src_type || FLT_LDOUBLE == src_type ||
-             FLT_FLOAT16 == src_type) &&
+             FLT_FLOAT16 == src_type || FLT_COMPLEX == src_type || DBL_COMPLEX == src_type ||
+             LDBL_COMPLEX == src_type) &&
             (INT_UCHAR == dst_type || INT_USHORT == dst_type || INT_UINT == dst_type ||
              INT_ULONG == dst_type || INT_ULLONG == dst_type)) {
             if (H5T__bit_get_d(src_bits, src_nbits - 1, (size_t)1)) {
@@ -5008,68 +8260,133 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         printf("    elmt %u: \n", (unsigned)j);
 
         printf("        src = ");
-        for (k = 0; k < src_size; k++)
-            printf(" %02x", saved[j * src_size + ENDIAN(src_size, k, sendian)]);
+        if (FLT_COMPLEX == src_type || DBL_COMPLEX == src_type || LDBL_COMPLEX == src_type) {
+            unsigned char *saved_ptr = saved + (j * src_size);
+            size_t         part_size = src_size / 2;
+            for (k = 0; k < part_size; k++)
+                printf(" %02x", saved_ptr[ENDIAN(part_size, k, sendian)]);
+            saved_ptr += part_size;
+            for (k = 0; k < part_size; k++)
+                printf(" %02x", saved_ptr[ENDIAN(part_size, k, sendian)]);
+        }
+        else {
+            for (k = 0; k < src_size; k++)
+                printf(" %02x", saved[j * src_size + ENDIAN(src_size, k, sendian)]);
+        }
         printf("%*s", (int)(3 * MAX(0, (ssize_t)dst_size - (ssize_t)src_size)), "");
         switch (src_type) {
-            case INT_SCHAR:
-                memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
-                printf(" %29d\n", (int)*((signed char *)aligned));
+            case INT_SCHAR: {
+                signed char sc;
+                memcpy(&sc, saved + j * sizeof(signed char), sizeof(signed char));
+                printf(" %29d\n", (int)sc);
                 break;
-            case INT_UCHAR:
-                memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
-                printf(" %29u\n", (unsigned)*((unsigned char *)aligned));
+            }
+            case INT_UCHAR: {
+                unsigned char uc;
+                memcpy(&uc, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                printf(" %29u\n", (unsigned)uc);
                 break;
-            case INT_SHORT:
-                memcpy(aligned, saved + j * sizeof(short), sizeof(short));
-                printf(" %29hd\n", *((short *)aligned));
+            }
+            case INT_SHORT: {
+                short s;
+                memcpy(&s, saved + j * sizeof(short), sizeof(short));
+                printf(" %29hd\n", s);
                 break;
-            case INT_USHORT:
-                memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
-                printf(" %29hu\n", *((unsigned short *)aligned));
+            }
+            case INT_USHORT: {
+                unsigned short us;
+                memcpy(&us, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                printf(" %29hu\n", us);
                 break;
-            case INT_INT:
-                memcpy(aligned, saved + j * sizeof(int), sizeof(int));
-                printf(" %29d\n", *((int *)aligned));
+            }
+            case INT_INT: {
+                int i;
+                memcpy(&i, saved + j * sizeof(int), sizeof(int));
+                printf(" %29d\n", i);
                 break;
-            case INT_UINT:
-                memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
-                printf(" %29u\n", *((unsigned *)aligned));
+            }
+            case INT_UINT: {
+                unsigned int ui;
+                memcpy(&ui, saved + j * sizeof(unsigned), sizeof(unsigned));
+                printf(" %29u\n", ui);
                 break;
-            case INT_LONG:
-                memcpy(aligned, saved + j * sizeof(long), sizeof(long));
-                printf(" %29ld\n", *((long *)aligned));
+            }
+            case INT_LONG: {
+                long l;
+                memcpy(&l, saved + j * sizeof(long), sizeof(long));
+                printf(" %29ld\n", l);
                 break;
-            case INT_ULONG:
-                memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
-                printf(" %29lu\n", *((unsigned long *)aligned));
+            }
+            case INT_ULONG: {
+                unsigned long ul;
+                memcpy(&ul, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                printf(" %29lu\n", ul);
                 break;
-            case INT_LLONG:
-                memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
-                fprintf(stdout, " %29lld\n", *((long long *)aligned));
+            }
+            case INT_LLONG: {
+                long long ll;
+                memcpy(&ll, saved + j * sizeof(long long), sizeof(long long));
+                fprintf(stdout, " %29lld\n", ll);
                 break;
-            case INT_ULLONG:
-                memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
-                fprintf(stdout, " %29llu\n", *((unsigned long long *)aligned));
+            }
+            case INT_ULLONG: {
+                unsigned long long ull;
+                memcpy(&ull, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                fprintf(stdout, " %29llu\n", ull);
                 break;
-            case FLT_FLOAT:
-                memcpy(aligned, saved + j * sizeof(float), sizeof(float));
-                printf(" %29f\n", (double)*((float *)aligned));
+            }
+            case FLT_FLOAT: {
+                float f;
+                memcpy(&f, saved + j * sizeof(float), sizeof(float));
+                printf(" %29f\n", (double)f);
                 break;
-            case FLT_DOUBLE:
-                memcpy(aligned, saved + j * sizeof(double), sizeof(double));
-                printf(" %29f\n", *((double *)aligned));
+            }
+            case FLT_DOUBLE: {
+                double d;
+                memcpy(&d, saved + j * sizeof(double), sizeof(double));
+                printf(" %29f\n", d);
                 break;
-            case FLT_LDOUBLE:
-                memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
-                printf(" %29Lf\n", *((long double *)aligned));
+            }
+            case FLT_LDOUBLE: {
+                long double ld;
+                memcpy(&ld, saved + j * sizeof(long double), sizeof(long double));
+                printf(" %29Lf\n", ld);
                 break;
+            }
             case FLT_FLOAT16:
 #ifdef H5_HAVE__FLOAT16
-                memcpy(aligned, saved + j * sizeof(H5__Float16), sizeof(H5__Float16));
-                printf(" %29f\n", (double)*((H5__Float16 *)aligned));
+            {
+                H5__Float16 f16;
+                memcpy(&f16, saved + j * sizeof(H5__Float16), sizeof(H5__Float16));
+                printf(" %29f\n", (double)f16);
                 break;
+            }
 #else
+                assert(0 && "Should not reach this point!");
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            case FLT_COMPLEX: {
+                H5_float_complex fc;
+                memcpy(&fc, saved + j * sizeof(H5_float_complex), sizeof(H5_float_complex));
+                printf(" %29f%+fi\n", (double)crealf(fc), (double)cimagf(fc));
+                break;
+            }
+            case DBL_COMPLEX: {
+                H5_double_complex dc;
+                memcpy(&dc, saved + j * sizeof(H5_double_complex), sizeof(H5_double_complex));
+                printf(" %29f%+fi\n", creal(dc), cimag(dc));
+                break;
+            }
+            case LDBL_COMPLEX: {
+                H5_ldouble_complex ldc;
+                memcpy(&ldc, saved + j * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
+                printf(" %29Lf%+Lfi\n", creall(ldc), cimagl(ldc));
+                break;
+            }
+#else
+            case FLT_COMPLEX:
+            case DBL_COMPLEX:
+            case LDBL_COMPLEX:
                 assert(0 && "Should not reach this point!");
 #endif
             case OTHER:
@@ -5079,68 +8396,133 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         }
 
         printf("        dst = ");
-        for (k = 0; k < dst_size; k++)
-            printf(" %02x", buf[j * dst_size + ENDIAN(dst_size, k, dendian)]);
+        if (FLT_COMPLEX == dst_type || DBL_COMPLEX == dst_type || LDBL_COMPLEX == dst_type) {
+            unsigned char *buf_ptr   = buf + (j * dst_size);
+            size_t         part_size = dst_size / 2;
+            for (k = 0; k < part_size; k++)
+                printf(" %02x", buf_ptr[ENDIAN(part_size, k, dendian)]);
+            buf_ptr += part_size;
+            for (k = 0; k < part_size; k++)
+                printf(" %02x", buf_ptr[ENDIAN(part_size, k, dendian)]);
+        }
+        else {
+            for (k = 0; k < dst_size; k++)
+                printf(" %02x", buf[j * dst_size + ENDIAN(dst_size, k, dendian)]);
+        }
         printf("%*s", (int)(3 * MAX(0, (ssize_t)src_size - (ssize_t)dst_size)), "");
         switch (dst_type) {
-            case INT_SCHAR:
-                memcpy(aligned, buf + j * sizeof(signed char), sizeof(signed char));
-                printf(" %29d\n", (int)*((signed char *)aligned));
+            case INT_SCHAR: {
+                signed char sc;
+                memcpy(&sc, buf + j * sizeof(signed char), sizeof(signed char));
+                printf(" %29d\n", (int)sc);
                 break;
-            case INT_UCHAR:
-                memcpy(aligned, buf + j * sizeof(unsigned char), sizeof(unsigned char));
-                printf(" %29u\n", (unsigned)*((unsigned char *)aligned));
+            }
+            case INT_UCHAR: {
+                unsigned char uc;
+                memcpy(&uc, buf + j * sizeof(unsigned char), sizeof(unsigned char));
+                printf(" %29u\n", (unsigned)uc);
                 break;
-            case INT_SHORT:
-                memcpy(aligned, buf + j * sizeof(short), sizeof(short));
-                printf(" %29hd\n", *((short *)aligned));
+            }
+            case INT_SHORT: {
+                short s;
+                memcpy(&s, buf + j * sizeof(short), sizeof(short));
+                printf(" %29hd\n", s);
                 break;
-            case INT_USHORT:
-                memcpy(aligned, buf + j * sizeof(unsigned short), sizeof(unsigned short));
-                printf(" %29hu\n", *((unsigned short *)aligned));
+            }
+            case INT_USHORT: {
+                unsigned short us;
+                memcpy(&us, buf + j * sizeof(unsigned short), sizeof(unsigned short));
+                printf(" %29hu\n", us);
                 break;
-            case INT_INT:
-                memcpy(aligned, buf + j * sizeof(int), sizeof(int));
-                printf(" %29d\n", *((int *)aligned));
+            }
+            case INT_INT: {
+                int i;
+                memcpy(&i, buf + j * sizeof(int), sizeof(int));
+                printf(" %29d\n", i);
                 break;
-            case INT_UINT:
-                memcpy(aligned, buf + j * sizeof(unsigned), sizeof(unsigned));
-                printf(" %29u\n", *((unsigned *)aligned));
+            }
+            case INT_UINT: {
+                unsigned int ui;
+                memcpy(&ui, buf + j * sizeof(unsigned), sizeof(unsigned));
+                printf(" %29u\n", ui);
                 break;
-            case INT_LONG:
-                memcpy(aligned, buf + j * sizeof(long), sizeof(long));
-                printf(" %29ld\n", *((long *)aligned));
+            }
+            case INT_LONG: {
+                long l;
+                memcpy(&l, buf + j * sizeof(long), sizeof(long));
+                printf(" %29ld\n", l);
                 break;
-            case INT_ULONG:
-                memcpy(aligned, buf + j * sizeof(unsigned long), sizeof(unsigned long));
-                printf(" %29lu\n", *((unsigned long *)aligned));
+            }
+            case INT_ULONG: {
+                unsigned long ul;
+                memcpy(&ul, buf + j * sizeof(unsigned long), sizeof(unsigned long));
+                printf(" %29lu\n", ul);
                 break;
-            case INT_LLONG:
-                memcpy(aligned, buf + j * sizeof(long long), sizeof(long long));
-                fprintf(stdout, " %29lld\n", *((long long *)aligned));
+            }
+            case INT_LLONG: {
+                long long ll;
+                memcpy(&ll, buf + j * sizeof(long long), sizeof(long long));
+                fprintf(stdout, " %29lld\n", ll);
                 break;
-            case INT_ULLONG:
-                memcpy(aligned, buf + j * sizeof(unsigned long long), sizeof(unsigned long long));
-                fprintf(stdout, " %29llu\n", *((unsigned long long *)aligned));
+            }
+            case INT_ULLONG: {
+                unsigned long long ull;
+                memcpy(&ull, buf + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                fprintf(stdout, " %29llu\n", ull);
                 break;
-            case FLT_FLOAT:
-                memcpy(aligned, buf + j * sizeof(float), sizeof(float));
-                printf(" %29f\n", (double)*((float *)aligned));
+            }
+            case FLT_FLOAT: {
+                float f;
+                memcpy(&f, buf + j * sizeof(float), sizeof(float));
+                printf(" %29f\n", (double)f);
                 break;
-            case FLT_DOUBLE:
-                memcpy(aligned, buf + j * sizeof(double), sizeof(double));
-                printf(" %29f\n", *((double *)aligned));
+            }
+            case FLT_DOUBLE: {
+                double d;
+                memcpy(&d, buf + j * sizeof(double), sizeof(double));
+                printf(" %29f\n", d);
                 break;
-            case FLT_LDOUBLE:
-                memcpy(aligned, buf + j * sizeof(long double), sizeof(long double));
-                printf(" %29Lf\n", *((long double *)aligned));
+            }
+            case FLT_LDOUBLE: {
+                long double ld;
+                memcpy(&ld, buf + j * sizeof(long double), sizeof(long double));
+                printf(" %29Lf\n", ld);
                 break;
+            }
             case FLT_FLOAT16:
 #ifdef H5_HAVE__FLOAT16
-                memcpy(aligned, buf + j * sizeof(H5__Float16), sizeof(H5__Float16));
-                printf(" %29f\n", (double)*((H5__Float16 *)aligned));
+            {
+                H5__Float16 f16;
+                memcpy(&f16, buf + j * sizeof(H5__Float16), sizeof(H5__Float16));
+                printf(" %29f\n", (double)f16);
                 break;
+            }
 #else
+                assert(0 && "Should not reach this point!");
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            case FLT_COMPLEX: {
+                H5_float_complex fc;
+                memcpy(&fc, buf + j * sizeof(H5_float_complex), sizeof(H5_float_complex));
+                printf(" %29f%+fi\n", (double)crealf(fc), (double)cimagf(fc));
+                break;
+            }
+            case DBL_COMPLEX: {
+                H5_double_complex dc;
+                memcpy(&dc, buf + j * sizeof(H5_double_complex), sizeof(H5_double_complex));
+                printf(" %29f%+fi\n", creal(dc), cimag(dc));
+                break;
+            }
+            case LDBL_COMPLEX: {
+                H5_ldouble_complex ldc;
+                memcpy(&ldc, buf + j * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
+                printf(" %29Lf%+Lfi\n", creall(ldc), cimagl(ldc));
+                break;
+            }
+#else
+            case FLT_COMPLEX:
+            case DBL_COMPLEX:
+            case LDBL_COMPLEX:
                 assert(0 && "Should not reach this point!");
 #endif
             case OTHER:
@@ -5150,8 +8532,19 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         }
 
         printf("        and = ");
-        for (k = 0; k < dst_size; k++)
-            printf(" %02x", hw[ENDIAN(dst_size, k, dendian)]);
+        if (FLT_COMPLEX == dst_type || DBL_COMPLEX == dst_type || LDBL_COMPLEX == dst_type) {
+            unsigned char *hw_tmp_ptr = hw;
+            size_t         part_size  = dst_size / 2;
+            for (k = 0; k < part_size; k++)
+                printf(" %02x", hw_tmp_ptr[ENDIAN(part_size, k, dendian)]);
+            hw_tmp_ptr += part_size;
+            for (k = 0; k < part_size; k++)
+                printf(" %02x", hw_tmp_ptr[ENDIAN(part_size, k, dendian)]);
+        }
+        else {
+            for (k = 0; k < dst_size; k++)
+                printf(" %02x", hw[ENDIAN(dst_size, k, dendian)]);
+        }
         printf("%*s", (int)(3 * MAX(0, (ssize_t)src_size - (ssize_t)dst_size)), "");
         switch (dst_type) {
             case INT_SCHAR:
@@ -5200,6 +8593,25 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
 #else
                 assert(0 && "Should not reach this point!");
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            case FLT_COMPLEX:
+                printf(" %29f%+fi\n", (double)crealf(*((H5_float_complex *)((void *)hw))),
+                       (double)cimagf(*((H5_float_complex *)((void *)hw))));
+                break;
+            case DBL_COMPLEX:
+                printf(" %29f%+fi\n", creal(*((H5_double_complex *)((void *)hw))),
+                       cimag(*((H5_double_complex *)((void *)hw))));
+                break;
+            case LDBL_COMPLEX:
+                printf(" %29Lf%+Lfi\n", creall(*((H5_ldouble_complex *)((void *)hw))),
+                       cimagl(*((H5_ldouble_complex *)((void *)hw))));
+                break;
+#else
+            case FLT_COMPLEX:
+            case DBL_COMPLEX:
+            case LDBL_COMPLEX:
+                assert(0 && "Should not reach this point!");
+#endif
             case OTHER:
             default:
                 assert(0 && "Unknown type");
@@ -5223,12 +8635,14 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         PASSED();
 
 done:
-    if (buf)
+    if (buf) {
         aligned_free(buf);
-    if (saved)
+        buf = NULL;
+    }
+    if (saved) {
         aligned_free(saved);
-    if (aligned)
-        free(aligned);
+        saved = NULL;
+    }
     fflush(stdout);
     /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
@@ -5247,8 +8661,6 @@ error:
         aligned_free(buf);
     if (saved)
         aligned_free(saved);
-    if (aligned)
-        free(aligned);
     fflush(stdout);
 
     /* Restore the default error handler (set in h5_test_init()) */
@@ -5527,6 +8939,11 @@ run_fp_tests(const char *name)
 #ifdef H5_HAVE__FLOAT16
         nerrors += test_conv_flt_1("noop", TEST_NOOP, H5T_NATIVE_FLOAT16, H5T_NATIVE_FLOAT16);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        nerrors += test_conv_flt_1("noop", TEST_NOOP, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_FLOAT_COMPLEX);
+        nerrors += test_conv_flt_1("noop", TEST_NOOP, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_DOUBLE_COMPLEX);
+        nerrors += test_conv_flt_1("noop", TEST_NOOP, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE_COMPLEX);
+#endif
         goto done;
     }
 
@@ -5558,9 +8975,55 @@ run_fp_tests(const char *name)
         SKIPPED();
         puts("    Test skipped due to compiler error in handling conversion.");
     }
-#endif
-#endif
-#endif
+#endif /* H5_LDOUBLE_TO_FLOAT16_CORRECT */
+#endif /* H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE */
+#endif /* H5_HAVE__FLOAT16 */
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_FLOAT);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_FLOAT);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_FLOAT);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_DOUBLE);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_DOUBLE);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_DOUBLE);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE);
+#ifdef H5_HAVE__FLOAT16
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT16, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT16, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT16, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_FLOAT16);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_FLOAT16);
+#ifdef H5_LDOUBLE_TO_FLOAT16_CORRECT
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_FLOAT16);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s normalized %s -> %s conversions", name, "long double _Complex",
+                 "_Float16");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to compiler error in handling conversion.");
+    }
+#endif /* H5_LDOUBLE_TO_FLOAT16_CORRECT */
+#endif /* H5_HAVE__FLOAT16 */
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_DOUBLE_COMPLEX);
+#endif /* H5_HAVE_COMPLEX_NUMBERS */
 
     /*Test denormalized values.  TEST_DENORM indicates denormalized values.*/
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE);
@@ -5580,10 +9043,10 @@ run_fp_tests(const char *name)
         SKIPPED();
         puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
     }
-#endif
+#endif /* H5_DISABLE_SOME_LDOUBLE_CONV */
 
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
-#endif
+#endif /* H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE */
 #ifdef H5_HAVE__FLOAT16
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT16, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT16, H5T_NATIVE_DOUBLE);
@@ -5603,9 +9066,79 @@ run_fp_tests(const char *name)
         SKIPPED();
         puts("    Test skipped due to compiler error in handling conversion.");
     }
-#endif
-#endif
-#endif
+#endif /* H5_LDOUBLE_TO_FLOAT16_CORRECT */
+#endif /* H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE */
+#endif /* H5_HAVE__FLOAT16 */
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_FLOAT);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_FLOAT);
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_FLOAT);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s denormalized %s -> %s conversions", name,
+                 "long double _Complex", "float");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+    }
+#endif /* H5_DISABLE_SOME_LDOUBLE_CONV */
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_DOUBLE);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_DOUBLE);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_DOUBLE);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE);
+#ifdef H5_HAVE__FLOAT16
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT16, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT16, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT16, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_FLOAT16);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_FLOAT16);
+#ifdef H5_LDOUBLE_TO_FLOAT16_CORRECT
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_FLOAT16);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s denormalized %s -> %s conversions", name,
+                 "long double _Complex", "_Float16");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to compiler error in handling conversion.");
+    }
+#endif /* H5_LDOUBLE_TO_FLOAT16_CORRECT */
+#endif /* H5_HAVE__FLOAT16 */
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE_COMPLEX);
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_FLOAT_COMPLEX);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s denormalized %s -> %s conversions", name,
+                 "long double _Complex", "float _Complex");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+    }
+#endif /* H5_DISABLE_SOME_LDOUBLE_CONV */
+    nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_DOUBLE_COMPLEX);
+#endif /* H5_HAVE_COMPLEX_NUMBERS */
 
     /*Test special values, +/-0, +/-infinity, +/-QNaN, +/-SNaN.*/
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE);
@@ -5626,8 +9159,8 @@ run_fp_tests(const char *name)
         SKIPPED();
         puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
     }
-#endif
-#endif
+#endif /* H5_DISABLE_SOME_LDOUBLE_CONV */
+#endif /* H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE */
 #ifdef H5_HAVE__FLOAT16
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT16, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT16, H5T_NATIVE_DOUBLE);
@@ -5647,9 +9180,103 @@ run_fp_tests(const char *name)
         SKIPPED();
         puts("    Test skipped due to compiler error in handling conversion.");
     }
-#endif
-#endif
-#endif
+#endif /* H5_LDOUBLE_TO_FLOAT16_CORRECT */
+#endif /* H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE */
+#endif /* H5_HAVE__FLOAT16 */
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_FLOAT);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_FLOAT);
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_FLOAT);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, "long double _Complex",
+                 "float");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+    }
+#endif /* H5_DISABLE_SOME_LDOUBLE_CONV */
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_DOUBLE);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_DOUBLE);
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_DOUBLE);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, "long double _Complex",
+                 "double");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+    }
+#endif /* H5_DISABLE_SOME_LDOUBLE_CONV */
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE);
+#ifdef H5_HAVE__FLOAT16
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT16, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT16, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT16, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_FLOAT16);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_FLOAT16);
+#ifdef H5_LDOUBLE_TO_FLOAT16_CORRECT
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_FLOAT16);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, "long double _Complex",
+                 "_Float16");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to compiler error in handling conversion.");
+    }
+#endif /* H5_LDOUBLE_TO_FLOAT16_CORRECT */
+#endif /* H5_HAVE__FLOAT16 */
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_LDOUBLE_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE_COMPLEX);
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_FLOAT_COMPLEX);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, "long double _Complex",
+                 "float _Complex");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+    }
+#endif /* H5_DISABLE_SOME_LDOUBLE_CONV */
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
+    nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_DOUBLE_COMPLEX);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, "long double _Complex",
+                 "double _Complex");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+    }
+#endif /* H5_DISABLE_SOME_LDOUBLE_CONV */
+#endif /* H5_HAVE_COMPLEX_NUMBERS */
 
 done:
     return nerrors;
@@ -5674,11 +9301,21 @@ run_int_fp_conv(const char *name)
 #ifdef H5_HAVE__FLOAT16
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_SCHAR, H5T_NATIVE_FLOAT16);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_SCHAR, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_SCHAR, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_SCHAR, H5T_NATIVE_LDOUBLE_COMPLEX);
+#endif
 
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UCHAR, H5T_NATIVE_FLOAT);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UCHAR, H5T_NATIVE_DOUBLE);
 #ifdef H5_HAVE__FLOAT16
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UCHAR, H5T_NATIVE_FLOAT16);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UCHAR, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UCHAR, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UCHAR, H5T_NATIVE_LDOUBLE_COMPLEX);
 #endif
 
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_SHORT, H5T_NATIVE_FLOAT);
@@ -5686,11 +9323,21 @@ run_int_fp_conv(const char *name)
 #ifdef H5_HAVE__FLOAT16
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_SHORT, H5T_NATIVE_FLOAT16);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_SHORT, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_SHORT, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_SHORT, H5T_NATIVE_LDOUBLE_COMPLEX);
+#endif
 
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_USHORT, H5T_NATIVE_FLOAT);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_USHORT, H5T_NATIVE_DOUBLE);
 #ifdef H5_HAVE__FLOAT16
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_USHORT, H5T_NATIVE_FLOAT16);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_USHORT, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_USHORT, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_USHORT, H5T_NATIVE_LDOUBLE_COMPLEX);
 #endif
 
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT);
@@ -5698,11 +9345,21 @@ run_int_fp_conv(const char *name)
 #ifdef H5_HAVE__FLOAT16
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT16);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_INT, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_INT, H5T_NATIVE_LDOUBLE_COMPLEX);
+#endif
 
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UINT, H5T_NATIVE_FLOAT);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UINT, H5T_NATIVE_DOUBLE);
 #ifdef H5_HAVE__FLOAT16
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UINT, H5T_NATIVE_FLOAT16);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UINT, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UINT, H5T_NATIVE_DOUBLE_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UINT, H5T_NATIVE_LDOUBLE_COMPLEX);
 #endif
 
 #if H5_SIZEOF_LONG != H5_SIZEOF_INT
@@ -5711,11 +9368,44 @@ run_int_fp_conv(const char *name)
 #ifdef H5_HAVE__FLOAT16
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LONG, H5T_NATIVE_FLOAT16);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LONG, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LONG, H5T_NATIVE_DOUBLE_COMPLEX);
+#if !defined(H5_LONG_TO_LDOUBLE_SPECIAL) && !defined(H5_DISABLE_SOME_LDOUBLE_CONV)
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LONG, H5T_NATIVE_LDOUBLE_COMPLEX);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long", "long double _Complex");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to the special algorithm of hardware conversion.");
+    }
+#endif
+#endif
 
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULONG, H5T_NATIVE_FLOAT);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULONG, H5T_NATIVE_DOUBLE);
 #ifdef H5_HAVE__FLOAT16
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULONG, H5T_NATIVE_FLOAT16);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULONG, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULONG, H5T_NATIVE_DOUBLE_COMPLEX);
+#if !defined(H5_LONG_TO_LDOUBLE_SPECIAL) && !defined(H5_DISABLE_SOME_LDOUBLE_CONV)
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULONG, H5T_NATIVE_LDOUBLE_COMPLEX);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "unsigned long",
+                 "long double _Complex");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to the special algorithm of hardware conversion.");
+    }
+#endif
 #endif
 #endif
 
@@ -5725,11 +9415,45 @@ run_int_fp_conv(const char *name)
 #ifdef H5_HAVE__FLOAT16
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_FLOAT16);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_DOUBLE_COMPLEX);
+#if H5_LLONG_TO_LDOUBLE_CORRECT
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE_COMPLEX);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long long",
+                 "long double _Complex");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to compiler error in handling conversion.");
+    }
+#endif
+#endif
 
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_DOUBLE);
 #ifdef H5_HAVE__FLOAT16
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT16);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT_COMPLEX);
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_DOUBLE_COMPLEX);
+#if H5_LLONG_TO_LDOUBLE_CORRECT
+    nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE_COMPLEX);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "unsigned long long",
+                 "long double _Complex");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to compiler error in handling conversion.");
+    }
+#endif
 #endif
 #endif
 
@@ -5809,11 +9533,49 @@ run_fp_int_conv(const char *name)
 #ifdef H5_HAVE__FLOAT16
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT16, H5T_NATIVE_SCHAR);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_SCHAR);
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_SCHAR);
+#ifdef H5_DISABLE_SOME_LDOUBLE_CONV
+        if (test_values != TEST_SPECIAL)
+#endif
+            nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_SCHAR);
+#ifdef H5_DISABLE_SOME_LDOUBLE_CONV
+        else {
+            char str[256];
+
+            snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name,
+                     "long double _Complex", "signed char");
+            printf("%-70s", str);
+            SKIPPED();
+            puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+        }
+#endif
+#endif
 
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT, H5T_NATIVE_UCHAR);
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE, H5T_NATIVE_UCHAR);
 #ifdef H5_HAVE__FLOAT16
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT16, H5T_NATIVE_UCHAR);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_UCHAR);
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_UCHAR);
+#ifdef H5_DISABLE_SOME_LDOUBLE_CONV
+        if (test_values != TEST_SPECIAL)
+#endif
+            nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_UCHAR);
+#ifdef H5_DISABLE_SOME_LDOUBLE_CONV
+        else {
+            char str[256];
+
+            snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name,
+                     "long double _Complex", "unsigned char");
+            printf("%-70s", str);
+            SKIPPED();
+            puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+        }
+#endif
 #endif
 
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT, H5T_NATIVE_SHORT);
@@ -5821,11 +9583,49 @@ run_fp_int_conv(const char *name)
 #ifdef H5_HAVE__FLOAT16
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT16, H5T_NATIVE_SHORT);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_SHORT);
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_SHORT);
+#ifdef H5_DISABLE_SOME_LDOUBLE_CONV
+        if (test_values != TEST_SPECIAL)
+#endif
+            nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_SHORT);
+#ifdef H5_DISABLE_SOME_LDOUBLE_CONV
+        else {
+            char str[256];
+
+            snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name,
+                     "long double _Complex", "short");
+            printf("%-70s", str);
+            SKIPPED();
+            puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+        }
+#endif
+#endif
 
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT, H5T_NATIVE_USHORT);
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE, H5T_NATIVE_USHORT);
 #ifdef H5_HAVE__FLOAT16
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT16, H5T_NATIVE_USHORT);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_USHORT);
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_USHORT);
+#ifdef H5_DISABLE_SOME_LDOUBLE_CONV
+        if (test_values != TEST_SPECIAL)
+#endif
+            nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_USHORT);
+#ifdef H5_DISABLE_SOME_LDOUBLE_CONV
+        else {
+            char str[256];
+
+            snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name,
+                     "long double _Complex", "unsigned short");
+            printf("%-70s", str);
+            SKIPPED();
+            puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+        }
+#endif
 #endif
 
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT, H5T_NATIVE_INT);
@@ -5833,11 +9633,49 @@ run_fp_int_conv(const char *name)
 #ifdef H5_HAVE__FLOAT16
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT16, H5T_NATIVE_INT);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_INT);
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_INT);
+#ifdef H5_DISABLE_SOME_LDOUBLE_CONV
+        if (test_values != TEST_SPECIAL)
+#endif
+            nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_INT);
+#ifdef H5_DISABLE_SOME_LDOUBLE_CONV
+        else {
+            char str[256];
+
+            snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name,
+                     "long double _Complex", "int");
+            printf("%-70s", str);
+            SKIPPED();
+            puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+        }
+#endif
+#endif
 
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT, H5T_NATIVE_UINT);
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE, H5T_NATIVE_UINT);
 #ifdef H5_HAVE__FLOAT16
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT16, H5T_NATIVE_UINT);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_UINT);
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_UINT);
+#ifdef H5_DISABLE_SOME_LDOUBLE_CONV
+        if (test_values != TEST_SPECIAL)
+#endif
+            nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_UINT);
+#ifdef H5_DISABLE_SOME_LDOUBLE_CONV
+        else {
+            char str[256];
+
+            snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name,
+                     "long double _Complex", "unsigned int");
+            printf("%-70s", str);
+            SKIPPED();
+            puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+        }
+#endif
 #endif
 
 #if H5_SIZEOF_LONG != H5_SIZEOF_INT
@@ -5846,11 +9684,51 @@ run_fp_int_conv(const char *name)
 #ifdef H5_HAVE__FLOAT16
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT16, H5T_NATIVE_LONG);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_LONG);
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_LONG);
+#ifndef H5_LDOUBLE_TO_LONG_SPECIAL
+#ifdef H5_DISABLE_SOME_LDOUBLE_CONV
+        if (test_values != TEST_SPECIAL && test_values != TEST_NORMAL)
+#endif
+            nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_LONG);
+#else
+        {
+            char str[256];
+
+            snprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long double _Complex",
+                     "long");
+            printf("%-70s", str);
+            SKIPPED();
+            puts("    Test skipped due to the special algorithm of hardware conversion.");
+        }
+#endif
+#endif
 
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT, H5T_NATIVE_ULONG);
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE, H5T_NATIVE_ULONG);
 #ifdef H5_HAVE__FLOAT16
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT16, H5T_NATIVE_ULONG);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_ULONG);
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_ULONG);
+#ifndef H5_LDOUBLE_TO_LONG_SPECIAL
+#ifdef H5_DISABLE_SOME_LDOUBLE_CONV
+        if (test_values != TEST_SPECIAL && test_values != TEST_NORMAL)
+#endif
+            nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_ULONG);
+#else
+        {
+            char str[256];
+
+            snprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long double _Complex",
+                     "unsigned long");
+            printf("%-70s", str);
+            SKIPPED();
+            puts("    Test skipped due to the special algorithm of hardware conversion.");
+        }
+#endif
 #endif
 #endif
 
@@ -5861,6 +9739,23 @@ run_fp_int_conv(const char *name)
 #ifdef H5_HAVE__FLOAT16
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT16, H5T_NATIVE_LLONG);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_LLONG);
+            nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_LLONG);
+#ifdef H5_LDOUBLE_TO_LLONG_ACCURATE
+            nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_LLONG);
+#else
+            {
+                char str[256];
+
+                snprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long double _Complex",
+                         "long long");
+                printf("%-70s", str);
+                SKIPPED();
+                puts("    Test skipped due to hardware conversion error.");
+            }
+#endif
+#endif
         }
         else { /* Software conversion */
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT, H5T_NATIVE_LLONG);
@@ -5868,11 +9763,45 @@ run_fp_int_conv(const char *name)
 #ifdef H5_HAVE__FLOAT16
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT16, H5T_NATIVE_LLONG);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_LLONG);
+            nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_LLONG);
+#ifdef H5_LDOUBLE_TO_LLONG_ACCURATE
+            nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_LLONG);
+#else
+            {
+                char str[256];
+
+                snprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long double _Complex",
+                         "long long");
+                printf("%-70s", str);
+                SKIPPED();
+                puts("    Test skipped due to hardware conversion error.");
+            }
+#endif
+#endif
         }
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT, H5T_NATIVE_ULLONG);
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE, H5T_NATIVE_ULLONG);
 #ifdef H5_HAVE__FLOAT16
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT16, H5T_NATIVE_ULLONG);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_ULLONG);
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_ULLONG);
+#ifdef H5_LDOUBLE_TO_LLONG_ACCURATE
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_ULLONG);
+#else
+        {
+            char str[256];
+
+            snprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long double _Complex",
+                     "unsigned long long");
+            printf("%-70s", str);
+            SKIPPED();
+            puts("    Test skipped due to hardware conversion error.");
+        }
+#endif
 #endif
 #endif
 
@@ -5997,6 +9926,10 @@ main(void)
     /* Test user-defined, query functions and software conversion
      * for user-defined integer types */
     nerrors += (unsigned long)test_derived_integer();
+
+    /* Test user-defined, query functions and software conversion
+     * for user-defined complex number types */
+    nerrors += (unsigned long)test_derived_complex();
 
     /* Test degenerate cases */
     nerrors += (unsigned long)run_fp_tests("noop");

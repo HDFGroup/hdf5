@@ -231,7 +231,7 @@ done:
  *-------------------------------------------------------------------------
  */
 uint64_t
-H5T__bit_get_d(uint8_t *buf, size_t offset, size_t size)
+H5T__bit_get_d(const uint8_t *buf, size_t offset, size_t size)
 {
     uint64_t val = 0;
     size_t   i, hs;

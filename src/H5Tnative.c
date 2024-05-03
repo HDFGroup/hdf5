@@ -53,6 +53,10 @@ static herr_t H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_siz
  *                      H5T_NATIVE_DOUBLE
  *                      H5T_NATIVE_LDOUBLE
  *
+ *                      H5T_NATIVE_FLOAT_COMPLEX (if available)
+ *                      H5T_NATIVE_DOUBLE_COMPLEX (if available)
+ *                      H5T_NATIVE_LDOUBLE_COMPLEX (if available)
+ *
  *              Compound, array, enum, and VL types all choose among these
  *              types for their members.  Time, Bitfield, Opaque, Reference
  *              types are only copy out.
@@ -440,7 +444,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
             size_t vl_size    = 0;
             size_t super_size = 0;
 
-            /* Retrieve base type for array type */
+            /* Retrieve base type for variable-length type */
             if (NULL == (super_type = H5T_get_super(dtype)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get parent type for VL type");
             /* Don't need alignment, offset information if this VL isn't a field of compound type.  If it
@@ -453,7 +457,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
             if (H5T_close_real(super_type) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_CLOSEERROR, NULL, "cannot close datatype");
 
-            /* Create a new array type based on native type */
+            /* Create a new variable-length type based on native type */
             if (NULL == (new_type = H5T__vlen_create(nat_super_type)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create VL type");
 
@@ -466,6 +470,38 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
             vl_size  = sizeof(hvl_t);
 
             if (H5T__cmp_offset(comp_size, offset, vl_size, (size_t)1, vl_align, struct_align) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset");
+
+            ret_value = new_type;
+        } /* end case */
+        break;
+
+        case H5T_COMPLEX: {
+            size_t super_offset = 0;
+            size_t super_size   = 0;
+            size_t super_align  = 0;
+
+            /* Retrieve base type for complex number type */
+            if (NULL == (super_type = H5T_get_super(dtype)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get parent type for complex number type");
+
+            if (NULL == (nat_super_type = H5T__get_native_type(super_type, direction, &super_align,
+                                                               &super_offset, &super_size)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "parent native type retrieval failed");
+
+            /* Close super type */
+            if (H5T_close_real(super_type) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_CLOSEERROR, NULL, "cannot close datatype");
+
+            /* Create a new complex number type based on native type */
+            if (NULL == (new_type = H5T__complex_create(nat_super_type)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create complex number type");
+
+            /* Close base type */
+            if (H5T_close_real(nat_super_type) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_CLOSEERROR, NULL, "cannot close datatype");
+
+            if (H5T__cmp_offset(comp_size, offset, new_type->shared->size, 1, super_align, struct_align) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset");
 
             ret_value = new_type;
@@ -1266,3 +1302,101 @@ H5T__init_native_internal(void)
 
     return SUCCEED;
 }
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+/*-------------------------------------------------------------------------
+ * Function:    H5T__init_native_complex_types
+ *
+ * Purpose:     Initializes native complex number datatypes
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T__init_native_complex_types(void)
+{
+    H5T_t *native_float   = NULL; /* Datatype structure for native float */
+    H5T_t *native_double  = NULL; /* Datatype structure for native double */
+    H5T_t *native_ldouble = NULL; /* Datatype structure for native long double */
+    H5T_t *dt             = NULL;
+    herr_t ret_value      = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Assumes that native floating-point types are already initialized */
+    assert(H5T_NATIVE_FLOAT_g != H5I_INVALID_HID);
+    assert(H5T_NATIVE_DOUBLE_g != H5I_INVALID_HID);
+    assert(H5T_NATIVE_LDOUBLE_g != H5I_INVALID_HID);
+
+    /* Declare structure for finding alignment of each type */
+    typedef struct {
+        struct {
+            char             c;
+            H5_float_complex x;
+        } FLOAT_COMPLEX;
+        struct {
+            char              c;
+            H5_double_complex x;
+        } DOUBLE_COMPLEX;
+        struct {
+            char               c;
+            H5_ldouble_complex x;
+        } LDOUBLE_COMPLEX;
+    } alignments_t;
+
+    if (NULL == (native_float = (H5T_t *)H5I_object(H5T_NATIVE_FLOAT_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get datatype structure for native float type");
+    if (NULL == (native_double = (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get datatype structure for native double type");
+    if (NULL == (native_ldouble = (H5T_t *)H5I_object(H5T_NATIVE_LDOUBLE_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get datatype structure for native long double type");
+
+    /* H5T_NATIVE_FLOAT_COMPLEX */
+
+    if (NULL == (dt = H5T__complex_create(native_float)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't create native float complex datatype");
+    dt->shared->state = H5T_STATE_IMMUTABLE;
+
+    /* Register the type and set global variables */
+    if ((H5T_NATIVE_FLOAT_COMPLEX_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for native float complex datatype");
+    H5T_NATIVE_FLOAT_COMPLEX_ALIGN_g = TAG_ALIGNMENT(FLOAT_COMPLEX);
+
+    dt = NULL;
+
+    /* H5T_NATIVE_DOUBLE_COMPLEX */
+
+    if (NULL == (dt = H5T__complex_create(native_double)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't create native double complex datatype");
+    dt->shared->state = H5T_STATE_IMMUTABLE;
+
+    /* Register the type and set global variables */
+    if ((H5T_NATIVE_DOUBLE_COMPLEX_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for native double complex datatype");
+    H5T_NATIVE_DOUBLE_COMPLEX_ALIGN_g = TAG_ALIGNMENT(DOUBLE_COMPLEX);
+
+    dt = NULL;
+
+    /* H5T_NATIVE_LDOUBLE_COMPLEX */
+
+    if (NULL == (dt = H5T__complex_create(native_ldouble)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't create native long double complex datatype");
+    dt->shared->state = H5T_STATE_IMMUTABLE;
+
+    /* Register the type and set global variables */
+    if ((H5T_NATIVE_LDOUBLE_COMPLEX_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                    "can't register ID for native long double complex datatype");
+    H5T_NATIVE_LDOUBLE_COMPLEX_ALIGN_g = TAG_ALIGNMENT(LDOUBLE_COMPLEX);
+
+    dt = NULL;
+
+done:
+    if (ret_value < 0) {
+        if (dt && (H5T_close(dt) < 0))
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "can't close datatype");
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+#endif

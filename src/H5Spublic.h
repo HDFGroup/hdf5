@@ -251,10 +251,10 @@ H5_DLL hid_t H5Scopy(hid_t space_id);
  *          Further dataspace types may be added later.
  *
  *          A scalar dataspace, #H5S_SCALAR, has a single element, though that
- *          element may be of a complex datatype, such as a compound or array
+ *          element may be of a composite datatype, such as a compound or array
  *          datatype. By convention, the rank of a scalar dataspace is always \p 0
  *          (zero); think of it geometrically as a single, dimensionless point,
- *          though that point can be complex.
+ *          though that point can be composite.
  *
  *          A simple dataspace, #H5S_SIMPLE, consists of a regular array of elements.
  *

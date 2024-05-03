@@ -1012,6 +1012,7 @@ diff_can_type(hid_t f_tid1, hid_t f_tid2, int rank1, int rank2, hsize_t *dims1, 
         case H5T_ENUM:
         case H5T_VLEN:
         case H5T_REFERENCE:
+        case H5T_COMPLEX:
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
         default:

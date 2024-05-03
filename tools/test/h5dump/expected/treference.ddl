@@ -68,6 +68,40 @@ GROUP "/" {
       (3,2,0): 0x17, 0x18
       }
    }
+   ATTRIBUTE "complex" {
+      DATATYPE  H5T_COMPLEX_IEEE_F32LE
+      DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
+      DATA {
+      (0): 1+2i, 3+4i
+      }
+   }
+   ATTRIBUTE "complex2D" {
+      DATATYPE  H5T_COMPLEX_IEEE_F32LE
+      DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
+      DATA {
+      (0,0): 1+2i, 3+4i,
+      (1,0): 5+6i, 7+8i,
+      (2,0): 9+10i, 11+12i
+      }
+   }
+   ATTRIBUTE "complex3D" {
+      DATATYPE  H5T_COMPLEX_IEEE_F32LE
+      DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
+      DATA {
+      (0,0,0): 1+2i, 3+4i,
+      (0,1,0): 5+6i, 7+8i,
+      (0,2,0): 9+10i, 11+12i,
+      (1,0,0): 13+14i, 15+16i,
+      (1,1,0): 17+18i, 19+20i,
+      (1,2,0): 21+22i, 23+24i,
+      (2,0,0): 25+26i, 27+28i,
+      (2,1,0): 29+30i, 31+32i,
+      (2,2,0): 33+34i, 35+36i,
+      (3,0,0): 37+38i, 39+40i,
+      (3,1,0): 41+42i, 43+44i,
+      (3,2,0): 45+46i, 47+48i
+      }
+   }
    ATTRIBUTE "compound" {
       DATATYPE  H5T_COMPOUND {
          H5T_STD_I8LE "a";
@@ -532,6 +566,40 @@ GROUP "/" {
          (3,0,0): 0x13, 0x14,
          (3,1,0): 0x15, 0x16,
          (3,2,0): 0x17, 0x18
+         }
+      }
+      ATTRIBUTE "complex" {
+         DATATYPE  H5T_COMPLEX_IEEE_F32LE
+         DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
+         DATA {
+         (0): 1+2i, 3+4i
+         }
+      }
+      ATTRIBUTE "complex2D" {
+         DATATYPE  H5T_COMPLEX_IEEE_F32LE
+         DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
+         DATA {
+         (0,0): 1+2i, 3+4i,
+         (1,0): 5+6i, 7+8i,
+         (2,0): 9+10i, 11+12i
+         }
+      }
+      ATTRIBUTE "complex3D" {
+         DATATYPE  H5T_COMPLEX_IEEE_F32LE
+         DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
+         DATA {
+         (0,0,0): 1+2i, 3+4i,
+         (0,1,0): 5+6i, 7+8i,
+         (0,2,0): 9+10i, 11+12i,
+         (1,0,0): 13+14i, 15+16i,
+         (1,1,0): 17+18i, 19+20i,
+         (1,2,0): 21+22i, 23+24i,
+         (2,0,0): 25+26i, 27+28i,
+         (2,1,0): 29+30i, 31+32i,
+         (2,2,0): 33+34i, 35+36i,
+         (3,0,0): 37+38i, 39+40i,
+         (3,1,0): 41+42i, 43+44i,
+         (3,2,0): 45+46i, 47+48i
          }
       }
       ATTRIBUTE "compound" {
@@ -1142,6 +1210,40 @@ GROUP "/" {
          (3,2,0): 0x17, 0x18
          }
       }
+      ATTRIBUTE "complex" {
+         DATATYPE  H5T_COMPLEX_IEEE_F32LE
+         DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
+         DATA {
+         (0): 1+2i, 3+4i
+         }
+      }
+      ATTRIBUTE "complex2D" {
+         DATATYPE  H5T_COMPLEX_IEEE_F32LE
+         DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
+         DATA {
+         (0,0): 1+2i, 3+4i,
+         (1,0): 5+6i, 7+8i,
+         (2,0): 9+10i, 11+12i
+         }
+      }
+      ATTRIBUTE "complex3D" {
+         DATATYPE  H5T_COMPLEX_IEEE_F32LE
+         DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
+         DATA {
+         (0,0,0): 1+2i, 3+4i,
+         (0,1,0): 5+6i, 7+8i,
+         (0,2,0): 9+10i, 11+12i,
+         (1,0,0): 13+14i, 15+16i,
+         (1,1,0): 17+18i, 19+20i,
+         (1,2,0): 21+22i, 23+24i,
+         (2,0,0): 25+26i, 27+28i,
+         (2,1,0): 29+30i, 31+32i,
+         (2,2,0): 33+34i, 35+36i,
+         (3,0,0): 37+38i, 39+40i,
+         (3,1,0): 41+42i, 43+44i,
+         (3,2,0): 45+46i, 47+48i
+         }
+      }
       ATTRIBUTE "compound" {
          DATATYPE  H5T_COMPOUND {
             H5T_STD_I8LE "a";
@@ -1602,6 +1704,40 @@ GROUP "/" {
          (3,0,0): 0x13, 0x14,
          (3,1,0): 0x15, 0x16,
          (3,2,0): 0x17, 0x18
+         }
+      }
+      DATASET "complex" {
+         DATATYPE  H5T_COMPLEX_IEEE_F32LE
+         DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
+         DATA {
+         (0): 1+2i, 3+4i
+         }
+      }
+      DATASET "complex2D" {
+         DATATYPE  H5T_COMPLEX_IEEE_F32LE
+         DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
+         DATA {
+         (0,0): 1+2i, 3+4i,
+         (1,0): 5+6i, 7+8i,
+         (2,0): 9+10i, 11+12i
+         }
+      }
+      DATASET "complex3D" {
+         DATATYPE  H5T_COMPLEX_IEEE_F32LE
+         DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
+         DATA {
+         (0,0,0): 1+2i, 3+4i,
+         (0,1,0): 5+6i, 7+8i,
+         (0,2,0): 9+10i, 11+12i,
+         (1,0,0): 13+14i, 15+16i,
+         (1,1,0): 17+18i, 19+20i,
+         (1,2,0): 21+22i, 23+24i,
+         (2,0,0): 25+26i, 27+28i,
+         (2,1,0): 29+30i, 31+32i,
+         (2,2,0): 33+34i, 35+36i,
+         (3,0,0): 37+38i, 39+40i,
+         (3,1,0): 41+42i, 43+44i,
+         (3,2,0): 45+46i, 47+48i
          }
       }
       DATASET "compound" {

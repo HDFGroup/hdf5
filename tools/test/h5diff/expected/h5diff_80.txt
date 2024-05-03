@@ -15,6 +15,9 @@ file1     file2
     x      x    /g1/bitfield   
     x      x    /g1/bitfield2D 
     x      x    /g1/bitfield3D 
+    x      x    /g1/complex    
+    x      x    /g1/complex2D  
+    x      x    /g1/complex3D  
     x      x    /g1/compound   
     x      x    /g1/compound2D 
     x      x    /g1/compound3D 
@@ -293,6 +296,53 @@ position        bitfield3D      bitfield3D      difference
 [ 3 1 1 ]          22              0               22             
 [ 3 2 0 ]          23              0               23             
 [ 3 2 1 ]          24              0               24             
+24 differences found
+dataset: </g1/complex> and </g1/complex>
+size:           [2]           [2]
+position        complex         complex         difference          
+------------------------------------------------------------
+[ 0 ]          1+2i            0+0i            1+2i           
+[ 1 ]          3+4i            0+0i            3+4i           
+2 differences found
+dataset: </g1/complex2D> and </g1/complex2D>
+size:           [3x2]           [3x2]
+position        complex2D       complex2D       difference          
+------------------------------------------------------------
+[ 0 0 ]          1+2i            0+0i            1+2i           
+[ 0 1 ]          3+4i            0+0i            3+4i           
+[ 1 0 ]          5+6i            0+0i            5+6i           
+[ 1 1 ]          7+8i            0+0i            7+8i           
+[ 2 0 ]          9+10i           0+0i            9+10i          
+[ 2 1 ]          11+12i          0+0i            11+12i         
+6 differences found
+dataset: </g1/complex3D> and </g1/complex3D>
+size:           [4x3x2]           [4x3x2]
+position        complex3D       complex3D       difference          
+------------------------------------------------------------
+[ 0 0 0 ]          1+2i            0+0i            1+2i           
+[ 0 0 1 ]          3+4i            0+0i            3+4i           
+[ 0 1 0 ]          5+6i            0+0i            5+6i           
+[ 0 1 1 ]          7+8i            0+0i            7+8i           
+[ 0 2 0 ]          9+10i           0+0i            9+10i          
+[ 0 2 1 ]          11+12i          0+0i            11+12i         
+[ 1 0 0 ]          13+14i          0+0i            13+14i         
+[ 1 0 1 ]          15+16i          0+0i            15+16i         
+[ 1 1 0 ]          17+18i          0+0i            17+18i         
+[ 1 1 1 ]          19+20i          0+0i            19+20i         
+[ 1 2 0 ]          21+22i          0+0i            21+22i         
+[ 1 2 1 ]          23+24i          0+0i            23+24i         
+[ 2 0 0 ]          25+26i          0+0i            25+26i         
+[ 2 0 1 ]          27+28i          0+0i            27+28i         
+[ 2 1 0 ]          29+30i          0+0i            29+30i         
+[ 2 1 1 ]          31+32i          0+0i            31+32i         
+[ 2 2 0 ]          33+34i          0+0i            33+34i         
+[ 2 2 1 ]          35+36i          0+0i            35+36i         
+[ 3 0 0 ]          37+38i          0+0i            37+38i         
+[ 3 0 1 ]          39+40i          0+0i            39+40i         
+[ 3 1 0 ]          41+42i          0+0i            41+42i         
+[ 3 1 1 ]          43+44i          0+0i            43+44i         
+[ 3 2 0 ]          45+46i          0+0i            45+46i         
+[ 3 2 1 ]          47+48i          0+0i            47+48i         
 24 differences found
 dataset: </g1/compound> and </g1/compound>
 size:           [2]           [2]

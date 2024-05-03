@@ -35,6 +35,41 @@
 //! [predefined_ieee_datatypes_table]
  *
  *
+//! [predefined_complex_datatypes_table]
+<table>
+<caption>Predefined Complex Number Datatypes</caption>
+<tr>
+<th>Datatype</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>#H5T_COMPLEX_IEEE_F16BE</td>
+<td>Complex number of 2 16-bit big-endian IEEE floating point numbers</td>
+</tr>
+<tr>
+<td>#H5T_COMPLEX_IEEE_F16LE</td>
+<td>Complex number of 2 16-bit little-endian IEEE floating point numbers</td>
+</tr>
+<tr>
+<td>#H5T_COMPLEX_IEEE_F32BE</td>
+<td>Complex number of 2 32-bit big-endian IEEE floating point numbers</td>
+</tr>
+<tr>
+<td>#H5T_COMPLEX_IEEE_F32LE</td>
+<td>Complex number of 2 32-bit little-endian IEEE floating point numbers</td>
+</tr>
+<tr>
+<td>#H5T_COMPLEX_IEEE_F64BE</td>
+<td>Complex number of 2 64-bit big-endian IEEE floating point numbers</td>
+</tr>
+<tr>
+<td>#H5T_COMPLEX_IEEE_F64LE</td>
+<td>Complex number of 2 64-bit little-endian IEEE floating point numbers</td>
+</tr>
+</table>
+//! [predefined_complex_datatypes_table]
+ *
+ *
 //! [predefined_std_datatypes_table]
 <table>
 <caption>Predefined Standard Datatypes</caption>
@@ -487,6 +522,18 @@
 <tr>
 <td>#H5T_NATIVE_LDOUBLE</td>
 <td>C-style long double</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_FLOAT_COMPLEX</td>
+<td>C-style float _Complex (MSVC _Fcomplex) (May be H5I_INVALID_HID if platform doesn't support float _Complex / _Fcomplex type)</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_DOUBLE_COMPLEX</td>
+<td>C-style double _Complex (MSVC _Dcomplex) (May be H5I_INVALID_HID if platform doesn't support double _Complex / _Dcomplex type)</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_LDOUBLE_COMPLEX</td>
+<td>C-style long double _Complex (MSVC _Lcomplex) (May be H5I_INVALID_HID if platform doesn't support long double _Complex / _Lcomplex type)</td>
 </tr>
 <tr>
 <td>#H5T_NATIVE_B8</td>

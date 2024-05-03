@@ -106,6 +106,8 @@ $SRC_H5DUMP_TESTFILES/tbitnopaque.h5
 $SRC_H5DUMP_TESTFILES/tchar.h5
 $SRC_H5DUMP_TESTFILES/tcmpdattrintsize.h5
 $SRC_H5DUMP_TESTFILES/tcmpdintsize.h5
+$SRC_H5DUMP_TESTFILES/tcomplex.h5
+$SRC_H5DUMP_TESTFILES/tcomplex_be.h5
 $SRC_H5DUMP_TESTFILES/tcompound.h5
 $SRC_H5DUMP_TESTFILES/tcompound_complex.h5
 $SRC_H5DUMP_TESTFILES/tcompound_complex2.h5
@@ -254,6 +256,10 @@ $SRC_H5DUMP_OUTFILES/tcomp-1.ddl
 $SRC_H5DUMP_OUTFILES/tcomp-2.ddl
 $SRC_H5DUMP_OUTFILES/tcomp-3.ddl
 $SRC_H5DUMP_OUTFILES/tcomp-4.ddl
+$SRC_H5DUMP_OUTFILES/tcomplex.ddl
+$SRC_H5DUMP_OUTFILES/tcomplex_be.ddl
+$SRC_H5DUMP_OUTFILES/tcomplex_be_info.ddl
+$SRC_H5DUMP_OUTFILES/tcomplex_info.ddl
 $SRC_H5DUMP_OUTFILES/tcompound_complex2.ddl
 $SRC_H5DUMP_OUTFILES/tcompact.ddl
 $SRC_H5DUMP_OUTFILES/tcontents.ddl
@@ -1364,6 +1370,23 @@ TOOLTEST tldouble_scalar.ddl -p --enable-error-stack tldouble_scalar.h5
 # tests for _Float16 type
 TOOLTEST tfloat16.ddl --enable-error-stack tfloat16.h5
 TOOLTEST tfloat16_be.ddl --enable-error-stack tfloat16_be.h5
+
+# Tests for complex numbers. For portability, use a fixed floating-point
+# precision and skip dumping of the "long double _Complex" dataset. The "long
+# double _Complex" dataset may display differently across platforms, e.g.
+# between Linux and Windows, due to the size of "long double" and is only
+# affected by the fixed floating-point precision option when
+# sizeof(long double) != sizeof(double). Use -w80 after the floating-point
+# format option since specifying a fixed floating-point precision resets h5dump's
+# default number of columns value.
+TOOLTEST tcomplex.ddl --enable-error-stack -m %.6f -w80 -d ArrayDatasetFloatComplex -d CompoundDatasetFloatComplex \
+         -d DatasetDoubleComplex -d DatasetFloatComplex -d VariableLengthDatasetFloatComplex tcomplex.h5
+TOOLTEST tcomplex_info.ddl --enable-error-stack -p -H -m %.6f -w80 -d ArrayDatasetFloatComplex -d CompoundDatasetFloatComplex \
+         -d DatasetDoubleComplex -d DatasetFloatComplex -d VariableLengthDatasetFloatComplex tcomplex.h5
+TOOLTEST tcomplex_be.ddl --enable-error-stack -m %.6f -w80 -d ArrayDatasetFloatComplex -d CompoundDatasetFloatComplex \
+         -d DatasetDoubleComplex -d DatasetFloatComplex -d VariableLengthDatasetFloatComplex tcomplex_be.h5
+TOOLTEST tcomplex_be_info.ddl --enable-error-stack -p -H -m %.6f -w80 -d ArrayDatasetFloatComplex -d CompoundDatasetFloatComplex \
+         -d DatasetDoubleComplex -d DatasetFloatComplex -d VariableLengthDatasetFloatComplex tcomplex_be.h5
 
 # test for vms
 TOOLTEST tvms.ddl --enable-error-stack tvms.h5

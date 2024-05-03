@@ -632,7 +632,7 @@ test_attr_compound_write(FileAccPropList &fapl)
         hsize_t   dims2[] = {ATTR4_DIM1, ATTR4_DIM2};
         DataSpace sid2(ATTR4_RANK, dims2);
 
-        // Create complex attribute for the dataset
+        // Create compound attribute for the dataset
         Attribute attr = dataset.createAttribute(ATTR4_NAME, comp_type, sid2);
 
         // Try to create the same attribute again (should fail)
@@ -643,7 +643,7 @@ test_attr_compound_write(FileAccPropList &fapl)
         {
         } // do nothing, exception expected
 
-        // Write complex attribute data
+        // Write compound attribute data
         attr.write(comp_type, attr_data4);
 
         PASSED();
@@ -2001,8 +2001,8 @@ test_attr(const void *params)
             test_attr_rename(curr_fapl);      // Test renaming attribute
             test_attr_basic_read(curr_fapl);  // Test basic H5A reading code
 
-            test_attr_compound_write(curr_fapl); // Test complex datatype H5A writing code
-            test_attr_compound_read(curr_fapl);  // Test complex datatype H5A reading code
+            test_attr_compound_write(curr_fapl); // Test compound datatype H5A writing code
+            test_attr_compound_read(curr_fapl);  // Test compound datatype H5A reading code
 
             test_attr_scalar_write(curr_fapl); // Test scalar dataspace H5A writing code
             test_attr_scalar_read(curr_fapl);  // Test scalar dataspace H5A reading code
