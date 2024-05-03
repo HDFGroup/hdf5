@@ -222,7 +222,7 @@ TOOLTEST_ERR() {
     cp $actual_err $actual_err_sav
 
     # grep output
-    $GREP "$expected" $actualerr > /dev/null
+    $GREP "$expected" $actual_err > /dev/null
     if test $? -eq 0; then
         echo "PASSED"
     else
