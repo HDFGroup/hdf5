@@ -2885,40 +2885,6 @@ if test -n "$DEBUG_PKG_LIST"; then
 fi
 
 ## ----------------------------------------------------------------------
-## Check if they would like the function stack support compiled in
-##
-AC_MSG_CHECKING([whether function stack tracking is enabled])
-AC_ARG_ENABLE([codestack],
-              [AS_HELP_STRING([--enable-codestack],
-                              [Enable the function stack tracing (for developer debugging).
-                               [default=no]
-                              ])],
-              [CODESTACK=$enableval])
-
-## Set the default level.
-if test "X-$CODESTACK" = X- ; then
-  CODESTACK=no
-fi
-
-## Allow this variable to be substituted in
-## other files (src/libhdf5.settings.in, etc.)
-AC_SUBST([CODESTACK])
-
-case "X-$CODESTACK" in
-  X-yes)
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([HAVE_CODESTACK], [1],
-                [Define if the function stack tracing code is to be compiled in])
-    ;;
-  X-no)
-      AC_MSG_RESULT([no])
-    ;;
-  *)
-      AC_MSG_ERROR([Unrecognized value: $CODESTACK])
-    ;;
-esac
-
-## ----------------------------------------------------------------------
 ## Enable tracing of the API
 ##
 AC_MSG_CHECKING([for API tracing]);
