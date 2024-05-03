@@ -62,8 +62,6 @@ test -d $TESTDIR || mkdir -p $TESTDIR
 # copy test files and expected output files from source dirs to test dir
 #
 COPY_TESTFILES="
-$SRC_H5CLEAR_OUTFILES/h5clear_open_fail.err
-$SRC_H5CLEAR_OUTFILES/h5clear_no_mdc_image.err
 $SRC_H5CLEAR_OUTFILES/h5clear_usage.ddl
 $SRC_H5CLEAR_OUTFILES/h5clear_missing_file.ddl
 $SRC_H5CLEAR_OUTFILES/h5clear_status_noclose_after_size.ddl
