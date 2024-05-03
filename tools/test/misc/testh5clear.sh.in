@@ -202,10 +202,10 @@ TOOLTEST_OUT() {
 # same as TOOLTEST_OUT just grep stderr
 TOOLTEST_ERR() {
     fname=$1
-    option1=$2
-    option2=$3
-    option3=$4
-    expected=$5
+    expected=$2
+    option1=$3
+    option2=$4
+    option3=$5
     # Prepare expected and actual output
     actual="$TESTDIR/`basename $fname .h5`.out"
     actual_err="$TESTDIR/`basename $fname .h5`.out.err"
@@ -307,11 +307,11 @@ TOOLTEST_OUT "" "" "" "" h5clear_usage.ddl
 TOOLTEST_OUT junk.h5 "" "" "" h5clear_usage.ddl
 TOOLTEST_OUT orig_h5clear_sec2_v3.h5 "" "" "" h5clear_usage.ddl
 TOOLTEST_OUT "" -m "" "" h5clear_missing_file.ddl
-TOOLTEST_ERR junk.h5 -s "" "" "h5clear error"
+TOOLTEST_ERR junk.h5 "h5clear error" -s "" ""
 TOOLTEST_OUT "" -m -s "" h5clear_missing_file.ddl
-TOOLTEST_ERR junk.h5 -m -s "" "h5clear error"
-TOOLTEST_ERR orig_h5clear_sec2_v2.h5 -m "" "" "h5clear warning"
-TOOLTEST_ERR orig_h5clear_sec2_v0.h5 -s -m "" "h5clear warning"
+TOOLTEST_ERR junk.h5 "h5clear error" -m -s ""
+TOOLTEST_ERR orig_h5clear_sec2_v2.h5 "h5clear warning" -m "" ""
+TOOLTEST_ERR orig_h5clear_sec2_v0.h5 "h5clear warning" -s -m ""
 #
 #
 # The following are tests to verify the expected exit code from h5clear:
@@ -341,8 +341,8 @@ TOOLTEST h5clear_sec2_v0.h5 -l -m $FAIL
 #
 #
 # h5clear_mdc_image.h5 already has cache image removed earlier, verify the expected warning from h5clear:
-TOOLTEST_ERR mod_h5clear_mdc_image.h5 -m "" "" "h5clear warning"
-TOOLTEST_ERR mod_h5clear_mdc_image.h5 -s -m "" "h5clear warning"
+TOOLTEST_ERR mod_h5clear_mdc_image.h5 "h5clear warning" -m "" ""
+TOOLTEST_ERR mod_h5clear_mdc_image.h5 "h5clear warning" -s -m ""
 #
 #
 #
@@ -380,7 +380,7 @@ OPEN_CHK h5clear_sec2_v2.h5 $SUCCEED
 # "h5clear -s --increment=0 h5clear_status_noclose.h5"  (clear status_flag, EOA = MAX(EOA, EOF) + 0)
 #                                                       (no output, check exit code)
 # "h5clear --filesize h5clear_status_noclose_user.h5"   (print EOA/EOF after the last action)
-TOOLTEST_ERR h5clear_status_noclose.h5 --filesize "" "" "h5clear error:"
+TOOLTEST_ERR h5clear_status_noclose.h5 "h5clear error:" --filesize "" ""
 TOOLTEST h5clear_status_noclose.h5 -s --increment=0 $SUCCEED
 TOOLTEST_OUT h5clear_status_noclose.h5 --filesize "" "" h5clear_status_noclose_after_size.ddl
 #
