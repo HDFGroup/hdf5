@@ -45,13 +45,10 @@
       old_h5fc_ext2_sf.ddl
       old_h5fc_ext3_isf.ddl
       h5fc_v_err.ddl
-      h5fc_v_err.ddl.err
   )
   set (HDF5_REFERENCE_ERR_FILES
-      h5fc_d_file.ddl.err
       h5fc_dname.err
       h5fc_nonexistfile.ddl.err
-      h5fc_nonexistdset_file.ddl.err
   )
   set (HDF5_REFERENCE_TEST_FILES
       h5fc_non_v3.h5
@@ -266,7 +263,6 @@
       set_tests_properties (H5FC_CHECK_IDX-${testname}-clean-objects PROPERTIES
           FIXTURES_CLEANUP clear_H5FC-${testname}
       )
-      
       add_test (
           NAME H5FC-${testname}-tmpfile
           COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/${testname}-tmp.h5
@@ -440,17 +436,20 @@
 # h5format_convert nonexist.h5  (no options, file does not exist)
   ADD_H5_OUTPUT (h5fc_help h5fc_help.ddl 0 "" --help)
   ADD_H5_OUTPUT (h5fc_nooption h5fc_nooption.ddl 1 "")
+#  ADD_H5_MASK_OUTPUT (h5fc_nooption h5fc_nooption.ddl 1 "" "")
   ADD_H5_OUTPUT (h5fc_nonexistfile h5fc_nonexistfile.ddl 1 "" nonexist.h5)
+#  ADD_H5_MASK_OUTPUT (h5fc_nonexistfile h5fc_nonexistfile.ddl 1 "unable to open file" "" nonexist.h5)
 #
 #
 # h5format_convert -d old_h5fc_ext_none.h5 (just -d option, file exists)
 # h5format_convert --dname old_h5fc_ext_none.h5 (just --dname option, file exists)
 # h5format_convert --dname (just --dname option)
 # h5format_convert --dname=nonexist old_h5fc_ext_none.h5 (dataset does not exist, file exists)
-  ADD_H5_OUTPUT (h5fc_d_file-d h5fc_d_file.ddl 1 old_h5fc_ext_none.h5 -d)
-  ADD_H5_OUTPUT (h5fc_d_file h5fc_d_file.ddl 1 old_h5fc_ext_none.h5 --dname)
+  ADD_H5_MASK_OUTPUT (h5fc_d_file-d h5fc_d_file.ddl 1 "missing file name" old_h5fc_ext_none.h5 -d)
+  ADD_H5_MASK_OUTPUT (h5fc_d_file h5fc_d_file.ddl 1 "missing file name" old_h5fc_ext_none.h5 --dname)
   ADD_H5_OUTPUT (h5fc_dname h5fc_dname.ddl 1 "" --dname)
-  ADD_H5_OUTPUT (h5fc_nonexistdset_file h5fc_nonexistdset_file.ddl 1 old_h5fc_ext_none.h5 --dname=nonexist)
+#  ADD_H5_MASK_OUTPUT (h5fc_dname h5fc_dname.ddl 1 "missing file name" "" --dname)
+  ADD_H5_MASK_OUTPUT (h5fc_nonexistdset_file h5fc_nonexistdset_file.ddl 1 "unable to open dataset" old_h5fc_ext_none.h5 --dname=nonexist)
 #
 #
 #

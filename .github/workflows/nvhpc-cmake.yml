@@ -59,6 +59,7 @@ jobs:
           -DHDF5_BUILD_FORTRAN:BOOL=ON \
           -DHDF5_BUILD_JAVA:BOOL=OFF \
           -DMPIEXEC_MAX_NUMPROCS:STRING="2" \
+          -DMPIEXEC_PREFLAGS:STRING="--mca;opal_warn_on_missing_libcuda;0" \
           $GITHUB_WORKSPACE
 
       - name: CMake Build
