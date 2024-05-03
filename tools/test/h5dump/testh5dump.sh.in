@@ -56,7 +56,6 @@ SRC_TOOLS="$srcdir/../.."
 SRC_H5LS_TESTFILES="$SRC_TOOLS/test/h5ls/testfiles"
 SRC_H5DUMP_TESTFILES="$SRC_TOOLS/test/h5dump/testfiles"
 SRC_H5DUMP_OUTFILES="$SRC_TOOLS/test/h5dump/expected"
-SRC_H5DUMP_ERRORFILES="$SRC_TOOLS/test/h5dump/errfiles"
 SRC_H5DUMP_EXPFILES="$SRC_TOOLS/test/h5dump/exportfiles"
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
@@ -1079,15 +1078,16 @@ GREPTEST3()
     expect="$TESTDIR/$3"
     actual="$TESTDIR/`basename $3 .txt`.out"
     actual_err="$TESTDIR/`basename $3 .ddl`.oerr"
+    actual_ext="$TESTDIR/`basename $1 .ddl`.ext"
     shift
     shift
     shift
 
     # Run test.
-    TESTING $DUMPER -p $@
+    TESTING $DUMPER $@
     (
         cd $TESTDIR
-        $ENVCMD $RUNSERIAL $DUMPER_BIN -p "$@"
+        $ENVCMD $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
 
     if [ "$txttype" = "ERRTXT" ]; then

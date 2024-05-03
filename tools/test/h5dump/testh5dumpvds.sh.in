@@ -49,7 +49,6 @@ SRC_TOOLS="$srcdir/../.."
 SRC_H5LS_TESTFILES="$SRC_TOOLS/test/h5ls/testfiles"
 SRC_H5DUMP_TESTFILES="$SRC_TOOLS/test/h5dump/testfiles"
 SRC_H5DUMP_OUTFILES="$SRC_TOOLS/test/h5dump/expected"
-SRC_H5DUMP_ERRORFILES="$srcdir/errfiles"
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
@@ -125,13 +124,10 @@ $SRC_H5DUMP_OUTFILES/vds/vds_layout-eiger.ddl
 $SRC_H5DUMP_OUTFILES/vds/vds_layout-maxmin.ddl
 "
 
-LIST_ERROR_TEST_FILES="
-"
-
 #
 # copy test files and expected output files from source dirs to test dir
 #
-COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES $LIST_ERROR_TEST_FILES"
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES"
 
 COPY_TESTFILES_TO_TESTDIR()
 {
