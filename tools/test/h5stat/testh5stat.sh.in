@@ -220,8 +220,6 @@ GREPTEST()
     expect="$TESTDIR/$3"
     actual="$TESTDIR/`basename $1 .ddl`.out"
     actual_err="$TESTDIR/`basename $1 .ddl`.out.err"
-    actual_sav=${actual}-sav
-    actual_err_sav=${actual_err}-sav
     shift
     shift
     shift
@@ -237,13 +235,13 @@ GREPTEST()
     TESTING $H5COPY $@
     (
         $RUNSERIAL $H5COPY_BIN $@
-    ) > $actualout 2> $actualerr
+    ) > $actual 2> $actual_err
     RET=$?
 
     if [ "$txttype" = "ERRTXT" ]; then
-        $GREP "$expectdata" $actualerr > /dev/null
+        $GREP "$expectdata" $actual_err > /dev/null
     else
-        $GREP "$expectdata" $actualout > /dev/null
+        $GREP "$expectdata" $actual > /dev/null
     fi
 
     if [ $? -eq 0 ]; then

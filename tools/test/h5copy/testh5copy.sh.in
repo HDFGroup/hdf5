@@ -188,8 +188,8 @@ VERIFY_OUTPUT()
 
 TOOLTEST()
 {
-    actualout="$TESTDIR/tooltest.actualout"
-    actualerr="$TESTDIR/tooltest.actualerr"
+    actual="$TESTDIR/tooltest.actual"
+    actual_err="$TESTDIR/tooltest.actual_err"
     runh5diff=yes
     if [ "$1" = -i ]; then
         inputfile=$2
@@ -219,13 +219,13 @@ TOOLTEST()
         echo " output for '$H5COPY $@'"
         echo "#############################"
         $RUNSERIAL $H5COPY_BIN $@
-    ) > $actualout 2> $actualerr
+    ) > $actual 2> $actual_err
     RET=$?
 
     if [ $RET != 0 ]; then
         echo "*FAILED*"
         echo "failed result is:"
-        cat $actualout
+        cat $actual
         nerrors="`expr $nerrors + 1`"
     else
         echo " PASSED"
@@ -236,7 +236,7 @@ TOOLTEST()
 
         # Clean up output file
         if test -z "$HDF5_NOCLEANUP"; then
-            rm -f $actualout $actualerr $outputfile
+            rm -f $actual $actual_err $outputfile
         fi
     fi
 }
@@ -244,8 +244,8 @@ TOOLTEST()
 # TOOLTEST back-to-back
 TOOLTEST_PREFILL()
 {
-    actualout="$TESTDIR/tooltest.actualout"
-    actualerr="$TESTDIR/tooltest.actualerr"
+    actual="$TESTDIR/tooltest.actual"
+    actual_err="$TESTDIR/tooltest.actual_err"
     runh5diff=yes
     if [ "$1" = -i ]; then
         inputfile=$2
@@ -269,13 +269,13 @@ TOOLTEST_PREFILL()
         echo " output for '$H5COPY $@'"
         echo "#############################"
         $RUNSERIAL $H5COPY_BIN  -i $inputfile -o $outputfile -v -s $grp_name -d $grp_name2
-    ) > $actualout 2> $actualerr
+    ) > $actual 2> $actual_err
     RET=$?
 
     if [ $RET != 0 ]; then
         echo "*FAILED*"
         echo "failed result is:"
-        cat $actualout
+        cat $actual
         nerrors="`expr $nerrors + 1`"
     else
         TESTING $H5COPY $@
@@ -284,13 +284,13 @@ TOOLTEST_PREFILL()
             echo " output for '$H5COPY $@'"
             echo "#############################"
             $RUNSERIAL $H5COPY_BIN  -i $inputfile -o $outputfile -v -s $obj_name -d $obj_name2
-        ) > $actualout 2> $actualerr
+        ) > $actual 2> $actual_err
         RET=$?
 
         if [ $RET != 0 ]; then
             echo "*FAILED*"
             echo "failed result is:"
-            cat $actualout
+            cat $actual
             nerrors="`expr $nerrors + 1`"
         else
             echo " PASSED"
@@ -301,7 +301,7 @@ TOOLTEST_PREFILL()
 
             # Clean up output file
             if test -z "$HDF5_NOCLEANUP"; then
-                rm -f $actualout $actualerr $outputfile
+                rm -f $actual $actual_err $outputfile
             fi
         fi
     fi
@@ -310,8 +310,8 @@ TOOLTEST_PREFILL()
 # TOOLTEST back-to-back
 TOOLTEST_SAME()
 {
-    actualout="$TESTDIR/tooltest.actualout"
-    actualerr="$TESTDIR/tooltest.actualerr"
+    actual="$TESTDIR/tooltest.actual"
+    actual_err="$TESTDIR/tooltest.actual_err"
     runh5diff=yes
     if [ "$1" = -i ]; then
         inputfile=$2
@@ -334,13 +334,13 @@ TOOLTEST_SAME()
         echo " output for '$H5COPY $@'"
         echo "#############################"
         $RUNSERIAL $H5COPY_BIN  -i $inputfile -o $outputfile -v -s $grp_name -d $grp_name
-    ) > $actualout 2> $actualerr
+    ) > $actual 2> $actual_err
     RET=$?
 
     if [ $RET != 0 ]; then
         echo "*FAILED*"
         echo "failed result is:"
-        cat $actualout
+        cat $actual
         nerrors="`expr $nerrors + 1`"
     else
         TESTING $H5COPY $@
@@ -349,13 +349,13 @@ TOOLTEST_SAME()
             echo " output for '$H5COPY $@'"
             echo "#############################"
             $RUNSERIAL $H5COPY_BIN  -i $outputfile -o $outputfile -v -s $grp_name -d $grp_name2
-        ) > $actualout 2> $actualerr
+        ) > $actual 2> $actual_err
         RET=$?
 
         if [ $RET != 0 ]; then
             echo "*FAILED*"
             echo "failed result is:"
-            cat $actualout
+            cat $actual
             nerrors="`expr $nerrors + 1`"
         else
             echo " PASSED"
@@ -366,7 +366,7 @@ TOOLTEST_SAME()
 
             # Clean up output file
             if test -z "$HDF5_NOCLEANUP"; then
-                rm -f $actualout $actualerr $outputfile
+                rm -f $actual $actual_err $outputfile
             fi
         fi
     fi
@@ -381,8 +381,8 @@ GREPTEST()
     expectdata=$2
     expectout="$TESTDIR/$3"
     expecterr="$TESTDIR/`basename $3 .out`.err"
-    actualout="$TESTDIR/$3.actualout"
-    actualerr="$TESTDIR/$3.actualerr"
+    actual="$TESTDIR/$3.actual"
+    actual_err="$TESTDIR/$3.actual_err"
     shift
     shift
     shift
@@ -398,13 +398,13 @@ GREPTEST()
     TESTING $H5COPY $@
     (
         $RUNSERIAL $H5COPY_BIN $@
-    ) > $actualout 2> $actualerr
+    ) > $actual 2> $actual_err
     RET=$?
 
     if [ "$txttype" = "ERRTXT" ]; then
-        $GREP "$expectdata" $actualerr > /dev/null
+        $GREP "$expectdata" $actual_err > /dev/null
     else
-        $GREP "$expectdata" $actualout > /dev/null
+        $GREP "$expectdata" $actual > /dev/null
     fi
 
     if [ $? -eq 0 ]; then
