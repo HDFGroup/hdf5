@@ -796,7 +796,6 @@ TOOLTEST3() {
     if test -z "$HDF5_NOCLEANUP"; then
         rm -f $actual $actual_err $actual_sav $actual_err_sav
     fi
-
 }
 
 # same as TOOLTEST1 but expects h5dump to fail
@@ -949,7 +948,7 @@ GREPTEST3()
     expect="$TESTDIR/$3"
     actual="$TESTDIR/`basename $3 .txt`.out"
     actual_err="$TESTDIR/`basename $3 .ddl`.oerr"
-    actual_ext="$TESTDIR/`basename $1 .ddl`.ext"
+    actual_ext="$TESTDIR/`basename $3 .ddl`.ext"
     shift
     shift
     shift
