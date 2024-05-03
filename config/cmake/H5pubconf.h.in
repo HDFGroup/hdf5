@@ -110,9 +110,6 @@
 /* Define to 1 if CLOCK_MONOTONIC_COARSE is available */
 #cmakedefine H5_HAVE_CLOCK_MONOTONIC_COARSE @H5_HAVE_CLOCK_MONOTONIC_COARSE@
 
-/* Define if the function stack tracing code is to be compiled in */
-#cmakedefine H5_HAVE_CODESTACK @H5_HAVE_CODESTACK@
-
 /* Define to 1 if you have the <curl/curl.h> header file. */
 #cmakedefine H5_HAVE_CURL_CURL_H @H5_HAVE_CURL_H@
 
