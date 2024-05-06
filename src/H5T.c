@@ -1655,12 +1655,11 @@ H5T__unlock_cb(void *_dt, hid_t H5_ATTR_UNUSED id, void *_udata)
     FUNC_ENTER_PACKAGE_NOERR
 
     assert(dt);
-    assert(dt->shared);
 
-    if (H5T_STATE_IMMUTABLE == dt->shared->state) {
+    if (dt->shared && (H5T_STATE_IMMUTABLE == dt->shared->state)) {
         dt->shared->state = H5T_STATE_RDONLY;
         (*n)++;
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__unlock_cb() */
@@ -1874,7 +1873,6 @@ H5T__close_cb(H5T_t *dt, void **request)
 
     /* Sanity check */
     assert(dt);
-    assert(dt->shared);
 
     /* If this datatype is VOL-managed (i.e.: has a VOL object),
      * close it through the VOL connector.
@@ -4154,10 +4152,10 @@ H5T_close_real(H5T_t *dt)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    assert(dt && dt->shared);
+    assert(dt);
 
     /* Clean up resources, depending on shared state */
-    if (dt->shared->state != H5T_STATE_OPEN) {
+    if (dt->shared && (dt->shared->state != H5T_STATE_OPEN)) {
         if (H5T__free(dt) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype");
 
@@ -4194,10 +4192,9 @@ H5T_close(H5T_t *dt)
 
     /* Sanity check */
     assert(dt);
-    assert(dt->shared);
 
     /* Named datatype cleanups */
-    if (dt->shared->state == H5T_STATE_OPEN) {
+    if (dt->shared && (dt->shared->state == H5T_STATE_OPEN)) {
         /* Decrement refcount count on open named datatype */
         dt->shared->fo_count--;
 
