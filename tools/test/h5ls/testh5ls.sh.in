@@ -51,7 +51,6 @@ SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
 SRC_H5JAM_TESTFILES="$SRC_TOOLS/test/h5jam/testfiles"
 SRC_H5STAT_TESTFILES="$SRC_TOOLS/test/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
-SRC_H5LS_ERRFILES="$SRC_TOOLS/test/h5ls/errfiles"
 SRC_H5LS_OUTFILES="$SRC_TOOLS/test/h5ls/expected"
 
 TESTDIR=./tmp
@@ -93,12 +92,6 @@ $SRC_H5DUMP_TESTFILES/tstr.h5
 $SRC_H5DUMP_TESTFILES/tudlink.h5
 $SRC_H5DUMP_TESTFILES/tvldtypes1.h5
 $SRC_H5LS_TESTFILES/tdset_idx.h5
-"
-
-LIST_ERROR_TEST_FILES="
-$SRC_H5LS_ERRFILES/nosuchfile.err
-$SRC_H5LS_ERRFILES/textlinksrc-nodangle-1.err
-$SRC_H5LS_ERRFILES/tgroup-1.err
 "
 
 LIST_OTHER_TEST_FILES="
@@ -240,7 +233,6 @@ TESTING() {
 # $2 and on -- argument for the h5ls tool
 TOOLTEST() {
     expect="$TESTDIR/$1"
-    expect_err="$TESTDIR/`basename $1 .ls`.err"
     actual="$TESTDIR/`basename $1 .ls`.out"
     actual_err="$TESTDIR/`basename $1 .ls`.out.err"
     actual_sav=${actual}-sav
