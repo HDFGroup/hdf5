@@ -139,7 +139,7 @@
 /**
  * \ingroup H5R
  * \def H5Rget_obj_type
- * \api_vers_3{H5Rget_obj_type,H5Rget_obj_type1,H5Rget_obj_type2,H5R_get_obj_type3}
+ * \api_vers_3{H5Rget_obj_type,H5Rget_obj_type1,H5Rget_obj_type2,H5Rget_obj_type3}
  */
 
 /**
