@@ -1506,12 +1506,12 @@ H5E__copy_stack_entry(H5E_entry_t *dst_entry, const H5E_entry_t *src_entry)
          * there's no need to duplicate them.
          */
         if (NULL == (dst_entry->err.file_name = strdup(src_entry->err.file_name)))
-	    HGOTO_ERROR(H5E_ERROR, H5E_CANTCOPY, FAIL, "unable to duplicate file name");
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTCOPY, FAIL, "unable to duplicate file name");
         if (NULL == (dst_entry->err.func_name = strdup(src_entry->err.func_name)))
-	    HGOTO_ERROR(H5E_ERROR, H5E_CANTCOPY, FAIL, "unable to duplicate function name");
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTCOPY, FAIL, "unable to duplicate function name");
     }
     if (NULL == (dst_entry->err.desc = strdup(src_entry->err.desc)))
-	HGOTO_ERROR(H5E_ERROR, H5E_CANTCOPY, FAIL, "unable to duplicate error description");
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTCOPY, FAIL, "unable to duplicate error description");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
