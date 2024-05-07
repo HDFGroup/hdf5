@@ -1481,14 +1481,7 @@ H5E__copy_stack_entry(H5E_entry_t *dst_entry, const H5E_entry_t *src_entry)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    /*
-     * WARNING: We cannot call HERROR() from within this function or else we
-     *		could enter infinite recursion.  Furthermore, we also cannot
-     *		call any other HDF5 macro or function which might call
-     *		HERROR().  HERROR() is called by HRETURN_ERROR() which could
-     *		be called by FUNC_ENTER().
-     */
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     assert(dst_entry);
@@ -1502,23 +1495,23 @@ H5E__copy_stack_entry(H5E_entry_t *dst_entry, const H5E_entry_t *src_entry)
         /* Note: don't waste time incrementing library internal error IDs */
         if (dst_entry->err.cls_id != H5E_ERR_CLS_g)
             if (H5I_inc_ref(dst_entry->err.cls_id, false) < 0)
-                HGOTO_DONE(FAIL);
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to increment ref count on error class");
         if (dst_entry->err.maj_num < H5E_first_maj_id_g || dst_entry->err.maj_num > H5E_last_maj_id_g)
             if (H5I_inc_ref(dst_entry->err.maj_num, false) < 0)
-                HGOTO_DONE(FAIL);
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to increment ref count on error message");
         if (dst_entry->err.min_num < H5E_first_min_id_g || dst_entry->err.min_num > H5E_last_min_id_g)
             if (H5I_inc_ref(dst_entry->err.min_num, false) < 0)
-                HGOTO_DONE(FAIL);
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to increment ref count on error message");
         /* The library's 'func' & 'file' strings are statically allocated (by the compiler)
          * there's no need to duplicate them.
          */
         if (NULL == (dst_entry->err.file_name = strdup(src_entry->err.file_name)))
-            HGOTO_DONE(FAIL);
+	    HGOTO_ERROR(H5E_ERROR, H5E_CANTCOPY, FAIL, "unable to duplicate file name");
         if (NULL == (dst_entry->err.func_name = strdup(src_entry->err.func_name)))
-            HGOTO_DONE(FAIL);
+	    HGOTO_ERROR(H5E_ERROR, H5E_CANTCOPY, FAIL, "unable to duplicate function name");
     }
     if (NULL == (dst_entry->err.desc = strdup(src_entry->err.desc)))
-        HGOTO_DONE(FAIL);
+	HGOTO_ERROR(H5E_ERROR, H5E_CANTCOPY, FAIL, "unable to duplicate error description");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
