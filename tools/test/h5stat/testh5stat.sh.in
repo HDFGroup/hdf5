@@ -33,6 +33,7 @@ CP='cp'
 DIRNAME='dirname'
 LS='ls'
 AWK='awk'
+GREP='grep'
 
 nerrors=0
 verbose=yes
@@ -74,18 +75,6 @@ $SRC_H5STAT_TESTFILES/h5stat_idx.h5
 $SRC_H5STAT_TESTFILES/h5stat_threshold.h5
 "
 
-LIST_ERR_TEST_FILES="
-$SRC_H5STAT_OUTFILES/h5stat_err_refcount.err
-$SRC_H5STAT_OUTFILES/h5stat_err_old_layout.err
-$SRC_H5STAT_OUTFILES/h5stat_err_old_fill.err
-$SRC_H5STAT_OUTFILES/h5stat_err1_links.err
-$SRC_H5STAT_OUTFILES/h5stat_err1_dims.err
-$SRC_H5STAT_OUTFILES/h5stat_err1_numattrs.err
-$SRC_H5STAT_OUTFILES/h5stat_err2_numattrs.err
-$SRC_H5STAT_OUTFILES/h5stat_notexist.err
-$SRC_H5STAT_OUTFILES/h5stat_nofile.err
-"
-
 LIST_OTHER_TEST_FILES="
 $SRC_H5STAT_OUTFILES/h5stat_err_refcount.ddl
 $SRC_H5STAT_OUTFILES/h5stat_err_old_layout.ddl
@@ -123,7 +112,7 @@ $SRC_H5STAT_OUTFILES/h5stat_numattrs4.ddl
 #
 # copy test files and expected output files from source dirs to test dir
 #
-COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_ERR_TEST_FILES $LIST_OTHER_TEST_FILES"
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES"
 
 COPY_TESTFILES_TO_TESTDIR()
 {
@@ -187,7 +176,6 @@ TESTING() {
 #
 TOOLTEST() {
    expect="$TESTDIR/$1"
-   expect_err="$TESTDIR/`basename $1 .ddl`.err"
    actual="$TESTDIR/`basename $1 .ddl`.out"
    actual_err="$TESTDIR/`basename $1 .ddl`.out.err"
    actual_sav=${actual}-sav
@@ -207,17 +195,7 @@ TOOLTEST() {
    cp $actual_err $actual_err_sav
    STDERR_FILTER $actual_err
 
-   if [ ! -f $expect ]; then
-      # Compare error files if the expect file doesn't exist.
-      if $CMP $expect_err $actual_err; then
-         echo " PASSED"
-      else
-         echo "*FAILED*"
-         echo "    Expected result (*.err) differs from actual result (*.out.err)"
-         nerrors="`expr $nerrors + 1`"
-         test yes = "$verbose" && $DIFF $expect_err $actual_err |sed 's/^/    /'
-      fi
-   elif $CMP $expect $actual; then
+   if $CMP $expect $actual; then
       echo " PASSED"
    else
       echo "*FAILED*"
@@ -232,6 +210,52 @@ TOOLTEST() {
    fi
 }
 
+
+# Call the h5stat tool and grep for a value
+# txttype ERRTXT greps test error output, otherwise greps test output
+GREPTEST()
+{
+    txttype=$1
+    expectdata=$2
+    expect="$TESTDIR/$3"
+    actual="$TESTDIR/`basename $1 .ddl`.out"
+    actual_err="$TESTDIR/`basename $1 .ddl`.out.err"
+    shift
+    shift
+    shift
+    if [ "$1" = -i ]; then
+        inputfile=$2
+    fi
+
+    if [ "$3" = -o ]; then
+        outputfile=$4
+    fi
+
+   TESTING $STAT $@
+   (
+      cd $TESTDIR
+      $RUNSERIAL $STAT_BIN $@
+   ) >$actual 2>$actual_err
+    RET=$?
+
+    if [ "$txttype" = "ERRTXT" ]; then
+        $GREP "$expectdata" $actual_err > /dev/null
+    else
+        $GREP "$expectdata" $actual > /dev/null
+    fi
+
+    if [ $? -eq 0 ]; then
+        echo " PASSED"
+    else
+        echo " FAILED"
+        nerrors="`expr $nerrors + 1`"
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+        rm -f $actual $actual_err
+    fi
+}
 
 # Print a "SKIP" message
 SKIP() {
@@ -282,7 +306,7 @@ TOOLTEST h5stat_idx.ddl h5stat_idx.h5
 #     -g -l 8
 #     --links=8
 #     --links=20 -g
-TOOLTEST h5stat_err1_links.ddl -l 0 h5stat_threshold.h5
+GREPTEST ERRTXT "Invalid threshold for small groups" h5stat_err1_links.ddl -l 0 h5stat_threshold.h5
 TOOLTEST h5stat_links1.ddl -g -l 8 h5stat_threshold.h5
 TOOLTEST h5stat_links2.ddl --links=8 h5stat_threshold.h5
 TOOLTEST h5stat_links3.ddl --links=20 -g h5stat_threshold.h5
@@ -297,7 +321,7 @@ TOOLTEST h5stat_links5.ddl -g -l 40000 h5stat_newgrat.h5
 #     -d --dims=-1 (incorrect threshold value)
 #     -gd -m 5
 #     -d --di=15
-TOOLTEST h5stat_err1_dims.ddl -d --dims=-1 h5stat_threshold.h5
+GREPTEST ERRTXT "Invalid threshold for small datasets" h5stat_err1_dims.ddl -d --dims=-1 h5stat_threshold.h5
 TOOLTEST h5stat_dims1.ddl -gd -m 5 h5stat_threshold.h5
 TOOLTEST h5stat_dims2.ddl -d --dims=15 h5stat_threshold.h5
 #
@@ -307,8 +331,8 @@ TOOLTEST h5stat_dims2.ddl -d --dims=15 h5stat_threshold.h5
 #    -AS -a 10
 #    -a 1
 #    -A --numattrs=25
-TOOLTEST h5stat_err1_numattrs.ddl -a -2 h5stat_threshold.h5
-TOOLTEST h5stat_err2_numattrs.ddl --numattrs h5stat_threshold.h5
+GREPTEST ERRTXT "Invalid threshold for small # of attributes" h5stat_err1_numattrs.ddl -a -2 h5stat_threshold.h5
+GREPTEST ERRTXT "Invalid threshold for small # of attributes" h5stat_err2_numattrs.ddl --numattrs h5stat_threshold.h5
 TOOLTEST h5stat_numattrs1.ddl -AS -a 10 h5stat_threshold.h5
 TOOLTEST h5stat_numattrs2.ddl -a 1 h5stat_threshold.h5
 TOOLTEST h5stat_numattrs3.ddl -A --numattrs=25 h5stat_threshold.h5
