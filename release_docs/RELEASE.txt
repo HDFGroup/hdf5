@@ -1087,20 +1087,6 @@ Bug Fixes since HDF5-1.14.4 release
     - Renamed h5fuse.sh to h5fuse
 
       Addresses Discussion #3791
-    
-    - Names of objects with square brackets will have trouble without the
-      special argument, --no-compact-subset, on the h5dump command line.
-
-      h5diff did not have this option and now it has been added.
-
-      Fixes GitHub issue #2682
-
-    - In the tools traverse function - an error in either visit call
-      will bypass the cleanup of the local data variables.
-
-      Replaced the H5TOOLS_GOTO_ERROR with just H5TOOLS_ERROR.
-
-      Fixes GitHub issue #2598
 
 
     Performance
