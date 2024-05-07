@@ -179,7 +179,7 @@
   ADD_H5_TEST (h5stat_help2 0 --help)
 
 # Test when h5stat a file that does not exist
-  ADD_H5_CMP_TEST (h5stat_notexist 1 "unable to open file" notexist.h5)
+  ADD_H5_ERR_TEST (h5stat_notexist 1 "unable to open file" notexist.h5)
   ADD_H5_CMP_TEST (h5stat_nofile 1 "missing file name" '')
 
 # Test file with groups, compressed datasets, user-applied filters, etc.
