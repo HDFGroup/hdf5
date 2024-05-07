@@ -498,11 +498,17 @@ done:
 herr_t
 H5F_get_checksums(const uint8_t *buf, size_t buf_size, uint32_t *s_chksum /*out*/, uint32_t *c_chksum /*out*/)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     assert(buf);
     assert(buf_size);
+
+    /* Check for buffer size smaller than H5_SIZEOF_CHKSUM */
+    if (buf_size < H5_SIZEOF_CHKSUM)
+        HGOTO_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "checksum buffer is smaller than expected");
 
     /* Return the stored checksum */
     if (s_chksum) {
@@ -519,5 +525,6 @@ H5F_get_checksums(const uint8_t *buf, size_t buf_size, uint32_t *s_chksum /*out*
     if (c_chksum)
         *c_chksum = H5_checksum_metadata(buf, buf_size - H5_SIZEOF_CHKSUM, 0);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_chksums() */

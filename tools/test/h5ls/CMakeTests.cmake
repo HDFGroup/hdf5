@@ -51,13 +51,6 @@
       tudlink.h5
       tvldtypes1.h5
   )
-
-  set (LIST_ERR_TEST_FILES
-      nosuchfile.err
-      textlinksrc-nodangle-1.err
-      tgroup-1.err
-  )
-
   set (LIST_OTHER_TEST_FILES
       help-1.ls
       help-2.ls
@@ -135,9 +128,6 @@
   endforeach ()
   foreach (listothers ${LIST_OTHER_TEST_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/${listothers}" "h5ls_files")
-  endforeach ()
-  foreach (listerrfiles ${LIST_ERR_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/errfiles/${listerrfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listerrfiles}" "h5ls_files")
   endforeach ()
   add_custom_target(h5ls_files ALL COMMENT "Copying files needed by h5ls tests" DEPENDS ${h5ls_files_list})
 

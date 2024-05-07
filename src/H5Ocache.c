@@ -190,6 +190,15 @@ H5O__cache_get_final_load_size(const void *image, size_t image_len, void *_udata
     /* Set the final size for the cache image */
     *actual_len = udata->chunk0_size + (size_t)H5O_SIZEOF_HDR(udata->oh);
 
+    /* Save the oh version to be used later in verify_chksum callback
+       because oh will be freed before leaving this routine */
+    udata->oh_version = udata->oh->version;
+
+    /* Free allocated memory: fix github issue #3970 */
+    if (H5O__free(udata->oh, false) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't destroy object header");
+    udata->oh = NULL;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_get_final_load_size() */
@@ -211,35 +220,27 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
     H5O_cache_ud_t *udata     = (H5O_cache_ud_t *)_udata; /* User data for callback */
     htri_t          ret_value = true;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     assert(image);
     assert(udata);
-    assert(udata->oh);
 
     /* There is no checksum for version 1 */
-    if (udata->oh->version != H5O_VERSION_1) {
+    if (udata->oh_version != H5O_VERSION_1) {
         uint32_t stored_chksum;   /* Stored metadata checksum value */
         uint32_t computed_chksum; /* Computed metadata checksum value */
 
         /* Get stored and computed checksums */
-        H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+        if (H5F_get_checksums(image, len, &stored_chksum, &computed_chksum) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get checksums");
 
-        if (stored_chksum != computed_chksum) {
-            /* These fields are not deserialized yet in H5O__prefix_deserialize() */
-            assert(udata->oh->chunk == NULL);
-            assert(udata->oh->mesg == NULL);
-            assert(udata->oh->proxy == NULL);
-
-            /* Indicate that udata->oh is to be freed later
-               in H5O__prefix_deserialize() */
-            udata->free_oh = true;
-            ret_value      = false;
-        }
+        if (stored_chksum != computed_chksum)
+            ret_value = false;
     }
     else
         assert(!(udata->common.file_intent & H5F_ACC_SWMR_WRITE));
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_verify_chksum() */
 
@@ -275,21 +276,12 @@ H5O__cache_deserialize(const void *image, size_t len, void *_udata, bool *dirty)
     assert(udata->common.f);
     assert(udata->common.cont_msg_info);
     assert(dirty);
+    assert(udata->oh == NULL);
 
-    /* Check for partially deserialized object header
-     *
-     * The Object header prefix will be deserialized if the object header came
-     * through the 'get_final_load_size' callback and not deserialized if
-     * the object header is coming from a cache image.
-     */
-    if (NULL == udata->oh) {
-        /* Deserialize the object header prefix */
-        if (H5O__prefix_deserialize((const uint8_t *)image, len, udata) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't deserialize object header prefix");
-        assert(udata->oh);
-    }
+    if (H5O__prefix_deserialize((const uint8_t *)image, len, udata) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't deserialize object header prefix");
+    assert(udata->oh);
 
-    /* Retrieve partially deserialized object header from user data */
     oh = udata->oh;
 
     /* Set SWMR flag, if appropriate */
@@ -634,7 +626,7 @@ H5O__cache_chk_verify_chksum(const void *_image, size_t len, void *_udata)
     H5O_chk_cache_ud_t *udata     = (H5O_chk_cache_ud_t *)_udata; /* User data for callback */
     htri_t              ret_value = true;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     assert(image);
 
@@ -644,12 +636,14 @@ H5O__cache_chk_verify_chksum(const void *_image, size_t len, void *_udata)
         uint32_t computed_chksum; /* Computed metadata checksum value */
 
         /* Get stored and computed checksums */
-        H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+        if (H5F_get_checksums(image, len, &stored_chksum, &computed_chksum) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get checksums");
 
         if (stored_chksum != computed_chksum)
             ret_value = false;
     }
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_chk_verify_chksum() */
 
@@ -1144,25 +1138,9 @@ H5O__prefix_deserialize(const uint8_t *_image, size_t len, H5O_cache_ud_t *udata
     if ((size_t)(image - _image) != (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header prefix length");
 
-    /* If udata->oh is to be freed (see H5O__cache_verify_chksum),
-     * save the pointer to udata->oh and free it later after setting
-     * udata->oh with the new object header
-     */
-    if (udata->free_oh) {
-        H5O_t *saved_oh = udata->oh;
-        assert(udata->oh);
-
-        /* Save the object header for later use in 'deserialize' callback */
-        udata->oh = oh;
-        if (H5O__free(saved_oh, false) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't destroy object header");
-        udata->free_oh = false;
-    }
-    else
-        /* Save the object header for later use in 'deserialize' callback */
-        udata->oh = oh;
-
-    oh = NULL;
+    /* Save the object header for later use in 'deserialize' callback */
+    udata->oh = oh;
+    oh        = NULL;
 
 done:
     /* Release the [possibly partially initialized] object header on errors */

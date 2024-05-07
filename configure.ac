@@ -1543,7 +1543,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_OPTIMIZE_OUTPUT_FOR_C=YES
   DOXYGEN_MACRO_EXPANSION=YES
   DOXYGEN_OUTPUT_DIRECTORY=hdf5lib_docs
-  DOXYGEN_EXAMPLES_DIRECTORY='$(SRCDIR)/doxygen/dox/cookbook $(SRCDIR)/doxygen/examples $(SRCDIR)/src $(SRCDIR)/examples $(SRCDIR)/test'
+  DOXYGEN_EXAMPLES_DIRECTORY='$(SRCDIR)/doxygen/dox/cookbook $(SRCDIR)/doxygen/examples $(SRCDIR)/src $(SRCDIR)/release_docs $(SRCDIR)/test'
   DOXYGEN_LAYOUT_FILE='$(SRCDIR)/doxygen/hdf5doxy_layout.xml'
   DOXYGEN_HTML_HEADER='$(SRCDIR)/doxygen/hdf5_header.html'
   DOXYGEN_HTML_FOOTER='$(SRCDIR)/doxygen/hdf5_footer.html'
@@ -2418,6 +2418,14 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[int __attribute__((unused)) x]])],
                  AC_MSG_RESULT([yes])],
                [AC_MSG_RESULT([no])])
 
+AC_MSG_CHECKING([if compiler supports the __builtin_expect() extension])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[void *ptr = (void*) 0;
+               if (__builtin_expect (ptr != (void*) 0, 1)) return 0;]])],
+  [AC_DEFINE([HAVE_BUILTIN_EXPECT], [1],
+          [Define if supports __builtin_expect() extension])
+    AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])])
+
 ## ----------------------------------------------------------------------
 ## Remove old ways of determining debug/production build.
 ## These were used in 1.8.x and earlier. We should probably keep these checks
@@ -2876,40 +2884,6 @@ if test -n "$DEBUG_PKG_LIST"; then
     H5_CPPFLAGS="$H5_CPPFLAGS -DH5${pkg}_DEBUG"
   done
 fi
-
-## ----------------------------------------------------------------------
-## Check if they would like the function stack support compiled in
-##
-AC_MSG_CHECKING([whether function stack tracking is enabled])
-AC_ARG_ENABLE([codestack],
-              [AS_HELP_STRING([--enable-codestack],
-                              [Enable the function stack tracing (for developer debugging).
-                               [default=no]
-                              ])],
-              [CODESTACK=$enableval])
-
-## Set the default level.
-if test "X-$CODESTACK" = X- ; then
-  CODESTACK=no
-fi
-
-## Allow this variable to be substituted in
-## other files (src/libhdf5.settings.in, etc.)
-AC_SUBST([CODESTACK])
-
-case "X-$CODESTACK" in
-  X-yes)
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([HAVE_CODESTACK], [1],
-                [Define if the function stack tracing code is to be compiled in])
-    ;;
-  X-no)
-      AC_MSG_RESULT([no])
-    ;;
-  *)
-      AC_MSG_ERROR([Unrecognized value: $CODESTACK])
-    ;;
-esac
 
 ## ----------------------------------------------------------------------
 ## Enable tracing of the API

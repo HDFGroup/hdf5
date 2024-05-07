@@ -43,6 +43,17 @@
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 #include "H5VMprivate.h" /* Vectors and arrays                       */
 
+/* Datatype conversion functions */
+#include "H5Tconv_integer.h"
+#include "H5Tconv_float.h"
+#include "H5Tconv_string.h"
+#include "H5Tconv_bitfield.h"
+#include "H5Tconv_compound.h"
+#include "H5Tconv_reference.h"
+#include "H5Tconv_enum.h"
+#include "H5Tconv_vlen.h"
+#include "H5Tconv_array.h"
+
 /****************/
 /* Local Macros */
 /****************/
@@ -4471,30 +4482,6 @@ H5T_get_size(const H5T_t *dt)
 } /* end H5T_get_size() */
 
 /*-------------------------------------------------------------------------
- * Function:  H5T_get_force_conv
- *
- * Purpose:   Determines if the type has forced conversion. This will be
- *            true if and only if the type keeps a pointer to a file VOL
- *            object internally.
- *
- * Return:    true/false (never fails)
- *
- *-------------------------------------------------------------------------
- */
-bool
-H5T_get_force_conv(const H5T_t *dt)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* check args */
-    assert(dt);
-    assert(dt->shared);
-
-    FUNC_LEAVE_NOAPI(dt->shared->force_conv)
-} /* end H5T_get_force_conv() */
-
-/*-------------------------------------------------------------------------
  * Function:  H5T_cmp
  *
  * Purpose:   Compares two data types.
@@ -5515,7 +5502,7 @@ H5T__path_free(H5T_path_t *path, H5T_conv_ctx_t *conv_ctx)
     assert(conv_ctx);
 
     if (path->conv.u.app_func) {
-        H5T__print_stats(path, &nprint);
+        H5T__print_path_stats(path, &nprint);
 
         path->cdata.command = H5T_CONV_FREE;
 

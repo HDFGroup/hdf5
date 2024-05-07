@@ -59,7 +59,6 @@ $SRC_H5COPY_TESTFILES/h5copy_extlinks_trg.h5
 # List of expect files that will be copied over to local test dir
 LIST_OTHER_TEST_FILES="
 $SRC_H5COPY_OUTFILES/h5copy_misc1.out
-$SRC_H5COPY_OUTFILES/h5copy_misc1.err
 $SRC_H5COPY_OUTFILES/h5copy_help1.ddl
 $SRC_H5COPY_OUTFILES/h5copy_help2.ddl
 "
@@ -79,6 +78,7 @@ CP='cp'
 DIRNAME='dirname'
 LS='ls'
 AWK='awk'
+GREP='grep'
 
 nerrors=0
 verbose=yes
@@ -188,8 +188,8 @@ VERIFY_OUTPUT()
 
 TOOLTEST()
 {
-    actualout="$TESTDIR/tooltest.actualout"
-    actualerr="$TESTDIR/tooltest.actualerr"
+    actual="$TESTDIR/tooltest.actual"
+    actual_err="$TESTDIR/tooltest.actual_err"
     runh5diff=yes
     if [ "$1" = -i ]; then
         inputfile=$2
@@ -219,13 +219,13 @@ TOOLTEST()
         echo " output for '$H5COPY $@'"
         echo "#############################"
         $RUNSERIAL $H5COPY_BIN $@
-    ) > $actualout 2> $actualerr
+    ) > $actual 2> $actual_err
     RET=$?
 
     if [ $RET != 0 ]; then
         echo "*FAILED*"
         echo "failed result is:"
-        cat $actualout
+        cat $actual
         nerrors="`expr $nerrors + 1`"
     else
         echo " PASSED"
@@ -236,7 +236,7 @@ TOOLTEST()
 
         # Clean up output file
         if test -z "$HDF5_NOCLEANUP"; then
-            rm -f $actualout $actualerr $outputfile
+            rm -f $actual $actual_err $outputfile
         fi
     fi
 }
@@ -244,8 +244,8 @@ TOOLTEST()
 # TOOLTEST back-to-back
 TOOLTEST_PREFILL()
 {
-    actualout="$TESTDIR/tooltest.actualout"
-    actualerr="$TESTDIR/tooltest.actualerr"
+    actual="$TESTDIR/tooltest.actual"
+    actual_err="$TESTDIR/tooltest.actual_err"
     runh5diff=yes
     if [ "$1" = -i ]; then
         inputfile=$2
@@ -269,13 +269,13 @@ TOOLTEST_PREFILL()
         echo " output for '$H5COPY $@'"
         echo "#############################"
         $RUNSERIAL $H5COPY_BIN  -i $inputfile -o $outputfile -v -s $grp_name -d $grp_name2
-    ) > $actualout 2> $actualerr
+    ) > $actual 2> $actual_err
     RET=$?
 
     if [ $RET != 0 ]; then
         echo "*FAILED*"
         echo "failed result is:"
-        cat $actualout
+        cat $actual
         nerrors="`expr $nerrors + 1`"
     else
         TESTING $H5COPY $@
@@ -284,13 +284,13 @@ TOOLTEST_PREFILL()
             echo " output for '$H5COPY $@'"
             echo "#############################"
             $RUNSERIAL $H5COPY_BIN  -i $inputfile -o $outputfile -v -s $obj_name -d $obj_name2
-        ) > $actualout 2> $actualerr
+        ) > $actual 2> $actual_err
         RET=$?
 
         if [ $RET != 0 ]; then
             echo "*FAILED*"
             echo "failed result is:"
-            cat $actualout
+            cat $actual
             nerrors="`expr $nerrors + 1`"
         else
             echo " PASSED"
@@ -301,7 +301,7 @@ TOOLTEST_PREFILL()
 
             # Clean up output file
             if test -z "$HDF5_NOCLEANUP"; then
-                rm -f $actualout $actualerr $outputfile
+                rm -f $actual $actual_err $outputfile
             fi
         fi
     fi
@@ -310,8 +310,8 @@ TOOLTEST_PREFILL()
 # TOOLTEST back-to-back
 TOOLTEST_SAME()
 {
-    actualout="$TESTDIR/tooltest.actualout"
-    actualerr="$TESTDIR/tooltest.actualerr"
+    actual="$TESTDIR/tooltest.actual"
+    actual_err="$TESTDIR/tooltest.actual_err"
     runh5diff=yes
     if [ "$1" = -i ]; then
         inputfile=$2
@@ -334,13 +334,13 @@ TOOLTEST_SAME()
         echo " output for '$H5COPY $@'"
         echo "#############################"
         $RUNSERIAL $H5COPY_BIN  -i $inputfile -o $outputfile -v -s $grp_name -d $grp_name
-    ) > $actualout 2> $actualerr
+    ) > $actual 2> $actual_err
     RET=$?
 
     if [ $RET != 0 ]; then
         echo "*FAILED*"
         echo "failed result is:"
-        cat $actualout
+        cat $actual
         nerrors="`expr $nerrors + 1`"
     else
         TESTING $H5COPY $@
@@ -349,13 +349,13 @@ TOOLTEST_SAME()
             echo " output for '$H5COPY $@'"
             echo "#############################"
             $RUNSERIAL $H5COPY_BIN  -i $outputfile -o $outputfile -v -s $grp_name -d $grp_name2
-        ) > $actualout 2> $actualerr
+        ) > $actual 2> $actual_err
         RET=$?
 
         if [ $RET != 0 ]; then
             echo "*FAILED*"
             echo "failed result is:"
-            cat $actualout
+            cat $actual
             nerrors="`expr $nerrors + 1`"
         else
             echo " PASSED"
@@ -366,50 +366,25 @@ TOOLTEST_SAME()
 
             # Clean up output file
             if test -z "$HDF5_NOCLEANUP"; then
-                rm -f $actualout $actualerr $outputfile
+                rm -f $actual $actual_err $outputfile
             fi
         fi
     fi
 }
 
 
-# Compare the two text files
-# PASS if same
-# FAIL if different, and show the diff
-#
-# Assumed arguments:
-# $1 is text file1 (expected output)
-# $2 is text file2 (actual output)
-CMP_OUTPUT()
+# Call the h5copy tool and grep for a value
+# txttype ERRTXT greps test error output, otherwise greps test output
+GREPTEST()
 {
-    expect=$1
-    actual=$2
-
-    VERIFY_OUTPUT $@
-    if [ ! -f $expect ]; then
-        # Create the expect file if it doesn't yet exist.
-        echo " CREATED"
-        cp $actual $expect
-        echo "    Expected result (*.ddl) missing"
-        nerrors="`expr $nerrors + 1`"
-    elif $CMP $expect $actual; then
-        echo " PASSED"
-    else
-        echo "*FAILED*"
-        echo "    Expected output differs from actual output"
-        nerrors="`expr $nerrors + 1`"
-        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
-    fi
-}
-
-TOOLTEST_FAIL()
-{
-    expectout="$TESTDIR/$1"
-    expecterr="$TESTDIR/`basename $1 .out`.err"
-    actualout="$TESTDIR/$1.actualout"
-    actualerr="$TESTDIR/$1.actualerr"
-    actualout_sav=${actualout}-sav
-    actualerr_sav=${actualerr}-sav
+    txttype=$1
+    expectdata=$2
+    expectout="$TESTDIR/$3"
+    expecterr="$TESTDIR/`basename $3 .out`.err"
+    actual="$TESTDIR/$3.actual"
+    actual_err="$TESTDIR/$3.actual_err"
+    shift
+    shift
     shift
     if [ "$1" = -i ]; then
         inputfile=$2
@@ -419,40 +394,31 @@ TOOLTEST_FAIL()
         outputfile=$4
     fi
 
+    # Run test.
     TESTING $H5COPY $@
     (
-        #echo "#############################"
-        #echo " output for '$H5COPY $@'"
-        #echo "#############################"
         $RUNSERIAL $H5COPY_BIN $@
-    ) > $actualout 2> $actualerr
+    ) > $actual 2> $actual_err
     RET=$?
 
-    # save actualout and actualerr in case they are needed later.
-    cp $actualout $actualout_sav
-    STDOUT_FILTER $actualout
-    cp $actualerr $actualerr_sav
-    STDERR_FILTER $actualerr
-    if [ $RET != 0 ]; then
-        echo " PASSED"
-        # Verifying output text from h5copy
-        if [ "$expectout" != "SKIP" ]; then
-            CMP_OUTPUT $expecterr $actualerr
-        fi
+    if [ "$txttype" = "ERRTXT" ]; then
+        $GREP "$expectdata" $actual_err > /dev/null
     else
-        echo "*FAILED*"
-        echo "failed result is:"
-        cat $actualout
+        $GREP "$expectdata" $actual > /dev/null
+    fi
+
+    if [ $? -eq 0 ]; then
+        echo " PASSED"
+    else
+        echo " FAILED"
         nerrors="`expr $nerrors + 1`"
     fi
 
-
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-        rm -f $actualout $actualerr $actualout_sav $actualerr_sav $outputfile
+        rm -f $actual $actual_err
     fi
 }
-
 
 # Call the h5diff tool
 #
@@ -462,22 +428,6 @@ H5DIFFTEST()
     $RUNSERIAL $H5DIFF_BIN -q "$@"
     RET=$?
     if [ $RET != 0 ] ; then
-        echo "*FAILED*"
-        nerrors="`expr $nerrors + 1`"
-    else
-        echo " PASSED"
-    fi
-}
-
-# Call the h5diff tool with a call that is expected to fail
-#
-H5DIFFTEST_FAIL()
-{
-    VERIFY  $@
-    $RUNSERIAL $H5DIFF_BIN -q "$@"
-    RET=$?
-
-    if [ $h5haveexitcode = 'yes' -a $RET != 1 ] ; then
         echo "*FAILED*"
         nerrors="`expr $nerrors + 1`"
     else
@@ -630,7 +580,7 @@ TEST_MISC()
     TESTFILE="$TESTDIR/h5copytst.h5"
 
     echo "Test copying object into group which doesn't exist, without -p"
-    TOOLTEST_FAIL h5copy_misc1.out -i $TESTFILE -o $TESTDIR/h5copy_misc1.out.h5 -v -s /simple  -d /g1/g2/simple
+    GREPTEST ERRTXT "h5copy error" h5copy_misc1.out -i $TESTFILE -o $TESTDIR/h5copy_misc1.out.h5 -v -s /simple  -d /g1/g2/simple
 
     echo "Test copying objects to the same file "
     TOOLTEST_SAME -i $TESTFILE -o $TESTDIR/samefile1.out.h5 /simple /simple_cp

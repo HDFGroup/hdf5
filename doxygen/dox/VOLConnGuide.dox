@@ -230,7 +230,7 @@ The initialization and terminate callbacks:
 \endcode
 
 \subsection subsecVOLMap Map Storage to HDF5 File Objects
-The most difficult part of designing a new VOL connector is going to determining how to support HDF5
+The most difficult part of designing a new VOL connector is determining how to support HDF5
 file objects and operations using your storage system. There isn't much specific advice to give here, as each
 connector will have unique needs, but a forthcoming "tutorial" connector will set up a simple connector and
 demonstrate this process.

@@ -436,6 +436,7 @@ endif ()
 if (MINGW OR NOT WINDOWS)
   foreach (other_test
       HAVE_ATTRIBUTE
+      HAVE_BUILTIN_EXPECT
       SYSTEM_SCOPE_THREADS
       HAVE_SOCKLEN_T
   )
@@ -495,16 +496,6 @@ if (HDF5_WANT_DCONV_EXCEPTION)
   set (${HDF_PREFIX}_WANT_DCONV_EXCEPTION 1)
 endif ()
 MARK_AS_ADVANCED (HDF5_WANT_DCONV_EXCEPTION)
-
-# ----------------------------------------------------------------------
-# Check if they would like the function stack support compiled in
-#-----------------------------------------------------------------------------
-option (HDF5_ENABLE_CODESTACK "Enable the function stack tracing (for developer debugging)." OFF)
-mark_as_advanced (HDF5_ENABLE_CODESTACK)
-if (HDF5_ENABLE_CODESTACK)
-  set (${HDF_PREFIX}_HAVE_CODESTACK 1)
-endif ()
-MARK_AS_ADVANCED (HDF5_ENABLE_CODESTACK)
 
 # ----------------------------------------------------------------------
 # Check if they would like to show all warnings (not suppressed internally)
