@@ -47,6 +47,18 @@ New Features
 
     Configuration:
     -------------
+    - Added configuration option for internal threading/concurrency support:
+
+          CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)
+          Autotools:  --enable-threads    (yes/no) (Default: yes)
+
+      This option enables support for threading and concurrency algorithms
+      within the HDF5 library.  It is required for, but separate from, the
+      'threadsafe' configure option, which makes the HDF5 API safe to call from
+      multiple threads.  It is possible to enable the 'threads' option and
+      disable the 'threadsafe' option, but not vice versa.  The 'threads' option
+      must be on to enable the subfiling VFD.
+
     - Removed "function/code stack" debugging configuration option:
 
           CMake:      HDF5_ENABLE_CODESTACK
@@ -361,7 +373,7 @@ New Features
       CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
       that allow users to specify common configure options and share them with others.
       HDF added a CMakePresets.json file of a typical configuration and support
-      file, config/cmake-presets/hidden-presets.json.
+      file, config/cmake-presets/hidden-presets.json. 
       Also added a section to INSTALL_CMake.txt with very basic explanation of the
       process to use CMakePresets.
 
@@ -543,7 +555,7 @@ New Features
       to filtered datasets. The Subfiling VFD now properly handles vector
       I/O requests in their entirety, resulting in fewer I/O calls, improved
       vector I/O performance and improved vector I/O memory efficiency.
-
+    
     - Added a simple cache to the read-only S3 (ros3) VFD
 
       The read-only S3 VFD now caches the first N bytes of a file stored
@@ -1704,6 +1716,13 @@ Bug Fixes since HDF5-1.14.0 release
       instead and will no longer be installed on the system for Autotools builds
       of HDF5. The CMake configuration code already avoids installing the
       executable on the system.
+
+    - Fixed a configuration issue that prevented building of the Subfiling VFD on macOS
+
+      Checks were added to the CMake and Autotools code to verify that CLOCK_MONOTONIC_COARSE,
+      PTHREAD_MUTEX_ADAPTIVE_NP and pthread_condattr_setclock() are available before attempting
+      to use them in Subfiling VFD-related utility code. Without these checks, attempting
+      to build the Subfiling VFD on macOS would fail.
 
     - Fixes the ordering of INCLUDES when building with CMake
 
