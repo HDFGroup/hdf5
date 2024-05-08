@@ -25,14 +25,6 @@
 
 #ifdef H5_HAVE_MIRROR_VFD
 
-/*
- * This file needs to access private information from the H5FD package.
- * This file also needs to access the file testing code.
- */
-#define H5FD_FRIEND /*suppress error about including H5FDpkg   */
-#define H5FD_TESTING
-#include "H5FDpkg.h" /* File Drivers         */
-
 #define HEXDUMP_XMITS 1     /* Toggle whether to print xmit bytes-blob */
                             /* in detailed logging  */
 #define HEXDUMP_WRITEDATA 0 /* Toggle whether to print bytes to write */
@@ -237,7 +229,7 @@ session_stop(struct mirror_session *session)
     /* Close HDF5 file if it is still open (probably in error) */
     if (session->file) {
         mirror_log(session->loginfo, V_WARN, "HDF5 file still open at cleanup");
-        if (H5FDclose_test(session->file) < 0) {
+        if (H5FDclose(session->file) < 0) {
             mirror_log(session->loginfo, V_ERR, "H5FDclose() during cleanup!");
             ret_value--;
         }
@@ -404,6 +396,7 @@ reply_error(struct mirror_session *session, const char *msg)
 static int
 do_close(struct mirror_session *session)
 {
+
     assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "do_close()");
@@ -414,7 +407,7 @@ do_close(struct mirror_session *session)
         return -1;
     }
 
-    if (H5FDclose_test(session->file) < 0) {
+    if (H5FDclose(session->file) < 0) {
         mirror_log(session->loginfo, V_ERR, "H5FDclose()");
         reply_error(session, "H5FDclose()");
         return -1;
@@ -462,7 +455,7 @@ do_lock(struct mirror_session *session, const unsigned char *xmit_buf)
     }
     mirror_log(session->loginfo, V_INFO, "lock rw: (%d)", xmit_lock.rw);
 
-    if (H5FDlock_test(session->file, (bool)xmit_lock.rw) < 0) {
+    if (H5FDlock(session->file, (bool)xmit_lock.rw) < 0) {
         mirror_log(session->loginfo, V_ERR, "H5FDlock()");
         reply_error(session, "remote H5FDlock() failure");
         return -1;
@@ -540,7 +533,7 @@ do_open(struct mirror_session *session, const H5FD_mirror_xmit_open_t *xmit_open
         goto error;
     }
 
-    session->file = H5FDopen_test(xmit_open->filename, _flags, fapl_id, _maxaddr);
+    session->file = H5FDopen(xmit_open->filename, _flags, fapl_id, _maxaddr);
     if (NULL == session->file) {
         mirror_log(session->loginfo, V_ERR, "H5FDopen()");
         reply_error(session, "remote H5FDopen() failure");
@@ -606,7 +599,7 @@ do_set_eoa(struct mirror_session *session, const unsigned char *xmit_buf)
 
     mirror_log(session->loginfo, V_INFO, "set EOA addr %d", xmit_seoa.eoa_addr);
 
-    if (H5FDset_eoa_test(session->file, (H5FD_mem_t)xmit_seoa.type, (haddr_t)xmit_seoa.eoa_addr) < 0) {
+    if (H5FDset_eoa(session->file, (H5FD_mem_t)xmit_seoa.type, (haddr_t)xmit_seoa.eoa_addr) < 0) {
         mirror_log(session->loginfo, V_ERR, "H5FDset_eoa()");
         reply_error(session, "remote H5FDset_eoa() failure");
         return -1;
@@ -632,12 +625,13 @@ do_set_eoa(struct mirror_session *session, const unsigned char *xmit_buf)
 static int
 do_truncate(struct mirror_session *session)
 {
+
     assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "do_truncate()");
 
     /* default DXPL ID (0), 0 for "false" closing -- both probably unused */
-    if (H5FDtruncate_test(session->file, 0, 0) < 0) {
+    if (H5FDtruncate(session->file, 0, 0) < 0) {
         mirror_log(session->loginfo, V_ERR, "H5FDtruncate()");
         reply_error(session, "remote H5FDtruncate() failure");
         return -1;
@@ -667,7 +661,7 @@ do_unlock(struct mirror_session *session)
 
     mirror_log(session->loginfo, V_INFO, "do_unlock()");
 
-    if (H5FDunlock_test(session->file) < 0) {
+    if (H5FDunlock(session->file) < 0) {
         mirror_log(session->loginfo, V_ERR, "H5FDunlock()");
         reply_error(session, "remote H5FDunlock() failure");
         return -1;
@@ -776,8 +770,8 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
         mirror_log(session->loginfo, V_INFO, "writing %zd bytes at %zu", nbytes_in_packet,
                    (addr + sum_bytes_written));
 
-        if (H5FDwrite_test(session->file, type, H5P_DEFAULT, (addr + sum_bytes_written),
-                           (size_t)nbytes_in_packet, buf) < 0) {
+        if (H5FDwrite(session->file, type, H5P_DEFAULT, (addr + sum_bytes_written), (size_t)nbytes_in_packet,
+                      buf) < 0) {
             mirror_log(session->loginfo, V_ERR, "H5FDwrite()");
             reply_error(session, "remote H5FDwrite() failure");
             return -1;

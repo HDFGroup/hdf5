@@ -21,14 +21,6 @@
 #include "H5FDioc.h"
 #endif
 
-/*
- * This file needs to access private information from the H5FD package.
- * This file also needs to access the file testing code.
- */
-#define H5FD_FRIEND /*suppress error about including H5FDpkg   */
-#define H5FD_TESTING
-#include "H5FDpkg.h" /* File Drivers         */
-
 /* Must be a power of 2.  Reducing it below 1024 may cause problems */
 #define INTS_PER_RANK 1024
 
@@ -523,7 +515,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
         flags = H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC;
 
-        if (NULL == (lf = H5FDopen_test(filename, flags, fapl_id, HADDR_UNDEF))) {
+        if (NULL == (lf = H5FDopen(filename, flags, fapl_id, HADDR_UNDEF))) {
 
             pass         = false;
             failure_mssg = "H5FDopen() failed.\n";
@@ -539,7 +531,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
         eoa = (haddr_t)mpi_size * (haddr_t)INTS_PER_RANK * (haddr_t)(sizeof(int32_t));
 
-        if (H5FDset_eoa_test(lf, H5FD_MEM_DEFAULT, eoa) < 0) {
+        if (H5FDset_eoa(lf, H5FD_MEM_DEFAULT, eoa) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDset_eoa() failed.\n";
@@ -594,7 +586,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
     else { /* tidy up from failure as possible  */
 
         if (lf)
-            H5FDclose_test(lf);
+            H5FDclose(lf);
 
         if (fapl_id != -1)
             H5Pclose(fapl_id);
@@ -638,7 +630,7 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
 
     if (*lf_ptr) {
 
-        if (H5FDclose_test(*lf_ptr) < 0) {
+        if (H5FDclose(*lf_ptr) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDclose() failed.\n";
@@ -805,8 +797,8 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (mpi_rank == 0) {
 
-            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size,
-                               (void *)increasing_fi_buf) < 0) {
+            if (H5FDwrite(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)increasing_fi_buf) <
+                0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
@@ -846,7 +838,7 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
         sizes[0] = (size_t)INTS_PER_RANK * sizeof(int32_t);
         bufs[0]  = (void *)(&(read_fi_buf[mpi_rank * INTS_PER_RANK]));
 
-        if (H5FDread_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+        if (H5FDread_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDread_vector() failed.\n";
@@ -1035,8 +1027,8 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (mpi_rank == 0) {
 
-            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size,
-                               (void *)decreasing_fi_buf) < 0) {
+            if (H5FDwrite(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)decreasing_fi_buf) <
+                0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
@@ -1085,7 +1077,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             count = 0;
         }
 
-        if (H5FDread_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+        if (H5FDread_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDread_vector() failed.\n";
@@ -1124,7 +1116,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             count = 0;
         }
 
-        if (H5FDread_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+        if (H5FDread_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDread_vector() failed.\n";
@@ -1336,8 +1328,8 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (mpi_rank == 0) {
 
-            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size,
-                               (void *)negative_fi_buf) < 0) {
+            if (H5FDwrite(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)negative_fi_buf) <
+                0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
@@ -1429,7 +1421,7 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             bufs[3] = (void *)(buf_0);
         }
 
-        if (H5FDread_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+        if (H5FDread_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDread_vector() failed.\n";
@@ -1689,8 +1681,8 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (mpi_rank == 0) {
 
-            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size,
-                               (void *)increasing_fi_buf) < 0) {
+            if (H5FDwrite(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)increasing_fi_buf) <
+                0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
@@ -1817,7 +1809,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             count = 0;
         }
 
-        if (H5FDread_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+        if (H5FDread_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDread_vector() failed (1).\n";
@@ -2116,8 +2108,8 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (mpi_rank == 0) {
 
-            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size,
-                               (void *)increasing_fi_buf) < 0) {
+            if (H5FDwrite(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)increasing_fi_buf) <
+                0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
@@ -2177,7 +2169,7 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             bufs[i]  = (void *)(&(read_fi_buf[base_index + (i * 16)]));
         }
 
-        if (H5FDread_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+        if (H5FDread_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDread_vector() failed (1).\n";
@@ -2356,7 +2348,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         sizes[0] = (size_t)INTS_PER_RANK * sizeof(int32_t);
         bufs[0]  = (const void *)(&(increasing_fi_buf[mpi_rank * INTS_PER_RANK]));
 
-        if (H5FDwrite_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+        if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDwrite_vector() failed.\n";
@@ -2382,7 +2374,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         size_t image_size = (size_t)mpi_size * (size_t)INTS_PER_RANK * sizeof(int32_t);
 
-        if (H5FDread_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
+        if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDread() failed.\n";
@@ -2548,7 +2540,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             sizes[0] = (size_t)INTS_PER_RANK * sizeof(int32_t);
             bufs[0]  = (const void *)(&(increasing_fi_buf[mpi_rank * INTS_PER_RANK]));
 
-            if (H5FDwrite_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+            if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite_vector() failed (1).\n";
@@ -2556,7 +2548,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         }
         else { /* even ranks */
 
-            if (H5FDwrite_vector_test(lf, dxpl_id, 0, NULL, NULL, NULL, NULL) < 0) {
+            if (H5FDwrite_vector(lf, dxpl_id, 0, NULL, NULL, NULL, NULL) < 0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite_vector() failed (2).\n";
@@ -2575,7 +2567,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (mpi_rank % 2 == 1) { /* odd ranks */
 
-            if (H5FDwrite_vector_test(lf, dxpl_id, 0, NULL, NULL, NULL, NULL) < 0) {
+            if (H5FDwrite_vector(lf, dxpl_id, 0, NULL, NULL, NULL, NULL) < 0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite_vector() failed (3).\n";
@@ -2589,7 +2581,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             sizes[0] = (size_t)INTS_PER_RANK * sizeof(int32_t);
             bufs[0]  = (const void *)(&(negative_fi_buf[mpi_rank * INTS_PER_RANK]));
 
-            if (H5FDwrite_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+            if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite_vector() failed (4).\n";
@@ -2616,7 +2608,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         size_t image_size = (size_t)mpi_size * (size_t)INTS_PER_RANK * sizeof(int32_t);
 
-        if (H5FDread_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
+        if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDread() failed.\n";
@@ -2819,7 +2811,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         sizes[3] = bytes_per_write;
         bufs[3]  = (const void *)(&(zero_fi_buf[(mpi_rank * INTS_PER_RANK) + (3 * (INTS_PER_RANK / 4))]));
 
-        if (H5FDwrite_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+        if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDwrite_vector() failed (1).\n";
@@ -2847,7 +2839,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         size_t image_size = (size_t)mpi_size * (size_t)INTS_PER_RANK * sizeof(int32_t);
 
-        if (H5FDread_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
+        if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDread() failed.\n";
@@ -3080,7 +3072,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         bufs[3] =
             (const void *)(&(increasing_fi_buf[(mpi_rank * INTS_PER_RANK) + (3 * (INTS_PER_RANK / 4))]));
 
-        if (H5FDwrite_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+        if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDwrite_vector() failed (1).\n";
@@ -3108,7 +3100,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         size_t image_size = (size_t)mpi_size * (size_t)INTS_PER_RANK * sizeof(int32_t);
 
-        if (H5FDread_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
+        if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDread() failed.\n";
@@ -3352,7 +3344,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         sizes[0] = (size_t)INTS_PER_RANK * sizeof(int32_t);
         bufs[0]  = (const void *)(&(zero_fi_buf[mpi_rank * INTS_PER_RANK]));
 
-        if (H5FDwrite_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+        if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDwrite_vector() failed.\n";
@@ -3469,7 +3461,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             count = 0;
         }
 
-        if (H5FDwrite_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+        if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDwrite_vector() failed (1).\n";
@@ -3496,7 +3488,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         size_t image_size = (size_t)mpi_size * (size_t)INTS_PER_RANK * sizeof(int32_t);
 
-        if (H5FDread_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
+        if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDread() failed.\n";
@@ -3783,8 +3775,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (mpi_rank == 0) {
 
-            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)zero_fi_buf) <
-                0) {
+            if (H5FDwrite(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)zero_fi_buf) < 0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
@@ -3832,7 +3823,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             bufs[i]  = (const void *)(&(increasing_fi_buf[base_index + (i * 16)]));
         }
 
-        if (H5FDwrite_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+        if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDwrite_vector() failed (1).\n";
@@ -3857,7 +3848,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         size_t image_size = (size_t)mpi_size * (size_t)INTS_PER_RANK * sizeof(int32_t);
 
-        if (H5FDread_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
+        if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDread() failed.\n";
@@ -4044,7 +4035,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         sizes[0] = (size_t)INTS_PER_RANK * sizeof(int32_t);
         bufs[0]  = (void *)(&(zero_fi_buf[mpi_rank * INTS_PER_RANK]));
 
-        if (H5FDwrite_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+        if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDwrite_vector() failed.\n";
@@ -4077,7 +4068,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             bufs[i]  = (void *)(&(increasing_fi_buf[base_index + (i * (INTS_PER_RANK / 8))]));
         }
 
-        if (H5FDwrite_vector_test(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
+        if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDwrite_vector() failed (1).\n";
@@ -4103,7 +4094,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         size_t image_size = (size_t)mpi_size * (size_t)INTS_PER_RANK * sizeof(int32_t);
 
-        if (H5FDread_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
+        if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDread() failed.\n";
@@ -4305,8 +4296,7 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (mpi_rank == 0) {
 
-            if (H5FDwrite_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)zero_fi_buf) <
-                0) {
+            if (H5FDwrite(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)zero_fi_buf) < 0) {
 
                 pass         = false;
                 failure_mssg = "H5FDwrite() on rank 0 failed.\n";
@@ -4359,7 +4349,7 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             tt_bufs[i]  = (const void *)(&(increasing_fi_buf[base_index + (i - 1)]));
         }
 
-        if (H5FDwrite_vector_test(lf, dxpl_id, count, types, tt_addrs, sizes, tt_bufs) < 0) {
+        if (H5FDwrite_vector(lf, dxpl_id, count, types, tt_addrs, sizes, tt_bufs) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDwrite_vector() failed (1).\n";
@@ -4383,7 +4373,7 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         size_t image_size = (size_t)mpi_size * (size_t)INTS_PER_RANK * sizeof(int32_t);
 
-        if (H5FDread_test(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
+        if (H5FDread(lf, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, image_size, (void *)read_fi_buf) < 0) {
 
             pass         = false;
             failure_mssg = "H5FDread() failed.\n";
@@ -4684,7 +4674,7 @@ test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t
             rbufs[i] = rbufs[rbufcount - 1];
 
     /* Issue read call */
-    if (H5FDread_selection_test(lf, type, dxpl, count, mem_spaces, file_spaces, offsets, element_sizes,
+    if (H5FDread_selection(lf, type, dxpl, count, mem_spaces, file_spaces, offsets, element_sizes,
                                 (void **)rbufs) < 0)
         goto error;
 
@@ -4752,8 +4742,7 @@ test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count,
     }
 
     /* Issue write call */
-    if (H5FDwrite_selection_test(lf, type, dxpl, count, mem_spaces, file_spaces, offsets, element_sizes,
-                                 bufs) < 0)
+    if (H5FDwrite_selection(lf, type, dxpl, count, mem_spaces, file_spaces, offsets, element_sizes, bufs) < 0)
         goto error;
 
     if (bufs)
@@ -6048,10 +6037,8 @@ test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
     /* Loop over memory types */
     for (type = 1; type < H5FD_MEM_NTYPES; type++) {
 
-        addrs[0] =
-            H5FDalloc_test(lf, type, H5P_DEFAULT, (sizeof(int) * (hsize_t)sel_dim0 * (hsize_t)sel_dim1));
-        addrs[1] =
-            H5FDalloc_test(lf, type, H5P_DEFAULT, (sizeof(int) * (hsize_t)sel_dim0 * (hsize_t)sel_dim1));
+        addrs[0] = H5FDalloc(lf, type, H5P_DEFAULT, (sizeof(int) * (hsize_t)sel_dim0 * (hsize_t)sel_dim1));
+        addrs[1] = H5FDalloc(lf, type, H5P_DEFAULT, (sizeof(int) * (hsize_t)sel_dim0 * (hsize_t)sel_dim1));
 
         test_selection_io_types_1d(mpi_rank, mpi_size, lf, dxpl, type, addrs, element_sizes, mem_spaces,
                                    file_spaces, dims1);
@@ -6133,7 +6120,7 @@ test_selection_io(int mpi_rank, int mpi_size)
     /* Create file */
     flags = H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC;
 
-    if (NULL == (lf = H5FDopen_test(filename, flags, fapl, HADDR_UNDEF)))
+    if (NULL == (lf = H5FDopen(filename, flags, fapl, HADDR_UNDEF)))
         P_TEST_ERROR;
 
     /* Default dxpl which will be H5FD_MPIO_INDEPENDENT by default */
@@ -6174,7 +6161,7 @@ test_selection_io(int mpi_rank, int mpi_size)
     }
 
     /* Close file */
-    if (H5FDclose_test(lf) < 0)
+    if (H5FDclose(lf) < 0)
         P_TEST_ERROR;
 
     /* Close the fapl */
