@@ -4675,7 +4675,7 @@ test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t
 
     /* Issue read call */
     if (H5FDread_selection(lf, type, dxpl, count, mem_spaces, file_spaces, offsets, element_sizes,
-                                (void **)rbufs) < 0)
+                           (void **)rbufs) < 0)
         goto error;
 
     /* Verify result */

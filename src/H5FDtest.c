@@ -30,8 +30,8 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions    */
-#include "H5FDpkg.h"    /* File Drivers         */
+#include "H5private.h" /* Generic Functions    */
+#include "H5FDpkg.h"   /* File Drivers         */
 
 /****************/
 /* Local Macros */
