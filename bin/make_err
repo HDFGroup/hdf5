@@ -304,7 +304,6 @@ sub create_init ($) {
     my $sect_desc;              # Description of section
     my $first_major = 0;        # Whether the first major error code was saved
     my $first_minor = 0;        # Whether the first minor error code was saved
-    my $num_msg;                # Number of messages
 
     # Rename previous file
 #    rename "${prefix}${file}", "${prefix}${file}~" or die "unable to make backup";
@@ -319,7 +318,6 @@ sub create_init ($) {
     print_startprotect(*HEADER, $file);
 
     # Iterate over all the major errors
-    $num_msg = 0;
     print HEADER "\n/*********************/\n";
     print HEADER   "/* Major error codes */\n";
     print HEADER   "/*********************/\n\n";
@@ -335,14 +333,12 @@ sub create_init ($) {
             $first_major = 1;
         }
         $last_name = $name;
-        $num_msg++;
     }
     print HEADER " "x(0*$indent),"\n/* Remember last major error code ID */\n";
     print HEADER " "x(0*$indent),"assert(H5E_last_maj_id_g==H5I_INVALID_HID);\n";
     print HEADER " "x(0*$indent),"H5E_last_maj_id_g = ${last_name}_g;\n\n";
 
     # Iterate over all the minor error sections
-    $num_msg = 0;
     print HEADER "\n/*********************/\n";
     print HEADER   "/* Minor error codes */\n";
     print HEADER   "/*********************/\n\n";
@@ -363,7 +359,6 @@ sub create_init ($) {
                 $first_minor = 1;
             }
             $last_name = $name;
-            $num_msg++;
         }
     }
     print HEADER " "x(0*$indent),"\n/* Remember last minor error code ID */\n";
