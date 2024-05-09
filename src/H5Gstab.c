@@ -999,7 +999,7 @@ H5G__stab_valid(H5O_loc_t *grp_oloc, H5O_stab_t *alt_stab)
 
     /* Update the symbol table message and clear errors if necessary */
     if (changed) {
-        H5E_clear_stack(NULL);
+        H5E_clear_stack();
         if (H5O_msg_write(grp_oloc, H5O_STAB_ID, 0, H5O_UPDATE_TIME | H5O_UPDATE_FORCE, &stab) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to correct symbol table message");
     } /* end if */

@@ -34,6 +34,8 @@ m4/ltversion.m4
 m4/lt~obsolete.m4
 src/H5Edefin.h
 src/H5Einit.h
+src/H5Emajdef.h
+src/H5Emindef.h
 src/H5Epubgen.h
 src/H5Eterm.h
 src/H5config.h.in

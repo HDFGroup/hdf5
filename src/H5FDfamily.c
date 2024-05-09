@@ -779,7 +779,7 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
         if (!file->memb[file->nmembs]) {
             if (0 == file->nmembs)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open member file");
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
             break;
         }
         file->nmembs++;
@@ -1497,7 +1497,7 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
             if (0 == current_member)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete member file");
             else
-                H5E_clear_stack(NULL);
+                H5E_clear_stack();
             break;
         }
         current_member++;

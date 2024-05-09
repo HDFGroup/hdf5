@@ -1468,7 +1468,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
                 if (H5G_loc_find(&dst_root_loc, suggestion->path, &obj_loc /*out*/) < 0)
                     /* Ignore errors - i.e. suggestions not present in
                      * destination file */
-                    H5E_clear_stack(NULL);
+                    H5E_clear_stack();
                 else
                     /* Check object and add to skip list if appropriate */
                     if (H5O__copy_search_comm_dt_check(&obj_oloc, &udata) < 0) {

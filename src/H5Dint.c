@@ -1495,7 +1495,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
     /* Check if dataset was already open */
     if (NULL == (shared_fo = (H5D_shared_t *)H5FO_opened(dataset->oloc.file, dataset->oloc.addr))) {
         /* Clear any errors from H5FO_opened() */
-        H5E_clear_stack(NULL);
+        H5E_clear_stack();
 
         /* Open the dataset object */
         if (H5D__open_oid(dataset, dapl_id) < 0)
