@@ -944,7 +944,7 @@ H5SM_can_share(H5F_t *f, H5SM_master_table_t *table, ssize_t *sohm_index_num, un
      * then this type of message isn't shareable
      */
     if ((index_num = H5SM__get_index(my_table, type_id)) < 0) {
-        H5E_clear_stack(NULL); /*ignore error*/
+        H5E_clear_stack(); /*ignore error*/
         HGOTO_DONE(false);
     } /* end if */
 
@@ -1337,9 +1337,9 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, bool def
                 found            = true;
             } /* end if */
             else
-                H5E_clear_stack(NULL); /*ignore error*/
-        }                              /* end else */
-    }                                  /* end else */
+                H5E_clear_stack(); /*ignore error*/
+        }                          /* end else */
+    }                              /* end else */
 
     if (found) {
         /* If the message was found, it's shared in the heap (now).  Set up a
