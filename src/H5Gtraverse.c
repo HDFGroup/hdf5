@@ -199,7 +199,7 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
         /* Check if we just needed to know if the object exists */
         if (target & H5G_TARGET_EXISTS) {
             /* Clear any errors from the stack */
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
 
             /* Indicate that the object doesn't exist */
             *obj_exists = false;

@@ -591,7 +591,7 @@ H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_
         if (lnk)
             *exists = false;
         else
-            HGOTO_ERROR(H5E_SYM, H5E_INTERNAL, FAIL, "no object or link info?");
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "no object or link info?");
     else
         *exists = true;
 

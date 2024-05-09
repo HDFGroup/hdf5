@@ -870,6 +870,8 @@ set (H5_PRIVATE_HEADERS
 
     ${HDF5_SRC_DIR}/H5Edefin.h
     ${HDF5_SRC_DIR}/H5Einit.h
+    ${HDF5_SRC_DIR}/H5Emajdef.h
+    ${HDF5_SRC_DIR}/H5Emindef.h
     ${HDF5_SRC_DIR}/H5Epkg.h
     ${HDF5_SRC_DIR}/H5Eprivate.h
     ${HDF5_SRC_DIR}/H5Eterm.h
