@@ -1600,7 +1600,7 @@ H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type)
     /* Look up class for object header */
     if (NULL == (obj_class = H5O__obj_class_real(oh))) {
         /* Clear error stack from "failed" class lookup */
-        H5E_clear_stack(NULL);
+        H5E_clear_stack();
 
         /* Set type to "unknown" */
         *obj_type = H5O_TYPE_UNKNOWN;
