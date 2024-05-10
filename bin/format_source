@@ -25,10 +25,12 @@ find . \( -type d -path ./config -prune -and -not -path ./config \) \
         -name H5LTanalyze.c \
         -or -name H5LTparse.c \
         -or -name H5LTparse.h \
-        -or -name H5Epubgen.h \
-        -or -name H5Einit.h \
-        -or -name H5Eterm.h \
         -or -name H5Edefin.h \
+        -or -name H5Einit.h \
+        -or -name H5Emajdef.h \
+        -or -name H5Emindef.h \
+        -or -name H5Epubgen.h \
+        -or -name H5Eterm.h \
         -or -name H5version.h \
         -or -name H5overflow.h \
         \) \) \

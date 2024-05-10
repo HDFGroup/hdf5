@@ -62,6 +62,7 @@ struct H5F_efc_t {
 };
 
 /* Private prototypes */
+static H5F_t *H5F__efc_open_file(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 static herr_t H5F__efc_release_real(H5F_efc_t *efc);
 static herr_t H5F__efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent);
 static void   H5F__efc_try_close_tag1(H5F_shared_t *sf, H5F_shared_t **tail);
@@ -115,6 +116,50 @@ done:
 } /* end H5F__efc_create() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F__efc_open_file
+ *
+ * Purpose:     Helper routine to open and set up a file.
+ *
+ * Return:      Pointer to open file on success
+ *              NULL on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5F_t *
+H5F__efc_open_file(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+{
+    H5F_t *file = NULL;      /* Opened file */
+    H5F_t *ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Open the file */
+    if (NULL == (file = H5F_open(name, flags, fcpl_id, fapl_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
+
+    /* Make file post open call */
+    if (H5F__post_open(file) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file");
+
+    /* Increment the number of open objects to prevent the file from being
+     * closed out from under us - "simulate" having an open file id.  Note
+     * that this behaviour replaces the calls to H5F_incr_nopen_objs() and
+     * H5F_decr_nopen_objs() in H5L_extern_traverse(). */
+    file->nopen_objs++;
+
+    /* Set the return value */
+    ret_value = file;
+
+done:
+    if (!ret_value)
+        if (file)
+            if (H5F_try_close(file, NULL) < 0)
+                HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close external file");
+
+FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__efc_open_file() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5F__efc_open
  *
  * Purpose:     Opens a file using the external file cache.  The target
@@ -156,22 +201,12 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
     if (H5CX_set_vol_connector_prop(&connector_prop) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't set VOL connector info in API context");
 
-    /* Check if the EFC exists.  If it does not, just call H5F_open().  We
+    /* Check if the EFC exists.  If it does not, just open the file.  We
      * support this so clients do not have to make 2 different calls depending
      * on the state of the efc. */
     if (!efc) {
-        if (NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id)))
+        if (NULL == (ret_value = H5F__efc_open_file(name, flags, fcpl_id, fapl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
-
-        /* Make file post open call */
-        if (H5F__post_open(ret_value) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file");
-
-        /* Increment the number of open objects to prevent the file from being
-         * closed out from under us - "simulate" having an open file id.  Note
-         * that this behaviour replaces the calls to H5F_incr_nopen_objs() and
-         * H5F_decr_nopen_objs() in H5L_extern_traverse(). */
-        ret_value->nopen_objs++;
 
         HGOTO_DONE(ret_value);
     } /* end if */
@@ -231,24 +266,14 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
              * do not add it to cache */
             if (ent) {
                 if (H5F__efc_remove_ent(efc, ent) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, NULL,
-                                "can't remove entry from external file cache");
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, NULL, "can't remove entry from external file cache");
 
                 /* Do not free ent, we will recycle it below */
             } /* end if */
             else {
                 /* Cannot cache file, just open file and return */
-                if (NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id)))
+                if (NULL == (ret_value = H5F__efc_open_file(name, flags, fcpl_id, fapl_id)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
-
-                /* Make file post open call */
-                if (H5F__post_open(ret_value) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file");
-
-                /* Increment the number of open objects to prevent the file from
-                 * being closed out from under us - "simulate" having an open
-                 * file id */
-                ret_value->nopen_objs++;
 
                 HGOTO_DONE(ret_value);
             } /* end else */
@@ -263,17 +288,9 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
         /* Open the file */
-        if (NULL == (ent->file = H5F_open(name, flags, fcpl_id, fapl_id)))
+        if (NULL == (ent->file = H5F__efc_open_file(name, flags, fcpl_id, fapl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
         open_file = true;
-
-        /* Make file post open call */
-        if (H5F__post_open(ent->file) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file");
-
-        /* Increment the number of open objects to prevent the file from being
-         * closed out from under us - "simulate" having an open file id */
-        ent->file->nopen_objs++;
 
         /* Add the file to the cache */
         /* Skip list */
@@ -299,11 +316,6 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
         if (ent->file->shared->efc)
             ent->file->shared->efc->nrefs++;
     } /* end else */
-
-    assert(ent);
-    assert(ent->file);
-    assert(ent->name);
-    assert(ent->nopen);
 
     /* Set the return value */
     ret_value = ent->file;

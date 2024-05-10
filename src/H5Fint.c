@@ -852,14 +852,13 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
     /* Target file_name is an absolute pathname: see RM for detailed description */
     if (H5_CHECK_ABSOLUTE(file_name) || H5_CHECK_ABS_PATH(file_name)) {
         /* Try opening file */
-        src_file = H5F__efc_open(efc, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        H5E_PAUSE_ERRORS {
+            src_file = H5F__efc_open(efc, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        } H5E_RESUME_ERRORS
 
         /* Adjust temporary file name if file not opened */
         if (NULL == src_file) {
             char *ptr;
-
-            /* Reset the error stack */
-            H5E_clear_stack();
 
             /* Get last component of file_name */
             H5_GET_LAST_DELIMITER(file_name, ptr)
@@ -875,13 +874,12 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
     }     /* end if */
     else if (H5_CHECK_ABS_DRIVE(file_name)) {
         /* Try opening file */
-        src_file = H5F__efc_open(efc, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        H5E_PAUSE_ERRORS {
+            src_file = H5F__efc_open(efc, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        } H5E_RESUME_ERRORS
 
         /* Adjust temporary file name if file not opened */
         if (NULL == src_file) {
-            /* Reset the error stack */
-            H5E_clear_stack();
-
             /* Strip "<drive-letter>:" */
             strncpy(temp_file_name, &file_name[2], temp_file_name_len);
             temp_file_name[temp_file_name_len - 1] = '\0';
@@ -920,19 +918,16 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
                     } /* end if */
 
                     /* Try opening file */
-                    src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+                    H5E_PAUSE_ERRORS {
+                        src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+                    } H5E_RESUME_ERRORS
 
                     /* Release copy of file name */
                     full_name = (char *)H5MM_xfree(full_name);
 
-                    /* Check for file not opened */
-                    if (NULL == src_file)
-                        /* Reset the error stack */
-                        H5E_clear_stack();
                     /* Leave if file was opened */
-                    else
+                    if (src_file)
                         break;
-                    H5E_clear_stack();
                 } /* end if */
             }     /* end while */
 
@@ -947,15 +942,12 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename");
 
         /* Try opening file */
-        src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        H5E_PAUSE_ERRORS {
+            src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        } H5E_RESUME_ERRORS
 
         /* Release name */
         full_name = (char *)H5MM_xfree(full_name);
-
-        /* Check for file not opened */
-        if (NULL == src_file)
-            /* Reset the error stack */
-            H5E_clear_stack();
     } /* end if */
 
     /* Try searching from main file's "extpath": see description in H5F_open() & H5_build_extpath() */
@@ -968,27 +960,21 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename");
 
             /* Try opening file */
-            src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+            H5E_PAUSE_ERRORS {
+                src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+            } H5E_RESUME_ERRORS
 
             /* Release name */
             full_name = (char *)H5MM_xfree(full_name);
-
-            /* Check for file not opened */
-            if (NULL == src_file)
-                /* Reset the error stack */
-                H5E_clear_stack();
         } /* end if */
     }     /* end if */
 
     /* Try the relative file_name stored in temp_file_name */
     if (src_file == NULL) {
         /* Try opening file */
-        src_file = H5F__efc_open(efc, temp_file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
-
-        /* Check for file not opened */
-        if (NULL == src_file)
-            /* Reset the error stack */
-            H5E_clear_stack();
+        H5E_PAUSE_ERRORS {
+            src_file = H5F__efc_open(efc, temp_file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        } H5E_RESUME_ERRORS
     } /* end if */
 
     /* try the 'resolved' name for the virtual file */
@@ -1011,23 +997,20 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
         actual_file_name = (char *)H5MM_xfree(actual_file_name);
 
         /* Try opening with the resolved name */
-        src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        H5E_PAUSE_ERRORS {
+            src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        } H5E_RESUME_ERRORS
 
         /* Release name */
         full_name = (char *)H5MM_xfree(full_name);
-
-        /* Check for file not opened */
-        if (NULL == src_file)
-            /* Reset the error stack */
-            H5E_clear_stack();
     } /* end if */
 
     /* Set return value (possibly NULL or valid H5F_t *) */
     ret_value = src_file;
 
 done:
-    if ((NULL == ret_value) && src_file)
-        if (H5F_efc_close(primary_file, src_file) < 0)
+    if (NULL == ret_value)
+        if (src_file && H5F_efc_close(primary_file, src_file) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close source file");
     if (full_name)
         full_name = (char *)H5MM_xfree(full_name);
@@ -1850,40 +1833,41 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      * application's responsibility to prevent this situation (there's no
      * way for us to detect it here anyway).
      */
-    if (drvr->cmp)
+    if (drvr->cmp) {
         tent_flags = flags & ~(H5F_ACC_CREAT | H5F_ACC_TRUNC | H5F_ACC_EXCL);
+
+        /*
+         * When performing a tentative open of a file where we have stripped
+         * away flags such as H5F_ACC_CREAT from the specified file access
+         * flags, the H5E_PAUSE/RESUME_ERRORS macros are used to suppress
+         * pushing error messages on the essos stack since there is an
+         * expectation that the tentative open might fail.
+         *
+         * If the tentative file open call fails, another attempt at opening
+         * the file will be made without error output being suppressed.
+         *
+         * However, if stripping away the H5F_ACC_CREAT flag and others left
+         * us with the same file access flags as before, then we will skip
+         * this tentative file open and only make a single attempt at opening
+         * the file.  In this case, we don't want to suppress errors since
+         * the underlying file driver might provide more details on why the
+         * file open failed.
+         */
+        if (tent_flags != flags) {
+            /* Make tentative attempt to open file */
+            H5E_PAUSE_ERRORS {
+                lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF);
+            } H5E_RESUME_ERRORS
+
+            /* If the tentative open failed, reset the file access flags,
+             * then make another attempt at opening the file.
+             */
+            if (NULL == lf)
+                tent_flags = flags;
+        }
+    }
     else
         tent_flags = flags;
-
-    /*
-     * When performing a tentative open of a file where we have stripped away
-     * flags such as H5F_ACC_CREAT from the specified file access flags, the
-     * H5E_BEGIN/END_TRY macros are used to suppress error output since there
-     * is an expectation that the tentative open might fail. Even though we
-     * explicitly clear the error stack after such a failure, the underlying
-     * file driver might maintain its own error stack and choose whether to
-     * display errors based on whether the library has disabled error reporting.
-     * Since we wish to suppress that error output as well for the case of
-     * tentative file opens, surrounding the file open call with the
-     * H5E_BEGIN/END_TRY macros is an explicit instruction to the file driver
-     * not to display errors. If the tentative file open call fails, another
-     * attempt at opening the file will be made without error output being
-     * suppressed.
-     *
-     * However, if stripping away the H5F_ACC_CREAT flag and others left us
-     * with the same file access flags as before, then we will skip this
-     * tentative file open and only make a single attempt at opening the file.
-     * In this case, we don't want to suppress error output since the underlying
-     * file driver might provide more details on why the file open failed.
-     */
-    if (tent_flags != flags) {
-        /* Make tentative attempt to open file */
-        H5E_BEGIN_TRY
-        {
-            lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF);
-        }
-        H5E_END_TRY
-    }
 
     /*
      * If a tentative attempt to open the file wasn't necessary, attempt
@@ -1891,16 +1875,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      * the error stack and reset the file access flags, then make another
      * attempt at opening the file.
      */
-    if ((tent_flags == flags) || (lf == NULL)) {
-        if (tent_flags != flags) {
-            H5E_clear_stack();
-            tent_flags = flags;
-        }
-
+    if (NULL == lf)
         if (NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x",
-                        name, tent_flags);
-    }
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x", name, tent_flags);
 
     /* Is the file already open? */
     if ((shared = H5F__sfile_search(lf)) != NULL) {

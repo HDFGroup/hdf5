@@ -532,8 +532,11 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
 
-    if (err_stack == H5E_DEFAULT)
-        estack = NULL;
+    /* Check for 'default' error stack */
+    if (err_stack == H5E_DEFAULT) {
+        if (NULL == (estack = H5E__get_my_stack()))
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get the default error stack");
+    }
     else {
         /* Only clear the error stack if it's not the default stack */
         H5E_clear_stack();
@@ -543,35 +546,33 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID");
     } /* end else */
 
-    /* Note that the variable-argument parsing for the format is identical in
-     *      the H5E_printf_stack() routine - correct errors and make changes in both
-     *      places. -QAK
-     */
+    /* Check if error reporting is paused for this stack */
+    if (!estack->paused) {
+        /* Start the variable-argument parsing */
+        va_start(ap, fmt);
+        va_started = true;
 
-    /* Format the description */
-    va_start(ap, fmt);
-    va_started = true;
+        /* Duplicate string information */
+        if (NULL == (tmp_file = strdup(file)))
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "can't duplicate file string");
+        if (NULL == (tmp_func = strdup(func)))
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "can't duplicate function string");
 
-    /* Duplicate string information */
-    if (NULL == (tmp_file = strdup(file)))
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "can't duplicate file string");
-    if (NULL == (tmp_func = strdup(func)))
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "can't duplicate function string");
+        /* Increment refcount on non-library IDs */
+        if (cls_id != H5E_ERR_CLS_g)
+            if (H5I_inc_ref(cls_id, false) < 0)
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "can't increment class ID");
+        if (maj_id < H5E_first_maj_id_g || maj_id > H5E_last_maj_id_g)
+            if (H5I_inc_ref(maj_id, false) < 0)
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "can't increment major error ID");
+        if (min_id < H5E_first_min_id_g || min_id > H5E_last_min_id_g)
+            if (H5I_inc_ref(min_id, false) < 0)
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "can't increment minor error ID");
 
-    /* Increment refcount on non-library IDs */
-    if (cls_id != H5E_ERR_CLS_g)
-        if (H5I_inc_ref(cls_id, false) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "can't increment class ID");
-    if (maj_id < H5E_first_maj_id_g || maj_id > H5E_last_maj_id_g)
-        if (H5I_inc_ref(maj_id, false) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "can't increment major error ID");
-    if (min_id < H5E_first_min_id_g || min_id > H5E_last_min_id_g)
-        if (H5I_inc_ref(min_id, false) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "can't increment minor error ID");
-
-    /* Push the error on the stack */
-    if (H5E__push_stack(estack, true, tmp_file, tmp_func, line, cls_id, maj_id, min_id, fmt, &ap) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't push error on stack");
+        /* Push the error on the stack */
+        if (H5E__push_stack(estack, true, tmp_file, tmp_func, line, cls_id, maj_id, min_id, fmt, &ap) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't push error on stack");
+    }
 
 done:
     if (va_started)

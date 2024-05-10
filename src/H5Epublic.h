@@ -77,11 +77,12 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
  * trying something that's likely or expected to fail.  The code to try can
  * be nested between calls to H5Eget_auto() and H5Eset_auto(), but it's
  * easier just to use this macro like:
+ *
  *     H5E_BEGIN_TRY {
  *        ...stuff here that's likely to fail...
  *      } H5E_END_TRY
  *
- * Warning: don't break, return, or longjmp() from the body of the loop or
+ * Warning: don't break, return, or longjmp() from the block of code or
  *        the error reporting won't be properly restored!
  *
  * These two macros still use the old API functions for backward compatibility
