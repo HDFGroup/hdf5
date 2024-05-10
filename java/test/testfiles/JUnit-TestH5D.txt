@@ -1,4 +1,4 @@
-JUnit version 4.11
+JUnit version 4.13.2
 .testH5DArrayenum_rw
 .testH5DVLwrVL
 .testH5Dget_storage_size
