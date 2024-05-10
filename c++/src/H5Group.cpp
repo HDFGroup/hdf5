@@ -279,9 +279,7 @@ Group::~Group()
 Group &
 Group::operator=(const Group &original)
 {
-    if (&original != this) {
-        setId(original.id);
-    }
+    IdComponent::operator=(original);
 
     return *this;
 }
