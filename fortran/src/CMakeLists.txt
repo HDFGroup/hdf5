@@ -406,7 +406,7 @@ if (BUILD_STATIC_LIBS)
 endif ()
 
 if (BUILD_SHARED_LIBS)
-  if(WIN32)
+  if(MSVC)
       set(DLLDEF ${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def)
   else()
       set(DLLDEF "")
