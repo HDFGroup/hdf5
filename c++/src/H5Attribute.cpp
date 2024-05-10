@@ -610,9 +610,7 @@ Attribute::~Attribute()
 Attribute &
 Attribute::operator=(const Attribute &original)
 {
-    if (&original != this) {
-        setId(original.id);
-    }
+    IdComponent::operator=(original);
 
     return *this;
 }
