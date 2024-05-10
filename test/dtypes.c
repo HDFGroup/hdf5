@@ -3914,6 +3914,214 @@ error:
 } /* end test_user_compound_conversion() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_compound_member_convert_id_leak_func1
+ *
+ * Purpose:     Datatype conversion function for the
+ *              test_compound_member_convert_id_leak test that just
+ *              converts a float value to a double value with a cast.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_compound_member_convert_id_leak_func1(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+                                           size_t H5_ATTR_UNUSED buf_stride, size_t H5_ATTR_UNUSED bkg_stride,
+                                           void *buf, void H5_ATTR_UNUSED *bkg,
+                                           hid_t H5_ATTR_UNUSED dset_xfer_plist)
+{
+    float  tmp_val;
+    double tmp_val2;
+
+    switch (cdata->command) {
+        case H5T_CONV_INIT:
+            if (!H5Tequal(src_id, H5T_NATIVE_FLOAT) || !H5Tequal(dst_id, H5T_NATIVE_DOUBLE))
+                return FAIL;
+            break;
+        case H5T_CONV_CONV:
+            if (nelmts != 1)
+                return FAIL;
+
+            memcpy(&tmp_val, buf, sizeof(float));
+            tmp_val2 = (double)tmp_val;
+            memcpy(buf, &tmp_val2, sizeof(double));
+
+            break;
+        case H5T_CONV_FREE:
+            break;
+        default:
+            return FAIL;
+    }
+
+    return SUCCEED;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_compound_member_convert_id_leak_func2
+ *
+ * Purpose:     Datatype conversion function for the
+ *              test_compound_member_convert_id_leak test that just
+ *              returns the double value 0.1.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_compound_member_convert_id_leak_func2(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+                                           size_t H5_ATTR_UNUSED buf_stride, size_t H5_ATTR_UNUSED bkg_stride,
+                                           void *buf, void H5_ATTR_UNUSED *bkg,
+                                           hid_t H5_ATTR_UNUSED dset_xfer_plist)
+{
+    double tmp_val = 0.1;
+
+    switch (cdata->command) {
+        case H5T_CONV_INIT:
+            if (!H5Tequal(src_id, H5T_NATIVE_FLOAT) || !H5Tequal(dst_id, H5T_NATIVE_DOUBLE))
+                return FAIL;
+            break;
+        case H5T_CONV_CONV:
+            if (nelmts != 1)
+                return FAIL;
+
+            memcpy(buf, &tmp_val, sizeof(double));
+
+            break;
+        case H5T_CONV_FREE:
+            break;
+        default:
+            return FAIL;
+    }
+
+    return SUCCEED;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_compound_member_convert_id_leak
+ *
+ * Purpose:     Tests for an issue where IDs that are registered for
+ *              compound datatype members during datatype conversion were
+ *              leaked when the library's conversion path table is modified
+ *              and the compound conversion path recalculates its cached
+ *              data.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_member_convert_id_leak(void)
+{
+    int64_t num_dtype_ids = 0;
+    float   val1;
+    double  val2;
+    double  bkg;
+    hid_t   tid1 = H5I_INVALID_HID;
+    hid_t   tid2 = H5I_INVALID_HID;
+
+    TESTING("compound conversion member ID leak");
+
+    if ((tid1 = H5Tcreate(H5T_COMPOUND, sizeof(float))) < 0)
+        TEST_ERROR;
+    if ((tid2 = H5Tcreate(H5T_COMPOUND, sizeof(double))) < 0)
+        TEST_ERROR;
+
+    if (H5Tinsert(tid1, "mem", 0, H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(tid2, "mem", 0, H5T_NATIVE_DOUBLE) < 0)
+        TEST_ERROR;
+
+    /* Store the current number of datatype IDs registered */
+    if ((num_dtype_ids = H5I_nmembers(H5I_DATATYPE)) < 0)
+        TEST_ERROR;
+
+    /* Convert a value from float to double */
+    val1 = 3.0f;
+    val2 = 0.0;
+    memcpy(&val2, &val1, sizeof(float));
+    if (H5Tconvert(tid1, tid2, 1, &val2, &bkg, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Make sure the number of datatype IDs registered didn't change */
+    if (num_dtype_ids != H5I_nmembers(H5I_DATATYPE))
+        TEST_ERROR;
+
+    /* Register a custom conversion function from float to double
+     * and convert the value again
+     */
+    if (H5Tregister(H5T_PERS_HARD, "myflttodbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
+                    test_compound_member_convert_id_leak_func1) < 0)
+        TEST_ERROR;
+
+    val1 = 3.0f;
+    val2 = 0.0;
+    memcpy(&val2, &val1, sizeof(float));
+    if (H5Tconvert(tid1, tid2, 1, &val2, &bkg, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Since an application conversion function was used, two IDs should
+     * have been registered, one for the source type and one for the
+     * destination type
+     */
+    num_dtype_ids += 2;
+
+    /* Make sure the number of datatype IDs registered is correct */
+    if (num_dtype_ids != H5I_nmembers(H5I_DATATYPE))
+        TEST_ERROR;
+
+    if (H5Tunregister(H5T_PERS_HARD, "myflttodbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
+                      test_compound_member_convert_id_leak_func1) < 0)
+        TEST_ERROR;
+
+    /* Register a different custom conversion function from float to double
+     * and convert the value again
+     */
+    if (H5Tregister(H5T_PERS_HARD, "myflttodbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
+                    test_compound_member_convert_id_leak_func2) < 0)
+        TEST_ERROR;
+
+    val1 = 3.0f;
+    val2 = 0.0;
+    memcpy(&val2, &val1, sizeof(float));
+    if (H5Tconvert(tid1, tid2, 1, &val2, &bkg, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Make sure the number of datatype IDs registered didn't change */
+    if (num_dtype_ids != H5I_nmembers(H5I_DATATYPE))
+        TEST_ERROR;
+
+    if (H5Tunregister(H5T_PERS_HARD, "myflttodbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
+                      test_compound_member_convert_id_leak_func2) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(tid1) < 0)
+        TEST_ERROR;
+    if (H5Tclose(tid2) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tunregister(H5T_PERS_HARD, "myflttodbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
+                      test_compound_member_convert_id_leak_func1);
+        H5Tunregister(H5T_PERS_HARD, "myflttodbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
+                      test_compound_member_convert_id_leak_func2);
+        H5Tclose(tid1);
+        H5Tclose(tid2);
+    }
+    H5E_END_TRY;
+
+    return 1;
+} /* end test_compound_member_convert_id_leak() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_query
  *
  * Purpose:     Tests query functions of compound and enumeration types.
@@ -10198,6 +10406,7 @@ main(void)
     nerrors += test_compound_17();
     nerrors += test_compound_18();
     nerrors += test_user_compound_conversion();
+    nerrors += test_compound_member_convert_id_leak();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_enum_2();
     nerrors += test_conv_bitfield();

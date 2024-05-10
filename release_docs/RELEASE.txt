@@ -761,6 +761,22 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed a leak of datatype IDs created internally during datatype conversion
+
+      Fixed an issue where the library could leak IDs that it creates internally
+      for compound datatype members during datatype conversion. When the library's
+      table of datatype conversion functions is modified (such as when a new
+      conversion function is registered with the library from within an application),
+      the compound datatype conversion function has to recalculate data that it
+      has cached. When recalculating that data, the library was registering new
+      IDs for each of the members of the source and destination compound datatypes
+      involved in the conversion process and was overwriting the old cached IDs
+      without first closing them. This would result in use-after-free issues due
+      to multiple IDs pointing to the same internal H5T_t structure, as well as
+      crashes due to the library not gracefully handling partially initialized or
+      partially freed datatypes on library termination.
+
+      Fixes h5py GitHub #2419
 
     - Fixed function H5Requal actually to compare the reference pointers
 
