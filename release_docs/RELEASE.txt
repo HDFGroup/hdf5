@@ -502,7 +502,6 @@ Bug Fixes since HDF5-1.14.4 release
 ===================================
     Library
     -------
-
     - Fixed function H5Requal actually to compare the reference pointers
 
       Fixed an issue with H5Requal always returning true because the
