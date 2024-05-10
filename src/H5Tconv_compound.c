@@ -264,21 +264,32 @@ H5T__conv_struct_init(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, co
             if (need_ids) {
                 hid_t tid;
 
-                if ((tid = H5I_register(H5I_DATATYPE, priv->src_memb[i], false)) < 0) {
-                    H5T__conv_struct_free(priv);
-                    cdata->priv = NULL;
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-                                "can't register ID for source compound member datatype");
+                /* Only register new IDs for the source and destination member datatypes
+                 * if IDs weren't already registered for them. If the cached conversion
+                 * information has to be recalculated (in the case where the library's
+                 * table of conversion functions is modified), the same IDs can be reused
+                 * since the only information that needs to be recalculated is the conversion
+                 * paths used.
+                 */
+                if (priv->src_memb_id[i] == H5I_INVALID_HID) {
+                    if ((tid = H5I_register(H5I_DATATYPE, priv->src_memb[i], false)) < 0) {
+                        H5T__conv_struct_free(priv);
+                        cdata->priv = NULL;
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+                                    "can't register ID for source compound member datatype");
+                    }
+                    priv->src_memb_id[i] = tid;
                 }
-                priv->src_memb_id[i] = tid;
 
-                if ((tid = H5I_register(H5I_DATATYPE, priv->dst_memb[src2dst[i]], false)) < 0) {
-                    H5T__conv_struct_free(priv);
-                    cdata->priv = NULL;
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-                                "can't register ID for destination compound member datatype");
+                if (priv->dst_memb_id[src2dst[i]] == H5I_INVALID_HID) {
+                    if ((tid = H5I_register(H5I_DATATYPE, priv->dst_memb[src2dst[i]], false)) < 0) {
+                        H5T__conv_struct_free(priv);
+                        cdata->priv = NULL;
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+                                    "can't register ID for destination compound member datatype");
+                    }
+                    priv->dst_memb_id[src2dst[i]] = tid;
                 }
-                priv->dst_memb_id[src2dst[i]] = tid;
             }
         } /* end if */
     }     /* end for */
