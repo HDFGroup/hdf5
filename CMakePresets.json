@@ -46,6 +46,8 @@
         "BLOSC_PACKAGE_NAME": {"type": "STRING", "value": "blosc"},
         "BLOSC_ZLIB_TGZ_NAME": {"type": "STRING", "value": "zlib-1.3.tar.gz"},
         "BLOSC_ZLIB_PACKAGE_NAME": {"type": "STRING", "value": "zlib"},
+        "BLOSC2_TGZ_NAME": {"type": "STRING", "value": "c-blosc2-2.14.4.tar.gz"},
+        "BLOSC2_PACKAGE_NAME": {"type": "STRING", "value": "blosc2"},
         "BZ2_TGZ_NAME": {"type": "STRING", "value": "bzip2-bzip2-1.0.8.tar.gz"},
         "BZ2_PACKAGE_NAME": {"type": "STRING", "value": "bz2"},
         "FPZIP_TGZ_NAME": {"type": "STRING", "value": "fpzip-1.3.0.tar.gz"},

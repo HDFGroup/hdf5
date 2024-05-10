@@ -62,9 +62,9 @@ set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRIN
 ### ext libs on system
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO")
 #set(ENV{ZLIB_ROOT} "some_location")
-#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib -DZLIB_INCLUDE_DIR:PATH=some_location/include")
+#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DH5_ZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib -DH5_ZLIB_INCLUDE_DIR:PATH=some_location/include")
 #set(ENV{SZIP_ROOT} "some_location")
-#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib -DSZIP_INCLUDE_DIR:PATH=some_location/include")
+#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DH5_SZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib -DH5_SZIP_INCLUDE_DIR:PATH=some_location/include")
 
 ### disable using ext zlib
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF")

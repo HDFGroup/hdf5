@@ -2737,6 +2737,7 @@ allocated if necessary.
  * <table>
  * <tr><th>Filter</th><th>SetFilter Params</th></tr>
  * <tr><td>BLOSC</td><td>UD=32001,0,0</td></tr>
+ * <tr><td>BLOSC2</td><td>UD=32026,0,0</td></tr>
  * <tr><td>BSHUF</td><td>UD=32004,0,0</td></tr>
  * <tr><td>BZIP2</td><td>UD=307,0,1,9</td></tr>
  * <tr><td>JPEG</td><td>UD=32019,0,4,q,c,r,t</td></tr>
