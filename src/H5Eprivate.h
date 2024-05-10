@@ -203,7 +203,7 @@ H5_DLL herr_t H5E_printf_stack(const char *file, const char *func, unsigned line
                                hid_t min_idx, const char *fmt, ...) H5_ATTR_FORMAT(printf, 6, 7);
 H5_DLL herr_t H5E_clear_stack(void);
 H5_DLL herr_t H5E_dump_api_stack(void);
-H5_DLL void H5E_pause_stack(void);
-H5_DLL void H5E_resume_stack(void);
+H5_DLL void   H5E_pause_stack(void);
+H5_DLL void   H5E_resume_stack(void);
 
 #endif /* H5Eprivate_H */

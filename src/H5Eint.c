@@ -847,7 +847,7 @@ H5E__set_default_auto(H5E_stack_t *stk)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     stk->auto_data = NULL;
-    stk->paused = 0;
+    stk->paused    = 0;
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5E__set_default_auto() */
@@ -1383,10 +1383,10 @@ herr_t
 H5E_printf_stack(const char *file, const char *func, unsigned line, hid_t maj_id, hid_t min_id,
                  const char *fmt, ...)
 {
-    H5E_stack_t *estack;          /* Pointer to error stack to modify */
-    va_list ap;                   /* Varargs info */
-    bool    va_started = false;   /* Whether the variable argument list is open */
-    herr_t  ret_value  = SUCCEED; /* Return value */
+    H5E_stack_t *estack;               /* Pointer to error stack to modify */
+    va_list      ap;                   /* Varargs info */
+    bool         va_started = false;   /* Whether the variable argument list is open */
+    herr_t       ret_value  = SUCCEED; /* Return value */
 
     /*
      * WARNING: We cannot call HERROR() from within this function or else we
@@ -1817,7 +1817,7 @@ H5E_dump_api_stack(void)
 void
 H5E_pause_stack(void)
 {
-    H5E_stack_t *estack    = H5E__get_my_stack();
+    H5E_stack_t *estack = H5E__get_my_stack();
 
     FUNC_ENTER_NOAPI_NOERR
 

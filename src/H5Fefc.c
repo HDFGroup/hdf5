@@ -128,7 +128,7 @@ done:
 static H5F_t *
 H5F__efc_open_file(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t *file = NULL;      /* Opened file */
+    H5F_t *file      = NULL; /* Opened file */
     H5F_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -156,7 +156,7 @@ done:
             if (H5F_try_close(file, NULL) < 0)
                 HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close external file");
 
-FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__efc_open_file() */
 
 /*-------------------------------------------------------------------------
@@ -266,7 +266,8 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
              * do not add it to cache */
             if (ent) {
                 if (H5F__efc_remove_ent(efc, ent) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, NULL, "can't remove entry from external file cache");
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, NULL,
+                                "can't remove entry from external file cache");
 
                 /* Do not free ent, we will recycle it below */
             } /* end if */

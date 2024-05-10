@@ -852,9 +852,11 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
     /* Target file_name is an absolute pathname: see RM for detailed description */
     if (H5_CHECK_ABSOLUTE(file_name) || H5_CHECK_ABS_PATH(file_name)) {
         /* Try opening file */
-        H5E_PAUSE_ERRORS {
+        H5E_PAUSE_ERRORS
+        {
             src_file = H5F__efc_open(efc, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
-        } H5E_RESUME_ERRORS
+        }
+        H5E_RESUME_ERRORS
 
         /* Adjust temporary file name if file not opened */
         if (NULL == src_file) {
@@ -874,9 +876,11 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
     }     /* end if */
     else if (H5_CHECK_ABS_DRIVE(file_name)) {
         /* Try opening file */
-        H5E_PAUSE_ERRORS {
+        H5E_PAUSE_ERRORS
+        {
             src_file = H5F__efc_open(efc, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
-        } H5E_RESUME_ERRORS
+        }
+        H5E_RESUME_ERRORS
 
         /* Adjust temporary file name if file not opened */
         if (NULL == src_file) {
@@ -918,9 +922,12 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
                     } /* end if */
 
                     /* Try opening file */
-                    H5E_PAUSE_ERRORS {
-                        src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
-                    } H5E_RESUME_ERRORS
+                    H5E_PAUSE_ERRORS
+                    {
+                        src_file =
+                            H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+                    }
+                    H5E_RESUME_ERRORS
 
                     /* Release copy of file name */
                     full_name = (char *)H5MM_xfree(full_name);
@@ -942,9 +949,11 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename");
 
         /* Try opening file */
-        H5E_PAUSE_ERRORS {
+        H5E_PAUSE_ERRORS
+        {
             src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
-        } H5E_RESUME_ERRORS
+        }
+        H5E_RESUME_ERRORS
 
         /* Release name */
         full_name = (char *)H5MM_xfree(full_name);
@@ -960,9 +969,11 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename");
 
             /* Try opening file */
-            H5E_PAUSE_ERRORS {
+            H5E_PAUSE_ERRORS
+            {
                 src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
-            } H5E_RESUME_ERRORS
+            }
+            H5E_RESUME_ERRORS
 
             /* Release name */
             full_name = (char *)H5MM_xfree(full_name);
@@ -972,9 +983,11 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
     /* Try the relative file_name stored in temp_file_name */
     if (src_file == NULL) {
         /* Try opening file */
-        H5E_PAUSE_ERRORS {
+        H5E_PAUSE_ERRORS
+        {
             src_file = H5F__efc_open(efc, temp_file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
-        } H5E_RESUME_ERRORS
+        }
+        H5E_RESUME_ERRORS
     } /* end if */
 
     /* try the 'resolved' name for the virtual file */
@@ -997,9 +1010,11 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
         actual_file_name = (char *)H5MM_xfree(actual_file_name);
 
         /* Try opening with the resolved name */
-        H5E_PAUSE_ERRORS {
+        H5E_PAUSE_ERRORS
+        {
             src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
-        } H5E_RESUME_ERRORS
+        }
+        H5E_RESUME_ERRORS
 
         /* Release name */
         full_name = (char *)H5MM_xfree(full_name);
@@ -1855,9 +1870,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
          */
         if (tent_flags != flags) {
             /* Make tentative attempt to open file */
-            H5E_PAUSE_ERRORS {
+            H5E_PAUSE_ERRORS
+            {
                 lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF);
-            } H5E_RESUME_ERRORS
+            }
+            H5E_RESUME_ERRORS
 
             /* If the tentative open failed, reset the file access flags,
              * then make another attempt at opening the file.
@@ -1877,7 +1894,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      */
     if (NULL == lf)
         if (NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x", name, tent_flags);
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x",
+                        name, tent_flags);
 
     /* Is the file already open? */
     if ((shared = H5F__sfile_search(lf)) != NULL) {

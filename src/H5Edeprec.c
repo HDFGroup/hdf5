@@ -182,10 +182,10 @@ done:
 herr_t
 H5Epush1(const char *file, const char *func, unsigned line, H5E_major_t maj, H5E_minor_t min, const char *str)
 {
-    H5E_stack_t *estack;             /* Pointer to error stack to modify */
-    const char *tmp_file;            /* Copy of the file name */
-    const char *tmp_func;            /* Copy of the function name */
-    herr_t      ret_value = SUCCEED; /* Return value */
+    H5E_stack_t *estack;              /* Pointer to error stack to modify */
+    const char  *tmp_file;            /* Copy of the file name */
+    const char  *tmp_func;            /* Copy of the function name */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
