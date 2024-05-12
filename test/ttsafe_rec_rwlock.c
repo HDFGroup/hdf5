@@ -80,9 +80,9 @@ typedef struct rec_rwlock_test_udata_t {
 
     /* thread control fields */
     H5TS_rec_rwlock_t *lock;
-    int32_t         target_rd_lock_cycles;
-    int32_t         target_wr_lock_cycles;
-    int32_t         max_recursive_lock_depth;
+    int32_t            target_rd_lock_cycles;
+    int32_t            target_wr_lock_cycles;
+    int32_t            max_recursive_lock_depth;
 
     /* thread stats fields */
     int64_t read_locks_granted;
@@ -114,20 +114,20 @@ typedef struct rec_rwlock_test_udata_t {
 static H5TS_THREAD_RETURN_TYPE
 tts_rec_rwlock_smoke_check_test_thread(void *_udata)
 {
-    hbool_t                   read;
-    int32_t                   rec_lock_depth = 0;
-    int32_t                   max_rec_lock_depth;
-    int32_t                   rd_locks_remaining;
-    int32_t                   wr_locks_remaining;
-    herr_t                    result;
-    H5TS_rec_rwlock_t           *lock;
+    hbool_t                  read;
+    int32_t                  rec_lock_depth = 0;
+    int32_t                  max_rec_lock_depth;
+    int32_t                  rd_locks_remaining;
+    int32_t                  wr_locks_remaining;
+    herr_t                   result;
+    H5TS_rec_rwlock_t       *lock;
     rec_rwlock_test_udata_t *udata = (rec_rwlock_test_udata_t *)_udata;
 
     assert(_udata);
     rd_locks_remaining = udata->target_rd_lock_cycles;
     wr_locks_remaining = udata->target_wr_lock_cycles;
     max_rec_lock_depth = udata->max_recursive_lock_depth;
-    lock            = udata->lock;
+    lock               = udata->lock;
 
     while (rd_locks_remaining > 0 || wr_locks_remaining > 0) {
         if (wr_locks_remaining == 0)
@@ -547,17 +547,17 @@ tts_rec_rwlock_smoke_check_1(void)
 void
 tts_rec_rwlock_smoke_check_2(void)
 {
-    herr_t                    result;
-    int                       express_test;
-    int                       i;
-    int                       num_threads = MAX_NUM_THREADS;
-    int                       lock_cycles = MAX_LOCK_CYCLES;
-    H5TS_thread_t             threads[MAX_NUM_THREADS];
+    herr_t                   result;
+    int                      express_test;
+    int                      i;
+    int                      num_threads = MAX_NUM_THREADS;
+    int                      lock_cycles = MAX_LOCK_CYCLES;
+    H5TS_thread_t            threads[MAX_NUM_THREADS];
     rec_rwlock_test_udata_t *udata = NULL;
 #if H5TS_ENABLE_REC_RWLOCK_STATS
-    hbool_t              verbose                     = FALSE;
-    int32_t              total_target_rd_lock_cycles = 0;
-    int32_t              total_target_wr_lock_cycles = 0;
+    hbool_t                 verbose                     = FALSE;
+    int32_t                 total_target_rd_lock_cycles = 0;
+    int32_t                 total_target_wr_lock_cycles = 0;
     H5TS_rec_rwlock_stats_t stats;
     H5TS_rec_rwlock_stats_t expected;
 #endif
@@ -601,7 +601,7 @@ tts_rec_rwlock_smoke_check_2(void)
     /* 2) Setup the user data to be passed to each reader test thread. */
     for (i = 0; i < MAX_NUM_THREADS; i++) {
         memset(&udata[i], 0, sizeof(udata[i]));
-        udata[i].lock                  = &lock;
+        udata[i].lock                     = &lock;
         udata[i].target_rd_lock_cycles    = lock_cycles;
         udata[i].max_recursive_lock_depth = 10;
     }
@@ -753,17 +753,17 @@ tts_rec_rwlock_smoke_check_2(void)
 void
 tts_rec_rwlock_smoke_check_3(void)
 {
-    herr_t                    result;
-    int                       i;
-    int                       express_test;
-    int                       num_threads = MAX_NUM_THREADS;
-    int                       lock_cycles = MAX_LOCK_CYCLES;
-    H5TS_thread_t             threads[MAX_NUM_THREADS];
+    herr_t                   result;
+    int                      i;
+    int                      express_test;
+    int                      num_threads = MAX_NUM_THREADS;
+    int                      lock_cycles = MAX_LOCK_CYCLES;
+    H5TS_thread_t            threads[MAX_NUM_THREADS];
     rec_rwlock_test_udata_t *udata = NULL;
 #if H5TS_ENABLE_REC_RWLOCK_STATS
-    hbool_t              verbose                     = FALSE;
-    int32_t              total_target_rd_lock_cycles = 0;
-    int32_t              total_target_wr_lock_cycles = 0;
+    hbool_t                 verbose                     = FALSE;
+    int32_t                 total_target_rd_lock_cycles = 0;
+    int32_t                 total_target_wr_lock_cycles = 0;
     H5TS_rec_rwlock_stats_t stats;
     H5TS_rec_rwlock_stats_t expected;
 #endif
@@ -807,7 +807,7 @@ tts_rec_rwlock_smoke_check_3(void)
     /* 2) Setup the user data to be passed to each writer test thread. */
     for (i = 0; i < MAX_NUM_THREADS; i++) {
         memset(&udata[i], 0, sizeof(udata[i]));
-        udata[i].lock                  = &lock;
+        udata[i].lock                     = &lock;
         udata[i].target_wr_lock_cycles    = lock_cycles;
         udata[i].max_recursive_lock_depth = 10;
     }
@@ -959,17 +959,17 @@ tts_rec_rwlock_smoke_check_3(void)
 void
 tts_rec_rwlock_smoke_check_4(void)
 {
-    herr_t                    result;
-    int                       i;
-    int                       express_test;
-    int                       num_threads = MAX_NUM_THREADS;
-    int                       lock_cycles = MAX_LOCK_CYCLES;
-    H5TS_thread_t             threads[MAX_NUM_THREADS];
+    herr_t                   result;
+    int                      i;
+    int                      express_test;
+    int                      num_threads = MAX_NUM_THREADS;
+    int                      lock_cycles = MAX_LOCK_CYCLES;
+    H5TS_thread_t            threads[MAX_NUM_THREADS];
     rec_rwlock_test_udata_t *udata = NULL;
 #if H5TS_ENABLE_REC_RWLOCK_STATS
-    hbool_t              verbose                     = FALSE;
-    int32_t              total_target_rd_lock_cycles = 0;
-    int32_t              total_target_wr_lock_cycles = 0;
+    hbool_t                 verbose                     = FALSE;
+    int32_t                 total_target_rd_lock_cycles = 0;
+    int32_t                 total_target_wr_lock_cycles = 0;
     H5TS_rec_rwlock_stats_t stats;
     H5TS_rec_rwlock_stats_t expected;
 #endif
@@ -1013,7 +1013,7 @@ tts_rec_rwlock_smoke_check_4(void)
     /* 2) Setup the user data to be passed to each writer test thread. */
     for (i = 0; i < MAX_NUM_THREADS; i++) {
         memset(&udata[i], 0, sizeof(udata[i]));
-        udata[i].lock                  = &lock;
+        udata[i].lock                     = &lock;
         udata[i].target_rd_lock_cycles    = lock_cycles;
         udata[i].target_wr_lock_cycles    = lock_cycles;
         udata[i].max_recursive_lock_depth = 10;

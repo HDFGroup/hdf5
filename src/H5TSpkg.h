@@ -188,7 +188,7 @@ typedef enum {
 
 typedef struct H5TS_rec_rwlock_t {
     /* General fields */
-    H5TS_mutex_t        mutex;
+    H5TS_mutex_t           mutex;
     H5TS_rec_rwlock_type_t lock_type;
 
     /* Writer fields */

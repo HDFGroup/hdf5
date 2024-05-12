@@ -472,7 +472,7 @@ H5TS__rec_rwlock_rdlock(H5TS_rec_rwlock_t *lock)
         if (H5_UNLIKELY(H5TS_key_create(&lock->rec_read_lock_count_key, free) < 0))
             HGOTO_DONE(FAIL);
         lock->is_key_registered = true;
-        count                      = NULL;
+        count                   = NULL;
     }
     else if (H5_UNLIKELY(H5TS_key_get_value(lock->rec_read_lock_count_key, (void **)&count) < 0))
         HGOTO_DONE(FAIL);
