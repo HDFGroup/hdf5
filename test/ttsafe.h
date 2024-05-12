@@ -39,10 +39,10 @@ void tts_is_threadsafe(void);
 #ifdef H5_HAVE_THREADS
 void tts_thread_pool(void);
 void tts_atomics(void);
-void tts_rec_rw_lock_smoke_check_1(void);
-void tts_rec_rw_lock_smoke_check_2(void);
-void tts_rec_rw_lock_smoke_check_3(void);
-void tts_rec_rw_lock_smoke_check_4(void);
+void tts_rec_rwlock_smoke_check_1(void);
+void tts_rec_rwlock_smoke_check_2(void);
+void tts_rec_rwlock_smoke_check_3(void);
+void tts_rec_rwlock_smoke_check_4(void);
 #ifdef H5_HAVE_THREADSAFE
 void tts_dcreate(void);
 void tts_error(void);

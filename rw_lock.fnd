@@ -1,0 +1,38 @@
+src/H5TSpkg.h: * Structure H5TS_rw_lock_t
+src/H5TSpkg.h:typedef struct H5TS_rw_lock_t {
+src/H5TSpkg.h:} H5TS_rw_lock_t;
+src/H5TSpkg.h:H5_DLL herr_t H5TS__rw_lock_init(H5TS_rw_lock_t *rw_lock);
+src/H5TSpkg.h:H5_DLL herr_t H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock);
+src/H5TSpkg.h:H5_DLL herr_t H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock);
+src/H5TSpkg.h:H5_DLL herr_t H5TS__rw_unlock(H5TS_rw_lock_t *rw_lock);
+src/H5TSpkg.h:H5_DLL herr_t H5TS__rw_lock_destroy(H5TS_rw_lock_t *rw_lock);
+src/H5TSpkg.h:H5_DLL herr_t H5TS__rw_lock_get_stats(H5TS_rw_lock_t *rw_lock, H5TS_rw_lock_stats_t *stats);
+src/H5TSpkg.h:H5_DLL herr_t H5TS__rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock);
+src/H5TSrwlock.c: * H5TS_rw_lock_t.
+src/H5TSrwlock.c:H5TS__update_stats_rd_lock(H5TS_rw_lock_t *rw_lock, const H5TS_rec_entry_count_t *count)
+src/H5TSrwlock.c:H5TS__update_stats_rd_lock_delay(H5TS_rw_lock_t *rw_lock)
+src/H5TSrwlock.c:H5TS__update_stats_rd_unlock(H5TS_rw_lock_t *rw_lock, const H5TS_rec_entry_count_t *count)
+src/H5TSrwlock.c:H5TS__update_stats_wr_lock(H5TS_rw_lock_t *rw_lock)
+src/H5TSrwlock.c:H5TS__update_stats_wr_lock_delay(H5TS_rw_lock_t *rw_lock)
+src/H5TSrwlock.c:H5TS__update_stats_wr_unlock(H5TS_rw_lock_t *rw_lock)
+src/H5TSrwlock.c:H5TS__rw_lock_get_stats(H5TS_rw_lock_t *rw_lock, H5TS_rw_lock_stats_t *stats)
+src/H5TSrwlock.c:H5TS__rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock)
+src/H5TSrwlock.c: * Purpose:     Initialize the supplied instance of H5TS_rw_lock_t.
+src/H5TSrwlock.c:H5TS__rw_lock_init(H5TS_rw_lock_t *rw_lock)
+src/H5TSrwlock.c:    /* The current H5TS_rw_lock_t implementation uses H5TS_key_create() with a
+src/H5TSrwlock.c: * Purpose:     Take down an instance of H5TS_rw_lock_t.  All mutex, condition
+src/H5TSrwlock.c: *              H5TS_rw_lock_t is not freed.
+src/H5TSrwlock.c:H5TS__rw_lock_destroy(H5TS_rw_lock_t *rw_lock)
+src/H5TSrwlock.c:H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock)
+src/H5TSrwlock.c:H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock)
+src/H5TSrwlock.c:H5TS__rw_unlock(H5TS_rw_lock_t *rw_lock)
+test/ttsafe_rec_rw_lock.c:    H5TS_rw_lock_t *rw_lock;
+test/ttsafe_rec_rw_lock.c:    H5TS_rw_lock_t           *rw_lock;
+test/ttsafe_rec_rw_lock.c:    H5TS_rw_lock_t rec_rw_lock;
+test/ttsafe_rec_rw_lock.c:    H5TS_rw_lock_t rec_rw_lock;
+test/ttsafe_rec_rw_lock.c:    H5TS_rw_lock_t rec_rw_lock;
+test/ttsafe_rec_rw_lock.c:    H5TS_rw_lock_t rec_rw_lock;
+src/CMakeLists.txt:    ${HDF5_SRC_DIR}/H5TSrwlock.c
+src/Makefile.am:        H5TSrwlock.c H5TSthread.c H5TSwin.c \
+test/CMakeLists.txt:    ${HDF5_TEST_SOURCE_DIR}/ttsafe_rec_rw_lock.c
+test/Makefile.am:    ttsafe_rec_rw_lock.c ttsafe_thread_id.c ttsafe_thread_pool.c
