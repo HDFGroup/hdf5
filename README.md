@@ -1,4 +1,4 @@
-HDF5 version 1.14.4-2 released on 2024-04-15
+HDF5 version 1.14.4-3 currently under development
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
