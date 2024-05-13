@@ -128,7 +128,7 @@ done:
 static herr_t
 H5F__efc_try_open_file(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t *file = NULL;         /* File opened */
+    H5F_t *file      = NULL;    /* File opened */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
