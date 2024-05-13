@@ -116,6 +116,14 @@ typedef struct H5TS_pool_t H5TS_pool_t;
 
 /* Portability aliases */
 #ifdef H5_HAVE_C11_THREADS
+
+/* Non-recursive readers/writer lock */
+typedef struct H5TS_rwlock_t {
+    mtx_t mutex;
+    cnd_t read_cv, write_cv;
+    unsigned readers, writers, read_waiters, write_waiters;
+} H5TS_rwlock_t;
+
 typedef thrd_t H5TS_thread_t;
 typedef int (*H5TS_thread_start_func_t)(void *);
 typedef int       H5TS_thread_ret_t;
@@ -131,6 +139,7 @@ typedef LPTHREAD_START_ROUTINE H5TS_thread_start_func_t;
 typedef DWORD                  H5TS_thread_ret_t;
 typedef DWORD                  H5TS_key_t;
 typedef CRITICAL_SECTION       H5TS_CAPABILITY("mutex") H5TS_mutex_t;
+typedef SRWLOCK                H5TS_rwlock_t;
 typedef CONDITION_VARIABLE     H5TS_cond_t;
 typedef INIT_ONCE              H5TS_once_t;
 typedef PINIT_ONCE_FN          H5TS_once_init_func_t;
@@ -140,6 +149,7 @@ typedef void *(*H5TS_thread_start_func_t)(void *);
 typedef void           *H5TS_thread_ret_t;
 typedef pthread_key_t   H5TS_key_t;
 typedef pthread_mutex_t H5TS_CAPABILITY("mutex") H5TS_mutex_t;
+typedef pthread_rwlock_t H5TS_rwlock_t;
 typedef pthread_cond_t  H5TS_cond_t;
 typedef pthread_once_t  H5TS_once_t;
 typedef void (*H5TS_once_init_func_t)(void);
@@ -205,6 +215,14 @@ H5_DLL herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex) H5TS_ACQUIRE(*mutex);
 H5_DLL herr_t H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired) H5TS_TRY_ACQUIRE(SUCCEED, *mutex);
 H5_DLL herr_t H5TS_mutex_unlock(H5TS_mutex_t *mutex) H5TS_RELEASE(*mutex);
 H5_DLL herr_t H5TS_mutex_destroy(H5TS_mutex_t *mutex);
+
+/* R/W locks */
+H5_DLL herr_t H5TS_rwlock_init(H5TS_rwlock_t *lock);
+H5_DLL herr_t H5TS_rwlock_rdlock(H5TS_rwlock_t *lock);
+H5_DLL herr_t H5TS_rwlock_rdunlock(H5TS_rwlock_t *lock);
+H5_DLL herr_t H5TS_rwlock_wrlock(H5TS_rwlock_t *lock);
+H5_DLL herr_t H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock);
+H5_DLL herr_t H5TS_rwlock_destroy(H5TS_rwlock_t *lock);
 
 /* Condition variable operations */
 H5_DLL herr_t H5TS_cond_init(H5TS_cond_t *cond);
