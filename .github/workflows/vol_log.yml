@@ -58,7 +58,7 @@ jobs:
       - name: Checkout Log-based VOL
         uses: actions/checkout@v4.1.1
         with:
-          repository: DataLib-ECP/vol-log-based
+          repository: HDFGroup/vol-log-based
           path: vol-log-based
 
       - name: Build HDF5 Log-based VOL connector and test with external tests 
