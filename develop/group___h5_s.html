@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.9ad5f7e</span>
+   &#160;<span id="projectnumber">1.15.0.8817b5b</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -361,7 +361,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns an dataspace identifier if successful; otherwise returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a dataspace identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_s.html#gae7578a93bb7b22989bcb737f26b60ad1" title="Performs an operation on a hyperslab and an existing selection and returns the resulting selection.">H5Scombine_hyperslab()</a> combines a hyperslab selection specified by <code>start</code>, <code>stride</code>, <code>count</code> and <code>block</code> with the current selection for the dataspace <code>space_id</code>, creating a new dataspace to return the generated selection. If the current selection is not a hyperslab, it is freed and the hyperslab parameters passed in are combined with the <a class="el" href="_h5_spublic_8h.html#a1e9590539381e3922a1582067d496304a865473ae023d0ac257aeb9424f363e75">H5S_SEL_ALL</a> hyperslab (ie. a selection composing the entire current extent). If either <code>stride</code> or <code>block</code> is NULL, then it will be set to <code>1</code>.</p>
 <dl class="section since"><dt>Since</dt><dd>1.10.6 </dd></dl>
 
@@ -437,7 +437,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns an dataspace identifier if successful; otherwise returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a dataspace identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_s.html#gae5e26a8f8191768a600d40ec518ed66b" title="Creates an exact copy of a dataspace.">H5Scopy()</a> creates a new dataspace which is an exact copy of the dataspace identified by <code>space_id</code>. The dataspace identifier returned from this function should be released with <a class="el" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1" title="Releases and terminates access to a dataspace.">H5Sclose()</a> or resource leaks will occur.</p>
 <dl class="section version"><dt>Version</dt><dd>1.4.0 Fortran subroutine introduced. </dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>

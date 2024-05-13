@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.9ad5f7e</span>
+   &#160;<span id="projectnumber">1.15.0.8817b5b</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -302,7 +302,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns an object identifier if successful; otherwise returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns an object identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p>Given a binary property list description in a buffer, <a class="el" href="group___p_l_c_r.html#gafd75009eb96922e72beffa78718d4bdd" title="Decodes property list received in a binary object buffer and returns a new property list identifier.">H5Pdecode()</a> reconstructs the HDF5 property list and returns an identifier for the new property list. The binary description of the property list is encoded by <a class="el" href="_h5version_8h.html#af1a9ff52a69251d57ffa686102f162a8">H5Pencode()</a>.</p>
 <p>The user is responsible for passing in the correct buffer.</p>
 <p>The property list identifier returned by this function should be released with <a class="el" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb" title="Terminates access to a property list.">H5Pclose()</a> when the identifier is no longer needed so that resource leaks will not develop.</p>
