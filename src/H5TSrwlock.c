@@ -84,9 +84,9 @@ H5TS_rwlock_init(H5TS_rwlock_t *lock)
         HGOTO_DONE(FAIL);
 
     /* Initialize scalar fields */
-    lock->readers = 0;
-    lock->writers = 0;
-    lock->read_waiters = 0;
+    lock->readers       = 0;
+    lock->writers       = 0;
+    lock->read_waiters  = 0;
     lock->write_waiters = 0;
 
 done:
@@ -106,7 +106,7 @@ herr_t
 H5TS_rwlock_rdlock(H5TS_rwlock_t *lock)
 {
     bool   have_mutex = false;
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -136,7 +136,7 @@ H5TS_rwlock_rdlock(H5TS_rwlock_t *lock)
 done:
     /* Release mutex, if we're holding it */
     if (H5_LIKELY(have_mutex))
-	if (H5_UNLIKELY(mtx_unlock(&lock->mutex) != thrd_success))
+        if (H5_UNLIKELY(mtx_unlock(&lock->mutex) != thrd_success))
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -155,7 +155,7 @@ herr_t
 H5TS_rwlock_rdunlock(H5TS_rwlock_t *lock)
 {
     bool   have_mutex = false;
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -175,7 +175,7 @@ H5TS_rwlock_rdunlock(H5TS_rwlock_t *lock)
 done:
     /* Release mutex, if we're holding it */
     if (H5_LIKELY(have_mutex))
-	if (H5_UNLIKELY(mtx_unlock(&lock->mutex) != thrd_success))
+        if (H5_UNLIKELY(mtx_unlock(&lock->mutex) != thrd_success))
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -194,7 +194,7 @@ herr_t
 H5TS_rwlock_wrlock(H5TS_rwlock_t *lock)
 {
     bool   have_mutex = false;
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -224,26 +224,21 @@ H5TS_rwlock_wrlock(H5TS_rwlock_t *lock)
 done:
     /* Release mutex, if we're holding it */
     if (H5_LIKELY(have_mutex))
-	if (H5_UNLIKELY(mtx_unlock(&lock->mutex) != thrd_success))
+        if (H5_UNLIKELY(mtx_unlock(&lock->mutex) != thrd_success))
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_rwlock_wrlock() */
 
--------------------------------------------------------------------------
- * Function: H5TS_rwlock_wrunlock
- *
- * Purpose:  Release a write lock
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock)
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -*Function
+    : H5TS_rwlock_wrunlock **Purpose : Release a write lock **Return : Non -
+    negative on                                               success / Negative on failure                                               **
+        -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -* /
+        herr_t
+        H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock)
 {
     bool   have_mutex = false;
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -259,14 +254,15 @@ H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock)
     if (lock->write_waiters) {
         if (H5_UNLIKELY(cnd_signal(&lock->write_cv) != thrd_success))
             HGOTO_DONE(FAIL);
-    } else if (lock->read_waiters)
-	if (H5_UNLIKELY(cnd_broadcast(&lock->read_cv) != thrd_success))
+    }
+    else if (lock->read_waiters)
+        if (H5_UNLIKELY(cnd_broadcast(&lock->read_cv) != thrd_success))
             HGOTO_DONE(FAIL);
 
 done:
     /* Release mutex, if we're holding it */
     if (H5_LIKELY(have_mutex))
-	if (H5_UNLIKELY(mtx_unlock(&lock->mutex) != thrd_success))
+        if (H5_UNLIKELY(mtx_unlock(&lock->mutex) != thrd_success))
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -552,4 +548,3 @@ done:
 #endif
 
 #endif /* H5_HAVE_THREADS */
-
