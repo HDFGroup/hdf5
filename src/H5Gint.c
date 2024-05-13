@@ -507,7 +507,7 @@ H5G__open_oid(H5G_t *grp)
 {
     bool   obj_opened = false;
     htri_t msg_exists;
-    herr_t ret_value  = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
