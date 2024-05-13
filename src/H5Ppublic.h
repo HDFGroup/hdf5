@@ -882,7 +882,7 @@ H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name, H5P_cls_create_func
  *
  * \param[in] buf Buffer holding the encoded property list
  *
- * \return \hid_tv{object}
+ * \return \hid_ti{object}
  *
  * \details Given a binary property list description in a buffer, H5Pdecode()
  *          reconstructs the HDF5 property list and returns an identifier
