@@ -915,7 +915,6 @@ H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t pr
                     } /* end if */
 
                     /* Try opening file */
-                    H5E_PAUSE_ERRORS
                     if (H5F__efc_try_open(efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT,
                                           fapl_id) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
@@ -1867,9 +1866,9 @@ H5F_try_open(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid
         /*
          * When performing a tentative open of a file where we have stripped
          * away flags such as H5F_ACC_CREAT from the specified file access
-         * flags, the H5E_PAUSE/RESUME_ERRORS macros are used to suppress
-         * pushing error messages on the essos stack since there is an
-         * expectation that the tentative open might fail.
+         * flags, use 'try open' operation to avoid pushing error messages
+         * on the error stack since there is an expectation that the tentative
+         * open might fail.
          *
          * If the tentative file open call fails, another attempt at opening
          * the file will be made without error output being suppressed.
@@ -1955,6 +1954,7 @@ H5F_try_open(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid
              */
             if (H5FD_close(lf) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to close low-level file info");
+            lf = NULL;
 
             if (H5FD_try_open(&lf, name, flags, fapl_id, HADDR_UNDEF) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");

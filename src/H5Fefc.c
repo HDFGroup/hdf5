@@ -126,34 +126,38 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__efc_try_open_file(H5F_t **file, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+H5F__efc_try_open_file(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
+    H5F_t *file = NULL;         /* File opened */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Open the file */
-    if (H5F_try_open(file, name, flags, fcpl_id, fapl_id) < 0)
+    if (H5F_try_open(&file, name, flags, fcpl_id, fapl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't open file");
 
     /* Check if file was not opened */
-    if (NULL == *file)
+    if (NULL == file)
         HGOTO_DONE(SUCCEED);
 
     /* Make file post open call */
-    if (H5F__post_open(*file) < 0)
+    if (H5F__post_open(file) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't finish opening file");
 
     /* Increment the number of open objects to prevent the file from being
      * closed out from under us - "simulate" having an open file id.  Note
      * that this behaviour replaces the calls to H5F_incr_nopen_objs() and
      * H5F_decr_nopen_objs() in H5L_extern_traverse(). */
-    (*file)->nopen_objs++;
+    file->nopen_objs++;
+
+    /* Set 'out' parameter */
+    *_file = file;
 
 done:
     if (ret_value < 0)
-        if (*file)
-            if (H5F_try_close(*file, NULL) < 0)
+        if (file)
+            if (H5F_try_close(file, NULL) < 0)
                 HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -291,12 +295,16 @@ H5F__efc_try_open(H5F_efc_t *efc, H5F_t **file, const char *name, unsigned flags
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "memory allocation failed");
 
         /* Try opening the file */
+        ent->file = NULL;
         if (H5F__efc_try_open_file(&ent->file, name, flags, fcpl_id, fapl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
         /* Check if file was actually opened */
-        if (NULL == ent->file)
+        if (NULL == ent->file) {
+            ent->name = (char *)H5MM_xfree(ent->name);
+            ent       = H5FL_FREE(H5F_efc_ent_t, ent);
             HGOTO_DONE(SUCCEED);
+        }
         else
             open_file = true;
 
