@@ -413,9 +413,6 @@ jobs:
           compiler: intel
           version: '2024.1'
 
-      - name: Enable Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1.13.0
-
       - name: Set file base name (Windows_intel)
         id: set-file-base
         run: |
