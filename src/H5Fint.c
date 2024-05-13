@@ -823,8 +823,8 @@ H5F__getenv_prefix_name(char **env_prefix /*in,out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t prefix_type, const char *prop_prefix,
-                     const char *file_name, unsigned file_intent, hid_t fapl_id)
+H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t prefix_type,
+                         const char *prop_prefix, const char *file_name, unsigned file_intent, hid_t fapl_id)
 {
     H5F_t     *src_file         = NULL; /* Source file */
     H5F_efc_t *efc              = NULL; /* External file cache */
@@ -832,7 +832,7 @@ H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t pr
     char      *actual_file_name = NULL; /* File's actual name */
     char      *temp_file_name   = NULL; /* Temporary pointer to file name */
     size_t     temp_file_name_len;      /* Length of temporary file name */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -916,7 +916,8 @@ H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t pr
 
                     /* Try opening file */
                     H5E_PAUSE_ERRORS
-                    if (H5F__efc_try_open(efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
+                    if (H5F__efc_try_open(efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT,
+                                          fapl_id) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
                     /* Release copy of file name */
@@ -956,7 +957,8 @@ H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t pr
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't prepend prefix to filename");
 
             /* Try opening file */
-            if (H5F__efc_try_open(efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
+            if (H5F__efc_try_open(efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) <
+                0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
             /* Release name */
@@ -967,7 +969,8 @@ H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t pr
     /* Try the relative file_name stored in temp_file_name */
     if (src_file == NULL) {
         /* Try opening file */
-        if (H5F__efc_try_open(efc, &src_file, temp_file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
+        if (H5F__efc_try_open(efc, &src_file, temp_file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) <
+            0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
     } /* end if */
 
@@ -1027,7 +1030,7 @@ H5F_t *
 H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const char *prop_prefix,
                      const char *file_name, unsigned file_intent, hid_t fapl_id)
 {
-    H5F_t *file = NULL;      /* File opened */
+    H5F_t *file      = NULL; /* File opened */
     H5F_t *ret_value = NULL; /* Return value  */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1036,7 +1039,8 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
     assert(primary_file->shared);
 
     /* Try opening the file */
-    if (H5F_prefix_try_open_file(&file, primary_file, prefix_type, prop_prefix, file_name, file_intent, fapl_id) < 0)
+    if (H5F_prefix_try_open_file(&file, primary_file, prefix_type, prop_prefix, file_name, file_intent,
+                                 fapl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't try opening file");
     if (NULL == file)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
@@ -1929,11 +1933,13 @@ H5F_try_open(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "file is already open for read-only");
 
         if ((flags & H5F_ACC_SWMR_WRITE) && 0 == (shared->flags & H5F_ACC_SWMR_WRITE))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "SWMR write access flag not the same for file that is already open");
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                        "SWMR write access flag not the same for file that is already open");
         if ((flags & H5F_ACC_SWMR_READ) &&
             !((shared->flags & H5F_ACC_SWMR_WRITE) || (shared->flags & H5F_ACC_SWMR_READ) ||
               (shared->flags & H5F_ACC_RDWR)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "SWMR read access flag not the same for file that is already open");
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                        "SWMR read access flag not the same for file that is already open");
 
         /* Allocate new "high-level" file struct */
         if ((file = H5F__new(shared, flags, fcpl_id, fapl_id, NULL)) == NULL)
@@ -2007,7 +2013,8 @@ H5F_try_open(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid
         if (file->shared->use_file_locking != use_file_locking)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "file locking flag values don't match");
         if (file->shared->use_file_locking && (file->shared->ignore_disabled_locks != ignore_disabled_locks))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "file locking 'ignore disabled locks' flag values don't match");
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+                        "file locking 'ignore disabled locks' flag values don't match");
     }
 
     /* Check if page buffering is enabled */
@@ -2017,7 +2024,8 @@ H5F_try_open(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid
 #ifdef H5_HAVE_PARALLEL
         /* Collective metadata writes are not supported with page buffering */
         if (file->shared->coll_md_write)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "collective metadata writes are not supported with page buffering");
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                        "collective metadata writes are not supported with page buffering");
 
         /* Temporary: fail file create when page buffering feature is enabled for parallel */
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "page buffering is disabled for parallel");
@@ -2040,7 +2048,8 @@ H5F_try_open(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid
         int mpi_size = H5F_shared_mpi_get_size(file->shared);
 
         if ((mpi_size > 1) && evict_on_close)
-            HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "evict on close is currently not supported in parallel HDF5");
+            HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL,
+                        "evict on close is currently not supported in parallel HDF5");
     }
 #endif
 
@@ -2160,7 +2169,9 @@ H5F_try_open(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid
 
                 if (file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS ||
                     file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "file is already open for write/SWMR write (may use <h5clear file> to clear file consistency flags)");
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                                "file is already open for write/SWMR write (may use <h5clear file> to clear "
+                                "file consistency flags)");
             } /* version 3 superblock */
 
             file->shared->sblock->status_flags |= H5F_SUPER_WRITE_ACCESS;
@@ -2189,11 +2200,14 @@ H5F_try_open(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid
                          !(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS)) ||
                         (!(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) &&
                          file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "file is not already open for SWMR writing");
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                                    "file is not already open for SWMR writing");
                 } /* end if */
                 else if ((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) ||
                          (file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "file is already open for write (may use <h5clear file> to clear file consistency flags)");
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                                "file is already open for write (may use <h5clear file> to clear file "
+                                "consistency flags)");
             } /* version 3 superblock */
         }     /* end else */
     }         /* end if set_flag */
@@ -2221,8 +2235,8 @@ done:
 H5F_t *
 H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t *file = NULL; /* File opened */
-    H5F_t *ret_value = NULL;   /* Return value */
+    H5F_t *file      = NULL; /* File opened */
+    H5F_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

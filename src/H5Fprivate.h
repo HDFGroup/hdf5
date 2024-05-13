@@ -661,9 +661,11 @@ H5_DLL herr_t H5F_efc_close(H5F_t *parent, H5F_t *file);
 
 /* File prefix routines */
 H5_DLL H5F_t *H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type,
-    const char *prop_prefix, const char *file_name, unsigned file_intent, hid_t fapl_id);
-H5_DLL herr_t H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t prefix_type, const char *prop_prefix,
-    const char *file_name, unsigned file_intent, hid_t fapl_id);
+                                   const char *prop_prefix, const char *file_name, unsigned file_intent,
+                                   hid_t fapl_id);
+H5_DLL herr_t H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t prefix_type,
+                                       const char *prop_prefix, const char *file_name, unsigned file_intent,
+                                       hid_t fapl_id);
 
 /* Global heap CWFS routines */
 H5_DLL herr_t H5F_cwfs_add(H5F_t *f, struct H5HG_heap_t *heap);

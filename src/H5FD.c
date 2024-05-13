@@ -717,12 +717,12 @@ done:
 herr_t
 H5FD_try_open(H5FD_t **_file, const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_t *file = NULL;                /* File opened */
-    H5FD_class_t          *driver;           /* VFD for file */
-    H5FD_driver_prop_t     driver_prop;      /* Property for driver ID & info */
-    H5P_genplist_t        *plist;            /* Property list pointer */
-    unsigned long          driver_flags = 0; /* File-inspecific driver feature flags */
-    H5FD_file_image_info_t file_image_info;  /* Initial file image */
+    H5FD_t                *file = NULL;         /* File opened */
+    H5FD_class_t          *driver;              /* VFD for file */
+    H5FD_driver_prop_t     driver_prop;         /* Property for driver ID & info */
+    H5P_genplist_t        *plist;               /* Property list pointer */
+    unsigned long          driver_flags = 0;    /* File-inspecific driver feature flags */
+    H5FD_file_image_info_t file_image_info;     /* Initial file image */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -830,7 +830,7 @@ done:
 H5FD_t *
 H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_t *file = NULL; /* File opened */
+    H5FD_t *file      = NULL; /* File opened */
     H5FD_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)

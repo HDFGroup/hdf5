@@ -62,7 +62,8 @@ struct H5F_efc_t {
 };
 
 /* Private prototypes */
-static herr_t H5F__efc_try_open_file(H5F_t **file, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
+static herr_t H5F__efc_try_open_file(H5F_t **file, const char *name, unsigned flags, hid_t fcpl_id,
+                                     hid_t fapl_id);
 static herr_t H5F__efc_release_real(H5F_efc_t *efc);
 static herr_t H5F__efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent);
 static void   H5F__efc_try_close_tag1(H5F_shared_t *sf, H5F_shared_t **tail);
@@ -175,12 +176,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__efc_try_open(H5F_efc_t *efc, H5F_t **file, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+H5F__efc_try_open(H5F_efc_t *efc, H5F_t **file, const char *name, unsigned flags, hid_t fcpl_id,
+                  hid_t fapl_id)
 {
-    H5F_efc_ent_t        *ent       = NULL;  /* Entry for target file in efc */
-    bool                  open_file = false; /* Whether ent->file needs to be closed in case of error */
-    H5P_genplist_t       *plist;             /* Property list pointer for FAPL */
-    H5VL_connector_prop_t connector_prop;    /* Property for VOL connector ID & info        */
+    H5F_efc_ent_t        *ent       = NULL;    /* Entry for target file in efc */
+    bool                  open_file = false;   /* Whether ent->file needs to be closed in case of error */
+    H5P_genplist_t       *plist;               /* Property list pointer for FAPL */
+    H5VL_connector_prop_t connector_prop;      /* Property for VOL connector ID & info        */
     herr_t                ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -266,7 +268,8 @@ H5F__efc_try_open(H5F_efc_t *efc, H5F_t **file, const char *name, unsigned flags
              * do not add it to cache */
             if (ent) {
                 if (H5F__efc_remove_ent(efc, ent) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "can't remove entry from external file cache");
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL,
+                                "can't remove entry from external file cache");
 
                 /* Do not free ent, we will recycle it below */
             } /* end if */
@@ -353,8 +356,8 @@ done:
 H5F_t *
 H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t *file = NULL;       /* File opened */
-    H5F_t *ret_value = NULL;  /* Return value */
+    H5F_t *file      = NULL; /* File opened */
+    H5F_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
