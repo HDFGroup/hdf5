@@ -162,7 +162,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5F__efc_try_open
  *
- * Purpose:     Attepts to open a file using the external file cache.
+ * Purpose:     Attempts to open a file using the external file cache.
  *
  *              The target file is added to the external file cache of the
  *              parent if it is not already present.  If the target file is
@@ -290,7 +290,7 @@ H5F__efc_try_open(H5F_efc_t *efc, H5F_t **file, const char *name, unsigned flags
         if (NULL == (ent->name = H5MM_strdup(name)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "memory allocation failed");
 
-        /* Try opeing the file */
+        /* Try opening the file */
         if (H5F__efc_try_open_file(&ent->file, name, flags, fcpl_id, fapl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
