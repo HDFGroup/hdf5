@@ -153,6 +153,10 @@ endif ()
 # Generate the aec_config.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
 configure_file (${LIBAEC_RESOURCES_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+# Create libaec.h with current version information
+configure_file(
+  "include/libaec.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/libaec.h")
 
 #-----------------------------------------------------------------------------
 # All libs/tests/examples need the main include directories
@@ -172,7 +176,7 @@ set(LIBAEC_SRCS
 )
 
 set (LIBAEC_PUBLIC_HEADERS
-    ${LIBAEC_INC_DIR}/libaec.h
+    ${CMAKE_CURRENT_BINARY_DIR}/libaec.h
 )
 
 add_library (${LIBAEC_LIB_TARGET} STATIC ${LIBAEC_SRCS} ${LIBAEC_PUBLIC_HEADERS})
