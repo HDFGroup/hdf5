@@ -5,6 +5,8 @@ PROJECT (LIBAEC C)
 # Basic LIBAEC stuff here
 #-----------------------------------------------------------------------------
 set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set (LIBAEC_PACKAGE_EXT ${HDF_PACKAGE_EXT})
 set (HDF_USE_GNU_DIRS ${HDF5_USE_GNU_DIRS})
@@ -20,10 +22,12 @@ if (WINDOWS)
 endif ()
 
 if (NOT WINDOWS)
-  TEST_BIG_ENDIAN (WORDS_BIGENDIAN)
+include(TestBigEndian)
+test_big_endian(WORDS_BIGENDIAN)
 endif ()
 
 # Check for __builtin_clzll for faster decoding
+include(CheckCSourceCompiles)
 check_c_source_compiles(
   "int main(void)\n{return __builtin_clzll(1LL);}"
   HAVE_DECL___BUILTIN_CLZLL)
@@ -34,6 +38,13 @@ if(NOT HAVE_DECL___BUILTIN_CLZLL)
     "int main(void){unsigned long foo; unsigned __int64 bar=1LL;
 return _BitScanReverse64(&foo, bar);}"
     HAVE_BSR64)
+endif()
+
+include(CheckSymbolExists)
+check_symbol_exists(snprintf "stdio.h" HAVE_SNPRINTF)
+if(NOT HAVE_SNPRINTF)
+  check_symbol_exists(_snprintf "stdio.h" HAVE__SNPRINTF)
+  check_symbol_exists(_snprintf_s "stdio.h" HAVE__SNPRINTF_S)
 endif()
 
 #-----------------------------------------------------------------------------
@@ -62,8 +73,8 @@ set (LIBAEC_LIB_TARGET            "${LIBAEC_LIB_CORENAME}-static")
 set (SZIP_LIB_TARGET              "${SZIP_LIB_CORENAME}-static")
 
 set (libaec_VERS_MAJOR 1)
-set (libaec_VERS_MINOR 0)
-set (libaec_VERS_RELEASE 6)
+set (libaec_VERS_MINOR 1)
+set (libaec_VERS_RELEASE 3)
 
 #-----------------------------------------------------------------------------
 set (LIBAEC_PACKAGE "libaec")
@@ -157,6 +168,7 @@ set(LIBAEC_SRCS
     ${LIBAEC_SRC_DIR}/encode.c
     ${LIBAEC_SRC_DIR}/encode_accessors.c
     ${LIBAEC_SRC_DIR}/decode.c
+    ${LIBAEC_SRC_DIR}/vector.c
 )
 
 set (LIBAEC_PUBLIC_HEADERS
