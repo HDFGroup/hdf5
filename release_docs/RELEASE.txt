@@ -47,6 +47,14 @@ New Features
 
     Configuration:
     -------------
+    - Added support for using zlib-ng package as the zlib library:
+
+          CMake:      HDF5_USE_ZLIB_NG
+          Autotools:  --enable-zlibng
+
+      Added the option HDF5_USE_ZLIB_NG to allow the replacement of the
+      default ZLib package by the zlib-ng package as a built-in compression library.
+
     - Removed "function/code stack" debugging configuration option:
 
           CMake:      HDF5_ENABLE_CODESTACK

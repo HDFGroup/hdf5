@@ -28,7 +28,7 @@ macro (EXTERNAL_ZLIB_LIBRARY compress_type)
     FetchContent_Populate(HDF5_ZLIB)
 
     # Copy an additional/replacement files into the populated source
-    if (USE_ZLIB_NG)
+    if (HDF5_USE_ZLIB_NG)
       file(COPY ${HDF_RESOURCES_DIR}/ZLIBNG/CMakeLists.txt DESTINATION ${hdf5_zlib_SOURCE_DIR})
     else ()
       file(COPY ${HDF_RESOURCES_DIR}/ZLIB/CMakeLists.txt DESTINATION ${hdf5_zlib_SOURCE_DIR})
