@@ -583,13 +583,10 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
 
     if (H5F_INTENT(f) & H5F_ACC_SWMR_READ) {
         /*
-         * When the file is opened for SWMR read access, skip the check if:
-         * --the file is already marked for SWMR writing and
-         * --the file has version 3 superblock for SWMR support
+         * When the file is opened for SWMR read access, skip the check if
+         * the file has a version 3 superblock capable of SWMR support
          */
-        if ((sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS) &&
-            (sblock->status_flags & H5F_SUPER_WRITE_ACCESS) &&
-            sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
+        if (sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
             skip_eof_check = true;
     }
     if (!skip_eof_check && initial_read) {
