@@ -155,7 +155,7 @@ H5Iff.lo:            $(srcdir)/H5Iff.F90 H5f90global.lo
 H5Lff.lo:            $(srcdir)/H5Lff.F90 H5f90global.lo
 H5Off.lo:            $(srcdir)/H5Off.F90 H5f90global.lo
 H5Pff.lo:            $(srcdir)/H5Pff.F90 H5f90global.lo H5fortkit.lo
-H5Rff.lo:            $(srcdir)/H5Rff.F90 H5f90global.lo
+H5Rff.lo:            $(srcdir)/H5Rff.F90 H5f90global.lo H5fortkit.lo
 H5Sff.lo:            $(srcdir)/H5Sff.F90 H5f90global.lo
 H5Tff.lo:            $(srcdir)/H5Tff.F90 H5f90global.lo
 H5VLff.lo:           $(srcdir)/H5VLff.F90 H5f90global.lo H5fortkit.lo
