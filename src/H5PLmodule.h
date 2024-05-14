@@ -47,7 +47,7 @@
  * function, as a user would do in the past. The identification number and the filter parameters should be
  * available to the application. For example, if the application intends to apply the HDF5 bzip2 compression
  * filter that was registered with The HDF Group and has an identification number 307
- * (<a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">Registered
+ * (<a href="https://\PLURL/docs/RegisteredFilterPlugins.md">Registered
  * Filters</a>) then the application would follow the steps as outlined below: \code dcpl = H5Pcreate
  * (H5P_DATASET_CREATE); status = H5Pset_filter (dcpl, (H5Z_filter_t)307, H5Z_FLAG_MANDATORY, (size_t)6,
  * cd_values); dset = H5Dcreate (file, DATASET, H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, status = H5Dwrite
@@ -183,7 +183,7 @@
  * \subsubsection subsubsec_filter_plugins_prog_reg Registering a Filter with The HDF Group
  * If you are writing a filter that will be used by others, it would be a good idea to request a filter
  * identification number and register it with The HDF Group. Please follow the procedure described at
- * <a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">Registered
+ * <a href="https://\PLURL/docs/RegisteredFilterPlugins.md">Registered
  * Filters</a>.
  *
  * The HDF Group anticipates that developers of HDF5 filter plugins will not only register new filters, but
@@ -236,7 +236,7 @@
  * libH5Zbzip2.so may be linked with libbz2.so instead of including bzip2 source into the
  * plugin library.
  * The complete example of the HDF5 bzip2 plugin library is provided at
- * <a href="https://github.com/HDFGroup/hdf5_plugins/tree/master/BZIP2">BZIP2 Filter Plugin</a>
+ * <a href="https://\PLURL/BZIP2">BZIP2 Filter Plugin</a>
  * and can be adopted for other plugins.</li></ul>
  *
  * \subsubsection subsubsec_filter_plugins_prog_install Installing an HDF5 Filter Plugin
@@ -262,7 +262,7 @@
  *
  * \subsection subsec_filter_plugins_build Building an HDF5 bzip2 Plugin Example
  * The HDF Group provides an repository of the HDF5 filter plugin that can be checked out from
- * <a href="https://github.com/HDFGroup/hdf5_plugins/tree/master/BZIP2">BZIP2 Filter Plugin</a>.
+ * <a href="https://\PLURL/BZIP2">BZIP2 Filter Plugin</a>.
  *
  * It contains the source code for the bzip2
  * plugin library and an example that uses the plugin. It requires the HDF5 Library with the dynamically
@@ -276,10 +276,10 @@
  * \endcode
  *
  * See the documentation at
- * <aref="https://github.com/HDFGroup/hdf5_plugins/tree/master/docs">hdf5_plugins/docs</a> folder. In
+ * <aref="https://\PLURL/docs">hdf5_plugins/docs</a> folder. In
  * particular:
- * <aref="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/INSTALL_With_CMake.txt">INSTALL_With_CMake</a>
- * <aref="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/USING_HDF5_AND_CMake.txt">USING_HDF5_AND_CMake</a>
+ * <aref="https://\PLURL/docs/INSTALL_With_CMake.txt">INSTALL_With_CMake</a>
+ * <aref="https://\PLURL/docs/USING_HDF5_AND_CMake.txt">USING_HDF5_AND_CMake</a>
  */
 
 /**

@@ -21,6 +21,7 @@ ALIASES += SRCURL="github.com/HDFGroup/hdf5/blob/develop"
 #Other projects that contribute to HDF5
 ALIASES += PRJURL="\HDFURL/projects"
 ALIASES += HVURL="github.com/HDFGroup/hdfview/blob/master"
+ALIASES += PLURL="github.com/HDFGroup/hdf5_plugins/blob/master"
 ################################################################################
 # Styling
 ################################################################################

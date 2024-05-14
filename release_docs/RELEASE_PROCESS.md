@@ -18,7 +18,7 @@ Maintenance releases are always forward compatible with regards to the HDF5 file
 - HDF5 libraries and command line utilities can access files created by future maintenance versions of the library.
 Note that maintenance releases are NOT guaranteed to be interface-compatible, meaning that, on occasion, application source code will need updated and re-compiled against a new maintenance release when the interface changes. Interface changes are only made when absolutely necessary as deemed by the HDF5 product manager(s), and interface compatibility reports are published with each release to inform customers and users of any incompatibilities in the interface.
 
-For more information on the HDF5 versioning and backward and forward compatibility issues, see the [API Compatibility Macros](https://docs.hdfgroup.org/hdf5/v1_14/v1_14_4/api-compat-macros.html) on the public website.
+For more information on the HDF5 versioning and backward and forward compatibility issues, see the [API Compatibility Macros][2]/v1_14_4/api-compat-macros.html on the public website.
 
 ## Participants:
 - Product Manager — The individual responsible for the overall direction and development of a software product at The HDF Group.
@@ -35,21 +35,21 @@ For more information on the HDF5 versioning and backward and forward compatibili
 ### 3. Prepare Release Notes (Release Manager)
 1. Confirm that all non-trivial changes made to the source are reflected in the release notes. Verify the following: 
     - [HDF5 Milestones Projects](https://github.com/HDFGroup/hdf5/milestones)
-    - Each entry in [RELEASE.txt](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt) traces to one or more resolved GH issues marked with FixVersion="X.Y.Z". 
-    - Each resolved GH milestone issue traces to an entry in [RELEASE.txt](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt).
+    - Each entry in [RELEASE.txt][1]/release_docs/RELEASE.txt traces to one or more resolved GH issues marked with FixVersion="X.Y.Z". 
+    - Each resolved GH milestone issue traces to an entry in [RELEASE.txt][1]/release_docs/RELEASE.txt.
     - Each resolved GH milestone issue traces to one or more revisions to the HDF5 source.
     - Each resolved GH milestone issue traces to one or more pull requests.
-2. For each previously authored KNOWN ISSUE in the [RELEASE.txt](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt), if the issue has been resolved or can no longer be confirmed, remove the issue from the [RELEASE.txt](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt).
+2. For each previously authored KNOWN ISSUE in the [RELEASE.txt][1]/release_docs/RELEASE.txt, if the issue has been resolved or can no longer be confirmed, remove the issue from the [RELEASE.txt][1]/release_docs/RELEASE.txt.
     - Document any new known issues at the top of the list.
-3. Update the TESTED CONFIGURATION FEATURES SUMMARY in [RELEASE.txt](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt) to correspond to features and options that have been tested during the maintenance period by the automated daily regression tests. 
+3. Update the TESTED CONFIGURATION FEATURES SUMMARY in [RELEASE.txt][1]/release_docs/RELEASE.txt to correspond to features and options that have been tested during the maintenance period by the automated daily regression tests. 
     - **See: Testing/Testing Systems(this is a page in confluence)**
-4. Update current compiler information for each platform in the PLATFORMS TESTED section of [RELEASE.txt](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt).
-5. Review the [RELEASE.txt](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt) for formatting and language to verify that it corresponds to guidelines found in **[Writing Notes in a RELEASE.txt(this is missing)]()** File.
-6. Review and update, if needed, the [README](https://github.com/HDFGroup/hdf5/blob/develop/README.md) and [COPYING](https://github.com/HDFGroup/hdf5/blob/develop/COPYING) files.
-7. Review and update all INSTALL_* files in [release_docs](https://github.com/HDFGroup/hdf5/tree/develop/release_docs), if needed.
-    - [INSTALL](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL) should be general info and not require extensive changes
-    - [INSTALL_Auto.txt](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_Auto.txt) are the instructions for building under autotools.
-    - [INSTALL_CMake.txt](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_CMake.txt) are the instructions for building under CMake.
+4. Update current compiler information for each platform in the PLATFORMS TESTED section of [RELEASE.txt][1]/release_docs/RELEASE.txt.
+5. Review the [RELEASE.txt][1]/release_docs/RELEASE.txt for formatting and language to verify that it corresponds to guidelines found in **[Writing Notes in a RELEASE.txt(this is missing)]()** File.
+6. Review and update, if needed, the [README][1]/README.md and [COPYING][1]/COPYING files.
+7. Review and update all INSTALL_* files in [release_docs][1]/release_docs, if needed.
+    - [INSTALL][1]/release_docs/INSTALL should be general info and not require extensive changes
+    - [INSTALL_Auto.txt][1]/release_docs/INSTALL_Auto.txt are the instructions for building under autotools.
+    - [INSTALL_CMake.txt][1]/release_docs/INSTALL_CMake.txt are the instructions for building under CMake.
 
 ### 4. Freeze Code (Release Manager | Test Automation Team)
 1. Transition from performing maintenance on software to preparing for its delivery.
@@ -62,14 +62,14 @@ For more information on the HDF5 versioning and backward and forward compatibili
 ### 5. Update Interface Version (Release Manager | Product Manager)
 1. Verify interface additions, changes, and removals, and update the shared library interface version number.
 2. Execute the CI snapshot workflow.
-    - Actions - “[hdf5 release build](https://github.com/HDFGroup/hdf5/blob/develop/.github/workflows/release.yml)” workflow and use the defaults.
+    - Actions - “[hdf5 release build][1]/.github/workflows/release.yml” workflow and use the defaults.
 3. Download and inspect release build source and binary files.  Downloaded source files should build correctly, one or more binaries should install and run correctly.  There should be nothing missing nor any extraneous files that aren’t meant for release.
-4. Verify the interface compatibility reports between the current source and the previous release on the Github [Snapshots](https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14) page.
-    - The compatibility reports are produced by the CI and are viewable in the Github [Releases/snapshot](https://github.com/HDFGroup/hdf5/releases/tag/snapshot) section.
-5. Verify the interface compatibility reports between the current source and the previous release on the Github [Snapshots](https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14) page.
-    - The compatibility reports are produced by the CI and are viewable in the Github [Releases/snapshot](https://github.com/HDFGroup/hdf5/releases/tag/snapshot) section.
+4. Verify the interface compatibility reports between the current source and the previous release on the Github [Snapshots][3]/snapshot-1.14 page.
+    - The compatibility reports are produced by the CI and are viewable in the Github [Releases/snapshot][3]/snapshot section.
+5. Verify the interface compatibility reports between the current source and the previous release on the Github [Snapshots][3]/snapshot-1.14 page.
+    - The compatibility reports are produced by the CI and are viewable in the Github [Releases/snapshot][3]/snapshot section.
 6. Confirm the necessity of and approve of any interface-breaking changes. If any changes need to be reverted, task the developer who made the change to do so as soon as possible. If a change is reverted, return to the previous step and regenerate the compatibility report after the changes is made. Otherwise, continue to the next step.
-7. Update the .so version numbers in the [config/lt_vers.am](https://github.com/HDFGroup/hdf5/blob/develop/config/lt_vers.am) file in the support branch according to [libtool's library interface version](https://www.gnu.org/software/libtool/manual/libtool.html#Versioning) scheme. 
+7. Update the .so version numbers in the [config/lt_vers.am][1]/config/lt_vers.am file in the support branch according to [libtool's library interface version](https://www.gnu.org/software/libtool/manual/libtool.html#Versioning) scheme. 
     - See [Updating version info (Libtool)](https://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html#Updating-version-info) for rules to help update library version numbers. 
 8. After the release branch has been created, run `./autogen.sh` to regenerate build system files on the release branch and commit the changes.    
 
@@ -83,21 +83,21 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - or create the new branch in GitHub GUI.
 4. Check that required CMake files point to the specific versions of the third-party software (szip, zlib and plugins) that they depend on.
     - Update as needed.
-5. Change the **support** branch to X.Y.{Z+1}-1 using the [bin/h5vers](https://github.com/HDFGroup/hdf5/blob/develop/bin/h5vers) script: 
+5. Change the **support** branch to X.Y.{Z+1}-1 using the [bin/h5vers][1]/bin/h5vers script: 
     - `$ git checkout hdf5_X_Y`
     - `$ bin/h5vers -s X.Y.{Z+1}-1;`
     - `$ git commit -m "Updated support branch version number to X.Y.{Z+1}-1"`
     - `$ git push`
-6. Change the **release preparation branch**'s version number to X.Y.Z-{SR+1} using the [bin/h5vers](https://github.com/HDFGroup/hdf5/blob/develop/bin/h5vers) script: 
+6. Change the **release preparation branch**'s version number to X.Y.Z-{SR+1} using the [bin/h5vers][1]/bin/h5vers script: 
     - `$ git checkout hdf5_X_Y_Z;` 
     - `$ bin/h5vers -s X.Y.Z-{SR+1};` 
     - `$ git commit -m "Updated release preparation branch version number to X.Y.Z-{SR+1}"` 
     - `$ git push` 
 7. Update default configuration mode
     - `$ git checkout hdf5_X_Y_Z;` and `$ bin/switch_maint_mode -disable ./configure.ac` to disable `AM_MAINTAINER_MODE`. 
-    - Need to set option `HDF5_GENERATE_HEADERS` to `OFF`, currently in line 996 of [src/CMakeLists.txt](https://github.com/HDFGroup/hdf5/blob/develop/src/CMakeLists.txt).
-    - Change the **release preparation branch**'s (i.e. hdf5_X_Y_Z) default configuration mode from development to production in [configure.ac](https://github.com/HDFGroup/hdf5/blob/develop/configure.ac). 
-    - Find “Determine build mode” in [configure.ac](https://github.com/HDFGroup/hdf5/blob/develop/configure.ac). 
+    - Need to set option `HDF5_GENERATE_HEADERS` to `OFF`, currently in line 996 of [src/CMakeLists.txt][1]/src/CMakeLists.txt.
+    - Change the **release preparation branch**'s (i.e. hdf5_X_Y_Z) default configuration mode from development to production in [configure.ac][1]/configure.ac. 
+    - Find “Determine build mode” in [configure.ac][1]/configure.ac. 
     - Change `default=debug` to `default=production` at the bottom of the `AS_HELP_STRING` for `--enable-build-mode`.
     - Under `if test "X-$BUILD_MODE" = X- ; then` change `BUILD_MODE=debug` to `BUILD_MODE=production`. 
     - Run `sh ./autogen.sh` to regenerate the UNIX build system files and commit the changes. (use `git status --ignored` to see the changes and `git add -f` to add all files. First delete any new files not to be committed, notably `src/H5public.h~` and `autom4te.cache/`.)
@@ -137,7 +137,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 
 ### 8. Finalize Release Notes (Release Manager)
 1. Perform a final review of release notes and ensure that any new changes made to the source, any new known issues discovered, and any additional tests run since the code freeze have been reflected in RELEASE.txt and other appropriate in-source documentation files (INSTALL_*, etc.). (Refer to the sub-steps of step 3 for what to check).
-2. Update the [RELEASE.txt](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt) in the **support** branch (i.e. hdf5_X_Y) to remove entries in “Bugs fixed” and “New Features” sections and increment the version number for the following release (“Bug fixes since X.Y.Z” - occurs twice).
+2. Update the [RELEASE.txt][1]/release_docs/RELEASE.txt in the **support** branch (i.e. hdf5_X_Y) to remove entries in “Bugs fixed” and “New Features” sections and increment the version number for the following release (“Bug fixes since X.Y.Z” - occurs twice).
     - `$ git checkout hdf5_X_Y` 
     - `$ vi RELEASE.txt # update RELEASE.txt to clear it out` 
     - `$ git commit -m "Reset RELEASE.txt in preparation for the next release."` 
@@ -161,3 +161,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 ### 11. Conduct Release Retrospective (Release Manager)
 1. Schedule time and solicit comments from retrospective
 2. Identify issues and document them
+
+[1]: https://github.com/HDFGroup/hdf5/blob/develop
+[2]: https://support.hdfgroup.org/documentation/hdf5
+[3]: https://github.com/HDFGroup/hdf5/releases/tag
