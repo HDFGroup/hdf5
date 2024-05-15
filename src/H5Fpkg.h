@@ -133,8 +133,7 @@
 
 /* Optimistic read size for superblock */
 /* Size of a v2+ superblock, w/8-byte addresses & lengths */
-#define H5F_SUPERBLOCK_SPEC_READ_SIZE \
-    (H5F_SUPERBLOCK_FIXED_SIZE + H5F_SUPERBLOCK_VARLEN_SIZE(2, 8, 8))
+#define H5F_SUPERBLOCK_SPEC_READ_SIZE (H5F_SUPERBLOCK_FIXED_SIZE + H5F_SUPERBLOCK_VARLEN_SIZE(2, 8, 8))
 
 /* For superblock version 0 & 1:
    Offset to the file consistency flags (status_flags) in the superblock (excluding H5F_SUPERBLOCK_FIXED_SIZE)
