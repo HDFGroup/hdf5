@@ -67,16 +67,16 @@ static const char *flavors[] = {
  * occurs), and `op' will be set to H5F_OP_UNKNOWN.
  */
 typedef struct H5FD_log_t {
-    H5FD_t         pub; /* public stuff, must be first      */
-    int            fd;  /* the unix file                    */
-    haddr_t        eoa; /* end of allocated region          */
-    haddr_t        eof; /* end of file; current file size   */
+    H5FD_t  pub; /* public stuff, must be first      */
+    int     fd;  /* the unix file                    */
+    haddr_t eoa; /* end of allocated region          */
+    haddr_t eof; /* end of file; current file size   */
 #ifndef H5_HAVE_PREADWRITE
     haddr_t        pos; /* current file I/O position        */
     H5FD_file_op_t op;  /* last operation                   */
-#endif /* H5_HAVE_PREADWRITE */
-    bool           ignore_disabled_file_locks;
-    char           filename[H5FD_MAX_FILENAME_LEN]; /* Copy of file name from open operation */
+#endif                  /* H5_HAVE_PREADWRITE */
+    bool ignore_disabled_file_locks;
+    char filename[H5FD_MAX_FILENAME_LEN]; /* Copy of file name from open operation */
 #ifndef H5_HAVE_WIN32_API
     /* On most systems the combination of device and i-node number uniquely
      * identify a file.  Note that Cygwin, MinGW and other Windows POSIX
@@ -1634,7 +1634,7 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNU
         file->pos = HADDR_UNDEF;
         file->op  = OP_UNKNOWN;
 #endif /* H5_HAVE_PREADWRITE */
-    } /* end if */
+    }  /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
