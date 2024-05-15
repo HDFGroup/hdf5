@@ -166,6 +166,20 @@ jobs:
               path: ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
+      - name: Save tgz-tarball_nover
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-tarball_nover
+              path: hdf5.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save zip-tarball_nover
+        uses: actions/upload-artifact@v4
+        with:
+              name: zip-tarball_nover
+              path: hdf5.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
       - name: Save NEWSLETTER
         uses: actions/upload-artifact@v4
         with:
