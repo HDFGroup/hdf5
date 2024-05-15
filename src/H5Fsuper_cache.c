@@ -306,8 +306,7 @@ H5F__cache_superblock_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t 
     assert(image_len);
 
     /* Set the initial image length size */
-    *image_len = H5F_SUPERBLOCK_FIXED_SIZE + /* Fixed size of superblock */
-                 H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE;
+    *image_len = H5F_SUPERBLOCK_SPEC_READ_SIZE;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5F__cache_superblock_get_initial_load_size() */
