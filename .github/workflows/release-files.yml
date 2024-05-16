@@ -154,12 +154,12 @@ jobs:
 #        with:
 #              name: cp-to-non-versioned
 #              path: ${{ github.workspace }}
-
-     - name: Create sha256 sums for non-versioned files
-        if: ${{ (inputs.use_environ == 'release') }}
-        run: |
-          sha256sum hdf5.tar.gz >> hdf5.sha256sums.txt
-          sha256sum hdf5.zip >> hdf5.sha256sums.txt
+#
+#     - name: Create sha256 sums for non-versioned files
+#        if: ${{ (inputs.use_environ == 'release') }}
+#        run: |
+#          sha256sum hdf5.tar.gz >> hdf5.sha256sums.txt
+#          sha256sum hdf5.zip >> hdf5.sha256sums.txt
 
       - name: Create sha256 sums for files
         run: |
