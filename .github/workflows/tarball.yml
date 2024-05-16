@@ -142,9 +142,11 @@ jobs:
         run: |
           mv hdf5-${{ steps.version.outputs.SOURCE_TAG }}.tar.gz ${{ inputs.use_tag }}.tar.gz
           mv hdf5-${{ steps.version.outputs.SOURCE_TAG }}.zip ${{ inputs.use_tag }}.zip
+          cp ${{ inputs.use_tag }}.tar.gz hdf5.tar.gz
+          cp ${{ inputs.use_tag }}.zip hdf5.zip
         shell: bash
 
-      - name: cp-to-non-versioned
+      - name: Copy the release file source to the non-versioned file name
         id: cp-to-non-versioned
         if: ${{ (inputs.use_environ == 'release') }}
         run: |
