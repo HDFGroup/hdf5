@@ -58,8 +58,8 @@ tts_cancel(void)
     int   ret;
 
     /* Initialize barrier */
-    ret = H5TS__barrier_init(&barrier, 2);
-    CHECK_I(ret, "H5TS__barrier_init");
+    ret = H5TS_barrier_init(&barrier, 2);
+    CHECK_I(ret, "H5TS_barrier_init");
 
     /*
      * Create a hdf5 file using H5F_ACC_TRUNC access, default file
@@ -69,7 +69,7 @@ tts_cancel(void)
     assert(cancel_file >= 0);
     ret = pthread_create(&childthread, NULL, tts_cancel_thread, NULL);
     assert(ret == 0);
-    ret = H5TS__barrier_wait(&barrier);
+    ret = H5TS_barrier_wait(&barrier);
     assert(ret == 0);
     ret = pthread_cancel(childthread);
     assert(ret == 0);
@@ -87,8 +87,8 @@ tts_cancel(void)
     ret = H5Fclose(cancel_file);
     assert(ret >= 0);
 
-    ret = H5TS__barrier_destroy(&barrier);
-    CHECK_I(ret, "H5TS__barrier_destroy");
+    ret = H5TS_barrier_destroy(&barrier);
+    CHECK_I(ret, "H5TS_barrier_destroy");
 } /* end tts_cancel() */
 
 void *
@@ -165,8 +165,8 @@ tts_cancel_callback(void *elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_ATTR_U
     int    value   = *(int *)elem;
     herr_t status;
 
-    status = H5TS__barrier_wait(&barrier);
-    CHECK_I(status, "H5TS__barrier_wait");
+    status = H5TS_barrier_wait(&barrier);
+    CHECK_I(status, "H5TS_barrier_wait");
 
     HDsleep(3);
 

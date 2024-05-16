@@ -71,7 +71,7 @@ thread_main(void H5_ATTR_UNUSED *arg)
     used[tid - 2] = true;
     H5TS_mutex_unlock(&used_lock);
 
-    H5TS__barrier_wait(&barrier);
+    H5TS_barrier_wait(&barrier);
 
     /* Verify that the thread ID hasn't changed */
     ntid = H5TS_thread_id();
@@ -81,7 +81,7 @@ thread_main(void H5_ATTR_UNUSED *arg)
     return (H5TS_thread_ret_t)0;
 
 pre_barrier_error:
-    H5TS__barrier_wait(&barrier);
+    H5TS_barrier_wait(&barrier);
 
     return (H5TS_thread_ret_t)0;
 }
@@ -102,8 +102,8 @@ tts_thread_id(void)
 
     result = H5TS_mutex_init(&used_lock, H5TS_MUTEX_TYPE_PLAIN);
     CHECK_I(result, "H5TS_mutex_lock");
-    result = H5TS__barrier_init(&barrier, NTHREADS);
-    CHECK_I(result, "H5TS__barrier_init");
+    result = H5TS_barrier_init(&barrier, NTHREADS);
+    CHECK_I(result, "H5TS_barrier_init");
 
     /* Get the thread ID for the main thread, so that the child threads
      * always start from a thread ID of 2.
@@ -130,8 +130,8 @@ tts_thread_id(void)
                 TestErrPrintf("thread ID %d did not run.", i + 1);
         }
     }
-    result = H5TS__barrier_destroy(&barrier);
-    CHECK_I(result, "H5TS__barrier_destroy");
+    result = H5TS_barrier_destroy(&barrier);
+    CHECK_I(result, "H5TS_barrier_destroy");
 
 } /* end tts_thread_id() */
 
