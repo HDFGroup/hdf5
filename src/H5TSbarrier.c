@@ -60,7 +60,7 @@
 /*******************/
 
 /*--------------------------------------------------------------------------
- * Function:    H5TS__barrier_init
+ * Function:    H5TS_barrier_init
  *
  * Purpose:     Initialize a thread barrier
  *
@@ -69,7 +69,7 @@
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS__barrier_init(H5TS_barrier_t *barrier, unsigned count)
+H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count)
 {
     herr_t ret_value = SUCCEED;
 
@@ -96,22 +96,22 @@ H5TS__barrier_init(H5TS_barrier_t *barrier, unsigned count)
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS__barrier_init() */
+} /* end H5TS_barrier_init() */
 
 /*--------------------------------------------------------------------------
- * Function:    H5TS__barrier_wait
+ * Function:    H5TS_barrier_wait
  *
  * Purpose:     Wait at a barrier.
  *
  * Note:     	Similar to pthread_barrier_wait, a barrier may be re-used
- *		multiple times without intervening calls to H5TS__barrier_init.
+ *		multiple times without intervening calls to H5TS_barrier_init.
  *
  * Return:      Non-negative on success / Negative on failure
  *
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS__barrier_wait(H5TS_barrier_t *barrier)
+H5TS_barrier_wait(H5TS_barrier_t *barrier)
 {
 #ifdef H5_HAVE_PTHREAD_BARRIER
     int ret;
@@ -157,10 +157,10 @@ done:
 #endif
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS__barrier_wait() */
+} /* end H5TS_barrier_wait() */
 
 /*--------------------------------------------------------------------------
- * Function:    H5TS__barrier_destroy
+ * Function:    H5TS_barrier_destroy
  *
  * Purpose:     Destroy an H5TS_barrier_t.  All internal components are
  *              destroyed, but the instance of H5TS_barrier_t is not freed.
@@ -170,7 +170,7 @@ done:
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS__barrier_destroy(H5TS_barrier_t *barrier)
+H5TS_barrier_destroy(H5TS_barrier_t *barrier)
 {
     herr_t ret_value = SUCCEED;
 
@@ -210,6 +210,6 @@ H5TS__barrier_destroy(H5TS_barrier_t *barrier)
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS__barrier_destroy() */
+} /* end H5TS_barrier_destroy() */
 
 #endif /* H5_HAVE_THREADS */

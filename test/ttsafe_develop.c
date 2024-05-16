@@ -43,13 +43,13 @@ tts_develop_api_thr_1(void *_udata)
     CHECK_I(result, "H5TSmutex_acquire");
     VERIFY(acquired, true, "H5TSmutex_acquire");
 
-    result = H5TS__barrier_wait(udata->barrier);
-    CHECK_I(result, "H5TS__barrier_wait");
+    result = H5TS_barrier_wait(udata->barrier);
+    CHECK_I(result, "H5TS_barrier_wait");
 
     /* Thread #2 will attempt (unsuccessfully) to acquire the API lock */
 
-    result = H5TS__barrier_wait(udata->barrier);
-    CHECK_I(result, "H5TS__barrier_wait");
+    result = H5TS_barrier_wait(udata->barrier);
+    CHECK_I(result, "H5TS_barrier_wait");
 
     /* Release the API lock */
     result = H5TSmutex_release(&lock_count);
@@ -74,16 +74,16 @@ tts_develop_api_thr_2(void *_udata)
 
     /* Thread #1 will acquire the API lock */
 
-    result = H5TS__barrier_wait(udata->barrier);
-    CHECK_I(result, "H5TS__barrier_wait");
+    result = H5TS_barrier_wait(udata->barrier);
+    CHECK_I(result, "H5TS_barrier_wait");
 
     /* Attempt to acquire the API lock - should not acquire it */
     result = H5TSmutex_acquire(1, &acquired);
     CHECK_I(result, "H5TSmutex_acquire");
     VERIFY(acquired, false, "H5TSmutex_acquire");
 
-    result = H5TS__barrier_wait(udata->barrier);
-    CHECK_I(result, "H5TS__barrier_wait");
+    result = H5TS_barrier_wait(udata->barrier);
+    CHECK_I(result, "H5TS_barrier_wait");
 
     /* Thread #1 will release the API lock */
 
@@ -123,8 +123,8 @@ tts_develop_api(void)
     /* Check H5TSmutex_acquire & H5TSmutex_release in thread callbacks */
 
     /* Create the thread barrier for the two threads */
-    result = H5TS__barrier_init(&barrier, 2);
-    CHECK_I(result, "H5TS__barrier_init");
+    result = H5TS_barrier_init(&barrier, 2);
+    CHECK_I(result, "H5TS_barrier_init");
 
     /* Create the threads */
     udata.barrier = &barrier;
@@ -139,8 +139,8 @@ tts_develop_api(void)
     result = H5TS_thread_join(thread_2, NULL);
     CHECK_I(result, "H5TS_thread_join");
 
-    result = H5TS__barrier_destroy(&barrier);
-    CHECK_I(result, "H5TS__barrier_destroy");
+    result = H5TS_barrier_destroy(&barrier);
+    CHECK_I(result, "H5TS_barrier_destroy");
 
     /* Test multiple / recursive acquisition of the API lock  */
 

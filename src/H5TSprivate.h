@@ -249,9 +249,9 @@ H5_DLL void     H5TS_atomic_destroy_uint(H5TS_atomic_uint_t *obj);
 #endif /* H5_HAVE_STDATOMIC_H */
 
 /* Barrier related function declarations */
-H5_DLL herr_t H5TS__barrier_init(H5TS_barrier_t *barrier, unsigned count);
-H5_DLL herr_t H5TS__barrier_wait(H5TS_barrier_t *barrier);
-H5_DLL herr_t H5TS__barrier_destroy(H5TS_barrier_t *barrier);
+H5_DLL herr_t H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count);
+H5_DLL herr_t H5TS_barrier_wait(H5TS_barrier_t *barrier);
+H5_DLL herr_t H5TS_barrier_destroy(H5TS_barrier_t *barrier);
 
 #endif /* H5_HAVE_THREADS */
 
