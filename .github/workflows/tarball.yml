@@ -144,7 +144,7 @@ jobs:
           mv hdf5-${{ steps.version.outputs.SOURCE_TAG }}.zip ${{ inputs.use_tag }}.zip
         shell: bash
 
-      - name: Copy the release file source to the non-versioned file name
+      - name: Copy the release file source to a non-versioned file name
         id: cp-to-non-versioned
         if: ${{ (inputs.use_environ == 'release') }}
         run: |
