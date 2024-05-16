@@ -146,7 +146,7 @@ jobs:
           cp ${{ inputs.use_tag }}.zip hdf5.zip
         shell: bash
 
-      - name: Copy the release file source to the non-versioned file name
+      - name: cp-to-non-versioned
         id: cp-to-non-versioned
         if: ${{ (inputs.use_environ == 'release') }}
         run: |
