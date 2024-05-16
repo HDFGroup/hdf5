@@ -162,20 +162,6 @@ jobs:
               name: zip-tarball-nover
               path: ${{ github.workspace }}
 
-#     - name: Get published nonversioned source (tgz)
-#        if: ${{ (inputs.use_environ == 'release') }}
-#        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
-#        with:
-#              name: tgz-tarball-nover
-#              path: ${{ github.workspace }}
-
-#     - name: Get published nonversioned source (zip)
-#        if: ${{ (inputs.use_environ == 'release') }}
-#        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
-#        with:
-#              name: zip-tarball-nover
-#              path: ${{ github.workspace }}
-
       - name: Create sha256 sums for files
         run: |
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip > ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
@@ -190,6 +176,11 @@ jobs:
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+
+      - name: Create sha256 sums for files  for nonversioned files
+        run: |
+          sha256sum hdf5.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum hdf5.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
 
 #     - name: Create sha256 sums for non-versioned files
 #        if: ${{ (inputs.use_environ == 'release') }}
