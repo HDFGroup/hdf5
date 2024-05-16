@@ -177,11 +177,11 @@ jobs:
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
 
-#     - name: Create sha256 sums for non-versioned files
-#        if: ${{ (inputs.use_environ == 'release') }}
-#        run: |
-#          sha256sum hdf5.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-#          sha256sum hdf5.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+     - name: Create sha256 sums for non-versioned files
+        if: ${{ (inputs.use_environ == 'release') }}
+        run: |
+          sha256sum hdf5.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum hdf5.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
 
       - name: Store snapshot name
         run: |
