@@ -306,6 +306,13 @@ it may be some time before that work is complete.
 \subsection subsecVOLPassthrough Passthrough Connectors
 Coming Soon
 
+Note: 
+Passthrough VOL connectors should avoid doing anything with the file in the open and create 
+callbacks except opening it. If connectors need to do anything else they should use the post 
+open callback (H5VL_NATIVE_FILE_POST_OPEN op_type for the file "optional" callback), 
+making sure to perform operations on the file only after passing the post open call down to 
+the terminal connector.  The post open callback is made for both file open and file create calls.
+
 \subsection subsecVOLAsync Asynchronous Operations
 Coming Soon
 
