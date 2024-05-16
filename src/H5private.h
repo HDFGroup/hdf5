@@ -589,7 +589,11 @@
  */
 #ifdef H5_HAVE__FLOAT16
 #if defined(__GNUC__)
+#if defined(__aarch64__)
+typedef __fp16 H5__Float16;
+#else
 __extension__ typedef _Float16 H5__Float16;
+#endif
 #else
 typedef _Float16 H5__Float16;
 #endif
