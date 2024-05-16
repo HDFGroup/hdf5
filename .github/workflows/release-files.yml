@@ -148,20 +148,20 @@ jobs:
               name: abi-reports
               path: ${{ github.workspace }}
 
-     - name: Get published non-versioned source (tgz)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
-        if: ${{ (inputs.use_environ == 'release') }}
-        with:
-              name: tgz-tarball_nover
-              path: ${{ github.workspace }}
-
-     - name: Get published non-versioned source (zip)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
-        if: ${{ (inputs.use_environ == 'release') }}
-        with:
-              name: zip-tarball_nover
-              path: ${{ github.workspace }}
-
+#     - name: Get published non-versioned source (tgz)
+#        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+#        if: ${{ (inputs.use_environ == 'release') }}
+#        with:
+#              name: tgz-tarball_nover
+#              path: ${{ github.workspace }}
+#
+#     - name: Get published non-versioned source (zip)
+#        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+#        if: ${{ (inputs.use_environ == 'release') }}
+#        with:
+#              name: zip-tarball_nover
+#              path: ${{ github.workspace }}
+#
       - name: Create sha256 sums for files
         run: |
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip > ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
@@ -177,11 +177,11 @@ jobs:
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
 
-     - name: Create sha256 sums for non-versioned files
-        if: ${{ (inputs.use_environ == 'release') }}
-        run: |
-          sha256sum hdf5.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum hdf5.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+#     - name: Create sha256 sums for non-versioned files
+#        if: ${{ (inputs.use_environ == 'release') }}
+#        run: |
+#          sha256sum hdf5.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+#          sha256sum hdf5.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
 
       - name: Store snapshot name
         run: |
