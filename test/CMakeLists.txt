@@ -350,6 +350,7 @@ set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_dcreate.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_develop.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_error.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_rwlock.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_rec_rwlock.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_thread_id.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_thread_pool.c

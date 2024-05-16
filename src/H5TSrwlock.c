@@ -76,6 +76,10 @@ H5TS_rwlock_init(H5TS_rwlock_t *lock)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
+
     /* Initialize synchronization primitives */
     if (H5_UNLIKELY(mtx_init(&lock->mutex, mtx_plain) != thrd_success))
         HGOTO_DONE(FAIL);
@@ -110,6 +114,10 @@ H5TS_rwlock_rdlock(H5TS_rwlock_t *lock)
     herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
 
     /* Acquire the lock's mutex */
     if (H5_UNLIKELY(mtx_lock(&lock->mutex) != thrd_success))
@@ -160,6 +168,10 @@ H5TS_rwlock_rdunlock(H5TS_rwlock_t *lock)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
+
     /* Acquire the lock's mutex */
     if (H5_UNLIKELY(mtx_lock(&lock->mutex) != thrd_success))
         HGOTO_DONE(FAIL);
@@ -199,6 +211,10 @@ H5TS_rwlock_wrlock(H5TS_rwlock_t *lock)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
+
     /* Acquire the lock's mutex */
     if (H5_UNLIKELY(mtx_lock(&lock->mutex) != thrd_success))
         HGOTO_DONE(FAIL);
@@ -231,17 +247,26 @@ done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_rwlock_wrlock() */
 
--- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -*Function
-    : H5TS_rwlock_wrunlock **Purpose : Release a write lock **Return : Non -
-    negative on                                               success / Negative on failure                                               **
-        -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -* /
-        herr_t
-        H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock)
+/*-------------------------------------------------------------------------
+ * Function: H5TS_rwlock_wrunlock
+ *
+ * Purpose:  Release a write lock
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock)
 {
     bool   have_mutex = false;
     herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
 
     /* Acquire the lock's mutex */
     if (H5_UNLIKELY(mtx_lock(&lock->mutex) != thrd_success))
@@ -281,7 +306,13 @@ done:
 herr_t
 H5TS_rwlock_destroy(H5TS_rwlock_t *lock)
 {
+    herr_t ret_value = SUCCEED;
+
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
 
     /* Destroy synchronization primitives */
     /* NOTE: mtx_destroy() & cnd_destroy() can't fail */
@@ -289,7 +320,8 @@ H5TS_rwlock_destroy(H5TS_rwlock_t *lock)
     cnd_destroy(&lock->read_cv);
     cnd_destroy(&lock->write_cv);
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_rwlock_destroy() */
 #else
 #ifdef H5_HAVE_WIN_THREADS
@@ -305,11 +337,18 @@ H5TS_rwlock_destroy(H5TS_rwlock_t *lock)
 herr_t
 H5TS_rwlock_init(H5TS_rwlock_t *lock)
 {
+    herr_t ret_value = SUCCEED;
+
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
 
     InitializeSRWLock(lock);
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_rwlock_init() */
 
 /*-------------------------------------------------------------------------
@@ -324,11 +363,18 @@ H5TS_rwlock_init(H5TS_rwlock_t *lock)
 herr_t
 H5TS_rwlock_rdlock(H5TS_rwlock_t *lock)
 {
+    herr_t ret_value = SUCCEED;
+
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
 
     AcquireSRWLockShared(lock);
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_rwlock_rdlock() */
 
 /*-------------------------------------------------------------------------
@@ -343,11 +389,18 @@ H5TS_rwlock_rdlock(H5TS_rwlock_t *lock)
 herr_t
 H5TS_rwlock_rdunlock(H5TS_rwlock_t *lock)
 {
+    herr_t ret_value = SUCCEED;
+
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
 
     ReleaseSRWLockShared(lock);
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_rwlock_rdunlock() */
 
 /*-------------------------------------------------------------------------
@@ -362,11 +415,18 @@ H5TS_rwlock_rdunlock(H5TS_rwlock_t *lock)
 herr_t
 H5TS_rwlock_wrlock(H5TS_rwlock_t *lock)
 {
+    herr_t ret_value = SUCCEED;
+
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
 
     AcquireSRWLockExclusive(lock);
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_rwlock_wrlock() */
 
 /*-------------------------------------------------------------------------
@@ -381,11 +441,18 @@ H5TS_rwlock_wrlock(H5TS_rwlock_t *lock)
 herr_t
 H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock)
 {
+    herr_t ret_value = SUCCEED;
+
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
 
     ReleaseSRWLockExclusive(lock);
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_rwlock_wrunlock() */
 
 /*-------------------------------------------------------------------------
@@ -400,12 +467,19 @@ H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock)
 herr_t
 H5TS_rwlock_destroy(H5TS_rwlock_t *lock)
 {
+    herr_t ret_value = SUCCEED;
+
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
 
     /* Destroy synchronization primitives */
     /* SRWLOCKs don't have to be destroyed */
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_rwlock_destroy() */
 #else
 /*-------------------------------------------------------------------------
@@ -423,6 +497,10 @@ H5TS_rwlock_init(H5TS_rwlock_t *lock)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
 
     if (H5_UNLIKELY(pthread_rwlock_init(lock, NULL)))
         HGOTO_DONE(FAIL);
@@ -447,6 +525,10 @@ H5TS_rwlock_rdlock(H5TS_rwlock_t *lock)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
+
     if (H5_UNLIKELY(pthread_rwlock_rdlock(lock)))
         HGOTO_DONE(FAIL);
 
@@ -469,6 +551,10 @@ H5TS_rwlock_rdunlock(H5TS_rwlock_t *lock)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
 
     if (H5_UNLIKELY(pthread_rwlock_unlock(lock)))
         HGOTO_DONE(FAIL);
@@ -493,6 +579,10 @@ H5TS_rwlock_wrlock(H5TS_rwlock_t *lock)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
+
     if (H5_UNLIKELY(pthread_rwlock_wrlock(lock)))
         HGOTO_DONE(FAIL);
 
@@ -516,6 +606,10 @@ H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
+
     if (H5_UNLIKELY(pthread_rwlock_unlock(lock)))
         HGOTO_DONE(FAIL);
 
@@ -538,6 +632,10 @@ H5TS_rwlock_destroy(H5TS_rwlock_t *lock)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
 
     if (H5_UNLIKELY(pthread_rwlock_destroy(lock)))
         HGOTO_DONE(FAIL);

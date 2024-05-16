@@ -107,6 +107,7 @@ main(int argc, char *argv[])
     /* C11 atomics only tested when emulated */
     AddTest("atomics", tts_atomics, NULL, "emulation of C11 atomics", NULL);
 #endif /* H5_HAVE_STDATOMIC_H */
+    AddTest("rwlock", tts_rwlock, NULL, "simple R/W locks", NULL);
 #ifndef H5_HAVE_WIN_THREADS
     /* Recursive R/W locks */
     AddTest("rec_rwlock_1", tts_rec_rwlock_smoke_check_1, NULL, "recursive R/W lock smoke check 1 -- basic",
