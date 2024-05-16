@@ -73,7 +73,7 @@ H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     if (H5_UNLIKELY(NULL == barrier || 0 == count))
         HGOTO_DONE(FAIL);
@@ -120,7 +120,7 @@ H5TS_barrier_wait(H5TS_barrier_t *barrier)
 #endif
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     if (H5_UNLIKELY(NULL == barrier))
         HGOTO_DONE(FAIL);
@@ -174,7 +174,7 @@ H5TS_barrier_destroy(H5TS_barrier_t *barrier)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     if (H5_UNLIKELY(NULL == barrier))
         HGOTO_DONE(FAIL);
