@@ -456,7 +456,7 @@ error:
 static herr_t
 test_create(void)
 {
-    const char *err_msg  = "Error message";  /* Error message for pushing error */
+    const char *err_msg = "Error message";   /* Error message for pushing error */
     ssize_t     err_num;                     /* Number of errors on stack */
     hid_t       estack_id = H5I_INVALID_HID; /* Error stack ID */
 
@@ -511,7 +511,7 @@ error:
 static herr_t
 test_copy(void)
 {
-    const char *err_msg  = "Error message";  /* Error message for pushing error */
+    const char *err_msg = "Error message";   /* Error message for pushing error */
     ssize_t     err_num;                     /* Number of errors on stack */
     hid_t       estack_id = H5I_INVALID_HID; /* Error stack ID */
     herr_t      ret;                         /* Generic return value */
@@ -702,7 +702,8 @@ test_pause(void)
     herr_t      ret;                           /* Generic return value */
 
     /* Push an error */
-    if (H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s", err_msg1) < 0)
+    if (H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s",
+                err_msg1) < 0)
         TEST_ERROR;
 
     /* Copy error stack, which clears the original */

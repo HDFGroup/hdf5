@@ -902,8 +902,8 @@ done:
 herr_t
 H5Eis_paused(hid_t stack_id, hbool_t *is_paused)
 {
-    H5E_stack_t *stack;                 /* Error stack */
-    herr_t       ret_value = SUCCEED;   /* Return value */
+    H5E_stack_t *stack;               /* Error stack */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
@@ -945,8 +945,8 @@ done:
 herr_t
 H5Epause_stack(hid_t stack_id)
 {
-    H5E_stack_t *stack;                 /* Error stack */
-    herr_t       ret_value = SUCCEED;   /* Return value */
+    H5E_stack_t *stack;               /* Error stack */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -977,8 +977,8 @@ done:
 herr_t
 H5Eresume_stack(hid_t stack_id)
 {
-    H5E_stack_t *stack;                 /* Error stack */
-    herr_t       ret_value = SUCCEED;   /* Return value */
+    H5E_stack_t *stack;               /* Error stack */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
