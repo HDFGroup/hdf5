@@ -416,8 +416,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
         HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "can't get property list");
 
     /* Make certain we can read the fixed-size portion of the superblock */
-    if (H5F__set_eoa(f, H5FD_MEM_SUPER,
-                     (haddr_t)(H5F_SUPERBLOCK_FIXED_SIZE + H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE)) < 0)
+    if (H5F__set_eoa(f, H5FD_MEM_SUPER, (haddr_t)H5F_SUPERBLOCK_SPEC_READ_SIZE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "set end of space allocation request failed");
 
     /* Set up the user data for cache callbacks */
