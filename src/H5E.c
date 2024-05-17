@@ -866,7 +866,6 @@ H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_sta
     H5E_stack_t *dst_stack, *src_stack; /* Error stacks */
     herr_t       ret_value = SUCCEED;   /* Return value */
 
-    /* Don't clear the error stack! :-) */
     FUNC_ENTER_API(FAIL)
 
     /* Check args */
@@ -890,3 +889,114 @@ H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_sta
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eappend_stack() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Eis_paused
+ *
+ * Purpose:     Check if pushing errors on an error stack is paused
+ *
+ * Return:      Non-negative value on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Eis_paused(hid_t stack_id, hbool_t *is_paused)
+{
+    H5E_stack_t *stack;                 /* Error stack */
+    herr_t       ret_value = SUCCEED;   /* Return value */
+
+    /* Don't clear the error stack! :-) */
+    FUNC_ENTER_API_NOCLEAR(FAIL)
+
+    /* Get the correct error stack */
+    if (stack_id == H5E_DEFAULT) {
+        if (NULL == (stack = H5E__get_my_stack()))
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
+    } /* end if */
+    else {
+        /* Only clear the error stack if it's not the default stack */
+        H5E_clear_stack();
+
+        /* Get the error stack to operate on */
+        if (NULL == (stack = (H5E_stack_t *)H5I_object_verify(stack_id, H5I_ERROR_STACK)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an error stack ID");
+    } /* end else */
+
+    /* Check arguments */
+    if (NULL == is_paused)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "is_paused parameter is NULL");
+
+    /* Check if the stack is paused */
+    *is_paused = (stack->paused > 0);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Eis_paused() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Epause_stack
+ *
+ * Purpose:     Pause pushing errors on an error stack
+ *
+ * Return:      Non-negative value on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Epause_stack(hid_t stack_id)
+{
+    H5E_stack_t *stack;                 /* Error stack */
+    herr_t       ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Applications can't pause the default stack */
+    if (stack_id == H5E_DEFAULT)
+        HGOTO_ERROR(H5E_ERROR, H5E_BADVALUE, FAIL, "can't current use default error stack");
+    else
+        /* Get the error stack to operate on */
+        if (NULL == (stack = (H5E_stack_t *)H5I_object_verify(stack_id, H5I_ERROR_STACK)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an error stack ID");
+
+    /* Increment pause counter */
+    stack->paused++;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Epause_stack() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Eresume_stack
+ *
+ * Purpose:     Resume pushing errors on an error stack
+ *
+ * Return:      Non-negative value on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Eresume_stack(hid_t stack_id)
+{
+    H5E_stack_t *stack;                 /* Error stack */
+    herr_t       ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Applications can't resume the default stack */
+    if (stack_id == H5E_DEFAULT)
+        HGOTO_ERROR(H5E_ERROR, H5E_BADVALUE, FAIL, "can't current use default error stack");
+    else
+        /* Get the error stack to operate on */
+        if (NULL == (stack = (H5E_stack_t *)H5I_object_verify(stack_id, H5I_ERROR_STACK)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an error stack ID");
+
+    /* Check for pause/resume imbalance */
+    if (0 == stack->paused)
+        HGOTO_ERROR(H5E_ERROR, H5E_BADRANGE, FAIL, "resuming more than paused");
+
+    /* Decrement pause counter */
+    stack->paused--;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Eresume_stack() */
