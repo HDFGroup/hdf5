@@ -2898,6 +2898,11 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
             VERIFY(is_dense, true, "H5O__is_attr_dense_test");
         }
 
+        /* Verify github issue #1388 that the last renamed attribute
+           with/without tracking corder can be deleted */
+        ret = H5Adelete(dataset, new_attrname);
+        CHECK(ret, FAIL, "H5Adelete");
+
         /* Close Dataset */
         ret = H5Dclose(dataset);
         CHECK(ret, FAIL, "H5Dclose");
@@ -2930,8 +2935,8 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     dataset = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
     CHECK(dataset, H5I_INVALID_HID, "H5Dopen2");
 
-    /* Verify renamed attributes */
-    for (u = 0; u < (max_compact * 2); u++) {
+    /* Verify renamed attributes (the last attribute was deleted) */
+    for (u = 0; u < (max_compact * 2 - 1); u++) {
         unsigned value; /* Attribute value */
 
         /* Open attribute */
