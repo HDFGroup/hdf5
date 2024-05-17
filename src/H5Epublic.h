@@ -340,11 +340,11 @@ H5_DLL herr_t H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t cl
  *
  *          The library may pause pushing errors on the default error stack
  *          when performing "speculative" operations, such as testing for the
- *          existance of something that could be located at one of many
+ *          existence of something that could be located at one of many
  *          locations. \p stack_id is the error stack to query, and the value
  *          pointed to by \p is_paused is set to TRUE/FALSE.
  *
- *          If an error occurs while attepting to query the status of \p stack_id,
+ *          If an error occurs while attempting to query the status of \p stack_id,
  *          the value pointed to by \p is_paused is unchanged.
  *
  * \since 1.14.4
