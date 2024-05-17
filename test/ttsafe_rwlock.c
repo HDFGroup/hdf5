@@ -27,8 +27,8 @@
 #define COUNT_MAX 1024
 
 typedef struct {
-    H5TS_rwlock_t lock;
-    int val;
+    H5TS_rwlock_t  lock;
+    int            val;
     H5TS_barrier_t barrier;
 } atomic_counter_t;
 
@@ -121,7 +121,7 @@ verify_counting(void *_counter)
 {
     atomic_counter_t *counter = (atomic_counter_t *)_counter;
     herr_t            result;
-    int               last_val = 0;
+    int               last_val  = 0;
     H5TS_thread_ret_t ret_value = 0;
 
     /* Count up & down a number of times */
@@ -178,10 +178,10 @@ verify_counting(void *_counter)
 void
 tts_rwlock(void)
 {
-    H5TS_pool_t *pool = NULL;
-    H5TS_rwlock_t lock;
+    H5TS_pool_t     *pool = NULL;
+    H5TS_rwlock_t    lock;
     atomic_counter_t counter;
-    herr_t       result;
+    herr_t           result;
 
     /* Sanity checks on bad input */
     result = H5TS_rwlock_init(NULL);
@@ -197,14 +197,12 @@ tts_rwlock(void)
     result = H5TS_rwlock_destroy(NULL);
     VERIFY(result, FAIL, "H5TS_rwlock_destroy");
 
-
     /* Create & destroy lock */
     result = H5TS_rwlock_init(&lock);
     CHECK_I(result, "H5TS_rwlock_init");
 
     result = H5TS_rwlock_destroy(&lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
-
 
     /* Read lock & unlock */
     result = H5TS_rwlock_init(&lock);
@@ -219,7 +217,6 @@ tts_rwlock(void)
     result = H5TS_rwlock_destroy(&lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
 
-
     /* Write lock & unlock */
     result = H5TS_rwlock_init(&lock);
     CHECK_I(result, "H5TS_rwlock_init");
@@ -232,7 +229,6 @@ tts_rwlock(void)
 
     result = H5TS_rwlock_destroy(&lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
-
 
     /* Hold read lock w/many threads */
     result = H5TS_rwlock_init(&counter.lock);
@@ -258,7 +254,6 @@ tts_rwlock(void)
     result = H5TS_rwlock_destroy(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
 
-
     /* Increment counter w/many threads */
     result = H5TS_rwlock_init(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_init");
@@ -279,7 +274,6 @@ tts_rwlock(void)
 
     result = H5TS_rwlock_destroy(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
-
 
     /* Increment & decrement counter w/many threads while reading */
     result = H5TS_rwlock_init(&counter.lock);
@@ -315,4 +309,3 @@ tts_rwlock(void)
 } /* end tts_rwlock() */
 
 #endif /*H5_HAVE_THREADS*/
-
