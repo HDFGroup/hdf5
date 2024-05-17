@@ -839,6 +839,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
     htri_t              attr_sharable;       /* Flag indicating attributes are shareable */
     htri_t              shared_mesg;         /* Should this message be stored in the Shared Message table? */
     bool                attr_exists;         /* Attribute exists in v2 B-tree */
+    H5O_ainfo_t         tainfo    = *ainfo;  /* Copy of ainfo */
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -977,8 +978,12 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
     else if (shared_mesg < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "error determining if message should be shared");
 
-    /* Delete old attribute from dense storage */
-    if (H5A__dense_remove(f, ainfo, old_name) < 0)
+    /* Deactivate the field so that H5A__dense_remove() won't delete the new renamed attribute
+       that was just added to the creation order index v2 B-tree via H5A__dense_insert() */
+    tainfo.corder_bt2_addr = HADDR_UNDEF;
+
+    /* Only delete the old attribute (before rename) from the name index v2 B-tree */
+    if (H5A__dense_remove(f, (const H5O_ainfo_t *)&tainfo, old_name) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute in dense storage");
 
 done:
