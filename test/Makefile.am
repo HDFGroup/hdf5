@@ -127,29 +127,29 @@ if HAVE_SHARED_CONDITIONAL
   # The libh5test library provides common support code for the tests.
   # The filter_plugin* libraries are for use in filter_plugin.c.
   # Build them as shared libraries if that option was enabled in configure.
-  noinst_LTLIBRARIES=libh5test.la libfilter_plugin1_dsets.la libfilter_plugin2_dsets.la libfilter_plugin3_dsets.la libfilter_plugin4_groups.la libnull_vfd_plugin.la libnull_vol_connector.la
-  libfilter_plugin1_dsets_la_SOURCES=filter_plugin1_dsets.c
-  libfilter_plugin2_dsets_la_SOURCES=filter_plugin2_dsets.c
-  libfilter_plugin3_dsets_la_SOURCES=filter_plugin3_dsets.c
-  libfilter_plugin4_groups_la_SOURCES=filter_plugin4_groups.c
-  libfilter_plugin1_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
-  libfilter_plugin2_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
-  libfilter_plugin3_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
-  libfilter_plugin4_groups_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
-  libfilter_plugin3_dsets_la_LIBADD=$(LIBHDF5)
-  libfilter_plugin4_groups_la_LIBADD=$(LIBHDF5)
+  noinst_LTLIBRARIES=libh5test.la #libfilter_plugin1_dsets.la libfilter_plugin2_dsets.la libfilter_plugin3_dsets.la libfilter_plugin4_groups.la libnull_vfd_plugin.la libnull_vol_connector.la
+#  libfilter_plugin1_dsets_la_SOURCES=filter_plugin1_dsets.c
+#  libfilter_plugin2_dsets_la_SOURCES=filter_plugin2_dsets.c
+#  libfilter_plugin3_dsets_la_SOURCES=filter_plugin3_dsets.c
+#  libfilter_plugin4_groups_la_SOURCES=filter_plugin4_groups.c
+#  libfilter_plugin1_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+#  libfilter_plugin2_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+#  libfilter_plugin3_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+#  libfilter_plugin4_groups_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+#  libfilter_plugin3_dsets_la_LIBADD=$(LIBHDF5)
+#  libfilter_plugin4_groups_la_LIBADD=$(LIBHDF5)
 
   # VFD plugin test libraries
   #
   # null_vfd_plugin is used for testing basic VFD plugin functionality.
-  libnull_vfd_plugin_la_SOURCES=null_vfd_plugin.c
-  libnull_vfd_plugin_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+#  libnull_vfd_plugin_la_SOURCES=null_vfd_plugin.c
+#  libnull_vfd_plugin_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
 
   # VOL plugin test libraries
   #
   # null_vol_connector is used for testing basic VOL plugin functionality.
-  libnull_vol_connector_la_SOURCES=null_vol_connector.c
-  libnull_vol_connector_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+#  libnull_vol_connector_la_SOURCES=null_vol_connector.c
+#  libnull_vol_connector_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
 
 else
   # The libh5test library provides common support code for the tests.

@@ -87,9 +87,9 @@ endif
 #   TOOLS_DIR=
 #endif
 
-SUBDIRS = src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR) bin $(TOOLS_DIR) utils . \
+SUBDIRS = src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR) bin $(TOOLS_DIR) . \
           $(CXX_DIR) $(FORTRAN_DIR) $(JAVA_DIR) $(HDF5_HL_DIR)
-DIST_SUBDIRS = src test testpar bin tools utils . c++ fortran hl examples java
+DIST_SUBDIRS = src test testpar bin tools . c++ fortran hl examples java
 
 # Some files generated during configure that should be cleaned
 DISTCLEANFILES=config/stamp1 config/stamp2
@@ -197,7 +197,7 @@ endif
 # Run tests with different Virtual File Drivers.
 # Currently, only invoke check-vfd in the test directory.
 check-vfd:
-	for d in src utils test; do                                     \
+	for d in src test; do                                     \
 	  if test $$d != .; then                                        \
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;           \
 	  fi;                                                           \

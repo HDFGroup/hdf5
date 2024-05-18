@@ -182,6 +182,7 @@ tts_rwlock(void)
     H5TS_rwlock_t    lock;
     atomic_counter_t counter;
     herr_t           result;
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Sanity checks on bad input */
     result = H5TS_rwlock_init(NULL);
@@ -196,6 +197,7 @@ tts_rwlock(void)
     VERIFY(result, FAIL, "H5TS_rwlock_wrunlock");
     result = H5TS_rwlock_destroy(NULL);
     VERIFY(result, FAIL, "H5TS_rwlock_destroy");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Create & destroy lock */
     result = H5TS_rwlock_init(&lock);
@@ -203,6 +205,7 @@ tts_rwlock(void)
 
     result = H5TS_rwlock_destroy(&lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Read lock & unlock */
     result = H5TS_rwlock_init(&lock);
@@ -216,6 +219,7 @@ tts_rwlock(void)
 
     result = H5TS_rwlock_destroy(&lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Write lock & unlock */
     result = H5TS_rwlock_init(&lock);
@@ -229,6 +233,7 @@ tts_rwlock(void)
 
     result = H5TS_rwlock_destroy(&lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Hold read lock w/many threads */
     result = H5TS_rwlock_init(&counter.lock);
@@ -253,6 +258,7 @@ tts_rwlock(void)
 
     result = H5TS_rwlock_destroy(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Increment counter w/many threads */
     result = H5TS_rwlock_init(&counter.lock);
@@ -274,6 +280,7 @@ tts_rwlock(void)
 
     result = H5TS_rwlock_destroy(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Increment & decrement counter w/many threads while reading */
     result = H5TS_rwlock_init(&counter.lock);
@@ -305,6 +312,7 @@ tts_rwlock(void)
 
     result = H5TS_rwlock_destroy(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
 } /* end tts_rwlock() */
 
