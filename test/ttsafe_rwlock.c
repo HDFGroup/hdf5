@@ -154,7 +154,8 @@ fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthrea
             result = H5TS_rwlock_rdunlock(&counter->lock);
             CHECK_I(result, "H5TS_rdlock_wrunlock");
 
-            HDnanosleep(&sleep_spec, NULL);
+            //HDnanosleep(&sleep_spec, NULL);
+            H5TS_thread_yield();
         } while (last_val < (NUM_WRITERS * COUNT_MAX));
 
         /* Wait at barrier, to ensure all threads have finishend counting up */
@@ -178,7 +179,8 @@ fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthrea
             result = H5TS_rwlock_rdunlock(&counter->lock);
             CHECK_I(result, "H5TS_rdlock_wrunlock");
 
-            HDnanosleep(&sleep_spec, NULL);
+            //HDnanosleep(&sleep_spec, NULL);
+            H5TS_thread_yield();
         } while (last_val > 0);
     }
 

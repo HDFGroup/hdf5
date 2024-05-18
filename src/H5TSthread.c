@@ -147,6 +147,25 @@ H5TS_thread_setcancelstate(int H5_ATTR_UNUSED state, int H5_ATTR_UNUSED *oldstat
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
 } /* H5TS_thread_setcancelstate() */
+
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_yield
+ *
+ * Purpose:  Yield thread execution
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+void
+H5TS_thread_yield(void)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    thrd_yield();
+
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY                                                                 \
+} /* H5TS_thread_yield() */
 #else
 #ifdef H5_HAVE_WIN_THREADS
 /*--------------------------------------------------------------------------
@@ -250,6 +269,25 @@ H5TS_thread_setcancelstate(int H5_ATTR_UNUSED state, int H5_ATTR_UNUSED *oldstat
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
 } /* H5TS_thread_setcancelstate() */
+
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_yield
+ *
+ * Purpose:  Yield thread execution
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+void
+H5TS_thread_yield(void)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    SwitchToThread();
+
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY                                                                 \
+} /* H5TS_thread_yield() */
 #else
 /*--------------------------------------------------------------------------
  * Function: H5TS_thread_create
@@ -343,6 +381,25 @@ H5TS_thread_setcancelstate(int state, int *oldstate)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_thread_setcancelstate() */
+
+/*--------------------------------------------------------------------------
+ * Function: H5TS_thread_yield
+ *
+ * Purpose:  Yield thread execution
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+void
+H5TS_thread_yield(void)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    sched_yield();
+
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY                                                                 \
+} /* H5TS_thread_yield() */
 #endif
 #endif
 #endif /* H5_HAVE_THREADS */
