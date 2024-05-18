@@ -51,41 +51,41 @@ include $(top_srcdir)/config/commence.am
 
 # Conditionals.  These conditionals are defined during configure
 # Define each variable to empty if it is not used to placate pmake
-if BUILD_CXX_CONDITIONAL
-   CXX_DIR =c++
-else
+#if BUILD_CXX_CONDITIONAL
+#   CXX_DIR =c++
+#else
    CXX_DIR=
-endif
-if BUILD_FORTRAN_CONDITIONAL
-   FORTRAN_DIR =fortran
-else
+#endif
+#if BUILD_FORTRAN_CONDITIONAL
+#   FORTRAN_DIR =fortran
+#else
    FORTRAN_DIR=
-endif
-if BUILD_JAVA_CONDITIONAL
-   JAVA_DIR=java
-else
+#endif
+#if BUILD_JAVA_CONDITIONAL
+#   JAVA_DIR=java
+#else
    JAVA_DIR=
-endif
-if BUILD_HDF5_HL_CONDITIONAL
-   HDF5_HL_DIR =hl
-else
+#endif
+#if BUILD_HDF5_HL_CONDITIONAL
+#   HDF5_HL_DIR =hl
+#else
    HDF5_HL_DIR=
-endif
+#endif
 if BUILD_TESTS_CONDITIONAL
    TESTSERIAL_DIR =test
 else
    TESTSERIAL_DIR=
 endif
-if BUILD_TESTS_PARALLEL_CONDITIONAL
-   TESTPARALLEL_DIR =testpar
-else
-   TESTPARALLEL_DIR=
-endif
-if BUILD_TOOLS_CONDITIONAL
-   TOOLS_DIR =tools
-else
-   TOOLS_DIR=
-endif
+#if BUILD_TESTS_PARALLEL_CONDITIONAL
+#   TESTPARALLEL_DIR =testpar
+#else
+#   TESTPARALLEL_DIR=
+#endif
+#if BUILD_TOOLS_CONDITIONAL
+#   TOOLS_DIR =tools
+#else
+#   TOOLS_DIR=
+#endif
 
 SUBDIRS = src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR) bin $(TOOLS_DIR) utils . \
           $(CXX_DIR) $(FORTRAN_DIR) $(JAVA_DIR) $(HDF5_HL_DIR)

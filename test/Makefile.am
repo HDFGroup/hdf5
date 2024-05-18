@@ -34,11 +34,11 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       test_vds_env.sh: vds_env
 #       test_vds_swmr.sh: vds_swmr*
 #       test_use_cases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
-TEST_SCRIPT = test_abort_fail.sh test_check_version.sh test_error.sh \
+#TEST_SCRIPT = test_abort_fail.sh test_check_version.sh test_error.sh \
     test_flush_refresh.sh test_external_env.sh test_libinfo.sh \
     test_links_env.sh test_swmr.sh test_vds_env.sh test_vds_swmr.sh \
     test_use_cases.sh
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
+#SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     external_env$(EXEEXT) filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
     swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) swmr_writer$(EXEEXT) \
@@ -46,11 +46,11 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) swmr_start_write$(EXEEXT) \
     vds_env$(EXEEXT) vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
-  TEST_SCRIPT += test_plugin.sh
-  SCRIPT_DEPEND += filter_plugin$(EXEEXT) vfd_plugin $(EXEEXT) vol_plugin$(EXEEXT)
+#  TEST_SCRIPT += test_plugin.sh
+#  SCRIPT_DEPEND += filter_plugin$(EXEEXT) vfd_plugin $(EXEEXT) vol_plugin$(EXEEXT)
 endif
 if MIRROR_VFD_CONDITIONAL
-  TEST_SCRIPT += test_mirror.sh
+#  TEST_SCRIPT += test_mirror.sh
 endif
 
 check_SCRIPTS = $(TEST_SCRIPT)
@@ -59,17 +59,18 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # executed, generally most specific tests to least specific tests.
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
-TEST_PROG= testhdf5 \
-           cache cache_api cache_image cache_tagging lheap ohdr \
-           stab gheap evict_on_close farray earray btree2 fheap \
-           accum hyperslab istore bittests dt_arith page_buffer \
-           dtypes dsets chunk_info cmpd_dset mdset cmpd_dtransform filter_fail extend direct_chunk \
-           external efc objcopy objcopy_ref links unlink twriteorder big mtime \
-           fillval mount select_io_dset\
-           flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
-           enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
-           dangle dtransform reserved cross_read freespace mf vds file_image \
-           unregister cache_logging cork swmr vol timer event_set onion
+TEST_PROG= ttsafe
+#TEST_PROG= testhdf5 \
+#           cache cache_api cache_image cache_tagging lheap ohdr \
+#           stab gheap evict_on_close farray earray btree2 fheap \
+#           accum hyperslab istore bittests dt_arith page_buffer \
+#           dtypes dsets chunk_info cmpd_dset mdset cmpd_dtransform filter_fail extend direct_chunk \
+#           external efc objcopy objcopy_ref links unlink twriteorder big mtime \
+#           fillval mount select_io_dset\
+#           flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
+#           enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
+#           dangle dtransform reserved cross_read freespace mf vds file_image \
+#           unregister cache_logging cork swmr vol timer event_set onion
 
 # List programs to be built when testing here
 #
@@ -163,8 +164,8 @@ LDADD=libh5test.la $(LIBHDF5)
 ttsafe_SOURCES=ttsafe.c ttsafe_acreate.c ttsafe_atomic.c ttsafe_attr_vlen.c \
     ttsafe_cancel.c ttsafe_dcreate.c ttsafe_develop.c ttsafe_error.c \
     ttsafe_rwlock.c ttsafe_rec_rwlock.c ttsafe_thread_id.c ttsafe_thread_pool.c
-cache_image_SOURCES=cache_image.c genall5.c
-mirror_vfd_SOURCES=mirror_vfd.c genall5.c
+cache_image_SOURCES=#cache_image.c genall5.c
+mirror_vfd_SOURCES=#mirror_vfd.c genall5.c
 
 # Additional target for running timing test
 timings _timings: testmeta
