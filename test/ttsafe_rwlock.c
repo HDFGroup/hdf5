@@ -129,6 +129,7 @@ verify_counting(void *_counter)
     herr_t            result;
     int               last_val  = 0;
     H5TS_thread_ret_t ret_value = 0;
+    struct timespec sleep_spec = {0, 100}; /* Sleep for 100 ns */
 
     /* Count up & down a number of times */
     for (unsigned u = 0; u < NUM_ITERS; u++) {
@@ -152,6 +153,8 @@ fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthrea
 
             result = H5TS_rwlock_rdunlock(&counter->lock);
             CHECK_I(result, "H5TS_rdlock_wrunlock");
+
+            HDnanosleep(&sleep_spec, NULL);
         } while (last_val < (NUM_WRITERS * COUNT_MAX));
 
         /* Wait at barrier, to ensure all threads have finishend counting up */
@@ -174,6 +177,8 @@ fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthrea
 
             result = H5TS_rwlock_rdunlock(&counter->lock);
             CHECK_I(result, "H5TS_rdlock_wrunlock");
+
+            HDnanosleep(&sleep_spec, NULL);
         } while (last_val > 0);
     }
 
