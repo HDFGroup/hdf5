@@ -93,6 +93,7 @@ fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthrea
 
             /* Increment value */
             counter->val++;
+fprintf(stderr, "%s:%u - %llu, counter->val = %d\n", __func__, __LINE__, (unsigned long long)pthread_self(), counter->val);
 
             result = H5TS_rwlock_wrunlock(&counter->lock);
             CHECK_I(result, "H5TS_rwlock_wrunlock");
@@ -111,6 +112,7 @@ fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthrea
 
             /* Decrement value */
             counter->val--;
+fprintf(stderr, "%s:%u - %llu, counter->val = %d\n", __func__, __LINE__, (unsigned long long)pthread_self(), counter->val);
 
             result = H5TS_rwlock_wrunlock(&counter->lock);
             CHECK_I(result, "H5TS_rwlock_wrunlock");
