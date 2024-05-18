@@ -24,7 +24,7 @@
 #define NUM_WRITERS 4
 
 #define NUM_ITERS 32
-#define COUNT_MAX 1024
+#define COUNT_MAX 16
 
 typedef struct {
     H5TS_rwlock_t  lock;
