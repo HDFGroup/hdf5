@@ -51,45 +51,45 @@ include $(top_srcdir)/config/commence.am
 
 # Conditionals.  These conditionals are defined during configure
 # Define each variable to empty if it is not used to placate pmake
-#if BUILD_CXX_CONDITIONAL
-#   CXX_DIR =c++
-#else
+if BUILD_CXX_CONDITIONAL
+   CXX_DIR =c++
+else
    CXX_DIR=
-#endif
-#if BUILD_FORTRAN_CONDITIONAL
-#   FORTRAN_DIR =fortran
-#else
+endif
+if BUILD_FORTRAN_CONDITIONAL
+   FORTRAN_DIR =fortran
+else
    FORTRAN_DIR=
-#endif
-#if BUILD_JAVA_CONDITIONAL
-#   JAVA_DIR=java
-#else
+endif
+if BUILD_JAVA_CONDITIONAL
+   JAVA_DIR=java
+else
    JAVA_DIR=
-#endif
-#if BUILD_HDF5_HL_CONDITIONAL
-#   HDF5_HL_DIR =hl
-#else
+endif
+if BUILD_HDF5_HL_CONDITIONAL
+   HDF5_HL_DIR =hl
+else
    HDF5_HL_DIR=
-#endif
+endif
 if BUILD_TESTS_CONDITIONAL
    TESTSERIAL_DIR =test
 else
    TESTSERIAL_DIR=
 endif
-#if BUILD_TESTS_PARALLEL_CONDITIONAL
-#   TESTPARALLEL_DIR =testpar
-#else
-#   TESTPARALLEL_DIR=
-#endif
-#if BUILD_TOOLS_CONDITIONAL
-#   TOOLS_DIR =tools
-#else
-#   TOOLS_DIR=
-#endif
+if BUILD_TESTS_PARALLEL_CONDITIONAL
+   TESTPARALLEL_DIR =testpar
+else
+   TESTPARALLEL_DIR=
+endif
+if BUILD_TOOLS_CONDITIONAL
+   TOOLS_DIR =tools
+else
+   TOOLS_DIR=
+endif
 
-SUBDIRS = src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR) bin $(TOOLS_DIR) . \
+SUBDIRS = src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR) bin $(TOOLS_DIR) utils . \
           $(CXX_DIR) $(FORTRAN_DIR) $(JAVA_DIR) $(HDF5_HL_DIR)
-DIST_SUBDIRS = src test testpar bin tools . c++ fortran hl examples java
+DIST_SUBDIRS = src test testpar bin tools utils . c++ fortran hl examples java
 
 # Some files generated during configure that should be cleaned
 DISTCLEANFILES=config/stamp1 config/stamp2
@@ -197,7 +197,7 @@ endif
 # Run tests with different Virtual File Drivers.
 # Currently, only invoke check-vfd in the test directory.
 check-vfd:
-	for d in src test; do                                     \
+	for d in src utils test; do                                     \
 	  if test $$d != .; then                                        \
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;           \
 	  fi;                                                           \

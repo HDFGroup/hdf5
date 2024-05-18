@@ -8,9 +8,9 @@
 # which you will need to set to "Read and write permissions"
 #
 name: clang-format Commit Changes
-#on: 
-#  workflow_dispatch:
-#  push:
+on: 
+  workflow_dispatch:
+  push:
 permissions:
   contents: read
 jobs:

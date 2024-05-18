@@ -98,35 +98,26 @@ main(int argc, char *argv[])
 
     /* Initialize testing framework */
     TestInit(argv[0], NULL, NULL);
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Tests are generally arranged from least to most complexity... */
     AddTest("is_threadsafe", tts_is_threadsafe, NULL, "library threadsafe status", NULL);
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 #ifdef H5_HAVE_THREADS
     AddTest("thread_pool", tts_thread_pool, NULL, "thread pools", NULL);
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 #ifndef H5_HAVE_STDATOMIC_H
     /* C11 atomics only tested when emulated */
     AddTest("atomics", tts_atomics, NULL, "emulation of C11 atomics", NULL);
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 #endif /* H5_HAVE_STDATOMIC_H */
     AddTest("rwlock", tts_rwlock, NULL, "simple R/W locks", NULL);
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 #ifndef H5_HAVE_WIN_THREADS
     /* Recursive R/W locks */
     AddTest("rec_rwlock_1", tts_rec_rwlock_smoke_check_1, NULL, "recursive R/W lock smoke check 1 -- basic",
             NULL);
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     AddTest("rec_rwlock_2", tts_rec_rwlock_smoke_check_2, NULL,
             "recursive R/W lock smoke check 2 -- mob of readers", NULL);
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     AddTest("rec_rwlock_3", tts_rec_rwlock_smoke_check_3, NULL,
             "recursive R/W lock smoke check 3 -- mob of writers", NULL);
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     AddTest("rec_rwlock_4", tts_rec_rwlock_smoke_check_4, NULL,
             "recursive R/W lock smoke check 4 -- mixed mob", NULL);
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 #endif /* !H5_HAVE_WIN_THREADS */
 
 #ifdef H5_HAVE_THREADSAFE
@@ -158,15 +149,12 @@ fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Display testing information */
     TestInfo(argv[0]);
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Parse command line arguments */
     TestParseCmdLine(argc, argv);
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Perform requested testing */
     PerformTests();
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Display test summary, if requested */
     if (GetTestSummary())

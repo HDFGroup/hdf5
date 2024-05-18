@@ -2,7 +2,7 @@
 # https://github.com/codespell-project/codespell
 # https://github.com/codespell-project/actions-codespell
 name: codespell
-#on: [push, pull_request]
+on: [push, pull_request]
 permissions:
   contents: read
 jobs:

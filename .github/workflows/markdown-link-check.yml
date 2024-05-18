@@ -1,10 +1,10 @@
 name: Check Markdown links
 
-#on:
-#  workflow_dispatch:
-#  push:
-#  pull_request:
-#    branches: [ develop ]
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    branches: [ develop ]
 
 jobs:
   markdown-link-check:

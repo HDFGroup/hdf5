@@ -1,18 +1,18 @@
 name: hdf5 dev CMake CI
 
 # Controls when the action will run. Triggers the workflow on a call
-#on:
-#  workflow_call:
-#    inputs:
-#      thread_safety:
-#        description: "TS or empty"
-#        required: true
-#        type: string
-#
-#      build_mode:
-#        description: "release vs. debug build"
-#        required: true
-#        type: string
+on:
+  workflow_call:
+    inputs:
+      thread_safety:
+        description: "TS or empty"
+        required: true
+        type: string
+
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
 
 permissions:
   contents: read

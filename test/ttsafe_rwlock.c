@@ -123,7 +123,6 @@ verify_counting(void *_counter)
     herr_t            result;
     int               last_val  = 0;
     H5TS_thread_ret_t ret_value = 0;
-    struct timespec sleep_spec = {0, 100}; /* Sleep for 100 ns */
 
     /* Count up & down a number of times */
     for (unsigned u = 0; u < NUM_ITERS; u++) {
@@ -146,7 +145,7 @@ verify_counting(void *_counter)
             result = H5TS_rwlock_rdunlock(&counter->lock);
             CHECK_I(result, "H5TS_rdlock_wrunlock");
 
-            //HDnanosleep(&sleep_spec, NULL);
+            /* Give the writers a chance to make progress */
             H5TS_thread_yield();
         } while (last_val < (NUM_WRITERS * COUNT_MAX));
 
@@ -169,7 +168,7 @@ verify_counting(void *_counter)
             result = H5TS_rwlock_rdunlock(&counter->lock);
             CHECK_I(result, "H5TS_rdlock_wrunlock");
 
-            //HDnanosleep(&sleep_spec, NULL);
+            /* Give the writers a chance to make progress */
             H5TS_thread_yield();
         } while (last_val > 0);
     }
@@ -189,7 +188,6 @@ tts_rwlock(void)
     H5TS_rwlock_t    lock;
     atomic_counter_t counter;
     herr_t           result;
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Sanity checks on bad input */
     result = H5TS_rwlock_init(NULL);
@@ -204,7 +202,6 @@ fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     VERIFY(result, FAIL, "H5TS_rwlock_wrunlock");
     result = H5TS_rwlock_destroy(NULL);
     VERIFY(result, FAIL, "H5TS_rwlock_destroy");
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Create & destroy lock */
     result = H5TS_rwlock_init(&lock);
@@ -212,7 +209,6 @@ fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_rwlock_destroy(&lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Read lock & unlock */
     result = H5TS_rwlock_init(&lock);
@@ -226,7 +222,6 @@ fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_rwlock_destroy(&lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Write lock & unlock */
     result = H5TS_rwlock_init(&lock);
@@ -240,7 +235,6 @@ fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_rwlock_destroy(&lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Hold read lock w/many threads */
     result = H5TS_rwlock_init(&counter.lock);
@@ -265,7 +259,6 @@ fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_rwlock_destroy(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Increment counter w/many threads */
     result = H5TS_rwlock_init(&counter.lock);
@@ -287,7 +280,6 @@ fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_rwlock_destroy(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Increment & decrement counter w/many threads while reading */
     result = H5TS_rwlock_init(&counter.lock);
@@ -319,7 +311,6 @@ fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_rwlock_destroy(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
 } /* end tts_rwlock() */
 
