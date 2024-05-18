@@ -164,7 +164,7 @@ H5TS_thread_yield(void)
 
     thrd_yield();
 
-    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY                                                                 \
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* H5TS_thread_yield() */
 #else
 #ifdef H5_HAVE_WIN_THREADS
@@ -286,7 +286,7 @@ H5TS_thread_yield(void)
 
     SwitchToThread();
 
-    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY                                                                 \
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* H5TS_thread_yield() */
 #else
 /*--------------------------------------------------------------------------
@@ -398,7 +398,7 @@ H5TS_thread_yield(void)
 
     sched_yield();
 
-    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY                                                                 \
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* H5TS_thread_yield() */
 #endif
 #endif

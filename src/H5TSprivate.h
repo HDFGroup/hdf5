@@ -241,7 +241,7 @@ H5_DLL herr_t H5TS_thread_create(H5TS_thread_t *thread, H5TS_thread_start_func_t
 H5_DLL herr_t H5TS_thread_join(H5TS_thread_t thread, H5TS_thread_ret_t *ret_val);
 H5_DLL herr_t H5TS_thread_detach(H5TS_thread_t thread);
 H5_DLL herr_t H5TS_thread_setcancelstate(int state, int *oldstate);
-H5_DLL void H5TS_thread_yield(void);
+H5_DLL void   H5TS_thread_yield(void);
 
 /* Thread pools */
 H5_DLL herr_t H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads);
