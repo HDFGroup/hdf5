@@ -24,7 +24,7 @@
 #define NUM_WRITERS 4
 
 #define NUM_ITERS 32
-#define COUNT_MAX 256
+#define COUNT_MAX 1024
 
 typedef struct {
     H5TS_rwlock_t  lock;
@@ -81,10 +81,8 @@ count_up_and_down(void *_counter)
     /* Count up & down a number of times */
     for (unsigned u = 0; u < NUM_ITERS; u++) {
         /* Wait at barrier, to ensure all threads are ready to count */
-fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthread_self());
         result = H5TS_barrier_wait(&counter->barrier);
         CHECK_I(result, "H5TS_barrier_wait");
-fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthread_self());
 
         /* Count up */
         for (unsigned v = 0; v < COUNT_MAX; v++) {
@@ -93,17 +91,14 @@ fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthrea
 
             /* Increment value */
             counter->val++;
-//fprintf(stderr, "%s:%u - %llu, counter->val = %d\n", __func__, __LINE__, (unsigned long long)pthread_self(), counter->val);
 
             result = H5TS_rwlock_wrunlock(&counter->lock);
             CHECK_I(result, "H5TS_rwlock_wrunlock");
         }
 
         /* Wait at barrier, to ensure all threads have finishend counting up */
-fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthread_self());
         result = H5TS_barrier_wait(&counter->barrier);
         CHECK_I(result, "H5TS_barrier_wait");
-fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthread_self());
 
         /* Count down */
         for (unsigned v = 0; v < COUNT_MAX; v++) {
@@ -112,7 +107,6 @@ fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthrea
 
             /* Decrement value */
             counter->val--;
-//fprintf(stderr, "%s:%u - %llu, counter->val = %d\n", __func__, __LINE__, (unsigned long long)pthread_self(), counter->val);
 
             result = H5TS_rwlock_wrunlock(&counter->lock);
             CHECK_I(result, "H5TS_rwlock_wrunlock");
@@ -134,10 +128,8 @@ verify_counting(void *_counter)
     /* Count up & down a number of times */
     for (unsigned u = 0; u < NUM_ITERS; u++) {
         /* Wait at barrier, to ensure all threads are ready to count */
-fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthread_self());
         result = H5TS_barrier_wait(&counter->barrier);
         CHECK_I(result, "H5TS_barrier_wait");
-fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthread_self());
 
         /* Verify that counter goes only up */
         do {
@@ -159,10 +151,8 @@ fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthrea
         } while (last_val < (NUM_WRITERS * COUNT_MAX));
 
         /* Wait at barrier, to ensure all threads have finishend counting up */
-fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthread_self());
         result = H5TS_barrier_wait(&counter->barrier);
         CHECK_I(result, "H5TS_barrier_wait");
-fprintf(stderr, "%s:%u - %llu\n", __func__, __LINE__, (unsigned long long)pthread_self());
 
         /* Verify that counter goes only down */
         do {
