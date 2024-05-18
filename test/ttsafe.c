@@ -95,7 +95,6 @@ gen_name(int value)
 int
 main(int argc, char *argv[])
 {
-SetTestVerbosity(VERBO_HI);
 
     /* Initialize testing framework */
     TestInit(argv[0], NULL, NULL);
