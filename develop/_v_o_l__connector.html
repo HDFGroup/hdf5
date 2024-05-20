@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.70ed053</span>
+   &#160;<span id="projectnumber">1.15.0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -260,6 +260,7 @@ Testing Your Connector</h2>
 <h2><a class="anchor" id="subsecVOLPassthrough"></a>
 Passthrough Connectors</h2>
 <p>Coming Soon</p>
+<p>Note: Passthrough VOL connectors should avoid doing anything with the file in the open and create callbacks except opening it. If connectors need to do anything else they should use the post open callback (H5VL_NATIVE_FILE_POST_OPEN op_type for the file "optional" callback), making sure to perform operations on the file only after passing the post open call down to the terminal connector. The post open callback is made for both file open and file create calls.</p>
 <h2><a class="anchor" id="subsecVOLAsync"></a>
 Asynchronous Operations</h2>
 <p>Coming Soon</p>
