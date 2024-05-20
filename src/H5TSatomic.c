@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose: C11 atomicr emulation outines
+ * Purpose: C11 atomic emulation outines
  *
  * Note:  Because this threadsafety framework operates outside the library,
  *        it does not use the error stack (although it does use error macros
