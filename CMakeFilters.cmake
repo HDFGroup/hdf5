@@ -10,8 +10,8 @@
 # help@hdfgroup.org.
 #
 option (USE_LIBAEC_STATIC "Use static AEC library" OFF)
-option (ZLIB_USE_EXTERNAL "Use External Library Building for ZLIB else search" OFF)
-option (SZIP_USE_EXTERNAL "Use External Library Building for SZIP else search" OFF)
+option (ZLIB_USE_EXTERNAL "Use External Library Building for ZLIB" OFF)
+option (SZIP_USE_EXTERNAL "Use External Library Building for SZIP" OFF)
 
 if (NOT ZLIB_USE_LOCALCONTENT)
   set (ZLIB_URL ${ZLIB_TGZ_ORIGPATH}/${ZLIB_TGZ_NAME})
@@ -119,9 +119,14 @@ if (HDF5_ENABLE_SZIP_SUPPORT)
   if (NOT SZIP_USE_EXTERNAL)
     set(libaec_USE_STATIC_LIBS ${HDF5_USE_LIBAEC_STATIC})
     set(SZIP_FOUND FALSE)
-    find_package (SZIP NAMES ${LIBAEC_PACKAGE_NAME}${HDF_PACKAGE_EXT} COMPONENTS static shared)
-    if (NOT SZIP_FOUND)
-      find_package (SZIP) # Legacy find
+    find_package (libaec 1.0.5 CONFIG)
+    if (SZIP_FOUND)
+      set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${H5_SZIP_LIBRARIES})
+    else ()
+      find_package (SZIP NAMES ${LIBAEC_PACKAGE_NAME}${HDF_PACKAGE_EXT} COMPONENTS static shared)
+      if (NOT SZIP_FOUND)
+        find_package (SZIP) # Legacy find
+      endif ()
     endif ()
     set(H5_SZIP_FOUND ${SZIP_FOUND})
     if (H5_SZIP_FOUND)
