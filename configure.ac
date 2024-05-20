@@ -4617,7 +4617,8 @@ fi
 ## linker flags:  -l with no library name; -l <libname>, specifically gfortran or m.
 ## This sed script corrects "-l <libname>" first and then "-l " with no library name.
 ## If the order is not preserved, all instances of "-l " will be removed.
-sed -e '/^postdeps/ s/-l \([a-zA-Z]\)/-l\1/g' -e '/^postdeps/ s/-l //g' -i libtool
+sed -e '/^postdeps/ s/-l \([a-zA-Z]\)/-l\1/g' -e '/^postdeps/ s/-l //g' libtool > libtool.bak
+mv -- libtool.bak libtool
 
 ## show the configure settings
 cat src/libhdf5.settings
