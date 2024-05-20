@@ -689,6 +689,8 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         do {
 #ifdef H5_HAVE_PREADWRITE
             bytes_read = HDpread(file->fd, buf, bytes_in, offset);
+            if (bytes_read > 0)
+                offset += bytes_read;
 #else
             bytes_read  = HDread(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
@@ -719,13 +721,13 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         assert((size_t)bytes_read <= size);
 
         size -= (size_t)bytes_read;
-        offset += (HDoff_t)bytes_read;
+        addr += (haddr_t)bytes_read;
         buf = (char *)buf + bytes_read;
     } /* end while */
 
 #ifndef H5_HAVE_PREADWRITE
     /* Update current position */
-    file->pos = (haddr_t)offset;
+    file->pos = addr;
     file->op  = OP_READ;
 #endif /* H5_HAVE_PREADWRITE */
 
@@ -797,6 +799,8 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
         do {
 #ifdef H5_HAVE_PREADWRITE
             bytes_wrote = HDpwrite(file->fd, buf, bytes_in, offset);
+            if (bytes_wrote > 0)
+                offset += bytes_wrote;
 #else
             bytes_wrote = HDwrite(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
@@ -821,7 +825,7 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
         assert((size_t)bytes_wrote <= size);
 
         size -= (size_t)bytes_wrote;
-        offset += (HDoff_t)bytes_wrote;
+        addr += (haddr_t)bytes_wrote;
         buf = (const char *)buf + bytes_wrote;
     } /* end while */
 
@@ -830,8 +834,8 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
     file->pos = addr;
     file->op  = OP_WRITE;
 #endif /* H5_HAVE_PREADWRITE */
-    if ((haddr_t)offset > file->eof)
-        file->eof = (haddr_t)offset;
+    if (addr > file->eof)
+        file->eof = addr;
 
 done:
 #ifndef H5_HAVE_PREADWRITE
