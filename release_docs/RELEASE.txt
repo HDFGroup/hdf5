@@ -1674,6 +1674,22 @@ Bug Fixes since HDF5-1.14.0 release
 
     Configuration
     -------------
+    - Fixed/reverted an Autotools configure hack that causes problems on MacOS
+
+      A sed line in configure.ac was added in the past to paper over some
+      problems with older versions of the Autotools that would add incorrect
+      linker flags. This used the -i option in a way that caused silent
+      errors on MacOS that did not break the build.
+
+      The original fix for this problem (in 1.14.4) removed the sed line
+      entirely, but it turns out that the sed cleanup is still necessary
+      on some systems, where empty -l options will be added to the libtool
+      script.
+
+      This sed line has been restored and reworked to not use -i.
+
+      Fixes GitHub issues #3843 and #4448
+
     - Fixed a list index out of range issue in the runTest.cmake file
 
       Fixed an issue in config/cmake/runTest.cmake where the CMake logic
@@ -1700,16 +1716,6 @@ Bug Fixes since HDF5-1.14.0 release
 
         * HDF5_ENABLE_DOXY_WARNINGS: ON/OFF (Default: OFF)
         * --enable-doxygen-errors: enable/disable (Default: disable)
-
-    - Removed an Autotools configure hack that causes problems on MacOS
-
-      A sed line in configure.ac was added in the past to paper over some
-      problems with older versions of the Autotools that would add incorrect
-      linker flags. This hack is not needed with recent versions of the
-      Autotools and the sed line errors on MacOS (though this was a silent
-      error that didn't break the build) so the hack has been removed.
-
-      Fixes GitHub issue #3843
 
     - Fixed an issue where the h5tools_test_utils test program was being
       installed on the system for Autotools builds of HDF5
