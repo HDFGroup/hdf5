@@ -21,6 +21,7 @@
 #include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
+#include "H5Wrapper.h"
 #include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
 

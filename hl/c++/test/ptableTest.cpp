@@ -13,6 +13,7 @@
 /* ptableTest.cpp */
 
 #include <iostream>
+#include "H5Wrapper.h"
 #include "ptableTest.h"
 
 using namespace H5;

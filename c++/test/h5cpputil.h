@@ -21,6 +21,7 @@
 #ifndef H5cpputil_H
 #define H5cpputil_H
 
+#include "H5Wrapper.h"
 #include "h5test.h"
 
 using namespace H5;

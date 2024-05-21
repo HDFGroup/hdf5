@@ -18,6 +18,7 @@
  * February 2004
  */
 
+#include "H5Wrapper.h"
 /* High-level library internal header file */
 #include "H5HLprivate2.h"
 

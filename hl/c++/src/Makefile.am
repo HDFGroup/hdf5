@@ -19,7 +19,7 @@ include $(top_srcdir)/config/commence.am
 include $(top_srcdir)/config/lt_vers.am
 
 # Include src directory
-AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/c++/src -I$(top_srcdir)/hl/src
 
 # This is our main target
 lib_LTLIBRARIES=libhdf5_hl_cpp.la

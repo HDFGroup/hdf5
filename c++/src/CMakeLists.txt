@@ -75,6 +75,7 @@ set (CPP_HDRS
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5PropList.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5StrType.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5VarLenType.h
+    ${HDF5_CPP_SRC_SOURCE_DIR}/H5Wrapper.h
 )
 
 if (BUILD_STATIC_LIBS)
