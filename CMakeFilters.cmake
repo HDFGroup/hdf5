@@ -10,8 +10,8 @@
 # help@hdfgroup.org.
 #
 option (USE_LIBAEC_STATIC "Use static AEC library" OFF)
-option (ZLIB_USE_EXTERNAL "Use External Library Building for ZLIB" OFF)
-option (SZIP_USE_EXTERNAL "Use External Library Building for SZIP" OFF)
+option (ZLIB_USE_EXTERNAL "Use External Library Building for ZLIB else search" OFF)
+option (SZIP_USE_EXTERNAL "Use External Library Building for SZIP else search" OFF)
 
 if (NOT ZLIB_USE_LOCALCONTENT)
   set (ZLIB_URL ${ZLIB_TGZ_ORIGPATH}/${ZLIB_TGZ_NAME})
@@ -32,8 +32,8 @@ include (ExternalProject)
 set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)")
 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
 if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
-  set (ZLIB_USE_EXTERNAL ON CACHE BOOL "Use External Library Building for ZLIB" FORCE)
-  set (SZIP_USE_EXTERNAL ON CACHE BOOL "Use External Library Building for SZIP" FORCE)
+  set (ZLIB_USE_EXTERNAL ON CACHE BOOL "Use External Library Building for ZLIB else search" FORCE)
+  set (SZIP_USE_EXTERNAL ON CACHE BOOL "Use External Library Building for SZIP else search" FORCE)
   if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT")
     set (ZLIB_URL ${ZLIB_GIT_URL} CACHE STRING "Path to zlib git repository")
     set (ZLIB_BRANCH ${ZLIB_GIT_BRANCH})
@@ -57,9 +57,9 @@ if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MAT
     endif ()
   else ()
     set (HDF5_ENABLE_Z_LIB_SUPPORT OFF CACHE BOOL "" FORCE)
-    set (ZLIB_USE_EXTERNAL OFF CACHE BOOL "Use External Library Building for ZLIB")
+    set (ZLIB_USE_EXTERNAL OFF CACHE BOOL "Use External Library Building for ZLIB else search")
     set (HDF5_ENABLE_SZIP_SUPPORT OFF CACHE BOOL "" FORCE)
-    set (SZIP_USE_EXTERNAL OFF CACHE BOOL "Use External Library Building for SZIP")
+    set (SZIP_USE_EXTERNAL OFF CACHE BOOL "Use External Library Building for SZIP else search")
   endif ()
 endif ()
 
