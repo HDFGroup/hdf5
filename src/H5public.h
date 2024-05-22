@@ -91,7 +91,7 @@
 /**
  * Short version string
  */
-#define H5_VERS_STR "1.15.0"
+#define H5_VERS_STR "1.14.5-1"
 /**
  * Full version string
  */
