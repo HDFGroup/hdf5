@@ -162,7 +162,7 @@
  *
  * \subsubsection subsubsec_filter_plugins_prog_write Writing a Filter Function
  * The HDF5 filter function for the dynamically loaded filter feature should be written as any custom filter
- * described in <a href="http://www.hdfgroup.org/HDF5/doc/H5.user/Filters.html">Custom Filters</a>. See the
+ * described in <a href="https://\DOXURL/_f_i_l_t_e_r.html">Custom Filters</a>. See the
  * “Example” section, section 5, of that document to get an idea of the simple filter function, and see the
  * example of the more sophisticated HDF5 bzip2 filter function in the “Building an HDF5 bzip2 Plugin Example”
  * section. The HDF5 bzip2 filter function is also available for download from <a
