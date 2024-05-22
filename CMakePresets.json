@@ -72,8 +72,8 @@
         "HDF5_ENABLE_PLUGIN_SUPPORT": "ON",
         "H5PL_ALLOW_EXTERNAL_SUPPORT": {"type": "STRING", "value": "TGZ"},
         "PLUGIN_PACKAGE_NAME": {"type": "STRING", "value": "pl"},
-        "PLUGIN_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot"},
-        "PLUGIN_TGZ_NAME": {"type": "STRING", "value": "hdf5_plugins-master.tar.gz"}
+        "PLUGIN_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/HDFGroup/hdf5_plugins/releases/download/hdf5-1.14.4"},
+        "PLUGIN_TGZ_NAME": {"type": "STRING", "value": "hdf5_plugins-1.14.4.tar.gz"}
       }
     },
     {
