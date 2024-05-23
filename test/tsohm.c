@@ -2422,7 +2422,7 @@ test_sohm_size2(int close_reopen)
         (list_index_small.attrs1 - list_index_small.interleaved))
         VERIFY(0, 1, "h5_get_file_size");
 
-    /* Give it some overhead (for checkin to move messages into continuation message) */
+    /* Give it some overhead (for commit to move messages into continuation message) */
     if ((list_index_small.attrs1 - list_index_small.interleaved) >
         (h5_stat_size_t)((float)(btree_index.attrs1 - btree_index.interleaved) * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
