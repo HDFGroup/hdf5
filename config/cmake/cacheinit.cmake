@@ -56,7 +56,6 @@ set (ZLIB_GIT_BRANCH "develop" CACHE STRING "" FORCE)
 set (ZLIBNG_PACKAGE_NAME "zlib-ng" CACHE STRING "Name of ZLIBNG package" FORCE)
 set (ZLIBNG_TGZ_NAME "2.1.6.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
 set (ZLIBNG_TGZ_ORIGPATH "https://github.com/zlib-ng/zlib-ng/archive/refs/tags" CACHE STRING "Use ZLIBNG from original location" FORCE)
-set (ZLIBNG_USE_LOCALCONTENT ON CACHE BOOL "Use local file for ZLIBNG FetchContent" FORCE)
 set (ZLIBNG_GIT_URL "https://github.com/zlib-ng/zlib-ng.git" CACHE STRING "Use ZLIBNG from  GitHub repository" FORCE)
 set (ZLIBNG_GIT_BRANCH "develop" CACHE STRING "" FORCE)
 

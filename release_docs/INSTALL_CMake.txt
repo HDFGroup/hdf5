@@ -531,10 +531,10 @@ These five steps are described in detail below.
             set (ZLIB_USE_LOCALCONTENT ON CACHE BOOL "Use local file for ZLIB FetchContent" FORCE)
             set (ZLIB_GIT_URL "https://github.com/madler/zlib.git" CACHE STRING "Use ZLIB from  GitHub repository" FORCE)
             set (ZLIB_GIT_BRANCH "develop" CACHE STRING "" FORCE)
+            set (HDF5_USE_ZLIB_NG OFF CACHE BOOL "Use zlib-ng library as zlib library" FORCE)
             set (ZLIBNG_PACKAGE_NAME "zlib-ng" CACHE STRING "Name of ZLIBNG package" FORCE)
             set (ZLIBNG_TGZ_NAME "2.1.6.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
             set (ZLIBNG_TGZ_ORIGPATH "https://github.com/zlib-ng/zlib-ng/archive/refs/tags" CACHE STRING "Use ZLIBNG from original location" FORCE)
-            set (ZLIBNG_USE_LOCALCONTENT ON CACHE BOOL "Use local file for ZLIBNG FetchContent" FORCE)
             set (ZLIBNG_GIT_URL "https://github.com/zlib-ng/zlib-ng.git" CACHE STRING "Use ZLIBNG from  GitHub repository" FORCE)
             set (ZLIBNG_GIT_BRANCH "develop" CACHE STRING "" FORCE)
             set (LIBAEC_PACKAGE_NAME "libaec" CACHE STRING "Name of AEC SZIP package" FORCE)
@@ -932,15 +932,15 @@ HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                         OFF
 HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                               OFF
 HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                           ON
 
-ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB"        OFF
-ZLIB_TGZ_ORIGPATH           "Use ZLIB from original location"               "https://github.com/madler/zlib/releases/download/v1.2.13"
-ZLIB_TGZ_NAME               "Use ZLIB from original compressed file"        "zlib-1.2.13.tar.gz"
+if (HDF5_USE_ZLIB_NG)
+    ZLIBNG_USE_EXTERNAL     "Use External Library Building for ZLIBNG"      OFF
+    ZLIBNG_TGZ_ORIGPATH     "Use ZLIBNG from original location"             "https://github.com/zlib-ng/zlib-ng/releases/tag/2.1.6"
+    ZLIBNG_TGZ_NAME         "Use ZLIBNG from original compressed file"      "2.1.6.tar.gz"
+else
+    ZLIB_USE_EXTERNAL       "Use External Library Building for ZLIB"        OFF
+    ZLIB_TGZ_ORIGPATH       "Use ZLIB from original location"               "https://github.com/madler/zlib/releases/download/v1.2.13"
+    ZLIB_TGZ_NAME           "Use ZLIB from original compressed file"        "zlib-1.2.13.tar.gz"
 ZLIB_USE_LOCALCONTENT       "Use local file for ZLIB FetchContent"          ON
-
-ZLIBNG_USE_EXTERNAL           "Use External Library Building for ZLIBNG"    OFF
-ZLIBNG_TGZ_ORIGPATH           "Use ZLIBNG from original location"           "https://github.com/zlib-ng/zlib-ng/archive/refs/tags"
-ZLIBNG_TGZ_NAME               "Use ZLIBNG from original compressed file"    "2.1.6.tar.gz"
-ZLIBNG_USE_LOCALCONTENT       "Use local file for ZLIBNG FetchContent"      ON
 
 SZIP_USE_EXTERNAL           "Use External Library Building for SZIP"        OFF
 if (HDF5_ENABLE_SZIP_SUPPORT)

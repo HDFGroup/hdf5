@@ -34,8 +34,8 @@
       "inherits": ["ci-base-tgz", "ci-CompressionVars"],
       "cacheVariables": {
         "HDF5_PACKAGE_EXTLIBS": "ON",
+        "HDF5_USE_ZLIB_NG": "OFF",
         "ZLIB_USE_LOCALCONTENT": "OFF",
-        "ZLIBNG_USE_LOCALCONTENT": "OFF",
         "LIBAEC_USE_LOCALCONTENT": "OFF"
       }
     },
