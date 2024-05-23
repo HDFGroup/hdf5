@@ -302,7 +302,7 @@ H5P__dapl_vds_file_pref_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNU
 /*-------------------------------------------------------------------------
  * Function:    H5P__dapl_vds_file_pref_enc
  *
- * Purpose:     Callback routine which is called whenever the vds file flags
+ * Purpose:     Callback routine which is called whenever the vds file prefix
  *              property in the dataset access property list is
  *              encoded.
  *
