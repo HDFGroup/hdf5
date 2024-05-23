@@ -120,7 +120,7 @@ typedef struct H5FA_hdr_t {
     haddr_t dblk_addr; /* Address of Fixed Array Data block */
 
     /* Statistics for Fixed Array (stored in header) */
-    H5FA_stat_t stats; /* Statistcs for Fixed Array */
+    H5FA_stat_t stats; /* Statistics for Fixed Array */
 
     /* Computed/cached values (not stored in header) */
     size_t  rc;             /* Reference count of the header                                */

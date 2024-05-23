@@ -7722,7 +7722,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                         /* Keep going, nothing to split off */
                     } /* end else */
 
-                    /* Check for overlaps between span 'a' and midle of span 'b' */
+                    /* Check for overlaps between span 'a' and middle of span 'b' */
 
                     /* Make certain both spans either have a down span or both don't have one */
                     assert((span_a->down != NULL && span_b->down != NULL) ||

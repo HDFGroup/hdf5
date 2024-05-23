@@ -164,7 +164,7 @@ do {                                                                            
  *         into the IOC I/O Queue, and set to true when the entry is dispatched
  *         to the worker thread pool for execution.
  *
- *         When in_progress is FALS, the entry is said to be pending.
+ *         When in_progress is false, the entry is said to be pending.
  *
  * counter: uint32_t containing a serial number assigned to this IOC
  *         I/O Queue entry.  Note that this will roll over on long

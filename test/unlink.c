@@ -207,7 +207,7 @@ test_many(hid_t file)
     } /* end for */
     PASSED();
 
-    /* Create a bunch of names and unlink them from the midle */
+    /* Create a bunch of names and unlink them from the middle */
     TESTING("outward unlink");
     for (i = 0; i < how_many; i++) {
         snprintf(name, sizeof(name), "obj_%05d", i);

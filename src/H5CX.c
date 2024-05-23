@@ -3365,7 +3365,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5CX_test_set_mpio_coll_chunk_link_num_true
  *
- * Purpose:     Sets the instrumented "collective chunk link num tru" value for the current API call context.
+ * Purpose:     Sets the instrumented "collective chunk link num true" value for the current API call context.
  *
  * Note:        Only sets value if property set in DXPL
  *
