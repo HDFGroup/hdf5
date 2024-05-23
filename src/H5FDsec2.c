@@ -48,14 +48,16 @@ static htri_t ignore_disabled_file_locks_s = FAIL;
  * occurs), and 'op' will be set to H5F_OP_UNKNOWN.
  */
 typedef struct H5FD_sec2_t {
-    H5FD_t         pub; /* public stuff, must be first      */
-    int            fd;  /* the filesystem file descriptor   */
-    haddr_t        eoa; /* end of allocated region          */
-    haddr_t        eof; /* end of file; current file size   */
+    H5FD_t  pub; /* public stuff, must be first      */
+    int     fd;  /* the filesystem file descriptor   */
+    haddr_t eoa; /* end of allocated region          */
+    haddr_t eof; /* end of file; current file size   */
+#ifndef H5_HAVE_PREADWRITE
     haddr_t        pos; /* current file I/O position        */
     H5FD_file_op_t op;  /* last operation                   */
-    bool           ignore_disabled_file_locks;
-    char           filename[H5FD_MAX_FILENAME_LEN]; /* Copy of file name from open operation */
+#endif                  /* H5_HAVE_PREADWRITE */
+    bool ignore_disabled_file_locks;
+    char filename[H5FD_MAX_FILENAME_LEN]; /* Copy of file name from open operation */
 #ifndef H5_HAVE_WIN32_API
     /* On most systems the combination of device and i-node number uniquely
      * identify a file.  Note that Cygwin, MinGW and other Windows POSIX
@@ -334,8 +336,10 @@ H5FD__sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 
     file->fd = fd;
     H5_CHECKED_ASSIGN(file->eof, haddr_t, sb.st_size, h5_stat_size_t);
+#ifndef H5_HAVE_PREADWRITE
     file->pos = HADDR_UNDEF;
     file->op  = OP_UNKNOWN;
+#endif /* H5_HAVE_PREADWRITE */
 #ifdef H5_HAVE_WIN32_API
     file->hFile = (HANDLE)_get_osfhandle(fd);
     if (INVALID_HANDLE_VALUE == file->hFile)
@@ -721,16 +725,20 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         buf = (char *)buf + bytes_read;
     } /* end while */
 
+#ifndef H5_HAVE_PREADWRITE
     /* Update current position */
     file->pos = addr;
     file->op  = OP_READ;
+#endif /* H5_HAVE_PREADWRITE */
 
 done:
+#ifndef H5_HAVE_PREADWRITE
     if (ret_value < 0) {
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op  = OP_UNKNOWN;
-    } /* end if */
+    }  /* end if */
+#endif /* H5_HAVE_PREADWRITE */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__sec2_read() */
@@ -822,17 +830,21 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
     } /* end while */
 
     /* Update current position and eof */
+#ifndef H5_HAVE_PREADWRITE
     file->pos = addr;
     file->op  = OP_WRITE;
-    if (file->pos > file->eof)
-        file->eof = file->pos;
+#endif /* H5_HAVE_PREADWRITE */
+    if (addr > file->eof)
+        file->eof = addr;
 
 done:
+#ifndef H5_HAVE_PREADWRITE
     if (ret_value < 0) {
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op  = OP_UNKNOWN;
-    } /* end if */
+    }  /* end if */
+#endif /* H5_HAVE_PREADWRITE */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__sec2_write() */
@@ -893,10 +905,12 @@ H5FD__sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UN
         /* Update the eof value */
         file->eof = file->eoa;
 
+#ifndef H5_HAVE_PREADWRITE
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op  = OP_UNKNOWN;
-    } /* end if */
+#endif /* H5_HAVE_PREADWRITE */
+    }  /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
