@@ -1428,7 +1428,7 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, had
     if (NULL == (sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG))) {
         H5G_bt_common_t udata; /*data to pass through B-tree	*/
 
-        H5E_clear_stack(NULL); /* discard that error */
+        H5E_clear_stack(); /* discard that error */
         udata.heap       = heap;
         udata.block_size = H5HL_heap_get_size(heap);
         if (H5B_debug(f, addr, stream, indent, fwidth, H5B_SNODE, &udata) < 0)

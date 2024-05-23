@@ -1112,7 +1112,9 @@ done:
         if (cont_msg_info.msgs)
             cont_msg_info.msgs = (H5O_cont_t *)H5FL_SEQ_FREE(H5O_cont_t, cont_msg_info.msgs);
 
-        if (H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
+        /* Unprotect the ohdr and delete it from cache since if we failed to load it it's in an inconsistent
+         * state */
+        if (H5O_unprotect(loc, oh, H5AC__DELETED_FLAG) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header");
     }
 
@@ -1233,8 +1235,19 @@ H5O_unprotect(const H5O_loc_t *loc, H5O_t *oh, unsigned oh_flags)
             } /* end if */
         }     /* end for */
 
-        /* Reet the flag from the unprotect */
+        /* Reset the flag from the unprotect */
         oh->chunks_pinned = false;
+    } /* end if */
+
+    /* Remove the other chunks if we're removing the ohdr (due to a failure) */
+    if (oh_flags & H5AC__DELETED_FLAG) {
+        unsigned u; /* Local index variable */
+
+        /* Iterate over chunks > 0 */
+        for (u = 1; u < oh->nchunks; u++)
+            /* Expunge chunk proxy from cache */
+            if (H5AC_expunge_entry(loc->file, H5AC_OHDR_CHK, oh->chunk[u].addr, H5AC__NO_FLAGS_SET) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to expunge object header chunk");
     } /* end if */
 
     /* Unprotect the object header */
@@ -1600,7 +1613,7 @@ H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type)
     /* Look up class for object header */
     if (NULL == (obj_class = H5O__obj_class_real(oh))) {
         /* Clear error stack from "failed" class lookup */
-        H5E_clear_stack(NULL);
+        H5E_clear_stack();
 
         /* Set type to "unknown" */
         *obj_type = H5O_TYPE_UNKNOWN;

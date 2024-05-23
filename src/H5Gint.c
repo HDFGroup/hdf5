@@ -439,7 +439,7 @@ H5G_open(const H5G_loc_t *loc)
     if ((shared_fo = (H5G_shared_t *)H5FO_opened(grp->oloc.file, grp->oloc.addr)) == NULL) {
 
         /* Clear any errors from H5FO_opened() */
-        H5E_clear_stack(NULL);
+        H5E_clear_stack();
 
         /* Open the group object */
         if (H5G__open_oid(grp) < 0)
@@ -506,7 +506,8 @@ static herr_t
 H5G__open_oid(H5G_t *grp)
 {
     bool   obj_opened = false;
-    herr_t ret_value  = SUCCEED;
+    htri_t msg_exists;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -523,8 +524,14 @@ H5G__open_oid(H5G_t *grp)
     obj_opened = true;
 
     /* Check if this object has the right message(s) to be treated as a group */
-    if ((H5O_msg_exists(&(grp->oloc), H5O_STAB_ID) <= 0) && (H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID) <= 0))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "not a group");
+    if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check if symbol table message exists");
+    if (!msg_exists) {
+        if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check if link info message exists");
+        if (!msg_exists)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "not a group");
+    }
 
 done:
     if (ret_value < 0) {

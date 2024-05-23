@@ -163,7 +163,7 @@ jobs:
       - name: Get published binary (MacOS)
         uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
-              name: tgz-osx12-${{ inputs.build_mode }}-binary
+              name: tgz-osx-${{ inputs.build_mode }}-binary
               path: ${{ github.workspace }}
 
       - name: Uncompress hdf5 binary (MacOS)
@@ -189,12 +189,12 @@ jobs:
               ls ${{ runner.workspace }}
 
       # symlinks the compiler executables to a common location 
-      - name: Setup GNU Fortran
-        uses: fortran-lang/setup-fortran@v1
-        id: setup-fortran
-        with:
-          compiler: gcc
-          version: 12
+      # - name: Setup GNU Fortran
+      #   uses: fortran-lang/setup-fortran@v1
+      #   id: setup-fortran
+      #   with:
+      #     compiler: gcc
+      #     version: 12
 
       - name: Run ctest (MacOS)
         id: run-ctest

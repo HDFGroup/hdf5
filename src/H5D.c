@@ -2137,7 +2137,7 @@ H5Dformat_convert(hid_t dset_id)
 
     /* Convert the dataset */
     if (H5VL_dataset_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_INTERNAL, FAIL, "can't convert dataset format");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTUPDATE, FAIL, "can't convert dataset format");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2442,7 +2442,7 @@ H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t op, void *op_dat
 
     /* Iterate over the chunks */
     if ((ret_value = H5VL_dataset_optional(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL)) < 0)
-        HERROR(H5E_BADITER, H5E_BADITER, "error iterating over dataset chunks");
+        HERROR(H5E_DATASET, H5E_BADITER, "error iterating over dataset chunks");
 
 done:
     FUNC_LEAVE_API(ret_value)

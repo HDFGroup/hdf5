@@ -859,7 +859,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
             char *ptr;
 
             /* Reset the error stack */
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
 
             /* Get last component of file_name */
             H5_GET_LAST_DELIMITER(file_name, ptr)
@@ -880,7 +880,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
         /* Adjust temporary file name if file not opened */
         if (NULL == src_file) {
             /* Reset the error stack */
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
 
             /* Strip "<drive-letter>:" */
             strncpy(temp_file_name, &file_name[2], temp_file_name_len);
@@ -928,11 +928,11 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
                     /* Check for file not opened */
                     if (NULL == src_file)
                         /* Reset the error stack */
-                        H5E_clear_stack(NULL);
+                        H5E_clear_stack();
                     /* Leave if file was opened */
                     else
                         break;
-                    H5E_clear_stack(NULL);
+                    H5E_clear_stack();
                 } /* end if */
             }     /* end while */
 
@@ -955,7 +955,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
         /* Check for file not opened */
         if (NULL == src_file)
             /* Reset the error stack */
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
     } /* end if */
 
     /* Try searching from main file's "extpath": see description in H5F_open() & H5_build_extpath() */
@@ -976,7 +976,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
             /* Check for file not opened */
             if (NULL == src_file)
                 /* Reset the error stack */
-                H5E_clear_stack(NULL);
+                H5E_clear_stack();
         } /* end if */
     }     /* end if */
 
@@ -988,7 +988,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
         /* Check for file not opened */
         if (NULL == src_file)
             /* Reset the error stack */
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
     } /* end if */
 
     /* try the 'resolved' name for the virtual file */
@@ -1019,7 +1019,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
         /* Check for file not opened */
         if (NULL == src_file)
             /* Reset the error stack */
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
     } /* end if */
 
     /* Set return value (possibly NULL or valid H5F_t *) */
@@ -1893,7 +1893,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      */
     if ((tent_flags == flags) || (lf == NULL)) {
         if (tent_flags != flags) {
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
             tent_flags = flags;
         }
 
