@@ -950,9 +950,11 @@ H5Epause_stack(hid_t stack_id)
 
     FUNC_ENTER_API(FAIL)
 
-    /* Applications can't pause the default stack */
-    if (stack_id == H5E_DEFAULT)
-        HGOTO_ERROR(H5E_ERROR, H5E_BADVALUE, FAIL, "can't current use default error stack");
+    /* Get the correct error stack */
+    if (stack_id == H5E_DEFAULT) {
+        if (NULL == (stack = H5E__get_my_stack()))
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
+    } /* end if */
     else
         /* Get the error stack to operate on */
         if (NULL == (stack = (H5E_stack_t *)H5I_object_verify(stack_id, H5I_ERROR_STACK)))
@@ -982,9 +984,11 @@ H5Eresume_stack(hid_t stack_id)
 
     FUNC_ENTER_API(FAIL)
 
-    /* Applications can't resume the default stack */
-    if (stack_id == H5E_DEFAULT)
-        HGOTO_ERROR(H5E_ERROR, H5E_BADVALUE, FAIL, "can't current use default error stack");
+    /* Get the correct error stack */
+    if (stack_id == H5E_DEFAULT) {
+        if (NULL == (stack = H5E__get_my_stack()))
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
+    } /* end if */
     else
         /* Get the error stack to operate on */
         if (NULL == (stack = (H5E_stack_t *)H5I_object_verify(stack_id, H5I_ERROR_STACK)))

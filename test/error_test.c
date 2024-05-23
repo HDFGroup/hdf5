@@ -747,25 +747,10 @@ test_pause(void)
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
-    H5E_BEGIN_TRY
-    {
-        ret = H5Epause_stack(H5E_DEFAULT);
-    }
-    H5E_END_TRY
-    if (ret >= 0)
-        TEST_ERROR;
-
     /* Check for bad arguments */
     H5E_BEGIN_TRY
     {
         ret = H5Eresume_stack(H5I_INVALID_HID);
-    }
-    H5E_END_TRY
-    if (ret >= 0)
-        TEST_ERROR;
-    H5E_BEGIN_TRY
-    {
-        ret = H5Eresume_stack(H5E_DEFAULT);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -811,6 +796,44 @@ test_pause(void)
 
     /* Close error stack */
     if (H5Eclose_stack(estack_id1) < 0)
+        TEST_ERROR;
+
+    /* Pause default error stack */
+    if (H5Epause_stack(H5E_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Check if stack is paused */
+    is_paused = FALSE;
+    if (H5Eis_paused(H5E_DEFAULT, &is_paused) < 0)
+        TEST_ERROR;
+    if (TRUE != is_paused)
+        TEST_ERROR;
+
+    /* Resume error stack */
+    if (H5Eresume_stack(H5E_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Check if stack is paused */
+    is_paused = TRUE;
+    if (H5Eis_paused(H5E_DEFAULT, &is_paused) < 0)
+        TEST_ERROR;
+    if (FALSE != is_paused)
+        TEST_ERROR;
+
+    /* Check for resuming too many times */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eresume_stack(H5E_DEFAULT);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+
+    /* Check if stack is paused, after trying to resume too many times */
+    is_paused = TRUE;
+    if (H5Eis_paused(H5E_DEFAULT, &is_paused) < 0)
+        TEST_ERROR;
+    if (FALSE != is_paused)
         TEST_ERROR;
 
     return 0;
