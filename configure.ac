@@ -4445,7 +4445,7 @@ AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
 AC_CONFIG_FILES([Makefile
                  doxygen/Doxyfile
                  src/Makefile
-                 src/libhdf5.settings
+                 src/libhdf5.settings:src/libhdf5.settings.autotools.in
                  src/H5build_settings.c:${BUILD_SETTINGS_FILE}
                  test/Makefile
                  test/H5srcdir_str.h

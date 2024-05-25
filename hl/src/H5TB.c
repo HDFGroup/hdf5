@@ -593,7 +593,7 @@ H5TBwrite_fields_index(hid_t loc_id, const char *dset_name, hsize_t nfields, con
     if ((write_type_id = H5Tcreate(H5T_COMPOUND, type_size)) < 0)
         goto out;
 
-    /* iterate tru the members */
+    /* iterate through the members */
     for (i = 0; i < nfields; i++) {
         unsigned j;
 
@@ -1032,7 +1032,7 @@ H5TBread_fields_index(hid_t loc_id, const char *dset_name, hsize_t nfields, cons
     if ((read_type_id = H5Tcreate(H5T_COMPOUND, type_size)) < 0)
         goto out;
 
-    /* iterate tru the members */
+    /* iterate through the members */
     for (i = 0; i < nfields; i++) {
         unsigned j;
 
@@ -2998,7 +2998,7 @@ H5TBget_field_info(hid_t loc_id, const char *dset_name, char *field_names[], siz
     if ((nfields = H5Tget_nmembers(tid)) < 0)
         goto out;
 
-    /* iterate tru the members */
+    /* iterate through the members */
     for (i = 0; i < nfields; i++) {
         /* get the member name */
         if (field_names) {

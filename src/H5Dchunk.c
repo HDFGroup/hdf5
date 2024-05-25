@@ -5376,7 +5376,7 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
     const uint32_t     *chunk_dim = layout->u.chunk.dim;  /* Convenience pointer to chunk dimensions */
     unsigned            space_ndims;                      /* Dataset's space rank */
     const hsize_t      *space_dim;                        /* Dataset's dataspace dimensions */
-    unsigned            op_dim;                           /* Current operationg dimension */
+    unsigned            op_dim;                           /* Current operating dimension */
     H5D_io_info_t       chk_io_info;                      /* Chunked I/O info object */
     H5D_chunk_ud_t      chk_udata;                        /* User data for locking chunk */
     H5D_storage_t       chk_store;                        /* Chunk storage information */
