@@ -190,7 +190,7 @@ H5_DLL herr_t H5TS_api_lock(void);
 H5_DLL herr_t H5TS_api_unlock(void);
 
 /* Retrieve per-thread info */
-H5_DLL uint64_t             H5TS_thread_id(void);
+H5_DLL herr_t H5TS_thread_id(uint64_t *id);
 H5_DLL struct H5CX_node_t **H5TS_get_api_ctx_ptr(void);
 H5_DLL struct H5E_stack_t  *H5TS_get_err_stack(void);
 #endif /* H5_HAVE_THREADSAFE */

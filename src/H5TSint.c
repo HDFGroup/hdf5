@@ -399,36 +399,37 @@ done:
  * Purpose:     Return an identifier for the current thread.
  *
  *              The ID satisfies the following properties:
- *                1) 1 <= ID <= UINT64_MAX
- *                2) ID is constant over a thread's lifetime.
- *                3) No two threads share an ID
+ *                1) ID 0 is reserved
+ *                2) 1 <= ID <= UINT64_MAX
+ *                3) ID is constant over a thread's lifetime
+ *                4) No two threads share an ID
  *
- *              ID 0 is reserved.  H5TS_thread_id() returns 0 if the library
- *              was not built with thread safety or if an error prevents it
- *              from assigning an ID.
- *
- * Return:      ID for the current thread on success / 0 on failure
+ * Return:      Non-negative on success / Negative on failure
  *
  *--------------------------------------------------------------------------
  */
-uint64_t
-H5TS_thread_id(void)
+herr_t
+H5TS_thread_id(uint64_t *id)
 {
     H5TS_tinfo_node_t *tinfo_node;
-    uint64_t           ret_value;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == id))
+        HGOTO_DONE(FAIL);
+
     /* Check if info for thread has been created */
     if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, (void **)&tinfo_node) < 0))
-        HGOTO_DONE(0);
+        HGOTO_DONE(FAIL);
     if (NULL == tinfo_node)
         /* Create thread info for this thread */
         if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
-            HGOTO_DONE(0);
+            HGOTO_DONE(FAIL);
 
     /* Set return value */
-    ret_value = tinfo_node->info.id;
+    *id = tinfo_node->info.id;
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
