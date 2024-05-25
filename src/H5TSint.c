@@ -412,7 +412,7 @@ herr_t
 H5TS_thread_id(uint64_t *id)
 {
     H5TS_tinfo_node_t *tinfo_node;
-    herr_t ret_value = SUCCEED;
+    herr_t             ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 

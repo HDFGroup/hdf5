@@ -1106,13 +1106,13 @@ h5_show_hostname(void)
     int mpi_rank, mpi_initialized, mpi_finalized;
 #endif
 #ifdef H5_HAVE_THREADSAFE
-    uint64_t thread_id = 0;  /* ID of thread */
+    uint64_t thread_id = 0; /* ID of thread */
 
     if (H5TS_thread_id(&thread_id) < 0)
         return;
 #endif
 
-    /* try show the process or thread id in multiple processes cases*/
+        /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
     MPI_Initialized(&mpi_initialized);
     MPI_Finalized(&mpi_finalized);

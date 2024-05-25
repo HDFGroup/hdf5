@@ -923,9 +923,9 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     const char      *min_str   = "No minor description"; /* Minor error description */
     bool             have_desc = true; /* Flag to indicate whether the error has a "real" description */
 #ifdef H5_HAVE_THREADSAFE
-    uint64_t         thread_id = 0;                      /* ID of thread */
+    uint64_t thread_id = 0; /* ID of thread */
 #endif
-    herr_t           ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1054,9 +1054,9 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     const char  *min_str   = "No minor description"; /* Minor error description */
     bool         have_desc = true; /* Flag to indicate whether the error has a "real" description */
 #ifdef H5_HAVE_THREADSAFE
-    uint64_t         thread_id = 0;                      /* ID of thread */
+    uint64_t thread_id = 0; /* ID of thread */
 #endif
-    herr_t       ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NOERR
 
