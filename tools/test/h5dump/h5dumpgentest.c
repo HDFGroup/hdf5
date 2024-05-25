@@ -6599,8 +6599,8 @@ gent_hyperslab(void)
 /*-------------------------------------------------------------------------
  * Function: gent_group_creation_order
  *
- * Purpose: generate a file with several groups with creation order set and not
- *  set tru its hierarchy
+ * Purpose: generate a file with several groups with creation order set and
+ *  not set throughout its hierarchy
  *
  *-------------------------------------------------------------------------
  */
