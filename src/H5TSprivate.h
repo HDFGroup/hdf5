@@ -197,7 +197,7 @@ typedef void (*H5TS_once_init_func_t)(void);
 #if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 typedef atomic_int  H5TS_atomic_int_t;
 typedef atomic_uint H5TS_atomic_uint_t;
-/* Suppress warning about _Atomic keywoard not supported in C99 */
+/* Suppress warning about _Atomic keyword not supported in C99 */
 H5_GCC_CLANG_DIAG_OFF("c99-c11-compat")
 typedef void *_Atomic H5TS_atomic_voidp_t;
 H5_GCC_CLANG_DIAG_ON("c99-c11-compat")
