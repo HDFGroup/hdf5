@@ -788,7 +788,7 @@ done:
     The encoding of property values will be done according to the file format
     setting in fapl_id.
  USAGE
-    herr_t H5Pencode(plist_id, buf, nalloc, fapl_id)
+    herr_t H5Pencode2(plist_id, buf, nalloc, fapl_id)
         hid_t plist_id;         IN: Identifier to property list to encode
         void *buf:              OUT: buffer to gold the encoded plist
         size_t *nalloc;         IN/OUT: size of buffer needed to encode plist
