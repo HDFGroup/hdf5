@@ -922,7 +922,10 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     const char      *maj_str   = "No major description"; /* Major error description */
     const char      *min_str   = "No minor description"; /* Minor error description */
     bool             have_desc = true; /* Flag to indicate whether the error has a "real" description */
-    herr_t           ret_value = SUCCEED;
+#ifdef H5_HAVE_THREADSAFE
+    uint64_t thread_id = 0; /* ID of thread */
+#endif
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -950,6 +953,11 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
 
     /* Get error class info */
     cls_ptr = maj_ptr->cls;
+
+#ifdef H5_HAVE_THREADSAFE
+    if (H5TS_thread_id(&thread_id) < 0)
+        HGOTO_DONE(FAIL);
+#endif
 
     /* Print error class header if new class */
     if (eprint->cls.lib_name == NULL || strcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
@@ -980,12 +988,12 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
             } /* end if */
 #ifdef H5_HAVE_THREADSAFE
             else
-                fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
+                fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
         } /* end block */
 #else
 #ifdef H5_HAVE_THREADSAFE
-        fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
+        fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
 #endif
         fprintf(stream, ":\n");
@@ -1045,7 +1053,10 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     const char  *maj_str   = "No major description"; /* Major error description */
     const char  *min_str   = "No minor description"; /* Minor error description */
     bool         have_desc = true; /* Flag to indicate whether the error has a "real" description */
-    herr_t       ret_value = SUCCEED;
+#ifdef H5_HAVE_THREADSAFE
+    uint64_t thread_id = 0; /* ID of thread */
+#endif
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1079,6 +1090,11 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     if (!cls_ptr)
         HGOTO_DONE(FAIL);
 
+#ifdef H5_HAVE_THREADSAFE
+    if (H5TS_thread_id(&thread_id) < 0)
+        HGOTO_DONE(FAIL);
+#endif
+
     /* Print error class header if new class */
     if (eprint->cls.lib_name == NULL || strcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
         /* update to the new class information */
@@ -1108,12 +1124,12 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
             } /* end if */
 #ifdef H5_HAVE_THREADSAFE
             else
-                fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
+                fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
         } /* end block */
 #else
 #ifdef H5_HAVE_THREADSAFE
-        fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
+        fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
 #endif
         fprintf(stream, ":\n");

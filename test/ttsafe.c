@@ -99,6 +99,26 @@ main(int argc, char *argv[])
     /* Initialize testing framework */
     TestInit(argv[0], NULL, NULL);
 
+#ifdef H5_HAVE_THREADS
+    MESSAGE(2, ("\nConcurrency Configuration:\n"));
+    MESSAGE(2, ("\tThreading enabled, using "));
+#ifdef H5_HAVE_C11_THREADS
+    MESSAGE(2, ("C11 threads\n"));
+#else
+#ifdef H5_HAVE_WIN_THREADS
+    MESSAGE(2, ("Windows threads\n"));
+#else
+    MESSAGE(2, ("pthreads\n"));
+#endif
+#endif
+#ifdef H5_HAVE_STDATOMIC_H
+    MESSAGE(2, ("\tC11 atomics enabled\n"));
+#endif
+#ifdef H5_HAVE_THREADSAFE
+    MESSAGE(2, ("\tThreadsafe API enabled\n"));
+#endif
+#endif
+
     /* Tests are generally arranged from least to most complexity... */
     AddTest("is_threadsafe", tts_is_threadsafe, NULL, "library threadsafe status", NULL);
 #ifdef H5_HAVE_THREADS

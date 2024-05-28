@@ -50,7 +50,7 @@ thread_main(void H5_ATTR_UNUSED *arg)
     int      min_id, max_id;
     uint64_t ntid, tid;
 
-    tid = H5TS_thread_id();
+    H5TS_thread_id(&tid);
 
     H5TS_mutex_lock(&used_lock);
     min_id = (times * NTHREADS) + 2;
@@ -74,7 +74,7 @@ thread_main(void H5_ATTR_UNUSED *arg)
     H5TS_barrier_wait(&barrier);
 
     /* Verify that the thread ID hasn't changed */
-    ntid = H5TS_thread_id();
+    H5TS_thread_id(&ntid);
     if (ntid != tid)
         TestErrPrintf("tid changed from %" PRIu64 " to %" PRIu64 " FAIL\n", tid, ntid);
 
@@ -108,7 +108,7 @@ tts_thread_id(void)
     /* Get the thread ID for the main thread, so that the child threads
      * always start from a thread ID of 2.
      */
-    tid = H5TS_thread_id();
+    H5TS_thread_id(&tid);
     VERIFY(tid, 1, "H5TS_thread_id");
 
     /* Start the test threads and join them twice to make sure that

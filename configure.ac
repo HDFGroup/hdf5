@@ -2157,6 +2157,9 @@ if test "X$THREADS" = "Xyes"; then
     ## Check for C11 threads, we want to use C11 threads unless the builder
     ## explicitly specifies --with-pthreads=(yes | path(s))
     AC_SUBST([HAVE_C11_THREADS]) HAVE_C11_THREADS=no
+    # Comment out check for C11 threads for now, since it conflicts with the
+    # current --std=c99 compile flags at configuration time.  When we switch to
+    # --std=c11, this can be uncommented.
     #AC_CHECK_HEADERS([threads.h],[HAVE_THREADS_H="yes"],[HAVE_THREADS_H="no"])
     if test "x$HAVE_THREADS_H" = "xyes"; then
         # Default or no --> C11 threads
@@ -4464,7 +4467,7 @@ AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
 AC_CONFIG_FILES([Makefile
                  doxygen/Doxyfile
                  src/Makefile
-                 src/libhdf5.settings
+                 src/libhdf5.settings:src/libhdf5.settings.autotools.in
                  src/H5build_settings.c:${BUILD_SETTINGS_FILE}
                  test/Makefile
                  test/H5srcdir_str.h
@@ -4631,6 +4634,13 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       ;;
   esac
 fi
+
+## HDF5 configure code created by autotools with gcc 4.9.2 is adding problematic
+## linker flags:  -l with no library name; -l <libname>, specifically gfortran or m.
+## This sed script corrects "-l <libname>" first and then "-l " with no library name.
+## If the order is not preserved, all instances of "-l " will be removed.
+sed -e '/^postdeps/ s/-l \([a-zA-Z]\)/-l\1/g' -e '/^postdeps/ s/-l //g' libtool > libtool.bak
+mv -- libtool.bak libtool
 
 ## show the configure settings
 cat src/libhdf5.settings

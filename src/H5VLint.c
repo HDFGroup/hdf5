@@ -354,7 +354,7 @@ H5VL__set_def_conn(void)
     H5P_genclass_t *def_fapclass;           /* Default file access property class */
     const char     *env_var;                /* Environment variable for default VOL connector */
     char           *buf          = NULL;    /* Buffer for tokenizing string */
-    hid_t           connector_id = -1;      /* VOL conntector ID */
+    hid_t           connector_id = -1;      /* VOL connector ID */
     void           *vol_info     = NULL;    /* VOL connector info */
     herr_t          ret_value    = SUCCEED; /* Return value */
 

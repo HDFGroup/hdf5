@@ -271,6 +271,8 @@ macro (TARGET_C_PROPERTIES wintarget libtype)
   if(MSVC)
     set_property(TARGET ${wintarget} APPEND PROPERTY LINK_FLAGS "${WIN_LINK_FLAGS}")
   endif()
+  #Disable UNITY_BUILD for now
+  set_property(TARGET ${wintarget} APPEND PROPERTY UNITY_BUILD OFF)
 endmacro ()
 
 #-----------------------------------------------------------------------------

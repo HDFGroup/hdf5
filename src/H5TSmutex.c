@@ -38,7 +38,6 @@
 /****************/
 /* Local Macros */
 /****************/
-#define H5TS_NO_THREAD_SAFETY_ANALYSIS H5_ATTR_THREAD_ANNOT(no_thread_safety_analysis)
 
 /******************/
 /* Local Typedefs */
