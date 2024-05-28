@@ -959,7 +959,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-int
+herr_t
 H5FDquery(const H5FD_t *file, unsigned long *flags /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
