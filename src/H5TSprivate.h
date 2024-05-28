@@ -46,9 +46,9 @@
 #define H5TS_ONCE_INITIALIZER ONCE_FLAG_INIT
 
 /* Thread macros */
-#define H5TS_thread_self()         thrd_current()
-#define H5TS_thread_equal(t1, t2)  thrd_equal((t1), (t2))
-#define H5TS_THREAD_RETURN_TYPE    H5TS_thread_ret_t
+#define H5TS_thread_self()        thrd_current()
+#define H5TS_thread_equal(t1, t2) thrd_equal((t1), (t2))
+#define H5TS_THREAD_RETURN_TYPE   H5TS_thread_ret_t
 
 /* Mutex macros */
 #define H5TS_MUTEX_TYPE_PLAIN     mtx_plain
@@ -56,16 +56,16 @@
 #else
 #ifdef H5_HAVE_WIN_THREADS
 /* Static initialization values */
-#define H5TS_ONCE_INITIALIZER      INIT_ONCE_STATIC_INIT
+#define H5TS_ONCE_INITIALIZER     INIT_ONCE_STATIC_INIT
 
 /* Thread macros */
-#define H5TS_thread_self()         GetCurrentThread()
-#define H5TS_thread_equal(t1, t2)  (GetThreadId(t1) == GetThreadId(t2))
-#define H5TS_THREAD_RETURN_TYPE    H5TS_thread_ret_t WINAPI
+#define H5TS_thread_self()        GetCurrentThread()
+#define H5TS_thread_equal(t1, t2) (GetThreadId(t1) == GetThreadId(t2))
+#define H5TS_THREAD_RETURN_TYPE   H5TS_thread_ret_t WINAPI
 
 /* Mutex macros */
-#define H5TS_MUTEX_TYPE_PLAIN      0
-#define H5TS_MUTEX_TYPE_RECURSIVE  1
+#define H5TS_MUTEX_TYPE_PLAIN     0
+#define H5TS_MUTEX_TYPE_RECURSIVE 1
 #else
 /* Static initialization values */
 #define H5TS_ONCE_INITIALIZER      PTHREAD_ONCE_INIT

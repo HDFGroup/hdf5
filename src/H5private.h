@@ -1163,23 +1163,22 @@ extern char H5_lib_vers_info_g[];
 #define H5CANCEL_DECL int oldstate = 0;
 
 /* Disable & restore canceling the thread */
-#define H5TS_DISABLE_CANCEL                                        \
-    do {                                                           \
-        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &oldstate); \
-    } while(0)
-#define H5TS_RESTORE_CANCEL                     \
-    do {                                        \
-        pthread_setcancelstate(oldstate, NULL); \
-    } while(0)
+#define H5TS_DISABLE_CANCEL                                                                                  \
+    do {                                                                                                     \
+        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &oldstate);                                           \
+    } while (0)
+#define H5TS_RESTORE_CANCEL                                                                                  \
+    do {                                                                                                     \
+        pthread_setcancelstate(oldstate, NULL);                                                              \
+    } while (0)
 #else
 /* Local variable for saving cancellation state */
-#define H5CANCEL_DECL /* */
+#define H5CANCEL_DECL       /* */
 
 /* Disable & restore canceling the thread */
 #define H5TS_DISABLE_CANCEL /* */
 #define H5TS_RESTORE_CANCEL /* */
 #endif
-
 
 /* Macros for entering & leaving an API routine in a threadsafe manner */
 #define H5_API_LOCK                                                                                          \
@@ -1200,7 +1199,7 @@ extern char H5_lib_vers_info_g[];
 #define H5CANCEL_DECL /* */
 
 /* No locks (non-threadsafe builds) */
-#define H5_API_LOCK /* */
+#define H5_API_LOCK   /* */
 #define H5_API_UNLOCK /* */
 
 #endif /* H5_HAVE_THREADSAFE */
