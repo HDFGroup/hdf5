@@ -153,8 +153,8 @@ tts_rec_rwlock_smoke_check_test_thread(void *_udata)
 
             while (rec_lock_depth > 0) {
                 if (rec_lock_depth >= max_rec_lock_depth || (rand() % 2) == 0) {
-                    result = H5TS__rec_rwlock_unlock(lock);
-                    CHECK_I(result, "H5TS__rec_rwlock_unlock");
+                    result = H5TS__rec_rwlock_rdunlock(lock);
+                    CHECK_I(result, "H5TS__rec_rwlock_rdunlock");
 
                     rec_lock_depth--;
                     udata->read_locks_released++;
@@ -181,8 +181,8 @@ tts_rec_rwlock_smoke_check_test_thread(void *_udata)
 
             while (rec_lock_depth > 0) {
                 if (rec_lock_depth >= max_rec_lock_depth || (rand() % 2) == 0) {
-                    result = H5TS__rec_rwlock_unlock(lock);
-                    CHECK_I(result, "H5TS__rec_rwlock_unlock");
+                    result = H5TS__rec_rwlock_wrunlock(lock);
+                    CHECK_I(result, "H5TS__rec_rwlock_wrunlock");
 
                     rec_lock_depth--;
                     udata->write_locks_released++;
@@ -280,8 +280,8 @@ tts_rec_rwlock_smoke_check_1(void)
     CHECK_I(result, "H5TS__rec_rwlock_rdlock");
 
     /* 3) Drop the read lock. */
-    result = H5TS__rec_rwlock_unlock(&lock);
-    CHECK_I(result, "H5TS__rec_rwlock_unlock");
+    result = H5TS__rec_rwlock_rdunlock(&lock);
+    CHECK_I(result, "H5TS__rec_rwlock_rdunlock");
 
 #if H5TS_ENABLE_REC_RWLOCK_STATS
     /* 4) Verify the expected stats, and then reset them. */
@@ -324,12 +324,12 @@ tts_rec_rwlock_smoke_check_1(void)
     CHECK_I(result, "H5TS__rec_rwlock_rdlock");
 
     /* 7) Drop the read lock. */
-    result = H5TS__rec_rwlock_unlock(&lock);
-    CHECK_I(result, "H5TS__rec_rwlock_unlock");
+    result = H5TS__rec_rwlock_rdunlock(&lock);
+    CHECK_I(result, "H5TS__rec_rwlock_rdunlock");
 
     /* 8) Drop the read lock a second time. */
-    result = H5TS__rec_rwlock_unlock(&lock);
-    CHECK_I(result, "H5TS__rec_rwlock_unlock");
+    result = H5TS__rec_rwlock_rdunlock(&lock);
+    CHECK_I(result, "H5TS__rec_rwlock_rdunlock");
 
 #if H5TS_ENABLE_REC_RWLOCK_STATS
     /* 9) Verify the expected stats, and then reset them. */
@@ -368,8 +368,8 @@ tts_rec_rwlock_smoke_check_1(void)
     CHECK_I(result, "H5TS__rec_rwlock_wrlock");
 
     /* 11) Drop the write lock. */
-    result = H5TS__rec_rwlock_unlock(&lock);
-    CHECK_I(result, "H5TS__rec_rwlock_unlock");
+    result = H5TS__rec_rwlock_wrunlock(&lock);
+    CHECK_I(result, "H5TS__rec_rwlock_wrunlock");
 
 #if H5TS_ENABLE_REC_RWLOCK_STATS
     /* 12) Verify the expected stats, and then reset them. */
@@ -412,12 +412,12 @@ tts_rec_rwlock_smoke_check_1(void)
     CHECK_I(result, "H5TS__rec_rwlock_wrlock");
 
     /* 15) Drop the write lock. */
-    result = H5TS__rec_rwlock_unlock(&lock);
-    CHECK_I(result, "H5TS__rec_rwlock_unlock");
+    result = H5TS__rec_rwlock_wrunlock(&lock);
+    CHECK_I(result, "H5TS__rec_rwlock_wrunlock");
 
     /* 16) Drop the write lock a second time. */
-    result = H5TS__rec_rwlock_unlock(&lock);
-    CHECK_I(result, "H5TS__rec_rwlock_unlock");
+    result = H5TS__rec_rwlock_wrunlock(&lock);
+    CHECK_I(result, "H5TS__rec_rwlock_wrunlock");
 
 #if H5TS_ENABLE_REC_RWLOCK_STATS
     /* 17) Verify the expected stats, and then reset them. */
@@ -460,8 +460,8 @@ tts_rec_rwlock_smoke_check_1(void)
     VERIFY(result, FAIL, "H5TS__rec_rwlock_rdlock");
 
     /* 20) Drop the write lock. */
-    result = H5TS__rec_rwlock_unlock(&lock);
-    CHECK_I(result, "H5TS__rec_rwlock_unlock");
+    result = H5TS__rec_rwlock_wrunlock(&lock);
+    CHECK_I(result, "H5TS__rec_rwlock_wrunlock");
 
     /* 21) Obtain a read lock. */
     result = H5TS__rec_rwlock_rdlock(&lock);
@@ -472,8 +472,8 @@ tts_rec_rwlock_smoke_check_1(void)
     VERIFY(result, FAIL, "H5TS__rec_rwlock_wrlock");
 
     /* 23) Drop the read lock. */
-    result = H5TS__rec_rwlock_unlock(&lock);
-    CHECK_I(result, "H5TS__rec_rwlock_unlock");
+    result = H5TS__rec_rwlock_rdunlock(&lock);
+    CHECK_I(result, "H5TS__rec_rwlock_rdunlock");
 
 #if H5TS_ENABLE_REC_RWLOCK_STATS
     /* 24) Verify the expected stats, and then reset them. */

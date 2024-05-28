@@ -238,7 +238,8 @@ H5_DLL herr_t H5TS__tinfo_term(void);
 H5_DLL herr_t H5TS__rec_rwlock_init(H5TS_rec_rwlock_t *lock);
 H5_DLL herr_t H5TS__rec_rwlock_rdlock(H5TS_rec_rwlock_t *lock);
 H5_DLL herr_t H5TS__rec_rwlock_wrlock(H5TS_rec_rwlock_t *lock);
-H5_DLL herr_t H5TS__rec_rwlock_unlock(H5TS_rec_rwlock_t *lock);
+H5_DLL herr_t H5TS__rec_rwlock_rdunlock(H5TS_rec_rwlock_t *lock);
+H5_DLL herr_t H5TS__rec_rwlock_wrunlock(H5TS_rec_rwlock_t *lock);
 H5_DLL herr_t H5TS__rec_rwlock_destroy(H5TS_rec_rwlock_t *lock);
 
 /* 'once' callbacks */

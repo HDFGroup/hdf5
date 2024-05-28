@@ -604,17 +604,92 @@ done:
 } /* end H5TS__rec_rwlock_wrlock() */
 
 /*--------------------------------------------------------------------------
- * Function:    H5TS__rec_rwlock_unlock
+ * Function:    H5TS__rec_rwlock_rdunlock
  *
- * Purpose:     Attempt to unlock either a read or a write lock on a
- *              recursive read / write lock.
+ * Purpose:     Attempt to unlock a read lock.
  *
  * Return:      Non-negative on success / Negative on failure
  *
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS__rec_rwlock_unlock(H5TS_rec_rwlock_t *lock)
+H5TS__rec_rwlock_rdunlock(H5TS_rec_rwlock_t *lock)
+{
+    H5TS_rec_entry_count_t *count;
+    bool   have_mutex = false;
+    herr_t ret_value  = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
+
+    /* Acquire the mutex */
+    if (H5_UNLIKELY(H5TS_mutex_lock(&lock->mutex) < 0))
+        HGOTO_DONE(FAIL);
+    have_mutex = true;
+
+    /* Error check */
+    if (H5_UNLIKELY(H5TS_REC_RWLOCK_READ != lock->lock_type))
+        HGOTO_DONE(FAIL);
+
+    /* Sanity and error checks */
+    assert(lock->is_key_registered);
+    assert(lock->reader_thread_count > 0);
+    assert(0 == lock->rec_write_lock_count);
+    if (H5_UNLIKELY(H5TS_key_get_value(lock->rec_read_lock_count_key, (void **)&count) < 0))
+	HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(NULL == count))
+	HGOTO_DONE(FAIL);
+    assert(*count > 0);
+
+    /* Decrement recursive lock count for this thread */
+    (*count)--;
+#if H5TS_ENABLE_REC_RWLOCK_STATS
+    H5TS__update_stats_rd_unlock(lock, count);
+#endif
+
+    /* Check if this thread is releasing its last read lock */
+    if (0 == *count) {
+	/* Decrement the # of threads with a read lock */
+	lock->reader_thread_count--;
+
+	/* Check if lock is unused now */
+	if (0 == lock->reader_thread_count) {
+	    lock->lock_type = H5TS_REC_RWLOCK_UNUSED;
+
+	    /* Indicate that lock is unused now */
+	    /* Prioritize pending writers if there are any */
+	    if (lock->waiting_writers_count > 0) {
+		if (H5_UNLIKELY(H5TS_cond_signal(&lock->writers_cv) < 0))
+		    HGOTO_DONE(FAIL);
+	    }
+	    else {
+		if (H5_UNLIKELY(H5TS_cond_broadcast(&lock->readers_cv) < 0))
+		    HGOTO_DONE(FAIL);
+	    }
+	}
+    }
+
+done:
+    if (H5_LIKELY(have_mutex))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex) < 0))
+            ret_value = FAIL;
+
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS__rec_rwlock_rdunlock() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS__rec_rwlock_wrunlock
+ *
+ * Purpose:     Attempt to unlock a write lock
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS__rec_rwlock_wrunlock(H5TS_rec_rwlock_t *lock)
 {
     bool   have_mutex = false;
     herr_t ret_value  = SUCCEED;
@@ -630,56 +705,24 @@ H5TS__rec_rwlock_unlock(H5TS_rec_rwlock_t *lock)
     have_mutex = true;
 
     /* Error check */
-    if (H5_UNLIKELY(H5TS_REC_RWLOCK_UNUSED == lock->lock_type)) /* Unlocking an unused lock? */
+    if (H5_UNLIKELY(H5TS_REC_RWLOCK_WRITE != lock->lock_type))
         HGOTO_DONE(FAIL);
 
-    if (H5TS_REC_RWLOCK_WRITE == lock->lock_type) { /* Drop a write lock */
-        /* Sanity checks */
-        assert(0 == lock->reader_thread_count);
-        assert(lock->rec_write_lock_count > 0);
+    /* Sanity checks */
+    assert(0 == lock->reader_thread_count);
+    assert(lock->rec_write_lock_count > 0);
 
-        /* Decrement recursive lock count */
-        lock->rec_write_lock_count--;
+    /* Decrement recursive lock count */
+    lock->rec_write_lock_count--;
 #if H5TS_ENABLE_REC_RWLOCK_STATS
-        H5TS__update_stats_wr_unlock(lock);
+    H5TS__update_stats_wr_unlock(lock);
 #endif
 
-        /* Check if lock is unused now */
-        if (0 == lock->rec_write_lock_count)
-            lock->lock_type = H5TS_REC_RWLOCK_UNUSED;
-    }
-    else { /* Drop a read lock */
-        H5TS_rec_entry_count_t *count;
+    /* Check if lock is unused now */
+    if (0 == lock->rec_write_lock_count) {
+	lock->lock_type = H5TS_REC_RWLOCK_UNUSED;
 
-        /* Sanity and error checks */
-        assert(lock->is_key_registered);
-        assert(lock->reader_thread_count > 0);
-        assert(0 == lock->rec_write_lock_count);
-        if (H5_UNLIKELY(H5TS_key_get_value(lock->rec_read_lock_count_key, (void **)&count) < 0))
-            HGOTO_DONE(FAIL);
-        if (H5_UNLIKELY(NULL == count))
-            HGOTO_DONE(FAIL);
-        assert(*count > 0);
-
-        /* Decrement recursive lock count for this thread */
-        (*count)--;
-#if H5TS_ENABLE_REC_RWLOCK_STATS
-        H5TS__update_stats_rd_unlock(lock, count);
-#endif
-
-        /* Check if this thread is releasing its last read lock */
-        if (0 == *count) {
-            /* Decrement the # of threads with a read lock */
-            lock->reader_thread_count--;
-
-            /* Check if lock is unused now */
-            if (0 == lock->reader_thread_count)
-                lock->lock_type = H5TS_REC_RWLOCK_UNUSED;
-        }
-    }
-
-    /* Signal condition variable if lock is unused now */
-    if (H5TS_REC_RWLOCK_UNUSED == lock->lock_type) {
+	/* Indicate that lock is unused now */
         /* Prioritize pending writers if there are any */
         if (lock->waiting_writers_count > 0) {
             if (H5_UNLIKELY(H5TS_cond_signal(&lock->writers_cv) < 0))
@@ -697,6 +740,6 @@ done:
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS__rec_rwlock_unlock() */
+} /* end H5TS__rec_rwlock_wrunlock() */
 
 #endif /* H5_HAVE_THREADS */
