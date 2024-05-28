@@ -184,7 +184,7 @@ verify_counting(void *_counter)
 void
 tts_rwlock(void)
 {
-    H5TS_thread_t threads[NUM_THREADS];
+    H5TS_thread_t    threads[NUM_THREADS];
     H5TS_pool_t     *pool = NULL;
     H5TS_rwlock_t    lock;
     atomic_counter_t counter;
@@ -237,7 +237,6 @@ tts_rwlock(void)
     result = H5TS_rwlock_destroy(&lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
 
-
     /* Hold read lock w/many threads */
     result = H5TS_rwlock_init(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_init");
@@ -260,7 +259,6 @@ tts_rwlock(void)
 
     result = H5TS_rwlock_destroy(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
-
 
     /* Increment counter w/many threads */
     result = H5TS_rwlock_init(&counter.lock);

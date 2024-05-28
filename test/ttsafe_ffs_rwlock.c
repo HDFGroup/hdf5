@@ -24,17 +24,17 @@
 
 typedef struct {
     H5TS_ffs_rwlock_t lock;
-    int            val;
-    H5TS_barrier_t barrier;
+    int               val;
+    H5TS_barrier_t    barrier;
 } atomic_counter_t;
 
 static H5TS_THREAD_RETURN_TYPE
 incr_task(void *_counter)
 {
     H5TS_ffs_rwlock_local_t local;
-    atomic_counter_t *counter = (atomic_counter_t *)_counter;
-    herr_t            result;
-    H5TS_thread_ret_t ret_value = 0;
+    atomic_counter_t       *counter = (atomic_counter_t *)_counter;
+    herr_t                  result;
+    H5TS_thread_ret_t       ret_value = 0;
 
     result = H5TS_ffs_rwlock_wrlock(&counter->lock, &local);
     CHECK_I(result, "H5TS_ffs_rwlock_wrlock");
@@ -52,9 +52,9 @@ static H5TS_THREAD_RETURN_TYPE
 many_read(void *_counter)
 {
     H5TS_ffs_rwlock_local_t local;
-    atomic_counter_t *counter = (atomic_counter_t *)_counter;
-    herr_t            result;
-    H5TS_thread_ret_t ret_value = 0;
+    atomic_counter_t       *counter = (atomic_counter_t *)_counter;
+    herr_t                  result;
+    H5TS_thread_ret_t       ret_value = 0;
 
     result = H5TS_ffs_rwlock_rdlock(&counter->lock, &local);
     CHECK_I(result, "H5TS_ffs_rwlock_rdlock");
@@ -77,12 +77,12 @@ many_read(void *_counter)
 void
 tts_ffs_rwlock(void)
 {
-    H5TS_ffs_rwlock_t lock;
+    H5TS_ffs_rwlock_t       lock;
     H5TS_ffs_rwlock_local_t local;
-    H5TS_pool_t     *pool = NULL;
-    H5TS_thread_t threads[NUM_THREADS];
-    atomic_counter_t counter;
-    herr_t           result;
+    H5TS_pool_t            *pool = NULL;
+    H5TS_thread_t           threads[NUM_THREADS];
+    atomic_counter_t        counter;
+    herr_t                  result;
 
     /* Sanity checks on bad input */
     result = H5TS_ffs_rwlock_init(NULL);
@@ -112,11 +112,9 @@ tts_ffs_rwlock(void)
     result = H5TS_ffs_rwlock_wrunlock(NULL, &local);
     VERIFY(result, FAIL, "H5TS_ffs_rwlock_wrunlock");
 
-
     /* Create lock */
     result = H5TS_ffs_rwlock_init(&lock);
     CHECK_I(result, "H5TS_ffs_rwlock_init");
-
 
     /* Read lock & unlock */
     result = H5TS_ffs_rwlock_rdlock(&lock, &local);
@@ -125,14 +123,12 @@ tts_ffs_rwlock(void)
     result = H5TS_ffs_rwlock_rdunlock(&lock, &local);
     CHECK_I(result, "H5TS_ffs_rwlock_rdunlock");
 
-
     /* Write lock & unlock */
     result = H5TS_ffs_rwlock_wrlock(&lock, &local);
     CHECK_I(result, "H5TS_ffs_rwlock_wrlock");
 
     result = H5TS_ffs_rwlock_wrunlock(&lock, &local);
     CHECK_I(result, "H5TS_ffs_rwlock_wrunlock");
-
 
     /* Hold read lock w/many threads */
     result = H5TS_ffs_rwlock_init(&counter.lock);
@@ -154,7 +150,6 @@ tts_ffs_rwlock(void)
     result = H5TS_barrier_destroy(&counter.barrier);
     CHECK_I(result, "H5TS_barrier_destroy");
 
-
     /* Increment counter w/many threads */
     result = H5TS_ffs_rwlock_init(&counter.lock);
     CHECK_I(result, "H5TS_ffs_rwlock_init");
@@ -173,8 +168,6 @@ tts_ffs_rwlock(void)
 
     VERIFY(counter.val, NUM_THREADS, "many incr");
 
-
 } /* end tts_ffs_rwlock() */
 
 #endif /* defined(H5_HAVE_THREADS) && defined(H5_HAVE_STDATOMIC_H) */
-

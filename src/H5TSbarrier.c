@@ -117,22 +117,23 @@ H5TS_barrier_wait(H5TS_barrier_t *barrier)
 
 #ifdef H5_HAVE_PTHREAD_BARRIER
     {
-	ret = pthread_barrier_wait(barrier);
-	if (H5_UNLIKELY(ret != 0 && ret != PTHREAD_BARRIER_SERIAL_THREAD))
-	    HGOTO_DONE(FAIL);
+        ret = pthread_barrier_wait(barrier);
+        if (H5_UNLIKELY(ret != 0 && ret != PTHREAD_BARRIER_SERIAL_THREAD))
+            HGOTO_DONE(FAIL);
     }
 #else
     {
-	const unsigned my_generation = H5TS_atomic_load_uint(&barrier->generation);
+        const unsigned my_generation = H5TS_atomic_load_uint(&barrier->generation);
 
-	/* When the last thread enters, reset the openings & bump the generation */
+        /* When the last thread enters, reset the openings & bump the generation */
         if (1 == H5TS_atomic_fetch_sub_uint(&barrier->openings, 1)) {
-	    H5TS_atomic_store_uint(&barrier->openings, barrier->count);
-	    H5TS_atomic_fetch_add_uint(&barrier->generation, 1);
-        } else {
-	    /* Not the last thread, when for the generation to change */
-            while(H5TS_atomic_load_uint(&barrier->generation) == my_generation)
-		;
+            H5TS_atomic_store_uint(&barrier->openings, barrier->count);
+            H5TS_atomic_fetch_add_uint(&barrier->generation, 1);
+        }
+        else {
+            /* Not the last thread, when for the generation to change */
+            while (H5TS_atomic_load_uint(&barrier->generation) == my_generation)
+                ;
         }
     }
 #endif

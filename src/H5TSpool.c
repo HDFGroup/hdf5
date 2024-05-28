@@ -56,10 +56,10 @@ struct H5TS_pool_t {
     H5TS_mutex_t mutex; /* Mutex to control access to pool struct */
     H5TS_cond_t  cond;
 
-    bool           shutdown;    /* Pool is shutting down */
-    unsigned    num_threads; /* # of threads in pool */
+    bool               shutdown;       /* Pool is shutting down */
+    unsigned           num_threads;    /* # of threads in pool */
     H5TS_atomic_uint_t active_threads; /* # of threads in pool */
-    H5TS_thread_t *threads;     /* Array of worker threads in pool */
+    H5TS_thread_t     *threads;        /* Array of worker threads in pool */
 
     H5TS_pool_task_t *head, *tail; /* Task queue */
 };
@@ -235,7 +235,7 @@ done:
     H5TS_atomic_fetch_sub_uint(&pool->active_threads, 1);
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-    return(ret_value);
+    return (ret_value);
 } /* end H5TS__pool_do() */
 
 /*--------------------------------------------------------------------------

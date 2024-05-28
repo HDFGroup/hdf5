@@ -106,7 +106,7 @@ herr_t
 H5TS_ffs_rwlock_rdlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local)
 {
     H5TS_ffs_rwlock_local_t *pred;
-    herr_t ret_value  = SUCCEED;
+    herr_t                   ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -116,7 +116,7 @@ H5TS_ffs_rwlock_rdlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t
 
     /* Initialize local node */
     local->state = H5TS_FFS_RWLOCK_READER;
-    local->spin = true;
+    local->spin  = true;
     local->next = local->prev = NULL;
 
     /* Add local node to end of list */
@@ -129,7 +129,7 @@ H5TS_ffs_rwlock_rdlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t
     if (NULL != pred) {
         /* Connect linked list */
         local->prev = pred;
-        pred->next = local;
+        pred->next  = local;
 
         /* Spin if the previous node is not an active reader */
         if (H5TS_FFS_RWLOCK_ACTIVE_READER != pred->state)
@@ -164,7 +164,7 @@ herr_t
 H5TS_ffs_rwlock_rdunlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local)
 {
     H5TS_ffs_rwlock_local_t *pred;
-    herr_t ret_value  = SUCCEED;
+    herr_t                   ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -242,7 +242,7 @@ H5TS_ffs_rwlock_rdunlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local
     if (NULL != local->next) {
         /* Unblock next node */
         local->next->spin = false;
-        local->next->prev = NULL;       /* 'I->prev->prev' in paper is incorrect */
+        local->next->prev = NULL; /* 'I->prev->prev' in paper is incorrect */
     }
 
     /* Release lock on local node */
@@ -267,7 +267,7 @@ herr_t
 H5TS_ffs_rwlock_wrlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local)
 {
     H5TS_ffs_rwlock_local_t *pred;
-    herr_t ret_value  = SUCCEED;
+    herr_t                   ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -277,8 +277,8 @@ H5TS_ffs_rwlock_wrlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t
 
     /* Initialize local node for lock */
     local->state = H5TS_FFS_RWLOCK_WRITER;
-    local->spin = true;
-    local->next = NULL;
+    local->spin  = true;
+    local->next  = NULL;
 
     /* Add local node to end of list */
     /* Use atomic_exchange to ensure clean swap in case another thread is
@@ -315,8 +315,8 @@ done:
 herr_t
 H5TS_ffs_rwlock_wrunlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local)
 {
-    H5TS_ffs_rwlock_local_t *pred = local;
-    herr_t ret_value  = SUCCEED;
+    H5TS_ffs_rwlock_local_t *pred      = local;
+    herr_t                   ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -352,4 +352,3 @@ done:
 } /* end H5TS_ffs_rwlock_wrunlock() */
 
 #endif /* H5_HAVE_THREADS */
-

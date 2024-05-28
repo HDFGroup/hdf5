@@ -427,8 +427,9 @@ H5TS_atomic_init_voidp(H5TS_atomic_voidp_t *obj, void *desired)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Initialize mutex that protects the "atomic" value */
-    (void)H5TS_mutex_init(&obj->mutex, H5TS_MUTEX_TYPE_PLAIN);
+        /* Initialize mutex that protects the "atomic" value */
+        (void)
+    H5TS_mutex_init(&obj->mutex, H5TS_MUTEX_TYPE_PLAIN);
 
     /* Set the value */
     obj->value = desired;
@@ -453,8 +454,9 @@ H5TS_atomic_exchange_voidp(H5TS_atomic_voidp_t *obj, void *desired)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Lock mutex that protects the "atomic" value */
-    (void)H5TS_mutex_lock(&obj->mutex);
+        /* Lock mutex that protects the "atomic" value */
+        (void)
+    H5TS_mutex_lock(&obj->mutex);
 
     /* Get the current value */
     ret_value = obj->value;
@@ -489,14 +491,16 @@ H5TS_atomic_compare_exchange_strong_voidp(H5TS_atomic_voidp_t *obj, void **expec
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Lock mutex that protects the "atomic" value */
-    (void)H5TS_mutex_lock(&obj->mutex);
+        /* Lock mutex that protects the "atomic" value */
+        (void)
+    H5TS_mutex_lock(&obj->mutex);
 
     /* Compare 'obj' w/'expected' */
     if (obj->value == *expected) {
         obj->value = desired;
-        ret_value = true;
-    } else {
+        ret_value  = true;
+    }
+    else {
         *expected = obj->value;
         ret_value = false;
     }
@@ -523,8 +527,9 @@ H5TS_atomic_destroy_voidp(H5TS_atomic_voidp_t *obj)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Destroy mutex that protects the "atomic" value */
-    (void)H5TS_mutex_destroy(&obj->mutex);
+        /* Destroy mutex that protects the "atomic" value */
+        (void)
+    H5TS_mutex_destroy(&obj->mutex);
 
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* end H5TS_atomic_destroy_voidp() */
