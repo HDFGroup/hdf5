@@ -78,20 +78,15 @@ H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count)
     if (H5_UNLIKELY(NULL == barrier || 0 == count))
         HGOTO_DONE(FAIL);
 
-        /* Initialize the barrier */
 #ifdef H5_HAVE_PTHREAD_BARRIER
+    /* Initialize the barrier */
     if (H5_UNLIKELY(pthread_barrier_init(barrier, NULL, count)))
         HGOTO_DONE(FAIL);
 #else
-    /* Initialize fields to default values */
-    memset(barrier, 0, sizeof(*barrier));
-    if (H5_UNLIKELY(H5TS_mutex_init(&barrier->mutex, H5TS_MUTEX_TYPE_PLAIN) < 0))
-        HGOTO_DONE(FAIL);
-    if (H5_UNLIKELY(H5TS_cond_init(&barrier->cv) < 0))
-        HGOTO_DONE(FAIL);
-
-    /* Set non-default fields */
-    barrier->count = barrier->threshold = count;
+    /* Initialize fields */
+    barrier->count = count;
+    H5TS_atomic_store_uint(&barrier->openings, count);
+    H5TS_atomic_store_uint(&barrier->generation, 0);
 #endif
 
 done:
@@ -113,11 +108,6 @@ done:
 herr_t
 H5TS_barrier_wait(H5TS_barrier_t *barrier)
 {
-#ifdef H5_HAVE_PTHREAD_BARRIER
-    int ret;
-#else
-    bool have_mutex                     = false;
-#endif
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
@@ -126,36 +116,28 @@ H5TS_barrier_wait(H5TS_barrier_t *barrier)
         HGOTO_DONE(FAIL);
 
 #ifdef H5_HAVE_PTHREAD_BARRIER
-    ret = pthread_barrier_wait(barrier);
-    if (H5_UNLIKELY(ret != 0 && ret != PTHREAD_BARRIER_SERIAL_THREAD))
-        HGOTO_DONE(FAIL);
-#else
-    /* Acquire the mutex for the barrier */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&barrier->mutex) < 0))
-        HGOTO_DONE(FAIL);
-    have_mutex = true;
-
-    barrier->entered++;
-    if (barrier->entered < barrier->threshold) {
-        if (H5_UNLIKELY(H5TS_cond_wait(&barrier->cv, &barrier->mutex) < 0))
-            HGOTO_DONE(FAIL);
+    {
+	ret = pthread_barrier_wait(barrier);
+	if (H5_UNLIKELY(ret != 0 && ret != PTHREAD_BARRIER_SERIAL_THREAD))
+	    HGOTO_DONE(FAIL);
     }
-    else {
-        if (H5_UNLIKELY(H5TS_cond_broadcast(&barrier->cv) < 0))
-            HGOTO_DONE(FAIL);
+#else
+    {
+	const unsigned my_generation = H5TS_atomic_load_uint(&barrier->generation);
 
-        /* Increment threshold count of threads for next barrier */
-        barrier->threshold += barrier->count;
+	/* When the last thread enters, reset the openings & bump the generation */
+        if (1 == H5TS_atomic_fetch_sub_uint(&barrier->openings, 1)) {
+	    H5TS_atomic_store_uint(&barrier->openings, barrier->count);
+	    H5TS_atomic_fetch_add_uint(&barrier->generation, 1);
+        } else {
+	    /* Not the last thread, when for the generation to change */
+            while(H5TS_atomic_load_uint(&barrier->generation) == my_generation)
+		;
+        }
     }
 #endif
 
 done:
-#ifndef H5_HAVE_PTHREAD_BARRIER
-    if (H5_LIKELY(have_mutex))
-        if (H5_UNLIKELY(H5TS_mutex_unlock(&barrier->mutex) < 0))
-            ret_value = FAIL;
-#endif
-
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_barrier_wait() */
 
@@ -183,29 +165,9 @@ H5TS_barrier_destroy(H5TS_barrier_t *barrier)
     if (H5_UNLIKELY(pthread_barrier_destroy(barrier)))
         HGOTO_DONE(FAIL);
 #else
-
-    /* Acquire the mutex for the barrier */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&barrier->mutex) < 0))
-        HGOTO_DONE(FAIL);
-
-    /* Check for barrier still in use */
-    if (H5_UNLIKELY((barrier->threshold - barrier->entered) != barrier->count)) {
-        (void)H5TS_mutex_unlock(&barrier->mutex);
-        HGOTO_DONE(FAIL);
-    }
-
-    /* Release the barrier's mutex */
-    if (H5_UNLIKELY(H5TS_mutex_unlock(&barrier->mutex) < 0))
-        HGOTO_DONE(FAIL);
-
-    /* Call the appropriate pthread destroy routines.  We are committed
-     * to the destroy at this point, so call them all, even if one fails
-     * along the way.
-     */
-    if (H5_UNLIKELY(H5TS_mutex_destroy(&barrier->mutex) < 0))
-        ret_value = FAIL;
-    if (H5_UNLIKELY(H5TS_cond_destroy(&barrier->cv) < 0))
-        ret_value = FAIL;
+    /* Destroy the (emulated) atomic variables */
+    H5TS_atomic_destroy_uint(&barrier->openings);
+    H5TS_atomic_destroy_uint(&barrier->generation);
 #endif
 
 done:

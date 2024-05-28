@@ -398,6 +398,125 @@ H5TS_atomic_destroy_uint(H5TS_atomic_uint_t *obj)
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* end H5TS_atomic_destroy_uint() */
 
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_atomic_init_voidp
+ *
+ * Purpose:     Initializes an atomic 'void *' variable object with a value.
+ *
+ * Note:        Per the C11 standard, this function is not atomic and
+ *              concurrent execution from multiple threads is a data race.
+ *
+ * Return:      None
+ *
+ *--------------------------------------------------------------------------
+ */
+void
+H5TS_atomic_init_voidp(H5TS_atomic_voidp_t *obj, void *desired)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Initialize mutex that protects the "atomic" value */
+    (void)H5TS_mutex_init(&obj->mutex, H5TS_MUTEX_TYPE_PLAIN);
+
+    /* Set the value */
+    obj->value = desired;
+
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
+} /* end H5TS_atomic_init_voidp() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_atomic_exchange_voidp
+ *
+ * Purpose:     Atomically replaces the value of an atomic 'void *' variable
+ *              and returns the value held previously.
+ *
+ * Return:      Returns the value of the atomic variable held previously
+ *
+ *--------------------------------------------------------------------------
+ */
+void *
+H5TS_atomic_exchange_voidp(H5TS_atomic_voidp_t *obj, void *desired)
+{
+    void *ret_value;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Lock mutex that protects the "atomic" value */
+    (void)H5TS_mutex_lock(&obj->mutex);
+
+    /* Get the current value */
+    ret_value = obj->value;
+
+    /* Set the value */
+    obj->value = desired;
+
+    /* Release the object's mutex */
+    H5TS_mutex_unlock(&obj->mutex);
+
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_atomic_exchange_voidp() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_atomic_compare_exchange_strong_voidp
+ *
+ * Purpose:     Atomically compares the contents of 'obj' with 'expected', and
+ *              if those are bitwise equal, replaces the former with 'desired'
+ *              (performs read-modify-write operation). Otherwise, loads the
+ *              actual contents of 'obj' into '*expected' (performs load
+ *              operation).
+ *
+ * Return:      The result of the comparison: true if 'obj' was equal to
+ *              'expected', false otherwise.
+ *
+ *--------------------------------------------------------------------------
+ */
+bool
+H5TS_atomic_compare_exchange_strong_voidp(H5TS_atomic_voidp_t *obj, void **expected, void *desired)
+{
+    bool ret_value;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Lock mutex that protects the "atomic" value */
+    (void)H5TS_mutex_lock(&obj->mutex);
+
+    /* Compare 'obj' w/'expected' */
+    if (obj->value == *expected) {
+        obj->value = desired;
+        ret_value = true;
+    } else {
+        *expected = obj->value;
+        ret_value = false;
+    }
+    /* Release the object's mutex */
+    H5TS_mutex_unlock(&obj->mutex);
+
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_atomic_compare_exchange_strong_voidp() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_atomic_destroy_voidp
+ *
+ * Purpose:     Destroys / releases resources for an atomic 'void *' variable
+ *
+ * Note:        No equivalent in the C11 atomics, but needed here, to destroy
+ *              the mutex used to protect the atomic value.
+ *
+ * Return:      None
+ *
+ *--------------------------------------------------------------------------
+ */
+void
+H5TS_atomic_destroy_voidp(H5TS_atomic_voidp_t *obj)
+{
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Destroy mutex that protects the "atomic" value */
+    (void)H5TS_mutex_destroy(&obj->mutex);
+
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
+} /* end H5TS_atomic_destroy_voidp() */
+
 #endif /* H5_HAVE_STDATOMIC_H */
 
 #endif /* H5_HAVE_THREADS */

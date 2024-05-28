@@ -184,6 +184,7 @@ verify_counting(void *_counter)
 void
 tts_rwlock(void)
 {
+    H5TS_thread_t threads[NUM_THREADS];
     H5TS_pool_t     *pool = NULL;
     H5TS_rwlock_t    lock;
     atomic_counter_t counter;
@@ -236,6 +237,7 @@ tts_rwlock(void)
     result = H5TS_rwlock_destroy(&lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
 
+
     /* Hold read lock w/many threads */
     result = H5TS_rwlock_init(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_init");
@@ -243,22 +245,22 @@ tts_rwlock(void)
     result = H5TS_barrier_init(&counter.barrier, NUM_THREADS);
     CHECK_I(result, "H5TS_barrier_init");
 
-    result = H5TS_pool_create(&pool, NUM_THREADS);
-    CHECK_I(result, "H5TS_pool_create");
-
     for (unsigned u = 0; u < NUM_THREADS; u++) {
-        result = H5TS_pool_add_task(pool, many_read, &counter);
-        CHECK_I(result, "H5TS_pool_add_task");
+        result = H5TS_thread_create(&threads[u], many_read, &counter);
+        CHECK_I(result, "H5TS_thread_create");
     }
 
-    result = H5TS_pool_destroy(pool);
-    CHECK_I(result, "H5TS_pool_destroy");
+    for (unsigned u = 0; u < NUM_THREADS; u++) {
+        result = H5TS_thread_join(threads[u], NULL);
+        CHECK_I(result, "H5TS_thread_join");
+    }
 
     result = H5TS_barrier_destroy(&counter.barrier);
     CHECK_I(result, "H5TS_barrier_destroy");
 
     result = H5TS_rwlock_destroy(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
+
 
     /* Increment counter w/many threads */
     result = H5TS_rwlock_init(&counter.lock);
