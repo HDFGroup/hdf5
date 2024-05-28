@@ -2817,8 +2817,8 @@ H5D__vlen_get_buf_size_gen_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned
 
     /* Read in the point (with the custom VL memory allocator) */
     if (H5VL_dataset_read(1, &vlen_bufsize->dset_vol_obj->data, vlen_bufsize->dset_vol_obj->connector,
-                          &type_id, &vlen_bufsize->mspace_id, &vlen_bufsize->fspace_id,
-                          vlen_bufsize->dxpl_id, &vlen_bufsize->common.fl_tbuf, H5_REQUEST_NULL) < 0)
+                          &type_id, &vlen_bufsize->mspace_id, &vlen_bufsize->fspace_id, vlen_bufsize->dxpl_id,
+                          &vlen_bufsize->common.fl_tbuf, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point");
 
 done:

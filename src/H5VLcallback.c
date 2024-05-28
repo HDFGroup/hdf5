@@ -2039,8 +2039,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_read(size_t count, void *obj[], H5VL_t *connector, hid_t mem_type_id[],
-                         hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req)
+H5VL_dataset_read(size_t count, void *obj[], H5VL_t *connector, hid_t mem_type_id[], hid_t mem_space_id[],
+                  hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req)
 {
     bool          vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
     H5VL_object_t tmp_vol_obj;             /* Temporary VOL object for setting VOL wrapper */
@@ -2162,9 +2162,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_write(size_t count, void *obj[], H5VL_t *connector, hid_t mem_type_id[],
-                          hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id, const void *buf[],
-                          void **req)
+H5VL_dataset_write(size_t count, void *obj[], H5VL_t *connector, hid_t mem_type_id[], hid_t mem_space_id[],
+                   hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void **req)
 {
     bool          vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
     H5VL_object_t tmp_vol_obj;             /* Temporary VOL object for setting VOL wrapper */
