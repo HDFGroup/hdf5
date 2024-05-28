@@ -66,14 +66,17 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option for ZLib support
 #-----------------------------------------------------------------------------
+set(H5_ZLIB_FOUND FALSE)
 option (HDF5_ENABLE_Z_LIB_SUPPORT "Enable Zlib Filters" ON)
 if (HDF5_ENABLE_Z_LIB_SUPPORT)
   if (NOT H5_ZLIB_HEADER)
     if (NOT ZLIB_USE_EXTERNAL)
+      set(ZLIB_FOUND FALSE)
       find_package (ZLIB NAMES ${ZLIB_PACKAGE_NAME}${HDF_PACKAGE_EXT} COMPONENTS static shared)
-      if (NOT H5_ZLIB_FOUND)
+      if (NOT ZLIB_FOUND)
         find_package (ZLIB) # Legacy find
       endif ()
+      set(H5_ZLIB_FOUND ${ZLIB_FOUND})
       if (H5_ZLIB_FOUND)
         set (H5_ZLIB_HEADER "zlib.h")
         set (H5_ZLIB_INCLUDE_DIR_GEN ${ZLIB_INCLUDE_DIR})
@@ -89,9 +92,7 @@ if (HDF5_ENABLE_Z_LIB_SUPPORT)
     endif ()
   else ()
     # This project is being called from within another and ZLib is already configured
-    set (H5_HAVE_FILTER_DEFLATE 1)
-    set (H5_HAVE_ZLIB_H 1)
-    set (H5_HAVE_LIBZ 1)
+    set(H5_ZLIB_FOUND TRUE)
   endif ()
   if (H5_ZLIB_FOUND)
     set (H5_HAVE_FILTER_DEFLATE 1)
@@ -111,6 +112,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option for SzLib support
 #-----------------------------------------------------------------------------
+set(H5_SZIP_FOUND FALSE)
 option (HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" ON)
 if (HDF5_ENABLE_SZIP_SUPPORT)
   option (HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding" ON)
@@ -121,6 +123,7 @@ if (HDF5_ENABLE_SZIP_SUPPORT)
     if (NOT SZIP_FOUND)
       find_package (SZIP) # Legacy find
     endif ()
+    set(H5_SZIP_FOUND ${SZIP_FOUND})
     if (H5_SZIP_FOUND)
       set (H5_SZIP_INCLUDE_DIR_GEN ${SZIP_INCLUDE_DIR})
       set (H5_SZIP_INCLUDE_DIRS ${H5_SZIP_INCLUDE_DIRS} ${SZIP_INCLUDE_DIR})

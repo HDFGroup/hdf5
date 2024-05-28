@@ -407,6 +407,7 @@ FORTRAN
   MATLAB  PyHigh  PyLow
 </td>
 <td>h5ex_t_array.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_array.tst">h5ex_t_array.tst</a></td>
 <td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_array.ddl">h5ex_t_array.ddl</a></td>
 </tr>
 <tr>
