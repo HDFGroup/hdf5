@@ -616,8 +616,8 @@ herr_t
 H5TS__rec_rwlock_rdunlock(H5TS_rec_rwlock_t *lock)
 {
     H5TS_rec_entry_count_t *count;
-    bool   have_mutex = false;
-    herr_t ret_value  = SUCCEED;
+    bool                    have_mutex = false;
+    herr_t                  ret_value  = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -638,9 +638,9 @@ H5TS__rec_rwlock_rdunlock(H5TS_rec_rwlock_t *lock)
     assert(lock->reader_thread_count > 0);
     assert(0 == lock->rec_write_lock_count);
     if (H5_UNLIKELY(H5TS_key_get_value(lock->rec_read_lock_count_key, (void **)&count) < 0))
-	HGOTO_DONE(FAIL);
+        HGOTO_DONE(FAIL);
     if (H5_UNLIKELY(NULL == count))
-	HGOTO_DONE(FAIL);
+        HGOTO_DONE(FAIL);
     assert(*count > 0);
 
     /* Decrement recursive lock count for this thread */
@@ -651,24 +651,24 @@ H5TS__rec_rwlock_rdunlock(H5TS_rec_rwlock_t *lock)
 
     /* Check if this thread is releasing its last read lock */
     if (0 == *count) {
-	/* Decrement the # of threads with a read lock */
-	lock->reader_thread_count--;
+        /* Decrement the # of threads with a read lock */
+        lock->reader_thread_count--;
 
-	/* Check if lock is unused now */
-	if (0 == lock->reader_thread_count) {
-	    lock->lock_type = H5TS_REC_RWLOCK_UNUSED;
+        /* Check if lock is unused now */
+        if (0 == lock->reader_thread_count) {
+            lock->lock_type = H5TS_REC_RWLOCK_UNUSED;
 
-	    /* Indicate that lock is unused now */
-	    /* Prioritize pending writers if there are any */
-	    if (lock->waiting_writers_count > 0) {
-		if (H5_UNLIKELY(H5TS_cond_signal(&lock->writers_cv) < 0))
-		    HGOTO_DONE(FAIL);
-	    }
-	    else {
-		if (H5_UNLIKELY(H5TS_cond_broadcast(&lock->readers_cv) < 0))
-		    HGOTO_DONE(FAIL);
-	    }
-	}
+            /* Indicate that lock is unused now */
+            /* Prioritize pending writers if there are any */
+            if (lock->waiting_writers_count > 0) {
+                if (H5_UNLIKELY(H5TS_cond_signal(&lock->writers_cv) < 0))
+                    HGOTO_DONE(FAIL);
+            }
+            else {
+                if (H5_UNLIKELY(H5TS_cond_broadcast(&lock->readers_cv) < 0))
+                    HGOTO_DONE(FAIL);
+            }
+        }
     }
 
 done:
@@ -720,9 +720,9 @@ H5TS__rec_rwlock_wrunlock(H5TS_rec_rwlock_t *lock)
 
     /* Check if lock is unused now */
     if (0 == lock->rec_write_lock_count) {
-	lock->lock_type = H5TS_REC_RWLOCK_UNUSED;
+        lock->lock_type = H5TS_REC_RWLOCK_UNUSED;
 
-	/* Indicate that lock is unused now */
+        /* Indicate that lock is unused now */
         /* Prioritize pending writers if there are any */
         if (lock->waiting_writers_count > 0) {
             if (H5_UNLIKELY(H5TS_cond_signal(&lock->writers_cv) < 0))
