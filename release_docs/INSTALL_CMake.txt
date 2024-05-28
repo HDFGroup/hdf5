@@ -846,6 +846,7 @@ HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"           
 HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                             OFF
 HDF5_DIMENSION_SCALES_NEW_REF  "Use new-style references with dimension scale APIs"              OFF
 HDF5_EXTERNAL_LIB_PREFIX       "Use prefix for custom library naming."                           ""
+HDF5_EXTERNAL_LIB_SUFFIX       "Use suffix for custom library naming."                           ""
 
 HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings"                                       OFF
 HDF5_ENABLE_ALL_WARNINGS       "Enable all warnings"                                             OFF
