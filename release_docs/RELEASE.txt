@@ -59,6 +59,14 @@ New Features
       disable the 'threadsafe' option, but not vice versa.  The 'threads' option
       must be on to enable the subfiling VFD.
 
+    - Disable CMake UNITY_BUILD for hdf5
+
+      CMake added a target property, UNITY_BUILD, that when set to true, the target
+      source files will be combined into batches for faster compilation. By default,
+      the setting is OFF, but could be enabled by a project that includes HDF5 as a subproject.
+
+      HDF5 has disabled this feature by setting the property to OFF in the HDFMacros.cmake file.
+
     - Removed "function/code stack" debugging configuration option:
 
           CMake:      HDF5_ENABLE_CODESTACK
