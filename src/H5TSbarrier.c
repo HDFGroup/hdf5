@@ -117,7 +117,7 @@ H5TS_barrier_wait(H5TS_barrier_t *barrier)
 
 #ifdef H5_HAVE_PTHREAD_BARRIER
     {
-        ret = pthread_barrier_wait(barrier);
+        int ret = pthread_barrier_wait(barrier);
         if (H5_UNLIKELY(ret != 0 && ret != PTHREAD_BARRIER_SERIAL_THREAD))
             HGOTO_DONE(FAIL);
     }
