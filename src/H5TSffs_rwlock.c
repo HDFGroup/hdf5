@@ -103,7 +103,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_ffs_rwlock_rdlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local)
+H5TS_ffs_rwlock_rdlock(H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local)
 {
     H5TS_ffs_rwlock_local_t *pred;
     herr_t                   ret_value = SUCCEED;
@@ -161,7 +161,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_ffs_rwlock_rdunlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local)
+H5TS_ffs_rwlock_rdunlock(H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local)
 {
     H5TS_ffs_rwlock_local_t *pred;
     herr_t                   ret_value = SUCCEED;
@@ -264,7 +264,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_ffs_rwlock_wrlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local)
+H5TS_ffs_rwlock_wrlock(H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local)
 {
     H5TS_ffs_rwlock_local_t *pred;
     herr_t                   ret_value = SUCCEED;
@@ -313,7 +313,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_ffs_rwlock_wrunlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local)
+H5TS_ffs_rwlock_wrunlock(H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local)
 {
     H5TS_ffs_rwlock_local_t *pred      = local;
     herr_t                   ret_value = SUCCEED;

@@ -236,12 +236,12 @@ typedef struct H5TS_ffs_rwlock_local_t {
         H5TS_FFS_RWLOCK_WRITER,
         H5TS_FFS_RWLOCK_ACTIVE_READER
     } state;                                     /* State of local lock component */
-    volatile bool                   spin;        /* Local 'spin' variable */
+    bool                            spin;        /* Local 'spin' variable */
     struct H5TS_ffs_rwlock_local_t *next, *prev; /* Neighbors in list */
     H5TS_spinlock_t                 lock;        /* Spin lock for 'local' node */
 } H5TS_ffs_rwlock_local_t;
 
-typedef H5TS_ffs_rwlock_local_t *H5TS_ffs_rwlock_t;
+typedef H5TS_ffs_rwlock_local_t * _Atomic H5TS_ffs_rwlock_t;
 #endif
 
 /*****************************/
@@ -287,10 +287,10 @@ H5_DLL herr_t H5TS_rwlock_destroy(H5TS_rwlock_t *lock);
 #if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 /* 'Fast, Fair, Scalable' (FFS) R/W locks */
 H5_DLL herr_t H5TS_ffs_rwlock_init(H5TS_ffs_rwlock_t *lock);
-H5_DLL herr_t H5TS_ffs_rwlock_rdlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local);
-H5_DLL herr_t H5TS_ffs_rwlock_rdunlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local);
-H5_DLL herr_t H5TS_ffs_rwlock_wrlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local);
-H5_DLL herr_t H5TS_ffs_rwlock_wrunlock(volatile H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local);
+H5_DLL herr_t H5TS_ffs_rwlock_rdlock(H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local);
+H5_DLL herr_t H5TS_ffs_rwlock_rdunlock(H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local);
+H5_DLL herr_t H5TS_ffs_rwlock_wrlock(H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local);
+H5_DLL herr_t H5TS_ffs_rwlock_wrunlock(H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local);
 #endif
 
 /* Condition variable operations */
