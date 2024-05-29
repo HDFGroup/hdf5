@@ -757,6 +757,9 @@ if (HDF5_ENABLE_PARALLEL)
                Reading/Writing >2GB of data in a single parallel I/O operation will be disabled.")
       set (LARGE_PARALLEL_IO OFF)
     endif ()
+
+    # Used by Subfiling VFD feature
+    CHECK_SYMBOL_EXISTS (MPI_Comm_split_type "mpi.h" H5_HAVE_MPI_Comm_split_type)
   else ()
     message (FATAL_ERROR "Parallel libraries not found")
   endif ()
@@ -816,8 +819,7 @@ if (HDF5_ENABLE_SUBFILING_VFD)
   if (NOT HDF5_ENABLE_PARALLEL)
     message (FATAL_ERROR "Subfiling VFD requires a parallel HDF5 build")
   else ()
-    # Check for MPI_Comm_split_type
-    CHECK_SYMBOL_EXISTS (MPI_Comm_split_type "mpi.h" H5_HAVE_MPI_Comm_split_type)
+    # Make sure we found MPI_Comm_split_type previously
     if (NOT H5_HAVE_MPI_Comm_split_type)
       message (FATAL_ERROR "Subfiling VFD requires MPI-3 support for MPI_Comm_split_type")
     endif ()
