@@ -477,7 +477,7 @@ H5S_select_valid(const H5S_t *space)
     assert(space);
 
     ret_value = (*space->select.type->is_valid)(space);
-]
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_valid() */
 
