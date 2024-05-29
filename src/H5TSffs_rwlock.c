@@ -40,7 +40,7 @@
 #include "H5Eprivate.h" /* Error handling                      */
 #include "H5TSpkg.h"    /* Threadsafety                        */
 
-#ifdef H5_HAVE_THREADS
+#if defined(H5_HAVE_THREADS) && defined(H5_HAVE_STDATOMIC_H)
 
 /****************/
 /* Local Macros */
@@ -351,4 +351,4 @@ done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_ffs_rwlock_wrunlock() */
 
-#endif /* H5_HAVE_THREADS */
+#endif /* H5_HAVE_THREADS && H5_HAVE_STDATOMIC_H */
