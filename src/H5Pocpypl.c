@@ -578,7 +578,7 @@ H5P__ocpy_merge_comm_dt_list_close(const char H5_ATTR_UNUSED *name, size_t H5_AT
 
     assert(value);
 
-    /* Free the merge commmitted dtype list */
+    /* Free the merge committed dtype list */
     H5P__free_merge_comm_dtype_list(*(H5O_copy_dtype_merge_list_t **)value);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
