@@ -241,7 +241,7 @@ typedef struct H5TS_ffs_rwlock_local_t {
     H5TS_spinlock_t                 lock;        /* Spin lock for 'local' node */
 } H5TS_ffs_rwlock_local_t;
 
-typedef H5TS_ffs_rwlock_local_t * _Atomic H5TS_ffs_rwlock_t;
+typedef H5TS_ffs_rwlock_local_t *_Atomic H5TS_ffs_rwlock_t;
 #endif
 
 /*****************************/
