@@ -244,7 +244,11 @@ typedef struct H5TS_ffs_rwlock_local_t {
     H5TS_spinlock_t                 lock;        /* Spin lock for 'local' node */
 } H5TS_ffs_rwlock_local_t;
 
+H5_GCC_DIAG_OFF("c99-c11-compat")
+H5_CLANG_DIAG_OFF("c11-extensions")
 typedef H5TS_ffs_rwlock_local_t *_Atomic H5TS_ffs_rwlock_t;
+H5_GCC_DIAG_ON("c99-c11-compat")
+H5_CLANG_DIAG_ON("c11-extensions")
 #endif
 
 /*****************************/
