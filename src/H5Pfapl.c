@@ -5468,7 +5468,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_mpi_info_get
  *
- * Purpose:     Copies an MPI comminicator property when it's retrieved from a property list
+ * Purpose:     Copies an MPI info object property when it's retrieved from a property list
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
