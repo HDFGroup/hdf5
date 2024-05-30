@@ -4445,7 +4445,7 @@ AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
 AC_CONFIG_FILES([Makefile
                  doxygen/Doxyfile
                  src/Makefile
-                 src/libhdf5.settings
+                 src/libhdf5.settings:src/libhdf5.settings.autotools.in
                  src/H5build_settings.c:${BUILD_SETTINGS_FILE}
                  test/Makefile
                  test/H5srcdir_str.h
@@ -4612,6 +4612,13 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       ;;
   esac
 fi
+
+## HDF5 configure code created by autotools with gcc 4.9.2 is adding problematic
+## linker flags:  -l with no library name; -l <libname>, specifically gfortran or m.
+## This sed script corrects "-l <libname>" first and then "-l " with no library name.
+## If the order is not preserved, all instances of "-l " will be removed.
+sed -e '/^postdeps/ s/-l \([a-zA-Z]\)/-l\1/g' -e '/^postdeps/ s/-l //g' libtool > libtool.bak
+mv -- libtool.bak libtool
 
 ## show the configure settings
 cat src/libhdf5.settings

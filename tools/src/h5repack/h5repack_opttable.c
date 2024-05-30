@@ -191,7 +191,7 @@ options_add_layout(obj_list_t *obj_list, unsigned n_objs, pack_info_t *pack, pac
 
     /* search if this object is already in the table; "path" is the key */
     if (table->nelems > 0) {
-        /* go tru the supplied list of names */
+        /* go through the supplied list of names */
         for (j = 0; j < n_objs; j++) {
             /* linear table search */
             for (i = 0; i < table->nelems; i++) {
@@ -234,7 +234,7 @@ options_add_layout(obj_list_t *obj_list, unsigned n_objs, pack_info_t *pack, pac
     }
     /* first time insertion */
     else {
-        /* go tru the supplied list of names */
+        /* go through the supplied list of names */
         for (j = 0; j < n_objs; j++) {
             I = table->nelems + added;
             added++;
@@ -307,7 +307,7 @@ options_add_filter(obj_list_t *obj_list, unsigned n_objs, filter_info_t filt, pa
 
     /* first time insertion */
     else {
-        /* go tru the supplied list of names */
+        /* go through the supplied list of names */
         for (j = 0; j < n_objs; j++) {
             I = table->nelems + added;
             added++;

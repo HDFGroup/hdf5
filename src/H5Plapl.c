@@ -634,7 +634,7 @@ H5P__lacc_elink_pref_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
 /*-------------------------------------------------------------------------
  * Function:       H5P__lacc_elink_pref_enc
  *
- * Purpose:        Callback routine which is called whenever the elink flags
+ * Purpose:        Callback routine which is called whenever the elink prefix
  *                 property in the dataset access property list is
  *                 encoded.
  *

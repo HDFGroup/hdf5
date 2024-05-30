@@ -4976,7 +4976,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:       H5P__encode_coll_md_read_flag_t
  *
- * Purpose:        Generic encoding callback routine for 'coll_md_read_flag' properties.
+ * Purpose:        Callback routine which is called whenever the collective
+ *                 metadata read flag property in the file creation property list is
+ *                 encoded.
  *
  * Return:       Success:    Non-negative
  *           Failure:    Negative
@@ -5010,7 +5012,9 @@ H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
 /*-------------------------------------------------------------------------
  * Function:       H5P__decode_coll_md_read_flag_t
  *
- * Purpose:        Generic decoding callback routine for 'coll_md_read_flag' properties.
+ * Purpose:        Callback routine which is called whenever the collective
+ *                 metadata read flag property in the file creation property list is
+ *                 decoded.
  *
  * Return:       Success:    Non-negative
  *           Failure:    Negative
@@ -5030,7 +5034,7 @@ H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
     assert(*pp);
     assert(coll_md_read_flag);
 
-    /* Decode file close degree */
+    /* Decode metadata read flag */
     *coll_md_read_flag = (H5P_coll_md_read_flag_t) * (*pp);
     *pp += sizeof(H5P_coll_md_read_flag_t);
 
@@ -5468,7 +5472,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_mpi_info_get
  *
- * Purpose:     Copies an MPI comminicator property when it's retrieved from a property list
+ * Purpose:     Copies an MPI info object property when it's retrieved from a property list
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative

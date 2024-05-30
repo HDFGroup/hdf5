@@ -416,8 +416,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
         HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "can't get property list");
 
     /* Make certain we can read the fixed-size portion of the superblock */
-    if (H5F__set_eoa(f, H5FD_MEM_SUPER,
-                     (haddr_t)(H5F_SUPERBLOCK_FIXED_SIZE + H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE)) < 0)
+    if (H5F__set_eoa(f, H5FD_MEM_SUPER, (haddr_t)H5F_SUPERBLOCK_SPEC_READ_SIZE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "set end of space allocation request failed");
 
     /* Set up the user data for cache callbacks */
@@ -583,13 +582,10 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
 
     if (H5F_INTENT(f) & H5F_ACC_SWMR_READ) {
         /*
-         * When the file is opened for SWMR read access, skip the check if:
-         * --the file is already marked for SWMR writing and
-         * --the file has version 3 superblock for SWMR support
+         * When the file is opened for SWMR read access, skip the check if
+         * the file has a version 3 superblock capable of SWMR support
          */
-        if ((sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS) &&
-            (sblock->status_flags & H5F_SUPER_WRITE_ACCESS) &&
-            sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
+        if (sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
             skip_eof_check = true;
     }
     if (!skip_eof_check && initial_read) {
