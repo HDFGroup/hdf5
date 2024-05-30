@@ -39,7 +39,6 @@
       "name": "ci-base-plugins",
       "hidden": true,
       "cacheVariables": {
-        "PLUGIN_TGZ_NAME": {"type": "STRING", "value": "hdf5_plugins-1.14.tar.gz"},
         "BSHUF_TGZ_NAME": {"type": "STRING", "value": "bitshuffle-0.5.1.tar.gz"},
         "BSHUF_PACKAGE_NAME": {"type": "STRING", "value": "bshuf"},
         "BLOSC_TGZ_NAME": {"type": "STRING", "value": "c-blosc-1.21.5.tar.gz"},
@@ -74,7 +73,7 @@
         "HDF5_ENABLE_PLUGIN_SUPPORT": "ON",
         "H5PL_ALLOW_EXTERNAL_SUPPORT": {"type": "STRING", "value": "TGZ"},
         "PLUGIN_PACKAGE_NAME": {"type": "STRING", "value": "pl"},
-        "PLUGIN_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot"},
+        "PLUGIN_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot-1.14"},
         "PLUGIN_TGZ_NAME": {"type": "STRING", "value": "hdf5_plugins-1.14.tar.gz"}
       }
     },
