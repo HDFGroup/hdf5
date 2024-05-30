@@ -238,15 +238,10 @@ H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads)
     /* Start worker threads */
     for (u = 0; u < num_threads; u++)
         /* Create thread, which immediately starts processing tasks */
-        if (H5_UNLIKELY(H5TS_thread_create(&new_pool->threads[u], H5TS__pool_do, (void *)new_pool) < 0))
+        if (H5_UNLIKELY(H5TS_thread_create(&new_pool->threads[u], H5TS__pool_do, (void *)new_pool) < 0)) {
+            new_pool->num_threads = u;
             HGOTO_DONE(FAIL);
-
-    /* Check for error when starting threads */
-    if (u != new_pool->num_threads) {
-        /* Set # of threads successfully created (for joining them, in free routine) */
-        new_pool->num_threads = u;
-        HGOTO_DONE(FAIL);
-    }
+        }
 
     /* Set return value */
     *pool = new_pool;
