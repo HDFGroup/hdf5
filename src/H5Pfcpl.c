@@ -645,7 +645,7 @@ done:
  * Function:       H5P__fcrt_btree_rank_enc
  *
  * Purpose:        Callback routine which is called whenever the index storage
- *                 btree in file creation property list is encoded.
+ *                 btree in a file creation property list is encoded.
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
@@ -688,7 +688,7 @@ H5P__fcrt_btree_rank_enc(const void *value, void **_pp, size_t *size)
  * Function:       H5P__fcrt_btree_rank_dec
  *
  * Purpose:        Callback routine which is called whenever the index storage
- *                 btree in file creation property list is decoded.
+ *                 btree in a file creation property list is decoded.
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
@@ -909,8 +909,8 @@ done:
  * Function:       H5P__fcrt_shmsg_index_types_enc
  *
  * Purpose:        Callback routine which is called whenever the shared
- *                 message indec types in file creation property list
- *                 is encoded.
+ *                 message index types in a file creation property list
+ *                 are encoded.
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
@@ -953,8 +953,8 @@ H5P__fcrt_shmsg_index_types_enc(const void *value, void **_pp, size_t *size)
  * Function:       H5P__fcrt_shmsg_index_types_dec
  *
  * Purpose:        Callback routine which is called whenever the shared
- *                 message indec types in file creation property list
- *                 is decoded.
+ *                 message index types in a file creation property list
+ *                 are decoded.
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
@@ -994,7 +994,7 @@ done:
  * Function:       H5P__fcrt_shmsg_index_minsize_enc
  *
  * Purpose:        Callback routine which is called whenever the shared
- *                 message index minsize in file creation property list
+ *                 message index minsize in a file creation property list
  *                 is encoded.
  *
  * Return:	   Success:	Non-negative
@@ -1038,7 +1038,7 @@ H5P__fcrt_shmsg_index_minsize_enc(const void *value, void **_pp, size_t *size)
  * Function:       H5P__fcrt_shmsg_index_minsize_dec
  *
  * Purpose:        Callback routine which is called whenever the shared
- *                 message indec minsize in file creation property list
+ *                 message index minsize in a file creation property list
  *                 is decoded.
  *
  * Return:	   Success:	Non-negative
