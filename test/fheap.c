@@ -16043,7 +16043,7 @@ main(void)
                 if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = def_fapl;
-                /* This is a fix for the daily test failure from the checkin for libver bounds. */
+                /* This is a fix for the daily test failure from the commit for libver bounds. */
                 /*
                  * Many tests failed the file size check when comparing (a) and (b) as below:
                  * --Create a file and close the file.  Got the initial file size (a).

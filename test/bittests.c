@@ -170,7 +170,7 @@ test_copy(void)
                 break;
         if (size > 0 && j >= (int)sizeof(v2)) {
             H5_FAILED();
-            puts("    Unabled to find copied region in destination");
+            puts("    Unable to find copied region in destination");
             goto failed;
         }
         if (0 == size && j < (int)sizeof(v2)) {
@@ -677,7 +677,7 @@ test_set(void)
                 break;
         if (size > 0 && j >= (int)sizeof(v2)) {
             H5_FAILED();
-            puts("    Unabled to find set region in buffer");
+            puts("    Unable to find set region in buffer");
             goto failed;
         }
         if (0 == size && j < (int)sizeof(v2)) {
@@ -792,7 +792,7 @@ test_clear(void)
                 break;
         if (size > 0 && j >= (int)sizeof(v2)) {
             H5_FAILED();
-            puts("    Unabled to find cleared region in buffer");
+            puts("    Unable to find cleared region in buffer");
             goto failed;
         }
         if (0 == size && j < (int)sizeof(v2)) {

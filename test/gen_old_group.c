@@ -15,7 +15,7 @@
  *              empty "symbol table" group.
  *
  *              This file is used in the v1.7 branch (after the "compact group"
- *              checkin) to test compatibility.  Compile and run this
+ *              commit) to test compatibility.  Compile and run this
  *              program (with the 1.6.x branch), it will generate a file*
  *              called "group_old.h5".  You need to move it to the test
  *              directory in the HDF5 v1.7 source tree.  The test/stab.c
