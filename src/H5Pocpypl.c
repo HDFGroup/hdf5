@@ -179,7 +179,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P__free_merge_comm_dtype_list
  *
- * Purpose:     Frees the provided merge named dtype list
+ * Purpose:     Frees the provided merge committed dtype list
  *
  * Return:      NULL
  *
@@ -329,9 +329,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:       H5P__ocpy_merge_comm_dt_list_enc
  *
- * Purpose:        Callback routine which is called whenever the common
- *		   datatype property in the object copy property list is
- *                 decoded.
+ * Purpose:        Callback routine which is called whenever the merge
+ *                 committed datatype list property in the object copy
+ *                 property list is encoded.
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
@@ -383,9 +383,9 @@ H5P__ocpy_merge_comm_dt_list_enc(const void *value, void **_pp, size_t *size)
 /*-------------------------------------------------------------------------
  * Function:       H5P__ocpy_merge_comm_dt_list_dec
  *
- * Purpose:        Callback routine which is called whenever the common
- *                 datatype property in the dataset access property list is
- *                 decoded.
+ * Purpose:        Callback routine which is called whenever the merge
+ *                 committed datatype list property in the object copy
+ *                 property list is decoded.
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
@@ -564,7 +564,7 @@ done:
 /*--------------------------------------------------------------------------
  * Function:	H5P__ocpy_merge_comm_dt_list_close
  *
- * Purpose:	Close the merge common datatype list property
+ * Purpose:	Close the merge committed datatype list property
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
@@ -578,7 +578,7 @@ H5P__ocpy_merge_comm_dt_list_close(const char H5_ATTR_UNUSED *name, size_t H5_AT
 
     assert(value);
 
-    /* Free the merge named dtype list */
+    /* Free the merge committed dtype list */
     H5P__free_merge_comm_dtype_list(*(H5O_copy_dtype_merge_list_t **)value);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

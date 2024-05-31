@@ -147,7 +147,7 @@ H5TS__pool_do(void *_pool)
 
     /* Acquire the mutex for the pool */
     if (H5_UNLIKELY(H5TS_mutex_lock(&pool->mutex) < 0))
-        HGOTO_DONE((H5TS_thread_ret_t)1);
+        HGOTO_DONE((H5TS_thread_ret_t)-1);
     have_mutex = true;
 
     /* Increment active thread count for pool */
@@ -156,7 +156,7 @@ H5TS__pool_do(void *_pool)
     /* If queue is empty and pool is not shutting down, wait for a task */
     while (NULL == pool->head && !pool->shutdown)
         if (H5_UNLIKELY(H5TS_cond_wait(&pool->cond, &pool->mutex) < 0))
-            HGOTO_DONE((H5TS_thread_ret_t)1);
+            HGOTO_DONE((H5TS_thread_ret_t)-1);
 
     /* If there's a task, invoke it, else we're shutting down */
     if (NULL != pool->head) {
@@ -171,7 +171,7 @@ H5TS__pool_do(void *_pool)
 
         /* Release the pool's mutex */
         if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
-            HGOTO_DONE((H5TS_thread_ret_t)1);
+            HGOTO_DONE((H5TS_thread_ret_t)-1);
         have_mutex = false;
 
         /* Invoke function for task */
@@ -189,13 +189,13 @@ H5TS__pool_do(void *_pool)
         while (1) {
             /* Acquire the mutex for the pool */
             if (H5_UNLIKELY(H5TS_mutex_lock(&pool->mutex) < 0))
-                HGOTO_DONE((H5TS_thread_ret_t)1);
+                HGOTO_DONE((H5TS_thread_ret_t)-1);
             have_mutex = true;
 
             /* If queue is empty and pool is not shutting down, wait for a task */
             while (NULL == pool->head && !pool->shutdown)
                 if (H5_UNLIKELY(H5TS_cond_wait(&pool->cond, &pool->mutex) < 0))
-                    HGOTO_DONE((H5TS_thread_ret_t)1);
+                    HGOTO_DONE((H5TS_thread_ret_t)-1);
 
             /* If there's a task, invoke it, else we're shutting down */
             if (NULL != pool->head) {
@@ -210,7 +210,7 @@ H5TS__pool_do(void *_pool)
 
                 /* Release the pool's mutex */
                 if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
-                    HGOTO_DONE((H5TS_thread_ret_t)1);
+                    HGOTO_DONE((H5TS_thread_ret_t)-1);
                 have_mutex = false;
 
                 /* Invoke function for task */
@@ -229,7 +229,7 @@ done:
     /* Release the pool's mutex, if we're holding it */
     if (have_mutex)
         if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
-            ret_value = (H5TS_thread_ret_t)1;
+            ret_value = (H5TS_thread_ret_t)-1;
 
     /* Decrement active thread count for pool */
     H5TS_atomic_fetch_sub_uint(&pool->active_threads, 1);

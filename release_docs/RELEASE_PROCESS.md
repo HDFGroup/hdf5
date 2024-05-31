@@ -18,7 +18,7 @@ Maintenance releases are always forward compatible with regards to the HDF5 file
 - HDF5 libraries and command line utilities can access files created by future maintenance versions of the library.
 Note that maintenance releases are NOT guaranteed to be interface-compatible, meaning that, on occasion, application source code will need updated and re-compiled against a new maintenance release when the interface changes. Interface changes are only made when absolutely necessary as deemed by the HDF5 product manager(s), and interface compatibility reports are published with each release to inform customers and users of any incompatibilities in the interface.
 
-For more information on the HDF5 versioning and backward and forward compatibility issues, see the [API Compatibility Macros](https://docs.hdfgroup.org/hdf5/v1_14/v1_14_4/api-compat-macros.html) on the public website.
+For more information on the HDF5 versioning and backward and forward compatibility issues, see the [API Compatibility Macros](https://hdfgroup.github.io/hdf5/develop/api-compat-macros.html) on the public website.
 
 ## Participants:
 - Product Manager — The individual responsible for the overall direction and development of a software product at The HDF Group.
