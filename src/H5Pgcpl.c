@@ -485,7 +485,7 @@ done:
  * Function:       H5P__gcrt_group_info_enc
  *
  * Purpose:        Callback routine which is called whenever the group
- *                 property in the dataset access property list is
+ *                 info property in the dataset access property list is
  *                 encoded.
  *
  * Return:	   Success:	Non-negative
@@ -564,7 +564,7 @@ H5P__gcrt_group_info_dec(const void **_pp, void *_value)
  * Function:       H5P__gcrt_link_info_enc
  *
  * Purpose:        Callback routine which is called whenever the link
- *                 property in the dataset access property list is
+ *                 info property in the dataset access property list is
  *                 encoded.
  *
  * Return:	   Success:	Non-negative
