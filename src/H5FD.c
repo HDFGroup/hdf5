@@ -955,33 +955,32 @@ done:
  *
  * Purpose:     Query a VFL driver for its feature flags. (listed in H5FDpublic.h)
  *
- * Return:      Success:    0
- *              Failure:    -1
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-int
+herr_t
 H5FDquery(const H5FD_t *file, unsigned long *flags /*out*/)
 {
-    int ret_value = 0;
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API((-1))
+    FUNC_ENTER_API(FAIL)
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "file pointer cannot be NULL");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "file class pointer cannot be NULL");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
     if (!flags)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "flags parameter cannot be NULL");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "flags parameter cannot be NULL");
 
     /* Call private function */
     if (H5FD__query(file, flags) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, (-1), "unable to query feature flags");
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to query feature flags");
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5FDquery() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_query
