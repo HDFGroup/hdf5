@@ -95,7 +95,7 @@ gen_name(int value)
 int
 main(int argc, char *argv[])
 {
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
+    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Initialize testing framework */
     TestInit(argv[0], NULL, NULL);
