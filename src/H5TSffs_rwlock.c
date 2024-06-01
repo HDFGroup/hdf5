@@ -341,7 +341,7 @@ H5TS_ffs_rwlock_wrunlock(H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local
      * until they link themselves into the list.
      */
     while (NULL == local->next)
-        ;
+        ; /* spin, until another thread changes local->next */
 
     /* Unblock next node */
     local->next->prev = NULL;
