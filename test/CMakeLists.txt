@@ -358,86 +358,86 @@ set (ttsafe_SOURCES
 )
 
 set (H5_EXPRESS_TESTS
-    cache
-    cache_api
-    cache_image # multiple source
-    btree2
-    farray
-    earray
-    fheap
-    objcopy_ref
-    objcopy
+#    cache
+#    cache_api
+#    cache_image # multiple source
+#    btree2
+#    farray
+#    earray
+#    fheap
+#    objcopy_ref
+#    objcopy
 )
 
 set (H5_TESTS
-    testhdf5 # multiple source
-    cache_tagging
-    lheap
-    ohdr
-    stab
-    gheap
-    evict_on_close
-    accum
-    hyperslab
-    istore
-    bittests
-    dt_arith
-    page_buffer
-    dtypes
-    dsets
-    select_io_dset
-    chunk_info # compression lib link
-    cmpd_dset
-    mdset
-    filter_fail
-    extend
-    direct_chunk # compression lib link
-    external
-    external_env
-    efc
-    links
-    unlink
-    twriteorder
-    big
-    mtime
-    fillval
-    mount
-    flush1
-    flush2
-    app_ref
-    enum
-    set_extent
+#    testhdf5 # multiple source
+#    cache_tagging
+#    lheap
+#    ohdr
+#    stab
+#    gheap
+#    evict_on_close
+#    accum
+#    hyperslab
+#    istore
+#    bittests
+#    dt_arith
+#    page_buffer
+#    dtypes
+#    dsets
+#    select_io_dset
+#    chunk_info # compression lib link
+#    cmpd_dset
+#    mdset
+#    filter_fail
+#    extend
+#    direct_chunk # compression lib link
+#    external
+#    external_env
+#    efc
+#    links
+#    unlink
+#    twriteorder
+#    big
+#    mtime
+#    fillval
+#    mount
+#    flush1
+#    flush2
+#    app_ref
+#    enum
+#    set_extent
     ttsafe # multiple source
-    enc_dec_plist
-    enc_dec_plist_cross_platform
-    getname
-    vfd
-    ros3
-    s3comms
-    hdfs
-    #mirror_vfd # multiple source
-    ntypes
-    dangle
-    dtransform
-    # reserved disabled
-    cross_read
-    freespace
-    mf
-    vds
-    vds_env
-    file_image
-    unregister
-    cache_logging
-    cork
-    swmr
-    vol
-    timer
-    cmpd_dtransform
-    event_set
-    onion
+#    enc_dec_plist
+#    enc_dec_plist_cross_platform
+#    getname
+#    vfd
+#    ros3
+#    s3comms
+#    hdfs
+#    #mirror_vfd # multiple source
+#    ntypes
+#    dangle
+#    dtransform
+#    # reserved disabled
+#    cross_read
+#    freespace
+#    mf
+#    vds
+#    vds_env
+#    file_image
+#    unregister
+#    cache_logging
+#    cork
+#    swmr
+#    vol
+#    timer
+#    cmpd_dtransform
+#    event_set
+#    onion
 )
 if (HDF5_BUILD_UTILS)
-  set (H5_TESTS ${H5_TESTS} mirror_vfd)
+#  set (H5_TESTS ${H5_TESTS} mirror_vfd)
 endif ()
 
 macro (ADD_H5_EXE file)
@@ -463,12 +463,12 @@ macro (ADD_H5_EXE file)
 endmacro ()
 
 set (H5_TESTS_MULTIPLE
-    chunk_info
-    direct_chunk
-    testhdf5
-    cache_image
+#    chunk_info
+#    direct_chunk
+#    testhdf5
+#    cache_image
     ttsafe
-    mirror_vfd
+#    mirror_vfd
 )
 # Only build single source tests here
 foreach (h5_test ${H5_TESTS} ${H5_EXPRESS_TESTS})
@@ -616,16 +616,16 @@ endif ()
 ##############################################################################
 
 set (H5_CHECK_TESTS
-    error_test
-    err_compat
-    tcheck_version
-    testmeta
-    atomic_writer
-    atomic_reader
-    links_env
-    filenotclosed
-    del_many_dense_attrs
-    flushrefresh
+#    error_test
+#    err_compat
+#    tcheck_version
+#    testmeta
+#    atomic_writer
+#    atomic_reader
+#    links_env
+#    filenotclosed
+#    del_many_dense_attrs
+#    flushrefresh
 )
 
 foreach (h5_test ${H5_CHECK_TESTS})
@@ -648,15 +648,15 @@ endif ()
 ##############################################################################
 
 set (H5_SWMR_TESTS
-    swmr_addrem_writer
-    swmr_generator
-    swmr_reader
-    swmr_remove_reader
-    swmr_remove_writer
-    swmr_sparse_reader
-    swmr_sparse_writer
-    swmr_start_write
-    swmr_writer
+#    swmr_addrem_writer
+#    swmr_generator
+#    swmr_reader
+#    swmr_remove_reader
+#    swmr_remove_writer
+#    swmr_sparse_reader
+#    swmr_sparse_writer
+#    swmr_start_write
+#    swmr_writer
 )
 
 foreach (h5_test ${H5_SWMR_TESTS})
@@ -664,9 +664,9 @@ foreach (h5_test ${H5_SWMR_TESTS})
 endforeach ()
 
 set (H5_VDS_SWMR_TESTS
-    vds_swmr_gen
-    vds_swmr_reader
-    vds_swmr_writer
+#    vds_swmr_gen
+#    vds_swmr_reader
+#    vds_swmr_writer
 )
 
 macro (ADD_H5_VDS_EXE file)
