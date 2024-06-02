@@ -204,56 +204,71 @@ fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     VERIFY(result, FAIL, "H5TS_rwlock_wrunlock");
     result = H5TS_rwlock_destroy(NULL);
     VERIFY(result, FAIL, "H5TS_rwlock_destroy");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Create & destroy lock */
     result = H5TS_rwlock_init(&lock);
     CHECK_I(result, "H5TS_rwlock_init");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_rwlock_destroy(&lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Read lock & unlock */
     result = H5TS_rwlock_init(&lock);
     CHECK_I(result, "H5TS_rwlock_init");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_rwlock_rdlock(&lock);
     CHECK_I(result, "H5TS_rwlock_rdlock");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_rwlock_rdunlock(&lock);
     CHECK_I(result, "H5TS_rwlock_rdunlock");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_rwlock_destroy(&lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Write lock & unlock */
     result = H5TS_rwlock_init(&lock);
     CHECK_I(result, "H5TS_rwlock_init");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_rwlock_wrlock(&lock);
     CHECK_I(result, "H5TS_rwlock_wrlock");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_rwlock_wrunlock(&lock);
     CHECK_I(result, "H5TS_rwlock_wrunlock");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_rwlock_destroy(&lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Hold read lock w/many threads */
     result = H5TS_rwlock_init(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_init");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_barrier_init(&counter.barrier, NUM_THREADS);
     CHECK_I(result, "H5TS_barrier_init");
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     for (unsigned u = 0; u < NUM_THREADS; u++) {
         result = H5TS_thread_create(&threads[u], many_read, &counter);
         CHECK_I(result, "H5TS_thread_create");
     }
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     for (unsigned u = 0; u < NUM_THREADS; u++) {
         result = H5TS_thread_join(threads[u], NULL);
         CHECK_I(result, "H5TS_thread_join");
     }
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_barrier_destroy(&counter.barrier);
     CHECK_I(result, "H5TS_barrier_destroy");

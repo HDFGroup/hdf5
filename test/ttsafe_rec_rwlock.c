@@ -270,7 +270,6 @@ tts_rec_rwlock_smoke_check_1(void)
     H5TS_rec_rwlock_stats_t stats;
 #endif
     H5TS_rec_rwlock_t lock;
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* 1) Initialize an instance of the recursive R/W lock. */
     result = H5TS__rec_rwlock_init(&lock);
@@ -564,7 +563,6 @@ tts_rec_rwlock_smoke_check_2(void)
     H5TS_rec_rwlock_stats_t expected;
 #endif
     H5TS_rec_rwlock_t lock;
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
 #if H5TS_ENABLE_REC_RWLOCK_STATS
     /* Reset expected stats fields to zero -- we will construct the expected
@@ -771,7 +769,6 @@ tts_rec_rwlock_smoke_check_3(void)
     H5TS_rec_rwlock_stats_t expected;
 #endif
     H5TS_rec_rwlock_t lock;
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
 #if H5TS_ENABLE_REC_RWLOCK_STATS
     /* Reset expected stats fields to zero -- we will construct the expected
@@ -978,7 +975,6 @@ tts_rec_rwlock_smoke_check_4(void)
     H5TS_rec_rwlock_stats_t expected;
 #endif
     H5TS_rec_rwlock_t lock;
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
 #if H5TS_ENABLE_REC_RWLOCK_STATS
     /* Reset expected stats fields to zero -- we will construct the expected

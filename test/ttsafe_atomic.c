@@ -68,7 +68,6 @@ tts_atomics(void)
 {
     H5TS_pool_t *pool = NULL;
     herr_t       result;
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Initialize the counter */
     H5TS_atomic_init_int(&counter_g, 0);

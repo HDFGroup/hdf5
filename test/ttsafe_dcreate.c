@@ -64,7 +64,6 @@ tts_dcreate(void)
     hid_t  dataset = H5I_INVALID_HID;
     int    datavalue, i;
     herr_t status;
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /*
      * Create a hdf5 file using H5F_ACC_TRUNC access, default file
