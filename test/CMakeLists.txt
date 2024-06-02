@@ -719,7 +719,7 @@ if (HDF5_ENABLE_FORMATTERS)
 endif ()
 
 #-- Set accum dependencies
-set_target_properties (accum PROPERTIES DEPENDS accum_swmr_reader)
+#set_target_properties (accum PROPERTIES DEPENDS accum_swmr_reader)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
