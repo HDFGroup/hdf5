@@ -35,8 +35,8 @@ jobs:
       matrix:
         name:
           - "Windows MSVC"
-#          - "Ubuntu gcc"
-#          - "MacOS Clang"
+          - "Ubuntu gcc"
+          - "MacOS Clang"
 
         # This is where we list the bulk of the options for each configuration.
         # The key-value pair values are usually appropriate for being CMake or
@@ -64,48 +64,48 @@ jobs:
             generator: "-G \"Visual Studio 17 2022\" -A x64"
             run_tests: true
 
-#          # Linux (Ubuntu) w/ gcc + CMake
-#          #
-#          # We might think about adding Clang, but MacOS already tests that
-#          # so it's not critical
-#          - name: "Ubuntu gcc"
-#            os: ubuntu-latest
-#            cpp: ON
-#            fortran: ON
-#            java: ON
-#            docs: ON
-#            libaecfc: ON
-#            localaec: OFF
-#            zlibfc: ON
-#            localzlib: OFF
-#            parallel: OFF
-#            mirror_vfd: ON
-#            direct_vfd: ON
-#            ros3_vfd: ON
-#            generator: "-G Ninja"
-#            run_tests: true
+          # Linux (Ubuntu) w/ gcc + CMake
+          #
+          # We might think about adding Clang, but MacOS already tests that
+          # so it's not critical
+          - name: "Ubuntu gcc"
+            os: ubuntu-latest
+            cpp: ON
+            fortran: ON
+            java: ON
+            docs: ON
+            libaecfc: ON
+            localaec: OFF
+            zlibfc: ON
+            localzlib: OFF
+            parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: ON
+            ros3_vfd: ON
+            generator: "-G Ninja"
+            run_tests: true
 
 
           # MacOS w/ Clang + CMake
           #
           # We could also build with the Autotools via brew installing them,
           # but that seems unnecessary
-#          - name: "MacOS Clang"
-#            os: macos-13
-#            cpp: ON
-#            fortran: OFF
-#            java: ON
-#            docs: ON
-#            libaecfc: ON
-#            localaec: OFF
-#            zlibfc: ON
-#            localzlib: OFF
-#            parallel: OFF
-#            mirror_vfd: ON
-#            direct_vfd: OFF
-#            ros3_vfd: OFF
-#            generator: "-G Ninja"
-#            run_tests: true
+          - name: "MacOS Clang"
+            os: macos-13
+            cpp: ON
+            fortran: OFF
+            java: ON
+            docs: ON
+            libaecfc: ON
+            localaec: OFF
+            zlibfc: ON
+            localzlib: OFF
+            parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: OFF
+            ros3_vfd: OFF
+            generator: "-G Ninja"
+            run_tests: true
 
     # Sets the job's name from the properties
     name: "${{ matrix.name }}-${{ inputs.build_mode }}-${{ inputs.thread_safety }}"
@@ -222,10 +222,10 @@ jobs:
       #
       # RUN TESTS
       #
-#      - name: CMake Run Tests
-#        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
-#        working-directory: ${{ runner.workspace }}/build
-#        if: ${{ matrix.run_tests && (inputs.thread_safety != 'TS') }}
+      - name: CMake Run Tests
+        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+        if: ${{ matrix.run_tests && (inputs.thread_safety != 'TS') }}
 
       # THREAD-SAFE
       - name: CMake Run Thread-Safe Tests
