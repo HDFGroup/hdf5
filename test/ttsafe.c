@@ -55,7 +55,6 @@ tts_is_threadsafe(void)
 {
     bool is_ts;
     bool should_be;
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
 #ifdef H5_HAVE_THREADSAFE
     is_ts     = false;
@@ -96,7 +95,6 @@ gen_name(int value)
 int
 main(int argc, char *argv[])
 {
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Initialize testing framework */
     TestInit(argv[0], NULL, NULL);
@@ -121,14 +119,13 @@ fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 #endif
 #endif
 
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     /* Tests are generally arranged from least to most complexity... */
-//    AddTest("is_threadsafe", tts_is_threadsafe, NULL, "library threadsafe status", NULL);
+    AddTest("is_threadsafe", tts_is_threadsafe, NULL, "library threadsafe status", NULL);
 #ifdef H5_HAVE_THREADS
-//    AddTest("thread_pool", tts_thread_pool, NULL, "thread pools", NULL);
+    AddTest("thread_pool", tts_thread_pool, NULL, "thread pools", NULL);
 #ifndef H5_HAVE_STDATOMIC_H
     /* C11 atomics only tested when emulated */
-//    AddTest("atomics", tts_atomics, NULL, "emulation of C11 atomics", NULL);
+    AddTest("atomics", tts_atomics, NULL, "emulation of C11 atomics", NULL);
 #endif /* H5_HAVE_STDATOMIC_H */
     AddTest("rwlock", tts_rwlock, NULL, "simple R/W locks", NULL);
 #ifdef H5_HAVE_STDATOMIC_H
@@ -136,31 +133,30 @@ fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 #endif /* H5_HAVE_STDATOMIC_H */
 #ifndef H5_HAVE_WIN_THREADS
     /* Recursive R/W locks */
-//    AddTest("rec_rwlock_1", tts_rec_rwlock_smoke_check_1, NULL, "recursive R/W lock smoke check 1 -- basic",
-//            NULL);
-//    AddTest("rec_rwlock_2", tts_rec_rwlock_smoke_check_2, NULL,
-//            "recursive R/W lock smoke check 2 -- mob of readers", NULL);
-//    AddTest("rec_rwlock_3", tts_rec_rwlock_smoke_check_3, NULL,
-//            "recursive R/W lock smoke check 3 -- mob of writers", NULL);
-//    AddTest("rec_rwlock_4", tts_rec_rwlock_smoke_check_4, NULL,
-//            "recursive R/W lock smoke check 4 -- mixed mob", NULL);
+    AddTest("rec_rwlock_1", tts_rec_rwlock_smoke_check_1, NULL, "recursive R/W lock smoke check 1 -- basic",
+            NULL);
+    AddTest("rec_rwlock_2", tts_rec_rwlock_smoke_check_2, NULL,
+            "recursive R/W lock smoke check 2 -- mob of readers", NULL);
+    AddTest("rec_rwlock_3", tts_rec_rwlock_smoke_check_3, NULL,
+            "recursive R/W lock smoke check 3 -- mob of writers", NULL);
+    AddTest("rec_rwlock_4", tts_rec_rwlock_smoke_check_4, NULL,
+            "recursive R/W lock smoke check 4 -- mixed mob", NULL);
 #endif /* !H5_HAVE_WIN_THREADS */
 
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 #ifdef H5_HAVE_THREADSAFE
-//    AddTest("thread_id", tts_thread_id, NULL, "thread IDs", NULL);
+    AddTest("thread_id", tts_thread_id, NULL, "thread IDs", NULL);
 
-//    AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
-//    AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
+    AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
+    AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
 #ifdef H5_HAVE_PTHREAD_H
     /* Thread cancellability only supported with pthreads ... */
-//    AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test", NULL);
+    AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test", NULL);
 #endif /* H5_HAVE_PTHREAD_H */
-//    AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation", NULL);
-//    AddTest("attr_vlen", tts_attr_vlen, cleanup_attr_vlen, "multi-file-attribute-vlen read", NULL);
+    AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation", NULL);
+    AddTest("attr_vlen", tts_attr_vlen, cleanup_attr_vlen, "multi-file-attribute-vlen read", NULL);
 
     /* Developer API routine tests */
-//    AddTest("developer", tts_develop_api, NULL, "developer API routines", NULL);
+    AddTest("developer", tts_develop_api, NULL, "developer API routines", NULL);
 
 #else /* H5_HAVE_THREADSAFE */
 
@@ -173,19 +169,15 @@ fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     printf("Most threading tests skipped because THREADS not enabled\n");
 
 #endif /* H5_HAVE_THREADS */
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Display testing information */
     TestInfo(argv[0]);
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Parse command line arguments */
     TestParseCmdLine(argc, argv);
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Perform requested testing */
     PerformTests();
-fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Display test summary, if requested */
     if (GetTestSummary())

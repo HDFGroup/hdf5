@@ -195,7 +195,6 @@ H5TS_mutex_init(H5TS_mutex_t *mutex, int H5_ATTR_UNUSED type)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-fprintf(stderr, "%s:%u - mutex = %p\n", __func__, __LINE__, mutex);
     InitializeCriticalSection(mutex);
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
