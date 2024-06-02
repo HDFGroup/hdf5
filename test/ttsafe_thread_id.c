@@ -99,6 +99,7 @@ tts_thread_id(void)
     uint64_t      tid;
     int           i;
     herr_t        result;
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     result = H5TS_mutex_init(&used_lock, H5TS_MUTEX_TYPE_PLAIN);
     CHECK_I(result, "H5TS_mutex_lock");

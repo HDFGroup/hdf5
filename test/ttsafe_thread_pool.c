@@ -96,6 +96,7 @@ tts_thread_pool(void)
 {
     H5TS_pool_t *pool = NULL;
     herr_t       result;
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Initialize the counter */
     result = H5TS_mutex_init(&counter_g.mutex, H5TS_MUTEX_TYPE_PLAIN);

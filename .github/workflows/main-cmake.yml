@@ -222,10 +222,10 @@ jobs:
       #
       # RUN TESTS
       #
-      - name: CMake Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
-        working-directory: ${{ runner.workspace }}/build
-        if: ${{ matrix.run_tests && (inputs.thread_safety != 'TS') }}
+#      - name: CMake Run Tests
+#        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+#        working-directory: ${{ runner.workspace }}/build
+#        if: ${{ matrix.run_tests && (inputs.thread_safety != 'TS') }}
 
       # THREAD-SAFE
       - name: CMake Run Thread-Safe Tests

@@ -55,6 +55,7 @@ tts_is_threadsafe(void)
 {
     bool is_ts;
     bool should_be;
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
 #ifdef H5_HAVE_THREADSAFE
     is_ts     = false;

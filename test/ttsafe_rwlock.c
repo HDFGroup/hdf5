@@ -189,6 +189,7 @@ tts_rwlock(void)
     H5TS_rwlock_t    lock;
     atomic_counter_t counter;
     herr_t           result;
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Sanity checks on bad input */
     result = H5TS_rwlock_init(NULL);
@@ -312,6 +313,7 @@ tts_rwlock(void)
     result = H5TS_rwlock_destroy(&counter.lock);
     CHECK_I(result, "H5TS_rwlock_destroy");
 
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 } /* end tts_rwlock() */
 
 #endif /*H5_HAVE_THREADS*/
