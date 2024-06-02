@@ -78,6 +78,7 @@ H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count)
     if (H5_UNLIKELY(NULL == barrier || 0 == count))
         HGOTO_DONE(FAIL);
 
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 #ifdef H5_HAVE_PTHREAD_BARRIER
     /* Initialize the barrier */
     if (H5_UNLIKELY(pthread_barrier_init(barrier, NULL, count)))
@@ -85,8 +86,11 @@ H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count)
 #else
     /* Initialize fields */
     barrier->count = count;
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     H5TS_atomic_store_uint(&barrier->openings, count);
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     H5TS_atomic_store_uint(&barrier->generation, 0);
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 #endif
 
 done:
