@@ -413,7 +413,7 @@ H5S_get_select_npoints(const H5S_t *space)
     Check whether the selection fits within the extent, with the current
     offset defined.
  USAGE
-    htri_t H5Sselect_void(dsid)
+    htri_t H5Sselect_valid(dsid)
         hid_t dsid;             IN: Dataspace ID to query
  RETURNS
     true if the selection fits within the extent, false if it does not and
@@ -451,7 +451,7 @@ done:
     Check whether the selection fits within the extent, with the current
     offset defined.
  USAGE
-    htri_t H5S_select_void(space)
+    htri_t H5S_select_valid(space)
         H5S_t *space;           IN: Dataspace to query
  RETURNS
     true if the selection fits within the extent, false if it does not and
@@ -921,7 +921,7 @@ H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
  PURPOSE
     Adjust a selection by subtracting an offset
  USAGE
-    herr_t H5S_select_adjust_u(space, offset)
+    herr_t H5S_select_adjust_s(space, offset)
         H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
         const hssize_t *offset; IN: Offset to subtract
  RETURNS
@@ -2786,8 +2786,8 @@ done:
  PURPOSE
     Create a dataspace selection iterator for a dataspace's selection
  USAGE
-    hid_t H5Ssel_iter_create(space)
-        hid_t   space;  IN: ID of the dataspace with selection to iterate over
+    hid_t H5Ssel_iter_create(space,elmt_size,flags)
+        hid_t   space;     IN: ID of the dataspace with selection to iterate over
  RETURNS
     Valid dataspace selection iterator ID on success, H5I_INVALID_HID on failure
  DESCRIPTION
@@ -2997,7 +2997,7 @@ done:
  PURPOSE
     Resets a dataspace selection iterator back to an initial state.
  USAGE
-    herr_t H5Ssel_iter_reset(sel_iter_id)
+    herr_t H5Ssel_iter_reset(sel_iter_id,space_id)
         hid_t   sel_iter_id;  IN: ID of the dataspace selection iterator to
                                   reset
         hid_t   space_id;     IN: ID of the dataspace with selection to
