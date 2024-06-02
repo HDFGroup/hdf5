@@ -96,7 +96,7 @@ gen_name(int value)
 int
 main(int argc, char *argv[])
 {
-    fprintf(stderr, "%s:%u\n", __func__, __LINE__);
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Initialize testing framework */
     TestInit(argv[0], NULL, NULL);
@@ -121,6 +121,7 @@ main(int argc, char *argv[])
 #endif
 #endif
 
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     /* Tests are generally arranged from least to most complexity... */
     AddTest("is_threadsafe", tts_is_threadsafe, NULL, "library threadsafe status", NULL);
 #ifdef H5_HAVE_THREADS
@@ -145,6 +146,7 @@ main(int argc, char *argv[])
             "recursive R/W lock smoke check 4 -- mixed mob", NULL);
 #endif /* !H5_HAVE_WIN_THREADS */
 
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 #ifdef H5_HAVE_THREADSAFE
     AddTest("thread_id", tts_thread_id, NULL, "thread IDs", NULL);
 
@@ -171,15 +173,19 @@ main(int argc, char *argv[])
     printf("Most threading tests skipped because THREADS not enabled\n");
 
 #endif /* H5_HAVE_THREADS */
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Display testing information */
     TestInfo(argv[0]);
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Parse command line arguments */
     TestParseCmdLine(argc, argv);
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Perform requested testing */
     PerformTests();
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Display test summary, if requested */
     if (GetTestSummary())
