@@ -304,16 +304,20 @@ void
 H5TS_atomic_store_uint(H5TS_atomic_uint_t *obj, unsigned desired)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
         /* Lock mutex that protects the "atomic" value */
         (void)
     H5TS_mutex_lock(&obj->mutex);
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Set the value */
     obj->value = desired;
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     /* Release the object's mutex */
     H5TS_mutex_unlock(&obj->mutex);
+fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* end H5TS_atomic_store_uint() */
