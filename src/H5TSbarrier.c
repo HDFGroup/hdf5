@@ -87,9 +87,9 @@ fprintf(stderr, "%s:%u\n", __func__, __LINE__);
     /* Initialize fields */
     barrier->count = count;
 fprintf(stderr, "%s:%u\n", __func__, __LINE__);
-    H5TS_atomic_store_uint(&barrier->openings, count);
+    H5TS_atomic_init_uint(&barrier->openings, count);
 fprintf(stderr, "%s:%u\n", __func__, __LINE__);
-    H5TS_atomic_store_uint(&barrier->generation, 0);
+    H5TS_atomic_init_uint(&barrier->generation, 0);
 fprintf(stderr, "%s:%u\n", __func__, __LINE__);
 #endif
 
