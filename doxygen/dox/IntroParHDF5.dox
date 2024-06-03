@@ -35,7 +35,8 @@ The following shows the Parallel HDF5 implementation layers:
 This tutorial assumes that you are somewhat familiar with parallel programming with MPI (Message Passing Interface).
 
 If you are not familiar with parallel programming, here is a tutorial that may be of interest:
-<a href="http://www.nersc.gov/users/training/online-tutorials/introduction-to-scientific-i-o/?show_all=1">Tutorial on HDF5 I/O tuning at NERSC</a>
+<a href="https://\DOCURL/hdf5_topics/2016_NERSC_Introduction_to_Scientific_IO.pdf">Tutorial on HDF5 I/O tuning at NERSC</a>.
+(NOTE: As of 2024, the specific systems described in this tutorial are outdated.)
 
 Some of the terms that you must understand in this tutorial are:
 <ul>
@@ -150,8 +151,10 @@ Following is example code for creating an access template in HDF5:
 \endcode
 
 The following example programs create an HDF5 file using Parallel HDF5:
-<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_file_create.c">C: file_create.c</a>
-<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_file_create.F90">F90: file_create.F90</a>
+
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_file_create.c">C: ph5_file_create.c</a>
+
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_file_create.F90">F90: ph5_f90_file_create.F90</a>
 
 
 \subsection subsec_pintro_create_dset Creating and Accessing a Dataset with PHDF5
@@ -231,8 +234,10 @@ The following code demonstrates a collective write using Parallel HDF5:
 \endcode
 
 The following example programs create an HDF5 dataset using Parallel HDF5:
-<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_dataset.c">C: dataset.c</a>
-<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_dataset.F90">F90: dataset.F90</a>
+
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_dataset.c">C: ph5_dataset.c</a>
+
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_dataset.F90">F90: ph5_f90_dataset.F90</a>
 
 
 \subsubsection subsec_pintro_hyperslabs Hyperslabs

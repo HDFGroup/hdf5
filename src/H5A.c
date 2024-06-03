@@ -1880,7 +1880,7 @@ done:
  PURPOSE
     Calls a user's function for each attribute on an object
  USAGE
-    herr_t H5Aiterate2(loc_id, obj_name, idx_type, order, idx, op, op_data, lapl_id)
+    herr_t H5Aiterate_by_name(loc_id, obj_name, idx_type, order, idx, op, op_data, lapl_id)
         hid_t loc_id;           IN: Base location for object
         const char *obj_name;   IN: Name of object relative to location
         H5_index_t idx_type;    IN: Type of index to use
