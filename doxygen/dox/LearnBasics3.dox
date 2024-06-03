@@ -48,6 +48,19 @@ Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
 \section secLBDsetLayoutDesc Description of a Dataset
+The Creating a Dataset tutorial topic defines a dataset as a multidimensional array of data elements together with supporting metadata, where:
+
+\li The array of elements consists of the raw data values that a user wishes to store in HDF5.
+\li The supporting metadata describes that data. The metadata is stored in the dataset (object) header of a dataset.
+
+Datatype, dataspace, attribute, and storage layout information were introduced as part of the metadata associated with a dataset:
+<table>
+<tr>
+<td>
+\image html tutr-lodset.png
+</td>
+</tr>
+</table>
 
 \section secLBDsetLayout Dataset Storage Layout
 The storage information, or storage layout, defines how the raw data values in the dataset are
