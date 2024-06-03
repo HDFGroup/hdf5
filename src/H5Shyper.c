@@ -3482,7 +3482,6 @@ H5Sget_select_hyper_nblocks(hid_t spaceid)
     hssize_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("Hs", "i", spaceid);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
@@ -4821,7 +4820,6 @@ H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numbloc
     herr_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ihh*[a2]h", spaceid, startblock, numblocks, buf);
 
     /* Check args */
     if (buf == NULL)
@@ -7724,7 +7722,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                         /* Keep going, nothing to split off */
                     } /* end else */
 
-                    /* Check for overlaps between span 'a' and midle of span 'b' */
+                    /* Check for overlaps between span 'a' and middle of span 'b' */
 
                     /* Make certain both spans either have a down span or both don't have one */
                     assert((span_a->down != NULL && span_b->down != NULL) ||
@@ -9178,8 +9176,8 @@ H5S__check_spans_overlap(const H5S_hyper_span_info_t *spans1, const H5S_hyper_sp
     assert(spans2);
 
     /* Use low & high bounds to try to avoid spinning through the span lists */
-    if (H5S_RANGE_OVERLAP(spans1->low_bounds[0], spans1->high_bounds[0], spans2->low_bounds[0],
-                          spans2->high_bounds[0])) {
+    if (H5_RANGE_OVERLAP(spans1->low_bounds[0], spans1->high_bounds[0], spans2->low_bounds[0],
+                         spans2->high_bounds[0])) {
         H5S_hyper_span_t *span1, *span2; /* Hyperslab spans */
 
         /* Walk over spans, comparing them for overlap */
@@ -9187,7 +9185,7 @@ H5S__check_spans_overlap(const H5S_hyper_span_info_t *spans1, const H5S_hyper_sp
         span2 = spans2->head;
         while (span1 && span2) {
             /* Check current two spans for overlap */
-            if (H5S_RANGE_OVERLAP(span1->low, span1->high, span2->low, span2->high)) {
+            if (H5_RANGE_OVERLAP(span1->low, span1->high, span2->low, span2->high)) {
                 /* Check for spans in lowest dimension already */
                 if (span1->down) {
                     /* Sanity check */
@@ -9765,8 +9763,8 @@ H5S__hyper_regular_and_single_block(H5S_t *space, const hsize_t start[], const h
             block_end  = (start[u] + block[u]) - 1;
 
             /* Check for overlap */
-            if (!H5S_RANGE_OVERLAP(space->select.sel_info.hslab->diminfo.opt[u].start, select_end, start[u],
-                                   block_end)) {
+            if (!H5_RANGE_OVERLAP(space->select.sel_info.hslab->diminfo.opt[u].start, select_end, start[u],
+                                  block_end)) {
                 overlap = false;
                 break;
             } /* end if */
@@ -9812,8 +9810,8 @@ H5S__hyper_regular_and_single_block(H5S_t *space, const hsize_t start[], const h
             block_end  = (start[u] + block[u]) - 1;
 
             /* Check for overlap */
-            if (!H5S_RANGE_OVERLAP(space->select.sel_info.hslab->diminfo.opt[u].start, select_end, start[u],
-                                   block_end)) {
+            if (!H5_RANGE_OVERLAP(space->select.sel_info.hslab->diminfo.opt[u].start, select_end, start[u],
+                                  block_end)) {
                 overlap = false;
                 break;
             } /* end if */
@@ -10300,7 +10298,6 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[], con
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "iSs*h*h*h*h", space_id, op, start, stride, count, block);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -10446,7 +10443,7 @@ H5S_combine_hyperslab(const H5S_t *old_space, H5S_seloper_t op, const hsize_t st
         } /* end for */
 
         /* Check bound box of both spaces to see if they overlap */
-        if (H5S_RANGE_OVERLAP(old_low_bounds[0], old_high_bounds[0], new_low_bounds[0], new_high_bounds[0]))
+        if (H5_RANGE_OVERLAP(old_low_bounds[0], old_high_bounds[0], new_low_bounds[0], new_high_bounds[0]))
             overlapped = true;
 
         /* Non-overlapping situations can be handled in special ways */
@@ -10625,7 +10622,6 @@ H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[], co
     hid_t  ret_value;        /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE6("i", "iSs*h*h*h*h", space_id, op, start, stride, count, block);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -10745,7 +10741,6 @@ H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     hid_t  ret_value;        /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "iSsi", space1_id, op, space2_id);
 
     /* Check args */
     if (NULL == (space1 = (H5S_t *)H5I_object_verify(space1_id, H5I_DATASPACE)))
@@ -10875,7 +10870,6 @@ H5Smodify_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iSsi", space1_id, op, space2_id);
 
     /* Check args */
     if (NULL == (space1 = (H5S_t *)H5I_object_verify(space1_id, H5I_DATASPACE)))
@@ -11415,8 +11409,8 @@ H5S__hyper_proj_int_iterate(H5S_hyper_span_info_t *ss_span_info, const H5S_hyper
     /* Check for non-overlapping bounds */
     check_intersect = true;
     for (u = 0; u < (udata->ss_rank - depth); u++)
-        if (!H5S_RANGE_OVERLAP(ss_span_info->low_bounds[u], ss_span_info->high_bounds[u],
-                               sis_span_info->low_bounds[u], sis_span_info->high_bounds[u])) {
+        if (!H5_RANGE_OVERLAP(ss_span_info->low_bounds[u], ss_span_info->high_bounds[u],
+                              sis_span_info->low_bounds[u], sis_span_info->high_bounds[u])) {
             check_intersect = false;
             break;
         } /* end if */
@@ -11441,7 +11435,7 @@ H5S__hyper_proj_int_iterate(H5S_hyper_span_info_t *ss_span_info, const H5S_hyper
             /* Main loop */
             do {
                 /* Check if spans overlap */
-                if (H5S_RANGE_OVERLAP(ss_low, ss_span->high, sis_low, sis_span->high)) {
+                if (H5_RANGE_OVERLAP(ss_low, ss_span->high, sis_low, sis_span->high)) {
                     high = MIN(ss_span->high, sis_span->high);
                     if (ss_span->down) {
                         /* Add skipped elements if there's a pre-gap */
@@ -12382,7 +12376,6 @@ H5Sis_regular_hyperslab(hid_t spaceid)
     htri_t ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "i", spaceid);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
@@ -12431,7 +12424,6 @@ H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[] /*out*/, hsize_t stride[
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*h*h*h*h", spaceid, start, stride, count, block);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))

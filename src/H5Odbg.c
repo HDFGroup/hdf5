@@ -87,6 +87,10 @@ H5O__assert(const H5O_t *oh)
 
     FUNC_ENTER_PACKAGE_NOERR
 
+    assert(oh);
+    assert(oh->chunk || oh->nchunks == 0);
+    assert(oh->mesg || oh->nmesgs == 0);
+
     /* Initialize the tracking variables */
     hdr_size   = 0;
     meta_space = (size_t)H5O_SIZEOF_HDR(oh) + (size_t)(H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
@@ -139,6 +143,8 @@ H5O__assert(const H5O_t *oh)
     for (u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
         uint8_t H5_ATTR_NDEBUG_UNUSED *curr_hdr;      /* Start of current message header */
         size_t                         curr_tot_size; /* Total size of current message (including header) */
+
+        assert(curr_msg->type);
 
         curr_hdr      = curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh);
         curr_tot_size = curr_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh);
@@ -307,16 +313,16 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
             char       buf[128]; /* Buffer for formatting time info */
 
             /* Time fields */
-            tm = HDlocaltime(&oh->atime);
+            tm = localtime(&oh->atime);
             strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Access Time:", buf);
-            tm = HDlocaltime(&oh->mtime);
+            tm = localtime(&oh->mtime);
             strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Modification Time:", buf);
-            tm = HDlocaltime(&oh->ctime);
+            tm = localtime(&oh->ctime);
             strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Change Time:", buf);
-            tm = HDlocaltime(&oh->btime);
+            tm = localtime(&oh->btime);
             strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Birth Time:", buf);
         } /* end if */

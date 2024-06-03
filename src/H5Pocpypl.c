@@ -179,7 +179,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P__free_merge_comm_dtype_list
  *
- * Purpose:     Frees the provided merge named dtype list
+ * Purpose:     Frees the provided merge committed dtype list
  *
  * Return:      NULL
  *
@@ -329,9 +329,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:       H5P__ocpy_merge_comm_dt_list_enc
  *
- * Purpose:        Callback routine which is called whenever the common
- *		   datatype property in the object copy property list is
- *                 decoded.
+ * Purpose:        Callback routine which is called whenever the merge
+ *                 committed datatype list property in the object copy
+ *                 property list is encoded.
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
@@ -383,9 +383,9 @@ H5P__ocpy_merge_comm_dt_list_enc(const void *value, void **_pp, size_t *size)
 /*-------------------------------------------------------------------------
  * Function:       H5P__ocpy_merge_comm_dt_list_dec
  *
- * Purpose:        Callback routine which is called whenever the common
- *                 datatype property in the dataset access property list is
- *                 decoded.
+ * Purpose:        Callback routine which is called whenever the merge
+ *                 committed datatype list property in the object copy
+ *                 property list is decoded.
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
@@ -564,7 +564,7 @@ done:
 /*--------------------------------------------------------------------------
  * Function:	H5P__ocpy_merge_comm_dt_list_close
  *
- * Purpose:	Close the merge common datatype list property
+ * Purpose:	Close the merge committed datatype list property
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
@@ -578,7 +578,7 @@ H5P__ocpy_merge_comm_dt_list_close(const char H5_ATTR_UNUSED *name, size_t H5_AT
 
     assert(value);
 
-    /* Free the merge named dtype list */
+    /* Free the merge committed dtype list */
     H5P__free_merge_comm_dtype_list(*(H5O_copy_dtype_merge_list_t **)value);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -610,7 +610,6 @@ H5Pset_copy_object(hid_t plist_id, unsigned cpy_option)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iIu", plist_id, cpy_option);
 
     /* Check parameters */
     if (cpy_option & ~H5O_COPY_ALL)
@@ -645,7 +644,6 @@ H5Pget_copy_object(hid_t plist_id, unsigned *cpy_option /*out*/)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Iu", plist_id, cpy_option);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
@@ -687,7 +685,6 @@ H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path)
     herr_t                       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*s", plist_id, path);
 
     /* Check parameters */
     if (!path)
@@ -746,7 +743,6 @@ H5Pfree_merge_committed_dtype_paths(hid_t plist_id)
     herr_t                       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", plist_id);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
@@ -792,7 +788,6 @@ H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data)
     herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iOs*x", plist_id, func, op_data);
 
     /* Check if the callback function is NULL and the user data is non-NULL.
      * This is almost certainly an error as the user data will not be used. */
@@ -838,7 +833,6 @@ H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func /*out*/, void *
     herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*Os**x", plist_id, func, op_data);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))

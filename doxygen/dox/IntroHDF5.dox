@@ -204,7 +204,7 @@ Useful tools for working with HDF5 files include:
 \li HDFView:            A java browser to view HDF (HDF4 and HDF5) files
 
 <h4>h5dump</h4>
-The h5dump utility displays the contents of an HDF5 file in Data Description Language (\ref DDLBNF110).
+The h5dump utility displays the contents of an HDF5 file in Data Description Language (\ref DDLBNF114).
 Below is an example of h5dump output for an HDF5 file that contains no objects:
 \code
 $ h5dump file.h5
@@ -608,8 +608,8 @@ on the <a href="http://hdfeos.org/">HDF-EOS Tools and Information Center</a> pag
 \section secHDF5Examples Examples
 \li \ref LBExamples
 \li \ref ExAPI
-\li <a href="https://portal.hdfgroup.org/display/HDF5/Examples+in+the+Source+Code">Examples in the Source Code</a>
-\li <a href="https://portal.hdfgroup.org/display/HDF5/Other+Examples">Other Examples</a>
+\li <a href="https://github.com/HDFGroup/hdf5/tree/develop/examples">Examples in the Source Code</a>
+\li <a href="https://\DSPURL/Other+Examples">Other Examples</a>
 
 \section secHDF5ExamplesCompile How To Compile
 For information on compiling in C, C++ and Fortran, see: \ref LBCompiling
@@ -618,10 +618,10 @@ For information on compiling in C, C++ and Fortran, see: \ref LBCompiling
 <a href="http://hdfeos.org/zoo/index.php">IDL, MATLAB, and NCL Examples for HDF-EOS</a>
 Examples of how to access and visualize NASA HDF-EOS files using IDL, MATLAB, and NCL.
 
-<a href="https://support.hdfgroup.org/ftp/HDF5/examples/misc-examples/">Miscellaneous Examples</a>
+<a href="https://\AEXURL/misc-examples/">Miscellaneous Examples</a>
 These (very old) examples resulted from working with users, and are not fully tested. Most of them are in C, with a few in Fortran and Java.
 
-<a href="https://support.hdfgroup.org/ftp/HDF5/examples/special_values_HDF5_example.tar">Using Special Values</a>
+<a href="https://\AEXURL/special_values_HDF5_example.tar">Using Special Values</a>
 These examples show how to create special values in an HDF5 application.
 
 */

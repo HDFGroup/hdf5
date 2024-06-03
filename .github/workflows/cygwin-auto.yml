@@ -15,6 +15,7 @@ jobs:
   cygwin_build_and_test:
     name: "cygwin ${{ inputs.build_mode }}"
     runs-on: windows-latest
+    timeout-minutes: 30
     steps:
       - name: Set git to use LF
         run: |

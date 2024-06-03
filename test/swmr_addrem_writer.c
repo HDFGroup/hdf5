@@ -172,7 +172,7 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
         symbol = choose_dataset();
 
         /* Decide whether to shrink or expand, and by how much */
-        count[1] = (hsize_t)HDrandom() % (MAX_SIZE_CHANGE * 2) + 1;
+        count[1] = (hsize_t)rand() % (MAX_SIZE_CHANGE * 2) + 1;
 
         if (count[1] > MAX_SIZE_CHANGE) {
             /* Add records */
@@ -359,7 +359,7 @@ main(int argc, char *argv[])
         HDgettimeofday(&t, NULL);
         random_seed = (unsigned)(t.tv_usec);
     } /* end if */
-    HDsrandom(random_seed);
+    srand(random_seed);
     /* ALWAYS emit the random seed for possible debugging */
     fprintf(stderr, "Using writer random seed: %u\n", random_seed);
 

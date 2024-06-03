@@ -245,7 +245,7 @@ H5C__log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mp
     /* Open log file and set it to be unbuffered */
     if (NULL == (json_udata->outfile = fopen(file_name, "w")))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file");
-    HDsetbuf(json_udata->outfile, NULL);
+    setbuf(json_udata->outfile, NULL);
 
 done:
     if (file_name)
@@ -339,7 +339,7 @@ H5C__json_write_start_log_msg(void *udata)
 \"action\":\"logging start\"\
 },\n\
 ",
-             (long long)HDtime(NULL));
+             (long long)time(NULL));
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -378,7 +378,7 @@ H5C__json_write_stop_log_msg(void *udata)
 }\n\
 ]}\n\
 ",
-             (long long)HDtime(NULL));
+             (long long)time(NULL));
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -417,7 +417,7 @@ H5C__json_write_create_cache_log_msg(void *udata, herr_t fxn_ret_value)
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (int)fxn_ret_value);
+             (long long)time(NULL), (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -455,7 +455,7 @@ H5C__json_write_destroy_cache_log_msg(void *udata)
 \"action\":\"destroy\"\
 },\n\
 ",
-             (long long)HDtime(NULL));
+             (long long)time(NULL));
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -494,7 +494,7 @@ H5C__json_write_evict_cache_log_msg(void *udata, herr_t fxn_ret_value)
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (int)fxn_ret_value);
+             (long long)time(NULL), (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -535,7 +535,7 @@ H5C__json_write_expunge_entry_log_msg(void *udata, haddr_t address, int type_id,
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)address, (int)type_id, (int)fxn_ret_value);
+             (long long)time(NULL), (unsigned long)address, (int)type_id, (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -574,7 +574,7 @@ H5C__json_write_flush_cache_log_msg(void *udata, herr_t fxn_ret_value)
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (int)fxn_ret_value);
+             (long long)time(NULL), (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -618,7 +618,7 @@ H5C__json_write_insert_entry_log_msg(void *udata, haddr_t address, int type_id, 
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)address, type_id, flags, (int)size, (int)fxn_ret_value);
+             (long long)time(NULL), (unsigned long)address, type_id, flags, (int)size, (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -659,7 +659,7 @@ H5C__json_write_mark_entry_dirty_log_msg(void *udata, const H5C_cache_entry_t *e
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
+             (long long)time(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -700,7 +700,7 @@ H5C__json_write_mark_entry_clean_log_msg(void *udata, const H5C_cache_entry_t *e
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
+             (long long)time(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -742,7 +742,7 @@ H5C__json_write_mark_unserialized_entry_log_msg(void *udata, const H5C_cache_ent
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
+             (long long)time(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -784,7 +784,7 @@ H5C__json_write_mark_serialized_entry_log_msg(void *udata, const H5C_cache_entry
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
+             (long long)time(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -827,7 +827,7 @@ H5C__json_write_move_entry_log_msg(void *udata, haddr_t old_addr, haddr_t new_ad
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)old_addr, (unsigned long)new_addr, type_id,
+             (long long)time(NULL), (unsigned long)old_addr, (unsigned long)new_addr, type_id,
              (int)fxn_ret_value);
 
     /* Write the log message to the file */
@@ -869,7 +869,7 @@ H5C__json_write_pin_entry_log_msg(void *udata, const H5C_cache_entry_t *entry, h
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
+             (long long)time(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -914,7 +914,7 @@ H5C__json_write_create_fd_log_msg(void *udata, const H5C_cache_entry_t *parent,
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)parent->addr, (unsigned long)child->addr,
+             (long long)time(NULL), (unsigned long)parent->addr, (unsigned long)child->addr,
              (int)fxn_ret_value);
 
     /* Write the log message to the file */
@@ -966,7 +966,7 @@ H5C__json_write_protect_entry_log_msg(void *udata, const H5C_cache_entry_t *entr
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)entry->addr, type_id, rw_s, (int)entry->size,
+             (long long)time(NULL), (unsigned long)entry->addr, type_id, rw_s, (int)entry->size,
              (int)fxn_ret_value);
 
     /* Write the log message to the file */
@@ -1010,7 +1010,7 @@ H5C__json_write_resize_entry_log_msg(void *udata, const H5C_cache_entry_t *entry
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)entry->addr, (int)new_size, (int)fxn_ret_value);
+             (long long)time(NULL), (unsigned long)entry->addr, (int)new_size, (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -1051,7 +1051,7 @@ H5C__json_write_unpin_entry_log_msg(void *udata, const H5C_cache_entry_t *entry,
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
+             (long long)time(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -1096,7 +1096,7 @@ H5C__json_write_destroy_fd_log_msg(void *udata, const H5C_cache_entry_t *parent,
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)parent->addr, (unsigned long)child->addr,
+             (long long)time(NULL), (unsigned long)parent->addr, (unsigned long)child->addr,
              (int)fxn_ret_value);
 
     /* Write the log message to the file */
@@ -1140,7 +1140,7 @@ H5C__json_write_unprotect_entry_log_msg(void *udata, haddr_t address, int type_i
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)address, type_id, flags, (int)fxn_ret_value);
+             (long long)time(NULL), (unsigned long)address, type_id, flags, (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -1181,7 +1181,7 @@ H5C__json_write_set_cache_config_log_msg(void *udata, const H5AC_cache_config_t 
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (int)fxn_ret_value);
+             (long long)time(NULL), (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
@@ -1222,7 +1222,7 @@ H5C__json_write_remove_entry_log_msg(void *udata, const H5C_cache_entry_t *entry
 \"returned\":%d\
 },\n\
 ",
-             (long long)HDtime(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
+             (long long)time(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)

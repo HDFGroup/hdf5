@@ -107,7 +107,7 @@ main(int argc, char *argv[])
     hid_t       fapl_id = H5I_INVALID_HID;
     MPI_File   *mpifh_p = NULL;
     char        name[1024];
-    const char *envval = NULL;
+    const char *driver_name;
     int         mpi_size;
     int         mpi_rank;
     MPI_Comm    comm = MPI_COMM_WORLD;
@@ -121,11 +121,9 @@ main(int argc, char *argv[])
         TESTING("H5Fflush (part1)");
 
     /* Don't run using the split VFD */
-    envval = getenv(HDF5_DRIVER);
-    if (envval == NULL)
-        envval = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
-    if (!strcmp(envval, "split")) {
+    if (!strcmp(driver_name, "split")) {
         if (mpi_rank == 0) {
             SKIPPED();
             puts("    Test not compatible with current Virtual File Driver");

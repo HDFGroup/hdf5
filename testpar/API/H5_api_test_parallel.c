@@ -223,7 +223,7 @@ main(int argc, char **argv)
     n_tests_skipped_g = 0;
 
     if (MAINPROCESS) {
-        seed = (unsigned)HDtime(NULL);
+        seed = (unsigned)time(NULL);
     }
 
     if (mpi_size > 1) {

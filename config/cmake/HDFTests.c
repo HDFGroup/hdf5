@@ -15,6 +15,21 @@
 #define SIMPLE_TEST(x) int main(void){ x; return 0; }
 
 
+#ifdef HAVE_BUILTIN_EXPECT
+
+int
+main ()
+{
+    void *ptr = (void*) 0;
+
+    if (__builtin_expect (ptr != (void*) 0, 1))
+        return 0;
+
+    return 0;
+}
+
+#endif /* HAVE_BUILTIN_EXPECT */
+
 #ifdef HAVE_ATTRIBUTE
 
 int
@@ -88,29 +103,6 @@ int main ()
 }
 
 #endif /* DEV_T_IS_SCALAR */
-
-#ifdef TEST_DIRECT_VFD_WORKS
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-int main(void)
-{
-    int fid;
-
-    if ((fid = open("tst_file", O_CREAT | O_TRUNC | O_DIRECT, 0755)) < 0)
-        return 1;
-    close(fid);
-    remove("tst_file");
-
-    return 0;
-}
-#endif
-
-#ifdef HAVE_DIRECT
-       SIMPLE_TEST(posix_memalign());
-#endif
 
 #ifdef HAVE_DEFAULT_SOURCE
 /* Check default source */

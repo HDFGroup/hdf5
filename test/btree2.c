@@ -2903,12 +2903,12 @@ test_insert_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t
     herr_t      ret;                    /* Generic error return value */
 
     /* Initialize random number seed */
-    curr_time = HDtime(NULL);
+    curr_time = time(NULL);
 #if 0
 curr_time=1109170019;
 fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 #endif
-    HDsrandom((unsigned)curr_time);
+    srand((unsigned)curr_time);
 
     /*
      * Test inserting many records into v2 B-tree
@@ -2925,7 +2925,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Shuffle record #'s */
     for (u = 0; u < INSERT_MANY; u++) {
-        swap_idx          = ((unsigned)HDrandom() % (INSERT_MANY - u)) + u;
+        swap_idx          = ((unsigned)rand() % (INSERT_MANY - u)) + u;
         temp_rec          = records[u];
         records[u]        = records[swap_idx];
         records[swap_idx] = temp_rec;
@@ -3015,7 +3015,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     /* Find random records */
     for (u = 0; u < FIND_MANY; u++) {
         /* Pick random record */
-        idx = (hsize_t)(HDrandom() % INSERT_MANY);
+        idx = (hsize_t)(rand() % INSERT_MANY);
 
         /* Attempt to find existent record in root of level-4 B-tree */
         found = false;
@@ -3046,7 +3046,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     /* Find random records */
     for (u = 0; u < FIND_MANY; u++) {
         /* Pick random record */
-        idx = (hsize_t)(HDrandom() % INSERT_MANY);
+        idx = (hsize_t)(rand() % INSERT_MANY);
 
         /* Attempt to find existent record in root of level-4 B-tree */
         /* (in increasing order) */
@@ -4973,12 +4973,12 @@ test_update_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t
     herr_t           ret;                    /* Generic error return value */
 
     /* Initialize random number seed */
-    curr_time = HDtime(NULL);
+    curr_time = time(NULL);
 #if 0
 curr_time = 1451342093;
 fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 #endif
-    HDsrandom((unsigned)curr_time);
+    srand((unsigned)curr_time);
 
     /*
      * Test inserting many records into v2 B-tree
@@ -5000,7 +5000,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         H5B2_test_rec_t temp_rec; /* Temporary record */
         unsigned        swap_idx; /* Location to swap with when shuffling */
 
-        swap_idx          = ((unsigned)HDrandom() % (INSERT_MANY_REC - u)) + u;
+        swap_idx          = ((unsigned)rand() % (INSERT_MANY_REC - u)) + u;
         temp_rec          = records[u];
         records[u]        = records[swap_idx];
         records[swap_idx] = temp_rec;
@@ -5076,7 +5076,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     /* Find random records */
     for (u = 0; u < FIND_MANY_REC; u++) {
         /* Pick random record */
-        find.key = (hsize_t)(HDrandom() % INSERT_MANY_REC);
+        find.key = (hsize_t)(rand() % INSERT_MANY_REC);
         find.val = (hsize_t)-1;
 
         /* Attempt to find existent record in level-4 B-tree */
@@ -5112,7 +5112,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         hsize_t idx; /* Record index */
 
         /* Pick random record */
-        idx = (hsize_t)(HDrandom() % INSERT_MANY_REC);
+        idx = (hsize_t)(rand() % INSERT_MANY_REC);
 
         /* Reset find record */
         find.key = (hsize_t)-1;
@@ -8598,7 +8598,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_lots(const char *env_h5_drvr, hid_t fapl, const H5B2_create_t *cparam)
+test_remove_lots(const char *driver_name, hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t     file = H5I_INVALID_HID; /* File ID */
     char      filename[1024];         /* Filename to use */
@@ -8619,12 +8619,12 @@ test_remove_lots(const char *env_h5_drvr, hid_t fapl, const H5B2_create_t *cpara
     bool      single_file_vfd;        /* Whether VFD used stores data in a single file */
 
     /* Initialize random number seed */
-    curr_time = HDtime(NULL);
+    curr_time = time(NULL);
 #if 0
 curr_time = 1163537969;
 fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 #endif
-    HDsrandom((unsigned)curr_time);
+    srand((unsigned)curr_time);
 
     /*
      * Test removing many records into v2 B-tree
@@ -8643,7 +8643,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         hsize_t  temp_rec; /* Temporary record */
         unsigned swap_idx; /* Location to swap with when shuffling */
 
-        swap_idx          = ((unsigned)HDrandom() % (INSERT_MANY - u)) + u;
+        swap_idx          = ((unsigned)rand() % (INSERT_MANY - u)) + u;
         temp_rec          = records[u];
         records[u]        = records[swap_idx];
         records[swap_idx] = temp_rec;
@@ -8656,7 +8656,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         TEST_ERROR;
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = !h5_driver_uses_multiple_files(env_h5_drvr, H5_EXCLUDE_NON_MULTIPART_DRIVERS);
+    single_file_vfd = !h5_driver_uses_multiple_files(driver_name, H5_EXCLUDE_NON_MULTIPART_DRIVERS);
     if (single_file_vfd) {
         /* Make a copy of the file in memory, in order to speed up deletion testing */
 
@@ -8665,6 +8665,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
             TEST_ERROR;
 
         /* Retrieve the file's size */
+        memset(&sb, 0, sizeof(h5_stat_t));
         if (HDfstat(fd, &sb) < 0)
             TEST_ERROR;
 
@@ -8702,7 +8703,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         hsize_t  temp_rec; /* Temporary record */
         unsigned swap_idx; /* Location to swap with when shuffling */
 
-        swap_idx          = ((unsigned)HDrandom() % (INSERT_MANY - u)) + u;
+        swap_idx          = ((unsigned)rand() % (INSERT_MANY - u)) + u;
         temp_rec          = records[u];
         records[u]        = records[swap_idx];
         records[swap_idx] = temp_rec;
@@ -8796,7 +8797,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     /* Remove all records */
     for (u = 0; u < INSERT_MANY; u++) {
         /* Pick a record index to remove from randomly */
-        rem_idx = ((unsigned)HDrandom() % (INSERT_MANY - u));
+        rem_idx = ((unsigned)rand() % (INSERT_MANY - u));
         rrecord = HSIZET_MAX;
 
         /* Remove random record */
@@ -9915,12 +9916,10 @@ main(void)
     unsigned         nerrors = 0;               /* Cumulative error count */
     unsigned         reopen;                    /* Whether to reopen B-tree during tests */
     int              ExpressMode;
-    const char      *envval         = NULL;
+    const char      *driver_name;
     bool             api_ctx_pushed = false; /* Whether API context pushed */
 
-    envval = getenv(HDF5_DRIVER);
-    if (envval == NULL)
-        envval = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Reset library */
     h5_reset();
@@ -9928,7 +9927,7 @@ main(void)
     ExpressMode = GetTestExpress();
 
     /* For the Direct I/O driver, skip intensive tests due to poor performance */
-    if (!strcmp(envval, "direct"))
+    if (!strcmp(driver_name, "direct"))
         ExpressMode = 2;
 
     if (ExpressMode > 1)
@@ -10012,7 +10011,7 @@ main(void)
         if (ExpressMode > 1)
             printf("***Express test mode on.  test_remove_lots skipped\n");
         else
-            nerrors += test_remove_lots(envval, fapl, &cparam);
+            nerrors += test_remove_lots(driver_name, fapl, &cparam);
 
         /* Test more complex B-tree queries */
         nerrors += test_find_neighbor(fapl, &cparam, &tparam);

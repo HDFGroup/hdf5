@@ -40,15 +40,15 @@ static const char *FILENAME[] = {"accum", "accum_swmr_big", NULL};
 int
 main(void)
 {
-    hid_t    fid  = H5I_INVALID_HID; /* File ID */
-    hid_t    fapl = H5I_INVALID_HID; /* file access property list ID */
-    H5F_t   *f    = NULL;            /* File pointer */
-    char     filename[1024];
-    unsigned u;                      /* Local index variable */
-    uint8_t  rbuf[1024];             /* Buffer for reading */
-    uint8_t  buf[1024];              /* Buffer for holding the expected data */
-    char    *driver         = NULL;  /* VFD string (from env variable) */
-    bool     api_ctx_pushed = false; /* Whether API context pushed */
+    const char *driver_name = NULL;            /* VFD string (from env variable) */
+    hid_t       fid         = H5I_INVALID_HID; /* File ID */
+    hid_t       fapl        = H5I_INVALID_HID; /* file access property list ID */
+    H5F_t      *f           = NULL;            /* File pointer */
+    char        filename[1024];
+    unsigned    u;                      /* Local index variable */
+    uint8_t     rbuf[1024];             /* Buffer for reading */
+    uint8_t     buf[1024];              /* Buffer for holding the expected data */
+    bool        api_ctx_pushed = false; /* Whether API context pushed */
 
     /* Testing setup */
     h5_reset();
@@ -56,8 +56,8 @@ main(void)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    driver = getenv(HDF5_DRIVER);
-    if (!H5FD__supports_swmr_test(driver))
+    driver_name = h5_get_test_driver_name();
+    if (!H5FD__supports_swmr_test(driver_name))
         return EXIT_SUCCESS;
 
     /* Initialize buffers */

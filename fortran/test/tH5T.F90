@@ -941,7 +941,7 @@ CONTAINS
 !-------------------------------------------------------------------------
 ! * Function:    test_derived_flt
 ! *
-! * Purpose:     Tests user-define and query functions of floating-point types.
+! * Purpose:     Tests user-defined and query functions of floating-point types.
 ! *              test h5tget/set_fields_f.
 ! *
 ! * Return:      Success:        0

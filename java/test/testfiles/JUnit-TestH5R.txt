@@ -1,4 +1,4 @@
-JUnit version 4.11
+JUnit version 4.13.2
 .testH5Ropen_attr_Nullref
 .testH5Rget_attr_name_Nullref
 .testH5Ropen_region_Nullref

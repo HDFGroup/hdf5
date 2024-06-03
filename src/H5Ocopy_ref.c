@@ -65,7 +65,7 @@ static herr_t H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_
 static herr_t H5O__copy_expand_ref_region1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t *dst_oloc,
                                            H5G_loc_t *dst_root_loc, void *buf_dst, size_t ref_count,
                                            H5O_copy_t *cpy_info);
-static herr_t H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, H5T_t *dt_src, const void *buf_src,
+static herr_t H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, const H5T_t *dt_src, const void *buf_src,
                                            size_t nbytes_src, H5O_loc_t *dst_oloc, H5G_loc_t *dst_root_loc,
                                            void *buf_dst, size_t ref_count, H5O_copy_t *cpy_info);
 
@@ -285,7 +285,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, H5T_t *dt_src, const void *buf_src, size_t nbytes_src,
+H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, const H5T_t *dt_src, const void *buf_src, size_t nbytes_src,
                              H5O_loc_t *dst_oloc, H5G_loc_t *dst_root_loc, void *buf_dst, size_t ref_count,
                              H5O_copy_t *cpy_info)
 {
@@ -412,7 +412,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_copy_expand_ref(H5F_t *file_src, H5T_t *dt_src, void *buf_src, size_t nbytes_src, H5F_t *file_dst,
+H5O_copy_expand_ref(H5F_t *file_src, const H5T_t *dt_src, void *buf_src, size_t nbytes_src, H5F_t *file_dst,
                     void *buf_dst, H5O_copy_t *cpy_info)
 {
     H5O_loc_t dst_oloc;     /* Copied object object location */

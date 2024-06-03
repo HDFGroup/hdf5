@@ -118,10 +118,10 @@ CONTAINS
 
     IF((field .EQ. H5O_INFO_TIME_F).OR.(field .EQ. H5O_INFO_ALL_F))THEN
 
-       atime(1:8) = h5gmtime(oinfo_c%atime)
-       btime(1:8) = h5gmtime(oinfo_c%btime)
-       ctime(1:8) = h5gmtime(oinfo_c%ctime)
-       mtime(1:8) = h5gmtime(oinfo_c%mtime)
+       atime(1:8) = INT(h5gmtime(oinfo_c%atime),C_INT)
+       btime(1:8) = INT(h5gmtime(oinfo_c%btime),C_INT)
+       ctime(1:8) = INT(h5gmtime(oinfo_c%ctime),C_INT)
+       mtime(1:8) = INT(h5gmtime(oinfo_c%mtime),C_INT)
 
        DO i = 1, 8
           IF( (atime(i) .NE. oinfo_f%atime(i)) )THEN

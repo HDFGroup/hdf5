@@ -726,7 +726,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
     if (H5FD_MEM_DRAW == type) {
         last_page_addr = ((addr + size - 1) / page_buf->page_size) * page_buf->page_size;
 
-        /* How many pages does this write span */
+        /* How many pages does this read span */
         num_touched_pages =
             (last_page_addr / page_buf->page_size + 1) - (first_page_addr / page_buf->page_size);
         if (first_page_addr == last_page_addr) {
@@ -835,6 +835,10 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                 offset     = (0 == i ? addr - page_entry->addr : 0);
                 buf_offset = (0 == i ? 0 : size - access_size);
 
+                /* Account for reads that would overflow a page */
+                if (offset + access_size > page_buf->page_size)
+                    access_size = page_buf->page_size - offset;
+
                 /* copy the requested data from the page into the input buffer */
                 H5MM_memcpy((uint8_t *)buf + buf_offset, (uint8_t *)page_entry->page_buf_ptr + offset,
                             access_size);
@@ -905,6 +909,11 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                 /* Copy the requested data from the page into the input buffer */
                 offset     = (0 == i ? addr - search_addr : 0);
                 buf_offset = (0 == i ? 0 : size - access_size);
+
+                /* Account for reads that would overflow a page */
+                if (offset + access_size > page_buf->page_size)
+                    access_size = page_buf->page_size - offset;
+
                 H5MM_memcpy((uint8_t *)buf + buf_offset, (uint8_t *)new_page_buf + offset, access_size);
 
                 /* Create the new PB entry */

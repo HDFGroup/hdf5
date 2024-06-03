@@ -39,6 +39,8 @@ list of the property types.
 \li Close the property list when done, using #H5Pclose.
 
 <hr>
+Previous Chapter \ref LBDatatypes - Next Chapter \ref LBDsetLayout
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 @page LBDsetLayout Dataset Storage Layout
@@ -156,9 +158,9 @@ Specifically look at the \ref ExAPI.
 There are examples for different languages.
 
 The C example to create a chunked dataset is:
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/C/H5D/h5ex_d_chunk.c">h5ex_d_chunk.c</a>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_chunk.c">h5ex_d_chunk.c</a>
 The C example to create a compact dataset is:
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/C/H5D/h5ex_d_compact.c">h5ex_d_compact.c</a>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_compact.c">h5ex_d_compact.c</a>
 
 \section secLBDsetLayoutChange Changing the Layout after Dataset Creation
 The dataset layout is a Dataset Creation Property List. This means that once the dataset has been
@@ -166,11 +168,13 @@ created the dataset layout cannot be changed. The h5repack utility can be used t
 to a new with a new layout.
 
 \section secLBDsetLayoutSource Sources of Information
-<a href="https://confluence.hdfgroup.org/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a>
-(See the documentation on <a href="https://confluence.hdfgroup.org/display/HDF5/Advanced+Topics+in+HDF5">Advanced Topics in HDF5</a>)
+<a href="https://\DOCURL/chunking_in_hdf5.html">Chunking in HDF5</a>
+(See the documentation on <a href="https://\DOCURL/advanced_topics_list.html">Advanced Topics in HDF5</a>)
 \see \ref sec_plist in the HDF5 \ref UG.
 
 <hr>
+Previous Chapter \ref LBPropsList - Next Chapter \ref LBExtDset
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 
@@ -184,7 +188,7 @@ certain initial dimensions, then to later increase the size of any of the initia
 
 HDF5 requires you to use chunking to define extendible datasets. This makes it possible to extend
 datasets efficiently without having to excessively reorganize storage. (To use chunking efficiently,
-be sure to see the advanced topic, <a href="https://confluence.hdfgroup.org/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a>.)
+be sure to see the advanced topic, <a href="https://\DOCURL/chunking_in_hdf5.html">Chunking in HDF5</a>.)
 
 The following operations are required in order to extend a dataset:
 \li Declare the dataspace of the dataset to have unlimited dimensions for all dimensions that might eventually be extended.
@@ -216,6 +220,8 @@ after this call, the dataset's dataspace must be refreshed with #H5Dget_space be
 \li Once there is no longer a need for a Property List instance, it should be closed with the #H5Pclose call.
 
 <hr>
+Previous Chapter \ref LBDsetLayout - Next Chapter \ref LBComDset
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 @page LBComDset Compressed Datasets
@@ -224,7 +230,7 @@ Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 \section secLBComDsetCreate Creating a Compressed Dataset
 HDF5 requires you to use chunking to create a compressed dataset. (To use chunking efficiently,
-be sure to see the advanced topic, <a href="https://confluence.hdfgroup.org/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a>.)
+be sure to see the advanced topic, <a href="https://\DOCURL/chunking_in_hdf5.html">Chunking in HDF5</a>.)
 
 The following operations are required in order to create a compressed dataset:
 \li Create a dataset creation property list.
@@ -258,6 +264,8 @@ to #H5Dcreate will fail if attempting to create an SZIP compressed dataset with 
 The conflict can only be detected when the property list is used.
 
 <hr>
+Previous Chapter \ref LBExtDset - Next Chapter \ref LBContents
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 @page LBContents Discovering the Contents of an HDF5 File
@@ -294,14 +302,16 @@ Specifically look at the \ref ExAPI.
 There are examples for different languages, where examples of using #H5Literate and #H5Ovisit/#H5Lvisit are included.
 
 The h5ex_g_traverse example traverses a file using H5Literate:
-\li C: <a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/C/H5G/h5ex_g_traverse.c">h5ex_g_traverse.c</a>
-\li F90: <a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/FORTRAN/H5G/h5ex_g_traverse_F03.f90">h5ex_g_traverse_F03.f90</a>
+\li C: <a href="https://\SRCURL/HDF5Examples/C/H5G/h5ex_g_traverse.c">h5ex_g_traverse.c</a>
+\li F90: <a href="https://\SRCURL/HDF5Examples/FORTRAN/H5G/h5ex_g_traverse.F90">h5ex_g_traverse_F03.f90</a>
 
 The h5ex_g_visit example traverses a file using H5Ovisit and H5Lvisit:
-\li C: <a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/C/H5G/h5ex_g_visit.c">h5ex_g_visit.c</a>
-\li F90:  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/FORTRAN/H5G/h5ex_g_visit_F03.f90">h5ex_g_visit_F03.f90</a>
+\li C: <a href="https://\SRCURL/HDF5Examples/C/H5G/h5ex_g_visit.c">h5ex_g_visit.c</a>
+\li F90:  <a href="https://\SRCURL/HDF5Examples/FORTRAN/H5G/h5ex_g_visit.F90">h5ex_g_visit_F03.f90</a>
 
 <hr>
+Previous Chapter \ref LBComDset - Next Chapter \ref LBQuiz
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 @page LBQuiz Learning the basics QUIZ
@@ -398,6 +408,8 @@ is in the <code style="background-color:whitesmoke;">root</code> group. How woul
 </ol>
 
 <hr>
+Previous Chapter \ref LBContents - Next Chapter \ref LBQuizAnswers
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 @page LBQuizAnswers Learning the basics QUIZ with Answers
@@ -691,9 +703,11 @@ did = H5Dopen (file_id, "/foo/boo/moo"); /* absolute path */
 </ol>
 
 <hr>
+Previous Chapter \ref LBQuiz - Next Chapter \ref LBCompiling
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBCompiling Compiling HDF5 Applications
+/** @page LBCompiling Compiling HDF5 Applications
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -746,6 +760,9 @@ To see how the libraries linked in with a compile script were configured and bui
 The h5cc, h5c++, and h5fc compile scripts come with the HDF5 binary distributions (include files,
 libraries, and utilities) for the platforms we support. The h5c++ and h5fc utilities are ONLY present
 if the library was built with C++ and Fortran.
+
+<h4>USING_HDF5_CMake.txt:</h4>
+\verbinclude USING_HDF5_CMake.txt
 
 \section secLBCompilingVS Using Visual Studio
 
@@ -811,7 +828,7 @@ HDF5 C Library
 \code
 libhdf5_hl_cpp.a
 libhdf5_cpp.a
-libhdf5hl_fortran.a
+libhdf5_hl_fortran.a
 libhdf5_fortran.a
 libhdf5_hl.a
 libhdf5.a
@@ -821,7 +838,7 @@ libhdf5.a
 \code
 libhdf5_hl_cpp.a
 libhdf5_cpp.a
-libhdf5hl_fortran.a
+libhdf5_hl_fortran.a
 libhdf5_fortran.a
 libhdf5_hl.a
 libhdf5.a
@@ -832,7 +849,7 @@ libhdf5.a
 \code
 libhdf5_hl_cpp.lib
 libhdf5_cpp.lib
-libhdf5hl_fortran.lib
+libhdf5_hl_fortran.lib
 libhdf5_fortran.lib
 libhdf5_hl.lib
 libhdf5.lib
@@ -863,7 +880,7 @@ HDF5 C Library
 \code
 libhdf5_hl_cpp.so
 libhdf5_cpp.so
-libhdf5hl_fortran.so
+libhdf5_hl_fortran.so
 libhdf5_fortran.so
 libhdf5_hl.so
 libhdf5.so
@@ -873,7 +890,7 @@ libhdf5.so
 \code
 libhdf5_hl_cpp.dylib
 libhdf5_cpp.dylib
-libhdf5hl_fortran.dylib
+libhdf5_hl_fortran.dylib
 libhdf5_fortran.dylib
 libhdf5_hl.dylib
 libhdf5.dylib
@@ -883,7 +900,7 @@ libhdf5.dylib
 \code
 hdf5_hl_cpp.lib
 hdf5_cpp.lib
-hdf5hl_fortran.lib
+hdf5_hl_fortran.lib
 hdf5_fortran.lib
 hdf5_hl.lib
 hdf5.lib
@@ -1001,13 +1018,13 @@ For example, on Unix the log files will be in:
 There are log files for the configure, test, and build. 
 
 <hr>
+Previous Chapter \ref LBQuizAnswers - Next Chapter \ref LBTraining
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBTraining Training Videos
-Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
-<hr>
+*/
 
-<a href="https://confluence.hdfgroup.org/display/HDF5/Training+Videos">Training Videos</a>
+/ref LBTraining
 
 <hr>
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics

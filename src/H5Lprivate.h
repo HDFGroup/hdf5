@@ -47,6 +47,12 @@
 /*  callback function for external link traversal */
 #define H5L_ACS_ELINK_CB_NAME "external link callback"
 
+#ifdef H5L_MODULE
+#define H5L_OCRT_INFO(L) (((H5L_trav_cr_t *)(L))->ocrt_info)
+#else /* H5L_MODULE */
+#define H5L_OCRT_INFO(L) (H5L_get_ocrt_info(L))
+#endif
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/
@@ -56,6 +62,8 @@ typedef struct H5L_elink_cb_t {
     H5L_elink_traverse_t func;
     void                *user_data;
 } H5L_elink_cb_t;
+
+typedef struct H5L_trav_cr_t H5L_trav_cr_t;
 
 /*****************************/
 /* Library Private Variables */
@@ -75,6 +83,7 @@ H5_DLL herr_t H5L_get_info(const H5G_loc_t *loc, const char *name, H5L_info2_t *
 H5_DLL herr_t H5L_register_external(void);
 H5_DLL herr_t H5L_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                           hsize_t *idx_p, H5L_iterate2_t op, void *op_data);
+H5_DLL H5O_obj_create_t *H5L_get_ocrt_info(const H5L_trav_cr_t *l);
 
 /* User-defined link functions */
 H5_DLL herr_t             H5L_register(const H5L_class_t *cls);

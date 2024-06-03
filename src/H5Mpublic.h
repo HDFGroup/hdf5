@@ -32,33 +32,37 @@
 
 /* Macros defining operation IDs for map VOL callbacks (implemented using the
  * "optional" VOL callback) */
-#define H5VL_MAP_CREATE   1
-#define H5VL_MAP_OPEN     2
-#define H5VL_MAP_GET_VAL  3
-#define H5VL_MAP_EXISTS   4
-#define H5VL_MAP_PUT      5
-#define H5VL_MAP_GET      6
-#define H5VL_MAP_SPECIFIC 7
-#define H5VL_MAP_OPTIONAL 8
-#define H5VL_MAP_CLOSE    9
+#define H5VL_MAP_CREATE   1 /**< Callback operation ID for map create */
+#define H5VL_MAP_OPEN     2 /**< Callback operation ID for map open */
+#define H5VL_MAP_GET_VAL  3 /**< Callback operation ID for getting an associated value from a map */
+#define H5VL_MAP_EXISTS   4 /**< Callback operation ID for checking if a value exists in a map */
+#define H5VL_MAP_PUT      5 /**< Callback operation ID for putting a key-value pair to a map */
+#define H5VL_MAP_GET      6 /**< Callback operation ID for map get callback */
+#define H5VL_MAP_SPECIFIC 7 /**< Callback operation ID for map specific operation */
+#define H5VL_MAP_OPTIONAL 8 /**< Currently unused */
+#define H5VL_MAP_CLOSE    9 /**< Callback operation ID for terminating access to a map */
 
 /*******************/
 /* Public Typedefs */
 /*******************/
 
-/* types for map GET callback */
+/**
+ * Types for map GET callback
+ */
 typedef enum H5VL_map_get_t {
-    H5VL_MAP_GET_MAPL,     /* map access property list */
-    H5VL_MAP_GET_MCPL,     /* map creation property list */
-    H5VL_MAP_GET_KEY_TYPE, /* key type                 */
-    H5VL_MAP_GET_VAL_TYPE, /* value type               */
-    H5VL_MAP_GET_COUNT     /* key count                */
+    H5VL_MAP_GET_MAPL,     /**< Callback operation ID for getting map access property list   */
+    H5VL_MAP_GET_MCPL,     /**< Callback operation ID for getting map creation property list */
+    H5VL_MAP_GET_KEY_TYPE, /**< Callback operation ID for getting the key datatype for a map */
+    H5VL_MAP_GET_VAL_TYPE, /**< Callback operation ID for getting the value datatype for a map */
+    H5VL_MAP_GET_COUNT /**< Callback operation ID for getting the number of key-value pairs stored in a map */
 } H5VL_map_get_t;
 
-/* types for map SPECIFIC callback */
+/**
+ * Types for map SPECIFIC callback
+ */
 typedef enum H5VL_map_specific_t {
-    H5VL_MAP_ITER,  /* H5Miterate               */
-    H5VL_MAP_DELETE /* H5Mdelete                */
+    H5VL_MAP_ITER,  /**< Callback operation ID for iterating over all key-value pairs stored in the map */
+    H5VL_MAP_DELETE /**< Callback operation ID for deleting a key-value pair stored in the map */
 } H5VL_map_specific_t;
 
 //! <!-- [H5M_iterate_t_snip] -->
@@ -68,112 +72,116 @@ typedef enum H5VL_map_specific_t {
 typedef herr_t (*H5M_iterate_t)(hid_t map_id, const void *key, void *op_data);
 //! <!-- [H5M_iterate_t_snip] -->
 
-/* Parameters for map operations */
+/**
+ * Parameters for map operations
+ */
 typedef union H5VL_map_args_t {
-    /* H5VL_MAP_CREATE */
+
+    /** H5VL_MAP_CREATE */
     struct {
-        H5VL_loc_params_t loc_params;  /* Location parameters for object */
-        const char       *name;        /* Name of new map object */
-        hid_t             lcpl_id;     /* Link creation property list for map */
-        hid_t             key_type_id; /* Datatype for map keys */
-        hid_t             val_type_id; /* Datatype for map values */
-        hid_t             mcpl_id;     /* Map creation property list */
-        hid_t             mapl_id;     /* Map access property list */
-        void             *map;         /* Pointer to newly created map object (OUT) */
+        H5VL_loc_params_t loc_params;  /**< Location parameters for object */
+        const char       *name;        /**< Name of new map object */
+        hid_t             lcpl_id;     /**< Link creation property list for map */
+        hid_t             key_type_id; /**< Datatype for map keys */
+        hid_t             val_type_id; /**< Datatype for map values */
+        hid_t             mcpl_id;     /**< Map creation property list */
+        hid_t             mapl_id;     /**< Map access property list */
+        void             *map;         /**< Pointer to newly created map object (OUT) */
     } create;
 
-    /* H5VL_MAP_OPEN */
+    /** H5VL_MAP_OPEN */
     struct {
-        H5VL_loc_params_t loc_params; /* Location parameters for object */
-        const char       *name;       /* Name of new map object */
-        hid_t             mapl_id;    /* Map access property list */
-        void             *map;        /* Pointer to newly created map object (OUT) */
+        H5VL_loc_params_t loc_params; /**< Location parameters for object */
+        const char       *name;       /**< Name of new map object */
+        hid_t             mapl_id;    /**< Map access property list */
+        void             *map;        /**< Pointer to newly created map object (OUT) */
     } open;
 
-    /* H5VL_MAP_GET_VAL */
+    /** H5VL_MAP_GET_VAL */
     struct {
-        hid_t       key_mem_type_id;   /* Memory datatype for key */
-        const void *key;               /* Pointer to key */
-        hid_t       value_mem_type_id; /* Memory datatype for value */
-        void       *value;             /* Buffer for value (OUT) */
+        hid_t       key_mem_type_id;   /**< Memory datatype for key */
+        const void *key;               /**< Pointer to key */
+        hid_t       value_mem_type_id; /**< Memory datatype for value */
+        void       *value;             /**< Buffer for value (OUT) */
     } get_val;
 
-    /* H5VL_MAP_EXISTS */
+    /** H5VL_MAP_EXISTS */
     struct {
-        hid_t       key_mem_type_id; /* Memory datatype for key */
-        const void *key;             /* Pointer to key */
-        hbool_t     exists;          /* Flag indicating whether key exists in map (OUT) */
+        hid_t       key_mem_type_id; /**< Memory datatype for key */
+        const void *key;             /**< Pointer to key */
+        hbool_t     exists;          /**< Flag indicating whether key exists in map (OUT) */
     } exists;
 
-    /* H5VL_MAP_PUT */
+    /** H5VL_MAP_PUT */
     struct {
-        hid_t       key_mem_type_id;   /* Memory datatype for key */
-        const void *key;               /* Pointer to key */
-        hid_t       value_mem_type_id; /* Memory datatype for value */
-        const void *value;             /* Pointer to value */
+        hid_t       key_mem_type_id;   /**< Memory datatype for key */
+        const void *key;               /**< Pointer to key */
+        hid_t       value_mem_type_id; /**< Memory datatype for value */
+        const void *value;             /**< Pointer to value */
     } put;
 
-    /* H5VL_MAP_GET */
+    /** H5VL_MAP_GET */
     struct {
-        H5VL_map_get_t get_type; /* 'get' operation to perform */
+        H5VL_map_get_t get_type; /**< 'get' operation to perform */
 
-        /* Parameters for each operation */
+        /** Parameters for each operation */
         union {
-            /* H5VL_MAP_GET_MAPL */
+            /** H5VL_MAP_GET_MAPL */
             struct {
-                hid_t mapl_id; /* Map access property list ID (OUT) */
+                hid_t mapl_id; /**< Get map access property list ID (OUT) */
             } get_mapl;
 
-            /* H5VL_MAP_GET_MCPL */
+            /** H5VL_MAP_GET_MCPL */
             struct {
-                hid_t mcpl_id; /* Map creation property list ID (OUT) */
+                hid_t mcpl_id; /**< Get map creation property list ID (OUT) */
             } get_mcpl;
 
-            /* H5VL_MAP_GET_KEY_TYPE */
+            /** H5VL_MAP_GET_KEY_TYPE */
             struct {
-                hid_t type_id; /* Datatype ID for map's keys (OUT) */
+                hid_t type_id; /**< Get datatype ID for map's keys (OUT) */
             } get_key_type;
 
-            /* H5VL_MAP_GET_VAL_TYPE */
+            /** H5VL_MAP_GET_VAL_TYPE */
             struct {
-                hid_t type_id; /* Datatype ID for map's values (OUT) */
+                hid_t type_id; /**< Get datatype ID for map's values (OUT) */
             } get_val_type;
 
-            /* H5VL_MAP_GET_COUNT */
+            /** H5VL_MAP_GET_COUNT */
             struct {
-                hsize_t count; /* # of KV pairs in map (OUT) */
+                hsize_t count; /**< Get number of key-value pairs in the map (OUT) */
             } get_count;
         } args;
     } get;
 
-    /* H5VL_MAP_SPECIFIC */
+    /** H5VL_MAP_SPECIFIC */
     struct {
-        H5VL_map_specific_t specific_type; /* 'specific' operation to perform */
+        H5VL_map_specific_t specific_type;
+        /**< 'specific' operation to perform */
 
-        /* Parameters for each operation */
+        /** Parameters for each operation */
         union {
-            /* H5VL_MAP_ITER */
+            /* H5VL_MAP_ITER specific operation */
             struct {
-                H5VL_loc_params_t loc_params;      /* Location parameters for object */
-                hsize_t           idx;             /* Start/end iteration index (IN/OUT) */
-                hid_t             key_mem_type_id; /* Memory datatype for key */
-                H5M_iterate_t     op;              /* Iteration callback routine */
-                void             *op_data;         /* Pointer to callback context */
+                H5VL_loc_params_t loc_params;      /**< Location parameters for object */
+                hsize_t           idx;             /**< Start/end iteration index (IN/OUT) */
+                hid_t             key_mem_type_id; /**< Memory datatype for key */
+                H5M_iterate_t     op;              /**< Iteration callback routine */
+                void             *op_data;         /**< Pointer to callback context */
             } iterate;
 
-            /* H5VL_MAP_DELETE */
+            /* H5VL_MAP_DELETE specific operation */
             struct {
-                H5VL_loc_params_t loc_params;      /* Location parameters for object */
-                hid_t             key_mem_type_id; /* Memory datatype for key */
-                const void       *key;             /* Pointer to key */
+                H5VL_loc_params_t loc_params;      /**< Location parameters for object */
+                hid_t             key_mem_type_id; /**< Memory datatype for key */
+                const void       *key;             /**< Pointer to key */
             } del;
         } args;
     } specific;
 
-    /* H5VL_MAP_OPTIONAL */
+    /** H5VL_MAP_OPTIONAL */
     /* Unused */
 
-    /* H5VL_MAP_CLOSE */
+    /** H5VL_MAP_CLOSE */
     /* No args */
 } H5VL_map_args_t;
 
@@ -206,7 +214,7 @@ extern "C" {
  * \lcpl_id
  * \mcpl_id
  * \mapl_id
- * \returns \hid_t{map object}
+ * \return \hid_t{map object}
  *
  * \details H5Mcreate() creates a new map object for storing key-value
  *          pairs. The in-file datatype for keys is defined by \p key_type_id
@@ -254,7 +262,7 @@ H5_DLL hid_t H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id, 
  * \fgdta_loc_id{loc_id}
  * \param[in] name Map object name relative to \p loc_id
  * \mapl_id
- * \returns \hid_t{map object}
+ * \return \hid_t{map object}
  *
  * \details H5Mopen() finds a map object specified by \p name under the location
  *          specified by \p loc_id. The map object should be close with
@@ -283,7 +291,7 @@ H5_DLL hid_t  H5Mopen_async(hid_t loc_id, const char *name, hid_t mapl_id, hid_t
  * \brief Terminates access to a map object
  *
  * \map_id
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details H5Mclose() closes access to a map object specified by \p map_id and
  *          releases resources used by it.
@@ -313,7 +321,7 @@ H5_DLL herr_t H5Mclose_async(hid_t map_id, hid_t es_id);
  * \brief Gets key datatype for a map object
  *
  * \map_id
- * \returns \hid_t{datatype}
+ * \return \hid_t{datatype}
  *
  * \details H5Mget_key_type() retrieves key datatype as stored in the file for a
  *          map object specified by \p map_id and returns identifier for the
@@ -330,7 +338,7 @@ H5_DLL hid_t H5Mget_key_type(hid_t map_id);
  * \brief Gets value datatype for a map object
  *
  * \map_id
- * \returns \hid_t{datatype}
+ * \return \hid_t{datatype}
  *
  * \details H5Mget_val_type() retrieves value datatype as stored in the file for
  *          a map object specified by \p map_id and returns identifier for the
@@ -347,7 +355,7 @@ H5_DLL hid_t H5Mget_val_type(hid_t map_id);
  * \brief Gets creation property list for a map object
  *
  * \map_id
- * \returns \hid_t{map creation property list}
+ * \return \hid_t{map creation property list}
  *
  * \details H5Mget_create_plist() returns an identifier for a copy of the
  *          creation property list for a map object specified by \p map_id.
@@ -366,7 +374,7 @@ H5_DLL hid_t H5Mget_create_plist(hid_t map_id);
  * \brief Gets access property list for a map object
  *
  * \map_id
- * \returns \hid_t{map access property list}
+ * \return \hid_t{map access property list}
  *
  * \details H5Mget_access_plist() returns an identifier for a copy of the access
  *          property list for a map object specified by \p map_id.
@@ -384,7 +392,7 @@ H5_DLL hid_t H5Mget_access_plist(hid_t map_id);
  * \map_id
  * \param[out] count The number of key-value pairs stored in the map object
  * \dxpl_id
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details H5Mget_count() retrieves the number of key-value pairs stored in a
  *          map specified by map_id.
@@ -405,7 +413,7 @@ H5_DLL herr_t H5Mget_count(hid_t map_id, hsize_t *count, hid_t dxpl_id);
  * \type_id{val_mem_type_id}
  * \param[in] value Pointer to value buffer
  * \dxpl_id
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details H5Mput() adds a key-value pair to a map object specified by \p
  *          map_id, or updates the value for the specified key if one was set
@@ -449,7 +457,7 @@ H5_DLL herr_t H5Mput_async(hid_t map_id, hid_t key_mem_type_id, const void *key,
  * \type_id{val_mem_type_id}
  * \param[out] value Pointer to value buffer
  * \dxpl_id
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details H5Mget() retrieves from a map object specified by \p map_id, the
  *          value associated with the provided key \p key. \p key_mem_type_id
@@ -494,7 +502,7 @@ H5_DLL herr_t H5Mget_async(hid_t map_id, hid_t key_mem_type_id, const void *key,
  * \param[in] key Pointer to key buffer
  * \param[out] exists Pointer to a buffer to return the existence status
  * \dxpl_id
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details H5Mexists() checks if the provided key is stored in the map object
  *          specified by \p map_id. If \p key_mem_type_id is different from that
@@ -520,7 +528,7 @@ H5_DLL herr_t H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, hb
  * \param[in] op User-defined iterator function
  * \op_data
  * \dxpl_id
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details H5Miterate() iterates over all key-value pairs stored in the map
  *          object specified by \p map_id, making the callback specified by \p
@@ -564,7 +572,7 @@ H5_DLL herr_t H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_
  * \op_data
  * \dxpl_id
  * \lapl_id
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details H5Miterate_by_name() iterates over all key-value pairs stored in the
  *          map object specified by \p map_id, making the callback specified by
@@ -604,7 +612,7 @@ H5_DLL herr_t H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *id
  * \type_id{key_mem_type_id}
  * \param[in] key Pointer to key buffer
  * \dxpl_id
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details H5Mdelete() deletes a key-value pair from the map object specified
  *          by \p map_id. \p key_mem_type_id specifies the datatype for the

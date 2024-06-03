@@ -71,6 +71,9 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
       links_env
       external_env
       vds_env
+      mirror_vfd
+      ros3
+      hdfs
   )
 
   # Skip several tests with subfiling VFD, mostly due
@@ -200,6 +203,15 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
   endmacro ()
 
   macro (ADD_VFD_TEST vfdname resultcode)
+    foreach (h5_test ${H5_EXPRESS_TESTS})
+      if (NOT h5_test IN_LIST H5_VFD_SKIP_TESTS)
+        if (WIN32)
+          CHECK_VFD_TEST (${h5_test} ${vfdname} ${resultcode})
+        else ()
+          DO_VFD_TEST (${h5_test} ${vfdname} ${resultcode})
+        endif ()
+      endif ()
+    endforeach ()
     foreach (h5_test ${H5_TESTS})
       if (NOT h5_test IN_LIST H5_VFD_SKIP_TESTS)
         if (WIN32)

@@ -110,9 +110,6 @@
 /* Define to 1 if CLOCK_MONOTONIC_COARSE is available */
 #cmakedefine H5_HAVE_CLOCK_MONOTONIC_COARSE @H5_HAVE_CLOCK_MONOTONIC_COARSE@
 
-/* Define if the function stack tracing code is to be compiled in */
-#cmakedefine H5_HAVE_CODESTACK @H5_HAVE_CODESTACK@
-
 /* Define to 1 if you have the <curl/curl.h> header file. */
 #cmakedefine H5_HAVE_CURL_CURL_H @H5_HAVE_CURL_H@
 
@@ -131,6 +128,9 @@
 /* Define if library information should be embedded in the executables */
 #cmakedefine H5_HAVE_EMBEDDED_LIBINFO @H5_HAVE_EMBEDDED_LIBINFO@
 
+/* Define to 1 if you have the `fabsf16' function. */
+#cmakedefine H5_HAVE_FABSF16 @H5_HAVE_FABSF16@
+
 /* Define to 1 if you have the `fcntl' function. */
 #cmakedefine H5_HAVE_FCNTL @H5_HAVE_FCNTL@
 
@@ -142,6 +142,9 @@
 
 /* Define if support for szip filter is enabled */
 #cmakedefine H5_HAVE_FILTER_SZIP @H5_HAVE_FILTER_SZIP@
+
+/* Determine if _Float16 is available */
+#cmakedefine H5_HAVE__FLOAT16 @H5_HAVE__FLOAT16@
 
 /* Determine if __float128 is available */
 #cmakedefine H5_HAVE_FLOAT128 @H5_HAVE_FLOAT128@
@@ -270,12 +273,6 @@
 /* Define to 1 if you have the <quadmath.h> header file. */
 #cmakedefine H5_HAVE_QUADMATH_H @H5_HAVE_QUADMATH_H@
 
-/* Define to 1 if you have the `random' function. */
-#cmakedefine H5_HAVE_RANDOM @H5_HAVE_RANDOM@
-
-/* Define to 1 if you have the `rand_r' function. */
-#cmakedefine H5_HAVE_RAND_R @H5_HAVE_RAND_R@
-
 /* Define whether the Read-Only S3 virtual file driver (VFD) should be
    compiled */
 #cmakedefine H5_HAVE_ROS3_VFD @H5_HAVE_ROS3_VFD@
@@ -328,6 +325,9 @@
 /* Define to 1 if you have the <szlib.h> header file. */
 #cmakedefine H5_HAVE_SZLIB_H @H5_HAVE_SZLIB_H@
 
+/* Define to 1 if the compiler supports the __builtin_expect() extension */
+#cmakedefine H5_HAVE_BUILTIN_EXPECT @H5_HAVE_BUILTIN_EXPECT@
+
 #if defined(_WIN32) && !defined(H5_BUILT_AS_DYNAMIC_LIB)
 /* Not supported on WIN32 platforms with static linking */
 /* #undef H5_HAVE_THREADSAFE */
@@ -360,10 +360,10 @@
 /* Define to 1 if you have the `waitpid' function. */
 #cmakedefine H5_HAVE_WAITPID @H5_HAVE_WAITPID@
 
-/* Define to 1 if you have the 'InitOnceExecuteOnce' function. */
+/* Define to 1 if you have Win32 threads */
 #cmakedefine H5_HAVE_WIN_THREADS @H5_HAVE_WIN_THREADS@
 
-/* Define if your system has window style path name. */
+/* Define if your system has Windows-style path name. */
 #cmakedefine H5_HAVE_WINDOW_PATH @H5_HAVE_WINDOW_PATH@
 
 /* Define to 1 if you have the <zlib.h> header file. */
@@ -383,6 +383,9 @@
 
 /* Define if new-style references should be used with dimension scales */
 #cmakedefine H5_DIMENSION_SCALES_WITH_NEW_REF @H5_DIMENSION_SCALES_WITH_NEW_REF@
+
+/* Define if your system can convert long double to _Float16 values correctly. */
+#cmakedefine H5_LDOUBLE_TO_FLOAT16_CORRECT @H5_LDOUBLE_TO_FLOAT16_CORRECT@
 
 /* Define if your system can convert long double to (unsigned) long long
    values correctly. */
@@ -585,6 +588,9 @@
 
 /* The size of `_Quad', as computed by sizeof. */
 #define H5_SIZEOF__QUAD @H5_SIZEOF__QUAD@
+
+/* The size of `_Float16', as computed by sizeof. */
+#define H5_SIZEOF__FLOAT16 @H5_SIZEOF__FLOAT16@
 
 /* The size of `__float128', as computed by sizeof. */
 #define H5_SIZEOF___FLOAT128 @H5_SIZEOF___FLOAT128@

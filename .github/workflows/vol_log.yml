@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          sudo apt update
+          sudo apt-get update
           sudo apt-get install automake autoconf libtool libtool-bin libopenmpi-dev zlib1g-dev
           #mpich
 
@@ -58,7 +58,7 @@ jobs:
       - name: Checkout Log-based VOL
         uses: actions/checkout@v4.1.1
         with:
-          repository: DataLib-ECP/vol-log-based
+          repository: HDFGroup/vol-log-based
           path: vol-log-based
 
       - name: Build HDF5 Log-based VOL connector and test with external tests 

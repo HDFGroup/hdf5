@@ -235,11 +235,11 @@
  * Note that the root group, indicated above by /, was automatically created when the file was created.
  *
  * h5dump is described on the
- * <a href="https://portal.hdfgroup.org/display/HDF5/h5dump">Tools</a>
+ * <a href="https://\DOXURL/_view_tools_view.html#subsecViewToolsViewContent_h5dump">
+ * Tools</a>
  * page under
- * <a href="https://portal.hdfgroup.org/display/HDF5/Libraries+and+Tools+Reference">
- * Libraries and Tools Reference</a>.
- * The HDF5 DDL grammar is described in the document \ref DDLBNF110.
+ * <a href="https://\DOXURL/_view_tools_command.html">Command-line Tools</a>.
+ * The HDF5 DDL grammar is described in the document \ref DDLBNF114.
  *
  * \subsection subsec_file_summary File Function Summaries
  * General library (\ref H5 functions and macros), (\ref H5F functions), file related
@@ -712,7 +712,7 @@
  * If the application opens an HDF5 file without both determining the driver used to create the file
  * and setting up the use of that driver, the HDF5 Library will examine the superblock and the
  * driver definition block to identify the driver.
- * See the <a href="https://hdfgroup.github.io/hdf5/develop/_s_p_e_c.html">HDF5 File Format Specification</a>
+ * See the <a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>
  * for detailed descriptions of the superblock and the driver definition block.
  *
  * \subsubsection subsubsec_file_alternate_drivers_sec2 The POSIX (aka SEC2) Driver
@@ -888,10 +888,11 @@
  *
  * Additional parameters may be added to these functions in the future.
  *
- * @see <a href="https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations">
+ * @see <a href="https://\DOCURL/advanced_topics/file_image_ops.html">
  * HDF5 File Image Operations</a>
  * section for information on more advanced usage of the Memory file driver, and
- * @see <a href="http://www.hdfgroup.org/HDF5/doc/Advanced/ModifiedRegionWrites/ModifiedRegionWrites.pdf">
+ * @see <a
+ * href="https://docs.hdfgroup.org/archive/support/HDF5/doc/Advanced/ModifiedRegionWrites/ModifiedRegionWrites.pdf">
  * Modified Region Writes</a>
  * section for information on how to set write operations so that only modified regions are written
  * to storage.

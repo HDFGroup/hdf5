@@ -100,6 +100,8 @@ $SRC_H5DUMP_TESTFILES/tdatareg.h5
 $SRC_H5DUMP_TESTFILES/tdset.h5
 $SRC_H5DUMP_TESTFILES/tempty.h5
 $SRC_H5DUMP_TESTFILES/textlink.h5
+$SRC_H5DUMP_TESTFILES/tfloat16.h5
+$SRC_H5DUMP_TESTFILES/tfloat16_be.h5
 $SRC_H5DUMP_TESTFILES/tfpformat.h5
 $SRC_H5DUMP_TESTFILES/tgroup.h5
 $SRC_H5DUMP_TESTFILES/thlink.h5
@@ -150,6 +152,8 @@ $SRC_H5DUMP_OUTFILES/xml/tempty-ns-2.h5.xml
 $SRC_H5DUMP_OUTFILES/xml/tenum.h5.xml
 $SRC_H5DUMP_OUTFILES/xml/test35.nc.xml
 $SRC_H5DUMP_OUTFILES/xml/textlink.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tfloat16.h5.xml
+$SRC_H5DUMP_OUTFILES/xml/tfloat16_be.h5.xml
 $SRC_H5DUMP_OUTFILES/xml/tfpformat.h5.xml
 $SRC_H5DUMP_OUTFILES/xml/tgroup.h5.xml
 $SRC_H5DUMP_OUTFILES/xml/thlink.h5.xml
@@ -382,6 +386,10 @@ TOOLTEST torderattr1.h5.xml --xml -H --sort_by=name --sort_order=ascending torde
 TOOLTEST torderattr2.h5.xml --xml -H --sort_by=name --sort_order=descending torderattr.h5
 TOOLTEST torderattr3.h5.xml --xml -H --sort_by=creation_order --sort_order=ascending torderattr.h5
 TOOLTEST torderattr4.h5.xml --xml -H --sort_by=creation_order --sort_order=descending torderattr.h5
+
+# tests for _Float16 type
+TOOLTEST tfloat16.h5.xml --xml tfloat16.h5
+TOOLTEST tfloat16_be.h5.xml --xml tfloat16_be.h5
 
 # tests for floating point user defined printf format
 TOOLTEST tfpformat.h5.xml -u -m %.7f tfpformat.h5

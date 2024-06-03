@@ -4908,8 +4908,8 @@ error:
 int
 main(void)
 {
-    const char *env_h5_drvr = NULL; /* VFD value from environment */
-    int         nerrors     = 0;
+    const char *driver_name; /* VFD value from environment */
+    int         nerrors = 0;
 
     printf("Testing Onion VFD functionality.\n");
 
@@ -4918,10 +4918,8 @@ main(void)
     /* The onion VFD only supports the sec2 VFD under the hood, so skip this
      * test when the environment variable has been set to something else
      */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
-    if ((0 != strcmp(env_h5_drvr, "nomatch")) && (0 != strcmp(env_h5_drvr, "sec2"))) {
+    driver_name = h5_get_test_driver_name();
+    if (0 != strcmp(driver_name, "sec2")) {
         SKIPPED();
         puts("Onion VFD test skipped due to non-sec2 default VFD");
         exit(EXIT_SUCCESS);

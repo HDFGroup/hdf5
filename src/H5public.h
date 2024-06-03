@@ -89,6 +89,10 @@
  */
 #define H5_VERS_SUBRELEASE ""
 /**
+ * Short version string
+ */
+#define H5_VERS_STR "1.15.0"
+/**
  * Full version string
  */
 #define H5_VERS_INFO "HDF5 library version: 1.15.0"
@@ -103,7 +107,7 @@
  * \param[in] Maj Major version number - A non-negative integer value
  * \param[in] Min Minor version number - A non-negative integer value
  * \param[in] Rel Release version number - A non-negative integer value
- * \returns A value of 1 is returned if the library version is greater than
+ * \return A value of 1 is returned if the library version is greater than
  *          or equal to the version number specified.\n
  *          A value of 0 is returned if the library version is less than the
  *          version number specified.\n
@@ -139,7 +143,7 @@
  * \param[in] Maj Major version number - A non-negative integer value
  * \param[in] Min Minor version number - A non-negative integer value
  * \param[in] Rel Release version number - A non-negative integer value
- * \returns A value of 1 is returned if the library version is less than
+ * \return A value of 1 is returned if the library version is less than
  *          or equal to the version number specified.\n
  *          A value of 0 is returned if the library version is greater than the
  *          version number specified.\n

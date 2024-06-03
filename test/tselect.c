@@ -4118,6 +4118,8 @@ test_select_hyper_offset(void)
     CHECK(ret, FAIL, "H5Soffset_simple");
     valid = H5Sselect_valid(sid1);
     VERIFY(valid, true, "H5Sselect_valid");
+    ret = H5S__verify_offsets(sid1, offset);
+    CHECK(ret, FAIL, "H5S__verify_offsets");
 
     /* Check an invalid offset */
     offset[0] = 10;
@@ -4127,6 +4129,8 @@ test_select_hyper_offset(void)
     CHECK(ret, FAIL, "H5Soffset_simple");
     valid = H5Sselect_valid(sid1);
     VERIFY(valid, false, "H5Sselect_valid");
+    ret = H5S__verify_offsets(sid1, offset);
+    CHECK(ret, FAIL, "H5S__verify_offsets");
 
     /* Reset offset */
     offset[0] = 0;
@@ -4136,6 +4140,28 @@ test_select_hyper_offset(void)
     CHECK(ret, FAIL, "H5Soffset_simple");
     valid = H5Sselect_valid(sid1);
     VERIFY(valid, true, "H5Sselect_valid");
+    ret = H5S__verify_offsets(sid1, offset);
+    CHECK(ret, FAIL, "H5S__verify_offsets");
+
+    /* Check behavior of NULL offset parameter */
+
+    /* Set a valid offset */
+    offset[0] = -1;
+    offset[1] = 0;
+    offset[2] = 0;
+    ret       = H5Soffset_simple(sid1, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+    valid = H5Sselect_valid(sid1);
+    VERIFY(valid, true, "H5Sselect_valid");
+    /* Reset using NULL */
+    ret = H5Soffset_simple(sid1, NULL);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+    valid = H5Sselect_valid(sid1);
+    VERIFY(valid, true, "H5Sselect_valid");
+    /* Validate offset */
+    offset[0] = 0;
+    ret       = H5S__verify_offsets(sid1, offset);
+    CHECK(ret, FAIL, "H5S__verify_offsets");
 
     /* Select 15x26 hyperslab for memory dataset */
     start[0]  = 15;
@@ -6292,7 +6318,6 @@ test_select_hyper_union_random_5d(hid_t read_plist)
     herr_t   ret;               /* Generic return value        */
     hssize_t npoints,           /* Number of elements in file selection */
         npoints2;               /* Number of elements in memory selection */
-    unsigned seed;              /* Random number seed for each test */
     unsigned test_num;          /* Count of tests being executed */
 
     /* Output message about test being performed */
@@ -6336,31 +6361,26 @@ test_select_hyper_union_random_5d(hid_t read_plist)
     CHECK(sid2, FAIL, "H5Screate_simple");
 
     /* Get initial random # seed */
-    seed = (unsigned)HDtime(NULL) + (unsigned)HDclock();
+    srand((unsigned)time(NULL));
 
     /* Crunch through a bunch of random hyperslab reads from the file dataset */
     for (test_num = 0; test_num < NRAND_HYPER; test_num++) {
-        /* Save random # seed for later use */
-        /* (Used in case of errors, to regenerate the hyperslab sequence) */
-        seed += (unsigned)HDclock();
-        HDsrandom(seed);
-
         for (i = 0; i < NHYPERSLABS; i++) {
             /* Select random hyperslab location & size for selection */
             for (j = 0; j < SPACE5_RANK; j++) {
-                start[j] = ((hsize_t)HDrandom() % dims1[j]);
-                count[j] = (((hsize_t)HDrandom() % (dims1[j] - start[j])) + 1);
-            } /* end for */
+                start[j] = ((hsize_t)rand() % dims1[j]);
+                count[j] = (((hsize_t)rand() % (dims1[j] - start[j])) + 1);
+            }
 
             /* Select hyperslab */
             ret = H5Sselect_hyperslab(sid1, (i == 0 ? H5S_SELECT_SET : H5S_SELECT_OR), start, NULL, count,
                                       NULL);
             CHECK(ret, FAIL, "H5Sselect_hyperslab");
             if (ret < 0) {
-                TestErrPrintf("Random hyperslabs for seed %u failed!\n", seed);
+                TestErrPrintf("Random hyperslabs failed!\n");
                 break;
-            } /* end if */
-        }     /* end for */
+            }
+        }
 
         /* Get the number of elements selected */
         npoints = H5Sget_select_npoints(sid1);
@@ -6379,17 +6399,17 @@ test_select_hyper_union_random_5d(hid_t read_plist)
         ret = H5Dread(dataset, H5T_NATIVE_INT, sid2, sid1, read_plist, rbuf);
         CHECK(ret, FAIL, "H5Dread");
         if (ret < 0) {
-            TestErrPrintf("Random hyperslabs for seed %u failed!\n", seed);
+            TestErrPrintf("Random hyperslabs failed!\n");
             break;
-        } /* end if */
+        }
 
         /* Compare data read with data written out */
         tbuf = rbuf;
         ret  = H5Diterate(wbuf, H5T_NATIVE_INT, sid1, test_select_hyper_iter2, &tbuf);
         if (ret < 0) {
-            TestErrPrintf("Random hyperslabs for seed %u failed!\n", seed);
+            TestErrPrintf("Random hyperslabs failed!\n");
             break;
-        } /* end if */
+        }
 
         /* Set the read buffer back to all zeroes */
         memset(rbuf, 0, (size_t)SPACE6_DIM1);
@@ -16052,16 +16072,14 @@ test_select(void)
     size_t      rdcc_nbytes;                  /* Raw data number of bytes */
     double      rdcc_w0;                      /* Raw data write percentage */
     hssize_t    offset[SPACE7_RANK] = {1, 1}; /* Offset for testing selection offsets */
-    const char *env_h5_drvr;                  /* File Driver value from environment */
+    const char *driver_name;                  /* File Driver value from environment */
     herr_t      ret;                          /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Selections\n"));
 
     /* Get the VFD to use */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Create a dataset transfer property list */
     plist_id = H5Pcreate(H5P_DATASET_XFER);
@@ -16126,7 +16144,7 @@ test_select(void)
     test_select_hyper_valid_combination(); /* Test different input combinations */
 
     /* The following tests are currently broken with the Direct VFD */
-    if (strcmp(env_h5_drvr, "direct") != 0) {
+    if (strcmp(driver_name, "direct") != 0) {
         test_select_hyper_and_2d();  /* Test hyperslab intersection (AND) code for 2-D dataset */
         test_select_hyper_xor_2d();  /* Test hyperslab XOR code for 2-D dataset */
         test_select_hyper_notb_2d(); /* Test hyperslab NOTB code for 2-D dataset */

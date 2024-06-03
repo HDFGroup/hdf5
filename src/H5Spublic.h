@@ -179,7 +179,7 @@ H5_DLL herr_t H5Sclose(hid_t space_id);
  * \param[in] count   Number of blocks included in the hyperslab
  * \param[in] block   Size of a block in the hyperslab
  *
- * \return \hid_tv{dataspace}
+ * \return \hid_t{dataspace}
  *
  * \details H5Scombine_hyperslab() combines a hyperslab selection specified
  *          by \p start, \p stride, \p count and \p block with the current
@@ -224,7 +224,7 @@ H5_DLL hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_i
  *
  * \space_id
  *
- * \return \hid_tv{dataspace}
+ * \return \hid_t{dataspace}
  *
  * \details H5Scopy() creates a new dataspace which is an exact copy of the
  *          dataspace identified by \p space_id. The dataspace identifier
@@ -541,6 +541,8 @@ H5_DLL hssize_t H5Sget_select_elem_npoints(hid_t spaceid);
  * \param[in] numpoints   Number of element points to get
  * \param[out] buf        List of element points selected
  *
+ * \return \herr_t
+ *
  * \details H5Sget_select_elem_pointlist() returns the list of element
  *          points in the current dataspace selection \p space_id. Starting
  *          with the \p startpoint in the list of points, \p numpoints
@@ -832,11 +834,15 @@ H5_DLL herr_t H5Smodify_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_i
  *          \p space_id. The offset array must be the same number of
  *          elements as the number of dimensions for the dataspace. If the
  *          \p offset array is set to NULL, the offset for the dataspace is
- *          reset to 0.
+ *          reset to 0 in all dimensions.
  *
  *          This function allows the same shaped selection to be moved to
  *          different locations within a dataspace without requiring it to
  *          be redefined.
+ *
+ * \note    Until 1.14.4, setting the offset parameter to NULL was considered
+ *          an error, despite the reference manual stating that it had the
+ *          behavior described above.
  *
  * \version 1.4.0 Fortran subroutine was introduced.
  * \since 1.0.0

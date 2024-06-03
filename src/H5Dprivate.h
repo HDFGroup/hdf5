@@ -124,12 +124,19 @@
 /* Default virtual dataset list size */
 #define H5D_VIRTUAL_DEF_LIST_SIZE 8
 
+#ifdef H5D_MODULE
+#define H5D_OBJ_ID(D) (((H5D_obj_create_t *)(D))->dcpl_id)
+#else /* H5D_MODULE */
+#define H5D_OBJ_ID(D) (H5D_get_dcpl_id(D))
+#endif
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/
 
 /* Typedef for dataset in memory (defined in H5Dpkg.h) */
-typedef struct H5D_t H5D_t;
+typedef struct H5D_t            H5D_t;
+typedef struct H5D_obj_create_t H5D_obj_create_t;
 
 /* Typedef for cached dataset creation property list information */
 typedef struct H5D_dcpl_cache_t {
@@ -171,6 +178,7 @@ H5_DLL H5G_name_t *H5D_nameof(H5D_t *dataset);
 H5_DLL herr_t      H5D_flush_all(H5F_t *f);
 H5_DLL hid_t       H5D_get_create_plist(const H5D_t *dset);
 H5_DLL hid_t       H5D_get_access_plist(const H5D_t *dset);
+H5_DLL hid_t       H5D_get_dcpl_id(const H5D_obj_create_t *d);
 
 /* Functions that operate on chunked storage */
 H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, bool reset_addr);

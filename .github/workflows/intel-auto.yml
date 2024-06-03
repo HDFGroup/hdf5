@@ -30,7 +30,7 @@ jobs:
         id: setup-fortran
         with:
           compiler: intel
-          version: '2024.0'
+          version: '2024.1'
 
       - name: Autotools Configure
         shell: bash

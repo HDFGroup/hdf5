@@ -78,6 +78,7 @@ test_dataset_append_notset(hid_t fid)
     } /* end for */
 
     /* File size when not flushed */
+    memset(&sb1, 0, sizeof(h5_stat_t));
     if (HDstat(FILENAME, &sb1) < 0)
         TEST_ERROR;
 
@@ -86,6 +87,7 @@ test_dataset_append_notset(hid_t fid)
         FAIL_STACK_ERROR;
 
     /* File size after flushing */
+    memset(&sb2, 0, sizeof(h5_stat_t));
     if (HDstat(FILENAME, &sb2) < 0)
         TEST_ERROR;
 

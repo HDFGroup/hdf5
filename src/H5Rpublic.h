@@ -140,8 +140,9 @@ extern "C" {
  *          \ref H5R_ref_t is defined in H5Rpublic.h as:
  *          \snippet this H5R_ref_t_snip
  *
- *          H5Rdestroy() should be used to release the resource from the
- *          reference.
+ *          The function returns a \p ref_ptr pointer, which must be released
+ *          using H5Rdestroy() to avoid resource leaks and possible HDF5
+ *          library shutdown issues.
  *
  * \since 1.12.0
  *
@@ -178,8 +179,9 @@ H5_DLL herr_t H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5
  *          \ref H5R_ref_t is defined in H5Rpublic.h as:
  *          \snippet this H5R_ref_t_snip
  *
- *          H5Rdestroy() should be used to release the resource from the
- *          reference.
+ *          The function returns a \p ref_ptr pointer, which must be released
+ *          using H5Rdestroy() to avoid resource leaks and possible HDF5
+ *          library shutdown issues.
  *
  * \since 1.12.0
  *
@@ -217,8 +219,9 @@ H5_DLL herr_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, h
  *          \ref H5R_ref_t is defined in H5Rpublic.h as:
  *          \snippet this H5R_ref_t_snip
  *
- *          H5Rdestroy() should be used to release the resource from the
- *          reference.
+ *          The function returns a \p ref_ptr pointer, which must be released
+ *          using H5Rdestroy() to avoid resource leaks and possible HDF5
+ *          library shutdown issues.
  *
  * \since 1.12.0
  *
@@ -316,6 +319,10 @@ H5_DLL htri_t H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr);
  * \details H5Rcopy() creates a copy of an existing reference.
  *          \p src_ref_ptr points to the reference to copy, and \p dst_ref_ptr is the
  *          pointer to the destination reference.
+ *
+ *          The function returns a \p dst_ref_ptr pointer, which must be released
+ *          using H5Rdestroy() to avoid resource leaks and possible HDF5
+ *          library shutdown issues.
  *
  * \since 1.12.0
  *
@@ -512,21 +519,15 @@ H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *ob
  *
  * \param[in] ref_ptr  Pointer to reference to query
  * \param[in,out] name Buffer to place the file name of the reference
- * \param[in] size     Size of the \p name buffer
+ * \param[in] size     Size of the \p name buffer. When the size is passed in,
+ *                     the \c NULL terminator needs to be included.
  *
  * \return Returns the length of the name if successful, otherwise, a negative value.
  *
  * \details H5Rget_file_name() retrieves the file name for the object,
  *          region or attribute reference pointed to by \p ref_ptr.
  *
- *          Up to \p size characters of the name are returned in \p name;
- *          additional characters, if any, are not returned to the user
- *          application. If the length of the name, which determines
- *          the required value of size, is unknown, a preliminary
- *          H5Rget_file_name() call can be made. The return value of this
- *          call will be the size of the file name. That value can then be
- *          passed in for size in the second call to H5Rget_file_name(),
- *          which will retrieve the actual name.
+ *          \details_namelen{file,H5Rget_file_name}
  *
  * \since 1.12.0
  *
@@ -541,8 +542,9 @@ H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  *
  * \param[in] ref_ptr  Pointer to reference to query
  * \rapl_id
- * \param[in,out] name Buffer to place the file name of the reference
- * \param[in] size     Size of the \p name buffer
+ * \param[in,out] name Buffer to place the object name of the reference
+ * \param[in] size     Size of the \p name buffer. When the size is passed in,
+ *                     the \c NULL terminator needs to be included.
  *
  * \return Returns the length of the name if successful, returning
  *          0 (zero) if no name is associated with the identifier. Otherwise
@@ -556,16 +558,7 @@ H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  *          be used to access external files that the reference points to
  *          (through a file access property list).
  *
- *          Up to size characters of the name are returned in \p name; additional
- *          characters, if any, are not returned to the user application. If
- *          the length of the name, which determines the required value of
- *          \p size, is unknown, a preliminary call to H5Rget_obj_name() call
- *          can be made. The return value of this call will be the size of the
- *          object name. That value can then be passed in for \p size in the
- *          second call to H5Rget_obj_name(), which will retrieve the actual
- *          name. If there is no name associated with the object identifier
- *          or if the name is NULL, H5Rget_obj_name() returns the size of
- *          the name buffer (the size does not include the \c \0 terminator).
+ *          \details_namelen{object,H5Rget_obj_name}
  *
  *          If \p ref_ptr is an object reference, \p name will be returned with
  *          a name for the referenced object. If \p ref_ptr is a dataset region
@@ -596,14 +589,7 @@ H5_DLL ssize_t H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *name, si
  * \details H5Rget_attr_name() retrieves the attribute name for the
  *          attribute reference pointed to by \p ref_ptr.
  *
- *          Up to size characters of the name are returned in \p name;
- *          additional characters, if any, are not returned to the user
- *          application. If the length of the name, which determines
- *          the required value of \p size, is unknown, a preliminary
- *          H5Rget_attr_name() call can be made. The return value of this
- *          call will be the size of the attribute name. That value can then
- *          be passed in for size in the second call to H5Rget_attr_name(),
- *          which will retrieve the actual name.
+ *          \details_namelen_plusone{attribute,H5Rget_attr_name}
  *
  * \since 1.12.0
  *
@@ -765,6 +751,9 @@ H5_DLL hid_t H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
  *
  * \return \herr_t
  *
+ * \deprecated As of HDF5-1.12, this function has been deprecated in favor of
+ *             H5Rcreate_object(), H5Rcreate_region() and H5Rcreate_attr().
+ *
  * \details H5Rcreate() creates the reference, \p ref, of the type specified in
  *          \p ref_type, pointing to the object \p name located at \p loc_id.
  *
@@ -854,6 +843,10 @@ H5_DLL herr_t H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref, H
  * \return Returns identifier of referenced object if successful; otherwise
  *         returns a negative value.
  *
+ * \deprecated As of HDF5-1.12, this function and H5Rdereference1() have been
+ *             deprecated in favor of H5Ropen_attr(), H5Ropen_object()
+ *             and H5Ropen_region().
+ *
  * \details Given a reference, \p ref, to an object or a region in an object,
  *          H5Rdereference2() opens that object and returns an identifier.
  *
@@ -935,6 +928,9 @@ H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
  *         no name is associated with the identifier. Otherwise returns a
  *         negative value.
  *
+ * \deprecated As of HDF5-1.12, this function has been deprecated in favor of
+ *             H5Rget_file_name(), H5Rget_obj_name() and H5Rget_attr_name().
+ *
  * \details H5Rget_name() retrieves a name for the object identified by \p ref.\n
  *          \p loc_id is used to identify the file containing the reference. It
  *          can be the file identifier for the file containing the reference or
@@ -952,23 +948,10 @@ H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
  *          reference, \p name will contain a name for the object containing the
  *          referenced region.
  *
- *          Up to \p size characters of the name are returned in \p name;
- *          additional characters, if any, are not returned to the user
- *          application.
+ *          \details_namelen{,H5Rget_name}
  *
- *          If the length of the name, which determines the required value of \p
- *          size, is unknown, a preliminary H5Rget_name() call can be made. The
- *          return value of this call will be the size of the object name. That
- *          value can then be assigned to \p size for a second H5Rget_name()
- *          call, which will retrieve the actual name.
- *
- *          If there is no name associated with the object identifier or if the
- *          \p name is \c NULL, H5Rget_name() returns the size of the \p name
- *          buffer (the size does not include the \p NULL terminator).
- *
- *          Note that an object in an HDF5 file may have multiple paths if there
- *          are multiple links pointing to it. This function may return any one
- *          of these paths.
+ *          \note An object in an HDF5 file may have multiple paths if multiple
+ *          links point to it. This function may return any one of these paths.
  *
  * \since 1.8.0
  */

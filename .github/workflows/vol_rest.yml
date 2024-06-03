@@ -129,6 +129,11 @@ jobs:
       #    path: ${{ runner.workspace }}/hsds-${{ env.HSDS_COMMIT_SHORT }}-install
       #    key: ${{ runner.os }}-${{ runner.arch }}-hsds-${{ env.HSDS_COMMIT }}-${{ inputs.build_mode }}-cache
 
+      # Requests 2.32.0 breaks requests-unixsocket, used by HSDS for socket connections
+      - name: Fix requests version
+        run: |
+          pip install requests==2.31.0
+
       - name: Run HSDS unit tests
         shell: bash
         working-directory: ${{github.workspace}}/hsds
@@ -188,8 +193,3 @@ jobs:
           ROOT_DIR=${{github.workspace}}/hsdsdata \
           BUCKET_NAME=hsdstest \
           ctest --build-config ${{ inputs.build_mode }} -VV -R "h5_api" .
-
-      - name: Stop HSDS
-        working-directory: ${{github.workspace}}/hsds
-        run: |
-          ./stopall.sh

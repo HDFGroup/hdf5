@@ -2287,7 +2287,13 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, bo
 
             break;
         case H5T_FLOAT:
-            if (H5Tequal(dtype, H5T_IEEE_F32BE)) {
+            if (H5Tequal(dtype, H5T_IEEE_F16BE)) {
+                snprintf(dt_str, *slen, "H5T_IEEE_F16BE");
+            }
+            else if (H5Tequal(dtype, H5T_IEEE_F16LE)) {
+                snprintf(dt_str, *slen, "H5T_IEEE_F16LE");
+            }
+            else if (H5Tequal(dtype, H5T_IEEE_F32BE)) {
                 snprintf(dt_str, *slen, "H5T_IEEE_F32BE");
             }
             else if (H5Tequal(dtype, H5T_IEEE_F32LE)) {
@@ -2299,6 +2305,11 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, bo
             else if (H5Tequal(dtype, H5T_IEEE_F64LE)) {
                 snprintf(dt_str, *slen, "H5T_IEEE_F64LE");
             }
+#ifdef H5_HAVE__FLOAT16
+            else if (H5Tequal(dtype, H5T_NATIVE_FLOAT16)) {
+                snprintf(dt_str, *slen, "H5T_NATIVE_FLOAT16");
+            }
+#endif
             else if (H5Tequal(dtype, H5T_NATIVE_FLOAT)) {
                 snprintf(dt_str, *slen, "H5T_NATIVE_FLOAT");
             }

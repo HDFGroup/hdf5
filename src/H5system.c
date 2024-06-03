@@ -94,39 +94,6 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
 #endif /* H5_HAVE_VASPRINTF */
 
 /*-------------------------------------------------------------------------
- * Function:  HDrand/HDsrand
- *
- * Purpose:  Wrapper function for rand.  If rand_r exists on this system,
- *     use it.
- *
- *     Wrapper function for srand.  If rand_r is available, it will keep
- *     track of the seed locally instead of using srand() which modifies
- *     global state and can break other programs.
- *
- * Return:  Success:  Random number from 0 to RAND_MAX
- *
- *    Failure:  Cannot fail.
- *
- *-------------------------------------------------------------------------
- */
-#ifdef H5_HAVE_RAND_R
-
-static unsigned int g_seed = 42;
-
-int
-HDrand(void)
-{
-    return rand_r(&g_seed);
-}
-
-void
-HDsrand(unsigned int seed)
-{
-    g_seed = seed;
-}
-#endif /* H5_HAVE_RAND_R */
-
-/*-------------------------------------------------------------------------
  * Function:    Pflock
  *
  * Purpose:     Wrapper function for POSIX systems where flock(2) is not
@@ -223,12 +190,12 @@ H5_make_time(struct tm *tm)
 
     /* Initialize timezone information */
     if (!H5_ntzset) {
-        HDtzset();
+        tzset();
         H5_ntzset = true;
-    } /* end if */
+    }
 
     /* Perform base conversion */
-    if ((time_t)-1 == (the_time = HDmktime(tm)))
+    if ((time_t)-1 == (the_time = mktime(tm)))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCONVERT, FAIL, "badly formatted modification time message");
 
         /* Adjust for timezones */
@@ -339,13 +306,20 @@ Wsetenv(const char *name, const char *value, int overwrite)
      * value is non-zero), then return an error code.
      */
     if (!overwrite) {
+#ifndef H5_HAVE_MINGW
         size_t  bufsize;
         errno_t err;
 
         err = getenv_s(&bufsize, NULL, 0, name);
         if (err || bufsize)
             return (int)err;
-    } /* end if */
+#else
+        /* MinGW doesn't have getenv_s() */
+        char *test = getenv(name);
+        if (*test)
+            return FAIL;
+#endif
+    }
 
     return (int)_putenv_s(name, value);
 } /* end Wsetenv() */
@@ -514,27 +488,21 @@ error:
 } /* end H5_get_utf16_str() */
 
 /*-------------------------------------------------------------------------
- * Function:     Wopen_utf8
+ * Function:     Wopen
  *
- * Purpose:      UTF-8 equivalent of open(2) for use on Windows.
- *               Converts a UTF-8 input path to UTF-16 and then opens the
- *               file via _wopen() under the hood
+ * Purpose:      Equivalent of open(2) for use on Windows. Necessary to
+ *               handle code pages and Unicode on that platform.
  *
  * Return:       Success:    A POSIX file descriptor
  *               Failure:    -1
- *
  *-------------------------------------------------------------------------
  */
 int
-Wopen_utf8(const char *path, int oflag, ...)
+Wopen(const char *path, int oflag, ...)
 {
     int      fd    = -1;   /* POSIX file descriptor to be returned */
     wchar_t *wpath = NULL; /* UTF-16 version of the path */
     int      pmode = 0;    /* mode (optionally set via variable args) */
-
-    /* Convert the input UTF-8 path to UTF-16 */
-    if (NULL == (wpath = H5_get_utf16_str(path)))
-        goto done;
 
     /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
      * transformations when performing I/O. Note that this will
@@ -551,47 +519,83 @@ Wopen_utf8(const char *path, int oflag, ...)
         va_end(vl);
     }
 
-    /* Open the file */
-    fd = _wopen(wpath, oflag, pmode);
+    /* First try opening the file with the normal POSIX open() call.
+     * This will handle ASCII without additional processing as well as
+     * systems where code pages are being used instead of true Unicode.
+     */
+    if ((fd = open(path, oflag, pmode)) >= 0) {
+        /* If this succeeds, we're done */
+        goto done;
+    }
 
-done:
-    if (wpath)
-        H5MM_xfree((void *)wpath);
-
-    return fd;
-} /* end Wopen_utf8() */
-
-/*-------------------------------------------------------------------------
- * Function:     Wremove_utf8
- *
- * Purpose:      UTF-8 equivalent of remove(3) for use on Windows.
- *               Converts a UTF-8 input path to UTF-16 and then opens the
- *               file via _wremove() under the hood
- *
- * Return:       Success:    0
- *               Failure:    -1
- *
- *-------------------------------------------------------------------------
- */
-int
-Wremove_utf8(const char *path)
-{
-    wchar_t *wpath = NULL; /* UTF-16 version of the path */
-    int      ret   = -1;
+    if (errno == ENOENT) {
+        /* Not found, reset errno and try with UTF-16 */
+        errno = 0;
+    }
+    else {
+        /* Some other error (like permissions), so just exit */
+        goto done;
+    }
 
     /* Convert the input UTF-8 path to UTF-16 */
     if (NULL == (wpath = H5_get_utf16_str(path)))
         goto done;
 
-    /* Open the file */
+    /* Open the file using a UTF-16 path */
+    fd = _wopen(wpath, oflag, pmode);
+
+done:
+    H5MM_xfree(wpath);
+
+    return fd;
+} /* end Wopen() */
+
+/*-------------------------------------------------------------------------
+ * Function:     Wremove
+ *
+ * Purpose:      Equivalent of remove(3) for use on Windows. Necessary to
+ *               handle code pages and Unicode on that platform.
+ *
+ * Return:       Success:    0
+ *               Failure:    -1
+ *-------------------------------------------------------------------------
+ */
+int
+Wremove(const char *path)
+{
+    wchar_t *wpath = NULL; /* UTF-16 version of the path */
+    int      ret   = -1;
+
+    /* First try removing the file with the normal POSIX remove() call.
+     * This will handle ASCII without additional processing as well as
+     * systems where code pages are being used instead of true Unicode.
+     */
+    if ((ret = remove(path)) >= 0) {
+        /* If this succeeds, we're done */
+        goto done;
+    }
+
+    if (errno == ENOENT) {
+        /* Not found, reset errno and try with UTF-16 */
+        errno = 0;
+    }
+    else {
+        /* Some other error (like permissions), so just exit */
+        goto done;
+    }
+
+    /* Convert the input UTF-8 path to UTF-16 */
+    if (NULL == (wpath = H5_get_utf16_str(path)))
+        goto done;
+
+    /* Remove the file using a UTF-16 path */
     ret = _wremove(wpath);
 
 done:
-    if (wpath)
-        H5MM_xfree((void *)wpath);
+    H5MM_xfree(wpath);
 
     return ret;
-} /* end Wremove_utf8() */
+} /* end Wremove() */
 
 #endif /* H5_HAVE_WIN32_API */
 
@@ -652,7 +656,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
          * Unix: does not apply
          */
         if (H5_CHECK_ABS_DRIVE(name)) {
-            drive  = HDtoupper(name[0]) - 'A' + 1;
+            drive  = toupper(name[0]) - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
             strncpy(new_name, &name[2], name_len);
         }
@@ -1367,7 +1371,7 @@ H5_strcasestr(const char *haystack, const char *needle)
         const char *h = haystack;
         const char *n = needle;
         /* loop while lowercase strings match, or needle ends */
-        while (HDtolower(*h) == HDtolower(*n) && *n) {
+        while (tolower(*h) == tolower(*n) && *n) {
             h++;
             n++;
         }

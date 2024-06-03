@@ -8,6 +8,14 @@
 <th>Description</th>
 </tr>
 <tr>
+<td>#H5T_IEEE_F16BE</td>
+<td>16-bit big-endian IEEE floating point</td>
+</tr>
+<tr>
+<td>#H5T_IEEE_F16LE</td>
+<td>16-bit little-endian IEEE floating point</td>
+</tr>
+<tr>
 <td>#H5T_IEEE_F32BE</td>
 <td>32-bit big-endian IEEE floating point</td>
 </tr>
@@ -463,6 +471,10 @@
 <tr>
 <td>#H5T_NATIVE_ULLONG</td>
 <td>C-style unsigned long long</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_FLOAT16</td>
+<td>C-style _Float16 (May be H5I_INVALID_HID if platform doesn't support _Float16 type)</td>
 </tr>
 <tr>
 <td>#H5T_NATIVE_FLOAT</td>

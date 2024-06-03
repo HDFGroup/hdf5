@@ -106,6 +106,7 @@ test_reference_params(void)
     ssize_t      name_size;              /* Size of reference name           */
     bool         vol_is_native;
     herr_t       ret; /* Generic return value             */
+    htri_t       is_equal;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Reference Parameters\n"));
@@ -307,16 +308,16 @@ test_reference_params(void)
     /* Test parameters to H5Requal */
     H5E_BEGIN_TRY
     {
-        ret = H5Requal(NULL, &rbuf[0]);
+        is_equal = H5Requal(NULL, &rbuf[0]);
     }
     H5E_END_TRY
-    VERIFY(ret, FAIL, "H5Requal ref1");
+    VERIFY(is_equal, FAIL, "H5Requal ref1");
     H5E_BEGIN_TRY
     {
-        ret = H5Requal(&rbuf[0], NULL);
+        is_equal = H5Requal(&rbuf[0], NULL);
     }
     H5E_END_TRY
-    VERIFY(ret, FAIL, "H5Requal ref2");
+    VERIFY(is_equal, FAIL, "H5Requal ref2");
 
     /* Test parameters to H5Rcopy */
     H5E_BEGIN_TRY
@@ -440,10 +441,13 @@ test_reference_obj(void)
     hid_t      dapl_id; /* Dataset access property list     */
     H5R_ref_t *wbuf,    /* buffer to write to disk          */
         *rbuf;          /* buffer read from disk            */
+    H5R_ref_t *wbuf_cp; /* copy buffer                      */
     unsigned  *ibuf, *obuf;
     unsigned   i, j;     /* Counters                         */
     H5O_type_t obj_type; /* Object type                      */
     herr_t     ret;      /* Generic return value             */
+    ssize_t    namelen;  /* String buffer size return value  */
+    char       buf[100];
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Object Reference Functions\n"));
@@ -551,6 +555,24 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_NAMED_DATATYPE, "H5Rget_obj_type3");
 
+    /* Check copying a reference */
+    wbuf_cp = calloc(sizeof(H5R_ref_t), 1);
+    ret     = H5Rcopy(&wbuf[0], &wbuf_cp[0]);
+    CHECK(ret, FAIL, "H5Rcopy");
+
+    /* Check if references are equal */
+    htri_t is_equal = H5Requal(&wbuf[0], &wbuf_cp[0]);
+    CHECK(is_equal, FAIL, "H5Requal");
+    VERIFY(is_equal, TRUE, "H5Requal");
+
+    is_equal = H5Requal(&wbuf[0], &wbuf[2]);
+    CHECK(is_equal, FAIL, "H5Requal");
+    VERIFY(is_equal, FALSE, "H5Requal");
+
+    ret = H5Rdestroy(&wbuf_cp[0]);
+    CHECK(ret, FAIL, "H5Rdestroy");
+    free(wbuf_cp);
+
     /* Write selection to disk */
     ret = H5Dwrite(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -578,6 +600,23 @@ test_reference_obj(void)
     /* Read selection from disk */
     ret = H5Dread(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
     CHECK(ret, FAIL, "H5Dread");
+
+    /* Check file name for reference */
+    namelen = H5Rget_file_name(&rbuf[0], NULL, 0);
+    CHECK(namelen, FAIL, "H5Dget_file_name");
+    VERIFY(namelen, strlen(FILE_REF_OBJ), "H5Dget_file_name");
+
+    /* Make sure size parameter is ignored */
+    namelen = H5Rget_file_name(&rbuf[0], NULL, 200);
+    CHECK(namelen, FAIL, "H5Dget_file_name");
+    VERIFY(namelen, strlen(FILE_REF_OBJ), "H5Dget_file_name");
+
+    /* Get the file name for the reference */
+    namelen = H5Rget_file_name(&rbuf[0], (char *)buf, sizeof(buf));
+    CHECK(namelen, FAIL, "H5Dget_file_name");
+
+    ret = !((strcmp(buf, FILE_REF_OBJ) == 0) && (namelen == strlen(FILE_REF_OBJ)));
+    CHECK(ret, FAIL, "H5Literate");
 
     /* Open dataset object */
     dset2 = H5Ropen_object(&rbuf[0], H5P_DEFAULT, dapl_id);
@@ -3592,15 +3631,13 @@ void
 test_reference(void)
 {
     H5F_libver_t low, high;   /* Low and high bounds */
-    const char  *env_h5_drvr; /* File Driver value from environment */
+    const char  *driver_name; /* File Driver value from environment */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing References\n"));
 
     /* Get the VFD to use */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     test_reference_params();    /* Test for correct parameter checking */
     test_reference_obj();       /* Test basic H5R object reference code */
@@ -3622,7 +3659,7 @@ test_reference(void)
     }     /* end low bound */
 
     /* The following test is currently broken with the Direct VFD */
-    if (strcmp(env_h5_drvr, "direct") != 0) {
+    if (strcmp(driver_name, "direct") != 0) {
         test_reference_obj_deleted(); /* Test H5R object reference code for deleted objects */
     }
 

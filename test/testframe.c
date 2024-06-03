@@ -637,7 +637,8 @@ SetTest(const char *testname, int action)
 /* Enable a test timer that will kill long-running tests, the time is configurable
  * via an environment variable.
  *
- * Only useful on POSIX systems where alarm(2) is present.
+ * Only useful on POSIX systems where alarm(2) is present. This does not include
+ * MinGW builds, which will often incorrectly decide that alarm(2) exists.
  */
 void
 TestAlarmOn(void)

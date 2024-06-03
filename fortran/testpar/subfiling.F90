@@ -25,29 +25,33 @@ PROGRAM subfiling_test
   IMPLICIT NONE
 
   INTEGER :: total_error = 0        ! sum of the number of errors
-  INTEGER :: mpierror               ! MPI hdferror flag
-  INTEGER :: mpi_rank               ! rank of the calling process in the communicator
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror               ! MPI hdferror flag
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_rank               ! rank of the calling process in the communicator
 
 #ifdef H5_HAVE_SUBFILING_VFD
 
   CHARACTER(LEN=7), PARAMETER :: filename = "subf.h5"
 
-  INTEGER :: hdferror               ! HDF hdferror flag
-  INTEGER :: mpi_size, mpi_size_ret ! number of processes in the group of communicator
-  INTEGER :: required, provided
+  INTEGER :: hdferror                                      ! HDF hdferror flag
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_size_ret ! number of processes in the group of communicator
+  INTEGER(KIND=MPI_INTEGER_KIND) :: required, provided
   LOGICAL :: file_exists
 
   INTEGER(HID_T) :: fapl_id
   INTEGER(HID_T) :: file_id
-  INTEGER :: comm, comm_ret
-  INTEGER :: info, info_ret
+  INTEGER(KIND=MPI_INTEGER_KIND) :: comm, comm_ret
+  INTEGER(KIND=MPI_INTEGER_KIND) :: info, info_ret
   CHARACTER(LEN=3) :: info_val
   CHARACTER(LEN=180) :: subfname
   INTEGER :: i, sum
   INTEGER(C_INT64_T) inode
   TYPE(H5FD_subfiling_config_t) :: vfd_config
   TYPE(H5FD_ioc_config_t)       :: vfd_config_ioc
-  LOGICAL :: flag
+#ifdef H5_MPI_LOGICAL_KIND
+  LOGICAL(KIND=H5_MPI_LOGICAL_KIND) :: flag
+#else
+  LOGICAL(KIND=MPI_INTEGER_KIND) :: flag
+#endif
 
   INTEGER :: nerrors = 0
 
@@ -56,6 +60,7 @@ PROGRAM subfiling_test
   CHARACTER(len=8) :: hex1, hex2
   CHARACTER(len=1) :: arg
 
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_int_type
   !
   ! initialize MPI
   !
@@ -84,7 +89,7 @@ PROGRAM subfiling_test
      IF(mpi_rank==0) CALL write_test_status(sum, &
           'Testing Initializing mpi_init_thread', total_error)
      CALL MPI_Barrier(MPI_COMM_WORLD, mpierror)
-     CALL mpi_abort(MPI_COMM_WORLD, 1, mpierror)
+     CALL mpi_abort(MPI_COMM_WORLD, 1_MPI_INTEGER_KIND, mpierror)
   ENDIF
 
   !
@@ -101,9 +106,9 @@ PROGRAM subfiling_test
   IF(mpi_size.GT.2)THEN
 
      IF (mpi_rank.LE.1)THEN
-        CALL MPI_Comm_split(MPI_COMM_WORLD, 1, mpi_rank, comm, mpierror)
+        CALL MPI_Comm_split(MPI_COMM_WORLD, 1_MPI_INTEGER_KIND, mpi_rank, comm, mpierror)
      ELSE
-        CALL MPI_Comm_split(MPI_COMM_WORLD, 0, mpi_rank, comm, mpierror)
+        CALL MPI_Comm_split(MPI_COMM_WORLD, 0_MPI_INTEGER_KIND, mpi_rank, comm, mpierror)
      ENDIF
 
      CALL MPI_Info_create(info, mpierror)
@@ -128,8 +133,8 @@ PROGRAM subfiling_test
            nerrors = nerrors + 1
         ENDIF
 
-        CALL mpi_info_get(info_ret,"foo", 3, info_val, flag, mpierror)
-        IF(flag .EQV. .TRUE.)THEN
+        CALL mpi_info_get(info_ret,"foo", 3_MPI_INTEGER_KIND, info_val, flag, mpierror)
+        IF(LOGICAL(flag) .EQV. LOGICAL(.TRUE.))THEN
            IF(info_val.NE."bar")THEN
               IF(mpi_rank.EQ.0) &
                    WRITE(*,*) "Failed H5Pset_mpi_params_f and H5Pget_mpi_params_f sequence"
@@ -148,7 +153,13 @@ PROGRAM subfiling_test
 
   ENDIF
 
-  CALL MPI_REDUCE(nerrors, sum, 1, MPI_INTEGER, MPI_SUM, 0, MPI_COMM_WORLD, mpierror)
+  IF(h5_sizeof(total_error).EQ.8_size_t)THEN
+     mpi_int_type=MPI_INTEGER8
+  ELSE
+     mpi_int_type=MPI_INTEGER4
+  ENDIF
+
+  CALL MPI_REDUCE(nerrors, sum, 1_MPI_INTEGER_KIND, mpi_int_type, MPI_SUM, 0_MPI_INTEGER_KIND, MPI_COMM_WORLD, mpierror)
   IF(mpi_rank==0) CALL write_test_status(sum, &
        'Testing H5Pset/get_mpi_params_f', total_error)
 
@@ -267,10 +278,10 @@ PROGRAM subfiling_test
 
   ! Testing modifying defaults for subfiling FD
 
-  vfd_config%magic = H5FD_SUBFILING_FAPL_MAGIC_F
-  vfd_config%version = H5FD_SUBFILING_CURR_FAPL_VERSION_F
+  vfd_config%magic = INT(H5FD_SUBFILING_FAPL_MAGIC_F,C_INT32_T)
+  vfd_config%version = INT(H5FD_SUBFILING_CURR_FAPL_VERSION_F,C_INT32_T)
   vfd_config%require_ioc = .TRUE.
-  vfd_config%shared_cfg%ioc_selection = SELECT_IOC_ONE_PER_NODE_F
+  vfd_config%shared_cfg%ioc_selection = INT(SELECT_IOC_ONE_PER_NODE_F,C_INT)
   vfd_config%shared_cfg%stripe_size = 16*1024*1024
   vfd_config%shared_cfg%stripe_count = 3
 
@@ -299,8 +310,8 @@ PROGRAM subfiling_test
   IF(mpi_rank==0) CALL write_test_status(nerrors, &
        'Testing H5Pset/get_fapl_subfiling_f with custom settings', total_error)
 
-  vfd_config_ioc%magic   = H5FD_IOC_FAPL_MAGIC_F
-  vfd_config_ioc%version = H5FD_IOC_CURR_FAPL_VERSION_F
+  vfd_config_ioc%magic   = INT(H5FD_IOC_FAPL_MAGIC_F,C_INT32_T)
+  vfd_config_ioc%version = INT(H5FD_IOC_CURR_FAPL_VERSION_F,C_INT32_T)
   vfd_config_ioc%thread_pool_size = 2
 
   nerrors = 0
@@ -374,7 +385,13 @@ PROGRAM subfiling_test
   !
   CALL h5close_f(hdferror)
 
-  CALL MPI_ALLREDUCE(total_error, sum, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, mpierror)
+  IF(h5_sizeof(total_error).EQ.8_size_t)THEN
+     mpi_int_type=MPI_INTEGER8
+  ELSE
+     mpi_int_type=MPI_INTEGER4
+  ENDIF
+
+  CALL MPI_ALLREDUCE(total_error, sum, 1_MPI_INTEGER_KIND, mpi_int_type, MPI_SUM, MPI_COMM_WORLD, mpierror)
 
   !
   ! close MPI
@@ -386,7 +403,7 @@ PROGRAM subfiling_test
      ENDIF
   ELSE
      WRITE(*,*) 'Errors detected in process ', mpi_rank
-     CALL mpi_abort(MPI_COMM_WORLD, 1, mpierror)
+     CALL mpi_abort(MPI_COMM_WORLD, 1_MPI_INTEGER_KIND, mpierror)
      IF (mpierror .NE. MPI_SUCCESS) THEN
         WRITE(*,*) "MPI_ABORT  *FAILED* Process = ", mpi_rank
      ENDIF

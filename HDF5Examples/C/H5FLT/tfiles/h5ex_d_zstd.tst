@@ -5,7 +5,7 @@ zstd filter is available for encoding and decoding.
 Filter info is available from the dataset creation property 
    Filter identifier is 32015
    Number of parameters is 1 with the value 0
-   To find more about the filter check HDF5 zstd filter; see http://www.hdfgroup.org/services/contributions.html
+   To find more about the filter check HDF5 zstd filter; see https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md
 ....Reading zstd compressed data ................
 ZSTD number of differing array elements=0
 zstd filter is available now since H5Dread triggered loading of the filter.

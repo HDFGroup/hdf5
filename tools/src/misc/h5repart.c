@@ -239,6 +239,7 @@ main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    memset(&sb, 0, sizeof(h5_stat_t));
     if (HDfstat(src, &sb) < 0) {
         perror("fstat");
         exit(EXIT_FAILURE);
@@ -358,6 +359,7 @@ main(int argc, char *argv[])
                 perror(src_name);
                 exit(EXIT_FAILURE);
             }
+            memset(&sb, 0, sizeof(h5_stat_t));
             if (HDfstat(src, &sb) < 0) {
                 perror("fstat");
                 exit(EXIT_FAILURE);

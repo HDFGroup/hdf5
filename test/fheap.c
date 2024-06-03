@@ -6234,17 +6234,17 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     fill_size = get_fill_size(tparam);
 
     /* Choose random # seed */
-    seed = (unsigned long)HDtime(NULL);
+    seed = (unsigned long)time(NULL);
 #if 0
 /* seed = (unsigned long)1155438845; */
 fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
-    HDsrandom((unsigned)seed);
+    srand((unsigned)seed);
 
     /* Set heap ID to random (non-null) value */
     heap_id[0] = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_MAN;
     for (u = 1; u < HEAP_ID_LEN; u++)
-        heap_id[u] = (unsigned char)(HDrandom() + 1);
+        heap_id[u] = (unsigned char)(rand() + 1);
 
     /* Try removing bogus heap ID from empty heap */
     H5E_BEGIN_TRY
@@ -6268,7 +6268,7 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
         /* Set heap ID to random (non-null) value */
         heap_id[0] = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_MAN;
         for (u = 1; u < HEAP_ID_LEN; u++)
-            heap_id[u] = (unsigned char)(HDrandom() + 1);
+            heap_id[u] = (unsigned char)(rand() + 1);
 
         /* Get offset of random heap ID */
         if (H5HF_get_id_off_test(fh, heap_id, &obj_off) < 0)
@@ -15142,18 +15142,18 @@ test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     } /* end else */
 
     /* Choose random # seed */
-    seed = (unsigned long)HDtime(NULL);
+    seed = (unsigned long)time(NULL);
 #if 0
 /* seed = (unsigned long)1156158635; */
 fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
-    HDsrandom((unsigned)seed);
+    srand((unsigned)seed);
 
     /* Loop over adding objects to the heap, until the size limit is reached */
     total_obj_added = 0;
     while (total_obj_added < size_limit) {
         /* Choose a random size of object (from 1 up to above standalone block size limit) */
-        obj_size = (((uint32_t)HDrandom() % (tmp_cparam.max_man_size + 255)) + 1);
+        obj_size = (((uint32_t)rand() % (tmp_cparam.max_man_size + 255)) + 1);
         obj_loc  = (tmp_cparam.max_man_size + 255) - obj_size;
 
         /* Insert object */
@@ -15174,7 +15174,7 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
 
         /* Choose a position to swap with */
         /* (0 is current position) */
-        pos = ((size_t)HDrandom() % (keep_ids.num_ids - u));
+        pos = ((size_t)rand() % (keep_ids.num_ids - u));
 
         /* If we chose a different position, swap with it */
         if (pos > 0) {
@@ -15345,12 +15345,12 @@ test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_te
     } /* end else */
 
     /* Choose random # seed */
-    seed = (unsigned long)HDtime(NULL);
+    seed = (unsigned long)time(NULL);
 #if 0
 /* seed = (unsigned long)1155181717; */
 fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
-    HDsrandom((unsigned)seed);
+    srand((unsigned)seed);
 
     /* Loop over adding objects to the heap, until the size limit is reached */
     total_obj_added = 0;
@@ -15362,13 +15362,13 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
          *      25% of the objects will be twice as large, 12.5% will be
          *      four times larger, etc.)
          */
-        while (HDrandom() < (RAND_MAX / 2) && size_range < tmp_cparam.max_man_size)
+        while (rand() < (RAND_MAX / 2) && size_range < tmp_cparam.max_man_size)
             size_range *= 2;
         if (size_range > (tmp_cparam.max_man_size + 255))
             size_range = tmp_cparam.max_man_size + 255;
 
         /* Choose a random size of object (from 1 up to stand alone block size) */
-        obj_size = (((unsigned)HDrandom() % (size_range - 1)) + 1);
+        obj_size = (((unsigned)rand() % (size_range - 1)) + 1);
         obj_loc  = (tmp_cparam.max_man_size + 255) - obj_size;
 
         /* Insert object */
@@ -15389,7 +15389,7 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
 
         /* Choose a position to swap with */
         /* (0 is current position) */
-        pos = ((size_t)HDrandom() % (keep_ids.num_ids - u));
+        pos = ((size_t)rand() % (keep_ids.num_ids - u));
 
         /* If we chose a different position, swap with it */
         if (pos > 0) {
@@ -15958,17 +15958,15 @@ main(void)
     unsigned          nerrors = 0;                            /* Cumulative error count */
     unsigned    num_pb_fs = 1; /* The number of settings to test for page buffering and file space handling */
     int         ExpressMode;   /* Express testing level */
-    const char *envval;        /* Environment variable */
+    const char *driver_name;   /* Environment variable */
     bool        contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
     bool        api_ctx_pushed = false; /* Whether API context pushed */
 
     /* Don't run this test using certain file drivers */
-    envval = getenv(HDF5_DRIVER);
-    if (envval == NULL)
-        envval = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (bool)(strcmp(envval, "split") != 0 && strcmp(envval, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     /* Reset library */
     h5_reset();
@@ -16045,7 +16043,7 @@ main(void)
                 if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = def_fapl;
-                /* This is a fix for the daily test failure from the checkin for libver bounds. */
+                /* This is a fix for the daily test failure from the commit for libver bounds. */
                 /*
                  * Many tests failed the file size check when comparing (a) and (b) as below:
                  * --Create a file and close the file.  Got the initial file size (a).

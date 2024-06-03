@@ -167,7 +167,6 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t t
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*siiii", loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id);
 
     /* Commit the dataset synchronously */
     if ((ret_value = H5T__commit_api_common(loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id, NULL, NULL)) <
@@ -197,8 +196,6 @@ H5Tcommit_async(const char *app_file, const char *app_func, unsigned app_line, h
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE10("e", "*s*sIui*siiiii", app_file, app_func, app_line, loc_id, name, type_id, lcpl_id, tcpl_id,
-              tapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -324,7 +321,6 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iiii", loc_id, type_id, tcpl_id, tapl_id);
 
     /* Check arguments */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -424,11 +420,13 @@ done:
 herr_t
 H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
 {
-    H5O_loc_t  temp_oloc;           /* Temporary object header location */
-    H5G_name_t temp_path;           /* Temporary path */
-    bool       loc_init = false;    /* Have temp_oloc and temp_path been initialized? */
-    size_t     dtype_size;          /* Size of the datatype message */
-    herr_t     ret_value = SUCCEED; /* Return value */
+    H5O_t     *oh = NULL;            /* Pointer to actual object header */
+    H5O_loc_t  temp_oloc;            /* Temporary object header location */
+    H5G_name_t temp_path;            /* Temporary path */
+    bool       loc_init     = false; /* Have temp_oloc and temp_path been initialized? */
+    bool       ohdr_created = false; /* Has the object header been created yet? */
+    size_t     dtype_size;           /* Size of the datatype message */
+    herr_t     ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -481,9 +479,23 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
      */
     if (H5O_create(file, dtype_size, (size_t)1, tcpl_id, &temp_oloc) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create datatype object header");
-    if (H5O_msg_create(&temp_oloc, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE,
-                       H5O_UPDATE_TIME, type) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to update type header message");
+    ohdr_created = true;
+
+    /* Pin the object header */
+    if (NULL == (oh = H5O_pin(&temp_oloc)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header");
+
+    /* Check for creating committed datatype with unusual datatype */
+    if (!(H5O_has_chksum(oh) || (H5F_RFIC_FLAGS(file) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)) &&
+        H5T_is_numeric_with_unusual_unused_bits(type))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                    "creating committed datatype with unusual datatype, see documentation for "
+                    "H5Pset_relax_file_integrity_checks for details.");
+
+    /* Insert the datatype message */
+    if (H5O_msg_append_oh(file, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE,
+                          H5O_UPDATE_TIME, type) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert type header message");
 
     /* Copy the new object header's location into the datatype, taking ownership of it */
     if (H5O_loc_copy_shallow(&(type->oloc), &temp_oloc) < 0)
@@ -510,23 +522,39 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype in memory");
 
 done:
+    if (oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTUNPIN, FAIL, "unable to unpin object header");
+
     if (ret_value < 0) {
+        /* Close & delete the object header on failure */
+        if (ohdr_created) {
+            H5O_loc_t *oloc_ptr; /* Pointer to object header location */
+
+            /* Point at correct object header location, depending on state when failure occurred */
+            if (loc_init)
+                oloc_ptr = &temp_oloc;
+            else
+                oloc_ptr = &(type->oloc);
+            if (H5O_dec_rc_by_loc(oloc_ptr) < 0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL,
+                            "unable to decrement refcount on newly created object");
+            if (H5O_close(oloc_ptr, NULL) < 0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header");
+            if (H5O_delete(file, oloc_ptr->addr) < 0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header");
+        }
+
+        /* Release the location info, if the datatype doesn't own it */
         if (loc_init) {
             H5O_loc_free(&temp_oloc);
             H5G_name_free(&temp_path);
-        } /* end if */
+        }
+
+        /* Reset the shared state for the datatype */
         if ((type->shared->state == H5T_STATE_TRANSIENT || type->shared->state == H5T_STATE_RDONLY) &&
-            (type->sh_loc.type == H5O_SHARE_TYPE_COMMITTED)) {
-            if (H5O_dec_rc_by_loc(&(type->oloc)) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL,
-                            "unable to decrement refcount on newly created object");
-            if (H5O_close(&(type->oloc), NULL) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header");
-            if (H5O_delete(file, type->sh_loc.u.loc.oh_addr) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header");
+            (type->sh_loc.type == H5O_SHARE_TYPE_COMMITTED))
             type->sh_loc.type = H5O_SHARE_TYPE_UNSHARED;
-        } /* end if */
-    }     /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5T__commit() */
@@ -547,7 +575,6 @@ H5Tcommitted(hid_t type_id)
     htri_t ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "i", type_id);
 
     /* Check arguments */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -659,7 +686,6 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "i*si", loc_id, name, tapl_id);
 
     /* Open the datatype synchronously */
     if ((ret_value = H5T__open_api_common(loc_id, name, tapl_id, NULL, NULL)) < 0)
@@ -690,7 +716,6 @@ H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, tapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -741,7 +766,6 @@ H5Tget_create_plist(hid_t dtype_id)
     hid_t  ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", dtype_id);
 
     /* Check arguments */
     if (NULL == (type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
@@ -801,7 +825,6 @@ H5Tflush(hid_t type_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -845,7 +868,6 @@ H5Trefresh(hid_t type_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -1015,7 +1037,7 @@ H5T_open(const H5G_loc_t *loc)
     /* Check if datatype was already open */
     if (NULL == (shared_fo = (H5T_shared_t *)H5FO_opened(loc->oloc->file, loc->oloc->addr))) {
         /* Clear any errors from H5FO_opened() */
-        H5E_clear_stack(NULL);
+        H5E_clear_stack();
 
         /* Open the datatype object */
         if (NULL == (dt = H5T__open_oid(loc)))

@@ -839,6 +839,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
     htri_t              attr_sharable;       /* Flag indicating attributes are shareable */
     htri_t              shared_mesg;         /* Should this message be stored in the Shared Message table? */
     bool                attr_exists;         /* Attribute exists in v2 B-tree */
+    H5O_ainfo_t         tainfo    = *ainfo;  /* Copy of ainfo */
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -977,8 +978,12 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
     else if (shared_mesg < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "error determining if message should be shared");
 
-    /* Delete old attribute from dense storage */
-    if (H5A__dense_remove(f, ainfo, old_name) < 0)
+    /* Deactivate the field so that H5A__dense_remove() won't delete the new renamed attribute
+       that was just added to the creation order index v2 B-tree via H5A__dense_insert() */
+    tainfo.corder_bt2_addr = HADDR_UNDEF;
+
+    /* Only delete the old attribute (before rename) from the name index v2 B-tree */
+    if (H5A__dense_remove(f, (const H5O_ainfo_t *)&tainfo, old_name) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute in dense storage");
 
 done:
@@ -1104,12 +1109,12 @@ H5A__dense_iterate(H5F_t *f, hid_t loc_id, const H5O_ainfo_t *ainfo, H5_index_t 
                    H5_iter_order_t order, hsize_t skip, hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op,
                    void *op_data)
 {
-    H5HF_t          *fheap        = NULL;      /* Fractal heap handle */
-    H5HF_t          *shared_fheap = NULL;      /* Fractal heap handle for shared header messages */
-    H5A_attr_table_t atable       = {0, NULL}; /* Table of attributes */
-    H5B2_t          *bt2          = NULL;      /* v2 B-tree handle for index */
-    haddr_t          bt2_addr;                 /* Address of v2 B-tree to use for lookup */
-    herr_t           ret_value = FAIL;         /* Return value */
+    H5HF_t          *fheap        = NULL;         /* Fractal heap handle */
+    H5HF_t          *shared_fheap = NULL;         /* Fractal heap handle for shared header messages */
+    H5A_attr_table_t atable       = {0, 0, NULL}; /* Table of attributes */
+    H5B2_t          *bt2          = NULL;         /* v2 B-tree handle for index */
+    haddr_t          bt2_addr;                    /* Address of v2 B-tree to use for lookup */
+    herr_t           ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1499,12 +1504,12 @@ herr_t
 H5A__dense_remove_by_idx(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, H5_iter_order_t order,
                          hsize_t n)
 {
-    H5HF_t          *fheap        = NULL;      /* Fractal heap handle */
-    H5HF_t          *shared_fheap = NULL;      /* Fractal heap handle for shared header messages */
-    H5A_attr_table_t atable       = {0, NULL}; /* Table of attributes */
-    H5B2_t          *bt2          = NULL;      /* v2 B-tree handle for index */
-    haddr_t          bt2_addr;                 /* Address of v2 B-tree to use for operation */
-    herr_t           ret_value = SUCCEED;      /* Return value */
+    H5HF_t          *fheap        = NULL;         /* Fractal heap handle */
+    H5HF_t          *shared_fheap = NULL;         /* Fractal heap handle for shared header messages */
+    H5A_attr_table_t atable       = {0, 0, NULL}; /* Table of attributes */
+    H5B2_t          *bt2          = NULL;         /* v2 B-tree handle for index */
+    haddr_t          bt2_addr;                    /* Address of v2 B-tree to use for operation */
+    herr_t           ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1586,7 +1591,7 @@ H5A__dense_remove_by_idx(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "error building table of attributes");
 
         /* Check for skipping too many attributes */
-        if (n >= atable.nattrs)
+        if (n >= atable.num_attrs)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
 
         /* Delete appropriate attribute from dense storage */

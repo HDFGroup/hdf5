@@ -2190,7 +2190,11 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
             break;
 
         case H5T_FLOAT:
-            if (H5Tequal(type, H5T_IEEE_F32BE) == true)
+            if (H5Tequal(type, H5T_IEEE_F16BE) == true)
+                h5tools_str_append(buffer, "H5T_IEEE_F16BE");
+            else if (H5Tequal(type, H5T_IEEE_F16LE) == true)
+                h5tools_str_append(buffer, "H5T_IEEE_F16LE");
+            else if (H5Tequal(type, H5T_IEEE_F32BE) == true)
                 h5tools_str_append(buffer, "H5T_IEEE_F32BE");
             else if (H5Tequal(type, H5T_IEEE_F32LE) == true)
                 h5tools_str_append(buffer, "H5T_IEEE_F32LE");
@@ -2202,6 +2206,10 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
                 h5tools_str_append(buffer, "H5T_VAX_F32");
             else if (H5Tequal(type, H5T_VAX_F64) == true)
                 h5tools_str_append(buffer, "H5T_VAX_F64");
+#ifdef H5_HAVE__FLOAT16
+            else if (H5Tequal(type, H5T_NATIVE_FLOAT16) == true)
+                h5tools_str_append(buffer, "H5T_NATIVE_FLOAT16");
+#endif
             else if (H5Tequal(type, H5T_NATIVE_FLOAT) == true)
                 h5tools_str_append(buffer, "H5T_NATIVE_FLOAT");
             else if (H5Tequal(type, H5T_NATIVE_DOUBLE) == true)

@@ -438,6 +438,8 @@ H5F_get_access_plist(H5F_t *f, bool app_ref)
         0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
                     "can't set initial metadata cache resize config.");
+    if (H5P_set(new_plist, H5F_ACS_RFIC_FLAGS_NAME, &(f->shared->rfic_flags)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set RFIC flags value");
 
     /* Prepare the driver property */
     driver_prop.driver_id         = f->shared->lf->driver_id;
@@ -857,7 +859,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
             char *ptr;
 
             /* Reset the error stack */
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
 
             /* Get last component of file_name */
             H5_GET_LAST_DELIMITER(file_name, ptr)
@@ -878,7 +880,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
         /* Adjust temporary file name if file not opened */
         if (NULL == src_file) {
             /* Reset the error stack */
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
 
             /* Strip "<drive-letter>:" */
             strncpy(temp_file_name, &file_name[2], temp_file_name_len);
@@ -926,11 +928,11 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
                     /* Check for file not opened */
                     if (NULL == src_file)
                         /* Reset the error stack */
-                        H5E_clear_stack(NULL);
+                        H5E_clear_stack();
                     /* Leave if file was opened */
                     else
                         break;
-                    H5E_clear_stack(NULL);
+                    H5E_clear_stack();
                 } /* end if */
             }     /* end while */
 
@@ -953,7 +955,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
         /* Check for file not opened */
         if (NULL == src_file)
             /* Reset the error stack */
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
     } /* end if */
 
     /* Try searching from main file's "extpath": see description in H5F_open() & H5_build_extpath() */
@@ -974,7 +976,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
             /* Check for file not opened */
             if (NULL == src_file)
                 /* Reset the error stack */
-                H5E_clear_stack(NULL);
+                H5E_clear_stack();
         } /* end if */
     }     /* end if */
 
@@ -986,7 +988,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
         /* Check for file not opened */
         if (NULL == src_file)
             /* Reset the error stack */
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
     } /* end if */
 
     /* try the 'resolved' name for the virtual file */
@@ -1017,7 +1019,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
         /* Check for file not opened */
         if (NULL == src_file)
             /* Reset the error stack */
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
     } /* end if */
 
     /* Set return value (possibly NULL or valid H5F_t *) */
@@ -1230,6 +1232,8 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
         if (H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) <
             0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial metadata cache resize config");
+        if (H5P_get(plist, H5F_ACS_RFIC_FLAGS_NAME, &(f->shared->rfic_flags)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get RFIC flags value");
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
@@ -1889,7 +1893,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      */
     if ((tent_flags == flags) || (lf == NULL)) {
         if (tent_flags != flags) {
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
             tent_flags = flags;
         }
 
@@ -2069,7 +2073,21 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         if (H5F__super_read(file, a_plist, true) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock");
 
-        /* Create the page buffer before initializing the superblock */
+        /* Skip trying to create a page buffer if the file space strategy
+         * stored in the superblock isn't paged.
+         */
+        if (shared->fs_strategy != H5F_FSPACE_STRATEGY_PAGE)
+            page_buf_size = 0;
+
+        /* If the page buffer is enabled, the strategy is paged, and the size in
+         * the fapl is smaller than the file's page size, bump the page buffer
+         * size up to the file's page size.
+         */
+        if (page_buf_size > 0 && shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE &&
+            shared->fs_page_size > page_buf_size)
+            page_buf_size = shared->fs_page_size;
+
+        /* Create the page buffer *after* reading the superblock */
         if (page_buf_size)
             if (H5PB_create(shared, page_buf_size, page_buf_min_meta_perc, page_buf_min_raw_perc) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create page buffer");
@@ -2783,6 +2801,7 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
         h5_stat_t lst; /* Stat info from lstat() call */
 
         /* Call lstat() on the file's name */
+        memset(&lst, 0, sizeof(h5_stat_t));
         if (HDlstat(name, &lst) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve stat info for file");
 
@@ -2825,12 +2844,14 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve POSIX file descriptor");
 
             /* Stat the filename we're resolving */
+            memset(&st, 0, sizeof(h5_stat_t));
             if (HDstat(name, &st) < 0)
-                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to stat file")
+                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to stat file");
 
             /* Stat the file we opened */
+            memset(&fst, 0, sizeof(h5_stat_t));
             if (HDfstat(*fd, &fst) < 0)
-                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to fstat file")
+                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to fstat file");
 
             /* Verify that the files are really the same */
             if (st.st_mode != fst.st_mode || st.st_ino != fst.st_ino || st.st_dev != fst.st_dev)

@@ -478,8 +478,6 @@ H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config)
     MPI_Info                 info           = MPI_INFO_NULL;
     herr_t                   ret_value      = SUCCEED;
 
-    /*NO TRACE*/
-
     /* Ensure Subfiling (and therefore MPI) is initialized before doing anything */
     if (H5FD_subfiling_init() < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize subfiling VFD");
@@ -559,8 +557,6 @@ H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
     H5P_genplist_t                *plist              = NULL;
     bool                           use_default_config = false;
     herr_t                         ret_value          = SUCCEED;
-
-    /*NO TRACE*/
 
     if (config_out == NULL)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_out is NULL");
@@ -1244,7 +1240,9 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
 
     if (driver->value == H5_VFD_IOC) {
         /* Get a copy of the context ID for later use */
-        file_ptr->context_id     = H5_subfile_fid_to_context(file_ptr->file_id);
+        if (H5_subfile_fid_to_context(file_ptr->file_id, &file_ptr->context_id) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL,
+                                    "unable to retrieve subfiling context ID for this file");
         file_ptr->fa.require_ioc = true;
     }
     else if (driver->value == H5_VFD_SEC2) {
@@ -1357,6 +1355,9 @@ done:
 
     H5MM_free(file_ptr->file_dir);
     file_ptr->file_dir = NULL;
+
+    if (file_ptr->context_id >= 0 && H5_free_subfiling_object(file_ptr->context_id) < 0)
+        H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free subfiling context object");
 
     /* Release the file info */
     file_ptr = H5FL_FREE(H5FD_subfiling_t, file_ptr);

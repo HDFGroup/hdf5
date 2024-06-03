@@ -182,7 +182,7 @@ As an example, a CMake configuration such as this:
 would result in build commands such as this:
 ```AFL_LLVM_THREADSAFE_INST=1 AFL_LLVM_LAF_ALL=1 afl-clang-lto --afl-lto <...>```
 
-## Compiler Options [`compiler-options.cmake`](compiler-options.cmake)
+## Compiler Options
 
 Allows for easy use of some pre-made compiler options for the major compilers.
 
@@ -200,8 +200,7 @@ Using `-DGENERATE_DEPENDENCY_DATA=ON` generates `.d` files along with regular ob
 
 ## Dependency Graph [`dependency-graph.cmake`](dependency-graph.cmake)
 
-CMake, with the dot application available, will build a visual representation of the library/executable dependencies, like so:
-![Dependency Graph](img/dp-graph.png)
+CMake, with the dot application available, will build a visual representation of the library/executable dependencies.
 
 ### Required Arguments
 

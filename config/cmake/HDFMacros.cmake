@@ -79,6 +79,9 @@ macro (SET_HDF_BUILD_TYPE)
     else ()
       set (HDF_CFG_NAME "Release")
     endif ()
+    # Set available build types for cmake-gui/ccmake convenience
+    set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+      "Debug" "Release" "RelWithDebInfo" "MinSizeRel" "Developer")
   endif ()
 endmacro ()
 
@@ -268,6 +271,8 @@ macro (TARGET_C_PROPERTIES wintarget libtype)
   if(MSVC)
     set_property(TARGET ${wintarget} APPEND PROPERTY LINK_FLAGS "${WIN_LINK_FLAGS}")
   endif()
+  #Disable UNITY_BUILD for now
+  set_property(TARGET ${wintarget} APPEND PROPERTY UNITY_BUILD OFF)
 endmacro ()
 
 #-----------------------------------------------------------------------------

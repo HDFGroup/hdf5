@@ -1213,6 +1213,7 @@ ioc_file_report_eof(sf_work_request_t *msg, MPI_Comm comm)
 
     fd = sf_context->sf_fids[subfile_idx];
 
+    memset(&sb, 0, sizeof(h5_stat_t));
     if (HDfstat(fd, &sb) < 0)
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SYSERRSTR, -1, "HDfstat failed");
 

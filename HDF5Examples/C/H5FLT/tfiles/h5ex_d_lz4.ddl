@@ -10,7 +10,7 @@ GROUP "/" {
       FILTERS {
          USER_DEFINED_FILTER {
             FILTER_ID 32004
-            COMMENT HDF5 lz4 filter; see http://www.hdfgroup.org/services/contributions.html
+            COMMENT HDF5 lz4 filter; see https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md
             PARAMS { 3 }
          }
       }

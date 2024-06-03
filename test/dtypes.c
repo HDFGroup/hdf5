@@ -73,8 +73,9 @@
         }                                                                                                    \
     } while (0)
 
-static const char *FILENAME[] = {"dtypes0", "dtypes1", "dtypes2", "dtypes3", "dtypes4",  "dtypes5",
-                                 "dtypes6", "dtypes7", "dtypes8", "dtypes9", "dtypes10", NULL};
+static const char *FILENAME[] = {"dtypes0",  "dtypes1",  "dtypes2",  "dtypes3", "dtypes4",
+                                 "dtypes5",  "dtypes6",  "dtypes7",  "dtypes8", "dtypes9",
+                                 "dtypes10", "dtypes11", "dtypes12", NULL};
 
 #define TESTFILE "bad_compound.h5"
 
@@ -3913,6 +3914,214 @@ error:
 } /* end test_user_compound_conversion() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_compound_member_convert_id_leak_func1
+ *
+ * Purpose:     Datatype conversion function for the
+ *              test_compound_member_convert_id_leak test that just
+ *              converts a float value to a double value with a cast.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_compound_member_convert_id_leak_func1(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+                                           size_t H5_ATTR_UNUSED buf_stride, size_t H5_ATTR_UNUSED bkg_stride,
+                                           void *buf, void H5_ATTR_UNUSED *bkg,
+                                           hid_t H5_ATTR_UNUSED dset_xfer_plist)
+{
+    float  tmp_val;
+    double tmp_val2;
+
+    switch (cdata->command) {
+        case H5T_CONV_INIT:
+            if (!H5Tequal(src_id, H5T_NATIVE_FLOAT) || !H5Tequal(dst_id, H5T_NATIVE_DOUBLE))
+                return FAIL;
+            break;
+        case H5T_CONV_CONV:
+            if (nelmts != 1)
+                return FAIL;
+
+            memcpy(&tmp_val, buf, sizeof(float));
+            tmp_val2 = (double)tmp_val;
+            memcpy(buf, &tmp_val2, sizeof(double));
+
+            break;
+        case H5T_CONV_FREE:
+            break;
+        default:
+            return FAIL;
+    }
+
+    return SUCCEED;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_compound_member_convert_id_leak_func2
+ *
+ * Purpose:     Datatype conversion function for the
+ *              test_compound_member_convert_id_leak test that just
+ *              returns the double value 0.1.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_compound_member_convert_id_leak_func2(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+                                           size_t H5_ATTR_UNUSED buf_stride, size_t H5_ATTR_UNUSED bkg_stride,
+                                           void *buf, void H5_ATTR_UNUSED *bkg,
+                                           hid_t H5_ATTR_UNUSED dset_xfer_plist)
+{
+    double tmp_val = 0.1;
+
+    switch (cdata->command) {
+        case H5T_CONV_INIT:
+            if (!H5Tequal(src_id, H5T_NATIVE_FLOAT) || !H5Tequal(dst_id, H5T_NATIVE_DOUBLE))
+                return FAIL;
+            break;
+        case H5T_CONV_CONV:
+            if (nelmts != 1)
+                return FAIL;
+
+            memcpy(buf, &tmp_val, sizeof(double));
+
+            break;
+        case H5T_CONV_FREE:
+            break;
+        default:
+            return FAIL;
+    }
+
+    return SUCCEED;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_compound_member_convert_id_leak
+ *
+ * Purpose:     Tests for an issue where IDs that are registered for
+ *              compound datatype members during datatype conversion were
+ *              leaked when the library's conversion path table is modified
+ *              and the compound conversion path recalculates its cached
+ *              data.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_member_convert_id_leak(void)
+{
+    int64_t num_dtype_ids = 0;
+    float   val1;
+    double  val2;
+    double  bkg;
+    hid_t   tid1 = H5I_INVALID_HID;
+    hid_t   tid2 = H5I_INVALID_HID;
+
+    TESTING("compound conversion member ID leak");
+
+    if ((tid1 = H5Tcreate(H5T_COMPOUND, sizeof(float))) < 0)
+        TEST_ERROR;
+    if ((tid2 = H5Tcreate(H5T_COMPOUND, sizeof(double))) < 0)
+        TEST_ERROR;
+
+    if (H5Tinsert(tid1, "mem", 0, H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(tid2, "mem", 0, H5T_NATIVE_DOUBLE) < 0)
+        TEST_ERROR;
+
+    /* Store the current number of datatype IDs registered */
+    if ((num_dtype_ids = H5I_nmembers(H5I_DATATYPE)) < 0)
+        TEST_ERROR;
+
+    /* Convert a value from float to double */
+    val1 = 3.0f;
+    val2 = 0.0;
+    memcpy(&val2, &val1, sizeof(float));
+    if (H5Tconvert(tid1, tid2, 1, &val2, &bkg, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Make sure the number of datatype IDs registered didn't change */
+    if (num_dtype_ids != H5I_nmembers(H5I_DATATYPE))
+        TEST_ERROR;
+
+    /* Register a custom conversion function from float to double
+     * and convert the value again
+     */
+    if (H5Tregister(H5T_PERS_HARD, "myflttodbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
+                    test_compound_member_convert_id_leak_func1) < 0)
+        TEST_ERROR;
+
+    val1 = 3.0f;
+    val2 = 0.0;
+    memcpy(&val2, &val1, sizeof(float));
+    if (H5Tconvert(tid1, tid2, 1, &val2, &bkg, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Since an application conversion function was used, two IDs should
+     * have been registered, one for the source type and one for the
+     * destination type
+     */
+    num_dtype_ids += 2;
+
+    /* Make sure the number of datatype IDs registered is correct */
+    if (num_dtype_ids != H5I_nmembers(H5I_DATATYPE))
+        TEST_ERROR;
+
+    if (H5Tunregister(H5T_PERS_HARD, "myflttodbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
+                      test_compound_member_convert_id_leak_func1) < 0)
+        TEST_ERROR;
+
+    /* Register a different custom conversion function from float to double
+     * and convert the value again
+     */
+    if (H5Tregister(H5T_PERS_HARD, "myflttodbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
+                    test_compound_member_convert_id_leak_func2) < 0)
+        TEST_ERROR;
+
+    val1 = 3.0f;
+    val2 = 0.0;
+    memcpy(&val2, &val1, sizeof(float));
+    if (H5Tconvert(tid1, tid2, 1, &val2, &bkg, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Make sure the number of datatype IDs registered didn't change */
+    if (num_dtype_ids != H5I_nmembers(H5I_DATATYPE))
+        TEST_ERROR;
+
+    if (H5Tunregister(H5T_PERS_HARD, "myflttodbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
+                      test_compound_member_convert_id_leak_func2) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(tid1) < 0)
+        TEST_ERROR;
+    if (H5Tclose(tid2) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tunregister(H5T_PERS_HARD, "myflttodbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
+                      test_compound_member_convert_id_leak_func1);
+        H5Tunregister(H5T_PERS_HARD, "myflttodbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
+                      test_compound_member_convert_id_leak_func2);
+        H5Tclose(tid1);
+        H5Tclose(tid2);
+    }
+    H5E_END_TRY;
+
+    return 1;
+} /* end test_compound_member_convert_id_leak() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_query
  *
  * Purpose:     Tests query functions of compound and enumeration types.
@@ -5153,9 +5362,9 @@ test_conv_str_2(void)
     if (NULL == (buf = (char *)calloc(nelmts, (size_t)8)))
         goto error;
     for (i = 0; i < nelmts; i++) {
-        nchars = (size_t)(HDrand() % 8);
+        nchars = (size_t)(rand() % 8);
         for (j = 0; j < nchars; j++)
-            buf[i * 8 + j] = (char)('a' + HDrand() % 26);
+            buf[i * 8 + j] = (char)('a' + rand() % 26);
         while (j < nchars)
             buf[i * 8 + j++] = '\0';
     } /* end for */
@@ -5227,9 +5436,9 @@ test_conv_str_3(void)
     if (NULL == (buf = (char *)calloc(nelmts, (size_t)8)))
         FAIL_PUTS_ERROR("Allocation failed.");
     for (i = 0; i < nelmts; i++) {
-        nchars = (size_t)(HDrand() % 8);
+        nchars = (size_t)(rand() % 8);
         for (j = 0; j < nchars; j++)
-            buf[i * 8 + j] = (char)('a' + HDrand() % 26);
+            buf[i * 8 + j] = (char)('a' + rand() % 26);
         while (j < nchars)
             buf[i * 8 + j++] = '\0';
     } /* end for */
@@ -5366,7 +5575,7 @@ test_conv_enum_1(void)
     if (NULL == (buf = (int *)malloc(nelmts * MAX(H5Tget_size(t1), H5Tget_size(t2)))))
         goto error;
     for (u = 0; u < nelmts; u++)
-        buf[u] = HDrand() % 26;
+        buf[u] = rand() % 26;
 
     /* Conversions */
     snprintf(s, sizeof(s), "Testing random enum conversion O(N)");
@@ -6035,6 +6244,644 @@ error:
         H5Tclose(type);
     return 1;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    test__Float16
+ *
+ * Purpose:     Tests the _Float16 datatype.
+ *
+ * Return:      Success:    0
+ *              Failure:    number of errors
+ *-------------------------------------------------------------------------
+ */
+static int
+test__Float16(void)
+{
+#ifdef H5_HAVE__FLOAT16
+    H5T_path_t *path = NULL;
+    const char *driver_name;
+    hsize_t     dims[1];
+    htri_t      is_little_endian;
+    H5T_t      *native_dtype = NULL;
+    H5T_t      *tmp_dtype    = NULL;
+    hid_t       fid          = H5I_INVALID_HID;
+    hid_t       space_id     = H5I_INVALID_HID;
+    hid_t       dset_id      = H5I_INVALID_HID;
+    hid_t       dcpl_id      = H5I_INVALID_HID;
+    hid_t       native_type  = H5I_INVALID_HID;
+    char        filename[256];
+
+    TESTING("_Float16 datatype");
+
+    driver_name = h5_get_test_driver_name();
+
+    /* Check that native macro maps to a valid type */
+    if (0 == H5Tget_size(H5T_NATIVE_FLOAT16)) {
+        H5_FAILED();
+        printf("Invalid size for H5T_NATIVE_FLOAT16 datatype\n");
+        goto error;
+    }
+
+    /* Check that native type for standard 16-bit float type matches */
+    if ((native_type = H5Tget_native_type(H5T_IEEE_F16LE, H5T_DIR_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't get native type for H5T_IEEE_F16LE\n");
+        goto error;
+    }
+
+    if (0 == H5Tequal(native_type, H5T_NATIVE_FLOAT16)) {
+        H5_FAILED();
+        printf("Native _Float16 type for H5T_IEEE_F16LE wasn't equal to H5T_NATIVE_FLOAT16\n");
+        goto error;
+    }
+
+    if (H5Tclose(native_type) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if ((native_type = H5Tget_native_type(H5T_IEEE_F16BE, H5T_DIR_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't get native type for H5T_IEEE_F16BE\n");
+        goto error;
+    }
+
+    if (0 == H5Tequal(native_type, H5T_NATIVE_FLOAT16)) {
+        H5_FAILED();
+        printf("Native _Float16 type for H5T_IEEE_F16BE wasn't equal to H5T_NATIVE_FLOAT16\n");
+        goto error;
+    }
+
+    if (H5Tclose(native_type) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    /*
+     * Ensure that conversion between native _Float16 datatype and
+     * the matching standard datatype is covered by the no-op conversion
+     * function. Ensure that conversion between native _Float16 datatype
+     * and the other standard datatype is covered by the byte-order
+     * conversion function.
+     */
+    if (NULL == (native_dtype = H5I_object_verify(H5T_NATIVE_FLOAT16, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for datatype\n");
+        goto error;
+    }
+
+    if ((is_little_endian = H5Tequal(H5T_NATIVE_FLOAT16, H5T_IEEE_F16LE)) < 0) {
+        H5_FAILED();
+        printf("Can't check if native _Float16 type matches standard little-endian type\n");
+        goto error;
+    }
+
+    if (NULL == (tmp_dtype = H5I_object_verify(H5T_IEEE_F16LE, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for H5T_IEEE_F16LE datatype\n");
+        goto error;
+    }
+
+    if (NULL == (path = H5T_path_find(native_dtype, tmp_dtype))) {
+        H5_FAILED();
+        printf("Can't find datatype conversion path\n");
+        goto error;
+    }
+
+    if (path->is_hard || path->conv.is_app) {
+        H5_FAILED();
+        printf("Invalid conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16LE\n");
+        goto error;
+    }
+
+    if (is_little_endian) {
+        if (path->conv.u.lib_func != H5T__conv_noop) {
+            H5_FAILED();
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16LE was not H5T__conv_noop\n");
+            goto error;
+        }
+    }
+    else {
+        if (path->conv.u.lib_func != H5T__conv_order_opt) {
+            H5_FAILED();
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16LE was not H5T__conv_order\n");
+            goto error;
+        }
+    }
+
+    if (NULL == (tmp_dtype = H5I_object_verify(H5T_IEEE_F16BE, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for H5T_IEEE_F16BE datatype\n");
+        goto error;
+    }
+
+    if (NULL == (path = H5T_path_find(native_dtype, tmp_dtype))) {
+        H5_FAILED();
+        printf("Can't find datatype conversion path\n");
+        goto error;
+    }
+
+    if (path->is_hard || path->conv.is_app) {
+        H5_FAILED();
+        printf("Invalid conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16BE\n");
+        goto error;
+    }
+
+    if (is_little_endian) {
+        if (path->conv.u.lib_func != H5T__conv_order_opt) {
+            H5_FAILED();
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16BE was not H5T__conv_order\n");
+            goto error;
+        }
+    }
+    else {
+        if (path->conv.u.lib_func != H5T__conv_noop) {
+            H5_FAILED();
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16BE was not H5T__conv_noop\n");
+            goto error;
+        }
+    }
+
+    /*
+     * Ensure that conversion between native _Float16 datatype and a
+     * couple of other datatypes are the correct type of conversions.
+     */
+    if (is_little_endian) {
+        /* Check for a native type that matches H5T_STD_I32LE before
+         * checking for a hard conversion path
+         */
+        if (H5Tequal(H5T_NATIVE_SHORT, H5T_STD_I32LE) == true ||
+            H5Tequal(H5T_NATIVE_INT, H5T_STD_I32LE) == true ||
+            H5Tequal(H5T_NATIVE_LONG, H5T_STD_I32LE) == true) {
+            if (H5Tcompiler_conv(H5T_NATIVE_FLOAT16, H5T_STD_I32LE) != true) {
+                H5_FAILED();
+                printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_STD_I32LE was not a hard conversion\n");
+                goto error;
+            }
+        }
+
+        if (H5Tcompiler_conv(H5T_NATIVE_FLOAT16, H5T_STD_I32BE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_STD_I32BE was not a soft conversion\n");
+            goto error;
+        }
+    }
+    else {
+        if (H5Tcompiler_conv(H5T_NATIVE_FLOAT16, H5T_STD_I32LE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_STD_I32LE was not a soft conversion\n");
+            goto error;
+        }
+
+        /* Check for a native type that matches H5T_STD_I32BE before
+         * checking for a hard conversion path
+         */
+        if (H5Tequal(H5T_NATIVE_SHORT, H5T_STD_I32BE) == true ||
+            H5Tequal(H5T_NATIVE_INT, H5T_STD_I32BE) == true ||
+            H5Tequal(H5T_NATIVE_LONG, H5T_STD_I32BE) == true) {
+            if (H5Tcompiler_conv(H5T_NATIVE_FLOAT16, H5T_STD_I32BE) != true) {
+                H5_FAILED();
+                printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_STD_I32BE was not a hard conversion\n");
+                goto error;
+            }
+        }
+    }
+
+    if (H5Tcompiler_conv(H5T_NATIVE_FLOAT16, H5T_NATIVE_SCHAR) != true) {
+        H5_FAILED();
+        printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_NATIVE_SCHAR was not a hard conversion\n");
+        goto error;
+    }
+
+    /*
+     * Ensure that conversion between standard _Float16 datatypes and a
+     * couple of other datatypes are the correct type of conversions.
+     */
+    if (is_little_endian) {
+        if (H5Tcompiler_conv(H5T_IEEE_F16LE, H5T_NATIVE_FLOAT) != true) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16LE -> H5T_NATIVE_FLOAT was not a hard conversion\n");
+            goto error;
+        }
+
+        /* Check for a native type that matches H5T_IEEE_F32LE before
+         * checking for a hard conversion path
+         */
+        if (H5Tequal(H5T_NATIVE_FLOAT, H5T_IEEE_F32LE) == true ||
+            H5Tequal(H5T_NATIVE_DOUBLE, H5T_IEEE_F32LE) == true ||
+            H5Tequal(H5T_NATIVE_LDOUBLE, H5T_IEEE_F32LE) == true) {
+            if (H5Tcompiler_conv(H5T_IEEE_F16LE, H5T_IEEE_F32LE) != true) {
+                H5_FAILED();
+                printf("Conversion path for H5T_IEEE_F16LE -> H5T_IEEE_F32LE was not a hard conversion\n");
+                goto error;
+            }
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16LE, H5T_IEEE_F32BE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16LE -> H5T_IEEE_F32BE was not a soft conversion\n");
+            goto error;
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16BE, H5T_NATIVE_FLOAT) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16BE -> H5T_NATIVE_FLOAT was not a soft conversion\n");
+            goto error;
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16BE, H5T_IEEE_F32BE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16BE -> H5T_IEEE_F32BE was not a soft conversion\n");
+            goto error;
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16BE, H5T_IEEE_F32LE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16BE -> H5T_IEEE_F32LE was not a soft conversion\n");
+            goto error;
+        }
+    }
+    else {
+        /* big-endian */
+        if (H5Tcompiler_conv(H5T_IEEE_F16LE, H5T_NATIVE_FLOAT) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16LE -> H5T_NATIVE_FLOAT was not a soft conversion\n");
+            goto error;
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16LE, H5T_IEEE_F32LE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16LE -> H5T_IEEE_F32LE was not a soft conversion\n");
+            goto error;
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16LE, H5T_IEEE_F32BE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16LE -> H5T_IEEE_F32BE was not a soft conversion\n");
+            goto error;
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16BE, H5T_NATIVE_FLOAT) != true) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16BE -> H5T_NATIVE_FLOAT was not a hard conversion\n");
+            goto error;
+        }
+
+        /* Check for a native type that matches H5T_IEEE_F32BE before
+         * checking for a hard conversion path
+         */
+        if (H5Tequal(H5T_NATIVE_FLOAT, H5T_IEEE_F32LE) == true ||
+            H5Tequal(H5T_NATIVE_DOUBLE, H5T_IEEE_F32LE) == true ||
+            H5Tequal(H5T_NATIVE_LDOUBLE, H5T_IEEE_F32LE) == true) {
+            if (H5Tcompiler_conv(H5T_IEEE_F16BE, H5T_IEEE_F32BE) != true) {
+                H5_FAILED();
+                printf("Conversion path for H5T_IEEE_F16BE -> H5T_IEEE_F32BE was not a hard conversion\n");
+                goto error;
+            }
+        }
+
+        if (H5Tcompiler_conv(H5T_IEEE_F16BE, H5T_IEEE_F32LE) != false) {
+            H5_FAILED();
+            printf("Conversion path for H5T_IEEE_F16BE -> H5T_IEEE_F32LE was not a soft conversion\n");
+            goto error;
+        }
+    }
+
+    /*
+     * Create a dataset with the datatype and check the dataset raw
+     * data storage size, as well as the file size
+     */
+    h5_fixname(FILENAME[11], H5P_DEFAULT, filename, sizeof filename);
+
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create file!\n");
+        goto error;
+    }
+
+    dims[0] = 10000;
+    if ((space_id = H5Screate_simple(1, dims, NULL)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create dataspace\n");
+        goto error;
+    }
+
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create DCPL\n");
+        goto error;
+    }
+
+    if (H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't set alloc time\n");
+        goto error;
+    }
+
+    if ((dset_id = H5Dcreate2(fid, "Dataset", H5T_NATIVE_FLOAT16, space_id, H5P_DEFAULT, dcpl_id,
+                              H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create dataset\n");
+        goto error;
+    }
+
+    if (H5Dget_storage_size(dset_id) != dims[0] * sizeof(H5__Float16)) {
+        H5_FAILED();
+        AT();
+        printf("Incorrect dataset raw data storage size allocated in file\n");
+        goto error;
+    }
+
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space_id) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    if (!h5_driver_uses_multiple_files(driver_name, H5_EXCLUDE_NON_MULTIPART_DRIVERS)) {
+        bool is_default_vfd_compat = false;
+
+        if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &is_default_vfd_compat) < 0)
+            TEST_ERROR;
+        if (is_default_vfd_compat) {
+            h5_stat_size_t file_size = h5_get_file_size(filename, H5P_DEFAULT);
+
+            if (file_size < 0)
+                TEST_ERROR;
+            if ((size_t)file_size < dims[0] * sizeof(H5__Float16)) {
+                H5_FAILED();
+                AT();
+                printf("File size value was too small\n");
+                goto error;
+            }
+
+            /* 4096 bytes is arbitrary, but should suffice for now */
+            if ((size_t)file_size > (dims[0] * sizeof(H5__Float16)) + 4096) {
+                H5_FAILED();
+                AT();
+                printf("File size value was too large\n");
+                goto error;
+            }
+        }
+    }
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(native_type);
+        H5Pclose(dcpl_id);
+        H5Sclose(space_id);
+        H5Dclose(dset_id);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    return 1;
+#else
+    TESTING("that _Float16 datatype is unavailable");
+
+    /* Make sure H5T_NATIVE_FLOAT16 macro maps to invalid datatype */
+    H5E_BEGIN_TRY
+    {
+        if (0 != H5Tget_size(H5T_NATIVE_FLOAT16)) {
+            H5_FAILED();
+            AT();
+            printf("Valid size was returned for invalid datatype\n");
+            return 1;
+        }
+    }
+    H5E_END_TRY
+
+    PASSED();
+
+    return 0;
+#endif
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_array_cmpd_vl
+ *
+ * Purpose:     Tests that conversion occurs correctly with an array of
+ *              arrays of compounds containing a variable length sequence.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_array_cmpd_vl(void)
+{
+    typedef struct cmpd_struct {
+        hvl_t vl;
+    } cmpd_struct;
+
+    int         int_wdata[2][3][2] = {{{0, 1}, {2, 3}, {4, 5}}, {{6, 7}, {8, 9}, {10, 11}}};
+    cmpd_struct wdata[2][3];
+    cmpd_struct rdata[2][3];
+    hid_t       file;
+    hid_t       vl_tid, cmpd_tid, inner_array_tid, outer_array_tid;
+    hid_t       space_id;
+    hid_t       dset_id;
+    hsize_t     dim1[1];
+    char        filename[1024];
+
+    TESTING("array of arrays of compounds with a vlen");
+
+    /* Create File */
+    h5_fixname(FILENAME[12], H5P_DEFAULT, filename, sizeof filename);
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create file!\n");
+        goto error;
+    } /* end if */
+
+    /* Create VL of ints datatype */
+    if ((vl_tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    /* Create compound datatype */
+    if ((cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    if (H5Tinsert(cmpd_tid, "vl", HOFFSET(struct cmpd_struct, vl), vl_tid) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't insert field 'vl'\n");
+        goto error;
+    } /* end if */
+
+    /* Create inner array type */
+    dim1[0] = 3;
+    if ((inner_array_tid = H5Tarray_create2(cmpd_tid, 1, dim1)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    /* Create outer array type */
+    dim1[0] = 2;
+    if ((outer_array_tid = H5Tarray_create2(inner_array_tid, 1, dim1)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    /* Create space, dataset */
+    dim1[0] = 1;
+    if ((space_id = H5Screate_simple(1, dim1, NULL)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create space\n");
+        goto error;
+    } /* end if */
+
+    if ((dset_id = H5Dcreate2(file, "Dataset", outer_array_tid, space_id, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create dataset\n");
+        goto error;
+    } /* end if */
+
+    /* Initialize wdata */
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 3; j++) {
+            wdata[i][j].vl.len = 2;
+            wdata[i][j].vl.p   = int_wdata[i][j];
+        }
+
+    /* Write data */
+    if (H5Dwrite(dset_id, outer_array_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't write data\n");
+        goto error;
+    } /* end if */
+
+    /* Initialize rdata */
+    (void)memset(rdata, 0, sizeof(rdata));
+
+    /* Read data */
+    if (H5Dread(dset_id, outer_array_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't read data\n");
+        goto error;
+    } /* end if */
+
+    /* Check for correctness of read data */
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 3; j++)
+            if (rdata[i][j].vl.len != 2 || ((int *)rdata[i][j].vl.p)[0] != int_wdata[i][j][0] ||
+                ((int *)rdata[i][j].vl.p)[1] != int_wdata[i][j][1]) {
+                H5_FAILED();
+                AT();
+                printf("incorrect read data at [%d][%d]\n", i, j);
+                goto error;
+            }
+
+    /* Reclaim memory */
+    if (H5Treclaim(outer_array_tid, space_id, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't reclaim memory\n");
+        goto error;
+    } /* end if */
+
+    /* Adjust write buffer */
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 3; j++) {
+            int_wdata[i][j][0] += 100;
+            int_wdata[i][j][1] += 100;
+        }
+
+    /* Overwrite dataset with adjusted wdata */
+    if (H5Dwrite(dset_id, outer_array_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't write data\n");
+        goto error;
+    } /* end if */
+
+    /* Initialize rdata */
+    (void)memset(rdata, 0, sizeof(rdata));
+
+    /* Read data */
+    if (H5Dread(dset_id, outer_array_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't read data\n");
+        goto error;
+    } /* end if */
+
+    /* Check for correctness of read data */
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 3; j++)
+            if (rdata[i][j].vl.len != 2 || ((int *)rdata[i][j].vl.p)[0] != int_wdata[i][j][0] ||
+                ((int *)rdata[i][j].vl.p)[1] != int_wdata[i][j][1]) {
+                H5_FAILED();
+                AT();
+                printf("incorrect read data at [%d][%d]\n", i, j);
+                goto error;
+            }
+
+    /* Reclaim memory */
+    if (H5Treclaim(outer_array_tid, space_id, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't reclaim memory\n");
+        goto error;
+    } /* end if */
+
+    /* Close */
+    if (H5Dclose(dset_id) < 0)
+        goto error;
+    if (H5Tclose(outer_array_tid) < 0)
+        goto error;
+    if (H5Tclose(inner_array_tid) < 0)
+        goto error;
+    if (H5Tclose(cmpd_tid) < 0)
+        goto error;
+    if (H5Tclose(vl_tid) < 0)
+        goto error;
+    if (H5Sclose(space_id) < 0)
+        goto error;
+    if (H5Fclose(file) < 0)
+        goto error;
+
+    PASSED();
+    return 0;
+
+error:
+    return 1;
+} /* end test_array_cmpd_vl() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_encode
@@ -6991,6 +7838,299 @@ error:
 } /* end test_int_float_except() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_app_conv_ids_func
+ *
+ * Purpose:     Conversion function for test_app_conv_ids test that calls
+ *              H5Tget_class on the ID for the source and destination
+ *              datatypes to try to make sure they're valid.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_app_conv_ids_func(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t H5_ATTR_UNUSED nelmts,
+                       size_t H5_ATTR_UNUSED buf_stride, size_t H5_ATTR_UNUSED bkg_stride,
+                       void H5_ATTR_UNUSED *buf, void H5_ATTR_UNUSED *bkg, hid_t H5_ATTR_UNUSED dxpl)
+{
+    if (cdata->command == H5T_CONV_CONV) {
+        if (H5Tget_class(src_id) < 0)
+            return FAIL;
+        if (H5Tget_class(dst_id) < 0)
+            return FAIL;
+    }
+
+    return SUCCEED;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_app_conv_ids
+ *
+ * Purpose:     Tests that the IDs passed to an application conversion
+ *              function for different datatypes are valid.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_app_conv_ids(void)
+{
+    const size_t buf_size     = 1024; /* Must be big enough to hold element of largest datatype */
+    hsize_t      array_dims[] = {1};
+    hsize_t      dims[]       = {1};
+    hid_t        src_type_id  = H5I_INVALID_HID;
+    hid_t        dst_type_id  = H5I_INVALID_HID;
+    hid_t        space_id     = H5I_INVALID_HID;
+    hvl_t        vl_elem      = {0};
+    int          vl_int       = 0;
+    void        *conv_elem    = NULL;
+    void        *bkg_buf      = NULL;
+
+    TESTING("passing datatype IDs to application conversion function");
+
+    if (NULL == (conv_elem = malloc(buf_size)))
+        TEST_ERROR;
+    if (NULL == (bkg_buf = malloc(buf_size)))
+        TEST_ERROR;
+
+    vl_elem.len = 1;
+    vl_elem.p   = &vl_int;
+
+    for (int src_type = H5T_INTEGER; src_type < H5T_NCLASSES; src_type++) {
+        switch ((H5T_class_t)src_type) {
+            case H5T_BITFIELD:
+                if ((src_type_id = H5Tcopy(H5T_STD_B32LE)) < 0)
+                    TEST_ERROR;
+                break;
+            case H5T_REFERENCE:
+                if ((src_type_id = H5Tcopy(H5T_STD_REF)) < 0)
+                    TEST_ERROR;
+                break;
+            case H5T_ENUM:
+                if ((src_type_id = H5Tenum_create(H5T_NATIVE_INT)) < 0)
+                    TEST_ERROR;
+                break;
+            case H5T_VLEN:
+                if ((src_type_id = H5Tvlen_create(H5T_NATIVE_INT)) < 0)
+                    TEST_ERROR;
+                break;
+            case H5T_ARRAY:
+                if ((src_type_id = H5Tarray_create2(H5T_NATIVE_INT, 1, array_dims)) < 0)
+                    TEST_ERROR;
+                break;
+            case H5T_INTEGER:
+            case H5T_FLOAT:
+            case H5T_TIME:
+            case H5T_STRING:
+            case H5T_OPAQUE:
+            case H5T_COMPOUND:
+            default:
+                if ((src_type_id = H5Tcreate((H5T_class_t)src_type, buf_size / 2)) < 0)
+                    TEST_ERROR;
+                break;
+
+            case H5T_NO_CLASS:
+            case H5T_NCLASSES:
+                TEST_ERROR;
+        }
+
+        for (int dst_type = H5T_INTEGER; dst_type < H5T_NCLASSES; dst_type++) {
+            /* Use different datatype sizes for dest type so we don't convert with no-op function */
+            switch ((H5T_class_t)dst_type) {
+                case H5T_BITFIELD:
+                    if ((dst_type_id = H5Tcopy(H5T_STD_B64LE)) < 0)
+                        TEST_ERROR;
+                    break;
+                case H5T_REFERENCE:
+                    if ((dst_type_id = H5Tcopy(H5T_STD_REF)) < 0)
+                        TEST_ERROR;
+                    break;
+                case H5T_ENUM:
+                    if ((dst_type_id = H5Tenum_create(H5T_NATIVE_LONG)) < 0)
+                        TEST_ERROR;
+                    break;
+                case H5T_VLEN:
+                    if ((dst_type_id = H5Tvlen_create(H5T_NATIVE_LONG)) < 0)
+                        TEST_ERROR;
+                    break;
+                case H5T_ARRAY:
+                    if ((dst_type_id = H5Tarray_create2(H5T_NATIVE_LONG, 1, array_dims)) < 0)
+                        TEST_ERROR;
+                    break;
+                case H5T_INTEGER:
+                case H5T_FLOAT:
+                case H5T_TIME:
+                case H5T_STRING:
+                case H5T_OPAQUE:
+                case H5T_COMPOUND:
+                default:
+                    if ((dst_type_id = H5Tcreate((H5T_class_t)dst_type, buf_size / 4)) < 0)
+                        TEST_ERROR;
+                    break;
+
+                case H5T_NO_CLASS:
+                case H5T_NCLASSES:
+                    TEST_ERROR;
+            }
+
+            if (H5Tregister(H5T_PERS_SOFT, "app_conv_ids_func", src_type_id, dst_type_id,
+                            &test_app_conv_ids_func) < 0)
+                TEST_ERROR;
+
+            memset(conv_elem, 0, buf_size);
+
+            if (src_type == H5T_VLEN)
+                memcpy(conv_elem, &vl_elem, sizeof(hvl_t));
+
+            if (H5Tconvert(src_type_id, dst_type_id, 1, conv_elem, bkg_buf, H5P_DEFAULT) < 0)
+                TEST_ERROR;
+
+            if (H5Tunregister(H5T_PERS_SOFT, "app_conv_ids_func", src_type_id, dst_type_id,
+                              &test_app_conv_ids_func) < 0)
+                TEST_ERROR;
+
+            if (H5Tclose(dst_type_id) < 0)
+                TEST_ERROR;
+            dst_type_id = H5I_INVALID_HID;
+        }
+
+        if (H5Tclose(src_type_id) < 0)
+            TEST_ERROR;
+        src_type_id = H5I_INVALID_HID;
+    }
+
+    /* Reset library after type conversion path table was potentially modified */
+    h5_restore_err();
+    reset_hdf5();
+
+    /* Test with container-like datatypes where the conversion on the top-level type
+     * is performed with a library-internal conversion function, but conversions on
+     * the member types are performed with an application conversion function
+     */
+
+    if (H5Tregister(H5T_PERS_HARD, "app_conv_ids_func", H5T_NATIVE_INT, H5T_NATIVE_LONG,
+                    &test_app_conv_ids_func) < 0)
+        TEST_ERROR;
+
+    /*******************************
+     * Top-level compound datatype *
+     *******************************/
+    if ((src_type_id = H5Tcreate(H5T_COMPOUND, sizeof(int))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(src_type_id, "comp_mem", 0, H5T_NATIVE_INT) < 0)
+        TEST_ERROR;
+    if ((dst_type_id = H5Tcreate(H5T_COMPOUND, sizeof(long))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(dst_type_id, "comp_mem", 0, H5T_NATIVE_LONG) < 0)
+        TEST_ERROR;
+
+    memset(conv_elem, 0, buf_size);
+    if (H5Tconvert(src_type_id, dst_type_id, 1, conv_elem, bkg_buf, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(src_type_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(dst_type_id) < 0)
+        TEST_ERROR;
+
+    /***************************
+     * Top-level enum datatype *
+     ***************************/
+    if ((src_type_id = H5Tenum_create(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+    if ((dst_type_id = H5Tenum_create(H5T_NATIVE_LONG)) < 0)
+        TEST_ERROR;
+
+    memset(conv_elem, 0, buf_size);
+    if (H5Tconvert(src_type_id, dst_type_id, 1, conv_elem, bkg_buf, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(src_type_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(dst_type_id) < 0)
+        TEST_ERROR;
+
+    /**************************************
+     * Top-level variable-length datatype *
+     **************************************/
+    if ((src_type_id = H5Tvlen_create(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+    if ((dst_type_id = H5Tvlen_create(H5T_NATIVE_LONG)) < 0)
+        TEST_ERROR;
+
+    memset(conv_elem, 0, buf_size);
+    memcpy(conv_elem, &vl_elem, sizeof(hvl_t));
+    if (H5Tconvert(src_type_id, dst_type_id, 1, conv_elem, bkg_buf, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if ((space_id = H5Screate_simple(1, dims, NULL)) < 0)
+        TEST_ERROR;
+    if (H5Treclaim(dst_type_id, space_id, H5P_DEFAULT, conv_elem) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space_id) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(src_type_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(dst_type_id) < 0)
+        TEST_ERROR;
+
+    /****************************
+     * Top-level array datatype *
+     ****************************/
+    if ((src_type_id = H5Tarray_create2(H5T_NATIVE_INT, 1, array_dims)) < 0)
+        TEST_ERROR;
+    if ((dst_type_id = H5Tarray_create2(H5T_NATIVE_LONG, 1, array_dims)) < 0)
+        TEST_ERROR;
+
+    memset(conv_elem, 0, buf_size);
+    if (H5Tconvert(src_type_id, dst_type_id, 1, conv_elem, bkg_buf, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(src_type_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(dst_type_id) < 0)
+        TEST_ERROR;
+
+    if (H5Tunregister(H5T_PERS_HARD, "app_conv_ids_func", H5T_NATIVE_INT, H5T_NATIVE_LONG,
+                      &test_app_conv_ids_func) < 0)
+        TEST_ERROR;
+
+    free(bkg_buf);
+    bkg_buf = NULL;
+    free(conv_elem);
+    conv_elem = NULL;
+
+    /* Reset library after type conversion path table was potentially modified */
+    h5_restore_err();
+    reset_hdf5();
+
+    PASSED();
+
+    return 0;
+
+error:
+    free(bkg_buf);
+    free(conv_elem);
+
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(space_id);
+        H5Tclose(src_type_id);
+        H5Tclose(dst_type_id);
+    }
+    H5E_END_TRY
+
+    /* Reset library after type conversion path table was potentially modified */
+    h5_restore_err();
+    reset_hdf5();
+
+    return 1;
+} /* end test_app_conv_ids() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_set_order
  *
  * Purpose:     Tests H5Tset_order/H5Tget_order.  Verifies that
@@ -7385,6 +8525,107 @@ error:
     H5E_END_TRY
     return 1;
 } /* end test_set_order_compound() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_enum_member_order
+ *
+ * Purpose:     Tests that datatype conversions don't perturb the ordering
+ *              of members within an enum datatype due to the way they sort
+ *              the members internally during conversion.
+ *
+ * Return:      Success:    0
+ *              Failure:    number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+#define NUM_MEMBERS 3
+static int
+test_enum_member_order(void)
+{
+    typedef enum { SOLID, LIQUID, GAS, PLASMA } phase_t;
+
+    const char *enum_names[4]              = {"SOLID", "LIQUID", "GAS", "PLASMA"};
+    phase_t     enum_int_buf[NUM_MEMBERS]  = {LIQUID, GAS, PLASMA};
+    long        enum_long_buf[NUM_MEMBERS] = {0, 0, 0};
+    hid_t       enum_type1                 = H5I_INVALID_HID;
+    hid_t       enum_type2                 = H5I_INVALID_HID;
+    int         val_int                    = -1;
+    long        val_long                   = -1;
+
+    TESTING("stability of enum member ordering after datatype conversion");
+
+    /* Test enum type */
+
+    if ((enum_type1 = H5Tenum_create(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+    if ((enum_type2 = H5Tenum_create(H5T_NATIVE_LONG)) < 0)
+        TEST_ERROR;
+
+    for (size_t i = 0; i < sizeof(enum_names) / sizeof(enum_names[0]); i++) {
+        val_int  = (int)i;
+        val_long = (long)i;
+
+        /* Insert members into enums in order: SOLID, LIQUID, GAS, PLASMA */
+        if (H5Tenum_insert(enum_type1, enum_names[i], &val_int) < 0)
+            TEST_ERROR;
+        if (H5Tenum_insert(enum_type2, enum_names[i], &val_long) < 0)
+            TEST_ERROR;
+    }
+
+    memcpy(enum_long_buf, enum_int_buf, NUM_MEMBERS * sizeof(int));
+
+    /* Convert from int enum type to long enum type */
+    if (H5Tconvert(enum_type1, enum_type2, NUM_MEMBERS, enum_long_buf, NULL, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Sanity check */
+    for (size_t i = 0; i < NUM_MEMBERS; i++) {
+        if (enum_long_buf[i] != (long)enum_int_buf[i]) {
+            H5_FAILED();
+            printf("long enum buf member %zu mismatch after conversion; expected %ld, got %ld\n", i,
+                   (long)enum_int_buf[i], enum_long_buf[i]);
+            goto error;
+        }
+    }
+
+    /* Check that each enum type's members are in the same order we inserted them in */
+    for (size_t i = 0; i < sizeof(enum_names) / sizeof(enum_names[0]); i++) {
+        if (H5Tget_member_value(enum_type1, (unsigned)i, &val_int) < 0)
+            TEST_ERROR;
+        if (val_int != (int)i) {
+            H5_FAILED();
+            printf("int enum member %zu was out of order; expected %d, got %d\n", i, (int)i, val_int);
+            goto error;
+        }
+
+        if (H5Tget_member_value(enum_type2, (unsigned)i, &val_long) < 0)
+            TEST_ERROR;
+        if (val_long != (long)i) {
+            H5_FAILED();
+            printf("long enum member %zu was out of order; expected %ld, got %ld\n", i, (long)i, val_long);
+            goto error;
+        }
+    }
+
+    if (H5Tclose(enum_type1) < 0)
+        TEST_ERROR;
+    if (H5Tclose(enum_type2) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(enum_type1);
+        H5Tclose(enum_type2);
+    }
+    H5E_END_TRY
+
+    return 1;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    test_named_indirect_reopen
@@ -9096,7 +10337,7 @@ main(void)
     hid_t fapl    = H5I_INVALID_HID;
 
     /* Set the random # seed */
-    HDsrandom((unsigned)HDtime(NULL));
+    srand((unsigned)time(NULL));
 
     reset_hdf5();
     fapl = h5_fileaccess();
@@ -9126,6 +10367,7 @@ main(void)
     nerrors += test_delete_obj_named(fapl);
     nerrors += test_delete_obj_named_fileid(fapl);
     nerrors += test_set_order_compound(fapl);
+    nerrors += test_enum_member_order();
     nerrors += test_str_create();
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     nerrors += test_deprec(fapl);
@@ -9164,16 +10406,22 @@ main(void)
     nerrors += test_compound_17();
     nerrors += test_compound_18();
     nerrors += test_user_compound_conversion();
+    nerrors += test_compound_member_convert_id_leak();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_enum_2();
     nerrors += test_conv_bitfield();
     nerrors += test_bitfield_funcs();
     nerrors += test_opaque();
     nerrors += test_set_order();
+    nerrors += test_array_cmpd_vl();
+
+    nerrors += test__Float16();
 
     if (!driver_is_parallel) {
         nerrors += test_utf_ascii_conv();
     }
+
+    nerrors += test_app_conv_ids();
 
     nerrors += test_versionbounds();
 

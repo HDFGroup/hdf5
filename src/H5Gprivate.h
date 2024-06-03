@@ -94,8 +94,10 @@
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5G_MODULE
 #define H5G_MOUNTED(G) ((G)->shared->mounted)
+#define H5G_OBJ_ID(G)  (((H5G_obj_create_t *)(G))->gcpl_id)
 #else /* H5G_MODULE */
 #define H5G_MOUNTED(G) (H5G_mounted(G))
+#define H5G_OBJ_ID(G)  (H5G_get_gcpl_id(G))
 #endif /* H5G_MODULE */
 
 /*
@@ -109,6 +111,7 @@
 #define H5G_TARGET_UDLINK   0x0004
 #define H5G_TARGET_EXISTS   0x0008
 #define H5G_CRT_INTMD_GROUP 0x0010
+#define H5G_CRT_OBJ         0x0020
 
 /* Type of operation being performed for call to H5G_name_replace() */
 typedef enum {
@@ -136,6 +139,7 @@ typedef struct H5G_name_t {
 /* Forward declarations (for prototypes & struct definitions) */
 struct H5O_loc_t;
 struct H5O_link_t;
+typedef struct H5G_obj_create_t H5G_obj_create_t;
 
 /*
  * The "location" of an object in a group hierarchy.  This points to an object
@@ -224,8 +228,8 @@ H5_DLL herr_t H5G_link_to_info(const struct H5O_loc_t *link_loc, const struct H5
 /*
  * Functions that understand group objects
  */
-H5_DLL herr_t H5G_obj_insert(const struct H5O_loc_t *grp_oloc, const char *name, struct H5O_link_t *obj_lnk,
-                             bool adj_link, H5O_type_t obj_type, const void *crt_info);
+H5_DLL herr_t H5G_obj_insert(const struct H5O_loc_t *grp_oloc, struct H5O_link_t *obj_lnk, bool adj_link,
+                             H5O_type_t obj_type, const void *crt_info);
 H5_DLL herr_t H5G_obj_get_name_by_idx(const struct H5O_loc_t *oloc, H5_index_t idx_type,
                                       H5_iter_order_t order, hsize_t n, char *name, size_t name_size,
                                       size_t *name_len);
@@ -235,6 +239,7 @@ H5_DLL herr_t H5G_obj_remove_by_idx(const struct H5O_loc_t *grp_oloc, H5RS_str_t
 H5_DLL herr_t H5G_obj_lookup_by_idx(const struct H5O_loc_t *grp_oloc, H5_index_t idx_type,
                                     H5_iter_order_t order, hsize_t n, struct H5O_link_t *lnk);
 H5_DLL hid_t  H5G_get_create_plist(const H5G_t *grp);
+H5_DLL hid_t  H5G_get_gcpl_id(const H5G_obj_create_t *g);
 
 /*
  * These functions operate on symbol table nodes.

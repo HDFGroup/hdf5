@@ -151,8 +151,9 @@ typedef struct {
  */
 typedef struct H5G_bt_common_t {
     /* downward */
-    const char *name; /*points to temporary memory         */
-    H5HL_t     *heap; /*symbol table heap             */
+    const char *name;       /* Points to temporary memory */
+    H5HL_t     *heap;       /* Symbol table heap */
+    size_t      block_size; /* Size of the heap block */
 } H5G_bt_common_t;
 
 /*
@@ -210,11 +211,12 @@ typedef struct H5G_bt_it_it_t {
 
 /* Data passed through B-tree iteration for copying copy symbol table content */
 typedef struct H5G_bt_it_cpy_t {
-    const H5O_loc_t  *src_oloc;      /* Source object location */
-    haddr_t           src_heap_addr; /* Heap address of the source symbol table  */
-    H5F_t            *dst_file;      /* File of destination group */
-    const H5O_stab_t *dst_stab;      /* Symbol table message for destination group */
-    H5O_copy_t       *cpy_info;      /* Information for copy operation */
+    const H5O_loc_t  *src_oloc;       /* Source object location */
+    H5HL_t           *src_heap;       /* Heap for the source symbol table  */
+    size_t            src_block_size; /* Size of the heap block */
+    H5F_t            *dst_file;       /* File of destination group */
+    const H5O_stab_t *dst_stab;       /* Symbol table message for destination group */
+    H5O_copy_t       *cpy_info;       /* Information for copy operation */
 } H5G_bt_it_cpy_t;
 
 /* Common information for "by index" lookups in symbol tables */
@@ -279,11 +281,11 @@ typedef struct H5G_bt2_ud_ins_t {
 } H5G_bt2_ud_ins_t;
 
 /* Typedef for group creation operation */
-typedef struct H5G_obj_create_t {
+struct H5G_obj_create_t {
     hid_t            gcpl_id;    /* Group creation property list */
     H5G_cache_type_t cache_type; /* Type of symbol table entry cache */
     H5G_cache_t      cache;      /* Cached data for symbol table entry */
-} H5G_obj_create_t;
+};
 
 /* Callback information for copying groups */
 typedef struct H5G_copy_file_ud_t {
@@ -345,9 +347,9 @@ H5_DLL const char *H5G__component(const char *name, size_t *size_p);
  */
 H5_DLL herr_t H5G__stab_create(H5O_loc_t *grp_oloc, const H5O_ginfo_t *ginfo, H5O_stab_t *stab);
 H5_DLL herr_t H5G__stab_create_components(H5F_t *f, H5O_stab_t *stab, size_t size_hint);
-H5_DLL herr_t H5G__stab_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
-                               H5O_type_t obj_type, const void *crt_info);
-H5_DLL herr_t H5G__stab_insert_real(H5F_t *f, const H5O_stab_t *stab, const char *name, H5O_link_t *obj_lnk,
+H5_DLL herr_t H5G__stab_insert(const H5O_loc_t *grp_oloc, H5O_link_t *obj_lnk, H5O_type_t obj_type,
+                               const void *crt_info);
+H5_DLL herr_t H5G__stab_insert_real(H5F_t *f, const H5O_stab_t *stab, H5O_link_t *obj_lnk,
                                     H5O_type_t obj_type, const void *crt_info);
 H5_DLL herr_t H5G__stab_delete(H5F_t *f, const H5O_stab_t *stab);
 H5_DLL herr_t H5G__stab_iterate(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
@@ -374,8 +376,7 @@ H5_DLL void   H5G__ent_reset(H5G_entry_t *ent);
 H5_DLL herr_t H5G__ent_decode_vec(const H5F_t *f, const uint8_t **pp, const uint8_t *p_end, H5G_entry_t *ent,
                                   unsigned n);
 H5_DLL herr_t H5G__ent_encode_vec(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, unsigned n);
-H5_DLL herr_t H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk,
-                               H5O_type_t obj_type, const void *crt_info, H5G_entry_t *ent);
+H5_DLL herr_t H5G__ent_to_link(const H5G_entry_t *ent, const H5HL_t *heap, H5O_link_t *lnk);
 H5_DLL herr_t H5G__ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth,
                              const H5HL_t *heap);
 
@@ -392,7 +393,8 @@ H5_DLL herr_t H5G__node_iterate_size(H5F_t *f, const void *_lt_key, haddr_t addr
 H5_DLL herr_t H5G__node_free(H5G_node_t *sym);
 
 /* Functions that understand links in groups */
-H5_DLL herr_t H5G__ent_to_link(H5O_link_t *lnk, const H5HL_t *heap, const H5G_entry_t *ent, const char *name);
+H5_DLL herr_t H5G__link_to_ent(H5F_t *f, H5HL_t *heap, const H5O_link_t *lnk, H5O_type_t obj_type,
+                               const void *crt_info, H5G_entry_t *ent);
 H5_DLL herr_t H5G__link_to_loc(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, H5G_loc_t *obj_loc);
 H5_DLL herr_t H5G__link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type, H5_iter_order_t order);
 H5_DLL herr_t H5G__link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip, hsize_t *last_lnk,

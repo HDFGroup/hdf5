@@ -79,7 +79,7 @@ parallel_print(const char *format, ...)
                 /* Terminate the outbuff at the end of the previous output */
                 outBuff[outBuffOffset] = '\0';
 
-                overflow_file = HDtmpfile();
+                overflow_file = tmpfile();
                 if (overflow_file == NULL)
                     fprintf(rawerrorstream,
                             "warning: could not create overflow file.  Output may be truncated.\n");
@@ -589,12 +589,12 @@ dump_table(hid_t fid, char *tablename, table_t *table)
 
     PRINTSTREAM(rawoutstream, "%s: # of entries = %d\n", tablename, table->nobjs);
     for (u = 0; u < table->nobjs; u++) {
-        H5VLconnector_token_to_str(fid, table->objs[u].obj_token, &obj_tok_str);
+        H5Otoken_to_str(fid, &table->objs[u].obj_token, &obj_tok_str);
 
         PRINTSTREAM(rawoutstream, "%s %s %d %d\n", obj_tok_str, table->objs[u].objname,
                     table->objs[u].displayed, table->objs[u].recorded);
 
-        H5VLfree_token_str(fid, obj_tok_str);
+        H5free_memory(obj_tok_str);
     }
 }
 

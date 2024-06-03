@@ -1,10 +1,10 @@
 HDF5 "tfilters.h5" {
 DATASET "nbit" {
-   DATATYPE  32-bit little-endian integer 3-bit precision
+   DATATYPE  32-bit little-endian integer 17-bit precision
    DATASPACE  SIMPLE { ( 20, 10 ) / ( 20, 10 ) }
    STORAGE_LAYOUT {
       CHUNKED ( 10, 5 )
-      SIZE XXXX (10.XXX:1 COMPRESSION)
+      SIZE XXXX (1.XXX:1 COMPRESSION)
    }
    FILTERS {
       COMPRESSION NBIT

@@ -74,14 +74,14 @@ PROGRAM main
      ! Insert enumerated value for memtype.
      !
      val = i
-     CALL h5tenum_insert_f(memtype, TRIM(names(i+1)), val, hdferr)
+     f_ptr = C_LOC(val)
+     CALL h5tenum_insert_f(memtype, TRIM(names(i+1)), f_ptr, hdferr)
      !
      ! Insert enumerated value for filetype.  We must first convert
      ! the numerical value val to the base type of the destination.
      !
-     f_ptr = C_LOC(val)
      CALL h5tconvert_f (M_BASET, F_BASET, INT(1,SIZE_T), f_ptr, hdferr)
-     CALL h5tenum_insert_f(filetype, TRIM(names(i+1)), val, hdferr)
+     CALL h5tenum_insert_f(filetype, TRIM(names(i+1)), f_ptr, hdferr)
   ENDDO
   !
   ! Create dataspace.  Setting maximum size to be the current size.
@@ -129,7 +129,7 @@ PROGRAM main
         !
         ! Get the name of the enumeration member.
         !
-        CALL h5tenum_nameof_f( memtype, rdata(i,j), NAME_BUF_SIZE, name, hdferr) 
+        CALL h5tenum_nameof_f( memtype, INT(rdata(i,j)), NAME_BUF_SIZE, name, hdferr)
         WRITE(*,'(" ", A6," ")', ADVANCE='NO') TRIM(NAME)
      ENDDO
      WRITE(*,'("]")')

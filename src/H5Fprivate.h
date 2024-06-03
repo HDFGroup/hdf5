@@ -101,6 +101,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_VOL_CLS(F)                 ((F)->shared->vol_cls)
 #define H5F_VOL_OBJ(F)                 ((F)->vol_obj)
 #define H5F_USE_FILE_LOCKING(F)        ((F)->shared->use_file_locking)
+#define H5F_RFIC_FLAGS(F)              ((F)->shared->rfic_flags)
 #else /* H5F_MODULE */
 #define H5F_LOW_BOUND(F)                 (H5F_get_low_bound(F))
 #define H5F_HIGH_BOUND(F)                (H5F_get_high_bound(F))
@@ -165,6 +166,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_VOL_CLS(F)                 (H5F_get_vol_cls(F))
 #define H5F_VOL_OBJ(F)                 (H5F_get_vol_obj(F))
 #define H5F_USE_FILE_LOCKING(F)        (H5F_get_use_file_locking(F))
+#define H5F_RFIC_FLAGS(F)              (H5F_get_rfic_flags(F))
 #endif /* H5F_MODULE */
 
 /* Macros to encode/decode offset/length's for storing in the file */
@@ -282,6 +284,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_MPI_PARAMS_COMM_NAME "mpi_params_comm" /* the MPI communicator */
 #define H5F_ACS_MPI_PARAMS_INFO_NAME "mpi_params_info" /* the MPI info struct */
 #endif                                                 /* H5_HAVE_PARALLEL */
+#define H5F_ACS_RFIC_FLAGS_NAME "rfic_flags"           /* Relaxed file integrity check (RFIC) flags */
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME "local" /* Whether absolute symlinks local to file. */
@@ -525,7 +528,8 @@ H5_DLL bool    H5F_get_min_dset_ohdr(const H5F_t *f);
 H5_DLL herr_t  H5F_set_min_dset_ohdr(H5F_t *f, bool minimize);
 H5_DLL const H5VL_class_t *H5F_get_vol_cls(const H5F_t *f);
 H5_DLL H5VL_object_t      *H5F_get_vol_obj(const H5F_t *f);
-H5_DLL bool                H5F_get_file_locking(const H5F_t *f);
+H5_DLL bool                H5F_get_use_file_locking(const H5F_t *f);
+H5_DLL uint64_t            H5F_get_rfic_flags(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t            H5F_get_base_addr(const H5F_t *f);

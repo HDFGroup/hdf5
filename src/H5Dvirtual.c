@@ -884,7 +884,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *vir
             src_file_open = true;
         else
             /* Reset the error stack */
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
     } /* end if */
     else
         /* Source file is ".", use the virtual dataset's file */
@@ -906,7 +906,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *vir
         /* Dataset does not exist */
         if (NULL == source_dset->dset) {
             /* Reset the error stack */
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
 
             source_dset->dset_exists = false;
         } /* end if */

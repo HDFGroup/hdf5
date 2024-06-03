@@ -30,7 +30,8 @@ main(void)
 {
     hsize_t     dima[]      = {1};
     hsize_t     dims[]      = {LENGTH};
-    hid_t       str_dtyp_id = H5I_INVALID_HID, att_dtyp_id = H5I_INVALID_HID;
+    hid_t       str_dtyp_id = H5I_INVALID_HID;
+    hid_t       att_dtyp_id = H5I_INVALID_HID;
     hid_t       file_id     = H5I_INVALID_HID;
     hid_t       fspace_id   = H5I_INVALID_HID;
     hid_t       dset_id     = H5I_INVALID_HID;
@@ -43,54 +44,58 @@ main(void)
     att_t      *atts        = NULL;
     att_t      *atts_res    = NULL;
 
+    printf("Testing writing compound attributes followed by data w/ transform.\n");
+
+    TESTING("data types are reset properly");
+
     /* Compound datatype */
-    if (NULL == (atts = malloc(sizeof(att_t))))
+    if (NULL == (atts = (att_t *)calloc(1, sizeof(att_t))))
         TEST_ERROR;
     strcpy(atts[0].name, "Name");
     strcpy(atts[0].unit, "Unit");
 
     /* String type */
     if ((str_dtyp_id = H5Tcopy(H5T_C_S1)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tset_size(str_dtyp_id, 64) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Attribute type */
     if ((att_dtyp_id = H5Tcreate(H5T_COMPOUND, sizeof(att_t))) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(att_dtyp_id, "NAME", HOFFSET(att_t, name), str_dtyp_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(att_dtyp_id, "UNIT", HOFFSET(att_t, unit), str_dtyp_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create file. */
     if ((file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create file dataspace. */
     if ((fspace_id = H5Screate_simple(1, dims, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create dataset. */
     if ((dset_id = H5Dcreate2(file_id, "test_dset", H5T_NATIVE_INT, fspace_id, H5P_DEFAULT, H5P_DEFAULT,
                               H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write the attribute (compound) to the dataset */
     if ((att_dspc_id = H5Screate_simple(1, dima, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((att_attr_id =
              H5Acreate2(dset_id, "ATTRIBUTES", att_dtyp_id, att_dspc_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Awrite(att_attr_id, att_dtyp_id, atts) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create dataset transfer property list */
     if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_data_transform(dxpl_id, expr) < 0) {
         printf("**** ERROR: H5Pset_data_transform (expression: %s) ****\n", expr);
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     }
 
     if (NULL == (data = malloc(LENGTH * sizeof(int))))
@@ -104,13 +109,13 @@ main(void)
 
     /* Write the data */
     if (H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, data) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read attribute */
     if (NULL == (atts_res = malloc(sizeof(att_t))))
         TEST_ERROR;
     if (H5Aread(att_attr_id, att_dtyp_id, atts_res) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify attribute */
     if (strcmp(atts_res[0].name, atts[0].name) != 0)
@@ -120,37 +125,40 @@ main(void)
 
     /* Read the data */
     if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify data */
     for (unsigned idx = 0; idx < LENGTH; idx++)
         if (data[idx] != data_res[idx])
             TEST_ERROR;
 
+    /* Close all identifiers. */
+    if (H5Pclose(dxpl_id) < 0)
+        TEST_ERROR;
+    if (H5Aclose(att_attr_id) < 0)
+        TEST_ERROR;
+    if (H5Sclose(att_dspc_id) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Sclose(fspace_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(att_dtyp_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(str_dtyp_id) < 0)
+        TEST_ERROR;
+
     free(atts);
     free(atts_res);
     free(data);
     free(data_res);
 
-    /* Close all identifiers. */
-    if (H5Pclose(dxpl_id) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Aclose(att_attr_id) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Sclose(att_dspc_id) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Dclose(dset_id) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Sclose(fspace_id) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tclose(att_dtyp_id) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tclose(str_dtyp_id) < 0)
-        FAIL_STACK_ERROR;
+    HDremove(FILENAME);
 
-    return 0;
+    PASSED();
+    return EXIT_SUCCESS;
 
 error:
     H5E_BEGIN_TRY
@@ -166,14 +174,10 @@ error:
     }
     H5E_END_TRY
 
-    if (atts)
-        free(atts);
-    if (atts_res)
-        free(atts_res);
-    if (data)
-        free(data);
-    if (data_res)
-        free(data_res);
+    free(atts);
+    free(atts_res);
+    free(data);
+    free(data_res);
 
-    return 1;
+    return EXIT_FAILURE;
 }

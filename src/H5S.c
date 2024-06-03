@@ -329,7 +329,6 @@ H5Screate(H5S_class_t type)
     hid_t  ret_value;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("i", "Sc", type);
 
     /* Check args */
     if (type <= H5S_NO_CLASS || type > H5S_NULL) /* don't allow complex dataspace yet */
@@ -432,7 +431,6 @@ H5Sclose(hid_t space_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", space_id);
 
     /* Check args */
     if (NULL == H5I_object_verify(space_id, H5I_DATASPACE))
@@ -465,7 +463,6 @@ H5Scopy(hid_t space_id)
     hid_t  ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", space_id);
 
     /* Check args */
     if (NULL == (src = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -504,7 +501,6 @@ H5Sextent_copy(hid_t dst_id, hid_t src_id)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", dst_id, src_id);
 
     /* Check args */
     if (NULL == (src = (H5S_t *)H5I_object_verify(src_id, H5I_DATASPACE)))
@@ -615,6 +611,10 @@ H5S__extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src, bool copy_max)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy shared information");
 
 done:
+    if (ret_value < 0)
+        if (dst->size)
+            dst->size = H5FL_ARR_FREE(hsize_t, dst->size);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__extent_copy_real() */
 
@@ -712,7 +712,6 @@ H5Sget_simple_extent_npoints(hid_t space_id)
     hssize_t ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("Hs", "i", space_id);
 
     /* Check args */
     if (NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -802,7 +801,6 @@ H5Sget_simple_extent_ndims(hid_t space_id)
     int    ret_value = -1;
 
     FUNC_ENTER_API((-1))
-    H5TRACE1("Is", "i", space_id);
 
     /* Check args */
     if (NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -877,7 +875,6 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[] /*out*/, hsize_t maxdim
     int    ret_value = -1;
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Is", "i*h*h", space_id, dims, maxdims);
 
     /* Check args */
     if (NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -1124,7 +1121,6 @@ H5Sis_simple(hid_t space_id)
     htri_t ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "i", space_id);
 
     /* Check args and all the boring stuff. */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -1170,7 +1166,6 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/], con
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iIs*[a1]h*[a1]h", space_id, rank, dims, max);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -1219,7 +1214,8 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims, const hs
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    assert(rank <= H5S_MAX_RANK);
+    if (rank > H5S_MAX_RANK)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "dataspace rank too large: %u", rank);
 
     /* shift out of the previous state to a "simple" dataspace.  */
     if (H5S__extent_release(&space->extent) < 0)
@@ -1297,7 +1293,6 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/], const hsize_t maxdims[/
     hid_t  ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "Is*[a0]h*[a0]h", rank, dims, maxdims);
 
     /* Check arguments */
     if (rank < 0)
@@ -1386,7 +1381,6 @@ H5Sencode2(hid_t obj_id, void *buf, size_t *nalloc, hid_t fapl_id)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*x*zi", obj_id, buf, nalloc, fapl_id);
 
     /* Check argument and retrieve object */
     if (NULL == (dspace = (H5S_t *)H5I_object_verify(obj_id, H5I_DATASPACE)))
@@ -1495,7 +1489,6 @@ H5Sdecode(const void *buf)
     hid_t  ret_value;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "*x", buf);
 
     if (buf == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "empty buffer");
@@ -1592,6 +1585,30 @@ done:
 } /* end H5S_decode() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5S_get_simple_extent
+ *
+ * Purpose:     Internal function for retrieving the extent for a dataspace object
+ *
+ * Return:      Success:    Pointer to the extent for a dataspace (not copied)
+ *              Failure:    NULL
+ *
+ * Note:        This routine participates in the "Inlining C function pointers"
+ *              pattern, don't call it directly, use the appropriate macro
+ *              defined in H5Sprivate.h.
+ *
+ *-------------------------------------------------------------------------
+ */
+const H5S_extent_t *
+H5S_get_simple_extent(const H5S_t *space)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(space);
+
+    FUNC_LEAVE_NOAPI(&space->extent)
+} /* end H5S_get_simple_extent() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5S_get_simple_extent_type
  *
  * Purpose:     Internal function for retrieving the type of extent for a dataspace object
@@ -1638,7 +1655,6 @@ H5Sget_simple_extent_type(hid_t sid)
     H5S_class_t ret_value; /* Return value */
 
     FUNC_ENTER_API(H5S_NO_CLASS)
-    H5TRACE1("Sc", "i", sid);
 
     /* Check arguments */
     if (NULL == (space = (H5S_t *)H5I_object_verify(sid, H5I_DATASPACE)))
@@ -1671,7 +1687,6 @@ H5Sset_extent_none(hid_t space_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", space_id);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -1820,7 +1835,6 @@ H5Sextent_equal(hid_t space1_id, hid_t space2_id)
     htri_t       ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("t", "ii", space1_id, space2_id);
 
     /* check args */
     if (NULL == (ds1 = (const H5S_t *)H5I_object_verify(space1_id, H5I_DATASPACE)) ||

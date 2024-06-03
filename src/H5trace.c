@@ -1657,12 +1657,20 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5T_NATIVE_LLONG");
                                 else if (obj == H5T_NATIVE_ULLONG_g)
                                     H5RS_acat(rs, "H5T_NATIVE_ULLONG");
+#ifdef H5_HAVE__FLOAT16
+                                else if (obj == H5T_NATIVE_FLOAT16_g)
+                                    H5RS_acat(rs, "H5T_NATIVE_FLOAT16");
+#endif
                                 else if (obj == H5T_NATIVE_FLOAT_g)
                                     H5RS_acat(rs, "H5T_NATIVE_FLOAT");
                                 else if (obj == H5T_NATIVE_DOUBLE_g)
                                     H5RS_acat(rs, "H5T_NATIVE_DOUBLE");
                                 else if (obj == H5T_NATIVE_LDOUBLE_g)
                                     H5RS_acat(rs, "H5T_NATIVE_LDOUBLE");
+                                else if (obj == H5T_IEEE_F16BE_g)
+                                    H5RS_acat(rs, "H5T_IEEE_F16BE");
+                                else if (obj == H5T_IEEE_F16LE_g)
+                                    H5RS_acat(rs, "H5T_IEEE_F16LE");
                                 else if (obj == H5T_IEEE_F32BE_g)
                                     H5RS_acat(rs, "H5T_IEEE_F32BE");
                                 else if (obj == H5T_IEEE_F32LE_g)

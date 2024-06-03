@@ -427,6 +427,11 @@ print_native_type(h5tools_str_t *buffer, hid_t type, int ind)
         else if (H5Tequal(type, H5T_NATIVE_ULLONG) == true) {
             h5tools_str_append(buffer, "native unsigned long long");
         }
+#ifdef H5_HAVE__FLOAT16
+        else if (H5Tequal(type, H5T_NATIVE_FLOAT16) == true) {
+            h5tools_str_append(buffer, "native _Float16");
+        }
+#endif
         else if (H5Tequal(type, H5T_NATIVE_FLOAT) == true) {
             h5tools_str_append(buffer, "native float");
         }
@@ -551,7 +556,13 @@ print_native_type(h5tools_str_t *buffer, hid_t type, int ind)
 static bool
 print_ieee_type(h5tools_str_t *buffer, hid_t type, int ind)
 {
-    if (H5Tequal(type, H5T_IEEE_F32BE) == true) {
+    if (H5Tequal(type, H5T_IEEE_F16BE) == true) {
+        h5tools_str_append(buffer, "IEEE 16-bit big-endian float");
+    }
+    else if (H5Tequal(type, H5T_IEEE_F16LE) == true) {
+        h5tools_str_append(buffer, "IEEE 16-bit little-endian float");
+    }
+    else if (H5Tequal(type, H5T_IEEE_F32BE) == true) {
         h5tools_str_append(buffer, "IEEE 32-bit big-endian float");
     }
     else if (H5Tequal(type, H5T_IEEE_F32LE) == true) {
@@ -2178,9 +2189,9 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
                 struct tm *tm;
 
                 if (simple_output_g)
-                    tm = HDgmtime(&(oinfo->mtime));
+                    tm = gmtime(&(oinfo->mtime));
                 else
-                    tm = HDlocaltime(&(oinfo->mtime));
+                    tm = localtime(&(oinfo->mtime));
                 if (tm) {
                     strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
                     h5tools_str_reset(&buffer);

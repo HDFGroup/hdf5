@@ -23,8 +23,13 @@ Implementation requirements were to:
 \li Not have a reserved process, as this might interfere with parallel algorithms.
 \li Not spawn any processes, as this is not even commonly supported now.
 
-The following shows the Parallel HDF5 implementation layers.
+The following shows the Parallel HDF5 implementation layers:
 
+<table>
+<tr><td>
+\image html pimplayer.gif
+</td></tr>
+</table>
 
 \subsection subsec_pintro_prog Parallel Programming with HDF5
 This tutorial assumes that you are somewhat familiar with parallel programming with MPI (Message Passing Interface).
@@ -145,8 +150,8 @@ Following is example code for creating an access template in HDF5:
 \endcode
 
 The following example programs create an HDF5 file using Parallel HDF5:
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/C/H5PAR/ph5_file_create.c">C: file_create.c</a>
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/FORTRAN/H5PAR/ph5_f90_file_create.F90">F90: file_create.F90</a>
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_file_create.c">C: file_create.c</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_file_create.F90">F90: file_create.F90</a>
 
 
 \subsection subsec_pintro_create_dset Creating and Accessing a Dataset with PHDF5
@@ -226,8 +231,8 @@ The following code demonstrates a collective write using Parallel HDF5:
 \endcode
 
 The following example programs create an HDF5 dataset using Parallel HDF5:
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/C/H5PAR/ph5_dataset.c">C: dataset.c</a>
-<a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/FORTRAN/H5PAR/ph5_f90_dataset.F90">F90: dataset.F90</a>
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_dataset.c">C: dataset.c</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_dataset.F90">F90: dataset.F90</a>
 
 
 \subsubsection subsec_pintro_hyperslabs Hyperslabs
@@ -263,7 +268,6 @@ HDF5 by contiguous hyperslab, by regularly spaced data in a column/row, by patte
 </td>
 </tr>
 </table>
-
 
 <hr>
 Navigate back: \ref index "Main" / \ref GettingStarted

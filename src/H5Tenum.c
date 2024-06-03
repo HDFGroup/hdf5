@@ -47,7 +47,6 @@ H5Tenum_create(hid_t parent_id)
     hid_t  ret_value;     /*return value			*/
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", parent_id);
 
     /* Check args */
     if (NULL == (parent = (H5T_t *)H5I_object_verify(parent_id, H5I_DATATYPE)) ||
@@ -67,15 +66,14 @@ done:
 } /* end H5Tenum_create() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__enum_create
+ * Function:    H5T__enum_create
  *
- * Purpose:	Private function for H5Tenum_create.  Create a new
+ * Purpose:     Private function for H5Tenum_create.  Create a new
  *              enumeration data type based on the specified
- *		TYPE, which must be an integer type.
+ *              TYPE, which must be an integer type.
  *
- * Return:	Success:	new enumeration data type
- *
- *		Failure:        NULL
+ * Return:      Success:    new enumeration data type
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -91,9 +89,11 @@ H5T__enum_create(const H5T_t *parent)
     /* Build new type */
     if (NULL == (ret_value = H5T__alloc()))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    ret_value->shared->type   = H5T_ENUM;
-    ret_value->shared->parent = H5T_copy(parent, H5T_COPY_ALL);
-    assert(ret_value->shared->parent);
+    ret_value->shared->type = H5T_ENUM;
+
+    if (NULL == (ret_value->shared->parent = H5T_copy(parent, H5T_COPY_ALL)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy base datatype for enum");
+
     ret_value->shared->size = ret_value->shared->parent->shared->size;
 
 done:
@@ -123,7 +123,6 @@ H5Tenum_insert(hid_t type, const char *name, const void *value)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*s*x", type, name, value);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type, H5I_DATATYPE)))
@@ -222,7 +221,6 @@ H5Tget_member_value(hid_t type, unsigned membno, void *value /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iIu*x", type, membno, value);
 
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
@@ -289,7 +287,6 @@ H5Tenum_nameof(hid_t type, const void *value, char *name /*out*/, size_t size)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*x*sz", type, value, name, size);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type, H5I_DATATYPE)))
@@ -420,7 +417,6 @@ H5Tenum_valueof(hid_t type, const char *name, void *value /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*s*x", type, name, value);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type, H5I_DATATYPE)))

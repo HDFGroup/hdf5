@@ -34,14 +34,14 @@ srcdir=@srcdir@
 utils_testdir=@abs_top_builddir@/@H5_UTILS_TEST_BUILDDIR@
 testdir=@abs_top_builddir@/@H5_TEST_BUILDDIR@
 
-# Check to see if the VFD specified by the HDF5_DRIVER environment variable
-# supports SWMR.
+# Check to see if the VFD specified by the HDF5_DRIVER or HDF5_TEST_DRIVER
+# environment variable supports SWMR.
 $utils_testdir/swmr_check_compat_vfd
 rc=$?
 if [[ $rc != 0 ]] ; then
     echo
-    echo "The VFD specified by the HDF5_DRIVER environment variable"
-    echo "does not support SWMR"
+    echo "The VFD specified by the HDF5_DRIVER or HDF5_TEST_DRIVER"
+    echo "environment variable does not support SWMR."
     echo
     echo "SWMR use case tests skipped"
     echo

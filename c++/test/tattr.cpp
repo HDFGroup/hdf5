@@ -1406,17 +1406,23 @@ test_attr_dtype_shared(FileAccPropList &fapl)
     SUBTEST("Shared Datatypes with Attributes");
 
     try {
+        h5_stat_size_t empty_filesize        = 0; // Size of empty file
+        bool           is_default_vfd_compat = false;
+
         // Create a file
         H5File fid1(FILE_DTYPE, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
         // Close file
         fid1.close();
 
-        // Get size of file
-        h5_stat_size_t empty_filesize; // Size of empty file
-        empty_filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
-        if (empty_filesize < 0)
-            TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
+        h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &is_default_vfd_compat);
+
+        if (is_default_vfd_compat) {
+            // Get size of file
+            empty_filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
+            if (empty_filesize < 0)
+                TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
+        }
 
         // Open the file again
         fid1.openFile(FILE_DTYPE, H5F_ACC_RDWR);
@@ -1533,10 +1539,12 @@ test_attr_dtype_shared(FileAccPropList &fapl)
         // Close file
         fid1.close();
 
-        // Check size of file
-        filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
-        verify_val(static_cast<long>(filesize), static_cast<long>(empty_filesize), "Checking file size",
-                   __LINE__, __FILE__);
+        if (is_default_vfd_compat) {
+            // Check size of file
+            filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
+            verify_val(static_cast<long>(filesize), static_cast<long>(empty_filesize), "Checking file size",
+                       __LINE__, __FILE__);
+        }
 
         PASSED();
     } // end try block

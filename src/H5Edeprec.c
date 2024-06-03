@@ -86,7 +86,6 @@ H5Eget_major(H5E_major_t maj)
     char      *ret_value; /* Return value */
 
     FUNC_ENTER_API_NOCLEAR(NULL)
-    H5TRACE1("*s", "i", maj);
 
     /* Get the message object */
     if (NULL == (msg = (H5E_msg_t *)H5I_object_verify(maj, H5I_ERROR_MSG)))
@@ -135,7 +134,6 @@ H5Eget_minor(H5E_minor_t min)
     char      *ret_value; /* Return value */
 
     FUNC_ENTER_API_NOCLEAR(NULL)
-    H5TRACE1("*s", "i", min);
 
     /* Get the message object */
     if (NULL == (msg = (H5E_msg_t *)H5I_object_verify(min, H5I_ERROR_MSG)))
@@ -184,14 +182,29 @@ done:
 herr_t
 H5Epush1(const char *file, const char *func, unsigned line, H5E_major_t maj, H5E_minor_t min, const char *str)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    const char *tmp_file;            /* Copy of the file name */
+    const char *tmp_func;            /* Copy of the function name */
+    herr_t      ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE6("e", "*s*sIuii*s", file, func, line, maj, min, str);
+
+    /* Duplicate string information */
+    if (NULL == (tmp_file = strdup(file)))
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "can't duplicate file string");
+    if (NULL == (tmp_func = strdup(func)))
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "can't duplicate function string");
+
+    /* Increment refcount on non-library IDs */
+    if (maj < H5E_first_maj_id_g || maj > H5E_last_maj_id_g)
+        if (H5I_inc_ref(maj, false) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "can't increment major error ID");
+    if (min < H5E_first_min_id_g || min > H5E_last_min_id_g)
+        if (H5I_inc_ref(min, false) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "can't increment minor error ID");
 
     /* Push the error on the default error stack */
-    if (H5E__push_stack(NULL, file, func, line, H5E_ERR_CLS_g, maj, min, str) < 0)
+    if (H5E__push_stack(NULL, true, tmp_file, tmp_func, line, H5E_ERR_CLS_g, maj, min, str, NULL) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't push error on stack");
 
 done:
@@ -215,10 +228,9 @@ H5Eclear1(void)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE0("e", "");
 
     /* Clear the default error stack */
-    if (H5E_clear_stack(NULL) < 0)
+    if (H5E_clear_stack() < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack");
 
 done:
@@ -241,12 +253,11 @@ done:
 herr_t
 H5Eprint1(FILE *stream)
 {
-    H5E_t *estack;              /* Error stack to operate on */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5E_stack_t *estack;              /* Error stack to operate on */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    /*NO TRACE*/
 
     if (NULL == (estack = H5E__get_my_stack()))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
@@ -273,13 +284,12 @@ done:
 herr_t
 H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client_data)
 {
-    H5E_t        *estack;              /* Error stack to operate on */
+    H5E_stack_t  *estack;              /* Error stack to operate on */
     H5E_walk_op_t walk_op;             /* Error stack walking callback */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    /*NO TRACE*/
 
     if (NULL == (estack = H5E__get_my_stack()))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
@@ -310,12 +320,11 @@ done:
 herr_t
 H5Eget_auto1(H5E_auto1_t *func /*out*/, void **client_data /*out*/)
 {
-    H5E_t        *estack;              /* Error stack to operate on */
+    H5E_stack_t  *estack;              /* Error stack to operate on */
     H5E_auto_op_t auto_op;             /* Error stack operator */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "*Ea**x", func, client_data);
 
     /* Retrieve default error stack */
     if (NULL == (estack = H5E__get_my_stack()))
@@ -359,13 +368,12 @@ done:
 herr_t
 H5Eset_auto1(H5E_auto1_t func, void *client_data)
 {
-    H5E_t        *estack;              /* Error stack to operate on */
+    H5E_stack_t  *estack;              /* Error stack to operate on */
     H5E_auto_op_t auto_op;             /* Error stack operator */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE2("e", "Ea*x", func, client_data);
 
     if (NULL == (estack = H5E__get_my_stack()))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");

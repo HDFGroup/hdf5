@@ -1694,6 +1694,7 @@ main(void)
             GOERROR;
         if (h5repack(FNAME4, FNAME4OUT, &pack_options) < 0)
             GOERROR;
+        memset(&file_stat, 0, sizeof(h5_stat_t));
         if (HDstat(FNAME4OUT, &file_stat) < 0)
             GOERROR;
         fsize1 = file_stat.st_size;
@@ -1711,6 +1712,7 @@ main(void)
         if (h5repack_verify(FNAME4, FNAME4OUT, &pack_options) <= 0)
             GOERROR;
         /* record the file size of the output file */
+        memset(&file_stat, 0, sizeof(h5_stat_t));
         if (HDstat(FNAME4OUT, &file_stat) < 0)
             GOERROR;
         fsize2 = file_stat.st_size;

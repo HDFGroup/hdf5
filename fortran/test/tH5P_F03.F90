@@ -47,7 +47,7 @@ MODULE test_genprop_cls_cb1_mod
 
 CONTAINS
 
-  INTEGER FUNCTION test_genprop_cls_cb1_f(list_id, create_data ) bind(C)
+  INTEGER(KIND=C_INT) FUNCTION test_genprop_cls_cb1_f(list_id, create_data ) bind(C)
 
     IMPLICIT NONE
 

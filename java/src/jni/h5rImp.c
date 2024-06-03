@@ -12,7 +12,7 @@
 
 /*
  *  For details of the HDF libraries, see the HDF Documentation at:
- *    http://hdfgroup.org/HDF5/doc/
+ *    https://portal.hdfgroup.org/documentation/index.html
  *
  */
 #ifdef __cplusplus
@@ -203,6 +203,12 @@ Java_hdf_hdf5lib_H5_H5Rdestroy(JNIEnv *env, jclass clss, jbyteArray ref)
 
     if ((status = H5Rdestroy(&loc_ref)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    /* Reset buffer to 0 to be safe. H5Rdestroy does this, but
+     * only on our temporary reference object that we copied
+     * into for alignment reasons.
+     */
+    memset(refBuf, 0, H5R_REF_BUF_SIZE);
 
 done:
     if (refBuf)

@@ -145,8 +145,9 @@ typedef struct H5A_bt2_ud_ins_t {
 
 /* Data structure to hold table of attributes for an object */
 typedef struct {
-    size_t  nattrs; /* # of attributes in table */
-    H5A_t **attrs;  /* Pointer to array of attribute pointers */
+    size_t  num_attrs; /* Curr. # of attributes in table */
+    size_t  max_attrs; /* Max. # of attributes in table */
+    H5A_t **attrs;     /* Pointer to array of attribute pointers */
 } H5A_attr_table_t;
 
 /*****************************/

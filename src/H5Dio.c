@@ -43,7 +43,8 @@
 static herr_t H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_io_info_t *dset_info,
                                H5D_io_info_t *io_info);
 static herr_t H5D__dset_ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t *store);
-static herr_t H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, H5T_t *mem_type);
+static herr_t H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info,
+                                 const H5T_t *mem_type);
 static herr_t H5D__typeinfo_init_phase2(H5D_io_info_t *io_info);
 static herr_t H5D__typeinfo_init_phase3(H5D_io_info_t *io_info);
 #ifdef H5_HAVE_PARALLEL
@@ -394,8 +395,12 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
 
             /* Invoke correct "high level" I/O routine */
-            if ((*dset_info[i].io_ops.multi_read)(&io_info, &dset_info[i]) < 0)
+            if ((*dset_info[i].io_ops.multi_read)(&io_info, &dset_info[i]) < 0) {
+                /* Reset metadata tagging */
+                H5AC_tag(prev_tag, NULL);
+
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
+            }
 
             /* Reset metadata tagging */
             H5AC_tag(prev_tag, NULL);
@@ -1037,7 +1042,7 @@ H5D__dset_ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t 
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, H5T_t *mem_type)
+H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, const H5T_t *mem_type)
 {
     H5D_type_info_t  *type_info;
     const H5D_t      *dset;

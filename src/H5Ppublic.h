@@ -46,56 +46,182 @@
  * The library's property list classes
  */
 
-#define H5P_ROOT             (H5OPEN H5P_CLS_ROOT_ID_g)
-#define H5P_OBJECT_CREATE    (H5OPEN H5P_CLS_OBJECT_CREATE_ID_g)
-#define H5P_FILE_CREATE      (H5OPEN H5P_CLS_FILE_CREATE_ID_g)
-#define H5P_FILE_ACCESS      (H5OPEN H5P_CLS_FILE_ACCESS_ID_g)
-#define H5P_DATASET_CREATE   (H5OPEN H5P_CLS_DATASET_CREATE_ID_g)
-#define H5P_DATASET_ACCESS   (H5OPEN H5P_CLS_DATASET_ACCESS_ID_g)
-#define H5P_DATASET_XFER     (H5OPEN H5P_CLS_DATASET_XFER_ID_g)
-#define H5P_FILE_MOUNT       (H5OPEN H5P_CLS_FILE_MOUNT_ID_g)
-#define H5P_GROUP_CREATE     (H5OPEN H5P_CLS_GROUP_CREATE_ID_g)
-#define H5P_GROUP_ACCESS     (H5OPEN H5P_CLS_GROUP_ACCESS_ID_g)
-#define H5P_DATATYPE_CREATE  (H5OPEN H5P_CLS_DATATYPE_CREATE_ID_g)
-#define H5P_DATATYPE_ACCESS  (H5OPEN H5P_CLS_DATATYPE_ACCESS_ID_g)
-#define H5P_MAP_CREATE       (H5OPEN H5P_CLS_MAP_CREATE_ID_g)
-#define H5P_MAP_ACCESS       (H5OPEN H5P_CLS_MAP_ACCESS_ID_g)
-#define H5P_STRING_CREATE    (H5OPEN H5P_CLS_STRING_CREATE_ID_g)
+/**
+ * Property list class root, is not user-accessible
+ */
+#define H5P_ROOT (H5OPEN H5P_CLS_ROOT_ID_g)
+/**
+ * Object creation property list class, is not user-accessible
+ */
+#define H5P_OBJECT_CREATE (H5OPEN H5P_CLS_OBJECT_CREATE_ID_g)
+/**
+ * File creation property list class
+ */
+#define H5P_FILE_CREATE (H5OPEN H5P_CLS_FILE_CREATE_ID_g)
+/**
+ * File access property list class
+ */
+#define H5P_FILE_ACCESS (H5OPEN H5P_CLS_FILE_ACCESS_ID_g)
+/**
+ * Dataset creation property list class
+ */
+#define H5P_DATASET_CREATE (H5OPEN H5P_CLS_DATASET_CREATE_ID_g)
+/**
+ * Dataset access property list class
+ */
+#define H5P_DATASET_ACCESS (H5OPEN H5P_CLS_DATASET_ACCESS_ID_g)
+/**
+ * Dataset transfer property list class
+ */
+#define H5P_DATASET_XFER (H5OPEN H5P_CLS_DATASET_XFER_ID_g)
+/**
+ * File mount property list class
+ */
+#define H5P_FILE_MOUNT (H5OPEN H5P_CLS_FILE_MOUNT_ID_g)
+/**
+ * Group creation property list class
+ */
+#define H5P_GROUP_CREATE (H5OPEN H5P_CLS_GROUP_CREATE_ID_g)
+/**
+ * Group access property list class
+ */
+#define H5P_GROUP_ACCESS (H5OPEN H5P_CLS_GROUP_ACCESS_ID_g)
+/**
+ * Datatype creation property list class
+ */
+#define H5P_DATATYPE_CREATE (H5OPEN H5P_CLS_DATATYPE_CREATE_ID_g)
+/**
+ * Datatype access property list class
+ */
+#define H5P_DATATYPE_ACCESS (H5OPEN H5P_CLS_DATATYPE_ACCESS_ID_g)
+/**
+ * Map creation property list class
+ */
+#define H5P_MAP_CREATE (H5OPEN H5P_CLS_MAP_CREATE_ID_g)
+/**
+ * Map access property list class
+ */
+#define H5P_MAP_ACCESS (H5OPEN H5P_CLS_MAP_ACCESS_ID_g)
+/**
+ * String creation property list class, is not user-accessible
+ */
+#define H5P_STRING_CREATE (H5OPEN H5P_CLS_STRING_CREATE_ID_g)
+/**
+ * Attribute creation property list class
+ */
 #define H5P_ATTRIBUTE_CREATE (H5OPEN H5P_CLS_ATTRIBUTE_CREATE_ID_g)
+/**
+ * Attribute access property list class
+ */
 #define H5P_ATTRIBUTE_ACCESS (H5OPEN H5P_CLS_ATTRIBUTE_ACCESS_ID_g)
-#define H5P_OBJECT_COPY      (H5OPEN H5P_CLS_OBJECT_COPY_ID_g)
-#define H5P_LINK_CREATE      (H5OPEN H5P_CLS_LINK_CREATE_ID_g)
-#define H5P_LINK_ACCESS      (H5OPEN H5P_CLS_LINK_ACCESS_ID_g)
-#define H5P_VOL_INITIALIZE   (H5OPEN H5P_CLS_VOL_INITIALIZE_ID_g)
+/**
+ * Object copy property list class
+ */
+#define H5P_OBJECT_COPY (H5OPEN H5P_CLS_OBJECT_COPY_ID_g)
+/**
+ * Link creation property list class
+ */
+#define H5P_LINK_CREATE (H5OPEN H5P_CLS_LINK_CREATE_ID_g)
+/**
+ * Link access property list class
+ */
+#define H5P_LINK_ACCESS (H5OPEN H5P_CLS_LINK_ACCESS_ID_g)
+/**
+ * VOL initialization property list class
+ */
+#define H5P_VOL_INITIALIZE (H5OPEN H5P_CLS_VOL_INITIALIZE_ID_g)
+/**
+ * Reference access property list class
+ */
 #define H5P_REFERENCE_ACCESS (H5OPEN H5P_CLS_REFERENCE_ACCESS_ID_g)
 
 /*
  * The library's default property lists
  */
-#define H5P_FILE_CREATE_DEFAULT      (H5OPEN H5P_LST_FILE_CREATE_ID_g)
-#define H5P_FILE_ACCESS_DEFAULT      (H5OPEN H5P_LST_FILE_ACCESS_ID_g)
-#define H5P_DATASET_CREATE_DEFAULT   (H5OPEN H5P_LST_DATASET_CREATE_ID_g)
-#define H5P_DATASET_ACCESS_DEFAULT   (H5OPEN H5P_LST_DATASET_ACCESS_ID_g)
-#define H5P_DATASET_XFER_DEFAULT     (H5OPEN H5P_LST_DATASET_XFER_ID_g)
-#define H5P_FILE_MOUNT_DEFAULT       (H5OPEN H5P_LST_FILE_MOUNT_ID_g)
-#define H5P_GROUP_CREATE_DEFAULT     (H5OPEN H5P_LST_GROUP_CREATE_ID_g)
-#define H5P_GROUP_ACCESS_DEFAULT     (H5OPEN H5P_LST_GROUP_ACCESS_ID_g)
-#define H5P_DATATYPE_CREATE_DEFAULT  (H5OPEN H5P_LST_DATATYPE_CREATE_ID_g)
-#define H5P_DATATYPE_ACCESS_DEFAULT  (H5OPEN H5P_LST_DATATYPE_ACCESS_ID_g)
-#define H5P_MAP_CREATE_DEFAULT       (H5OPEN H5P_LST_MAP_CREATE_ID_g)
-#define H5P_MAP_ACCESS_DEFAULT       (H5OPEN H5P_LST_MAP_ACCESS_ID_g)
+/**
+ * File creation default property list
+ */
+#define H5P_FILE_CREATE_DEFAULT (H5OPEN H5P_LST_FILE_CREATE_ID_g)
+/**
+ * File access default property list
+ */
+#define H5P_FILE_ACCESS_DEFAULT (H5OPEN H5P_LST_FILE_ACCESS_ID_g)
+/**
+ * Dataset creation default property list
+ */
+#define H5P_DATASET_CREATE_DEFAULT (H5OPEN H5P_LST_DATASET_CREATE_ID_g)
+/**
+ * Dataset access default property list
+ */
+#define H5P_DATASET_ACCESS_DEFAULT (H5OPEN H5P_LST_DATASET_ACCESS_ID_g)
+/**
+ * Dataset transfer default property list
+ */
+#define H5P_DATASET_XFER_DEFAULT (H5OPEN H5P_LST_DATASET_XFER_ID_g)
+/**
+ * File mount default property list
+ */
+#define H5P_FILE_MOUNT_DEFAULT (H5OPEN H5P_LST_FILE_MOUNT_ID_g)
+/**
+ * Group creation default property list
+ */
+#define H5P_GROUP_CREATE_DEFAULT (H5OPEN H5P_LST_GROUP_CREATE_ID_g)
+/**
+ * Group access default property list
+ */
+#define H5P_GROUP_ACCESS_DEFAULT (H5OPEN H5P_LST_GROUP_ACCESS_ID_g)
+/**
+ * Datytype creation default property list
+ */
+#define H5P_DATATYPE_CREATE_DEFAULT (H5OPEN H5P_LST_DATATYPE_CREATE_ID_g)
+/**
+ * Datytype access default property list
+ */
+#define H5P_DATATYPE_ACCESS_DEFAULT (H5OPEN H5P_LST_DATATYPE_ACCESS_ID_g)
+/**
+ * Map creation default property list
+ */
+#define H5P_MAP_CREATE_DEFAULT (H5OPEN H5P_LST_MAP_CREATE_ID_g)
+/**
+ * Map access default property list
+ */
+#define H5P_MAP_ACCESS_DEFAULT (H5OPEN H5P_LST_MAP_ACCESS_ID_g)
+/**
+ * Attribute creation default property list
+ */
 #define H5P_ATTRIBUTE_CREATE_DEFAULT (H5OPEN H5P_LST_ATTRIBUTE_CREATE_ID_g)
+/**
+ * Attribute access default property list
+ */
 #define H5P_ATTRIBUTE_ACCESS_DEFAULT (H5OPEN H5P_LST_ATTRIBUTE_ACCESS_ID_g)
-#define H5P_OBJECT_COPY_DEFAULT      (H5OPEN H5P_LST_OBJECT_COPY_ID_g)
-#define H5P_LINK_CREATE_DEFAULT      (H5OPEN H5P_LST_LINK_CREATE_ID_g)
-#define H5P_LINK_ACCESS_DEFAULT      (H5OPEN H5P_LST_LINK_ACCESS_ID_g)
-#define H5P_VOL_INITIALIZE_DEFAULT   (H5OPEN H5P_LST_VOL_INITIALIZE_ID_g)
+/**
+ * Object copy default property list
+ */
+#define H5P_OBJECT_COPY_DEFAULT (H5OPEN H5P_LST_OBJECT_COPY_ID_g)
+/**
+ * Link creation default property list
+ */
+#define H5P_LINK_CREATE_DEFAULT (H5OPEN H5P_LST_LINK_CREATE_ID_g)
+/**
+ * Link access default property list
+ */
+#define H5P_LINK_ACCESS_DEFAULT (H5OPEN H5P_LST_LINK_ACCESS_ID_g)
+/**
+ * VOL initialization default property list
+ */
+#define H5P_VOL_INITIALIZE_DEFAULT (H5OPEN H5P_LST_VOL_INITIALIZE_ID_g)
+/**
+ * Reference access default property list
+ */
 #define H5P_REFERENCE_ACCESS_DEFAULT (H5OPEN H5P_LST_REFERENCE_ACCESS_ID_g)
-
-/* Common creation order flags (for links in groups and attributes on objects) */
+/**
+ * Attribute creation order is tracked but not necessarily indexed
+ */
 #define H5P_CRT_ORDER_TRACKED 0x0001
+/**
+ * Attribute creation order is indexed (requires #H5P_CRT_ORDER_TRACKED)
+ */
 #define H5P_CRT_ORDER_INDEXED 0x0002
-
 /**
  * Default value of type \ref hid_t for all property list classes
  */
@@ -192,6 +318,9 @@ typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
  *
  * \details The H5P_prp_cb1_t() function describes the parameters used by the
  *          property create, copy and close callback functions.
+ *
+ * \since 1.8.0
+ *
  */
 typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
 //! <!-- [H5P_prp_cb1_t_snip] -->
@@ -208,6 +337,9 @@ typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
  *
  * \details The H5P_prp_cb2_t() function describes the parameters used by the
  *          property set, copy and delete callback functions.
+ *
+ * \since 1.8.0
+ *
  */
 typedef herr_t (*H5P_prp_cb2_t)(hid_t prop_id, const char *name, size_t size, void *value);
 //! <!-- [H5P_prp_cb2_t_snip] -->
@@ -257,6 +389,9 @@ typedef H5P_prp_cb1_t H5P_prp_copy_func_t;
  *         \c value1 and \c value2 are equal.
  *
  * \see H5Pregister(), H5Pinsert()
+ *
+ * \since 1.8.0
+ *
  */
 typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2, size_t size);
 //! <!-- [H5P_prp_compare_func_t_snip] -->
@@ -747,7 +882,7 @@ H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name, H5P_cls_create_func
  *
  * \param[in] buf Buffer holding the encoded property list
  *
- * \return \hid_tv{object}
+ * \return \hid_ti{object}
  *
  * \details Given a binary property list description in a buffer, H5Pdecode()
  *          reconstructs the HDF5 property list and returns an identifier
@@ -3573,7 +3708,7 @@ H5_DLL herr_t H5Pget_fclose_degree(hid_t fapl_id, H5F_close_degree_t *degree);
  * \see H5LTopen_file_image(), H5Fget_file_image(), H5Pset_file_image(),
  *      H5Pset_file_image_callbacks(), H5Pget_file_image_callbacks(),
  *      \ref H5FD_file_image_callbacks_t, \ref H5FD_file_image_op_t,
- *      <a href="https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations">
+ *      <a href="https://\DOCURL/advanced_topics/file_image_ops.html">
  *      HDF5 File Image Operations</a>.
  *
  *
@@ -3613,7 +3748,7 @@ H5_DLL herr_t H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_l
  * \see H5LTopen_file_image(), H5Fget_file_image(), H5Pset_file_image(),
  *      H5Pset_file_image_callbacks(), H5Pget_file_image_callbacks(),
  *      \ref H5FD_file_image_callbacks_t, \ref H5FD_file_image_op_t,
- *      <a href="https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations">
+ *      <a href="https://\DOCURL/advanced_topics/file_image_ops.html">
  *      HDF5 File Image Operations</a>.
  *
  * \since 1.8.9
@@ -4557,7 +4692,7 @@ H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);
  *          This function is part of the file image
  *          operations feature set. It is highly recommended to study the guide
  *          [<em>HDF5 File Image Operations</em>]
- *          (https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations
+ *          (https://\DOCURL/advanced_topics/file_image_ops.html
  *          ) before using this feature set. See the “See Also” section below
  *          for links to other elements of HDF5 file image operations.
  *
@@ -4569,9 +4704,9 @@ H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);
  *    \li H5Pget_file_image_callbacks()
  *
  *    \li [HDF5 File Image Operations]
- *        (https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations)
+ *        (https://\DOCURL/advanced_topics/file_image_ops.html)
  *        in [Advanced Topics in HDF5]
- *        (https://portal.hdfgroup.org/display/HDF5/Advanced+Topics+in+HDF5)
+ *        (https://\DOCURL/advanced_topics_list.html)
  *
  *    \li Within H5Pset_file_image_callbacks():
  *    \li Callback #H5FD_file_image_callbacks_t
@@ -4594,7 +4729,7 @@ H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
  *            **Recommended Reading:** This function is part of the file
  *            image operations feature set. It is highly recommended to study
  *            the guide [HDF5 File Image Operations]
- *            (https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations
+ *            (https://\DOCURL/advanced_topics/file_image_ops.html
  *            ) before using this feature set. See the “See Also” section below
  *            for links to other elements of HDF5 file image operations.
  *
@@ -4854,131 +4989,111 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *           </tr>
  *           <tr>
  *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
- *                \p high=#H5F_LIBVER_V18</td>
+ *                \p high=<any other version but not #H5F_LIBVER_LATEST></td>
  *            <td>
  *             \li The library will create objects with the earliest
  *                 possible format versions.
  *             \li The library will allow objects to be created with the
- *                 latest format versions available to library release 1.8.x.
+ *                 latest format versions available to library release
+ *                 specified in the \p high value.
  *             \li API calls that create objects or features that are
- *                 available to versions of the library greater than 1.8.x
- *                 release will fail.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
- *                \p high=#H5F_LIBVER_V110</td>
- *            <td>
- *             \li The library will create objects with the earliest possible
- *                 format versions.
- *             \li The library will allow objects to be created with the latest
- *                 format versions available to library release 1.10.x.
- *             \li API calls that create objects or features that are
- *                 available to versions of the library greater than 1.10.x
- *                 release will fail.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
- *                \p high=#H5F_LIBVER_V112</td>
- *            <td>
- *             \li The library will create objects with the earliest possible
- *                 format versions.
- *             \li The library will allow objects to be created with the latest
- *                 format versions available to library release 1.12.x.
- *             \li API calls that create objects or features that are
- *                 available to versions of the library greater than 1.12.x
- *                 release will fail.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
- *                \p high=#H5F_LIBVER_V114</td>
- *            <td>
- *             \li The library will create objects with the earliest possible
- *                 format versions.
- *             \li The library will allow objects to be created with the latest
- *                 format versions available to library release 1.14.x.
- *             \li API calls that create objects or features that are
- *                 available to versions of the library greater than 1.14.x
- *                 release will fail.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
- *                \p high=#H5F_LIBVER_V116</td>
- *            <td>
- *             \li The library will create objects with the earliest possible
- *                 format versions.
- *             \li The library will allow objects to be created with the latest
- *                 format versions available to library release 1.16.x.  See
- *                 note *H5F_LIBVER_LATEST* below the table.
- *             \li This is the library default setting and provides the greatest
- *                 format compatibility.</td>
+ *                 available to versions of the library greater than the
+ *                 specified version in \p high will fail.</td>
  *           </tr>
  *           <tr>
  *            <td>\p low=#H5F_LIBVER_V18<br />
- *                \p high=#H5F_LIBVER_V18</td>
+ *                \p high=<any version higher than \p low but not #H5F_LIBVER_LATEST></td>
  *            <td>
  *             \li The library will create objects with the latest format
  *                 versions available to library release 1.8.x.
  *             \li The library will allow objects to be created with the latest
- *                 format versions available to library release 1.8.x.
+ *                 format versions available to library release specified
+ *                 in the \p high value.
+ *             \li API calls that create objects or features that are
+ *                 available to versions of the library greater than the
+ *                 specified version in \p high will fail.
+ *             \li Earlier versions of the library may not be able to access
+ *                 objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V110<br />
+ *                \p high=<any version higher than \p low but not #H5F_LIBVER_LATEST></td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.10.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release specified
+ *                  in the \p high value.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than version specified in
+ *                  \p high will fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V112<br />
+ *                \p high=<any version higher than \p low but not #H5F_LIBVER_LATEST></td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.12.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release specified
+ *                  in the \p high value.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than version specified in
+ *                  \p high will fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V114<br />
+ *                \p high=<any version higher than \p low but not #H5F_LIBVER_LATEST></td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.14.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release specified
+ *                  in the \p high value.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than version specified in
+ *                  \p high will fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=high </td>
+ *            <td>
+ *             \li The library will create objects with the latest format
+ *                 versions available to library release specified.
  *             \li The objects written with this setting may be
  *                 accessible to a smaller range of library versions than
  *                 would be the case if low is set to #H5F_LIBVER_EARLIEST.
  *             \li API calls that create objects or features that are available
- *                 to versions of the library greater than 1.8.x release will
- *                 fail.
- *             \li Earlier versions of the library may not be able to access
- *                 objects created with this setting.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_V18<br />
- *                \p high=#H5F_LIBVER_V110</td>
- *            <td>
- *             \li The library will create objects with the latest format
- *                 versions available to library release 1.8.x.
- *             \li The library will allow objects to be created with the latest
- *                 format versions available to library release 1.10.x.
- *             \li API calls that create objects or features that are
- *                 available to versions of the library greater than 1.10.x
+ *                 to versions of the library greater than the specified
  *                 release will fail.
  *             \li Earlier versions of the library may not be able to access
  *                 objects created with this setting.</td>
  *           </tr>
  *           <tr>
- *            <td>\p low=#H5F_LIBVER_V18<br />
- *                \p high=#H5F_LIBVER_V112</td>
+ *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
+ *                \p high=#H5F_LIBVER_LATEST</td>
  *            <td>
- *             \li The library will create objects with the latest format
- *                 versions available to library release 1.8.x.
+ *             \li The library will create objects with the earliest possible
+ *                 format versions.
  *             \li The library will allow objects to be created with the latest
- *                 format versions available to library release 1.12.x.
- *             \li API calls that create objects or features that are
- *                 available to versions of the library greater than 1.12.x
- *                 release will fail.
- *             \li Earlier versions of the library may not be able to access
- *                 objects created with this setting.</td>
+ *                 format versions available to the latest release.  See
+ *                 note #H5F_LIBVER_LATEST below the table.
+ *             \li This is the library default setting and provides the greatest
+ *                 format compatibility.</td>
  *           </tr>
  *           <tr>
- *            <td>\p low=#H5F_LIBVER_V18<br />
- *                \p high=#H5F_LIBVER_V114</td>
+ *            <td>\p low=<any version lower than \p high><br/>
+ *                \p high=#H5F_LIBVER_LATEST</td>
  *            <td>
  *             \li The library will create objects with the latest format
- *                 versions available to library release 1.8.x.
+ *                 versions available to library release \p low.
  *             \li The library will allow objects to be created with the latest
- *                 format versions available to library release 1.14.x.
- *             \li API calls that create objects or features that are
- *                 available to versions of the library greater than 1.14.x
- *                 release will fail.
- *             \li Earlier versions of the library may not be able to access
- *                 objects created with this setting.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_V18<br />
- *                \p high=#H5F_LIBVER_V116</td>
- *            <td>
- *             \li The library will create objects with the latest format
- *                 versions available to library release 1.8.x.
- *             \li The library will allow objects to be created with the latest
- *                 format versions available to library release 1.16.x.  See
+ *                 format versions available to the latest release.  See
  *                 note *H5F_LIBVER_LATEST* below the table.
  *             \li This setting allows users to take advantage of the latest
  *                 features and performance enhancements in the library.
@@ -4986,148 +5101,13 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *                 objects created with this setting.</td>
  *           </tr>
  *           <tr>
- *            <td>\p low=#H5F_LIBVER_V110<br />
- *                \p high=#H5F_LIBVER_V110</td>
+ *            <td>\p low=#H5F_LIBVER_LATEST<br />
+ *                \p high=#H5F_LIBVER_LATEST</td>
  *             <td>
  *              \li The library will create objects with the latest format
- *                  versions available to library release 1.10.x.
+ *                  versions available to the latest release.
  *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.10.x.
- *              \li The objects written with this setting may be
- *                  accessible to a smaller range of library versions than
- *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
- *              \li API calls that create objects or features that are available
- *                  to versions of the library greater than 1.10.x release will
- *                  fail.
- *              \li Earlier versions of the library may not be able to access
- *                  objects created with this setting.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_V110<br />
- *                \p high=#H5F_LIBVER_V112</td>
- *             <td>
- *              \li The library will create objects with the latest format
- *                  versions available to library release 1.10.x.
- *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.12.x.
- *              \li API calls that create objects or features that are available
- *                  to versions of the library greater than 1.12.x release will
- *                  fail.
- *              \li Earlier versions of the library may not be able to access
- *                  objects created with this setting.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_V110<br />
- *                \p high=#H5F_LIBVER_V114</td>
- *             <td>
- *              \li The library will create objects with the latest format
- *                  versions available to library release 1.10.x.
- *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.14.x.
- *              \li API calls that create objects or features that are available
- *                  to versions of the library greater than 1.14.x release will
- *                  fail.
- *              \li Earlier versions of the library may not be able to access
- *                  objects created with this setting.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_V110<br />
- *                \p high=#H5F_LIBVER_V116</td>
- *             <td>
- *              \li The library will create objects with the latest format
- *                  versions available to library release 1.10.x.
- *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.16.x.  See
- *                  note *H5F_LIBVER_LATEST* below the table.
- *              \li This setting allows users to take advantage of the latest
- *                  features and performance enhancements in the library.
- *              \li Earlier versions of the library may not be able to access
- *                  objects created with this setting.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_V112<br />
- *                \p high=#H5F_LIBVER_V112</td>
- *             <td>
- *              \li The library will create objects with the latest format
- *                  versions available to library release 1.12.x.
- *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.12.x.
- *              \li The objects written with this setting may be
- *                  accessible to a smaller range of library versions than
- *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
- *              \li API calls that create objects or features that are available
- *                  to versions of the library greater than 1.12.x release will
- *                  fail.
- *              \li Earlier versions of the library may not be able to access
- *                  objects created with this setting.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_V112<br />
- *                \p high=#H5F_LIBVER_V114</td>
- *             <td>
- *              \li The library will create objects with the latest format
- *                  versions available to library release 1.12.x.
- *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.14.x.
- *              \li API calls that create objects or features that are available
- *                  to versions of the library greater than 1.14.x release will
- *                  fail.
- *              \li Earlier versions of the library may not be able to access
- *                  objects created with this setting.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_V112<br />
- *                \p high=#H5F_LIBVER_V116</td>
- *             <td>
- *              \li The library will create objects with the latest format
- *                  versions available to library release 1.12.x.
- *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.16.x.  See
- *                  note *H5F_LIBVER_LATEST* below the table.
- *              \li This setting allows users to take advantage of the latest
- *                  features and performance enhancements in the library.
- *              \li Earlier versions of the library may not be able to access
- *                  objects created with this setting.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_V114<br />
- *                \p high=#H5F_LIBVER_V114</td>
- *             <td>
- *              \li The library will create objects with the latest format
- *                  versions available to library release 1.14.x.
- *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.14.x.
- *              \li The objects written with this setting may be
- *                  accessible to a smaller range of library versions than
- *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
- *              \li API calls that create objects or features that are available
- *                  to versions of the library greater than 1.14.x release will
- *                  fail.
- *              \li Earlier versions of the library may not be able to access
- *                  objects created with this setting.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_V114<br />
- *                \p high=#H5F_LIBVER_V116</td>
- *             <td>
- *              \li The library will create objects with the latest format
- *                  versions available to library release 1.14.x.
- *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.16.x.  See
- *                  note *H5F_LIBVER_LATEST* below the table.
- *              \li This setting allows users to take advantage of the latest
- *                  features and performance enhancements in the library.
- *              \li Earlier versions of the library may not be able to access
- *                  objects created with this setting.</td>
- *           </tr>
- *           <tr>
- *            <td>\p low=#H5F_LIBVER_V116<br />
- *                \p high=#H5F_LIBVER_V116</td>
- *             <td>
- *              \li The library will create objects with the latest format
- *                  versions available to library release 1.16.x.
- *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.16.x.  See
+ *                  format versions available to the latest release.  See
  *                  note *H5F_LIBVER_LATEST* below the table.
  *              \li This setting allows users to take advantage of the latest
  *                  features and performance enhancements in the library.
@@ -5225,7 +5205,7 @@ H5_DLL herr_t H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
  *          current state of the logging flags.
  *
  *          The log format is described in [<em>Metadata Cache Logging</em>]
- *          (https://portal.hdfgroup.org/display/HDF5/Fine-tuning+the+Metadata+Cache).
+ *          (https://\DSPURL/Fine-tuning+the+Metadata+Cache).
  *
  * \since 1.10.0
  *
@@ -5777,7 +5757,16 @@ H5_DLL herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t 
  *          If a non-zero page buffer size is set, and the file space strategy
  *          is not set to paged or the page size for the file space strategy is
  *          larger than the page buffer size, the subsequent call to H5Fcreate()
- *          or H5Fopen() using the \p plist_id will fail.
+ *          using the \p plist_id will fail.
+ *
+ * \note    As of HDF5 1.14.4, this property will be ignored when an existing
+ *          file is being opened and the file space strategy stored in the
+ *          file isn't paged. This was previously a failure.
+ *
+ * \note    As of HDF5 1.14.4, if a file with a paged file space strategy is
+ *          opened with a page size that is smaller than the file's page size,
+ *          the page cache size will be rounded up to the file's page size.
+ *          This was previously a failure.
  *
  *          The function also allows setting the minimum percentage of pages for
  *          metadata and raw data to prevent a certain type of data to evict hot
@@ -5788,6 +5777,79 @@ H5_DLL herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t 
  */
 H5_DLL herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned min_meta_per,
                                       unsigned min_raw_per);
+
+/**
+ * \ingroup FAPL
+ *
+ * \brief Relax file integrity checks that may issue errors for some valid files
+ *
+ * \fapl_id{plist_id}
+ * \param[in] flags Relaxed integrity checks flag. Valid values are:
+ *                 \li #H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS
+ *                     suppresses integrity checks for detecting
+ *                     unusually high values for the number of unused bits in
+ *                     numeric datatype classes (H5T_INTEGER, H5T_FLOAT, and
+ *                     H5T_BITFIELD).  Integrity checks are triggered when
+ *                     the precision for a datatype (i.e. the number of bits
+ *                     containing actual data) is less than half of the
+ *                     datatype's size and the datatype is greater than
+ *                     1 byte in size.   For example, a datatype with a
+ *                     precision of 15 bits and a size of 4 bytes (i.e. 32 bits)
+ *                     will issue an error, but a datatype with 17 bits of
+ *                     precision and a size of 4 bytes will not issue an
+ *                     error, nor will a datatype with a precision of 1, 2, or
+ *                     3 bits and a size of 1 byte issue an error.
+ *                 \li #H5F_RFIC_ALL relaxes all integrity checks above.
+ *
+ * \return \herr_t
+ *
+ * \details Incorrectly encoded or corrupted metadata in a native HDF5
+ *          format file can cause incorrect library behavior when the metadata
+ *          has no checksum.  Integrity checks within the library detect these
+ *          circumstances and issue errors when incorrect metadata is found.
+ *          Unfortunately, some of the integrity checks for detecting these
+ *          circumstances may incorrectly issue an error for a valid HDF5 file
+ *          that was intentionally created with these configurations.
+ *          Setting the appropriate flag(s) with this routine will relax the
+ *          file integrity checks for these valid files and suppress errors
+ *          when accessing objects with these configurations.
+ *
+ *          The library will also issue errors when these configurations are
+ *          used to create objects, preventing applications from unintentionally
+ *          creating them.  Setting the appropriate flag with this routine will
+ *          also suppress those errors on creation, although using this routine
+ *          and the appropriate flag(s) will still be required when accessing
+ *          files created with these configurations.
+ *
+ *          A more complete solution that avoids errors on both object creation
+ *          and access is to use the H5Pset_libver_bounds routine with a low
+ *          bound of at least #H5F_LIBVER_V18 when creating objects with these
+ *          configurations.  This will cause the library to checksum a file's
+ *          metadata, allowing accidental data corruption to be correctly
+ *          detected and errors correctly issued without ambiguity.
+ *
+ * \since 1.14.4
+ *
+ */
+H5_DLL herr_t H5Pset_relax_file_integrity_checks(hid_t plist_id, uint64_t flags);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Retrieve relaxed file integrity check flags
+ *
+ * \fapl_id{plist_id}
+ * \param[out] flags  Relaxed file integrity check flags
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_relax_file_integrity_checks() retrieves the relaxed file
+ *          integrity check value into \p flags for the file access property
+ *          list specified in \p plist_id.
+ *
+ * \since 1.14.4
+ *
+ */
+H5_DLL herr_t H5Pget_relax_file_integrity_checks(hid_t plist_id, uint64_t *flags);
 
 /* Dataset creation property list (DCPL) routines */
 /**
@@ -6143,7 +6205,7 @@ H5_DLL herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count /*out*/);
  *                   (0 ≤ \p index < \p count), where \p count is the
  *                   number of mappings returned by H5Pget_virtual_count().
  * \param[out] name  A buffer containing the name of the source dataset
- * \param[in]  size  The size, in bytes, of the name buffer. Must be the
+ * \param[in]  size  The size, in bytes, of the \p name buffer. Must be the
  *                   size of the dataset name in bytes plus 1 for a NULL
  *                   terminator
  *
@@ -6160,14 +6222,7 @@ H5_DLL herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count /*out*/);
  *          \p name; additional characters, if any, are not returned to
  *          the user application.
  *
- *          If the length of the dataset name, which determines the
- *          required value of \p size, is unknown, a preliminary call
- *          to H5Pget_virtual_dsetname() with the last two parameters
- *          set to NULL and zero respectively can be made. The return
- *          value of this call will be the size in bytes of the dataset
- *          name. That value, plus 1 for a NULL terminator, must then be
- *          assigned to \p size for a second H5Pget_virtual_dsetname()
- *          call, which will retrieve the actual dataset name.
+ *          \details_namelen{dataset,H5Pget_virtual_dsetname}
  *
  * \see_virtual
  *
@@ -6204,14 +6259,7 @@ H5_DLL ssize_t H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name /
  *          \p name; additional characters, if any, are not returned to
  *          the user application.
  *
- *          If the length of the filename, which determines the required
- *          value of \p size, is unknown, a preliminary call to
- *          H5Pget_virtual_filename() with the last two parameters set
- *          to NULL and zero respectively can be made. The return value
- *          of this call will be the size in bytes of the filename. That
- *          value, plus 1 for a NULL terminator, must then be assigned to
- *          \p size for a second H5Pget_virtual_filename() call, which
- *          will retrieve the actual filename.
+ *          \details_namelen{file,H5Pget_virtual_filename}
  *
  * \see_virtual
  *
@@ -7054,7 +7102,7 @@ H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels
  *          VDS access time. Example code for many source and virtual dataset mappings
  *          is available in the "Examples of Source to Virtual Dataset Mapping"
  *          chapter in the
- *          <a href="https://portal.hdfgroup.org/display/HDF5/RFC+HDF5+Virtual+Dataset">
+ *          <a href="https://\RFCURL/HDF5-VDS-requirements-use-cases-2014-12-10.pdf">
  *            RFC: HDF5 Virtual Dataset</a>.
  *      </td>
  *      </tr>
@@ -7127,7 +7175,7 @@ H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels
  *             If that source file does not exist, the new \p src_file_name
  *             after stripping will be \Code{A.h5}
  *
- * \see <a href="https://portal.hdfgroup.org/display/HDF5/Virtual+Dataset++-+VDS">
+ * \see <a href="https://\RFCURL/HDF5-VDS-requirements-use-cases-2014-12-10.pdf">
  *        Virtual Dataset Overview</a>
  *
  * \see_virtual
@@ -7545,8 +7593,8 @@ H5_DLL herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_
  *          that uses external storage:
  *
  *          \li The default behavior of the library is to search for the
- *              dataset's external storage raw data files in the same
- *              directory as the HDF5 file which contains the dataset.
+ *              dataset's external storage raw data files in the current
+ *              working directory of the program.
  *          \li If the prefix is set to an absolute path, the target
  *              directory will be searched for the dataset's external
  *              storage raw data files.
@@ -8978,7 +9026,7 @@ H5_DLL herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, uns
  *      must be created and maintained in the original style. This is HDF5's default
  *      behavior. If backward compatibility with pre-1.8.0 libraries is not a concern,
  *      greater efficiencies can be obtained with the new-format compact and indexed
- *      groups. See <a href="https://portal.hdfgroup.org/display/HDF5/Groups">Group
+ *      groups. See <a href="https://\DOXURL/group___h5_g.html">Group
  *      implementations in HDF5</a> in the \ref H5G API introduction (at the bottom).\n
  *      H5Pset_local_heap_size_hint() is useful for tuning file size when files
  *      contain original-style groups with either zero members or very large

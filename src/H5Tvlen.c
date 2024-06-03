@@ -144,7 +144,6 @@ H5Tvlen_create(hid_t base_id)
     hid_t  ret_value;   /*return value			*/
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("i", "i", base_id);
 
     /* Check args */
     if (NULL == (base = (H5T_t *)H5I_object_verify(base_id, H5I_DATATYPE)))
@@ -1053,7 +1052,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt)
+H5T_vlen_reclaim_elmt(void *elem, const H5T_t *dt)
 {
     H5T_vlen_alloc_info_t vl_alloc_info;       /* VL allocation info */
     herr_t                ret_value = SUCCEED; /* return value */

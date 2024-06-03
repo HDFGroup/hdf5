@@ -7752,15 +7752,13 @@ evict_on_close_test(bool H5_ATTR_PARALLEL_UNUSED single_file_vfd)
 int
 main(void)
 {
-    const char *env_h5_drvr;     /* File driver value from environment */
+    const char *driver_name;     /* File driver value from environment */
     bool        single_file_vfd; /* Whether VFD used stores data in a single file */
     unsigned    nerrs = 0;
     int         express_test;
 
     /* Get the VFD to use */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     H5open();
 
@@ -7772,7 +7770,7 @@ main(void)
     printf("=========================================\n");
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = !h5_driver_uses_multiple_files(env_h5_drvr, H5_EXCLUDE_NON_MULTIPART_DRIVERS);
+    single_file_vfd = !h5_driver_uses_multiple_files(driver_name, H5_EXCLUDE_NON_MULTIPART_DRIVERS);
 
     nerrs += check_cache_image_ctl_flow_1(single_file_vfd);
     nerrs += check_cache_image_ctl_flow_2(single_file_vfd);

@@ -766,6 +766,7 @@ fill_file_list(mfu_flist new_flist, const char *config_filename, int myrank, int
         char       *eol = strchr(linebuf, '\n');
         if (eol)
             *eol = '\0';
+        memset(&statbuf, 0, sizeof(h5_stat_t));
         if (HDstat(linebuf, &statbuf) == 0) {
             if (myrank == (index % size)) {
                 mfu_flist_insert_stat((flist_t *)new_flist, linebuf, O_RDONLY, &statbuf);

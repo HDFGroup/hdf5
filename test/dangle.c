@@ -623,18 +623,16 @@ error:
 int
 main(void)
 {
-    const char *env_h5_drvr; /* File Driver value from environment */
+    const char *driver_name; /* File Driver value from environment */
     int         nerrors = 0;
 
     /* Get the VFD to use */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Don't run this test with the multi/split VFD. A bug in library shutdown
      * ordering causes problems with the multi VFD when IDs are left dangling.
      */
-    if (!strcmp(env_h5_drvr, "multi") || !strcmp(env_h5_drvr, "split")) {
+    if (!strcmp(driver_name, "multi") || !strcmp(driver_name, "split")) {
         puts(" -- SKIPPED for incompatible VFD --");
         return 0;
     }

@@ -211,6 +211,13 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
     if (NULL == (oh = H5O_pin(loc)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header");
 
+    /* Check for creating attribute with unusual datatype */
+    if (!(H5O_has_chksum(oh) || (H5F_RFIC_FLAGS(loc->file) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)) &&
+        H5T_is_numeric_with_unusual_unused_bits(attr->shared->dt))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL,
+                    "creating attribute with unusual datatype, see documentation for "
+                    "H5Pset_relax_file_integrity_checks for details.");
+
     /* Check if this object already has attribute information */
     if (oh->version > H5O_VERSION_1) {
         bool   new_ainfo = false; /* Flag to indicate that the attribute information is new */
@@ -1171,10 +1178,10 @@ herr_t
 H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order_t order,
                       hsize_t skip, hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data)
 {
-    H5O_t           *oh = NULL;             /* Pointer to actual object header */
-    H5O_ainfo_t      ainfo;                 /* Attribute information for object */
-    H5A_attr_table_t atable    = {0, NULL}; /* Table of attributes */
-    herr_t           ret_value = FAIL;      /* Return value */
+    H5O_t           *oh = NULL;                /* Pointer to actual object header */
+    H5O_ainfo_t      ainfo;                    /* Attribute information for object */
+    H5A_attr_table_t atable    = {0, 0, NULL}; /* Table of attributes */
+    herr_t           ret_value = FAIL;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(loc->addr)
 
@@ -1223,7 +1230,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, H5_index_t idx_type, H
         oh = NULL;
 
         /* Check for skipping too many attributes */
-        if (skip > 0 && skip >= atable.nattrs)
+        if (skip > 0 && skip >= atable.num_attrs)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
 
         /* Iterate over attributes in table */
@@ -1293,8 +1300,8 @@ done:
 static herr_t
 H5O__attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo)
 {
-    H5A_attr_table_t atable    = {0, NULL}; /* Table of attributes */
-    herr_t           ret_value = SUCCEED;   /* Return value */
+    H5A_attr_table_t atable    = {0, 0, NULL}; /* Table of attributes */
+    herr_t           ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1530,11 +1537,11 @@ done:
 herr_t
 H5O__attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order_t order, hsize_t n)
 {
-    H5O_t           *oh = NULL;                /* Pointer to actual object header */
-    H5O_ainfo_t      ainfo;                    /* Attribute information for object */
-    htri_t           ainfo_exists = false;     /* Whether the attribute info exists in the file */
-    H5A_attr_table_t atable       = {0, NULL}; /* Table of attributes */
-    herr_t           ret_value    = SUCCEED;   /* Return value */
+    H5O_t           *oh = NULL;                   /* Pointer to actual object header */
+    H5O_ainfo_t      ainfo;                       /* Attribute information for object */
+    htri_t           ainfo_exists = false;        /* Whether the attribute info exists in the file */
+    H5A_attr_table_t atable       = {0, 0, NULL}; /* Table of attributes */
+    herr_t           ret_value    = SUCCEED;      /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(loc->addr)
 
@@ -1568,7 +1575,7 @@ H5O__attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table");
 
         /* Check for skipping too many attributes */
-        if (n >= atable.nattrs)
+        if (n >= atable.num_attrs)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
 
         /* Set up user data for callback, to remove the attribute by name */

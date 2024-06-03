@@ -1525,7 +1525,7 @@ New Features
 Support for New Platforms, Languages and Compilers
 ==================================================
 
-No new platorms, languages, or compilers are supported in this release.
+No new platforms, languages, or compilers are supported in this release.
 
 
 Bug Fixes since HDF5-1.6.6 Release

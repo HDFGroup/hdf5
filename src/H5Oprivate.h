@@ -932,6 +932,7 @@ H5_DLL time_t  H5O_get_oh_mtime(const H5O_t *oh);
 H5_DLL uint8_t H5O_get_oh_version(const H5O_t *oh);
 H5_DLL herr_t  H5O_get_rc_and_type(const H5O_loc_t *oloc, unsigned *rc, H5O_type_t *otype);
 H5_DLL H5AC_proxy_entry_t *H5O_get_proxy(const H5O_t *oh);
+H5_DLL bool                H5O_has_chksum(const H5O_t *oh);
 
 /* Object header message routines */
 H5_DLL herr_t H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
@@ -985,7 +986,7 @@ H5_DLL herr_t H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *ob
 /* Object copying routines */
 H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
                                   H5O_copy_t *cpy_info, bool inc_depth, H5O_type_t *obj_type, void **udata);
-H5_DLL herr_t H5O_copy_expand_ref(H5F_t *file_src, H5T_t *dt_src, void *buf_src, size_t nbytes_src,
+H5_DLL herr_t H5O_copy_expand_ref(H5F_t *file_src, const H5T_t *dt_src, void *buf_src, size_t nbytes_src,
                                   H5F_t *file_dst, void *buf_dst, H5O_copy_t *cpy_info);
 
 /* Debugging routines */
@@ -1003,7 +1004,7 @@ H5_DLL herr_t     H5O_loc_free(H5O_loc_t *loc);
 H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);
 
 /* EFL operators */
-H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);
+H5_DLL herr_t H5O_efl_total_size(const H5O_efl_t *efl, hsize_t *size);
 
 /* File space info routines */
 H5_DLL herr_t H5O_fsinfo_set_version(H5F_libver_t low, H5F_libver_t high, H5O_fsinfo_t *fsinfo);

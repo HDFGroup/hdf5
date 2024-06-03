@@ -27,7 +27,7 @@
  * 1 to MAX_NINC).  Assumes integers i and ninc are in scope. */
 #define RAND_INC(id)                                                                                         \
     do {                                                                                                     \
-        ninc = (HDrand() % MAX_NINC) + 1;                                                                    \
+        ninc = (rand() % MAX_NINC) + 1;                                                                      \
                                                                                                              \
         for (i = 0; i < ninc; i++)                                                                           \
             if (H5Iinc_ref(ids[id]) != i + 2)                                                                \
@@ -79,7 +79,7 @@ Abrt_Handler(int H5_ATTR_UNUSED sig)
 int
 main(void)
 {
-    const char *env_h5_drvr; /* File Driver value from environment */
+    const char *driver_name; /* File Driver value from environment */
     hid_t       ids[T_NUMCLASSES];
     hid_t       fapl; /* File Access Property List */
     int         ninc;
@@ -89,19 +89,17 @@ main(void)
     h5_reset();
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
 
-    HDsrand((unsigned)HDtime(NULL));
+    srand((unsigned)time(NULL));
 
     TESTING("library shutdown with reference count > 1");
 
     /* Get the VFD to use */
-    env_h5_drvr = getenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Don't run this test with the multi/split VFD. A bug in library shutdown
      * ordering causes problems with the multi VFD when IDs are left dangling.
      */
-    if (!strcmp(env_h5_drvr, "multi") || !strcmp(env_h5_drvr, "split")) {
+    if (!strcmp(driver_name, "multi") || !strcmp(driver_name, "split")) {
         puts("\n -- SKIPPED for incompatible VFD --");
         return 0;
     }
@@ -174,7 +172,7 @@ main(void)
 
     RAND_INC(T_ESTACK);
 
-    HDsignal(SIGABRT, &Abrt_Handler);
+    signal(SIGABRT, &Abrt_Handler);
 
     if (H5close() < 0)
         TEST_ERROR;

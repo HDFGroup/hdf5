@@ -35,6 +35,8 @@
       textlink.h5
       textlinksrc.h5
       textlinktar.h5
+      tfloat16.h5
+      tfloat16_be.h5
       tgroup.h5
       tgrp_comments.h5
       tgrpnullspace.h5
@@ -49,13 +51,6 @@
       tudlink.h5
       tvldtypes1.h5
   )
-
-  set (LIST_ERR_TEST_FILES
-      nosuchfile.err
-      textlinksrc-nodangle-1.err
-      tgroup-1.err
-  )
-
   set (LIST_OTHER_TEST_FILES
       help-1.ls
       help-2.ls
@@ -88,6 +83,10 @@
       textlinksrc-7-old.ls
       textlinksrc-nodangle-1.ls
       textlinksrc-nodangle-2.ls
+      tfloat16.ls
+      tfloat16_nosupport.ls
+      tfloat16_be.ls
+      tfloat16_be_nosupport.ls
       tgroup.ls
       tgroup-1.ls
       tgroup-2.ls
@@ -129,9 +128,6 @@
   endforeach ()
   foreach (listothers ${LIST_OTHER_TEST_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/${listothers}" "h5ls_files")
-  endforeach ()
-  foreach (listerrfiles ${LIST_ERR_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/errfiles/${listerrfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listerrfiles}" "h5ls_files")
   endforeach ()
   add_custom_target(h5ls_files ALL COMMENT "Copying files needed by h5ls tests" DEPENDS ${h5ls_files_list})
 
@@ -313,6 +309,33 @@
   ADD_H5_TEST (tsoftlinks-nodangle-1 1 -w80 --follow-symlinks --no-dangling-links tsoftlinks.h5)
   # when used file with no dangling links - expected exit code 0
   ADD_H5_TEST (thlinks-nodangle-1 0 -w80 --follow-symlinks --no-dangling-links thlink.h5)
+
+  # tests for _Float16 type
+  if (${${HDF_PREFIX}_HAVE__FLOAT16})
+    # If support is available for _Float16 type, the second test
+    # will fail as the type will be printed out as "native _Float16"
+    # rather than "IEEE 16-bit little-endian float".
+    if (H5_WORDS_BIGENDIAN)
+      ADD_H5_TEST (tfloat16_be 0 -w80 -v tfloat16_be.h5)
+      ADD_H5_TEST (tfloat16_be_nosupport 0 -w80 -v tfloat16_be.h5)
+      set_tests_properties (H5LS-tfloat16_be_nosupport PROPERTIES WILL_FAIL "true")
+    else ()
+      ADD_H5_TEST (tfloat16 0 -w80 -v tfloat16.h5)
+      ADD_H5_TEST (tfloat16_nosupport 0 -w80 -v tfloat16.h5)
+      set_tests_properties (H5LS-tfloat16_nosupport PROPERTIES WILL_FAIL "true")
+    endif ()
+  else ()
+    # If support is NOT available for _Float16 type, the first two tests
+    # will fail as the types will be printed out as
+    # "IEEE 16-bit little-endian float" and "IEEE 16-bit big-endian float"
+    # rather than "native _Float16"
+    ADD_H5_TEST (tfloat16 0 -w80 -v tfloat16.h5)
+    set_tests_properties (H5LS-tfloat16 PROPERTIES WILL_FAIL "true")
+    ADD_H5_TEST (tfloat16_be 0 -w80 -v tfloat16_be.h5)
+    set_tests_properties (H5LS-tfloat16_be PROPERTIES WILL_FAIL "true")
+    ADD_H5_TEST (tfloat16_nosupport 0 -w80 -v tfloat16.h5)
+    ADD_H5_TEST (tfloat16_be_nosupport 0 -w80 -v tfloat16_be.h5)
+  endif ()
 
 # test for wildcards in filename (does not work with cmake)
 #  ADD_H5_TEST (tstarfile 0 -w80 t*link.h5)

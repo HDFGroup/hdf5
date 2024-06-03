@@ -30,6 +30,7 @@
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5CXprivate.h" /* API Contexts                             */
+#include "H5Dprivate.h"  /* Datasets                                 */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fprivate.h"  /* File access                              */
 #include "H5Gpkg.h"      /* Groups                                   */
@@ -198,7 +199,7 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
         /* Check if we just needed to know if the object exists */
         if (target & H5G_TARGET_EXISTS) {
             /* Clear any errors from the stack */
-            H5E_clear_stack(NULL);
+            H5E_clear_stack();
 
             /* Indicate that the object doesn't exist */
             *obj_exists = false;
@@ -613,6 +614,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
                 const H5O_linfo_t *linfo;     /* Link info settings for new group */
                 const H5O_pline_t *pline;     /* Filter pipeline settings for new group */
                 H5G_obj_create_t   gcrt_info; /* Group creation info */
+                H5O_obj_create_t  *ocrt_info; /* Object creation info in op_data */
 
                 /* Check for the parent group having a group info message */
                 /* (OK if not found) */
@@ -665,8 +667,15 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
                     pline = &def_pline;
 
                 /* Create the intermediate group */
-                /* XXX: Should we allow user to control the group creation params here? -QAK */
-                gcrt_info.gcpl_id    = H5P_GROUP_CREATE_DEFAULT;
+                gcrt_info.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+                /* Propagate the object creation properties when creating intermedidate groups */
+                if ((target & H5G_CRT_OBJ) && (ocrt_info = H5L_OCRT_INFO(op_data)) != NULL) {
+                    if (ocrt_info->obj_type == H5O_TYPE_GROUP)
+                        gcrt_info.gcpl_id = H5G_OBJ_ID(ocrt_info->crt_info);
+                    else if (ocrt_info->obj_type == H5O_TYPE_DATASET)
+                        gcrt_info.gcpl_id = H5D_OBJ_ID(ocrt_info->crt_info);
+                }
+
                 gcrt_info.cache_type = H5G_NOTHING_CACHED;
                 memset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
                 if (H5G__obj_create_real(grp_oloc.file, ginfo, linfo, pline, &gcrt_info,

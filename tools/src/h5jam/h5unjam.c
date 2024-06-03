@@ -173,7 +173,7 @@ main(int argc, char *argv[])
 {
     hid_t     ifile = H5I_INVALID_HID;
     hid_t     plist = H5I_INVALID_HID;
-    off_t     fsize;
+    HDoff_t   fsize;
     hsize_t   usize;
     htri_t    testval;
     herr_t    status;
@@ -241,6 +241,7 @@ main(int argc, char *argv[])
         goto done;
     }
 
+    memset(&sbuf, 0, sizeof(h5_stat_t));
     res = HDfstat(HDfileno(rawinstream), &sbuf);
     if (res < 0) {
         error_msg("Can't stat file \"%s\"\n", input_file);
@@ -305,9 +306,9 @@ copy_to_file(FILE *infid, FILE *ofid, ssize_t _where, ssize_t show_much)
 {
     static char buf[COPY_BUF_SIZE];
     size_t      how_much;
-    off_t       where = (off_t)_where;
-    off_t       to;
-    off_t       from;
+    HDoff_t     where = (HDoff_t)_where;
+    HDoff_t     to;
+    HDoff_t     from;
     herr_t      ret_value = 0;
 
     /* nothing to copy */
@@ -348,8 +349,8 @@ copy_to_file(FILE *infid, FILE *ofid, ssize_t _where, ssize_t show_much)
 
         /* Update positions/size */
         how_much -= bytes_read;
-        from += (off_t)bytes_read;
-        to += (off_t)bytes_read;
+        from += (HDoff_t)bytes_read;
+        to += (HDoff_t)bytes_read;
 
         /* Write nchars bytes to output file */
         bytes_wrote = fwrite(buf, (size_t)1, bytes_read, ofid);

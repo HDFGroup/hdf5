@@ -223,7 +223,7 @@ error:
 int
 main(void)
 {
-    char       *driver = NULL;             /* name of current VFD (from env var)       */
+    const char *driver_name;               /* name of current VFD (from env var)       */
     bool        vfd_supports_swmr;         /* whether the current VFD supports SWMR    */
     hid_t       fapl_id = H5I_INVALID_HID; /* file access proplist ID                  */
     char        filename[1024];            /* filename                                 */
@@ -236,8 +236,8 @@ main(void)
         PUTS_ERROR("bad vfd-dependent fapl");
 
     /* Check if the current VFD supports SWMR */
-    driver            = getenv(HDF5_DRIVER);
-    vfd_supports_swmr = H5FD__supports_swmr_test(driver);
+    driver_name       = h5_get_test_driver_name();
+    vfd_supports_swmr = H5FD__supports_swmr_test(driver_name);
 
     if (h5_driver_is_default_vfd_compatible(fapl_id, &driver_is_default_vfd_compatible) < 0) {
         printf("Can't check if VFD is compatible with default VFD\n");
