@@ -5678,6 +5678,7 @@ H5_DLL herr_t H5Pget_mpi_params(hid_t fapl_id, MPI_Comm *comm, MPI_Info *info);
  */
 H5_DLL herr_t H5Pset_mpi_params(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 #endif /* H5_HAVE_PARALLEL */
+
 /**
  * \ingroup FAPL
  *
@@ -6532,7 +6533,7 @@ H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size);
+H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, HDoff_t offset, hsize_t size);
 /**
  * \ingroup DCPL
  *
