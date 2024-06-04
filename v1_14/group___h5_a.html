@@ -395,7 +395,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000010">Deprecated:</a></b></dt><dd>Superseded by <a class="el" href="group___h5_a.html#ga4f4e5248c09f689633079ed8afc0b308" title="Creates an attribute attached to a specified object.">H5Acreate2()</a>.</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>The <code>acpl</code> parameter is currently not used; specify <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>.</dd></dl>
 <p><a class="el" href="group___h5_a.html#gaa30f5f6c277d6c46f8aa31e89cdba085" title="Creates an attribute attached to a specified object.">H5Acreate1()</a> creates an attribute, <code>name</code>, which is attached to the object specified by the identifier <code>loc_id</code>.</p>
@@ -469,7 +469,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_a.html#ga4f4e5248c09f689633079ed8afc0b308" title="Creates an attribute attached to a specified object.">H5Acreate2()</a> creates an attribute, <code>attr_name</code>, which is attached to the object specified by the identifier <code>loc_id</code>.</p>
 <p>The attribute name, <code>attr_name</code>, must be unique for the object.</p>
 <p>The attribute is created with the specified datatype and dataspace, <code>type_id</code> and <code>space_id</code>.</p>
@@ -601,7 +601,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_a.html#ga004160c28e281455ec48aa7fe557ef8a" title="Creates an attribute attached to a specified object.">H5Acreate_by_name()</a> creates an attribute, <code>attr_name</code>, which is attached to the object specified by <code>loc_id</code> and <code>obj_name</code>.</p>
 <p><code>loc_id</code> is a location identifier; <code>obj_name</code> is the object name relative to <code>loc_id</code>.</p>
 <p>The attribute name, <code>attr_name</code>, must be unique for the object.</p>
@@ -924,7 +924,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns an attribute's creation property list identifier if successful; otherwise returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns an attribute's creation property list identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_a.html#ga0f6b545850bd21f128904eff51df226d" title="Gets an attribute creation property list identifier.">H5Aget_create_plist()</a> returns an identifier for the attribute creation property list associated with the attribute specified by <code>attr_id</code>.</p>
 <p>The creation property list identifier should be released with <a class="el" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb" title="Terminates access to a property list.">H5Pclose()</a> to prevent resource leaks.</p>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
@@ -1296,7 +1296,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns an attribute dataspace identifier if successful; otherwise returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns an attribute dataspace identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_a.html#ga9e21e544119d03f9342530b45a71d74d" title="Gets a copy of the dataspace for an attribute.">H5Aget_space()</a> retrieves a copy of the dataspace for an attribute. The dataspace identifier returned from this function must be released with <a class="el" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1" title="Releases and terminates access to a dataspace.">H5Sclose()</a> or resource leaks will develop.</p>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
@@ -1619,7 +1619,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_a.html#ga59863b205b6d93b2145f0fbca49656f7" title="Opens an attribute for an object specified by object identifier and attribute name.">H5Aopen()</a> opens an existing attribute, <code>attr_name</code>, that is attached to the object specified by an object identifier, <code>obj_id</code>.</p>
 <dl class="section note"><dt>Note</dt><dd>The <code>aapl_id</code> parameter is currently not used; specify <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>.</dd></dl>
 <p>This function, <a class="el" href="group___h5_a.html#gab1451cdff4f77dcf9feaee83c8179b2d" title="Opens the nth attribute attached to an object.">H5Aopen_by_idx()</a> or <a class="el" href="group___h5_a.html#gadb49a0b5b9798d2e944d877adba8ae10" title="Opens an attribute for an object by object name and attribute name.">H5Aopen_by_name()</a> must be called before the attribute can be accessed for any further purpose, including reading, writing, or any modification.</p>
@@ -1731,7 +1731,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_a.html#gab1451cdff4f77dcf9feaee83c8179b2d" title="Opens the nth attribute attached to an object.">H5Aopen_by_idx()</a> opens an existing attribute that is attached to an object specified by location and name, <code>loc_id</code> and <code>obj_name</code>, respectively.</p>
 <p>The attribute is identified by an index type, an index traversal order, and a position in the index, <code>idx_type</code>, <code>order</code> and <code>n</code>, respectively.</p>
 <dl class="section note"><dt>Note</dt><dd>The <code>aapl_id</code> parameter is currently not used; specify <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>.</dd></dl>
@@ -1797,7 +1797,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_a.html#gadb49a0b5b9798d2e944d877adba8ae10" title="Opens an attribute for an object by object name and attribute name.">H5Aopen_by_name()</a> opens an existing attribute, <code>attr_name</code>, that is attached to an object specified by location and name, <code>loc_id</code> and <code>obj_name</code>, respectively.</p>
 <p><code>loc_id</code> specifies a location from which the target object can be located and <code>obj_name</code> is an object name relative to <code>loc_id</code>.</p>
 <dl class="section note"><dt>Note</dt><dd>The <code>aapl_id</code> parameter is currently not used; specify <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>.</dd></dl>
@@ -1842,7 +1842,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000013">Deprecated:</a></b></dt><dd>Superseded by <a class="el" href="group___h5_a.html#gab1451cdff4f77dcf9feaee83c8179b2d" title="Opens the nth attribute attached to an object.">H5Aopen_by_idx()</a>.</dd></dl>
 <p><a class="el" href="group___h5_a.html#gadaa85276f2731ad78462a6fd27118470" title="Opens the attribute specified by its index.">H5Aopen_idx()</a> opens an attribute that is attached to the object specified with <code>loc_id</code>. The location object may be either a group, dataset, or named datatype, all of which may have any sort of attribute. The attribute specified by the index, <code>idx</code>, indicates the attribute to access. The value of <code>idx</code> is a 0-based, non-negative integer. The attribute identifier returned from this function must be released with <a class="el" href="group___h5_a.html#gaef4394b661e2c930879e9868e122bdda" title="Closes the specified attribute.">H5Aclose()</a> or resource leaks will develop.</p>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
@@ -1883,7 +1883,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns a negative value.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns an attribute identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000014">Deprecated:</a></b></dt><dd>Superseded by <a class="el" href="group___h5_a.html#gadb49a0b5b9798d2e944d877adba8ae10" title="Opens an attribute for an object by object name and attribute name.">H5Aopen_by_name()</a>.</dd></dl>
 <p><a class="el" href="group___h5_a.html#ga5c05fade96b6b7e2299f56a5b1edb1c1" title="Opens an attribute specified by name.">H5Aopen_name()</a> opens an attribute specified by its name, <code>name</code>, which is attached to the object specified with <code>loc_id</code>. The location object may be either a group, dataset, or named datatype, which may have any sort of attribute. The attribute identifier returned from this function must be released with <a class="el" href="group___h5_a.html#gaef4394b661e2c930879e9868e122bdda" title="Closes the specified attribute.">H5Aclose()</a> or resource leaks will develop.</p>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>

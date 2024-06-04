@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.7"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>HDF5: Property Lists Basics</title>
+<title>HDF5: h5r_ref_t Type Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -77,7 +77,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(document).ready(function(){initNavTree('_l_b_props_list.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('structh5r_1_1h5r__ref__t.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -102,46 +102,42 @@ $(document).ready(function(){initNavTree('_l_b_props_list.html',''); initResizab
 </div>
 </div>
 
-<div><div class="header">
-  <div class="headertitle"><div class="title">Property Lists Basics</div></div>
+<div class="header">
+  <div class="summary">
+<a href="#pub-attribs">Data Fields</a>  </div>
+  <div class="headertitle"><div class="title">h5r_ref_t Type Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_getting_started.html">Getting Started with HDF5</a> / <a class="el" href="_learn_basics.html">Learning the Basics</a> </p><hr  />
-<h1><a class="anchor" id="secLBPList"></a>
-What is a Property (or Property List)?</h1>
-<p>In HDF5, a property or property list is a characteristic or feature associated with an HDF5 object. There are default properties which handle the most common needs. These default properties are specified by passing in <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a> for the Property List parameter of a function. Default properties can be modified by use of the <a class="el" href="group___h5_p.html">Property Lists (H5P)</a> interface and function parameters.</p>
-<p>The <a class="el" href="group___h5_p.html">Property Lists (H5P)</a> API allows a user to take advantage of the more powerful features in HDF5. It typically supports unusual cases when creating or accessing HDF5 objects. There is a programming model for working with Property Lists in HDF5 (see below).</p>
-<p>For examples of modifying a property list, see these tutorial topics: </p><ul>
-<li><dl class="section see"><dt>See also</dt><dd><a class="el" href="_l_b_dset_layout.html">Dataset Storage Layout</a> </dd></dl>
-</li>
-<li><dl class="section see"><dt>See also</dt><dd><a class="el" href="_l_b_ext_dset.html">Extendible Datasets</a> </dd></dl>
-</li>
-<li><dl class="section see"><dt>See also</dt><dd><a class="el" href="_l_b_com_dset.html">Compressed Datasets</a></dd></dl>
-There are many Property Lists associated with creating and accessing objects in HDF5. See the <a class="el" href="group___h5_p.html">Property Lists (H5P)</a> Interface documentation in the HDF5 <a class="el" href="_r_m.html">HDF5 Reference Manual</a> for a list of the different properties associated with HDF5 interfaces.</li>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Data Fields</h2></td></tr>
+<tr class="memitem:ad5e20d5ac27f00f89993b2b6d6e45c6f"><td class="memItemLeft" align="right" valign="top">integer(c_int8_t), dimension(1:<a class="el" href="namespaceh5global.html#acd2bffa97c51f20958bf4b9ae84522e1">h5r_ref_buf_size_f</a>)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structh5r_1_1h5r__ref__t.html#ad5e20d5ac27f00f89993b2b6d6e45c6f">data</a></td></tr>
+<tr class="separator:ad5e20d5ac27f00f89993b2b6d6e45c6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Field Documentation</h2>
+<a id="ad5e20d5ac27f00f89993b2b6d6e45c6f" name="ad5e20d5ac27f00f89993b2b6d6e45c6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5e20d5ac27f00f89993b2b6d6e45c6f">&#9670;&#160;</a></span>data</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(c_int8_t), dimension(1:<a class="el" href="namespaceh5global.html#acd2bffa97c51f20958bf4b9ae84522e1">h5r_ref_buf_size_f</a>) data</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this type was generated from the following file:<ul>
+<li>fortran/src/<a class="el" href="_h5_rff_8_f90.html">H5Rff.F90</a></li>
 </ul>
-<p>In summary: </p><ul>
-<li>Properties are features of HDF5 objects, that can be changed by use of the Property List API and function parameters. </li>
-<li>Property lists provide a mechanism for adding functionality to HDF5 calls without increasing the number of arguments used for a given call. </li>
-<li>The Property List API supports unusual cases when creating and accessing HDF5 objects.</li>
-</ul>
-<h1><a class="anchor" id="secLBPListProg"></a>
-Programming Model</h1>
-<p>Default properties are specified by simply passing in <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a> (C) / H5P_DEFAULT_F (F90) for the property list parameter in those functions for which properties can be changed.</p>
-<p>The programming model for changing a property list is as follows: </p><ul>
-<li>Create a copy or "instance" of the desired pre-defined property type, using the <a class="el" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa" title="Creates a new property list as an instance of a property list class.">H5Pcreate</a> call. This will return a property list identifier. Please see the <a class="el" href="_r_m.html">HDF5 Reference Manual</a> entry for <a class="el" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa" title="Creates a new property list as an instance of a property list class.">H5Pcreate</a>, for a comprehensive list of the property types. </li>
-<li>With the property list identifier, modify the property, using the <a class="el" href="group___h5_p.html">Property Lists (H5P)</a> APIs. </li>
-<li>Modify the object feature, by passing the property list identifier into the corresponding HDF5 object function. </li>
-<li>Close the property list when done, using <a class="el" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb" title="Terminates access to a property list.">H5Pclose</a>.</li>
-</ul>
-<hr  />
-<p> Previous Chapter <a class="el" href="_l_b_datatypes.html">Datatype Basics</a> - Next Chapter <a class="el" href="_l_b_dset_layout.html">Dataset Storage Layout</a></p>
-<p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_getting_started.html">Getting Started with HDF5</a> / <a class="el" href="_learn_basics.html">Learning the Basics</a> </p>
-</div></div><!-- contents -->
-</div><!-- PageDoc -->
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
+    <li class="navelem"><a class="el" href="namespaceh5r.html">h5r</a></li><li class="navelem"><a class="el" href="structh5r_1_1h5r__ref__t.html">h5r_ref_t</a></li>
     <li class="footer">Generated by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>

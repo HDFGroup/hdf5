@@ -132,7 +132,258 @@ Compile Scripts</h1>
 </div><!-- fragment --><p>To see how the libraries linked in with a compile script were configured and built, use the -showconfig option. For example, if using h5cc type: </p><div class="fragment"><div class="line">h5cc -showconfig</div>
 </div><!-- fragment --><h4>Detailed Description of Unix Compile Scripts:</h4>
 <p>The h5cc, h5c++, and h5fc compile scripts come with the HDF5 binary distributions (include files, libraries, and utilities) for the platforms we support. The h5c++ and h5fc utilities are ONLY present if the library was built with C++ and Fortran.</p>
-<h1><a class="anchor" id="secLBCompilingVS"></a>
+<h4>USING_HDF5_CMake.txt:</h4>
+<pre class="fragment">************************************************************************
+* Build and Install HDF5 Applications with CMake                       *
+************************************************************************
+
+Notes: This short instruction is written for users who want to quickly
+       build HDF5 applications using the CMake tools. Users can adapt
+       these instructions for their own applications. For more information,
+       see the "Minimum C Project Files for CMake" section.
+
+       More information about using CMake can be found at the KitWare
+       site, www.cmake.org.
+
+       CMake uses the command line; however, the visual CMake tool is
+       available for the configuration step. The steps are similar for
+       all of the operating systems supported by CMake.
+
+       NOTES:
+         1. Using CMake for building and using HDF5 is under active
+            development. While we have attempted to provide error-free
+            files, please understand that development with CMake has not
+            been extensively tested outside of HDF. The CMake specific
+            files may change before the next release.
+
+         2. CMake for HDF5 development should be usable on any system
+            where CMake is supported. Please send us any comments on how
+            CMake support can be improved on any system.
+
+         3. See the appendix at the bottom of this file for an example
+            of using a ctest script for building and testing. See
+            INSTALL_CMake.txt for more information.
+
+         4. See https://cmake.org/cmake/help/latest/command/find_package.html
+            for more information on the CMake "Config Mode Search Procedure".
+
+
+========================================================================
+I. Preconditions
+========================================================================
+
+   1. We suggest you obtain the latest CMake for your platform from the Kitware
+      web site. The HDF5 1.14.x product requires a minimum CMake version
+      of 3.18. If you are using VS2022, the minimum CMake version is 3.21.
+
+   2. You have installed the HDF5 library built with CMake, by executing
+      the HDF Install Utility (the *.msi file in the binary package for
+      Windows or the *.sh on Linux). You can obtain pre-built binaries
+      from The HDF Group's website at www.hdfgroup.org.
+
+   3. Set the HDF5_ROOT CMake variable, -DHDF5_ROOT=&lt;install_path&gt;
+      or environment variable, set(ENV{HDF5_ROOT} "&lt;install_path&gt;")
+      to the installed location of HDF5.
+         On Windows:
+            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.14.x/
+         On unix:
+            HDF5_ROOT=&lt;install root folder&gt;/HDF_Group/HDF5/1.14.x/
+
+      If you are using shared libraries, you may need to add to the path
+      environment variable. Set the path environment variable to the
+      installed location of the library files for HDF5.
+         On Windows (*.dll):
+            PATH=%PATH%;C:/Program Files/HDF_Group/HDF5/1.14.x/bin
+         On unix (*.so):
+            LD_LIBRARY_PATH=$LD_LIBRARY_PATH:&lt;install root folder&gt;/HDF_Group/HDF5/1.14.x/lib
+
+      If you are using filter plugin libraries, you will need to set the
+      HDF5_PLUGIN_PATH environment variable.
+         On Windows:
+            HDF5_PLUGIN_PATH=C:/Program Files/HDF_Group/HDF5/1.14.x/lib/plugin
+         On unix:
+            HDF5_PLUGIN_PATH=&lt;install root folder&gt;/HDF_Group/HDF5/1.14.x/lib/plugin
+
+      (Note there are no quote characters used on Windows and all platforms
+      use forward slashes)
+
+   4. Created separate source and build directories.
+      (CMake commands are executed in the build directory)
+
+   5. Created a CMakeLists.txt file(s) for your source. See Section III
+      below.
+
+
+
+========================================================================
+II. Building HDF5 Applications with CMake
+========================================================================
+
+Go through these steps to build HDF5 applications with CMake.
+   (The application must support building with CMake.)
+
+   1. Run CMake
+   2. Configure the cache settings
+   3. Build HDF5 Applications
+   4. Test HDF5 Applications
+
+These steps are described in more detail below.
+   1. Run CMake
+
+      The visual CMake executable is named "cmake-gui.exe" on Windows and should be
+      available in your Start menu. For Linux, UNIX, and Mac users the
+      executable is named "cmake-gui" and can be found where CMake was
+      installed.
+
+      Specify the source and build directories. Make the build and source
+      directories different. For example on Windows, if the source is at
+      c:\MyHDFstuff\hdf5, then use c:\MyHDFstuff\hdf5\build or
+      c:\MyHDFstuff\build\hdf5 for the build directory.
+
+      PREFERRED:
+        Users can perform the configuration step without using the visual
+        cmake-gui program. The following is an example command line
+        configuration step executed within the build directory:
+
+        cmake -G "&lt;generator&gt;"  [-D&lt;options&gt;]  &lt;sourcepath&gt;
+
+        Where &lt;generator&gt; is
+            * MinGW Makefiles
+            * NMake Makefiles
+            * Unix Makefiles
+            * Visual Studio 15 2017
+            * Visual Studio 15 2017 Win64
+            * Visual Studio 16 2019
+            * ... in addition VS2019 will need to set the "-A" option,
+            * ... [Win32, x64, ARM, ARM64]
+            * Visual Studio 17 2022
+            * ... in addition VS2022 will need to set the "-A" option,
+            * ... [Win32, x64, ARM, ARM64]
+
+        &lt;options&gt; is:
+            * BUILD_TESTING:BOOL=ON
+            * BUILD_SHARED_LIBS:BOOL=[ON | OFF]
+
+   2. Configure the cache settings
+
+      2.1  Visual CMake users, click the Configure button. If this is the first time you are
+           running cmake-gui in this directory, you will be prompted for the
+           generator you wish to use (for example on Windows, Visual Studio 16 2019).
+           CMake will read in the CMakeLists.txt files from the source directory and
+           display options for the HDF5 project. After the first configure you
+           can adjust the cache settings and/or specify locations of other programs.
+
+           Any conflicts or new values will be highlighted by the configure
+           process in red. Once you are happy with all the settings and there are no
+           more values in red, click the Generate button to produce the appropriate
+           build files.
+
+           On Windows, if you are using a Visual Studio generator, the solution and
+           project files will be created in the build folder.
+
+           On linux, if you are using the Unix Makefiles generator, the Makefiles will
+           be created in the build folder.
+
+      2.2  Alternative command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
+
+           cmake -G "Visual Studio 16 2019" -A "x64" -DBUILD_TESTING:BOOL=ON ..
+
+   3. Build HDF5 Applications
+
+      On Windows, you can build HDF5 applications using either the Visual Studio Environment
+      or the command line. The command line is normally used on linux, Unix, and Mac.
+
+      To build from the command line, navigate to your build directory and
+      execute the following:
+
+              cmake --build . --config {Debug | Release}
+
+      NOTE: "--config {Debug | Release}" may be optional on your platform. We
+            recommend choosing either Debug or Release on Windows. If you are
+            using the pre-built binaries from HDF, use Release.
+
+      3.1  If you wish to use the Visual Studio environment, open the solution
+           file in your build directory. Be sure to select either Debug or
+           Release and build the solution.
+
+   4. Test HDF5 Applications
+
+      To test the build, navigate to your build directory and execute:
+
+              ctest . -C {Debug | Release}
+
+      NOTE: "-C {Debug | Release}" may be optional on your platform. We
+            recommend choosing either Debug or Release to match the build
+            step on Windows.
+
+   5. The files that support building with CMake are all of the files in the
+      config/cmake folder, the CMakeLists.txt files in each source folder, and
+      CTestConfig.cmake. CTestConfig.cmake is specific to the internal testing
+      performed by The HDF Group. It should be altered for the user's
+      installation and needs. The cacheinit.cmake file settings are used by
+      The HDF Group for daily testing. It should be altered/ignored for the user's
+      installation and needs.
+
+
+
+========================================================================
+III. Minimum C Project Files for CMake
+========================================================================
+
+Given the preconditions in section I, create a CMakeLists.txt file at the
+source root. Include the following text in the file:
+
+##########################################################
+cmake_minimum_required (VERSION 3.18)
+project (HDF5MyApp C)
+
+set (LIB_TYPE STATIC) # or SHARED
+string(TOLOWER ${LIB_TYPE} SEARCH_TYPE)
+
+find_package (HDF5 NAMES hdf5 COMPONENTS C ${SEARCH_TYPE})
+# find_package (HDF5) # Find non-cmake built HDF5
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_INCLUDE_DIR}")
+set (LINK_LIBS ${LINK_LIBS} ${HDF5_C_${LIB_TYPE}_LIBRARY})
+
+set (example hdf_example)
+
+add_executable (${example} ${PROJECT_SOURCE_DIR}/${example}.c)
+target_link_libraries (${example} ${LINK_LIBS})
+
+enable_testing ()
+include (CTest)
+
+add_test (NAME test_example COMMAND ${example})
+##########################################################
+
+
+
+========================================================================
+IV. APPENDIX
+========================================================================
+
+Below is an example of a ctest script that can be used to build the examples.
+Adjust the values as necessary. Note that the defaults can be entered on the
+command line and the build folder is created as a sub-folder. Windows should
+adjust the forward slash to double backslashes, except for the HDF_DIR
+environment variable.
+
+NOTE: this file is available in the HDF5 repository, for more information see:
+    https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs/USING_CMake_Examples.txt
+
+           ctest -S HDF5_Examples.cmake -C Release -V -O test.log
+
+Also available at the HDF web site is a CMake application framework template.
+You can quickly add files to the framework and execute the script to compile
+your application with an installed HDF5 binary.
+
+
+========================================================================
+For further assistance, send email to help@hdfgroup.org
+========================================================================
+
+
+</pre><h1><a class="anchor" id="secLBCompilingVS"></a>
 Using Visual Studio</h1>
 <ol type="1">
 <li>If you are building on 64-bit Windows, find the "Platform" dropdown and select "x64". Also select the correct Configuration (Debug, Release, RelWithDebInfo, etc)</li>
@@ -163,19 +414,19 @@ HDF5 Libraries</h1>
 <div class="line">HDF5 C Library</div>
 </div><!-- fragment -->  </td><td><div class="fragment"><div class="line">libhdf5_hl_cpp.a</div>
 <div class="line">libhdf5_cpp.a</div>
-<div class="line">libhdf5hl_fortran.a</div>
+<div class="line">libhdf5_hl_fortran.a</div>
 <div class="line">libhdf5_fortran.a</div>
 <div class="line">libhdf5_hl.a</div>
 <div class="line">libhdf5.a</div>
 </div><!-- fragment -->  </td><td><div class="fragment"><div class="line">libhdf5_hl_cpp.a</div>
 <div class="line">libhdf5_cpp.a</div>
-<div class="line">libhdf5hl_fortran.a</div>
+<div class="line">libhdf5_hl_fortran.a</div>
 <div class="line">libhdf5_fortran.a</div>
 <div class="line">libhdf5_hl.a</div>
 <div class="line">libhdf5.a</div>
 </div><!-- fragment -->  </td><td><em>Windows</em> <div class="fragment"><div class="line">libhdf5_hl_cpp.lib</div>
 <div class="line">libhdf5_cpp.lib</div>
-<div class="line">libhdf5hl_fortran.lib</div>
+<div class="line">libhdf5_hl_fortran.lib</div>
 <div class="line">libhdf5_fortran.lib</div>
 <div class="line">libhdf5_hl.lib</div>
 <div class="line">libhdf5.lib</div>
@@ -194,19 +445,19 @@ HDF5 Libraries</h1>
 <div class="line">HDF5 C Library</div>
 </div><!-- fragment -->  </td><td><div class="fragment"><div class="line">libhdf5_hl_cpp.so</div>
 <div class="line">libhdf5_cpp.so</div>
-<div class="line">libhdf5hl_fortran.so</div>
+<div class="line">libhdf5_hl_fortran.so</div>
 <div class="line">libhdf5_fortran.so</div>
 <div class="line">libhdf5_hl.so</div>
 <div class="line">libhdf5.so</div>
 </div><!-- fragment -->  </td><td><div class="fragment"><div class="line">libhdf5_hl_cpp.dylib</div>
 <div class="line">libhdf5_cpp.dylib</div>
-<div class="line">libhdf5hl_fortran.dylib</div>
+<div class="line">libhdf5_hl_fortran.dylib</div>
 <div class="line">libhdf5_fortran.dylib</div>
 <div class="line">libhdf5_hl.dylib</div>
 <div class="line">libhdf5.dylib</div>
 </div><!-- fragment -->  </td><td><div class="fragment"><div class="line">hdf5_hl_cpp.lib</div>
 <div class="line">hdf5_cpp.lib</div>
-<div class="line">hdf5hl_fortran.lib</div>
+<div class="line">hdf5_hl_fortran.lib</div>
 <div class="line">hdf5_fortran.lib</div>
 <div class="line">hdf5_hl.lib</div>
 <div class="line"><a class="code hl_namespace" href="namespacehdf5.html">hdf5</a>.lib</div>
@@ -262,7 +513,8 @@ Troubleshooting CMake</h2>
 <p>If the error is still not clear, then check the log files. You will find those in the build directory. For example, on Unix the log files will be in: </p><div class="fragment"><div class="line">build/Testing/Temporary/  </div>
 </div><!-- fragment --><p> There are log files for the configure, test, and build.</p>
 <hr  />
-<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_getting_started.html">Getting Started with HDF5</a> / <a class="el" href="_learn_basics.html">Learning the Basics</a> </p>
+<p> Previous Chapter <a class="el" href="_l_b_quiz_answers.html">Learning the basics QUIZ with Answers</a> - Next Chapter <a class="el" href="_l_b_training.html">Training Videos</a></p>
+<p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_getting_started.html">Getting Started with HDF5</a> / <a class="el" href="_learn_basics.html">Learning the Basics</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

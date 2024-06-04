@@ -121,7 +121,14 @@ Overview of Parallel HDF5 (PHDF5) Design</h1>
 <li>Not have a reserved process, as this might interfere with parallel algorithms. </li>
 <li>Not spawn any processes, as this is not even commonly supported now.</li>
 </ul>
-<p>The following shows the Parallel HDF5 implementation layers.</p>
+<p>The following shows the Parallel HDF5 implementation layers:</p>
+<table class="doxtable">
+<tr>
+<td><div class="image">
+<img src="pimplayer.gif" alt=""/>
+</div>
+  </td></tr>
+</table>
 <h2><a class="anchor" id="subsec_pintro_prog"></a>
 Parallel Programming with HDF5</h2>
 <p>This tutorial assumes that you are somewhat familiar with parallel programming with MPI (Message Passing Interface).</p>
@@ -225,7 +232,7 @@ Do this by first passing a data transfer property list class type to: <a class="
 <div class="ttc" id="a_h5_f_dmpi_8h_html_a99bc5a964089fea144e7056b004bcc16a6c67820a8798cd75a6f0ebbb44e9a2af"><div class="ttname"><a href="_h5_f_dmpi_8h.html#a99bc5a964089fea144e7056b004bcc16a6c67820a8798cd75a6f0ebbb44e9a2af">H5FD_MPIO_INDEPENDENT</a></div><div class="ttdeci">@ H5FD_MPIO_INDEPENDENT</div><div class="ttdef"><b>Definition</b> H5FDmpi.h:37</div></div>
 <div class="ttc" id="a_h5_f_dmpi_8h_html_a99bc5a964089fea144e7056b004bcc16a75d4dc80546ad3c16d2d7647ab267fab"><div class="ttname"><a href="_h5_f_dmpi_8h.html#a99bc5a964089fea144e7056b004bcc16a75d4dc80546ad3c16d2d7647ab267fab">H5FD_MPIO_COLLECTIVE</a></div><div class="ttdeci">@ H5FD_MPIO_COLLECTIVE</div><div class="ttdef"><b>Definition</b> H5FDmpi.h:38</div></div>
 <div class="ttc" id="a_h5_ipublic_8h_html_a0045db7ff9c22ad35db6ae91662e1943"><div class="ttname"><a href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></div><div class="ttdeci">int64_t hid_t</div><div class="ttdef"><b>Definition</b> H5Ipublic.h:60</div></div>
-<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:235</div></div>
+<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:239</div></div>
 <div class="ttc" id="agroup___d_x_p_l_html_ga001a22b64f60b815abf5de8b4776f09e"><div class="ttname"><a href="group___d_x_p_l.html#ga001a22b64f60b815abf5de8b4776f09e">H5Pset_dxpl_mpio</a></div><div class="ttdeci">H5_DLL herr_t H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)</div><div class="ttdoc">Sets data transfer mode.</div></div>
 </div><!-- fragment --><p class="endli"><em>Fortran</em> </p><div class="fragment"><div class="line">h5pset_dxpl_mpi_f (prp_id, data_xfer_mode, hdferr)</div>
 <div class="line">     prp_id         IN: Property List Identifier (INTEGER (HID_T))</div>
