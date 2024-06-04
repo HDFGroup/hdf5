@@ -1540,7 +1540,7 @@
   ADD_H5_TEST (szip_convert ${TESTTYPE} ${arg})
 
 #limit
-  set (arg ${FILE4} -f GZIP=1 -m 1024)
+  set (arg ${FILE4} -f GZIP=2 -m 1024)
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")

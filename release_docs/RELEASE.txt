@@ -59,6 +59,14 @@ New Features
       disable the 'threadsafe' option, but not vice versa.  The 'threads' option
       must be on to enable the subfiling VFD.
 
+    - Added support for using zlib-ng package as the zlib library:
+
+          CMake:      HDF5_USE_ZLIB_NG
+          Autotools:  --enable-zlibng
+
+      Added the option HDF5_USE_ZLIB_NG to allow the replacement of the
+      default ZLib package by the zlib-ng package as a built-in compression library.
+
     - Disable CMake UNITY_BUILD for hdf5
 
       CMake added a target property, UNITY_BUILD, that when set to true, the target
