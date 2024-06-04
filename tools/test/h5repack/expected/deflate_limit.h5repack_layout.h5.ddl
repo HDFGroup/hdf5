@@ -8,7 +8,7 @@ GROUP "/" {
          SIZE XXXX (2.XXX:1 COMPRESSION)
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 1 }
+         COMPRESSION DEFLATE { LEVEL 2 }
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -26,7 +26,7 @@ GROUP "/" {
          SIZE XXXX (2.XXX:1 COMPRESSION)
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 1 }
+         COMPRESSION DEFLATE { LEVEL 2 }
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -44,7 +44,7 @@ GROUP "/" {
          SIZE XXXX (2.XXX:1 COMPRESSION)
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 1 }
+         COMPRESSION DEFLATE { LEVEL 2 }
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -62,7 +62,7 @@ GROUP "/" {
          SIZE XXXX (2.XXX:1 COMPRESSION)
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 1 }
+         COMPRESSION DEFLATE { LEVEL 2 }
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -80,7 +80,7 @@ GROUP "/" {
          SIZE XXXX (2.XXX:1 COMPRESSION)
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 1 }
+         COMPRESSION DEFLATE { LEVEL 2 }
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -98,7 +98,7 @@ GROUP "/" {
          SIZE XXXX (2.XXX:1 COMPRESSION)
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 1 }
+         COMPRESSION DEFLATE { LEVEL 2 }
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -116,7 +116,7 @@ GROUP "/" {
          SIZE XXXX (2.XXX:1 COMPRESSION)
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 1 }
+         COMPRESSION DEFLATE { LEVEL 2 }
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
