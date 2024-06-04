@@ -287,7 +287,7 @@ typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id, void
 /**
  * \brief Callback function for H5Pcreate_class()
  *
- * \param[in] prop_id    The identifier of the property list class being created
+ * \param[in] prop_id    The identifier of the property list class being closed
  * \param[in] close_data User pointer to any close data required
  * \return \herr_t
  *
