@@ -408,8 +408,6 @@ CHECK_FUNCTION_EXISTS (getrusage         ${HDF_PREFIX}_HAVE_GETRUSAGE)
 
 CHECK_FUNCTION_EXISTS (pread             ${HDF_PREFIX}_HAVE_PREAD)
 CHECK_FUNCTION_EXISTS (pwrite            ${HDF_PREFIX}_HAVE_PWRITE)
-CHECK_FUNCTION_EXISTS (rand_r            ${HDF_PREFIX}_HAVE_RAND_R)
-CHECK_FUNCTION_EXISTS (random            ${HDF_PREFIX}_HAVE_RANDOM)
 
 CHECK_FUNCTION_EXISTS (strcasestr        ${HDF_PREFIX}_HAVE_STRCASESTR)
 CHECK_FUNCTION_EXISTS (strdup            ${HDF_PREFIX}_HAVE_STRDUP)
@@ -436,6 +434,7 @@ endif ()
 if (MINGW OR NOT WINDOWS)
   foreach (other_test
       HAVE_ATTRIBUTE
+      HAVE_BUILTIN_EXPECT
       SYSTEM_SCOPE_THREADS
       HAVE_SOCKLEN_T
   )
@@ -495,16 +494,6 @@ if (HDF5_WANT_DCONV_EXCEPTION)
   set (${HDF_PREFIX}_WANT_DCONV_EXCEPTION 1)
 endif ()
 MARK_AS_ADVANCED (HDF5_WANT_DCONV_EXCEPTION)
-
-# ----------------------------------------------------------------------
-# Check if they would like the function stack support compiled in
-#-----------------------------------------------------------------------------
-option (HDF5_ENABLE_CODESTACK "Enable the function stack tracing (for developer debugging)." OFF)
-mark_as_advanced (HDF5_ENABLE_CODESTACK)
-if (HDF5_ENABLE_CODESTACK)
-  set (${HDF_PREFIX}_HAVE_CODESTACK 1)
-endif ()
-MARK_AS_ADVANCED (HDF5_ENABLE_CODESTACK)
 
 # ----------------------------------------------------------------------
 # Check if they would like to show all warnings (not suppressed internally)
@@ -613,6 +602,7 @@ if (HDF5_ENABLE_DIRECT_VFD)
   if (HAVE_O_DIRECT AND HAVE_POSIX_MEMALIGN)
     set (${HDF_PREFIX}_HAVE_DIRECT 1)
   else ()
+    set (HDF5_ENABLE_DIRECT_VFD OFF CACHE BOOL "Build the Direct I/O Virtual File Driver" FORCE)
     message (FATAL_ERROR "The direct VFD was requested but cannot be built.\nIt requires O_DIRECT flag support and posix_memalign()")
   endif ()
 endif ()
@@ -629,6 +619,7 @@ option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
       list (APPEND LINK_LIBS ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES})
       INCLUDE_DIRECTORIES (${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
     else ()
+      set (HDF5_ENABLE_ROS3_VFD OFF CACHE BOOL "Build the ROS3 Virtual File Driver" FORCE)
       message (WARNING "The Read-Only S3 VFD was requested but cannot be built.\nPlease check that openssl and cURL are available on your\nsystem, and/or re-configure without option HDF5_ENABLE_ROS3_VFD.")
     endif ()
 endif ()
@@ -645,7 +636,8 @@ if (HDF5_ENABLE_MIRROR_VFD)
        ${HDF_PREFIX}_HAVE_FORK)
       set (${HDF_PREFIX}_HAVE_MIRROR_VFD 1)
   else()
-    message(WARNING "The socket-based Mirror VFD was requested but cannot be built. System prerequisites are not met.")
+      set (HDF5_ENABLE_MIRROR_VFD OFF CACHE BOOL "Build the Mirror Virtual File Driver" FORCE)
+      message(WARNING "The socket-based Mirror VFD was requested but cannot be built. System prerequisites are not met.")
   endif()
 endif()
 
@@ -799,7 +791,7 @@ macro (H5ConversionTests TEST def msg)
           message (VERBOSE "${msg}... no")
           file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
             "Test ${TEST} Compile succeeded with the following output:\n ${${TEST}_COMPILE_OUTPUT}\n"
-          )         
+          )
           file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
             "Test ${TEST} Run failed with exit code ${${TEST}_RUN} and with the following output:\n ${${TEST}_RUN_OUTPUT}\n"
           )
@@ -872,93 +864,127 @@ H5ConversionTests (${HDF_PREFIX}_LLONG_TO_LDOUBLE_CORRECT TRUE "Checking IF corr
 H5ConversionTests (${HDF_PREFIX}_DISABLE_SOME_LDOUBLE_CONV FALSE "Checking IF the cpu is power9 and cannot correctly converting long double values")
 
 #-----------------------------------------------------------------------------
+# Options for enabling/disabling support for non-standard features, datatypes,
+# etc. These features should still be checked for at configure time, but these
+# options allow disabling of support for these features when compiler support
+# is incomplete or broken. In this case, configure time checks may not be
+# enough to properly enable/disable a feature and can cause library build
+# problems.
+#-----------------------------------------------------------------------------
+# Option to enable or disable all non-standard features. Specific features can
+# be enabled or disabled with their respective options below
+option (HDF5_ENABLE_NONSTANDARD_FEATURES "Enable support for non-standard programming language features" ON)
+# Options for enabling or disabling individual features
+option (HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 "Enable support for _Float16 C datatype" ${HDF5_ENABLE_NONSTANDARD_FEATURES})
+
+#-----------------------------------------------------------------------------
 # Check if _Float16 type is available
 #-----------------------------------------------------------------------------
-message (STATUS "Checking if _Float16 support is available")
-set (${HDF_PREFIX}_HAVE__FLOAT16 0)
-HDF_CHECK_TYPE_SIZE (_Float16 ${HDF_PREFIX}_SIZEOF__FLOAT16)
-if (${HDF_PREFIX}_SIZEOF__FLOAT16)
-  # Request _Float16 support
-  set (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} "-D__STDC_WANT_IEC_60559_TYPES_EXT__")
+if (HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16)
+  message (STATUS "Checking if _Float16 support is available")
+  HDF_CHECK_TYPE_SIZE (_Float16 ${HDF_PREFIX}_SIZEOF__FLOAT16)
 
-  # Some compilers expose the _Float16 datatype, but not the macros and
-  # functions used with the datatype. We need the macros for proper
-  # datatype conversion support. Check for these here.
-  CHECK_SYMBOL_EXISTS (FLT16_EPSILON "float.h" h5_have_flt16_epsilon)
-  CHECK_SYMBOL_EXISTS (FLT16_MIN "float.h" h5_have_flt16_min)
-  CHECK_SYMBOL_EXISTS (FLT16_MAX "float.h" h5_have_flt16_max)
-  CHECK_SYMBOL_EXISTS (FLT16_MIN_10_EXP "float.h" h5_have_flt16_min_10_exp)
-  CHECK_SYMBOL_EXISTS (FLT16_MAX_10_EXP "float.h" h5_have_flt16_max_10_exp)
-  CHECK_SYMBOL_EXISTS (FLT16_MANT_DIG "float.h" h5_have_flt16_mant_dig)
+  if (${HDF_PREFIX}_SIZEOF__FLOAT16)
+    # Request _Float16 support
+    set (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} "-D__STDC_WANT_IEC_60559_TYPES_EXT__")
 
-  if (h5_have_flt16_epsilon AND h5_have_flt16_min AND
-      h5_have_flt16_max AND h5_have_flt16_min_10_exp AND
-      h5_have_flt16_max_10_exp AND h5_have_flt16_mant_dig)
-    # Some compilers like OneAPI on Windows appear to detect _Float16 support
-    # properly up to this point, and, in the absence of any architecture-specific
-    # tuning compiler flags, will generate code for H5Tconv.c that performs
-    # software conversions on _Float16 variables with compiler-internal functions
-    # such as __extendhfsf2, __truncsfhf2, or __truncdfhf2. However, these
-    # compilers will fail to link these functions into the build for currently
-    # unknown reasons and cause the build to fail. Since these are compiler-internal
-    # functions that we don't appear to have much control over, let's try to
-    # compile a program that will generate these functions to check for _Float16
-    # support. If we fail to compile this program, we will simply disable
-    # _Float16 support for the time being.
+    # Some compilers expose the _Float16 datatype, but not the macros and
+    # functions used with the datatype. We need the macros for proper
+    # datatype conversion support. Check for these here.
+    CHECK_SYMBOL_EXISTS (FLT16_EPSILON "float.h" h5_have_flt16_epsilon)
+    CHECK_SYMBOL_EXISTS (FLT16_MIN "float.h" h5_have_flt16_min)
+    CHECK_SYMBOL_EXISTS (FLT16_MAX "float.h" h5_have_flt16_max)
+    CHECK_SYMBOL_EXISTS (FLT16_MIN_10_EXP "float.h" h5_have_flt16_min_10_exp)
+    CHECK_SYMBOL_EXISTS (FLT16_MAX_10_EXP "float.h" h5_have_flt16_max_10_exp)
+    CHECK_SYMBOL_EXISTS (FLT16_MANT_DIG "float.h" h5_have_flt16_mant_dig)
 
-    # Some compilers, notably AppleClang on MacOS 12, will succeed in the
-    # configure check below when optimization flags like -O3 are manually
-    # passed in CMAKE_C_FLAGS. However, the build will then fail when it
-    # reaches compilation of H5Tconv.c because of the issue mentioned above.
-    # MacOS 13 appears to have fixed this, but, just to be sure, backup and
-    # clear CMAKE_C_FLAGS before performing these configure checks.
-    set (cmake_c_flags_backup "${CMAKE_C_FLAGS}")
-    set (CMAKE_C_FLAGS "")
+    if (h5_have_flt16_epsilon AND h5_have_flt16_min AND
+        h5_have_flt16_max AND h5_have_flt16_min_10_exp AND
+        h5_have_flt16_max_10_exp AND h5_have_flt16_mant_dig)
+      # Some compilers like OneAPI on Windows appear to detect _Float16 support
+      # properly up to this point, and, in the absence of any architecture-specific
+      # tuning compiler flags, will generate code for H5Tconv.c that performs
+      # software conversions on _Float16 variables with compiler-internal functions
+      # such as __extendhfsf2, __truncsfhf2, or __truncdfhf2. However, these
+      # compilers will fail to link these functions into the build for currently
+      # unknown reasons and cause the build to fail. Since these are compiler-internal
+      # functions that we don't appear to have much control over, let's try to
+      # compile a program that will generate these functions to check for _Float16
+      # support. If we fail to compile this program, we will simply disable
+      # _Float16 support for the time being.
+      H5ConversionTests (
+          ${HDF_PREFIX}_FLOAT16_CONVERSION_FUNCS_LINK
+          FALSE
+          "Checking if compiler can convert _Float16 type with casts"
+      )
 
-    H5ConversionTests (
-        ${HDF_PREFIX}_FLOAT16_CONVERSION_FUNCS_LINK
-        FALSE
-        "Checking if compiler can convert _Float16 type with casts"
-    )
-
-    set (CMAKE_C_FLAGS "${cmake_c_flags_backup}")
-
-    if (${${HDF_PREFIX}_FLOAT16_CONVERSION_FUNCS_LINK})
-      # Finally, MacOS 13 appears to have a bug specifically when converting
-      # long double values to _Float16. Release builds of the dt_arith test
-      # would cause any assignments to a _Float16 variable to be elided,
-      # whereas Debug builds would perform incorrect hardware conversions by
-      # simply chopping off all the bytes of the value except for the first 2.
-      # These tests pass on MacOS 14, so let's perform a quick test to check
-      # if the hardware conversion is done correctly.
-
-      # Backup and clear CMAKE_C_FLAGS before performing configure checks
+      # Some compilers, notably AppleClang on MacOS 12, will succeed in the
+      # configure check above when optimization flags like -O3 are manually
+      # passed in CMAKE_C_FLAGS. However, the build will then fail when it
+      # reaches compilation of H5Tconv.c because of the issue mentioned above.
+      # MacOS 13 appears to have fixed this, but, just to be sure, make sure
+      # the check also passes without the passed in CMAKE_C_FLAGS.
       set (cmake_c_flags_backup "${CMAKE_C_FLAGS}")
       set (CMAKE_C_FLAGS "")
 
       H5ConversionTests (
-          ${HDF_PREFIX}_LDOUBLE_TO_FLOAT16_CORRECT
-          TRUE
-          "Checking if correctly converting long double to _Float16 values"
+          ${HDF_PREFIX}_FLOAT16_CONVERSION_FUNCS_LINK_NO_FLAGS
+          FALSE
+          "Checking if compiler can convert _Float16 type with casts (without CMAKE_C_FLAGS)"
       )
 
       set (CMAKE_C_FLAGS "${cmake_c_flags_backup}")
 
-      if (NOT ${${HDF_PREFIX}_LDOUBLE_TO_FLOAT16_CORRECT})
-        message (VERBOSE "Conversions from long double to _Float16 appear to be incorrect. These will be emulated through a soft conversion function.")
+      if (${HDF_PREFIX}_FLOAT16_CONVERSION_FUNCS_LINK AND ${HDF_PREFIX}_FLOAT16_CONVERSION_FUNCS_LINK_NO_FLAGS)
+        # Finally, MacOS 13 appears to have a bug specifically when converting
+        # long double values to _Float16. Release builds of the dt_arith test
+        # would cause any assignments to a _Float16 variable to be elided,
+        # whereas Debug builds would perform incorrect hardware conversions by
+        # simply chopping off all the bytes of the value except for the first 2.
+        # These tests pass on MacOS 14, so let's perform a quick test to check
+        # if the hardware conversion is done correctly.
+        H5ConversionTests (
+            ${HDF_PREFIX}_LDOUBLE_TO_FLOAT16_CORRECT
+            TRUE
+            "Checking if correctly converting long double to _Float16 values"
+        )
+
+        # Backup and clear CMAKE_C_FLAGS before performing configure check again
+        set (cmake_c_flags_backup "${CMAKE_C_FLAGS}")
+        set (CMAKE_C_FLAGS "")
+
+        H5ConversionTests (
+            ${HDF_PREFIX}_LDOUBLE_TO_FLOAT16_CORRECT_NO_FLAGS
+            TRUE
+            "Checking if correctly converting long double to _Float16 values (without CMAKE_C_FLAGS)"
+        )
+
+        set (CMAKE_C_FLAGS "${cmake_c_flags_backup}")
+
+        if (NOT ${HDF_PREFIX}_LDOUBLE_TO_FLOAT16_CORRECT OR NOT ${HDF_PREFIX}_LDOUBLE_TO_FLOAT16_CORRECT_NO_FLAGS)
+          message (VERBOSE "Conversions from long double to _Float16 appear to be incorrect. These will be emulated through a soft conversion function.")
+        endif ()
+
+        set (${HDF_PREFIX}_HAVE__FLOAT16 1)
+
+        # Check if we can use fabsf16
+        CHECK_FUNCTION_EXISTS (fabsf16 ${HDF_PREFIX}_HAVE_FABSF16)
+      else ()
+        message (STATUS "_Float16 support has been disabled because the compiler couldn't compile and run a test program for _Float16 conversions")
+        message (STATUS "Check ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log for information on why the test program couldn't be compiled/run")
       endif ()
-
-      set (${HDF_PREFIX}_HAVE__FLOAT16 1)
-
-      # Check if we can use fabsf16
-      CHECK_FUNCTION_EXISTS (fabsf16 ${HDF_PREFIX}_HAVE_FABSF16)
     else ()
-      message (STATUS "_Float16 support has been disabled because the compiler couldn't compile and run a test program for _Float16 conversions")
-      message (STATUS "Check ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log for information on why the test program couldn't be compiled/run")
+      message (STATUS "_Float16 support has been disabled since the required macros (FLT16_MAX, FLT16_EPSILON, etc. were not found)")
     endif ()
   else ()
-    message (STATUS "_Float16 support has been disabled since the required macros (FLT16_MAX, FLT16_EPSILON, etc. were not found)")
+    message (STATUS "_Float16 support has been disabled since the _Float16 type was not found")
   endif ()
 else ()
-  message (STATUS "_Float16 support has been disabled since the _Float16 type was not found")
+  set (${HDF_PREFIX}_SIZEOF__FLOAT16 0 CACHE INTERNAL "SizeOf for ${HDF_PREFIX}_SIZEOF__FLOAT16")
+  unset (${HDF_PREFIX}_HAVE__FLOAT16 CACHE)
+  unset (${HDF_PREFIX}_LDOUBLE_TO_FLOAT16_CORRECT CACHE)
+endif ()
+
+if (NOT ${HDF_PREFIX}_HAVE__FLOAT16)
+  set (HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 OFF CACHE BOOL "Enable support for _Float16 C datatype" FORCE)
 endif ()

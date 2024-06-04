@@ -130,6 +130,7 @@ typedef struct H5S_sel_iter_op_t {
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5S_MODULE
+#define H5S_GET_EXTENT(S)                       (&(S)->extent)
 #define H5S_GET_EXTENT_TYPE(S)                  ((S)->extent.type)
 #define H5S_GET_EXTENT_NDIMS(S)                 ((S)->extent.rank)
 #define H5S_GET_EXTENT_NPOINTS(S)               ((S)->extent.nelem)
@@ -157,6 +158,7 @@ typedef struct H5S_sel_iter_op_t {
     ((*(ITER)->type->iter_get_seq_list)(ITER, MAXSEQ, MAXBYTES, NSEQ, NBYTES, OFF, LEN))
 #define H5S_SELECT_ITER_RELEASE(ITER) ((*(ITER)->type->iter_release)(ITER))
 #else /* H5S_MODULE */
+#define H5S_GET_EXTENT(S)                       (H5S_get_simple_extent(S))
 #define H5S_GET_EXTENT_TYPE(S)                  (H5S_get_simple_extent_type(S))
 #define H5S_GET_EXTENT_NDIMS(S)                 (H5S_get_simple_extent_ndims(S))
 #define H5S_GET_EXTENT_NPOINTS(S)               (H5S_get_simple_extent_npoints(S))
@@ -200,14 +202,15 @@ struct H5O_loc_t;
 typedef struct H5S_t H5S_t;
 
 /* Operations on dataspaces */
-H5_DLL herr_t      H5S_init(void);
-H5_DLL H5S_t      *H5S_copy(const H5S_t *src, bool share_selection, bool copy_max);
-H5_DLL herr_t      H5S_close(H5S_t *ds);
-H5_DLL H5S_class_t H5S_get_simple_extent_type(const H5S_t *ds);
-H5_DLL hssize_t    H5S_get_simple_extent_npoints(const H5S_t *ds);
-H5_DLL hsize_t     H5S_get_npoints_max(const H5S_t *ds);
-H5_DLL bool        H5S_has_extent(const H5S_t *ds);
-H5_DLL int         H5S_get_simple_extent_ndims(const H5S_t *ds);
+H5_DLL herr_t              H5S_init(void);
+H5_DLL H5S_t              *H5S_copy(const H5S_t *src, bool share_selection, bool copy_max);
+H5_DLL herr_t              H5S_close(H5S_t *ds);
+H5_DLL const H5S_extent_t *H5S_get_simple_extent(const H5S_t *ds);
+H5_DLL H5S_class_t         H5S_get_simple_extent_type(const H5S_t *ds);
+H5_DLL hssize_t            H5S_get_simple_extent_npoints(const H5S_t *ds);
+H5_DLL hsize_t             H5S_get_npoints_max(const H5S_t *ds);
+H5_DLL bool                H5S_has_extent(const H5S_t *ds);
+H5_DLL int                 H5S_get_simple_extent_ndims(const H5S_t *ds);
 H5_DLL int    H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[] /*out*/, hsize_t max_dims[] /*out*/);
 H5_DLL herr_t H5S_write(H5F_t *f, struct H5O_t *oh, unsigned update_flags, H5S_t *ds);
 H5_DLL herr_t H5S_append(H5F_t *f, struct H5O_t *oh, H5S_t *ds);

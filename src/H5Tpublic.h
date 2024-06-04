@@ -227,12 +227,13 @@ extern "C" {
  * \param[in] src_buf Source data buffer
  * \param[in,out] dst_buf Destination data buffer
  * \param[in,out] user_data Callback context
- * \returns Valid callback function return values are #H5T_CONV_ABORT,
+ * \return Valid callback function return values are #H5T_CONV_ABORT,
  *          #H5T_CONV_UNHANDLED and #H5T_CONV_HANDLED.
  *
  * \details If an exception like overflow happens during conversion, this
  *          function is called if it's registered through H5Pset_type_conv_cb().
  *
+ * \since 1.8.0
  */
 typedef H5T_conv_ret_t (*H5T_conv_except_func_t)(H5T_conv_except_t except_type, hid_t src_id, hid_t dst_id,
                                                  void *src_buf, void *dst_buf, void *user_data);

@@ -228,7 +228,7 @@ read_records(const char *filename, bool verbose, FILE *verbose_file, unsigned ra
 
             /* Determine the offset of the symbol, within level 0 symbols */
             /* (level 0 symbols are the most common symbols) */
-            offset     = (unsigned)((unsigned)HDrandom() % symbol_count[0]);
+            offset     = (unsigned)((unsigned)rand() % symbol_count[0]);
             sym_com[v] = &symbol_info[0][offset];
 
             /* Emit informational message */
@@ -267,7 +267,7 @@ read_records(const char *filename, bool verbose, FILE *verbose_file, unsigned ra
         fprintf(verbose_file, "Reading records\n");
 
     /* Get the starting time */
-    start_time = HDtime(NULL);
+    start_time = time(NULL);
     curr_time  = start_time;
 
     /* Create file access property list */
@@ -336,7 +336,7 @@ read_records(const char *filename, bool verbose, FILE *verbose_file, unsigned ra
         HDsleep(poll_time);
 
         /* Retrieve the current time */
-        curr_time = HDtime(NULL);
+        curr_time = time(NULL);
     } /* end while */
 
     /* Close the memory dataspace */
@@ -475,7 +475,7 @@ main(int argc, char *argv[])
         HDgettimeofday(&t, NULL);
         random_seed = (unsigned)(t.tv_usec);
     } /* end if */
-    HDsrandom(random_seed);
+    srand(random_seed);
 
     /* Open output file */
     if (verbose) {

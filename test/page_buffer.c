@@ -1651,6 +1651,114 @@ error:
 } /* test_min_threshold */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_pb_fapl_tolerance_at_open()
+ *
+ * Purpose:     Tests if the library tolerates setting fapl page buffer
+ *              values via H5Pset_page_buffer_size() when opening a file
+ *              that does not use page buffering or has a size smaller
+ *              than the file's page size.
+ *
+ *              As of HDF5 1.14.4, these should succeed.
+ *
+ * Return:      0 if test is successful
+ *              1 if test fails
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_pb_fapl_tolerance_at_open(void)
+{
+    const char *filename = "pb_fapl_tolerance.h5";
+    hid_t       fapl     = H5I_INVALID_HID;
+    hid_t       fcpl     = H5I_INVALID_HID;
+    hid_t       fid      = H5I_INVALID_HID;
+    H5F_t      *f        = NULL;
+
+    TESTING("if opening non-page-buffered files works w/ H5Pset_page_buffer_size()");
+
+    /* Create a file WITHOUT page buffering */
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Set up page buffering values on a fapl */
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_page_buffer_size(fapl, 512, 0, 0) < 0)
+        TEST_ERROR;
+
+    /* Attempt to open non-page-buf file w/ page buf fapl. Should succeed,
+     * but without a page buffer.
+     */
+    if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+    if (NULL == (f = (H5F_t *)H5VL_object(fid)))
+        TEST_ERROR;
+    if (f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE)
+        TEST_ERROR;
+    if (f->shared->page_buf != NULL)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Set up a fcpl with a page size that is larger than the fapl size */
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1) < 0)
+        TEST_ERROR;
+    if (H5Pset_file_space_page_size(fcpl, 4096) < 0)
+        TEST_ERROR;
+
+    /* Create a file that uses page buffering with a larger page size */
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Attempt to open page-buf file w/ fapl page buf size that is too small.
+     * Should succeed with a page buffer size that matches the file's page size.
+     */
+    if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+    if (NULL == (f = (H5F_t *)H5VL_object(fid)))
+        TEST_ERROR;
+    if (f->shared->fs_strategy != H5F_FSPACE_STRATEGY_PAGE)
+        TEST_ERROR;
+    if (f->shared->page_buf == NULL)
+        TEST_ERROR;
+    if (f->shared->fs_page_size != 4096)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Shut down */
+    if (H5Pclose(fcpl) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fapl) < 0)
+        TEST_ERROR;
+
+    HDremove(filename);
+
+    PASSED();
+
+    return 0;
+
+error:
+
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+        H5Pclose(fcpl);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    return 1;
+
+} /* test_pb_fapl_tolerance_at_open */
+
+/*-------------------------------------------------------------------------
  * Function:    test_stats_collection()
  *
  * Purpose:     Tests verifying correct collection of statistics
@@ -2083,12 +2191,12 @@ main(void)
         SKIPPED();
         puts("Skip page buffering test because paged aggregation is disabled for multi/split drivers");
         exit(EXIT_SUCCESS);
-    } /* end if */
+    }
 
     if ((fapl = h5_fileaccess()) < 0) {
         nerrors++;
         PUTS_ERROR("Can't get VFD-dependent fapl");
-    } /* end if */
+    }
 
     /* Push API context */
     if (H5CX_push() < 0)
@@ -2107,6 +2215,7 @@ main(void)
     nerrors += test_lru_processing(fapl, driver_name);
     nerrors += test_min_threshold(fapl, driver_name);
     nerrors += test_stats_collection(fapl, driver_name);
+    nerrors += test_pb_fapl_tolerance_at_open();
 
 #endif /* H5_HAVE_PARALLEL */
 

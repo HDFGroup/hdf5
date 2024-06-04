@@ -3982,7 +3982,7 @@ test_misc21(void)
 
     /* Allocate space for the buffer */
     buf = (char *)calloc(MISC21_SPACE_DIM0 * MISC21_SPACE_DIM1, 1);
-    CHECK(buf, NULL, "calloc");
+    CHECK_PTR(buf, "calloc");
 
     /* Create the file */
     fid = H5Fcreate(MISC21_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -4068,7 +4068,7 @@ test_misc22(void)
 
     /* Allocate space for the buffer */
     buf = (char *)calloc(MISC22_SPACE_DIM0 * MISC22_SPACE_DIM1, 8);
-    CHECK(buf, NULL, "calloc");
+    CHECK_PTR(buf, "calloc");
 
     /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);

@@ -134,7 +134,7 @@ PROGRAM subfiling_test
         ENDIF
 
         CALL mpi_info_get(info_ret,"foo", 3_MPI_INTEGER_KIND, info_val, flag, mpierror)
-        IF(LOGICAL(flag) .EQV. .TRUE.)THEN
+        IF(LOGICAL(flag) .EQV. LOGICAL(.TRUE.))THEN
            IF(info_val.NE."bar")THEN
               IF(mpi_rank.EQ.0) &
                    WRITE(*,*) "Failed H5Pset_mpi_params_f and H5Pget_mpi_params_f sequence"

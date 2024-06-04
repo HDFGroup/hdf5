@@ -124,7 +124,7 @@ jobs:
 
       - name: Install CMake Dependencies (Linux)
         run: |
-           sudo apt update
+           sudo apt-get update
            sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
@@ -261,7 +261,7 @@ jobs:
       - name: Save published binary (Mac)
         uses: actions/upload-artifact@v4
         with:
-              name: tgz-osx12-${{ inputs.build_mode }}-binary
+              name: tgz-osx-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if: ${{ (matrix.os == 'macos-13') && (inputs.thread_safety != 'TS') }}

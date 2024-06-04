@@ -344,6 +344,39 @@ set (H5TEST_SEPARATE_TESTS
     flush2
     vds_env
 )
+foreach (h5_test ${H5_EXPRESS_TESTS})
+  if (NOT h5_test IN_LIST H5TEST_SEPARATE_TESTS)
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5TESTXPR-${h5_test} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${h5_test}>)
+      set_tests_properties (H5TESTXPR-${h5_test} PROPERTIES
+          FIXTURES_REQUIRED clear_H5TEST
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+          WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+      )
+    else ()
+      add_test (NAME H5TESTXPR-${h5_test} COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+          -D "TEST_PROGRAM=$<TARGET_FILE:${h5_test}>"
+          -D "TEST_ARGS:STRING="
+          -D "TEST_EXPECT=0"
+          -D "TEST_SKIP_COMPARE=TRUE"
+          -D "TEST_OUTPUT=${h5_test}.txt"
+          -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+          #-D "TEST_REFERENCE=${test}.out"
+          -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
+          -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5TESTXPR-${h5_test} PROPERTIES
+          FIXTURES_REQUIRED clear_H5TEST
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+          WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+      )
+    endif ()
+    if ("H5TESTXPR-${h5_test}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5TESTXPR-${h5_test} PROPERTIES DISABLED true)
+    endif ()
+  endif ()
+endforeach ()
 foreach (h5_test ${H5_TESTS})
   if (NOT h5_test IN_LIST H5TEST_SEPARATE_TESTS)
     if (HDF5_USING_ANALYSIS_TOOL)
@@ -384,10 +417,10 @@ foreach (h5_test ${H5_TESTS})
   endif ()
 endforeach ()
 
-set_tests_properties (H5TEST-fheap PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
+set_tests_properties (H5TESTXPR-fheap PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
 set_tests_properties (H5TEST-big PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
-set_tests_properties (H5TEST-btree2 PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
-set_tests_properties (H5TEST-objcopy PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
+set_tests_properties (H5TESTXPR-btree2 PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
+set_tests_properties (H5TESTXPR-objcopy PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
 
 #-- Adding test for cache
 if (NOT CYGWIN)

@@ -796,10 +796,10 @@ H5G__verify_cached_stabs_test(hid_t gid)
 {
     H5G_t          *grp = NULL; /* Group */
     htri_t          stab_exists;
-    H5O_stab_t      stab;                     /* Symbol table message */
-    H5G_bt_common_t udata     = {NULL, NULL}; /* Dummy udata so H5B_iterate doesn't freak out */
-    haddr_t         prev_tag  = HADDR_UNDEF;  /* Previous metadata tag */
-    herr_t          ret_value = SUCCEED;      /* Return value */
+    H5O_stab_t      stab;                        /* Symbol table message */
+    H5G_bt_common_t udata     = {NULL, NULL, 0}; /* Dummy udata so H5B_iterate doesn't freak out */
+    haddr_t         prev_tag  = HADDR_UNDEF;     /* Previous metadata tag */
+    herr_t          ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 

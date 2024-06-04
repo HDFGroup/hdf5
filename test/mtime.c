@@ -64,7 +64,7 @@ main(void)
         TEST_ERROR;
     if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_SCHAR, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-    now = HDtime(NULL);
+    now = time(NULL);
     if (H5Dclose(dset) < 0)
         TEST_ERROR;
     if (H5Sclose(space) < 0)
@@ -110,11 +110,11 @@ main(void)
         puts("    cannot be queried on this system.  See H5O_mtime_decode().");
         return 0;
     }
-    else if (fabs(HDdifftime(now, oi1.ctime)) > 60.0) {
+    else if (fabs(difftime(now, oi1.ctime)) > 60.0) {
         H5_FAILED();
-        tm = HDlocaltime(&(oi1.ctime));
+        tm = localtime(&(oi1.ctime));
         strftime((char *)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
-        tm = HDlocaltime(&now);
+        tm = localtime(&now);
         strftime((char *)buf2, sizeof buf2, "%Y-%m-%d %H:%M:%S", tm);
         printf("    got: %s\n    ans: %s\n", buf1, buf2);
         goto error;

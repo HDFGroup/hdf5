@@ -80,20 +80,6 @@ H5DOread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fi
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Note:
- * 	This routine is copied from the fast forward feature branch: features/hdf5_ff
- *	src/H5FF.c:H5DOappend() with the following modifications:
- * 	1) Remove and replace macro calls such as
- *		FUNC_ENTER_API, H5TRACE, HGOTO_ERROR
- * 	   accordingly because hl does not have these macros
- *	2) Replace H5I_get_type() by H5Iget_type()
- *	3) Replace H5P_isa_class() by H5Pisa_class()
- *	4) Fix a bug in the following: replace extension by size[axis]
- *		if(extension < old_size) {
- *		  ret_value = FAIL;
- *		  goto done;
- *   		}
- *
  *-------------------------------------------------------------------------
  */
 herr_t

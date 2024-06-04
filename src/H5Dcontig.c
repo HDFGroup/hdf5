@@ -357,6 +357,65 @@ done:
 } /* end H5D__contig_delete */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D__contig_check
+ *
+ * Purpose:	Sanity check the contiguous info for a dataset.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__contig_check(const H5F_t *f, const H5O_layout_t *layout, const H5S_extent_t *extent, const H5T_t *dt)
+{
+    hsize_t nelmts;              /* Number of elements in dataspace */
+    size_t  dt_size;             /* Size of datatype */
+    hsize_t data_size;           /* Raw data size */
+    herr_t  ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    assert(f);
+    assert(layout);
+    assert(extent);
+    assert(dt);
+
+    /* Retrieve the number of elements in the dataspace */
+    nelmts = H5S_extent_nelem(extent);
+
+    /* Get the datatype's size */
+    if (0 == (dt_size = H5T_GET_SIZE(dt)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve size of datatype");
+
+    /* Compute the size of the dataset's contiguous storage */
+    data_size = nelmts * dt_size;
+
+    /* Check for overflow during multiplication */
+    if (nelmts != (data_size / dt_size))
+        HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed");
+
+    /* Check for invalid (corrupted in the file, probably) dimensions */
+    if (H5_addr_defined(layout->storage.u.contig.addr)) {
+        haddr_t rel_eoa; /* Relative end of file address	*/
+
+        if (HADDR_UNDEF == (rel_eoa = H5F_get_eoa(f, H5FD_MEM_DRAW)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to determine file size");
+
+        /* Check for invalid dataset size (from bad dimensions) putting the
+         * dataset elements off the end of the file
+         */
+        if (H5_addr_le((layout->storage.u.contig.addr + data_size), layout->storage.u.contig.addr))
+            HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "invalid dataset size, likely file corruption");
+        if (H5_addr_gt((layout->storage.u.contig.addr + data_size), rel_eoa))
+            HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "invalid dataset size, likely file corruption");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__contig_check() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5D__contig_construct
  *
  * Purpose:	Constructs new contiguous layout information for dataset
@@ -438,17 +497,21 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__contig_init(H5F_t H5_ATTR_UNUSED *f, const H5D_t *dset, hid_t H5_ATTR_UNUSED dapl_id)
+H5D__contig_init(H5F_t *f, const H5D_t *dset, hid_t H5_ATTR_UNUSED dapl_id)
 {
-    hsize_t tmp_size;            /* Temporary holder for raw data size */
-    size_t  tmp_sieve_buf_size;  /* Temporary holder for sieve buffer size */
-    herr_t  ret_value = SUCCEED; /* Return value */
+    size_t tmp_sieve_buf_size;  /* Temporary holder for sieve buffer size */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     assert(f);
     assert(dset);
+
+    /* Sanity check the dataset's info */
+    if (H5D__contig_check(f, &dset->shared->layout, H5S_GET_EXTENT(dset->shared->space), dset->shared->type) <
+        0)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "invalid dataset info");
 
     /* Compute the size of the contiguous storage for versions of the
      * layout message less than version 3 because versions 1 & 2 would
@@ -469,25 +532,16 @@ H5D__contig_init(H5F_t H5_ATTR_UNUSED *f, const H5D_t *dset, hid_t H5_ATTR_UNUSE
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve size of datatype");
 
         /* Compute the size of the dataset's contiguous storage */
-        tmp_size = nelmts * dt_size;
-
-        /* Check for overflow during multiplication */
-        if (nelmts != (tmp_size / dt_size))
-            HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed");
-
-        /* Assign the dataset's contiguous storage size */
-        dset->shared->layout.storage.u.contig.size = tmp_size;
-    } /* end if */
-    else
-        tmp_size = dset->shared->layout.storage.u.contig.size;
+        dset->shared->layout.storage.u.contig.size = nelmts * dt_size;
+    }
 
     /* Get the sieve buffer size for the file */
     tmp_sieve_buf_size = H5F_SIEVE_BUF_SIZE(dset->oloc.file);
 
     /* Adjust the sieve buffer size to the smaller one between the dataset size and the buffer size
      * from the file access property.  (SLU - 2012/3/30) */
-    if (tmp_size < tmp_sieve_buf_size)
-        dset->shared->cache.contig.sieve_buf_size = tmp_size;
+    if (dset->shared->layout.storage.u.contig.size < tmp_sieve_buf_size)
+        dset->shared->cache.contig.sieve_buf_size = dset->shared->layout.storage.u.contig.size;
     else
         dset->shared->cache.contig.sieve_buf_size = tmp_sieve_buf_size;
 
@@ -1810,9 +1864,6 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
     } /* end while */
 
 done:
-    /* Caller expects that source datatype will be freed */
-    if (dt_src && (H5T_close(dt_src) < 0))
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     if (dt_dst && (H5T_close(dt_dst) < 0))
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     if (dt_mem && (H5T_close(dt_mem) < 0))

@@ -21,9 +21,6 @@
 /* Private headers needed by this file */
 #include "H5private.h"
 
-/* Typedef for error stack (defined in H5Epkg.h) */
-typedef struct H5E_t H5E_t;
-
 /*
  * HERROR macro, used to facilitate error reporting between a FUNC_ENTER()
  * and a FUNC_LEAVE() within a function body.  The arguments are the major
@@ -31,7 +28,7 @@ typedef struct H5E_t H5E_t;
  */
 #define HERROR(maj_id, min_id, ...)                                                                          \
     do {                                                                                                     \
-        H5E_printf_stack(NULL, __FILE__, __func__, __LINE__, H5E_ERR_CLS_g, maj_id, min_id, __VA_ARGS__);    \
+        H5E_printf_stack(__FILE__, __func__, __LINE__, maj_id, min_id, __VA_ARGS__);                         \
     } while (0)
 
 /*
@@ -185,9 +182,9 @@ extern int  H5E_mpi_error_str_len;
 
 /* Library-private functions defined in H5E package */
 H5_DLL herr_t H5E_init(void);
-H5_DLL herr_t H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id,
-                               hid_t maj_id, hid_t min_id, const char *fmt, ...) H5_ATTR_FORMAT(printf, 8, 9);
-H5_DLL herr_t H5E_clear_stack(H5E_t *estack);
-H5_DLL herr_t H5E_dump_api_stack(bool is_api);
+H5_DLL herr_t H5E_printf_stack(const char *file, const char *func, unsigned line, hid_t maj_idx,
+                               hid_t min_idx, const char *fmt, ...) H5_ATTR_FORMAT(printf, 6, 7);
+H5_DLL herr_t H5E_clear_stack(void);
+H5_DLL herr_t H5E_dump_api_stack(void);
 
 #endif /* H5Eprivate_H */

@@ -243,8 +243,9 @@ H5_DLL hid_t H5Iget_file_id(hid_t id);
  *
  * \obj_id{id}
  * \param[out] name A buffer for the name associated with the identifier
- * \param[in] size The size of the \p name buffer; usually the size of
- *                 the name in bytes plus 1 for a NULL terminator
+ * \param[in]  size The size, in bytes, of the \p name buffer. Must be the
+ *                  size of the object name in bytes plus 1 for a NULL
+ *                  terminator
  *
  * \return ssize_t
  *
@@ -254,12 +255,7 @@ H5_DLL hid_t H5Iget_file_id(hid_t id);
  *          additional characters, if any, are not returned to the user
  *          application.
  *
- *          If the length of the name, which determines the required value of
- *          \p size, is unknown, a preliminary H5Iget_name() call can be made.
- *          The return value of this call will be the size in bytes of the
- *          object name. That value, plus 1 for a NULL terminator, is then
- *          assigned to size for a second H5Iget_name() call, which will
- *          retrieve the actual name.
+ *          \details_namelen{object,H5Iget_name}
  *
  *          If the object identified by \p id is an attribute, as determined
  *          via H5Iget_type(), H5Iget_name() retrieves the name of the object
@@ -399,7 +395,7 @@ H5_DLL int H5Iget_ref(hid_t id);
  * \brief Creates and returns a new ID type
  *
  * \param[in] hash_size Minimum hash table size (in entries) used to store IDs
- *                      for the new type
+ *                      for the new type (unused in 1.8.13 and later)
  * \param[in] reserved Number of reserved IDs for the new type
  * \param[in] free_func Function used to deallocate space for a single ID
  *
@@ -409,7 +405,8 @@ H5_DLL int H5Iget_ref(hid_t id);
  *          identifier for it.
  *
  *          The \p hash_size parameter indicates the minimum size of the hash
- *          table used to store IDs in the new type.
+ *          table used to store IDs in the new type. This parameter is unused
+ *          in 1.8.13 and later, when the implementation of ID storage changed.
  *
  *          The \p reserved parameter indicates the number of IDs in this new
  *          type to be reserved. Reserved IDs are valid IDs which are not

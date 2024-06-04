@@ -204,7 +204,6 @@ H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dens
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iIuIu", plist_id, max_compact, min_dense);
 
     /* Range check values */
     if (max_compact < min_dense)
@@ -244,7 +243,6 @@ H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*Iu*Iu", plist_id, max_compact, min_dense);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
@@ -281,7 +279,6 @@ H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iIu", plist_id, crt_order_flags);
 
     /* Check for bad combination of flags */
     if (!(crt_order_flags & H5P_CRT_ORDER_TRACKED) && (crt_order_flags & H5P_CRT_ORDER_INDEXED))
@@ -328,7 +325,6 @@ H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_flags /*out*/)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Iu", plist_id, crt_order_flags);
 
     /* Get values */
     if (crt_order_flags) {
@@ -386,7 +382,6 @@ H5Pset_obj_track_times(hid_t plist_id, hbool_t track_times)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ib", plist_id, track_times);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
@@ -425,7 +420,6 @@ H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times /*out*/)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*b", plist_id, track_times);
 
     /* Get values */
     if (track_times) {
@@ -547,7 +541,6 @@ H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iZfIuz*[a3]Iu", plist_id, filter, flags, cd_nelmts, cd_values);
 
     /* Check args */
     if (filter < 0 || filter > H5Z_FILTER_MAX)
@@ -606,7 +599,6 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iZfIuz*[a3]Iu", plist_id, filter, flags, cd_nelmts, cd_values);
 
     /* Check args */
     if (filter < 0 || filter > H5Z_FILTER_MAX)
@@ -715,7 +707,6 @@ H5Pget_nfilters(hid_t plist_id)
     int             ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("Is", "i", plist_id);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
@@ -764,8 +755,6 @@ H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
     H5Z_filter_t             ret_value; /* return value */
 
     FUNC_ENTER_API(H5Z_FILTER_ERROR)
-    H5TRACE8("Zf", "iIu*Iu*z*Iuz*s*Iu", plist_id, idx, flags, cd_nelmts, cd_values, namelen, name,
-             filter_config);
 
     /* Check args */
     if (cd_nelmts || cd_values) {
@@ -889,8 +878,6 @@ H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "iZf*Iu*z*Iuz*s*Iu", plist_id, id, flags, cd_nelmts, cd_values, namelen, name,
-             filter_config);
 
     /* Check args */
     if (id < 0 || id > H5Z_FILTER_MAX)
@@ -947,7 +934,6 @@ H5Pall_filters_avail(hid_t plist_id)
     htri_t          ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "i", plist_id);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
@@ -1015,7 +1001,6 @@ H5Premove_filter(hid_t plist_id, H5Z_filter_t filter)
     herr_t          ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iZf", plist_id, filter);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
@@ -1063,7 +1048,6 @@ H5Pset_deflate(hid_t plist_id, unsigned level)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iIu", plist_id, level);
 
     /* Check arguments */
     if (level > 9)
@@ -1107,7 +1091,6 @@ H5Pset_fletcher32(hid_t plist_id)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", plist_id);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
@@ -1665,7 +1648,6 @@ H5Pget_filter1(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
     H5Z_filter_t             ret_value; /* return value */
 
     FUNC_ENTER_API(H5Z_FILTER_ERROR)
-    H5TRACE7("Zf", "iIu*Iu*z*Iuz*s", plist_id, idx, flags, cd_nelmts, cd_values, namelen, name);
 
     /* Check args */
     if (cd_nelmts || cd_values) {
@@ -1742,7 +1724,6 @@ H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "iZf*Iu*z*Iuz*s", plist_id, id, flags, cd_nelmts, cd_values, namelen, name);
 
     /* Check args */
     if (id < 0 || id > H5Z_FILTER_MAX)

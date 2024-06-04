@@ -226,7 +226,6 @@ H5Zregister(const void *cls)
 #endif
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*x", cls);
 
     /* Check args */
     if (cls_real == NULL)
@@ -358,7 +357,6 @@ H5Zunregister(H5Z_filter_t id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "Zf", id);
 
     /* Check args */
     if (id < 0 || id > H5Z_FILTER_MAX)
@@ -706,7 +704,6 @@ H5Zfilter_avail(H5Z_filter_t id)
     htri_t ret_value = false; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "Zf", id);
 
     /* Check args */
     if (id < 0 || id > H5Z_FILTER_MAX)
@@ -784,7 +781,7 @@ H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hi
         if (NULL == (fclass = H5Z_find(pline->filter[u].id))) {
             /* Ignore errors from optional filters */
             if (pline->filter[u].flags & H5Z_FLAG_OPTIONAL)
-                H5E_clear_stack(NULL);
+                H5E_clear_stack();
             else
                 HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "required filter was not located");
         } /* end if */
@@ -1451,7 +1448,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
 
                 *nbytes = *buf_size;
                 failed |= (unsigned)1 << idx;
-                H5E_clear_stack(NULL);
+                H5E_clear_stack();
             }
             else
                 *nbytes = new_nbytes;
@@ -1468,7 +1465,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                 if ((pline->filter[idx].flags & H5Z_FLAG_OPTIONAL) == 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "required filter is not registered");
                 failed |= (unsigned)1 << idx;
-                H5E_clear_stack(NULL);
+                H5E_clear_stack();
                 continue; /* filter excluded */
             }             /* end if */
 
@@ -1504,7 +1501,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                     *nbytes = *buf_size;
                 }
                 failed |= (unsigned)1 << idx;
-                H5E_clear_stack(NULL);
+                H5E_clear_stack();
             }
             else
                 *nbytes = new_nbytes;
@@ -1719,7 +1716,6 @@ H5Zget_filter_info(H5Z_filter_t filter, unsigned *filter_config_flags /*out*/)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "Zf*Iu", filter, filter_config_flags);
 
     /* Get the filter info */
     if (H5Z_get_filter_info(filter, filter_config_flags) < 0)

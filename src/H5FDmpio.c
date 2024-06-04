@@ -389,7 +389,6 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     herr_t          ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iMcMi", fapl_id, comm, info);
 
     /* Check arguments */
     if (fapl_id == H5P_DEFAULT)
@@ -439,7 +438,6 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm /*out*/, MPI_Info *info /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*Mc*Mi", fapl_id, comm, info);
 
     /* Set comm and info in case we have problems */
     if (comm)
@@ -503,7 +501,6 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iDt", dxpl_id, xfer_mode);
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
@@ -541,7 +538,6 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Dt", dxpl_id, xfer_mode);
 
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
@@ -579,7 +575,6 @@ H5Pset_dxpl_mpio_collective_opt(hid_t dxpl_id, H5FD_mpio_collective_opt_t opt_mo
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iDc", dxpl_id, opt_mode);
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
@@ -618,7 +613,6 @@ H5Pset_dxpl_mpio_chunk_opt(hid_t dxpl_id, H5FD_mpio_chunk_opt_t opt_mode)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iDh", dxpl_id, opt_mode);
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
@@ -655,7 +649,6 @@ H5Pset_dxpl_mpio_chunk_opt_num(hid_t dxpl_id, unsigned num_chunk_per_proc)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iIu", dxpl_id, num_chunk_per_proc);
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
@@ -695,7 +688,6 @@ H5Pset_dxpl_mpio_chunk_opt_ratio(hid_t dxpl_id, unsigned percent_num_proc_per_ch
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iIu", dxpl_id, percent_num_proc_per_chunk);
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
@@ -1812,7 +1804,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
             /* Determine size of this vector element */
             if (!fixed_size) {
                 if ((*s_sizes)[i] == 0) {
-                    assert(vector_was_sorted);
+                    assert(*vector_was_sorted);
                     assert(i > 0);
                     fixed_size = true;
                     size       = sizes[i - 1];
@@ -1959,7 +1951,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
 done:
     /* free sorted vectors if they exist */
-    if (!vector_was_sorted)
+    if (!*vector_was_sorted)
         if (s_types) {
             free(s_types);
             s_types = NULL;

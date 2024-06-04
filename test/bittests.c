@@ -156,9 +156,9 @@ test_copy(void)
     TESTING("bit copy operations");
 
     for (i = 0; i < NTESTS; i++) {
-        s_offset = (size_t)HDrand() % (8 * sizeof v1);
-        d_offset = (size_t)HDrand() % (8 * sizeof v2);
-        size     = (unsigned)HDrand() % MIN(8 * sizeof(v1), 8 * sizeof(v2));
+        s_offset = (size_t)rand() % (8 * sizeof v1);
+        d_offset = (size_t)rand() % (8 * sizeof v2);
+        size     = (unsigned)rand() % MIN(8 * sizeof(v1), 8 * sizeof(v2));
         size     = MIN3(size, 8 * sizeof(v1) - s_offset, 8 * sizeof(v2) - d_offset);
         memset(v1, 0xff, sizeof v1);
         memset(v2, 0x00, sizeof v2);
@@ -170,7 +170,7 @@ test_copy(void)
                 break;
         if (size > 0 && j >= (int)sizeof(v2)) {
             H5_FAILED();
-            puts("    Unabled to find copied region in destination");
+            puts("    Unable to find copied region in destination");
             goto failed;
         }
         if (0 == size && j < (int)sizeof(v2)) {
@@ -277,12 +277,12 @@ test_shift(void)
     TESTING("bit shift operations");
 
     for (i = 0; i < NTESTS; i++) {
-        offset = (size_t)HDrand() % (8 * sizeof vector);
-        size   = (size_t)HDrand() % (8 * sizeof(vector) - offset);
+        offset = (size_t)rand() % (8 * sizeof vector);
+        size   = (size_t)rand() % (8 * sizeof(vector) - offset);
         /* Don't want size to be 0 */
         if (size == 0)
             continue;
-        shift_dist = (ssize_t)((size_t)HDrand() % size);
+        shift_dist = (ssize_t)((size_t)rand() % size);
 
         /*-------- LEFT-shift some bits and make sure something was shifted --------*/
         memset(vector, 0x00, sizeof vector);
@@ -411,8 +411,8 @@ test_increment(void)
     TESTING("bit increment operations");
 
     for (i = 0; i < NTESTS; i++) {
-        offset = (size_t)HDrand() % (8 * sizeof vector);
-        size   = (size_t)HDrand() % (8 * sizeof(vector) - offset);
+        offset = (size_t)rand() % (8 * sizeof vector);
+        size   = (size_t)rand() % (8 * sizeof(vector) - offset);
         /* Don't want size to be 0 */
         if (size == 0)
             continue;
@@ -497,8 +497,8 @@ test_decrement(void)
     TESTING("bit decrement operations");
 
     for (i = 0; i < NTESTS; i++) {
-        offset = (size_t)HDrand() % (8 * sizeof vector);
-        size   = (size_t)HDrand() % (8 * sizeof(vector) - offset);
+        offset = (size_t)rand() % (8 * sizeof vector);
+        size   = (size_t)rand() % (8 * sizeof(vector) - offset);
         /* Don't want size to be 0 */
         if (size == 0)
             continue;
@@ -566,8 +566,8 @@ test_negate(void)
     TESTING("bit negate operations");
 
     for (i = 0; i < NTESTS; i++) {
-        offset = (size_t)HDrand() % (8 * sizeof vector);
-        size   = (size_t)HDrand() % (8 * sizeof(vector) - offset);
+        offset = (size_t)rand() % (8 * sizeof vector);
+        size   = (size_t)rand() % (8 * sizeof(vector) - offset);
         /* Don't want size to be 0 */
         if (size == 0)
             continue;
@@ -665,8 +665,8 @@ test_set(void)
     TESTING("bit set operations");
 
     for (i = 0; i < NTESTS; i++) {
-        d_offset = (size_t)HDrand() % (8 * sizeof v2);
-        size     = (size_t)HDrand() % (8 * sizeof(v2));
+        d_offset = (size_t)rand() % (8 * sizeof v2);
+        size     = (size_t)rand() % (8 * sizeof(v2));
         size     = MIN(size, 8 * sizeof(v2) - d_offset);
         memset(v2, 0x00, sizeof v2);
 
@@ -677,7 +677,7 @@ test_set(void)
                 break;
         if (size > 0 && j >= (int)sizeof(v2)) {
             H5_FAILED();
-            puts("    Unabled to find set region in buffer");
+            puts("    Unable to find set region in buffer");
             goto failed;
         }
         if (0 == size && j < (int)sizeof(v2)) {
@@ -780,8 +780,8 @@ test_clear(void)
     TESTING("bit clear operations");
 
     for (i = 0; i < NTESTS; i++) {
-        d_offset = (size_t)HDrand() % (8 * sizeof v2);
-        size     = (size_t)HDrand() % (8 * sizeof(v2));
+        d_offset = (size_t)rand() % (8 * sizeof v2);
+        size     = (size_t)rand() % (8 * sizeof(v2));
         size     = MIN(size, 8 * sizeof(v2) - d_offset);
         memset(v2, 0xff, sizeof v2);
 
@@ -792,7 +792,7 @@ test_clear(void)
                 break;
         if (size > 0 && j >= (int)sizeof(v2)) {
             H5_FAILED();
-            puts("    Unabled to find cleared region in buffer");
+            puts("    Unable to find cleared region in buffer");
             goto failed;
         }
         if (0 == size && j < (int)sizeof(v2)) {

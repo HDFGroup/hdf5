@@ -99,7 +99,6 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*si", loc_id, name, type_id);
 
     /* Check arguments */
     if (!name || !*name)
@@ -159,7 +158,6 @@ H5Topen1(hid_t loc_id, const char *name)
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE2("i", "i*s", loc_id, name);
 
     /* Check args */
     if (!name || !*name)

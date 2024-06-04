@@ -25,6 +25,7 @@
       file_space.ddl
       filter_fail.ddl
       non_existing.ddl
+      infinite_loop.ddl
       packedbits.ddl
       tall-1.ddl
       tall-2.ddl
@@ -298,6 +299,7 @@
       tfpformat.h5
       tfvalues.h5
       tgroup.h5
+      3790_infinite_loop.h5
       tgrp_comments.h5
       tgrpnullspace.h5
       thlink.h5
@@ -368,32 +370,6 @@
       tst_onion_dset_1d.h5
       tst_onion_dset_1d.h5.onion
   )
-  set (HDF5_ERROR_REFERENCE_TEST_FILES
-      filter_fail.err
-      non_existing.err
-      tall-1.err
-      tall-2A.err
-      tall-2A0.err
-      tall-2B.err
-      tarray1_big.err
-      tattrregR.err
-      tattr-3.err
-      tcomp-3.err
-      tdataregR.err
-      tdset-2.err
-      texceedsubblock.err
-      texceedsubcount.err
-      texceedsubstart.err
-      texceedsubstride.err
-      textlink.err
-      textlinkfar.err
-      textlinksrc.err
-      torderlinks1.err
-      torderlinks2.err
-      tgroup-2.err
-      tperror.err
-      tslink-D.err
-  )
 
   # make test dir
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
@@ -415,10 +391,6 @@
   
   foreach (tst_h5N_file ${HDF5_N_REFERENCE_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${tst_h5N_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N" "h5dump_std_files")
-  endforeach ()
-
-  foreach (tst_error_file ${HDF5_ERROR_REFERENCE_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/errfiles/${tst_error_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_error_file}" "h5dump_std_files")
   endforeach ()
 
   # --------------------------------------------------------------------
@@ -1266,10 +1238,10 @@
   ADD_H5_TEST (tindicessub4 0 --enable-error-stack -d 4d -s 0,0,1,2  -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2  taindices.h5)
 
   # Exceed the dimensions for subsetting
-  ADD_H5_TEST (texceedsubstart 1 --enable-error-stack -d 1d -s 1,3 taindices.h5)
-  ADD_H5_TEST (texceedsubcount 1 --enable-error-stack -d 1d -c 1,3 taindices.h5)
-  ADD_H5_TEST (texceedsubstride 1 --enable-error-stack -d 1d -S 1,3 taindices.h5)
-  ADD_H5_TEST (texceedsubblock 1 --enable-error-stack -d 1d -k 1,3 taindices.h5)
+  ADD_H5ERR_MASK_TEST (texceedsubstart 1 "exceed dataset dims" --enable-error-stack -d 1d -s 1,3 taindices.h5)
+  ADD_H5ERR_MASK_TEST (texceedsubcount 1 "exceed dataset dims" --enable-error-stack -d 1d -c 1,3 taindices.h5)
+  ADD_H5ERR_MASK_TEST (texceedsubstride 1 "exceed dataset dims" --enable-error-stack -d 1d -S 1,3 taindices.h5)
+  ADD_H5ERR_MASK_TEST (texceedsubblock 1 "exceed dataset dims" --enable-error-stack -d 1d -k 1,3 taindices.h5)
 
   # tests for filters
   # SZIP
@@ -1421,21 +1393,24 @@
   ADD_H5_TEST_EXPORT (tall-6 tall.h5 0 --enable-error-stack -d /g1/g1.1/dset1.1.1 -y -o)
 
   # test for non-existing file
-  ADD_H5_TEST (non_existing 1 --enable-error-stack tgroup.h5 non_existing.h5)
+  ADD_H5ERR_MASK_TEST (non_existing 1 "unable to open file" --enable-error-stack tgroup.h5 non_existing.h5)
+
+  # test to verify github issue#3790: infinite loop closing library
+  ADD_H5ERR_MASK_TEST (infinite_loop 1 "unable to open file" 3790_infinite_loop.h5)
 
   # test to verify HDFFV-10333: error similar to H5O_attr_decode in the jira issue
-  ADD_H5_TEST (err_attr_dspace 1 err_attr_dspace.h5)
+  ADD_H5ERR_MASK_TEST (err_attr_dspace 1 "error getting attribute information" err_attr_dspace.h5)
 
   # test to verify HDFFV-9407: long double full precision
 #  ADD_H5_GREP_TEST (t128bit_float 1 "1.123456789012345" -m %.35Lg t128bit_float.h5)
 
   # test to verify HDFFV-10480: out of bounds read in H5O_fill_new[old]_decode
-  ADD_H5_TEST (tCVE_2018_11206_fill_old 1 tCVE_2018_11206_fill_old.h5)
-  ADD_H5_TEST (tCVE_2018_11206_fill_new 1 tCVE_2018_11206_fill_new.h5)
+  ADD_H5ERR_MASK_TEST (tCVE_2018_11206_fill_old 1 "" tCVE_2018_11206_fill_old.h5)
+  ADD_H5ERR_MASK_TEST (tCVE_2018_11206_fill_new 1 "" tCVE_2018_11206_fill_new.h5)
 
   # test to verify fix for CVE-2021-37501: multiplication overflow in H5O__attr_decode()
   # https://github.com/ST4RF4LL/Something_Found/blob/main/HDF5_v1.13.0_h5dump_heap_overflow.assets/poc
-  ADD_H5_TEST (tCVE-2021-37501_attr_decode 1 tCVE-2021-37501_attr_decode.h5)
+  ADD_H5ERR_MASK_TEST (tCVE-2021-37501_attr_decode 1 "error getting attribute information" tCVE-2021-37501_attr_decode.h5)
 
   # onion VFD tests
   ADD_H5_TEST (tst_onion_objs 0 --enable-error-stack --vfd-name onion --vfd-info 3 tst_onion_objs.h5)

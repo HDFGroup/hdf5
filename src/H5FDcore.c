@@ -391,7 +391,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
 
         if (-1 == bytes_wrote) { /* error */
             int    myerrno = errno;
-            time_t mytime  = HDtime(NULL);
+            time_t mytime  = time(NULL);
 
             offset = HDlseek(file->fd, 0, SEEK_CUR);
 
@@ -399,7 +399,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
                         "write to backing store failed: time = %s, filename = '%s', file descriptor = %d, "
                         "errno = %d, error message = '%s', ptr = %p, total write size = %llu, bytes this "
                         "sub-write = %llu, bytes actually written = %llu, offset = %llu",
-                        HDctime(&mytime), file->name, file->fd, myerrno, strerror(myerrno), (void *)ptr,
+                        ctime(&mytime), file->name, file->fd, myerrno, strerror(myerrno), (void *)ptr,
                         (unsigned long long)size, (unsigned long long)bytes_in,
                         (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
@@ -518,7 +518,6 @@ H5Pset_core_write_tracking(hid_t plist_id, hbool_t is_enabled, size_t page_size)
     herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ibz", plist_id, is_enabled, page_size);
 
     /* The page size cannot be zero */
     if (page_size == 0)
@@ -565,7 +564,6 @@ H5Pget_core_write_tracking(hid_t plist_id, hbool_t *is_enabled /*out*/, size_t *
     herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*b*z", plist_id, is_enabled, page_size);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
@@ -604,7 +602,6 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "izb", fapl_id, increment, backing_store);
 
     /* Check argument */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -642,7 +639,6 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, hbool_t *backing_stor
     herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*z*b", fapl_id, increment, backing_store);
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
@@ -900,7 +896,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 
                     if (-1 == bytes_read) { /* error */
                         int    myerrno = errno;
-                        time_t mytime  = HDtime(NULL);
+                        time_t mytime  = time(NULL);
 
                         offset = HDlseek(file->fd, 0, SEEK_CUR);
 
@@ -909,7 +905,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                             "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
                             "error message = '%s', file->mem = %p, total read size = %llu, bytes this "
                             "sub-read = %llu, bytes actually read = %llu, offset = %llu",
-                            HDctime(&mytime), file->name, file->fd, myerrno, strerror(myerrno),
+                            ctime(&mytime), file->name, file->fd, myerrno, strerror(myerrno),
                             (void *)file->mem, (unsigned long long)size, (unsigned long long)bytes_in,
                             (unsigned long long)bytes_read, (unsigned long long)offset);
                     } /* end if */

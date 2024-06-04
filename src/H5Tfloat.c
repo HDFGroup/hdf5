@@ -47,7 +47,6 @@ H5Tget_fields(hid_t type_id, size_t *spos /*out*/, size_t *epos /*out*/, size_t 
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*z*z*z*z*z", type_id, spos, epos, esize, mpos, msize);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -95,7 +94,6 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize, size_t mpos
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "izzzzz", type_id, spos, epos, esize, mpos, msize);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -150,7 +148,6 @@ H5Tget_ebias(hid_t type_id)
     size_t ret_value; /* Return value */
 
     FUNC_ENTER_API(0)
-    H5TRACE1("z", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -183,7 +180,6 @@ H5Tset_ebias(hid_t type_id, size_t ebias)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iz", type_id, ebias);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -221,7 +217,6 @@ H5Tget_norm(hid_t type_id)
     H5T_norm_t ret_value; /* Return value */
 
     FUNC_ENTER_API(H5T_NORM_ERROR)
-    H5TRACE1("Tn", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -255,7 +250,6 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iTn", type_id, norm);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -297,7 +291,6 @@ H5Tget_inpad(hid_t type_id)
     H5T_pad_t ret_value; /* Return value */
 
     FUNC_ENTER_API(H5T_PAD_ERROR)
-    H5TRACE1("Tp", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -333,7 +326,6 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iTp", type_id, pad);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))

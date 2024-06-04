@@ -1003,7 +1003,6 @@ H5Sget_select_elem_npoints(hid_t spaceid)
     hssize_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("Hs", "i", spaceid);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
@@ -1415,6 +1414,9 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bo
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, sizeof(uint32_t), p_end))
         HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection rank");
     UINT32DECODE(pp, rank);
+    if (0 == rank || rank > H5S_MAX_RANK)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid rank (%u) for serialized point selection",
+                    rank);
 
     if (!*space) {
         /* Patch the rank of the allocated dataspace */
@@ -1456,10 +1458,6 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bo
             break;
     } /* end switch */
 
-    /* Allocate space for the coordinates */
-    if (NULL == (coord = (hsize_t *)H5MM_malloc(num_elem * rank * sizeof(hsize_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information");
-
     /* Determine necessary size of buffer for coordinates */
     enc_type_size = 0;
 
@@ -1480,9 +1478,18 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bo
 
     coordinate_buffer_requirement = num_elem * rank * enc_type_size;
 
+    /* Check for overflow during multiplication */
+    if (num_elem != (coordinate_buffer_requirement / (rank * enc_type_size)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "size of point selection buffer overflowed");
+
+    /* Check for possible buffer overrun */
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, coordinate_buffer_requirement, p_end))
         HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
                     "buffer overflow while decoding selection coordinates");
+
+    /* Allocate space for the coordinates */
+    if (NULL == (coord = (hsize_t *)H5MM_malloc(num_elem * rank * sizeof(hsize_t))))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate coordinate information");
 
     /* Retrieve the coordinates from the buffer */
     for (tcoord = coord, i = 0; i < num_elem; i++)
@@ -1637,7 +1644,6 @@ H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoint
     herr_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ihh*[a2]h", spaceid, startpoint, numpoints, buf);
 
     /* Check args */
     if (NULL == buf)
@@ -2446,7 +2452,6 @@ H5Sselect_elements(hid_t spaceid, H5S_seloper_t op, size_t num_elem, const hsize
     herr_t ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iSsz*h", spaceid, op, num_elem, coord);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))

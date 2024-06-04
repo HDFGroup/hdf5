@@ -47,7 +47,7 @@ sub print_warning ($) {
     my $fh = shift;
 
     print $fh "\n/* Generated automatically by bin/make_err -- do not edit */\n";
-    print $fh "/* Add new errors to H5err.txt file */\n\n";
+    print $fh "/* Add new errors to H5err.txt file */\n";
 }
 
 ##############################################################################
@@ -92,7 +92,7 @@ sub parse_line ($) {
         # Get the major error's name & description
         ($name, $desc) = ($line =~ /^\s*MAJOR,\s*(\w*),\s*(.*)\n/);
 #print "MAJOR: name=$name, desc=$desc\n";
-        
+
         # Check if the name already exists as a major or minor error message
         if(exists($major{$name}) || exists($minor{$name})) {
             die "duplicated name: $name";
@@ -103,12 +103,12 @@ sub parse_line ($) {
     }
     # Parse minor error lines
     elsif($line =~ /^\s*MINOR,/) {
-        my $min_section;           # Minor errors have a section they below to also
+        my $min_section;           # Minor errors have a section they belong to also
 
         # Get the minor error's section, name & description
         ($min_section, $name, $desc) = ($line =~ /^\s*MINOR,\s*(\w*),\s*(\w*),\s*(.*)\n/);
 #print "MINOR: min_section=$min_section, name=$name, desc=$desc\n";
-        
+
         # Check for valid section
         if(!exists($section{$min_section})) {
             die "unknown section: $min_section";
@@ -121,7 +121,7 @@ sub parse_line ($) {
 
         # Store the minor errors in a hash table, indexed by the name
         $minor{$name}=$desc;
-        
+
         # Add the minor error to the list for the section
         push @{$section_list{$min_section}}, $name;
     }
@@ -130,7 +130,7 @@ sub parse_line ($) {
         # Get the section's name & description
         ($name, $desc) = ($line =~ /^\s*SECTION,\s*(\w*),\s*(.*)\n/);
 #print "SECTION: name=$name, desc=$desc\n";
-        
+
         # Check if the section has already been defined
         if(exists($section{$name})) {
             die "duplicated name: $name";
@@ -178,10 +178,10 @@ sub create_public ($) {
     print HEADER "\n/*********************/\n";
     print HEADER   "/* Major error codes */\n";
     print HEADER   "/*********************/\n\n";
-    foreach $name (keys %major) {
+    foreach $name (sort keys %major) {
         printf HEADER "#define %-20s (H5OPEN %s_g)\n",$name,$name;
     }
-    foreach $name (keys %major) {
+    foreach $name (sort keys %major) {
         printf HEADER "H5_DLLVAR hid_t %-20s /* %s */\n","${name}_g;",$major{$name};
     }
 
@@ -189,14 +189,14 @@ sub create_public ($) {
     print HEADER "\n/*********************/\n";
     print HEADER   "/* Minor error codes */\n";
     print HEADER   "/*********************/\n";
-    while ( ($sect_name, $sect_desc) = each (%section)) {
-        print HEADER "\n/* $sect_desc */\n";
+    foreach $sect_name (sort keys %section) {
+        print HEADER "\n/* $section{$sect_name} */\n";
 
         # Iterate over all the minor errors in each section
-        for $name ( @{$section_list{$sect_name}}) {
+        for $name (sort @{$section_list{$sect_name}}) {
             printf HEADER "#define %-20s (H5OPEN %s_g)\n",$name,$name;
         }
-        for $name ( @{$section_list{$sect_name}}) {
+        for $name (sort @{$section_list{$sect_name}}) {
             printf HEADER "H5_DLLVAR hid_t %-20s /* %s */\n","${name}_g;",$minor{$name};
         }
     }
@@ -214,15 +214,96 @@ sub create_public ($) {
 }
 
 ##############################################################################
+# Create the generated portion of the H5E major message definition code
+#
+sub create_majdef ($) {
+    my $prefix = shift;         # Get the prefix for the generated file
+    my $file = "H5Emajdef.h";   # Name of file to generate
+    my $name;                   # Name of error message
+
+    # Rename previous file
+#    rename "${prefix}${file}", "${prefix}${file}~" or die "unable to make backup";
+
+    # Open new header file
+    open HEADER, ">${prefix}${file}" or die "unable to modify source";
+
+    # Create file contents
+
+    print_copyright(*HEADER);
+    print_warning(*HEADER);
+    print_startprotect(*HEADER, $file);
+
+    # Iterate over all the major errors
+    print HEADER "\n/***********************************/\n";
+    print HEADER   "/* Major error message definitions */\n";
+    print HEADER   "/***********************************/\n\n";
+    print HEADER   "/* clang-format off */\n";
+    foreach $name (sort keys %major) {
+        printf HEADER "static const H5E_msg_t ${name}_msg_s = {false, \"${major{$name}}\", H5E_MAJOR, &H5E_err_cls_s};\n";
+    }
+    print HEADER   "/* clang-format on */\n";
+
+    print_endprotect(*HEADER, $file);
+
+    # Close header file
+    close HEADER;
+}
+
+##############################################################################
+# Create the generated portion of the H5E minor message definition code
+#
+sub create_mindef ($) {
+    my $prefix = shift;         # Get the prefix for the generated file
+    my $file = "H5Emindef.h";     # Name of file to generate
+    my $name;                   # Name of error message
+    my $sect_name;              # Section of minor error messages
+
+    # Rename previous file
+#    rename "${prefix}${file}", "${prefix}${file}~" or die "unable to make backup";
+
+    # Open new header file
+    open HEADER, ">${prefix}${file}" or die "unable to modify source";
+
+    # Create file contents
+
+    print_copyright(*HEADER);
+    print_warning(*HEADER);
+    print_startprotect(*HEADER, $file);
+
+    # Iterate over all the minor error sections
+    print HEADER "\n/***********************************/\n";
+    print HEADER   "/* Minor error message definitions */\n";
+    print HEADER   "/***********************************/\n\n";
+    print HEADER   "/* clang-format off */\n";
+    foreach $sect_name (sort keys %section) {
+        print HEADER "\n/* $sect_name: $section{$sect_name} */\n";
+
+        # Iterate over all the minor errors in each section
+        for $name (sort @{$section_list{$sect_name}}) {
+            printf HEADER "static const H5E_msg_t ${name}_msg_s = {false, \"${minor{$name}}\", H5E_MINOR, &H5E_err_cls_s};\n";
+        }
+    }
+    print HEADER   "/* clang-format on */\n";
+
+    print_endprotect(*HEADER, $file);
+
+    # Close header file
+    close HEADER;
+}
+
+##############################################################################
 # Create the generated portion of the H5E initialization code
 #
 sub create_init ($) {
     my $prefix = shift;         # Get the prefix for the generated file
     my $file = "H5Einit.h";     # Name of file to generate
     my $name;                   # Name of error message
+    my $last_name;              # Name of previous error message
     my $desc;                   # Description of error message
     my $sect_name;              # Section of minor error messages
     my $sect_desc;              # Description of section
+    my $first_major = 0;        # Whether the first major error code was saved
+    my $first_minor = 0;        # Whether the first minor error code was saved
 
     # Rename previous file
 #    rename "${prefix}${file}", "${prefix}${file}~" or die "unable to make backup";
@@ -240,30 +321,49 @@ sub create_init ($) {
     print HEADER "\n/*********************/\n";
     print HEADER   "/* Major error codes */\n";
     print HEADER   "/*********************/\n\n";
-    foreach $name (keys %major) {
-        print HEADER " "x(0*$indent),"assert(${name}_g==(-1));\n";
-        print HEADER " "x(0*$indent),"if((msg = H5E__create_msg(cls, H5E_MAJOR, \"${major{$name}}\"))==NULL)\n";
-        print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, \"error message initialization failed\");\n";
-        print HEADER " "x(0*$indent),"if((${name}_g = H5I_register(H5I_ERROR_MSG, msg, false))<0)\n";
+    foreach $name (sort keys %major) {
+        print HEADER "/* $name */\n";
+        print HEADER " "x(0*$indent),"assert(H5I_INVALID_HID == ${name}_g);\n";
+        print HEADER " "x(0*$indent),"if((${name}_g = H5I_register(H5I_ERROR_MSG, &${name}_msg_s, false)) < 0)\n";
         print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, \"can't register error message\");\n";
+        if ($first_major == 0) {
+            print HEADER " "x(0*$indent),"\n/* Remember first major error code ID */\n";
+            print HEADER " "x(0*$indent),"assert(H5E_first_maj_id_g==H5I_INVALID_HID);\n";
+            print HEADER " "x(0*$indent),"H5E_first_maj_id_g = ${name}_g;\n\n";
+            $first_major = 1;
+        }
+        $last_name = $name;
     }
+    print HEADER " "x(0*$indent),"\n/* Remember last major error code ID */\n";
+    print HEADER " "x(0*$indent),"assert(H5E_last_maj_id_g==H5I_INVALID_HID);\n";
+    print HEADER " "x(0*$indent),"H5E_last_maj_id_g = ${last_name}_g;\n\n";
 
     # Iterate over all the minor error sections
     print HEADER "\n/*********************/\n";
     print HEADER   "/* Minor error codes */\n";
     print HEADER   "/*********************/\n\n";
-    while ( ($sect_name, $sect_desc) = each (%section)) {
-        print HEADER "\n"," "x(0*$indent),"/* $sect_desc */\n";
+    foreach $sect_name (sort keys %section) {
+        print HEADER "\n/* $section{$sect_name} */\n";
 
         # Iterate over all the minor errors in each section
-        for $name ( @{$section_list{$sect_name}}) {
-            print HEADER " "x(0*$indent),"assert(${name}_g==(-1));\n";
-            print HEADER " "x(0*$indent),"if((msg = H5E__create_msg(cls, H5E_MINOR, \"${minor{$name}}\"))==NULL)\n";
-            print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, \"error message initialization failed\");\n";
-            print HEADER " "x(0*$indent),"if((${name}_g = H5I_register(H5I_ERROR_MSG, msg, true))<0)\n";
+        for $name (sort @{$section_list{$sect_name}}) {
+            print HEADER "/* $name */\n";
+            print HEADER " "x(0*$indent),"assert(H5I_INVALID_HID == ${name}_g);\n";
+            print HEADER " "x(0*$indent),"if((${name}_g = H5I_register(H5I_ERROR_MSG, &${name}_msg_s, false)) < 0)\n";
             print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, \"can't register error message\");\n";
+
+            if ($first_minor == 0) {
+                print HEADER " "x(0*$indent),"\n/* Remember first minor error code ID */\n";
+                print HEADER " "x(0*$indent),"assert(H5E_first_min_id_g==H5I_INVALID_HID);\n";
+                print HEADER " "x(0*$indent),"H5E_first_min_id_g = ${name}_g;\n\n";
+                $first_minor = 1;
+            }
+            $last_name = $name;
         }
     }
+    print HEADER " "x(0*$indent),"\n/* Remember last minor error code ID */\n";
+    print HEADER " "x(0*$indent),"assert(H5E_last_min_id_g==H5I_INVALID_HID);\n";
+    print HEADER " "x(0*$indent),"H5E_last_min_id_g = ${last_name}_g;\n";
 
     print_endprotect(*HEADER, $file);
 
@@ -296,22 +396,26 @@ sub create_term ($) {
 
     # Iterate over all the major errors
     print HEADER "\n/* Reset major error IDs */\n";
-    foreach $name (keys %major) {
-        print HEADER " "x($indent),"\n${name}_g=";
+    foreach $name (sort keys %major) {
+        print HEADER " "x($indent),"${name}_g =\n";
     }
-    print HEADER " (-1);\n";
+    print HEADER " "x(2*$indent),"H5I_INVALID_HID;\n";
+    print HEADER "\n"," "x(0*$indent),"H5E_first_maj_id_g = H5I_INVALID_HID;\n";
+    print HEADER " "x(0*$indent),"H5E_last_maj_id_g = H5I_INVALID_HID;\n\n";
 
     # Iterate over all the minor error sections
     print HEADER "\n/* Reset minor error IDs */\n";
-    while ( ($sect_name, $sect_desc) = each (%section)) {
-        print HEADER "\n"," "x(0*$indent),"\n/* $sect_desc */";
+    foreach $sect_name (sort keys %section) {
+        print HEADER "\n/* $sect_name: $section{$sect_name} */\n";
 
         # Iterate over all the minor errors in each section
-        for $name ( @{$section_list{$sect_name}}) {
-            print HEADER " "x($indent),"\n${name}_g=";
+        for $name (sort @{$section_list{$sect_name}}) {
+            print HEADER " "x($indent),"${name}_g =\n";
         }
     }
-    print HEADER " (-1);\n";
+    print HEADER " "x(2*$indent),"H5I_INVALID_HID;\n";
+    print HEADER "\n"," "x(0*$indent),"H5E_first_min_id_g = H5I_INVALID_HID;\n";
+    print HEADER " "x(0*$indent),"H5E_last_min_id_g = H5I_INVALID_HID;\n\n";
 
     print_endprotect(*HEADER, $file);
 
@@ -329,6 +433,7 @@ sub create_define ($) {
     my $desc;                   # Description of error message
     my $sect_name;              # Section of minor error messages
     my $sect_desc;              # Description of section
+    my $num_msg;                # Number of messages
 
     # Rename previous file
 #    rename "${prefix}${file}", "${prefix}${file}~" or die "unable to make backup";
@@ -343,21 +448,29 @@ sub create_define ($) {
     print_startprotect(*HEADER, $file);
 
     # Iterate over all the major errors
+    $num_msg = 0;
     print HEADER "\n/* Major error IDs */\n";
-    foreach $name (keys %major) {
-        printf HEADER "hid_t %-20s = FAIL;      /* %s */\n","${name}_g",$major{$name};
+    foreach $name (sort keys %major) {
+        printf HEADER "hid_t %-20s = H5I_INVALID_HID;      /* %s */\n","${name}_g",$major{$name};
+        $num_msg++;
     }
+    print HEADER "\n/* Number of major error messages */\n";
+    printf HEADER "#define H5E_NUM_MAJ_ERRORS %d\n", $num_msg;
 
     # Iterate over all the minor error sections
+    $num_msg = 0;
     print HEADER "\n/* Minor error IDs */\n";
-    while ( ($sect_name, $sect_desc) = each (%section)) {
-        print HEADER "\n/* $sect_desc */\n";
+    foreach $sect_name (sort keys %section) {
+        print HEADER "\n/* $sect_name: $section{$sect_name} */\n";
 
         # Iterate over all the minor errors in each section
-        for $name ( @{$section_list{$sect_name}}) {
-            printf HEADER "hid_t %-20s = FAIL;      /* %s */\n","${name}_g",$minor{$name};
+        for $name (sort @{$section_list{$sect_name}}) {
+            printf HEADER "hid_t %-20s = H5I_INVALID_HID;      /* %s */\n","${name}_g",$minor{$name};
+            $num_msg++;
         }
     }
+    print HEADER "\n/* Number of minor error messages */\n";
+    printf HEADER "#define H5E_NUM_MIN_ERRORS %d\n", $num_msg;
 
     print_endprotect(*HEADER, $file);
 
@@ -382,10 +495,14 @@ for $file (@ARGV) {
         }
     }
     close SOURCE;
-  
+
     # Create header files
     print "Generating 'H5Epubgen.h'\n";
     create_public($prefix);
+    print "Generating 'H5Emajdef.h'\n";
+    create_majdef($prefix);
+    print "Generating 'H5Emindef.h'\n";
+    create_mindef($prefix);
     print "Generating 'H5Einit.h'\n";
     create_init($prefix);
     print "Generating 'H5Eterm.h'\n";

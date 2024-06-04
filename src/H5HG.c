@@ -556,6 +556,11 @@ H5HG_read(H5F_t *f, H5HG_t *hobj, void *object /*out*/, size_t *buf_size)
     assert(f);
     assert(hobj);
 
+    /* Heap object idx 0 is the free space in the heap and should never be given out */
+    if (0 == hobj->idx)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "bad heap index, heap object = {%" PRIxHADDR ", %zu}",
+                    hobj->addr, hobj->idx);
+
     /* Load the heap */
     if (NULL == (heap = H5HG__protect(f, hobj->addr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect global heap");
@@ -630,6 +635,11 @@ H5HG_link(H5F_t *f, const H5HG_t *hobj, int adjust)
     if (0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file");
 
+    /* Heap object idx 0 is the free space in the heap and should never be given out */
+    if (0 == hobj->idx)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad heap index, heap object = {%" PRIxHADDR ", %zu}",
+                    hobj->addr, hobj->idx);
+
     /* Load the heap */
     if (NULL == (heap = H5HG__protect(f, hobj->addr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap");
@@ -682,6 +692,11 @@ H5HG_get_obj_size(H5F_t *f, H5HG_t *hobj, size_t *obj_size)
     assert(hobj);
     assert(obj_size);
 
+    /* Heap object idx 0 is the free space in the heap and should never be given out */
+    if (0 == hobj->idx)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad heap index, heap object = {%" PRIxHADDR ", %zu}",
+                    hobj->addr, hobj->idx);
+
     /* Load the heap */
     if (NULL == (heap = H5HG__protect(f, hobj->addr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap");
@@ -730,6 +745,11 @@ H5HG_remove(H5F_t *f, H5HG_t *hobj)
     assert(hobj);
     if (0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file");
+
+    /* Heap object idx 0 is the free space in the heap and should never be given out */
+    if (0 == hobj->idx)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad heap index, heap object = {%" PRIxHADDR ", %zu}",
+                    hobj->addr, hobj->idx);
 
     /* Load the heap */
     if (NULL == (heap = H5HG__protect(f, hobj->addr, H5AC__NO_FLAGS_SET)))

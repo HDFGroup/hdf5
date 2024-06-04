@@ -58,6 +58,7 @@ typedef struct H5D_compact_iovv_memmanage_ud_t {
 
 /* Layout operation callbacks */
 static herr_t  H5D__compact_construct(H5F_t *f, H5D_t *dset);
+static herr_t  H5D__compact_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
 static bool    H5D__compact_is_space_alloc(const H5O_storage_t *storage);
 static herr_t  H5D__compact_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
 static herr_t  H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata);
@@ -79,7 +80,7 @@ static herr_t  H5D__compact_dest(H5D_t *dset);
 /* Compact storage layout I/O ops */
 const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {{
     H5D__compact_construct,      /* construct */
-    NULL,                        /* init */
+    H5D__compact_init,           /* init */
     H5D__compact_is_space_alloc, /* is_space_alloc */
     NULL,                        /* is_data_cached */
     H5D__compact_io_init,        /* io_init */
@@ -197,6 +198,63 @@ H5D__compact_construct(H5F_t *f, H5D_t *dset)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__compact_construct() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__compact_init
+ *
+ * Purpose:	Initialize the info for a compact dataset.  This is
+ *		called when the dataset is initialized.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__compact_init(H5F_t H5_ATTR_UNUSED *f, const H5D_t *dset, hid_t H5_ATTR_UNUSED dapl_id)
+{
+    hssize_t snelmts;             /* Temporary holder for number of elements in dataspace */
+    hsize_t  nelmts;              /* Number of elements in dataspace */
+    size_t   dt_size;             /* Size of datatype */
+    hsize_t  data_size;           /* Dataset size, in bytes */
+    herr_t   ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    assert(dset);
+    assert(H5D_COMPACT == dset->shared->layout.storage.type);
+
+    /*
+     * Now that we've read the dataset's datatype, dataspace and
+     * layout information, perform a quick check for compact datasets
+     * to ensure that the size of the internal buffer that was
+     * allocated for the dataset's raw data matches the size of
+     * the data. A corrupted file can cause a mismatch between the
+     * two, which might result in buffer overflows during future
+     * I/O to the dataset.
+     */
+    if (0 == (dt_size = H5T_GET_SIZE(dset->shared->type)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get datatype size");
+    if ((snelmts = H5S_GET_EXTENT_NPOINTS(dset->shared->space)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of elements in dataset's dataspace");
+    nelmts = (hsize_t)snelmts;
+
+    /* Compute the size of the dataset's contiguous storage */
+    data_size = nelmts * dt_size;
+
+    /* Check for overflow during multiplication */
+    if (nelmts != (data_size / dt_size))
+        HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed");
+
+    /* Check for mismatch */
+    if (dset->shared->layout.storage.u.compact.size != data_size)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
+                    "bad value from dataset header - size of compact dataset's data buffer doesn't match "
+                    "size of dataset data");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__compact_init() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__compact_is_space_alloc
@@ -606,9 +664,6 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
     storage_dst->dirty = true;
 
 done:
-    /* Caller expects that source datatype will be freed */
-    if (dt_src && (H5T_close(dt_src) < 0))
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     if (dt_dst && (H5T_close(dt_dst) < 0))
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     if (dt_mem && (H5T_close(dt_mem) < 0))

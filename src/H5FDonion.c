@@ -281,7 +281,6 @@ H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out)
     herr_t                        ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*!", fapl_id, fa_out);
 
     if (NULL == fa_out)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL info-out pointer");
@@ -323,7 +322,6 @@ H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
     herr_t          ret_value      = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*!", fapl_id, fa);
 
     if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not a valid FAPL ID");
@@ -462,15 +460,15 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 
     FUNC_ENTER_PACKAGE
 
-    HDtime(&rawtime);
-    info = HDgmtime(&rawtime);
+    time(&rawtime);
+    info = gmtime(&rawtime);
     strftime(rec->time_of_creation, sizeof(rec->time_of_creation), "%Y%m%dT%H%M%SZ", info);
 
     rec->logical_eof = file->logical_eof;
 
     if ((true == file->is_open_rw) && (H5FD__onion_merge_revision_index_into_archival_index(
                                            file->rev_index, &file->curr_rev_record.archival_index) < 0))
-        HGOTO_ERROR(H5E_VFL, H5E_INTERNAL, FAIL, "unable to update index to write");
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "unable to update index to write");
 
     if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_REVISION_RECORD + (size_t)rec->comment_size +
                                    (H5FD_ONION_ENCODED_SIZE_INDEX_ENTRY * rec->archival_index.n_entries))))
@@ -1667,7 +1665,6 @@ H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, uint64_t *revi
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*si*UL", filename, fapl_id, revision_count);
 
     /* Check args */
     if (!filename || !strcmp(filename, ""))

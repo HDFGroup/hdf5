@@ -318,6 +318,9 @@ typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
  *
  * \details The H5P_prp_cb1_t() function describes the parameters used by the
  *          property create, copy and close callback functions.
+ *
+ * \since 1.8.0
+ *
  */
 typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
 //! <!-- [H5P_prp_cb1_t_snip] -->
@@ -334,6 +337,9 @@ typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
  *
  * \details The H5P_prp_cb2_t() function describes the parameters used by the
  *          property set, copy and delete callback functions.
+ *
+ * \since 1.8.0
+ *
  */
 typedef herr_t (*H5P_prp_cb2_t)(hid_t prop_id, const char *name, size_t size, void *value);
 //! <!-- [H5P_prp_cb2_t_snip] -->
@@ -383,6 +389,9 @@ typedef H5P_prp_cb1_t H5P_prp_copy_func_t;
  *         \c value1 and \c value2 are equal.
  *
  * \see H5Pregister(), H5Pinsert()
+ *
+ * \since 1.8.0
+ *
  */
 typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2, size_t size);
 //! <!-- [H5P_prp_compare_func_t_snip] -->
@@ -873,7 +882,7 @@ H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name, H5P_cls_create_func
  *
  * \param[in] buf Buffer holding the encoded property list
  *
- * \return \hid_tv{object}
+ * \return \hid_ti{object}
  *
  * \details Given a binary property list description in a buffer, H5Pdecode()
  *          reconstructs the HDF5 property list and returns an identifier
@@ -3699,7 +3708,7 @@ H5_DLL herr_t H5Pget_fclose_degree(hid_t fapl_id, H5F_close_degree_t *degree);
  * \see H5LTopen_file_image(), H5Fget_file_image(), H5Pset_file_image(),
  *      H5Pset_file_image_callbacks(), H5Pget_file_image_callbacks(),
  *      \ref H5FD_file_image_callbacks_t, \ref H5FD_file_image_op_t,
- *      <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html">
+ *      <a href="https://\DOCURL/advanced_topics/file_image_ops.html">
  *      HDF5 File Image Operations</a>.
  *
  *
@@ -3739,7 +3748,7 @@ H5_DLL herr_t H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_l
  * \see H5LTopen_file_image(), H5Fget_file_image(), H5Pset_file_image(),
  *      H5Pset_file_image_callbacks(), H5Pget_file_image_callbacks(),
  *      \ref H5FD_file_image_callbacks_t, \ref H5FD_file_image_op_t,
- *      <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html">
+ *      <a href="https://\DOCURL/advanced_topics/file_image_ops.html">
  *      HDF5 File Image Operations</a>.
  *
  * \since 1.8.9
@@ -4683,7 +4692,7 @@ H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);
  *          This function is part of the file image
  *          operations feature set. It is highly recommended to study the guide
  *          [<em>HDF5 File Image Operations</em>]
- *          (https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html
+ *          (https://\DOCURL/advanced_topics/file_image_ops.html
  *          ) before using this feature set. See the “See Also” section below
  *          for links to other elements of HDF5 file image operations.
  *
@@ -4695,9 +4704,9 @@ H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);
  *    \li H5Pget_file_image_callbacks()
  *
  *    \li [HDF5 File Image Operations]
- *        (https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html)
+ *        (https://\DOCURL/advanced_topics/file_image_ops.html)
  *        in [Advanced Topics in HDF5]
- *        (https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics_list.html)
+ *        (https://\DOCURL/advanced_topics_list.html)
  *
  *    \li Within H5Pset_file_image_callbacks():
  *    \li Callback #H5FD_file_image_callbacks_t
@@ -4720,7 +4729,7 @@ H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
  *            **Recommended Reading:** This function is part of the file
  *            image operations feature set. It is highly recommended to study
  *            the guide [HDF5 File Image Operations]
- *            (https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html
+ *            (https://\DOCURL/advanced_topics/file_image_ops.html
  *            ) before using this feature set. See the “See Also” section below
  *            for links to other elements of HDF5 file image operations.
  *
@@ -5196,7 +5205,7 @@ H5_DLL herr_t H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
  *          current state of the logging flags.
  *
  *          The log format is described in [<em>Metadata Cache Logging</em>]
- *          (https://portal.hdfgroup.org/display/HDF5/Fine-tuning+the+Metadata+Cache).
+ *          (https://\DSPURL/Fine-tuning+the+Metadata+Cache).
  *
  * \since 1.10.0
  *
@@ -5749,7 +5758,16 @@ H5_DLL herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t 
  *          If a non-zero page buffer size is set, and the file space strategy
  *          is not set to paged or the page size for the file space strategy is
  *          larger than the page buffer size, the subsequent call to H5Fcreate()
- *          or H5Fopen() using the \p plist_id will fail.
+ *          using the \p plist_id will fail.
+ *
+ * \note    As of HDF5 1.14.4, this property will be ignored when an existing
+ *          file is being opened and the file space strategy stored in the
+ *          file isn't paged. This was previously a failure.
+ *
+ * \note    As of HDF5 1.14.4, if a file with a paged file space strategy is
+ *          opened with a page size that is smaller than the file's page size,
+ *          the page cache size will be rounded up to the file's page size.
+ *          This was previously a failure.
  *
  *          The function also allows setting the minimum percentage of pages for
  *          metadata and raw data to prevent a certain type of data to evict hot
@@ -6188,7 +6206,7 @@ H5_DLL herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count /*out*/);
  *                   (0 ≤ \p index < \p count), where \p count is the
  *                   number of mappings returned by H5Pget_virtual_count().
  * \param[out] name  A buffer containing the name of the source dataset
- * \param[in]  size  The size, in bytes, of the name buffer. Must be the
+ * \param[in]  size  The size, in bytes, of the \p name buffer. Must be the
  *                   size of the dataset name in bytes plus 1 for a NULL
  *                   terminator
  *
@@ -6205,14 +6223,7 @@ H5_DLL herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count /*out*/);
  *          \p name; additional characters, if any, are not returned to
  *          the user application.
  *
- *          If the length of the dataset name, which determines the
- *          required value of \p size, is unknown, a preliminary call
- *          to H5Pget_virtual_dsetname() with the last two parameters
- *          set to NULL and zero respectively can be made. The return
- *          value of this call will be the size in bytes of the dataset
- *          name. That value, plus 1 for a NULL terminator, must then be
- *          assigned to \p size for a second H5Pget_virtual_dsetname()
- *          call, which will retrieve the actual dataset name.
+ *          \details_namelen{dataset,H5Pget_virtual_dsetname}
  *
  * \see_virtual
  *
@@ -6249,14 +6260,7 @@ H5_DLL ssize_t H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name /
  *          \p name; additional characters, if any, are not returned to
  *          the user application.
  *
- *          If the length of the filename, which determines the required
- *          value of \p size, is unknown, a preliminary call to
- *          H5Pget_virtual_filename() with the last two parameters set
- *          to NULL and zero respectively can be made. The return value
- *          of this call will be the size in bytes of the filename. That
- *          value, plus 1 for a NULL terminator, must then be assigned to
- *          \p size for a second H5Pget_virtual_filename() call, which
- *          will retrieve the actual filename.
+ *          \details_namelen{file,H5Pget_virtual_filename}
  *
  * \see_virtual
  *
@@ -7099,7 +7103,7 @@ H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels
  *          VDS access time. Example code for many source and virtual dataset mappings
  *          is available in the "Examples of Source to Virtual Dataset Mapping"
  *          chapter in the
- *          <a href="https://docs.hdfgroup.org/hdf5/rfc/HDF5-VDS-requirements-use-cases-2014-12-10.pdf">
+ *          <a href="https://\RFCURL/HDF5-VDS-requirements-use-cases-2014-12-10.pdf">
  *            RFC: HDF5 Virtual Dataset</a>.
  *      </td>
  *      </tr>
@@ -7172,7 +7176,7 @@ H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels
  *             If that source file does not exist, the new \p src_file_name
  *             after stripping will be \Code{A.h5}
  *
- * \see <a href="https://docs.hdfgroup.org/hdf5/rfc/HDF5-VDS-requirements-use-cases-2014-12-10.pdf">
+ * \see <a href="https://\RFCURL/HDF5-VDS-requirements-use-cases-2014-12-10.pdf">
  *        Virtual Dataset Overview</a>
  *
  * \see_virtual
@@ -9023,7 +9027,7 @@ H5_DLL herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, uns
  *      must be created and maintained in the original style. This is HDF5's default
  *      behavior. If backward compatibility with pre-1.8.0 libraries is not a concern,
  *      greater efficiencies can be obtained with the new-format compact and indexed
- *      groups. See <a href="https://docs.hdfgroup.org/hdf5/develop/group___h5_g.html">Group
+ *      groups. See <a href="https://\DOXURL/group___h5_g.html">Group
  *      implementations in HDF5</a> in the \ref H5G API introduction (at the bottom).\n
  *      H5Pset_local_heap_size_hint() is useful for tuning file size when files
  *      contain original-style groups with either zero members or very large

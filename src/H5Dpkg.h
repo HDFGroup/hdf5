@@ -712,6 +712,8 @@ H5_DLL herr_t H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinf
 H5_DLL herr_t H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f_dst,
                                H5O_storage_contig_t *storage_dst, H5T_t *src_dtype, H5O_copy_t *cpy_info);
 H5_DLL herr_t H5D__contig_delete(H5F_t *f, const H5O_storage_t *store);
+H5_DLL herr_t H5D__contig_check(const H5F_t *f, const H5O_layout_t *layout, const H5S_extent_t *extent,
+                                const H5T_t *dt);
 
 /* Functions that operate on chunked dataset storage */
 H5_DLL htri_t H5D__chunk_cacheable(const H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, haddr_t caddr,

@@ -38,7 +38,6 @@ libhdf5_la_SOURCES= H5.c H5build_settings.c H5checksum.c H5dbg.c H5system.c \
         H5C.c H5Cdbg.c H5Centry.c H5Cepoch.c H5Cimage.c H5Cint.c \
         H5Clog.c H5Clog_json.c H5Clog_trace.c \
         H5Cprefetched.c H5Cquery.c H5Ctag.c H5Ctest.c \
-        H5CS.c \
         H5CX.c \
         H5D.c H5Dbtree.c H5Dbtree2.c H5Dchunk.c H5Dcompact.c H5Dcontig.c \
         H5Ddbg.c H5Ddeprec.c H5Dearray.c H5Defl.c H5Dfarray.c H5Dfill.c \
@@ -92,6 +91,8 @@ libhdf5_la_SOURCES= H5.c H5build_settings.c H5checksum.c H5dbg.c H5system.c \
         H5SL.c \
         H5SM.c H5SMbtree2.c H5SMcache.c H5SMmessage.c H5SMtest.c \
         H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c H5Tcompound.c H5Tconv.c \
+        H5Tconv_integer.c H5Tconv_float.c H5Tconv_string.c H5Tconv_bitfield.c \
+        H5Tconv_compound.c H5Tconv_reference.c H5Tconv_enum.c H5Tconv_vlen.c H5Tconv_array.c \
         H5Tcset.c H5Tdbg.c H5Tdeprec.c H5Tenum.c H5Tfields.c H5Tfixed.c \
         H5Tfloat.c H5Tinit_float.c H5Tnative.c H5Toffset.c H5Toh.c H5Topaque.c \
         H5Torder.c H5Tref.c H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c \
@@ -181,9 +182,9 @@ settings_DATA=libhdf5.settings
 
 # Error header generation
 #
-# Actually, H5Einit.h, H5Eterm.h, H5Edefin.h and H5Epubgen.h all
-# depend on H5err.txt, but the perl script generates them all, so just
-# list one here.
+# Actually, H5Einit.h, H5Eterm.h, H5Edefin.h, H5Emajdef.h, H5Emindef.h,
+# and H5Epubgen.h all depend on H5err.txt, but the perl script generates them
+# all, so just list one here.
 $(top_srcdir)/src/H5Edefin.h: $(top_srcdir)/src/H5err.txt
 	perl $(top_srcdir)/bin/make_err $?
 

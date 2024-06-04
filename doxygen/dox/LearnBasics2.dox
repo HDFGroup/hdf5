@@ -63,6 +63,8 @@ GROUP "/" {
 \endcode
 
 <hr>
+Previous Chapter \ref LBAttrCreate - Next Chapter \ref LBGrpCreateNames
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 @page LBGrpCreateNames Creating Groups using Absolute and Relative Names
@@ -189,6 +191,8 @@ GROUP "/" {
 \endcode
 
 <hr>
+Previous Chapter \ref LBGrpCreate - Next Chapter \ref LBGrpDset
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 @page LBGrpDset Creating Datasets in Groups
@@ -298,6 +302,8 @@ DATASET "dset1" {
 \endcode
 
 <hr>
+Previous Chapter \ref LBGrpCreateNames - Next Chapter \ref LBDsetSubRW
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 @page LBDsetSubRW Reading From or Writing To a Subset of a Dataset
@@ -468,7 +474,7 @@ If the offset were 1x1 (instead of 1x2), then the selection can be made:
 </table>
 
 The selections above were tested with the
-<a href="https://support.hdfgroup.org/ftp/HDF5/examples/howto/subset/h5_subsetbk.c">h5_subsetbk.c</a>
+<a href="https://\AEXURL/howto/subset/h5_subsetbk.c">h5_subsetbk.c</a>
 example code. The memory dataspace was defined as one-dimensional.
 
 \subsection subsecLBDsetSubRWProgRem Remarks
@@ -477,6 +483,8 @@ example code. The memory dataspace was defined as one-dimensional.
 for these parameters, rather than passing in an array for each, and for Fortran 90 you can omit these parameters.
 
 <hr>
+Previous Chapter \ref LBGrpDset - Next Chapter \ref LBDatatypes
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 @page LBDatatypes Datatype Basics
@@ -1159,6 +1167,8 @@ If nested VL datatypes were used to create the buffer, this routine frees them f
 releasing all the memory without creating memory leaks.
 
 <hr>
+Previous Chapter \ref LBDsetSubRW - Next Chapter \ref LBPropsList
+
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 */

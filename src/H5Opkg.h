@@ -366,7 +366,7 @@ typedef struct H5O_cache_ud_t {
     unsigned              v1_pfx_nmesgs; /* Number of messages from v1 prefix header */
     size_t                chunk0_size;   /* Size of serialized first chunk    */
     H5O_t                *oh;            /* Partially deserialized object header, for later use */
-    bool                  free_oh;       /* Whether to free the object header or not */
+    uint8_t               oh_version;    /* Oh version number          */
     H5O_common_cache_ud_t common;        /* Common object header cache callback info */
 } H5O_cache_ud_t;
 
@@ -600,8 +600,8 @@ H5_DLL herr_t H5O__condense_header(H5F_t *f, H5O_t *oh);
 H5_DLL herr_t H5O__release_mesg(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg, bool adj_link);
 
 /* Shared object operators */
-H5_DLL void  *H5O__shared_decode(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, const uint8_t *buf,
-                                 const H5O_msg_class_t *type);
+H5_DLL void  *H5O__shared_decode(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, size_t buf_size,
+                                 const uint8_t *buf, const H5O_msg_class_t *type);
 H5_DLL herr_t H5O__shared_encode(const H5F_t *f, uint8_t *buf /*out*/, const H5O_shared_t *sh_mesg);
 H5_DLL size_t H5O__shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg);
 H5_DLL herr_t H5O__shared_delete(H5F_t *f, H5O_t *open_oh, const H5O_msg_class_t *mesg_type,

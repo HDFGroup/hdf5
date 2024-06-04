@@ -28,7 +28,7 @@ jobs:
       # libssl, etc. are needed for the ros3 VFD
       - name: Install Linux Dependencies
         run: |
-           sudo apt update
+           sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
@@ -89,7 +89,7 @@ jobs:
       # libssl, etc. are needed for the ros3 VFD
       - name: Install Linux Dependencies
         run: |
-           sudo apt update
+           sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
@@ -150,7 +150,7 @@ jobs:
       # libssl, etc. are needed for the ros3 VFD
       - name: Install Linux Dependencies
         run: |
-           sudo apt update
+           sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
@@ -211,7 +211,7 @@ jobs:
       # libssl, etc. are needed for the ros3 VFD
       - name: Install Linux Dependencies
         run: |
-           sudo apt update
+           sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
@@ -272,7 +272,7 @@ jobs:
       # libssl, etc. are needed for the ros3 VFD
       - name: Install Linux Dependencies
         run: |
-           sudo apt update
+           sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
@@ -333,7 +333,7 @@ jobs:
       # libssl, etc. are needed for the ros3 VFD
       - name: Install Linux Dependencies
         run: |
-           sudo apt update
+           sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
@@ -394,7 +394,7 @@ jobs:
       # libssl, etc. are needed for the ros3 VFD
       - name: Install Linux Dependencies
         run: |
-           sudo apt update
+           sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
@@ -457,7 +457,7 @@ jobs:
       # libssl, etc. are needed for the ros3 VFD
       - name: Install Linux Dependencies
         run: |
-           sudo apt update
+           sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12

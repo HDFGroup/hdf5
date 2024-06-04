@@ -1004,7 +1004,7 @@ H5_DLL herr_t     H5O_loc_free(H5O_loc_t *loc);
 H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);
 
 /* EFL operators */
-H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);
+H5_DLL herr_t H5O_efl_total_size(const H5O_efl_t *efl, hsize_t *size);
 
 /* File space info routines */
 H5_DLL herr_t H5O_fsinfo_set_version(H5F_libver_t low, H5F_libver_t high, H5O_fsinfo_t *fsinfo);

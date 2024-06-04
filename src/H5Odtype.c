@@ -366,6 +366,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 hsize_t  dim[H5O_LAYOUT_NDIMS];  /* Dimensions of the array */
                 H5T_t   *array_dt;               /* Temporary pointer to the array datatype */
                 H5T_t   *temp_type;              /* Temporary pointer to the field's datatype */
+                unsigned memb_idx;               /* Local index counter */
 
                 /* Get the length of the field name */
                 if (!skip) {
@@ -387,6 +388,13 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
 
                 if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, *pp, actual_name_length, p_end))
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+
+                /* Check for duplicated field name */
+                for (memb_idx = 0; memb_idx < dt->shared->u.compnd.nmembs; memb_idx++)
+                    if (0 == strcmp((const char *)*pp, dt->shared->u.compnd.memb[memb_idx].name))
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL,
+                                    "duplicated compound field name '%s', for fields %u and %u",
+                                    (const char *)*pp, memb_idx, dt->shared->u.compnd.nmembs);
 
                 /* Decode the field name */
                 if (NULL == (dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
@@ -509,6 +517,18 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 if (version == H5O_DTYPE_VERSION_1) {
                     /* Check if this member is an array field */
                     if (ndims > 0) {
+                        /* Validate decoded dims */
+                        for (unsigned u = 0; u < ndims; u++)
+                            if (!(dim[u] > 0)) {
+                                dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
+                                    H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
+                                if (H5T_close_real(temp_type) < 0)
+                                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL,
+                                                "can't release datatype info");
+                                HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL,
+                                            "zero-sized dimension specified");
+                            }
+
                         /* Create the array datatype for the field */
                         if ((array_dt = H5T__array_create(temp_type, ndims, dim)) == NULL) {
                             dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
@@ -690,6 +710,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                      */
                     actual_name_length = strlen((const char *)*pp);
                 }
+                if (0 == actual_name_length)
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADSIZE, FAIL, "0 length enum name");
 
                 if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, *pp, actual_name_length, p_end))
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");

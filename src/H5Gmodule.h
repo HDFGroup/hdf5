@@ -775,8 +775,8 @@
  * \image html Groups_fig9_aa.gif "c) A link named dset2 to the same dataset is created in /group2."
  * </td>
  * <td>
- * \image html Groups_fig9_bb.gif "d) The link from /group1 to dset1 is removed. The dataset is
- * still in the file, but can be accessed only as /group2/dset2."
+ * \image html Groups_fig9_bb.gif "d) The link from /group1 to dset1 is removed."
+ * The dataset is still in the file, but can be accessed only as /group2/dset2.
  * </td>
  * </tr>
  * </table>
@@ -811,8 +811,7 @@
  * </tr>
  * <tr>
  * <td>
- * \image html Groups_fig10_c.gif "c) dset1 has three names: /group1/dset1, /group2/dset2, and
- * /group1/GXX/dset2."
+ * \image html Groups_fig10_c.gif "c) dset1 has 3 names: /group1/dset1, /group2/dset2, and /group1/GXX/dset2."
  * </td>
  * <td>
  * \image html Groups_fig10_d.gif "d) dset1 has an infinite number of available path names."

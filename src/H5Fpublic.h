@@ -1142,7 +1142,7 @@ H5_DLL herr_t H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate_ptr);
  *                          or NULL if that datum is not desired
  * \param[out] cur_num_entries_ptr Pointer to the location in which the current number of entries in
  *                                 the cache is to be returned, or NULL if that datum is not desired
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details H5Fget_mdc_size()  queries the metadata cache of the target file for the desired size
  *          information, and returns this information in the locations indicated by the pointer
@@ -1168,7 +1168,7 @@ H5_DLL herr_t H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
  * \brief Resets hit rate statistics counters for the target file
  *
  * \file_id
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details
  * \parblock
@@ -1199,7 +1199,9 @@ H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
  *
  * \obj_id
  * \param[out] name Buffer for the file name
- * \param[in] size Size, in bytes, of the \p name buffer
+ * \param[in]  size The size, in bytes, of the \p name buffer. Must be the
+ *                  size of the file name in bytes plus 1 for a NULL
+ *                  terminator
  *
  * \return Returns the length of the file name if successful; otherwise returns
  *         a negative value.
@@ -1212,17 +1214,7 @@ H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
  *          additional characters, if any, are not returned to the user
  *          application.
  *
- *          If the length of the name, which determines the required value of
- *          size, is unknown, a preliminary H5Fget_name() call can be made by
- *          setting \p name to NULL. The return value of this call will be the
- *          size of the file name; that value plus one (1) can then be assigned
- *          to size for a second H5Fget_name() call, which will retrieve the
- *          actual name. (The value passed in with the parameter \p size must
- *          be one greater than size in bytes of the actual name in order to
- *          accommodate the null terminator; if \p size is set to the exact
- *          size of the name, the last byte passed back will contain the null
- *          terminator and the last character will be missing from the name
- *          passed back to the calling application.)
+ *          \details_namelen{file,H5Fget_name}
  *
  *          If an error occurs, the buffer pointed to by \p name is unchanged
  *          and the function returns a negative value.
@@ -1683,7 +1675,7 @@ H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], u
  * \file_id
  * \param[out] image_addr Offset of the cache image if it exists, or #HADDR_UNDEF if it does not
  * \param[out] image_size Length of the cache image if it exists, or 0 if it does not
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details
  * \parblock
@@ -1771,7 +1763,7 @@ H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
  * \param[in] flag Logical flag for atomicity setting. Valid values are:
  *                 \li \c 1 -- Sets MPI file access to atomic mode.
  *                 \li \c 0 -- Sets MPI file access to nonatomic mode.
- * \returns \herr_t
+ * \return \herr_t
  *
  * \par Motivation
  * H5Fset_mpi_atomicity() is applicable only in parallel environments using MPI I/O.
@@ -1836,7 +1828,7 @@ H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
  * \param[out] flag Logical flag for atomicity setting. Valid values are:
  *                  \li 1 -- MPI file access is set to atomic mode.
  *                  \li 0 -- MPI file access is set to nonatomic mode.
- * \returns \herr_t
+ * \return \herr_t
  *
  * \details H5Fget_mpi_atomicity() retrieves the current consistency semantics mode for
  *          data access for the file \p file_id.
@@ -1956,10 +1948,8 @@ H5_DLL herr_t H5Fget_info1(hid_t obj_id, H5F_info1_t *file_info);
  *
  * \return \herr_t
  *
- * \deprecated When?
- *
- * \todo In which version was this function introduced?
- * \todo In which version was this function deprecated?
+ * \since 1.10.1
+ * \deprecated 1.10.2 Deprecated in favor of the function H5Fset_libver_bounds()
  *
  */
 H5_DLL herr_t H5Fset_latest_format(hid_t file_id, hbool_t latest_format);
@@ -1972,12 +1962,10 @@ H5_DLL herr_t H5Fset_latest_format(hid_t file_id, hbool_t latest_format);
  *
  * \return \htri_t
  *
- * \deprecated When?
- *
  * \details H5Fis_hdf5() determines whether a file is in the HDF5 format.
  *
- * \todo In which version was this function deprecated?
- * \todo In which version was this function introduced?
+ * \since 1.0.0
+ * \deprecated 1.12.0 Deprecated in favor of the function H5Fis_accessible()
  *
  */
 H5_DLL htri_t H5Fis_hdf5(const char *file_name);

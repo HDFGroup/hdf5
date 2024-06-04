@@ -179,7 +179,7 @@ H5_DLL herr_t H5Sclose(hid_t space_id);
  * \param[in] count   Number of blocks included in the hyperslab
  * \param[in] block   Size of a block in the hyperslab
  *
- * \return \hid_tv{dataspace}
+ * \return \hid_t{dataspace}
  *
  * \details H5Scombine_hyperslab() combines a hyperslab selection specified
  *          by \p start, \p stride, \p count and \p block with the current
@@ -224,7 +224,7 @@ H5_DLL hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_i
  *
  * \space_id
  *
- * \return \hid_tv{dataspace}
+ * \return \hid_t{dataspace}
  *
  * \details H5Scopy() creates a new dataspace which is an exact copy of the
  *          dataspace identified by \p space_id. The dataspace identifier
@@ -540,6 +540,8 @@ H5_DLL hssize_t H5Sget_select_elem_npoints(hid_t spaceid);
  * \param[in] startpoint  Element point to start with
  * \param[in] numpoints   Number of element points to get
  * \param[out] buf        List of element points selected
+ *
+ * \return \herr_t
  *
  * \details H5Sget_select_elem_pointlist() returns the list of element
  *          points in the current dataspace selection \p space_id. Starting

@@ -99,14 +99,6 @@ set (H5C_HDRS
 IDE_GENERATED_PROPERTIES ("H5C" "${H5C_HDRS}" "${H5C_SOURCES}" )
 
 
-set (H5CS_SOURCES
-    ${HDF5_SRC_DIR}/H5CS.c
-)
-set (H5CS_HDRS
-)
-IDE_GENERATED_PROPERTIES ("H5CS" "${H5CS_HDRS}" "${H5CS_SOURCES}" )
-
-
 set (H5CX_SOURCES
     ${HDF5_SRC_DIR}/H5CX.c
 )
@@ -610,6 +602,15 @@ set (H5T_SOURCES
     ${HDF5_SRC_DIR}/H5Tcommit.c
     ${HDF5_SRC_DIR}/H5Tcompound.c
     ${HDF5_SRC_DIR}/H5Tconv.c
+    ${HDF5_SRC_DIR}/H5Tconv_integer.c
+    ${HDF5_SRC_DIR}/H5Tconv_float.c
+    ${HDF5_SRC_DIR}/H5Tconv_string.c
+    ${HDF5_SRC_DIR}/H5Tconv_bitfield.c
+    ${HDF5_SRC_DIR}/H5Tconv_compound.c
+    ${HDF5_SRC_DIR}/H5Tconv_reference.c
+    ${HDF5_SRC_DIR}/H5Tconv_enum.c
+    ${HDF5_SRC_DIR}/H5Tconv_vlen.c
+    ${HDF5_SRC_DIR}/H5Tconv_array.c
     ${HDF5_SRC_DIR}/H5Tcset.c
     ${HDF5_SRC_DIR}/H5Tdbg.c
     ${HDF5_SRC_DIR}/H5Tdeprec.c
@@ -768,7 +769,6 @@ set (common_SRCS
     ${H5B_SOURCES}
     ${H5B2_SOURCES}
     ${H5C_SOURCES}
-    ${H5CS_SOURCES}
     ${H5CX_SOURCES}
     ${H5D_SOURCES}
     ${H5E_SOURCES}
@@ -863,8 +863,6 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5Cpkg.h
     ${HDF5_SRC_DIR}/H5Cprivate.h
 
-    ${HDF5_SRC_DIR}/H5CSprivate.h
-
     ${HDF5_SRC_DIR}/H5CXprivate.h
 
     ${HDF5_SRC_DIR}/H5Dpkg.h
@@ -872,6 +870,8 @@ set (H5_PRIVATE_HEADERS
 
     ${HDF5_SRC_DIR}/H5Edefin.h
     ${HDF5_SRC_DIR}/H5Einit.h
+    ${HDF5_SRC_DIR}/H5Emajdef.h
+    ${HDF5_SRC_DIR}/H5Emindef.h
     ${HDF5_SRC_DIR}/H5Epkg.h
     ${HDF5_SRC_DIR}/H5Eprivate.h
     ${HDF5_SRC_DIR}/H5Eterm.h
@@ -955,6 +955,17 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5SMpkg.h
     ${HDF5_SRC_DIR}/H5SMprivate.h
 
+    ${HDF5_SRC_DIR}/H5Tconv.h
+    ${HDF5_SRC_DIR}/H5Tconv_array.h
+    ${HDF5_SRC_DIR}/H5Tconv_bitfield.h
+    ${HDF5_SRC_DIR}/H5Tconv_compound.h
+    ${HDF5_SRC_DIR}/H5Tconv_enum.h
+    ${HDF5_SRC_DIR}/H5Tconv_float.h
+    ${HDF5_SRC_DIR}/H5Tconv_integer.h
+    ${HDF5_SRC_DIR}/H5Tconv_macros.h
+    ${HDF5_SRC_DIR}/H5Tconv_reference.h
+    ${HDF5_SRC_DIR}/H5Tconv_string.h
+    ${HDF5_SRC_DIR}/H5Tconv_vlen.h
     ${HDF5_SRC_DIR}/H5Tpkg.h
     ${HDF5_SRC_DIR}/H5Tprivate.h
 
@@ -1176,9 +1187,9 @@ set (_PKG_CONFIG_PREFIX ${CMAKE_INSTALL_PREFIX})
 set (_PKG_CONFIG_EXEC_PREFIX \${prefix})
 set (_PKG_CONFIG_LIBDIR \${exec_prefix}/${HDF5_INSTALL_LIB_DIR})
 set (_PKG_CONFIG_INCLUDEDIR \${prefix}/${HDF5_INSTALL_INCLUDE_DIR})
-set (_PKG_CONFIG_LIBNAME "${HDF5_LIB_CORENAME}")
+set (_PKG_CONFIG_LIBNAME "${HDF5_LIB_NAME}")
 set (_PKG_CONFIG_VERSION "${HDF5_PACKAGE_VERSION}")
-set (PKGCONFIG_LIBNAME "${HDF5_LIB_CORENAME}")
+set (PKGCONFIG_LIBNAME "${HDF5_LIB_NAME}")
 if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
   set (PKGCONFIG_LIBNAME "${PKGCONFIG_LIBNAME}${CMAKE_DEBUG_POSTFIX}")
 endif ()

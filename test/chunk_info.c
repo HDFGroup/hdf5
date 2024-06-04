@@ -2367,9 +2367,9 @@ test_chunk_address_with_userblock(hid_t fapl_id)
         int data    = -1;
         int data_ub = -1;
 
-        if (HDlseek(fd, (off_t)(od.addresses[i]), SEEK_SET) < 0)
+        if (HDlseek(fd, (HDoff_t)(od.addresses[i]), SEEK_SET) < 0)
             TEST_ERROR;
-        if (HDlseek(fd_ub, (off_t)(od_ub.addresses[i]), SEEK_SET) < 0)
+        if (HDlseek(fd_ub, (HDoff_t)(od_ub.addresses[i]), SEEK_SET) < 0)
             TEST_ERROR;
 
         if (HDread(fd, &data, sizeof(int)) != sizeof(int))
