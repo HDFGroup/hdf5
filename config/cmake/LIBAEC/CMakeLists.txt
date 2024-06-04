@@ -5,6 +5,8 @@ PROJECT (LIBAEC C)
 # Basic LIBAEC stuff here
 #-----------------------------------------------------------------------------
 set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set (LIBAEC_PACKAGE_EXT ${HDF_PACKAGE_EXT})
 set (HDF_USE_GNU_DIRS ${HDF5_USE_GNU_DIRS})
@@ -20,10 +22,12 @@ if (WINDOWS)
 endif ()
 
 if (NOT WINDOWS)
-  TEST_BIG_ENDIAN (WORDS_BIGENDIAN)
+include(TestBigEndian)
+test_big_endian(WORDS_BIGENDIAN)
 endif ()
 
 # Check for __builtin_clzll for faster decoding
+include(CheckCSourceCompiles)
 check_c_source_compiles(
   "int main(void)\n{return __builtin_clzll(1LL);}"
   HAVE_DECL___BUILTIN_CLZLL)
@@ -34,6 +38,13 @@ if(NOT HAVE_DECL___BUILTIN_CLZLL)
     "int main(void){unsigned long foo; unsigned __int64 bar=1LL;
 return _BitScanReverse64(&foo, bar);}"
     HAVE_BSR64)
+endif()
+
+include(CheckSymbolExists)
+check_symbol_exists(snprintf "stdio.h" HAVE_SNPRINTF)
+if(NOT HAVE_SNPRINTF)
+  check_symbol_exists(_snprintf "stdio.h" HAVE__SNPRINTF)
+  check_symbol_exists(_snprintf_s "stdio.h" HAVE__SNPRINTF_S)
 endif()
 
 #-----------------------------------------------------------------------------
@@ -62,8 +73,8 @@ set (LIBAEC_LIB_TARGET            "${LIBAEC_LIB_CORENAME}-static")
 set (SZIP_LIB_TARGET              "${SZIP_LIB_CORENAME}-static")
 
 set (libaec_VERS_MAJOR 1)
-set (libaec_VERS_MINOR 0)
-set (libaec_VERS_RELEASE 6)
+set (libaec_VERS_MINOR 1)
+set (libaec_VERS_RELEASE 3)
 
 #-----------------------------------------------------------------------------
 set (LIBAEC_PACKAGE "libaec")
@@ -142,6 +153,10 @@ endif ()
 # Generate the aec_config.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
 configure_file (${LIBAEC_RESOURCES_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+# Create libaec.h with current version information
+configure_file(
+  "include/libaec.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/libaec.h")
 
 #-----------------------------------------------------------------------------
 # All libs/tests/examples need the main include directories
@@ -157,10 +172,11 @@ set(LIBAEC_SRCS
     ${LIBAEC_SRC_DIR}/encode.c
     ${LIBAEC_SRC_DIR}/encode_accessors.c
     ${LIBAEC_SRC_DIR}/decode.c
+    ${LIBAEC_SRC_DIR}/vector.c
 )
 
 set (LIBAEC_PUBLIC_HEADERS
-    ${LIBAEC_INC_DIR}/libaec.h
+    ${CMAKE_CURRENT_BINARY_DIR}/libaec.h
 )
 
 add_library (${LIBAEC_LIB_TARGET} STATIC ${LIBAEC_SRCS} ${LIBAEC_PUBLIC_HEADERS})
@@ -223,18 +239,6 @@ if (LIBAEC_EXPORTED_TARGETS)
 endif ()
 
 include (CMakePackageConfigHelpers)
-
-#-----------------------------------------------------------------------------
-# Check for Installation Utilities
-#-----------------------------------------------------------------------------
-if (WIN32)
-  set (PF_ENV_EXT "(x86)")
-  find_program (NSIS_EXECUTABLE NSIS.exe PATHS "$ENV{ProgramFiles}\\NSIS" "$ENV{ProgramFiles${PF_ENV_EXT}}\\NSIS")
-  if(NOT CPACK_WIX_ROOT)
-    file(TO_CMAKE_PATH "$ENV{WIX}" CPACK_WIX_ROOT)
-  endif ()
-  find_program (WIX_EXECUTABLE candle  PATHS "${CPACK_WIX_ROOT}/bin")
-endif ()
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
@@ -324,145 +328,3 @@ if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
   )
 endif ()
 
-#-----------------------------------------------------------------------------
-# Check for Installation Utilities
-#-----------------------------------------------------------------------------
-if (WIN32)
-  set (PF_ENV_EXT "(x86)")
-  find_program (NSIS_EXECUTABLE NSIS.exe PATHS "$ENV{ProgramFiles}\\NSIS" "$ENV{ProgramFiles${PF_ENV_EXT}}\\NSIS")
-  if(NOT CPACK_WIX_ROOT)
-    file(TO_CMAKE_PATH "$ENV{WIX}" CPACK_WIX_ROOT)
-  endif()
-  find_program (WIX_EXECUTABLE candle  PATHS "${CPACK_WIX_ROOT}/bin")
-endif ()
-
-configure_file (${LIBAEC_SOURCE_DIR}/LICENSE.txt ${LIBAEC_BINARY_DIR}/LIBAEC_LICENSE.txt @ONLY)
-configure_file (${LIBAEC_SOURCE_DIR}/README.SZIP ${LIBAEC_BINARY_DIR}/LIBAEC_README.SZIP @ONLY)
-configure_file (${LIBAEC_SOURCE_DIR}/README.md ${LIBAEC_BINARY_DIR}/LIBAEC_README.md @ONLY)
-
-#-----------------------------------------------------------------------------
-# Set the cpack variables
-#-----------------------------------------------------------------------------
-if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
-  set (CPACK_PACKAGE_VENDOR "HDF_Group")
-  set (CPACK_PACKAGE_NAME "${LIBAEC_PACKAGE_NAME}")
-  if (NOT WIN32 OR LIBAEC_VERS_SUBRELEASE MATCHES "^[0-9]+$")
-    set (CPACK_PACKAGE_VERSION "${LIBAEC_PACKAGE_VERSION_STRING}")
-  else ()
-    set (CPACK_PACKAGE_VERSION "${LIBAEC_PACKAGE_VERSION}")
-  endif ()
-  set (CPACK_PACKAGE_VERSION_MAJOR "${LIBAEC_PACKAGE_VERSION_MAJOR}")
-  set (CPACK_PACKAGE_VERSION_MINOR "${LIBAEC_PACKAGE_VERSION_MINOR}")
-  set (CPACK_PACKAGE_VERSION_PATCH "")
-  set (CPACK_RESOURCE_FILE_LICENSE "${LIBAEC_BINARY_DIR}/LIBAEC_LICENSE.txt")
-  set (CPACK_PACKAGE_DESCRIPTION_FILE "${LIBAEC_BINARY_DIR}/LIBAEC_README.SZIP")
-  set (CPACK_RESOURCE_FILE_README "${LIBAEC_BINARY_DIR}/LIBAEC_README.md")
-  set (CPACK_PACKAGE_RELOCATABLE TRUE)
-  set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "libaec - Adaptive Entropy Coding library by Deutsches Klimarechenzentrum GmbH")
-  set (CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_VENDOR}/${CPACK_PACKAGE_NAME}/${CPACK_PACKAGE_VERSION}")
-
-  set (CPACK_GENERATOR "TGZ")
-  if (WIN32)
-    set (CPACK_GENERATOR "ZIP")
-
-    if (NSIS_EXECUTABLE)
-      list (APPEND CPACK_GENERATOR "NSIS")
-    endif ()
-    # Installers for 32- vs. 64-bit CMake:
-    #  - Root install directory (displayed to end user at installer-run time)
-    #  - "NSIS package/display name" (text used in the installer GUI)
-    #  - Registry key used to store info about the installation
-    set (CPACK_NSIS_PACKAGE_NAME "${LIBAEC_PACKAGE_STRING}")
-    if (CMAKE_CL_64)
-      set (CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
-      set (CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION} (Win64)")
-    else ()
-      set (CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES")
-      set (CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
-    endif ()
-    set (CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_PACKAGE_NAME}")
-    set (CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_VENDOR}\\\\${CPACK_PACKAGE_NAME}\\\\${CPACK_PACKAGE_VERSION}")
-    set (CPACK_NSIS_CONTACT "${LIBAEC_PACKAGE_BUGREPORT}")
-    set (CPACK_NSIS_MODIFY_PATH ON)
-    set (CPACK_NSIS_PACKAGE_NAME "LIBAEC ${LIBAEC_PACKAGE_VERSION}")
-    if (WIX_EXECUTABLE)
-      list (APPEND CPACK_GENERATOR "WIX")
-    endif ()
-#WiX variables
-    set (CPACK_WIX_UNINSTALL "1")
-    set (CPACK_RESOURCE_FILE_LICENSE "${LIBAEC_BINARY_DIR}/LIBAEC_LICENSE.txt")
-  elseif (APPLE)
-    list (APPEND CPACK_GENERATOR "STGZ")
-    list (APPEND CPACK_GENERATOR "DragNDrop")
-    set (CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
-    set (CPACK_PACKAGING_INSTALL_PREFIX "/${CPACK_PACKAGE_INSTALL_DIRECTORY}")
-    #set (CPACK_PACKAGE_ICON "${LIBAEC_RESOURCES_DIR}/hdf.icns")
-
-    option (LIBAEC_PACK_MACOSX_FRAMEWORK  "Package the LIBAEC Library in a Framework" OFF)
-    if (LIBAEC_PACK_MACOSX_FRAMEWORK AND LIBAEC_BUILD_FRAMEWORKS)
-      set (CPACK_BUNDLE_NAME "${LIBAEC_PACKAGE_STRING}")
-      set (CPACK_BUNDLE_LOCATION "/")    # make sure CMAKE_INSTALL_PREFIX ends in /
-      set (CMAKE_INSTALL_PREFIX "/${CPACK_BUNDLE_NAME}.framework/Versions/${CPACK_PACKAGE_VERSION}/${CPACK_PACKAGE_NAME}/")
-      set (CPACK_SHORT_VERSION_STRING "${CPACK_PACKAGE_VERSION}")
-      #-----------------------------------------------------------------------------
-      # Configure the Info.plist file for the install bundle
-      #-----------------------------------------------------------------------------
-      configure_file (
-          ${LIBAEC_RESOURCES_DIR}/CPack.Info.plist.in
-          ${LIBAEC_BINARY_DIR}/CMakeFiles/Info.plist @ONLY
-      )
-      configure_file (
-          ${LIBAEC_RESOURCES_DIR}/PkgInfo.in
-          ${LIBAEC_BINARY_DIR}/CMakeFiles/PkgInfo @ONLY
-      )
-      install (
-          FILES ${LIBAEC_BINARY_DIR}/CMakeFiles/PkgInfo
-          DESTINATION ..
-      )
-    endif ()
-  else ()
-    list (APPEND CPACK_GENERATOR "STGZ")
-    set (CPACK_PACKAGING_INSTALL_PREFIX "/${CPACK_PACKAGE_INSTALL_DIRECTORY}")
-    set (CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
-
-    set (CPACK_DEBIAN_PACKAGE_SECTION "Libraries")
-    set (CPACK_DEBIAN_PACKAGE_MAINTAINER "${LIBAEC_PACKAGE_BUGREPORT}")
-
-#      list (APPEND CPACK_GENERATOR "RPM")
-    set (CPACK_RPM_PACKAGE_RELEASE "1")
-    set (CPACK_RPM_COMPONENT_INSTALL ON)
-    set (CPACK_RPM_PACKAGE_RELOCATABLE ON)
-  endif ()
-
-  # By default, do not warn when built on machines using only VS Express:
-  if (NOT DEFINED CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS)
-    set (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS ON)
-  endif ()
-  include (InstallRequiredSystemLibraries)
-
-  set (CPACK_INSTALL_CMAKE_PROJECTS "${LIBAEC_BINARY_DIR};LIBAEC;libraries;/")
-  set (CPACK_INSTALL_CMAKE_PROJECTS "${LIBAEC_BINARY_DIR};LIBAEC;configinstall;/")
-
-  set (CPACK_ALL_INSTALL_TYPES Full Developer User)
-  set (CPACK_INSTALL_TYPE_FULL_DISPLAY_NAME "Everything")
-
-  set(CPACK_COMPONENTS_ALL libraries headers documents configinstall)
-
-  include (CPack)
-
-  cpack_add_component_group(Runtime)
-
-  cpack_add_component (libraries
-      DISPLAY_NAME "LIBAEC Libraries"
-      REQUIRED
-      GROUP Runtime
-      INSTALL_TYPES Full Developer User
-  )
-  cpack_add_component (configinstall
-      DISPLAY_NAME "LIBAEC CMake files"
-      DEPENDS libraries
-      GROUP Development
-      INSTALL_TYPES Full Developer User
-  )
-
-endif ()
