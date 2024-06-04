@@ -20,9 +20,12 @@
         "ZLIB_PACKAGE_NAME": {"type": "STRING", "value": "zlib"},
         "ZLIB_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/madler/zlib/releases/download/v1.3"},
         "ZLIB_TGZ_NAME": {"type": "STRING", "value": "zlib-1.3.tar.gz"},
+        "ZLIBNG_PACKAGE_NAME": {"type": "STRING", "value": "zlib-ng"},
+        "ZLIBNG_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags"},
+        "ZLIBNG_TGZ_NAME": {"type": "STRING", "value": "2.1.6.tar.gz"},
         "LIBAEC_PACKAGE_NAME": {"type": "STRING", "value": "libaec"},
-        "LIBAEC_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6"},
-        "LIBAEC_TGZ_NAME": {"type": "STRING", "value": "libaec-1.0.6.tar.gz"}
+        "LIBAEC_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3"},
+        "LIBAEC_TGZ_NAME": {"type": "STRING", "value": "libaec-1.1.3.tar.gz"}
       }
     },
     {
@@ -31,6 +34,7 @@
       "inherits": ["ci-base-tgz", "ci-CompressionVars"],
       "cacheVariables": {
         "HDF5_PACKAGE_EXTLIBS": "ON",
+        "HDF5_USE_ZLIB_NG": "OFF",
         "ZLIB_USE_LOCALCONTENT": "OFF",
         "LIBAEC_USE_LOCALCONTENT": "OFF"
       }
