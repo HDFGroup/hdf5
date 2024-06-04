@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.5b366b3</span>
+   &#160;<span id="projectnumber">1.15.0.b823c16</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -132,7 +132,7 @@ Overview of Parallel HDF5 (PHDF5) Design</h1>
 <h2><a class="anchor" id="subsec_pintro_prog"></a>
 Parallel Programming with HDF5</h2>
 <p>This tutorial assumes that you are somewhat familiar with parallel programming with MPI (Message Passing Interface).</p>
-<p>If you are not familiar with parallel programming, here is a tutorial that may be of interest: <a href="http://www.nersc.gov/users/training/online-tutorials/introduction-to-scientific-i-o/?show_all=1">Tutorial on HDF5 I/O tuning at NERSC</a></p>
+<p>If you are not familiar with parallel programming, here is a tutorial that may be of interest: <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/hdf5_topics/2016_NERSC_Introduction_to_Scientific_IO.pdf">Tutorial on HDF5 I/O tuning at NERSC</a>. (NOTE: As of 2024, the specific systems described in this tutorial are outdated.)</p>
 <p>Some of the terms that you must understand in this tutorial are: </p><ul>
 <li>
 <p class="startli"><b>MPI Communicator</b> Allows a group of processes to communicate with each other.</p>
@@ -210,7 +210,9 @@ Close the file. </li>
 <div class="line">35       ! Setup file access property list with parallel I/O access.</div>
 <div class="line">36       !</div>
 <div class="line">37 CALL h5pcreate_f(H5P_FILE_ACCESS_F, plist_id, error) 38 CALL h5pset_fapl_mpio_f(plist_id, comm, info, error)</div>
-</div><!-- fragment --><p>The following example programs create an HDF5 file using Parallel HDF5: <a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/C/H5PAR/ph5_file_create.c">C: file_create.c</a> <a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/FORTRAN/H5PAR/ph5_f90_file_create.F90">F90: file_create.F90</a></p>
+</div><!-- fragment --><p>The following example programs create an HDF5 file using Parallel HDF5:</p>
+<p><a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/C/H5PAR/ph5_file_create.c">C: ph5_file_create.c</a></p>
+<p><a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/FORTRAN/H5PAR/ph5_f90_file_create.F90">F90: ph5_f90_file_create.F90</a></p>
 <h2><a class="anchor" id="subsec_pintro_create_dset"></a>
 Creating and Accessing a Dataset with PHDF5</h2>
 <p>The programming model for creating and accessing a dataset is as follows: </p><ol>
@@ -267,7 +269,9 @@ Do this by first passing a data transfer property list class type to: <a class="
 <div class="line">115       !</div>
 <div class="line">116       CALL h5dwrite_f (dset_id, H5T_NATIVE_INTEGER, data, dimsfi, error, &amp;</div>
 <div class="line">117          file_space_id = filespace, mem_space_id = memspace, xfer_prp = plist_id)</div>
-</div><!-- fragment --><p>The following example programs create an HDF5 dataset using Parallel HDF5: <a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/C/H5PAR/ph5_dataset.c">C: dataset.c</a> <a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/FORTRAN/H5PAR/ph5_f90_dataset.F90">F90: dataset.F90</a></p>
+</div><!-- fragment --><p>The following example programs create an HDF5 dataset using Parallel HDF5:</p>
+<p><a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/C/H5PAR/ph5_dataset.c">C: ph5_dataset.c</a></p>
+<p><a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/FORTRAN/H5PAR/ph5_f90_dataset.F90">F90: ph5_f90_dataset.F90</a></p>
 <h3><a class="anchor" id="subsec_pintro_hyperslabs"></a>
 Hyperslabs</h3>
 <p>The programming model for writing and reading hyperslabs is: /li Each process defines the memory and file hyperslabs. /li Each process executes a partial write/read call which is either collective or independent.</p>
