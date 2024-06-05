@@ -22,7 +22,7 @@ space_id = dataset.id.get_space()
 space_id.select_hyperslab((1,1), (2,2), stride=(4,4), block=(2,2))
 #---> Doesn't work dataset.id.read(space_id, space_id, data_selected, h5py.h5t.STD_I32LE) 
 dataset.id.read(space_id, space_id, data_selected) 
-print("Seleted data read from file....")
+print("Selected data read from file....")
 print(data_selected[...])
 #
 # Close the file before exiting

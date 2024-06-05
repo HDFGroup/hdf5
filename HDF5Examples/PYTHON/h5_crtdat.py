@@ -3,7 +3,7 @@
 #
 import h5py
 #
-# Create a new file using defaut properties.
+# Create a new file using default properties.
 #
 file = h5py.File('dset.h5','w')
 #
