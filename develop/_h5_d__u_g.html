@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.b823c16</span>
+   &#160;<span id="projectnumber">1.15.0.b698b48</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -241,7 +241,7 @@ Dataset Function Summaries</h2>
 <tr>
 <td><a class="el" href="group___d_c_p_l.html#ga37de4b6071a94574cfab5cd6de9c3fc6" title="Sets up use of the SZIP compression filter.">H5Pset_szip</a> </td><td>Sets up use of the Szip compression filter.  </td></tr>
 <tr>
-<td><a class="el" href="group___d_c_p_l.html#ga85ff7c9c827fa524041cd58c199b77b8" title="Adds an external file to the list of external files.">H5Pset_external</a> </td><td>Adds an external file to the list of external files.  </td></tr>
+<td><a class="el" href="group___d_c_p_l.html#ga64bf68bda464eaaabfe24846533b1935" title="Adds an external file to the list of external files.">H5Pset_external</a> </td><td>Adds an external file to the list of external files.  </td></tr>
 <tr>
 <td><a class="el" href="group___d_c_p_l.html#ga4c45d90845ea7627b6238f95168c41ce" title="Returns the number of external files for a dataset.">H5Pget_external_count</a> </td><td>Returns the number of external files for a dataset.  </td></tr>
 <tr>
@@ -1038,11 +1038,11 @@ External Storage Properties</h3>
 <tr>
 <th>Function </th><th>Description  </th></tr>
 <tr>
-<td><a class="el" href="group___d_c_p_l.html#ga85ff7c9c827fa524041cd58c199b77b8" title="Adds an external file to the list of external files.">H5Pset_external</a> </td><td>This function adds a new segment to the end of the external file list of the specified dataset creation property list. The segment begins a byte offset of file name and continues for size bytes. The space represented by this segment is adjacent to the space already represented by the external file list. The last segment in a file list may have the size <a class="el" href="_h5_fpublic_8h.html#a2a667df33694861e41d1b9eb3a55b373">H5F_UNLIMITED</a>, in which case the external file may be of unlimited size and no more files can be added to the external files list.  </td></tr>
+<td><a class="el" href="group___d_c_p_l.html#ga64bf68bda464eaaabfe24846533b1935" title="Adds an external file to the list of external files.">H5Pset_external</a> </td><td>This function adds a new segment to the end of the external file list of the specified dataset creation property list. The segment begins a byte offset of file name and continues for size bytes. The space represented by this segment is adjacent to the space already represented by the external file list. The last segment in a file list may have the size <a class="el" href="_h5_fpublic_8h.html#a2a667df33694861e41d1b9eb3a55b373">H5F_UNLIMITED</a>, in which case the external file may be of unlimited size and no more files can be added to the external files list.  </td></tr>
 <tr>
 <td><a class="el" href="group___d_c_p_l.html#ga4c45d90845ea7627b6238f95168c41ce" title="Returns the number of external files for a dataset.">H5Pget_external_count</a> </td><td>Calling this function returns the number of segments in an external file list. If the dataset creation property list has no external data, then zero is returned.  </td></tr>
 <tr>
-<td><a class="el" href="group___d_c_p_l.html#ga78253b80b6c86faf7ff0db135146521d" title="Returns information about an external file.">H5Pget_external</a> </td><td>This is the counterpart for the <a class="el" href="group___d_c_p_l.html#ga85ff7c9c827fa524041cd58c199b77b8" title="Adds an external file to the list of external files.">H5Pset_external</a> function. Given a dataset creation property list and a zero-based index into that list, the file name, byte offset, and segment size are returned through non-null arguments. At most name_size characters are copied into the name argument which is not null terminated if the file name is longer than the supplied name buffer (this is similar to strncpy()).  </td></tr>
+<td><a class="el" href="group___d_c_p_l.html#ga78253b80b6c86faf7ff0db135146521d" title="Returns information about an external file.">H5Pget_external</a> </td><td>This is the counterpart for the <a class="el" href="group___d_c_p_l.html#ga64bf68bda464eaaabfe24846533b1935" title="Adds an external file to the list of external files.">H5Pset_external</a> function. Given a dataset creation property list and a zero-based index into that list, the file name, byte offset, and segment size are returned through non-null arguments. At most name_size characters are copied into the name argument which is not null terminated if the file name is longer than the supplied name buffer (this is similar to strncpy()).  </td></tr>
 </table>
 <p>The figure below shows an example of how a contiguous, one-dimensional dataset is partitioned into three parts and each of those parts is stored in a segment of an external file. The top rectangle represents the logical address space of the dataset while the bottom rectangle represents an external file.</p>
 <table class="doxtable">
@@ -1055,10 +1055,10 @@ External file storage</div></div>
 </table>
 <p>The example below shows code that defines the external storage for the example. Note that the segments are defined in order of the logical addresses they represent, not their order within the external file. It would also have been possible to put the segments in separate files. Care should be taken when setting up segments in a single file since the library does not automatically check for segments that overlap.</p>
 <p><em>External storage</em> </p><div class="fragment"><div class="line">plist = <a class="code hl_function" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a> (<a class="code hl_define" href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a>);</div>
-<div class="line"><a class="code hl_function" href="group___d_c_p_l.html#ga85ff7c9c827fa524041cd58c199b77b8">H5Pset_external</a> (plist, <span class="stringliteral">&quot;velocity.data&quot;</span>, 3000, 1000);</div>
-<div class="line"><a class="code hl_function" href="group___d_c_p_l.html#ga85ff7c9c827fa524041cd58c199b77b8">H5Pset_external</a> (plist, <span class="stringliteral">&quot;velocity.data&quot;</span>, 0, 2500);</div>
-<div class="line"><a class="code hl_function" href="group___d_c_p_l.html#ga85ff7c9c827fa524041cd58c199b77b8">H5Pset_external</a> (plist, <span class="stringliteral">&quot;velocity.data&quot;</span>, 4500, 1500);</div>
-<div class="ttc" id="agroup___d_c_p_l_html_ga85ff7c9c827fa524041cd58c199b77b8"><div class="ttname"><a href="group___d_c_p_l.html#ga85ff7c9c827fa524041cd58c199b77b8">H5Pset_external</a></div><div class="ttdeci">herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)</div><div class="ttdoc">Adds an external file to the list of external files.</div></div>
+<div class="line"><a class="code hl_function" href="group___d_c_p_l.html#ga64bf68bda464eaaabfe24846533b1935">H5Pset_external</a> (plist, <span class="stringliteral">&quot;velocity.data&quot;</span>, 3000, 1000);</div>
+<div class="line"><a class="code hl_function" href="group___d_c_p_l.html#ga64bf68bda464eaaabfe24846533b1935">H5Pset_external</a> (plist, <span class="stringliteral">&quot;velocity.data&quot;</span>, 0, 2500);</div>
+<div class="line"><a class="code hl_function" href="group___d_c_p_l.html#ga64bf68bda464eaaabfe24846533b1935">H5Pset_external</a> (plist, <span class="stringliteral">&quot;velocity.data&quot;</span>, 4500, 1500);</div>
+<div class="ttc" id="agroup___d_c_p_l_html_ga64bf68bda464eaaabfe24846533b1935"><div class="ttname"><a href="group___d_c_p_l.html#ga64bf68bda464eaaabfe24846533b1935">H5Pset_external</a></div><div class="ttdeci">herr_t H5Pset_external(hid_t plist_id, const char *name, HDoff_t offset, hsize_t size)</div><div class="ttdoc">Adds an external file to the list of external files.</div></div>
 </div><!-- fragment --><p>The figure below shows an example of how a contiguous, two-dimensional dataset is partitioned into three parts and each of those parts is stored in a separate external file. The top rectangle represents the logical address space of the dataset while the bottom rectangles represent external files.</p>
 <table class="doxtable">
 <tr>
@@ -1070,9 +1070,9 @@ Partitioning a 2-D dataset for external storage</div></div>
 </table>
 <p>The example below shows code for the partitioning described above. In this example, the library maps the multi-dimensional array onto a linear address space as defined by the HDF5 format specification, and then maps that address space into the segments defined in the external file list.</p>
 <p><em>Partitioning a 2-D dataset for external storage</em> </p><div class="fragment"><div class="line">plist = <a class="code hl_function" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a> (<a class="code hl_define" href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a>);</div>
-<div class="line"><a class="code hl_function" href="group___d_c_p_l.html#ga85ff7c9c827fa524041cd58c199b77b8">H5Pset_external</a> (plist, <span class="stringliteral">&quot;scan1.data&quot;</span>, 0, 24);</div>
-<div class="line"><a class="code hl_function" href="group___d_c_p_l.html#ga85ff7c9c827fa524041cd58c199b77b8">H5Pset_external</a> (plist, <span class="stringliteral">&quot;scan2.data&quot;</span>, 0, 24);</div>
-<div class="line"><a class="code hl_function" href="group___d_c_p_l.html#ga85ff7c9c827fa524041cd58c199b77b8">H5Pset_external</a> (plist, <span class="stringliteral">&quot;scan3.data&quot;</span>, 0, 16);</div>
+<div class="line"><a class="code hl_function" href="group___d_c_p_l.html#ga64bf68bda464eaaabfe24846533b1935">H5Pset_external</a> (plist, <span class="stringliteral">&quot;scan1.data&quot;</span>, 0, 24);</div>
+<div class="line"><a class="code hl_function" href="group___d_c_p_l.html#ga64bf68bda464eaaabfe24846533b1935">H5Pset_external</a> (plist, <span class="stringliteral">&quot;scan2.data&quot;</span>, 0, 24);</div>
+<div class="line"><a class="code hl_function" href="group___d_c_p_l.html#ga64bf68bda464eaaabfe24846533b1935">H5Pset_external</a> (plist, <span class="stringliteral">&quot;scan3.data&quot;</span>, 0, 16);</div>
 </div><!-- fragment --><p>The segments of an external file can exist beyond the end of the (external) file. The library reads that part of a segment as zeros. When writing to a segment that exists beyond the end of a file, the external file is automatically extended. Using this feature, one can create a segment (or set of segments) which is larger than the current size of the dataset. This allows the dataset to be extended at a future time (provided the dataspace also allows the extension).</p>
 <p>All referenced external data files must exist before performing raw data I/O on the dataset. This is normally not a problem since those files are being managed directly by the application or indirectly through some other library. However, if the file is transferred from its original context, care must be taken to assure that all the external files are accessible in the new location.</p>
 <h2><a class="anchor" id="subsec_dataset_filters"></a>
