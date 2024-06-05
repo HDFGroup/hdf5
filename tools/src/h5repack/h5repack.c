@@ -748,7 +748,7 @@ check_options(pack_opt_t *options)
 
     if (options->ublock_filename == NULL && options->ublock_size != 0) {
         if (options->verbose > 0) {
-            printf("Warning: user block file name missing. Reserving a size of %d...\n",
+            printf("Warning: user block file name missing. Reserving a size of %ld...\n",
                    options->ublock_size);
         }
     }
