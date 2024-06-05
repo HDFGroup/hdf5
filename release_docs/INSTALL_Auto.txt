@@ -25,7 +25,7 @@ Obtaining HDF5 source code
    1. Create a directory for your development; for example, "myhdfstuff".
 
    2. Obtain HDF5 source from Github
-         development branch:  https://github.com/HDFGroup/hdf5
+         development branch:  https://github.com/HDFGroup/hdf5/develop
          last release:        https://github.com/HDFGroup/hdf5/releases/latest
              hdf5-1_14_"X".tar.gz or hdf5-1_14_"X".zip
 
@@ -334,7 +334,7 @@ III. Full installation instructions for source distributions
         (or '--with-pthread=DIR') flag to the configure script.
         For further information, see:
 
-           https://portal.hdfgroup.org/display/knowledge/Questions+about+thread-safety+and+concurrent+access
+           https://support.hdfgroup.org/hdf5/documentation/knowledge/Questions+about+thread-safety+and+concurrent+access
 
         The high-level, C++, Fortran and Java interfaces are not compatible
         with the thread-safety option because the lock is not hoisted
@@ -492,7 +492,7 @@ IV. Using the Library
         For information on using HDF5 see the documentation, tutorials and examples
         found here:
 
-           https://portal.hdfgroup.org/documentation/index.html
+           https://support.hdfgroup.org/hdf5/documentation/index.html
 
         A summary of the features included in the built HDF5 installation can be found
         in the libhdf5.settings file in the same directory as the static and/or
