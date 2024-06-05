@@ -347,7 +347,7 @@ H5_DLL herr_t H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t cl
  *          If an error occurs while attempting to query the status of \p stack_id,
  *          the value pointed to by \p is_paused is unchanged.
  *
- * \since 1.14.4
+ * \since 1.14.5
  */
 H5_DLL herr_t H5Eis_paused(hid_t stack_id, hbool_t *is_paused);
 /**
@@ -369,7 +369,7 @@ H5_DLL herr_t H5Eis_paused(hid_t stack_id, hbool_t *is_paused);
  *
  *          It is erroneous to attempt to pause the default error stack.
  *
- * \since 1.14.4
+ * \since 1.14.5
  */
 H5_DLL herr_t H5Epause_stack(hid_t stack_id);
 /**
@@ -389,7 +389,7 @@ H5_DLL herr_t H5Epause_stack(hid_t stack_id);
  *
  *          It is erroneous to attempt to resume the default error stack.
  *
- * \since 1.14.4
+ * \since 1.14.5
  */
 H5_DLL herr_t H5Eresume_stack(hid_t stack_id);
 /**
