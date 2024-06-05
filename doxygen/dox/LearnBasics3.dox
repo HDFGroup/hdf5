@@ -720,7 +720,7 @@ Previous Chapter \ref LBQuiz - Next Chapter \ref LBCompiling
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-/** @page LBCompiling Compiling HDF5 Applications
+@page LBCompiling Compiling HDF5 Applications
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
