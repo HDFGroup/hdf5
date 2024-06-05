@@ -1805,6 +1805,10 @@ fi
 arg="h5repack_objs.h5 -u ublock.bin -b 2048"
 TOOLTEST add_userblock $arg
 
+# reserve a userblock to file
+arg="h5repack_objs.h5 -b 2048"
+TOOLTEST reserve_userblock $arg
+
 # add alignment
 arg="h5repack_objs.h5 -t 1 -a 1 "
 TOOLTEST add_alignment $arg
