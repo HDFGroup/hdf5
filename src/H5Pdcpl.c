@@ -2586,7 +2586,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
+H5Pset_external(hid_t plist_id, const char *name, HDoff_t offset, hsize_t size)
 {
     size_t          idx;
     hsize_t         total, tmp;
@@ -2616,8 +2616,8 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
             tmp = total + efl.slot[idx].size;
             if (tmp <= total)
                 HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "total external data size overflowed");
-        } /* end for */
-    }     /* end if */
+        }
+    }
 
     /* Add to the list */
     if (efl.nused >= efl.nalloc) {
@@ -2628,7 +2628,8 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed");
         efl.nalloc = na;
         efl.slot   = x;
-    } /* end if */
+    }
+
     idx                       = efl.nused;
     efl.slot[idx].name_offset = 0; /*not entered into heap yet*/
     efl.slot[idx].name        = H5MM_xstrdup(name);
