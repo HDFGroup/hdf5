@@ -129,12 +129,11 @@ endif ()
 # Option to use threadsafe
 #-----------------------------------------------------------------------------
 option (HDF_ENABLE_THREADSAFE "Enable Threadsafety" OFF)
-if (HDF_ENABLE_THREADSAFE)
-  # check for unsupported options
-  if (HDF_ENABLE_PARALLEL)
-    message (FATAL " **** Parallel and Threadsafe options are mutually exclusive **** ")
-  endif ()
-
+# Note that HDF_ENABLE_THREADSAFE is the CMake option for determining
+# whether to enable thread-safety in the examples. HDF5_ENABLE_THREADSAFE
+# is the CMake option determining whether HDF5 was configured with
+# thread-safety enabled.
+if (HDF_ENABLE_THREADSAFE AND HDF5_ENABLE_THREADSAFE)
   # Check for threading package
   if (NOT Threads_FOUND)
     message (FATAL_ERROR " **** thread-safety option requires a threading package and none was found **** ")
