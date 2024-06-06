@@ -725,14 +725,14 @@ test_pause(void)
     if (ret >= 0)
         TEST_ERROR;
 
-    /* Check if default stack is paused */
+    /* Verify that default stack is not paused */
     is_paused = TRUE;
     if (H5Eis_paused(H5E_DEFAULT, &is_paused) < 0)
         TEST_ERROR;
     if (FALSE != is_paused)
         TEST_ERROR;
 
-    /* Check if application stack is paused */
+    /* Verify that application stack is not paused */
     is_paused = TRUE;
     if (H5Eis_paused(estack_id1, &is_paused) < 0)
         TEST_ERROR;
