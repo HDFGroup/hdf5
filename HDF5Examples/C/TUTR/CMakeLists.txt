@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.18)
-project (HDF5_EXAMPLES C)
+project (HDF5_EXAMPLES_TUTR C)
 
 #-----------------------------------------------------------------------------
 # Define Sources
@@ -35,7 +35,7 @@ set (examples
 )
 
 foreach (example ${examples})
-  add_executable (${example} ${HDF5_EXAMPLES_SOURCE_DIR}/${example}.c)
+  add_executable (${example} ${HDF5_EXAMPLES_TUTR_SOURCE_DIR}/${example}.c)
   target_include_directories (${example} PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   if (NOT BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (${example} STATIC)

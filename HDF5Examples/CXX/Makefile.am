@@ -18,11 +18,11 @@
 ## Run automake to generate a Makefile.in from this file.
 ##
 #
-# HDF5 Java Library Examples Makefile(.in)
+# HDF5 CXX Library Examples Makefile(.in)
 
 include $(top_srcdir)/config/commence.am
 
-## Only recurse into subdirectories if the Java (JNI) interface is enabled.
-   SUBDIRS=TUTR H5G H5D H5T
+## Only recurse into subdirectories if the CXX interface is enabled.
+   SUBDIRS=H5D TUTR
 
 include $(top_srcdir)/config/conclude.am

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.18)
-project (HDF5_F90_EXAMPLES C Fortran)
+project (HDF5_F90_EXAMPLES_TUTR C Fortran)
 # --------------------------------------------------------------------
 # Notes: When creating examples they should be prefixed
 # with "f90_ex_". This allows for easier filtering of the examples.
@@ -34,7 +34,7 @@ set (F2003_examples
 )
 
 foreach (example ${examples})
-  add_executable (f90_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
+  add_executable (f90_ex_${example} ${HDF5_F90_EXAMPLES_TUTR_SOURCE_DIR}/${example}.f90)
   target_compile_options(f90_ex_${example}
       PRIVATE
           "${HDF5_CMAKE_Fortran_FLAGS}"
@@ -78,7 +78,7 @@ foreach (example ${examples})
 endforeach ()
 
 foreach (example ${F2003_examples})
-  add_executable (f03_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
+  add_executable (f03_ex_${example} ${HDF5_F90_EXAMPLES_TUTR_SOURCE_DIR}/${example}.f90)
   target_compile_options(f03_ex_${example}
       PRIVATE
           "${HDF5_CMAKE_Fortran_FLAGS}"
@@ -122,7 +122,7 @@ foreach (example ${F2003_examples})
 endforeach ()
 
 if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
-  add_executable (f90_ex_ph5example ${HDF5_F90_EXAMPLES_SOURCE_DIR}/ph5example.f90)
+  add_executable (f90_ex_ph5example ${HDF5_F90_EXAMPLES_TUTR_SOURCE_DIR}/ph5example.f90)
   target_compile_options(f90_ex_ph5example
       PRIVATE
           "${HDF5_CMAKE_Fortran_FLAGS}"
