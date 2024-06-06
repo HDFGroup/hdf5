@@ -59,6 +59,7 @@ struct H5TS_pool_t {
     bool               shutdown;       /* Pool is shutting down */
     unsigned           num_threads;    /* # of threads in pool */
     H5TS_atomic_uint_t active_threads; /* # of threads in pool */
+    unsigned           sleeping_workers; /* # of workers currently sleeping */
     H5TS_thread_t     *threads;        /* Array of worker threads in pool */
 
     H5TS_pool_task_t *head, *tail; /* Task queue */
@@ -154,9 +155,12 @@ H5TS__pool_do(void *_pool)
     H5TS_atomic_fetch_add_uint(&pool->active_threads, 1);
 
     /* If queue is empty and pool is not shutting down, wait for a task */
-    while (NULL == pool->head && !pool->shutdown)
+    while (NULL == pool->head && !pool->shutdown) {
+        pool->sleeping_workers++;
         if (H5_UNLIKELY(H5TS_cond_wait(&pool->cond, &pool->mutex) < 0))
             HGOTO_DONE((H5TS_thread_ret_t)-1);
+        pool->sleeping_workers--;
+    }
 
     /* If there's a task, invoke it, else we're shutting down */
     if (NULL != pool->head) {
@@ -193,9 +197,12 @@ H5TS__pool_do(void *_pool)
             have_mutex = true;
 
             /* If queue is empty and pool is not shutting down, wait for a task */
-            while (NULL == pool->head && !pool->shutdown)
+            while (NULL == pool->head && !pool->shutdown) {
+                pool->sleeping_workers++;
                 if (H5_UNLIKELY(H5TS_cond_wait(&pool->cond, &pool->mutex) < 0))
                     HGOTO_DONE((H5TS_thread_ret_t)-1);
+                pool->sleeping_workers--;
+            }
 
             /* If there's a task, invoke it, else we're shutting down */
             if (NULL != pool->head) {
@@ -363,7 +370,7 @@ H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
     task = NULL;
 
     /* Wake up any sleeping worker */
-    if (H5_UNLIKELY(H5TS_cond_broadcast(&pool->cond) < 0))
+    if (pool->sleeping_workers > 0 && H5_UNLIKELY(H5TS_cond_signal(&pool->cond) < 0))
         HGOTO_DONE(FAIL);
 
 done:
