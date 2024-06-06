@@ -762,7 +762,10 @@ New Features
 
     Tools:
     ------
-    -
+    - Allow h5repack to reserve space for a user block without a file
+
+      This is useful for users who want to reserve space
+      in the file for future use without requiring a file to copy.
 
 
     High-Level APIs:
