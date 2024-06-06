@@ -1860,6 +1860,7 @@ H5E_resume_stack(void)
     FUNC_ENTER_NOAPI_NOERR
 
     assert(estack);
+    assert(estack->paused);
 
     /* Decrement pause counter */
     estack->paused--;

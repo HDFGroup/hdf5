@@ -365,9 +365,7 @@ H5_DLL herr_t H5Eis_paused(hid_t stack_id, hbool_t *is_paused);
  *          H5Eresume_stack() is used to allow errors to be pushed on a stack.
  *          Calls to H5Epause_stack() and H5Eresume_stack() must be matched.
  *
- *          Calls to H5Epause_stack()/H5Erusume_stack() may be nested.
- *
- *          It is erroneous to attempt to pause the default error stack.
+ *          Calls to H5Epause_stack()/H5Eresume_stack() may be nested.
  *
  * \since 1.14.5
  */
@@ -385,9 +383,7 @@ H5_DLL herr_t H5Epause_stack(hid_t stack_id);
  *
  *          Calls to H5Epause_stack() and H5Eresume_stack() must be matched.
  *
- *          Calls to H5Epause_stack()/H5Erusume_stack() may be nested.
- *
- *          It is erroneous to attempt to resume the default error stack.
+ *          Calls to H5Epause_stack()/H5Eresume_stack() may be nested.
  *
  * \since 1.14.5
  */
