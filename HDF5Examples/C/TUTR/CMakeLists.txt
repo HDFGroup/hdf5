@@ -1,59 +1,63 @@
 cmake_minimum_required (VERSION 3.18)
-project (HDF5_EXAMPLES_TUTR C)
+project (HDF5Examples_C_TUTR C)
 
 #-----------------------------------------------------------------------------
 # Define Sources
 #-----------------------------------------------------------------------------
-set (examples
-    h5_crtdat
-    h5_rdwt
-    h5_crtatt
-    h5_crtgrp
-    h5_crtgrpar
-    h5_crtgrpd
-    h5_cmprss
-    h5_extend
-    h5_subset
-    h5_write
-    h5_read
-    h5_extend_write
-    h5_chunk_read
-    h5_compound
-    h5_group
-    h5_select
-    h5_attribute
-    h5_mount
-    h5_ref_extern
-    h5_ref_compat
-    h5_reference_deprec
-    h5_drivers
-    h5_ref2reg_deprec
-    h5_extlink
-    h5_elink_unix2win
-    h5_shared_mesg
-    h5_debug_trace
-)
+include (C_sourcefiles.cmake)
 
-foreach (example ${examples})
-  add_executable (${example} ${HDF5_EXAMPLES_TUTR_SOURCE_DIR}/${example}.c)
-  target_include_directories (${example} PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  if (NOT BUILD_SHARED_LIBS)
-    TARGET_C_PROPERTIES (${example} STATIC)
-    target_link_libraries (${example} PRIVATE ${HDF5_LIB_TARGET})
-  else ()
-    TARGET_C_PROPERTIES (${example} SHARED)
-    target_link_libraries (${example} PRIVATE ${HDF5_LIBSH_TARGET})
+foreach (example_name ${examples})
+  add_executable (${EXAMPLE_VARNAME}_tutr_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.c)
+  target_compile_options(${EXAMPLE_VARNAME}_tutr_${example_name}
+      PRIVATE
+          "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_16_API}>:-DH5_USE_16_API>"
+          "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_18_API}>:-DH5_USE_18_API>"
+          "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_110_API}>:-DH5_USE_110_API>"
+          "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_112_API}>:-DH5_USE_112_API>"
+          "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_114_API}>:-DH5_USE_114_API>"
+          "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_116_API}>:-DH5_USE_116_API>"
+  )
+  if (H5_HAVE_PARALLEL)
+    target_include_directories (${EXAMPLE_VARNAME}_tutr_${example_name} PUBLIC ${MPI_C_INCLUDE_DIRS})
   endif ()
-  set_target_properties (${example} PROPERTIES FOLDER examples)
-
-  #-----------------------------------------------------------------------------
-  # Add Target to clang-format
-  #-----------------------------------------------------------------------------
-  if (HDF5_ENABLE_FORMATTERS)
-    clang_format (HDF5_EXAMPLES_${example}_FORMAT ${example})
-  endif ()
+  target_link_libraries (${EXAMPLE_VARNAME}_tutr_${example_name} ${H5EX_HDF5_LINK_LIBS})
 endforeach ()
 
-if (BUILD_TESTING AND HDF5_TEST_EXAMPLES)
-  include (CMakeTests.cmake)
+
+if (H5EX_BUILD_TESTING)
+  macro (ADD_H5_TEST testname)
+    add_test (
+        NAME ${EXAMPLE_VARNAME}_tutr_${testname}-clearall
+        COMMAND    ${CMAKE_COMMAND}
+            -E remove
+            ${testname}.h5
+    )
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME ${EXAMPLE_VARNAME}_tutr_${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${EXAMPLE_VARNAME}_tutr_${testname}>)
+      set_tests_properties (${EXAMPLE_VARNAME}_tutr_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_tutr_${testname}-clearall)
+    else ()
+      add_test (
+          NAME ${EXAMPLE_VARNAME}_tutr_${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:${EXAMPLE_VARNAME}_tutr_${testname}>"
+              -D "TEST_ARGS:STRING="
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_EXPECT=0"
+              -D "TEST_SKIP_COMPARE=TRUE"
+              -D "TEST_OUTPUT=${testname}.out"
+              -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
+              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
+      )
+      set_tests_properties (${EXAMPLE_VARNAME}_tutr_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_tutr_${testname}-clearall)
+    endif ()
+    if (last_test)
+      set_tests_properties (${EXAMPLE_VARNAME}_tutr_${testname} PROPERTIES DEPENDS ${last_test})
+    endif ()
+    set (last_test "${EXAMPLE_VARNAME}_tutr_${testname}")
+  endmacro ()
+
+  foreach (example_name ${examples})
+    ADD_H5_TEST (${example_name})
+  endforeach ()
 endif ()
