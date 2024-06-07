@@ -6,9 +6,13 @@ on:
   pull_request:
     branches: [ develop ]
 
+# The config file handles things like http 500 errors from sites like GitLab
+# and http 200 responses
 jobs:
   markdown-link-check:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        config-file: '.github/workflows/markdown_config.json'
