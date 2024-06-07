@@ -82,7 +82,6 @@ if (H5EX_BUILD_TESTING)
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
   )
 
-
   macro (ADD_H5_TEST testname)
     if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME ${EXAMPLE_VARNAME}_tutr_${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${EXAMPLE_VARNAME}_tutr_${testname}>)
@@ -101,7 +100,7 @@ if (H5EX_BUILD_TESTING)
               -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
-    set_tests_properties (${EXAMPLE_VARNAME}_tutr-${testname} PROPERTIES FIXTURES_REQUIRED clear_${EXAMPLE_VARNAME}_tutr)
+    set_tests_properties (${EXAMPLE_VARNAME}_tutr_${testname} PROPERTIES FIXTURES_REQUIRED clear_${EXAMPLE_VARNAME}_tutr)
     if (last_test)
       set_tests_properties (${EXAMPLE_VARNAME}_tutr_${testname} PROPERTIES DEPENDS ${last_test})
     endif ()
