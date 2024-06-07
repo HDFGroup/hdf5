@@ -815,7 +815,7 @@ H5F__getenv_prefix_name(char **env_prefix /*in,out*/)
 } /* end H5F__getenv_prefix_name() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_prefix_try_open_file
+ * Function:    H5F_prefix_open_file
  *
  * Purpose:     Attempts to open a dataset file.
  *
@@ -823,8 +823,8 @@ H5F__getenv_prefix_name(char **env_prefix /*in,out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t prefix_type,
-                         const char *prop_prefix, const char *file_name, unsigned file_intent, hid_t fapl_id)
+H5F_prefix_open_file(bool try, H5F_t **_file, H5F_t *primary_file, H5F_prefix_open_t prefix_type,
+                     const char *prop_prefix, const char *file_name, unsigned file_intent, hid_t fapl_id)
 {
     H5F_t     *src_file         = NULL; /* Source file */
     H5F_efc_t *efc              = NULL; /* External file cache */
@@ -836,7 +836,10 @@ H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t pr
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(file);
+    assert(_file);
+
+    /* Reset 'out' parameter */
+    *_file = NULL;
 
     efc = primary_file->shared->efc;
 
@@ -851,7 +854,7 @@ H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t pr
     /* Target file_name is an absolute pathname: see RM for detailed description */
     if (H5_CHECK_ABSOLUTE(file_name) || H5_CHECK_ABS_PATH(file_name)) {
         /* Try opening file */
-        if (H5F__efc_try_open(efc, &src_file, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
+        if (H5F__efc_open(true, efc, &src_file, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
         /* Adjust temporary file name if file not opened */
@@ -872,7 +875,7 @@ H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t pr
     }     /* end if */
     else if (H5_CHECK_ABS_DRIVE(file_name)) {
         /* Try opening file */
-        if (H5F__efc_try_open(efc, &src_file, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
+        if (H5F__efc_open(true, efc, &src_file, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
         /* Adjust temporary file name if file not opened */
@@ -915,8 +918,7 @@ H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t pr
                     } /* end if */
 
                     /* Try opening file */
-                    if (H5F__efc_try_open(efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT,
-                                          fapl_id) < 0)
+                    if (H5F__efc_open(true, efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
                     /* Release copy of file name */
@@ -939,7 +941,7 @@ H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t pr
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't prepend prefix to filename");
 
         /* Try opening file */
-        if (H5F__efc_try_open(efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
+        if (H5F__efc_open(true, efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
         /* Release name */
@@ -956,8 +958,7 @@ H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t pr
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't prepend prefix to filename");
 
             /* Try opening file */
-            if (H5F__efc_try_open(efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) <
-                0)
+            if (H5F__efc_open(true, efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
             /* Release name */
@@ -968,8 +969,7 @@ H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t pr
     /* Try the relative file_name stored in temp_file_name */
     if (src_file == NULL) {
         /* Try opening file */
-        if (H5F__efc_try_open(efc, &src_file, temp_file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) <
-            0)
+        if (H5F__efc_open(true, efc, &src_file, temp_file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
     } /* end if */
 
@@ -993,7 +993,7 @@ H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t pr
         actual_file_name = (char *)H5MM_xfree(actual_file_name);
 
         /* Try opening with the resolved name */
-        if (H5F__efc_try_open(efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
+        if (H5F__efc_open(true, efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
         /* Release name */
@@ -1001,7 +1001,11 @@ H5F_prefix_try_open_file(H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t pr
     } /* end if */
 
     /* Set 'out' parameter */
-    *file = src_file;
+    *_file = src_file;
+
+    /* See is we should return an error */
+    if (NULL == src_file && !try)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't open file");
 
 done:
     if (ret_value < 0)
@@ -1014,40 +1018,6 @@ done:
     if (actual_file_name)
         actual_file_name = (char *)H5MM_xfree(actual_file_name);
 
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F_prefix_try_open_file() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_prefix_open_file
- *
- * Purpose:     Attempts to open a dataset file.
- *
- * Return:      Pointer to an opened file on success / NULL on failure
- *-------------------------------------------------------------------------
- */
-H5F_t *
-H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const char *prop_prefix,
-                     const char *file_name, unsigned file_intent, hid_t fapl_id)
-{
-    H5F_t *file      = NULL; /* File opened */
-    H5F_t *ret_value = NULL; /* Return value  */
-
-    FUNC_ENTER_NOAPI(NULL)
-
-    assert(primary_file);
-    assert(primary_file->shared);
-
-    /* Try opening the file */
-    if (H5F_prefix_try_open_file(&file, primary_file, prefix_type, prop_prefix, file_name, file_intent,
-                                 fapl_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't try opening file");
-    if (NULL == file)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
-
-    /* Set return value */
-    ret_value = file;
-
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_prefix_open_file() */
 
@@ -1062,7 +1032,7 @@ done:
 htri_t
 H5F__is_hdf5(const char *name, hid_t fapl_id)
 {
-    H5FD_t       *file      = NULL;        /* Low-level file struct            */
+    H5FD_t       *lf      = NULL;        /* Low-level file struct            */
     H5F_shared_t *shared    = NULL;        /* Shared part of file              */
     haddr_t       sig_addr  = HADDR_UNDEF; /* Address of hdf5 file signature    */
     htri_t        ret_value = FAIL;        /* Return value                     */
@@ -1073,7 +1043,7 @@ H5F__is_hdf5(const char *name, hid_t fapl_id)
     /* NOTE:    This now uses the fapl_id that was passed in, so H5Fis_accessible()
      *          should work with arbitrary VFDs, unlike H5Fis_hdf5().
      */
-    if (NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
+    if (H5FD_open(false, &lf, name, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to open file");
 
     /* If the file is already open, it's an HDF5 file
@@ -1082,19 +1052,19 @@ H5F__is_hdf5(const char *name, hid_t fapl_id)
      * mandatory file locks (like Windows), creating a new file handle and attempting
      * to read through it will fail so we have to try this first.
      */
-    if ((shared = H5F__sfile_search(file)) != NULL)
+    if (NULL != (shared = H5F__sfile_search(lf)))
         ret_value = true;
     else {
         /* The file is an HDF5 file if the HDF5 file signature can be found */
-        if (H5FD_locate_signature(file, &sig_addr) < 0)
+        if (H5FD_locate_signature(lf, &sig_addr) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "error while trying to locate file signature");
         ret_value = (HADDR_UNDEF != sig_addr);
     }
 
 done:
     /* Close the file */
-    if (file)
-        if (H5FD_close(file) < 0 && true == ret_value)
+    if (lf)
+        if (H5FD_close(lf) < 0 && true == ret_value)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1803,11 +1773,17 @@ done:
  *        f: the open fails with flags combination from both the first and second opens
  *        s: the open succeeds with flags combination from both the first and second opens
  *
+ *        NOTE: If the 'try' flag is true, not opening the file with the
+ *        "non-tentative" VFD 'open' call is not treated an error; SUCCEED is
+ *        returned, with the file ptr set to NULL.  If 'try' is false, failing
+ *        the "non-tentative" VFD 'open' call generates an error.
+ *
  * Return:      SUCCEED/FAIL
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_try_open(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t             *file   = NULL; /*the success return value      */
     H5F_shared_t      *shared = NULL; /*shared part of `file'         */
@@ -1829,6 +1805,9 @@ H5F_try_open(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid
     herr_t             ret_value             = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    /* Reset 'out' parameter */
+    *_file = NULL;
 
     /*
      * If the driver has a 'cmp' method then the driver is capable of
@@ -1882,7 +1861,7 @@ H5F_try_open(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid
          */
         if (tent_flags != flags) {
             /* Make tentative attempt to open file */
-            if (H5FD_try_open(&lf, name, tent_flags, fapl_id, HADDR_UNDEF) < 0)
+            if (H5FD_open(true, &lf, name, tent_flags, fapl_id, HADDR_UNDEF) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
             /* If the tentative open failed, reset the file access flags,
@@ -1902,12 +1881,14 @@ H5F_try_open(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid
      * attempt at opening the file.
      */
     if (NULL == lf) {
-        if (H5FD_try_open(&lf, name, tent_flags, fapl_id, HADDR_UNDEF) < 0)
+        if (H5FD_open(try, &lf, name, tent_flags, fapl_id, HADDR_UNDEF) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
         /* Check if file was not opened */
-        if (NULL == lf)
+        if (NULL == lf) {
+            assert(try);
             HGOTO_DONE(SUCCEED);
+        }
     }
 
     /* Is the file already open? */
@@ -1956,12 +1937,9 @@ H5F_try_open(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to close low-level file info");
             lf = NULL;
 
-            if (H5FD_try_open(&lf, name, flags, fapl_id, HADDR_UNDEF) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
-
-            /* Check if file was not opened */
-            if (NULL == lf)
-                HGOTO_DONE(SUCCEED);
+            if (H5FD_open(false, &lf, name, flags, fapl_id, HADDR_UNDEF) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file");
+            assert(lf);
         } /* end if */
 
         /* Place an advisory lock on the file */
@@ -2220,36 +2198,6 @@ done:
         if (H5F__dest(file, false, true) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file");
 
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_try_open() */
-
-/*-------------------------------------------------------------------------
- * Function:  H5F_open
- *
- * Purpose:   Opens (or creates) a file.
- *
- * Return:    Success:    A new file pointer.
- *            Failure:    NULL
- *-------------------------------------------------------------------------
- */
-H5F_t *
-H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
-{
-    H5F_t *file      = NULL; /* File opened */
-    H5F_t *ret_value = NULL; /* Return value */
-
-    FUNC_ENTER_NOAPI(NULL)
-
-    /* Try opening the file */
-    if (H5F_try_open(&file, name, flags, fcpl_id, fapl_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't try opening file");
-    if (NULL == file)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
-
-    /* Set return value */
-    ret_value = file;
-
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
 

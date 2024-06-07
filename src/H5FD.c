@@ -693,7 +693,7 @@ H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
 
     /* Call private function */
-    if (NULL == (ret_value = H5FD_open(name, flags, fapl_id, maxaddr)))
+    if (H5FD_open(false, &ret_value, name, flags, fapl_id, maxaddr) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to open file");
 
 done:
@@ -701,21 +701,27 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_try_open
+ * Function:    H5FD_open
  *
- * Purpose:     Attempts to opens a file named NAME for the type(s) of access
- *              described by the bit vector FLAGS according to a file access
+ * Purpose:     Opens a file named NAME for the type(s) of access described
+ *              by the bit vector FLAGS according to a file access
  *              property list FAPL_ID (which may be the constant H5P_DEFAULT).
  *              The file should expect to handle format addresses in the range
  *              [0, MAXADDR] (if MAXADDR is the undefined address then the
  *              caller doesn't care about the address range).
+ *
+ *              If the 'try' flag is true, the VFD 'open' callback is called
+ *              with errors paused and not opening the file is not treated as
+ *              an error; SUCCEED is returned, with the file ptr set to NULL.
+ *              If 'try' is false, the VFD 'open' callback is made with errors
+ *              unpaused and a failure generates an error.
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_try_open(H5FD_t **_file, const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
+H5FD_open(bool try, H5FD_t **_file, const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_t                *file = NULL;         /* File opened */
     H5FD_class_t          *driver;              /* VFD for file */
@@ -726,6 +732,9 @@ H5FD_try_open(H5FD_t **_file, const char *name, unsigned flags, hid_t fapl_id, h
     herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    /* Reset 'out' parameter */
+    *_file = NULL;
 
     /* Sanity checks */
     if (0 == maxaddr)
@@ -763,15 +772,20 @@ H5FD_try_open(H5FD_t **_file, const char *name, unsigned flags, hid_t fapl_id, h
         maxaddr = driver->maxaddr;
 
     /* Try dispatching to file driver */
-    H5E_PAUSE_ERRORS
-    {
-        file = (driver->open)(name, flags, fapl_id, maxaddr);
-    }
-    H5E_RESUME_ERRORS
+    if (try) {
+        H5E_PAUSE_ERRORS
+        {
+            file = (driver->open)(name, flags, fapl_id, maxaddr);
+        }
+        H5E_RESUME_ERRORS
 
-    /* Check if file was not opened */
-    if (NULL == file)
-        HGOTO_DONE(SUCCEED);
+        /* Check if file was not opened */
+        if (NULL == file)
+            HGOTO_DONE(SUCCEED);
+    }
+    else
+        if (NULL == (file = (driver->open)(name, flags, fapl_id, maxaddr)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "can't open file");
 
     /* Set the file access flags */
     file->access_flags = flags;
@@ -809,42 +823,6 @@ H5FD_try_open(H5FD_t **_file, const char *name, unsigned flags, hid_t fapl_id, h
 
 done:
     /* Can't cleanup 'file' information, since we don't know what type it is */
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_try_open() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_open
- *
- * Purpose:     Opens a file named NAME for the type(s) of access described
- *              by the bit vector FLAGS according to a file access
- *              property list FAPL_ID (which may be the constant H5P_DEFAULT).
- *              The file should expect to handle format addresses in the range
- *              [0, MAXADDR] (if MAXADDR is the undefined address then the
- *              caller doesn't care about the address range).
- *
- * Return:      Success:    Pointer to a new file driver struct
- *              Failure:    NULL
- *
- *-------------------------------------------------------------------------
- */
-H5FD_t *
-H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
-{
-    H5FD_t *file      = NULL; /* File opened */
-    H5FD_t *ret_value = NULL; /* Return value */
-
-    FUNC_ENTER_NOAPI(NULL)
-
-    /* Try opening the file */
-    if (H5FD_try_open(&file, name, flags, fapl_id, maxaddr) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't try opening file");
-    if (NULL == file)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't open file");
-
-    /* Set return value */
-    ret_value = file;
-
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_open() */
 

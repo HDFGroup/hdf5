@@ -62,8 +62,7 @@ struct H5F_efc_t {
 };
 
 /* Private prototypes */
-static herr_t H5F__efc_try_open_file(H5F_t **file, const char *name, unsigned flags, hid_t fcpl_id,
-                                     hid_t fapl_id);
+static herr_t H5F__efc_open_file(bool try, H5F_t **file, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 static herr_t H5F__efc_release_real(H5F_efc_t *efc);
 static herr_t H5F__efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent);
 static void   H5F__efc_try_close_tag1(H5F_shared_t *sf, H5F_shared_t **tail);
@@ -117,29 +116,39 @@ done:
 } /* end H5F__efc_create() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F__efc_try_open_file
+ * Function:    H5F__efc_open_file
  *
  * Purpose:     Helper routine to try opening and setting up a file.
+ *
+ *              If the 'try' flag is true, not opening the file with the
+ *              underlying 'open' call is not treated an error; SUCCEED is
+ *              returned, with the file ptr set to NULL.  If 'try' is false,
+ *              failing the 'open' call generates an error.
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__efc_try_open_file(H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+H5F__efc_open_file(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t *file      = NULL;    /* File opened */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
+    /* Reset 'out' parameter */
+    *_file = NULL;
+
     /* Open the file */
-    if (H5F_try_open(&file, name, flags, fcpl_id, fapl_id) < 0)
+    if (H5F_open(try, &file, name, flags, fcpl_id, fapl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't open file");
 
     /* Check if file was not opened */
-    if (NULL == file)
+    if (NULL == file) {
+        assert(try);
         HGOTO_DONE(SUCCEED);
+    }
 
     /* Make file post open call */
     if (H5F__post_open(file) < 0)
@@ -161,10 +170,10 @@ done:
                 HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file");
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__efc_try_open_file() */
+} /* end H5F__efc_open_file() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F__efc_try_open
+ * Function:    H5F__efc_open
  *
  * Purpose:     Attempts to open a file using the external file cache.
  *
@@ -175,13 +184,17 @@ done:
  *              with H5F_efc_close (will not actually close the file
  *              until it is evicted from the EFC).
  *
+ *              If the 'try' flag is true, not opening the file with the
+ *              underlying 'open' call is not treated an error; SUCCEED is
+ *              returned, with the file ptr set to NULL.  If 'try' is false,
+ *              failing the 'open' call generates an error.
+ *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__efc_try_open(H5F_efc_t *efc, H5F_t **file, const char *name, unsigned flags, hid_t fcpl_id,
-                  hid_t fapl_id)
+H5F__efc_open(bool try, H5F_efc_t *efc, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_efc_ent_t        *ent       = NULL;    /* Entry for target file in efc */
     bool                  open_file = false;   /* Whether ent->file needs to be closed in case of error */
@@ -192,8 +205,11 @@ H5F__efc_try_open(H5F_efc_t *efc, H5F_t **file, const char *name, unsigned flags
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    assert(file);
+    assert(_file);
     assert(name);
+
+    /* Reset 'out' parameter */
+    *_file = NULL;
 
     /* Get the VOL info from the fapl */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -211,9 +227,14 @@ H5F__efc_try_open(H5F_efc_t *efc, H5F_t **file, const char *name, unsigned flags
      * support this so clients do not have to make 2 different calls depending
      * on the state of the efc. */
     if (!efc) {
-        if (H5F__efc_try_open_file(file, name, flags, fcpl_id, fapl_id) < 0)
+        if (H5F__efc_open_file(try, _file, name, flags, fcpl_id, fapl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
+        /* Check if file was not opened */
+        if (NULL == *_file)
+            assert(try);
+
+        /* Done now */
         HGOTO_DONE(SUCCEED);
     } /* end if */
 
@@ -272,16 +293,20 @@ H5F__efc_try_open(H5F_efc_t *efc, H5F_t **file, const char *name, unsigned flags
              * do not add it to cache */
             if (ent) {
                 if (H5F__efc_remove_ent(efc, ent) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL,
-                                "can't remove entry from external file cache");
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "can't remove entry from external file cache");
 
                 /* Do not free ent, we will recycle it below */
             } /* end if */
             else {
                 /* Cannot cache file, just try opening file and return */
-                if (H5F__efc_try_open_file(file, name, flags, fcpl_id, fapl_id) < 0)
+                if (H5F__efc_open_file(try, _file, name, flags, fcpl_id, fapl_id) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
+                /* Check if file was not opened */
+                if (NULL == *_file)
+                    assert(try);
+
+                /* Done now */
                 HGOTO_DONE(SUCCEED);
             } /* end else */
         }     /* end if */
@@ -290,23 +315,28 @@ H5F__efc_try_open(H5F_efc_t *efc, H5F_t **file, const char *name, unsigned flags
             if (NULL == (ent = H5FL_MALLOC(H5F_efc_ent_t)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "memory allocation failed");
 
-        /* Build new entry */
-        if (NULL == (ent->name = H5MM_strdup(name)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "memory allocation failed");
+        /* Reset pointers */
+        ent->file = NULL;
+        ent->name = NULL;
 
         /* Try opening the file */
-        ent->file = NULL;
-        if (H5F__efc_try_open_file(&ent->file, name, flags, fcpl_id, fapl_id) < 0)
+        if (H5F__efc_open_file(try, &ent->file, name, flags, fcpl_id, fapl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
         /* Check if file was actually opened */
         if (NULL == ent->file) {
-            ent->name = (char *)H5MM_xfree(ent->name);
-            ent       = H5FL_FREE(H5F_efc_ent_t, ent);
+            /* Sanity check */
+            assert(try);
+
+            ent = H5FL_FREE(H5F_efc_ent_t, ent);
             HGOTO_DONE(SUCCEED);
         }
         else
             open_file = true;
+
+        /* Build new entry */
+        if (NULL == (ent->name = H5MM_strdup(name)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "memory allocation failed");
 
         /* Add the file to the cache */
         /* Skip list */
@@ -334,7 +364,7 @@ H5F__efc_try_open(H5F_efc_t *efc, H5F_t **file, const char *name, unsigned flags
     } /* end else */
 
     /* Set 'out' parameter */
-    *file = ent->file;
+    *_file = ent->file;
 
 done:
     if (ret_value < 0)
@@ -344,44 +374,10 @@ done:
                 if (H5F_try_close(ent->file, NULL) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file");
             } /* end if */
-            ent->name = (char *)H5MM_xfree(ent->name);
+            ent->name = H5MM_xfree(ent->name);
             ent       = H5FL_FREE(H5F_efc_ent_t, ent);
         } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__efc_try_open() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__efc_open
- *
- * Purpose:     Opens a file using the external file cache.
- *              file is added to the external file cache of the parent
- * Return:      Pointer to open file on success
- *              NULL on failure
- *
- *-------------------------------------------------------------------------
- */
-H5F_t *
-H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
-{
-    H5F_t *file      = NULL; /* File opened */
-    H5F_t *ret_value = NULL; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Sanity checks */
-    assert(name);
-
-    /* Try opening the file */
-    if (H5F__efc_try_open(efc, &file, name, flags, fcpl_id, fapl_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't try opening file");
-    if (NULL == file)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
-
-    /* Set the return value */
-    ret_value = file;
-
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__efc_open() */
 
