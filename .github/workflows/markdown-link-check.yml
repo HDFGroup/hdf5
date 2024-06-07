@@ -7,6 +7,7 @@ on:
     branches: [ develop ]
 
 # The config file handles things like http 500 errors from sites like GitLab
+# and http 200 responses
 jobs:
   markdown-link-check:
     runs-on: ubuntu-latest
