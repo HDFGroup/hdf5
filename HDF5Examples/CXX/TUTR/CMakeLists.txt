@@ -26,35 +26,16 @@ if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8")
 endif ()
 
 if (H5EX_BUILD_TESTING)
-  set (${EXAMPLE_VARNAME}_cpp_ex_CLEANFILES
-      Group.h5
-      SDS.h5
-      SDScompound.h5
-      SDSextendible.h5
-      Select.h5
-  )
-  add_test (
-      NAME ${EXAMPLE_VARNAME}_cpp_ex-clear-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove ${${EXAMPLE_VARNAME}_cpp_ex_CLEANFILES}
-  )
-  set_tests_properties (${EXAMPLE_VARNAME}_cpp_ex-clear-objects PROPERTIES
-      FIXTURES_SETUP clear_${EXAMPLE_VARNAME}_cpp_ex
-      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-  )
-  add_test (
-      NAME ${EXAMPLE_VARNAME}_cpp_ex-clean-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove ${${EXAMPLE_VARNAME}_cpp_ex_CLEANFILES}
-  )
-  set_tests_properties (${EXAMPLE_VARNAME}_cpp_ex-clean-objects PROPERTIES
-      FIXTURES_CLEANUP clear_${EXAMPLE_VARNAME}_cpp_ex
-      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-  )
-
   macro (ADD_H5_TEST testname)
+    add_test (
+        NAME ${EXAMPLE_VARNAME}_cpp_ex_${testname}-clearall
+        COMMAND    ${CMAKE_COMMAND}
+            -E remove
+            ${testname}.h5
+    )
     if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME ${EXAMPLE_VARNAME}_cpp_ex_${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${EXAMPLE_VARNAME}_cpp_ex_${testname}>)
+      set_tests_properties (${EXAMPLE_VARNAME}_cpp_ex_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_cpp_ex_${testname}-clearall)
     else ()
       add_test (
           NAME ${EXAMPLE_VARNAME}_cpp_ex_${testname}
@@ -69,8 +50,8 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
               -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
+      set_tests_properties (${EXAMPLE_VARNAME}_cpp_ex_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_cpp_ex_${testname}-clearall)
     endif ()
-    set_tests_properties (${EXAMPLE_VARNAME}_cpp_ex_${testname} PROPERTIES FIXTURES_REQUIRED clear_${EXAMPLE_VARNAME}_cpp_ex)
     if (last_test)
       set_tests_properties (${EXAMPLE_VARNAME}_cpp_ex_${testname} PROPERTIES DEPENDS ${last_test})
     endif ()

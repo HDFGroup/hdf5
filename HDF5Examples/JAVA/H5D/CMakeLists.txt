@@ -76,8 +76,8 @@ if (H5EX_BUILD_TESTING)
         COMMAND    ${CMAKE_COMMAND}
             -E remove
             ${PROJECT_BINARY_DIR}/${example_name}.h5
-            ${example_name}.out
-            ${example_name}.out.err
+            ${PROJECT_BINARY_DIR}/${example_name}.out
+            ${PROJECT_BINARY_DIR}/${example_name}.out.err
     )
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clearall-objects PROPERTIES DEPENDS ${last_test})

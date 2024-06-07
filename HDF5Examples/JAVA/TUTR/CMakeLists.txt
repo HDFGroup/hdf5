@@ -75,9 +75,9 @@ if (H5EX_BUILD_TESTING)
         NAME ${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clearall-objects
         COMMAND    ${CMAKE_COMMAND}
             -E remove
-            ${HDFJAVA_EXAMPLES_INTRO_BINARY_DIR}/${example_name}.h5
-            ${example_name}.out
-            ${example_name}.out.err
+            ${PROJECT_BINARY_DIR}/${example_name}.h5
+            ${PROJECT_BINARY_DIR}/${example_name}.out
+            ${PROJECT_BINARY_DIR}/${example_name}.out.err
     )
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clearall-objects PROPERTIES DEPENDS ${last_test})
