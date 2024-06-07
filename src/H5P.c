@@ -1331,8 +1331,8 @@ done:
     property information will be copied from the source class into the
     destination class.
 
-    If a property is copied from one list to another, the property will be
-    first deleted from the destination list (generating a call to the 'close'
+    If a property is copied from one list to another list that already contains the property,
+    the property will be first deleted from the destination list (generating a call to the 'del'
     callback for the property, if one exists) and then the property is copied
     from the source list to the destination list (generating a call to the
     'copy' callback for the property, if one exists).

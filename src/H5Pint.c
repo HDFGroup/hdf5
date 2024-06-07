@@ -4862,15 +4862,16 @@ done:
  DESCRIPTION
     Copies a property from one property list to another.
 
-    If a property is copied from one list to another, the property will be
-    first deleted from the destination list (generating a call to the 'close'
+    If the property exists in the destination list, the property will be
+    first deleted from the destination list (generating a call to the 'del'
     callback for the property, if one exists) and then the property is copied
     from the source list to the destination list (generating a call to the
     'copy' callback for the property, if one exists).
 
-    If the property does not exist in the destination list, this call is
-    equivalent to calling H5Pinsert2 and the 'create' callback will be called
-    (if such a callback exists for the property).
+    If the property does not exist in the destination list, a new instance
+    of the property is created, the 'create' callback is called
+    (if such a callback exists for the property), and the new property is
+    inserted into the destination list.
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -4895,14 +4896,15 @@ H5P__copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
         NULL == (dst_plist = (H5P_genplist_t *)H5I_object(dst_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist");
 
+    /* Get the pointer to the source property */
+    if (NULL == (prop = H5P__find_prop_plist(src_plist, name)))
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist");
+
     /* If the property exists in the destination already */
     if (NULL != H5P__find_prop_plist(dst_plist, name)) {
-        /* Delete the property from the destination list, calling the 'close' callback if necessary */
+        /* Delete the property from the destination list, calling the 'del' callback if necessary */
         if (H5P_remove(dst_plist, name) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property");
-
-        /* Get the pointer to the source property */
-        prop = H5P__find_prop_plist(src_plist, name);
 
         /* Make a copy of the source property */
         if ((new_prop = H5P__dup_prop(prop, H5P_PROP_WITHIN_LIST)) == NULL)
@@ -4913,21 +4915,12 @@ H5P__copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
             if ((new_prop->copy)(new_prop->name, new_prop->size, new_prop->value) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "Can't copy property");
         } /* end if */
-
-        /* Insert the initialized property into the property list */
-        if (H5P__add_prop(dst_plist->props, new_prop) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "Can't insert property into list");
-
-        /* Increment the number of properties in list */
-        dst_plist->nprops++;
-    } /* end if */
-    /* If not, get the information required to do an H5Pinsert2 with the property into the destination list */
+    }     /* end if */
+    /* If property doesn't exist in destination */
     else {
-        /* Get the pointer to the source property */
-        if (NULL == (prop = H5P__find_prop_plist(src_plist, name)))
-            HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist");
-
-        /* Create property object from parameters */
+        /* Create property object from parameters. This is very similar to the property
+         * duplication call above, but the property's name is treated differently depending on
+         * whether the source property is defined on a plist or a plist class */
         if (NULL ==
             (new_prop = H5P__create_prop(prop->name, prop->size, H5P_PROP_WITHIN_LIST, prop->value,
                                          prop->create, prop->set, prop->get, prop->encode, prop->decode,
@@ -4939,14 +4932,14 @@ H5P__copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
             if ((new_prop->create)(new_prop->name, new_prop->size, new_prop->value) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "Can't initialize property");
         } /* end if */
+    }     /* end else */
 
-        /* Insert property into property list class */
-        if (H5P__add_prop(dst_plist->props, new_prop) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "Can't insert property into class");
+    /* Insert the initialized property into the property list */
+    if (H5P__add_prop(dst_plist->props, new_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "Can't insert property into list");
 
-        /* Increment property count for class */
-        dst_plist->nprops++;
-    } /* end else */
+    /* Increment the number of properties in list */
+    dst_plist->nprops++;
 
 done:
     /* Cleanup, if necessary */
