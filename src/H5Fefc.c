@@ -62,7 +62,8 @@ struct H5F_efc_t {
 };
 
 /* Private prototypes */
-static herr_t H5F__efc_open_file(bool try, H5F_t **file, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
+static herr_t H5F__efc_open_file(bool try, H5F_t **file, const char *name, unsigned flags, hid_t fcpl_id,
+                                 hid_t fapl_id);
 static herr_t H5F__efc_release_real(H5F_efc_t *efc);
 static herr_t H5F__efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent);
 static void   H5F__efc_try_close_tag1(H5F_shared_t *sf, H5F_shared_t **tail);
@@ -194,7 +195,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__efc_open(bool try, H5F_efc_t *efc, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+H5F__efc_open(bool try, H5F_efc_t *efc, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_id,
+              hid_t fapl_id)
 {
     H5F_efc_ent_t        *ent       = NULL;    /* Entry for target file in efc */
     bool                  open_file = false;   /* Whether ent->file needs to be closed in case of error */
@@ -293,7 +295,8 @@ H5F__efc_open(bool try, H5F_efc_t *efc, H5F_t **_file, const char *name, unsigne
              * do not add it to cache */
             if (ent) {
                 if (H5F__efc_remove_ent(efc, ent) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "can't remove entry from external file cache");
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL,
+                                "can't remove entry from external file cache");
 
                 /* Do not free ent, we will recycle it below */
             } /* end if */

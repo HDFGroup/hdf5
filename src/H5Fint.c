@@ -918,7 +918,8 @@ H5F_prefix_open_file(bool try, H5F_t **_file, H5F_t *primary_file, H5F_prefix_op
                     } /* end if */
 
                     /* Try opening file */
-                    if (H5F__efc_open(true, efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
+                    if (H5F__efc_open(true, efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT,
+                                      fapl_id) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
                     /* Release copy of file name */
@@ -958,7 +959,8 @@ H5F_prefix_open_file(bool try, H5F_t **_file, H5F_t *primary_file, H5F_prefix_op
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't prepend prefix to filename");
 
             /* Try opening file */
-            if (H5F__efc_open(true, efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
+            if (H5F__efc_open(true, efc, &src_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT,
+                              fapl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
             /* Release name */
@@ -969,7 +971,8 @@ H5F_prefix_open_file(bool try, H5F_t **_file, H5F_t *primary_file, H5F_prefix_op
     /* Try the relative file_name stored in temp_file_name */
     if (src_file == NULL) {
         /* Try opening file */
-        if (H5F__efc_open(true, efc, &src_file, temp_file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
+        if (H5F__efc_open(true, efc, &src_file, temp_file_name, file_intent, H5P_FILE_CREATE_DEFAULT,
+                          fapl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
     } /* end if */
 
@@ -1032,7 +1035,7 @@ done:
 htri_t
 H5F__is_hdf5(const char *name, hid_t fapl_id)
 {
-    H5FD_t       *lf      = NULL;        /* Low-level file struct            */
+    H5FD_t       *lf        = NULL;        /* Low-level file struct            */
     H5F_shared_t *shared    = NULL;        /* Shared part of file              */
     haddr_t       sig_addr  = HADDR_UNDEF; /* Address of hdf5 file signature    */
     htri_t        ret_value = FAIL;        /* Return value                     */

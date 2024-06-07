@@ -783,9 +783,8 @@ H5FD_open(bool try, H5FD_t **_file, const char *name, unsigned flags, hid_t fapl
         if (NULL == file)
             HGOTO_DONE(SUCCEED);
     }
-    else
-        if (NULL == (file = (driver->open)(name, flags, fapl_id, maxaddr)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "can't open file");
+    else if (NULL == (file = (driver->open)(name, flags, fapl_id, maxaddr)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "can't open file");
 
     /* Set the file access flags */
     file->access_flags = flags;
