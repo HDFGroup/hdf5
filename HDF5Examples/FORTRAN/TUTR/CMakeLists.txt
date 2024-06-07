@@ -15,7 +15,7 @@ include (Fortran_sourcefiles.cmake)
 
 #if (HDF_ENABLE_F2003)
   foreach (example_name ${f03_examples})
-    add_executable (${EXAMPLE_VARNAME}_f90_tutr_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.F90)
+    add_executable (${EXAMPLE_VARNAME}_f90_tutr_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.f90)
     target_compile_options(${EXAMPLE_VARNAME}_f90_tutr_${example_name}
         PRIVATE
             "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_16_API}>:-DH5_USE_16_API>"
@@ -34,7 +34,7 @@ include (Fortran_sourcefiles.cmake)
 #endif ()
 
 foreach (example_name ${common_examples})
-  add_executable (${EXAMPLE_VARNAME}_f90_tutr_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.F90)
+  add_executable (${EXAMPLE_VARNAME}_f90_tutr_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.f90)
   target_compile_options(${EXAMPLE_VARNAME}_f90_tutr_${example_name}
       PRIVATE
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_16_API}>:-DH5_USE_16_API>"
