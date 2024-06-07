@@ -25,6 +25,8 @@ endforeach ()
 
 
 if (H5EX_BUILD_TESTING)
+  file (MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/red ${PROJECT_BINARY_DIR}/blue ${PROJECT_BINARY_DIR}/u2w)
+
   macro (ADD_H5_TEST testname)
     add_test (
         NAME ${EXAMPLE_VARNAME}_tutr_${testname}-clearall
