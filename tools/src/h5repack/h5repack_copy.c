@@ -368,7 +368,7 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
      *-------------------------------------------------------------------------
      */
 
-    if (options->ublock_size > 0) {
+    if (options->ublock_filename != NULL && options->ublock_size > 0) {
         if (copy_user_block(options->ublock_filename, fnameout, options->ublock_size) < 0)
             H5TOOLS_GOTO_ERROR((-1), "Could not copy user block. Exiting...");
     }
