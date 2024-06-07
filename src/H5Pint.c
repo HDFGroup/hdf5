@@ -1475,7 +1475,7 @@ H5P__free_prop(H5P_genprop_t *prop)
  NAME
     H5P__free_prop_cb
  PURPOSE
-    Internal routine to properties from a property skip list
+    Internal routine to free properties from a property skip list
  USAGE
     herr_t H5P__free_prop_cb(item, key, op_data)
         void *item;             IN/OUT: Pointer to property
@@ -2117,7 +2117,7 @@ done:
         The 'compare' callback is called when a property list with this
     property is compared to another property list.  H5P_prp_compare_func_t is
     defined as:
-        typedef int (*H5P_prp_compare_func_t)( void *value1, void *value2,
+        typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2,
             size_t size);
     where the parameters to the callback function are:
         const void *value1; IN: The value of the first property being compared.
@@ -2606,7 +2606,7 @@ done:
         The 'compare' callback is called when a property list with this
     property is compared to another property list.  H5P_prp_compare_func_t is
     defined as:
-        typedef int (*H5P_prp_compare_func_t)( void *value1, void *value2,
+        typedef int (*H5P_prp_compare_func_t)(void *value1, void *value2,
             size_t size);
     where the parameters to the callback function are:
         const void *value1; IN: The value of the first property being compared.
