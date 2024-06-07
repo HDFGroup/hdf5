@@ -43,9 +43,6 @@ if (H5EX_BUILD_TESTING)
             -E remove
             ${testname}.h5
     )
-    if (last_test)
-      set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clearall PROPERTIES DEPENDS ${last_test})
-    endif ()
     add_test (NAME MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname} COMMAND "${CMAKE_COMMAND}"
         -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${mumprocs};${MPIEXEC_PREFLAGS};$<TARGET_FILE:${EXAMPLE_VARNAME}_f90_${testname}>;${MPIEXEC_POSTFLAGS}"
         -D "TEST_ARGS:STRING="
@@ -64,7 +61,7 @@ if (H5EX_BUILD_TESTING)
             -E remove
             ${testname}.h5
     )
-    set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clean PROPERTIES DEPENDS ${last_test})
+    set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clean PROPERTIES DEPENDS MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname})
     set (last_test "MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clean")
   endmacro ()
 
