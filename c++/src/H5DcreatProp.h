@@ -50,7 +50,7 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
     void setChunk(int ndims, const hsize_t *dim) const;
 
     // Returns information about an external file.
-    void getExternal(unsigned idx, size_t name_size, char *name, off_t &offset, hsize_t &size) const;
+    void getExternal(unsigned idx, size_t name_size, char *name, HDoff_t &offset, hsize_t &size) const;
 
     // Returns the number of external files for a dataset.
     int getExternalCount() const;
@@ -101,7 +101,7 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
     void setDeflate(int level) const;
 
     // Adds an external file to the list of external files.
-    void setExternal(const char *name, off_t offset, hsize_t size) const;
+    void setExternal(const char *name, HDoff_t offset, hsize_t size) const;
 
     // Adds a filter to the filter pipeline.
     void setFilter(H5Z_filter_t filter, unsigned int flags = 0, size_t cd_nelmts = 0,
