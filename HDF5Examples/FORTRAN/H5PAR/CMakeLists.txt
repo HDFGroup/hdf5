@@ -38,13 +38,13 @@ endforeach ()
 if (H5EX_BUILD_TESTING)
   macro (ADD_GREP_TEST testname mumprocs)
     add_test (
-        NAME ${EXAMPLE_VARNAME}_f90_${testname}-clearall
+        NAME MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clearall
         COMMAND    ${CMAKE_COMMAND}
             -E remove
             ${testname}.h5
     )
     if (last_test)
-      set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname}-clearall PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clearall PROPERTIES DEPENDS ${last_test})
     endif ()
     add_test (NAME MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname} COMMAND "${CMAKE_COMMAND}"
         -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${mumprocs};${MPIEXEC_PREFLAGS};$<TARGET_FILE:${EXAMPLE_VARNAME}_f90_${testname}>;${MPIEXEC_POSTFLAGS}"
@@ -57,14 +57,14 @@ if (H5EX_BUILD_TESTING)
         -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
         -P "${H5EX_RESOURCES_DIR}/grepTest.cmake"
     )
-    set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}-clearall)
+    set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clearall)
     add_test (
-        NAME ${EXAMPLE_VARNAME}_f90_${testname}-clean
+        NAME MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clean
         COMMAND    ${CMAKE_COMMAND}
             -E remove
             ${testname}.h5
     )
-    set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname}-clean PROPERTIES DEPENDS ${last_test})
+    set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clean PROPERTIES DEPENDS ${last_test})
     set (last_test "MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clean")
   endmacro ()
 
