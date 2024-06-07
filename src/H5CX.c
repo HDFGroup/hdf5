@@ -286,18 +286,18 @@ typedef struct H5CX_t {
                                                   (H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME) */
     bool mpio_coll_chunk_multi_ratio_ind_set;  /* Whether instrumented "collective chunk multi ratio ind"
                                                      value is set */
-    bool mpio_coll_rank0_bcast;                /* Instrumented "collective chunk multi ratio ind" value
-                                                     (H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME) */
-    bool mpio_coll_rank0_bcast_set; /* Whether instrumented "collective chunk multi ratio ind" value is set */
-#endif                              /* H5_HAVE_INSTRUMENTED_LIBRARY */
-#endif                              /* H5_HAVE_PARALLEL */
-    uint32_t no_selection_io_cause; /* Reason for not performing selection I/O
-                                          (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
-    bool no_selection_io_cause_set; /* Whether reason for not performing selection I/O is set */
+    bool mpio_coll_rank0_bcast;                /* Instrumented "collective rank 0 broadcast" value
+                                                     (H5D_XFER_COLL_RANK0_BCAST_NAME) */
+    bool mpio_coll_rank0_bcast_set;   /* Whether instrumented "collective rank 0 broadcast" value is set */
+#endif                                /* H5_HAVE_INSTRUMENTED_LIBRARY */
+#endif                                /* H5_HAVE_PARALLEL */
+    uint32_t no_selection_io_cause;   /* Reason for not performing selection I/O
+                                            (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
+    bool no_selection_io_cause_set;   /* Whether reason for not performing selection I/O is set */
     bool no_selection_io_cause_valid; /* Whether reason for not performing selection I/O is valid */
 
-    uint32_t
-         actual_selection_io_mode; /* Actual selection I/O mode used (H5D_ACTUAL_SELECTION_IO_MODE_NAME) */
+    uint32_t actual_selection_io_mode;   /* Actual selection I/O mode used
+                                            (H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME) */
     bool actual_selection_io_mode_set;   /* Whether actual selection I/O mode is set */
     bool actual_selection_io_mode_valid; /* Whether actual selection I/O mode is valid */
 
