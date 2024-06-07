@@ -413,9 +413,9 @@ test_genprop_cls_cpy_cb1(hid_t new_list_id, hid_t H5_ATTR_UNUSED old_list_id, vo
 }
 
 static herr_t
-test_genprop_cls_cls_cb1(hid_t list_id, void *create_data)
+test_genprop_cls_cls_cb1(hid_t list_id, void *close_data)
 {
-    count_data_t *cdata = (count_data_t *)create_data;
+    count_data_t *cdata = (count_data_t *)close_data;
 
     cdata->count++;
     cdata->id = list_id;
@@ -1006,9 +1006,9 @@ static prop_cb_info prop3_cb_info; /* Callback statistics for property #3 */
 **
 ****************************************************************/
 static herr_t
-test_genprop_cls_cpy_cb2(hid_t new_list_id, hid_t H5_ATTR_UNUSED old_list_id, void *create_data)
+test_genprop_cls_cpy_cb2(hid_t new_list_id, hid_t H5_ATTR_UNUSED old_list_id, void *copy_data)
 {
-    count_data_t *cdata = (count_data_t *)create_data;
+    count_data_t *cdata = (count_data_t *)copy_data;
 
     cdata->count++;
     cdata->id = new_list_id;
