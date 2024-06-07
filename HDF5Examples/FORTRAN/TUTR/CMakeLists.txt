@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.18)
-project (HDF5Examples_FORTRAN_TUTR C Fortran)
+project (HDF5Examples_FORTRAN_TUTR Fortran)
 
 #-----------------------------------------------------------------------------
 # Setup include Directories

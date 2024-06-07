@@ -92,6 +92,15 @@ if (H5EX_BUILD_TESTING)
     set_tests_properties (${EXAMPLE_VARNAME}_jnative-h5-${example_name}-copy-objects PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clearall-objects)
     set (last_test "${EXAMPLE_VARNAME}_jnative-h5-${example_name}-copy-objects")
     ADD_H5_TEST (${example_name} 0)
+    add_test (
+        NAME ${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clean-objects
+        COMMAND    ${CMAKE_COMMAND}
+            -E remove
+            ${PROJECT_BINARY_DIR}/${example_name}.h5
+            ${PROJECT_BINARY_DIR}/${example_name}.out
+            ${PROJECT_BINARY_DIR}/${example_name}.out.err
+    )
+    set_tests_properties (${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clean-objects PROPERTIES DEPENDS ${last_test})
   endforeach ()
 
 endif ()

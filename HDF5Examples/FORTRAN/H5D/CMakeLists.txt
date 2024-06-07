@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 project (HDF5Examples_FORTRAN_H5D Fortran)
 
 # --------------------------------------------------------------------
@@ -76,9 +76,10 @@ if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.10")
             "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_116_API}>:-DH5_USE_116_API>"
     )
     if (H5_HAVE_PARALLEL)
-      target_include_directories (${EXAMPLE_VARNAME}_f90_${example_name} PUBLIC ${MPI_C_INCLUDE_DIRS})
+      target_include_directories (${EXAMPLE_VARNAME}_f90_${example_name} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
     endif ()
     target_link_libraries (${EXAMPLE_VARNAME}_f90_${example_name} ${H5EX_LINK_Fortran_LIBS})
+    set_target_properties (${EXAMPLE_VARNAME}_f90_${example_name} PROPERTIES LINKER_LANGUAGE Fortran)
     if (H5EX_BUILD_TESTING)
       add_custom_command (
           TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
@@ -94,7 +95,7 @@ endif ()
 #if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.12")
 #  foreach (example_name ${1_12_examples})
 #    if (H5EX_BUILD_TESTING)
-#          add_custom_command (
+#      add_custom_command (
 #          TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
 #          POST_BUILD
 #          COMMAND    ${CMAKE_COMMAND}
@@ -246,6 +247,13 @@ if (H5EX_BUILD_TESTING)
     if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME ${EXAMPLE_VARNAME}_f90_${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${EXAMPLE_VARNAME}_f90_${testname}>)
       set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}-clearall)
+      add_test (
+          NAME ${EXAMPLE_VARNAME}_f90_${testname}-clean
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              ${testname}.h5
+      )
+      set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname}-clean PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_f90_${testname})
     else ()
       add_test (
           NAME ${EXAMPLE_VARNAME}_f90_${testname}
@@ -260,7 +268,10 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
               -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
-      set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}-clearall)
+      if (last_test)
+        set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${last_test})
+      endif ()
+      set (last_test "${EXAMPLE_VARNAME}_f90_${testname}")
       if (HDF5_BUILD_TOOLS)
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-f90_${testname}
@@ -275,8 +286,16 @@ if (H5EX_BUILD_TESTING)
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
                 -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
         )
-        set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-f90_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_f90_${testname})
+        set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-f90_${testname} PROPERTIES DEPENDS ${last_test})
+        set (last_test "${EXAMPLE_VARNAME}_H5DUMP-f90_${testname}")
       endif ()
+      add_test (
+          NAME ${EXAMPLE_VARNAME}_f90_${testname}-clean
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              ${testname}.h5
+      )
+      set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname}-clean PROPERTIES DEPENDS ${last_test})
     endif ()
   endmacro ()
 

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 project (HDF5Examples_FORTRAN_H5PAR Fortran)
 
 # --------------------------------------------------------------------
@@ -58,7 +58,14 @@ if (H5EX_BUILD_TESTING)
         -P "${H5EX_RESOURCES_DIR}/grepTest.cmake"
     )
     set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}-clearall)
-    set (last_test "MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}")
+    add_test (
+        NAME ${EXAMPLE_VARNAME}_f90_${testname}-clean
+        COMMAND    ${CMAKE_COMMAND}
+            -E remove
+            ${testname}.h5
+    )
+    set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname}-clean PROPERTIES DEPENDS ${last_test})
+    set (last_test "MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clean")
   endmacro ()
 
   # Ensure that 24 is a multiple of the number of processes.
