@@ -987,8 +987,8 @@ H5D__read_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t m
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
 
     /* Read the data */
-    if (H5VL_dataset_read_direct(count, obj, connector, mem_type_id, mem_space_id, file_space_id, dxpl_id,
-                                 buf, token_ptr) < 0)
+    if (H5VL_dataset_read(count, obj, connector, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf,
+                          token_ptr) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
 
 done:
@@ -1289,8 +1289,8 @@ H5D__write_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
 
     /* Write the data */
-    if (H5VL_dataset_write_direct(count, obj, connector, mem_type_id, mem_space_id, file_space_id, dxpl_id,
-                                  buf, token_ptr) < 0)
+    if (H5VL_dataset_write(count, obj, connector, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf,
+                           token_ptr) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
 
 done:

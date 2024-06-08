@@ -99,12 +99,6 @@ jobs:
       with:
             build_mode: "production"
 
-    call-release-auto-julia:
-        name: "Autotools Julia Workflows"
-        uses: ./.github/workflows/julia-auto.yml
-        with:
-            build_mode: "production"
-            
     call-release-auto-xpr:
         name: "Autotools TestExpress Workflows"
         uses: ./.github/workflows/testxpr-auto.yml

@@ -1632,7 +1632,7 @@ fi
 
 
 #limit
-arg="h5repack_layout.h5 -f GZIP=1 -m 1024"
+arg="h5repack_layout.h5 -f GZIP=2 -m 1024"
 if test $USE_FILTER_DEFLATE != "yes"  ; then
  SKIP $arg
 else
@@ -1804,6 +1804,10 @@ fi
 # add a userblock to file
 arg="h5repack_objs.h5 -u ublock.bin -b 2048"
 TOOLTEST add_userblock $arg
+
+# reserve a userblock to file
+arg="h5repack_objs.h5 -b 2048"
+TOOLTEST reserve_userblock $arg
 
 # add alignment
 arg="h5repack_objs.h5 -t 1 -a 1 "

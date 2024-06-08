@@ -47,6 +47,22 @@ New Features
 
     Configuration:
     -------------
+    - Added support for using zlib-ng package as the zlib library:
+
+          CMake:      HDF5_USE_ZLIB_NG
+          Autotools:  --enable-zlibng
+
+      Added the option HDF5_USE_ZLIB_NG to allow the replacement of the
+      default ZLib package by the zlib-ng package as a built-in compression library.
+
+    - Disable CMake UNITY_BUILD for hdf5
+
+      CMake added a target property, UNITY_BUILD, that when set to true, the target
+      source files will be combined into batches for faster compilation. By default,
+      the setting is OFF, but could be enabled by a project that includes HDF5 as a subproject.
+
+      HDF5 has disabled this feature by setting the property to OFF in the HDFMacros.cmake file.
+
     - Removed "function/code stack" debugging configuration option:
 
           CMake:      HDF5_ENABLE_CODESTACK
@@ -470,7 +486,10 @@ New Features
 
     Tools:
     ------
-    -
+    - Allow h5repack to reserve space for a user block without a file
+
+      This is useful for users who want to reserve space
+      in the file for future use without requiring a file to copy.
 
 
     High-Level APIs:

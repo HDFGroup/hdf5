@@ -979,6 +979,51 @@
       )
   endmacro ()
 
+  macro (ADD_H5_VERIFY_USERBLOCK testname userblocksize testfile)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
+      add_test (
+          NAME H5REPACK_VERIFY_USERBLOCK-${testname}-clear-objects
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
+      )
+      add_test (
+          NAME H5REPACK_VERIFY_USERBLOCK-${testname}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+      )
+      set_tests_properties (H5REPACK_VERIFY_USERBLOCK-${testname} PROPERTIES
+          DEPENDS H5REPACK_VERIFY_USERBLOCK-${testname}-clear-objects
+      )
+      if ("H5REPACK_VERIFY_USERBLOCK-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5REPACK_VERIFY_USERBLOCK-${testname} PROPERTIES DISABLED true)
+      endif ()
+      add_test (
+          NAME H5REPACK_VERIFY_USERBLOCK-${testname}_DMP
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=-H;-B;out-${testname}.${testfile}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_FILTER:STRING=USERBLOCK_SIZE ${userblocksize}"
+              -D "TEST_REFERENCE=USERBLOCK_SIZE ${userblocksize}"
+              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+      )
+      set_tests_properties (H5REPACK_VERIFY_USERBLOCK-${testname}_DMP PROPERTIES
+          DEPENDS H5REPACK_VERIFY_USERBLOCK-${testname}
+      )
+      if ("H5REPACK_VERIFY_USERBLOCK-${testname}_DMP" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5REPACK_VERIFY_USERBLOCK-${testname}_DMP PROPERTIES DISABLED true)
+      endif ()
+      add_test (
+          NAME H5REPACK_VERIFY_USERBLOCK-${testname}-clean-objects
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
+      )
+      set_tests_properties (H5REPACK_VERIFY_USERBLOCK-${testname}-clean-objects PROPERTIES
+          DEPENDS H5REPACK_VERIFY_USERBLOCK-${testname}_DMP
+      )
+    endif ()
+  endmacro ()
+
   macro (ADD_H5_TEST_META testname testfile)
       # Remove any output file left over from previous test run
       add_test (
@@ -1540,7 +1585,7 @@
   ADD_H5_TEST (szip_convert ${TESTTYPE} ${arg})
 
 #limit
-  set (arg ${FILE4} -f GZIP=1 -m 1024)
+  set (arg ${FILE4} -f GZIP=2 -m 1024)
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
@@ -1718,6 +1763,9 @@
 # add a userblock to file
   set (arg ${FILE1} -u ${PROJECT_BINARY_DIR}/testfiles/ublock.bin -b 2048)
   ADD_H5_TEST (add_userblock "TEST" ${arg})
+
+# add a userblock reserve to file
+  ADD_H5_VERIFY_USERBLOCK (reserve_userblock 2048 ${FILE1} -b 2048)
 
 # add alignment
   set (arg ${FILE1} -t 1 -a 1)

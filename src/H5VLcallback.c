@@ -2025,7 +2025,7 @@ done:
 } /* end H5VL__dataset_read() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_dataset_read_direct
+ * Function:    H5VL_dataset_read
  *
  * Purpose:     Reads data from dataset through the VOL.  This is like
  *              H5VL_dataset_read, but takes an array of void * for the
@@ -2039,8 +2039,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_read_direct(size_t count, void *obj[], H5VL_t *connector, hid_t mem_type_id[],
-                         hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req)
+H5VL_dataset_read(size_t count, void *obj[], H5VL_t *connector, hid_t mem_type_id[], hid_t mem_space_id[],
+                  hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req)
 {
     bool          vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
     H5VL_object_t tmp_vol_obj;             /* Temporary VOL object for setting VOL wrapper */
@@ -2068,70 +2068,6 @@ done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_dataset_read_direct() */
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_dataset_read
- *
- * Purpose:	Reads data from dataset through the VOL
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_dataset_read(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_id[], hid_t mem_space_id[],
-                  hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req)
-{
-    bool   vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
-    void  *obj_local;               /* Local buffer for obj */
-    void **obj = &obj_local;        /* Array of object pointers */
-    size_t i;                       /* Local index variable */
-    herr_t ret_value = SUCCEED;     /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    assert(vol_obj);
-    assert(vol_obj[0]);
-
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj[0]) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = true;
-
-    /* Allocate obj array if necessary */
-    if (count > 1)
-        if (NULL == (obj = (void **)H5MM_malloc(count * sizeof(void *))))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate space for object array");
-
-    /* Build obj array */
-    for (i = 0; i < count; i++) {
-        /* Get the object */
-        obj[i] = vol_obj[i]->data;
-
-        /* Make sure the class matches */
-        if (vol_obj[i]->connector->cls->value != vol_obj[0]->connector->cls->value)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                        "datasets are accessed through different VOL connectors and can't be used in the "
-                        "same I/O call");
-    }
-
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__dataset_read(count, obj, vol_obj[0]->connector->cls, mem_type_id, mem_space_id, file_space_id,
-                           dxpl_id, buf, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "dataset read failed");
-
-done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
-
-    /* Free memory */
-    if (obj != &obj_local)
-        H5MM_free(obj);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_read() */
@@ -2212,7 +2148,7 @@ done:
 } /* end H5VL__dataset_write() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_dataset_write_direct
+ * Function:    H5VL_dataset_write
  *
  * Purpose:     Writes data from dataset through the VOL.  This is like
  *              H5VL_dataset_write, but takes an array of void * for the
@@ -2226,9 +2162,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_write_direct(size_t count, void *obj[], H5VL_t *connector, hid_t mem_type_id[],
-                          hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id, const void *buf[],
-                          void **req)
+H5VL_dataset_write(size_t count, void *obj[], H5VL_t *connector, hid_t mem_type_id[], hid_t mem_space_id[],
+                   hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void **req)
 {
     bool          vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
     H5VL_object_t tmp_vol_obj;             /* Temporary VOL object for setting VOL wrapper */
@@ -2256,70 +2191,6 @@ done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_dataset_write_direct() */
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_dataset_write
- *
- * Purpose:	Writes data from dataset through the VOL
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_dataset_write(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_id[], hid_t mem_space_id[],
-                   hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void **req)
-{
-    bool   vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
-    void  *obj_local;               /* Local buffer for obj */
-    void **obj = &obj_local;        /* Array of object pointers */
-    size_t i;                       /* Local index variable */
-    herr_t ret_value = SUCCEED;     /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    assert(vol_obj);
-    assert(vol_obj[0]);
-
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj[0]) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = true;
-
-    /* Allocate obj array if necessary */
-    if (count > 1)
-        if (NULL == (obj = (void **)H5MM_malloc(count * sizeof(void *))))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate space for object array");
-
-    /* Build obj array */
-    for (i = 0; i < count; i++) {
-        /* Get the object */
-        obj[i] = vol_obj[i]->data;
-
-        /* Make sure the class matches */
-        if (vol_obj[i]->connector->cls->value != vol_obj[0]->connector->cls->value)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                        "datasets are accessed through different VOL connectors and can't be used in the "
-                        "same I/O call");
-    }
-
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__dataset_write(count, obj, vol_obj[0]->connector->cls, mem_type_id, mem_space_id, file_space_id,
-                            dxpl_id, buf, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "dataset write failed");
-
-done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
-
-    /* Free memory */
-    if (obj != &obj_local)
-        H5MM_free(obj);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_write() */
