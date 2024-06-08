@@ -352,7 +352,7 @@ typedef H5P_prp_cb2_t H5P_prp_get_func_t;
  * \brief Callback function for encoding property values
  *
  * \param[in]  value The property value to be encoded
- * \param[out] buf   The encoded property value
+ * \param[out] buf   Pointer to encoding buffer pointer
  * \param[out] size  The size of \p buf
  * \return \herr_t
  *
