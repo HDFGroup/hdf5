@@ -931,8 +931,7 @@
  * access property list for each member of the file family. memb_size specifies the logical size, in
  * bytes, of each family member. memb_size is used only when creating a new file or truncating an
  * existing file; otherwise the member size is determined by the size of the first member of the
- * family being opened. Note: If the size of the off_t type is four bytes, the maximum family
- * member size is usually 2^31-1 because the byte at offset 2,147,483,647 is generally inaccessible.
+ * family being opened.
  *
  * #H5Pget_fapl_family is used to retrieve file family properties. If the file access property list is set
  * to use the Family driver, member_properties will be returned with a pointer to a copy of the

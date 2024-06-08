@@ -372,9 +372,8 @@ H5F_get_fcpl(const H5F_t *f)
 /*-------------------------------------------------------------------------
  * Function: H5F_sizeof_addr
  *
- * Purpose:  Quick and dirty routine to retrieve the size of the file's size_t
- *           (Mainly added to stop non-file routines from poking about in the
- *           H5F_t data structure)
+ * Purpose:  Quick and dirty routine to retrieve the size of the file's size
+ *           of addresses
  *
  * Return:   'sizeof_addr' on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
@@ -394,9 +393,8 @@ H5F_sizeof_addr(const H5F_t *f)
 /*-------------------------------------------------------------------------
  * Function: H5F_sizeof_size
  *
- * Purpose:  Quick and dirty routine to retrieve the size of the file's off_t
- *           (Mainly added to stop non-file routines from poking about in the
- *           H5F_t data structure)
+ * Purpose:  Quick and dirty routine to retrieve the size of the file's size
+ *           of sizes
  *
  * Return:   'sizeof_size' on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------

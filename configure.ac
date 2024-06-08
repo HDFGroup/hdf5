@@ -2575,8 +2575,8 @@ case "X-$ASSERTS" in
 esac
 
 ## Incorporate the potentially warning-to-error promoting flags after
-## feature tests.  Some of the tests (e.g., `off_t`) generate compilation
-## errors with the flags we chose for the HDF5 library and tools.
+## feature tests.  Some of the tests generate compilation errors with the
+## flags we chose for the HDF5 library and tools.
 ##
 H5_CFLAGS="$H5_CFLAGS $H5_ECFLAGS"
 H5_CXXFLAGS="$H5_CXXFLAGS $H5_ECXXFLAGS"

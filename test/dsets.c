@@ -7189,7 +7189,7 @@ test_copy_dcpl(hid_t file, hid_t fapl)
         TEST_ERROR;
     if (H5Premove_filter(dcpl, H5Z_FILTER_FLETCHER32) < 0)
         TEST_ERROR;
-    if (H5Pset_external(dcpl, COPY_DCPL_EXTFILE_NAME, (off_t)0, (hsize_t)(500 * 4096 * sizeof(int))) < 0)
+    if (H5Pset_external(dcpl, COPY_DCPL_EXTFILE_NAME, 0, (hsize_t)(500 * 4096 * sizeof(int))) < 0)
         TEST_ERROR;
 
     /* Create second dataset of contiguous layout with external storage */
