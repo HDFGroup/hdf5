@@ -130,7 +130,4 @@ clean:
 	rm -f classhdf5_java.stamp
 
 
-# Clean examples when check-clean is invoked
-check-clean :: ;
-
 #include $(top_srcdir)/config/conclude.am

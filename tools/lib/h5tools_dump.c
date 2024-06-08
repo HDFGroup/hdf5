@@ -3144,7 +3144,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     H5D_layout_t     stl      = H5D_LAYOUT_ERROR;
     size_t           ncols    = 80; /* available output width        */
     size_t           cd_nelmts;     /* filter client number of values */
-    off_t            offset;        /* offset of external file     */
+    HDoff_t          offset;        /* offset of external file     */
     char             f_name[256];   /* filter name */
     char             name[256];     /* external or virtual file name       */
     hsize_t          chsize[64];    /* chunk size in elements */

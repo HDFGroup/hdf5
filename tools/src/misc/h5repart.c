@@ -65,28 +65,28 @@ usage(const char *progname)
 /*-------------------------------------------------------------------------
  * Function:    get_size
  *
- * Purpose:    Reads a size option of the form `-XNS' where `X' is any
- *        letter, `N' is a multi-character positive decimal number, and
- *        `S' is an optional suffix letter in the set [GgMmk].  The
- *        option may also be split among two arguments as: `-X NS'.
- *        The input value of ARGNO is the argument number for the
- *        switch in the ARGV vector and ARGC is the number of entries
- *        in that vector.
+ * Purpose:     Reads a size option of the form `-XNS' where `X' is any
+ *              letter, `N' is a multi-character positive decimal number, and
+ *              `S' is an optional suffix letter in the set [GgMmk].  The
+ *              option may also be split among two arguments as: `-X NS'.
+ *              The input value of ARGNO is the argument number for the
+ *              switch in the ARGV vector and ARGC is the number of entries
+ *              in that vector.
  *
- * Return:    Success:    The value N multiplied according to the
- *                suffix S.  On return ARGNO will be the number
- *                of the next argument to process.
+ * Return:      Success:    The value N multiplied according to the
+ *                          suffix S.  On return ARGNO will be the number
+ *                          of the next argument to process.
  *
- *        Failure:    Calls usage() which exits with a non-zero
- *                status.
+ *              Failure:    Calls usage() which exits with a non-zero
+ *                          status.
  *
  *-------------------------------------------------------------------------
  */
-static off_t
+static HDoff_t
 get_size(const char *progname, int *argno, int argc, char *argv[])
 {
-    off_t retval = -1;
-    char *suffix = NULL;
+    HDoff_t retval = -1;
+    char   *suffix = NULL;
 
     if (isdigit((int)(argv[*argno][2]))) {
         retval = strtol(argv[*argno] + 2, &suffix, 10);
@@ -126,13 +126,6 @@ get_size(const char *progname, int *argno, int argc, char *argv[])
 
 /*-------------------------------------------------------------------------
  * Function:    main
- *
- * Purpose:    Split an hdf5 file
- *
- * Return:    Success:
- *
- *        Failure:
- *
  *-------------------------------------------------------------------------
  */
 H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
@@ -163,12 +156,12 @@ main(int argc, char *argv[])
     int         dst_is_family;   /*is dst name a family name?    */
     int         dst_membno = 0;  /*destination member number    */
 
-    off_t   left_overs = 0;  /*amount of zeros left over    */
-    off_t   src_offset = 0;  /*offset in source member    */
-    off_t   dst_offset = 0;  /*offset in destination member    */
-    off_t   src_size;        /*source logical member size    */
-    off_t   src_act_size;    /*source actual member size    */
-    off_t   dst_size = 1 GB; /*destination logical memb size    */
+    HDoff_t left_overs = 0;  /*amount of zeros left over    */
+    HDoff_t src_offset = 0;  /*offset in source member    */
+    HDoff_t dst_offset = 0;  /*offset in destination member    */
+    HDoff_t src_size;        /*source logical member size    */
+    HDoff_t src_act_size;    /*source actual member size    */
+    HDoff_t dst_size = 1 GB; /*destination logical memb size    */
     hid_t   fapl;            /*file access property list     */
     hid_t   file;
     hsize_t hdsize;                   /*destination logical memb size */
@@ -283,14 +276,14 @@ main(int argc, char *argv[])
          */
         n = blk_size;
         if (dst_is_family)
-            n = (size_t)MIN((off_t)n, dst_size - dst_offset);
+            n = (size_t)MIN((HDoff_t)n, dst_size - dst_offset);
         if (left_overs) {
-            n          = (size_t)MIN((off_t)n, left_overs);
-            left_overs = left_overs - (off_t)n;
+            n          = (size_t)MIN((HDoff_t)n, left_overs);
+            left_overs = left_overs - (HDoff_t)n;
             need_write = false;
         }
         else if (src_offset < src_act_size) {
-            n = (size_t)MIN((off_t)n, src_act_size - src_offset);
+            n = (size_t)MIN((HDoff_t)n, src_act_size - src_offset);
             if ((nio = HDread(src, buf, n)) < 0) {
                 perror("read");
                 exit(EXIT_FAILURE);
@@ -343,16 +336,16 @@ main(int argc, char *argv[])
          * loop.   The destination offset must be updated so we can fix
          * trailing holes.
          */
-        src_offset = src_offset + (off_t)n;
+        src_offset = src_offset + (HDoff_t)n;
         if (src_offset == src_act_size) {
             HDclose(src);
             if (!src_is_family) {
-                dst_offset = dst_offset + (off_t)n;
+                dst_offset = dst_offset + (HDoff_t)n;
                 break;
             }
             snprintf(src_name, NAMELEN, src_gen_name, ++src_membno);
             if ((src = HDopen(src_name, O_RDONLY)) < 0 && ENOENT == errno) {
-                dst_offset = dst_offset + (off_t)n;
+                dst_offset = dst_offset + (HDoff_t)n;
                 break;
             }
             else if (src < 0) {

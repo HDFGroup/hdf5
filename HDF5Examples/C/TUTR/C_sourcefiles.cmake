@@ -1,0 +1,32 @@
+#-----------------------------------------------------------------------------
+# Define Sources, one file per application
+#-----------------------------------------------------------------------------
+set (examples
+    h5_crtdat
+    h5_rdwt
+    h5_crtatt
+    h5_crtgrp
+    h5_crtgrpar
+    h5_crtgrpd
+    h5_cmprss
+    h5_extend
+    h5_subset
+    h5_write
+    h5_read
+    h5_extend_write
+    h5_chunk_read
+    h5_compound
+    h5_group
+    h5_select
+    h5_attribute
+    h5_mount
+    h5_ref_extern
+    h5_ref_compat
+    h5_reference_deprec
+    h5_drivers
+    h5_ref2reg_deprec
+    h5_extlink
+    h5_elink_unix2win
+    h5_shared_mesg
+    h5_debug_trace
+)

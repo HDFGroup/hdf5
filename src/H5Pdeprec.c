@@ -149,8 +149,8 @@
     routine returns an error value.
 
         The 'delete' callback is called when a property is deleted from a
-    property list.  H5P_prp_del_func_t is defined as:
-        typedef herr_t (*H5P_prp_del_func_t)(hid_t prop_id, const char *name,
+    property list.  H5P_prp_delete_func_t is defined as:
+        typedef herr_t (*H5P_prp_delete_func_t)(hid_t prop_id, const char *name,
             size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list the property is deleted from.
@@ -314,8 +314,8 @@ done:
     routine returns an error value.
 
         The 'delete' callback is called when a property is deleted from a
-    property list.  H5P_prp_del_func_t is defined as:
-        typedef herr_t (*H5P_prp_del_func_t)(hid_t prop_id, const char *name,
+    property list.  H5P_prp_delete_func_t is defined as:
+        typedef herr_t (*H5P_prp_delete_func_t)(hid_t prop_id, const char *name,
             size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list the property is deleted from.

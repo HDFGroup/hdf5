@@ -59,6 +59,12 @@ New Features
       disable the 'threadsafe' option, but not vice versa.  The 'threads' option
       must be on to enable the subfiling VFD.
 
+    - Moved examples to the HDF5Examples folder in the source tree.
+
+      Moved the C++ and Fortran examples from the examples folder to the HDF5Examples
+      folder and renamed to TUTR, tutorial. This is referenced from the LearnBasics
+      doxygen page.
+
     - Added support for using zlib-ng package as the zlib library:
 
           CMake:      HDF5_USE_ZLIB_NG
