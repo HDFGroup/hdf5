@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.1dc0b67</span>
+   &#160;<span id="projectnumber">1.15.0.f44fa55</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -237,7 +237,7 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___g_c_p_l.html#ga701867215546a345dea7b8e9cf7a1b61" title="Returns the estimated link count and average link name length in a group.">H5Pget_est_link_info()</a> retrieves two settings from the group creation property list <code>plist_id:</code> the estimated number of links that are expected to be inserted into a group created with the property list and the estimated average length of those link names.</p>
 <p>The estimated number of links is returned in <code>est_num_entries</code>. The limit for <code>est_num_entries</code> is 64 K.</p>
 <p>The estimated average length of the anticipated link names is returned in <code>est_name_len</code>. The limit for <code>est_name_len</code> is 64 K.</p>
-<p>See <a href="hdfgroup.github.io/hdf5/develop/group___h5_g.html">Group implementations in HDF5</a> for a discussion of the available types of HDF5 group structures.</p>
+<p>See <a href="https://hdfgroup.github.io/hdf5/develop/group___h5_g.html">Group implementations in HDF5</a> for a discussion of the available types of HDF5 group structures.</p>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
@@ -420,9 +420,9 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___g_c_p_l.html#gaa8571642d45e73ab5a9ae71cf00501f9" title="Sets estimated number of links and length of link names in a group.">H5Pset_est_link_info()</a> inserts two settings into the group creation property list plist_id: the estimated number of links that are expected to be inserted into a group created with the property list and the estimated average length of those link names.</p>
 <p>The estimated number of links is passed in <code>est_num_entries</code>. The limit for <code>est_num_entries</code> is 64 K.</p>
 <p>The estimated average length of the anticipated link names is passed in <code>est_name_len</code>. The limit for <code>est_name_len</code> is 64 K.</p>
-<p>The values for these two settings are multiplied to compute the initial local heap size (for old-style groups, if the local heap size hint is not set) or the initial object header size for (new-style compact groups; see <a href="hdfgroup.github.io/hdf5/develop/group___h5_g.html">Group implementations in HDF5</a>). Accurately setting these parameters will help reduce wasted file space.</p>
+<p>The values for these two settings are multiplied to compute the initial local heap size (for old-style groups, if the local heap size hint is not set) or the initial object header size for (new-style compact groups; see <a href="https://hdfgroup.github.io/hdf5/develop/group___h5_g.html">Group implementations in HDF5</a>). Accurately setting these parameters will help reduce wasted file space.</p>
 <p>If a group is expected to have many links and to be stored in dense format, set <code>est_num_entries</code> to 0 (zero) for maximum efficiency. This will prevent the group from being created in the compact format.</p>
-<p>See <a href="hdfgroup.github.io/hdf5/develop/group___h5_g.html">Group implementations in HDF5</a> for a discussion of the available types of HDF5 group structures.</p>
+<p>See <a href="https://hdfgroup.github.io/hdf5/develop/group___h5_g.html">Group implementations in HDF5</a> for a discussion of the available types of HDF5 group structures.</p>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>

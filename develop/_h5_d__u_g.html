@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.1dc0b67</span>
+   &#160;<span id="projectnumber">1.15.0.f44fa55</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -245,7 +245,7 @@ Dataset Function Summaries</h2>
 <tr>
 <td><a class="el" href="group___d_c_p_l.html#ga4c45d90845ea7627b6238f95168c41ce" title="Returns the number of external files for a dataset.">H5Pget_external_count</a> </td><td>Returns the number of external files for a dataset.  </td></tr>
 <tr>
-<td><a class="el" href="group___d_c_p_l.html#ga78253b80b6c86faf7ff0db135146521d" title="Returns information about an external file.">H5Pget_external</a> </td><td>Returns information about an external file.  </td></tr>
+<td><a class="el" href="group___d_c_p_l.html#ga454633ced11c3fa64f70d5816fa7f6e2" title="Returns information about an external file.">H5Pget_external</a> </td><td>Returns information about an external file.  </td></tr>
 <tr>
 <td><a class="el" href="group___a_c_p_l.html#gad4fa8e2d17236786f770cf17eef908cc" title="Sets the character encoding used to encode link and attribute names.">H5Pset_char_encoding</a> </td><td>Sets the character encoding used to encode a string. Use to set ASCII or UTF-8 character encoding for object names.  </td></tr>
 <tr>
@@ -1042,7 +1042,7 @@ External Storage Properties</h3>
 <tr>
 <td><a class="el" href="group___d_c_p_l.html#ga4c45d90845ea7627b6238f95168c41ce" title="Returns the number of external files for a dataset.">H5Pget_external_count</a> </td><td>Calling this function returns the number of segments in an external file list. If the dataset creation property list has no external data, then zero is returned.  </td></tr>
 <tr>
-<td><a class="el" href="group___d_c_p_l.html#ga78253b80b6c86faf7ff0db135146521d" title="Returns information about an external file.">H5Pget_external</a> </td><td>This is the counterpart for the <a class="el" href="group___d_c_p_l.html#ga64bf68bda464eaaabfe24846533b1935" title="Adds an external file to the list of external files.">H5Pset_external</a> function. Given a dataset creation property list and a zero-based index into that list, the file name, byte offset, and segment size are returned through non-null arguments. At most name_size characters are copied into the name argument which is not null terminated if the file name is longer than the supplied name buffer (this is similar to strncpy()).  </td></tr>
+<td><a class="el" href="group___d_c_p_l.html#ga454633ced11c3fa64f70d5816fa7f6e2" title="Returns information about an external file.">H5Pget_external</a> </td><td>This is the counterpart for the <a class="el" href="group___d_c_p_l.html#ga64bf68bda464eaaabfe24846533b1935" title="Adds an external file to the list of external files.">H5Pset_external</a> function. Given a dataset creation property list and a zero-based index into that list, the file name, byte offset, and segment size are returned through non-null arguments. At most name_size characters are copied into the name argument which is not null terminated if the file name is longer than the supplied name buffer (this is similar to strncpy()).  </td></tr>
 </table>
 <p>The figure below shows an example of how a contiguous, one-dimensional dataset is partitioned into three parts and each of those parts is stored in a segment of an external file. The top rectangle represents the logical address space of the dataset while the bottom rectangle represents an external file.</p>
 <table class="doxtable">

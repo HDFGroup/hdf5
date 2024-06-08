@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.1dc0b67</span>
+   &#160;<span id="projectnumber">1.15.0.f44fa55</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -700,9 +700,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga2fd4f0446a38186db8256cef4c97a970"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___d_c_p_l.html#ga2fd4f0446a38186db8256cef4c97a970">H5Pget_dset_no_attrs_hint</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dcpl_id, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *minimize)</td></tr>
 <tr class="memdesc:ga2fd4f0446a38186db8256cef4c97a970"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the setting for whether or not to create minimized dataset object headers.  <br /></td></tr>
 <tr class="separator:ga2fd4f0446a38186db8256cef4c97a970"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga78253b80b6c86faf7ff0db135146521d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___d_c_p_l.html#ga78253b80b6c86faf7ff0db135146521d">H5Pget_external</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, unsigned idx, size_t name_size, char *name, off_t *offset, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *size)</td></tr>
-<tr class="memdesc:ga78253b80b6c86faf7ff0db135146521d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns information about an external file.  <br /></td></tr>
-<tr class="separator:ga78253b80b6c86faf7ff0db135146521d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga454633ced11c3fa64f70d5816fa7f6e2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___d_c_p_l.html#ga454633ced11c3fa64f70d5816fa7f6e2">H5Pget_external</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, unsigned idx, size_t name_size, char *name, <a class="el" href="_h5public_8h.html#a7231b68f6d5811a693d4cbc937a34604">HDoff_t</a> *offset, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *size)</td></tr>
+<tr class="memdesc:ga454633ced11c3fa64f70d5816fa7f6e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns information about an external file.  <br /></td></tr>
+<tr class="separator:ga454633ced11c3fa64f70d5816fa7f6e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4c45d90845ea7627b6238f95168c41ce"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___d_c_p_l.html#ga4c45d90845ea7627b6238f95168c41ce">H5Pget_external_count</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id)</td></tr>
 <tr class="memdesc:ga4c45d90845ea7627b6238f95168c41ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of external files for a dataset.  <br /></td></tr>
 <tr class="separator:ga4c45d90845ea7627b6238f95168c41ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2007,7 +2007,7 @@ Variables</h2></td></tr>
 <p>Callback function for <a class="el" href="group___p_l_c_r_a.html#ga62a1119b6ad2c33bcc9149df5e24ae12" title="Creates a new property list class.">H5Pcreate_class()</a> </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">prop_id</td><td>The identifier of the property list class being created </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">prop_id</td><td>The identifier of the property list class being closed </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">close_data</td><td>User pointer to any close data required </td></tr>
   </table>
   </dd>
@@ -2284,7 +2284,7 @@ This function is called for each property encountered when iterating over a prop
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>The property value to be encoded </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>The encoded property value </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>Pointer to encoding buffer pointer </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">size</td><td>The size of <code>buf</code> </td></tr>
   </table>
   </dd>
