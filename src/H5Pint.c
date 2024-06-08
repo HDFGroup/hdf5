@@ -1475,7 +1475,7 @@ H5P__free_prop(H5P_genprop_t *prop)
  NAME
     H5P__free_prop_cb
  PURPOSE
-    Internal routine to properties from a property skip list
+    Internal routine to free properties from a property skip list
  USAGE
     herr_t H5P__free_prop_cb(item, key, op_data)
         void *item;             IN/OUT: Pointer to property
@@ -2048,13 +2048,11 @@ done:
 
         The 'create' callback is called when a new property list with this
     property is being created.  H5P_prp_create_func_t is defined as:
-        typedef herr_t (*H5P_prp_create_func_t)(hid_t prop_id, const char *name,
-                size_t size, void *initial_value);
+        typedef herr_t (*H5P_prp_create_func_t)(const char *name, size_t size, void *value);
     where the parameters to the callback function are:
-        hid_t prop_id;      IN: The ID of the property list being created.
         const char *name;   IN: The name of the property being modified.
         size_t size;        IN: The size of the property value
-        void *initial_value; IN/OUT: The initial value for the property being created.
+        void *value;        IN/OUT: The initial value for the property being created.
                                 (The 'default' value passed to H5Pregister2)
     The 'create' routine may modify the value to be set and those changes will
     be stored as the initial value of the property.  If the 'create' routine
@@ -2069,7 +2067,7 @@ done:
         hid_t prop_id;      IN: The ID of the property list being modified.
         const char *name;   IN: The name of the property being modified.
         size_t size;        IN: The size of the property value
-        void *new_value;    IN/OUT: The value being set for the property.
+        void *value;    IN/OUT: The value being set for the property.
     The 'set' routine may modify the value to be set and those changes will be
     stored as the value of the property.  If the 'set' routine returns a
     negative value, the new property value is not copied into the property and
@@ -2090,8 +2088,8 @@ done:
     routine returns an error value.
 
         The 'delete' callback is called when a property is deleted from a
-    property list.  H5P_prp_del_func_t is defined as:
-        typedef herr_t (*H5P_prp_del_func_t)(hid_t prop_id, const char *name,
+    property list.  H5P_prp_delete_func_t is defined as:
+        typedef herr_t (*H5P_prp_delete_func_t)(hid_t prop_id, const char *name,
             size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list the property is deleted from.
@@ -2119,7 +2117,7 @@ done:
         The 'compare' callback is called when a property list with this
     property is compared to another property list.  H5P_prp_compare_func_t is
     defined as:
-        typedef int (*H5P_prp_compare_func_t)( void *value1, void *value2,
+        typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2,
             size_t size);
     where the parameters to the callback function are:
         const void *value1; IN: The value of the first property being compared.
@@ -2145,30 +2143,25 @@ done:
 
         The 'encode' callback is called when a property list with this
     property is being encoded.  H5P_prp_encode_func_t is defined as:
-        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size,
-        void *value, void *plist, uint8_t **buf);
+        typedef herr_t (*H5P_prp_encode_func_t)(const void *value, void **buf, size_t *size);
     where the parameters to the callback function are:
-        void *f;            IN: A fake file structure used to encode.
-        size_t *size;       IN/OUT: The size of the buffer to encode the property.
         void *value;        IN: The value of the property being encoded.
-        void *plist;        IN: The property list structure.
-        uint8_t **buf;      OUT: The buffer that holds the encoded property;
+        void **buf;         OUT: Pointer to encoding buffer pointer.
+        size_t *size;       IN/OUT: The size of the buffer needed to encode the property.
     The 'encode' routine returns the size needed to encode the property value
     if the buffer passed in is NULL or the size is zero. Otherwise it encodes
-    the property value into binary in buf.
+    the property value as binary in *buf.
 
         The 'decode' callback is called when a property list with this
     property is being decoded.  H5P_prp_encode_func_t is defined as:
-        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size,
-        void *value, void *plist, uint8_t **buf);
+        typedef herr_t (*H5P_prp_encode_func_t)(const void **buf, void *value);
     where the parameters to the callback function are:
-        void *f;            IN: A fake file structure used to decode.
-        size_t *size;       IN: H5_ATTR_UNUSED
-        void *value;        IN: H5_ATTR_UNUSED
-        void *plist;        IN: The property list structure.
-        uint8_t **buf;      IN: The buffer that holds the binary encoded property;
+        void **buf;         IN: Pointer to encoded buffer pointer.
+        void *value;        OUT: The buffer the property value is decoded into.
     The 'decode' routine decodes the binary buffer passed in and transforms it into
     corresponding property values that are set in the property list passed in.
+    After the value is decoded, (*buf) must be incremented
+    by the size of the encoded value.
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -2346,8 +2339,8 @@ done:
     corresponding property values that are set in the property list passed in.
 
         The 'delete' callback is called when a property is deleted from a
-    property list.  H5P_prp_del_func_t is defined as:
-        typedef herr_t (*H5P_prp_del_func_t)(hid_t prop_id, const char *name,
+    property list.  H5P_prp_delete_func_t is defined as:
+        typedef herr_t (*H5P_prp_delete_func_t)(hid_t prop_id, const char *name,
             size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list the property is deleted from.
@@ -2584,8 +2577,8 @@ done:
     corresponding property values that are set in the property list passed in.
 
         The 'delete' callback is called when a property is deleted from a
-    property list.  H5P_prp_del_func_t is defined as:
-        typedef herr_t (*H5P_prp_del_func_t)(hid_t prop_id, const char *name,
+    property list.  H5P_prp_delete_func_t is defined as:
+        typedef herr_t (*H5P_prp_delete_func_t)(hid_t prop_id, const char *name,
             size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list the property is deleted from.
@@ -2613,7 +2606,7 @@ done:
         The 'compare' callback is called when a property list with this
     property is compared to another property list.  H5P_prp_compare_func_t is
     defined as:
-        typedef int (*H5P_prp_compare_func_t)( void *value1, void *value2,
+        typedef int (*H5P_prp_compare_func_t)(void *value1, void *value2,
             size_t size);
     where the parameters to the callback function are:
         const void *value1; IN: The value of the first property being compared.
