@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.18)
-project (HDF5Examples_JAVA_INTRO Java)
+project (HDF5Examples_JAVA_TUTR Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
 
@@ -75,9 +75,9 @@ if (H5EX_BUILD_TESTING)
         NAME ${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clearall-objects
         COMMAND    ${CMAKE_COMMAND}
             -E remove
-            ${HDFJAVA_EXAMPLES_INTRO_BINARY_DIR}/${example_name}.h5
-            ${example_name}.out
-            ${example_name}.out.err
+            ${PROJECT_BINARY_DIR}/${example_name}.h5
+            ${PROJECT_BINARY_DIR}/${example_name}.out
+            ${PROJECT_BINARY_DIR}/${example_name}.out.err
     )
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clearall-objects PROPERTIES DEPENDS ${last_test})
@@ -92,6 +92,15 @@ if (H5EX_BUILD_TESTING)
     set_tests_properties (${EXAMPLE_VARNAME}_jnative-h5-${example_name}-copy-objects PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clearall-objects)
     set (last_test "${EXAMPLE_VARNAME}_jnative-h5-${example_name}-copy-objects")
     ADD_H5_TEST (${example_name} 0)
+    add_test (
+        NAME ${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clean
+        COMMAND    ${CMAKE_COMMAND}
+            -E remove
+            ${PROJECT_BINARY_DIR}/${example_name}.h5
+            ${PROJECT_BINARY_DIR}/${example_name}.out
+            ${PROJECT_BINARY_DIR}/${example_name}.out.err
+    )
+    set_tests_properties (${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clean PROPERTIES DEPENDS ${last_test})
   endforeach ()
 
 endif ()

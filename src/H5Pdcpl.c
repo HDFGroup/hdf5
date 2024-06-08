@@ -1400,14 +1400,14 @@ done:
 } /* end H5P__dcrt_ext_file_list_get() */
 
 /*-------------------------------------------------------------------------
- * Function:       H5P__dcrt_ext_file_list_enc
+ * Function:    H5P__dcrt_ext_file_list_enc
  *
- * Purpose:        Callback routine which is called whenever the efl
- *                 property in the dataset creation property list is
- *                 encoded.
+ * Purpose:     Callback routine which is called whenever the efl
+ *              property in the dataset creation property list is
+ *              encoded.
  *
- * Return:	   Success:	Non-negative
- *		   Failure:	Negative
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -1426,7 +1426,7 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
     /* Sanity check */
     assert(efl);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDcompile_assert(sizeof(off_t) <= sizeof(uint64_t));
+    HDcompile_assert(sizeof(HDoff_t) <= sizeof(uint64_t));
     HDcompile_assert(sizeof(hsize_t) <= sizeof(uint64_t));
     assert(size);
 
@@ -1459,14 +1459,14 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
-            /* encode size */
+            /* Encode size */
             enc_value = (uint64_t)efl->slot[u].size;
             enc_size  = H5VM_limit_enc_size(enc_value);
             assert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
-        } /* end for */
-    }     /* end if */
+        }
+    }
 
     /* Calculate size needed for encoding */
     *size += (1 + H5VM_limit_enc_size((uint64_t)efl->nused));
@@ -1476,20 +1476,20 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
         *size += len;
         *size += (1 + H5VM_limit_enc_size((uint64_t)efl->slot[u].offset));
         *size += (1 + H5VM_limit_enc_size((uint64_t)efl->slot[u].size));
-    } /* end for */
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__dcrt_ext_file_list_enc() */
 
 /*-------------------------------------------------------------------------
- * Function:       H5P__dcrt_ext_file_list_dec
+ * Function:    H5P__dcrt_ext_file_list_dec
  *
- * Purpose:        Callback routine which is called whenever the efl
- *                 property in the dataset creation property list is
- *                 decoded.
+ * Purpose:     Callback routine which is called whenever the efl
+ *              property in the dataset creation property list is
+ *              decoded.
  *
- * Return:	   Success:	Non-negative
- *		   Failure:	Negative
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -1510,7 +1510,7 @@ H5P__dcrt_ext_file_list_dec(const void **_pp, void *_value)
     assert(*pp);
     assert(efl);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDcompile_assert(sizeof(off_t) <= sizeof(uint64_t));
+    HDcompile_assert(sizeof(HDoff_t) <= sizeof(uint64_t));
     HDcompile_assert(sizeof(hsize_t) <= sizeof(uint64_t));
 
     /* Set property to default value */
@@ -1533,7 +1533,7 @@ H5P__dcrt_ext_file_list_dec(const void **_pp, void *_value)
 
             efl->nalloc = na;
             efl->slot   = x;
-        } /* end if */
+        }
 
         /* Decode length of slot name */
         enc_size = *(*pp)++;
@@ -1545,13 +1545,13 @@ H5P__dcrt_ext_file_list_dec(const void **_pp, void *_value)
         efl->slot[u].name = H5MM_xstrdup((const char *)(*pp));
         *pp += len;
 
-        /* decode offset */
+        /* Decode offset */
         enc_size = *(*pp)++;
         assert(enc_size < 256);
         UINT64DECODE_VAR(*pp, enc_value, enc_size);
         efl->slot[u].offset = (HDoff_t)enc_value;
 
-        /* decode size */
+        /* Decode size */
         enc_size = *(*pp)++;
         assert(enc_size < 256);
         UINT64DECODE_VAR(*pp, enc_value, enc_size);
@@ -1559,7 +1559,7 @@ H5P__dcrt_ext_file_list_dec(const void **_pp, void *_value)
 
         efl->slot[u].name_offset = 0; /*not entered into heap yet*/
         efl->nused++;
-    } /* end for */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2680,28 +2680,28 @@ done:
 } /* end H5Pget_external_count() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_external
+ * Function:    H5Pget_external
  *
- * Purpose:	Returns information about an external file.  External files
- *		are numbered from zero to N-1 where N is the value returned
- *		by H5Pget_external_count().  At most NAME_SIZE characters are
- *		copied into the NAME array.  If the external file name is
- *		longer than NAME_SIZE with the null terminator, then the
- *		return value is not null terminated (similar to strncpy()).
+ * Purpose:     Returns information about an external file.  External files
+ *              are numbered from zero to N-1 where N is the value returned
+ *              by H5Pget_external_count().  At most NAME_SIZE characters are
+ *              copied into the NAME array.  If the external file name is
+ *              longer than NAME_SIZE with the null terminator, then the
+ *              return value is not null terminated (similar to strncpy()).
  *
- *		If NAME_SIZE is zero or NAME is the null pointer then the
- *		external file name is not returned.  If OFFSET or SIZE are
- *		null pointers then the corresponding information is not
- *		returned.
+ *              If NAME_SIZE is zero or NAME is the null pointer then the
+ *              external file name is not returned.  If OFFSET or SIZE are
+ *              null pointers then the corresponding information is not
+ *              returned.
  *
  * See Also:	H5Pset_external()
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name /*out*/, off_t *offset /*out*/,
+H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name /*out*/, HDoff_t *offset /*out*/,
                 hsize_t *size /*out*/)
 {
     H5O_efl_t       efl;
@@ -2724,17 +2724,8 @@ H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name /*out
     /* Return values */
     if (name_size > 0 && name)
         strncpy(name, efl.slot[idx].name, name_size);
-    /* XXX: Badness!
-     *
-     * The offset parameter is of type off_t and the offset field of H5O_efl_entry_t
-     * is HDoff_t which is a different type on Windows (off_t is a 32-bit long,
-     * HDoff_t is __int64, a 64-bit type).
-     *
-     * In a future API reboot, we'll either want to make this parameter a haddr_t
-     * or define a 64-bit HDF5-specific offset type that is platform-independent.
-     */
     if (offset)
-        *offset = (off_t)efl.slot[idx].offset;
+        *offset = efl.slot[idx].offset;
     if (size)
         *size = efl.slot[idx].size;
 
