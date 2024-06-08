@@ -1018,7 +1018,7 @@ ioc_file_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data
     (void)ioc_idx;
 #endif
 
-    HDcompile_assert(H5_SIZEOF_OFF_T == sizeof(file_offset));
+    HDcompile_assert(sizeof(HDoff_t) == sizeof(file_offset));
 
     while (bytes_remaining) {
         errno = 0;
@@ -1066,7 +1066,7 @@ ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_
     (void)ioc_idx;
 #endif
 
-    HDcompile_assert(H5_SIZEOF_OFF_T == sizeof(file_offset));
+    HDcompile_assert(sizeof(HDoff_t) == sizeof(file_offset));
 
     while (bytes_remaining) {
         errno = 0;
@@ -1146,7 +1146,7 @@ ioc_file_truncate(sf_work_request_t *msg)
 
     fd = sf_context->sf_fids[subfile_idx];
 
-    if (HDftruncate(fd, (off_t)length) != 0)
+    if (HDftruncate(fd, (HDoff_t)length) != 0)
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SEEKERROR, -1, "HDftruncate failed");
 
     /*

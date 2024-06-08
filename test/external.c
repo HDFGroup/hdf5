@@ -97,7 +97,7 @@ test_non_extendible(hid_t file)
     hsize_t cur_size[1] = {100};           /* data space current size              */
     hsize_t max_size[1] = {100};           /* data space maximum size              */
     int     n           = 0;               /* number of external files             */
-    off_t   file_offset = 0;               /* external file offset                 */
+    HDoff_t file_offset = 0;               /* external file offset                 */
     hsize_t file_size   = 0;               /* sizeof external file segment         */
     haddr_t dset_addr   = HADDR_UNDEF;     /* address of dataset                   */
 
@@ -363,7 +363,7 @@ test_unlimited(hid_t file)
     hsize_t cur_size[1] = {100};           /* data space current size       */
     hsize_t max_size[1] = {H5S_UNLIMITED}; /* data space maximum size       */
     int     n;                             /* number of external files      */
-    off_t   file_offset;                   /* external file offset          */
+    HDoff_t file_offset;                   /* external file offset          */
     hsize_t file_size;                     /* sizeof external file segment  */
 
     TESTING("unlimited dataspace, unlimited external storage");
@@ -446,7 +446,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, hsize_t max_ext_size)
+add_external_files(hid_t dcpl_id, unsigned int n_external_files, HDoff_t offset, hsize_t max_ext_size)
 {
     char         exname[AEF_EXNAME_MAX_LEN + 1];
     unsigned int i = 0;
@@ -704,7 +704,7 @@ test_read_file_set(hid_t fapl)
         FAIL_STACK_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
         snprintf(filename, sizeof(filename), "extern_%dr.raw", (int)i + 1);
-        if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
+        if (H5Pset_external(dcpl, filename, (HDoff_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR;
     }
 
@@ -823,7 +823,7 @@ test_write_file_set(hid_t fapl)
         else
             size = H5F_UNLIMITED;
 
-        if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), size) < 0)
+        if (H5Pset_external(dcpl, filename, (HDoff_t)(i * GARBAGE_PER_FILE), size) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
 
@@ -946,9 +946,9 @@ test_path_absolute(hid_t fapl)
         if (i == 1)
             snprintf(filename, sizeof(filename), "%s%sextern_%zur.raw", cwdpath + 2, H5_DIR_SEPS, i + 1);
 #endif
-        if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
+        if (H5Pset_external(dcpl, filename, (HDoff_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR;
-    } /* end for */
+    }
 
     /* create the dataspace */
     cur_size = TOTAL_SIZE;
@@ -1036,9 +1036,9 @@ test_path_relative(hid_t fapl)
         FAIL_STACK_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
         snprintf(filename, sizeof(filename), "extern_%dr.raw", (int)i + 1);
-        if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
+        if (H5Pset_external(dcpl, filename, (HDoff_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR;
-    } /* end for */
+    }
 
     cur_size = TOTAL_SIZE;
     if ((space = H5Screate_simple(1, &cur_size, NULL)) < 0)
@@ -1130,9 +1130,9 @@ test_path_relative_cwd(hid_t fapl)
         FAIL_STACK_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
         snprintf(filename, sizeof(filename), "..%sextern_%dr.raw", H5_DIR_SEPS, (int)i + 1);
-        if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
+        if (H5Pset_external(dcpl, filename, (HDoff_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR;
-    } /* end for */
+    }
 
     cur_size = TOTAL_SIZE;
     if ((space = H5Screate_simple(1, &cur_size, NULL)) < 0)
