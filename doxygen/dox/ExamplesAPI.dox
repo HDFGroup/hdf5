@@ -842,66 +842,66 @@ FORTRAN
 <tr>
 <td>Create/Read/Write an Attribute</td>
 <td>
-<a href="https://\SRCURL/HDF5Examples/JAVA/H5J/HDF5AttributeCreate.java">Java</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5AttributeCreate.java">Java</a>
 <a href="https://github.com/HDFGroup/hdfview/blob/master/test/org.hdfgroup.object.example.test/intro/H5Object_CreateAttribute.java">JavaObj</a>
 </td>
-<td><a href="https://\SRCURL/HDF5Examples/JAVA/H5J/tfiles/110/HDF5AttributeCreate.txt">HDF5AttributeCreate.txt</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5AttributeCreate.txt">HDF5AttributeCreate.txt</a></td>
 </tr>
 <tr>
 <td>Create Datasets</td>
 <td>
-<a href="https://\SRCURL/HDF5Examples/JAVA/H5J/HDF5DatasetCreate.java">Java</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5DatasetCreate.java">Java</a>
 <a href="https://github.com/HDFGroup/hdfview/blob/master/test/org.hdfgroup.object.example.test/intro/H5Object_CreateDataset.java">JavaObj</a>
 </td>
-<td><a href="https://\SRCURL/HDF5Examples/JAVA/H5J/tfiles/110/HDF5DatasetCreate.txt">HDF5DatasetCreate.txt</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5DatasetCreate.txt">HDF5DatasetCreate.txt</a></td>
 </tr>
 <tr>
 <td>Read/Write Datasets</td>
 <td>
-<a href="https://\SRCURL/HDF5Examples/JAVA/H5J/HDF5DatasetRead.java">Java</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5DatasetRead.java">Java</a>
 <a href="https://github.com/HDFGroup/hdfview/blob/master/test/org.hdfgroup.object.example.test/intro/H5Object_ReadWrite.java">JavaObj</a>
 </td>
-<td><a href="https://\SRCURL/HDF5Examples/JAVA/H5J/tfiles/110/HDF5DatasetRead.txt">HDF5DatasetRead.txt</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5DatasetRead.txt">HDF5DatasetRead.txt</a></td>
 </tr>
 <tr>
 <td>Create an Empty File</td>
 <td>
-<a href="https://\SRCURL/HDF5Examples/JAVA/H5J/HDF5FileCreate.java">Java</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5FileCreate.java">Java</a>
 <a href="https://github.com/HDFGroup/hdfview/blob/master/test/org.hdfgroup.object.example.test/intro/H5Object_CreateFile.java">JavaObj</a>
 </td>
-<td><a href="https://\SRCURL/HDF5Examples/JAVA/H5J/tfiles/110/HDF5FileCreate.txt">HDF5FileCreate.txt</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5FileCreate.txt">HDF5FileCreate.txt</a></td>
 </tr>
 <tr>
 <td>Retrieve the File Structure</td>
 <td>
-<a href="https://\SRCURL/HDF5Examples/JAVA/H5J/HDF5FileStructure.java">Java</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5FileStructure.java">Java</a>
   JavaObj
 </td>
-<td><a href="https://\SRCURL/HDF5Examples/JAVA/H5J/tfiles/110/HDF5FileStructure.txt">HDF5FileStructure.txt</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5FileStructure.txt">HDF5FileStructure.txt</a></td>
 </tr>
 <tr>
 <td>Create Groups</td>
 <td>
-<a href="https://\SRCURL/HDF5Examples/JAVA/H5J/HDF5GroupCreate.java">Java</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5GroupCreate.java">Java</a>
 <a href="https://github.com/HDFGroup/hdfview/blob/master/test/org.hdfgroup.object.example.test/intro/H5Object_CreateGroup.java">JavaObj</a>
 </td>
-<td><a href="https://\SRCURL/HDF5Examples/JAVA/H5J/tfiles/110/HDF5GroupCreate.java">HDF5GroupCreate.txt</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5GroupCreate.java">HDF5GroupCreate.txt</a></td>
 </tr>
 <tr>
 <td>Select a Subset of a Dataset</td>
 <td>
-<a href="https://\SRCURL/HDF5Examples/JAVA/H5J/HDF5SubsetSelect.java">Java</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5SubsetSelect.java">Java</a>
   JavaObj
 </td>
-<td><a href="https://\SRCURL/HDF5Examples/JAVA/H5J/tfiles/110/HDF5SubsetSelect.txt">HDF5SubsetSelect.txt</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5SubsetSelect.txt">HDF5SubsetSelect.txt</a></td>
 </tr>
 <tr>
 <td>Create Two Datasets Within Groups</td>
 <td>
-<a href="https://\SRCURL/HDF5Examples/JAVA/H5J/HDF5GroupDatasetCreate.java">Java</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5GroupDatasetCreate.java">Java</a>
 <a href="https://github.com/HDFGroup/hdfview/blob/master/test/org.hdfgroup.object.example.test/intro/H5Object_CreateGroupDataset.java">JavaObj</a>
 </td>
-<td><a href="https://\SRCURL/HDF5Examples/JAVA/H5J/tfiles/110/HDF5GroupDatasetCreate.java">HDF5GroupDatasetCreate.txt</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5GroupDatasetCreate.java">HDF5GroupDatasetCreate.txt</a></td>
 </tr>
 </table>
 

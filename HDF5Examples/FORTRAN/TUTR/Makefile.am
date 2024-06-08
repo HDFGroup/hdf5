@@ -18,11 +18,6 @@
 
 include $(top_srcdir)/config/commence.am
 
-# Compile parallel fortran examples only if parallel is enabled
-if BUILD_PARALLEL_CONDITIONAL
-   EXAMPLE_PROG_PARA=ph5example
-endif
-
 INSTALL_SCRIPT_FILES = run-fortran-ex.sh
 
 # These are the programs that 'make all' or 'make tests' will build and
@@ -63,13 +58,8 @@ h5_crtatt.chkexe_: h5_rdwt.chkexe_
 
 # Tell automake how to build examples using h5fc
 # Additional dependencies for the examples are listed below
-if BUILD_PARALLEL_CONDITIONAL
-$(EXTRA_PROG): $(H5FC_PP)
-	$(H5FC_PP) $(H5CCFLAGS) -o $@ $(srcdir)/$@.f90;
-else
 $(EXTRA_PROG): $(H5FC)
 	$(H5FC) $(H5CCFLAGS) -o $@ $(srcdir)/$@.f90;
-endif
 
 # Tell automake how to install examples
 # Note: no '/' after DESTDIR.  Explanation in commence.am
@@ -97,7 +87,6 @@ refobjexample: refobjexample.f90
 refregexample: refregexample.f90
 mountexample: mountexample.f90
 compound: compound.f90
-ph5example: ph5example.f90
 rwdset_fortran2003: rwdset_fortran2003.f90
 nested_derived_type: nested_derived_type.f90
 compound_fortran2003: compound_fortran2003.f90
