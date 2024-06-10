@@ -6,14 +6,14 @@ ALIASES += THG="The HDF Group"
 # Default URL for HDF Group Files
 ALIASES += HDFURL="support.hdfgroup.org"
 # URL for archived files
-ALIASES += ARCURL="\HDFURL/archive/support/ftp/HDF5"
+ALIASES += ARCURL="\HDFURL/archive/hdf5"
 # URL for RFCs
 ALIASES += RFCURL="\HDFURL/documentation/hdf5/rfc"
 # URL for documentation
 ALIASES += DOCURL="\HDFURL/documentation/hdf5"
 # URL for downloads
 ALIASES += DWNURL="\HDFURL/downloads/hdf5"
-ALIASES += AEXURL="\HDFURL/ftp/HDF5/examples"
+ALIASES += AEXURL="\HDFURL/archive/hdf5/examples"
 # doxygen subdir (develop, v1_14)
 ALIASES += DOXURL="hdfgroup.github.io/hdf5/develop"
 #branch name (develop, hdf5_1_14)
