@@ -22,10 +22,8 @@
 
 #ifdef H5_HAVE_C11_THREADS
 
-#define H5TS_mutex_lock(mutex) \
-    ((H5_UNLIKELY(mtx_lock(mutex) != thrd_success)) ? FAIL : SUCCEED)
-#define H5TS_mutex_unlock(mutex) \
-    (H5_UNLIKELY(mtx_unlock(mutex) != thrd_success) ? FAIL : SUCCEED)
+#define H5TS_mutex_lock(mutex)   ((H5_UNLIKELY(mtx_lock(mutex) != thrd_success)) ? FAIL : SUCCEED)
+#define H5TS_mutex_unlock(mutex) (H5_UNLIKELY(mtx_unlock(mutex) != thrd_success) ? FAIL : SUCCEED)
 
 #else
 #ifdef H5_HAVE_WIN_THREADS
@@ -64,11 +62,8 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 } /* end H5TS_mutex_unlock() */
 #else
 
-#define H5TS_mutex_lock(mutex) \
-    ((H5_UNLIKELY(pthread_mutex_lock(mutex))) ? FAIL : SUCCEED)
-#define H5TS_mutex_unlock(mutex) \
-    (H5_UNLIKELY(pthread_mutex_unlock(mutex)) ? FAIL : SUCCEED)
+#define H5TS_mutex_lock(mutex)   ((H5_UNLIKELY(pthread_mutex_lock(mutex))) ? FAIL : SUCCEED)
+#define H5TS_mutex_unlock(mutex) (H5_UNLIKELY(pthread_mutex_unlock(mutex)) ? FAIL : SUCCEED)
 
 #endif
 #endif
-

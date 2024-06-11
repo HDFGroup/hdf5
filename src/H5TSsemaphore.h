@@ -13,8 +13,9 @@
 /*
  * Purpose: This file contains support for semaphores, equivalent to POSIX
  *        semaphore's capabilities.  The implementation is based on the
- *	  "lightweight semaphore" describend here: https://preshing.com/20150316/semaphores-are-surprisingly-versatile/
- *	  and implemented here: https://github.com/preshing/cpp11-on-multicore/blob/master/common/sema.h
+ *	  "lightweight semaphore" describend here:
+ *https://preshing.com/20150316/semaphores-are-surprisingly-versatile/ and implemented here:
+ *https://github.com/preshing/cpp11-on-multicore/blob/master/common/sema.h
  *
  * Note:  Because this threadsafety framework operates outside the library,
  *        it does not use the error stack (although it does use error macros
@@ -57,9 +58,8 @@
 
 #if defined(_WIN32)
 
-#define H5TS__semaphore_signal(sem) \
-    (H5_UNLIKELY(0 == ReleaseSemaphore(sem->sem, 1, NULL)) ? FAIL : SUCCEED)
-#define H5TS__semaphore_wait(sem) \
+#define H5TS__semaphore_signal(sem) (H5_UNLIKELY(0 == ReleaseSemaphore(sem->sem, 1, NULL)) ? FAIL : SUCCEED)
+#define H5TS__semaphore_wait(sem)                                                                            \
     (H5_UNLIKELY(WAIT_OBJECT_0 != WaitForSingleObject(sem->sem, INFINITE)) ? FAIL : SUCCEED)
 
 #elif defined(__MACH__)
@@ -68,18 +68,15 @@
  * Can't use POSIX semaphores due to http://lists.apple.com/archives/darwin-kernel/2009/Apr/msg00010.html
  */
 
-#define H5TS__semaphore_signal(sem) \
-    (H5_UNLIKELY(KERN_SUCCESS != semaphore_signal(sem->sem)) ? FAIL : SUCCEED)
-#define H5TS__semaphore_wait(sem) \
-    (H5_UNLIKELY(KERN_SUCCESS != semaphore_wait(sem->sem)) ? FAIL : SUCCEED)
+#define H5TS__semaphore_signal(sem) (H5_UNLIKELY(KERN_SUCCESS != semaphore_signal(sem->sem)) ? FAIL : SUCCEED)
+#define H5TS__semaphore_wait(sem)   (H5_UNLIKELY(KERN_SUCCESS != semaphore_wait(sem->sem)) ? FAIL : SUCCEED)
 
 #elif defined(__unix__)
 /*
  * POSIX semaphores, everywhere else
  */
 
-#define H5TS__semaphore_signal(mutex) \
-    ((H5_UNLIKELY(0 != sem_post(&sem->sem))) ? FAIL : SUCCEED)
+#define H5TS__semaphore_signal(mutex) ((H5_UNLIKELY(0 != sem_post(&sem->sem))) ? FAIL : SUCCEED)
 
 /*-------------------------------------------------------------------------
  * Function: H5TS__semaphore_wait
@@ -138,7 +135,9 @@ H5TS__semaphore_wait_with_partial_spinning(H5TS_semaphore_t *sem)
      */
     while (spin--) {
         old_count = atomic_load_explicit(&sem->count, memory_order_relaxed);
-        if ((old_count > 0) && atomic_compare_exchange_strong_explicit(&sem->count, &old_count, old_count - 1, memory_order_acquire, memory_order_acquire))
+        if ((old_count > 0) &&
+            atomic_compare_exchange_strong_explicit(&sem->count, &old_count, old_count - 1,
+                                                    memory_order_acquire, memory_order_acquire))
             return SUCCEED;
 
         /* Prevent the compiler from collapsing the loop. */
@@ -173,11 +172,11 @@ H5TS_semaphore_signal(H5TS_semaphore_t *sem)
     if (H5_UNLIKELY(NULL == sem))
         return FAIL;
 
-    old_count = atomic_fetch_add_explicit(&sem->count, 1, memory_order_release);
+    old_count  = atomic_fetch_add_explicit(&sem->count, 1, memory_order_release);
     to_release = -old_count < 1 ? -old_count : 1;
     if (to_release > 0)
-	if (H5_UNLIKELY(H5TS__semaphore_signal(sem) < 0))
-	    return FAIL;
+        if (H5_UNLIKELY(H5TS__semaphore_signal(sem) < 0))
+            return FAIL;
 
     return SUCCEED;
 } /* end H5TS_semaphore_signal() */
@@ -208,7 +207,9 @@ H5TS_semaphore_wait(H5TS_semaphore_t *sem)
      * system semaphore's 'wait').
      */
     old_count = atomic_load_explicit(&sem->count, memory_order_relaxed);
-    if (!(old_count > 0 && atomic_compare_exchange_strong_explicit(&sem->count, &old_count, old_count - 1, memory_order_acquire, memory_order_acquire)))
+    if (!(old_count > 0 &&
+          atomic_compare_exchange_strong_explicit(&sem->count, &old_count, old_count - 1,
+                                                  memory_order_acquire, memory_order_acquire)))
         if (H5_UNLIKELY(H5TS__semaphore_wait_with_partial_spinning(sem) < 0))
             return FAIL;
 
@@ -216,5 +217,3 @@ H5TS_semaphore_wait(H5TS_semaphore_t *sem)
 } /* end H5TS_semaphore_wait() */
 
 #endif /* H5_HAVE_THREADS && H5_HAVE_STDATOMIC_H */
-
-

@@ -284,8 +284,8 @@ typedef sem_t H5TS__semaphore_t;
 
 /* Lightweight semaphores */
 typedef struct H5TS_semaphore_t {
-    H5TS__semaphore_t sem;  	/* Underlying system semaphore */
-    atomic_int count;		/* Wrapper around underlying systen semaphore */
+    H5TS__semaphore_t sem;   /* Underlying system semaphore */
+    atomic_int        count; /* Wrapper around underlying systen semaphore */
 } H5TS_semaphore_t;
 
 #endif
@@ -359,7 +359,7 @@ H5_DLL void   H5TS_thread_yield(void);
 H5_DLL herr_t H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads);
 /* thread pool add task call is defined in H5TSpool.h */
 static inline herr_t H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx);
-H5_DLL herr_t H5TS_pool_destroy(H5TS_pool_t *pool);
+H5_DLL herr_t        H5TS_pool_destroy(H5TS_pool_t *pool);
 
 /* Emulated C11 atomics */
 #if !(defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus))
@@ -397,7 +397,7 @@ H5_DLL herr_t H5TS_semaphore_init(H5TS_semaphore_t *sem, unsigned initial_count)
 /* semaphore signal & wait calls are defined in H5TSsemaphore.h */
 static inline herr_t H5TS_semaphore_signal(H5TS_semaphore_t *sem);
 static inline herr_t H5TS_semaphore_wait(H5TS_semaphore_t *sem);
-H5_DLL herr_t H5TS_semaphore_destroy(H5TS_semaphore_t *sem);
+H5_DLL herr_t        H5TS_semaphore_destroy(H5TS_semaphore_t *sem);
 #endif /* H5_HAVE_STDATOMIC_H */
 
 #include "H5TScond.h"

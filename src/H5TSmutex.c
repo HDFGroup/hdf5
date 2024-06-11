@@ -213,7 +213,7 @@ H5TS_mutex_init(H5TS_mutex_t *mutex, int type)
 
     /* Create mutex attribute */
     if (H5_UNLIKELY(pthread_mutexattr_init(&_attr)))
-	HGOTO_DONE(FAIL);
+        HGOTO_DONE(FAIL);
     attr = &_attr;
 
     /* Set up recursive mutex, if requested */
@@ -222,7 +222,7 @@ H5TS_mutex_init(H5TS_mutex_t *mutex, int type)
             HGOTO_DONE(FAIL);
     }
     else
-	/* Otherwise, use "normal" mutex, without error checking */
+        /* Otherwise, use "normal" mutex, without error checking */
         if (H5_UNLIKELY(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_NORMAL)))
             HGOTO_DONE(FAIL);
 

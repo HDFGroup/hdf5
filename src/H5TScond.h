@@ -24,7 +24,6 @@
 /* Module Setup */
 /****************/
 
-
 /***********/
 /* Headers */
 /***********/
@@ -55,17 +54,14 @@
 
 #ifdef H5_HAVE_C11_THREADS
 
-#define H5TS_cond_wait(cond, mutex) \
-    (H5_UNLIKELY(cnd_wait((cond), (mutex)) != thrd_success) ? FAIL : SUCCEED)
-#define H5TS_cond_signal(cond) \
-    (H5_UNLIKELY(cnd_signal(cond) != thrd_success) ? FAIL : SUCCEED)
-#define H5TS_cond_broadcast(cond) \
-    (H5_UNLIKELY(cnd_broadcast(cond) != thrd_success) ? FAIL : SUCCEED)
+#define H5TS_cond_wait(cond, mutex) (H5_UNLIKELY(cnd_wait((cond), (mutex)) != thrd_success) ? FAIL : SUCCEED)
+#define H5TS_cond_signal(cond)      (H5_UNLIKELY(cnd_signal(cond) != thrd_success) ? FAIL : SUCCEED)
+#define H5TS_cond_broadcast(cond)   (H5_UNLIKELY(cnd_broadcast(cond) != thrd_success) ? FAIL : SUCCEED)
 
 #else
 #ifdef H5_HAVE_WIN_THREADS
 
-#define H5TS_cond_wait(cond, mutex) \
+#define H5TS_cond_wait(cond, mutex)                                                                          \
     (H5_UNLIKELY(!SleepConditionVariableCS(cond, mutex, INFINITE)) ? FAIL : SUCCEED)
 
 /*-------------------------------------------------------------------------
@@ -103,13 +99,9 @@ H5TS_cond_broadcast(H5TS_cond_t *cond)
 } /* end H5TS_cond_broadcast() */
 #else
 
-#define H5TS_cond_wait(cond, mutex) \
-    (H5_UNLIKELY(pthread_cond_wait((cond), (mutex))) ? FAIL : SUCCEED)
-#define H5TS_cond_signal(cond) \
-    (H5_UNLIKELY(pthread_cond_signal(cond)) ? FAIL : SUCCEED)
-#define H5TS_cond_broadcast(cond) \
-    (H5_UNLIKELY(pthread_cond_broadcast(cond)) ? FAIL : SUCCEED)
+#define H5TS_cond_wait(cond, mutex) (H5_UNLIKELY(pthread_cond_wait((cond), (mutex))) ? FAIL : SUCCEED)
+#define H5TS_cond_signal(cond)      (H5_UNLIKELY(pthread_cond_signal(cond)) ? FAIL : SUCCEED)
+#define H5TS_cond_broadcast(cond)   (H5_UNLIKELY(pthread_cond_broadcast(cond)) ? FAIL : SUCCEED)
 
 #endif
 #endif
-

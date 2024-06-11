@@ -13,8 +13,9 @@
 /*
  * Purpose: This file contains support for semaphores, equivalent to POSIX
  *        semaphore's capabilities.  The implementation is based on the
- *	  "lightweight semaphore" describend here: https://preshing.com/20150316/semaphores-are-surprisingly-versatile/
- *	  and implemented here: https://github.com/preshing/cpp11-on-multicore/blob/master/common/sema.h
+ *	  "lightweight semaphore" describend here:
+ *https://preshing.com/20150316/semaphores-are-surprisingly-versatile/ and implemented here:
+ *https://github.com/preshing/cpp11-on-multicore/blob/master/common/sema.h
  *
  * Note:  Because this threadsafety framework operates outside the library,
  *        it does not use the error stack (although it does use error macros
@@ -130,7 +131,8 @@ H5TS__semaphore_init(H5TS_semaphore_t *sem, int initial_count)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    if (H5_UNLIKELY(KERN_SUCCESS != semaphore_create(mach_task_self(), &sem->sem, SYNC_POLICY_FIFO, initial_count)))
+    if (H5_UNLIKELY(KERN_SUCCESS !=
+                    semaphore_create(mach_task_self(), &sem->sem, SYNC_POLICY_FIFO, initial_count)))
         HGOTO_DONE(FAIL);
 
 done:
@@ -271,4 +273,3 @@ done:
 } /* end H5TS_semaphore_destroy() */
 
 #endif /* H5_HAVE_THREADS && H5_HAVE_STDATOMIC_H */
-
