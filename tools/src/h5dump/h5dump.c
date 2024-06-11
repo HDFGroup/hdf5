@@ -17,7 +17,7 @@
 /* Name of tool */
 #define PROGRAMNAME "h5dump"
 
-long long          page_cache    = -1;
+size_t             page_cache    = 0;
 const char        *outfname_g    = NULL;
 static bool        doxml_g       = false;
 static bool        useschema_g   = true;
@@ -1025,9 +1025,6 @@ parse_start:
                 break;
             case 'K':
                 page_cache = strtoll(H5_optarg, NULL, 0);
-                if (page_cache == 0)
-                    /* To distinguish the "specified" zero value */
-                    page_cache = -1;
                 break;
 
             /** begin XML parameters **/
@@ -1384,7 +1381,7 @@ main(int argc, char *argv[])
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
-    if (page_cache >= 0) {
+    if (page_cache > 0) {
         if (H5Pset_page_buffer_size(fapl_id, page_cache, 0, 0) < 0) {
             error_msg("unable to set page buffer cache size for file access\n");
             h5tools_setstatus(EXIT_FAILURE);

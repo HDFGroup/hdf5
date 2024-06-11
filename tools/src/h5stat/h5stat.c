@@ -117,7 +117,7 @@ typedef struct iter_t {
 
 static const char *drivername = NULL;
 
-long long page_cache = -1;
+size_t page_cache = 0;
 
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
@@ -972,9 +972,6 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
             case 'K':
                 page_cache = strtoll(H5_optarg, NULL, 0);
-                if (page_cache == 0)
-                    /* To distinguish the "specified" zero value */
-                    page_cache = -1;
                 break;
 
             default:
@@ -1655,7 +1652,7 @@ main(int argc, char *argv[])
             goto done;
         }
     }
-    if (page_cache >= 0) {
+    if (page_cache > 0) {
         if (H5Pset_page_buffer_size(fapl_id, page_cache, 0, 0) < 0) {
             error_msg("unable to set page buffer cache size for file access\n");
             h5tools_setstatus(EXIT_FAILURE);

@@ -139,7 +139,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     opts->not_cmp = 0;
 
     /* init for page buffer cache size option */
-    opts->page_cache = -1;
+    opts->page_cache = 0;
 
     /* init for exclude-path option */
     exclude_head = NULL;
@@ -326,9 +326,6 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case 'K':
                 opts->page_cache = strtoll(H5_optarg, NULL, 0);
-                if (opts->page_cache == 0)
-                    /* To distinguish the "specified" zero value */
-                    opts->page_cache = -1;
                 break;
 
             case '1':

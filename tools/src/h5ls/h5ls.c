@@ -2662,7 +2662,7 @@ main(int argc, char *argv[])
     static char        root_name[] = "/";
     char               drivername[50];
     int                err_exit        = 0;
-    long long          page_cache      = -1;
+    size_t             page_cache      = 0;
     hid_t              fapl_id         = H5P_DEFAULT;
     bool               custom_vol_fapl = false;
     bool               custom_vfd_fapl = false;
@@ -2822,9 +2822,6 @@ main(int argc, char *argv[])
         }
         else if (!strncmp(argv[argno], "--page-buffer-size=", (size_t)8)) {
             page_cache = (int)strtoll(argv[argno] + 8, &rest, 0);
-            if (page_cache == 0)
-                /* To distinguish the "specified" zero value */
-                page_cache = -1;
         }
         else if (!strcmp(argv[argno], "--verbose")) {
             verbose_g++;
@@ -3023,7 +3020,7 @@ main(int argc, char *argv[])
         error_msg("failed to setup file access property list (fapl) for file\n");
         leave(EXIT_FAILURE);
     }
-    if (page_cache >= 0) {
+    if (page_cache > 0) {
         if (H5Pset_page_buffer_size(fapl_id, page_cache, 0, 0) < 0) {
             error_msg("unable to set page buffer cache size for file access\n");
             leave(EXIT_FAILURE);
