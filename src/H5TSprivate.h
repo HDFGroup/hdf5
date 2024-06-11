@@ -403,7 +403,9 @@ H5_DLL herr_t        H5TS_semaphore_destroy(H5TS_semaphore_t *sem);
 #include "H5TScond.h"
 #include "H5TSmutex.h"
 #include "H5TSpool.h"
+#if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 #include "H5TSsemaphore.h"
+#endif /* H5_HAVE_STDATOMIC_H */
 
 #endif /* H5_HAVE_THREADS */
 

@@ -95,7 +95,7 @@ H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
         return FAIL;
 
     /* Allocate & initialize new task */
-    if (H5_UNLIKELY(NULL == (task = malloc(sizeof(H5TS_pool_task_t)))))
+    if (H5_UNLIKELY(NULL == (task = (H5TS_pool_task_t *)malloc(sizeof(H5TS_pool_task_t)))))
         return FAIL;
     task->func = func;
     task->ctx  = ctx;
