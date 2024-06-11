@@ -11,8 +11,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose: This file contains support for mutex locks, equivalent to the
- *        pthread 'pthread_mutex_t' type and capabilities.
+ * Purpose: This file contains support for semaphores, equivalent to POSIX
+ *        semaphore's capabilities.  The implementation is based on the
+ *	  "lightweight semaphore" describend here: https://preshing.com/20150316/semaphores-are-surprisingly-versatile/
+ *	  and implemented here: https://github.com/preshing/cpp11-on-multicore/blob/master/common/sema.h
  *
  * Note:  Because this threadsafety framework operates outside the library,
  *        it does not use the error stack (although it does use error macros
@@ -33,7 +35,7 @@
 #include "H5Eprivate.h" /* Error handling                      */
 #include "H5TSpkg.h"    /* Threadsafety                        */
 
-#ifdef H5_HAVE_THREADS
+#if defined(H5_HAVE_THREADS) && defined(H5_HAVE_STDATOMIC_H)
 
 /****************/
 /* Local Macros */
@@ -59,239 +61,214 @@
 /* Local Variables */
 /*******************/
 
-#ifdef H5_HAVE_C11_THREADS
+#if defined(_WIN32)
 /*-------------------------------------------------------------------------
- * Function: H5TS_mutex_init
+ * Function: H5TS__semaphore_init
  *
- * Purpose:  Initialize a H5TS_mutex_t (does not allocate it)
+ * Purpose:  Initialize a H5TS_semaphore_t (does not allocate it)
  *
  * Return:   Non-negative on success / Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5TS_mutex_init(H5TS_mutex_t *mutex, int type)
+static herr_t
+H5TS__semaphore_init(H5TS_semaphore_t *sem, int initial_count)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    if (H5_UNLIKELY(mtx_init(mutex, type) != thrd_success))
+    if (H5_UNLIKELY(NULL == (sem->sem = CreateSemaphore(NULL, initial_count, LONG_MAX, NULL))))
         HGOTO_DONE(FAIL);
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_mutex_init() */
+} /* end H5TS__semaphore_init() */
 
 /*-------------------------------------------------------------------------
- * Function: H5TS_mutex_trylock
+ * Function: H5TS__semaphore_destroy
  *
- * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to TRUE if so
+ * Purpose:  Destroy a H5TS_semaphore_t (does not free it)
  *
  * Return:   Non-negative on success / Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired)
+static herr_t
+H5TS__semaphore_destroy(H5TS_semaphore_t *sem)
 {
-    int    rc;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    rc = mtx_trylock(mutex);
-    if (thrd_success == rc)
-        *acquired = true;
-    else if (thrd_busy == rc)
-        *acquired = false;
-    else
+    if (H5_UNLIKELY(0 == CloseHandle(sem->sem)))
         HGOTO_DONE(FAIL);
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_mutex_trylock() */
+} /* end H5TS__semaphore_destroy() */
+
+#elif defined(__MACH__)
+/*
+ * Mach semaphores, for MacOS
+ * Can't use POSIX semaphores due to http://lists.apple.com/archives/darwin-kernel/2009/Apr/msg00010.html
+ */
 
 /*-------------------------------------------------------------------------
- * Function: H5TS_mutex_destroy
+ * Function: H5TS__semaphore_init
  *
- * Purpose:  Destroy a H5TS_mutex_t (does not free it)
+ * Purpose:  Initialize a H5TS_semaphore_t (does not allocate it)
  *
  * Return:   Non-negative on success / Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5TS_mutex_destroy(H5TS_mutex_t *mutex)
+static herr_t
+H5TS__semaphore_init(H5TS_semaphore_t *sem, int initial_count)
 {
+    herr_t ret_value = SUCCEED;
+
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* NOTE: mtx_destroy() can't fail */
-    mtx_destroy(mutex);
+    if (H5_UNLIKELY(KERN_SUCCESS != semaphore_create(mach_task_self(), &sem->sem, SYNC_POLICY_FIFO, initial_count)))
+        HGOTO_DONE(FAIL);
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
-} /* end H5TS_mutex_destroy() */
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS__semaphore_init() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS__semaphore_destroy
+ *
+ * Purpose:  Destroy a H5TS_semaphore_t (does not free it)
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5TS__semaphore_destroy(H5TS_semaphore_t *sem)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(KERN_SUCCESS != semaphore_destroy(mach_task_self(), sem->sem)))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS__semaphore_destroy() */
+
+#elif defined(__unix__)
+/*
+ * POSIX semaphores, everywhere else
+ */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS__semaphore_init
+ *
+ * Purpose:  Initialize a H5TS_semaphore_t (does not allocate it)
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5TS__semaphore_init(H5TS_semaphore_t *sem, int initial_count)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(0 != sem_init(&sem->sem, 0, initial_count)))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS__semaphore_init() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS__semaphore_destroy
+ *
+ * Purpose:  Destroy a H5TS_semaphore_t (does not free it)
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5TS__semaphore_destroy(H5TS_semaphore_t *sem)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(0 != sem_destroy(&sem->sem)))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS__semaphore_destroy() */
+
 #else
-#ifdef H5_HAVE_WIN_THREADS
-/*-------------------------------------------------------------------------
- * Function: H5TS_mutex_init
- *
- * Purpose:  Initialize a H5TS_mutex_t (does not allocate it)
- *
- * Note:     All Windows CriticalSections are recursive
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_mutex_init(H5TS_mutex_t *mutex, int H5_ATTR_UNUSED type)
-{
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    InitializeCriticalSection(mutex);
-
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
-} /* end H5TS_mutex_init() */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS_mutex_trylock
- *
- * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to TRUE if so
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired)
-{
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    *acquired = TryEnterCriticalSection(mutex);
-
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
-} /* end H5TS_mutex_trylock() */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS_mutex_destroy
- *
- * Purpose:  Destroy a H5TS_mutex_t (does not free it)
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_mutex_destroy(H5TS_mutex_t *mutex)
-{
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    DeleteCriticalSection(mutex);
-
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
-} /* end H5TS_mutex_destroy() */
-
-#else
-/*-------------------------------------------------------------------------
- * Function: H5TS_mutex_init
- *
- * Purpose:  Initialize a H5TS_mutex_t (does not allocate it)
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_mutex_init(H5TS_mutex_t *mutex, int type)
-{
-    pthread_mutexattr_t  _attr;
-    pthread_mutexattr_t *attr      = NULL;
-    herr_t               ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    /* Create mutex attribute */
-    if (H5_UNLIKELY(pthread_mutexattr_init(&_attr)))
-	HGOTO_DONE(FAIL);
-    attr = &_attr;
-
-    /* Set up recursive mutex, if requested */
-    if (H5TS_MUTEX_TYPE_RECURSIVE == type) {
-        if (H5_UNLIKELY(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_RECURSIVE)))
-            HGOTO_DONE(FAIL);
-    }
-    else
-	/* Otherwise, use "normal" mutex, without error checking */
-        if (H5_UNLIKELY(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_NORMAL)))
-            HGOTO_DONE(FAIL);
-
-    /* Initialize the mutex */
-    if (H5_UNLIKELY(pthread_mutex_init(mutex, attr)))
-        HGOTO_DONE(FAIL);
-
-done:
-    /* Destroy the attribute */
-    if (NULL != attr)
-        if (H5_UNLIKELY(pthread_mutexattr_destroy(attr)))
-            ret_value = FAIL;
-
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_mutex_init() */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS_mutex_trylock
- *
- * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to TRUE if so
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_mutex_trylock(H5TS_mutex_t *mutex, bool *acquired)
-{
-    int    rc;
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    rc = pthread_mutex_trylock(mutex);
-    if (0 == rc)
-        *acquired = true;
-    else if (EBUSY == rc)
-        *acquired = false;
-    else
-        HGOTO_DONE(FAIL);
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_mutex_trylock() */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS_mutex_destroy
- *
- * Purpose:  Destroy a H5TS_mutex_t (does not free it)
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_mutex_destroy(H5TS_mutex_t *mutex)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    if (H5_UNLIKELY(pthread_mutex_destroy(mutex)))
-        HGOTO_DONE(FAIL);
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_mutex_destroy() */
-
-#endif
+#error "Unsupported platform!"
 #endif
 
-#endif /* H5_HAVE_THREADS */
+/*-------------------------------------------------------------------------
+ * Function: H5TS_semaphore_init
+ *
+ * Purpose:  Initialize a H5TS_semaphore_t (does not allocate it)
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_semaphore_init(H5TS_semaphore_t *sem, unsigned initial_count)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == sem))
+        HGOTO_DONE(FAIL);
+
+    sem->count = (int)initial_count;
+    if (H5_UNLIKELY(H5TS__semaphore_init(sem, (int)initial_count) < 0))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_semaphore_init() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_semaphore_destroy
+ *
+ * Purpose:  Destroy a H5TS_semaphore_t (does not free it)
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_semaphore_destroy(H5TS_semaphore_t *sem)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == sem))
+        HGOTO_DONE(FAIL);
+
+    if (H5_UNLIKELY(H5TS__semaphore_destroy(sem) < 0))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_semaphore_destroy() */
+
+#endif /* H5_HAVE_THREADS && H5_HAVE_STDATOMIC_H */
+
