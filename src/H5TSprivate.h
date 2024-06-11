@@ -285,7 +285,7 @@ typedef sem_t H5TS__semaphore_t;
 /* Lightweight semaphores */
 typedef struct H5TS_semaphore_t {
     H5TS__semaphore_t sem;   /* Underlying system semaphore */
-    atomic_int        count; /* Wrapper around underlying systen semaphore */
+    atomic_int        count; /* Wrapper around underlying system semaphore */
 } H5TS_semaphore_t;
 
 #endif
