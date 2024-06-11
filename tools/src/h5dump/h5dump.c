@@ -17,6 +17,7 @@
 /* Name of tool */
 #define PROGRAMNAME "h5dump"
 
+long long          page_cache    = -1;
 const char        *outfname_g    = NULL;
 static bool        doxml_g       = false;
 static bool        useschema_g   = true;
@@ -97,7 +98,7 @@ struct handler_t {
  */
 /* The following initialization makes use of C language concatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char            *s_opts   = "a:b*c:d:ef:g:hik:l:m:n*o*pq:rs:t:uvw:xyz:A*BCD:E*F:G:HM:N:O*RS:VX:";
+static const char            *s_opts   = "a:b*c:d:ef:g:hik:l:m:n*o*pq:rs:t:uvw:xyz:A*BCD:E*F:G:HK:M:N:O*RS:VX:";
 static struct h5_long_options l_opts[] = {{"attribute", require_arg, 'a'},
                                           {"binary", optional_arg, 'b'},
                                           {"count", require_arg, 'c'},
@@ -132,6 +133,7 @@ static struct h5_long_options l_opts[] = {{"attribute", require_arg, 'a'},
                                           {"form", require_arg, 'F'},
                                           {"vds-gap-size", require_arg, 'G'},
                                           {"header", no_arg, 'H'},
+                                          {"page-buffer-size", require_arg, 'K'},
                                           {"packed-bits", require_arg, 'M'},
                                           {"any_path", require_arg, 'N'},
                                           {"ddl", optional_arg, 'O'},
@@ -198,6 +200,8 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "     -O F, --ddl=F        Output ddl text into file F\n");
     PRINTVALSTREAM(rawoutstream,
                    "                          Use blank(empty) filename F to suppress ddl display\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --page-buffer-size=N Set the page buffer cache size, N=non-negative integers\n");
     PRINTVALSTREAM(rawoutstream,
                    "     --s3-cred=<cred>     Supply S3 authentication information to \"ros3\" vfd.\n");
     PRINTVALSTREAM(rawoutstream,
@@ -1019,6 +1023,12 @@ parse_start:
                     goto error;
                 }
                 break;
+            case 'K':
+                page_cache = strtoll(H5_optarg, NULL, 0);
+                if (page_cache == 0)
+                    /* To distinguish the "specified" zero value */
+                    page_cache = -1;
+                break;
 
             /** begin XML parameters **/
             case 'x':
@@ -1368,10 +1378,15 @@ main(int argc, char *argv[])
     /* Initialize indexing options */
     h5trav_set_index(sort_by, sort_order);
 
-    if (use_custom_vol_g || use_custom_vfd_g) {
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, use_custom_vol_g ? &vol_info_g : NULL,
-                                        use_custom_vfd_g ? &vfd_info_g : NULL)) < 0) {
-            error_msg("unable to create FAPL for file access\n");
+    if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, use_custom_vol_g ? &vol_info_g : NULL,
+                                    use_custom_vfd_g ? &vfd_info_g : NULL)) < 0) {
+        error_msg("unable to create FAPL for file access\n");
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
+    if (page_cache >= 0) {
+        if (H5Pset_page_buffer_size(fapl_id, page_cache, 0, 0) < 0) {
+            error_msg("unable to set page buffer cache size for file access\n");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }

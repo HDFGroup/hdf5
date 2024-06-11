@@ -624,8 +624,13 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
      *-------------------------------------------------------------------------
      */
     /* open file 1 */
+    if ((fapl1_id = h5tools_get_fapl(H5P_DEFAULT, NULL, NULL)) < 0) {
+        parallel_print("h5diff: unable to create fapl for input file\n");
+        H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create input fapl\n");
+    }
+
     if (opts->vfd_info[0].u.name) {
-        if ((fapl1_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &(opts->vfd_info[0]))) < 0) {
+        if ((fapl1_id = h5tools_get_fapl(fapl1_id, NULL, &(opts->vfd_info[0]))) < 0) {
             parallel_print("h5diff: unable to create fapl for input file\n");
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create input fapl\n");
         }
@@ -639,6 +644,15 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
         }
     }
 
+    if (opts->page_cache >= 0) {
+        if (H5Pset_page_buffer_size(fapl1_id, opts->page_cache, 0, 0) < 0) {
+            error_msg("unable to set page buffer cache size for file access\n");
+            h5tools_setstatus(EXIT_FAILURE);
+            ret_value = -1;
+            goto done;
+        }
+    }
+
     if ((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, fapl1_id, (fapl1_id != H5P_DEFAULT), NULL,
                                   (size_t)0)) < 0) {
         parallel_print("h5diff: <%s>: unable to open file\n", fname1);
@@ -647,8 +661,13 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     H5TOOLS_DEBUG("file1_id = %s", fname1);
 
     /* open file 2 */
+    if ((fapl2_id = h5tools_get_fapl(H5P_DEFAULT, NULL, NULL)) < 0) {
+        parallel_print("h5diff: unable to create fapl for input file\n");
+        H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create input fapl\n");
+    }
+
     if (opts->vfd_info[1].u.name) {
-        if ((fapl2_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &(opts->vfd_info[1]))) < 0) {
+        if ((fapl2_id = h5tools_get_fapl(fapl2_id, NULL, &(opts->vfd_info[1]))) < 0) {
             parallel_print("h5diff: unable to create fapl for output file\n");
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create output fapl\n");
         }
@@ -659,6 +678,15 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
                                          opts->custom_vfd[1] ? &(opts->vfd_info[1]) : NULL)) < 0) {
             parallel_print("h5diff: unable to create fapl for output file\n");
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create output fapl\n");
+        }
+    }
+
+    if (opts->page_cache >= 0) {
+        if (H5Pset_page_buffer_size(fapl2_id, opts->page_cache, 0, 0) < 0) {
+            error_msg("unable to set page buffer cache size for file access\n");
+            h5tools_setstatus(EXIT_FAILURE);
+            ret_value = -1;
+            goto done;
         }
     }
 

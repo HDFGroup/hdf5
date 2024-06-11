@@ -35,6 +35,7 @@ usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
    -wN, --width=N  Set the number of columns of output
    -v, --verbose   Generate more verbose output
    -V, --version   Print version number and exit
+   --page-buffer-size=N Set the page buffer cache size, N=non-negative integers
    --vfd=DRIVER    Use the specified virtual file driver
    -x, --hexdump   Show raw data in hexadecimal format
    --s3-cred=C     Supply S3 authentication information to "ros3" vfd.
