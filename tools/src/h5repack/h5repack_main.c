@@ -535,7 +535,6 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
     bool               custom_out_vol = false;
     bool               custom_out_vfd = false;
     hid_t              tmp_fapl       = H5I_INVALID_HID;
-    hid_t              cpy_fapl       = H5I_INVALID_HID;
     size_t             page_cache     = 0;
     int                bound, opt;
     int                ret_value = 0;
