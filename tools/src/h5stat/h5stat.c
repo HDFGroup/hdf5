@@ -1626,6 +1626,11 @@ main(int argc, char *argv[])
     /* enable error reporting if command line option */
     h5tools_error_report();
 
+    if ((fapl_id = h5tools_get_new_fapl(H5P_DEFAULT)) < 0) {
+        error_msg("unable to create FAPL for file access\n");
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
     if (drivername) {
         h5tools_vfd_info_t vfd_info;
 
@@ -1642,15 +1647,13 @@ main(int argc, char *argv[])
             vfd_info.info = &hdfs_fa;
 #endif
 
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
-            error_msg("Unable to create FAPL for file access\n");
-            goto done;
-        }
-    }
-    else {
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, NULL)) < 0) {
-            error_msg("Unable to create FAPL for file access\n");
-            goto done;
+        /* Set non-default virtual file driver, if requested */
+        if (&vfd_info) {
+            if (h5tools_set_fapl_vfd(fapl_id, &vfd_info) < 0) {
+                error_msg("unable to set VFD on fapl for file\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                goto done;
+            }
         }
     }
     if (page_cache > 0) {
@@ -1670,7 +1673,7 @@ main(int argc, char *argv[])
 
         printf("Filename: %s\n", fname);
 
-        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), NULL, 0);
+        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (drivername != NULL), NULL, 0);
 
         if (fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);

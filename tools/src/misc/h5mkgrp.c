@@ -252,10 +252,23 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
 
     /* Setup a custom fapl for file accesses */
     if (custom_vol || custom_vfd) {
-        if ((tmp_fapl_id = h5tools_get_fapl(options->fapl_id, custom_vol ? &vol_info : NULL,
-                                            custom_vfd ? &vfd_info : NULL)) < 0) {
-            error_msg("failed to setup file access property list (fapl) for file\n");
+        if ((tmp_fapl_id = h5tools_get_new_fapl(options->fapl_id)) < 0) {
+            error_msg("unable to create FAPL for file access\n");
             leave(EXIT_FAILURE);
+        }
+        /* Set non-default VOL connector, if requested */
+        if (custom_vol && &vol_info) {
+            if (h5tools_set_fapl_vol(tmp_fapl_id, &vol_info) < 0) {
+                error_msg("unable to set VOL on fapl for file\n");
+                leave(EXIT_FAILURE);
+            }
+        }
+        /* Set non-default virtual file driver, if requested */
+        if (custom_vfd && &vfd_info) {
+            if (h5tools_set_fapl_vfd(tmp_fapl_id, &vfd_info) < 0) {
+                error_msg("unable to set VFD on fapl for file\n");
+                leave(EXIT_FAILURE);
+            }
         }
 
         options->fapl_id = tmp_fapl_id;

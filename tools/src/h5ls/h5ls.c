@@ -3015,10 +3015,23 @@ main(int argc, char *argv[])
     }
 #endif
 
-    if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, custom_vol_fapl ? &vol_info : NULL,
-                                    custom_vfd_fapl ? &vfd_info : NULL)) < 0) {
-        error_msg("failed to setup file access property list (fapl) for file\n");
+    if ((fapl_id = h5tools_get_new_fapl(H5P_DEFAULT)) < 0) {
+        error_msg("unable to create FAPL for file access\n");
         leave(EXIT_FAILURE);
+    }
+    /* Set non-default VOL connector, if requested */
+    if (custom_vol_fapl && &vol_info) {
+        if (h5tools_set_fapl_vol(fapl_id, &vol_info) < 0) {
+            error_msg("unable to set VOL on fapl for file\n");
+            leave(EXIT_FAILURE);
+        }
+    }
+    /* Set non-default virtual file driver, if requested */
+    if (custom_vfd_fapl && &vfd_info) {
+        if (h5tools_set_fapl_vfd(fapl_id, &vfd_info) < 0) {
+            error_msg("unable to set VFD on fapl for file\n");
+            leave(EXIT_FAILURE);
+        }
     }
     if (page_cache > 0) {
         if (H5Pset_page_buffer_size(fapl_id, page_cache, 0, 0) < 0) {
@@ -3051,7 +3064,7 @@ main(int argc, char *argv[])
         file_id = H5I_INVALID_HID;
 
         while (fname && *fname) {
-            file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), drivername,
+            file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (custom_vol_fapl || custom_vfd_fapl), drivername,
                                     sizeof drivername);
 
             if (file_id >= 0) {

@@ -913,46 +913,68 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
     }
 
     /* Setup FAPL for input and output file accesses */
-    if (custom_in_vol || custom_in_vfd) {
-        if ((tmp_fapl = h5tools_get_fapl(options->fin_fapl, custom_in_vol ? &in_vol_info : NULL,
-                                         custom_in_vfd ? &in_vfd_info : NULL)) < 0) {
-            error_msg("failed to setup FAPL for input file\n");
+    if ((tmp_fapl = h5tools_get_new_fapl(options->fin_fapl)) < 0) {
+        error_msg("unable to create FAPL for file access for input file\n");
+        h5tools_setstatus(EXIT_FAILURE);
+        ret_value = -1;
+        goto done;
+    }
+    /* Set non-default VOL connector, if requested */
+    if (custom_in_vol && &in_vol_info) {
+        if (h5tools_set_fapl_vol(tmp_fapl, &in_vol_info) < 0) {
+            error_msg("unable to set VOL on fapl for input file\n");
             h5tools_setstatus(EXIT_FAILURE);
             ret_value = -1;
             goto done;
         }
-
-        options->fin_fapl = tmp_fapl;
+    }
+    /* Set non-default virtual file driver, if requested */
+    if (custom_in_vfd && &in_vfd_info) {
+        if (h5tools_set_fapl_vfd(tmp_fapl, &in_vfd_info) < 0) {
+            error_msg("unable to set VFD on fapl for input file\n");
+            h5tools_setstatus(EXIT_FAILURE);
+            ret_value = -1;
+            goto done;
+        }
     }
     if (page_cache > 0) {
-        if ((tmp_fapl = h5tools_get_fapl(options->fin_fapl, NULL, NULL)) < 0) {
-            error_msg("failed to setup FAPL for input file\n");
-            h5tools_setstatus(EXIT_FAILURE);
-            ret_value = -1;
-            goto done;
-        }
-
         if (H5Pset_page_buffer_size(tmp_fapl, page_cache, 0, 0) < 0) {
-            error_msg("unable to set page buffer cache size for file access\n");
+            error_msg("unable to set page buffer cache size for input file\n");
             h5tools_setstatus(EXIT_FAILURE);
             ret_value = -1;
             goto done;
         }
-
-        options->fin_fapl = tmp_fapl;
     }
 
-    if (custom_out_vol || custom_out_vfd) {
-        if ((tmp_fapl = h5tools_get_fapl(options->fout_fapl, custom_out_vol ? &out_vol_info : NULL,
-                                         custom_out_vfd ? &out_vfd_info : NULL)) < 0) {
-            error_msg("failed to setup FAPL for output file\n");
+    options->fin_fapl = tmp_fapl;
+
+    /* Setup FAPL for input and output file accesses */
+    if ((tmp_fapl = h5tools_get_new_fapl(options->fout_fapl)) < 0) {
+        error_msg("unable to create FAPL for file access for output file\n");
+        h5tools_setstatus(EXIT_FAILURE);
+        ret_value = -1;
+        goto done;
+    }
+    /* Set non-default VOL connector, if requested */
+    if (custom_out_vol && &out_vol_info) {
+        if (h5tools_set_fapl_vol(tmp_fapl, &out_vol_info) < 0) {
+            error_msg("unable to set VOL on fapl for output file\n");
             h5tools_setstatus(EXIT_FAILURE);
             ret_value = -1;
             goto done;
         }
-
-        options->fout_fapl = tmp_fapl;
     }
+    /* Set non-default virtual file driver, if requested */
+    if (custom_out_vfd && &out_vfd_info) {
+        if (h5tools_set_fapl_vfd(tmp_fapl, &out_vfd_info) < 0) {
+            error_msg("unable to set VFD on fapl for output file\n");
+            h5tools_setstatus(EXIT_FAILURE);
+            ret_value = -1;
+            goto done;
+        }
+    }
+
+    options->fout_fapl = tmp_fapl;
 
 done:
     return ret_value;
