@@ -1421,7 +1421,8 @@ main(int argc, char *argv[])
             goto done;
         }
         else
-            fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (use_custom_vol_g || use_custom_vfd_g), NULL, 0);
+            fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (use_custom_vol_g || use_custom_vfd_g), NULL,
+                                0);
 
         if (fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);

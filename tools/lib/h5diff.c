@@ -637,7 +637,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
         }
     }
 
-        /* Set non-default VOL connector, if requested */
+    /* Set non-default VOL connector, if requested */
     if (opts->custom_vol[0]) {
         if (h5tools_set_fapl_vol(fapl1_id, &(opts->vol_info[0])) < 0) {
             parallel_print("h5diff: unable to set VOL on fapl for input file\n");
@@ -652,8 +652,8 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
         }
     }
 
-    if ((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, fapl1_id, (opts->custom_vol[0] || opts->custom_vfd[0]), NULL,
-                                  (size_t)0)) < 0) {
+    if ((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, fapl1_id,
+                                  (opts->custom_vol[0] || opts->custom_vfd[0]), NULL, (size_t)0)) < 0) {
         parallel_print("h5diff: <%s>: unable to open file\n", fname1);
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "<%s>: unable to open file\n", fname1);
     }
@@ -669,11 +669,11 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     if (opts->custom_vfd[1] && opts->vfd_info[1].u.name) {
         if (h5tools_set_fapl_vfd(fapl2_id, &(opts->vfd_info[1])) < 0) {
             parallel_print("h5diff: unable to set VFD on fapl for output file\n");
-            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "failed to set VFD on FAPL\n");\
+            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "failed to set VFD on FAPL\n");
         }
     }
 
-        /* Set non-default VOL connector, if requested */
+    /* Set non-default VOL connector, if requested */
     if (opts->custom_vol[1]) {
         if (h5tools_set_fapl_vol(fapl2_id, &(opts->vol_info[1])) < 0) {
             parallel_print("h5diff: unable to set VOL on fapl for output file\n");
@@ -688,8 +688,8 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
         }
     }
 
-    if ((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, fapl2_id, (opts->custom_vol[1] || opts->custom_vfd[1]), NULL,
-                                  (size_t)0)) < 0) {
+    if ((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, fapl2_id,
+                                  (opts->custom_vol[1] || opts->custom_vfd[1]), NULL, (size_t)0)) < 0) {
         parallel_print("h5diff: <%s>: unable to open file\n", fname2);
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "<%s>: unable to open file\n", fname2);
     }

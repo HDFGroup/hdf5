@@ -3064,8 +3064,8 @@ main(int argc, char *argv[])
         file_id = H5I_INVALID_HID;
 
         while (fname && *fname) {
-            file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (custom_vol_fapl || custom_vfd_fapl), drivername,
-                                    sizeof drivername);
+            file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (custom_vol_fapl || custom_vfd_fapl),
+                                    drivername, sizeof drivername);
 
             if (file_id >= 0) {
                 if (verbose_g)
