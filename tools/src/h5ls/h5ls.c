@@ -2820,7 +2820,7 @@ main(int argc, char *argv[])
                 leave(EXIT_FAILURE);
             }
         }
-        else if (!strncmp(argv[argno], "--page-buffer-size=", (size_t)8)) {
+        else if (!strncmp(argv[argno], "--page-buffer-size=", (size_t)19)) {
             page_cache = strtoul(argv[argno] + 8, &rest, 0);
         }
         else if (!strcmp(argv[argno], "--verbose")) {
