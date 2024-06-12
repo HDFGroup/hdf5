@@ -1024,7 +1024,7 @@ parse_start:
                 }
                 break;
             case 'K':
-                page_cache = strtoll(H5_optarg, NULL, 0);
+                page_cache = strtoul(H5_optarg, NULL, 0);
                 break;
 
             /** begin XML parameters **/

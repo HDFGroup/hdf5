@@ -242,6 +242,7 @@ usage(const char *prog)
     fprintf(stdout, "                           than 0.  The default threshold is 10.\n");
     fprintf(stdout, "     -s, --freespace       Print free space information\n");
     fprintf(stdout, "     -S, --summary         Print summary of file space information\n");
+    fprintf(stdout, "     --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers\n");
     fprintf(stdout, "     --s3-cred=<cred>      Access file on S3, using provided credential\n");
     fprintf(stdout, "                           <cred> :: (region,id,key)\n");
     fprintf(stdout, "                           If <cred> == \"(,,)\", no authentication is used.\n");
@@ -971,7 +972,7 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
                 break;
 
             case 'K':
-                page_cache = strtoll(H5_optarg, NULL, 0);
+                page_cache = strtoul(H5_optarg, NULL, 0);
                 break;
 
             default:

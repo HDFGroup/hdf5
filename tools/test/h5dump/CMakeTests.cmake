@@ -1187,6 +1187,7 @@
   ADD_H5_TEST (tboot2A 0 --enable-error-stack --boot-block tfcontents2.h5)
   ADD_H5_TEST (tboot2B 0 --enable-error-stack --superblock tfcontents2.h5)
   ADD_H5_TEST (file_space 0 --enable-error-stack -B file_space.h5)
+  ADD_H5_TEST (file_space_cache 0 --enable-error-stack --page-buffer-size=16384 -B file_space.h5)
 
   # test -p with a non existing dataset
   ADD_H5ERR_MASK_TEST (tperror 1 "h5dump error: unable to get link info from \"bogus\"" --enable-error-stack -p -d bogus tfcontents1.h5)

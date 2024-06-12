@@ -258,6 +258,9 @@
   ADD_H5_TEST (tgroup 0 -w80 tgroup.h5)
   ADD_H5_TEST (tgroup-3 0 -w80 tgroup.h5/g1)
 
+  # test page buffer cache command
+  ADD_H5_TEST (tall-pbc 0 -w80 --page-buffer-size=8192 tall.h5)
+
   # test for displaying groups
   # The following combination of arguments is expected to return an error message
   # and return value 1

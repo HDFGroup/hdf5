@@ -325,7 +325,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 break;
 
             case 'K':
-                opts->page_cache = strtoll(H5_optarg, NULL, 0);
+                opts->page_cache = strtoul(H5_optarg, NULL, 0);
                 break;
 
             case '1':

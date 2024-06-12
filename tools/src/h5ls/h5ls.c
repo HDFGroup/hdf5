@@ -2821,7 +2821,7 @@ main(int argc, char *argv[])
             }
         }
         else if (!strncmp(argv[argno], "--page-buffer-size=", (size_t)8)) {
-            page_cache = (int)strtoll(argv[argno] + 8, &rest, 0);
+            page_cache = strtoul(argv[argno] + 8, &rest, 0);
         }
         else if (!strcmp(argv[argno], "--verbose")) {
             verbose_g++;
