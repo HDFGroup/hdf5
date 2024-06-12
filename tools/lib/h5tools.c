@@ -788,6 +788,12 @@ h5tools_get_fapl(hid_t prev_fapl_id, h5tools_vol_info_t *vol_info, h5tools_vfd_i
     ret_value = new_fapl_id;
 
 done:
+    /* Close the old fapl */
+    if (prev_fapl_id != H5P_DEFAULT)
+        if (H5Pclose(prev_fapl_id) < 0) {
+            H5TOOLS_ERROR(FAIL, "failed to close file access property list (fapl)");
+        }
+
     if (ret_value < 0) {
         if (new_fapl_id >= 0) {
             H5Pclose(new_fapl_id);
@@ -797,6 +803,8 @@ done:
         /* Clear error message unless asked for */
         if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
             H5Epop(H5tools_ERR_STACK_g, 1);
+    }
+    else {
     }
 
     return ret_value;
@@ -950,6 +958,7 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, bool use_specifi
               size_t drivername_size)
 {
     hid_t    fid          = H5I_INVALID_HID;
+    hid_t    cpy_fapl_id  = H5I_INVALID_HID;
     hid_t    tmp_fapl_id  = H5I_INVALID_HID;
     hid_t    used_fapl_id = H5I_INVALID_HID;
     unsigned volnum, drivernum;
@@ -1025,8 +1034,11 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, bool use_specifi
                 vfd_info.info   = NULL;
                 vfd_info.u.name = drivernames[drivernum];
 
+                /* create a copy of the original fapl */
+                if ((cpy_fapl_id = H5Pcopy(fapl_id)) < 0)
+                    H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "H5Pcopy failed");
                 /* Get a fapl reflecting the selected VOL connector and VFD */
-                if ((tmp_fapl_id = h5tools_get_fapl(fapl_id, &vol_info, &vfd_info)) < 0)
+                if ((tmp_fapl_id = h5tools_get_fapl(cpy_fapl_id, &vol_info, &vfd_info)) < 0)
                     continue;
 
                 /* Can we open the file with this combo? */
@@ -1050,8 +1062,11 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, bool use_specifi
         else {
             /* NOT the native VOL connector */
 
+            /* create a copy of the original fapl */
+            if ((cpy_fapl_id = H5Pcopy(fapl_id)) < 0)
+                H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "H5Pcopy failed");
             /* Get a FAPL for the current VOL connector */
-            if ((tmp_fapl_id = h5tools_get_fapl(fapl_id, &vol_info, NULL)) < 0)
+            if ((tmp_fapl_id = h5tools_get_fapl(cpy_fapl_id, &vol_info, NULL)) < 0)
                 continue;
 
             /* Can we open the file with this connector? */

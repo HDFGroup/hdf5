@@ -258,13 +258,6 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
             leave(EXIT_FAILURE);
         }
 
-        /* Close the old fapl */
-        if (options->fapl_id != H5P_DEFAULT)
-            if (H5Pclose(options->fapl_id) < 0) {
-                error_msg("failed to close file access property list (fapl)\n");
-                leave(EXIT_FAILURE);
-            }
-
         options->fapl_id = tmp_fapl_id;
     }
 

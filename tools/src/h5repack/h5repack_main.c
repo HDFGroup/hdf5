@@ -535,6 +535,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
     bool               custom_out_vol = false;
     bool               custom_out_vfd = false;
     hid_t              tmp_fapl       = H5I_INVALID_HID;
+    hid_t              cpy_fapl       = H5I_INVALID_HID;
     size_t             page_cache     = 0;
     int                bound, opt;
     int                ret_value = 0;
@@ -922,15 +923,6 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             goto done;
         }
 
-        /* Close old FAPL */
-        if (options->fin_fapl != H5P_DEFAULT)
-            if (H5Pclose(options->fin_fapl) < 0) {
-                error_msg("failed to close FAPL\n");
-                h5tools_setstatus(EXIT_FAILURE);
-                ret_value = -1;
-                goto done;
-            }
-
         options->fin_fapl = tmp_fapl;
     }
     if (page_cache > 0) {
@@ -948,15 +940,6 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             goto done;
         }
 
-        /* Close old FAPL */
-        if (options->fin_fapl != H5P_DEFAULT)
-            if (H5Pclose(options->fin_fapl) < 0) {
-                error_msg("failed to close FAPL\n");
-                h5tools_setstatus(EXIT_FAILURE);
-                ret_value = -1;
-                goto done;
-            }
-
         options->fin_fapl = tmp_fapl;
     }
 
@@ -968,15 +951,6 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             ret_value = -1;
             goto done;
         }
-
-        /* Close old FAPL */
-        if (options->fout_fapl != H5P_DEFAULT)
-            if (H5Pclose(options->fout_fapl) < 0) {
-                error_msg("failed to close FAPL\n");
-                h5tools_setstatus(EXIT_FAILURE);
-                ret_value = -1;
-                goto done;
-            }
 
         options->fout_fapl = tmp_fapl;
     }
