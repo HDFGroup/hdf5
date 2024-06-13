@@ -1118,7 +1118,7 @@ test_set_configured_fapl(void)
         else {
             H5E_BEGIN_TRY
             {
-                result = h5tools_new_get_fapl(H5P_DEFAULT);
+                result = h5tools_get_new_fapl(H5P_DEFAULT);
                 result = h5tools_set_fapl_vfd(result, &vfd_info);
             }
             H5E_END_TRY
