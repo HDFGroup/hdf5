@@ -33,13 +33,17 @@
 #define H5MF_FRIEND /*suppress error about including H5MFpkg      */
 #include "H5MFpkg.h"
 
+#ifdef PB_OUT
 #define NUM_DSETS 5
+#endif
 
 int mpi_size, mpi_rank;
 
+#ifdef PB_OUT
 static int create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_strategy);
 static int open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t page_size,
                      size_t page_buffer_size);
+#endif
 
 /*
  * test file access by communicator besides COMM_WORLD.
@@ -132,22 +136,29 @@ test_split_comm_access(void)
 void
 test_page_buffer_access(void)
 {
+    const char *filename;
     hid_t       file_id = H5I_INVALID_HID; /* File ID */
     hid_t       fcpl, fapl;
-    size_t      page_count = 0;
-    int         i, num_elements = 200;
-    haddr_t     raw_addr, meta_addr;
-    int        *data;
-    H5F_t      *f = NULL;
     herr_t      ret; /* generic return value */
-    const char *filename;
-    bool        api_ctx_pushed = false; /* Whether API context pushed */
+#ifdef PB_OUT
+    size_t  page_count = 0;
+    int     i, num_elements = 200;
+    haddr_t raw_addr, meta_addr;
+    int    *data;
+    H5F_t  *f              = NULL;
+    bool    api_ctx_pushed = false; /* Whether API context pushed */
+#endif
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
     filename = (const char *)GetTestParameters();
 
+    /* Until page buffering is supported in parallel in some form (even if
+     * just for a single MPI process), this test just will just check to
+     * make sure that an error is thrown when page buffering is enabled
+     * with parallel access.
+     */
     if (VERBOSE_MED)
         printf("Page Buffer Usage in Parallel %s\n", filename);
 
@@ -175,6 +186,15 @@ test_page_buffer_access(void)
     ret = H5Pset_coll_metadata_write(fapl, false);
     VRFY((ret >= 0), "");
 
+    /* This should fail due to page buffering not being supported in parallel */
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
+    }
+    H5E_END_TRY
+    VRFY((file_id < 0), "H5Fcreate failed");
+
+#ifdef PB_OUT
     ret = create_file(filename, fcpl, fapl, H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
     VRFY((ret == 0), "");
     ret = open_file(filename, fapl, H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED, sizeof(int) * 100,
@@ -442,8 +462,10 @@ test_page_buffer_access(void)
     free(data);
     data = NULL;
     MPI_Barrier(MPI_COMM_WORLD);
+#endif
 }
 
+#ifdef PB_OUT
 static int
 create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_strategy)
 {
@@ -760,6 +782,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
 
     return nerrors;
 }
+#endif
 
 /*
  * NOTE:  See HDFFV-10894 and add tests later to verify MPI-specific properties in the
