@@ -797,7 +797,7 @@ check_objects(const char *fname, pack_opt_t *options)
      * open the file
      *-------------------------------------------------------------------------
      */
-    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, options->fin_fapl, (options->fin_fapl != H5P_DEFAULT),
+    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, options->fin_fapl, (options->fin_vol || options->fin_vfd),
                              NULL, 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname, H5FOPENERROR);
 
