@@ -84,6 +84,7 @@ $SRC_H5STAT_OUTFILES/h5stat_help2.ddl
 $SRC_H5STAT_OUTFILES/h5stat_notexist.ddl
 $SRC_H5STAT_OUTFILES/h5stat_nofile.ddl
 $SRC_H5STAT_OUTFILES/h5stat_filters.ddl
+$SRC_H5STAT_OUTFILES/h5stat_filters-cache.ddl
 $SRC_H5STAT_OUTFILES/h5stat_filters-file.ddl
 $SRC_H5STAT_OUTFILES/h5stat_filters-F.ddl
 $SRC_H5STAT_OUTFILES/h5stat_filters-d.ddl

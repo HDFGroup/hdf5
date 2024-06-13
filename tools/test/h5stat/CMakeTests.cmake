@@ -28,6 +28,7 @@
       h5stat_notexist
       h5stat_nofile
       h5stat_filters
+      h5stat_filters-cache
       h5stat_filters-file
       h5stat_filters-F
       h5stat_filters-d
