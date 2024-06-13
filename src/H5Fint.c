@@ -2027,7 +2027,8 @@ H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_i
         if (page_buf_size) {
             /* Collective metadata writes are not supported with page buffering */
             if (file->shared->coll_md_write)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "collective metadata writes are not supported with page buffering");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                            "collective metadata writes are not supported with page buffering");
 
             /* Temporary: fail file create when page buffering feature is enabled for parallel */
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "page buffering is disabled for parallel");
@@ -2035,7 +2036,8 @@ H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_i
 
         if (mpi_size > 1) {
             if (evict_on_close)
-                HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "evict on close is currently not supported in parallel HDF5");
+                HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL,
+                            "evict on close is currently not supported in parallel HDF5");
         }
     }
 #endif
