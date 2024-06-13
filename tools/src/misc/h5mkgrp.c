@@ -257,14 +257,14 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
             leave(EXIT_FAILURE);
         }
         /* Set non-default VOL connector, if requested */
-        if (custom_vol && &vol_info) {
+        if (custom_vol) {
             if (h5tools_set_fapl_vol(tmp_fapl_id, &vol_info) < 0) {
                 error_msg("unable to set VOL on fapl for file\n");
                 leave(EXIT_FAILURE);
             }
         }
         /* Set non-default virtual file driver, if requested */
-        if (custom_vfd && &vfd_info) {
+        if (custom_vfd) {
             if (h5tools_set_fapl_vfd(tmp_fapl_id, &vfd_info) < 0) {
                 error_msg("unable to set VFD on fapl for file\n");
                 leave(EXIT_FAILURE);

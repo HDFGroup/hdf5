@@ -920,7 +920,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
         goto done;
     }
     /* Set non-default VOL connector, if requested */
-    if (custom_in_vol && &in_vol_info) {
+    if (custom_in_vol) {
         if (h5tools_set_fapl_vol(tmp_fapl, &in_vol_info) < 0) {
             error_msg("unable to set VOL on fapl for input file\n");
             h5tools_setstatus(EXIT_FAILURE);
@@ -929,7 +929,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
         }
     }
     /* Set non-default virtual file driver, if requested */
-    if (custom_in_vfd && &in_vfd_info) {
+    if (custom_in_vfd) {
         if (h5tools_set_fapl_vfd(tmp_fapl, &in_vfd_info) < 0) {
             error_msg("unable to set VFD on fapl for input file\n");
             h5tools_setstatus(EXIT_FAILURE);
@@ -956,7 +956,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
         goto done;
     }
     /* Set non-default VOL connector, if requested */
-    if (custom_out_vol && &out_vol_info) {
+    if (custom_out_vol) {
         if (h5tools_set_fapl_vol(tmp_fapl, &out_vol_info) < 0) {
             error_msg("unable to set VOL on fapl for output file\n");
             h5tools_setstatus(EXIT_FAILURE);
@@ -965,7 +965,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
         }
     }
     /* Set non-default virtual file driver, if requested */
-    if (custom_out_vfd && &out_vfd_info) {
+    if (custom_out_vfd) {
         if (h5tools_set_fapl_vfd(tmp_fapl, &out_vfd_info) < 0) {
             error_msg("unable to set VFD on fapl for output file\n");
             h5tools_setstatus(EXIT_FAILURE);

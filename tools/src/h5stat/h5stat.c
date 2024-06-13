@@ -1648,12 +1648,10 @@ main(int argc, char *argv[])
 #endif
 
         /* Set non-default virtual file driver, if requested */
-        if (&vfd_info) {
-            if (h5tools_set_fapl_vfd(fapl_id, &vfd_info) < 0) {
-                error_msg("unable to set VFD on fapl for file\n");
-                h5tools_setstatus(EXIT_FAILURE);
-                goto done;
-            }
+        if (h5tools_set_fapl_vfd(fapl_id, &vfd_info) < 0) {
+            error_msg("unable to set VFD on fapl for file\n");
+            h5tools_setstatus(EXIT_FAILURE);
+            goto done;
         }
     }
     if (page_cache > 0) {

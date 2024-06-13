@@ -1381,7 +1381,7 @@ main(int argc, char *argv[])
         goto done;
     }
     /* Set non-default VOL connector, if requested */
-    if (use_custom_vol_g && &vol_info_g) {
+    if (use_custom_vol_g) {
         if (h5tools_set_fapl_vol(fapl_id, &vol_info_g) < 0) {
             error_msg("unable to set VOL on fapl for file\n");
             h5tools_setstatus(EXIT_FAILURE);
@@ -1389,7 +1389,7 @@ main(int argc, char *argv[])
         }
     }
     /* Set non-default virtual file driver, if requested */
-    if (use_custom_vfd_g && &vfd_info_g) {
+    if (use_custom_vfd_g) {
         if (h5tools_set_fapl_vfd(fapl_id, &vfd_info_g) < 0) {
             error_msg("unable to set VFD on fapl for file\n");
             h5tools_setstatus(EXIT_FAILURE);
