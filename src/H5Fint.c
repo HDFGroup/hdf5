@@ -2002,15 +2002,6 @@ H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_i
     if (H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get page buffer size");
     if (page_buf_size) {
-#ifdef H5_HAVE_PARALLEL
-        /* Collective metadata writes are not supported with page buffering */
-        if (file->shared->coll_md_write)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
-                        "collective metadata writes are not supported with page buffering");
-
-        /* Temporary: fail file create when page buffering feature is enabled for parallel */
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "page buffering is disabled for parallel");
-#endif /* H5_HAVE_PARALLEL */
         /* Query for other page buffer cache properties */
         if (H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &page_buf_min_meta_perc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get minimum metadata fraction of page buffer");
@@ -2023,14 +2014,29 @@ H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_i
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get evict on close value");
 
 #ifdef H5_HAVE_PARALLEL
-    /* Check for evict on close in parallel (currently unsupported) */
+    /* Check for unsupported settings in parallel */
     assert(file->shared);
     if (H5F_SHARED_HAS_FEATURE(file->shared, H5FD_FEAT_HAS_MPI)) {
         int mpi_size = H5F_shared_mpi_get_size(file->shared);
 
-        if ((mpi_size > 1) && evict_on_close)
-            HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL,
-                        "evict on close is currently not supported in parallel HDF5");
+        /*
+         * While there shouldn't be any problems in general with using page buffering
+         * with only 1 MPI process, there are still some testing issues to be fixed.
+         * Until then, page buffering is disabled for any form of parallel access.
+         */
+        if (page_buf_size) {
+            /* Collective metadata writes are not supported with page buffering */
+            if (file->shared->coll_md_write)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "collective metadata writes are not supported with page buffering");
+
+            /* Temporary: fail file create when page buffering feature is enabled for parallel */
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "page buffering is disabled for parallel");
+        }
+
+        if (mpi_size > 1) {
+            if (evict_on_close)
+                HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "evict on close is currently not supported in parallel HDF5");
+        }
     }
 #endif
 
