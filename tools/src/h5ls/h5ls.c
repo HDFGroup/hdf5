@@ -3020,14 +3020,14 @@ main(int argc, char *argv[])
         leave(EXIT_FAILURE);
     }
     /* Set non-default VOL connector, if requested */
-    if (custom_vol_fapl && &vol_info) {
+    if (custom_vol_fapl) {
         if (h5tools_set_fapl_vol(fapl_id, &vol_info) < 0) {
             error_msg("unable to set VOL on fapl for file\n");
             leave(EXIT_FAILURE);
         }
     }
     /* Set non-default virtual file driver, if requested */
-    if (custom_vfd_fapl && &vfd_info) {
+    if (custom_vfd_fapl) {
         if (h5tools_set_fapl_vfd(fapl_id, &vfd_info) < 0) {
             error_msg("unable to set VFD on fapl for file\n");
             leave(EXIT_FAILURE);
