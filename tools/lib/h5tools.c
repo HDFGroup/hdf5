@@ -978,8 +978,7 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, bool use_specifi
      * the VFL driver/VOL connector that was set on the FAPL by the caller.
      */
     if (use_specific_driver)
-        H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to open file:%s using specified FAPL:%s", fname,
-                           drivername);
+        H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to open file using specified FAPL");
 
     /*
      * As a final resort, try to open the file using each of the available
