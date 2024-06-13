@@ -530,8 +530,8 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
     h5tools_vol_info_t out_vol_info;
     h5tools_vfd_info_t in_vfd_info;
     h5tools_vfd_info_t out_vfd_info;
-    hid_t              tmp_fapl       = H5I_INVALID_HID;
-    size_t             page_cache     = 0;
+    hid_t              tmp_fapl   = H5I_INVALID_HID;
+    size_t             page_cache = 0;
     int                bound, opt;
     int                ret_value = 0;
 
@@ -830,13 +830,13 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             case '7':
                 in_vfd_info.type    = VFD_BY_VALUE;
                 in_vfd_info.u.value = (H5FD_class_value_t)atoi(H5_optarg);
-                options->fin_vfd       = true;
+                options->fin_vfd    = true;
                 break;
 
             case '8':
                 in_vfd_info.type   = VFD_BY_NAME;
                 in_vfd_info.u.name = H5_optarg;
-                options->fin_vfd      = true;
+                options->fin_vfd   = true;
                 break;
 
             case '9':
@@ -846,13 +846,13 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             case '0':
                 out_vfd_info.type    = VFD_BY_VALUE;
                 out_vfd_info.u.value = (H5FD_class_value_t)atoi(H5_optarg);
-                options->fout_vfd       = true;
+                options->fout_vfd    = true;
                 break;
 
             case 'Y':
                 out_vfd_info.type   = VFD_BY_NAME;
                 out_vfd_info.u.name = H5_optarg;
-                options->fout_vfd      = true;
+                options->fout_vfd   = true;
                 break;
 
             case 'Z':
