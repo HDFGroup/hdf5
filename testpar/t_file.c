@@ -141,12 +141,12 @@ test_page_buffer_access(void)
     hid_t       fcpl, fapl;
     herr_t      ret; /* generic return value */
 #ifdef PB_OUT
-    size_t      page_count = 0;
-    int         i, num_elements = 200;
-    haddr_t     raw_addr, meta_addr;
-    int        *data;
-    H5F_t      *f = NULL;
-    bool        api_ctx_pushed = false; /* Whether API context pushed */
+    size_t  page_count = 0;
+    int     i, num_elements = 200;
+    haddr_t raw_addr, meta_addr;
+    int    *data;
+    H5F_t  *f              = NULL;
+    bool    api_ctx_pushed = false; /* Whether API context pushed */
 #endif
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
