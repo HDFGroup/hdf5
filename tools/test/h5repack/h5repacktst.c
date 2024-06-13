@@ -1127,7 +1127,7 @@ main(void)
             GOERROR;
         if (h5repack_verify(FNAME7, FNAME7OUT, &pack_options) <= 0)
             GOERROR;
-        if (h5repack_cmp_pl(FNAME7,  FNAME7OUT, &pack_options) <= 0)
+        if (h5repack_cmp_pl(FNAME7, FNAME7OUT, &pack_options) <= 0)
             GOERROR;
         if (h5repack_end(&pack_options) < 0)
             GOERROR;

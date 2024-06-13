@@ -182,15 +182,15 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
                 break;
 
             case '1':
-                vol_info.type    = VOL_BY_VALUE;
-                vol_info.u.value = (H5VL_class_value_t)atoi(H5_optarg);
-                options->custom_vol       = true;
+                vol_info.type       = VOL_BY_VALUE;
+                vol_info.u.value    = (H5VL_class_value_t)atoi(H5_optarg);
+                options->custom_vol = true;
                 break;
 
             case '2':
-                vol_info.type   = VOL_BY_NAME;
-                vol_info.u.name = H5_optarg;
-                options->custom_vol      = true;
+                vol_info.type       = VOL_BY_NAME;
+                vol_info.u.name     = H5_optarg;
+                options->custom_vol = true;
                 break;
 
             case '3':
@@ -198,15 +198,15 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
                 break;
 
             case '4':
-                vfd_info.type    = VFD_BY_VALUE;
-                vfd_info.u.value = (H5FD_class_value_t)atoi(H5_optarg);
-                options->custom_vfd       = true;
+                vfd_info.type       = VFD_BY_VALUE;
+                vfd_info.u.value    = (H5FD_class_value_t)atoi(H5_optarg);
+                options->custom_vfd = true;
                 break;
 
             case '5':
-                vfd_info.type   = VFD_BY_NAME;
-                vfd_info.u.name = H5_optarg;
-                options->custom_vfd      = true;
+                vfd_info.type       = VFD_BY_NAME;
+                vfd_info.u.name     = H5_optarg;
+                options->custom_vfd = true;
                 break;
 
             case '6':
@@ -329,8 +329,8 @@ main(int argc, char *argv[])
     }
 
     /* Attempt to open an existing HDF5 file first */
-    fid = h5tools_fopen(params_g.fname, H5F_ACC_RDWR, params_g.fapl_id, (params_g.custom_vol || params_g.custom_vfd),
-                        NULL, 0);
+    fid = h5tools_fopen(params_g.fname, H5F_ACC_RDWR, params_g.fapl_id,
+                        (params_g.custom_vol || params_g.custom_vfd), NULL, 0);
 
     /* If we couldn't open an existing file, try creating file */
     /* (use "EXCL" instead of "TRUNC", so we don't blow away existing non-HDF5 file) */

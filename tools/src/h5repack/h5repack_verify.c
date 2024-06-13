@@ -377,11 +377,11 @@ h5repack_cmp_pl(const char *fname1, const char *fname2, pack_opt_t *options)
      *-------------------------------------------------------------------------
      */
     /* Open the files */
-    if ((fid1 = h5tools_fopen(fname1, H5F_ACC_RDONLY, options->fin_fapl, (options->fin_vol || options->fin_vfd), NULL, 0)) <
-        0)
+    if ((fid1 = h5tools_fopen(fname1, H5F_ACC_RDONLY, options->fin_fapl,
+                              (options->fin_vol || options->fin_vfd), NULL, 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname1, H5FOPENERROR);
-    if ((fid2 = h5tools_fopen(fname2, H5F_ACC_RDONLY, options->fout_fapl, (options->fout_vol || options->fout_vfd), NULL, 0)) <
-        0)
+    if ((fid2 = h5tools_fopen(fname2, H5F_ACC_RDONLY, options->fout_fapl,
+                              (options->fout_vol || options->fout_vfd), NULL, 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname2, H5FOPENERROR);
 
     /*-------------------------------------------------------------------------
