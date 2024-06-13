@@ -530,10 +530,6 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
     h5tools_vol_info_t out_vol_info;
     h5tools_vfd_info_t in_vfd_info;
     h5tools_vfd_info_t out_vfd_info;
-    bool               custom_in_vol  = false;
-    bool               custom_in_vfd  = false;
-    bool               custom_out_vol = false;
-    bool               custom_out_vfd = false;
     hid_t              tmp_fapl       = H5I_INVALID_HID;
     size_t             page_cache     = 0;
     int                bound, opt;
@@ -802,13 +798,13 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             case '1':
                 in_vol_info.type    = VOL_BY_VALUE;
                 in_vol_info.u.value = (H5VL_class_value_t)atoi(H5_optarg);
-                custom_in_vol       = true;
+                options->fin_vol    = true;
                 break;
 
             case '2':
                 in_vol_info.type   = VOL_BY_NAME;
                 in_vol_info.u.name = H5_optarg;
-                custom_in_vol      = true;
+                options->fin_vol   = true;
                 break;
 
             case '3':
@@ -818,13 +814,13 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             case '4':
                 out_vol_info.type    = VOL_BY_VALUE;
                 out_vol_info.u.value = (H5VL_class_value_t)atoi(H5_optarg);
-                custom_out_vol       = true;
+                options->fout_vol    = true;
                 break;
 
             case '5':
                 out_vol_info.type   = VOL_BY_NAME;
                 out_vol_info.u.name = H5_optarg;
-                custom_out_vol      = true;
+                options->fout_vol   = true;
                 break;
 
             case '6':
@@ -834,13 +830,13 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             case '7':
                 in_vfd_info.type    = VFD_BY_VALUE;
                 in_vfd_info.u.value = (H5FD_class_value_t)atoi(H5_optarg);
-                custom_in_vfd       = true;
+                options->fin_vfd       = true;
                 break;
 
             case '8':
                 in_vfd_info.type   = VFD_BY_NAME;
                 in_vfd_info.u.name = H5_optarg;
-                custom_in_vfd      = true;
+                options->fin_vfd      = true;
                 break;
 
             case '9':
@@ -850,13 +846,13 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             case '0':
                 out_vfd_info.type    = VFD_BY_VALUE;
                 out_vfd_info.u.value = (H5FD_class_value_t)atoi(H5_optarg);
-                custom_out_vfd       = true;
+                options->fout_vfd       = true;
                 break;
 
             case 'Y':
                 out_vfd_info.type   = VFD_BY_NAME;
                 out_vfd_info.u.name = H5_optarg;
-                custom_out_vfd      = true;
+                options->fout_vfd      = true;
                 break;
 
             case 'Z':
@@ -920,7 +916,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
         goto done;
     }
     /* Set non-default VOL connector, if requested */
-    if (custom_in_vol) {
+    if (options->fin_vol) {
         if (h5tools_set_fapl_vol(tmp_fapl, &in_vol_info) < 0) {
             error_msg("unable to set VOL on fapl for input file\n");
             h5tools_setstatus(EXIT_FAILURE);
@@ -929,7 +925,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
         }
     }
     /* Set non-default virtual file driver, if requested */
-    if (custom_in_vfd) {
+    if (options->fin_vfd) {
         if (h5tools_set_fapl_vfd(tmp_fapl, &in_vfd_info) < 0) {
             error_msg("unable to set VFD on fapl for input file\n");
             h5tools_setstatus(EXIT_FAILURE);
@@ -956,7 +952,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
         goto done;
     }
     /* Set non-default VOL connector, if requested */
-    if (custom_out_vol) {
+    if (options->fout_vol) {
         if (h5tools_set_fapl_vol(tmp_fapl, &out_vol_info) < 0) {
             error_msg("unable to set VOL on fapl for output file\n");
             h5tools_setstatus(EXIT_FAILURE);
@@ -965,7 +961,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
         }
     }
     /* Set non-default virtual file driver, if requested */
-    if (custom_out_vfd) {
+    if (options->fout_vfd) {
         if (h5tools_set_fapl_vfd(tmp_fapl, &out_vfd_info) < 0) {
             error_msg("unable to set VFD on fapl for output file\n");
             h5tools_setstatus(EXIT_FAILURE);

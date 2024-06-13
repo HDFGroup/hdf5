@@ -133,6 +133,10 @@ typedef struct {
     int                   fs_persist;      /* Free space section threshold */
     long                  fs_threshold;    /* Free space section threshold */
     long long             fs_pagesize;     /* File space page size */
+    bool                  fin_vol;         /* Custom VOL for input file */
+    bool                  fin_vfd;         /* Custom VFD for input file */
+    bool                  fout_vol;        /* Custom VOL for output file */
+    bool                  fout_vfd;        /* Custom VFD for output file */
 } pack_opt_t;
 
 typedef struct named_dt_t {
