@@ -802,6 +802,16 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed library to allow usage of page buffering feature for serial file
+      access with parallel builds of HDF5
+
+      When HDF5 is built with parallel support enabled, the library would previously
+      disallow any usage of page buffering, even if a file was not opened with
+      parallel access. The library now allows usage of page buffering for serial
+      file access with parallel builds of HDF5. Usage of page buffering is still
+      disabled for any form of parallel file access, even if only 1 MPI process
+      is used.
+
     - Fixed a leak of datatype IDs created internally during datatype conversion
 
       Fixed an issue where the library could leak IDs that it creates internally

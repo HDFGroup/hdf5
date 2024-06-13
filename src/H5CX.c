@@ -153,10 +153,10 @@
  *      application's (non-default) property list.  Getting / setting these
  *      properties within the library does _not_ affect the application's
  *      property list.  Note that the naming of these fields, <foo> and
- *      <foo>_valid, is important for the H5CX_RETRIEVE_PROP_VALID ahd
- *      H5CX_RETRIEVE_PROP_VALID_SET macros to work properly.
+ *      <foo>_valid, is important for the H5CX_RETRIEVE_PROP_VALID
+ *      macro to work properly.
  *
- * - "Return-only"" properties that are returned to the application, mainly
+ * - "Return-only" properties that are returned to the application, mainly
  *      for sending out "introspection" information ("Why did collective I/O
  *      get broken for this operation?", "Which filters are set on the chunk I
  *      just directly read in?", etc) Setting these fields will cause the
@@ -164,6 +164,19 @@
  *      context is popped, when returning from the API routine.  Note that the
  *      naming of these fields, <foo> and <foo>_set, is important for the
  *      H5CX_TEST_SET_PROP and H5CX_SET_PROP macros to work properly.
+ *
+ * - "Return-and-read" properties that are returned to the application to send out introspection information,
+ *      but are also queried by the library internally. Internal queries always retrieve the original value
+ *      from the property list, and update the context's value to match. These properties have both a 'valid'
+ *      and 'set' flag. <foo>_valid is true if the field has ever been populated from its underlying property
+ *      list. <foo>_set flag is true if this field has ever been set on the context for application
+ *      introspection. The naming of these fields is important for the H5CX_RETRIEVE_PROP_VALID_SET macro to
+ *      work properly.
+ *
+ *      Note that if a set operation is followed by an internal read, it is possible for <foo>_set to be true
+ *      while the value in the context matches the underlying property list, resulting in a redundant write to
+ *      the property list when the context is popped. Similarly, if a field has been set on the context but
+ *      never read internally, <foo>_valid will be false despite the context containing a meaningful value.
  */
 typedef struct H5CX_t {
     /* DXPL */
@@ -1027,7 +1040,7 @@ H5CX_restore_state(const H5CX_state_t *api_state)
 /*-------------------------------------------------------------------------
  * Function:    H5CX_free_state
  *
- * Purpose:     Free a previously retrievedAPI context state
+ * Purpose:     Free a previously retrieved API context state
  *
  * Return:      Non-negative on success / Negative on failure
  *
