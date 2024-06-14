@@ -58,11 +58,15 @@ typedef enum {
 /* Define structure to hold property information */
 typedef struct H5P_genprop_t {
     /* Values for this property */
-    char             *name;        /* Name of property */
-    size_t            size;        /* Size of property value */
-    void             *value;       /* Pointer to property value */
-    H5P_prop_within_t type;        /* Type of object the property is within */
-    bool              shared_name; /* Whether the name is shared or not */
+    char             *name;  /* Name of property */
+    size_t            size;  /* Size of property value */
+    void             *value; /* Pointer to property value */
+    H5P_prop_within_t type;  /* Type of object the property is within */
+    bool shared_name; /* Whether the name buffer is owned by a different property. Names are only shared when
+                         duplicating a property from a class to a list, or when duplicating a property with a
+                         shared name from one list to another. The property that owns the name frees it when
+                         that property is closed. The name is guaranteed to stay allocated as long as other
+                         properties share it due to reference counting on property lists classes. */
 
     /* Callback function pointers & info */
     H5P_prp_create_func_t  create; /* Function to call when a property is created */
