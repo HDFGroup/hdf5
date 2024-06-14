@@ -271,7 +271,7 @@ typedef semaphore_t H5TS__semaphore_t;
 
 #elif defined(__unix__)
 /*
- * POSIX semaphores, everywhere else
+ * POSIX semaphores
  */
 #include <semaphore.h>
 
@@ -279,10 +279,19 @@ typedef semaphore_t H5TS__semaphore_t;
 typedef sem_t H5TS__semaphore_t;
 
 #else
-#error "Unsupported platform for semaphores!"
+/*
+ * Emulate semaphore w/mutex & condition variable
+ */
+
+typedef struct H5TS__semaphore_t {
+    H5TS_mutex_t mutex;
+    H5TS_cond_t cond;
+    unsigned waiters;
+    int counter;
+} H5TS__semaphore_t;
 #endif
 
-/* Lightweight semaphores */
+/* Lightweight semaphores, based on system semaphores */
 typedef struct H5TS_semaphore_t {
     H5TS__semaphore_t sem;   /* Underlying system semaphore */
     atomic_int        count; /* Wrapper around underlying system semaphore */
@@ -393,7 +402,7 @@ H5_DLL herr_t H5TS_barrier_wait(H5TS_barrier_t *barrier);
 H5_DLL herr_t H5TS_barrier_destroy(H5TS_barrier_t *barrier);
 
 #if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
-H5_DLL herr_t H5TS_semaphore_init(H5TS_semaphore_t *sem, unsigned initial_count);
+H5_DLL herr_t H5TS_semaphore_init(H5TS_semaphore_t *sem, int initial_count);
 /* semaphore signal & wait calls are defined in H5TSsemaphore.h */
 static inline herr_t H5TS_semaphore_signal(H5TS_semaphore_t *sem);
 static inline herr_t H5TS_semaphore_wait(H5TS_semaphore_t *sem);

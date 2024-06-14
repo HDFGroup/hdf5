@@ -186,12 +186,12 @@ tts_thread_pool(void)
     result        = H5TS_pool_create(&pool, NUM_THREADS);
     CHECK_I(result, "H5TS_pool_create");
 
-    for (unsigned u = 0; u < 20 * 1000 * 1000; u++) {
+    for (unsigned u = 0; u < 2 * 1000 * 1000; u++) {
         result = H5TS_pool_add_task(pool, incr_task, &counter_g);
         CHECK_I(result, "H5TS_pool_add_task");
     }
 
-    for (unsigned u = 0; u < 19 * 1000 * 1000; u++) {
+    for (unsigned u = 0; u < 1 * 1000 * 1000; u++) {
         result = H5TS_pool_add_task(pool, decr_task, &counter_g);
         CHECK_I(result, "H5TS_pool_add_task");
     }

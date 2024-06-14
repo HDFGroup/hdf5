@@ -164,7 +164,7 @@ done:
 
 #elif defined(__unix__)
 /*
- * POSIX semaphores, everywhere else
+ * POSIX semaphores
  */
 
 /*-------------------------------------------------------------------------
@@ -212,9 +212,65 @@ H5TS__semaphore_destroy(H5TS_semaphore_t *sem)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__semaphore_destroy() */
-
 #else
-#error "Unsupported platform!"
+/*
+ * Emulate semaphore w/mutex & condition variable
+ *
+ * Based off the Netscape Portable Runtime implementation:
+ *      https://hg.mozilla.org/projects/nspr/file/3e25d69ba6b268f2817e920a69eb2c091efe17e6/pr/src/threads/prsem.c
+ */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS__semaphore_init
+ *
+ * Purpose:  Initialize a H5TS_semaphore_t (does not allocate it)
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5TS__semaphore_init(H5TS_semaphore_t *sem, int initial_count)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(H5TS_mutex_init(&sem->sem.mutex, H5TS_MUTEX_TYPE_PLAIN) < 0))
+        HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(H5TS_cond_init(&sem->sem.cond) < 0))
+        HGOTO_DONE(FAIL);
+    sem->sem.waiters = 0;
+    sem->sem.counter = initial_count;
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS__semaphore_init() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS__semaphore_destroy
+ *
+ * Purpose:  Destroy a H5TS_semaphore_t (does not free it)
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5TS__semaphore_destroy(H5TS_semaphore_t *sem)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(H5TS_mutex_destroy(&sem->sem.mutex) < 0))
+        HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(H5TS_cond_destroy(&sem->sem.cond) < 0))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS__semaphore_destroy() */
 #endif
 
 /*-------------------------------------------------------------------------
@@ -227,7 +283,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_semaphore_init(H5TS_semaphore_t *sem, unsigned initial_count)
+H5TS_semaphore_init(H5TS_semaphore_t *sem, int initial_count)
 {
     herr_t ret_value = SUCCEED;
 
@@ -237,8 +293,8 @@ H5TS_semaphore_init(H5TS_semaphore_t *sem, unsigned initial_count)
     if (H5_UNLIKELY(NULL == sem))
         HGOTO_DONE(FAIL);
 
-    sem->count = (int)initial_count;
-    if (H5_UNLIKELY(H5TS__semaphore_init(sem, (int)initial_count) < 0))
+    atomic_init(&sem->count, initial_count);
+    if (H5_UNLIKELY(H5TS__semaphore_init(sem, initial_count) < 0))
         HGOTO_DONE(FAIL);
 
 done:

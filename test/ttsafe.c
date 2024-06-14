@@ -142,6 +142,9 @@ main(int argc, char *argv[])
     AddTest("rec_rwlock_4", tts_rec_rwlock_smoke_check_4, NULL,
             "recursive R/W lock smoke check 4 -- mixed mob", NULL);
 #endif /* !H5_HAVE_WIN_THREADS */
+#ifdef H5_HAVE_STDATOMIC_H
+    AddTest("semaphore", tts_semaphore, NULL, "lightweight system semaphores", NULL);
+#endif /* H5_HAVE_STDATOMIC_H */
 
 #ifdef H5_HAVE_THREADSAFE
     AddTest("thread_id", tts_thread_id, NULL, "thread IDs", NULL);

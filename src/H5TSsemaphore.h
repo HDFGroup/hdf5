@@ -73,7 +73,7 @@
 
 #elif defined(__unix__)
 /*
- * POSIX semaphores, everywhere else
+ * POSIX semaphores
  */
 
 #define H5TS__semaphore_signal(mutex) ((H5_UNLIKELY(0 != sem_post(&sem->sem))) ? FAIL : SUCCEED)
@@ -109,7 +109,93 @@ H5TS__semaphore_wait(H5TS_semaphore_t *sem)
     return SUCCEED;
 } /* end H5TS__semaphore_wait() */
 #else
-#error "Unsupported platform!"
+/*
+ * Emulate semaphore w/mutex & condition variable
+ *
+ * Based off the Netscape Portable Runtime implementation:
+ *      https://hg.mozilla.org/projects/nspr/file/3e25d69ba6b268f2817e920a69eb2c091efe17e6/pr/src/threads/prsem.c
+ */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS__semaphore_signal
+ *
+ * Purpose:  Increments (unlocks) the semaphore.  If the semaphore's value
+ *           becomes greater than zero, then another thread blocked in a wait
+ *           call will be woken up and proceed to lock the semaphore.
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static inline herr_t
+H5TS__semaphore_signal(H5TS_semaphore_t *sem)
+{
+    /* Acquire the mutex for the semaphore */
+    if (H5_UNLIKELY(H5TS_mutex_lock(&sem->sem.mutex) < 0))
+        return FAIL;
+
+    /* Wake a thread up, if any are waiting */
+    if (sem->sem.waiters)
+        if (H5_UNLIKELY(H5TS_cond_signal(&sem->sem.cond) < 0)) {
+            H5TS_mutex_unlock(&sem->sem.mutex);
+            return FAIL;
+        }
+
+    /* Increment the semaphore's value */
+    sem->sem.counter++;
+
+    /* Release the mutex for the semaphore */
+    if (H5_UNLIKELY(H5TS_mutex_unlock(&sem->sem.mutex) < 0))
+        return FAIL;
+
+    return SUCCEED;
+} /* end H5TS__semaphore_signal() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS__semaphore_wait
+ *
+ * Purpose:  Decrements (locks) the semaphore.  If the semaphore's value is
+ *           greater than zero, then the decrement proceeds, and the function
+ *           returns immediately.  If the semaphore currently has a value of
+ *           zero or less, then the call blocks until it becomes possible to
+ *           perform the decrement (i.e. the semaphore value rises above zero).
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static inline herr_t
+H5TS__semaphore_wait(H5TS_semaphore_t *sem)
+{
+    /* Acquire the mutex for the semaphore */
+    if (H5_UNLIKELY(H5TS_mutex_lock(&sem->sem.mutex) < 0))
+        return FAIL;
+
+    /* Wait for semaphore value > 0 */
+    while (0 == sem->sem.counter) {
+        herr_t ret;
+
+        /* Wait for signal that semaphore count has been incremented */
+        sem->sem.waiters++;
+        ret = H5TS_cond_wait(&sem->sem.cond, &sem->sem.mutex);
+        sem->sem.waiters--;
+
+        /* Check for error */
+        if (H5_UNLIKELY(ret < 0)) {
+            H5TS_mutex_unlock(&sem->sem.mutex);
+            return FAIL;
+        }
+    }
+
+    /* Decrement the semaphore's value */
+    sem->sem.counter--;
+
+    /* Release the mutex for the semaphore */
+    if (H5_UNLIKELY(H5TS_mutex_unlock(&sem->sem.mutex) < 0))
+        return FAIL;
+
+    return SUCCEED;
+} /* end H5TS__semaphore_wait() */
 #endif
 
 /*-------------------------------------------------------------------------
