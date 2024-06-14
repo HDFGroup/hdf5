@@ -48,7 +48,7 @@
  * be handled by the pthread library.
  *
  * In order for this macro to work, H5CX_get_my_context() must be preceded
- * by "H5CX_node_t *ctx =".
+ * by "H5CX_node_t **ctx =".
  */
 #define H5CX_get_my_context() H5CX__get_context()
 #else /* H5_HAVE_THREADSAFE */
@@ -84,14 +84,15 @@
     /* Mark the field as valid */                                                                            \
     (*head)->ctx.H5_GLUE(PROP_FIELD, _valid) = true;
 
-/* Macro for the duplicated code to retrieve properties from a property list */
+/* Macro for the duplicated code to retrieve a value from a plist if the context value is invalid */
 #define H5CX_RETRIEVE_PROP_VALID(PL, DEF_PL, PROP_NAME, PROP_FIELD)                                          \
     /* Check if the value has been retrieved already */                                                      \
     if (!(*head)->ctx.H5_GLUE(PROP_FIELD, _valid)) {                                                         \
         H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)                                         \
     } /* end if */
 
-/* Macro for the duplicated code to retrieve possibly set properties from a property list */
+/* Macro for the duplicated code to retrieve a value from a plist if the context value is invalid, or the
+ * library has previously modified the context value for return */
 #define H5CX_RETRIEVE_PROP_VALID_SET(PL, DEF_PL, PROP_NAME, PROP_FIELD)                                      \
     /* Check if the value has been retrieved already */                                                      \
     if (!((*head)->ctx.H5_GLUE(PROP_FIELD, _valid) || (*head)->ctx.H5_GLUE(PROP_FIELD, _set))) {             \
@@ -99,7 +100,7 @@
     } /* end if */
 
 #if defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_INSTRUMENTED_LIBRARY)
-/* Macro for the duplicated code to test and set properties for a property list */
+/* Macro for the duplicated code to set a context field that may not exist as a property */
 #define H5CX_TEST_SET_PROP(PROP_NAME, PROP_FIELD)                                                            \
     {                                                                                                        \
         htri_t check_prop = 0; /* Whether the property exists in the API context's DXPL */                   \
@@ -122,7 +123,7 @@
     }
 #endif /* defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_INSTRUMENTED_LIBRARY) */
 
-/* Macro for the duplicated code to test and set properties for a property list */
+/* Macro for the duplicated code to test and set properties for a property list from the context */
 #define H5CX_SET_PROP(PROP_NAME, PROP_FIELD)                                                                 \
     if ((*head)->ctx.H5_GLUE(PROP_FIELD, _set)) {                                                            \
         /* Retrieve the dataset transfer property list */                                                    \
