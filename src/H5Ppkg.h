@@ -108,10 +108,10 @@ struct H5P_genclass_t {
 struct H5P_genplist_t {
     H5P_genclass_t *pclass;     /* Pointer to class info */
     hid_t           plist_id;   /* Copy of the property list ID (for use in close callback) */
-    size_t          nprops;     /* Number of properties in class */
+    size_t          nprops;     /* Number of properties in this list */
     bool            class_init; /* Whether the class initialization callback finished successfully */
     H5SL_t         *del;        /* Skip list containing names of deleted properties */
-    H5SL_t         *props;      /* Skip list containing properties */
+    H5SL_t         *props;      /* Skip list containing properties modified from the parent class */
 };
 
 /* Property list/class iterator callback function pointer */
