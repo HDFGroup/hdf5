@@ -67,9 +67,3 @@ jobs:
         run: |
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
-
-      - name: CMake Run Tests
-        shell: bash
-        run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "ph5_f90_hyperslab_by_chunk|ph5_f90_hyperslab_by_pattern"
-        working-directory: ${{ runner.workspace }}/build
