@@ -95,4 +95,3 @@ H5TS_barrier_wait(H5TS_barrier_t *barrier)
 
     return SUCCEED;
 } /* end H5TS_barrier_wait() */
-

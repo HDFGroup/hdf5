@@ -403,4 +403,3 @@ H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock)
 } /* end H5TS_rwlock_wrunlock() */
 #endif
 #endif
-

@@ -324,7 +324,7 @@ static inline herr_t H5TS_rwlock_rdlock(H5TS_rwlock_t *lock);
 static inline herr_t H5TS_rwlock_rdunlock(H5TS_rwlock_t *lock);
 static inline herr_t H5TS_rwlock_wrlock(H5TS_rwlock_t *lock);
 static inline herr_t H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock);
-H5_DLL herr_t H5TS_rwlock_destroy(H5TS_rwlock_t *lock);
+H5_DLL herr_t        H5TS_rwlock_destroy(H5TS_rwlock_t *lock);
 
 #if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 /* 'Fast, Fair, Scalable' (FFS) R/W locks */
@@ -345,7 +345,7 @@ H5_DLL herr_t H5TS_key_create(H5TS_key_t *key, H5TS_key_destructor_func_t dtor);
 /* Key set & get calls are defined in H5TSkey.h */
 static inline herr_t H5TS_key_set_value(H5TS_key_t key, void *value);
 static inline herr_t H5TS_key_get_value(H5TS_key_t key, void **value);
-H5_DLL herr_t H5TS_key_delete(H5TS_key_t key);
+H5_DLL herr_t        H5TS_key_delete(H5TS_key_t key);
 
 /* Threads */
 H5_DLL herr_t H5TS_thread_create(H5TS_thread_t *thread, H5TS_thread_start_func_t func, void *udata);
@@ -368,31 +368,31 @@ static inline int  H5TS_atomic_load_int(H5TS_atomic_int_t *obj);
 static inline void H5TS_atomic_store_int(H5TS_atomic_int_t *obj, int desired);
 static inline int  H5TS_atomic_fetch_add_int(H5TS_atomic_int_t *obj, int arg);
 static inline int  H5TS_atomic_fetch_sub_int(H5TS_atomic_int_t *obj, int arg);
-H5_DLL void H5TS_atomic_destroy_int(H5TS_atomic_int_t *obj);
+H5_DLL void        H5TS_atomic_destroy_int(H5TS_atomic_int_t *obj);
 
 /* atomic_uint */
-H5_DLL void     H5TS_atomic_init_uint(H5TS_atomic_uint_t *obj, unsigned desired);
+H5_DLL void H5TS_atomic_init_uint(H5TS_atomic_uint_t *obj, unsigned desired);
 /* Atomic 'unsigned' load, store, etc. calls are defined in H5TSatomic.h */
 static inline unsigned H5TS_atomic_load_uint(H5TS_atomic_uint_t *obj);
 static inline void     H5TS_atomic_store_uint(H5TS_atomic_uint_t *obj, unsigned desired);
 static inline unsigned H5TS_atomic_fetch_add_uint(H5TS_atomic_uint_t *obj, unsigned arg);
 static inline unsigned H5TS_atomic_fetch_sub_uint(H5TS_atomic_uint_t *obj, unsigned arg);
-H5_DLL void     H5TS_atomic_destroy_uint(H5TS_atomic_uint_t *obj);
+H5_DLL void            H5TS_atomic_destroy_uint(H5TS_atomic_uint_t *obj);
 
 /* void * _Atomic (atomic void pointer) */
-H5_DLL void  H5TS_atomic_init_voidp(H5TS_atomic_voidp_t *obj, void *desired);
+H5_DLL void H5TS_atomic_init_voidp(H5TS_atomic_voidp_t *obj, void *desired);
 /* Atomic 'void *' load, store, etc. calls are defined in H5TSatomic.h */
 static inline void *H5TS_atomic_exchange_voidp(H5TS_atomic_voidp_t *obj, void *desired);
 static inline bool  H5TS_atomic_compare_exchange_strong_voidp(H5TS_atomic_voidp_t *obj, void **expected,
-                                                       void *desired);
-H5_DLL void  H5TS_atomic_destroy_voidp(H5TS_atomic_voidp_t *obj);
+                                                              void *desired);
+H5_DLL void         H5TS_atomic_destroy_voidp(H5TS_atomic_voidp_t *obj);
 #endif /* H5_HAVE_STDATOMIC_H */
 
 /* Barrier related function declarations */
 H5_DLL herr_t H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count);
 /* Barrier wait call is defined in H5TSbarrier.h */
 static inline herr_t H5TS_barrier_wait(H5TS_barrier_t *barrier);
-H5_DLL herr_t H5TS_barrier_destroy(H5TS_barrier_t *barrier);
+H5_DLL herr_t        H5TS_barrier_destroy(H5TS_barrier_t *barrier);
 
 H5_DLL herr_t H5TS_semaphore_init(H5TS_semaphore_t *sem, unsigned initial_count);
 /* Semaphore signal & wait calls are defined in H5TSsemaphore.h */
