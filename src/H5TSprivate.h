@@ -255,9 +255,9 @@ typedef sem_t H5TS_semaphore_t;
 /* Emulate semaphore w/mutex & condition variable */
 typedef struct H5TS_semaphore_t {
     H5TS_mutex_t mutex;
-    H5TS_cond_t cond;
-    unsigned waiters;
-    int counter;
+    H5TS_cond_t  cond;
+    unsigned     waiters;
+    int          counter;
 } H5TS_semaphore_t;
 #endif
 

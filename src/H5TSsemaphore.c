@@ -15,7 +15,8 @@
  *        semaphore's capabilities.
  *
  *        Emulated semaphores are based off the Netscape Portable Runtime
- *        implementation: https://hg.mozilla.org/projects/nspr/file/3e25d69ba6b268f2817e920a69eb2c091efe17e6/pr/src/threads/prsem.c
+ *        implementation:
+ * https://hg.mozilla.org/projects/nspr/file/3e25d69ba6b268f2817e920a69eb2c091efe17e6/pr/src/threads/prsem.c
  *
  * Note:  Because this threadsafety framework operates outside the library,
  *        it does not use the error stack (although it does use error macros

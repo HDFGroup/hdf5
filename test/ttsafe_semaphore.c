@@ -20,37 +20,37 @@
 
 #if defined(H5_HAVE_THREADS) && defined(H5_HAVE_STDATOMIC_H)
 
-#define NUM_PINGPONG (1000*1000)
-#define NUM_CLIENTSERVER (50*1000)
+#define NUM_PINGPONG     (1000 * 1000)
+#define NUM_CLIENTSERVER (50 * 1000)
 
 #define NUM_THREADS 16
 
 typedef struct {
     H5TS_semaphore_t ping_sem, pong_sem;
-    unsigned counter;
+    unsigned         counter;
 } pingpong_t;
 
 typedef struct {
     H5TS_semaphore_t ready_sem, work_avail_sem;
-    unsigned counter;
-    bool shutdown;
+    unsigned         counter;
+    bool             shutdown;
 } clientserver_t;
 
 static H5TS_THREAD_RETURN_TYPE
 ping(void *_test_info)
 {
-    pingpong_t *test_info = (pingpong_t *)_test_info;
+    pingpong_t       *test_info = (pingpong_t *)_test_info;
     herr_t            result;
     H5TS_thread_ret_t ret_value = 0;
 
     do {
-        result  = H5TS_semaphore_wait(&test_info->ping_sem);
-	CHECK_I(result, "H5TS_semaphore_wait");
+        result = H5TS_semaphore_wait(&test_info->ping_sem);
+        CHECK_I(result, "H5TS_semaphore_wait");
 
         test_info->counter++;
 
-        result  = H5TS_semaphore_signal(&test_info->pong_sem);
-	CHECK_I(result, "H5TS_semaphore_signal");
+        result = H5TS_semaphore_signal(&test_info->pong_sem);
+        CHECK_I(result, "H5TS_semaphore_signal");
     } while (test_info->counter < NUM_PINGPONG);
 
     return ret_value;
@@ -59,18 +59,18 @@ ping(void *_test_info)
 static H5TS_THREAD_RETURN_TYPE
 pong(void *_test_info)
 {
-    pingpong_t *test_info = (pingpong_t *)_test_info;
+    pingpong_t       *test_info = (pingpong_t *)_test_info;
     herr_t            result;
     H5TS_thread_ret_t ret_value = 0;
 
     do {
-        result  = H5TS_semaphore_wait(&test_info->pong_sem);
-	CHECK_I(result, "H5TS_semaphore_wait");
+        result = H5TS_semaphore_wait(&test_info->pong_sem);
+        CHECK_I(result, "H5TS_semaphore_wait");
 
         test_info->counter++;
 
-        result  = H5TS_semaphore_signal(&test_info->ping_sem);
-	CHECK_I(result, "H5TS_semaphore_signal");
+        result = H5TS_semaphore_signal(&test_info->ping_sem);
+        CHECK_I(result, "H5TS_semaphore_signal");
     } while (test_info->counter < NUM_PINGPONG);
 
     return ret_value;
@@ -84,9 +84,9 @@ pong(void *_test_info)
 static void
 tts_semaphore_pingpong(void)
 {
-    H5TS_thread_t    ping_thread, pong_thread;
-    pingpong_t       test_info;
-    herr_t           result;
+    H5TS_thread_t ping_thread, pong_thread;
+    pingpong_t    test_info;
+    herr_t        result;
 
     /* Test set up */
     /* NOTE: ping semaphore starts at 1 */
@@ -120,18 +120,18 @@ tts_semaphore_pingpong(void)
 static H5TS_THREAD_RETURN_TYPE
 client(void *_test_info)
 {
-    clientserver_t *test_info = (clientserver_t *)_test_info;
+    clientserver_t   *test_info = (clientserver_t *)_test_info;
     herr_t            result;
     H5TS_thread_ret_t ret_value = 0;
 
     do {
         /* Tell server this client is ready */
-        result  = H5TS_semaphore_signal(&test_info->ready_sem);
-	CHECK_I(result, "H5TS_semaphore_signal");
+        result = H5TS_semaphore_signal(&test_info->ready_sem);
+        CHECK_I(result, "H5TS_semaphore_signal");
 
         /* Wait for work */
-        result  = H5TS_semaphore_wait(&test_info->work_avail_sem);
-	CHECK_I(result, "H5TS_semaphore_wait");
+        result = H5TS_semaphore_wait(&test_info->work_avail_sem);
+        CHECK_I(result, "H5TS_semaphore_wait");
 
         /* Check for shutdown */
         if (test_info->shutdown)
@@ -152,10 +152,10 @@ client(void *_test_info)
 static void
 tts_semaphore_clientserver(void)
 {
-    H5TS_thread_t    client_threads[NUM_THREADS];
-    clientserver_t   test_info[NUM_THREADS];
-    unsigned         u;
-    herr_t           result;
+    H5TS_thread_t  client_threads[NUM_THREADS];
+    clientserver_t test_info[NUM_THREADS];
+    unsigned       u;
+    herr_t         result;
 
     for (u = 0; u < NUM_THREADS; u++) {
         /* Test set up */
@@ -163,7 +163,7 @@ tts_semaphore_clientserver(void)
         CHECK_I(result, "H5TS_semaphore_init");
         result = H5TS_semaphore_init(&test_info[u].work_avail_sem, 0);
         CHECK_I(result, "H5TS_semaphore_init");
-        test_info[u].counter = 0;
+        test_info[u].counter  = 0;
         test_info[u].shutdown = false;
 
         /* Start client thread */
@@ -175,29 +175,29 @@ tts_semaphore_clientserver(void)
     for (unsigned v = 0; v < NUM_CLIENTSERVER; v++)
         for (u = 0; u < NUM_THREADS; u++) {
             /* Wait for client to be ready */
-            result  = H5TS_semaphore_wait(&test_info[u].ready_sem);
+            result = H5TS_semaphore_wait(&test_info[u].ready_sem);
             CHECK_I(result, "H5TS_semaphore_signal");
 
             /* Set up "work" */
             test_info[u].counter++;
 
             /* Signal client thread */
-            result  = H5TS_semaphore_signal(&test_info[u].work_avail_sem);
+            result = H5TS_semaphore_signal(&test_info[u].work_avail_sem);
             CHECK_I(result, "H5TS_semaphore_signal");
         }
 
     /* Tell clients to shut down */
     for (u = 0; u < NUM_THREADS; u++) {
         /* Wait for client to be ready */
-        result  = H5TS_semaphore_wait(&test_info[u].ready_sem);
-	CHECK_I(result, "H5TS_semaphore_signal");
+        result = H5TS_semaphore_wait(&test_info[u].ready_sem);
+        CHECK_I(result, "H5TS_semaphore_signal");
 
         /* Set 'shutdown' flag */
         test_info[u].shutdown = true;
 
         /* Signal client thread */
-        result  = H5TS_semaphore_signal(&test_info[u].work_avail_sem);
-	CHECK_I(result, "H5TS_semaphore_signal");
+        result = H5TS_semaphore_signal(&test_info[u].work_avail_sem);
+        CHECK_I(result, "H5TS_semaphore_signal");
     }
 
     /* Wrap up */
@@ -238,14 +238,12 @@ tts_semaphore(void)
     result = H5TS_semaphore_destroy(NULL);
     VERIFY(result, FAIL, "H5TS_semaphore_destroy");
 
-
     /* Create & destroy semaphore */
     result = H5TS_semaphore_init(&sem, 0);
     CHECK_I(result, "H5TS_semaphore_init");
 
     result = H5TS_semaphore_destroy(&sem);
     CHECK_I(result, "H5TS_semaphore_destroy");
-
 
     /* Signal & wait w/same thread */
     result = H5TS_semaphore_init(&sem, 0);
@@ -260,14 +258,11 @@ tts_semaphore(void)
     result = H5TS_semaphore_destroy(&sem);
     CHECK_I(result, "H5TS_semaphore_destroy");
 
-
     /* Ping-pong test */
     tts_semaphore_pingpong();
-
 
     /* Client-server test */
     tts_semaphore_clientserver();
 } /* end tts_semaphore() */
 
 #endif /* defined(H5_HAVE_THREADS) && defined(H5_HAVE_STDATOMIC_H) */
-

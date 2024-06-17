@@ -121,9 +121,9 @@ done:
 static H5TS_THREAD_RETURN_TYPE
 H5TS__pool_do(void *_pool)
 {
-    H5TS_pool_t      *pool       = (H5TS_pool_t *)_pool; /* Pool for threads */
-    bool              have_queue_mutex = false;          /* Whether we're holding the task queue's mutex */
-    H5TS_thread_ret_t ret_value  = (H5TS_thread_ret_t)0;
+    H5TS_pool_t      *pool             = (H5TS_pool_t *)_pool; /* Pool for threads */
+    bool              have_queue_mutex = false; /* Whether we're holding the task queue's mutex */
+    H5TS_thread_ret_t ret_value        = (H5TS_thread_ret_t)0;
 
     /* Acquire tasks and invoke them, until pool is shut down */
     while (1) {
@@ -132,7 +132,6 @@ H5TS__pool_do(void *_pool)
         /* Wait for task */
         if (H5_UNLIKELY(H5TS_semaphore_wait(&pool->sem) < 0))
             HGOTO_DONE((H5TS_thread_ret_t)-1);
-
 
         /* Acquire the mutex for the task queue */
         if (H5_UNLIKELY(H5TS_mutex_lock(&pool->queue_mutex) < 0))
@@ -257,7 +256,7 @@ herr_t
 H5TS_pool_destroy(H5TS_pool_t *pool)
 {
     bool   have_queue_mutex = false; /* Whether we're holding the task queue mutex */
-    herr_t ret_value  = SUCCEED;
+    herr_t ret_value        = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -278,12 +277,10 @@ H5TS_pool_destroy(H5TS_pool_t *pool)
         HGOTO_DONE(FAIL);
     have_queue_mutex = false;
 
-
     /* Add a "shutdown" task for all threads */
     for (unsigned u = 0; u < pool->num_threads; u++)
         if (H5_UNLIKELY(H5TS_semaphore_signal(&pool->sem) < 0))
             HGOTO_DONE(FAIL);
-
 
     /* Free pool */
     if (H5_UNLIKELY(H5TS__pool_free(pool) < 0))

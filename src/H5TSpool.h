@@ -54,8 +54,8 @@ struct H5TS_pool_t {
     H5TS_pool_task_t *head, *tail; /* Task queue */
 
     /* Threads */
-    unsigned       num_threads;      /* # of threads in pool */
-    H5TS_thread_t *threads;          /* Array of worker threads in pool */
+    unsigned       num_threads; /* # of threads in pool */
+    H5TS_thread_t *threads;     /* Array of worker threads in pool */
 };
 
 /********************/
@@ -86,9 +86,9 @@ struct H5TS_pool_t {
 static inline herr_t
 H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
 {
-    H5TS_pool_task_t *task       = NULL;  /* Task for function to invoke */
+    H5TS_pool_task_t *task             = NULL;  /* Task for function to invoke */
     bool              have_queue_mutex = false; /* Whether we're holding the task queue mutex */
-    herr_t            ret_value  = SUCCEED;
+    herr_t            ret_value        = SUCCEED;
 
     /* Sanity checks */
     if (H5_UNLIKELY(NULL == pool))
@@ -133,7 +133,6 @@ H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
         goto done;
     }
     have_queue_mutex = false;
-
 
     /* Signal the semaphore */
     if (H5_UNLIKELY(H5TS_semaphore_signal(&pool->sem) < 0))
