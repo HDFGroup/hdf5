@@ -35,8 +35,7 @@
 
 #ifdef H5_HAVE_ROS3_VFD
 
-/* toggle debugging; pick a level
- */
+/* Set debug output level */
 #define ROS3_DEBUG_NONE           0
 #define ROS3_DEBUG_TRACE_API      1
 #define ROS3_DEBUG_TRACE_INTERNAL 2
@@ -49,19 +48,18 @@
 /* Max size of the cache, in bytes */
 #define ROS3_MAX_CACHE_SIZE 16777216
 
-/* The driver identification number, initialized at runtime
- */
+/* The driver identification number, initialized at runtime */
 static hid_t H5FD_ROS3_g = 0;
 
-/* Session/security token property name
- */
+/* Session/security token property name */
 #define ROS3_TOKEN_PROP_NAME "ros3_token_prop"
 
 #if ROS3_STATS
 
-/* arbitrarily large value, such that any reasonable size read will be "less"
+/* Arbitrarily large value, such that any reasonable size read will be "less"
  * than this value and set a true minimum
- * not 0 because that may be a valid recorded minimum in degenerate cases
+ *
+ * Not 0 because that may be a valid recorded minimum in degenerate cases
  */
 #define ROS3_STATS_STARTING_MIN 0xfffffffful
 
@@ -77,8 +75,7 @@ static hid_t H5FD_ROS3_g = 0;
 #define ROS3_STATS_START_POWER 10
 #define ROS3_STATS_BIN_COUNT   16 /* MUST BE GREATER THAN 0 */
 
-/*
- * Calculate `BASE ^ (START_POWER + (INTERVAL * bin_i))`
+/* Calculate `BASE ^ (START_POWER + (INTERVAL * bin_i))`
  * Stores result at `(unsigned long long *) out_ptr`.
  * Used in computing boundaries between stats bins.
  */
@@ -94,19 +91,11 @@ static hid_t H5FD_ROS3_g = 0;
         *(out_ptr) = donotshadowresult;                                                                      \
     }
 
-/* array to hold pre-computed boundaries for stats bins
- */
+/* Array to hold pre-computed boundaries for stats bins */
 static unsigned long long ros3_stats_boundaries[ROS3_STATS_BIN_COUNT];
 
 /***************************************************************************
- *
- * Structure: ros3_statsbin
- *
- * Purpose:
- *
- *     Structure for storing per-file ros3 VFD usage statistics.
- *
- *
+ * Structure for storing per-file ros3 VFD usage statistics.
  *
  * `count` (unsigned long long)
  *
@@ -123,7 +112,6 @@ static unsigned long long ros3_stats_boundaries[ROS3_STATS_BIN_COUNT];
  * `max` (unsigned long long)
  *
  *     Largest read size in this bin.
- *
  ***************************************************************************/
 typedef struct {
     unsigned long long count;
@@ -135,19 +123,8 @@ typedef struct {
 #endif /* ROS3_STATS */
 
 /***************************************************************************
- *
- * Structure: H5FD_ros3_t
- *
- * Purpose:
- *
- *     H5FD_ros3_t is a structure used to store all information needed to
- *     maintain R/O access to a single HDF5 file that has been stored as a
- *     S3 object.  This structure is created when such a file is "opened" and
- *     discarded when it is "closed".
- *
- *     Presents an S3 object as a file to the HDF5 library.
- *
- *
+ * Stores all information needed to maintain access to a single HDF5 file
+ * that has been stored as a S3 object.
  *
  * `pub` (H5FD_t)
  *
@@ -188,7 +165,6 @@ typedef struct {
  *     reserved for "big" reads, with no defined upper bound.
  *
  * *** end ROS3_STATS ***
- *
  ***************************************************************************/
 typedef struct H5FD_ros3_t {
     H5FD_t           pub;
@@ -203,8 +179,7 @@ typedef struct H5FD_ros3_t {
 #endif
 } H5FD_ros3_t;
 
-/*
- * These macros check for overflow of various quantities.  These macros
+/* These macros check for overflow of various quantities.  These macros
  * assume that HDoff_t is signed and haddr_t and size_t are unsigned.
  *
  * ADDR_OVERFLOW:   Checks whether a file address of type `haddr_t'
@@ -294,9 +269,8 @@ H5FL_DEFINE_STATIC(H5FD_ros3_t);
  * Purpose:     Initialize this driver by registering the driver with the
  *              library.
  *
- * Return:      Success:    The driver ID for the ros3 driver.
- *              Failure:    Negative
- *
+ * Return:      Success:    The driver ID for the ros3 driver
+ *              Failure:    H5I_INVALID_HID
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -320,8 +294,7 @@ H5FD_ros3_init(void)
         }
 
 #if ROS3_STATS
-        /* pre-compute statsbin boundaries */
-        /* do it only during initial registration */
+        /* Pre-compute statsbin boundaries */
         for (bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++) {
             unsigned long long value = 0;
 
@@ -343,7 +316,6 @@ done:
  * Purpose:     Shut down the VFD
  *
  * Returns:     SUCCEED (Can't fail)
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -365,12 +337,9 @@ H5FD__ros3_term(void)
  * Function:    H5Pset_fapl_ros3
  *
  * Purpose:     Modify the file access property list to use the H5FD_ROS3
- *              driver defined in this source file.  All driver specific
- *              properties are passed in as a pointer to a suitably
- *              initialized instance of H5FD_ros3_fapl_t
+ *              driver defined in this source file.
  *
  * Return:      SUCCEED/FAIL
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -401,20 +370,12 @@ done:
 } /* end H5Pset_fapl_ros3() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__ros3_validate_config()
+ * Function:    H5FD__ros3_validate_config
  *
  * Purpose:     Test to see if the supplied instance of H5FD_ros3_fapl_t
- *              contains internally consistent data.  Return SUCCEED if so,
- *              and FAIL otherwise.
+ *              contains internally consistent data.
  *
- *              Note the difference between internally consistent and
- *              correct.  As we will have to try to access the target
- *              object to determine whether the supplied data is correct,
- *              we will settle for internal consistency at this point
- *
- * Return:      SUCCEED if instance of H5FD_ros3_fapl_t contains internally
- *              consistent data, FAIL otherwise.
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -429,7 +390,7 @@ H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa)
     if (fa->version != H5FD_CURR_ROS3_FAPL_T_VERSION)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_ros3_fapl_t version");
 
-    /* if set to authenticate, region and id cannot be empty strings */
+    /* if set to authenticate, region and secret_id cannot be empty strings */
     if (fa->authenticate == true)
         if ((fa->aws_region[0] == '\0') || (fa->secret_id[0] == '\0'))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Inconsistent authentication information");
@@ -441,13 +402,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fapl_ros3
  *
- * Purpose:     Returns information about the ros3 file access property
- *              list though the function arguments.
+ * Purpose:     Queries properties set by the H5Pset_fapl_ros3() function.
  *
- * Return:      Success:        Non-negative
- *
- *              Failure:        Negative
- *
+ * Return:      Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -490,10 +447,8 @@ done:
  * Purpose:     Gets a file access property list which could be used to
  *              create an identical file.
  *
- * Return:      Success:        Ptr to new file access property list value.
- *
- *              Failure:        NULL
- *
+ * Return:      Success:    Pointer to new file access property list value
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
@@ -528,10 +483,8 @@ done:
  *
  * Purpose:     Copies the ros3-specific file access properties.
  *
- * Return:      Success:        Ptr to a new property list
- *
- *              Failure:        NULL
- *
+ * Return:      Success:    Pointer to a new property list
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
@@ -564,7 +517,6 @@ done:
  * Purpose:     Frees the ros3-specific file access properties.
  *
  * Return:      SUCCEED (cannot fail)
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -574,7 +526,7 @@ H5FD__ros3_fapl_free(void *_fa)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    assert(fa != NULL); /* sanity check */
+    assert(fa != NULL);
 
     H5MM_xfree(fa);
 
@@ -587,13 +539,7 @@ H5FD__ros3_fapl_free(void *_fa)
  * Purpose:     Returns session/security token of the ros3 file access
  *              property list though the function arguments.
  *
- * Return:      Success:        Non-negative
- *
- *              Failure:        Negative
- *
- * Programmer:  Jan-Willem Blokland
- *              2023-05-26
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -640,15 +586,11 @@ done:
 } /* end H5Pget_fapl_ros3_token() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__ros3_str_token_copy()
+ * Function:    H5FD__ros3_str_token_copy
  *
  * Purpose:     Create a copy of the token string.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Jan-Willem Blokland
- *              2023-05-26
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -672,17 +614,11 @@ done:
 } /* H5FD__ros3_str_token_copy() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__ros3_str_token_cmp()
+ * Function:    H5FD__ros3_str_token_cmp
  *
  * Purpose:     Compares two token strings with each other.
  *
- * Return:
- *     - Equivalent:     0
- *     - Not Equivalent: non-zero value
- *
- * Programmer:  Jan-Willem Blokland
- *              2023-05-26
- *
+ * Return:      A value like strcmp()
  *-------------------------------------------------------------------------
  */
 static int
@@ -711,17 +647,13 @@ H5FD__ros3_str_token_cmp(const void *_value1, const void *_value2, size_t H5_ATT
 } /* H5FD__ros3_str_token_cmp */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__ros3_str_token_close()
+ * Function:    H5FD__ros3_str_token_close
  *
  * Purpose:     Closes/frees the memory associated to the token string.
  *              Currently, it is an empty implementation since there no
  *              additional treatment needed for this property.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Jan-Willem Blokland
- *              2023-05-26
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -739,7 +671,7 @@ H5FD__ros3_str_token_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
 } /* H5FD__ros3_str_token_close */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__ros3_str_token_delete()
+ * Function:    H5FD__ros3_str_token_delete
  *
  * Purpose:     Deletes the property token from the property list and frees
  *              the memory associated to the token string.
@@ -747,10 +679,6 @@ H5FD__ros3_str_token_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
  *              additional treatment needed for this property.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Jan-Willem Blokland
- *              2023-05-26
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -769,17 +697,13 @@ H5FD__ros3_str_token_delete(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNU
 } /* H5FD__ros3_str_token_delete */
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pset_fapl_ros3_token()
+ * Function:    H5Pset_fapl_ros3_token
  *
  * Purpose:     Modify the file access property list to use the H5FD_ROS3
  *              driver defined in this source file by adding or
  *              modifying the session/security token property.
  *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Jan-Willem Blokland
- *              2023-05-26
- *
+ * Return:      Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -832,21 +756,11 @@ done:
 
 #if ROS3_STATS
 /*----------------------------------------------------------------------------
+ * Function:    ros3_reset_stats
  *
- * Function: ros3_reset_stats()
+ * Purpose:     Reset the collected statistics
  *
- * Purpose:
- *
- *     Reset the stats collection elements in this virtual file structure.
- *
- *     Clears any set data in stats bins; initializes/zeroes values.
- *
- * Return:
- *
- *     - SUCCESS: `SUCCEED`
- *     - FAILURE: `FAIL`
- *         - Occurs if the file is invalid somehow
- *
+ * Return:      SUCCEED/FAIL
  *----------------------------------------------------------------------------
  */
 static herr_t
@@ -882,16 +796,13 @@ done:
 #endif /* ROS3_STATS */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_open
  *
- * Function: H5FD__ros3_open()
- *
- * Purpose:
- *
- *     Create and/or opens a file as an HDF5 file.
+ * Purpose:     Create and/or open a file as an HDF5 file.
  *
  *     Any flag except H5F_ACC_RDONLY will cause an error.
  *
- *     Name (as received from `H5FD_open()`) must conform to web url:
+ *     `url` param (as received from `H5FD_open()`) must conform to web url:
  *         NAME   :: HTTP "://" DOMAIN [PORT] ["/" [URI] [QUERY] ]
  *         HTTP   :: "http" [ "s" ]
  *         DOMAIN :: e.g., "mybucket.host.org"
@@ -899,14 +810,8 @@ done:
  *         URI    :: <string> (e.g., "path/to/resource.hd5" )
  *         QUERY  :: "?" <string> (e.g., "arg1=param1&arg2=param2")
  *
- * Return:
- *
- *     Success: A pointer to a new file data structure.
- *              The public fields will be initialized by the caller, which is
- *              always H5FD_open().
- *
- *     Failure: NULL
- *
+ * Return:      Success:    A pointer to a new file data structure
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -958,13 +863,14 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get token value");
     }
 
-    /* open file; procedure depends on whether or not the fapl instructs to
+    /* Open file; procedure depends on whether or not the fapl instructs to
      * authenticate requests or not.
      */
     if (fa.authenticate == true) {
-        /* compute signing key (part of AWS/S3 REST API)
-         * can be re-used by user/key for 7 days after creation.
-         * find way to reuse/share
+        /* Compute signing key (part of AWS/S3 REST API). Can be re-used by
+         * user/key for 7 days after creation.
+         *
+         * TODO: Find way to reuse/share?
          */
         now = gmnow();
         assert(now != NULL);
@@ -991,7 +897,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
          */
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "could not open");
 
-    /* create new file struct */
+    /* Create new file struct */
     file = H5FL_CALLOC(H5FD_ros3_t);
     if (file == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct");
@@ -1002,7 +908,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 #if ROS3_STATS
     if (FAIL == ros3_reset_stats(file))
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, NULL, "unable to reset file statistics");
-#endif /* ROS3_STATS */
+#endif
 
     /* Cache the initial bytes of the file */
     {
@@ -1027,20 +933,17 @@ done:
             H5MM_xfree(file->cache);
             file = H5FL_FREE(H5FD_ros3_t, file);
         }
-        curl_global_cleanup(); /* early cleanup because open failed */
-    }                          /* end if null return value (error) */
+        curl_global_cleanup();
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ros3_open() */
 
 #if ROS3_STATS
 /*----------------------------------------------------------------------------
+ * Function:    ros3_fprint_stats
  *
- * Function: ros3_fprint_stats()
- *
- * Purpose:
- *
- *     Tabulate and pretty-print statistics for this virtual file.
+ * Purpose:     Tabulate and pretty-print statistics for this virtual file.
  *
  *     Should be called upon file close.
  *
@@ -1077,13 +980,7 @@ done:
  *     - 41080 bytes is represented by 40.177k, not 41.080k
  *     - 1004.831M represents approx. 1052642000 bytes
  *
- * Return:
- *
- *     - SUCCESS: `SUCCEED`
- *     - FAILURE: `FAIL`
- *         - occurs if the file passed in is invalid
- *         - TODO: if stream is invalid? how can we check this?
- *
+ * Return:      SUCCEED/FAIL
  *----------------------------------------------------------------------------
  */
 static herr_t
@@ -1293,13 +1190,13 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
         assert(suffix_i < sizeof(suffixes));
 
         fprintf(stream, " %8.3f%c %7llu %7llu %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
-                suffixes[suffix_i], /* bin ceiling      */
-                m->count,           /* metadata reads   */
-                r->count,           /* raw data reads    */
-                bm_val, bm_suffix,  /* metadata bytes   */
-                br_val, br_suffix,  /* raw data bytes    */
-                am_val, am_suffix,  /* metadata average */
-                ar_val, ar_suffix); /* raw data average  */
+                suffixes[suffix_i], /* Bin ceiling      */
+                m->count,           /* Metadata reads   */
+                r->count,           /* Raw data reads    */
+                bm_val, bm_suffix,  /* Metadata bytes   */
+                br_val, br_suffix,  /* Raw data bytes    */
+                am_val, am_suffix,  /* Metadata average */
+                ar_val, ar_suffix); /* Raw data average  */
 
         fflush(stream);
     }
@@ -1311,17 +1208,11 @@ done:
 #endif /* ROS3_STATS */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_close
  *
- * Function: H5FD__ros3_close()
+ * Purpose:     Close the file.
  *
- * Purpose:
- *
- *     Close an HDF5 file.
- *
- * Return:
- *
- *     SUCCEED/FAIL
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1336,7 +1227,6 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     fprintf(stdout, "H5FD__ros3_close() called.\n");
 #endif
 
-    /* Sanity checks */
     assert(file != NULL);
     assert(file->s3r_handle != NULL);
 
@@ -1344,10 +1234,9 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     /* TODO: mechanism to re-target stats printout */
     if (ros3_fprint_stats(stdout, file) == FAIL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_ERROR, FAIL, "problem while writing file statistics");
-#endif /* ROS3_STATS */
+#endif
 
-    /* Close the underlying request handle
-     */
+    /* Close the underlying request handle */
     if (FAIL == H5FD_s3comms_s3r_close(file->s3r_handle))
         HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close S3 request handle");
 
@@ -1356,36 +1245,31 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     file = H5FL_FREE(H5FD_ros3_t, file);
 
 done:
-    curl_global_cleanup(); /* cleanup to answer init on open */
+    curl_global_cleanup();
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ros3_close() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_cmp
  *
- * Function: H5FD__ros3_cmp()
+ * Purpose:     Compares two files belonging to this driver using an
+ *              arbitrary (but consistent) ordering:
  *
- * Purpose:
+ *              + url scheme
+ *              + url host
+ *              + url port
+ *              + url path
+ *              + url query
+ *              + fapl aws_region
+ *              + fapl secret_id
+ *              + fapl secret_key
  *
- *     Compares two files belonging to this driver using an arbitrary
- *     (but consistent) ordering:
+ * TODO:        This should return -1/0/1 like the other VFDs
  *
- *     + url scheme
- *     + url host
- *     + url port
- *     + url path
- *     + url query
- *     + fapl aws_region
- *     + fapl secret_id
- *     + fapl secret_key
- *
- *     tl;dr -> check URL, check credentials
- *
- * Return:
- *
- *     - Equivalent:      0
- *     - Not Equivalent: -1
- *
+ * Return:      Equivalent:         0
+ *              Not Equivalent:    -1
+ *              (Can't fail)
  *-------------------------------------------------------------------------
  */
 static int
@@ -1493,14 +1377,7 @@ done:
  * Purpose:     Set the flags that this VFL driver is capable of supporting.
  *              (listed in H5FDpublic.h)
  *
- *              Note that since the ROS3 VFD is read only, most flags
- *              are irrelevant.
- *
- *              The term "set" is highly misleading...
- *              stores/copies the supported flags in the out-pointer `flags`.
- *
  * Return:      SUCCEED (Can't fail)
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1512,30 +1389,27 @@ H5FD__ros3_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
     fprintf(stdout, "H5FD__ros3_query() called.\n");
 #endif
 
-    /* Set the VFL feature flags that this driver supports */
+    /* Set the VFL feature flags that this driver supports
+     *
+     * Since the ros3 VFD is read-only, many flags are irrelevant.
+     */
     if (flags) {
         *flags = 0;
         /* OK to perform data sieving for faster raw data reads & writes */
         *flags |= H5FD_FEAT_DATA_SIEVE;
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5FD__ros3_query() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_get_eoa
  *
- * Function: H5FD__ros3_get_eoa()
+ * Purpose:     Gets the end-of-address marker for the file. The EOA marker
+ *              is the first address past the last byte allocated in the
+ *              format address space.
  *
- * Purpose:
- *
- *     Gets the end-of-address marker for the file. The EOA marker
- *     is the first address past the last byte allocated in the
- *     format address space.
- *
- * Return:
- *
- *     The end-of-address marker.
- *
+ * Return:      The end-of-address marker (Can't fail)
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -1553,17 +1427,11 @@ H5FD__ros3_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 } /* end H5FD__ros3_get_eoa() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_set_eoa
  *
- * Function: H5FD__ros3_set_eoa()
+ * Purpose:     Set the end-of-address marker for the file.
  *
- * Purpose:
- *
- *     Set the end-of-address marker for the file.
- *
- * Return:
- *
- *      SUCCEED  (can't fail)
- *
+ * Return:      SUCCEED  (can't fail)
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1583,18 +1451,12 @@ H5FD__ros3_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 } /* H5FD__ros3_set_eoa() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_get_eof
  *
- * Function: H5FD__ros3_get_eof()
+ * Purpose:     Returns the end-of-file marker.
  *
- * Purpose:
- *
- *     Returns the end-of-file marker.
- *
- * Return:
- *
- *     EOF: the first address past the end of the "file", either the
- *     filesystem file or the HDF5 file.
- *
+ * Return:      End of file address, the first address past the end of the
+ *              "file". (Can't fail)
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -1612,17 +1474,11 @@ H5FD__ros3_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 } /* end H5FD__ros3_get_eof() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_get_handle
  *
- * Function: H5FD__ros3_get_handle()
+ * Purpose:     Returns the S3 Request handle (s3r_t) of ros3 file driver.
  *
- * Purpose:
- *
- *     Returns the S3 Request handle (s3r_t) of ros3 file driver.
- *
- * Returns:
- *
- *     SUCCEED/FAIL
- *
+ * Returns:     SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1647,22 +1503,13 @@ done:
 } /* end H5FD__ros3_get_handle() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_read
  *
- * Function: H5FD__ros3_read()
+ * Purpose:     Reads SIZE bytes of data from FILE beginning at address ADDR
+ *              into buffer BUF according to data transfer properties in
+ *              DXPL_ID.
  *
- * Purpose
- *
- *     Reads SIZE bytes of data from FILE beginning at address ADDR
- *     into buffer BUF according to data transfer properties in DXPL_ID.
- *
- * Return:
- *
- *     Success: `SUCCEED`
- *         - Result is stored in caller-supplied buffer BUF.
- *     Failure: `FAIL`
- *         - Unable to complete read.
- *         - Contents of buffer `buf` are undefined.
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1676,7 +1523,7 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     /* working variables for storing stats */
     ros3_statsbin *bin   = NULL;
     unsigned       bin_i = 0;
-#endif /* ROS3_STATS */
+#endif
 
     FUNC_ENTER_PACKAGE
 
@@ -1705,7 +1552,6 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
 
 #if ROS3_STATS
-
         /* Find which "bin" this read fits in. Can be "overflow" bin.  */
         for (bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++)
             if ((unsigned long long)size < ros3_stats_boundaries[bin_i])
@@ -1725,8 +1571,7 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         }
         bin->count++;
         bin->bytes += (unsigned long long)size;
-
-#endif /* ROS3_STATS */
+#endif
     }
 
 done:
@@ -1734,18 +1579,13 @@ done:
 } /* end H5FD__ros3_read() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_write
  *
- * Function: H5FD__ros3_write()
+ * Purpose:     Write bytes to file
  *
- * Purpose:
+ *              UNSUPPORTED IN READ-ONLY ROS3 VFD.
  *
- *     Write bytes to file.
- *     UNSUPPORTED IN READ-ONLY ROS3 VFD.
- *
- * Return:
- *
- *     FAIL (Not possible with Read-Only S3 file.)
- *
+ * Return:      FAIL (Not possible with Read-Only S3 file)
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1767,20 +1607,14 @@ done:
 } /* H5FD__ros3_write() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_truncate
  *
- * Function: H5FD__ros3_truncate()
+ * Purpose:     Makes sure that the true file size is the same (or larger)
+ *              than the end-of-address.
  *
- * Purpose:
+ *              NOT POSSIBLE ON READ-ONLY S3 FILES
  *
- *     Makes sure that the true file size is the same (or larger)
- *     than the end-of-address.
- *
- *     NOT POSSIBLE ON READ-ONLY S3 FILES.
- *
- * Return:
- *
- *     FAIL (Not possible on Read-Only S3 files.)
- *
+ * Return:      FAIL (Not possible on Read-Only S3 files)
  *-------------------------------------------------------------------------
  */
 static herr_t
