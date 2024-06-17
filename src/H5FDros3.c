@@ -1086,15 +1086,15 @@ H5FD__ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
     for (i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
         const H5FD_ros3_stats_bin_t *m;
         const H5FD_ros3_stats_bin_t *r;
-        unsigned long long   range_end = 0;
-        char                 bm_suffix = ' '; /* bytes-meta */
-        double               bm_val    = 0.0;
-        char                 br_suffix = ' '; /* bytes-raw */
-        double               br_val    = 0.0;
-        char                 am_suffix = ' '; /* average-meta */
-        double               am_val    = 0.0;
-        char                 ar_suffix = ' '; /* average-raw */
-        double               ar_val    = 0.0;
+        unsigned long long           range_end = 0;
+        char                         bm_suffix = ' '; /* bytes-meta */
+        double                       bm_val    = 0.0;
+        char                         br_suffix = ' '; /* bytes-raw */
+        double                       br_val    = 0.0;
+        char                         am_suffix = ' '; /* average-meta */
+        double                       am_val    = 0.0;
+        char                         ar_suffix = ' '; /* average-raw */
+        double                       ar_val    = 0.0;
 
         m = &file->meta[i];
         r = &file->raw[i];
@@ -1467,7 +1467,7 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
 #ifdef ROS3_STATS
         H5FD_ros3_stats_bin_t *bin = NULL;
-        int            i   = 0;
+        int                    i   = 0;
 
         /* Find which "bin" this read fits in. Can be "overflow" bin.  */
         for (i = 0; i < ROS3_STATS_BIN_COUNT; i++)
