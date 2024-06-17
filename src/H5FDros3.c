@@ -56,13 +56,6 @@ static hid_t H5FD_ROS3_g = 0;
  * array that is initialized at VFD startup does not change.
  */
 
-/* Arbitrarily large value, such that any reasonable size read will be "less"
- * than this value and set a true minimum
- *
- * Not 0 because that may be a valid recorded minimum in degenerate cases
- */
-#define ROS3_STATS_STARTING_MIN 0xfffffffful
-
 /* Number of bins */
 #define ROS3_STATS_BIN_COUNT 16
 
@@ -697,12 +690,12 @@ H5FD__ros3_reset_stats(H5FD_ros3_t *file)
     for (int i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
         file->raw[i].bytes = 0;
         file->raw[i].count = 0;
-        file->raw[i].min   = (uint64_t)ROS3_STATS_STARTING_MIN;
+        file->raw[i].min   = 0;
         file->raw[i].max   = 0;
 
         file->meta[i].bytes = 0;
         file->meta[i].count = 0;
-        file->meta[i].min   = (uint64_t)ROS3_STATS_STARTING_MIN;
+        file->meta[i].min   = 0;
         file->meta[i].max   = 0;
     }
 
@@ -905,8 +898,8 @@ H5FD__ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
     unsigned long count_raw    = 0;
     double        average_meta = 0.0;
     double        average_raw  = 0.0;
-    uint64_t      min_meta     = (uint64_t)ROS3_STATS_STARTING_MIN;
-    uint64_t      min_raw      = (uint64_t)ROS3_STATS_STARTING_MIN;
+    uint64_t      min_meta     = 0;
+    uint64_t      min_raw      = 0;
     uint64_t      max_meta     = 0;
     uint64_t      max_raw      = 0;
     uint64_t      bytes_raw    = 0;
