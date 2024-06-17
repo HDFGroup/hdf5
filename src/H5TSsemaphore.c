@@ -74,13 +74,13 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_semaphore_init(H5TS_semaphore_t *sem, int initial_count)
+H5TS_semaphore_init(H5TS_semaphore_t *sem, unsigned initial_count)
 {
     /* Check argument */
     if (H5_UNLIKELY(NULL == sem))
         return FAIL;
 
-    if (H5_UNLIKELY(NULL == (*sem = CreateSemaphore(NULL, initial_count, LONG_MAX, NULL))))
+    if (H5_UNLIKELY(NULL == (*sem = CreateSemaphore(NULL, (LONG)initial_count, LONG_MAX, NULL))))
         return FAIL;
 
     return SUCCEED;
@@ -123,7 +123,7 @@ H5TS_semaphore_destroy(H5TS_semaphore_t *sem)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_semaphore_init(H5TS_semaphore_t *sem, int initial_count)
+H5TS_semaphore_init(H5TS_semaphore_t *sem, unsigned initial_count)
 {
     /* Check argument */
     if (H5_UNLIKELY(NULL == sem))
@@ -171,7 +171,7 @@ H5TS_semaphore_destroy(H5TS_semaphore_t *sem)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TS_semaphore_init(H5TS_semaphore_t *sem, int initial_count)
+H5TS_semaphore_init(H5TS_semaphore_t *sem, unsigned initial_count)
 {
     /* Check argument */
     if (H5_UNLIKELY(NULL == sem))
@@ -184,7 +184,7 @@ H5TS_semaphore_init(H5TS_semaphore_t *sem, int initial_count)
         return FAIL;
     }
     sem->waiters = 0;
-    sem->counter = initial_count;
+    sem->counter = (int)initial_count;
 
     return SUCCEED;
 } /* end H5TS_semaphore_init() */
