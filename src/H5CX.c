@@ -2351,7 +2351,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_data_transform
  *
- * Purpose:     Retrieves the I/O filter callback function for the current API call context.
+ * Purpose:     Retrieves the data transformation expression for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
  *
