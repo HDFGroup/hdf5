@@ -35,14 +35,7 @@
 
 #ifdef H5_HAVE_ROS3_VFD
 
-/* Set debug output level */
-#define ROS3_DEBUG_NONE           0
-#define ROS3_DEBUG_TRACE_API      1
-#define ROS3_DEBUG_TRACE_INTERNAL 2
-#define ROS3_DEBUG                ROS3_DEBUG_NONE
-
-/* toggle stats collection and reporting
- */
+/* Toggle stats collection and reporting */
 #define ROS3_STATS 0
 
 /* Max size of the cache, in bytes */
@@ -283,10 +276,6 @@ H5FD_ros3_init(void)
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
-#if ROS3_DEBUG
-    fprintf(stdout, "H5FD_ros3_init() called.\n");
-#endif
-
     if (H5I_VFL != H5I_get_type(H5FD_ROS3_g)) {
         H5FD_ROS3_g = H5FD_register(&H5FD_ros3_g, sizeof(H5FD_class_t), false);
         if (H5I_INVALID_HID == H5FD_ROS3_g) {
@@ -323,10 +312,6 @@ H5FD__ros3_term(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-#if ROS3_DEBUG
-    fprintf(stdout, "H5FD__ros3_term() called.\n");
-#endif
-
     /* Reset VFL ID */
     H5FD_ROS3_g = 0;
 
@@ -351,10 +336,6 @@ H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa)
     FUNC_ENTER_API(FAIL)
 
     assert(fa != NULL);
-
-#if ROS3_DEBUG
-    fprintf(stdout, "H5Pset_fapl_ros3() called.\n");
-#endif
 
     plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
     if (plist == NULL)
@@ -415,10 +396,6 @@ H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_dst /*out*/)
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-
-#if ROS3_DEBUG
-    fprintf(stdout, "H5Pget_fapl_ros3() called.\n");
-#endif
 
     if (fa_dst == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_dst is NULL");
@@ -553,10 +530,6 @@ H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token_dst /*out*/)
 
     FUNC_ENTER_API(FAIL)
 
-#if ROS3_DEBUG
-    fprintf(stdout, "H5Pget_fapl_ros3_token() called.\n");
-#endif
-
     if (size == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size cannot be zero.");
     if (token_dst == NULL)
@@ -600,10 +573,6 @@ H5FD__ros3_str_token_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
-
-#if ROS3_DEBUG
-    fprintf(stdout, "H5FD__ros3_str_token_copy() called.\n");
-#endif
 
     if (*value)
         if (NULL == (*value = strdup(*value)))
@@ -716,10 +685,6 @@ H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
 
     FUNC_ENTER_API(FAIL)
 
-#if ROS3_DEBUG
-    fprintf(stdout, "H5Pset_fapl_ros3_token() called.\n");
-#endif
-
     if (fapl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -770,10 +735,6 @@ ros3_reset_stats(H5FD_ros3_t *file)
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
-
-#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
-    printf("ros3_reset_stats() called\n");
-#endif
 
     if (file == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file was null");
@@ -829,10 +790,6 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_t          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
-
-#if ROS3_DEBUG
-    fprintf(stdout, "H5FD__ros3_open() called.\n");
-#endif
 
     /* Sanity check on file offsets */
     HDcompile_assert(sizeof(HDoff_t) >= sizeof(size_t));
@@ -1223,10 +1180,6 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
 
     FUNC_ENTER_PACKAGE
 
-#if ROS3_DEBUG
-    fprintf(stdout, "H5FD__ros3_close() called.\n");
-#endif
-
     assert(file != NULL);
     assert(file->s3r_handle != NULL);
 
@@ -1282,10 +1235,6 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     int                 ret_value = 0;
 
     FUNC_ENTER_PACKAGE_NOERR
-
-#if ROS3_DEBUG
-    fprintf(stdout, "H5FD__ros3_cmp() called.\n");
-#endif
 
     assert(f1->s3r_handle != NULL);
     assert(f2->s3r_handle != NULL);
@@ -1385,10 +1334,6 @@ H5FD__ros3_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "H5FD__ros3_query() called.\n");
-#endif
-
     /* Set the VFL feature flags that this driver supports
      *
      * Since the ros3 VFD is read-only, many flags are irrelevant.
@@ -1419,10 +1364,6 @@ H5FD__ros3_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "H5FD__ros3_get_eoa() called.\n");
-#endif
-
     FUNC_LEAVE_NOAPI(file->eoa)
 } /* end H5FD__ros3_get_eoa() */
 
@@ -1440,10 +1381,6 @@ H5FD__ros3_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
     H5FD_ros3_t *file = (H5FD_ros3_t *)_file;
 
     FUNC_ENTER_PACKAGE_NOERR
-
-#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "H5FD__ros3_set_eoa() called.\n");
-#endif
 
     file->eoa = addr;
 
@@ -1466,10 +1403,6 @@ H5FD__ros3_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "H5FD__ros3_get_eof() called.\n");
-#endif
-
     FUNC_LEAVE_NOAPI(H5FD_s3comms_s3r_get_filesize(file->s3r_handle))
 } /* end H5FD__ros3_get_eof() */
 
@@ -1488,10 +1421,6 @@ H5FD__ros3_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_hand
     herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
-
-#if ROS3_DEBUG
-    fprintf(stdout, "H5FD__ros3_get_handle() called.\n");
-#endif
 
     if (!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid");
@@ -1520,16 +1449,12 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     size_t       filesize  = 0;
     herr_t       ret_value = SUCCEED;
 #if ROS3_STATS
-    /* working variables for storing stats */
+    /* Working variables for storing stats */
     ros3_statsbin *bin   = NULL;
     unsigned       bin_i = 0;
 #endif
 
     FUNC_ENTER_PACKAGE
-
-#if ROS3_DEBUG
-    fprintf(stdout, "H5FD__ros3_read() called.\n");
-#endif
 
     assert(file);
     assert(file->cache);
@@ -1596,10 +1521,6 @@ H5FD__ros3_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, h
 
     FUNC_ENTER_PACKAGE
 
-#if ROS3_DEBUG
-    fprintf(stdout, "H5FD__ros3_write() called.\n");
-#endif
-
     HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot write to read-only file.");
 
 done:
@@ -1623,10 +1544,6 @@ H5FD__ros3_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, 
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
-
-#if ROS3_DEBUG
-    fprintf(stdout, "H5FD__ros3_truncate() called.\n");
-#endif
 
     HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot truncate read-only file.");
 
