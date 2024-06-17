@@ -24,16 +24,9 @@
 /* Module Setup */
 /****************/
 
-#include "H5TSmodule.h" /* This source code file is part of the H5TS module */
-
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions                   */
-#include "H5Eprivate.h" /* Error handling                      */
-#include "H5TSpkg.h"    /* Threadsafety                        */
-
-#ifdef H5_HAVE_THREADS
 
 /****************/
 /* Local Macros */
@@ -61,167 +54,124 @@
 
 #ifdef H5_HAVE_C11_THREADS
 /*-------------------------------------------------------------------------
- * Function: H5TS_key_create
+ * Function: H5TS_key_set_value
  *
- * Purpose:  Thread-local key creation
+ * Purpose:  Set a thread-specific value for a thread-local key
  *
  * Return:   Non-negative on success / Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5TS_key_create(H5TS_key_t *key, H5TS_key_destructor_func_t dtor)
+static inline herr_t
+H5TS_key_set_value(H5TS_key_t key, void *value)
 {
-    herr_t ret_value = SUCCEED;
+    /* Set the value for this thread */
+    if (H5_UNLIKELY(tss_set(key, value) != thrd_success))
+        return FAIL;
 
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    /* Sanity check */
-    if (H5_UNLIKELY(NULL == key))
-        HGOTO_DONE(FAIL);
-
-    /* Create the key */
-    if (H5_UNLIKELY(tss_create(key, dtor) != thrd_success))
-        HGOTO_DONE(FAIL);
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_key_create() */
+    return SUCCEED;
+} /* end H5TS_key_set_value() */
 
 /*-------------------------------------------------------------------------
- * Function: H5TS_key_delete
+ * Function: H5TS_key_get_value
  *
- * Purpose:  Thread-local key deletion
+ * Purpose:  Get a thread-specific value for a thread-local key
  *
  * Return:   Non-negative on success / Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5TS_key_delete(H5TS_key_t key)
+static inline herr_t
+H5TS_key_get_value(H5TS_key_t key, void **value)
 {
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    /* Get the value for this thread */
+    /* NOTE: tss_get() can't fail */
+    *value = tss_get(key);
 
-    /* Delete the key */
-    /* NOTE: tss_delete() can't fail */
-    tss_delete(key);
-
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
-} /* end H5TS_key_delete() */
+    return SUCCEED;
+} /* end H5TS_key_get_value() */
 
 #else
 #ifdef H5_HAVE_WIN_THREADS
 /*-------------------------------------------------------------------------
- * Function: H5TS_key_create
+ * Function: H5TS_key_set_value
  *
- * Purpose:  Thread-local key creation
+ * Purpose:  Set a thread-specific value for a thread-local key
  *
  * Return:   Non-negative on success / Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5TS_key_create(H5TS_key_t *key, H5TS_key_destructor_func_t dtor)
+static inline herr_t
+H5TS_key_set_value(H5TS_key_t key, void *value)
 {
-    herr_t ret_value = SUCCEED;
+    /* Set the value for this thread */
+    if (H5_UNLIKELY(0 == TlsSetValue(key, (LPVOID)value)))
+        return FAIL;
 
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    /* Sanity check */
-    if (H5_UNLIKELY(NULL == key))
-        HGOTO_DONE(FAIL);
-
-    /* Fail if the key has a destructor callback, this is not supported by Windows */
-    if (NULL != dtor)
-        HGOTO_DONE(FAIL);
-
-    /* Create the key */
-    if (H5_UNLIKELY(TLS_OUT_OF_INDEXES == (*key = TlsAlloc())))
-        HGOTO_DONE(FAIL);
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_key_create() */
+    return SUCCEED;
+} /* end H5TS_key_set_value() */
 
 /*-------------------------------------------------------------------------
- * Function: H5TS_key_delete
+ * Function: H5TS_key_get_value
  *
- * Purpose:  Thread-local key deletion
+ * Purpose:  Get a thread-specific value for a thread-local key
  *
  * Return:   Non-negative on success / Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5TS_key_delete(H5TS_key_t key)
+static inline herr_t
+H5TS_key_get_value(H5TS_key_t key, void **value)
 {
-    herr_t ret_value = SUCCEED;
+    /* Get the value for this thread */
+    if (H5_UNLIKELY(NULL == (*value = TlsGetValue(key))))
+        /* Check for possible error, when NULL value is returned */
+        if (H5_UNLIKELY(ERROR_SUCCESS != GetLastError()))
+            return FAIL;
 
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    /* Delete the key */
-    if (TLS_OUT_OF_INDEXES != key)
-        if (H5_UNLIKELY(0 == TlsFree(key)))
-            HGOTO_DONE(FAIL);
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_key_delete() */
+    return SUCCEED;
+} /* end H5TS_key_get_value() */
 
 #else
 /*-------------------------------------------------------------------------
- * Function: H5TS_key_create
+ * Function: H5TS_key_set_value
  *
- * Purpose:  Thread-local key creation
+ * Purpose:  Set a thread-specific value for a thread-local key
  *
  * Return:   Non-negative on success / Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5TS_key_create(H5TS_key_t *key, H5TS_key_destructor_func_t dtor)
+static inline herr_t
+H5TS_key_set_value(H5TS_key_t key, void *value)
 {
-    herr_t ret_value = SUCCEED;
+    /* Set the value for this thread */
+    if (H5_UNLIKELY(pthread_setspecific(key, value)))
+        return FAIL;
 
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    /* Sanity check */
-    if (H5_UNLIKELY(NULL == key))
-        HGOTO_DONE(FAIL);
-
-    /* Create the key */
-    if (H5_UNLIKELY(pthread_key_create(key, dtor)))
-        HGOTO_DONE(FAIL);
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_key_create() */
+    return SUCCEED;
+} /* end H5TS_key_set_value() */
 
 /*-------------------------------------------------------------------------
- * Function: H5TS_key_delete
+ * Function: H5TS_key_get_value
  *
- * Purpose:  Thread-local key deletion
+ * Purpose:  Get a thread-specific value for a thread-local key
  *
  * Return:   Non-negative on success / Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5TS_key_delete(H5TS_key_t key)
+static inline herr_t
+H5TS_key_get_value(H5TS_key_t key, void **value)
 {
-    herr_t ret_value = SUCCEED;
+    /* Get the value for this thread */
+    /* NOTE: pthread_getspecific() can't fail */
+    *value = pthread_getspecific(key);
 
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    /* Delete the key */
-    if (H5_UNLIKELY(pthread_key_delete(key)))
-        HGOTO_DONE(FAIL);
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_key_delete() */
+    return SUCCEED;
+} /* end H5TS_key_get_value() */
 
 #endif
 #endif
 
-#endif /* H5_HAVE_THREADS */

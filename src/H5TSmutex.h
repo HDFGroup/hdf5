@@ -20,6 +20,38 @@
  *        FUNC_ENTER_* / FUNC_LEAVE_* macros.
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
+/***********/
+/* Headers */
+/***********/
+
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 #ifdef H5_HAVE_C11_THREADS
 
 #define H5TS_mutex_lock(mutex)   ((H5_UNLIKELY(mtx_lock(mutex) != thrd_success)) ? FAIL : SUCCEED)

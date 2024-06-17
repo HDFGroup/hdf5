@@ -34,7 +34,6 @@
 /****************/
 /* Local Macros */
 /****************/
-#ifdef H5_HAVE_THREADS
 
 /******************/
 /* Local Typedefs */
@@ -264,4 +263,3 @@ H5TS_semaphore_wait(H5TS_semaphore_t *sem)
     return SUCCEED;
 } /* end H5TS_semaphore_wait() */
 #endif
-#endif /* H5_HAVE_THREADS */

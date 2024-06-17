@@ -24,16 +24,9 @@
 /* Module Setup */
 /****************/
 
-#include "H5TSmodule.h" /* This source code file is part of the H5TS module */
-
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions                   */
-#include "H5Eprivate.h" /* Error handling                      */
-#include "H5TSpkg.h"    /* Threadsafety                        */
-
-#ifdef H5_HAVE_THREADS
 
 /****************/
 /* Local Macros */
@@ -60,70 +53,46 @@
 /*******************/
 
 /*--------------------------------------------------------------------------
- * Function:    H5TS_barrier_init
+ * Function:    H5TS_barrier_wait
  *
- * Purpose:     Initialize a thread barrier
+ * Purpose:     Wait at a barrier.
  *
- * Return:      Non-negative on success / Negative on failure
- *
- *--------------------------------------------------------------------------
- */
-herr_t
-H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    if (H5_UNLIKELY(NULL == barrier || 0 == count))
-        HGOTO_DONE(FAIL);
-
-#ifdef H5_HAVE_PTHREAD_BARRIER
-    /* Initialize the barrier */
-    if (H5_UNLIKELY(pthread_barrier_init(barrier, NULL, count)))
-        HGOTO_DONE(FAIL);
-#else
-    /* Initialize fields */
-    barrier->count = count;
-    H5TS_atomic_init_uint(&barrier->openings, count);
-    H5TS_atomic_init_uint(&barrier->generation, 0);
-#endif
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_barrier_init() */
-
-/*--------------------------------------------------------------------------
- * Function:    H5TS_barrier_destroy
- *
- * Purpose:     Destroy an H5TS_barrier_t.  All internal components are
- *              destroyed, but the instance of H5TS_barrier_t is not freed.
+ * Note:     	Similar to pthread_barrier_wait, a barrier may be re-used
+ *		multiple times without intervening calls to H5TS_barrier_init.
  *
  * Return:      Non-negative on success / Negative on failure
  *
  *--------------------------------------------------------------------------
  */
-herr_t
-H5TS_barrier_destroy(H5TS_barrier_t *barrier)
+static inline herr_t
+H5TS_barrier_wait(H5TS_barrier_t *barrier)
 {
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
     if (H5_UNLIKELY(NULL == barrier))
-        HGOTO_DONE(FAIL);
+        return FAIL;
 
 #ifdef H5_HAVE_PTHREAD_BARRIER
-    if (H5_UNLIKELY(pthread_barrier_destroy(barrier)))
-        HGOTO_DONE(FAIL);
+    {
+        int ret = pthread_barrier_wait(barrier);
+        if (H5_UNLIKELY(ret != 0 && ret != PTHREAD_BARRIER_SERIAL_THREAD))
+            return FAIL;
+    }
 #else
-    /* Destroy the (emulated) atomic variables */
-    H5TS_atomic_destroy_uint(&barrier->openings);
-    H5TS_atomic_destroy_uint(&barrier->generation);
+    {
+        const unsigned my_generation = H5TS_atomic_load_uint(&barrier->generation);
+
+        /* When the last thread enters, reset the openings & bump the generation */
+        if (1 == H5TS_atomic_fetch_sub_uint(&barrier->openings, 1)) {
+            H5TS_atomic_store_uint(&barrier->openings, barrier->count);
+            H5TS_atomic_fetch_add_uint(&barrier->generation, 1);
+        }
+        else {
+            /* Not the last thread, when for the generation to change */
+            while (H5TS_atomic_load_uint(&barrier->generation) == my_generation)
+                ;
+        }
+    }
 #endif
 
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_barrier_destroy() */
+    return SUCCEED;
+} /* end H5TS_barrier_wait() */
 
-#endif /* H5_HAVE_THREADS */
