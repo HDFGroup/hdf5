@@ -35,8 +35,8 @@
 
 #ifdef H5_HAVE_ROS3_VFD
 
-/* Toggle stats collection and reporting */
-#define ROS3_STATS 1
+/* Define to turn on stats collection and reporting */
+/* #define ROS3_STATS */
 
 /* Max size of the cache, in bytes */
 #define ROS3_MAX_CACHE_SIZE 16777216
@@ -47,7 +47,7 @@ static hid_t H5FD_ROS3_g = 0;
 /* Session/security token property name */
 #define ROS3_TOKEN_PROP_NAME "ros3_token_prop"
 
-#if ROS3_STATS
+#ifdef ROS3_STATS
 
 /* Arbitrarily large value, such that any reasonable size read will be "less"
  * than this value and set a true minimum
@@ -166,7 +166,7 @@ typedef struct H5FD_ros3_t {
     s3r_t           *s3r_handle;
     uint8_t         *cache;
     size_t           cache_size;
-#if ROS3_STATS
+#ifdef ROS3_STATS
     ros3_statsbin meta[ROS3_STATS_BIN_COUNT + 1];
     ros3_statsbin raw[ROS3_STATS_BIN_COUNT + 1];
 #endif
@@ -279,7 +279,7 @@ H5FD_ros3_init(void)
             HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register ros3");
         }
 
-#if ROS3_STATS
+#ifdef ROS3_STATS
         /* Pre-compute statsbin boundaries */
         for (int i = 0; i < ROS3_STATS_BIN_COUNT; i++) {
             unsigned long long value = 0;
@@ -716,7 +716,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_ros3_token() */
 
-#if ROS3_STATS
+#ifdef ROS3_STATS
 /*----------------------------------------------------------------------------
  * Function:    H5FD__ros3_reset_stats
  *
@@ -858,7 +858,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     file->s3r_handle = handle;
     H5MM_memcpy(&(file->fa), &fa, sizeof(H5FD_ros3_fapl_t));
 
-#if ROS3_STATS
+#ifdef ROS3_STATS
     if (FAIL == H5FD__ros3_reset_stats(file))
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, NULL, "unable to reset file statistics");
 #endif
@@ -892,7 +892,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ros3_open() */
 
-#if ROS3_STATS
+#ifdef ROS3_STATS
 /*----------------------------------------------------------------------------
  * Function:    H5FD__ros3_fprint_stats
  *
@@ -1179,7 +1179,7 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     assert(file != NULL);
     assert(file->s3r_handle != NULL);
 
-#if ROS3_STATS
+#ifdef ROS3_STATS
     if (H5FD__ros3_fprint_stats(stdout, file) == FAIL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_ERROR, FAIL, "problem while writing file statistics");
 #endif
@@ -1466,7 +1466,7 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         if (H5FD_s3comms_s3r_read(file->s3r_handle, addr, size, buf) == FAIL)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
 
-#if ROS3_STATS
+#ifdef ROS3_STATS
         ros3_statsbin *bin = NULL;
         int            i   = 0;
 
