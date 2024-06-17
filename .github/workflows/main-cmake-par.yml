@@ -61,3 +61,11 @@ jobs:
       - name: CMake Build
         run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
+
+      #
+      # RUN TESTS
+      #
+      - name: CMake Run Tests
+        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+        if: ${{ matrix.run_tests && (inputs.thread_safety != 'TS') }}

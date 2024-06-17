@@ -75,3 +75,8 @@ jobs:
       - name: Autotools Build
         run: make -j3
         working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Run Tests
+        run: make check -j2
+        working-directory: ${{ runner.workspace }}/build
+        if: ${{ inputs.thread_safety == 'disable' }}
