@@ -45,15 +45,17 @@ typedef struct H5TS_pool_task_t {
 
 /* Thread pool */
 struct H5TS_pool_t {
-    H5TS_mutex_t mutex; /* Mutex to control access to pool struct */
-    H5TS_cond_t  cond;
+    /* Semaphore */
+    H5TS_semaphore_t sem;
 
-    bool           shutdown;         /* Pool is shutting down */
-    unsigned       num_threads;      /* # of threads in pool */
-    unsigned       sleeping_workers; /* # of workers currently sleeping */
-    H5TS_thread_t *threads;          /* Array of worker threads in pool */
-
+    /* Task queue */
+    H5TS_mutex_t      queue_mutex; /* Mutex to control access to task queue */
+    bool              shutdown;    /* Pool is shutting down */
     H5TS_pool_task_t *head, *tail; /* Task queue */
+
+    /* Threads */
+    unsigned       num_threads;      /* # of threads in pool */
+    H5TS_thread_t *threads;          /* Array of worker threads in pool */
 };
 
 /********************/
@@ -85,7 +87,7 @@ static inline herr_t
 H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
 {
     H5TS_pool_task_t *task       = NULL;  /* Task for function to invoke */
-    bool              have_mutex = false; /* Whether we're holding the mutex */
+    bool              have_queue_mutex = false; /* Whether we're holding the task queue mutex */
     herr_t            ret_value  = SUCCEED;
 
     /* Sanity checks */
@@ -101,12 +103,12 @@ H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
     task->ctx  = ctx;
     task->next = NULL;
 
-    /* Acquire the mutex for the pool */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&pool->mutex) < 0)) {
+    /* Acquire the mutex for the task queue */
+    if (H5_UNLIKELY(H5TS_mutex_lock(&pool->queue_mutex) < 0)) {
         ret_value = FAIL;
         goto done;
     }
-    have_mutex = true;
+    have_queue_mutex = true;
 
     /* Is pool shutting down? */
     if (H5_UNLIKELY(pool->shutdown)) {
@@ -125,16 +127,26 @@ H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
     /* Avoid freeing the task on error, now */
     task = NULL;
 
-    /* Wake up any sleeping worker */
-    if (pool->sleeping_workers > 0 && H5_UNLIKELY(H5TS_cond_signal(&pool->cond) < 0))
+    /* Release the task queue's mutex, if we're holding it */
+    if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->queue_mutex) < 0)) {
+        ret_value = FAIL;
+        goto done;
+    }
+    have_queue_mutex = false;
+
+
+    /* Signal the semaphore */
+    if (H5_UNLIKELY(H5TS_semaphore_signal(&pool->sem) < 0))
         ret_value = FAIL;
 
 done:
-    /* Release the pool's mutex, if we're holding it */
-    if (H5_LIKELY(have_mutex))
-        if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->mutex) < 0))
+    /* Release the task queue's mutex, if we're still holding it */
+    /* (Can only happen on failure) */
+    if (H5_UNLIKELY(have_queue_mutex))
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->queue_mutex) < 0))
             ret_value = FAIL;
 
+    /* Free the task, on failure */
     if (H5_UNLIKELY(ret_value < 0))
         if (task)
             free(task);

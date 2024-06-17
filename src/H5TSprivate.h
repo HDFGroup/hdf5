@@ -227,6 +227,40 @@ typedef struct H5TS_barrier_t {
 } H5TS_barrier_t;
 #endif
 
+/* Semaphores */
+#if defined(_WIN32)
+/*
+ * Windows semaphores
+ */
+
+/* System semaphore */
+typedef HANDLE H5TS_semaphore_t;
+
+#elif defined(__unix__) && !defined(__MACH__)
+/*
+ * POSIX semaphores
+ */
+#include <semaphore.h>
+
+/* System semaphore */
+typedef sem_t H5TS_semaphore_t;
+
+#else
+/*
+ * Emulated semaphores, for MacOS and unknown platforms
+ * Can't use POSIX semaphores on MacOS due to:
+ *      http://lists.apple.com/archives/darwin-kernel/2009/Apr/msg00010.html
+ */
+
+/* Emulate semaphore w/mutex & condition variable */
+typedef struct H5TS_semaphore_t {
+    H5TS_mutex_t mutex;
+    H5TS_cond_t cond;
+    unsigned waiters;
+    int counter;
+} H5TS_semaphore_t;
+#endif
+
 #if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 /* Spinlock, built from C11 atomic_flag */
 typedef atomic_flag H5TS_spinlock_t;
@@ -249,53 +283,6 @@ H5_CLANG_DIAG_OFF("c11-extensions")
 typedef H5TS_ffs_rwlock_local_t *_Atomic H5TS_ffs_rwlock_t;
 H5_GCC_DIAG_ON("c99-c11-compat")
 H5_CLANG_DIAG_ON("c11-extensions")
-
-/* Lightweight semaphores */
-#if defined(_WIN32)
-/*
- * Windows semaphores
- */
-
-/* System semaphore */
-typedef HANDLE H5TS__semaphore_t;
-
-#elif defined(__MACH__)
-/*
- * Mach semaphores, for MacOS
- * Can't use POSIX semaphores due to http://lists.apple.com/archives/darwin-kernel/2009/Apr/msg00010.html
- */
-#include <mach/mach.h>
-
-/* System semaphore */
-typedef semaphore_t H5TS__semaphore_t;
-
-#elif defined(__unix__)
-/*
- * POSIX semaphores
- */
-#include <semaphore.h>
-
-/* System semaphore */
-typedef sem_t H5TS__semaphore_t;
-
-#else
-/*
- * Emulate semaphore w/mutex & condition variable
- */
-
-typedef struct H5TS__semaphore_t {
-    H5TS_mutex_t mutex;
-    H5TS_cond_t cond;
-    unsigned waiters;
-    int counter;
-} H5TS__semaphore_t;
-#endif
-
-/* Lightweight semaphores, based on system semaphores */
-typedef struct H5TS_semaphore_t {
-    H5TS__semaphore_t sem;   /* Underlying system semaphore */
-    atomic_int        count; /* Wrapper around underlying system semaphore */
-} H5TS_semaphore_t;
 
 #endif
 

@@ -34,7 +34,7 @@
 /****************/
 /* Local Macros */
 /****************/
-#if defined(H5_HAVE_THREADS) && defined(H5_HAVE_STDATOMIC_H)
+#ifdef H5_HAVE_THREADS
 
 /******************/
 /* Local Typedefs */
@@ -57,186 +57,6 @@
 /*******************/
 
 #if defined(_WIN32)
-
-#define H5TS__semaphore_signal(sem) (H5_UNLIKELY(0 == ReleaseSemaphore(sem->sem, 1, NULL)) ? FAIL : SUCCEED)
-#define H5TS__semaphore_wait(sem)                                                                            \
-    (H5_UNLIKELY(WAIT_OBJECT_0 != WaitForSingleObject(sem->sem, INFINITE)) ? FAIL : SUCCEED)
-
-#elif defined(__MACH__)
-/*
- * Mach semaphores, for MacOS
- * Can't use POSIX semaphores due to http://lists.apple.com/archives/darwin-kernel/2009/Apr/msg00010.html
- */
-
-#define H5TS__semaphore_signal(sem) (H5_UNLIKELY(KERN_SUCCESS != semaphore_signal(sem->sem)) ? FAIL : SUCCEED)
-#define H5TS__semaphore_wait(sem)   (H5_UNLIKELY(KERN_SUCCESS != semaphore_wait(sem->sem)) ? FAIL : SUCCEED)
-
-#elif defined(__unix__)
-/*
- * POSIX semaphores
- */
-
-#define H5TS__semaphore_signal(mutex) ((H5_UNLIKELY(0 != sem_post(&sem->sem))) ? FAIL : SUCCEED)
-
-/*-------------------------------------------------------------------------
- * Function: H5TS__semaphore_wait
- *
- * Purpose:  Decrements (locks) the semaphore.  If the semaphore's value is
- *           greater than zero, then the decrement proceeds, and the function
- *           returns immediately.  If the semaphore currently has a value of
- *           zero or less, then the call blocks until it becomes possible to
- *           perform the decrement (i.e. the semaphore value rises above zero).
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static inline herr_t
-H5TS__semaphore_wait(H5TS_semaphore_t *sem)
-{
-    int rc;
-
-    /* Loop because of:
-     *  http://stackoverflow.com/questions/2013181/gdb-causes-sem-wait-to-fail-with-eintr-error
-     */
-    do {
-        rc = sem_wait(&sem->sem);
-    } while (rc == -1 && errno == EINTR);
-
-    if (H5_UNLIKELY(0 != rc))
-        return FAIL;
-
-    return SUCCEED;
-} /* end H5TS__semaphore_wait() */
-#else
-/*
- * Emulate semaphore w/mutex & condition variable
- *
- * Based off the Netscape Portable Runtime implementation:
- *      https://hg.mozilla.org/projects/nspr/file/3e25d69ba6b268f2817e920a69eb2c091efe17e6/pr/src/threads/prsem.c
- */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS__semaphore_signal
- *
- * Purpose:  Increments (unlocks) the semaphore.  If the semaphore's value
- *           becomes greater than zero, then another thread blocked in a wait
- *           call will be woken up and proceed to lock the semaphore.
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static inline herr_t
-H5TS__semaphore_signal(H5TS_semaphore_t *sem)
-{
-    /* Acquire the mutex for the semaphore */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&sem->sem.mutex) < 0))
-        return FAIL;
-
-    /* Wake a thread up, if any are waiting */
-    if (sem->sem.waiters)
-        if (H5_UNLIKELY(H5TS_cond_signal(&sem->sem.cond) < 0)) {
-            H5TS_mutex_unlock(&sem->sem.mutex);
-            return FAIL;
-        }
-
-    /* Increment the semaphore's value */
-    sem->sem.counter++;
-
-    /* Release the mutex for the semaphore */
-    if (H5_UNLIKELY(H5TS_mutex_unlock(&sem->sem.mutex) < 0))
-        return FAIL;
-
-    return SUCCEED;
-} /* end H5TS__semaphore_signal() */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS__semaphore_wait
- *
- * Purpose:  Decrements (locks) the semaphore.  If the semaphore's value is
- *           greater than zero, then the decrement proceeds, and the function
- *           returns immediately.  If the semaphore currently has a value of
- *           zero or less, then the call blocks until it becomes possible to
- *           perform the decrement (i.e. the semaphore value rises above zero).
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static inline herr_t
-H5TS__semaphore_wait(H5TS_semaphore_t *sem)
-{
-    /* Acquire the mutex for the semaphore */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&sem->sem.mutex) < 0))
-        return FAIL;
-
-    /* Wait for semaphore value > 0 */
-    while (0 == sem->sem.counter) {
-        herr_t ret;
-
-        /* Wait for signal that semaphore count has been incremented */
-        sem->sem.waiters++;
-        ret = H5TS_cond_wait(&sem->sem.cond, &sem->sem.mutex);
-        sem->sem.waiters--;
-
-        /* Check for error */
-        if (H5_UNLIKELY(ret < 0)) {
-            H5TS_mutex_unlock(&sem->sem.mutex);
-            return FAIL;
-        }
-    }
-
-    /* Decrement the semaphore's value */
-    sem->sem.counter--;
-
-    /* Release the mutex for the semaphore */
-    if (H5_UNLIKELY(H5TS_mutex_unlock(&sem->sem.mutex) < 0))
-        return FAIL;
-
-    return SUCCEED;
-} /* end H5TS__semaphore_wait() */
-#endif
-
-/*-------------------------------------------------------------------------
- * Function: H5TS__semaphore_wait_with_partial_spinning
- *
- * Purpose:  Spin on the lightweight semaphore's atomic counter for a little
- *           while before invoking the system semaphore.
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static inline herr_t
-H5TS__semaphore_wait_with_partial_spinning(H5TS_semaphore_t *sem)
-{
-    int spin = 10000;
-    int old_count;
-
-    /* From original source: */
-    /* Is there a better way to set the initial spin count?
-     * If we lower it to 1000, testBenaphore becomes 15x slower on my Core i7-5930K Windows PC,
-     * as threads start hitting the kernel semaphore.
-     */
-    while (spin--) {
-        old_count = atomic_load_explicit(&sem->count, memory_order_relaxed);
-        if ((old_count > 0) &&
-            atomic_compare_exchange_strong_explicit(&sem->count, &old_count, old_count - 1,
-                                                    memory_order_acquire, memory_order_acquire))
-            return SUCCEED;
-
-        /* Prevent the compiler from collapsing the loop. */
-        atomic_signal_fence(memory_order_acquire);
-    }
-    old_count = atomic_fetch_sub_explicit(&sem->count, 1, memory_order_acquire);
-    if (old_count <= 0)
-        if (H5_UNLIKELY(H5TS__semaphore_wait(sem) < 0))
-            return FAIL;
-
-    return SUCCEED;
-} /* end H5TS__semaphore_wait_with_partial_spinning() */
-
 /*-------------------------------------------------------------------------
  * Function: H5TS_semaphore_signal
  *
@@ -251,18 +71,12 @@ H5TS__semaphore_wait_with_partial_spinning(H5TS_semaphore_t *sem)
 static inline herr_t
 H5TS_semaphore_signal(H5TS_semaphore_t *sem)
 {
-    int old_count;
-    int to_release;
-
     /* Check argument */
     if (H5_UNLIKELY(NULL == sem))
         return FAIL;
 
-    old_count  = atomic_fetch_add_explicit(&sem->count, 1, memory_order_release);
-    to_release = -old_count < 1 ? -old_count : 1;
-    if (to_release > 0)
-        if (H5_UNLIKELY(H5TS__semaphore_signal(sem) < 0))
-            return FAIL;
+    if (H5_UNLIKELY(0 == ReleaseSemaphore(*sem, 1, NULL)))
+        return FAIL;
 
     return SUCCEED;
 } /* end H5TS_semaphore_signal() */
@@ -283,23 +97,171 @@ H5TS_semaphore_signal(H5TS_semaphore_t *sem)
 static inline herr_t
 H5TS_semaphore_wait(H5TS_semaphore_t *sem)
 {
-    int old_count;
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == sem))
+        return FAIL;
+
+    if (H5_UNLIKELY(WAIT_OBJECT_0 != WaitForSingleObject(*sem, INFINITE)))
+        return FAIL;
+
+    return SUCCEED;
+} /* end H5TS_semaphore_wait() */
+
+#elif defined(__unix__) && !defined(__MACH__)
+/*
+ * POSIX semaphores
+ */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_semaphore_signal
+ *
+ * Purpose:  Increments (unlocks) the semaphore.  If the semaphore's value
+ *           becomes greater than zero, then another thread blocked in a wait
+ *           call will be woken up and proceed to lock the semaphore.
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static inline herr_t
+H5TS_semaphore_signal(H5TS_semaphore_t *sem)
+{
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == sem))
+        return FAIL;
+
+    if (H5_UNLIKELY(0 != sem_post(sem)))
+        return FAIL;
+
+    return SUCCEED;
+} /* end H5TS_semaphore_signal() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_semaphore_wait
+ *
+ * Purpose:  Decrements (locks) the semaphore.  If the semaphore's value is
+ *           greater than zero, then the decrement proceeds, and the function
+ *           returns immediately.  If the semaphore currently has a value of
+ *           zero or less, then the call blocks until it becomes possible to
+ *           perform the decrement (i.e. the semaphore value rises above zero).
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static inline herr_t
+H5TS_semaphore_wait(H5TS_semaphore_t *sem)
+{
+    int rc;
 
     /* Check argument */
     if (H5_UNLIKELY(NULL == sem))
         return FAIL;
 
-    /* Check atomic first, then try spinning (which will evetually call
-     * system semaphore's 'wait').
+    /* Loop because of:
+     *  http://stackoverflow.com/questions/2013181/gdb-causes-sem-wait-to-fail-with-eintr-error
      */
-    old_count = atomic_load_explicit(&sem->count, memory_order_relaxed);
-    if (!(old_count > 0 &&
-          atomic_compare_exchange_strong_explicit(&sem->count, &old_count, old_count - 1,
-                                                  memory_order_acquire, memory_order_acquire)))
-        if (H5_UNLIKELY(H5TS__semaphore_wait_with_partial_spinning(sem) < 0))
-            return FAIL;
+    do {
+        rc = sem_wait(sem);
+    } while (rc == -1 && errno == EINTR);
+
+    if (H5_UNLIKELY(0 != rc))
+        return FAIL;
 
     return SUCCEED;
 } /* end H5TS_semaphore_wait() */
+#else
+/*
+ * Emulate semaphore w/mutex & condition variable
+ */
 
-#endif /* H5_HAVE_THREADS && H5_HAVE_STDATOMIC_H */
+/*-------------------------------------------------------------------------
+ * Function: H5TS_semaphore_signal
+ *
+ * Purpose:  Increments (unlocks) the semaphore.  If the semaphore's value
+ *           becomes greater than zero, then another thread blocked in a wait
+ *           call will be woken up and proceed to lock the semaphore.
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static inline herr_t
+H5TS_semaphore_signal(H5TS_semaphore_t *sem)
+{
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == sem))
+        return FAIL;
+
+    /* Acquire the mutex for the semaphore */
+    if (H5_UNLIKELY(H5TS_mutex_lock(&sem->mutex) < 0))
+        return FAIL;
+
+    /* Wake a thread up, if any are waiting */
+    if (sem->waiters)
+        if (H5_UNLIKELY(H5TS_cond_signal(&sem->cond) < 0)) {
+            H5TS_mutex_unlock(&sem->mutex);
+            return FAIL;
+        }
+
+    /* Increment the semaphore's value */
+    sem->counter++;
+
+    /* Release the mutex for the semaphore */
+    if (H5_UNLIKELY(H5TS_mutex_unlock(&sem->mutex) < 0))
+        return FAIL;
+
+    return SUCCEED;
+} /* end H5TS_semaphore_signal() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_semaphore_wait
+ *
+ * Purpose:  Decrements (locks) the semaphore.  If the semaphore's value is
+ *           greater than zero, then the decrement proceeds, and the function
+ *           returns immediately.  If the semaphore currently has a value of
+ *           zero or less, then the call blocks until it becomes possible to
+ *           perform the decrement (i.e. the semaphore value rises above zero).
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static inline herr_t
+H5TS_semaphore_wait(H5TS_semaphore_t *sem)
+{
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == sem))
+        return FAIL;
+
+    /* Acquire the mutex for the semaphore */
+    if (H5_UNLIKELY(H5TS_mutex_lock(&sem->mutex) < 0))
+        return FAIL;
+
+    /* Wait for semaphore value > 0 */
+    while (0 == sem->counter) {
+        herr_t ret;
+
+        /* Wait for signal that semaphore count has been incremented */
+        sem->waiters++;
+        ret = H5TS_cond_wait(&sem->cond, &sem->mutex);
+        sem->waiters--;
+
+        /* Check for error */
+        if (H5_UNLIKELY(ret < 0)) {
+            H5TS_mutex_unlock(&sem->mutex);
+            return FAIL;
+        }
+    }
+
+    /* Decrement the semaphore's value */
+    sem->counter--;
+
+    /* Release the mutex for the semaphore */
+    if (H5_UNLIKELY(H5TS_mutex_unlock(&sem->mutex) < 0))
+        return FAIL;
+
+    return SUCCEED;
+} /* end H5TS_semaphore_wait() */
+#endif
+#endif /* H5_HAVE_THREADS */
