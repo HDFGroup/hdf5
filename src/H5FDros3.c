@@ -53,7 +53,7 @@ static hid_t H5FD_ROS3_g = 0;
  * are stored in arrays of bins (one for data and one for metadata) in the the
  * VFD's file structure. Each bin contains stats for I/O operations of a given
  * I/O size range. The bin boundaries are kept in a global "bin boundaries"
- * array that is initialized at VFD startup does not change.
+ * array that is initialized at VFD startup and does not change.
  */
 
 /* Number of bins */
@@ -846,15 +846,14 @@ done:
 
 #ifdef ROS3_STATS
 /*----------------------------------------------------------------------------
- * Function:    H5FD__ros3_fprint_stats
+ * Function:    H5FD__ros3_print_stats
  *
  * Purpose:     Tabulate and pretty-print statistics for this virtual file.
  *
  *     Should be called upon file close.
  *
  *     Shows number of reads and bytes read, broken down by
- *     "raw" (H5FD_MEM_DRAW)
- *     or "meta" (any other flag)
+ *     "raw" (H5FD_MEM_DRAW) or "meta" (any other flag)
  *
  *     Prints filename and listing of total number of reads and bytes read,
  *     both as a grand total and separate  meta- and raw data reads.
@@ -872,14 +871,12 @@ done:
  *           separate sub-colums for raw- and metadata reads.
  *         - each row represents one bin, identified by the top of its range
  *
- *     Bin ranges can be modified with pound-defines at the top of this file.
- *
  *     Bins without any reads in their bounds are not printed.
  *
  *     An "overflow" bin is also present, to catch "big" reads.
  *
- *     Output for all bins (and range ceiling and average size report)
- *     is divied by powers of 1024. By corollary, four digits before the decimal
+ *     Output for all bins (and range ceiling and average size report) is
+ *     divied by powers of 1024. By corollary, four digits before the decimal
  *     is valid.
  *
  *     - 41080 bytes is represented by 40.177k, not 41.080k
@@ -889,7 +886,7 @@ done:
  *----------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
+H5FD__ros3_print_stats(FILE *stream, const H5FD_ros3_t *file)
 {
     herr_t        ret_value    = SUCCEED;
     parsed_url_t *purl         = NULL;
@@ -1109,7 +1106,7 @@ H5FD__ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5FD__ros3_fprint_stats */
+} /* H5FD__ros3_print_stats */
 #endif /* ROS3_STATS */
 
 /*-------------------------------------------------------------------------
@@ -1132,7 +1129,7 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     assert(file->s3r_handle != NULL);
 
 #ifdef ROS3_STATS
-    if (H5FD__ros3_fprint_stats(stdout, file) == FAIL)
+    if (H5FD__ros3_print_stats(stdout, file) == FAIL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_ERROR, FAIL, "problem while writing file statistics");
 #endif
 
