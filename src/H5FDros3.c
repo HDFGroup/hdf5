@@ -49,6 +49,13 @@ static hid_t H5FD_ROS3_g = 0;
 
 #ifdef ROS3_STATS
 
+/* The ros3 VFD can collect some simple I/O stats on a per-file basis. These
+ * are stored in arrays of bins (one for data and one for metadata) in the the
+ * VFD's file structure. Each bin contains stats for I/O operations of a given
+ * I/O size range. The bin boundaries are kept in a global "bin boundaries"
+ * array that is initialized at VFD startup does not change.
+ */
+
 /* Arbitrarily large value, such that any reasonable size read will be "less"
  * than this value and set a true minimum
  *
@@ -56,33 +63,8 @@ static hid_t H5FD_ROS3_g = 0;
  */
 #define ROS3_STATS_STARTING_MIN 0xfffffffful
 
-/* Configuration definitions for stats collection and breakdown
- *
- * 2^10 = 1024
- *     Reads up to 1024 bytes (1 kB) fall in bin 0
- * 2^(10+(1*16)) = 2^26 = 64MB
- *     Reads of 64MB or greater fall in "overflow" bin[BIN_COUNT]
- */
-#define ROS3_STATS_BASE        2
-#define ROS3_STATS_INTERVAL    1
-#define ROS3_STATS_START_POWER 10
-#define ROS3_STATS_BIN_COUNT   16 /* MUST BE GREATER THAN 0 */
-
-/* Calculate `BASE ^ (START_POWER + (INTERVAL * bin_i))`
- * Stores result at `(unsigned long long *) out_ptr`.
- * Used in computing boundaries between stats bins.
- */
-#define ROS3_STATS_POW(bin_i, out_ptr)                                                                       \
-    {                                                                                                        \
-        uint64_t donotshadowresult = 1;                                                                      \
-        int      donotshadowindex  = 0;                                                                      \
-        for (donotshadowindex = 0;                                                                           \
-             donotshadowindex < (((bin_i)*ROS3_STATS_INTERVAL) + ROS3_STATS_START_POWER);                    \
-             donotshadowindex++) {                                                                           \
-            donotshadowresult *= ROS3_STATS_BASE;                                                            \
-        }                                                                                                    \
-        *(out_ptr) = donotshadowresult;                                                                      \
-    }
+/* Number of bins */
+#define ROS3_STATS_BIN_COUNT 16
 
 /* Array to hold pre-computed boundaries for stats bins */
 static uint64_t ros3_stats_boundaries_g[ROS3_STATS_BIN_COUNT];
@@ -261,13 +243,9 @@ H5FD_ros3_init(void)
         }
 
 #ifdef ROS3_STATS
-        /* Pre-compute statsbin boundaries */
-        for (int i = 0; i < ROS3_STATS_BIN_COUNT; i++) {
-            uint64_t value = 0;
-
-            ROS3_STATS_POW(i, &value)
-            ros3_stats_boundaries_g[i] = value;
-        }
+        /* Pre-compute stats bin boundaries on powers of 2 >= 10 */
+        for (int i = 0; i < ROS3_STATS_BIN_COUNT; i++)
+            ros3_stats_boundaries_g[i] = 1 << (10 + i);
 #endif
     }
 
