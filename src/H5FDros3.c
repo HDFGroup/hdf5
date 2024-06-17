@@ -106,12 +106,12 @@ static unsigned long long ros3_stats_boundaries_g[ROS3_STATS_BIN_COUNT];
  *
  *     Largest read size in this bin.
  ***************************************************************************/
-typedef struct {
+typedef struct H5FD_ros3_stats_bin {
     unsigned long long count;
     unsigned long long bytes;
     unsigned long long min;
     unsigned long long max;
-} ros3_statsbin;
+} H5FD_ros3_stats_bin_t;
 
 #endif /* ROS3_STATS */
 
@@ -141,14 +141,13 @@ typedef struct {
  *     Responsible for communicating with remote host and presenting file
  *     contents as indistinguishable from a file on the local filesystem.
  *
- * *** present only if ROS3_SATS is flagged to enable stats collection ***
+ * *** present only if ROS3_SATS is set to enable stats collection ***
  *
- * `meta` (ros3_statsbin[])
- * `raw` (ros3_statsbin[])
+ * `meta` (H5FD_ros3_stats_bin_t[])
+ * `raw` (H5FD_ros3_stats_bin_t[])
  *
- *     Only present if ros3 stats collection is enabled.
- *
- *     Arrays of `ros3_statsbin` structures to record raw- and metadata reads.
+ *     Arrays of `H5FD_ros3_stats_bin_t` structures to record raw- and
+ *     metadata reads.
  *
  *     Records count and size of reads performed by the VFD, and is used to
  *     print formatted usage statistics to stdout upon VFD shutdown.
@@ -167,8 +166,8 @@ typedef struct H5FD_ros3_t {
     uint8_t         *cache;
     size_t           cache_size;
 #ifdef ROS3_STATS
-    ros3_statsbin meta[ROS3_STATS_BIN_COUNT + 1];
-    ros3_statsbin raw[ROS3_STATS_BIN_COUNT + 1];
+    H5FD_ros3_stats_bin_t meta[ROS3_STATS_BIN_COUNT + 1];
+    H5FD_ros3_stats_bin_t raw[ROS3_STATS_BIN_COUNT + 1];
 #endif
 } H5FD_ros3_t;
 
@@ -992,8 +991,8 @@ H5FD__ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
      *******************/
 
     for (i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
-        const ros3_statsbin *r = &file->raw[i];
-        const ros3_statsbin *m = &file->meta[i];
+        const H5FD_ros3_stats_bin_t *r = &file->raw[i];
+        const H5FD_ros3_stats_bin_t *m = &file->meta[i];
 
         if (m->min < min_meta)
             min_meta = m->min;
@@ -1085,8 +1084,8 @@ H5FD__ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
     fprintf(stream, "    up-to      meta     raw     meta      raw       meta      raw\n");
 
     for (i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
-        const ros3_statsbin *m;
-        const ros3_statsbin *r;
+        const H5FD_ros3_stats_bin_t *m;
+        const H5FD_ros3_stats_bin_t *r;
         unsigned long long   range_end = 0;
         char                 bm_suffix = ' '; /* bytes-meta */
         double               bm_val    = 0.0;
@@ -1467,7 +1466,7 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
 
 #ifdef ROS3_STATS
-        ros3_statsbin *bin = NULL;
+        H5FD_ros3_stats_bin_t *bin = NULL;
         int            i   = 0;
 
         /* Find which "bin" this read fits in. Can be "overflow" bin.  */
