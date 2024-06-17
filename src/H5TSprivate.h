@@ -388,20 +388,16 @@ H5_DLL herr_t H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count);
 H5_DLL herr_t H5TS_barrier_wait(H5TS_barrier_t *barrier);
 H5_DLL herr_t H5TS_barrier_destroy(H5TS_barrier_t *barrier);
 
-#if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 H5_DLL herr_t H5TS_semaphore_init(H5TS_semaphore_t *sem, int initial_count);
 /* semaphore signal & wait calls are defined in H5TSsemaphore.h */
 static inline herr_t H5TS_semaphore_signal(H5TS_semaphore_t *sem);
 static inline herr_t H5TS_semaphore_wait(H5TS_semaphore_t *sem);
 H5_DLL herr_t        H5TS_semaphore_destroy(H5TS_semaphore_t *sem);
-#endif /* H5_HAVE_STDATOMIC_H */
 
 #include "H5TScond.h"
 #include "H5TSmutex.h"
 #include "H5TSpool.h"
-#if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 #include "H5TSsemaphore.h"
-#endif /* H5_HAVE_STDATOMIC_H */
 
 #endif /* H5_HAVE_THREADS */
 
