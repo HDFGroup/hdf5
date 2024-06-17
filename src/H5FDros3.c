@@ -36,7 +36,7 @@
 #ifdef H5_HAVE_ROS3_VFD
 
 /* Define to turn on stats collection and reporting */
-/* #define ROS3_STATS */
+#define ROS3_STATS
 
 /* Max size of the cache, in bytes */
 #define ROS3_MAX_CACHE_SIZE 16777216
@@ -74,8 +74,8 @@ static hid_t H5FD_ROS3_g = 0;
  */
 #define ROS3_STATS_POW(bin_i, out_ptr)                                                                       \
     {                                                                                                        \
-        unsigned long long donotshadowresult = 1;                                                            \
-        int                donotshadowindex  = 0;                                                            \
+        uint64_t donotshadowresult = 1;                                                                      \
+        int      donotshadowindex  = 0;                                                                      \
         for (donotshadowindex = 0;                                                                           \
              donotshadowindex < (((bin_i)*ROS3_STATS_INTERVAL) + ROS3_STATS_START_POWER);                    \
              donotshadowindex++) {                                                                           \
@@ -85,32 +85,14 @@ static hid_t H5FD_ROS3_g = 0;
     }
 
 /* Array to hold pre-computed boundaries for stats bins */
-static unsigned long long ros3_stats_boundaries_g[ROS3_STATS_BIN_COUNT];
+static uint64_t ros3_stats_boundaries_g[ROS3_STATS_BIN_COUNT];
 
-/***************************************************************************
- * Structure for storing per-file ros3 VFD usage statistics.
- *
- * `count` (unsigned long long)
- *
- *     Number of reads with size in this bin's range.
- *
- * `bytes` (unsigned long long)
- *
- *     Total number of bytes read through this bin.
- *
- * `min` (unsigned long long)
- *
- *     Smallest read size in this bin.
- *
- * `max` (unsigned long long)
- *
- *     Largest read size in this bin.
- ***************************************************************************/
+/* Structure for storing per-file usage statistics */
 typedef struct H5FD_ros3_stats_bin {
-    unsigned long long count;
-    unsigned long long bytes;
-    unsigned long long min;
-    unsigned long long max;
+    uint64_t count; /* # of reads with size in this bin's range */
+    uint64_t bytes; /* Total bytes read in this bin */
+    uint64_t min;   /* Smallest read size in this bin */
+    uint64_t max;   /* Largest read size in this bin */
 } H5FD_ros3_stats_bin_t;
 
 #endif /* ROS3_STATS */
@@ -281,7 +263,7 @@ H5FD_ros3_init(void)
 #ifdef ROS3_STATS
         /* Pre-compute statsbin boundaries */
         for (int i = 0; i < ROS3_STATS_BIN_COUNT; i++) {
-            unsigned long long value = 0;
+            uint64_t value = 0;
 
             ROS3_STATS_POW(i, &value)
             ros3_stats_boundaries_g[i] = value;
@@ -737,12 +719,12 @@ H5FD__ros3_reset_stats(H5FD_ros3_t *file)
     for (int i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
         file->raw[i].bytes = 0;
         file->raw[i].count = 0;
-        file->raw[i].min   = (unsigned long long)ROS3_STATS_STARTING_MIN;
+        file->raw[i].min   = (uint64_t)ROS3_STATS_STARTING_MIN;
         file->raw[i].max   = 0;
 
         file->meta[i].bytes = 0;
         file->meta[i].count = 0;
-        file->meta[i].min   = (unsigned long long)ROS3_STATS_STARTING_MIN;
+        file->meta[i].min   = (uint64_t)ROS3_STATS_STARTING_MIN;
         file->meta[i].max   = 0;
     }
 
@@ -938,22 +920,22 @@ done:
 static herr_t
 H5FD__ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
 {
-    herr_t             ret_value    = SUCCEED;
-    parsed_url_t      *purl         = NULL;
-    unsigned           i            = 0;
-    unsigned long      count_meta   = 0;
-    unsigned long      count_raw    = 0;
-    double             average_meta = 0.0;
-    double             average_raw  = 0.0;
-    unsigned long long min_meta     = (unsigned long long)ROS3_STATS_STARTING_MIN;
-    unsigned long long min_raw      = (unsigned long long)ROS3_STATS_STARTING_MIN;
-    unsigned long long max_meta     = 0;
-    unsigned long long max_raw      = 0;
-    unsigned long long bytes_raw    = 0;
-    unsigned long long bytes_meta   = 0;
-    double             re_dub       = 0.0; /* reusable double variable */
-    unsigned           suffix_i     = 0;
-    const char         suffixes[]   = {' ', 'K', 'M', 'G', 'T', 'P'};
+    herr_t        ret_value    = SUCCEED;
+    parsed_url_t *purl         = NULL;
+    unsigned      i            = 0;
+    unsigned long count_meta   = 0;
+    unsigned long count_raw    = 0;
+    double        average_meta = 0.0;
+    double        average_raw  = 0.0;
+    uint64_t      min_meta     = (uint64_t)ROS3_STATS_STARTING_MIN;
+    uint64_t      min_raw      = (uint64_t)ROS3_STATS_STARTING_MIN;
+    uint64_t      max_meta     = 0;
+    uint64_t      max_raw      = 0;
+    uint64_t      bytes_raw    = 0;
+    uint64_t      bytes_meta   = 0;
+    double        re_dub       = 0.0; /* reusable double variable */
+    unsigned      suffix_i     = 0;
+    const char    suffixes[]   = {' ', 'K', 'M', 'G', 'T', 'P'};
 
     FUNC_ENTER_PACKAGE
 
@@ -1018,8 +1000,8 @@ H5FD__ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
      ******************/
 
     fprintf(stream, "TOTAL READS: %lu  (%lu meta, %lu raw)\n", count_raw + count_meta, count_meta, count_raw);
-    fprintf(stream, "TOTAL BYTES: %llu  (%llu meta, %llu raw)\n", bytes_raw + bytes_meta, bytes_meta,
-            bytes_raw);
+    fprintf(stream, "TOTAL BYTES: %" PRIu64 "  (%" PRIu64 " meta, %" PRIu64 " raw)\n", bytes_raw + bytes_meta,
+            bytes_meta, bytes_raw);
 
     if (count_raw + count_meta == 0)
         goto done;
@@ -1086,7 +1068,7 @@ H5FD__ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
     for (i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
         const H5FD_ros3_stats_bin_t *m;
         const H5FD_ros3_stats_bin_t *r;
-        unsigned long long           range_end = 0;
+        uint64_t                     range_end = 0;
         char                         bm_suffix = ' '; /* bytes-meta */
         double                       bm_val    = 0.0;
         char                         br_suffix = ' '; /* bytes-raw */
@@ -1141,7 +1123,7 @@ H5FD__ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
             re_dub /= 1024.0;
         assert(suffix_i < sizeof(suffixes));
 
-        fprintf(stream, " %8.3f%c %7llu %7llu %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
+        fprintf(stream, " %8.3f%c %7" PRIu64 " %7" PRIu64 " %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
                 suffixes[suffix_i], /* Bin ceiling      */
                 m->count,           /* Metadata reads   */
                 r->count,           /* Raw data reads    */
@@ -1471,7 +1453,7 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
         /* Find which "bin" this read fits in. Can be "overflow" bin.  */
         for (i = 0; i < ROS3_STATS_BIN_COUNT; i++)
-            if ((unsigned long long)size < ros3_stats_boundaries_g[i])
+            if ((uint64_t)size < ros3_stats_boundaries_g[i])
                 break;
         bin = (type == H5FD_MEM_DRAW) ? &file->raw[i] : &file->meta[i];
 
@@ -1487,7 +1469,7 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
                 bin->max = size;
         }
         bin->count++;
-        bin->bytes += (unsigned long long)size;
+        bin->bytes += (uint64_t)size;
 #endif
     }
 
