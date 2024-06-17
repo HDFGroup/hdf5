@@ -36,7 +36,7 @@
 #ifdef H5_HAVE_ROS3_VFD
 
 /* Toggle stats collection and reporting */
-#define ROS3_STATS 0
+#define ROS3_STATS 1
 
 /* Max size of the cache, in bytes */
 #define ROS3_MAX_CACHE_SIZE 16777216
@@ -75,7 +75,7 @@ static hid_t H5FD_ROS3_g = 0;
 #define ROS3_STATS_POW(bin_i, out_ptr)                                                                       \
     {                                                                                                        \
         unsigned long long donotshadowresult = 1;                                                            \
-        unsigned           donotshadowindex  = 0;                                                            \
+        int                donotshadowindex  = 0;                                                            \
         for (donotshadowindex = 0;                                                                           \
              donotshadowindex < (((bin_i)*ROS3_STATS_INTERVAL) + ROS3_STATS_START_POWER);                    \
              donotshadowindex++) {                                                                           \
@@ -85,7 +85,7 @@ static hid_t H5FD_ROS3_g = 0;
     }
 
 /* Array to hold pre-computed boundaries for stats bins */
-static unsigned long long ros3_stats_boundaries[ROS3_STATS_BIN_COUNT];
+static unsigned long long ros3_stats_boundaries_g[ROS3_STATS_BIN_COUNT];
 
 /***************************************************************************
  * Structure for storing per-file ros3 VFD usage statistics.
@@ -270,9 +270,6 @@ hid_t
 H5FD_ros3_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
-#if ROS3_STATS
-    unsigned int bin_i;
-#endif
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
@@ -284,11 +281,11 @@ H5FD_ros3_init(void)
 
 #if ROS3_STATS
         /* Pre-compute statsbin boundaries */
-        for (bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++) {
+        for (int i = 0; i < ROS3_STATS_BIN_COUNT; i++) {
             unsigned long long value = 0;
 
-            ROS3_STATS_POW(bin_i, &value)
-            ros3_stats_boundaries[bin_i] = value;
+            ROS3_STATS_POW(i, &value)
+            ros3_stats_boundaries_g[i] = value;
         }
 #endif
     }
@@ -721,7 +718,7 @@ done:
 
 #if ROS3_STATS
 /*----------------------------------------------------------------------------
- * Function:    ros3_reset_stats
+ * Function:    H5FD__ros3_reset_stats
  *
  * Purpose:     Reset the collected statistics
  *
@@ -729,17 +726,16 @@ done:
  *----------------------------------------------------------------------------
  */
 static herr_t
-ros3_reset_stats(H5FD_ros3_t *file)
+H5FD__ros3_reset_stats(H5FD_ros3_t *file)
 {
-    unsigned i         = 0;
-    herr_t   ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
     if (file == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file was null");
 
-    for (i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
+    for (int i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
         file->raw[i].bytes = 0;
         file->raw[i].count = 0;
         file->raw[i].min   = (unsigned long long)ROS3_STATS_STARTING_MIN;
@@ -753,7 +749,7 @@ ros3_reset_stats(H5FD_ros3_t *file)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end ros3_reset_stats() */
+} /* end H5FD__ros3_reset_stats() */
 #endif /* ROS3_STATS */
 
 /*-------------------------------------------------------------------------
@@ -863,7 +859,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5MM_memcpy(&(file->fa), &fa, sizeof(H5FD_ros3_fapl_t));
 
 #if ROS3_STATS
-    if (FAIL == ros3_reset_stats(file))
+    if (FAIL == H5FD__ros3_reset_stats(file))
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, NULL, "unable to reset file statistics");
 #endif
 
@@ -898,7 +894,7 @@ done:
 
 #if ROS3_STATS
 /*----------------------------------------------------------------------------
- * Function:    ros3_fprint_stats
+ * Function:    H5FD__ros3_fprint_stats
  *
  * Purpose:     Tabulate and pretty-print statistics for this virtual file.
  *
@@ -941,7 +937,7 @@ done:
  *----------------------------------------------------------------------------
  */
 static herr_t
-ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
+H5FD__ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
 {
     herr_t             ret_value    = SUCCEED;
     parsed_url_t      *purl         = NULL;
@@ -1106,10 +1102,10 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
         if (r->count == 0 && m->count == 0)
             continue;
 
-        range_end = ros3_stats_boundaries[i];
+        range_end = ros3_stats_boundaries_g[i];
 
         if (i == ROS3_STATS_BIN_COUNT) {
-            range_end = ros3_stats_boundaries[i - 1];
+            range_end = ros3_stats_boundaries_g[i - 1];
             fprintf(stream, ">");
         }
         else
@@ -1161,7 +1157,7 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* ros3_fprint_stats */
+} /* H5FD__ros3_fprint_stats */
 #endif /* ROS3_STATS */
 
 /*-------------------------------------------------------------------------
@@ -1184,8 +1180,7 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     assert(file->s3r_handle != NULL);
 
 #if ROS3_STATS
-    /* TODO: mechanism to re-target stats printout */
-    if (ros3_fprint_stats(stdout, file) == FAIL)
+    if (H5FD__ros3_fprint_stats(stdout, file) == FAIL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_ERROR, FAIL, "problem while writing file statistics");
 #endif
 
@@ -1448,11 +1443,6 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     H5FD_ros3_t *file      = (H5FD_ros3_t *)_file;
     size_t       filesize  = 0;
     herr_t       ret_value = SUCCEED;
-#if ROS3_STATS
-    /* Working variables for storing stats */
-    ros3_statsbin *bin   = NULL;
-    unsigned       bin_i = 0;
-#endif
 
     FUNC_ENTER_PACKAGE
 
@@ -1477,11 +1467,14 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
 
 #if ROS3_STATS
+        ros3_statsbin *bin = NULL;
+        int            i   = 0;
+
         /* Find which "bin" this read fits in. Can be "overflow" bin.  */
-        for (bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++)
-            if ((unsigned long long)size < ros3_stats_boundaries[bin_i])
+        for (i = 0; i < ROS3_STATS_BIN_COUNT; i++)
+            if ((unsigned long long)size < ros3_stats_boundaries_g[i])
                 break;
-        bin = (type == H5FD_MEM_DRAW) ? &file->raw[bin_i] : &file->meta[bin_i];
+        bin = (type == H5FD_MEM_DRAW) ? &file->raw[i] : &file->meta[i];
 
         /* Store collected stats in appropriate bin */
         if (bin->count == 0) {
