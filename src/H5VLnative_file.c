@@ -90,7 +90,7 @@ H5VL__native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t 
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Create the file */
-    if (NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id)))
+    if (H5F_open(false, &new_file, name, flags, fcpl_id, fapl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file");
     new_file->id_exists = true;
 
@@ -124,7 +124,7 @@ H5VL__native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t H5
     FUNC_ENTER_PACKAGE
 
     /* Open the file */
-    if (NULL == (new_file = H5F_open(name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id)))
+    if (H5F_open(false, &new_file, name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");
     new_file->id_exists = true;
 
