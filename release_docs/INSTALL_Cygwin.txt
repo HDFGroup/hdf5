@@ -119,7 +119,7 @@ Build, Test and Install HDF5 on Cygwin
 
 4. Configuring
 
-   Notes: See detailed information in hdf5/release_docs/INSTALL_Auto.txt.
+   Notes: See detailed information in hdf5/release_docs/INSTALL_Autotools.txt.
 
    The host configuration file for Cygwin is located
    in the `config' directory and are based on architecture name,
