@@ -48,7 +48,7 @@
  * be handled by the pthread library.
  *
  * In order for this macro to work, H5CX_get_my_context() must be preceded
- * by "H5CX_node_t *ctx =".
+ * by "H5CX_node_t **ctx =".
  */
 #define H5CX_get_my_context() H5CX__get_context()
 #else /* H5_HAVE_THREADSAFE */
@@ -84,14 +84,15 @@
     /* Mark the field as valid */                                                                            \
     (*head)->ctx.H5_GLUE(PROP_FIELD, _valid) = true;
 
-/* Macro for the duplicated code to retrieve properties from a property list */
+/* Macro for the duplicated code to retrieve a value from a plist if the context value is invalid */
 #define H5CX_RETRIEVE_PROP_VALID(PL, DEF_PL, PROP_NAME, PROP_FIELD)                                          \
     /* Check if the value has been retrieved already */                                                      \
     if (!(*head)->ctx.H5_GLUE(PROP_FIELD, _valid)) {                                                         \
         H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)                                         \
     } /* end if */
 
-/* Macro for the duplicated code to retrieve possibly set properties from a property list */
+/* Macro for the duplicated code to retrieve a value from a plist if the context value is invalid, or the
+ * library has previously modified the context value for return */
 #define H5CX_RETRIEVE_PROP_VALID_SET(PL, DEF_PL, PROP_NAME, PROP_FIELD)                                      \
     /* Check if the value has been retrieved already */                                                      \
     if (!((*head)->ctx.H5_GLUE(PROP_FIELD, _valid) || (*head)->ctx.H5_GLUE(PROP_FIELD, _set))) {             \
@@ -99,7 +100,7 @@
     } /* end if */
 
 #if defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_INSTRUMENTED_LIBRARY)
-/* Macro for the duplicated code to test and set properties for a property list */
+/* Macro for the duplicated code to set a context field that may not exist as a property */
 #define H5CX_TEST_SET_PROP(PROP_NAME, PROP_FIELD)                                                            \
     {                                                                                                        \
         htri_t check_prop = 0; /* Whether the property exists in the API context's DXPL */                   \
@@ -122,7 +123,7 @@
     }
 #endif /* defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_INSTRUMENTED_LIBRARY) */
 
-/* Macro for the duplicated code to test and set properties for a property list */
+/* Macro for the duplicated code to test and set properties for a property list from the context */
 #define H5CX_SET_PROP(PROP_NAME, PROP_FIELD)                                                                 \
     if ((*head)->ctx.H5_GLUE(PROP_FIELD, _set)) {                                                            \
         /* Retrieve the dataset transfer property list */                                                    \
@@ -222,15 +223,15 @@ typedef struct H5CX_t {
 #endif                               /* H5_HAVE_PARALLEL */
 
     /* Cached DXPL properties */
-    size_t    max_temp_buf;            /* Maximum temporary buffer size */
+    size_t    max_temp_buf;            /* Maximum temporary buffer size (H5D_XFER_MAX_TEMP_BUF_NAME) .*/
     bool      max_temp_buf_valid;      /* Whether maximum temporary buffer size is valid */
     void     *tconv_buf;               /* Temporary conversion buffer (H5D_XFER_TCONV_BUF_NAME) */
     bool      tconv_buf_valid;         /* Whether temporary conversion buffer is valid */
     void     *bkgr_buf;                /* Background conversion buffer (H5D_XFER_BKGR_BUF_NAME) */
     bool      bkgr_buf_valid;          /* Whether background conversion buffer is valid */
-    H5T_bkg_t bkgr_buf_type;           /* Background buffer type (H5D_XFER_BKGR_BUF_NAME) */
+    H5T_bkg_t bkgr_buf_type;           /* Background buffer type (H5D_XFER_BKGR_BUF_TYPE_NAME) */
     bool      bkgr_buf_type_valid;     /* Whether background buffer type is valid */
-    double    btree_split_ratio[3];    /* B-tree split ratios */
+    double    btree_split_ratio[3];    /* B-tree split ratios (H5D_XFER_BTREE_SPLIT_RATIO_NAME) */
     bool      btree_split_ratio_valid; /* Whether B-tree split ratios are valid */
     size_t    vec_size;                /* Size of hyperslab vector (H5D_XFER_HYPER_VECTOR_SIZE_NAME) */
     bool      vec_size_valid;          /* Whether hyperslab vector is valid */
@@ -260,8 +261,8 @@ typedef struct H5CX_t {
     bool                    dt_conv_cb_valid;     /* Whether datatype conversion struct is valid */
     H5D_selection_io_mode_t selection_io_mode;    /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
     bool                    selection_io_mode_valid; /* Whether selection I/O mode is valid */
-    bool                    modify_write_buf;        /* Whether the library can modify write buffers */
-    bool                    modify_write_buf_valid;  /* Whether the modify_write_buf field is valid */
+    bool modify_write_buf; /* Whether the library can modify write buffers (H5D_XFER_MODIFY_WRITE_BUF_NAME)*/
+    bool modify_write_buf_valid; /* Whether the modify_write_buf field is valid */
 
     /* Return-only DXPL properties to return to application */
 #ifdef H5_HAVE_PARALLEL
@@ -318,32 +319,34 @@ typedef struct H5CX_t {
     bool actual_selection_io_mode_valid; /* Whether actual selection I/O mode is valid */
 
     /* Cached LCPL properties */
-    H5T_cset_t encoding;                 /* Link name character encoding */
-    bool       encoding_valid;           /* Whether link name character encoding is valid */
-    unsigned   intermediate_group;       /* Whether to create intermediate groups */
-    bool       intermediate_group_valid; /* Whether create intermediate group flag is valid */
+    H5T_cset_t encoding;         /* Link name character encoding (H5P_STRCRT_CHAR_ENCODING_NAME) */
+    bool       encoding_valid;   /* Whether link name character encoding is valid */
+    unsigned intermediate_group; /* Whether to create intermediate groups (H5L_CRT_INTERMEDIATE_GROUP_NAME) */
+    bool     intermediate_group_valid; /* Whether create intermediate group flag is valid */
 
     /* Cached LAPL properties */
     size_t nlinks;       /* Number of soft / UD links to traverse (H5L_ACS_NLINKS_NAME) */
     bool   nlinks_valid; /* Whether number of soft / UD links to traverse is valid */
 
     /* Cached DCPL properties */
-    bool    do_min_dset_ohdr;       /* Whether to minimize dataset object header */
+    bool    do_min_dset_ohdr; /* Whether to minimize dataset object header (H5D_CRT_MIN_DSET_HDR_SIZE_NAME) */
     bool    do_min_dset_ohdr_valid; /* Whether minimize dataset object header flag is valid */
-    uint8_t ohdr_flags;             /* Object header flags */
+    uint8_t ohdr_flags;             /* Object header flags (H5O_CRT_OHDR_FLAGS_NAME) */
     bool    ohdr_flags_valid;       /* Whether the object headers flags are valid */
 
     /* Cached DAPL properties */
-    const char *extfile_prefix;       /* Prefix for external file                      */
+    const char *extfile_prefix;       /* Prefix for external file (H5D_ACS_EFILE_PREFIX_NAME) */
     bool        extfile_prefix_valid; /* Whether the prefix for external file is valid */
-    const char *vds_prefix;           /* Prefix for VDS                                */
+    const char *vds_prefix;           /* Prefix for VDS (H5D_ACS_VDS_PREFIX_NAME) */
     bool        vds_prefix_valid;     /* Whether the prefix for VDS is valid           */
 
     /* Cached FAPL properties */
-    H5F_libver_t low_bound;        /* low_bound property for H5Pset_libver_bounds() */
-    bool         low_bound_valid;  /* Whether low_bound property is valid */
-    H5F_libver_t high_bound;       /* high_bound property for H5Pset_libver_bounds */
-    bool         high_bound_valid; /* Whether high_bound property is valid */
+    H5F_libver_t low_bound;       /* low_bound property for H5Pset_libver_bounds()
+                                     (H5F_ACS_LIBVER_LOW_BOUND_NAME) */
+    bool         low_bound_valid; /* Whether low_bound property is valid */
+    H5F_libver_t high_bound;      /* high_bound property for H5Pset_libver_bounds
+                                     (H5F_ACS_LIBVER_HIGH_BOUND_NAME) */
+    bool high_bound_valid;        /* Whether high_bound property is valid */
 
     /* Cached VOL settings */
     H5VL_connector_prop_t vol_connector_prop; /* Property for VOL connector ID & info */

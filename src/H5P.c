@@ -1397,8 +1397,10 @@ done:
     Returns non-negative on success, negative on failure.
  DESCRIPTION
         Removes a property from a property list class.  Future property lists
-    created of that class will not contain this property.  Existing property
-    lists containing this property are not affected.
+    created of that class will not contain this property. Existing property lists
+    which still use the default value for this property will have this property removed.
+    Existing property lists which have modified this property will not be affected.
+
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -1419,7 +1421,7 @@ H5Punregister(hid_t pclass_id, const char *name)
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
 
-    /* Remove the property list from class */
+    /* Remove the property from property list class */
     if ((ret_value = H5P__unregister(pclass, name)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to remove property from class");
 
