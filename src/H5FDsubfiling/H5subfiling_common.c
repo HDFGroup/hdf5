@@ -573,7 +573,7 @@ H5_open_subfiling_stub_file(const char *name, unsigned flags, MPI_Comm file_comm
         if (H5P_set_driver(plist, H5FD_MPIO, NULL, NULL) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI I/O driver on FAPL");
 
-        if (NULL == (stub_file = H5FD_open(name, flags, fapl_id, HADDR_UNDEF)))
+        if (H5FD_open(false, &stub_file, name, flags, fapl_id, HADDR_UNDEF) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "couldn't open HDF5 stub file");
 
         HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
