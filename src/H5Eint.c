@@ -188,7 +188,6 @@ H5E_init(void)
         HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group");
 
 #ifndef H5_HAVE_THREADSAFE
-    H5E_stack_g[0].nused = 0;
     H5E__set_default_auto(H5E_stack_g);
 #endif /* H5_HAVE_THREADSAFE */
 
@@ -317,7 +316,6 @@ H5E__get_stack(void)
         assert(estack);
 
         /* Set the thread-specific info */
-        estack->nused = 0;
         H5E__set_default_auto(estack);
 
         /* (It's not necessary to release this in this API, it is
@@ -821,8 +819,7 @@ done:
 /*--------------------------------------------------------------------------
  * Function:    H5E__set_default_auto
  *
- * Purpose:     Initialize "automatic" error stack reporting info to library
- *              default
+ * Purpose:     Initialize error stack to library default
  *
  * Return:      SUCCEED/FAIL
  *
@@ -832,6 +829,8 @@ void
 H5E__set_default_auto(H5E_stack_t *stk)
 {
     FUNC_ENTER_PACKAGE_NOERR
+
+    stk->nused = 0;
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #ifdef H5_USE_16_API_DEFAULT
@@ -848,6 +847,7 @@ H5E__set_default_auto(H5E_stack_t *stk)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     stk->auto_data = NULL;
+    stk->paused    = 0;
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5E__set_default_auto() */
@@ -1383,9 +1383,10 @@ herr_t
 H5E_printf_stack(const char *file, const char *func, unsigned line, hid_t maj_id, hid_t min_id,
                  const char *fmt, ...)
 {
-    va_list ap;                   /* Varargs info */
-    bool    va_started = false;   /* Whether the variable argument list is open */
-    herr_t  ret_value  = SUCCEED; /* Return value */
+    H5E_stack_t *estack;               /* Pointer to error stack to modify */
+    va_list      ap;                   /* Varargs info */
+    bool         va_started = false;   /* Whether the variable argument list is open */
+    herr_t       ret_value  = SUCCEED; /* Return value */
 
     /*
      * WARNING: We cannot call HERROR() from within this function or else we
@@ -1401,18 +1402,20 @@ H5E_printf_stack(const char *file, const char *func, unsigned line, hid_t maj_id
     assert(min_id >= H5E_first_min_id_g && min_id <= H5E_last_min_id_g);
     assert(fmt);
 
-    /* Note that the variable-argument parsing for the format is identical in
-     *      the H5Epush2() routine - correct errors and make changes in both
-     *      places. -QAK
-     */
-
-    /* Start the variable-argument parsing */
-    va_start(ap, fmt);
-    va_started = true;
-
-    /* Push the error on the stack */
-    if (H5E__push_stack(NULL, false, file, func, line, H5E_ERR_CLS_g, maj_id, min_id, fmt, &ap) < 0)
+    /* Get the 'default' error stack */
+    if (NULL == (estack = H5E__get_my_stack()))
         HGOTO_DONE(FAIL);
+
+    /* Check if error reporting is paused for this stack */
+    if (!estack->paused) {
+        /* Start the variable-argument parsing */
+        va_start(ap, fmt);
+        va_started = true;
+
+        /* Push the error on the stack */
+        if (H5E__push_stack(estack, false, file, func, line, H5E_ERR_CLS_g, maj_id, min_id, fmt, &ap) < 0)
+            HGOTO_DONE(FAIL);
+    }
 
 done:
     if (va_started)
@@ -1457,11 +1460,6 @@ H5E__push_stack(H5E_stack_t *estack, bool app_entry, const char *file, const cha
     assert(cls_id > 0);
     assert(maj_id > 0);
     assert(min_id > 0);
-
-    /* Check for 'default' error stack */
-    if (estack == NULL)
-        if (NULL == (estack = H5E__get_my_stack()))
-            HGOTO_DONE(FAIL);
 
     /*
      * Push the error if there's room.  Otherwise just forget it.
@@ -1688,8 +1686,9 @@ H5E_clear_stack(void)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Empty the error stack */
-    if (H5E__clear_entries(estack, estack->nused) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack");
+    if (estack->nused)
+        if (H5E__clear_entries(estack, estack->nused) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1791,3 +1790,80 @@ H5E_dump_api_stack(void)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_dump_api_stack() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E_pause_stack
+ *
+ * Purpose:     Pause pushing errors on the default error stack.
+ *
+ *              Generally used via the H5E_PAUSE_ERRORS / H5E_RESUME_ERRORS
+ *              macros.
+ *
+ *              When one needs to temporarily disable recording errors while
+ *              trying something that's likely or expected to fail.  The code
+ *              to try can be nested between these macros like:
+ *
+ *              H5E_PAUSE_ERRORS {
+ *                  ...stuff here that's likely to fail...
+ *              } H5E_RESUME_ERRORS
+ *
+ *              Warning: don't break, return, or longjmp() from the block of
+ *              code or the error reporting won't be properly restored!
+ *
+ * Return:      none
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5E_pause_stack(void)
+{
+    H5E_stack_t *estack = H5E__get_my_stack();
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    assert(estack);
+
+    /* Increment pause counter */
+    estack->paused++;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5E_pause_stack() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E_resume_stack
+ *
+ * Purpose:     Resume pushing errors on the default error stack.
+ *
+ *              Generally used via the H5E_PAUSE_ERRORS / H5E_RESUME_ERRORS
+ *              macros.
+ *
+ *              When one needs to temporarily disable recording errors while
+ *              trying something that's likely or expected to fail.  The code
+ *              to try can be nested between these macros like:
+ *
+ *              H5E_PAUSE_ERRORS {
+ *                  ...stuff here that's likely to fail...
+ *              } H5E_RESUME_ERRORS
+ *
+ *              Warning: don't break, return, or longjmp() from the block of
+ *              code or the error reporting won't be properly restored!
+ *
+ * Return:      none
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5E_resume_stack(void)
+{
+    H5E_stack_t *estack = H5E__get_my_stack();
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    assert(estack);
+    assert(estack->paused);
+
+    /* Decrement pause counter */
+    estack->paused--;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5E_resume_stack() */

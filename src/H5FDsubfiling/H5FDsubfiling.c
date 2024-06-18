@@ -1235,7 +1235,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't set stub file ID on FAPL");
 
     /* Open the HDF5 file's subfiles */
-    if (NULL == (file_ptr->sf_file = H5FD_open(name, flags, file_ptr->fa.ioc_fapl_id, HADDR_UNDEF)))
+    if (H5FD_open(false, &file_ptr->sf_file, name, flags, file_ptr->fa.ioc_fapl_id, HADDR_UNDEF) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open IOC file");
 
     if (driver->value == H5_VFD_IOC) {
