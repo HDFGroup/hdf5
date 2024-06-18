@@ -13,10 +13,8 @@
 /*
  * Read-Only S3 Virtual File Driver (VFD)
  *
- * Purpose:
- *
- *     Provide read-only access to files hosted on Amazon's S3 service.
- *     Relies on "s3comms" utility layer to implement the AWS REST API.
+ * Provides read-only access to files hosted on Amazon's S3 service.
+ * Relies on "s3comms" utility layer to implement the AWS REST API.
  */
 
 #ifdef H5_HAVE_ROS3_VFD
@@ -165,6 +163,12 @@ static herr_t H5FD__ros3_str_token_copy(const char *name, size_t size, void *_va
 static int    H5FD__ros3_str_token_cmp(const void *_value1, const void *_value2, size_t size);
 static herr_t H5FD__ros3_str_token_close(const char *name, size_t size, void *_value);
 static herr_t H5FD__ros3_str_token_delete(hid_t prop_id, const char *name, size_t size, void *_value);
+
+#ifdef ROS3_STATS
+static herr_t H5FD__ros3_reset_stats(H5FD_ros3_t *file);
+static herr_t H5FD__ros3_log_read_stats(H5FD_ros3_t *file, H5FD_mem_t type, uint64_t size);
+static herr_t H5FD__ros3_print_stats(FILE *stream, const H5FD_ros3_t *file);
+#endif
 
 static const H5FD_class_t H5FD_ros3_g = {
     H5FD_CLASS_VERSION,       /* struct version       */
@@ -668,42 +672,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_ros3_token() */
 
-#ifdef ROS3_STATS
-/*----------------------------------------------------------------------------
- * Function:    H5FD__ros3_reset_stats
- *
- * Purpose:     Reset the collected statistics
- *
- * Return:      SUCCEED/FAIL
- *----------------------------------------------------------------------------
- */
-static herr_t
-H5FD__ros3_reset_stats(H5FD_ros3_t *file)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
-
-    if (file == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file was null");
-
-    for (int i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
-        file->raw[i].bytes = 0;
-        file->raw[i].count = 0;
-        file->raw[i].min   = 0;
-        file->raw[i].max   = 0;
-
-        file->meta[i].bytes = 0;
-        file->meta[i].count = 0;
-        file->meta[i].min   = 0;
-        file->meta[i].max   = 0;
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__ros3_reset_stats() */
-#endif /* ROS3_STATS */
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD__ros3_open
  *
@@ -843,271 +811,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ros3_open() */
-
-#ifdef ROS3_STATS
-/*----------------------------------------------------------------------------
- * Function:    H5FD__ros3_print_stats
- *
- * Purpose:     Tabulate and pretty-print statistics for this virtual file.
- *
- *     Should be called upon file close.
- *
- *     Shows number of reads and bytes read, broken down by
- *     "raw" (H5FD_MEM_DRAW) or "meta" (any other flag)
- *
- *     Prints filename and listing of total number of reads and bytes read,
- *     both as a grand total and separate  meta- and raw data reads.
- *
- *     If any reads were done, prints out two tables:
- *
- *     1. overview of raw- and metadata reads
- *         - min (smallest size read)
- *         - average of size read
- *             - k,M,G suffixes by powers of 1024 (2^10)
- *         - max (largest size read)
- *     2. tabulation of "bins", sepraring reads into exponentially-larger
- *        ranges of size.
- *         - columns for number of reads, total bytes, and average size, with
- *           separate sub-colums for raw- and metadata reads.
- *         - each row represents one bin, identified by the top of its range
- *
- *     Bins without any reads in their bounds are not printed.
- *
- *     An "overflow" bin is also present, to catch "big" reads.
- *
- *     Output for all bins (and range ceiling and average size report) is
- *     divied by powers of 1024. By corollary, four digits before the decimal
- *     is valid.
- *
- *     - 41080 bytes is represented by 40.177k, not 41.080k
- *     - 1004.831M represents approx. 1052642000 bytes
- *
- * Return:      SUCCEED/FAIL
- *----------------------------------------------------------------------------
- */
-static herr_t
-H5FD__ros3_print_stats(FILE *stream, const H5FD_ros3_t *file)
-{
-    herr_t        ret_value    = SUCCEED;
-    parsed_url_t *purl         = NULL;
-    unsigned      i            = 0;
-    unsigned long count_meta   = 0;
-    unsigned long count_raw    = 0;
-    double        average_meta = 0.0;
-    double        average_raw  = 0.0;
-    uint64_t      min_meta     = 0;
-    uint64_t      min_raw      = 0;
-    uint64_t      max_meta     = 0;
-    uint64_t      max_raw      = 0;
-    uint64_t      bytes_raw    = 0;
-    uint64_t      bytes_meta   = 0;
-    double        re_dub       = 0.0; /* reusable double variable */
-    unsigned      suffix_i     = 0;
-    const char    suffixes[]   = {' ', 'K', 'M', 'G', 'T', 'P'};
-
-    FUNC_ENTER_PACKAGE
-
-    if (stream == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file stream cannot be null");
-    if (file == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file cannot be null");
-    if (file->s3r_handle == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "s3 request handle cannot be null");
-    if (file->s3r_handle->purl == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "parsed url structure cannot be null");
-    purl = file->s3r_handle->purl;
-
-    /******************
-     * PRINT FILENAME *
-     ******************/
-
-    fprintf(stream, "stats for %s://%s", purl->scheme, purl->host);
-    if (purl->port != NULL && purl->port[0] != '\0')
-        fprintf(stream, ":%s", purl->port);
-    if (purl->query != NULL && purl->query[0] != '\0') {
-        if (purl->path != NULL && purl->path[0] != '\0')
-            fprintf(stream, "/%s", purl->path);
-        else
-            fprintf(stream, "/");
-        fprintf(stream, "?%s", purl->query);
-    }
-    else if (purl->path != NULL && purl->path[0] != '\0') {
-        fprintf(stream, "/%s", purl->path);
-    }
-    fprintf(stream, "\n");
-
-    /*******************
-     * AGGREGATE STATS *
-     *******************/
-
-    for (i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
-        const H5FD_ros3_stats_bin_t *r = &file->raw[i];
-        const H5FD_ros3_stats_bin_t *m = &file->meta[i];
-
-        if (m->min < min_meta)
-            min_meta = m->min;
-        if (r->min < min_raw)
-            min_raw = r->min;
-        if (m->max > max_meta)
-            max_meta = m->max;
-        if (r->max > max_raw)
-            max_raw = r->max;
-
-        count_raw += r->count;
-        count_meta += m->count;
-        bytes_raw += r->bytes;
-        bytes_meta += m->bytes;
-    }
-    if (count_raw > 0)
-        average_raw = (double)bytes_raw / (double)count_raw;
-    if (count_meta > 0)
-        average_meta = (double)bytes_meta / (double)count_meta;
-
-    /******************
-     * PRINT OVERVIEW *
-     ******************/
-
-    fprintf(stream, "TOTAL READS: %lu  (%lu meta, %lu raw)\n", count_raw + count_meta, count_meta, count_raw);
-    fprintf(stream, "TOTAL BYTES: %" PRIu64 "  (%" PRIu64 " meta, %" PRIu64 " raw)\n", bytes_raw + bytes_meta,
-            bytes_meta, bytes_raw);
-
-    if (count_raw + count_meta == 0)
-        goto done;
-
-    /*************************
-     * PRINT AGGREGATE STATS *
-     *************************/
-
-    fprintf(stream, "SIZES     meta      raw\n");
-    fprintf(stream, "  min ");
-    if (count_meta == 0)
-        fprintf(stream, "   0.000  ");
-    else {
-        re_dub = (double)min_meta;
-        for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
-            re_dub /= 1024.0;
-        assert(suffix_i < sizeof(suffixes));
-        fprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
-    }
-
-    if (count_raw == 0)
-        fprintf(stream, "   0.000 \n");
-    else {
-        re_dub = (double)min_raw;
-        for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
-            re_dub /= 1024.0;
-        assert(suffix_i < sizeof(suffixes));
-        fprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
-    }
-
-    fprintf(stream, "  avg ");
-    re_dub = (double)average_meta;
-    for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
-        re_dub /= 1024.0;
-    assert(suffix_i < sizeof(suffixes));
-    fprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
-
-    re_dub = (double)average_raw;
-    for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
-        re_dub /= 1024.0;
-    assert(suffix_i < sizeof(suffixes));
-    fprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
-
-    fprintf(stream, "  max ");
-    re_dub = (double)max_meta;
-    for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
-        re_dub /= 1024.0;
-    assert(suffix_i < sizeof(suffixes));
-    fprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
-
-    re_dub = (double)max_raw;
-    for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
-        re_dub /= 1024.0;
-    assert(suffix_i < sizeof(suffixes));
-    fprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
-
-    /******************************
-     * PRINT INDIVIDUAL BIN STATS *
-     ******************************/
-
-    fprintf(stream, "BINS             # of reads      total bytes         average size\n");
-    fprintf(stream, "    up-to      meta     raw     meta      raw       meta      raw\n");
-
-    for (i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
-        const H5FD_ros3_stats_bin_t *m;
-        const H5FD_ros3_stats_bin_t *r;
-        uint64_t                     range_end = 0;
-        char                         bm_suffix = ' '; /* bytes-meta */
-        double                       bm_val    = 0.0;
-        char                         br_suffix = ' '; /* bytes-raw */
-        double                       br_val    = 0.0;
-        char                         am_suffix = ' '; /* average-meta */
-        double                       am_val    = 0.0;
-        char                         ar_suffix = ' '; /* average-raw */
-        double                       ar_val    = 0.0;
-
-        m = &file->meta[i];
-        r = &file->raw[i];
-        if (r->count == 0 && m->count == 0)
-            continue;
-
-        range_end = ros3_stats_boundaries_g[i];
-
-        if (i == ROS3_STATS_BIN_COUNT) {
-            range_end = ros3_stats_boundaries_g[i - 1];
-            fprintf(stream, ">");
-        }
-        else
-            fprintf(stream, " ");
-
-        bm_val = (double)m->bytes;
-        for (suffix_i = 0; bm_val >= 1024.0; suffix_i++)
-            bm_val /= 1024.0;
-        assert(suffix_i < sizeof(suffixes));
-        bm_suffix = suffixes[suffix_i];
-
-        br_val = (double)r->bytes;
-        for (suffix_i = 0; br_val >= 1024.0; suffix_i++)
-            br_val /= 1024.0;
-        assert(suffix_i < sizeof(suffixes));
-        br_suffix = suffixes[suffix_i];
-
-        if (m->count > 0)
-            am_val = (double)(m->bytes) / (double)(m->count);
-        for (suffix_i = 0; am_val >= 1024.0; suffix_i++)
-            am_val /= 1024.0;
-        assert(suffix_i < sizeof(suffixes));
-        am_suffix = suffixes[suffix_i];
-
-        if (r->count > 0)
-            ar_val = (double)(r->bytes) / (double)(r->count);
-        for (suffix_i = 0; ar_val >= 1024.0; suffix_i++)
-            ar_val /= 1024.0;
-        assert(suffix_i < sizeof(suffixes));
-        ar_suffix = suffixes[suffix_i];
-
-        re_dub = (double)range_end;
-        for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
-            re_dub /= 1024.0;
-        assert(suffix_i < sizeof(suffixes));
-
-        fprintf(stream, " %8.3f%c %7" PRIu64 " %7" PRIu64 " %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
-                suffixes[suffix_i], /* Bin ceiling      */
-                m->count,           /* Metadata reads   */
-                r->count,           /* Raw data reads    */
-                bm_val, bm_suffix,  /* Metadata bytes   */
-                br_val, br_suffix,  /* Raw data bytes    */
-                am_val, am_suffix,  /* Metadata average */
-                ar_val, ar_suffix); /* Raw data average  */
-
-        fflush(stream);
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5FD__ros3_print_stats */
-#endif /* ROS3_STATS */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__ros3_close
@@ -1416,28 +1119,8 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
 
 #ifdef ROS3_STATS
-        H5FD_ros3_stats_bin_t *bin = NULL;
-        int                    i   = 0;
-
-        /* Find which "bin" this read fits in. Can be "overflow" bin.  */
-        for (i = 0; i < ROS3_STATS_BIN_COUNT; i++)
-            if ((uint64_t)size < ros3_stats_boundaries_g[i])
-                break;
-        bin = (type == H5FD_MEM_DRAW) ? &file->raw[i] : &file->meta[i];
-
-        /* Store collected stats in appropriate bin */
-        if (bin->count == 0) {
-            bin->min = size;
-            bin->max = size;
-        }
-        else {
-            if (size < bin->min)
-                bin->min = size;
-            if (size > bin->max)
-                bin->max = size;
-        }
-        bin->count++;
-        bin->bytes += (uint64_t)size;
+        if (H5FD__ros3_log_read_stats(file, type, (uint64_t)size) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "unable to log read stats");
 #endif
     }
 
@@ -1492,5 +1175,341 @@ H5FD__ros3_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ros3_truncate() */
+
+#ifdef ROS3_STATS
+/*----------------------------------------------------------------------------
+ * Function:    H5FD__ros3_reset_stats
+ *
+ * Purpose:     Reset the collected statistics
+ *
+ * Return:      SUCCEED/FAIL
+ *----------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_reset_stats(H5FD_ros3_t *file)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    if (file == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file was null");
+
+    for (int i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
+        file->raw[i].bytes = 0;
+        file->raw[i].count = 0;
+        file->raw[i].min   = 0;
+        file->raw[i].max   = 0;
+
+        file->meta[i].bytes = 0;
+        file->meta[i].count = 0;
+        file->meta[i].min   = 0;
+        file->meta[i].max   = 0;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ros3_reset_stats() */
+
+/*----------------------------------------------------------------------------
+ * Function:    H5FD__ros3_log_read_stats
+ *
+ * Purpose:     Add data for a read to the ros3 stats
+ *
+ * Return:      SUCCEED/FAIL
+ *----------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_log_read_stats(H5FD_ros3_t *file, H5FD_mem_t type, uint64_t size)
+{
+    H5FD_ros3_stats_bin_t *bin       = NULL;
+    int                    i         = 0;
+    herr_t                 ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    if (file == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file was null");
+
+    /* Find which "bin" this read fits in */
+    for (i = 0; i < ROS3_STATS_BIN_COUNT; i++)
+        if (size < ros3_stats_boundaries_g[i])
+            break;
+    bin = (type == H5FD_MEM_DRAW) ? &file->raw[i] : &file->meta[i];
+
+    /* Store collected stats in appropriate bin */
+    bin->count++;
+    bin->bytes += size;
+    if (size < bin->min)
+        bin->min = size;
+    if (size > bin->max)
+        bin->max = size;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ros3_log_read_stats() */
+
+/*----------------------------------------------------------------------------
+ * Function:    H5FD__ros3_print_stats
+ *
+ * Purpose:     Tabulate and pretty-print statistics for this virtual file.
+ *
+ *     Should be called upon file close.
+ *
+ *     Shows number of reads and bytes read, broken down by
+ *     "raw" (H5FD_MEM_DRAW) or "meta" (any other flag)
+ *
+ *     Prints filename and listing of total number of reads and bytes read,
+ *     both as a grand total and separate  meta- and raw data reads.
+ *
+ *     If any reads were done, prints out two tables:
+ *
+ *     1. overview of raw- and metadata reads
+ *         - min (smallest size read)
+ *         - average of size read
+ *             - k,M,G suffixes by powers of 1024 (2^10)
+ *         - max (largest size read)
+ *     2. tabulation of "bins", sepraring reads into exponentially-larger
+ *        ranges of size.
+ *         - columns for number of reads, total bytes, and average size, with
+ *           separate sub-colums for raw- and metadata reads.
+ *         - each row represents one bin, identified by the top of its range
+ *
+ *     Bins without any reads in their bounds are not printed.
+ *
+ *     An "overflow" bin is also present, to catch "big" reads.
+ *
+ *     Output for all bins (and range ceiling and average size report) is
+ *     divied by powers of 1024. By corollary, four digits before the decimal
+ *     is valid.
+ *
+ *     - 41080 bytes is represented by 40.177k, not 41.080k
+ *     - 1004.831M represents approx. 1052642000 bytes
+ *
+ * Return:      SUCCEED/FAIL
+ *----------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_print_stats(FILE *stream, const H5FD_ros3_t *file)
+{
+    herr_t        ret_value    = SUCCEED;
+    parsed_url_t *purl         = NULL;
+    unsigned      i            = 0;
+    unsigned long count_meta   = 0;
+    unsigned long count_raw    = 0;
+    double        average_meta = 0.0;
+    double        average_raw  = 0.0;
+    uint64_t      min_meta     = 0;
+    uint64_t      min_raw      = 0;
+    uint64_t      max_meta     = 0;
+    uint64_t      max_raw      = 0;
+    uint64_t      bytes_raw    = 0;
+    uint64_t      bytes_meta   = 0;
+    double        re_dub       = 0.0; /* reusable double variable */
+    unsigned      suffix_i     = 0;
+    const char    suffixes[]   = {' ', 'K', 'M', 'G', 'T', 'P'};
+
+    FUNC_ENTER_PACKAGE
+
+    if (stream == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file stream cannot be null");
+    if (file == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file cannot be null");
+    if (file->s3r_handle == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "s3 request handle cannot be null");
+    if (file->s3r_handle->purl == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "parsed url structure cannot be null");
+    purl = file->s3r_handle->purl;
+
+    /******************
+     * PRINT FILENAME *
+     ******************/
+
+    fprintf(stream, "stats for %s://%s", purl->scheme, purl->host);
+    if (purl->port != NULL && purl->port[0] != '\0')
+        fprintf(stream, ":%s", purl->port);
+    if (purl->query != NULL && purl->query[0] != '\0') {
+        if (purl->path != NULL && purl->path[0] != '\0')
+            fprintf(stream, "/%s", purl->path);
+        else
+            fprintf(stream, "/");
+        fprintf(stream, "?%s", purl->query);
+    }
+    else if (purl->path != NULL && purl->path[0] != '\0') {
+        fprintf(stream, "/%s", purl->path);
+    }
+    fprintf(stream, "\n");
+
+    /*******************
+     * AGGREGATE STATS *
+     *******************/
+
+    for (i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
+        const H5FD_ros3_stats_bin_t *r = &file->raw[i];
+        const H5FD_ros3_stats_bin_t *m = &file->meta[i];
+
+        if (m->min < min_meta)
+            min_meta = m->min;
+        if (r->min < min_raw)
+            min_raw = r->min;
+        if (m->max > max_meta)
+            max_meta = m->max;
+        if (r->max > max_raw)
+            max_raw = r->max;
+
+        count_raw += r->count;
+        count_meta += m->count;
+        bytes_raw += r->bytes;
+        bytes_meta += m->bytes;
+    }
+    if (count_raw > 0)
+        average_raw = (double)bytes_raw / (double)count_raw;
+    if (count_meta > 0)
+        average_meta = (double)bytes_meta / (double)count_meta;
+
+    /******************
+     * PRINT OVERVIEW *
+     ******************/
+
+    fprintf(stream, "TOTAL READS: %lu  (%lu meta, %lu raw)\n", count_raw + count_meta, count_meta, count_raw);
+    fprintf(stream, "TOTAL BYTES: %" PRIu64 "  (%" PRIu64 " meta, %" PRIu64 " raw)\n", bytes_raw + bytes_meta,
+            bytes_meta, bytes_raw);
+
+    if (count_raw + count_meta == 0)
+        goto done;
+
+    /*************************
+     * PRINT AGGREGATE STATS *
+     *************************/
+
+    fprintf(stream, "SIZES     meta      raw\n");
+    fprintf(stream, "  min ");
+    if (count_meta == 0)
+        fprintf(stream, "   0.000  ");
+    else {
+        re_dub = (double)min_meta;
+        for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
+            re_dub /= 1024.0;
+        assert(suffix_i < sizeof(suffixes));
+        fprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
+    }
+
+    if (count_raw == 0)
+        fprintf(stream, "   0.000 \n");
+    else {
+        re_dub = (double)min_raw;
+        for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
+            re_dub /= 1024.0;
+        assert(suffix_i < sizeof(suffixes));
+        fprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
+    }
+
+    fprintf(stream, "  avg ");
+    re_dub = (double)average_meta;
+    for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
+        re_dub /= 1024.0;
+    assert(suffix_i < sizeof(suffixes));
+    fprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
+
+    re_dub = (double)average_raw;
+    for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
+        re_dub /= 1024.0;
+    assert(suffix_i < sizeof(suffixes));
+    fprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
+
+    fprintf(stream, "  max ");
+    re_dub = (double)max_meta;
+    for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
+        re_dub /= 1024.0;
+    assert(suffix_i < sizeof(suffixes));
+    fprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
+
+    re_dub = (double)max_raw;
+    for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
+        re_dub /= 1024.0;
+    assert(suffix_i < sizeof(suffixes));
+    fprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
+
+    /******************************
+     * PRINT INDIVIDUAL BIN STATS *
+     ******************************/
+
+    fprintf(stream, "BINS             # of reads      total bytes         average size\n");
+    fprintf(stream, "    up-to      meta     raw     meta      raw       meta      raw\n");
+
+    for (i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
+        const H5FD_ros3_stats_bin_t *m;
+        const H5FD_ros3_stats_bin_t *r;
+        uint64_t                     range_end = 0;
+        char                         bm_suffix = ' '; /* bytes-meta */
+        double                       bm_val    = 0.0;
+        char                         br_suffix = ' '; /* bytes-raw */
+        double                       br_val    = 0.0;
+        char                         am_suffix = ' '; /* average-meta */
+        double                       am_val    = 0.0;
+        char                         ar_suffix = ' '; /* average-raw */
+        double                       ar_val    = 0.0;
+
+        m = &file->meta[i];
+        r = &file->raw[i];
+        if (r->count == 0 && m->count == 0)
+            continue;
+
+        range_end = ros3_stats_boundaries_g[i];
+
+        if (i == ROS3_STATS_BIN_COUNT) {
+            range_end = ros3_stats_boundaries_g[i - 1];
+            fprintf(stream, ">");
+        }
+        else
+            fprintf(stream, " ");
+
+        bm_val = (double)m->bytes;
+        for (suffix_i = 0; bm_val >= 1024.0; suffix_i++)
+            bm_val /= 1024.0;
+        assert(suffix_i < sizeof(suffixes));
+        bm_suffix = suffixes[suffix_i];
+
+        br_val = (double)r->bytes;
+        for (suffix_i = 0; br_val >= 1024.0; suffix_i++)
+            br_val /= 1024.0;
+        assert(suffix_i < sizeof(suffixes));
+        br_suffix = suffixes[suffix_i];
+
+        if (m->count > 0)
+            am_val = (double)(m->bytes) / (double)(m->count);
+        for (suffix_i = 0; am_val >= 1024.0; suffix_i++)
+            am_val /= 1024.0;
+        assert(suffix_i < sizeof(suffixes));
+        am_suffix = suffixes[suffix_i];
+
+        if (r->count > 0)
+            ar_val = (double)(r->bytes) / (double)(r->count);
+        for (suffix_i = 0; ar_val >= 1024.0; suffix_i++)
+            ar_val /= 1024.0;
+        assert(suffix_i < sizeof(suffixes));
+        ar_suffix = suffixes[suffix_i];
+
+        re_dub = (double)range_end;
+        for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
+            re_dub /= 1024.0;
+        assert(suffix_i < sizeof(suffixes));
+
+        fprintf(stream, " %8.3f%c %7" PRIu64 " %7" PRIu64 " %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
+                suffixes[suffix_i], /* Bin ceiling      */
+                m->count,           /* Metadata reads   */
+                r->count,           /* Raw data reads    */
+                bm_val, bm_suffix,  /* Metadata bytes   */
+                br_val, br_suffix,  /* Raw data bytes    */
+                am_val, am_suffix,  /* Metadata average */
+                ar_val, ar_suffix); /* Raw data average  */
+
+        fflush(stream);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5FD__ros3_print_stats */
+#endif /* ROS3_STATS */
 
 #endif /* H5_HAVE_ROS3_VFD */
