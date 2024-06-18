@@ -395,7 +395,7 @@ New Features
       CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
       that allow users to specify common configure options and share them with others.
       HDF added a CMakePresets.json file of a typical configuration and support
-      file, config/cmake-presets/hidden-presets.json. 
+      file, config/cmake-presets/hidden-presets.json.
       Also added a section to INSTALL_CMake.txt with very basic explanation of the
       process to use CMakePresets.
 
@@ -443,6 +443,15 @@ New Features
 
     Library:
     --------
+    - Added new routines for interacting with error stacks: H5Epause_stack,
+      H5Eresume_stack, and H5Eis_paused.  These routines can be used to
+      indicate that errors from a call to an HDF5 routine should not be
+      pushed on to an error stack.  Primarily targeted toward 3rd-party
+      developers of Virtual File Drivirs (VFDs) and Virtual Object Layer (VOL)
+      connectors, these routines allow developers to perform "speculative"
+      operations (such as trying to open a file or object) without requiring
+      that the error stack be cleared after a speculative operation fails.
+
     - H5Pset_external() now uses HDoff_t, which is always a 64-bit type
 
       The H5Pset_external() call took an off_t parameter in HDF5 1.14.x and
@@ -593,7 +602,7 @@ New Features
       to filtered datasets. The Subfiling VFD now properly handles vector
       I/O requests in their entirety, resulting in fewer I/O calls, improved
       vector I/O performance and improved vector I/O memory efficiency.
-    
+
     - Added a simple cache to the read-only S3 (ros3) VFD
 
       The read-only S3 VFD now caches the first N bytes of a file stored

@@ -212,8 +212,8 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get external link prefix");
 
     /* Search for the target file */
-    if (NULL == (ext_file = H5F_prefix_open_file(loc.oloc->file, H5F_PREFIX_ELINK, elink_prefix, file_name,
-                                                 intent, fapl_id)))
+    if (H5F_prefix_open_file(false, &ext_file, loc.oloc->file, H5F_PREFIX_ELINK, elink_prefix, file_name,
+                             intent, fapl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTOPENFILE, H5I_INVALID_HID,
                     "unable to open external file, external link file name = '%s'", file_name);
 

@@ -854,12 +854,9 @@ H5FD__splitter_open(const char *name, unsigned flags, hid_t splitter_fapl_id, ha
         } /* end if logfile path given */
     }     /* end if logfile pointer/handle does not exist */
 
-    file_ptr->rw_file = H5FD_open(name, flags, fapl_ptr->rw_fapl_id, HADDR_UNDEF);
-    if (!file_ptr->rw_file)
+    if (H5FD_open(false, &file_ptr->rw_file, name, flags, fapl_ptr->rw_fapl_id, HADDR_UNDEF) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open R/W file");
-
-    file_ptr->wo_file = H5FD_open(fapl_ptr->wo_path, flags, fapl_ptr->wo_fapl_id, HADDR_UNDEF);
-    if (!file_ptr->wo_file)
+    if (H5FD_open(false, &file_ptr->wo_file, fapl_ptr->wo_path, flags, fapl_ptr->wo_fapl_id, HADDR_UNDEF) < 0)
         H5FD_SPLITTER_WO_ERROR(file_ptr, __func__, H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open W/O file")
 
     ret_value = (H5FD_t *)file_ptr;
