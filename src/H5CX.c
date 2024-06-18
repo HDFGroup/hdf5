@@ -2371,6 +2371,9 @@ H5CX_get_data_transform(H5Z_data_xform_t **data_transform)
     assert(head && *head);
     assert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
+    /* This getter does not use H5CX_RETRIEVE_PROP_VALID in order to use H5P_peek instead of H5P_get.
+       This prevents invocation of the data transform property's library-defined copy callback */
+
     /* Check if the value has been retrieved already */
     if (!(*head)->ctx.data_transform_valid) {
         /* Check for default DXPL */
