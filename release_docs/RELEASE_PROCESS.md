@@ -48,7 +48,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 6. Review and update, if needed, the [README](https://github.com/HDFGroup/hdf5/blob/develop/README.md) and [COPYING](https://github.com/HDFGroup/hdf5/blob/develop/COPYING) files.
 7. Review and update all INSTALL_* files in [release_docs](https://github.com/HDFGroup/hdf5/tree/develop/release_docs), if needed.
     - [INSTALL](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL) should be general info and not require extensive changes
-    - [INSTALL_Auto.txt](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_Auto.txt) are the instructions for building under autotools.
+    - [INSTALL_Autotools.txt](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_Autotools.txt) are the instructions for building under autotools.
     - [INSTALL_CMake.txt](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_CMake.txt) are the instructions for building under CMake.
 
 ### 4. Freeze Code (Release Manager | Test Automation Team)
