@@ -34,7 +34,7 @@
 #ifdef H5_HAVE_ROS3_VFD
 
 /* Define to turn on stats collection and reporting */
-#define ROS3_STATS
+/* #define ROS3_STATS */
 
 /* Max size of the cache, in bytes */
 #define ROS3_MAX_CACHE_SIZE 16777216
