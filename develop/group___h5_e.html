@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.6bc6fb6</span>
+   &#160;<span id="projectnumber">1.15.0.850d6c8</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -147,6 +147,24 @@ Functions</h2></td></tr>
 <tr class="memitem:gaa35a1b27d704a90f2a933f9d41df35ec"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_e.html#gaa35a1b27d704a90f2a933f9d41df35ec">H5Eappend_stack</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dst_stack_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> src_stack_id, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> close_source_stack)</td></tr>
 <tr class="memdesc:gaa35a1b27d704a90f2a933f9d41df35ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Appends one error stack to another, optionally closing the source stack.  <br /></td></tr>
 <tr class="separator:gaa35a1b27d704a90f2a933f9d41df35ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad3f05951758894c521e72567f1b8c410"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_e.html#gad3f05951758894c521e72567f1b8c410">H5Eis_paused</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> stack_id, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *is_paused)</td></tr>
+<tr class="memdesc:gad3f05951758894c521e72567f1b8c410"><td class="mdescLeft">&#160;</td><td class="mdescRight"><ul>
+<li>Check if pushing errors on an error stack is paused </li>
+</ul>
+ <br /></td></tr>
+<tr class="separator:gad3f05951758894c521e72567f1b8c410"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4c0064d86c4ce9b0ddef832dcc4158ed"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_e.html#ga4c0064d86c4ce9b0ddef832dcc4158ed">H5Epause_stack</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> stack_id)</td></tr>
+<tr class="memdesc:ga4c0064d86c4ce9b0ddef832dcc4158ed"><td class="mdescLeft">&#160;</td><td class="mdescRight"><ul>
+<li>Pause pushing errors on an error stack </li>
+</ul>
+ <br /></td></tr>
+<tr class="separator:ga4c0064d86c4ce9b0ddef832dcc4158ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaab20d99bd5f79d4e3c1996ddc22c3fa8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_e.html#gaab20d99bd5f79d4e3c1996ddc22c3fa8">H5Eresume_stack</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> stack_id)</td></tr>
+<tr class="memdesc:gaab20d99bd5f79d4e3c1996ddc22c3fa8"><td class="mdescLeft">&#160;</td><td class="mdescRight"><ul>
+<li>Resume pushing errors on an error stack </li>
+</ul>
+ <br /></td></tr>
+<tr class="separator:gaab20d99bd5f79d4e3c1996ddc22c3fa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga41c2ed13fd6aac6e413fe7383b9090fa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_e.html#ga41c2ed13fd6aac6e413fe7383b9090fa">H5Eclose_stack</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> stack_id)</td></tr>
 <tr class="memdesc:ga41c2ed13fd6aac6e413fe7383b9090fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes an error stack handle.  <br /></td></tr>
 <tr class="separator:ga41c2ed13fd6aac6e413fe7383b9090fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -890,6 +908,87 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="gad3f05951758894c521e72567f1b8c410" name="gad3f05951758894c521e72567f1b8c410"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad3f05951758894c521e72567f1b8c410">&#9670;&#160;</a></span>H5Eis_paused()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Eis_paused </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
+          <td class="paramname"><em>stack_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *&#160;</td>
+          <td class="paramname"><em>is_paused</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><ul>
+<li>Check if pushing errors on an error stack is paused </li>
+</ul>
+</p>
+<hr  />
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">stack_id</td><td>Error stack identifier </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">is_paused</td><td>Flag whether stack is paused </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="group___h5_e.html#gad3f05951758894c521e72567f1b8c410" title="Check if pushing errors on an error stack is paused">H5Eis_paused()</a> can be used within HDF5 VOL connectors and other dynamically loaded components to check if the HDF5 library, or other component has paused pushing error on the default error stack or an application stack.</p>
+<p>The library may pause pushing errors on the default error stack when performing "speculative" operations, such as testing for the existence of something that could be located at one of many locations. <code>stack_id</code> is the error stack to query, and the value pointed to by <code>is_paused</code> is set to TRUE/FALSE.</p>
+<p>If an error occurs while attempting to query the status of <code>stack_id</code>, the value pointed to by <code>is_paused</code> is unchanged.</p>
+<dl class="section since"><dt>Since</dt><dd>1.14.5 </dd></dl>
+
+</div>
+</div>
+<a id="ga4c0064d86c4ce9b0ddef832dcc4158ed" name="ga4c0064d86c4ce9b0ddef832dcc4158ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4c0064d86c4ce9b0ddef832dcc4158ed">&#9670;&#160;</a></span>H5Epause_stack()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Epause_stack </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
+          <td class="paramname"><em>stack_id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><ul>
+<li>Pause pushing errors on an error stack </li>
+</ul>
+</p>
+<hr  />
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">stack_id</td><td>Error stack identifier </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="group___h5_e.html#ga4c0064d86c4ce9b0ddef832dcc4158ed" title="Pause pushing errors on an error stack">H5Epause_stack()</a> pauses pushing errors on an error stack. Pushing an error on a paused error stack will be ignored (not fail).</p>
+<p><a class="el" href="group___h5_e.html#gaab20d99bd5f79d4e3c1996ddc22c3fa8" title="Resume pushing errors on an error stack">H5Eresume_stack()</a> is used to allow errors to be pushed on a stack. Calls to <a class="el" href="group___h5_e.html#ga4c0064d86c4ce9b0ddef832dcc4158ed" title="Pause pushing errors on an error stack">H5Epause_stack()</a> and <a class="el" href="group___h5_e.html#gaab20d99bd5f79d4e3c1996ddc22c3fa8" title="Resume pushing errors on an error stack">H5Eresume_stack()</a> must be matched.</p>
+<p>Calls to <a class="el" href="group___h5_e.html#ga4c0064d86c4ce9b0ddef832dcc4158ed" title="Pause pushing errors on an error stack">H5Epause_stack()</a>/H5Eresume_stack() may be nested.</p>
+<dl class="section since"><dt>Since</dt><dd>1.14.5 </dd></dl>
+
+</div>
+</div>
 <a id="ga818569ac92695fb1a7836c2389faa2ba" name="ga818569ac92695fb1a7836c2389faa2ba"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga818569ac92695fb1a7836c2389faa2ba">&#9670;&#160;</a></span>H5Epop()</h2>
 
@@ -1220,6 +1319,41 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="gaab20d99bd5f79d4e3c1996ddc22c3fa8" name="gaab20d99bd5f79d4e3c1996ddc22c3fa8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaab20d99bd5f79d4e3c1996ddc22c3fa8">&#9670;&#160;</a></span>H5Eresume_stack()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Eresume_stack </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
+          <td class="paramname"><em>stack_id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><ul>
+<li>Resume pushing errors on an error stack </li>
+</ul>
+</p>
+<hr  />
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">stack_id</td><td>Error stack identifier </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="group___h5_e.html#gaab20d99bd5f79d4e3c1996ddc22c3fa8" title="Resume pushing errors on an error stack">H5Eresume_stack()</a> resumes pushing errors on an error stack. </p><pre class="fragment">     Calls to H5Epause_stack() and H5Eresume_stack() must be matched.
+
+     Calls to H5Epause_stack()/H5Eresume_stack() may be nested.
+</pre> <dl class="section since"><dt>Since</dt><dd>1.14.5 </dd></dl>
+
+</div>
+</div>
 <a id="gab7e1c2db4a0811b70227833b5462eea8" name="gab7e1c2db4a0811b70227833b5462eea8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gab7e1c2db4a0811b70227833b5462eea8">&#9670;&#160;</a></span>H5Eset_auto1()</h2>
 
@@ -1260,7 +1394,7 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___h5_e.html#gab7e1c2db4a0811b70227833b5462eea8" title="Turns automatic error printing on or off.">H5Eset_auto1()</a> turns on or off automatic printing of errors. When turned on (non-null <code>func</code> pointer), any API function which returns an error indication will first call <code>func</code>, passing it <code>client_data</code> as an argument.</p>
 <p><code>func</code>, a function conforming to the <a class="el" href="_h5_epublic_8h.html#a54e242097ba2121788448b37579a107e" title="Callback function for H5Eset_auto1()">H5E_auto1_t</a> prototype, is defined in the <a class="el" href="_h5_epublic_8h.html">H5Epublic.h</a> source code file as: </p><div class="fragment"><div class="line"> </div>
 <div class="line"><span class="keyword">typedef</span> <a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> (*<a class="code hl_typedef" href="_h5_epublic_8h.html#a54e242097ba2121788448b37579a107e">H5E_auto1_t</a>)(<span class="keywordtype">void</span> *client_data);</div>
-<div class="ttc" id="a_h5_epublic_8h_html_a54e242097ba2121788448b37579a107e"><div class="ttname"><a href="_h5_epublic_8h.html#a54e242097ba2121788448b37579a107e">H5E_auto1_t</a></div><div class="ttdeci">herr_t(* H5E_auto1_t)(void *client_data)</div><div class="ttdoc">Callback function for H5Eset_auto1()</div><div class="ttdef"><b>Definition</b> H5Epublic.h:725</div></div>
+<div class="ttc" id="a_h5_epublic_8h_html_a54e242097ba2121788448b37579a107e"><div class="ttname"><a href="_h5_epublic_8h.html#a54e242097ba2121788448b37579a107e">H5E_auto1_t</a></div><div class="ttdeci">herr_t(* H5E_auto1_t)(void *client_data)</div><div class="ttdoc">Callback function for H5Eset_auto1()</div><div class="ttdef"><b>Definition</b> H5Epublic.h:791</div></div>
 <div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:239</div></div>
 </div><!-- fragment --><p>When the library is first initialized, the auto printing function is set to <a class="el" href="group___h5_e.html#ga9c71eb8e5b7261668e2e8926f1822365" title="Prints the current error stack in a default manner.">H5Eprint1()</a> (cast appropriately) and <code>client_data</code> is the standard error stream pointer, <code>stderr</code>.</p>
 <p>Automatic stack traversal is always in the <a class="el" href="_h5_epublic_8h.html#ae30cff307b364e94ce2d552edbca6813ab0ba668f408b6c98dade64021973fb49">H5E_WALK_DOWNWARD</a> direction.</p>
@@ -1315,7 +1449,7 @@ Functions</h2></td></tr>
 <p>When automatic printing is turned on, by the use of a non-null <code>func</code> pointer, any API function which returns an error indication will first call <code>func</code>, passing it <code>client_data</code> as an argument.</p>
 <p><code>func</code>, a function compliant with the <a class="el" href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca" title="Callback function for H5Eset_auto2()">H5E_auto2_t</a> prototype, is defined in the <a class="el" href="_h5_epublic_8h.html">H5Epublic.h</a> source code file as: </p><div class="fragment"><div class="line"> </div>
 <div class="line"><span class="keyword">typedef</span> <a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> (*<a class="code hl_typedef" href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a>)(<a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> estack, <span class="keywordtype">void</span> *client_data);</div>
-<div class="ttc" id="a_h5_epublic_8h_html_a0109c84ac574ac24abe6f7c7acab3fca"><div class="ttname"><a href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a></div><div class="ttdeci">herr_t(* H5E_auto2_t)(hid_t estack, void *client_data)</div><div class="ttdoc">Callback function for H5Eset_auto2()</div><div class="ttdef"><b>Definition</b> H5Epublic.h:198</div></div>
+<div class="ttc" id="a_h5_epublic_8h_html_a0109c84ac574ac24abe6f7c7acab3fca"><div class="ttname"><a href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a></div><div class="ttdeci">herr_t(* H5E_auto2_t)(hid_t estack, void *client_data)</div><div class="ttdoc">Callback function for H5Eset_auto2()</div><div class="ttdef"><b>Definition</b> H5Epublic.h:199</div></div>
 <div class="ttc" id="a_h5_ipublic_8h_html_a0045db7ff9c22ad35db6ae91662e1943"><div class="ttname"><a href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></div><div class="ttdeci">int64_t hid_t</div><div class="ttdef"><b>Definition</b> H5Ipublic.h:60</div></div>
 </div><!-- fragment --><p>When the library is first initialized, the auto printing function is set to <a class="el" href="group___h5_e.html#gae86ab32e85028412c731cf0f2b8d1f56" title="Prints the specified error stack in a default manner.">H5Eprint2()</a> (cast appropriately) and <code>client_data</code> is the standard error stream pointer, <code>stderr</code>.</p>
 <p>Automatic stack traversal is always in the <a class="el" href="_h5_epublic_8h.html#ae30cff307b364e94ce2d552edbca6813ab0ba668f408b6c98dade64021973fb49">H5E_WALK_DOWNWARD</a> direction.</p>
@@ -1432,8 +1566,8 @@ Functions</h2></td></tr>
 <p><code>direction</code> specifies whether the stack is walked from the inside out or the outside in. A value of <a class="el" href="_h5_epublic_8h.html#ae30cff307b364e94ce2d552edbca6813abedac175e65559c32551f132a78e1861">H5E_WALK_UPWARD</a> means to begin with the most specific error and end at the API; a value of <a class="el" href="_h5_epublic_8h.html#ae30cff307b364e94ce2d552edbca6813ab0ba668f408b6c98dade64021973fb49">H5E_WALK_DOWNWARD</a> means to start at the API and end at the innermost function where the error was first detected.</p>
 <p><code>func</code>, a function conforming to the <a class="el" href="_h5_epublic_8h.html#a2088c033647027f76172116e2da33293" title="Callback function for H5Ewalk1()">H5E_walk1_t</a> prototype, will be called for each error in the error stack. Its arguments will include an index number <code>n</code> (beginning at zero regardless of stack traversal direction), an error stack entry <code>err_desc</code>, and the <code>client_data</code> pointer passed to <a class="el" href="group___h5_e.html#gaa7e93cb96b399e5853721258872435a8">H5Eprint()</a>. The <a class="el" href="_h5_epublic_8h.html#a2088c033647027f76172116e2da33293" title="Callback function for H5Ewalk1()">H5E_walk1_t</a> prototype is as follows: </p><div class="fragment"><div class="line"> </div>
 <div class="line"><span class="keyword">typedef</span> <a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> (*<a class="code hl_typedef" href="_h5_epublic_8h.html#a2088c033647027f76172116e2da33293">H5E_walk1_t</a>)(<span class="keywordtype">int</span> n, <a class="code hl_struct" href="struct_h5_e__error1__t.html">H5E_error1_t</a> *err_desc, <span class="keywordtype">void</span> *client_data);</div>
-<div class="ttc" id="a_h5_epublic_8h_html_a2088c033647027f76172116e2da33293"><div class="ttname"><a href="_h5_epublic_8h.html#a2088c033647027f76172116e2da33293">H5E_walk1_t</a></div><div class="ttdeci">herr_t(* H5E_walk1_t)(int n, H5E_error1_t *err_desc, void *client_data)</div><div class="ttdoc">Callback function for H5Ewalk1()</div><div class="ttdef"><b>Definition</b> H5Epublic.h:711</div></div>
-<div class="ttc" id="astruct_h5_e__error1__t_html"><div class="ttname"><a href="struct_h5_e__error1__t.html">H5E_error1_t</a></div><div class="ttdef"><b>Definition</b> H5Epublic.h:688</div></div>
+<div class="ttc" id="a_h5_epublic_8h_html_a2088c033647027f76172116e2da33293"><div class="ttname"><a href="_h5_epublic_8h.html#a2088c033647027f76172116e2da33293">H5E_walk1_t</a></div><div class="ttdeci">herr_t(* H5E_walk1_t)(int n, H5E_error1_t *err_desc, void *client_data)</div><div class="ttdoc">Callback function for H5Ewalk1()</div><div class="ttdef"><b>Definition</b> H5Epublic.h:777</div></div>
+<div class="ttc" id="astruct_h5_e__error1__t_html"><div class="ttname"><a href="struct_h5_e__error1__t.html">H5E_error1_t</a></div><div class="ttdef"><b>Definition</b> H5Epublic.h:754</div></div>
 </div><!-- fragment --><dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
@@ -1493,7 +1627,7 @@ Functions</h2></td></tr>
 <p><code>direction</code> specifies whether the stack is walked from the inside out or the outside in. A value of <a class="el" href="_h5_epublic_8h.html#ae30cff307b364e94ce2d552edbca6813abedac175e65559c32551f132a78e1861">H5E_WALK_UPWARD</a> means to begin with the most specific error and end at the API; a value of <a class="el" href="_h5_epublic_8h.html#ae30cff307b364e94ce2d552edbca6813ab0ba668f408b6c98dade64021973fb49">H5E_WALK_DOWNWARD</a> means to start at the API and end at the innermost function where the error was first detected.</p>
 <p><code>func</code>, a function conforming to the <a class="el" href="_h5_epublic_8h.html#aa0fc6445c613e4159a17d28ca61be825" title="Callback function for H5Ewalk2()">H5E_walk2_t</a> prototype, will be called for each error in the error stack. Its arguments will include an index number <code>n</code> (beginning at zero regardless of stack traversal direction), an error stack entry <code>err_desc</code>, and the <code>client_data</code> pointer passed to <a class="el" href="group___h5_e.html#gaa7e93cb96b399e5853721258872435a8">H5Eprint()</a>. The <a class="el" href="_h5_epublic_8h.html#aa0fc6445c613e4159a17d28ca61be825" title="Callback function for H5Ewalk2()">H5E_walk2_t</a> prototype is as follows: </p><div class="fragment"><div class="line"> </div>
 <div class="line"><span class="keyword">typedef</span> <a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> (*<a class="code hl_typedef" href="_h5_epublic_8h.html#aa0fc6445c613e4159a17d28ca61be825">H5E_walk2_t</a>)(<span class="keywordtype">unsigned</span> n, <span class="keyword">const</span> <a class="code hl_struct" href="struct_h5_e__error2__t.html">H5E_error2_t</a> *err_desc, <span class="keywordtype">void</span> *client_data);</div>
-<div class="ttc" id="a_h5_epublic_8h_html_aa0fc6445c613e4159a17d28ca61be825"><div class="ttname"><a href="_h5_epublic_8h.html#aa0fc6445c613e4159a17d28ca61be825">H5E_walk2_t</a></div><div class="ttdeci">herr_t(* H5E_walk2_t)(unsigned n, const H5E_error2_t *err_desc, void *client_data)</div><div class="ttdoc">Callback function for H5Ewalk2()</div><div class="ttdef"><b>Definition</b> H5Epublic.h:183</div></div>
+<div class="ttc" id="a_h5_epublic_8h_html_aa0fc6445c613e4159a17d28ca61be825"><div class="ttname"><a href="_h5_epublic_8h.html#aa0fc6445c613e4159a17d28ca61be825">H5E_walk2_t</a></div><div class="ttdeci">herr_t(* H5E_walk2_t)(unsigned n, const H5E_error2_t *err_desc, void *client_data)</div><div class="ttdoc">Callback function for H5Ewalk2()</div><div class="ttdef"><b>Definition</b> H5Epublic.h:184</div></div>
 <div class="ttc" id="astruct_h5_e__error2__t_html"><div class="ttname"><a href="struct_h5_e__error2__t.html">H5E_error2_t</a></div><div class="ttdef"><b>Definition</b> H5Epublic.h:35</div></div>
 </div><!-- fragment --><dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 

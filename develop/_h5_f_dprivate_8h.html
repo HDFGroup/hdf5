@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.6bc6fb6</span>
+   &#160;<span id="projectnumber">1.15.0.850d6c8</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -185,8 +185,8 @@ Functions</h2></td></tr>
 <tr class="separator:a9f502548e1e6ef05880eb72187892e72"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52ebef81846405aae7ec40eff02c34c5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a52ebef81846405aae7ec40eff02c34c5">H5FD_get_driver_id_by_value</a> (<a class="el" href="_h5_f_dpublic_8h.html#a17ff64731b589ac818c2309d0d0ce8fb">H5FD_class_value_t</a> value, bool is_api)</td></tr>
 <tr class="separator:a52ebef81846405aae7ec40eff02c34c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a911ea53e8f9e06952c27ab8d76aee7fa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a911ea53e8f9e06952c27ab8d76aee7fa">H5FD_open</a> (const char *name, unsigned flags, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> maxaddr)</td></tr>
-<tr class="separator:a911ea53e8f9e06952c27ab8d76aee7fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73c5120f47bbd8b558063bab0ea1a4e8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a73c5120f47bbd8b558063bab0ea1a4e8">H5FD_open</a> (bool try, <a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> **file, const char *name, unsigned flags, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> maxaddr)</td></tr>
+<tr class="separator:a73c5120f47bbd8b558063bab0ea1a4e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0789d10189a33ad1520e5147ae8bd751"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a0789d10189a33ad1520e5147ae8bd751">H5FD_close</a> (<a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file)</td></tr>
 <tr class="separator:a0789d10189a33ad1520e5147ae8bd751"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79ccfb9197d138c07e070cda769b14c2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a79ccfb9197d138c07e070cda769b14c2">H5FD_cmp</a> (const <a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *f1, const <a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *f2)</td></tr>
@@ -1379,15 +1379,27 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a911ea53e8f9e06952c27ab8d76aee7fa" name="a911ea53e8f9e06952c27ab8d76aee7fa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a911ea53e8f9e06952c27ab8d76aee7fa">&#9670;&#160;</a></span>H5FD_open()</h2>
+<a id="a73c5120f47bbd8b558063bab0ea1a4e8" name="a73c5120f47bbd8b558063bab0ea1a4e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73c5120f47bbd8b558063bab0ea1a4e8">&#9670;&#160;</a></span>H5FD_open()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> * H5FD_open </td>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FD_open </td>
           <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>try</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> **&#160;</td>
+          <td class="paramname"><em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>name</em>, </td>
         </tr>
