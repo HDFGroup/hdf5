@@ -4458,7 +4458,7 @@ main(void)
     int   nerrors = 0;
     hid_t fapl    = H5I_INVALID_HID;
 
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
     if (setup(fapl) < 0)
         goto error;

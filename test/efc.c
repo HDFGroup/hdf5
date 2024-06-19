@@ -2697,7 +2697,8 @@ main(void)
 
     puts("All external file cache tests passed.");
 
-    h5_clean_files(FILENAME, fapl_id);
+    h5_delete_all_test_files(FILENAME, fapl_id);
+    H5Pclose(fapl_id);
 
     for (i = 0; i < N_FILENAMES; i++) {
         free(filename[i]);

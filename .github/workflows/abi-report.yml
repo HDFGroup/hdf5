@@ -82,7 +82,7 @@ jobs:
           mkdir "${{ github.workspace }}/hdf5R"
           cd "${{ github.workspace }}/hdf5R"
           wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5-${{ inputs.file_ref }}/hdf5-${{ inputs.file_ref }}-ubuntu-2204.tar.gz
-          tar zxf hdf5-${{ inputs.file_ref }}-ubuntu-2204.tar.gz
+          tar zxf hdf5-${{ inputs.file_ref }}-ubuntu-2204_gcc.tar.gz
 
       - name: List files for the space (Linux)
         run: |

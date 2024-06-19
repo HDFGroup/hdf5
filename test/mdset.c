@@ -642,7 +642,7 @@ main(void)
     unsigned i;
     int      ret;
 
-    h5_reset();
+    h5_test_init();
     fapl_id = h5_fileaccess();
 
     /* Initialize random number seed */

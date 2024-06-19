@@ -1103,7 +1103,7 @@ main(void)
      * Commence tests *
      ******************/
 
-    h5_reset();
+    h5_test_init();
 
     if (CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT)) {
         printf("Unable to set up curl, can't run ros3 tests\n");

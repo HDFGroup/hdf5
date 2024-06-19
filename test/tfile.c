@@ -4489,7 +4489,8 @@ test_filespace_info(const char *driver_name)
         }         /* end for fs_persist */
 
         /* close fapl_ and remove the file */
-        h5_clean_files(FILESPACE_NAME, my_fapl);
+        h5_delete_all_test_files(FILESPACE_NAME, my_fapl);
+        H5Pclose(my_fapl);
     } /* end for new_format */
 
 } /* test_filespace_info() */
@@ -4717,7 +4718,8 @@ test_file_freespace(const char *driver_name)
         /* Check that the file reverted to empty size */
         VERIFY(mod_filesize, empty_filesize, "H5Fget_freespace");
 
-        h5_clean_files(FILESPACE_NAME, my_fapl);
+        h5_delete_all_test_files(FILESPACE_NAME, my_fapl);
+        H5Pclose(my_fapl);
 
     } /* end for */
 
@@ -4805,7 +4807,8 @@ test_sects_freespace(const char *driver_name, bool new_format)
     if (!vol_is_native) {
         CHECK(H5Fclose(file), FAIL, "H5Fclose");
         CHECK(H5Pclose(fcpl), FAIL, "H5Pclose");
-        h5_clean_files(FILESPACE_NAME, fapl);
+        h5_delete_all_test_files(FILESPACE_NAME, fapl);
+        H5Pclose(fapl);
         CHECK(H5Pclose(fapl), FAIL, "H5Pclose");
         MESSAGE(5, (" -- SKIPPED --\n"));
         return;
@@ -4981,7 +4984,8 @@ test_sects_freespace(const char *driver_name, bool new_format)
     ret = H5Pclose(fcpl);
     CHECK(fcpl, FAIL, "H5Pclose");
 
-    h5_clean_files(FILESPACE_NAME, fapl);
+    h5_delete_all_test_files(FILESPACE_NAME, fapl);
+    H5Pclose(fapl);
 
 } /* end test_sects_freespace() */
 

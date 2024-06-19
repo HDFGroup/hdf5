@@ -363,7 +363,7 @@ main(void)
 {
     int nerrors = 0;
 
-    h5_reset();
+    h5_test_init();
 
     printf("Testing platform-independent timer functionality.\n");
 

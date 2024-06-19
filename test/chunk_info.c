@@ -2445,7 +2445,7 @@ main(void)
     hid_t fapl    = H5I_INVALID_HID; /* File access property list */
     int   nerrors = 0;               /* Number of errors so far */
 
-    h5_reset();
+    h5_test_init();
 
     /* Create a copy of file access property list */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)

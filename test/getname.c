@@ -3757,7 +3757,7 @@ main(void)
     bool  driver_is_parallel;
 
     /* Reset the library and get the file access property list */
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[0], fapl, filename0, sizeof filename0);
 
