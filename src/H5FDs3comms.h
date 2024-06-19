@@ -500,8 +500,6 @@ H5_DLL herr_t H5FD_s3comms_load_aws_profile(const char *name, char *key_id_out, 
 
 H5_DLL herr_t H5FD_s3comms_parse_url(const char *str, parsed_url_t **purl);
 
-H5_DLL herr_t H5FD_s3comms_percent_encode_char(char *repr, const unsigned char c, size_t *repr_len);
-
 H5_DLL herr_t H5FD_s3comms_signing_key(unsigned char *md, const char *secret, const char *region,
                                        const char *iso8601now);
 
