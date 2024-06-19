@@ -15970,7 +15970,7 @@ main(void)
     /* Reset library */
     h5_test_init();
 
-    def_fapl    = h5_fileaccess();
+    def_fapl = h5_fileaccess();
 
     /*
      * Caution when turning on ExpressMode 0:

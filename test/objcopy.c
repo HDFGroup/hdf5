@@ -17123,8 +17123,8 @@ main(void)
     hid_t       fcpl_shared, ocpl;
     unsigned    max_compact, min_dense;
     int         configuration; /* Configuration of tests. */
-    const char *driver_name; /* File Driver value from environment */
-    bool        same_file;   /* Whether to run tests that only use one file */
+    const char *driver_name;   /* File Driver value from environment */
+    bool        same_file;     /* Whether to run tests that only use one file */
     bool        driver_is_default_compatible;
 
     driver_name = h5_get_test_driver_name();

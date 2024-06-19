@@ -9922,7 +9922,7 @@ main(void)
 
     /* Reset library */
     h5_test_init();
-    fapl        = h5_fileaccess();
+    fapl = h5_fileaccess();
 
     /* For the Direct I/O driver, skip intensive tests due to poor performance */
     if (!strcmp(driver_name, "direct"))
