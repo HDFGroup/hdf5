@@ -2351,7 +2351,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_data_transform
  *
- * Purpose:     Retrieves the I/O filter callback function for the current API call context.
+ * Purpose:     Retrieves the data transformation expression for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
  *
@@ -2370,6 +2370,9 @@ H5CX_get_data_transform(H5Z_data_xform_t **data_transform)
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
     assert(head && *head);
     assert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
+
+    /* This getter does not use H5CX_RETRIEVE_PROP_VALID in order to use H5P_peek instead of H5P_get.
+       This prevents invocation of the data transform property's library-defined copy callback */
 
     /* Check if the value has been retrieved already */
     if (!(*head)->ctx.data_transform_valid) {
