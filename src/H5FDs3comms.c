@@ -73,11 +73,9 @@
  * pointer to data region and record of bytes written (offset)
  */
 struct s3r_datastruct {
-    unsigned long magic;
-    char         *data;
-    size_t        size;
+    char  *data;
+    size_t size;
 };
-#define S3COMMS_CALLBACK_DATASTRUCT_MAGIC 0x28c2b2ul
 
 /********************/
 /* Local Prototypes */
@@ -129,9 +127,6 @@ curlwritecallback(char *ptr, size_t size, size_t nmemb, void *userdata)
     struct s3r_datastruct *sds     = (struct s3r_datastruct *)userdata;
     size_t                 product = (size * nmemb);
     size_t                 written = 0;
-
-    if (sds->magic != S3COMMS_CALLBACK_DATASTRUCT_MAGIC)
-        return written;
 
     if (size > 0) {
         H5MM_memcpy(&(sds->data[sds->size]), ptr, product);
@@ -259,7 +254,6 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
         if (new_node == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for new set.");
 
-        new_node->magic     = S3COMMS_HRB_NODE_MAGIC;
         new_node->name      = NULL;
         new_node->value     = NULL;
         new_node->cat       = NULL;
@@ -292,7 +286,6 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
     /* sanity-check pointer passed in
      */
     assert((*L) != NULL);
-    assert((*L)->magic == S3COMMS_HRB_NODE_MAGIC);
     node_ptr = (*L);
 
     /* Check whether to modify/remove first node in list
@@ -312,8 +305,6 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
             H5MM_xfree(node_ptr->lowername);
             H5MM_xfree(node_ptr->name);
             H5MM_xfree(node_ptr->value);
-            assert(node_ptr->magic == S3COMMS_HRB_NODE_MAGIC);
-            node_ptr->magic += 1ul;
             H5MM_xfree(node_ptr);
 
             H5MM_xfree(lowername);
@@ -334,7 +325,6 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
 
             H5MM_xfree(lowername);
             lowername = NULL;
-            new_node->magic += 1ul;
             H5MM_xfree(new_node);
             new_node = NULL;
         }
@@ -420,8 +410,6 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
                 H5MM_xfree(tmp->name);
                 H5MM_xfree(tmp->value);
 
-                assert(tmp->magic == S3COMMS_HRB_NODE_MAGIC);
-                tmp->magic += 1ul;
                 H5MM_xfree(tmp);
 
                 H5MM_xfree(lowername);
@@ -437,8 +425,6 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
                 H5MM_xfree(node_ptr->value);
                 H5MM_xfree(node_ptr->cat);
 
-                assert(new_node->magic == S3COMMS_HRB_NODE_MAGIC);
-                new_node->magic += 1ul;
                 H5MM_xfree(new_node);
                 H5MM_xfree(lowername);
                 new_node  = NULL;
@@ -470,8 +456,6 @@ done:
         if (valuecpy != NULL)
             H5MM_xfree(valuecpy);
         if (new_node != NULL) {
-            assert(new_node->magic == S3COMMS_HRB_NODE_MAGIC);
-            new_node->magic += 1ul;
             H5MM_xfree(new_node);
         }
     }
@@ -502,14 +486,7 @@ done:
  *    - Destroy node/list separately as appropriate
  *    - Failure to account for this will result in a memory leak.
  *
- * Return:
- *
- *     - SUCCESS: `SUCCEED`
- *         - successfully released buffer resources
- *         - if `buf` is NULL or `*buf` is NULL, no effect
- *     - FAILURE: `FAIL`
- *         - `buf->magic != S3COMMS_HRB_MAGIC`
- *
+ * Return:  SUCCEED (can't fail)
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -518,22 +495,18 @@ H5FD_s3comms_hrb_destroy(hrb_t **_buf)
     hrb_t *buf       = NULL;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (_buf != NULL && *_buf != NULL) {
         buf = *_buf;
-        if (buf->magic != S3COMMS_HRB_MAGIC)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "pointer's magic does not match.");
 
         H5MM_xfree(buf->verb);
         H5MM_xfree(buf->version);
         H5MM_xfree(buf->resource);
-        buf->magic += 1ul;
         H5MM_xfree(buf);
         *_buf = NULL;
-    } /* end if `_buf` has some value */
+    }
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_hrb_destroy() */
 
@@ -590,7 +563,6 @@ H5FD_s3comms_hrb_init_request(const char *_verb, const char *_resource, const ch
     request = (hrb_t *)H5MM_malloc(sizeof(hrb_t));
     if (request == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, NULL, "no space for request structure");
-    request->magic        = S3COMMS_HRB_MAGIC;
     request->body         = NULL;
     request->body_len     = 0;
     request->first_header = NULL;
@@ -661,13 +633,7 @@ done:
  *     Close communications through given S3 Request Handle (`s3r_t`)
  *     and clean up associated resources.
  *
- * Return:
- *
- *     - SUCCESS: `SUCCEED`
- *     - FAILURE: `FAIL`
- *         - fails if handle is null or has invalid magic number
- *
- *
+ * Return:  SUCCEED/FAIL
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -679,8 +645,6 @@ H5FD_s3comms_s3r_close(s3r_t *handle)
 
     if (handle == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle cannot be null.");
-    if (handle->magic != S3COMMS_S3R_MAGIC)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle has invalid magic.");
 
     curl_easy_cleanup(handle->curlhandle);
 
@@ -768,7 +732,7 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
     CURL                 *curlh          = NULL;
     char                 *end            = NULL;
     char                 *headerresponse = NULL;
-    struct s3r_datastruct sds            = {S3COMMS_CALLBACK_DATASTRUCT_MAGIC, NULL, 0};
+    struct s3r_datastruct sds            = {NULL, 0};
     char                 *start          = NULL;
     herr_t                ret_value      = SUCCEED;
 
@@ -776,8 +740,6 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
 
     if (handle == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle cannot be null.");
-    if (handle->magic != S3COMMS_S3R_MAGIC)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle has invalid magic.");
     if (handle->curlhandle == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle has bad (null) curlhandle.");
 
@@ -860,7 +822,6 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
 
 done:
     H5MM_xfree(headerresponse);
-    sds.magic += 1; /* set to bad magic */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_s3comms_s3r_getsize */
@@ -921,13 +882,11 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
         HGOTO_ERROR(H5E_ARGS, H5E_CANTCREATE, NULL, "unable to create parsed url structure");
 
     assert(purl != NULL); /* if above passes, this must be true */
-    assert(purl->magic == S3COMMS_PARSED_URL_MAGIC);
 
     handle = (s3r_t *)H5MM_malloc(sizeof(s3r_t));
     if (handle == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, NULL, "could not malloc space for handle.");
 
-    handle->magic       = S3COMMS_S3R_MAGIC;
     handle->purl        = purl;
     handle->filesize    = 0;
     handle->region      = NULL;
@@ -1113,13 +1072,10 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
 
     if (handle == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle cannot be null.");
-    if (handle->magic != S3COMMS_S3R_MAGIC)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle has invalid magic.");
     if (handle->curlhandle == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle has bad (null) curlhandle.");
     if (handle->purl == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle has bad (null) url.");
-    assert(handle->purl->magic == S3COMMS_PARSED_URL_MAGIC);
     if (offset > handle->filesize || (len + offset) > handle->filesize)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to read past EoF");
 
@@ -1134,9 +1090,8 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (sds == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "could not malloc destination datastructure.");
 
-        sds->magic = S3COMMS_CALLBACK_DATASTRUCT_MAGIC;
-        sds->data  = (char *)dest;
-        sds->size  = 0;
+        sds->data = (char *)dest;
+        sds->size = 0;
         if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_WRITEDATA, sds))
             HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
                         "error while setting CURL option (CURLOPT_WRITEDATA).");
@@ -1244,7 +1199,6 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
                                                 (const char *)handle->purl->path, "HTTP/1.1");
         if (request == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not allocate hrb_t request.");
-        assert(request->magic == S3COMMS_HRB_MAGIC);
 
         now = gmnow();
         if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1))
@@ -1254,13 +1208,11 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to set x-amz-date header");
         if (headers == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem building headers list.");
-        assert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
 
         if (FAIL == H5FD_s3comms_hrb_node_set(&headers, "x-amz-content-sha256", (const char *)EMPTY_SHA256))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to set x-amz-content-sha256 header");
         if (headers == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem building headers list.");
-        assert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
 
         if (strlen((const char *)handle->token) > 0) {
             if (FAIL ==
@@ -1268,7 +1220,6 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to set x-amz-security-token header");
             if (headers == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem building headers list.");
-            assert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
         }
 
         if (rangebytesstr != NULL) {
@@ -1276,14 +1227,12 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to set range header");
             if (headers == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem building headers list.");
-            assert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
         }
 
         if (FAIL == H5FD_s3comms_hrb_node_set(&headers, "Host", handle->purl->host))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to set host header");
         if (headers == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem building headers list.");
-        assert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
 
         request->first_header = headers;
 
@@ -1327,7 +1276,6 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
 
         node = request->first_header;
         while (node != NULL) {
-            assert(node->magic == S3COMMS_HRB_NODE_MAGIC);
             curlheaders = curl_slist_append(curlheaders, (const char *)node->cat);
             if (curlheaders == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not append header to curl slist.");
@@ -1530,7 +1478,6 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
 
     if (http_request == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hrb object cannot be null.");
-    assert(http_request->magic == S3COMMS_HRB_MAGIC);
 
     if (canonical_request_dest == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "canonical request destination cannot be null.");
@@ -1553,8 +1500,6 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
     /* write in canonical headers, building signed headers concurrently */
     node = http_request->first_header; /* assumed sorted */
     while (node != NULL) {
-
-        assert(node->magic == S3COMMS_HRB_NODE_MAGIC);
 
         ret = snprintf(tmpstr, sizeof(tmpstr), "%s:%s\n", node->lowername, node->value);
         if (ret < 0 || ret >= (int)sizeof(tmpstr))
@@ -1668,7 +1613,6 @@ H5FD_s3comms_free_purl(parsed_url_t *purl)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (purl != NULL) {
-        assert(purl->magic == S3COMMS_PARSED_URL_MAGIC);
         if (purl->scheme != NULL)
             H5MM_xfree(purl->scheme);
         if (purl->host != NULL)
@@ -1679,7 +1623,6 @@ H5FD_s3comms_free_purl(parsed_url_t *purl)
             H5MM_xfree(purl->path);
         if (purl->query != NULL)
             H5MM_xfree(purl->query);
-        purl->magic += 1ul;
         H5MM_xfree(purl);
     }
 
@@ -2016,7 +1959,6 @@ H5FD_s3comms_parse_url(const char *str, parsed_url_t **_purl)
     purl = (parsed_url_t *)H5MM_malloc(sizeof(parsed_url_t));
     if (purl == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "can't allocate space for parsed_url_t");
-    purl->magic  = S3COMMS_PARSED_URL_MAGIC;
     purl->scheme = NULL;
     purl->host   = NULL;
     purl->port   = NULL;
