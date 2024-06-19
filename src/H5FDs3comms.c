@@ -47,17 +47,7 @@
 
 #ifdef H5_HAVE_ROS3_VFD
 
-/* toggle debugging: pick a level
- */
-#define S3COMMS_DEBUG_NONE           0
-#define S3COMMS_DEBUG_REQUESTS       1
-#define S3COMMS_DEBUG_TRACE_API      2
-#define S3COMMS_DEBUG_TRACE_INTERNAL 3
-#define S3COMMS_DEBUG_HEADERS        4
-#define S3COMMS_DEBUG                0
-
 /* manipulate verbosity of CURL output
- * operates separately from S3COMMS_DEBUG
  *
  * 0 -> no explicit curl output
  * 1 -> on error, print failure info to stderr
@@ -218,18 +208,6 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-    fprintf(stdout, "called H5FD_s3comms_hrb_node_set.");
-    printf("NAME: %s\n", name);
-    printf("VALUE: %s\n", value);
-    printf("LIST:\n->");
-    for (node_ptr = (*L); node_ptr != NULL; node_ptr = node_ptr->next)
-        fprintf(stdout, "{%s}\n->", node_ptr->cat);
-    printf("(null)\n");
-    fflush(stdout);
-    node_ptr = NULL;
-#endif
-
     if (name == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to operate on null name");
     namelen = strlen(name);
@@ -297,10 +275,6 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
         if (value == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove node from empty list");
         else {
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-            printf("CREATE NEW\n");
-            fflush(stdout);
-#endif
             /*******************
              * CREATE NEW LIST *
              *******************/
@@ -328,60 +302,24 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
         is_looking = false;
 
         if (value == NULL) {
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-            printf("REMOVE HEAD\n");
-            fflush(stdout);
-#endif
             /***************
              * REMOVE HEAD *
              ***************/
 
             *L = node_ptr->next;
 
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-            printf("FREEING CAT (node)\n");
-            fflush(stdout);
-#endif
             H5MM_xfree(node_ptr->cat);
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-            printf("FREEING LOWERNAME (node)\n");
-            fflush(stdout);
-#endif
             H5MM_xfree(node_ptr->lowername);
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-            printf("FREEING NAME (node)\n");
-            fflush(stdout);
-#endif
             H5MM_xfree(node_ptr->name);
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-            printf("FREEING VALUE (node)\n");
-            fflush(stdout);
-#endif
             H5MM_xfree(node_ptr->value);
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-            printf("MAGIC OK? %s\n", (node_ptr->magic == S3COMMS_HRB_NODE_MAGIC) ? "YES" : "NO");
-            fflush(stdout);
-#endif
             assert(node_ptr->magic == S3COMMS_HRB_NODE_MAGIC);
             node_ptr->magic += 1ul;
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-            printf("FREEING POINTER\n");
-            fflush(stdout);
-#endif
             H5MM_xfree(node_ptr);
 
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-            printf("FREEING WORKING LOWERNAME\n");
-            fflush(stdout);
-#endif
             H5MM_xfree(lowername);
             lowername = NULL;
         }
         else {
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-            printf("MODIFY HEAD\n");
-            fflush(stdout);
-#endif
             /***************
              * MODIFY HEAD *
              ***************/
@@ -408,10 +346,6 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
         if (value == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove a node 'before' head");
         else {
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-            printf("PREPEND NEW HEAD\n");
-            fflush(stdout);
-#endif
             /*******************
              * INSERT NEW HEAD *
              *******************/
@@ -437,10 +371,6 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
             if (value == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove absent node");
             else {
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-                printf("APPEND A NODE\n");
-                fflush(stdout);
-#endif
                 /*******************
                  * APPEND NEW NODE *
                  *******************/
@@ -460,10 +390,6 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
             if (value == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove absent node");
             else {
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-                printf("INSERT A NODE\n");
-                fflush(stdout);
-#endif
                 /*******************
                  * INSERT NEW NODE *
                  *******************/
@@ -489,10 +415,6 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
                 hrb_node_t *tmp = node_ptr->next;
                 node_ptr->next  = tmp->next;
 
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-                printf("REMOVE A NODE\n");
-                fflush(stdout);
-#endif
                 H5MM_xfree(tmp->cat);
                 H5MM_xfree(tmp->lowername);
                 H5MM_xfree(tmp->name);
@@ -506,10 +428,6 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
                 lowername = NULL;
             }
             else {
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-                printf("MODIFY A NODE\n");
-                fflush(stdout);
-#endif
                 /*****************
                  * MODIFY A NODE *
                  *****************/
@@ -602,10 +520,6 @@ H5FD_s3comms_hrb_destroy(hrb_t **_buf)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-    fprintf(stdout, "called H5FD_s3comms_hrb_destroy.\n");
-#endif
-
     if (_buf != NULL && *_buf != NULL) {
         buf = *_buf;
         if (buf->magic != S3COMMS_HRB_MAGIC)
@@ -662,10 +576,6 @@ H5FD_s3comms_hrb_init_request(const char *_verb, const char *_resource, const ch
     size_t vrsnlen   = 0;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "called H5FD_s3comms_hrb_init_request.\n");
-#endif
 
     if (_resource == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "resource string cannot be null.");
@@ -767,10 +677,6 @@ H5FD_s3comms_s3r_close(s3r_t *handle)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if S3COMMS_DEBUG > S3COMMS_DEBUG_TRACE_API
-    fprintf(stdout, "called H5FD_s3comms_s3r_close.\n");
-#endif
-
     if (handle == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle cannot be null.");
     if (handle->magic != S3COMMS_S3R_MAGIC)
@@ -868,10 +774,6 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "called H5FD_s3comms_s3r_getsize.\n");
-#endif
-
     if (handle == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle cannot be null.");
     if (handle->magic != S3COMMS_S3R_MAGIC)
@@ -916,10 +818,6 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "HTTP metadata buffer overrun");
     else if (sds.size == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "No HTTP metadata");
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    else
-        fprintf(stdout, "GETSIZE: OK\n");
-#endif
 
     /******************
      * PARSE RESPONSE *
@@ -949,10 +847,6 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
                     start); /* range is null-terminated, remember */
 
     handle->filesize = (size_t)content_length;
-
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_REQUESTS
-    fprintf(stdout, " -- size: %ju\n", content_length);
-#endif
 
     /**********************
      * UNDO HEAD SETTINGS *
@@ -1018,10 +912,6 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
     s3r_t        *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_API
-    fprintf(stdout, "called H5FD_s3comms_s3r_open.\n");
-#endif
 
     if (url == NULL || url[0] == '\0')
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "url cannot be null.");
@@ -1217,10 +1107,6 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_API
-    fprintf(stdout, "called H5FD_s3comms_s3r_read.\n");
-#endif
-
     /**************************************
      * ABSOLUTELY NECESSARY SANITY-CHECKS *
      **************************************/
@@ -1277,11 +1163,6 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (ret <= 0 || ret >= S3COMMS_MAX_RANGE_STRING_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format HTTP Range value");
     }
-
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_HEADERS
-    fprintf(stdout, "%s: Bytes %" PRIuHADDR " - %" PRIuHADDR ", Request Size: %zu\n", handle->httpverb,
-            offset, offset + len - 1, len);
-#endif
 
     /*******************
      * COMPILE REQUEST *
@@ -1391,10 +1272,6 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         }
 
         if (rangebytesstr != NULL) {
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_REQUESTS
-            fprintf(stdout, " -- request: %lu %zu\n", (size_t)offset, len);
-
-#endif
             if (FAIL == H5FD_s3comms_hrb_node_set(&headers, "Range", rangebytesstr))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to set range header");
             if (headers == NULL)
@@ -1502,23 +1379,6 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
 
     if (p_status != CURLE_OK)
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "curl cannot perform request");
-#endif
-
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    if (dest != NULL) {
-        fprintf(stdout, "len: %d\n", (int)len);
-        fprintf(stdout, "CHECKING FOR BUFFER OVERFLOW\n");
-        if (sds == NULL)
-            fprintf(stdout, "sds is NULL!\n");
-        else {
-            fprintf(stdout, "sds: 0x%llx\n", (long long)sds);
-            fprintf(stdout, "sds->size: %d\n", (int)sds->size);
-            if (len > sds->size)
-                fprintf(stdout, "buffer overwrite\n");
-        }
-    }
-    else
-        fprintf(stdout, "performed on entire file\n");
 #endif
 
 done:
@@ -1668,10 +1528,6 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "called H5FD_s3comms_aws_canonical_request.\n");
-#endif
-
     if (http_request == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hrb object cannot be null.");
     assert(http_request->magic == S3COMMS_HRB_MAGIC);
@@ -1774,10 +1630,6 @@ H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, 
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "called H5FD_s3comms_bytes_to_hex.\n");
-#endif
-
     if (dest == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hex destination cannot be null.");
     if (msg == NULL)
@@ -1814,10 +1666,6 @@ herr_t
 H5FD_s3comms_free_purl(parsed_url_t *purl)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    printf("called H5FD_s3comms_free_purl.\n");
-#endif
 
     if (purl != NULL) {
         assert(purl->magic == S3COMMS_PARSED_URL_MAGIC);
@@ -1874,10 +1722,6 @@ H5FD_s3comms_HMAC_SHA256(const unsigned char *key, size_t key_len, const char *m
     herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "called H5FD_s3comms_HMAC_SHA256.\n");
-#endif
 
     if (dest == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "destination cannot be null.");
@@ -1961,10 +1805,6 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     char    *line_buffer   = &(buffer[0]);
 
     FUNC_ENTER_PACKAGE
-
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "called load_aws_creds_from_file.\n");
-#endif
 
     /* format target line for start of profile */
     if (32 < snprintf(profile_line, 32, "[%s]", profile_name))
@@ -2079,10 +1919,6 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "called H5FD_s3comms_load_aws_profile.\n");
-#endif
-
 #ifdef H5_HAVE_WIN32_API
     ret = snprintf(awspath, 117, "%s/.aws/", getenv("USERPROFILE"));
 #else
@@ -2161,10 +1997,6 @@ H5FD_s3comms_nlowercase(char *dest, const char *s, size_t len)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "called H5FD_s3comms_nlowercase.\n");
-#endif
-
     if (dest == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "destination cannot be null.");
 
@@ -2220,10 +2052,6 @@ H5FD_s3comms_parse_url(const char *str, parsed_url_t **_purl)
     herr_t        ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    printf("called H5FD_s3comms_parse_url.\n");
-#endif
 
     if (str == NULL || *str == '\0')
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid url string");
@@ -2428,33 +2256,16 @@ H5FD_s3comms_percent_encode_char(char *repr, const unsigned char c, size_t *repr
     unsigned int i             = 0;
     int          chars_written = 0;
     herr_t       ret_value     = SUCCEED;
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    unsigned char s[2]   = {c, 0};
-    unsigned char hex[3] = {0, 0, 0};
-#endif
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "called H5FD_s3comms_percent_encode_char.\n");
-#endif
-
     if (repr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination `repr`.");
-
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    H5FD_s3comms_bytes_to_hex((char *)hex, s, 1, false);
-    fprintf(stdout, "    CHAR: \'%s\'\n", s);
-    fprintf(stdout, "    CHAR-HEX: \"%s\"\n", hex);
-#endif
 
     if (c <= (unsigned char)0x7f) {
         /* character represented in a single "byte"
          * and single percent-code
          */
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-        fprintf(stdout, "    SINGLE-BYTE\n");
-#endif
         *repr_len     = 3;
         chars_written = snprintf(repr, 4, "%%%02X", c);
         if (chars_written < 0)
@@ -2467,9 +2278,7 @@ H5FD_s3comms_percent_encode_char(char *repr, const unsigned char c, size_t *repr
         unsigned int  k          = 0; /* uint character representation */
         unsigned int  stack_size = 0;
         unsigned char stack[4]   = {0, 0, 0, 0};
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-        fprintf(stdout, "    MULTI-BYTE\n");
-#endif
+
         stack_size = 0;
         k          = (unsigned int)c;
         *repr_len  = 0;
@@ -2486,16 +2295,6 @@ H5FD_s3comms_percent_encode_char(char *repr, const unsigned char c, size_t *repr
         /* `stack` now has two to four six-bit 'numbers' to be put into
          * UTF-8 byte fields.
          */
-
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-        fprintf(stdout, "    STACK:\n    {\n");
-        for (i = 0; i < stack_size; i++) {
-            H5FD_s3comms_bytes_to_hex((char *)hex, (&stack[i]), 1, false);
-            hex[2] = 0;
-            fprintf(stdout, "      %s,\n", hex);
-        }
-        fprintf(stdout, "    }\n");
-#endif
 
         /****************
          * leading byte *
@@ -2579,10 +2378,6 @@ H5FD_s3comms_signing_key(unsigned char *md, const char *secret, const char *regi
     herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "called H5FD_s3comms_signing_key.\n");
-#endif
 
     if (md == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Destination `md` cannot be NULL.");
@@ -2669,10 +2464,6 @@ H5FD_s3comms_tostringtosign(char *dest, const char *req, const char *now, const 
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "called H5FD_s3comms_tostringtosign.\n");
-#endif
-
     if (dest == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "destination buffer cannot be null.");
     if (req == NULL)
@@ -2752,10 +2543,6 @@ H5FD_s3comms_trim(char *dest, char *s, size_t s_len, size_t *n_written)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "called H5FD_s3comms_trim.\n");
-#endif
 
     if (dest == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "destination cannot be null.");
@@ -2839,10 +2626,6 @@ H5FD_s3comms_uriencode(char *dest, const char *s, size_t s_len, bool encode_slas
     size_t s_off     = 0;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-#if S3COMMS_DEBUG >= S3COMMS_DEBUG_TRACE_INTERNAL
-    fprintf(stdout, "H5FD_s3comms_uriencode called.\n");
-#endif
 
     if (s == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source string cannot be NULL");
