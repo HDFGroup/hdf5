@@ -81,8 +81,8 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
      * open input file
      *-------------------------------------------------------------------------
      */
-    if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, options->fin_fapl, (options->fin_fapl != H5P_DEFAULT),
-                               NULL, (size_t)0)) < 0)
+    if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, options->fin_fapl,
+                               (options->fin_vol || options->fin_vfd), NULL, (size_t)0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fnamein, H5FOPENERROR);
 
     /* get user block size and file space strategy/persist/threshold */
@@ -849,7 +849,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                      * doesn't support this.
                      */
                     if (use_h5ocopy &&
-                        (options->fin_fapl != H5P_DEFAULT || options->fout_fapl != H5P_DEFAULT)) {
+                        (options->fin_vol || options->fout_vol || options->fin_vfd || options->fout_vfd)) {
                         hid_t in_vol_id;
                         hid_t out_vol_id;
                         hid_t default_vol_id;

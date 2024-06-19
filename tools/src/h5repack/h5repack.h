@@ -133,6 +133,10 @@ typedef struct {
     int                   fs_persist;      /* Free space section threshold */
     long                  fs_threshold;    /* Free space section threshold */
     long long             fs_pagesize;     /* File space page size */
+    bool                  fin_vol;         /* Custom VOL for input file */
+    bool                  fin_vfd;         /* Custom VFD for input file */
+    bool                  fout_vol;        /* Custom VOL for output file */
+    bool                  fout_vfd;        /* Custom VFD for output file */
 } pack_opt_t;
 
 typedef struct named_dt_t {
@@ -156,7 +160,7 @@ int h5repack_addlayout(const char *str, pack_opt_t *options);
 int h5repack_init(pack_opt_t *options, int verbose, bool latest);
 int h5repack_end(pack_opt_t *options);
 int h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options);
-int h5repack_cmp_pl(const char *fname1, hid_t fname1_fapl, const char *fname2, hid_t fname2_fapl);
+int h5repack_cmp_pl(const char *fname1, const char *fname2, pack_opt_t *options);
 
 /* Note: The below copy_named_datatype(), named_datatype_free(), copy_attr()
  * and struct named_dt_t were located in h5repack_copy.c as static prior to
