@@ -117,6 +117,8 @@ typedef struct iter_t {
 
 static const char *drivername = NULL;
 
+size_t page_cache = 0;
+
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
 static H5FD_ros3_fapl_ext_t ros3_fa = {
@@ -171,7 +173,7 @@ struct handler_t {
     char **obj;
 };
 
-static const char *s_opts = "Aa:Ddm:E*FfhGgl:sSTO:Vw:H:";
+static const char *s_opts = "Aa:Ddm:E*FfhGgl:K:sSTO:Vw:H:";
 /* e.g. "filemetadata" has to precede "file"; "groupmetadata" has to precede "group" etc. */
 static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"filemetadata", no_arg, 'F'},
@@ -187,6 +189,7 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"numattrs", require_arg, 'a'},
                                           {"freespace", no_arg, 's'},
                                           {"summary", no_arg, 'S'},
+                                          {"page-buffer-size", require_arg, 'K'},
                                           {"s3-cred", require_arg, 'w'},
                                           {"hdfs-attrs", require_arg, 'H'},
                                           {NULL, 0, '\0'}};
@@ -239,6 +242,7 @@ usage(const char *prog)
     fprintf(stdout, "                           than 0.  The default threshold is 10.\n");
     fprintf(stdout, "     -s, --freespace       Print free space information\n");
     fprintf(stdout, "     -S, --summary         Print summary of file space information\n");
+    fprintf(stdout, "     --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers\n");
     fprintf(stdout, "     --s3-cred=<cred>      Access file on S3, using provided credential\n");
     fprintf(stdout, "                           <cred> :: (region,id,key)\n");
     fprintf(stdout, "                           If <cred> == \"(,,)\", no authentication is used.\n");
@@ -967,6 +971,10 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 #endif
                 break;
 
+            case 'K':
+                page_cache = strtoul(H5_optarg, NULL, 0);
+                break;
+
             default:
                 usage(h5tools_getprogname());
                 goto error;
@@ -1618,6 +1626,11 @@ main(int argc, char *argv[])
     /* enable error reporting if command line option */
     h5tools_error_report();
 
+    if ((fapl_id = h5tools_get_new_fapl(H5P_DEFAULT)) < 0) {
+        error_msg("unable to create FAPL for file access\n");
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
     if (drivername) {
         h5tools_vfd_info_t vfd_info;
 
@@ -1634,8 +1647,17 @@ main(int argc, char *argv[])
             vfd_info.info = &hdfs_fa;
 #endif
 
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
-            error_msg("Unable to create FAPL for file access\n");
+        /* Set non-default virtual file driver, if requested */
+        if (h5tools_set_fapl_vfd(fapl_id, &vfd_info) < 0) {
+            error_msg("unable to set VFD on fapl for file\n");
+            h5tools_setstatus(EXIT_FAILURE);
+            goto done;
+        }
+    }
+    if (page_cache > 0) {
+        if (H5Pset_page_buffer_size(fapl_id, page_cache, 0, 0) < 0) {
+            error_msg("unable to set page buffer cache size for file access\n");
+            h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
     }
@@ -1649,7 +1671,7 @@ main(int argc, char *argv[])
 
         printf("Filename: %s\n", fname);
 
-        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), NULL, 0);
+        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (drivername != NULL), NULL, 0);
 
         if (fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);

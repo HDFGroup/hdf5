@@ -16,6 +16,7 @@ usage: h5dump [OPTIONS] files
      -b B, --binary=B     Binary file output, of form B
      -O F, --ddl=F        Output ddl text into file F
                           Use blank(empty) filename F to suppress ddl display
+     --page-buffer-size=N Set the page buffer cache size, N=non-negative integers
      --s3-cred=<cred>     Supply S3 authentication information to "ros3" vfd.
                           <cred> :: "(<aws-region>,<access-id>,<access-key>)"
                           If absent or <cred> -> "(,,)", no authentication.
