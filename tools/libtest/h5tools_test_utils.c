@@ -927,7 +927,7 @@ error:
  *
  * Function:   test_set_configured_fapl()
  *
- * Purpose:    Verify `h5tools_get_fapl()` with ROS3 and HDFS VFDs
+ * Purpose:    Verify `h5tools_get_new_fapl()` with ROS3 and HDFS VFDs
  *
  * Return:     0 if test passes
  *             1 if failure
@@ -1111,12 +1111,15 @@ test_set_configured_fapl(void)
         vfd_info.info   = C.conf_fa;
         vfd_info.u.name = C.vfdname;
 
-        if (C.expected == 1)
-            result = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info);
+        if (C.expected == 1) {
+            result = h5tools_get_new_fapl(H5P_DEFAULT);
+            result = h5tools_set_fapl_vfd(result, &vfd_info);
+        }
         else {
             H5E_BEGIN_TRY
             {
-                result = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info);
+                result = h5tools_get_new_fapl(H5P_DEFAULT);
+                result = h5tools_set_fapl_vfd(result, &vfd_info);
             }
             H5E_END_TRY
         }

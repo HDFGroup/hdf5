@@ -30,13 +30,15 @@ static struct h5_long_options l_opts[] = {
 
 /* Command line parameter settings */
 typedef struct mkgrp_opt_t {
-    char  *fname;   /* File name to operate on */
-    bool   latest;  /* Whether file should use latest format versions */
-    bool   verbose; /* Whether output should be verbose */
-    bool   parents; /* Whether to create intermediate groups */
-    size_t ngroups; /* Number of groups to create */
-    char **groups;  /* Pointer to array of group names */
-    hid_t  fapl_id; /* fapl to use when opening the file */
+    char  *fname;      /* File name to operate on */
+    bool   latest;     /* Whether file should use latest format versions */
+    bool   verbose;    /* Whether output should be verbose */
+    bool   parents;    /* Whether to create intermediate groups */
+    size_t ngroups;    /* Number of groups to create */
+    char **groups;     /* Pointer to array of group names */
+    hid_t  fapl_id;    /* fapl to use when opening the file */
+    bool   custom_vol; /* Whether fapl uses custom VOL */
+    bool   custom_vfd; /* Whether fapl uses custom VFD */
 } mkgrp_opt_t;
 
 static mkgrp_opt_t params_g; /* Command line parameter settings */
@@ -135,8 +137,6 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
 {
     int                opt;        /* Option from command line */
     size_t             curr_group; /* Current group name to copy */
-    bool               custom_vol = false;
-    bool               custom_vfd = false;
     h5tools_vol_info_t vol_info;
     h5tools_vfd_info_t vfd_info;
     hid_t              tmp_fapl_id = H5I_INVALID_HID;
@@ -182,15 +182,15 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
                 break;
 
             case '1':
-                vol_info.type    = VOL_BY_VALUE;
-                vol_info.u.value = (H5VL_class_value_t)atoi(H5_optarg);
-                custom_vol       = true;
+                vol_info.type       = VOL_BY_VALUE;
+                vol_info.u.value    = (H5VL_class_value_t)atoi(H5_optarg);
+                options->custom_vol = true;
                 break;
 
             case '2':
-                vol_info.type   = VOL_BY_NAME;
-                vol_info.u.name = H5_optarg;
-                custom_vol      = true;
+                vol_info.type       = VOL_BY_NAME;
+                vol_info.u.name     = H5_optarg;
+                options->custom_vol = true;
                 break;
 
             case '3':
@@ -198,15 +198,15 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
                 break;
 
             case '4':
-                vfd_info.type    = VFD_BY_VALUE;
-                vfd_info.u.value = (H5FD_class_value_t)atoi(H5_optarg);
-                custom_vfd       = true;
+                vfd_info.type       = VFD_BY_VALUE;
+                vfd_info.u.value    = (H5FD_class_value_t)atoi(H5_optarg);
+                options->custom_vfd = true;
                 break;
 
             case '5':
-                vfd_info.type   = VFD_BY_NAME;
-                vfd_info.u.name = H5_optarg;
-                custom_vfd      = true;
+                vfd_info.type       = VFD_BY_NAME;
+                vfd_info.u.name     = H5_optarg;
+                options->custom_vfd = true;
                 break;
 
             case '6':
@@ -251,19 +251,25 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
     }
 
     /* Setup a custom fapl for file accesses */
-    if (custom_vol || custom_vfd) {
-        if ((tmp_fapl_id = h5tools_get_fapl(options->fapl_id, custom_vol ? &vol_info : NULL,
-                                            custom_vfd ? &vfd_info : NULL)) < 0) {
-            error_msg("failed to setup file access property list (fapl) for file\n");
+    if (options->custom_vol || options->custom_vfd) {
+        if ((tmp_fapl_id = h5tools_get_new_fapl(options->fapl_id)) < 0) {
+            error_msg("unable to create FAPL for file access\n");
             leave(EXIT_FAILURE);
         }
-
-        /* Close the old fapl */
-        if (options->fapl_id != H5P_DEFAULT)
-            if (H5Pclose(options->fapl_id) < 0) {
-                error_msg("failed to close file access property list (fapl)\n");
+        /* Set non-default VOL connector, if requested */
+        if (options->custom_vol) {
+            if (h5tools_set_fapl_vol(tmp_fapl_id, &vol_info) < 0) {
+                error_msg("unable to set VOL on fapl for file\n");
                 leave(EXIT_FAILURE);
             }
+        }
+        /* Set non-default virtual file driver, if requested */
+        if (options->custom_vfd) {
+            if (h5tools_set_fapl_vfd(tmp_fapl_id, &vfd_info) < 0) {
+                error_msg("unable to set VFD on fapl for file\n");
+                leave(EXIT_FAILURE);
+            }
+        }
 
         options->fapl_id = tmp_fapl_id;
     }
@@ -323,8 +329,8 @@ main(int argc, char *argv[])
     }
 
     /* Attempt to open an existing HDF5 file first */
-    fid = h5tools_fopen(params_g.fname, H5F_ACC_RDWR, params_g.fapl_id, (params_g.fapl_id != H5P_DEFAULT),
-                        NULL, 0);
+    fid = h5tools_fopen(params_g.fname, H5F_ACC_RDWR, params_g.fapl_id,
+                        (params_g.custom_vol || params_g.custom_vfd), NULL, 0);
 
     /* If we couldn't open an existing file, try creating file */
     /* (use "EXCL" instead of "TRUNC", so we don't blow away existing non-HDF5 file) */
