@@ -352,17 +352,13 @@ H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_dst /*out*/)
 
     if (fa_dst == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_dst is NULL");
-
-    plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
-    if (plist == NULL)
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");
-
     if (H5FD_ROS3 != H5P_peek_driver(plist))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fapl not set to use the ros3 VFD");
 
-    fa_src = (const H5FD_ros3_fapl_t *)H5P_peek_driver_info(plist);
-    if (fa_src == NULL)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
+    if (NULL == (fa_src = (const H5FD_ros3_fapl_t *)H5P_peek_driver_info(plist)))
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
     /* Copy the ros3 fapl data out */
     H5MM_memcpy(fa_dst, fa_src, sizeof(H5FD_ros3_fapl_t));
@@ -694,21 +690,18 @@ done:
 static H5FD_t *
 H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_ros3_t     *file = NULL;
-    struct tm       *now  = NULL;
-    char             iso8601now[ISO8601_SIZE];
-    unsigned char    signing_key[SHA256_DIGEST_LENGTH];
-    s3r_t           *handle = NULL;
-    H5FD_ros3_fapl_t fa;
-    H5P_genplist_t  *plist = NULL;
-    htri_t           token_exists;
-    char            *token;
-    H5FD_t          *ret_value = NULL;
+    H5FD_ros3_t            *file = NULL;
+    struct tm              *now  = NULL;
+    char                    iso8601now[ISO8601_SIZE];
+    unsigned char           signing_key[SHA256_DIGEST_LENGTH];
+    s3r_t                  *handle = NULL;
+    const H5FD_ros3_fapl_t *fa     = NULL;
+    H5P_genplist_t         *plist  = NULL;
+    htri_t                  token_exists;
+    char                   *token;
+    H5FD_t                 *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
-
-    /* Sanity check on file offsets */
-    HDcompile_assert(sizeof(HDoff_t) >= sizeof(size_t));
 
     /* Check arguments */
     if (!url || !*url)
@@ -719,27 +712,29 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr");
     if (flags != H5F_ACC_RDONLY)
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL, "only Read-Only access allowed");
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
 
-    if (FAIL == H5Pget_fapl_ros3(fapl_id, &fa))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "can't get property list");
-
+    /* Init curl */
     if (CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to initialize curl global (placeholder flags)");
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "unable to initialize curl global (placeholder flags)");
+
+    /* Get ros3 driver info */
+    if (NULL == (fa = (const H5FD_ros3_fapl_t *)H5P_peek_driver_info(plist)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "could not get ros3 VFL driver info");
 
     /* Session/security token */
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a file access property list");
     if ((token_exists = H5P_exist_plist(plist, ROS3_TOKEN_PROP_NAME)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "failed to check if property token exists in plist");
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "failed check for property token in plist");
     if (token_exists) {
         if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get token value");
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get token value");
     }
 
     /* Open file; procedure depends on whether or not the fapl instructs to
      * authenticate requests or not.
      */
-    if (fa.authenticate == true) {
+    if (fa->authenticate == true) {
         /* Compute signing key (part of AWS/S3 REST API). Can be re-used by
          * user/key for 7 days after creation.
          *
@@ -749,15 +744,15 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         assert(now != NULL);
         if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while writing iso8601 timestamp");
-        if (FAIL == H5FD_s3comms_signing_key(signing_key, (const char *)fa.secret_key,
-                                             (const char *)fa.aws_region, (const char *)iso8601now))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while computing signing key");
+        if (FAIL == H5FD_s3comms_signing_key(signing_key, (const char *)fa->secret_key,
+                                             (const char *)fa->aws_region, (const char *)iso8601now))
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem while computing signing key");
 
         if (token_exists)
-            handle = H5FD_s3comms_s3r_open(url, (const char *)fa.aws_region, (const char *)fa.secret_id,
+            handle = H5FD_s3comms_s3r_open(url, (const char *)fa->aws_region, (const char *)fa->secret_id,
                                            (const unsigned char *)signing_key, (const char *)token);
         else
-            handle = H5FD_s3comms_s3r_open(url, (const char *)fa.aws_region, (const char *)fa.secret_id,
+            handle = H5FD_s3comms_s3r_open(url, (const char *)fa->aws_region, (const char *)fa->secret_id,
                                            (const unsigned char *)signing_key, "");
     }
     else
@@ -771,16 +766,15 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "could not open");
 
     /* Create new file struct */
-    file = H5FL_CALLOC(H5FD_ros3_t);
-    if (file == NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct");
+    if (NULL == (file = H5FL_CALLOC(H5FD_ros3_t)))
+        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, NULL, "unable to allocate file struct");
 
     file->s3r_handle = handle;
-    H5MM_memcpy(&(file->fa), &fa, sizeof(H5FD_ros3_fapl_t));
+    H5MM_memcpy(&(file->fa), fa, sizeof(H5FD_ros3_fapl_t));
 
 #ifdef ROS3_STATS
     if (FAIL == H5FD__ros3_reset_stats(file))
-        HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, NULL, "unable to reset file statistics");
+        HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, NULL, "unable to reset file statistics");
 #endif
 
     /* Cache the initial bytes of the file */
@@ -791,7 +785,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
         if (NULL == (file->cache = (uint8_t *)H5MM_calloc(file->cache_size)))
             HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, NULL, "unable to allocate cache memory");
-        if (H5FD_s3comms_s3r_read(file->s3r_handle, 0, file->cache_size, file->cache) == FAIL)
+        if (H5FD_s3comms_s3r_read(file->s3r_handle, 0, file->cache_size, file->cache) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, NULL, "unable to execute read");
     }
 
