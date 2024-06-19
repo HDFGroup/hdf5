@@ -1477,23 +1477,22 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P_peek_driver_info
  *
- * Purpose:    Returns a pointer directly to the file driver-specific
- *        information of a file access.
+ * Purpose:     Returns a pointer directly to the file driver-specific
+ *              information of a file access.
  *
- * Return:    Success:    Ptr to *uncopied* driver specific data
- *                structure if any.
+ * Return:      Success:    Pointer to *uncopied* driver-specific data
+ *                          structure, if any.
  *
- *        Failure:    NULL. Null is also returned if the driver has
- *                not registered any driver-specific properties
- *                although no error is pushed on the stack in
- *                this case.
- *
+ *              Failure:    NULL. NULL is also returned if the driver has
+ *                          not registered any driver-specific properties
+ *                          although no error is pushed on the stack in
+ *                          this case.
  *-------------------------------------------------------------------------
  */
 const void *
 H5P_peek_driver_info(H5P_genplist_t *plist)
 {
-    const void *ret_value = NULL; /* Return value */
+    const void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1504,7 +1503,7 @@ H5P_peek_driver_info(H5P_genplist_t *plist)
         if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver info");
         ret_value = driver_prop.driver_info;
-    } /* end if */
+    }
     else
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a file access property list");
 
