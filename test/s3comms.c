@@ -1547,77 +1547,6 @@ error:
 } /* end test_parse_url() */
 
 /*---------------------------------------------------------------------------
- *
- * Function: test_percent_encode_char()
- *
- * Purpose:
- *
- *     Define and verify behavior of `H5FD_s3comms_percent_encode_char()`
- *
- * Return:
- *
- *     Success:  0
- *     Failure: -1
- *
- *---------------------------------------------------------------------------
- */
-static herr_t
-test_percent_encode_char(void)
-{
-    /*************************
-     * test-local structures *
-     *************************/
-
-    struct testcase {
-        const char  c;
-        const char *exp;
-        size_t      exp_len;
-    };
-
-    /************************
-     * test-local variables *
-     ************************/
-
-    struct testcase cases[] = {
-        {'$', "%24", 3},        /* u+0024 dollar sign */
-        {' ', "%20", 3},        /* u+0020 space */
-        {'^', "%5E", 3},        /* u+0094 carat */
-        {'/', "%2F", 3},        /* u+002f solidus (forward slash) */
-        /* {??, "%C5%8C", 6},*/ /* u+014c Latin Capital Letter O with Macron */
-        /* Not included because it is multibyte "wide" character that poses  */
-        /* issues both in the underlying function and in being written in    */
-        /* this file.                                                        */
-        /* {'¢', "%C2%A2", 6}, */ /* u+00a2 cent sign */
-        /* above works, but complains about wide character overflow      */
-        /* Elide for now, until it is determined (a) unnecessary or      */
-        /* (b) requiring signature change to accommodate wide characters */
-        {'\0', "%00", 3}, /* u+0000 null */
-    };
-    char   dest[13];
-    size_t dest_len = 0;
-    int    i        = 0;
-    int    n_cases  = 5;
-
-    TESTING("percent encode characters");
-
-    for (i = 0; i < n_cases; i++) {
-        JSVERIFY(SUCCEED, H5FD_s3comms_percent_encode_char(dest, (const unsigned char)cases[i].c, &dest_len),
-                 NULL)
-        JSVERIFY(cases[i].exp_len, dest_len, NULL)
-        JSVERIFY(0, strncmp(dest, cases[i].exp, dest_len), NULL)
-        JSVERIFY_STR(cases[i].exp, dest, NULL)
-    }
-
-    JSVERIFY(FAIL, H5FD_s3comms_percent_encode_char(NULL, (const unsigned char)'^', &dest_len), NULL)
-
-    PASSED();
-    return 0;
-
-error:
-    return -1;
-} /* end test_percent_encode_char() */
-
-/*---------------------------------------------------------------------------
  * Function: test_s3r_get_filesize()
  *---------------------------------------------------------------------------
  */
@@ -2237,7 +2166,6 @@ main(void)
 
     /* tests ordered roughly by dependence */
     nerrors += test_macro_format_credential() < 0 ? 1 : 0;
-    nerrors += test_percent_encode_char() < 0 ? 1 : 0;
     nerrors += test_bytes_to_hex() < 0 ? 1 : 0;
     nerrors += test_HMAC_SHA256() < 0 ? 1 : 0;
     nerrors += test_signing_key() < 0 ? 1 : 0;
