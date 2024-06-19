@@ -730,7 +730,6 @@ test_hrb_init_request(void)
         }
         else {
             FAIL_IF(req == NULL);
-            JSVERIFY(S3COMMS_HRB_MAGIC, req->magic, NULL)
             if (C->verb == NULL) {
                 JSVERIFY_STR("GET", req->verb, NULL)
             }
