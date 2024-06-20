@@ -5886,7 +5886,7 @@ main(void)
         exit(EXIT_SUCCESS);
     }
 
-    h5_reset();
+    h5_test_init();
 
     printf("Testing basic Virtual File Driver functionality.\n");
 

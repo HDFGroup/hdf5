@@ -152,7 +152,7 @@ static int    opaque_funcs(void);
 static void
 reset_hdf5(void)
 {
-    h5_reset();
+    h5_test_init();
 #ifdef TEST_ALIGNMENT
     SET_ALIGNMENT(SCHAR, H5_SIZEOF_CHAR);
     SET_ALIGNMENT(UCHAR, H5_SIZEOF_CHAR);
@@ -862,7 +862,7 @@ test_compound_2(void)
 
     PASSED();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -874,7 +874,7 @@ error:
     free(bkg);
     free(orig);
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -984,7 +984,7 @@ test_compound_3(void)
 
     PASSED();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -995,7 +995,7 @@ error:
     free(bkg);
     free(orig);
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -1112,7 +1112,7 @@ test_compound_4(void)
 
     PASSED();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -1123,7 +1123,7 @@ error:
     free(bkg);
     free(orig);
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -1322,14 +1322,14 @@ test_compound_6(void)
 
     PASSED();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
     return 0;
 
 error:
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -1464,14 +1464,14 @@ test_compound_7(void)
 
     PASSED();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
     return 0;
 
 error:
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -5307,7 +5307,7 @@ test_conv_str_1(void)
 
     PASSED();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -5324,7 +5324,7 @@ error:
     if (buf)
         free(buf);
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -5392,7 +5392,7 @@ error:
     if (buf)
         free(buf);
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -5528,7 +5528,7 @@ error:
     if (tag)
         H5free_memory(tag); /* Technically allocated by API call */
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -5605,7 +5605,7 @@ error:
     if (buf)
         free(buf);
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -5763,7 +5763,7 @@ test_conv_bitfield(void)
     H5Tclose(dt);
     PASSED();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -5773,7 +5773,7 @@ error:
     H5Tclose(st);
     H5Tclose(dt);
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -5918,7 +5918,7 @@ error:
     if (retval == 0)
         PASSED();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();

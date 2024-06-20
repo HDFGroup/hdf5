@@ -2129,7 +2129,7 @@ main(void)
     int         nerrors        = 0;
     const char *bucket_url_env = NULL;
 
-    h5_reset();
+    h5_test_init();
 
 #endif /* H5_HAVE_ROS3_VFD */
 

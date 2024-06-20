@@ -561,7 +561,7 @@ main(void)
     hid_t fapl_id        = H5I_INVALID_HID;
     bool  api_ctx_pushed = false; /* Whether API context pushed */
 
-    h5_reset();
+    h5_test_init();
     if ((fapl_id = h5_fileaccess()) < 0)
         goto error;
 

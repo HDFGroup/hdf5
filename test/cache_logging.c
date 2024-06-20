@@ -132,7 +132,8 @@ test_logging_api(void)
         TEST_ERROR;
 
     HDremove(LOG_LOCATION);
-    h5_clean_files(FILENAME, fapl);
+    h5_delete_all_test_files(FILENAME, fapl);
+    H5Pclose(fapl);
 
     PASSED();
     return 0;
@@ -163,7 +164,7 @@ main(void)
     int nerrors = 0;
 
     /* Reset library */
-    h5_reset();
+    h5_test_init();
 
     printf("Testing basic metadata cache logging functionality.\n");
 

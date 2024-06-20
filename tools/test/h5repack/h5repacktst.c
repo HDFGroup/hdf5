@@ -1732,7 +1732,8 @@ main(void)
         hid_t fapl;
 
         fapl = h5_fileaccess();
-        h5_clean_files(H5REPACK_FILENAMES, fapl);
+        h5_delete_all_test_files(H5REPACK_FILENAMES, fapl);
+        H5Pclose(fapl);
     }
 
     puts("All h5repack tests passed.");

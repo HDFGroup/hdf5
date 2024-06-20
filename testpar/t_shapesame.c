@@ -4416,8 +4416,7 @@ main(int argc, char **argv)
         TestSummary();
 
     /* Clean up test files */
-    h5_clean_files(FILENAME, fapl);
-
+    h5_delete_all_test_files(FILENAME, fapl);
     H5Pclose(fapl);
 
     nerrors += GetTestNumErrs();

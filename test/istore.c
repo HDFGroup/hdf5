@@ -591,7 +591,7 @@ main(int argc, char *argv[])
     has_sparse_support = is_sparse();
 
     /* Reset library */
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     /* Use larger file addresses... */
