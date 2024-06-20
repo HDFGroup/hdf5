@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.850d6c8</span>
+   &#160;<span id="projectnumber">1.15.0.9fe7132</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -143,14 +143,6 @@ Macros</h2></td></tr>
 <tr class="separator:a5bcfb420a43fd8756a09368612dd1647"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a24add4687ae8b28b3c6e8ac8b202f0f7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a24add4687ae8b28b3c6e8ac8b202f0f7">S3COMMS_FORMAT_CREDENTIAL</a>(dest,  access,  iso8601_date,  region,  service)</td></tr>
 <tr class="separator:a24add4687ae8b28b3c6e8ac8b202f0f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a05eb3fc091e5a18803c6187b59f79b75"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a05eb3fc091e5a18803c6187b59f79b75">S3COMMS_HRB_NODE_MAGIC</a>&#160;&#160;&#160;0x7F5757UL</td></tr>
-<tr class="separator:a05eb3fc091e5a18803c6187b59f79b75"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afffc42e5df289eebd183b2291f4333b3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#afffc42e5df289eebd183b2291f4333b3">S3COMMS_HRB_MAGIC</a>&#160;&#160;&#160;0x6DCC84UL</td></tr>
-<tr class="separator:afffc42e5df289eebd183b2291f4333b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a731bdc70ce1bbdf8b3c9716283ec2025"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a731bdc70ce1bbdf8b3c9716283ec2025">S3COMMS_PARSED_URL_MAGIC</a>&#160;&#160;&#160;0x21D0DFUL</td></tr>
-<tr class="separator:a731bdc70ce1bbdf8b3c9716283ec2025"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2ae5c070188a73edf17ef86922de650b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a2ae5c070188a73edf17ef86922de650b">S3COMMS_S3R_MAGIC</a>&#160;&#160;&#160;0x44d8d79</td></tr>
-<tr class="separator:a2ae5c070188a73edf17ef86922de650b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -180,20 +172,12 @@ Functions</h2></td></tr>
 <tr class="separator:a598b8b432400dee94d2bcc313fef88d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af637c38e26542a9ec9922a7c5916a2fd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#af637c38e26542a9ec9922a7c5916a2fd">H5FD_s3comms_load_aws_profile</a> (const char *name, char *key_id_out, char *secret_access_key_out, char *aws_region_out)</td></tr>
 <tr class="separator:af637c38e26542a9ec9922a7c5916a2fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a331a701900ce364e9ad2ecaf07702e89"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a331a701900ce364e9ad2ecaf07702e89">H5FD_s3comms_nlowercase</a> (char *dest, const char *s, size_t len)</td></tr>
-<tr class="separator:a331a701900ce364e9ad2ecaf07702e89"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a447e48af26a6f9861afdcb17b9ce3da8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a447e48af26a6f9861afdcb17b9ce3da8">H5FD_s3comms_parse_url</a> (const char *str, <a class="el" href="structparsed__url__t.html">parsed_url_t</a> **purl)</td></tr>
 <tr class="separator:a447e48af26a6f9861afdcb17b9ce3da8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0920dcf00c5048def115f03d7674b6d5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a0920dcf00c5048def115f03d7674b6d5">H5FD_s3comms_percent_encode_char</a> (char *repr, const unsigned char c, size_t *repr_len)</td></tr>
-<tr class="separator:a0920dcf00c5048def115f03d7674b6d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a41b0bbdb55ad768fb1a8ca3dc6fb474e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a41b0bbdb55ad768fb1a8ca3dc6fb474e">H5FD_s3comms_signing_key</a> (unsigned char *md, const char *secret, const char *region, const char *iso8601now)</td></tr>
 <tr class="separator:a41b0bbdb55ad768fb1a8ca3dc6fb474e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01884498a547fed06923d9d83a69187f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a01884498a547fed06923d9d83a69187f">H5FD_s3comms_tostringtosign</a> (char *dest, const char *req_str, const char *now, const char *region)</td></tr>
 <tr class="separator:a01884498a547fed06923d9d83a69187f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a123318a075d4c88aef506d0901d4da3e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a123318a075d4c88aef506d0901d4da3e">H5FD_s3comms_trim</a> (char *dest, char *s, size_t s_len, size_t *n_written)</td></tr>
-<tr class="separator:a123318a075d4c88aef506d0901d4da3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7de4c5f35eeceda5f9668b2c5429b22c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a7de4c5f35eeceda5f9668b2c5429b22c">H5FD_s3comms_uriencode</a> (char *dest, const char *s, size_t s_len, bool encode_slash, size_t *n_written)</td></tr>
-<tr class="separator:a7de4c5f35eeceda5f9668b2c5429b22c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a4dec7c942f5ef522bd38971d754a3eb6" name="a4dec7c942f5ef522bd38971d754a3eb6"></a>
@@ -343,34 +327,6 @@ Functions</h2></td></tr>
 </div><!-- fragment -->
 </div>
 </div>
-<a id="afffc42e5df289eebd183b2291f4333b3" name="afffc42e5df289eebd183b2291f4333b3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afffc42e5df289eebd183b2291f4333b3">&#9670;&#160;</a></span>S3COMMS_HRB_MAGIC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define S3COMMS_HRB_MAGIC&#160;&#160;&#160;0x6DCC84UL</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a05eb3fc091e5a18803c6187b59f79b75" name="a05eb3fc091e5a18803c6187b59f79b75"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a05eb3fc091e5a18803c6187b59f79b75">&#9670;&#160;</a></span>S3COMMS_HRB_NODE_MAGIC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define S3COMMS_HRB_NODE_MAGIC&#160;&#160;&#160;0x7F5757UL</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a5bcfb420a43fd8756a09368612dd1647" name="a5bcfb420a43fd8756a09368612dd1647"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5bcfb420a43fd8756a09368612dd1647">&#9670;&#160;</a></span>S3COMMS_MAX_CREDENTIAL_SIZE</h2>
 
@@ -379,34 +335,6 @@ Functions</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define S3COMMS_MAX_CREDENTIAL_SIZE&#160;&#160;&#160;155</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a731bdc70ce1bbdf8b3c9716283ec2025" name="a731bdc70ce1bbdf8b3c9716283ec2025"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a731bdc70ce1bbdf8b3c9716283ec2025">&#9670;&#160;</a></span>S3COMMS_PARSED_URL_MAGIC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define S3COMMS_PARSED_URL_MAGIC&#160;&#160;&#160;0x21D0DFUL</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a2ae5c070188a73edf17ef86922de650b" name="a2ae5c070188a73edf17ef86922de650b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2ae5c070188a73edf17ef86922de650b">&#9670;&#160;</a></span>S3COMMS_S3R_MAGIC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define S3COMMS_S3R_MAGIC&#160;&#160;&#160;0x44d8d79</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -708,40 +636,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a331a701900ce364e9ad2ecaf07702e89" name="a331a701900ce364e9ad2ecaf07702e89"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a331a701900ce364e9ad2ecaf07702e89">&#9670;&#160;</a></span>H5FD_s3comms_nlowercase()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FD_s3comms_nlowercase </td>
-          <td>(</td>
-          <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>dest</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>s</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>len</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a447e48af26a6f9861afdcb17b9ce3da8" name="a447e48af26a6f9861afdcb17b9ce3da8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a447e48af26a6f9861afdcb17b9ce3da8">&#9670;&#160;</a></span>H5FD_s3comms_parse_url()</h2>
 
@@ -759,40 +653,6 @@ Functions</h2></td></tr>
           <td></td>
           <td class="paramtype"><a class="el" href="structparsed__url__t.html">parsed_url_t</a> **&#160;</td>
           <td class="paramname"><em>purl</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a0920dcf00c5048def115f03d7674b6d5" name="a0920dcf00c5048def115f03d7674b6d5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0920dcf00c5048def115f03d7674b6d5">&#9670;&#160;</a></span>H5FD_s3comms_percent_encode_char()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FD_s3comms_percent_encode_char </td>
-          <td>(</td>
-          <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>repr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const unsigned char&#160;</td>
-          <td class="paramname"><em>c</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t *&#160;</td>
-          <td class="paramname"><em>repr_len</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -995,92 +855,6 @@ Functions</h2></td></tr>
           <td></td>
           <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>region</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a123318a075d4c88aef506d0901d4da3e" name="a123318a075d4c88aef506d0901d4da3e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a123318a075d4c88aef506d0901d4da3e">&#9670;&#160;</a></span>H5FD_s3comms_trim()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FD_s3comms_trim </td>
-          <td>(</td>
-          <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>dest</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>s</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>s_len</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t *&#160;</td>
-          <td class="paramname"><em>n_written</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a7de4c5f35eeceda5f9668b2c5429b22c" name="a7de4c5f35eeceda5f9668b2c5429b22c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7de4c5f35eeceda5f9668b2c5429b22c">&#9670;&#160;</a></span>H5FD_s3comms_uriencode()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FD_s3comms_uriencode </td>
-          <td>(</td>
-          <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>dest</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>s</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>s_len</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>encode_slash</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t *&#160;</td>
-          <td class="paramname"><em>n_written</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
