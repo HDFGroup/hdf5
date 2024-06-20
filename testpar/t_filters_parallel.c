@@ -10319,7 +10319,8 @@ exit:
 
     TestAlarmOff();
 
-    h5_clean_files(FILENAME, fapl_id);
+    h5_delete_all_test_files(FILENAME, fapl_id);
+    H5Pclose(fapl_id);
     fapl_id = H5I_INVALID_HID;
 
     if (dcpl_id >= 0)

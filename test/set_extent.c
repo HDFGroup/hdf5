@@ -121,7 +121,7 @@ main(void)
     /* Initialize random number seed */
     srand((unsigned)time(NULL));
 
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     /* Copy the file access property list */

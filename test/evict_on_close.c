@@ -884,7 +884,7 @@ main(void)
     printf("Testing evict-on-close cache behavior\n");
 
     /* Initialize */
-    h5_reset();
+    h5_test_init();
 
     /* Test H5P call to set up EoC (does not require VFD-specific fapl) */
     nerrors += check_evict_on_close_api() < 0 ? 1 : 0;

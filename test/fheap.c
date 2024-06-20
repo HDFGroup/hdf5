@@ -15957,7 +15957,6 @@ main(void)
     unsigned          u, v;                                   /* Local index variable */
     unsigned          nerrors = 0;                            /* Cumulative error count */
     unsigned    num_pb_fs = 1; /* The number of settings to test for page buffering and file space handling */
-    int         ExpressMode;   /* Express testing level */
     const char *driver_name;   /* Environment variable */
     bool        contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
     bool        api_ctx_pushed = false; /* Whether API context pushed */
@@ -15969,10 +15968,9 @@ main(void)
     contig_addr_vfd = (bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0);
 
     /* Reset library */
-    h5_reset();
+    h5_test_init();
 
-    def_fapl    = h5_fileaccess();
-    ExpressMode = GetTestExpress();
+    def_fapl = h5_fileaccess();
 
     /*
      * Caution when turning on ExpressMode 0:
@@ -15984,9 +15982,9 @@ main(void)
      *      Activate full testing when this feature is re-enabled
      *      in the future for parallel build.
      */
-    if (ExpressMode > 1)
+    if (TestExpress > 1)
         printf("***Express test mode on.  Some tests may be skipped\n");
-    else if (ExpressMode == 0) {
+    else if (TestExpress == 0) {
 #ifdef H5_HAVE_PARALLEL
         num_pb_fs = NUM_PB_FS - 2;
 #else
@@ -16202,7 +16200,7 @@ main(void)
                     /* If this test fails, uncomment the tests above, which build up to this
                      * level of complexity gradually. -QAK
                      */
-                    if (ExpressMode > 1)
+                    if (TestExpress > 1)
                         printf(
                             "***Express test mode on.  test_man_start_5th_recursive_indirect is skipped\n");
                     else
@@ -16250,7 +16248,7 @@ main(void)
                                 nerrors += test_man_remove_first_row(fapl, &small_cparam, &tparam);
                                 nerrors += test_man_remove_first_two_rows(fapl, &small_cparam, &tparam);
                                 nerrors += test_man_remove_first_four_rows(fapl, &small_cparam, &tparam);
-                                if (ExpressMode > 1)
+                                if (TestExpress > 1)
                                     printf("***Express test mode on.  Some tests skipped\n");
                                 else {
                                     nerrors += test_man_remove_all_root_direct(fapl, &small_cparam, &tparam);
@@ -16300,7 +16298,7 @@ main(void)
                                 nerrors +=
                                     test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(
                                         fapl, &small_cparam, &tparam);
-                                if (ExpressMode > 1)
+                                if (TestExpress > 1)
                                     printf("***Express test mode on.  Some tests skipped\n");
                                 else {
                                     nerrors +=
@@ -16430,7 +16428,7 @@ main(void)
             }     /* end block */
 
             /* Random object insertion & deletion */
-            if (ExpressMode > 1)
+            if (TestExpress > 1)
                 printf("***Express test mode on.  Some tests skipped\n");
             else {
                 /* Random tests using "small" heap creation parameters */

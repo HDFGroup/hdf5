@@ -48,7 +48,7 @@ main(void)
     int         token_cmp;
     bool        driver_is_default_compatible;
 
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     TESTING("modification time messages");

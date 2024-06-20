@@ -15953,7 +15953,7 @@ main(void)
         check_dbl[i] = check_dbl_data + (i * DSET_DIM2);
 
     /* Testing setup */
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)

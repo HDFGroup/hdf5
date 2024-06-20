@@ -1845,7 +1845,7 @@ main(void)
     single_file_vfd = !h5_driver_uses_multiple_files(driver_name, 0);
 
     /* Reset library */
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 

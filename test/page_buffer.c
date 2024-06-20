@@ -2053,7 +2053,7 @@ main(void)
     const char *driver_name    = NULL;            /* File Driver value from environment */
     bool        api_ctx_pushed = false;           /* Whether API context pushed */
 
-    h5_reset();
+    h5_test_init();
 
     /* Get the VFD to use */
     driver_name = h5_get_test_driver_name();
@@ -2086,7 +2086,8 @@ main(void)
     nerrors += test_stats_collection(fapl, driver_name);
     nerrors += test_pb_fapl_tolerance_at_open();
 
-    h5_clean_files(FILENAME, fapl);
+    h5_delete_all_test_files(FILENAME, fapl);
+    H5Pclose(fapl);
 
     if (nerrors)
         goto error;

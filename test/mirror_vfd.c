@@ -2411,7 +2411,7 @@ main(int argc, char **argv)
     struct mt_opts opts;
     int            nerrors = 0;
 
-    h5_reset();
+    h5_test_init();
 
     g_log_stream = stdout; /* default debug/logging output stream */
 

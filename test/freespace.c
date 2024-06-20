@@ -2878,7 +2878,7 @@ main(void)
     unsigned nerrors        = 0;               /* Cumulative error count */
     bool     api_ctx_pushed = false;           /* Whether API context pushed */
 
-    h5_reset();
+    h5_test_init();
 
     if ((fapl = h5_fileaccess()) < 0) {
         nerrors++;

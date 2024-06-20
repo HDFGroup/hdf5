@@ -1049,7 +1049,8 @@ main(void)
     if (test_filter_error(filename, fapl) < 0)
         TEST_ERROR;
 
-    h5_clean_files(FILENAME, fapl);
+    h5_delete_all_test_files(FILENAME, fapl);
+    H5Pclose(fapl);
 
     free(ipoints2);
     free(ipoints2_data);
