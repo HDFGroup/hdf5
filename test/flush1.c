@@ -183,7 +183,7 @@ main(void)
     char        filename[1024];            /* filename                                 */
     bool        use_swmr;                  /* whether or not to use SWMR I/O           */
 
-    h5_reset();
+    h5_test_init();
     if ((fapl_id = h5_fileaccess()) < 0)
         TEST_ERROR;
 

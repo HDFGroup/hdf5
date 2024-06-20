@@ -425,7 +425,7 @@ fpe_handler(int H5_ATTR_UNUSED signo)
 static void
 reset_hdf5(void)
 {
-    h5_reset();
+    h5_test_init();
 
     if (without_hardware_g)
         h5_no_hwconv();
@@ -548,7 +548,7 @@ test_hard_query(void)
 
     PASSED();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -556,7 +556,7 @@ test_hard_query(void)
     return 0;
 
 error:
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -867,7 +867,7 @@ error:
 #endif
 #endif
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5(); /*print statistics*/
@@ -1289,7 +1289,7 @@ test_derived_flt(void)
 
     PASSED();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5(); /*print statistics*/
@@ -1313,7 +1313,7 @@ error:
     }
     H5E_END_TRY
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5(); /*print statistics*/
@@ -1599,7 +1599,7 @@ test_derived_integer(void)
 
     PASSED();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5(); /*print statistics*/
@@ -1621,7 +1621,7 @@ error:
     }
     H5E_END_TRY
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5(); /*print statistics*/
@@ -2670,7 +2670,7 @@ done:
         free(aligned);
     fflush(stdout);
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5(); /*print statistics*/
@@ -2686,7 +2686,7 @@ error:
         free(aligned);
     fflush(stdout);
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5(); /*print statistics*/
@@ -3812,7 +3812,7 @@ done:
     assert(0 && "Should not reach this point!");
     return 1;
 #else
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -3841,7 +3841,7 @@ error:
     assert(0 && "Should not reach this point!");
     return 1;
 #else
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -5230,7 +5230,7 @@ done:
     if (aligned)
         free(aligned);
     fflush(stdout);
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5(); /*print statistics*/
@@ -5251,7 +5251,7 @@ error:
         free(aligned);
     fflush(stdout);
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5(); /*print statistics*/
@@ -6022,7 +6022,7 @@ main(void)
      */
     without_hardware_g = true;
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
@@ -6040,12 +6040,12 @@ main(void)
     /* Test software integer-float conversion functions */
     nerrors += (unsigned long)run_int_fp_conv("soft");
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     reset_hdf5();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     if (nerrors) {

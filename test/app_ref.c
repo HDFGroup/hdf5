@@ -86,7 +86,7 @@ main(void)
     int         i;
     char        filename[1024];
 
-    h5_reset();
+    h5_test_init();
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
 
     srand((unsigned)time(NULL));
@@ -179,11 +179,11 @@ main(void)
 
     PASSED();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     /* Clean up any file(s) created */
-    h5_reset();
+    h5_test_init();
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     h5_cleanup(FILENAME, fapl);
 

@@ -2651,7 +2651,7 @@ main(void)
     /* Get the VFD to use */
     driver_name = h5_get_test_driver_name();
 
-    h5_reset();
+    h5_test_init();
 
     puts("Testing basic Virtual Object Layer (VOL) functionality.");
 

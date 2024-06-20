@@ -647,7 +647,7 @@ main(int argc, char *argv[])
     unsigned i;
     int      ret;
 
-    h5_reset();
+    h5_test_init();
 
     /* Initialize MPI */
     MPI_Init(&argc, &argv);

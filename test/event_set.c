@@ -655,7 +655,7 @@ main(void)
     int   nerrors = 0;               /* Error count */
 
     /* Setup */
-    h5_reset();
+    h5_test_init();
     fapl_id = h5_fileaccess();
 
     /* Register dummy connector IDs */
