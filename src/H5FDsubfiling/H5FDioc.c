@@ -835,7 +835,7 @@ H5FD__ioc_close_int(H5FD_ioc_t *file)
     assert(file);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
+        HMPI_DONE_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
 
     if (file->context_id >= 0) {
         subfiling_context_t *sf_context = H5FD__subfiling_get_object(file->context_id);
@@ -843,7 +843,7 @@ H5FD__ioc_close_int(H5FD_ioc_t *file)
         /* Don't allow IOC threads to be finalized until everyone gets here */
         if (!mpi_finalized && file->mpi_size > 1)
             if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
+                HMPI_DONE_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 
         /* Only finalize IOC threads and close subfiles if this is the last file
          * holding a reference to the context
@@ -855,15 +855,15 @@ H5FD__ioc_close_int(H5FD_ioc_t *file)
                     HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to finalize IOC threads");
 
             if (H5FD__subfiling_close_subfiles(file->context_id, file->comm) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfiling file(s)");
+                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfiling file(s)");
         }
     }
 
     if (!mpi_finalized) {
         if (H5_mpi_comm_free(&file->comm) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
+            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
         if (H5_mpi_info_free(&file->info) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
+            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
     }
 
     H5MM_free(file->file_path);
