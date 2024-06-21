@@ -109,7 +109,10 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
          * operation
          */
         for (int i = 0; i < num_subfiles_owned; i++)
-            if (MPI_SUCCESS != (mpi_code = MPI_Irecv(&recv_msgs[3 * i], 1, H5_subfiling_rpc_msg_type, sf_context->topology->io_concentrators[sf_context->topology->ioc_idx], TRUNC_COMPLETED, sf_context->sf_eof_comm, &recv_reqs[i])))
+            if (MPI_SUCCESS !=
+                (mpi_code = MPI_Irecv(&recv_msgs[3 * i], 1, H5_subfiling_rpc_msg_type,
+                                      sf_context->topology->io_concentrators[sf_context->topology->ioc_idx],
+                                      TRUNC_COMPLETED, sf_context->sf_eof_comm, &recv_reqs[i])))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Irecv failed", mpi_code);
 
         /* Compute the EOF for each subfile this IOC owns */
@@ -117,7 +120,8 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
             int64_t subfile_eof = num_full_stripes * sf_context->sf_stripe_size;
             int64_t global_subfile_idx;
 
-            global_subfile_idx = (i * sf_context->topology->n_io_concentrators) + sf_context->topology->ioc_idx;
+            global_subfile_idx =
+                (i * sf_context->topology->n_io_concentrators) + sf_context->topology->ioc_idx;
 
             if (global_subfile_idx < num_leftover_stripes)
                 subfile_eof += sf_context->sf_stripe_size;
@@ -129,7 +133,10 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
             msg[1] = i;
             msg[2] = -1; /* padding -- not used in this message */
 
-            if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 1, H5_subfiling_rpc_msg_type, sf_context->topology->io_concentrators[sf_context->topology->ioc_idx], TRUNC_OP, sf_context->sf_msg_comm)))
+            if (MPI_SUCCESS !=
+                (mpi_code = MPI_Send(msg, 1, H5_subfiling_rpc_msg_type,
+                                     sf_context->topology->io_concentrators[sf_context->topology->ioc_idx],
+                                     TRUNC_OP, sf_context->sf_msg_comm)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
         }
 
@@ -285,7 +292,8 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
     for (int i = 0; i < num_subfiles; i++) {
         int ioc_rank = sf_context->topology->io_concentrators[i % n_io_concentrators];
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Irecv(&recv_msg[3 * i], 1, H5_subfiling_rpc_msg_type, ioc_rank, GET_EOF_COMPLETED, sf_context->sf_eof_comm, &recv_reqs[i])))
+        if (MPI_SUCCESS != (mpi_code = MPI_Irecv(&recv_msg[3 * i], 1, H5_subfiling_rpc_msg_type, ioc_rank,
+                                                 GET_EOF_COMPLETED, sf_context->sf_eof_comm, &recv_reqs[i])))
             HMPI_GOTO_ERROR(FAIL, "MPI_Irecv", mpi_code);
     }
 
@@ -300,7 +308,8 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
         /* Set subfile index for receiving IOC */
         msg[0] = i / n_io_concentrators;
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 1, H5_subfiling_rpc_msg_type, ioc_rank, GET_EOF_OP, sf_context->sf_msg_comm)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 1, H5_subfiling_rpc_msg_type, ioc_rank, GET_EOF_OP,
+                                                sf_context->sf_msg_comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Send", mpi_code);
     }
 

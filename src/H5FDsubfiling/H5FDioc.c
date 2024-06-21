@@ -126,8 +126,8 @@ static herr_t H5FD__ioc_close_int(H5FD_ioc_t *file);
 static herr_t H5FD__ioc_write_vector_internal(H5FD_ioc_t *file, uint32_t count, H5FD_mem_t types[],
                                               haddr_t addrs[], size_t sizes[],
                                               const void *bufs[] /* data_in */);
-static herr_t H5FD__ioc_read_vector_internal(H5FD_ioc_t *file, uint32_t count, haddr_t addrs[], size_t sizes[],
-                                             void *bufs[] /* data_out */);
+static herr_t H5FD__ioc_read_vector_internal(H5FD_ioc_t *file, uint32_t count, haddr_t addrs[],
+                                             size_t sizes[], void *bufs[] /* data_out */);
 
 static const H5FD_class_t H5FD_ioc_g = {
     H5FD_CLASS_VERSION,        /* VFD interface version */
@@ -218,7 +218,8 @@ H5FD_ioc_init(void)
                 if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
                     HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Query_thread failed", mpi_code);
                 if (provided != MPI_THREAD_MULTIPLE)
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "IOC VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                                "IOC VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
             }
             else {
                 int required = MPI_THREAD_MULTIPLE;
@@ -230,12 +231,14 @@ H5FD_ioc_init(void)
                 H5FD_mpi_self_initialized = true;
 
                 if (provided != required)
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                                "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
             }
         }
 
         /* Retrieve upper bound for MPI message tag value */
-        if (MPI_SUCCESS != (mpi_code = MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB, &H5FD_IOC_tag_ub_val_ptr, &key_val_retrieved)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB, &H5FD_IOC_tag_ub_val_ptr,
+                                                         &key_val_retrieved)))
             HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Comm_get_attr failed", mpi_code);
 
         if (!key_val_retrieved)
@@ -299,8 +302,8 @@ herr_t
 H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config)
 {
     H5FD_ioc_config_t ioc_conf;
-    H5P_genplist_t    *plist = NULL;
-    herr_t             ret_value = SUCCEED;
+    H5P_genplist_t   *plist     = NULL;
+    herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
@@ -339,8 +342,8 @@ done:
 herr_t
 H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
 {
-    const H5FD_ioc_config_t *config         = NULL;
-    H5P_genplist_t          *plist          = NULL;
+    const H5FD_ioc_config_t *config             = NULL;
+    H5P_genplist_t          *plist              = NULL;
     bool                     use_default_config = false;
     herr_t                   ret_value          = SUCCEED;
 
@@ -541,10 +544,15 @@ H5FD__ioc_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "decoded subfiling configuration parameters are invalid");
 
     if (file->subf_config.stripe_size != sf_context->sf_stripe_size)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "specified subfiling stripe size (%" PRId64 ") doesn't match value stored in file (%" PRId64 ")", sf_context->sf_stripe_size, file->subf_config.stripe_size);
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                    "specified subfiling stripe size (%" PRId64
+                    ") doesn't match value stored in file (%" PRId64 ")",
+                    sf_context->sf_stripe_size, file->subf_config.stripe_size);
 
     if (file->subf_config.stripe_count != sf_context->sf_num_subfiles)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "specified subfiling stripe count (%d) doesn't match value stored in file (%" PRId32 ")", sf_context->sf_num_subfiles, file->subf_config.stripe_count);
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                    "specified subfiling stripe count (%d) doesn't match value stored in file (%" PRId32 ")",
+                    sf_context->sf_num_subfiles, file->subf_config.stripe_count);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -651,7 +659,7 @@ H5FD__ioc_fapl_free(void *_fapl)
 static H5FD_t *
 H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_ioc_t              *file   = NULL; /* Ioc VFD info */
+    H5FD_ioc_t              *file       = NULL; /* Ioc VFD info */
     const H5FD_ioc_config_t *config_ptr = NULL; /* Driver-specific property list */
     subfiling_context_t     *sf_context = NULL;
     H5FD_ioc_config_t        default_config;
@@ -751,13 +759,16 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if (H5FD__subfiling_get_file_id_prop(plist, &file->file_id) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get stub file ID from FAPL");
     if (file->file_id == UINT64_MAX)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "subfiling stub file ID property was missing from FAPL - IOC VFD wasn't correctly stacked under the subfiling VFD and cannot currently be used alone");
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL,
+                    "subfiling stub file ID property was missing from FAPL - IOC VFD wasn't correctly "
+                    "stacked under the subfiling VFD and cannot currently be used alone");
 
     /*
      * Open the subfiles for this HDF5 file. A subfiling context ID will be
      * returned, which is used for further interactions with this file's subfiles.
      */
-    if (H5FD__subfiling_open_subfiles(file->file_path, file->file_id, &file->subf_config, ioc_flags, file->comm, &file->context_id) < 0)
+    if (H5FD__subfiling_open_subfiles(file->file_path, file->file_id, &file->subf_config, ioc_flags,
+                                      file->comm, &file->context_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiles for file '%s'", name);
 
     /*
@@ -795,11 +806,13 @@ done:
             HMPI_DONE_ERROR(NULL, "MPI_Comm_size failed", mpi_code);
 
         if (mpi_size > 1)
-            if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(MPI_IN_PLACE, &err_result, 1, MPI_INT, MPI_MAX, reduce_comm)))
+            if (MPI_SUCCESS !=
+                (mpi_code = MPI_Allreduce(MPI_IN_PLACE, &err_result, 1, MPI_INT, MPI_MAX, reduce_comm)))
                 HMPI_DONE_ERROR(NULL, "MPI_Allreduce failed", mpi_code);
 
         if (err_result)
-            HDONE_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "one or more MPI ranks were unable to open file '%s'", name);
+            HDONE_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+                        "one or more MPI ranks were unable to open file '%s'", name);
     }
 
     if (NULL == ret_value)
@@ -955,7 +968,7 @@ H5FD__ioc_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out 
 static haddr_t
 H5FD__ioc_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
-    const H5FD_ioc_t *file      = (const H5FD_ioc_t *)_file;
+    const H5FD_ioc_t *file = (const H5FD_ioc_t *)_file;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1039,8 +1052,8 @@ static herr_t
 H5FD__ioc_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
                size_t size, void *buf)
 {
-    H5FD_ioc_t *file = (H5FD_ioc_t *)_file;
-    herr_t ret_value = SUCCEED;
+    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
+    herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1074,8 +1087,8 @@ static herr_t
 H5FD__ioc_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size,
                 const void *buf)
 {
-    H5FD_ioc_t *file = (H5FD_ioc_t *)_file;
-    herr_t ret_value = SUCCEED;
+    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
+    herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1091,7 +1104,7 @@ static herr_t
 H5FD__ioc_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
                       size_t sizes[], void *bufs[] /* out */)
 {
-    H5FD_ioc_t *file  = (H5FD_ioc_t *)_file;
+    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1111,9 +1124,8 @@ H5FD__ioc_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t t
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else
-        if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
 
     if (H5FD__ioc_read_vector_internal(file, count, addrs, sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't read vector of data");
@@ -1146,9 +1158,8 @@ H5FD__ioc_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else
-        if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
 
     if (H5FD__ioc_write_vector_internal(file, count, types, addrs, sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write vector of data");
@@ -1217,11 +1228,11 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
 
     if (mpi_rank == 0) {
-        int64_t read_n_subfiles = 0;
-        int32_t n_subfiles      = 0;
-        char   *prefix_env      = NULL;
-        int     num_digits      = 0;
-        h5_stat_t       st;
+        int64_t   read_n_subfiles = 0;
+        int32_t   n_subfiles      = 0;
+        char     *prefix_env      = NULL;
+        int       num_digits      = 0;
+        h5_stat_t st;
 
         memset(&st, 0, sizeof(h5_stat_t));
         if (HDstat(name, &st) < 0)
@@ -1394,7 +1405,8 @@ H5FD__ioc_write_vector_internal(H5FD_ioc_t *file, uint32_t count, H5FD_mem_t H5_
 
         H5_CHECK_OVERFLOW(addrs[i], haddr_t, int64_t);
         H5_CHECK_OVERFLOW(io_size, size_t, int64_t);
-        if (H5FD__ioc_write_independent_async(sf_context_id, (int64_t)addrs[i], (int64_t)io_size, bufs[i], &sf_io_reqs[i]) < 0)
+        if (H5FD__ioc_write_independent_async(sf_context_id, (int64_t)addrs[i], (int64_t)io_size, bufs[i],
+                                              &sf_io_reqs[i]) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "couldn't queue write operation");
 
         mpi_reqs[(2 * i)]     = sf_io_reqs[i]->io_transfer_req;
@@ -1470,7 +1482,8 @@ H5FD__ioc_read_vector_internal(H5FD_ioc_t *file, uint32_t count, haddr_t addrs[]
 
         H5_CHECK_OVERFLOW(addrs[i], haddr_t, int64_t);
         H5_CHECK_OVERFLOW(io_size, size_t, int64_t);
-        if (H5FD__ioc_read_independent_async(sf_context_id, (int64_t)addrs[i], (int64_t)io_size, bufs[i], &sf_io_reqs[i]) < 0)
+        if (H5FD__ioc_read_independent_async(sf_context_id, (int64_t)addrs[i], (int64_t)io_size, bufs[i],
+                                             &sf_io_reqs[i]) < 0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "couldn't queue read operation");
 
         mpi_reqs[i] = sf_io_reqs[i]->io_transfer_req;

@@ -413,11 +413,11 @@ extern "C" {
 H5_DLL herr_t H5FD__ioc_init_threads(void *_sf_context);
 H5_DLL herr_t H5FD__ioc_finalize_threads(void *_sf_context);
 H5_DLL herr_t H5FD__ioc_write_independent_async(int64_t context_id, int64_t offset, int64_t elements,
-                                           const void *data, io_req_t **io_req);
-H5_DLL herr_t H5FD__ioc_read_independent_async(int64_t context_id, int64_t offset, int64_t elements, void *data,
-                                          io_req_t **io_req);
+                                                const void *data, io_req_t **io_req);
+H5_DLL herr_t H5FD__ioc_read_independent_async(int64_t context_id, int64_t offset, int64_t elements,
+                                               void *data, io_req_t **io_req);
 H5_DLL herr_t H5FD__ioc_async_completion(MPI_Request *mpi_reqs, size_t num_reqs);
-H5_DLL int wait_for_thread_main(void);
+H5_DLL int    wait_for_thread_main(void);
 
 #ifdef __cplusplus
 }
