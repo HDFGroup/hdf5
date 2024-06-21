@@ -2128,7 +2128,7 @@ H5FD__subfiling_io_helper(H5FD_subfiling_t *file, size_t io_count, H5FD_mem_t ty
         }
 
         if (rank0_bcast && (file->mpi_size > 1)) {
-            size_t size;
+            size_t size = 0;
 
             assert(io_type == IO_TYPE_READ);
 
@@ -2225,7 +2225,7 @@ H5FD__subfiling_mirror_writes_to_stub(H5FD_subfiling_t *file, uint32_t count, H5
         /* If we find H5FD_MEM_NOLIST, we can stop looking at array entries */
         if (extend_types) {
             if (type == H5FD_MEM_SUPER)
-                super_count += (count - i) - 1; /* Account for remaining elements */
+                super_count += (count - (uint32_t)i) - 1; /* Account for remaining elements */
             break;
         }
     }
