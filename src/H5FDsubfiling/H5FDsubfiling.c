@@ -1264,35 +1264,34 @@ H5FD__subfiling_close_int(H5FD_subfiling_t *file)
     assert(file);
 
     if (file->sf_file && H5FD_close(file->sf_file) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfile");
+        HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfile");
     if (file->stub_file && H5FD_close(file->stub_file) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close HDF5 stub file");
+        HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close HDF5 stub file");
 
     /* If set, close the copy of the plist for the underlying VFD. */
     if (file->fa.ioc_fapl_id >= 0 && H5I_dec_ref(file->fa.ioc_fapl_id) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close IOC FAPL");
+        HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close IOC FAPL");
 
     if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
+        HMPI_DONE_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
     if (!mpi_finalized) {
         if (H5_mpi_comm_free(&file->comm) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
+            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
         if (H5_mpi_info_free(&file->info) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
+            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
         if (H5_mpi_comm_free(&file->ext_comm) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
     }
 
     H5MM_free(file->file_path);
     H5MM_free(file->file_dir);
 
     if (file->context_id >= 0 && H5FD__subfiling_free_object(file->context_id) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free subfiling context object");
+        HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free subfiling context object");
 
     /* Release the file info */
     H5FL_FREE(H5FD_subfiling_t, file);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 

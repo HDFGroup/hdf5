@@ -872,7 +872,6 @@ H5FD__ioc_close_int(H5FD_ioc_t *file)
     /* Release the file info */
     H5FL_FREE(H5FD_ioc_t, file);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
