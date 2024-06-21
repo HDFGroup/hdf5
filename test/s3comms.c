@@ -1646,9 +1646,9 @@ test_s3r_read(void)
     if (6464 != H5FD_s3comms_s3r_get_filesize(handle))
         TEST_ERROR;
 
-    /****************************
-     * Tests that shoud succeed *
-     ****************************/
+    /*****************************
+     * Tests that should succeed *
+     *****************************/
 
     /* Read from start of file */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
@@ -1683,9 +1683,9 @@ test_s3r_read(void)
             94))
         TEST_ERROR;
 
-    /*************************
-     * Tests that shoud fail *
-     *************************/
+    /**************************
+     * Tests that should fail *
+     **************************/
 
     /* Read past eof */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
