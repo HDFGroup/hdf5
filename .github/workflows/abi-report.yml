@@ -83,7 +83,7 @@ jobs:
         run: |
           mkdir "${{ github.workspace }}/hdf5R"
           cd "${{ github.workspace }}/hdf5R"
-          wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5-${{ inputs.file_ref }}/hdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}-ubuntu-2204_gcc.tar.gz
+          wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5_${{ inputs.file_ref }}/hdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}-ubuntu-2204_gcc.tar.gz
           tar zxf hdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}-ubuntu-2204_gcc.tar.gz
 
       - name: List files for the space (Linux)
