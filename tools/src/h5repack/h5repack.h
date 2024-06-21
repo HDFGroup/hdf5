@@ -86,10 +86,11 @@
  * \li    <strong>--sort_order=Z</strong> :   Sort groups and attributes by order Z
  * \li    <strong>--filter=FILT</strong> :    Filter type
  * \li    <strong>--layout=LAYT</strong> :    Layout type
- * \li    <strong>--fs_strategy=FS_STRATEGY</strong> : File space management strategy for #H5Pset_file_space_strategy
- * \li    <strong>--fs_persist=FS_PERSIST</strong> :   Persisting or not persisting free-space for #H5Pset_file_space_strategy
- * \li    <strong>---fs_threshold=FS_THRESHOLD</strong> :  Free-space section threshold for #H5Pset_file_space_strategy
- * \li    <strong>--fs_pagesize=FS_PAGESIZE</strong> :     File space page size for #H5Pset_file_space_page_size
+ * \li    <strong>--fs_strategy=FS_STRATEGY</strong> : File space management strategy for
+ * #H5Pset_file_space_strategy \li    <strong>--fs_persist=FS_PERSIST</strong> :   Persisting or not
+ * persisting free-space for #H5Pset_file_space_strategy \li    <strong>---fs_threshold=FS_THRESHOLD</strong>
+ * :  Free-space section threshold for #H5Pset_file_space_strategy \li
+ * <strong>--fs_pagesize=FS_PAGESIZE</strong> :     File space page size for #H5Pset_file_space_page_size
  *
  * \subsubsection subsubsec_cltools_h5repack_options_args Arguments to Certain Options
  * \li     <strong>M</strong> - is an integer greater than 1, size of dataset in bytes (default is 0)

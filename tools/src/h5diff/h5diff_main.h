@@ -13,7 +13,6 @@
 #ifndef H5DIFF_H
 #define H5DIFF_H
 
-
 /** \page H5TOOL_DF_UG The HDF5 h5diff Tool
  *
  * \section sec_cltools_h5diff h5diff
@@ -127,8 +126,8 @@
          If the system epsilon is not defined,one of the following predefined
          values will be used:
            <code style="background-color:whitesmoke;">FLT_EPSILON = 1.19209E-07</code> for floating-point type
-           <code style="background-color:whitesmoke;">DBL_EPSILON = 2.22045E-16</code> for double precision type
-         Can not use with '--relative' or '--delta'.
+           <code style="background-color:whitesmoke;">DBL_EPSILON = 2.22045E-16</code> for double precision
+ type Can not use with '--relative' or '--delta'.
   * \li   <strong>--exclude-path "path"</strong>
          Exclude the specified path to an object when comparing files or groups.
          If a group is excluded, all member objects will also be excluded.
@@ -229,4 +228,3 @@
  */
 
 #endif /* H5DIFF_H */
-

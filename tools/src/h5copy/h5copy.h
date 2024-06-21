@@ -13,7 +13,6 @@
 #ifndef H5COPY_H
 #define H5COPY_H
 
-
 /** \page H5TOOL_CP_UG The HDF5 h5copy Tool
  *
  * \section sec_cltools_h5copy h5copy
@@ -73,4 +72,3 @@
  */
 
 #endif /* H5COPY_H */
-
