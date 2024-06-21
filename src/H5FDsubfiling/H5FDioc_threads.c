@@ -1040,7 +1040,7 @@ H5FD__ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t
         else {
             if (retries == 0) {
 #ifdef H5FD_IOC_DEBUG
-                printf("[ioc(%d) %s]: TIMEOUT: file_offset=%" PRId64 ", data_size=%lld\n", ioc_idx, __func__,
+                printf("[ioc(%d) %s]: TIMEOUT: file_offset=%" PRId64 ", data_size=%" PRId64 "\n", ioc_idx, __func__,
                        file_offset, data_size);
 #endif
 
