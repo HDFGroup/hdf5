@@ -1710,7 +1710,7 @@ H5FD__subfiling_init_context(int64_t context_id, const char *prefix_env, const c
                              subfiling_context_t **context)
 {
     subfiling_context_t *sf_context = NULL;
-    char                *env_value   = NULL;
+    char                *env_value  = NULL;
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
@@ -1816,11 +1816,9 @@ H5FD__subfiling_init_context(int64_t context_id, const char *prefix_env, const c
                                                       &sf_context->sf_group_comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Comm_split failed", mpi_code);
 
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Comm_rank(sf_context->sf_group_comm, &sf_context->sf_group_rank)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(sf_context->sf_group_comm, &sf_context->sf_group_rank)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Comm_size(sf_context->sf_group_comm, &sf_context->sf_group_size)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(sf_context->sf_group_comm, &sf_context->sf_group_size)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
     }
 
