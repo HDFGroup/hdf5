@@ -46,12 +46,13 @@ static int64_t H5FD__subfiling_new_object_id(sf_obj_type_t obj_type);
 static herr_t  H5FD__subfiling_free_context(subfiling_context_t *sf_context);
 static herr_t  H5FD__subfiling_free_topology(sf_topology_t *topology);
 
-static herr_t H5FD__subfiling_init_context(const char *base_filename, uint64_t file_id,
+static herr_t H5FD__subfiling_setup_context(const char *base_filename, uint64_t file_id,
                                            H5FD_subfiling_params_t *subfiling_config, int file_acc_flags,
                                            MPI_Comm comm, int64_t *context_id_out);
 static herr_t H5FD__subfiling_init_app_topology(int64_t                  sf_context_id,
                                                 H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm,
                                                 MPI_Comm node_comm, sf_topology_t **app_topology_out);
+static herr_t H5FD__subfiling_init_context(int64_t context_id, const char *prefix_env, const char *base_filename, uint64_t file_id, H5FD_subfiling_params_t *subfiling_config, sf_topology_t *app_topology, MPI_Comm file_comm, MPI_Comm node_comm, subfiling_context_t **context);
 static herr_t
 H5FD__subfiling_get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_type,
                                                     char                       **ioc_sel_info_str);
@@ -623,8 +624,8 @@ H5FD__subfiling_open_subfiles(const char *base_filename, uint64_t file_id,
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't get subfiling object from context ID");
     }
     else {
-        /* Initialize new subfiling context ID based on configuration information */
-        if (H5FD__subfiling_init_context(base_filename, file_id, subfiling_config, file_acc_flags, file_comm,
+        /* Set up new subfiling context based on configuration information */
+        if (H5FD__subfiling_setup_context(base_filename, file_id, subfiling_config, file_acc_flags, file_comm,
                                          &context_id) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't initialize subfiling context");
 
@@ -718,11 +719,11 @@ done:
 -------------------------------------------------------------------------
 */
 static herr_t
-H5FD__subfiling_init_context(const char *base_filename, uint64_t file_id,
+H5FD__subfiling_setup_context(const char *base_filename, uint64_t file_id,
                              H5FD_subfiling_params_t *subfiling_config, int file_acc_flags, MPI_Comm comm,
                              int64_t *context_id_out)
 {
-    subfiling_context_t *new_context   = NULL;
+    subfiling_context_t *context   = NULL;
     sf_topology_t       *app_topology  = NULL;
     MPI_Comm             node_comm     = MPI_COMM_NULL;
     int64_t              context_id    = -1;
@@ -745,20 +746,8 @@ H5FD__subfiling_init_context(const char *base_filename, uint64_t file_id,
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(comm, &mpi_size)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
 
-    /* Use the file's index to create a new subfiling context ID */
-    if ((context_id = H5FD__subfiling_new_object_id(SF_CONTEXT)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't create new subfiling context ID");
-
-    /* Create a new subfiling context object with the created context ID */
-    if (NULL == (new_context = H5FD__subfiling_get_object(context_id)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't create new subfiling object");
-    new_context->sf_context_id = context_id;
-
     /* Check if a prefix has been set for the configuration file name */
     prefix_env = getenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
-    if (prefix_env && (strlen(prefix_env) > 0))
-        if (NULL == (new_context->config_file_prefix = strdup(prefix_env)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "couldn't copy config file prefix string");
 
     /*
      * If there's an existing subfiling configuration file for this file, read the
@@ -852,115 +841,22 @@ H5FD__subfiling_init_context(const char *base_filename, uint64_t file_id,
 #error "MPI-3 required for MPI_Comm_split_type"
 #endif
 
+    /* Use the file's index to create a new subfiling context ID */
+    if ((context_id = H5FD__subfiling_new_object_id(SF_CONTEXT)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't create new subfiling context ID");
+
     /*
-     * Setup the application topology information, including the computed
+     * Initialize the application topology information, including the computed
      * number and distribution map of the set of I/O concentrators
      */
     if (H5FD__subfiling_init_app_topology(context_id, subfiling_config, comm, node_comm, &app_topology) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't initialize application topology");
 
-    /* Set non-zero fields */
-    new_context->h5_file_id      = file_id;
-    new_context->sf_num_subfiles = subfiling_config->stripe_count;
-    new_context->sf_eof          = HADDR_UNDEF;
-    new_context->sf_stripe_size  = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
-    new_context->sf_msg_comm     = MPI_COMM_NULL;
-    new_context->sf_data_comm    = MPI_COMM_NULL;
-    new_context->sf_eof_comm     = MPI_COMM_NULL;
-    new_context->sf_node_comm    = node_comm;
-    new_context->sf_group_comm   = MPI_COMM_NULL;
-    new_context->sf_group_size   = 1;
-    new_context->topology        = app_topology;
-
-    if (NULL == (new_context->h5_filename = strdup(base_filename)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate space for subfiling filename");
-
-    /* Check for a subfile name prefix setting in the environment */
-    env_value = getenv(H5FD_SUBFILING_SUBFILE_PREFIX);
-    if (env_value && (strlen(env_value) > 0))
-        if (NULL == (new_context->subfile_prefix = strdup(env_value)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix value");
-
-    /* Set IOC stripe size from subfiling configuration */
-    if (subfiling_config->stripe_size > 0)
-        new_context->sf_stripe_size = subfiling_config->stripe_size;
-
-    /*
-     * If still set to the default, set the number of subfiles according to the
-     * default mapping of 1 I/O concentrator -> 1 subfile
-     */
-    if (new_context->sf_num_subfiles == H5FD_SUBFILING_DEFAULT_STRIPE_COUNT)
-        new_context->sf_num_subfiles = app_topology->n_io_concentrators;
-
-    /*
-     * Set blocksize per stripe value after possibly adjusting for user-specified
-     * subfile stripe size and number of subfiles
-     */
-    new_context->sf_blocksize_per_stripe = new_context->sf_stripe_size * new_context->sf_num_subfiles;
-
-    if (app_topology->rank_is_ioc) {
-        int leftover_subfiles;
-
-        /* Adjust base address after stripe size is set, if necessary */
-        new_context->sf_base_addr = (int64_t)(app_topology->ioc_idx * new_context->sf_stripe_size);
-
-        /*
-         * Calculate the number of subfiles this rank owns by round-robining them
-         * across the available IOCs and then allocate an array for the subfile IDs
-         */
-        new_context->sf_num_fids = new_context->sf_num_subfiles / app_topology->n_io_concentrators;
-
-        leftover_subfiles = new_context->sf_num_subfiles % app_topology->n_io_concentrators;
-        if (leftover_subfiles && (leftover_subfiles > app_topology->ioc_idx))
-            new_context->sf_num_fids++;
-
-        if (NULL == (new_context->sf_fids =
-                         H5MM_malloc((size_t)new_context->sf_num_fids * sizeof(*new_context->sf_fids))))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate subfile IDs array");
-
-        for (int i = 0; i < new_context->sf_num_fids; i++)
-            new_context->sf_fids[i] = -1;
-    }
-
-    /* Set up various MPI sub-communicators for MPI operations to/from IOC ranks */
-
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(comm, &new_context->sf_msg_comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(new_context->sf_msg_comm, MPI_ERRORS_RETURN)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_set_errhandler failed", mpi_code);
-
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(comm, &new_context->sf_data_comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(new_context->sf_data_comm, MPI_ERRORS_RETURN)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_set_errhandler failed", mpi_code);
-
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(comm, &new_context->sf_eof_comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(new_context->sf_eof_comm, MPI_ERRORS_RETURN)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_set_errhandler failed", mpi_code);
-
-    /* Create an MPI sub-communicator for IOC ranks */
-    if (app_topology->n_io_concentrators > 1) {
-        if (MPI_SUCCESS != (mpi_code = MPI_Comm_split(comm, app_topology->rank_is_ioc, mpi_rank,
-                                                      &new_context->sf_group_comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Comm_split failed", mpi_code);
-
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Comm_rank(new_context->sf_group_comm, &new_context->sf_group_rank)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Comm_size(new_context->sf_group_comm, &new_context->sf_group_size)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
-    }
-
-    /* Perform some final validation of subfiling configuration */
-    if (new_context->sf_stripe_size <= 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid subfiling stripe size (%" PRId64 ")",
-                    new_context->sf_stripe_size);
-    if (new_context->sf_num_subfiles <= 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid subfiling stripe count (%d)",
-                    new_context->sf_num_subfiles);
-    assert(new_context->sf_num_subfiles >= app_topology->n_io_concentrators);
+    /* Initialize the subfiling context */
+    if (H5FD__subfiling_init_context(context_id, prefix_env, base_filename, file_id, subfiling_config, app_topology, comm, node_comm, &context) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't initialize subfiling context");
+    assert(context);
+    node_comm = MPI_COMM_NULL;  /* New context takes ownership of node_comm */
 
     *context_id_out = context_id;
 
@@ -976,11 +872,13 @@ done:
             if (H5FD__subfiling_free_topology(app_topology) < 0)
                 HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling topology");
 
-        if (H5_mpi_comm_free(&node_comm) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free MPI communicator");
+        if (node_comm != MPI_COMM_NULL)
+            if (H5_mpi_comm_free(&node_comm) < 0)
+                HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free MPI communicator");
 
-        if (context_id >= 0 && H5FD__subfiling_free_object(context_id) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
+        if (context_id >= 0 && context)
+            if (H5FD__subfiling_free_object(context_id) < 0)
+                HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
 
         *context_id_out = -1;
     }
@@ -1785,6 +1683,152 @@ done:
     if (ret_value < 0)
         if (app_topology)
             H5MM_free(app_topology->io_concentrators);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__subfiling_init_context
+ *
+ * Purpose:     Called as part of the HDF5 file + subfiling opening.
+ *              This initializes the subfiling context and associates
+ *              this context with the specific HDF5 file.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__subfiling_init_context(int64_t context_id, const char *prefix_env, const char *base_filename, uint64_t file_id,
+    H5FD_subfiling_params_t *subfiling_config, sf_topology_t *app_topology,
+    MPI_Comm file_comm, MPI_Comm node_comm, subfiling_context_t **context)
+{
+    subfiling_context_t *new_context   = NULL;
+    char                *env_value     = NULL;
+    int                  mpi_code;
+    herr_t               ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Create a new subfiling context object with the created context ID */
+    if (NULL == (new_context = H5FD__subfiling_get_object(context_id)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't create new subfiling object");
+
+    /* Set non-zero fields */
+    new_context->h5_file_id      = file_id;
+    new_context->sf_context_id = context_id;
+    new_context->sf_num_subfiles = subfiling_config->stripe_count;
+    new_context->sf_eof          = HADDR_UNDEF;
+    new_context->sf_stripe_size  = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
+    new_context->sf_msg_comm     = MPI_COMM_NULL;
+    new_context->sf_data_comm    = MPI_COMM_NULL;
+    new_context->sf_eof_comm     = MPI_COMM_NULL;
+    new_context->sf_node_comm    = node_comm;
+    new_context->sf_group_comm   = MPI_COMM_NULL;
+    new_context->sf_group_size   = 1;
+    new_context->topology        = app_topology;
+
+    /* Check if a prefix has been set for the configuration file name */
+    if (prefix_env && (strlen(prefix_env) > 0))
+        if (NULL == (new_context->config_file_prefix = strdup(prefix_env)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "couldn't copy config file prefix string");
+
+    if (NULL == (new_context->h5_filename = strdup(base_filename)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate space for subfiling filename");
+
+    /* Check for a subfile name prefix setting in the environment */
+    env_value = getenv(H5FD_SUBFILING_SUBFILE_PREFIX);
+    if (env_value && (strlen(env_value) > 0))
+        if (NULL == (new_context->subfile_prefix = strdup(env_value)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix value");
+
+    /* Set IOC stripe size from subfiling configuration */
+    if (subfiling_config->stripe_size > 0)
+        new_context->sf_stripe_size = subfiling_config->stripe_size;
+
+    /*
+     * If still set to the default, set the number of subfiles according to the
+     * default mapping of 1 I/O concentrator -> 1 subfile
+     */
+    if (new_context->sf_num_subfiles == H5FD_SUBFILING_DEFAULT_STRIPE_COUNT)
+        new_context->sf_num_subfiles = app_topology->n_io_concentrators;
+
+    /*
+     * Set blocksize per stripe value after possibly adjusting for user-specified
+     * subfile stripe size and number of subfiles
+     */
+    new_context->sf_blocksize_per_stripe = new_context->sf_stripe_size * new_context->sf_num_subfiles;
+
+    if (app_topology->rank_is_ioc) {
+        int leftover_subfiles;
+
+        /* Adjust base address after stripe size is set, if necessary */
+        new_context->sf_base_addr = (int64_t)(app_topology->ioc_idx * new_context->sf_stripe_size);
+
+        /*
+         * Calculate the number of subfiles this rank owns by round-robining them
+         * across the available IOCs and then allocate an array for the subfile IDs
+         */
+        new_context->sf_num_fids = new_context->sf_num_subfiles / app_topology->n_io_concentrators;
+
+        leftover_subfiles = new_context->sf_num_subfiles % app_topology->n_io_concentrators;
+        if (leftover_subfiles && (leftover_subfiles > app_topology->ioc_idx))
+            new_context->sf_num_fids++;
+
+        if (NULL == (new_context->sf_fids = H5MM_malloc((size_t)new_context->sf_num_fids * sizeof(*new_context->sf_fids))))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate subfile IDs array");
+
+        for (int i = 0; i < new_context->sf_num_fids; i++)
+            new_context->sf_fids[i] = -1;
+    }
+
+    /* Set up various MPI sub-communicators for MPI operations to/from IOC ranks */
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &new_context->sf_msg_comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(new_context->sf_msg_comm, MPI_ERRORS_RETURN)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_set_errhandler failed", mpi_code);
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &new_context->sf_data_comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(new_context->sf_data_comm, MPI_ERRORS_RETURN)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_set_errhandler failed", mpi_code);
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &new_context->sf_eof_comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(new_context->sf_eof_comm, MPI_ERRORS_RETURN)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_set_errhandler failed", mpi_code);
+
+    /* Create an MPI sub-communicator for IOC ranks */
+    if (app_topology->n_io_concentrators > 1) {
+        int mpi_rank;
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(file_comm, &mpi_rank)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_split(file_comm, app_topology->rank_is_ioc, mpi_rank, &new_context->sf_group_comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Comm_split failed", mpi_code);
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(new_context->sf_group_comm, &new_context->sf_group_rank)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(new_context->sf_group_comm, &new_context->sf_group_size)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
+    }
+
+    /* Perform some final validation of subfiling configuration */
+    if (new_context->sf_stripe_size <= 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid subfiling stripe size (%" PRId64 ")", new_context->sf_stripe_size);
+    if (new_context->sf_num_subfiles <= 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid subfiling stripe count (%d)", new_context->sf_num_subfiles);
+    assert(new_context->sf_num_subfiles >= app_topology->n_io_concentrators);
+
+    *context = new_context;
+
+done:
+    if (ret_value < 0) {
+        if (context_id >= 0 && H5FD__subfiling_free_object(context_id) < 0)
+            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
+        *context = NULL;
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
