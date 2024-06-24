@@ -122,7 +122,7 @@
  * \li    <strong>-c[config] \<configfile\></strong>:
             Every input file should be associated with a
             configuration file and this is done by the -c option.
-            <configfile> is the name of the configuration file.
+            \<configfile\> is the name of the configuration file.
             (See Section \ref subsec_cltools_h5import_config)
 
  * \li    <strong>-o[utfile] \<outfile\></strong>:
@@ -294,7 +294,7 @@
               -1 for any dimension implies UNLIMITED
               DIMENSION size for that particular dimension.
 
- * \subsection subsec_cltools_h5repack_usage Usage Examples
+ * \subsection subsec_cltools_h5import_examples Usage Examples
  * \li          1. Configuration File may look like:
             PATH work h5 pkamat First-set
             INPUT-CLASS TEXTFP

@@ -20,14 +20,14 @@
  * \subsection subsec_cltools_h5diff_intro Introduction
  *  With h5diff you can compare objects between a HDF5 file and another file.
  *
- * \subsection subsec_cltools_h5diff_options Usage
+ * \subsection subsec_cltools_h5diff_usage Usage
   <h4> h5diff [OPTIONS] file1 file2 [obj1[ obj2]]</h4>
   * \li  <strong>file1</strong>             File name of the first HDF5 file
   * \li  <strong>file2 </strong>            File name of the second HDF5 file
   * \li  <strong>[obj1]</strong>            Name of an HDF5 object, in absolute path
   * \li  <strong>[obj2]</strong>            Name of an HDF5 object, in absolute path
 
- * \subsection subsec_cltools_h5diff_options Error Report
+ * \subsection subsec_cltools_h5diff_error Error Report
    * \li  <strong>--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
                         Optional value 2 also prints file open errors.
 

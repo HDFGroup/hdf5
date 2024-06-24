@@ -198,7 +198,7 @@
  *          <li><strong>COMPA</strong> (no parameter)</li>
  *          <li><strong>CONTI</strong> (no parameter)</li></ul>
  *
- * \subsection subsec_cltools_h5repack_usage Usage Examples
+ * \subsection subsec_cltools_h5repack_examples Usage Examples
  *  Examples of use:
  *
  * \li 1) h5repack -v -f GZIP=1 file1 file2
