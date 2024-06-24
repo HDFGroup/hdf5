@@ -34,6 +34,7 @@
 
 /* API context state */
 typedef struct H5CX_state_t {
+    hid_t                 fapl_id;            /* FAPL for operation */
     hid_t                 dcpl_id;            /* DCPL for operation */
     hid_t                 dxpl_id;            /* DXPL for operation */
     hid_t                 lapl_id;            /* LAPL for operation */

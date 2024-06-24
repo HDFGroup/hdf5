@@ -927,6 +927,18 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
     if (NULL == (*api_state = H5FL_CALLOC(H5CX_state_t)))
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTALLOC, FAIL, "unable to allocate new API context state");
 
+    /* Check for non-default FAPL */
+    if (H5P_FILE_ACCESS_DEFAULT != (*head)->ctx.fapl_id) {
+        /* Retrieve the FAPL property list */
+        H5CX_RETRIEVE_PLIST(fapl, FAIL)
+
+        /* Copy the FAPL ID */
+        if (((*api_state)->fapl_id = H5P_copy_plist((H5P_genplist_t *)(*head)->ctx.fapl, false)) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTCOPY, FAIL, "can't copy property list");
+    }
+    else
+        (*api_state)->fapl_id = H5P_FILE_ACCESS_DEFAULT;
+
     /* Check for non-default DCPL */
     if (H5P_DATASET_CREATE_DEFAULT != (*head)->ctx.dcpl_id) {
         /* Retrieve the DCPL property list */
@@ -1059,6 +1071,10 @@ H5CX_restore_state(const H5CX_state_t *api_state)
     assert(head && *head);
     assert(api_state);
 
+    /* Restore the FAPL info */
+    (*head)->ctx.fapl_id = api_state->fapl_id;
+    (*head)->ctx.fapl    = NULL;
+
     /* Restore the DCPL info */
     (*head)->ctx.dcpl_id = api_state->dcpl_id;
     (*head)->ctx.dcpl    = NULL;
@@ -1113,6 +1129,11 @@ H5CX_free_state(H5CX_state_t *api_state)
 
     /* Sanity check */
     assert(api_state);
+
+    /* Release the FAPL */
+    if (0 != api_state->fapl_id && H5P_FILE_ACCESS_DEFAULT != api_state->fapl_id)
+        if (H5I_dec_ref(api_state->fapl_id) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on FAPL");
 
     /* Release the DCPL */
     if (0 != api_state->dcpl_id && H5P_DATASET_CREATE_DEFAULT != api_state->dcpl_id)
