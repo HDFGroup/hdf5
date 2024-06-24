@@ -12,6 +12,28 @@
 #ifndef H5DUMP_H
 #define H5DUMP_H
 
+/** \page H5TOOL_DP_UG The HDF5 h5dump Tool
+ *
+ * \section sec_cltools_h5dump h5dump
+ *
+ * \subsection subsec_cltools_h5dump_intro Introduction
+ *  With h5dump you can dump objects from an HDF5 file to another file.
+ *
+ * \subsection subsec_cltools_h5dump_usage Usage
+ *    <h4>h5dump [OPTIONS] [OBJECTS...]</h4>
+ *
+ * \subsection subsec_cltools_h5dump_objs Objects
+ *
+ * \subsection subsec_cltools_h5dump_error Error Report Option
+ * \li    <strong>--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
+                          Optional value 2 also prints file open errors.
+
+ * \subsection subsec_cltools_h5dump_options Options
+ *
+ * \subsubsection subsubsec_cltools_h5dump_options_args Flag Type Options
+ *
+ */
+
 #include "hdf5.h"
 #include "H5private.h"
 #include "h5tools.h"

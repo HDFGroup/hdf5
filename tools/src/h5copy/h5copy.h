@@ -20,10 +20,10 @@
  * \subsection subsec_cltools_h5copy_intro Introduction
  *  With h5copy you can copy objects from an HDF5 file to another file.
  *
- * \subsection subsec_cltools_h5repack_usage Usage
+ * \subsection subsec_cltools_h5copy_usage Usage
  *    <h4>h5copy [OPTIONS] [OBJECTS...]</h4>
  *
- * \subsection subsec_cltools_h5repack_objs Objects
+ * \subsection subsec_cltools_h5copy_objs Objects
  * \li  <strong>--input</strong>        input file name
  * \li  <strong>--output</strong>       output file name
  * \li     <strong>--source</strong>       source object name

@@ -133,31 +133,31 @@
  * \li         <strong>NONE</strong>:
  *                 The mechanisms used in managing file space are virtual file
  *                 driver.
- * \li         The default strategy when not set is \bFSM_AGGR without persisting free-
+ * \li         The default strategy when not set is \b FSM_AGGR without persisting free-
  *          space.
  *
  * \li     <strong>FS_PERSIST</strong> is 1 to persisting free-space or 0 to not persisting free-space.
  *        The default when not set is not persisting free-space.
- *        The value is ignored for \bAGGR and \bNONE strategies.
+ *        The value is ignored for \b AGGR and \b NONE strategies.
  *
  * \li     <strong>FS_THRESHOLD</strong> is the minimum size (in bytes) of free-space sections to be
  *          tracked by the library.
  *        The default when not set is 1.
- *        The value is ignored for \bAGGR and \bNONE strategies.
+ *        The value is ignored for \b AGGR and \b NONE strategies.
  *
  * \li     <strong>FS_PAGESIZE</strong> is the size (in bytes) >=512 that is used by the library when
- *          the file space strategy \bPAGE is used.
+ *          the file space strategy \b PAGE is used.
  *        The default when not set is 4096.
  *
  * \subsubsection subsubsec_cltools_h5repack_options_filt Applying a Third-party Filter
  *      <strong>FILT</strong> - is a string with the format:
  *
- * \li      <strong><objects list>:<name of filter>=<filter parameters></strong>
+ * \li      <strong>\<objects list\>:\<name of filter\>=\<filter parameters\></strong>
  *
- * \li      <strong><objects list></strong> is a comma separated list of object names, meaning apply
+ * \li      <strong>\<objects list\></strong> is a comma separated list of object names, meaning apply
  *          compression only to those objects. If no names are specified, the filter
  *          is applied to all objects
- * \li      <strong><name of filter></strong> can be:
+ * \li      <strong>\<name of filter\></strong> can be:
  *          <ul><li><strong>GZIP</strong>, to apply the HDF5 GZIP filter (GZIP compression)</li>
  *          <li><strong>SZIP</strong>, to apply the HDF5 SZIP filter (SZIP compression)</li>
  *          <li><strong>SHUF</strong>, to apply the HDF5 shuffle filter</li>
@@ -166,16 +166,16 @@
  *          <li><strong>SOFF</strong>, to apply the HDF5 Scale/Offset filter</li>
  *          <li><strong>UD</strong>,   to apply a user defined filter</li>
  *          <li><strong>NONE</strong>, to remove all filters</li></ul>
- * \li     <strong><filter parameters></strong> is optional filter parameter information
- *          <ul><li><strong>GZIP=<deflation level></strong> from 1-9</li>
+ * \li     <strong>\<filter parameters\></strong> is optional filter parameter information
+ *          <ul><li><strong>GZIP=\<deflation level\></strong> from 1-9</li>
  *          <li><strong>SZIP=<pixels per block,coding></strong> pixels per block is a even number in
  *              2-32 and coding method is either EC or NN</li>
  *          <li><strong>SHUF</strong> (no parameter)</li>
  *          <li><strong>FLET</strong> (no parameter)</li>
  *          <li><strong>NBIT</strong> (no parameter)</li>
- *          <li><strong>SOFF=<scale_factor,scale_type></strong> scale_factor is an integer and scale_type
+ *          <li><strong>SOFF=\<scale_factor,scale_type\></strong> scale_factor is an integer and scale_type
  *              is either IN or DS</li>
- *          <li><strong>UD=<filter_number,filter_flag,cd_value_count,value1[,value2,...,valueN]></strong>
+ *          <li><strong>UD=\<filter_number,filter_flag,cd_value_count,value1[,value2,...,valueN]\></strong>
  *              Required values: filter_number, filter_flag, cd_value_count, value1
  *              Optional values: value2 to valueN
  *              filter_flag: 1 is OPTIONAL or 0 is MANDATORY</li>
@@ -184,16 +184,16 @@
  * \subsubsection subsubsec_cltools_h5repack_options_lay Layout Settings
  *      <strong>LAYT</strong> - is a string with the format:
  *
- * \li      <strong><objects list>:<layout type>=<layout parameters></strong>
+ * \li      <strong>\<objects list\>:\<layout type\>=\<layout parameters\></strong>
  *
- * \li      <strong><objects list></strong> is a comma separated list of object names, meaning that
+ * \li      <strong>\<objects list\></strong> is a comma separated list of object names, meaning that
  *          layout information is supplied for those objects. If no names are
  *          specified, the layout type is applied to all objects
- * \li      <strong><layout type></strong> can be:
+ * \li      <strong>\<layout type\></strong> can be:
  *          <ul><li><strong>CHUNK</strong>, to apply chunking layout</li>
  *          <li><strong>COMPA</strong>, to apply compact layout</li>
  *          <li><strong>CONTI</strong>, to apply contiguous layout</li></ul>
- * \li      <strong><layout parameters></strong> is optional layout information
+ * \li      <strong>\<layout parameters\></strong> is optional layout information
  *          <ul><li><strong>CHUNK=DIM[xDIM...xDIM]</strong>, the chunk size of each dimension</li>
  *          <li><strong>COMPA</strong> (no parameter)</li>
  *          <li><strong>CONTI</strong> (no parameter)</li></ul>
