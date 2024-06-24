@@ -90,7 +90,7 @@ jobs:
           - name: "MacOS-13 Clang"
             os: macos-13
             cpp: ON
-            fortran: OFF
+            fortran: ON
             java: ON
             docs: ON
             libaecfc: ON
@@ -155,6 +155,15 @@ jobs:
 
       - name: Install Dependencies (macOS)
         run: brew install ninja
+        if: ${{ matrix.os == 'macos-13' || matrix.os == 'macos-latest' }}
+
+        # symlinks the compiler executables to a common location 
+      - name: Install GNU Fortran (macOS)
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+            compiler: gcc
+            version: 13
         if: ${{ matrix.os == 'macos-13' || matrix.os == 'macos-latest' }}
 
       - name: Install Dependencies

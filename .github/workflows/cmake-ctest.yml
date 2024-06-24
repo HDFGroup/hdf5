@@ -287,7 +287,7 @@ jobs:
         id: setup-fortran
         with:
           compiler: gcc
-          version: 12
+          version: 13
 
       - name: Run ctest (MacOS)
         id: run-ctest
