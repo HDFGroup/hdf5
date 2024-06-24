@@ -104,7 +104,8 @@
           the compressed option.
  *
  * \subsection subsec_cltools_h5import_usage Usage
- *    <h4>h5import -h[elp], OR h5import \<infile\> -c[onfig] \<configfile\> [\<infile\> -c[config] \<confile2\>...] -o[utfile] \<outfile\></h4>
+ *    <h4>h5import -h[elp], OR h5import \<infile\> -c[onfig] \<configfile\> [\<infile\> -c[config]
+\<confile2\>...] -o[utfile] \<outfile\></h4>
 
  * \subsection subsec_cltools_h5import_options Options
  * \li     <strong>-h[elp]</strong>:            Print a usage message and exit
