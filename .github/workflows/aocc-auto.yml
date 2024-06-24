@@ -1,5 +1,6 @@
 name: hdf5 1.14 PAR autotools aocc ompi
 
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:

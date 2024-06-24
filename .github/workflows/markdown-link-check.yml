@@ -1,5 +1,6 @@
 name: Check Markdown links
 
+# Triggers the workflow on push or pull request or on demand
 on:
   workflow_dispatch:
   push:
