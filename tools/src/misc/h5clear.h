@@ -61,4 +61,3 @@ and appropriate actions can be taken.
  */
 
 #endif /* H5CLEAR_H */
-

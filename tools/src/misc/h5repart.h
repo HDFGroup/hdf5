@@ -36,7 +36,8 @@
  * \li     <strong>-b N</strong>:       The I/O block size, defaults to 1kB
  * \li     <strong>-m N</strong>:    The destination member size or 1GB
  * \li     <strong>-family_to_sec2</strong>:           Deprecated version of -family_to_single (below)
- * \li     <strong>-family_to_single</strong>:       Change file driver from family to the default single-file VFD (windows or sec2)
+ * \li     <strong>-family_to_single</strong>:       Change file driver from family to the default single-file
+ VFD (windows or sec2)
  *
     Sizes may be suffixed with 'g' for GB, 'm' for MB or 'k' for kB.
     File family names include an integer printf format such as '%%d'
@@ -44,4 +45,3 @@
  */
 
 #endif /* H5REPART_H */
-

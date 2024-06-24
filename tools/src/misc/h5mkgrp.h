@@ -51,4 +51,3 @@
  */
 
 #endif /* H5MKGRP_H */
-

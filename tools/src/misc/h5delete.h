@@ -28,4 +28,3 @@
  */
 
 #endif /* H5DELETE_H */
-
