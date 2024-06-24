@@ -1,5 +1,6 @@
 name: hdf5 dev autotools cygwin
 
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
