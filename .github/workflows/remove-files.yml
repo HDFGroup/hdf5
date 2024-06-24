@@ -1,6 +1,6 @@
 name: hdf5 dev remove-files
 
-# Controls when the action will run. Triggers the workflow on a schedule
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
