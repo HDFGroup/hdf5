@@ -33,6 +33,7 @@ jobs:
         name:
           - "Windows MSVC"
           - "Ubuntu gcc"
+          - "MacOS-13 Clang"
           - "MacOS Clang"
 
         # This is where we list the bulk of the options for each configuration.
