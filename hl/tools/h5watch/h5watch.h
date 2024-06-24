@@ -27,21 +27,21 @@
                           Optional value 2 also prints file open errors.
 
  * \subsection subsec_cltools_h5watch_options Options
- * \li     <strong>--help</strong>:            Print a usage message and exit
- * \li     <strong>--version</strong>:         Print version number and exit
- * \li     <strong>--label</strong>:           Label members of compound typed dataset.
- * \li     <strong>--simple</strong>:          Use a machine-readable output format.
- * \li     <strong>--dim</strong>:             Monitor changes in size of dataset dimensions only.
- * \li     <strong>--width=N</strong>:         Set the number of columns to N for output.
-                              A value of 0 sets the number of columns to the
-                              maximum (65535). The default width is 80 columns.
- * \li     <strong>--polling=N</strong>:       Set the polling interval to N (in seconds) when the
-                              dataset will be checked for appended data.  The default
-                              polling interval is 1.
- * \li     <strong>--fields=\<list_of_fields\></strong>:
-                              Display data for the fields specified in \<list_of_fields\>
-                              for a compound data type.  \<list_of_fields\> can be
-                              specified as follows:
+ * \li     <strong>--help</strong>       Print a usage message and exit
+ * \li     <strong>--version</strong>    Print version number and exit
+ * \li     <strong>--label</strong>      Label members of compound typed dataset.
+ * \li     <strong>--simple</strong>     Use a machine-readable output format.
+ * \li     <strong>--dim</strong>        Monitor changes in size of dataset dimensions only.
+ * \li     <strong>--width=N</strong>    Set the number of columns to N for output.
+                                         A value of 0 sets the number of columns to the
+                                         maximum (65535). The default width is 80 columns.
+ * \li     <strong>--polling=N</strong>  Set the polling interval to N (in seconds) when the
+                                         dataset will be checked for appended data.  The default
+                                         polling interval is 1.
+ * \li     <strong>--fields=\<list_of_fields\></strong>
+                                         Display data for the fields specified in \<list_of_fields\>
+                                         for a compound data type.  \<list_of_fields\> can be
+                                         specified as follows:
                                    <ul><li>1) A comma-separated list of field names in a
                                    compound data type.  "," is the separator
                                    for field names while "." is the separator
@@ -54,10 +54,10 @@
 
  * \subsection subsec_cltools_h5watch_objs Object
      OBJECT is specified as [\<filename\>/\<path_to_dataset\>/\<dsetname\>]
- * \li     <strong>\<filename\></strong>:            Name of the HDF5 file.  It may be preceded by path
-                              separated by slashes to the specified HDF5 file.
- * \li     <strong>\<path_to_dataset\></strong>:     Path separated by slashes to the specified dataset
- * \li     <strong>\<dsetname\></strong>:            Name of the dataset
+ * \li     <strong>\<filename\></strong>         Name of the HDF5 file.  It may be preceded by path
+                                                 separated by slashes to the specified HDF5 file.
+ * \li     <strong>\<path_to_dataset\></strong>  Path separated by slashes to the specified dataset
+ * \li     <strong>\<dsetname\></strong>         Name of the dataset
  *
  */
 

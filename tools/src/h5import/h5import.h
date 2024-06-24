@@ -107,10 +107,10 @@
  *    <h4>h5import -h[elp], OR h5import \<infile\> -c[onfig] \<configfile\> [\<infile\> -c[config]
 \<confile2\>...] -o[utfile] \<outfile\></h4>
 
- * \subsection subsec_cltools_h5import_options Options
+ * \subsection subsec_cltools_h5import_help Help
  * \li     <strong>-h[elp]</strong>:            Print a usage message and exit
  *
- * \subsubsection subsubsec_cltools_h5import_options_args Flag Type Options
+ * \subsubsection subsubsec_cltools_h5import_options Program Options
  * \li    <strong>\<infile(s)\></strong>:
                    Name of the Input file(s), containing a
             single n-dimensional floating point or integer array
@@ -142,7 +142,7 @@
            The configuration file may have the following keywords each
            followed by an acceptable value.
 
-          <h5>Required KEYWORDS</h5>
+ * \subsubsection subsubsec_cltools_h5import_config_req Required KEYWORDS
  * \li      PATH
  * \li      INPUT-CLASS
  * \li      INPUT-SIZE
@@ -152,7 +152,7 @@
  * \li      OUTPUT-CLASS
  * \li      OUTPUT-SIZE
 
-          <h5>Optional KEYWORDS</h5>
+ * \subsubsection subsubsec_cltools_h5import_config_opt Optional KEYWORDS
  * \li      OUTPUT-ARCHITECTURE
  * \li      OUTPUT-BYTE-ORDER
  * \li      CHUNKED-DIMENSION-SIZES
@@ -162,7 +162,7 @@
  * \li      MAXIMUM-DIMENSIONS
 
 
-            <h5>Values for keywords</h5>
+ * \subsubsection subsubsec_cltools_h5import_config_val Values for keywords
  * \li     PATH:
               Strings separated by spaces to represent
               the path of the data-set. If the groups in
@@ -204,7 +204,6 @@
  * \li      INPUT-SIZE:
               Integer denoting the size of the input data
               (8, 16, 32, 64).
-
               For floating point,
               INPUT-SIZE can be 32 or 64.
               For integers (signed and unsigned)
@@ -295,7 +294,8 @@
               DIMENSION size for that particular dimension.
 
  * \subsection subsec_cltools_h5import_examples Usage Examples
- * \li          1. Configuration File may look like:
+ * \li <strong>Configuration File may look like</strong>
+ * \code
             PATH work h5 pkamat First-set
             INPUT-CLASS TEXTFP
             RANK 3
@@ -304,8 +304,8 @@
             OUTPUT-SIZE 64
             OUTPUT-ARCHITECTURE IEEE
             OUTPUT-BYTE-ORDER LE
-              CHUNKED-DIMENSION-SIZES 2 2 2
-<br />
+            CHUNKED-DIMENSION-SIZES 2 2 2
+ \endcode
           The above configuration will accept a floating point array
           (5 x 2 x 4)  in an ASCII file with the rank and dimension sizes
           specified and will save it in a chunked data-set (of pattern
@@ -313,18 +313,19 @@
           and IEEE architecture. The dataset will be stored at
           "/work/h5/pkamat/First-set"
 
- * \li          2. Another configuration could be:
+ * \li  <strong>Another configuration could be</strong>
+ * \code
             PATH Second-set
             INPUT-CLASS IN
             RANK 5
             DIMENSION-SIZES 6 3 5 2 4
             OUTPUT-CLASS IN
             OUTPUT-SIZE 32
-              CHUNKED-DIMENSION-SIZES 2 2 2 2 2
+            CHUNKED-DIMENSION-SIZES 2 2 2 2 2
             EXTENDIBLE-DATASET 1 3
             COMPRESSION-TYPE GZIP
             COMPRESSION-PARAM 7
-<br />
+ \endcode
           The above configuration will accept an integer array
           (6 X 3 X 5 x 2 x 4)  in a binary file with the rank and
           dimension sizes specified and will save it in a chunked data-set

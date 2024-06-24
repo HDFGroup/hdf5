@@ -198,9 +198,9 @@
     <code style="background-color:whitesmoke;">obj1 /foo/mydataset[START;;COUNT;BLOCK]</code>
     <code style="background-color:whitesmoke;">obj1 /foo/mydataset[START]</code>
 
-  The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in
-  each dimension. START is optional and will default to 0 in each dimension.
-  Each of START, STRIDE, COUNT, and BLOCK must be a comma-separated list of integers with
+  The \b STRIDE, \b COUNT, and \b BLOCK parameters are optional and will default to 1 in
+  each dimension. \b START is optional and will default to 0 in each dimension.
+  Each of \b START, \b STRIDE, \b COUNT, and \b BLOCK must be a comma-separated list of integers with
   one integer for each dimension of the dataset.
 
  Exit code:

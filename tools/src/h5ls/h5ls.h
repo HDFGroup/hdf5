@@ -34,14 +34,14 @@
                           Optional value 2 also prints file open errors.
 
  * \subsection subsec_cltools_h5ls_options Options
- * \li    <strong>--help</strong>:  Print a usage message and exit
- * \li    <strong>--address</strong>:   Print raw data address.  If dataset is contiguous, address
+ * \li    <strong>--help</strong>    Print a usage message and exit
+ * \li    <strong>--address</strong> Print raw data address.  If dataset is contiguous, address
                    is offset in file of beginning of raw data. If chunked,
                    returned list of addresses indicates offset of each chunk.
                    Must be used with -v, --verbose option.
                    Provides no information for non-dataset objects.
- * \li    <strong>--data</strong>:      Print the values of datasets
- * \li    <strong>--follow-symlinks</strong>:
+ * \li    <strong>--data</strong>    Print the values of datasets
+ * \li    <strong>--follow-symlinks</strong>
                    Follow symbolic links (soft links and external links)
                    to display target object information.
                    Without this option, h5ls identifies a symbolic link
@@ -49,8 +49,8 @@
                    assigned to the symbolic link; it does not provide any
                    information regarding the target object or determine
                    whether the link is a dangling link.
- * \li    <strong>--no-dangling-links</strong>:
-                   Must be used with --follow-symlinks option;
+ * \li    <strong>--no-dangling-links</strong>
+                   Must be used with <strong>--follow-symlinks</strong> option;
                    otherwise, h5ls shows error message and returns an exit
                    code of 1.
                    Check for any symbolic links (soft links or external links)
@@ -58,49 +58,49 @@
                    or named datatype).
                    If any dangling link is found, this situation is treated
                    as an error and h5ls returns an exit code of 1.
- * \li    <strong>--full</strong>:      Print full path names instead of base names
- * \li    <strong>--group</strong>:     Show information about a group, not its contents
- * \li    <strong>--label</strong>:     Label members of compound datasets
- * \li    <strong>--recursive</strong>: List all groups recursively, avoiding cycles
- * \li    <strong>--string</strong>:    Print 1-byte integer datasets as ASCII
- * \li    <strong>--simple</strong>:    Use a machine-readable output format
- * \li    <strong>--width=N</strong>:  Set the number of columns of output
- * \li    <strong>--verbose</strong>:   Generate more verbose output
- * \li    <strong>--version</strong>:   Print version number and exit
- * \li    <strong>--page-buffer-size=N</strong>: Set the page buffer cache size, N=non-negative integers
- * \li    <strong>--vfd=DRIVER</strong>:    Use the specified virtual file driver
- * \li    <strong>--hexdump</strong>:   Show raw data in hexadecimal format
- * \li    <strong>--s3-cred=C</strong>:     Supply S3 authentication information to "ros3" vfd.
+ * \li    <strong>--full</strong>      Print full path names instead of base names
+ * \li    <strong>--group</strong>     Show information about a group, not its contents
+ * \li    <strong>--label</strong>     Label members of compound datasets
+ * \li    <strong>--recursive</strong> List all groups recursively, avoiding cycles
+ * \li    <strong>--string</strong>    Print 1-byte integer datasets as ASCII
+ * \li    <strong>--simple</strong>    Use a machine-readable output format
+ * \li    <strong>--width=N</strong>   Set the number of columns of output
+ * \li    <strong>--verbose</strong>   Generate more verbose output
+ * \li    <strong>--version</strong>   Print version number and exit
+ * \li    <strong>--page-buffer-size=N</strong> Set the page buffer cache size, N=non-negative integers
+ * \li    <strong>--vfd=DRIVER</strong>   Use the specified virtual file driver
+ * \li    <strong>--hexdump</strong>      Show raw data in hexadecimal format
+ * \li    <strong>--s3-cred=C</strong>    Supply S3 authentication information to "ros3" vfd.
                    Accepts tuple of "(\<aws-region\>,\<access-id\>,\<access-key\>)".
                    If absent or C-\>"(,,)", defaults to no-authentication.
                    Has no effect if vfd flag not set to "ros3".
- * \li    <strong>--hdfs-attrs=A</strong>:  Supply configuration information to Hadoop VFD.
+ * \li    <strong>--hdfs-attrs=A</strong> Supply configuration information to Hadoop VFD.
                    Accepts tuple of (\<namenode name\>,\<namenode port\>,
                    ...\<kerberos cache path\>,\<username\>,\<buffer size\>)
                    If absent or A == '(,,,,)', all default values are used.
                    Has no effect if vfd flag is not 'hdfs'.
- * \li    <strong>--vol-value</strong>:     Value (ID) of the VOL connector to use for opening the
+ * \li    <strong>--vol-value</strong>    Value (ID) of the VOL connector to use for opening the
                    HDF5 file specified
- * \li    <strong>--vol-name</strong>:      Name of the VOL connector to use for opening the
+ * \li    <strong>--vol-name</strong>     Name of the VOL connector to use for opening the
                    HDF5 file specified
- * \li    <strong>--vol-info</strong>:      VOL-specific info to pass to the VOL connector used for
+ * \li    <strong>--vol-info</strong>     VOL-specific info to pass to the VOL connector used for
                    opening the HDF5 file specified
                    If none of the above options are used to specify a VOL, then
                    the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,
                    if that environment variable is unset) will be used
- * \li    <strong>--vfd-value</strong>:     Value (ID) of the VFL driver to use for opening the
+ * \li    <strong>--vfd-value</strong>    Value (ID) of the VFL driver to use for opening the
                    HDF5 file specified
- * \li    <strong>--vfd-name</strong>:      Name of the VFL driver to use for opening the
+ * \li    <strong>--vfd-name</strong>     Name of the VFL driver to use for opening the
                    HDF5 file specified
- * \li    <strong>--vfd-info</strong>:      VFD-specific info to pass to the VFL driver used for
+ * \li    <strong>--vfd-info</strong>     VFD-specific info to pass to the VFL driver used for
                    opening the HDF5 file specified
  *
  * \subsubsection subsubsec_cltools_h5ls_options_depre Deprecated Options
     The following options have been removed in HDF5 1.12. Use the indicated
     replacement option in all work.
- * \li    <strong>--external</strong>:   Follow external links.
+ * \li    <strong>--external</strong>  Follow external links.
                       Replaced by <strong>--follow-symlinks</strong>.
- * \li    <strong>--errors</strong>:       Show all HDF5 error reporting
+ * \li    <strong>--errors</strong>    Show all HDF5 error reporting
                       Replaced by <strong>--enable-error-stack</strong>.
  *
  */

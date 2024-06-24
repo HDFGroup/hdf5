@@ -14,7 +14,7 @@
 
 /** \page H5TOOL_CR_UG The HDF5 h5clear Tool
  *
- * \section sec_cltools_h5clear h5stat
+ * \section sec_cltools_h5clear h5clear
  *
  * \subsection subsec_cltools_h5clear_intro Introduction
  *  With h5clear you can clear the superblock status flag field, removes metadata cache image, prints
