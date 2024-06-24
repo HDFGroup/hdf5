@@ -163,7 +163,7 @@ jobs:
         id: setup-fortran
         with:
             compiler: gcc
-            version: 13
+            version: 12
         if: ${{ matrix.os == 'macos-13' || matrix.os == 'macos-latest' }}
 
       - name: Install Dependencies
