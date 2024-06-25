@@ -18,7 +18,8 @@
  *
  * \subsection subsec_cltools_h5jam_intro Introduction
  * \li h5jam Adds user block to the front of an HDF5 file and creates a new concatenated file.
- * \li h5unjam Splits an HDF5 file into two files, one containing the user block data and the other the HDF5 data.
+ * \li h5unjam Splits an HDF5 file into two files, one containing the user block data and the other the HDF5
+ * data.
  *
  * \subsection subsec_cltools_h5jam_usage Usage
  *  <h4>h5jam -i \<in_file.h5\> -u \<in_user_file\> [-o \<out_file.h5\>] [--clobber]</h4>
