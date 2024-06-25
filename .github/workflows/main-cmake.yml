@@ -90,7 +90,7 @@ jobs:
           - name: "MacOS-13 Clang"
             os: macos-13
             cpp: ON
-            fortran: ON
+            fortran: OFF
             java: ON
             docs: ON
             libaecfc: ON
