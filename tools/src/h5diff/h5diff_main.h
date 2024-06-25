@@ -129,15 +129,19 @@
  *  when comparing groups, "path" is similar to the relative path from the group to the excluded object. This
  *  "path" can be taken from the first section of the output of the <strong>--verbose</strong> option.<br />
  *  For example, if you are comparing the group <code style="background-color:whitesmoke;">/groupA</code>
- *  in two files and you want to exclude <code
- * style="background-color:whitesmoke;">/groupA/groupB/groupC</code> in both files, the exclude option would
- * read as follows:<br /> <code style="background-color:whitesmoke;">--exclude-path "/groupB/groupC"</code>
- * <br /> If there are multiple paths to an object, only the specified path(s) will be excluded; the
- * comparison will include any path not explicitly excluded.<br /> This option can be used repeatedly to
- * exclude multiple paths. \li <strong>--exclude-attribute "path/to/object/with/attribute"</strong> Exclude
- * attributes on the specified path to an object when comparing files or groups.<br /> If there are multiple
- * paths to an object, only the specified path(s) will be excluded; the comparison will include any path not
- * explicitly excluded.<br /> This option can be used repeatedly to exclude multiple paths.
+ *  in two files and you want to exclude
+ *  <code style="background-color:whitesmoke;">/groupA/groupB/groupC</code> in both files,
+ *  the exclude option would read as follows:<br />
+ *  <code style="background-color:whitesmoke;">--exclude-path "/groupB/groupC"</code> <br />
+ *  If there are multiple paths to an object, only the specified path(s) will be excluded; the
+ *  comparison will include any path not explicitly excluded.<br />
+ *  This option can be used repeatedly to
+ *  exclude multiple paths.
+ * \li <strong>--exclude-attribute "path/to/object/with/attribute"</strong> Exclude
+ *  attributes on the specified path to an object when comparing files or groups.<br />
+ *  If there are multiple paths to an object, only the specified path(s) will be excluded;
+ *  the comparison will include any path not explicitly excluded.<br />
+ *  This option can be used repeatedly to exclude multiple paths.
  *
  * \subsubsection subsubsec_cltools_h5diff_modee Modes of output
  * \li <strong>Default mode</strong> print the number of differences found and where they occurred
