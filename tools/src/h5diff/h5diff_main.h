@@ -116,36 +116,25 @@
  *         is the data point value in file1 and b is the data point value in file2.
  *         If the system epsilon is not defined,one of the following predefined
  *         values will be used:
- *           <ul><li><code style="background-color:whitesmoke;">FLT_EPSILON = 1.19209E-07</code> for floating-point type</li>
- *           <li><code style="background-color:whitesmoke;">DBL_EPSILON = 2.22045E-16</code> for double precision</li></ul>
- *         type Can not use with '--relative' or '--delta'.
- * \li <strong>--exclude-path "path"</strong>
- *         Exclude the specified path to an object when comparing files or groups.
- *         If a group is excluded, all member objects will also be excluded.
- *         The specified path is excluded wherever it occurs.
- *         This flexibility enables the same option to exclude either objects that
- *         exist only in one file or common objects that are known to differ.<br />
- *         When comparing files, "path" is the absolute path to the excluded;
- *         object; when comparing groups, "path" is similar to the relative
- *         path from the group to the excluded object. This "path" can be
- *         taken from the first section of the output of the --verbose option.
- *         For example, if you are comparing the group
- *         <code style="background-color:whitesmoke;">/groupA</code> in two files and
- *         you want to exclude
- *         <code style="background-color:whitesmoke;">/groupA/groupB/groupC</code>
- *         in both files, the exclude option would read as follows:<br />
- *         <code style="background-color:whitesmoke;">--exclude-path "/groupB/groupC"</code>
- *         <br />
- *         If there are multiple paths to an object, only the specified path(s)
- *         will be excluded; the comparison will include any path not explicitly
- *         excluded.<br />
- *         This option can be used repeatedly to exclude multiple paths.
- * \li <strong>--exclude-attribute "path/to/object/with/attribute"</strong>
- *         Exclude attributes on the specified path to an object when comparing files or groups.<br />
- *         If there are multiple paths to an object, only the specified path(s)
- *         will be excluded; the comparison will include any path not explicitly
- *         excluded.<br />
- *         This option can be used repeatedly to exclude multiple paths.
+ *           <ul><li><code style="background-color:whitesmoke;">FLT_EPSILON = 1.19209E-07</code> for
+ * floating-point type</li> <li><code style="background-color:whitesmoke;">DBL_EPSILON = 2.22045E-16</code>
+ * for double precision</li></ul> type Can not use with '--relative' or '--delta'. \li <strong>--exclude-path
+ * "path"</strong> Exclude the specified path to an object when comparing files or groups. If a group is
+ * excluded, all member objects will also be excluded. The specified path is excluded wherever it occurs. This
+ * flexibility enables the same option to exclude either objects that exist only in one file or common objects
+ * that are known to differ.<br /> When comparing files, "path" is the absolute path to the excluded; object;
+ * when comparing groups, "path" is similar to the relative path from the group to the excluded object. This
+ * "path" can be taken from the first section of the output of the --verbose option. For example, if you are
+ * comparing the group <code style="background-color:whitesmoke;">/groupA</code> in two files and you want to
+ * exclude <code style="background-color:whitesmoke;">/groupA/groupB/groupC</code> in both files, the exclude
+ * option would read as follows:<br /> <code style="background-color:whitesmoke;">--exclude-path
+ * "/groupB/groupC"</code> <br /> If there are multiple paths to an object, only the specified path(s) will be
+ * excluded; the comparison will include any path not explicitly excluded.<br /> This option can be used
+ * repeatedly to exclude multiple paths. \li <strong>--exclude-attribute
+ * "path/to/object/with/attribute"</strong> Exclude attributes on the specified path to an object when
+ * comparing files or groups.<br /> If there are multiple paths to an object, only the specified path(s) will
+ * be excluded; the comparison will include any path not explicitly excluded.<br /> This option can be used
+ * repeatedly to exclude multiple paths.
  *
  * \subsubsection subsubsec_cltools_h5diff_modee Modes of output
  * \li <strong>Default mode</strong> print the number of differences found and where they occurred

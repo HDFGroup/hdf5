@@ -176,10 +176,9 @@
  *          <li><strong>SOFF=\<scale_factor,scale_type\></strong> scale_factor is an integer and scale_type
  *              is either IN or DS</li>
  *          <li><strong>UD=\<filter_number,filter_flag,cd_value_count,value1[,value2,...,valueN]\></strong>
- *              <ul><li><strong>Required values</strong> filter_number, filter_flag, cd_value_count, value1</li>
- *              <li><strong>Optional values</strong> value2 to valueN</li>
- *              <li><strong>filter_flag</strong> 1 is OPTIONAL or 0 is MANDATORY</li></ul></li>
- *          <li><strong>NONE</strong> (no parameter)</li></ul>
+ *              <ul><li><strong>Required values</strong> filter_number, filter_flag, cd_value_count,
+ * value1</li> <li><strong>Optional values</strong> value2 to valueN</li> <li><strong>filter_flag</strong> 1
+ * is OPTIONAL or 0 is MANDATORY</li></ul></li> <li><strong>NONE</strong> (no parameter)</li></ul>
  *
  * \subsubsection subsubsec_cltools_h5repack_options_lay Layout Settings
  * <strong>LAYT</strong> - is a string with the format:
