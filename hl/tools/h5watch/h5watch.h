@@ -28,7 +28,7 @@
 
  * \subsection subsec_cltools_h5watch_options Options
  * \li     <strong>--help</strong>       Print a usage message and exit
- * \li     <strong>--version</strong>    Print version number and exit
+ * \li     <strong>--version</strong>    Print the library version number and exit
  * \li     <strong>--label</strong>      Label members of compound typed dataset.
  * \li     <strong>--simple</strong>     Use a machine-readable output format.
  * \li     <strong>--dim</strong>        Monitor changes in size of dataset dimensions only.
@@ -47,13 +47,13 @@
                                    for field names while "." is the separator
                                    for a nested field.</li>
                                    <li>2) A single field name in a compound data type.
-                                   Can use this option multiple times.</li></ul>
+                                   This option can be used multiple times.</li></ul>
                               Note that backslash is the escape character to avoid
                               characters in field names that conflict with the tool's
                               separators.
 
  * \subsection subsec_cltools_h5watch_objs Object
-     OBJECT is specified as [\<filename\>/\<path_to_dataset\>/\<dsetname\>]
+     <strong>OBJECT</strong> is specified as [\<filename\>/\<path_to_dataset\>/\<dsetname\>]
  * \li     <strong>\<filename\></strong>         Name of the HDF5 file.  It may be preceded by path
                                                  separated by slashes to the specified HDF5 file.
  * \li     <strong>\<path_to_dataset\></strong>  Path separated by slashes to the specified dataset

@@ -25,166 +25,166 @@
  *
  * \subsection subsec_cltools_h5import_intro Introduction
  *  With h5import you can convert data stored in one or more ASCII or binary files
-          into one or more datasets (in accordance with the
-          user-specified type and storage properties) in an existing
-          or new HDF5 file.
+      into one or more datasets (in accordance with the
+      user-specified type and storage properties) in an existing
+      or new HDF5 file.
  *
  * \subsection subsec_cltools_h5import_desc Description
- *            The primary objective of the utility is to convert floating
-          point or integer data stored in ASCII text or binary form
-          into a data-set according to the type and storage properties
-          specified by the user. The utility can also accept ASCII
-          text files and store the contents in a compact form as an
-          array of one-dimensional strings.
+ *  The primary objective of the utility is to convert floating
+      point or integer data stored in \b ASCII text or binary form
+      into a data-set according to the type and storage properties
+      specified by the user. The utility can also accept \b ASCII
+      text files and store the contents in a compact form as an
+      array of one-dimensional strings.
 
-          The input data to be written as a data-set can be provided
-          to the utility in one of the following forms:
-          \li 1. ASCII text file with numeric data (floating point or
-          integer data).
-          \li 2. Binary file with native floating point data (32-bit or
-          64-bit)
-          \li 3. Binary file with native integer (signed or unsigned)
-          data (8-bit or 16-bit or 32-bit or 64-bit).
-          \li 4. ASCII text file containing strings (text data).
+      The input data to be written as a data-set can be provided
+      to the utility in one of the following forms:
+      \li 1. ASCII text file with numeric data (floating point or
+      integer data)
+      \li 2. Binary file with native floating point data (32-bit or
+      64-bit)
+      \li 3. Binary file with native integer (signed or unsigned)
+      data (8-bit or 16-bit or 32-bit or 64-bit)
+      \li 4. ASCII text file containing strings (text data)
 
-          Every input file is associated with a configuration file
-          also provided as an input to the utility. (See Section
-          "CONFIGURATION FILE" to know how it is to be organized).
-          The class, size and dimensions of the input data is
-          specified in this configuration file. A point to note is
-          that the floating point data in the ASCII text file may be
-          organized in the fixed floating form (for example 323.56)
-          or in a scientific notation (for example 3.23E+02). A
-          different input-class specification is to be used for both
-          forms.
+      Every input file is associated with a configuration file
+      also provided as an input to the utility. (See Section
+      \ref subsec_cltools_h5import_config to know how it is to be organized).
+      The class, size and dimensions of the input data is
+      specified in this configuration file. A point to note is
+      that the floating point data in the \b ASCII text file may be
+      organized in the fixed floating form (for example 323.56)
+      or in a scientific notation (for example 3.23E+02). A
+      different input-class specification is to be used for both
+      forms.
 
-          The utility extracts the input data from the input file
-          according to the specified parameters and saves it into
-          an H5 dataset.
+      The utility extracts the input data from the input file
+      according to the specified parameters and saves it into
+      an HDF5 dataset.
 
-          The user can specify output type and storage properties in
-          the configuration file. The user is required to specify the
-          path of the dataset. If the groups in the path leading to
-          the data-set do not exist, the groups will be created by the
-          utility. If no group is specified, the dataset will be
-          created under the root group.
+      The user can specify output type and storage properties in
+      the configuration file. The user is required to specify the
+      path of the dataset. If the groups in the path leading to
+      the dataset do not exist, the groups will be created by the
+      utility. If no group is specified, the dataset will be
+      created under the root group.
 
-          In addition to the name, the user is also required to
-          provide the class and size of output data to be written to
-          the dataset and may optionally specify the output-architecture,
-          and the output-byte-order. If output-architecture is not
-          specified the default is NATIVE. Output-byte-orders are fixed
-          for some architectures and may be specified only if output-
-          architecture is IEEE, UNIX or STD.
+      In addition to the name, the user is also required to
+      provide the class and size of output data to be written to
+      the dataset and may optionally specify the output-architecture,
+      and the output-byte-order. If output-architecture is not
+      specified the default is \b NATIVE. Output-byte-orders are fixed
+      for some architectures and may be specified only if output-
+      architecture is \b IEEE, \b UNIX or \b STD.
 
-           Also, layout and other storage properties such as
-          compression, external storage and extendible data-sets may be
-          optionally specified.  The layout and storage properties
-          denote how raw data is to be organized on the disk. If these
-          options are not specified the default is Contiguous layout
-          and storage.
+      Also, layout and other storage properties such as
+      compression, external storage and extendible datasets may be
+      optionally specified.  The layout and storage properties
+      denote how raw data is to be organized on the disk. If these
+      options are not specified, the default is \b Contiguous layout
+      and storage.
 
-          The dataset can be organized in any of the following ways:
-          \li 1. Contiguous.
-          \li 2. Chunked.
-          \li 3. External Storage File    (has to be contiguous)
-          \li 4. Extendible data sets     (has to be chunked)
-          \li 5. Compressed.        (has to be chunked)
-          \li 6. Compressed & Extendible  (has to be chunked)
+      The dataset can be organized in any of the following ways:
+      \li 1. <strong>Contiguous</strong>
+      \li 2. <strong>Chunked</strong>
+      \li 3. <strong>External Storage File</strong>    (has to be contiguous)
+      \li 4. <strong>Extendible data sets</strong>     (has to be chunked)
+      \li 5. <strong>Compressed </strong>       (has to be chunked)
+      \li 6. <strong>Compressed & Extendible</strong>  (has to be chunked)
 
-          If the user wants to store raw data in a non-HDF file then
-          the external storage file option is to be used and the name
-          of the file is to be specified.
+      If the user wants to store raw data in a non-HDF file then
+      the external storage file option is to be used and the name
+      of the file is to be specified.
 
-          If the user wants the dimensions of the data-set to be
-          unlimited, the extendible data set option can be chosen.
+      If the user wants the dimensions of the data-set to be
+      unlimited, the extendible data set option can be chosen.
 
-          The user may also specify the type of compression and the
-          level to which the data set must be compresses by setting
-          the compressed option.
+      The user may also specify the type of compression and the
+      level to which the data set must be compresses by setting
+      the compressed option.
  *
  * \subsection subsec_cltools_h5import_usage Usage
  *    <h4>h5import -h[elp], OR h5import \<infile\> -c[onfig] \<configfile\> [\<infile\> -c[config]
 \<confile2\>...] -o[utfile] \<outfile\></h4>
 
  * \subsection subsec_cltools_h5import_help Help
- * \li     <strong>-h[elp]</strong>:            Print a usage message and exit
+ * \li <strong>-h[elp]</strong>  Print a usage message and exit
  *
  * \subsubsection subsubsec_cltools_h5import_options Program Options
- * \li    <strong>\<infile(s)\></strong>:
-                   Name of the Input file(s), containing a
-            single n-dimensional floating point or integer array
-            in either ASCII text, native floating point(32-bit
-            or 64-bit) or native integer(8-bit or 16-bit or
-            32-bit or 64-bit). Data to be specified in the order
-            of fastest changing dimensions first.
+ * \li <strong>\<infile(s)\></strong>
+    Name of the Input file(s), containing a
+    single n-dimensional floating point or integer array
+    in either ASCII text, native floating point(32-bit
+    or 64-bit) or native integer(8-bit or 16-bit or
+    32-bit or 64-bit). Data to be specified in the order
+    of fastest changing dimensions first.
 
- * \li    <strong>-c[config] \<configfile\></strong>:
-            Every input file should be associated with a
-            configuration file and this is done by the -c option.
-            \<configfile\> is the name of the configuration file.
-            (See Section \ref subsec_cltools_h5import_config)
+ * \li <strong>-c[config] \<configfile\></strong>
+    Every input file should be associated with a
+    configuration file and this is done by the -c option.
+    \<configfile\> is the name of the configuration file.
+    (See Section \ref subsec_cltools_h5import_config).
 
- * \li    <strong>-o[utfile] \<outfile\></strong>:
-                   Name of the HDF5 output file. Data from one or more
-            input files are stored as one or more data sets in
-            \<outfile\>. The output file may be an existing file or
-            it maybe new in which case it will be created.
+ * \li <strong>-o[utfile] \<outfile\></strong>
+    Name of the HDF5 output file. Data from one or more
+    input files are stored as one or more data sets in
+    \<outfile\>. The output file may be an existing file or
+    it maybe new in which case it will be created.
 
 
  * \subsection subsec_cltools_h5import_config Configuration File
-          The configuration file is an ASCII text file and must be
-          the ddl formatted file (without data values) produced by h5dump
-          when used with the options '-o outfilename -b' of a single dataset (-d)
-          OR organized as "CONFIG-KEYWORD VALUE" pairs, one pair on each
-          line.
+    The configuration file is an ASCII text file and must be
+    the ddl formatted file (without data values) produced by \b h5dump
+    when used with the options \code -o outfilename -b \endcode of a single dataset (-d)
+    OR organized as <strong>CONFIG-KEYWORD VALUE</strong> pairs, one pair on each
+    line.
 
-           The configuration file may have the following keywords each
-           followed by an acceptable value.
+    The configuration file may have the following keywords each
+    followed by an acceptable value.
 
  * \subsubsection subsubsec_cltools_h5import_config_req Required KEYWORDS
- * \li      PATH
- * \li      INPUT-CLASS
- * \li      INPUT-SIZE
- * \li      INPUT-BYTE-ORDER
- * \li      RANK
- * \li      DIMENSION-SIZES
- * \li      OUTPUT-CLASS
- * \li      OUTPUT-SIZE
+ * \li <strong>PATH</strong>
+ * \li <strong>INPUT-CLASS</strong>
+ * \li <strong>INPUT-SIZE</strong>
+ * \li <strong>INPUT-BYTE-ORDER</strong>
+ * \li <strong>RANK</strong>
+ * \li <strong>DIMENSION-SIZES</strong>
+ * \li <strong>OUTPUT-CLASS</strong>
+ * \li <strong>OUTPUT-SIZE</strong>
 
  * \subsubsection subsubsec_cltools_h5import_config_opt Optional KEYWORDS
- * \li      OUTPUT-ARCHITECTURE
- * \li      OUTPUT-BYTE-ORDER
- * \li      CHUNKED-DIMENSION-SIZES
- * \li      COMPRESSION-TYPE
- * \li      COMPRESSION-PARAM
- * \li      EXTERNAL-STORAGE
- * \li      MAXIMUM-DIMENSIONS
-
+ * \li <strong>OUTPUT-ARCHITECTURE</strong>
+ * \li <strong>OUTPUT-BYTE-ORDER</strong>
+ * \li <strong>CHUNKED-DIMENSION-SIZES</strong>
+ * \li <strong>COMPRESSION-TYPE</strong>
+ * \li <strong>COMPRESSION-PARAM</strong>
+ * \li <strong>EXTERNAL-STORAGE</strong>
+ * \li <strong>MAXIMUM-DIMENSIONS</strong>
 
  * \subsubsection subsubsec_cltools_h5import_config_val Values for keywords
- * \li     PATH:
+ * \li     <strong>PATH</strong>
               Strings separated by spaces to represent
               the path of the data-set. If the groups in
               the path do not exist, they will be created.
               For example,
-                PATH grp1/grp2/dataset1
-                PATH: keyword
-                grp1: group under the root. If
-                      non-existent will be created.
-                grp2: group under grp1. If
+                <ul><li>PATH grp1/grp2/dataset1</li>
+                <li>PATH: keyword</li>
+                <li>grp1: group under the root. If
+                      non-existent will be created</li>
+                <li>grp2: group under grp1. If
                       non-existent will be created
-                      under grp1.
-                dataset1: the name of the data-set
-                    to be created.
+                      under grp1</li>
+                <li>dataset1: the name of the data-set
+                    to be created</li></ul>
 
- * \li      INPUT-CLASS:
+ * \li      <strong>INPUT-CLASS</strong>
               String denoting the type of input data.
-              ("TEXTIN", "TEXTFP", "FP", "IN",
-              "STR", "TEXTUIN", "UIN").
-              INPUT-CLASS "TEXTIN" denotes an ASCII text
+              <ul><li>"TEXTIN</li> <li>TEXTFP</li>
+              <li>FP</li> <li>IN</li> <li>STR</li>
+              <li>TEXTUIN</li> <li>UIN</li></ul>
+              \b INPUT-CLASS "TEXTIN" denotes an ASCII text
               file with signed integer data in ASCII form,
-              INPUT-CLASS "TEXTUIN" denotes an ASCII text
+              \b INPUT-CLASS "TEXTUIN" denotes an ASCII text
               file with unsigned integer data in ASCII form,
               "TEXTFP" denotes an ASCII text file containing
               floating point data in the fixed notation
@@ -195,61 +195,61 @@
                & "STR" denotes an ASCII text file the
               contents of which should be stored as an 1-D
               array of strings.
-              If INPUT-CLASS is "STR", then RANK,
-              DIMENSION-SIZES, OUTPUT-CLASS, OUTPUT-SIZE,
-              OUTPUT-ARCHITECTURE and OUTPUT-BYTE-ORDER
+              If \b INPUT-CLASS is "STR", then \b RANK,
+              \b DIMENSION-SIZES, \b OUTPUT-CLASS, \b OUTPUT-SIZE,
+              \b OUTPUT-ARCHITECTURE and \b OUTPUT-BYTE-ORDER
               will be ignored.
 
 
- * \li      INPUT-SIZE:
+ * \li      <strong>INPUT-SIZE</strong>
               Integer denoting the size of the input data
               (8, 16, 32, 64).
-              For floating point,
-              INPUT-SIZE can be 32 or 64.
-              For integers (signed and unsigned)
-              INPUT-SIZE can be 8, 16, 32 or 64.
+              <ul><li>For floating point,
+              \b INPUT-SIZE can be 32 or 64.</li>
+              <li>For integers (signed and unsigned)
+              \b INPUT-SIZE can be 8, 16, 32 or 64.</li></ul>
 
- * \li      RANK:
+ * \li      <strong>RANK</strong>
               Integer denoting the number of dimensions.
 
- * \li      DIMENSION-SIZES:
+ * \li      <strong>DIMENSION-SIZES</strong>
                     Integers separated by spaces to denote the
               dimension sizes for the no. of dimensions
               determined by rank.
 
- * \li      OUTPUT-CLASS:
+ * \li      <strong>OUTPUT-CLASS</strong>
               String dentoting data type of the dataset to
               be written ("IN","FP", "UIN")
 
- * \li       OUTPUT-SIZE:
+ * \li       <strong>OUTPUT-SIZE</strong>
               Integer denoting the size of the data in the
               output dataset to be written.
-              If OUTPUT-CLASS is "FP", OUTPUT-SIZE can be
+              If \b OUTPUT-CLASS is "FP", \b OUTPUT-SIZE can be
               32 or 64.
-              If OUTPUT-CLASS is "IN" or "UIN", OUTPUT-SIZE
+              If \b OUTPUT-CLASS is "IN" or "UIN", \b OUTPUT-SIZE
               can be 8, 16, 32 or 64.
 
- * \li      OUTPUT-ARCHITECTURE:
-              STRING denoting the type of output
+ * \li      <strong>OUTPUT-ARCHITECTURE</strong>
+              \b STRING denoting the type of output
               architecture. Can accept the following values
-              STD
-              IEEE
-              INTEL
-              CRAY
-              MIPS
-              ALPHA
-              NATIVE (default)
-              UNIX
+              <ul><li>STD</li>
+              <li>IEEE</li>
+              <li>INTEL
+              CRAY</li>
+              <li>MIPS</li>
+              <li>ALPHA</li>
+              <li>NATIVE (default)</li>
+              <li>UNIX</li></ul>
 
- * \li      OUTPUT-BYTE-ORDER:
+ * \li      <strong>OUTPUT-BYTE-ORDER</strong>
               String denoting the output-byte-order. Ignored
-              if the OUTPUT-ARCHITECTURE is not specified or
-              if it is IEEE, UNIX or STD. Can accept the
+              if the \b OUTPUT-ARCHITECTURE is not specified or
+              if it is \b IEEE, \b UNIX or \b STD. Can accept the
               following values.
-              BE (default)
-              LE
+              <ul><li>BE (default)</li>
+              <li>LE</li></ul>
 
- * \li      CHUNKED-DIMENSION-SIZES:
+ * \li      <strong>CHUNKED-DIMENSION-SIZES</strong>
               Integers separated by spaces to denote the
               dimension sizes of the chunk for the no. of
               dimensions determined by rank. Required field
@@ -257,19 +257,19 @@
               chunked storage. If this field is absent the
               dataset will be stored with contiguous storage.
 
- * \li       COMPRESSION-TYPE:
+ * \li       <strong>COMPRESSION-TYPE</strong>
               String denoting the type of compression to be
               used with the chunked storage. Requires the
-              CHUNKED-DIMENSION-SIZES to be specified. The only
-              currently supported compression method is GZIP.
+              \b CHUNKED-DIMENSION-SIZES to be specified. The only
+              currently supported compression method is \b GZIP.
               Will accept the following value
-              GZIP
+              <ul><li>GZIP</li></ul>
 
- * \li      COMPRESSION-PARAM:
+ * \li      <strong>COMPRESSION-PARAM</strong>
               Integer used to denote compression level and
               this option is to be always specified when
-              the COMPRESSION-TYPE option is specified. The
-              values are applicable only to GZIP
+              the \b COMPRESSION-TYPE option is specified. The
+              values are applicable only to \b GZIP
               compression.
               Value 1-9: The level of Compression.
                 1 will result in the fastest
@@ -277,21 +277,20 @@
                 the best compression ratio. The default
                 level of compression is 6.
 
- * \li      EXTERNAL-STORAGE:
+ * \li      <strong>EXTERNAL-STORAGE</strong>
               String to denote the name of the non-HDF5 file
-              to store data to. Cannot be used if CHUNKED-
-              DIMENSIONS or COMPRESSION-TYPE or EXTENDIBLE-
-              DATASET is specified.
-              Value <external-filename>: the name of the
+              to store data to. Cannot be used if \b CHUNKED-DIMENSIONS
+              or \b COMPRESSION-TYPE or \b EXTENDIBLE-DATASET is specified.
+              Value \<external-filename\>: the name of the
               external file as a string to be used.
 
- * \li      MAXIMUM-DIMENSIONS:
+ * \li      <strong>MAXIMUM-DIMENSIONS</strong>
               Integers separated by spaces to denote the
               maximum dimension sizes of all the
               dimensions determined by rank. Requires the
-              CHUNKED-DIMENSION-SIZES to be specified. A value of
-              -1 for any dimension implies UNLIMITED
-              DIMENSION size for that particular dimension.
+              \b CHUNKED-DIMENSION-SIZES to be specified. A value of
+              -1 for any dimension implies \b UNLIMITED
+              \b DIMENSION size for that particular dimension.
 
  * \subsection subsec_cltools_h5import_examples Usage Examples
  * \li <strong>Configuration File may look like</strong>

@@ -27,32 +27,32 @@
                           Optional value 2 also prints file open errors.
 
  * \subsection subsec_cltools_h5stat_options Options
- * \li     <strong>--help</strong>:            Print a usage message and exit
- * \li     <strong>--version</strong>:         Print version number and exit
- * \li     <strong>--file</strong>:            Print file information
- * \li     <strong>--filemetadata</strong>:    Print file space information for file's metadata
- * \li     <strong>--group</strong>:           Print group information
- * \li     <strong>--links=N</strong>:       Set the threshold for the # of links when printing
+ * \li     <strong>--help</strong>            Print a usage message and exit
+ * \li     <strong>--version</strong>         Print the library version number and exit
+ * \li     <strong>--file</strong>            Print file information
+ * \li     <strong>--filemetadata</strong>    Print file space information for file's metadata
+ * \li     <strong>--group</strong>           Print group information
+ * \li     <strong>--links=N</strong>       Set the threshold for the # of links when printing
                            information for small groups.  N is an integer greater
                            than 0.  The default threshold is 10.
- * \li     <strong>--groupmetadata </strong>:  Print file space information for groups' metadata
- * \li     <strong>--dset</strong>:            Print dataset information
- * \li     <strong>--dims=N</strong>:        Set the threshold for the dimension sizes when printing
+ * \li     <strong>--groupmetadata </strong>  Print file space information for groups' metadata
+ * \li     <strong>--dset</strong>            Print dataset information
+ * \li     <strong>--dims=N</strong>        Set the threshold for the dimension sizes when printing
                            information for small datasets.  N is an integer greater
                            than 0.  The default threshold is 10.
- * \li     <strong>--dsetmetadata</strong>:    Print file space information for datasets' metadata
- * \li     <strong>--dtypemetadata</strong>:   Print datasets' datatype information
- * \li     <strong>--attribute</strong>:       Print attribute information
- * \li     <strong>--numattrs=N</strong>:    Set the threshold for the number of attributes when printing
+ * \li     <strong>--dsetmetadata</strong>    Print file space information for datasets' metadata
+ * \li     <strong>--dtypemetadata</strong>   Print datasets' datatype information
+ * \li     <strong>--attribute</strong>       Print attribute information
+ * \li     <strong>--numattrs=N</strong>    Set the threshold for the number of attributes when printing
                            information for small number of attributes.  N is an integer greater
                            than 0.  The default threshold is 10.
- * \li     <strong>--freespace</strong>:       Print free space information
- * \li     <strong>--summary</strong>:         Print summary of file space information
- * \li     <strong>--page-buffer-size=N</strong>:  Set the page buffer cache size, N=non-negative integers
- * \li     <strong>--s3-cred=\<cred\></strong>:      Access file on S3, using provided credential
+ * \li     <strong>--freespace</strong>       Print free space information
+ * \li     <strong>--summary</strong>         Print summary of file space information
+ * \li     <strong>--page-buffer-size=N</strong>  Set the page buffer cache size, N=non-negative integers
+ * \li     <strong>--s3-cred=\<cred\></strong>      Access file on S3, using provided credential
                            \<cred\> :: (region,id,key)
                            If \<cred\> == "(,,)", no authentication is used.
- * \li     <strong>--hdfs-attrs=\<attrs\></strong>:  Access a file on HDFS with given configuration
+ * \li     <strong>--hdfs-attrs=\<attrs\></strong>  Access a file on HDFS with given configuration
                            attributes.
                            \<attrs\> :: (\<namenode name\>,\<namenode port\>,
                                        \<kerberos cache path\>,\<username\>,

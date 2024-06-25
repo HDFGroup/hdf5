@@ -30,69 +30,69 @@
  *                             Optional value 2 also prints file open errors.
  *
  * \subsection subsec_cltools_h5repack_options Options
- * \li    <strong>--help</strong> :          Print a usage message and exit
- * \li    <strong>--verbose=N</strong> :     Verbose mode, print object information.
+ * \li    <strong>--help</strong>           Print a usage message and exit
+ * \li    <strong>--verbose=N</strong>      Verbose mode, print object information.
  *        N - is an integer greater than 1, 2 displays read/write timing
- * \li    <strong>--version</strong> :       Print version number and exit
- * \li    <strong>--native</strong> :        Use a native HDF5 type when repacking
- * \li    <strong>--page-buffer-size=N</strong> : Set the page buffer cache size, N=non-negative integers
- * \li    <strong>--src-vol-value</strong> : Value (ID) of the VOL connector to use for opening the
+ * \li    <strong>--version</strong>        Print the library version number and exit
+ * \li    <strong>--native</strong>         Use a native HDF5 type when repacking
+ * \li    <strong>--page-buffer-size=N</strong>  Set the page buffer cache size, N=non-negative integers
+ * \li    <strong>--src-vol-value</strong>  Value (ID) of the VOL connector to use for opening the
  *                             input HDF5 file specified
- * \li    <strong>--src-vol-name</strong> :  Name of the VOL connector to use for opening the input
+ * \li    <strong>--src-vol-name</strong>   Name of the VOL connector to use for opening the input
  *                             HDF5 file specified
- * \li    <strong>--src-vol-info</strong> :  VOL-specific info to pass to the VOL connector used for
+ * \li    <strong>--src-vol-info</strong>   VOL-specific info to pass to the VOL connector used for
  *                             opening the input HDF5 file specified
- * \li    <strong>--dst-vol-value</strong> : Value (ID) of the VOL connector to use for opening the
+ * \li    <strong>--dst-vol-value</strong>  Value (ID) of the VOL connector to use for opening the
  *                             output HDF5 file specified
- * \li    <strong>--dst-vol-name</strong> :  Name of the VOL connector to use for opening the output
+ * \li    <strong>--dst-vol-name</strong>   Name of the VOL connector to use for opening the output
  *                             HDF5 file specified
- * \li    <strong>--dst-vol-info</strong> :  VOL-specific info to pass to the VOL connector used for
+ * \li    <strong>--dst-vol-info</strong>   VOL-specific info to pass to the VOL connector used for
  *                             opening the output HDF5 file specified
- * \li    <strong>--src-vfd-value</strong> : Value (ID) of the VFL driver to use for opening the
+ * \li    <strong>--src-vfd-value</strong>  Value (ID) of the VFL driver to use for opening the
  *                             input HDF5 file specified
- * \li    <strong>--src-vfd-name</strong> :  Name of the VFL driver to use for opening the input
+ * \li    <strong>--src-vfd-name</strong>   Name of the VFL driver to use for opening the input
  *                             HDF5 file specified
- * \li    <strong>--src-vfd-info</strong> :  VFD-specific info to pass to the VFL driver used for
+ * \li    <strong>--src-vfd-info</strong>   VFD-specific info to pass to the VFL driver used for
  *                             opening the input HDF5 file specified
- * \li    <strong>--dst-vfd-value</strong> : Value (ID) of the VFL driver to use for opening the
+ * \li    <strong>--dst-vfd-value</strong>  Value (ID) of the VFL driver to use for opening the
  *                             output HDF5 file specified
- * \li    <strong>--dst-vfd-name</strong> :  Name of the VFL driver to use for opening the output
+ * \li    <strong>--dst-vfd-name</strong>   Name of the VFL driver to use for opening the output
  *                             HDF5 file specified
- * \li    <strong>--dst-vfd-info</strong> :  VFD-specific info to pass to the VFL driver used for
+ * \li    <strong>--dst-vfd-info</strong>   VFD-specific info to pass to the VFL driver used for
  *                             opening the output HDF5 file specified
- * \li    <strong>--latest</strong> :        Use latest version of file format
+ * \li    <strong>--latest</strong>         Use latest version of file format
  *                             This option will take precedence over the options
  *                             --low and --high
- * \li    <strong>--low=BOUND</strong> :     The low bound for library release versions to use
+ * \li    <strong>--low=BOUND</strong>      The low bound for library release versions to use
  *                             when creating objects in the file
  *                             (default is #H5F_LIBVER_EARLIEST)
- * \li    <strong>--high=BOUND</strong> :    The high bound for library release versions to use
+ * \li    <strong>--high=BOUND</strong>     The high bound for library release versions to use
  *                             when creating objects in the file
  *                             (default is #H5F_LIBVER_LATEST)
- * \li    <strong>--merge</strong> :       Follow external soft link recursively and merge data
- * \li    <strong>--prune</strong> :       Do not follow external soft links and remove link
- * \li    <strong>--merge --prune</strong> : Follow external link, merge data and remove dangling link
- * \li    <strong>--compact=L1</strong> :   Maximum number of links in header messages
- * \li    <strong>--indexed=L2</strong> :   Minimum number of links in the indexed format
- * \li    <strong>--ssize=S[:F]</strong> :  Shared object header message minimum size
- * \li    <strong>--minimum=M</strong> :    Do not apply the filter to datasets smaller than M
- * \li    <strong>--file=E</strong> :       Name of file E with the -f and -l options
- * \li    <strong>--ublock=U</strong> :     Name of file U with user block data to be added
- * \li    <strong>--block=B</strong> :      Size of user block to be added
- * \li    <strong>--metadata_block_size=A</strong> : Metadata block size for #H5Pset_meta_block_size
- * \li    <strong>--threshold=T</strong> :  Threshold value for #H5Pset_alignment
- * \li    <strong>--alignment=A</strong> :  Alignment value for #H5Pset_alignment
- * \li    <strong>--sort_by=Q</strong> :    Sort groups and attributes by index Q
- * \li    <strong>--sort_order=Z</strong> : Sort groups and attributes by order Z
- * \li    <strong>--filter=FILT</strong> :  Filter type
- * \li    <strong>--layout=LAYT</strong> :  Layout type
- * \li    <strong>--fs_strategy=FS_STRATEGY</strong> : File space management strategy for
+ * \li    <strong>--merge</strong>          Follow external soft link recursively and merge data
+ * \li    <strong>--prune</strong>          Do not follow external soft links and remove link
+ * \li    <strong>--merge --prune</strong>  Follow external link, merge data and remove dangling link
+ * \li    <strong>--compact=L1</strong>    Maximum number of links in header messages
+ * \li    <strong>--indexed=L2</strong>    Minimum number of links in the indexed format
+ * \li    <strong>--ssize=S[:F]</strong>   Shared object header message minimum size
+ * \li    <strong>--minimum=M</strong>     Do not apply the filter to datasets smaller than M
+ * \li    <strong>--file=E</strong>        Name of file E with the -f and -l options
+ * \li    <strong>--ublock=U</strong>      Name of file U with user block data to be added
+ * \li    <strong>--block=B</strong>       Size of user block to be added
+ * \li    <strong>--metadata_block_size=A</strong>  Metadata block size for #H5Pset_meta_block_size
+ * \li    <strong>--threshold=T</strong>   Threshold value for #H5Pset_alignment
+ * \li    <strong>--alignment=A</strong>   Alignment value for #H5Pset_alignment
+ * \li    <strong>--sort_by=Q</strong>     Sort groups and attributes by index Q
+ * \li    <strong>--sort_order=Z</strong>  Sort groups and attributes by order Z
+ * \li    <strong>--filter=FILT</strong>   Filter type
+ * \li    <strong>--layout=LAYT</strong>   Layout type
+ * \li    <strong>--fs_strategy=FS_STRATEGY</strong>  File space management strategy for
  *                                    #H5Pset_file_space_strategy
- * \li    <strong>--fs_persist=FS_PERSIST</strong> :   Persisting or not
+ * \li    <strong>--fs_persist=FS_PERSIST</strong>    Persisting or not
  *                                    persisting free-space for #H5Pset_file_space_strategy
  * \li    <strong>---fs_threshold=FS_THRESHOLD</strong> : Free-space section
  *                                    threshold for #H5Pset_file_space_strategy
- * \li <strong>--fs_pagesize=FS_PAGESIZE</strong> : File space page size for #H5Pset_file_space_page_size
+ * \li <strong>--fs_pagesize=FS_PAGESIZE</strong>  File space page size for #H5Pset_file_space_page_size
  *
  * \subsubsection subsubsec_cltools_h5repack_options_args Arguments to Certain Options
  * \li     <strong>M</strong> - is an integer greater than 1, size of dataset in bytes (default is 0)
@@ -113,26 +113,26 @@
  * \subsubsection subsubsec_cltools_h5repack_options_bound Library Version Bounds
  *      <strong>BOUND</strong> is an integer indicating the library release versions to use when
  *            creating objects in the file (see #H5Pset_libver_bounds()):
- * \li         <strong>0</strong>: This is #H5F_LIBVER_EARLIEST in #H5F_libver_t struct
- * \li         <strong>1</strong>: This is #H5F_LIBVER_V18 in #H5F_libver_t struct
- * \li         <strong>2</strong>: This is #H5F_LIBVER_V110 in #H5F_libver_t struct
- * \li         <strong>3</strong>: This is #H5F_LIBVER_V112 in #H5F_libver_t struct
- * \li         <strong>4</strong>: This is #H5F_LIBVER_V114 in #H5F_libver_t struct
- * \li         <strong>5</strong>: This is #H5F_LIBVER_V116 in #H5F_libver_t struct
+ * \li         <strong>0</strong> This is #H5F_LIBVER_EARLIEST in #H5F_libver_t struct
+ * \li         <strong>1</strong> This is #H5F_LIBVER_V18 in #H5F_libver_t struct
+ * \li         <strong>2</strong> This is #H5F_LIBVER_V110 in #H5F_libver_t struct
+ * \li         <strong>3</strong> This is #H5F_LIBVER_V112 in #H5F_libver_t struct
+ * \li         <strong>4</strong> This is #H5F_LIBVER_V114 in #H5F_libver_t struct
+ * \li         <strong>5</strong> This is #H5F_LIBVER_V116 in #H5F_libver_t struct
  * \li            (#H5F_LIBVER_LATEST is aliased to #H5F_LIBVER_V116 for this release
  *
  * \subsubsection subsubsec_cltools_h5repack_options_fs File Strategy Settings
  *      <strong>FS_STRATEGY</strong> is a string indicating the file space strategy used:
- * \li         <strong>FSM_AGGR</strong>:
+ * \li         <strong>FSM_AGGR</strong>
  *                 The mechanisms used in managing file space are free-space
  *                 managers, aggregators and virtual file driver.
- * \li         <strong>PAGE</strong>:
+ * \li         <strong>PAGE</strong>
  *                 The mechanisms used in managing file space are free-space
  *                 managers with embedded paged aggregation and virtual file driver.
- * \li         <strong>AGGR</strong>:
+ * \li         <strong>AGGR</strong>
  *                 The mechanisms used in managing file space are aggregators and
  *                 virtual file driver.
- * \li         <strong>NONE</strong>:
+ * \li         <strong>NONE</strong>
  *                 The mechanisms used in managing file space are virtual file
  *                 driver.
  * \li         The default strategy when not set is \b FSM_AGGR without persisting free-
@@ -160,14 +160,14 @@
  *          compression only to those objects. If no names are specified, the filter
  *          is applied to all objects
  * \li      <strong>\<name of filter\></strong> can be:
- *          <ul><li><strong>GZIP</strong>, to apply the HDF5 GZIP filter (GZIP compression)</li>
- *          <li><strong>SZIP</strong>, to apply the HDF5 SZIP filter (SZIP compression)</li>
- *          <li><strong>SHUF</strong>, to apply the HDF5 shuffle filter</li>
- *          <li><strong>FLET</strong>, to apply the HDF5 checksum filter</li>
- *          <li><strong>NBIT</strong>, to apply the HDF5 NBIT filter (NBIT compression)</li>
- *          <li><strong>SOFF</strong>, to apply the HDF5 Scale/Offset filter</li>
- *          <li><strong>UD</strong>,   to apply a user defined filter</li>
- *          <li><strong>NONE</strong>, to remove all filters</li></ul>
+ *          <ul><li><strong>GZIP</strong> to apply the HDF5 GZIP filter (GZIP compression)</li>
+ *          <li><strong>SZIP</strong> to apply the HDF5 SZIP filter (SZIP compression)</li>
+ *          <li><strong>SHUF</strong> to apply the HDF5 shuffle filter</li>
+ *          <li><strong>FLET</strong> to apply the HDF5 checksum filter</li>
+ *          <li><strong>NBIT</strong> to apply the HDF5 NBIT filter (NBIT compression)</li>
+ *          <li><strong>SOFF</strong> to apply the HDF5 Scale/Offset filter</li>
+ *          <li><strong>UD</strong>   to apply a user defined filter</li>
+ *          <li><strong>NONE</strong> to remove all filters</li></ul>
  * \li     <strong>\<filter parameters\></strong> is optional filter parameter information
  *          <ul><li><strong>GZIP=\<deflation level\></strong> from 1-9</li>
  *          <li><strong>SZIP=<pixels per block,coding></strong> pixels per block is a even number in
@@ -192,9 +192,9 @@
  *          layout information is supplied for those objects. If no names are
  *          specified, the layout type is applied to all objects
  * \li      <strong>\<layout type\></strong> can be:
- *          <ul><li><strong>CHUNK</strong>, to apply chunking layout</li>
- *          <li><strong>COMPA</strong>, to apply compact layout</li>
- *          <li><strong>CONTI</strong>, to apply contiguous layout</li></ul>
+ *          <ul><li><strong>CHUNK</strong> to apply chunking layout</li>
+ *          <li><strong>COMPA</strong> to apply compact layout</li>
+ *          <li><strong>CONTI</strong> to apply contiguous layout</li></ul>
  * \li      <strong>\<layout parameters\></strong> is optional layout information
  *          <ul><li><strong>CHUNK=DIM[xDIM...xDIM]</strong>, the chunk size of each dimension</li>
  *          <li><strong>COMPA</strong> (no parameter)</li>

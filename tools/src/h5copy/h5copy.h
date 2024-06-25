@@ -37,7 +37,7 @@
  * \li     <strong>--help</strong>         Print a usage message and exit
  * \li     <strong>--parents</strong>      No error if existing, make parent groups as needed
  * \li     <strong>--verbose</strong>      Print information about OBJECTS and OPTIONS
- * \li     <strong>--version</strong>      Print version number and exit
+ * \li     <strong>--version</strong>      Print the library version number and exit
  * \li     <strong>--flag</strong>         Flag type
  *
  * \subsubsection subsubsec_cltools_h5copy_options_args Flag Type Options

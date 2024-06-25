@@ -27,11 +27,11 @@
                           Optional value 2 also prints file open errors.
 
  * \subsection subsec_cltools_h5format_convert_options Options
- * \li    <strong>--help</strong>:                Print a usage message and exit
- * \li    <strong>--version</strong>:             Print version number and exit
- * \li    <strong>--verbose</strong>:             Turn on verbose mode
- * \li    <strong>--dname=dataset_name</strong>:    Pathname for the dataset
- * \li    <strong>--noop</strong>:                Perform all the steps except the actual conversion
+ * \li    <strong>--help</strong>                Print a usage message and exit
+ * \li    <strong>--version</strong>             Print the library version number and exit
+ * \li    <strong>--verbose</strong>             Turn on verbose mode
+ * \li    <strong>--dname=dataset_name</strong>  Pathname for the dataset
+ * \li    <strong>--noop</strong>                Perform all the steps except the actual conversion
  *
  * \subsubsection subsubsec_cltools_h5format_convert_examples Usage Examples
  * \li 1) h5format_convert -dname=/group/dataset file_name

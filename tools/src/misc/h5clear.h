@@ -32,12 +32,12 @@ and appropriate actions can be taken.
                           Optional value 2 also prints file open errors.
 
  * \subsection subsec_cltools_h5clear_options Options
- * \li     <strong>--help</strong>:            Print a usage message and exit
- * \li     <strong>--version</strong>:         Print version number and exit
- * \li     <strong>--status</strong>:          Clear the status_flags field in the file's superblock
- * \li     <strong>--image</strong>:           Remove the metadata cache image from the file
- * \li     <strong>--filesize </strong>:       Print the file's EOA and EOF
- * \li     <strong>--increment=C</strong>:     Set the file's EOA to the maximum of (EOA, EOF) + C for
+ * \li     <strong>--help</strong>            Print a usage message and exit
+ * \li     <strong>--version</strong>         Print the library version number and exit
+ * \li     <strong>--status</strong>          Clear the status_flags field in the file's superblock
+ * \li     <strong>--image</strong>           Remove the metadata cache image from the file
+ * \li     <strong>--filesize </strong>       Print the file's EOA and EOF
+ * \li     <strong>--increment=C</strong>     Set the file's EOA to the maximum of (EOA, EOF) + C for
                              the file \<file_name\>.
                              C is >= 0; C is optional and will default to 1M when not set.
                              This option helps to repair a crashed SWMR file when the stored

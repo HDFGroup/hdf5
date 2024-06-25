@@ -32,23 +32,17 @@
                         Optional value 2 also prints file open errors.
 
  * \subsection subsec_cltools_h5diff_options Options
-  * \li    <strong>--help</strong>
-         Print a usage message and exit.
-  * \li   <strong>--version</strong>
-         Print version number and exit.
-  * \li   <strong>--report</strong>
-         Report mode. Print differences.
-  * \li   <strong>--verbose</strong>
-         Verbose mode. Print differences information and list of objects.
-  * \li   <strong>--verbose=N</strong>
-         Verbose mode with level. Print differences and list of objects.
+  * \li    <strong>--help</strong> Print a usage message and exit.
+  * \li   <strong>--version</strong> Print the library version number and exit.
+  * \li   <strong>--report</strong> Report mode. Print differences.
+  * \li   <strong>--verbose</strong> Verbose mode. Print differences information and list of objects.
+  * \li   <strong>--verbose=N</strong> Verbose mode with level. Print differences and list of objects.
          Level of detail depends on value of N:
           <ul><li> <strong>0</strong> : Identical to '-v' or '--verbose'.</li>
           <li> <strong>1</strong> : All level 0 information plus one-line attribute status summary.</li>
           <li> <strong>2</strong> : All level 1 information plus extended attribute status report.</li>
           <li> <strong>3</strong> : All level 2 information plus file names.</li></ul>
-  * \li   <strong>--quiet</strong>
-         Quiet mode. Do not produce output.
+  * \li   <strong>--quiet</strong> Quiet mode. Do not produce output.
   * \li   <strong>--page-buffer-size=N</strong>    Set the page buffer cache size, N=non-negative integers
   * \li   <strong>--vol-value-1</strong>           Value (ID) of the VOL connector to use for opening the
                            first HDF5 file specified
@@ -106,12 +100,9 @@
          resolve to an existing object (dataset, group, or named datatype).
          If any dangling link is found, this situation is treated as an error
          and h5diff returns an exit code of 2.
-  * \li   <strong>--compare</strong>
-         List objects that are not comparable
-  * \li   <strong>--nan</strong>
-         Avoid NaNs detection
-  * \li   <strong>--count=C</strong>
-         Print differences up to C. C must be a positive integer.
+  * \li   <strong>--compare</strong> List objects that are not comparable
+  * \li   <strong>--nan</strong> Avoid NaNs detection
+  * \li   <strong>--count=C</strong> Print differences up to C. C must be a positive integer.
   * \li   <strong>--delta=D</strong>
          Print difference if (|a-b| > D). D must be a positive number. Where a
          is the data point value in file1 and b is the data point value in file2.

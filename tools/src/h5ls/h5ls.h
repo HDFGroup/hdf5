@@ -66,7 +66,7 @@
  * \li    <strong>--simple</strong>    Use a machine-readable output format
  * \li    <strong>--width=N</strong>   Set the number of columns of output
  * \li    <strong>--verbose</strong>   Generate more verbose output
- * \li    <strong>--version</strong>   Print version number and exit
+ * \li    <strong>--version</strong>   Print the library version number and exit
  * \li    <strong>--page-buffer-size=N</strong> Set the page buffer cache size, N=non-negative integers
  * \li    <strong>--vfd=DRIVER</strong>   Use the specified virtual file driver
  * \li    <strong>--hexdump</strong>      Show raw data in hexadecimal format

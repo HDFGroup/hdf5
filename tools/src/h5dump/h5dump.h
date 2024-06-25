@@ -28,7 +28,7 @@
  *
  * \subsection subsec_cltools_h5dump_options Options
  * \li <strong>--help</strong>    Print a usage message and exit
- * \li <strong>--version</strong> Print version number and exit
+ * \li <strong>--version</strong> Print the library version number and exit
  *
  * \subsection subsec_cltools_h5dump_options_file File Options
  * \li <strong>--contents</strong>   Print a list of the file contents and exit

@@ -27,25 +27,25 @@
                           Optional value 2 also prints file open errors.
 
  * \subsection subsec_cltools_h5mkgrp_options Options
- * \li     <strong>--help</strong>:            Print a usage message and exit
- * \li     <strong>--version</strong>:         Print version number and exit
- * \li     <strong>--verbose</strong>:         Print information about OBJECTS and OPTIONS
- * \li     <strong>--latest</strong>:          Use latest version of file format to create groups
- * \li     <strong>--parents</strong>:         No error if existing, make parent groups as needed
- * \li    <strong>--vol-value</strong>:     Value (ID) of the VOL connector to use for opening the
+ * \li     <strong>--help</strong>            Print a usage message and exit
+ * \li     <strong>--version</strong>         Print the library version number and exit
+ * \li     <strong>--verbose</strong>         Print information about OBJECTS and OPTIONS
+ * \li     <strong>--latest</strong>          Use latest version of file format to create groups
+ * \li     <strong>--parents</strong>         No error if existing, make parent groups as needed
+ * \li    <strong>--vol-value</strong>     Value (ID) of the VOL connector to use for opening the
                    HDF5 file specified
- * \li    <strong>--vol-name</strong>:      Name of the VOL connector to use for opening the
+ * \li    <strong>--vol-name</strong>      Name of the VOL connector to use for opening the
                    HDF5 file specified
- * \li    <strong>--vol-info</strong>:      VOL-specific info to pass to the VOL connector used for
+ * \li    <strong>--vol-info</strong>      VOL-specific info to pass to the VOL connector used for
                    opening the HDF5 file specified
                    If none of the above options are used to specify a VOL, then
                    the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,
                    if that environment variable is unset) will be used
- * \li    <strong>--vfd-value</strong>:     Value (ID) of the VFL driver to use for opening the
+ * \li    <strong>--vfd-value</strong>     Value (ID) of the VFL driver to use for opening the
                    HDF5 file specified
- * \li    <strong>--vfd-name</strong>:      Name of the VFL driver to use for opening the
+ * \li    <strong>--vfd-name</strong>      Name of the VFL driver to use for opening the
                    HDF5 file specified
- * \li    <strong>--vfd-info</strong>:      VFD-specific info to pass to the VFL driver used for
+ * \li    <strong>--vfd-info</strong>      VFD-specific info to pass to the VFL driver used for
                    opening the HDF5 file specified
  *
  */
