@@ -20,10 +20,10 @@
  *  With h5delete you can delete an HDF5 file.
  *
  * \subsection subsec_cltools_h5delete_usage Usage
- *    <h4>h5delete [-f] \<filename\></h4>
-
+ *  <h4>h5delete [-f] \<filename\></h4>
+ *
  * \subsection subsec_cltools_h5delete_options Options
- * \li     <strong>-f</strong>:            Suppress output
+ * \li <strong>-f</strong> Suppress output
  *
  */
 

@@ -164,7 +164,7 @@
  * \subsubsection subsubsec_cltools_h5import_config_val Values for keywords
  * \li     <strong>PATH</strong>
               Strings separated by spaces to represent
-              the path of the data-set. If the groups in
+              the path of the dataset. If the groups in
               the path do not exist, they will be created.
               For example,
                 <ul><li>PATH grp1/grp2/dataset1</li>

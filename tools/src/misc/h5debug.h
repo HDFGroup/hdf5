@@ -20,11 +20,11 @@
  *  With h5debug you can debug an existing HDF5 file at a low level.
  *
  * \subsection subsec_cltools_h5debug_usage Usage
- *    <h4>h5debug filename [signature-addr [extra]*]</h4>
-
+ *  <h4>h5debug filename [signature-addr [extra]*]</h4>
+ *
  * \subsection subsec_cltools_h5debug_options Options
- * \li     <strong>signature-addr</strong>:   Primary data structure to dump
- * \li     <strong>extra</strong>:         Extra arguments for primary data structure
+ * \li <strong>signature-addr</strong> Primary data structure to dump
+ * \li <strong>extra</strong> Extra arguments for primary data structure
  *
  */
 

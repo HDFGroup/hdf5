@@ -17,14 +17,14 @@
  * \section sec_cltools_h5dump h5dump
  *
  * \subsection subsec_cltools_h5dump_intro Introduction
- *  With h5dump you can ddisplay objects from an HDF5 file.
+ *  With h5dump you can display objects from an HDF5 file.
  *
  * \subsection subsec_cltools_h5dump_usage Usage
- *    <h4>h5dump [OPTIONS] [files</h4>
+ * <h4>h5dump [OPTIONS] [files</h4>
  *
  * \subsection subsec_cltools_h5dump_error Error Report Option
- * \li    <strong>--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
- *                                              Optional value 2 also prints file open errors.
+ * \li <strong>--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
+ *                                           Optional value 2 also prints file open errors.
  *
  * \subsection subsec_cltools_h5dump_options Options
  * \li <strong>--help</strong>    Print a usage message and exit
@@ -32,54 +32,50 @@
  *
  * \subsection subsec_cltools_h5dump_options_file File Options
  * \li <strong>--contents</strong>   Print a list of the file contents and exit
-                                     Optional value 1 also prints attributes.
+ *                                   Optional value 1 also prints attributes.
  * \li <strong>--superblock</strong> Print the content of the super block
  * \li <strong>--header</strong>     Print the header only; no data is displayed
-  * \li <strong>--filedriver=D</strong> Specify which driver to open the file with
+ * \li <strong>--filedriver=D</strong> Specify which driver to open the file with
  * \li <strong>--output=F</strong>   Output raw data into file F
  * \li <strong>--binary=B</strong>   Binary file output, of form B
  * \li <strong>--ddl=F</strong>      Output ddl text into file F
-                                     Use blank(empty) filename F to suppress ddl display
+ *                                   Use blank(empty) filename F to suppress ddl display
  * \li <strong>--page-buffer-size=N</strong> Set the page buffer cache size, N=non-negative integers
  * \li <strong>--s3-cred=\<cred\></strong>   Supply S3 authentication information to "ros3" vfd.
-                          \<cred\> :: "(<aws-region>,<access-id>,<access-key>)"
-                          If absent or \<cred\> -> "(,,)", no authentication.
-                          Has no effect if filedriver is not "ros3".
+ *                          \code \<cred\> :: "(<aws-region>,<access-id>,<access-key>)" \endcode
+ *                          If absent or \code \<cred\> -> "(,,)" \endcode, no authentication.
+ *                          Has no effect if filedriver is not "ros3".
  * \li <strong>--hdfs-attrs=\<attrs\></strong> Supply configuration information for HDFS file access.
-                          For use with "--filedriver=hdfs"
-                          \<attrs\> :: (\<namenode name\>,\<namenode port\>,
-                                      \<kerberos cache path\>,\<username\>,
-                                      \<buffer size\>)
-                          Any absent attribute will use a default value.
- * \li <strong>--vol-value</strong>   Value (ID) of the VOL connector to use for opening the
-                                      HDF5 file specified
- * \li <strong>--vol-name</strong>    Name of the VOL connector to use for opening the
-                                      HDF5 file specified
- * \li <strong>--vol-info</strong>    VOL-specific info to pass to the VOL connector used for
-                   opening the HDF5 file specified
-                   If none of the above options are used to specify a VOL, then
-                   the VOL named by \b HDF5_VOL_CONNECTOR (or the native VOL connector,
-                   if that environment variable is unset) will be used
- * \li<strong>--vfd-value</strong>    Value (ID) of the VFL driver to use for opening the
-                                      HDF5 file specified
- * \li <strong>--vfd-name</strong>    Name of the VFL driver to use for opening the
-                                      HDF5 file specified
- * \li <strong>--vfd-info</strong>    VFD-specific info to pass to the VFL driver used for
-                                      opening the HDF5 file specified
+ *                          For use with <strong>--filedriver=hdfs</strong>
+ *                          \code \<attrs\> :: (\<namenode name\>,\<namenode port\>,
+ *                                      \<kerberos cache path\>,\<username\>,
+ *                                      \<buffer size\>) \endcode
+ *                          Any absent attribute will use a default value.
+ * \li <strong>--vol-value</strong> Value (ID) of the VOL connector to use for opening the HDF5 file specified
+ * \li <strong>--vol-name</strong>  Name of the VOL connector to use for opening the HDF5 file specified
+ * \li <strong>--vol-info</strong>  VOL-specific info to pass to the VOL connector used for
+ *                   opening the HDF5 file specified.<br />
+ *                   If none of the above options are used to specify a VOL, then
+ *                   the VOL named by \b HDF5_VOL_CONNECTOR (or the native VOL connector,
+ *                   if that environment variable is unset) will be used
+ * \li<strong>--vfd-value</strong> Value (ID) of the VFL driver to use for opening the HDF5 file specified
+ * \li <strong>--vfd-name</strong> Name of the VFL driver to use for opening the HDF5 file specified
+ * \li <strong>--vfd-info</strong> VFD-specific info to pass to the VFL driver used for
+ *                                    opening the HDF5 file specified
  *
  * \subsection subsec_cltools_h5dump_options_obj Object Options
  * \li <strong>--attribute=P</strong>  Print the specified attribute
-                          If an attribute name contains a slash (/), escape the
-                          slash with a preceding backslash (\).
-                          (See example section below.)
+ *                          If an attribute name contains a slash (/), escape the
+ *                          slash with a preceding backslash (\).
+ *                          (See example section below.)
  * \li <strong>--dataset=P</strong>    Print the specified dataset
  * \li <strong>--group=P</strong>      Print the specified group and all members
  * \li <strong>--soft-link=P</strong>  Print the value(s) of the specified soft link
  * \li <strong>--datatype=P</strong>   Print the specified named datatype
  * \li <strong>--any_path=P</strong>   Print any attribute, dataset, group, datatype, or link that matches P
-                                       P can be the absolute path or just a relative path.
+ *                                       P can be the absolute path or just a relative path.
  * \li <strong>--onlyattr</strong>     Print the header and value of attributes
-                                       Optional value 0 suppresses printing attributes.
+ *                                       Optional value 0 suppresses printing attributes.
  * \li <strong>--vds-view-first-missing</strong> Set the VDS bounds to first missing mapped elements.
  * \li <strong>--vds-gap-size=N</strong>  Set the missing file gap size, N=non-negative integers
  *
@@ -87,11 +83,11 @@
  * \li <strong>--object-ids</strong>   Print the object ids
  * \li <strong>--properties</strong>   Print dataset filters, storage layout and fill value
  * \li <strong>--packedbits=L</strong> Print packed bits as unsigned integers, using mask
-                          format L for an integer dataset specified with
-                          option -d. L is a list of offset,length values,
-                          separated by commas. Offset is the beginning bit in
-                          the data value and length is the number of bits of
-                          the mask.
+ *                          format L for an integer dataset specified with
+ *                          option -d. L is a list of offset,length values,
+ *                          separated by commas. Offset is the beginning bit in
+ *                          the data value and length is the number of bits of
+ *                          the mask.
  * \li <strong>--region</strong>       Print dataset pointed by region references
  *
  * \subsection subsec_cltools_h5dump_options_fmt Formatting Options
@@ -102,18 +98,18 @@
  * \li <strong>--sort_by=Q</strong>    Sort groups and attributes by index Q
  * \li <strong>--sort_order=Z</strong> Sort groups and attributes by order Z
  * \li <strong>--no-compact-subset</strong>  Disable compact form of subsetting and allow the use
-                                       of "[" in dataset names.
+ *                                       of "[" in dataset names.
  * \li <strong>--width=N</strong>      Set the number of columns of output. A value of 0 (zero)
-                                       sets the number of columns to the maximum (65535).
-                                       Default width is 80 columns.
+ *                                       sets the number of columns to the maximum (65535).
+ *                                       Default width is 80 columns.
  *
  * \subsection subsec_cltools_h5dump_options_xml XML Options
  * \li <strong>--xml</strong>          Output in XML using Schema
  * \li <strong>--use-dtd</strong>      Output in XML using DTD
  * \li <strong>--xml-dtd=U</strong>    Use the DTD or schema at U
  * \li <strong>--xml-ns=S</strong>     (XML Schema) Use qualified names n the XML
-                                       ":": no namespace, default: "hdf5:"
-                                       E.g., to dump a file called "-f", use h5dump -- -f
+ *                                       ":": no namespace, default: "hdf5:"
+ *                                       E.g., to dump a file called "-f", use h5dump -- -f
  *
  * \subsection subsec_cltools_h5dump_options_subset Subsetting Options
  * Subsetting is available by using the following options with a dataset
@@ -133,63 +129,61 @@
  *
  * \subsubsection subsubsec_cltools_h5dump_options_args Option Argument Conventions
  * \li <strong>D</strong> - is the file driver to use in opening the file. Acceptable values are available
- from https://portal.hdfgroup.org/documentation/hdf5-docs/registered_virtual_file_drivers_vfds.html. Without
- the file driver flag, the file will be opened with each driver in turn and in the order specified above until
- one driver succeeds in opening the file. See examples below for family, split, and multi driver special file
- name usage.
-
+ * from https://support.hdfgroup.org/documentation/HDF5/registered_virtual_file_drivers_vfds.html. Without
+ * the file driver flag, the file will be opened with each driver in turn and in the order specified above until
+ * one driver succeeds in opening the file. See examples below for family, split, and multi driver special file
+ * name usage.
+ *
  * \li <strong>F</strong> - is a filename.
  * \li <strong>P</strong> - is the full path from the root group to the object.
  * \li <strong>N</strong> - is an integer greater than 1.
  * \li <strong>T</strong> - is a string containing the floating point format, e.g '%.3f'
  * \li <strong>U</strong> - is a URI reference (as defined in [IETF RFC 2396],
-        updated by [IETF RFC 2732])
+ *        updated by [IETF RFC 2732])
  * \li <strong>B</strong> - is the form of binary output: NATIVE for a memory type, FILE for the
-        file type, LE or BE for pre-existing little or big endian types.
-        Must be used with -o (output file) and it is recommended that
-        -d (dataset) is used. B is an optional argument, defaults to NATIVE
+ *        file type, LE or BE for pre-existing little or big endian types.
+ *        Must be used with -o (output file) and it is recommended that
+ *        -d (dataset) is used. B is an optional argument, defaults to NATIVE
  * \li <strong>Q</strong> - is the sort index type. It can be "creation_order" or "name" (default)
  * \li <strong>Z</strong> - is the sort order type. It can be "descending" or "ascending" (default)
  *
  * \subsection subsec_cltools_h5dump_examples Usage Examples
-
- \li  1) Attribute foo of the group /bar_none in file quux.h5
-
-      h5dump -a /bar_none/foo quux.h5
-
-     Attribute "high/low" of the group /bar_none in the file quux.h5
-
-      h5dump -a "/bar_none/high\/low" quux.h5
-
- \li  2) Selecting a subset from dataset /foo in file quux.h5
-
-      h5dump -d /foo -s "0,1" -S "1,1" -c "2,3" -k "2,2" quux.h5
-
- \li  3) Saving dataset 'dset' in file quux.h5 to binary file 'out.bin'
-        using a little-endian type
-
-      h5dump -d /dset -b LE -o out.bin quux.h5
-
- \li  4) Display two packed bits (bits 0-1 and bits 4-6) in the dataset /dset
-
-      h5dump -d /dset -M 0,1,4,3 quux.h5
-
- \li  5) Dataset foo in files file1.h5 file2.h5 file3.h5
-
-      h5dump -d /foo file1.h5 file2.h5 file3.h5
-
- \li  6) Dataset foo in split files splitfile-m.h5 splitfile-r.h5
-
-      h5dump -d /foo -f split splitfile
-
- \li  7) Dataset foo in multi files mf-s.h5, mf-b.h5, mf-r.h5, mf-g.h5, mf-l.h5 and mf-o.h5
-
-      h5dump -d /foo -f multi mf
-
- \li  8) Dataset foo in family files fam00000.h5 fam00001.h5 and fam00002.h5
-
-      h5dump -d /foo -f family fam%05d.h5
-
+ *
+ * \li 1) Attribute foo of the group /bar_none in file quux.h5
+ *
+ *      h5dump -a /bar_none/foo quux.h5
+ *
+ * \li 2) Attribute "high/low" of the group /bar_none in the file quux.h5
+ *
+ *      h5dump -a "/bar_none/high\/low" quux.h5
+ *
+ * \li 3) Selecting a subset from dataset /foo in file quux.h5
+ *
+ *      h5dump -d /foo -s "0,1" -S "1,1" -c "2,3" -k "2,2" quux.h5
+ *
+ * \li 4) Saving dataset 'dset' in file quux.h5 to binary file 'out.bin' using a little-endian type
+ *
+ *      h5dump -d /dset -b LE -o out.bin quux.h5
+ *
+ * \li 5) Display two packed bits (bits 0-1 and bits 4-6) in the dataset /dset
+ *
+ *      h5dump -d /dset -M 0,1,4,3 quux.h5
+ *
+ * \li 6) Dataset foo in files file1.h5 file2.h5 file3.h5
+ *
+ *      h5dump -d /foo file1.h5 file2.h5 file3.h5
+ *
+ * \li 7) Dataset foo in split files splitfile-m.h5 splitfile-r.h5
+ *
+ *      h5dump -d /foo -f split splitfile
+ *
+ * \li 8) Dataset foo in multi files mf-s.h5, mf-b.h5, mf-r.h5, mf-g.h5, mf-l.h5 and mf-o.h5
+ *
+ *      h5dump -d /foo -f multi mf
+ *
+ * \li 9) Dataset foo in family files fam00000.h5 fam00001.h5 and fam00002.h5
+ *
+ *      h5dump -d /foo -f family fam%05d.h5
  *
  */
 
