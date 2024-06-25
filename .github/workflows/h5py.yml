@@ -1,4 +1,6 @@
 name: h5py
+
+# Triggers the workflow on a schedule or on demand
 on:
   workflow_dispatch:
   schedule:

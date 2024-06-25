@@ -200,8 +200,10 @@ main(int argc, char *argv[])
 
     H5Eset_auto2(H5E_DEFAULT, func, NULL);
 
-    h5_clean_files(FLUSH_FILENAME, fapl_id1);
-    h5_clean_files(NOFLUSH_FILENAME, fapl_id2);
+    h5_delete_all_test_files(FLUSH_FILENAME, fapl_id1);
+    H5Pclose(fapl_id1);
+    h5_delete_all_test_files(NOFLUSH_FILENAME, fapl_id2);
+    H5Pclose(fapl_id2);
 
     if (data_g) {
         free(data_g);

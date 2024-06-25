@@ -280,7 +280,7 @@ main(void)
     bool  api_ctx_pushed = false; /* Whether API context pushed */
 
     /* Testing setup */
-    h5_reset();
+    h5_test_init();
     fapl_id = h5_fileaccess();
 
     /* Push API context */

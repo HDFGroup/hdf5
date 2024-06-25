@@ -3183,7 +3183,7 @@ main(void)
     char  filename[1024];
     bool  driver_is_parallel;
 
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);

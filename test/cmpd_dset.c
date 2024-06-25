@@ -3334,7 +3334,7 @@ main(int argc, char *argv[])
     char     fname[256];
     unsigned nerrors = 0;
 
-    h5_reset();
+    h5_test_init();
 
     /* Turn off optimized compound converter? */
     if (argc > 1) {

@@ -7737,7 +7737,7 @@ main(void)
     bool        file_locking_enabled = false;   /* Checks if the file system supports locks */
 
     /* Testing setup */
-    h5_reset();
+    h5_test_init();
 
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.

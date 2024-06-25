@@ -649,7 +649,8 @@ test_core(void)
         FAIL_STACK_ERROR;
 
     /* Release resources */
-    h5_clean_files(FILENAME, fapl);
+    h5_delete_all_test_files(FILENAME, fapl);
+    H5Pclose(fapl);
     free(udata);
     free(file_image);
     HDremove(copied_filename);
@@ -924,7 +925,8 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
     VERIFY(err == SUCCEED, "H5Pclose(core_fapl_id) failed.");
 
     /* tidy up */
-    h5_clean_files(FILENAME2, fapl);
+    h5_delete_all_test_files(FILENAME2, fapl);
+    H5Pclose(fapl);
 
     /* discard the image buffer if it exists */
     if (image_ptr != NULL)
@@ -1070,7 +1072,8 @@ test_get_file_image_error_rejection(void)
     VERIFY(err == SUCCEED, "H5Fclose(file_id) failed.");
 
     /* tidy up */
-    h5_clean_files(FILENAME2, fapl_id);
+    h5_delete_all_test_files(FILENAME2, fapl_id);
+    H5Pclose(fapl_id);
 
     /* discard the image buffer if it exists */
     if (image_ptr != NULL)
@@ -1174,7 +1177,8 @@ test_get_file_image_error_rejection(void)
     VERIFY(err == SUCCEED, "H5Fclose(2) failed.");
 
     /* tidy up */
-    h5_clean_files(FILENAME2, fapl_id);
+    h5_delete_all_test_files(FILENAME2, fapl_id);
+    H5Pclose(fapl_id);
 
     /************************** Test #3 **********************************/
     /* set up a split file driver test file, and try to get its image
@@ -1236,7 +1240,8 @@ test_get_file_image_error_rejection(void)
     VERIFY(err == SUCCEED, "H5Fclose(2) failed.");
 
     /* tidy up */
-    h5_clean_files(FILENAME2, fapl_id);
+    h5_delete_all_test_files(FILENAME2, fapl_id);
+    H5Pclose(fapl_id);
 
     /************************** Test #4 **********************************/
     /* set up a family file driver test file, and try to get its image
@@ -1296,7 +1301,8 @@ test_get_file_image_error_rejection(void)
     VERIFY(err == SUCCEED, "H5Fclose(2) failed.");
 
     /* tidy up */
-    h5_clean_files(FILENAME2, fapl_id);
+    h5_delete_all_test_files(FILENAME2, fapl_id);
+    H5Pclose(fapl_id);
 
     PASSED();
 
@@ -1314,7 +1320,7 @@ main(void)
     bool     driver_is_default_compatible;
     unsigned user;
 
-    h5_reset();
+    h5_test_init();
 
     printf("Testing File Image Functionality.\n");
 
@@ -1375,7 +1381,7 @@ main(void)
 
     errors += test_get_file_image_error_rejection();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     if (errors) {

@@ -334,7 +334,7 @@ main(void)
     driver_name = h5_get_test_driver_name();
 
     /* Testing setup */
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     if (h5_using_parallel_driver(fapl, &driver_is_parallel) < 0)

@@ -2909,7 +2909,7 @@ main(void)
     srand((unsigned)time(NULL));
 
     /* Open */
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     /* Copy the file access property list */

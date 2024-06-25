@@ -125,9 +125,9 @@ set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 set (EXE_EXT "")
 if (WIN32)
   set (EXE_EXT ".exe")
-  add_definitions (-D_BIND_TO_CURRENT_VCLIBS_VERSION=1)
-  add_definitions (-D_CRT_SECURE_NO_WARNINGS)
-  add_definitions (-D_CONSOLE)
+  add_compile_definitions (_BIND_TO_CURRENT_VCLIBS_VERSION=1)
+  add_compile_definitions (_CRT_SECURE_NO_WARNINGS)
+  add_compile_definitions (_CONSOLE)
 endif ()
 
 if (MSVC)
@@ -161,7 +161,7 @@ configure_file(
 #-----------------------------------------------------------------------------
 # All libs/tests/examples need the main include directories
 #-----------------------------------------------------------------------------
-set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES 
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
     "${LIBAEC_BINARY_DIR};${LIBAEC_SOURCE_DIR}/src;${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
 )
 

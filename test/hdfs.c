@@ -1589,7 +1589,7 @@ main(void)
     }
 #endif /* H5_HAVE_LIBHDFS */
 
-    h5_reset();
+    h5_test_init();
 
     printf("Testing hdfs VFD functionality.\n");
 

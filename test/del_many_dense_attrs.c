@@ -66,7 +66,7 @@ main(void)
     int         i;                      /* Local index variable         */
 
     /* Testing setup */
-    h5_reset();
+    h5_test_init();
 
     /* To exit from the file for SIGABRT signal */
     if (signal(SIGABRT, catch_signal) == SIG_ERR)
