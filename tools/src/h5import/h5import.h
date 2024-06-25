@@ -179,7 +179,7 @@
 
  * \li      <strong>INPUT-CLASS</strong>
               String denoting the type of input data.
-              <ul><li>"TEXTIN</li> <li>TEXTFP</li>
+              <ul><li>TEXTIN</li> <li>TEXTFP</li>
               <li>FP</li> <li>IN</li> <li>STR</li>
               <li>TEXTUIN</li> <li>UIN</li></ul>
               \b INPUT-CLASS "TEXTIN" denotes an ASCII text
@@ -234,8 +234,8 @@
               architecture. Can accept the following values
               <ul><li>STD</li>
               <li>IEEE</li>
-              <li>INTEL
-              CRAY</li>
+              <li>INTEL</li>
+              <li>CRAY</li>
               <li>MIPS</li>
               <li>ALPHA</li>
               <li>NATIVE (default)</li>
@@ -333,7 +333,7 @@
           first and the third dimension will be defined as unlimited. The
           data-set will be compressed using GZIP and a compression level
           of 7.
-          The dataset will be stored at "/Second-set"
+          The dataset will be stored at \code /Second-set \endcode
 
  *
  */
