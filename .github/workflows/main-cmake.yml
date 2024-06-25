@@ -291,4 +291,4 @@ jobs:
               name: tgz-osx-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if: ${{ (matrix.os == 'macos-13' || matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}
+        if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}
