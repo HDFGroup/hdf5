@@ -17,7 +17,7 @@
  * \section sec_cltools_h5repart h5repart
  *
  * \subsection subsec_cltools_h5repart_intro Introduction
- *  With h5repart you can repartition a file family. This program can be used to
+ *  With h5repart, you can repartition a file family. This program can be used to
  *        split a single file into a family of files, join a family of
  *        files into a single file, or copy one family to another while
  *        changing the size of the family members. It can also be used
@@ -39,8 +39,8 @@
  * \li <strong>-family_to_single</strong> Change file driver from family to the default single-file
  *                      VFD (windows or sec2)
  *
- *    Sizes may be suffixed with 'g' for GB, 'm' for MB or 'k' for kB.
- *    File family names include an integer printf format such as '%%d'
+ *  Sizes may be suffixed with 'g' for GB, 'm' for MB or 'k' for kB.
+ *  File family names include an integer printf format such as '%%d'
  *
  */
 

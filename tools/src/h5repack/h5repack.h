@@ -18,7 +18,7 @@
  * \section sec_cltools_h5repack h5repack
  *
  * \subsection subsec_cltools_h5repack_intro Introduction
- *  With h5repack you can write an HDF5 file to a new file and change the layout for objects in the new file.
+ *  With h5repack, you can write an HDF5 file to a new file and change the layout for objects in the new file.
  *
  * \subsection subsec_cltools_h5repack_usage Usage
  * <h4>h5repack [OPTIONS] file1 file2</h4>
@@ -206,34 +206,34 @@
  *
  * \li 1) h5repack -v -f GZIP=1 file1 file2
  *
- *     GZIP compression with level 1 to all objects
+ *      GZIP compression with level 1 to all objects
  *
  * \li 2) h5repack -v -f dset1:SZIP=8,NN file1 file2
  *
- *     SZIP compression with 8 pixels per block and NN coding method to object dset1
+ *      SZIP compression with 8 pixels per block and NN coding method to object dset1
  *
  * \li 3) h5repack -v -l dset1,dset2:CHUNK=20x10 -f dset3,dset4,dset5:NONE file1 file2
  *
- *     Chunked layout, with a layout size of 20x10, to objects dset1 and dset2
- *     and remove filters to objects dset3, dset4, dset5
+ *      Chunked layout, with a layout size of 20x10, to objects dset1 and dset2
+ *      and remove filters to objects dset3, dset4, dset5
  *
  * \li 4) h5repack -L -c 10 -s 20:dtype file1 file2
  *
- *     Using latest file format with maximum compact group size of 10 and
- *     minimum shared datatype size of 20
+ *      Using latest file format with maximum compact group size of 10 and
+ *      minimum shared datatype size of 20
  *
  * \li 5) h5repack -f SHUF -f GZIP=1 file1 file2
  *
- *     Add both filters SHUF and GZIP in this order to all datasets
+ *      Add both filters SHUF and GZIP in this order to all datasets
  *
  * \li 6) h5repack -f UD=307,0,1,9 file1 file2
  *
- *     Add bzip2 filter to all datasets
+ *      Add bzip2 filter to all datasets
  *
  * \li 7) h5repack --low=0 --high=1 file1 file2
  *
- *     Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via
- *     H5Pset_libver_bounds() when creating the repacked file, file2
+ *      Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via
+ *      H5Pset_libver_bounds() when creating the repacked file, file2
  *
  *
  */

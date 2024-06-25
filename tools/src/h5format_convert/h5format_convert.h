@@ -17,7 +17,7 @@
  * \section sec_cltools_h5format_convert h5format_convert
  *
  * \subsection subsec_cltools_h5format_convert_intro Introduction
- *  With h5format_convert you can convert a datasets format in an HDF5 file.
+ *  With h5format_convert, you can convert a datasets format in an HDF5 file.
  *
  * \subsection subsec_cltools_h5format_convert_usage Usage
  *  <h4>h5format_convert [OPTIONS] file_name</h4>
@@ -34,21 +34,24 @@
  * \li <strong>--noop</strong>                Perform all the steps except the actual conversion
  *
  * \subsubsection subsubsec_cltools_h5format_convert_examples Usage Examples
- * \li 1) \code h5format_convert -dname=/group/dataset file_name \endcode
- *  Convert the dataset \</group/dataset\> in the HDF5 file \<file_name\>:
- *    <ul><li>a. chunked dataset: convert the chunk indexing type to version 1 B-tree</li>
- *    <li>b. compact/contiguous dataset: downgrade the layout version to 3</li>
- *    <li>c. virtual dataset: no action</li></ul>
+ * \li 1) h5format_convert -dname=/group/dataset file_name
  *
- * \li 2) \code h5format_convert file_name \endcode
- *  Convert all datasets in the HDF5 file \<file_name\>:
- *    <ul><li>a. chunked dataset: convert the chunk indexing type to version 1 B-tree</li>
- *    <li>b. compact/contiguous dataset: downgrade the layout version to 3</li>
- *    <li>c. virtual dataset: no action</li></ul>
+ *      Convert the dataset </group/dataset> in the HDF5 file <file_name>:
+ *      - chunked dataset: convert the chunk indexing type to version 1 B-tree
+ *      - compact/contiguous dataset: downgrade the layout version to 3
+ *      - virtual dataset: no action
  *
- * \li 3) \code h5format_convert --noop -dname=/group/dataset file_name \endcode
- *  Go through all the steps except the actual conversion when
- *  converting the dataset \</group/dataset\> in the HDF5 file \<file_name\>.
+ * \li 2) h5format_convert file_name
+ *
+ *      Convert all datasets in the HDF5 file <file_name>:
+ *      - chunked dataset: convert the chunk indexing type to version 1 B-tree
+ *      - compact/contiguous dataset: downgrade the layout version to 3
+ *      - virtual dataset: no action
+ *
+ * \li 3) h5format_convert --noop -dname=/group/dataset file_name
+ *
+ *      Go through all the steps except the actual conversion when
+ *      converting the dataset </group/dataset> in the HDF5 file <file_name>.
  *
  */
 

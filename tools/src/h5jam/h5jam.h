@@ -17,12 +17,12 @@
  * \section sec_cltools_h5jam h5jam and h5unjam
  *
  * \subsection subsec_cltools_h5jam_intro Introduction
- * \li h5jam: Adds user block to front of an HDF5 file and creates a new concatenated file.
- * \li h5unjam: Splits user file and HDF5 file into two files: user block data and HDF5 data.
+ * \li h5jam Adds user block to the front of an HDF5 file and creates a new concatenated file.
+ * \li h5unjam Splits an HDF5 file into two files, one containing the user block data and the other the HDF5 data.
  *
  * \subsection subsec_cltools_h5jam_usage Usage
- *    <h4>h5jam -i \<in_file.h5\> -u \<in_user_file\> [-o \<out_file.h5\>] [--clobber]</h4>
- *    <h4>h5unjam -i \<in_file.h5\> [-o \<out_file.h5\> ] [-u \<out_user_file\> | --delete]</h4>
+ *  <h4>h5jam -i \<in_file.h5\> -u \<in_user_file\> [-o \<out_file.h5\>] [--clobber]</h4>
+ *  <h4>h5unjam -i \<in_file.h5\> [-o \<out_file.h5\> ] [-u \<out_user_file\> | --delete]</h4>
  *
  * \subsection subsec_cltools_h5jam_options h5jam Options
  * \li <strong>-i in_file.h5</strong>   Specifies the input HDF5 file.
@@ -56,7 +56,7 @@
  * \li <strong>-h</strong> Prints a usage message and exits.
  * \li <strong>-V</strong> Prints the HDF5 library version and exits.
  *
- * If neither <strong>--delete</strong>: nor <strong>-u</strong>: is specified, the user block from the input
+ * If neither <strong>--delete</strong> nor <strong>-u</strong> is specified, the user block from the input
  * file will be displayed to stdout.
  *
  */

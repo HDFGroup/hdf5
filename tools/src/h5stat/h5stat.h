@@ -17,7 +17,7 @@
  * \section sec_cltools_h5stat h5stat
  *
  * \subsection subsec_cltools_h5stat_intro Introduction
- *  With h5stat you can dump stats from an HDF5 file.
+ *  With h5stat, you can dump stats from an HDF5 file.
  *
  * \subsection subsec_cltools_h5stat_usage Usage
  *  <h4>h5stat [OPTIONS] file</h4>

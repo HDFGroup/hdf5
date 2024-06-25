@@ -17,7 +17,7 @@
  * \section sec_cltools_h5dump h5dump
  *
  * \subsection subsec_cltools_h5dump_intro Introduction
- *  With h5dump you can display objects from an HDF5 file.
+ *  With h5dump, you can display objects from an HDF5 file.
  *
  * \subsection subsec_cltools_h5dump_usage Usage
  * <h4>h5dump [OPTIONS] [files</h4>
@@ -114,7 +114,7 @@
  * \subsection subsec_cltools_h5dump_options_subset Subsetting Options
  * Subsetting is available by using the following options with a dataset
  * option. Subsetting is done by selecting a hyperslab from the data.
- * Thus, the options mirror those for performing a hyperslab selection.
+ * Thus, the options mirror those for performing a hyperslab selection.<br />
  * One of the \b START, \b COUNT, \b STRIDE, or \b BLOCK parameters are mandatory if you do subsetting.
  * The \b STRIDE, \b COUNT, and \b BLOCK parameters are optional and will default to 1 in
  * each dimension. \b START is optional and will default to 0 in each dimension.
@@ -124,7 +124,7 @@
  * \li <strong>--count=COUNT</strong>    Number of blocks to include in selection
  * \li <strong>--block=BLOCK</strong>    Size of block in hyperslab
  *  \b START, \b COUNT, \b STRIDE, and \b BLOCK - is a list of integers the number of which are equal to the
- *      number of dimensions in the dataspace being queried
+ *      number of dimensions in the dataspace being queried.<br />
  *      (Alternate compact form of subsetting is described in the Reference Manual)
  *
  * \subsubsection subsubsec_cltools_h5dump_options_args Option Argument Conventions

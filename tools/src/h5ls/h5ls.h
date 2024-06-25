@@ -17,7 +17,7 @@
  * \section sec_cltools_h5ls h5ls
  *
  * \subsection subsec_cltools_h5ls_intro Introduction
- *  With h5ls you can dump objects from an HDF5 file.
+ *  With h5ls, you can dump objects from an HDF5 file.
  *
  * \subsection subsec_cltools_h5ls_usage Usage
  *  <h4>h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]</h4>
@@ -43,7 +43,7 @@
  * \li <strong>--data</strong> Print the values of datasets
  * \li <strong>--follow-symlinks</strong>
  *                   Follow symbolic links (soft links and external links)
- *                   to display target object information.
+ *                   to display target object information.<br />
  *                   Without this option, h5ls identifies a symbolic link
  *                   as a soft link or external link and prints the value
  *                   assigned to the symbolic link; it does not provide any
@@ -98,9 +98,9 @@
  * \subsubsection subsubsec_cltools_h5ls_options_depre Deprecated Options
  *    The following options have been removed in HDF5 1.12. Use the indicated
  *    replacement option in all work.
- * \li <strong>--external</strong>  Follow external links.
+ * \li <strong>--external</strong>  Follow external links.<br />
  *                      Replaced by <strong>--follow-symlinks</strong>.
- * \li <strong>--errors</strong>    Show all HDF5 error reporting
+ * \li <strong>--errors</strong>    Show all HDF5 error reporting<br />
  *                      Replaced by <strong>--enable-error-stack</strong>.
  *
  */

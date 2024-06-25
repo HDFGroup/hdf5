@@ -17,7 +17,7 @@
  * \section sec_cltools_h5mkgrp h5mkgrp
  *
  * \subsection subsec_cltools_h5mkgrp_intro Introduction
- *  With h5mkgrp you can create group(s) in an HDF5 file
+ *  With h5mkgrp, you can create group(s) in an HDF5 file
  *
  * \subsection subsec_cltools_h5mkgrp_usage Usage
  *  <h4>h5mkgrp [OPTIONS] FILE GROUP</h4>

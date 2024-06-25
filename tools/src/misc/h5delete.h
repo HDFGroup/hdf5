@@ -17,7 +17,7 @@
  * \section sec_cltools_h5delete h5delete
  *
  * \subsection subsec_cltools_h5delete_intro Introduction
- *  With h5delete you can delete an HDF5 file.
+ *  With h5delete, you can delete an HDF5 file.
  *
  * \subsection subsec_cltools_h5delete_usage Usage
  *  <h4>h5delete [-f] \<filename\></h4>

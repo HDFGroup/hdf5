@@ -18,7 +18,7 @@
  * \section sec_cltools_h5diff h5diff
  *
  * \subsection subsec_cltools_h5diff_intro Introduction
- * With h5diff you can compare objects between a HDF5 file and another file.
+ * With h5diff, you can compare objects between a HDF5 file and another file.
  *
  * \subsection subsec_cltools_h5diff_usage Usage
  * <h4> h5diff [OPTIONS] file1 file2 [obj1[ obj2]]</h4>
@@ -55,7 +55,7 @@
  * \li <strong>--vol-name-2</strong> Name of the VOL connector to use for opening the second
  *                           HDF5 file specified
  * \li <strong>--vol-info-2</strong> VOL-specific info to pass to the VOL connector used for
- *                           opening the second HDF5 file specified
+ *                           opening the second HDF5 file specified.<br />
  *                           If none of the above options are used to specify a VOL for a file, then
  *                           the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,
  *                           if that environment variable is unset) will be used
@@ -73,7 +73,7 @@
  *                           opening the second HDF5 file specified
  * \li <strong>--follow-symlinks</strong>
  *         Follow symbolic links (soft links and external links and compare the)
- *         links' target objects.
+ *         links' target objects.<br />
  *         If symbolic link(s) with the same name exist in the files being
  *         compared, then determine whether the target of each link is an existing
  *         object (dataset, group, or named datatype) or the link is a dangling
@@ -94,8 +94,8 @@
  *         If any symbolic link specified in the call to h5diff does not exist,
  *         h5diff treats it as an error and returns an exit code of 2.
  * \li <strong>--no-dangling-links</strong>
- *         Must be used with --follow-symlinks option; otherwise, h5diff shows
- *         error message and returns an exit code of 2.
+ *         Must be used with <strong>--follow-symlinks</strong> option; otherwise, h5diff shows
+ *         error message and returns an exit code of 2.<br />
  *         Check for any symbolic links (soft links or external links) that do not
  *         resolve to an existing object (dataset, group, or named datatype).
  *         If any dangling link is found, this situation is treated as an error
@@ -116,25 +116,30 @@
  *         is the data point value in file1 and b is the data point value in file2.
  *         If the system epsilon is not defined,one of the following predefined
  *         values will be used:
- *           <ul><li><code style="background-color:whitesmoke;">FLT_EPSILON = 1.19209E-07</code> for
- * floating-point type</li> <li><code style="background-color:whitesmoke;">DBL_EPSILON = 2.22045E-16</code>
- * for double precision</li></ul> type Can not use with '--relative' or '--delta'. \li <strong>--exclude-path
- * "path"</strong> Exclude the specified path to an object when comparing files or groups. If a group is
- * excluded, all member objects will also be excluded. The specified path is excluded wherever it occurs. This
- * flexibility enables the same option to exclude either objects that exist only in one file or common objects
- * that are known to differ.<br /> When comparing files, "path" is the absolute path to the excluded; object;
- * when comparing groups, "path" is similar to the relative path from the group to the excluded object. This
- * "path" can be taken from the first section of the output of the --verbose option. For example, if you are
- * comparing the group <code style="background-color:whitesmoke;">/groupA</code> in two files and you want to
- * exclude <code style="background-color:whitesmoke;">/groupA/groupB/groupC</code> in both files, the exclude
- * option would read as follows:<br /> <code style="background-color:whitesmoke;">--exclude-path
- * "/groupB/groupC"</code> <br /> If there are multiple paths to an object, only the specified path(s) will be
- * excluded; the comparison will include any path not explicitly excluded.<br /> This option can be used
- * repeatedly to exclude multiple paths. \li <strong>--exclude-attribute
- * "path/to/object/with/attribute"</strong> Exclude attributes on the specified path to an object when
- * comparing files or groups.<br /> If there are multiple paths to an object, only the specified path(s) will
- * be excluded; the comparison will include any path not explicitly excluded.<br /> This option can be used
- * repeatedly to exclude multiple paths.
+ *         <ul><li><code style="background-color:whitesmoke;">FLT_EPSILON = 1.19209E-07</code> for
+ *             floating-point type</li>
+ *             <li><code style="background-color:whitesmoke;">DBL_EPSILON = 2.22045E-16</code>
+ *             for double precision</li></ul>
+ *         type Can not use with '--relative' or '--delta'.
+ * \li <strong>--exclude-path "path"</strong> Exclude the specified path to an object when
+ *  comparing files or groups. If a group is excluded, all member objects will also be excluded.
+ *  The specified path is excluded wherever it occurs. This flexibility enables the same option
+ *  to exclude either objects that exist only in one file or common objects that are known to differ.<br />
+ *  When comparing files, "path" is the absolute path to the excluded object;
+ *  when comparing groups, "path" is similar to the relative path from the group to the excluded object. This
+ *  "path" can be taken from the first section of the output of the <strong>--verbose</strong> option.<br />
+ *  For example, if you are comparing the group <code style="background-color:whitesmoke;">/groupA</code>
+ *  in two files and you want to exclude <code style="background-color:whitesmoke;">/groupA/groupB/groupC</code>
+ *  in both files, the exclude option would read as follows:<br />
+ *  <code style="background-color:whitesmoke;">--exclude-path "/groupB/groupC"</code> <br />
+ *  If there are multiple paths to an object, only the specified path(s) will be
+ *  excluded; the comparison will include any path not explicitly excluded.<br />
+ *  This option can be used repeatedly to exclude multiple paths.
+ * \li <strong>--exclude-attribute "path/to/object/with/attribute"</strong> Exclude attributes on the
+ *  specified path to an object when comparing files or groups.<br />
+ *  If there are multiple paths to an object, only the specified path(s) will
+ *  be excluded; the comparison will include any path not explicitly excluded.<br />
+ *  This option can be used repeatedly to exclude multiple paths.
  *
  * \subsubsection subsubsec_cltools_h5diff_modee Modes of output
  * \li <strong>Default mode</strong> print the number of differences found and where they occurred
@@ -189,18 +194,20 @@
  *
  * \subsubsection subsubsec_cltools_h5diff_examples Examples
  * \li 1) h5diff file1 file2 /g1/dset1 /g1/dset2
- *    Compares object '/g1/dset1' in file1 with '/g1/dset2' in file2
+ *
+ *     Compares object '/g1/dset1' in file1 with '/g1/dset2' in file2
  *
  * \li 2) h5diff file1 file2 /g1/dset1
- *    Compares object '/g1/dset1' in both files
+ *
+ *     Compares object '/g1/dset1' in both files
  *
  * \li 3) h5diff file1 file2
- *    Compares all objects in both files
+ *
+ *     Compares all objects in both files
  *
  * Notes:
  *  file1 and file2 can be the same file.
- *  Use h5diff file1 file1 /g1/dset1 /g1/dset2 to compare
- *  '/g1/dset1' and '/g1/dset2' in the same file
+ *  Use h5diff file1 file1 /g1/dset1 /g1/dset2 to compare '/g1/dset1' and '/g1/dset2' in the same file
  *
  */
 

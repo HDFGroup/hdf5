@@ -24,7 +24,7 @@
  * \section sec_cltools_h5import h5import
  *
  * \subsection subsec_cltools_h5import_intro Introduction
- *  With h5import you can convert data stored in one or more ASCII or binary files
+ *  With h5import, you can convert data stored in one or more ASCII or binary files
       into one or more datasets (in accordance with the
       user-specified type and storage properties) in an existing
       or new HDF5 file.
@@ -55,8 +55,7 @@
       that the floating point data in the \b ASCII text file may be
       organized in the fixed floating form (for example 323.56)
       or in a scientific notation (for example 3.23E+02). A
-      different input-class specification is to be used for both
-      forms.
+      different input-class specification is to be used for both forms.
 
       The utility extracts the input data from the input file
       according to the specified parameters and saves it into
@@ -73,7 +72,7 @@
       provide the class and size of output data to be written to
       the dataset and may optionally specify the output-architecture,
       and the output-byte-order. If output-architecture is not
-      specified the default is \b NATIVE. Output-byte-orders are fixed
+      specified, the default is \b NATIVE. Output-byte-orders are fixed
       for some architectures and may be specified only if output-
       architecture is \b IEEE, \b UNIX or \b STD.
 
@@ -87,10 +86,10 @@
       The dataset can be organized in any of the following ways:
       \li 1. <strong>Contiguous</strong>
       \li 2. <strong>Chunked</strong>
-      \li 3. <strong>External Storage File</strong>    (has to be contiguous)
-      \li 4. <strong>Extendible data sets</strong>     (has to be chunked)
-      \li 5. <strong>Compressed </strong>       (has to be chunked)
-      \li 6. <strong>Compressed & Extendible</strong>  (has to be chunked)
+      \li 3. <strong>External Storage File</strong> (has to be contiguous)
+      \li 4. <strong>Extendible data sets</strong>(has to be chunked)
+      \li 5. <strong>Compressed </strong> (has to be chunked)
+      \li 6. <strong>Compressed & Extendible</strong> (has to be chunked)
 
       If the user wants to store raw data in a non-HDF file then
       the external storage file option is to be used and the name
@@ -131,7 +130,6 @@
     \<outfile\>. The output file may be an existing file or
     it maybe new in which case it will be created.
 
-
  * \subsection subsec_cltools_h5import_config Configuration File
     The configuration file is an ASCII text file and must be
     the ddl formatted file (without data values) produced by \b h5dump
@@ -162,135 +160,107 @@
  * \li <strong>MAXIMUM-DIMENSIONS</strong>
 
  * \subsubsection subsubsec_cltools_h5import_config_val Values for keywords
- * \li     <strong>PATH</strong>
-              Strings separated by spaces to represent
-              the path of the dataset. If the groups in
-              the path do not exist, they will be created.
-              For example,
-                <ul><li>PATH grp1/grp2/dataset1</li>
-                <li>PATH: keyword</li>
-                <li>grp1: group under the root. If
-                      non-existent will be created</li>
-                <li>grp2: group under grp1. If
-                      non-existent will be created
-                      under grp1</li>
-                <li>dataset1: the name of the data-set
-                    to be created</li></ul>
+ * \li <strong>PATH</strong>
+      Strings separated by spaces to represent
+      the path of the dataset. If the groups in
+      the path do not exist, they will be created.
+      For example,
+        <ul><li>PATH grp1/grp2/dataset1</li>
+        <li>PATH: keyword</li>
+        <li>grp1: group under the root. If non-existent will be created</li>
+        <li>grp2: group under grp1. If non-existent will be created under grp1</li>
+        <li>dataset1: the name of the data-set to be created</li></ul>
 
- * \li      <strong>INPUT-CLASS</strong>
-              String denoting the type of input data.
-              <ul><li>TEXTIN</li> <li>TEXTFP</li>
-              <li>FP</li> <li>IN</li> <li>STR</li>
-              <li>TEXTUIN</li> <li>UIN</li></ul>
-              \b INPUT-CLASS "TEXTIN" denotes an ASCII text
-              file with signed integer data in ASCII form,
-              \b INPUT-CLASS "TEXTUIN" denotes an ASCII text
-              file with unsigned integer data in ASCII form,
-              "TEXTFP" denotes an ASCII text file containing
-              floating point data in the fixed notation
-              (325.34),
-              "FP" denotes a floating point binary file,
-              "IN" denotes a signed integer binary file,
-              "UIN" denotes an unsigned integer binary file,
-               & "STR" denotes an ASCII text file the
-              contents of which should be stored as an 1-D
-              array of strings.
-              If \b INPUT-CLASS is "STR", then \b RANK,
-              \b DIMENSION-SIZES, \b OUTPUT-CLASS, \b OUTPUT-SIZE,
-              \b OUTPUT-ARCHITECTURE and \b OUTPUT-BYTE-ORDER
-              will be ignored.
+ * \li <strong>INPUT-CLASS</strong>
+      String denoting the type of input data.
+      <ul><li>TEXTIN</li>
+      <li>TEXTFP</li>
+      <li>FP</li>
+      <li>IN</li>
+      <li>STR</li>
+      <li>TEXTUIN</li>
+      <li>UIN</li></ul>
+      \b INPUT-CLASS "TEXTIN" denotes an ASCII text  file with signed integer data in ASCII form,
+      \b INPUT-CLASS "TEXTUIN" denotes an ASCII text file with unsigned integer data in ASCII form,
+      "TEXTFP" denotes an ASCII text file containing floating point data in the fixed notation
+      (325.34), <br />
+      "FP" denotes a floating point binary file,
+      "IN" denotes a signed integer binary file,
+      "UIN" denotes an unsigned integer binary file,
+       & "STR" denotes an ASCII text file the contents of which should be stored as an 1-D
+      array of strings.<br />
+      If \b INPUT-CLASS is "STR", then \b RANK,
+      \b DIMENSION-SIZES, \b OUTPUT-CLASS, \b OUTPUT-SIZE,
+      \b OUTPUT-ARCHITECTURE and \b OUTPUT-BYTE-ORDER
+      will be ignored.
 
 
- * \li      <strong>INPUT-SIZE</strong>
-              Integer denoting the size of the input data
-              (8, 16, 32, 64).
-              <ul><li>For floating point,
-              \b INPUT-SIZE can be 32 or 64.</li>
-              <li>For integers (signed and unsigned)
-              \b INPUT-SIZE can be 8, 16, 32 or 64.</li></ul>
+ * \li <strong>INPUT-SIZE</strong>
+      Integer denoting the size of the input data (8, 16, 32, 64).
+      <ul><li>For floating point, \b INPUT-SIZE can be 32 or 64.</li>
+      <li>For integers (signed and unsigned) \b INPUT-SIZE can be 8, 16, 32 or 64.</li></ul>
 
- * \li      <strong>RANK</strong>
-              Integer denoting the number of dimensions.
+ * \li <strong>RANK</strong>
+      Integer denoting the number of dimensions.
 
- * \li      <strong>DIMENSION-SIZES</strong>
-                    Integers separated by spaces to denote the
-              dimension sizes for the no. of dimensions
-              determined by rank.
+ * \li <strong>DIMENSION-SIZES</strong>
+      Integers separated by spaces to denote the dimension sizes for the no. of dimensions
+      determined by rank.
 
- * \li      <strong>OUTPUT-CLASS</strong>
-              String dentoting data type of the dataset to
-              be written ("IN","FP", "UIN")
+ * \li <strong>OUTPUT-CLASS</strong>
+      String dentoting data type of the dataset to  be written ("IN","FP", "UIN")
 
- * \li       <strong>OUTPUT-SIZE</strong>
-              Integer denoting the size of the data in the
-              output dataset to be written.
-              If \b OUTPUT-CLASS is "FP", \b OUTPUT-SIZE can be
-              32 or 64.
-              If \b OUTPUT-CLASS is "IN" or "UIN", \b OUTPUT-SIZE
-              can be 8, 16, 32 or 64.
+ * \li <strong>OUTPUT-SIZE</strong>
+      Integer denoting the size of the data in the  output dataset to be written.
+      If \b OUTPUT-CLASS is "FP", \b OUTPUT-SIZE can be 32 or 64.
+      If \b OUTPUT-CLASS is "IN" or "UIN", \b OUTPUT-SIZE can be 8, 16, 32 or 64.
 
- * \li      <strong>OUTPUT-ARCHITECTURE</strong>
-              \b STRING denoting the type of output
-              architecture. Can accept the following values
-              <ul><li>STD</li>
-              <li>IEEE</li>
-              <li>INTEL</li>
-              <li>CRAY</li>
-              <li>MIPS</li>
-              <li>ALPHA</li>
-              <li>NATIVE (default)</li>
-              <li>UNIX</li></ul>
+ * \li <strong>OUTPUT-ARCHITECTURE</strong>
+      \b STRING denoting the type of output architecture. Can accept the following values
+      <ul><li>STD</li>
+      <li>IEEE</li>
+      <li>INTEL</li>
+      <li>CRAY</li>
+      <li>MIPS</li>
+      <li>ALPHA</li>
+      <li>NATIVE (default)</li>
+      <li>UNIX</li></ul>
 
- * \li      <strong>OUTPUT-BYTE-ORDER</strong>
-              String denoting the output-byte-order. Ignored
-              if the \b OUTPUT-ARCHITECTURE is not specified or
-              if it is \b IEEE, \b UNIX or \b STD. Can accept the
-              following values.
-              <ul><li>BE (default)</li>
-              <li>LE</li></ul>
+ * \li <strong>OUTPUT-BYTE-ORDER</strong>
+      String denoting the output-byte-order. Ignored if the \b OUTPUT-ARCHITECTURE is not specified or
+      if it is \b IEEE, \b UNIX or \b STD. Can accept the following values.
+      <ul><li>BE (default)</li>
+      <li>LE</li></ul>
 
- * \li      <strong>CHUNKED-DIMENSION-SIZES</strong>
-              Integers separated by spaces to denote the
-              dimension sizes of the chunk for the no. of
-              dimensions determined by rank. Required field
-              to denote that the dataset will be stored with
-              chunked storage. If this field is absent the
-              dataset will be stored with contiguous storage.
+ * \li <strong>CHUNKED-DIMENSION-SIZES</strong>
+      Integers separated by spaces to denote the dimension sizes of the chunk for the no. of
+      dimensions determined by rank. Required field to denote that the dataset will be stored with
+      chunked storage. If this field is absent the dataset will be stored with contiguous storage.
 
- * \li       <strong>COMPRESSION-TYPE</strong>
-              String denoting the type of compression to be
-              used with the chunked storage. Requires the
-              \b CHUNKED-DIMENSION-SIZES to be specified. The only
-              currently supported compression method is \b GZIP.
-              Will accept the following value
-              <ul><li>GZIP</li></ul>
+ * \li <strong>COMPRESSION-TYPE</strong>
+      String denoting the type of compression to be used with the chunked storage. Requires the
+      \b CHUNKED-DIMENSION-SIZES to be specified. The only currently supported compression method is \b GZIP.
+      Will accept the following value
+      <ul><li>GZIP</li></ul>
 
- * \li      <strong>COMPRESSION-PARAM</strong>
-              Integer used to denote compression level and
-              this option is to be always specified when
-              the \b COMPRESSION-TYPE option is specified. The
-              values are applicable only to \b GZIP
-              compression.
-              Value 1-9: The level of Compression.
-                1 will result in the fastest
-                compression while 9 will result in
-                the best compression ratio. The default
-                level of compression is 6.
+ * \li <strong>COMPRESSION-PARAM</strong>
+      Integer used to denote compression level and this option is to be always specified when
+      the \b COMPRESSION-TYPE option is specified. The values are applicable only to \b GZIP
+      compression.<br />
+      Value 1-9: The level of Compression.<br />
+      1 will result in the fastest compression while 9 will result in
+      the best compression ratio.<br />
+      The default level of compression is 6.
 
- * \li      <strong>EXTERNAL-STORAGE</strong>
-              String to denote the name of the non-HDF5 file
-              to store data to. Cannot be used if \b CHUNKED-DIMENSIONS
-              or \b COMPRESSION-TYPE or \b EXTENDIBLE-DATASET is specified.
-              Value \<external-filename\>: the name of the
-              external file as a string to be used.
+ * \li <strong>EXTERNAL-STORAGE</strong>
+      String to denote the name of the non-HDF5 file to store data to. Cannot be used if \b CHUNKED-DIMENSIONS
+      or \b COMPRESSION-TYPE or \b EXTENDIBLE-DATASET is specified.
+      Value \<external-filename\>: the name of the external file as a string to be used.
 
- * \li      <strong>MAXIMUM-DIMENSIONS</strong>
-              Integers separated by spaces to denote the
-              maximum dimension sizes of all the
-              dimensions determined by rank. Requires the
-              \b CHUNKED-DIMENSION-SIZES to be specified. A value of
-              -1 for any dimension implies \b UNLIMITED
-              \b DIMENSION size for that particular dimension.
+ * \li <strong>MAXIMUM-DIMENSIONS</strong>
+      Integers separated by spaces to denote the maximum dimension sizes of all the
+      dimensions determined by rank. Requires the \b CHUNKED-DIMENSION-SIZES to be specified. A value of
+      -1 for any dimension implies \b UNLIMITED \b DIMENSION size for that particular dimension.
 
  * \subsection subsec_cltools_h5import_examples Usage Examples
  * \li <strong>Configuration File may look like</strong>
@@ -305,14 +275,14 @@
             OUTPUT-BYTE-ORDER LE
             CHUNKED-DIMENSION-SIZES 2 2 2
  \endcode
-          The above configuration will accept a floating point array
-          (5 x 2 x 4)  in an ASCII file with the rank and dimension sizes
-          specified and will save it in a chunked data-set (of pattern
-          2 X 2 X 2) of 64-bit floating point in the little-endian order
-          and IEEE architecture. The dataset will be stored at
-          "/work/h5/pkamat/First-set"
+      The above configuration will accept a floating point array
+      (5 x 2 x 4)  in an ASCII file with the rank and dimension sizes
+      specified and will save it in a chunked data-set (of pattern
+      2 X 2 X 2) of 64-bit floating point in the little-endian order
+      and IEEE architecture. The dataset will be stored at
+      "/work/h5/pkamat/First-set"
 
- * \li  <strong>Another configuration could be</strong>
+ * \li <strong>Another configuration could be</strong>
  * \code
             PATH Second-set
             INPUT-CLASS IN
@@ -325,15 +295,15 @@
             COMPRESSION-TYPE GZIP
             COMPRESSION-PARAM 7
  \endcode
-          The above configuration will accept an integer array
-          (6 X 3 X 5 x 2 x 4)  in a binary file with the rank and
-          dimension sizes specified and will save it in a chunked data-set
-          (of pattern 2 X 2 X 2 X 2 X 2) of 32-bit floating point in
-          native format (as output-architecture is not specified). The
-          first and the third dimension will be defined as unlimited. The
-          data-set will be compressed using GZIP and a compression level
-          of 7.
-          The dataset will be stored at \code /Second-set \endcode
+      The above configuration will accept an integer array
+      (6 X 3 X 5 x 2 x 4)  in a binary file with the rank and
+      dimension sizes specified and will save it in a chunked data-set
+      (of pattern 2 X 2 X 2 X 2 X 2) of 32-bit floating point in
+      native format (as output-architecture is not specified). The
+      first and the third dimension will be defined as unlimited. The
+      data-set will be compressed using GZIP and a compression level
+      of 7.<br />
+      The dataset will be stored at \code /Second-set \endcode
 
  *
  */

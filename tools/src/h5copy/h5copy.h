@@ -18,7 +18,7 @@
  * \section sec_cltools_h5copy h5copy
  *
  * \subsection subsec_cltools_h5copy_intro Introduction
- *  With h5copy you can copy objects from an HDF5 file to another file.
+ *  With h5copy, you can copy objects from an HDF5 file to another file.
  *
  * \subsection subsec_cltools_h5copy_usage Usage
  *  <h4>h5copy [OPTIONS] [OBJECTS...]</h4>
@@ -52,7 +52,7 @@
  *                  populated with correct reference values. Copies of referenced
  *                  datasets outside the copy range specified on the command line
  *                  will normally have a different name from the original.<br />
- *                  (Default:Without this option, reference value(s) in any
+ *                  (Default: Without this option, reference value(s) in any
  *                  reference datasets are set to NULL and referenced objects are
  *                  not copied unless they are otherwise within the copy range
  *                  specified on the command line.)
@@ -66,7 +66,6 @@
  * \li <strong>#H5O_COPY_EXPAND_REFERENCE_FLAG</strong>
  * \li <strong>#H5O_COPY_WITHOUT_ATTR_FLAG</strong>
  * \li <strong>#H5O_COPY_ALL</strong>
- *
  *
  */
 

@@ -17,7 +17,7 @@
  * \section sec_cltools_h5debug h5debug
  *
  * \subsection subsec_cltools_h5debug_intro Introduction
- *  With h5debug you can debug an existing HDF5 file at a low level.
+ *  With h5debug, you can debug an existing HDF5 file at a low level.
  *
  * \subsection subsec_cltools_h5debug_usage Usage
  *  <h4>h5debug filename [signature-addr [extra]*]</h4>

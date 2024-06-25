@@ -17,7 +17,7 @@
  * \section sec_cltools_h5clear h5clear
  *
  * \subsection subsec_cltools_h5clear_intro Introduction
- *  With h5clear you can clear the superblock status flag field, remove the metadata cache image, print
+ *  With h5clear, you can clear the superblock status flag field, remove the metadata cache image, print
  *  the EOA and EOF, or set the EOA of a file. It is not a general repair tool and should not
  *  be used to fix file corruption. If a process doesn't shut down cleanly, the
  *  superblock mark can be left that prevents opening a file without SWMR. Then,
@@ -48,19 +48,19 @@
  * \subsection subsec_cltools_h5clear_examples Usage Examples
  * \li 1) h5clear -s file_name
  *
- *     Clear the status_flags field in the superblock of the HDF5 file \<file_name\>.
+ *      Clear the status_flags field in the superblock of the HDF5 file <file_name>.
  *
  * \li 2) h5clear -m file_name
  *
- *     Remove the metadata cache image from the HDF5 file \<file_name\>.
+ *      Remove the metadata cache image from the HDF5 file <file_name>.
  *
  * \li 3) h5clear --increment file_name
  *
- *     Set the EOA to the maximum of (EOA, EOF) + 1M for the file \<file_name\>.
+ *      Set the EOA to the maximum of (EOA, EOF) + 1M for the file <file_name>.
  *
  * \li 4) h5clear --increment=512 file_name
  *
- *     Set the EOA to the maximum of (EOA, EOF) + 512 for the file \<file_name\>.
+ *      Set the EOA to the maximum of (EOA, EOF) + 512 for the file\<file_name>.
  *
  */
 
