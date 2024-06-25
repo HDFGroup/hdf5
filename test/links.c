@@ -23112,7 +23112,7 @@ main(void)
 
     driver_name = h5_get_test_driver_name();
 
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)

@@ -1,5 +1,6 @@
 name: hdf5 Check Application Binary Interface (ABI)
 
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
@@ -40,8 +41,10 @@ jobs:
       - name: Convert hdf5 reference name (Linux)
         id: convert-hdf5lib-refname
         run:  |
-          FILE_DOTS=$(echo "${{ inputs.file_ref }}" | sed -r "s/([0-9]+)\_([0-9]+)\_([0-9]+).*/\1\.\2\.\3/")
+          FILE_DOTS=$(echo "${{ inputs.file_ref }}" | sed -r "s/([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+).*/\1\.\2\.\3-\4/")
           echo "HDF5R_DOTS=$FILE_DOTS" >> $GITHUB_OUTPUT
+          FILE_DOTSMAIN=$(echo "${{ inputs.file_ref }}" | sed -r "s/([0-9]+)\.([0-9]+)\.([0-9]+).*/\1\.\2\.\3/")
+          echo "HDF5R_DOTSMAIN=$FILE_DOTSMAIN" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@v4.1.1
 
@@ -81,8 +84,8 @@ jobs:
         run: |
           mkdir "${{ github.workspace }}/hdf5R"
           cd "${{ github.workspace }}/hdf5R"
-          wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5-${{ inputs.file_ref }}/hdf5-${{ inputs.file_ref }}-ubuntu-2204.tar.gz
-          tar zxf hdf5-${{ inputs.file_ref }}-ubuntu-2204.tar.gz
+          wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5_${{ inputs.file_ref }}/hdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}-ubuntu-2204_gcc.tar.gz
+          tar zxf hdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}-ubuntu-2204_gcc.tar.gz
 
       - name: List files for the space (Linux)
         run: |
@@ -91,7 +94,7 @@ jobs:
       - name: Uncompress hdf5 reference binary (Linux)
         run:  |
           cd "${{ github.workspace }}/hdf5R"
-          tar -zxvf ${{ github.workspace }}/hdf5R/hdf5/HDF5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}-Linux.tar.gz --strip-components 1
+          tar -zxvf ${{ github.workspace }}/hdf5R/hdf5/HDF5-${{ inputs.file_ref }}-Linux.tar.gz --strip-components 1
 
       - name: List files for the HDFR space (Linux)
         run: |
@@ -113,7 +116,7 @@ jobs:
 
       - name: Run Java API report
         run: |
-          japi-compliance-checker ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/jarhdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}.jar ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/jarhdf5-${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}.jar
+          japi-compliance-checker ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/jarhdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTSMAIN }}.jar ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/jarhdf5-${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}.jar
 
       - name: Run ABI report
         run: |
@@ -145,7 +148,7 @@ jobs:
 
       - name: Copy ABI reports
         run: |
-          cp compat_reports/jarhdf5-/${{ steps.set-hdf5lib-refname.outputs.HDF5R_VERS }}_to_${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}/compat_report.html ${{ inputs.file_base }}-java_compat_report.html
+          cp compat_reports/jarhdf5-/${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTSMAIN }}_to_${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}/compat_report.html ${{ inputs.file_base }}-java_compat_report.html
           ls -l compat_reports/${{ inputs.file_base }}/X_to_Y
           cp compat_reports/${{ inputs.file_base }}/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_compat_report.html
           ls -l compat_reports/${{ inputs.file_base }}_hl/X_to_Y

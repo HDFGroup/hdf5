@@ -25,6 +25,7 @@
 #define PROGRAMNAME "h5ls"
 
 #define NAME_BUF_SIZE 2048
+
 /*
  *  Alternative formatting for data dumped by H5LS
  *
@@ -211,6 +212,8 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "   -wN, --width=N  Set the number of columns of output\n");
     PRINTVALSTREAM(rawoutstream, "   -v, --verbose   Generate more verbose output\n");
     PRINTVALSTREAM(rawoutstream, "   -V, --version   Print version number and exit\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --page-buffer-size=N Set the page buffer cache size, N=non-negative integers\n");
     PRINTVALSTREAM(rawoutstream, "   --vfd=DRIVER    Use the specified virtual file driver\n");
     PRINTVALSTREAM(rawoutstream, "   -x, --hexdump   Show raw data in hexadecimal format\n");
     PRINTVALSTREAM(rawoutstream,
@@ -2659,6 +2662,7 @@ main(int argc, char *argv[])
     static char        root_name[] = "/";
     char               drivername[50];
     int                err_exit        = 0;
+    size_t             page_cache      = 0;
     hid_t              fapl_id         = H5P_DEFAULT;
     bool               custom_vol_fapl = false;
     bool               custom_vfd_fapl = false;
@@ -2815,6 +2819,9 @@ main(int argc, char *argv[])
                 usage();
                 leave(EXIT_FAILURE);
             }
+        }
+        else if (!strncmp(argv[argno], "--page-buffer-size=", (size_t)19)) {
+            page_cache = strtoul(argv[argno] + 19, &rest, 0);
         }
         else if (!strcmp(argv[argno], "--verbose")) {
             verbose_g++;
@@ -2995,23 +3002,40 @@ main(int argc, char *argv[])
     }
 
     /* Setup a custom fapl for file accesses */
-    if (custom_vol_fapl || custom_vfd_fapl) {
 #ifdef H5_HAVE_ROS3_VFD
-        if (custom_vfd_fapl && (0 == strcmp(vfd_info.u.name, drivernames[ROS3_VFD_IDX]))) {
-            if (!vfd_info.info)
-                vfd_info.info = &ros3_fa;
-        }
+    if (custom_vfd_fapl && (0 == strcmp(vfd_info.u.name, drivernames[ROS3_VFD_IDX]))) {
+        if (!vfd_info.info)
+            vfd_info.info = &ros3_fa;
+    }
 #endif
 #ifdef H5_HAVE_LIBHDFS
-        if (custom_vfd_fapl && (0 == strcmp(vfd_info.u.name, drivernames[HDFS_VFD_IDX]))) {
-            if (!vfd_info.info)
-                vfd_info.info = &hdfs_fa;
-        }
+    if (custom_vfd_fapl && (0 == strcmp(vfd_info.u.name, drivernames[HDFS_VFD_IDX]))) {
+        if (!vfd_info.info)
+            vfd_info.info = &hdfs_fa;
+    }
 #endif
 
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, custom_vol_fapl ? &vol_info : NULL,
-                                        custom_vfd_fapl ? &vfd_info : NULL)) < 0) {
-            error_msg("failed to setup file access property list (fapl) for file\n");
+    if ((fapl_id = h5tools_get_new_fapl(H5P_DEFAULT)) < 0) {
+        error_msg("unable to create FAPL for file access\n");
+        leave(EXIT_FAILURE);
+    }
+    /* Set non-default VOL connector, if requested */
+    if (custom_vol_fapl) {
+        if (h5tools_set_fapl_vol(fapl_id, &vol_info) < 0) {
+            error_msg("unable to set VOL on fapl for file\n");
+            leave(EXIT_FAILURE);
+        }
+    }
+    /* Set non-default virtual file driver, if requested */
+    if (custom_vfd_fapl) {
+        if (h5tools_set_fapl_vfd(fapl_id, &vfd_info) < 0) {
+            error_msg("unable to set VFD on fapl for file\n");
+            leave(EXIT_FAILURE);
+        }
+    }
+    if (page_cache > 0) {
+        if (H5Pset_page_buffer_size(fapl_id, page_cache, 0, 0) < 0) {
+            error_msg("unable to set page buffer cache size for file access\n");
             leave(EXIT_FAILURE);
         }
     }
@@ -3040,8 +3064,8 @@ main(int argc, char *argv[])
         file_id = H5I_INVALID_HID;
 
         while (fname && *fname) {
-            file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), drivername,
-                                    sizeof drivername);
+            file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (custom_vol_fapl || custom_vfd_fapl),
+                                    drivername, sizeof drivername);
 
             if (file_id >= 0) {
                 if (verbose_g)

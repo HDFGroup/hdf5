@@ -752,7 +752,8 @@ test_links()
         /* Close 2nd FAPL */
         H5Pclose(fapl2_id);
 
-        h5_clean_files(FILENAME, fapl_id);
+        h5_delete_all_test_files(FILENAME, fapl_id);
+        H5Pclose(fapl_id);
     }
     catch (Exception &E) {
         issue_fail_msg("test_links()", __LINE__, __FILE__, E.getCDetailMsg());

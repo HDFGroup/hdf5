@@ -777,6 +777,14 @@ New Features
 
     Tools:
     ------
+    - Add option to adjust the page buffer size in tools
+
+      The page buffer cache size for a file can now be adjusted using the
+        --page-buffer-size=N
+      option in the h5repack, h5diff, h5dump, h5ls, and h5stat tools. This
+      will call the H5Pset_page_buffer_size() API function with the specified
+      size in bytes.
+
     - Allow h5repack to reserve space for a user block without a file
 
       This is useful for users who want to reserve space

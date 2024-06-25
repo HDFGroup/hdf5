@@ -346,7 +346,9 @@ typedef struct H5CX_t {
     bool high_bound_valid;        /* Whether high_bound property is valid */
 
     /* Cached VOL settings */
-    H5VL_connector_prop_t vol_connector_prop; /* Property for VOL connector ID & info */
+    H5VL_connector_prop_t vol_connector_prop; /* Property for VOL connector ID & info
+                               This is treated as an independent field with
+                               no relation to the property H5F_ACS_VOL_CONN_NAME stored on the FAPL */
     bool  vol_connector_prop_valid;           /* Whether property for VOL connector ID & info is valid */
     void *vol_wrap_ctx;                       /* VOL connector's "wrap context" for creating IDs */
     bool  vol_wrap_ctx_valid; /* Whether VOL connector's "wrap context" for creating IDs is valid */
@@ -2295,7 +2297,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_data_transform
  *
- * Purpose:     Retrieves the I/O filter callback function for the current API call context.
+ * Purpose:     Retrieves the data transformation expression for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
  *
@@ -2314,6 +2316,9 @@ H5CX_get_data_transform(H5Z_data_xform_t **data_transform)
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
     assert(head && *head);
     assert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
+
+    /* This getter does not use H5CX_RETRIEVE_PROP_VALID in order to use H5P_peek instead of H5P_get.
+       This prevents invocation of the data transform property's library-defined copy callback */
 
     /* Check if the value has been retrieved already */
     if (!(*head)->ctx.data_transform_valid) {

@@ -1,6 +1,6 @@
 name: hdf5 dev release build
 
-# Controls when the action will run. Triggers the workflow on a manual run
+# Triggers the workflow on demand
 on:
   workflow_dispatch:
     inputs:
@@ -13,8 +13,6 @@ on:
 permissions:
   contents: read
 
-# A workflow run is made up of one or more jobs that can run sequentially or
-# in parallel.
 jobs:
   log-the-inputs:
     runs-on: ubuntu-latest

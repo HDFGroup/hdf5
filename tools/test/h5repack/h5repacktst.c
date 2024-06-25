@@ -384,7 +384,7 @@ main(void)
         GOERROR;
     if (h5repack_verify(FNAME0, FNAME0OUT, &pack_options) <= 0)
         GOERROR;
-    if (h5repack_cmp_pl(FNAME0, pack_options.fin_fapl, FNAME0OUT, pack_options.fout_fapl) <= 0)
+    if (h5repack_cmp_pl(FNAME0, FNAME0OUT, &pack_options) <= 0)
         GOERROR;
     if (h5repack_end(&pack_options) < 0)
         GOERROR;
@@ -404,7 +404,7 @@ main(void)
             GOERROR;
         if (h5repack_verify(FNAME1, FNAME1OUT, &pack_options) <= 0)
             GOERROR;
-        if (h5repack_cmp_pl(FNAME1, pack_options.fin_fapl, FNAME1OUT, pack_options.fout_fapl) <= 0)
+        if (h5repack_cmp_pl(FNAME1, FNAME1OUT, &pack_options) <= 0)
             GOERROR;
         if (h5repack_end(&pack_options) < 0)
             GOERROR;
@@ -424,7 +424,7 @@ main(void)
         GOERROR;
     if (h5repack_verify(FNAME2, FNAME2OUT, &pack_options) <= 0)
         GOERROR;
-    if (h5repack_cmp_pl(FNAME2, pack_options.fin_fapl, FNAME2OUT, pack_options.fout_fapl) <= 0)
+    if (h5repack_cmp_pl(FNAME2, FNAME2OUT, &pack_options) <= 0)
         GOERROR;
     if (h5repack_end(&pack_options) < 0)
         GOERROR;
@@ -443,7 +443,7 @@ main(void)
         GOERROR;
     if (h5repack_verify(FNAME3, FNAME3OUT, &pack_options) <= 0)
         GOERROR;
-    if (h5repack_cmp_pl(FNAME3, pack_options.fin_fapl, FNAME3OUT, pack_options.fout_fapl) <= 0)
+    if (h5repack_cmp_pl(FNAME3, FNAME3OUT, &pack_options) <= 0)
         GOERROR;
     if (h5repack_end(&pack_options) < 0)
         GOERROR;
@@ -1127,7 +1127,7 @@ main(void)
             GOERROR;
         if (h5repack_verify(FNAME7, FNAME7OUT, &pack_options) <= 0)
             GOERROR;
-        if (h5repack_cmp_pl(FNAME7, pack_options.fin_fapl, FNAME7OUT, pack_options.fout_fapl) <= 0)
+        if (h5repack_cmp_pl(FNAME7, FNAME7OUT, &pack_options) <= 0)
             GOERROR;
         if (h5repack_end(&pack_options) < 0)
             GOERROR;
@@ -1732,7 +1732,8 @@ main(void)
         hid_t fapl;
 
         fapl = h5_fileaccess();
-        h5_clean_files(H5REPACK_FILENAMES, fapl);
+        h5_delete_all_test_files(H5REPACK_FILENAMES, fapl);
+        H5Pclose(fapl);
     }
 
     puts("All h5repack tests passed.");

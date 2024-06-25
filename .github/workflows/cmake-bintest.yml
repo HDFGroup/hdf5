@@ -1,6 +1,6 @@
 name: hdf5 examples bintest runs
 
-# Controls when the action will run. Triggers the workflow on a schedule
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
@@ -12,8 +12,6 @@ on:
 permissions:
   contents: read
 
-# A workflow run is made up of one or more jobs that can run sequentially or
-# in parallel
 jobs:
   test_binary_win:
   # Windows w/ MSVC + CMake
@@ -189,12 +187,12 @@ jobs:
               ls ${{ runner.workspace }}
 
       # symlinks the compiler executables to a common location 
-      # - name: Setup GNU Fortran
-      #   uses: fortran-lang/setup-fortran@v1
-      #   id: setup-fortran
-      #   with:
-      #     compiler: gcc
-      #     version: 12
+      - name: Setup GNU Fortran
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: gcc
+          version: 12
 
       - name: Run ctest (MacOS)
         id: run-ctest

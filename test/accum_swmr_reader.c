@@ -51,7 +51,7 @@ main(void)
     bool        api_ctx_pushed = false; /* Whether API context pushed */
 
     /* Testing setup */
-    h5_reset();
+    h5_test_init();
 
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.

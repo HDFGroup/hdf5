@@ -8608,7 +8608,8 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
          */
         /* Clean up files so the source files do not exist yet */
         H5Iinc_ref(vds_fapl); /* Prevent FAPL from being closed */
-        h5_clean_files(FILENAME, vds_fapl);
+        h5_delete_all_test_files(FILENAME, vds_fapl);
+        H5Pclose(vds_fapl);
 
         /* Clear virtual layout in DCPL */
         if (H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
@@ -8918,7 +8919,8 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
          */
         /* Clean up files so the source files do not exist yet */
         H5Iinc_ref(vds_fapl); /* Prevent FAPL from being closed */
-        h5_clean_files(FILENAME, vds_fapl);
+        h5_delete_all_test_files(FILENAME, vds_fapl);
+        H5Pclose(vds_fapl);
 
         /* Clear virtual layout in DCPL */
         if (H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
@@ -12323,7 +12325,7 @@ main(void)
     driver_name = h5_get_test_driver_name();
 
     /* Testing setup */
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     if (h5_using_parallel_driver(fapl, &driver_is_parallel) < 0)
