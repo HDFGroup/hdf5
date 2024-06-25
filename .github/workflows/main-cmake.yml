@@ -89,8 +89,8 @@ jobs:
             # but that seems unnecessary
           - name: "MacOS-13 Clang"
             os: macos-13
-            cpp: ON
-            fortran: OFF
+            cpp: OFF
+            fortran: ON
             java: ON
             docs: ON
             libaecfc: ON
