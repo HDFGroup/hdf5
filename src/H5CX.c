@@ -349,7 +349,9 @@ typedef struct H5CX_t {
     bool high_bound_valid;        /* Whether high_bound property is valid */
 
     /* Cached VOL settings */
-    H5VL_connector_prop_t vol_connector_prop; /* Property for VOL connector ID & info */
+    H5VL_connector_prop_t vol_connector_prop; /* Property for VOL connector ID & info
+                               This is treated as an independent field with
+                               no relation to the property H5F_ACS_VOL_CONN_NAME stored on the FAPL */
     bool  vol_connector_prop_valid;           /* Whether property for VOL connector ID & info is valid */
     void *vol_wrap_ctx;                       /* VOL connector's "wrap context" for creating IDs */
     bool  vol_wrap_ctx_valid; /* Whether VOL connector's "wrap context" for creating IDs is valid */
