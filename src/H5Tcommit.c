@@ -1036,9 +1036,6 @@ H5T_open(const H5G_loc_t *loc)
 
     /* Check if datatype was already open */
     if (NULL == (shared_fo = (H5T_shared_t *)H5FO_opened(loc->oloc->file, loc->oloc->addr))) {
-        /* Clear any errors from H5FO_opened() */
-        H5E_clear_stack();
-
         /* Open the datatype object */
         if (NULL == (dt = H5T__open_oid(loc)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
