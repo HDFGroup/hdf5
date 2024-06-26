@@ -1424,9 +1424,12 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
 
             tmp_flags = flags | (pline->filter[idx].flags);
             tmp_flags |= (edc_read == H5Z_DISABLE_EDC) ? H5Z_FLAG_SKIP_EDC : 0;
-            H5E_PAUSE_ERRORS {
-                new_nbytes = (fclass->filter)(tmp_flags, pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf);
-            } H5E_RESUME_ERRORS
+            H5E_PAUSE_ERRORS
+            {
+                new_nbytes = (fclass->filter)(tmp_flags, pline->filter[idx].cd_nelmts,
+                                              pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+            }
+            H5E_RESUME_ERRORS
 
 #ifdef H5Z_DEBUG
             H5_timer_stop(&timer);
@@ -1474,9 +1477,12 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
             H5_timer_start(&timer);
 #endif
 
-            H5E_PAUSE_ERRORS {
-                new_nbytes = (fclass->filter)(flags | pline->filter[idx].flags, pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf);
-            } H5E_RESUME_ERRORS
+            H5E_PAUSE_ERRORS
+            {
+                new_nbytes = (fclass->filter)(flags | pline->filter[idx].flags, pline->filter[idx].cd_nelmts,
+                                              pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+            }
+            H5E_RESUME_ERRORS
 
 #ifdef H5Z_DEBUG
             H5_timer_stop(&timer);
@@ -1736,7 +1742,7 @@ done:
 herr_t
 H5Z_get_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags)
 {
-    H5Z_class2_t *fclass = NULL;
+    H5Z_class2_t *fclass    = NULL;
     herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
