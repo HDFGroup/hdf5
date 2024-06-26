@@ -90,7 +90,7 @@
  *                                    #H5Pset_file_space_strategy
  * \li <strong>--fs_persist=FS_PERSIST</strong>    Persisting or not
  *                                    persisting free-space for #H5Pset_file_space_strategy
- * \li <strong>---fs_threshold=FS_THRESHOLD</strong> : Free-space section
+ * \li <strong>--fs_threshold=FS_THRESHOLD</strong> : Free-space section
  *                                    threshold for #H5Pset_file_space_strategy
  * \li <strong>--fs_pagesize=FS_PAGESIZE</strong>  File space page size for #H5Pset_file_space_page_size
  *
@@ -204,29 +204,29 @@
  *
  * \subsection subsec_cltools_h5repack_examples Usage Examples
  *
- * \li 1) h5repack -v -f GZIP=1 file1 file2
+ * \li 1) h5repack --verbose --filter=GZIP=1 file1 file2
  *
  *      GZIP compression with level 1 to all objects
  *
- * \li 2) h5repack -v -f dset1:SZIP=8,NN file1 file2
+ * \li 2) h5repack --verbose --filter=dset1:SZIP=8,NN file1 file2
  *
  *      SZIP compression with 8 pixels per block and NN coding method to object dset1
  *
- * \li 3) h5repack -v -l dset1,dset2:CHUNK=20x10 -f dset3,dset4,dset5:NONE file1 file2
+ * \li 3) h5repack --verbose --layout=dset1,dset2:CHUNK=20x10 --filter=dset3,dset4,dset5:NONE file1 file2
  *
  *      Chunked layout, with a layout size of 20x10, to objects dset1 and dset2
  *      and remove filters to objects dset3, dset4, dset5
  *
- * \li 4) h5repack -L -c 10 -s 20:dtype file1 file2
+ * \li 4) h5repack --latest --compact=10 --ssize=20:dtype file1 file2
  *
  *      Using latest file format with maximum compact group size of 10 and
  *      minimum shared datatype size of 20
  *
- * \li 5) h5repack -f SHUF -f GZIP=1 file1 file2
+ * \li 5) h5repack --filter=SHUF --filter=GZIP=1 file1 file2
  *
  *      Add both filters SHUF and GZIP in this order to all datasets
  *
- * \li 6) h5repack -f UD=307,0,1,9 file1 file2
+ * \li 6) h5repack --filter=UD=307,0,1,9 file1 file2
  *
  *      Add bzip2 filter to all datasets
  *

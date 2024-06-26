@@ -151,39 +151,39 @@
  *
  * \li 1) Attribute foo of the group /bar_none in file quux.h5
  *
- *      h5dump -a /bar_none/foo quux.h5
+ *      h5dump --attribute=/bar_none/foo quux.h5
  *
  * \li 2) Attribute "high/low" of the group /bar_none in the file quux.h5
  *
- *      h5dump -a "/bar_none/high\/low" quux.h5
+ *      h5dump --attribute="/bar_none/high\/low" quux.h5
  *
  * \li 3) Selecting a subset from dataset /foo in file quux.h5
  *
- *      h5dump -d /foo -s "0,1" -S "1,1" -c "2,3" -k "2,2" quux.h5
+ *      h5dump --dataset=/foo --start="0,1" --stride="1,1" --count="2,3" --block="2,2" quux.h5
  *
  * \li 4) Saving dataset 'dset' in file quux.h5 to binary file 'out.bin' using a little-endian type
  *
- *      h5dump -d /dset -b LE -o out.bin quux.h5
+ *      h5dump --dataset=/dset --binary=LE --output=out.bin quux.h5
  *
  * \li 5) Display two packed bits (bits 0-1 and bits 4-6) in the dataset /dset
  *
- *      h5dump -d /dset -M 0,1,4,3 quux.h5
+ *      h5dump -d-dataset=/dset --packedbits=0,1,4,3 quux.h5
  *
  * \li 6) Dataset foo in files file1.h5 file2.h5 file3.h5
  *
- *      h5dump -d /foo file1.h5 file2.h5 file3.h5
+ *      h5dump --dataset=/foo file1.h5 file2.h5 file3.h5
  *
  * \li 7) Dataset foo in split files splitfile-m.h5 splitfile-r.h5
  *
- *      h5dump -d /foo -f split splitfile
+ *      h5dump --dataset=/foo --filedriver=split splitfile
  *
  * \li 8) Dataset foo in multi files mf-s.h5, mf-b.h5, mf-r.h5, mf-g.h5, mf-l.h5 and mf-o.h5
  *
- *      h5dump -d /foo -f multi mf
+ *      h5dump --dataset=/foo --filedriver=multi mf
  *
  * \li 9) Dataset foo in family files fam00000.h5 fam00001.h5 and fam00002.h5
  *
- *      h5dump -d /foo -f family fam%05d.h5
+ *      h5dump --dataset=/foo --filedriver=family fam%05d.h5
  *
  */
 
