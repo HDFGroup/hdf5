@@ -375,21 +375,16 @@ H5FD__subfiling_free_context(subfiling_context_t *sf_context)
     }
 
     if (!mpi_finalized) {
-        if (sf_context->sf_msg_comm != MPI_COMM_NULL)
-            if (H5_mpi_comm_free(&sf_context->sf_msg_comm) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
-        if (sf_context->sf_data_comm != MPI_COMM_NULL)
-            if (H5_mpi_comm_free(&sf_context->sf_data_comm) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
-        if (sf_context->sf_eof_comm != MPI_COMM_NULL)
-            if (H5_mpi_comm_free(&sf_context->sf_eof_comm) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
-        if (sf_context->sf_node_comm != MPI_COMM_NULL)
-            if (H5_mpi_comm_free(&sf_context->sf_node_comm) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
-        if (sf_context->sf_group_comm != MPI_COMM_NULL)
-            if (H5_mpi_comm_free(&sf_context->sf_group_comm) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+        if (H5_mpi_comm_free(&sf_context->sf_msg_comm) < 0)
+            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+        if (H5_mpi_comm_free(&sf_context->sf_data_comm) < 0)
+            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+        if (H5_mpi_comm_free(&sf_context->sf_eof_comm) < 0)
+            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+        if (H5_mpi_comm_free(&sf_context->sf_node_comm) < 0)
+            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+        if (H5_mpi_comm_free(&sf_context->sf_group_comm) < 0)
+            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
     }
 
     H5MM_free(sf_context->subfile_prefix);
@@ -877,9 +872,8 @@ done:
             if (H5FD__subfiling_free_topology(app_topology) < 0)
                 HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling topology");
 
-        if (node_comm != MPI_COMM_NULL)
-            if (H5_mpi_comm_free(&node_comm) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free MPI communicator");
+        if (H5_mpi_comm_free(&node_comm) < 0)
+            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free MPI communicator");
 
         if (context_id >= 0 && context)
             if (H5FD__subfiling_free_object(context_id) < 0)
