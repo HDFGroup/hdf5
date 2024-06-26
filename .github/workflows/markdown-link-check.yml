@@ -4,7 +4,7 @@ name: Check Markdown links
 on:
   workflow_dispatch:
   schedule:
-      - cron: "0 10 * * 5"
+      - cron: "0 10 * * 6"
 
 # The config file handles things like http 500 errors from sites like GitLab
 # and http 200 responses
