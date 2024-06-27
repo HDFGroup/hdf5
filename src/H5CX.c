@@ -170,17 +170,17 @@
  *      H5CX_TEST_SET_PROP and H5CX_SET_PROP macros to work properly.
  *
  * - "Return-and-read" properties that are returned to the application to send out introspection information,
- *      but are also queried by the library internally. Internal queries always retrieve the original value
- *      from the property list, and update the context's value to match. These properties have both a 'valid'
- *      and 'set' flag. <foo>_valid is true if the field has ever been populated from its underlying property
- *      list. <foo>_set flag is true if this field has ever been set on the context for application
- *      introspection. The naming of these fields is important for the H5CX_RETRIEVE_PROP_VALID_SET macro to
- *      work properly.
+ *      but are also queried by the library internally. If the context value has been 'set' by an accessor,
+ *      all future queries will return the stored value from the context, to avoid later queries overwriting
+ *      that stored value with the value from the property list.
  *
- *      Note that if a set operation is followed by an internal read, it is possible for <foo>_set to be true
- *      while the value in the context matches the underlying property list, resulting in a redundant write to
- *      the property list when the context is popped. Similarly, if a field has been set on the context but
- *      never read internally, <foo>_valid will be false despite the context containing a meaningful value.
+ *      These properties have both a 'valid' and 'set' flag. <foo>_valid is true if the field has ever been
+ *      populated from its underlying property list. <foo>_set flag is true if this field has ever been set on
+ *      the context for application introspection. The naming of these fields is important for the
+ *      H5CX_RETRIEVE_PROP_VALID_SET macro to work properly.
+ *
+ *      If a field has been set on the context but never read internally, <foo>_valid will be false
+ *      despite the context containing a meaningful cached value.
  */
 typedef struct H5CX_t {
     /* DXPL */
