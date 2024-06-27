@@ -21,7 +21,7 @@ fi
 dir=$(
   cd -P -- "$(dirname -- "$prg")/.." && pwd -P
 ) || exit
-prg=$dir/$(basename -- "$prg") || exit
+prg=$dir/bin/$(basename -- "$prg") || exit
 
 printf '%s\n' "$prg"
 printf 'dir is %s\n' "$dir"
