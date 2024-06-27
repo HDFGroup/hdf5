@@ -939,6 +939,18 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
     else
         (*api_state)->fapl_id = H5P_FILE_ACCESS_DEFAULT;
 
+    /* Check for non-default DAPL */
+    if (H5P_DATASET_ACCESS_DEFAULT != (*head)->ctx.dapl_id) {
+        /* Retrieve the DAPL property list */
+        H5CX_RETRIEVE_PLIST(dapl, FAIL)
+
+        /* Copy the DAPL ID */
+        if (((*api_state)->dapl_id = H5P_copy_plist((H5P_genplist_t *)(*head)->ctx.dapl, false)) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTCOPY, FAIL, "can't copy property list");
+    }
+    else
+        (*api_state)->dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+
     /* Check for non-default DCPL */
     if (H5P_DATASET_CREATE_DEFAULT != (*head)->ctx.dcpl_id) {
         /* Retrieve the DCPL property list */
@@ -1075,6 +1087,10 @@ H5CX_restore_state(const H5CX_state_t *api_state)
     (*head)->ctx.fapl_id = api_state->fapl_id;
     (*head)->ctx.fapl    = NULL;
 
+    /* Restore the DAPL info */
+    (*head)->ctx.dapl_id = api_state->dapl_id;
+    (*head)->ctx.dapl    = NULL;
+
     /* Restore the DCPL info */
     (*head)->ctx.dcpl_id = api_state->dcpl_id;
     (*head)->ctx.dcpl    = NULL;
@@ -1134,6 +1150,11 @@ H5CX_free_state(H5CX_state_t *api_state)
     if (0 != api_state->fapl_id && H5P_FILE_ACCESS_DEFAULT != api_state->fapl_id)
         if (H5I_dec_ref(api_state->fapl_id) < 0)
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on FAPL");
+
+    /* Release the DAPL */
+    if (0 != api_state->dapl_id && H5P_DATASET_ACCESS_DEFAULT != api_state->dapl_id)
+        if (H5I_dec_ref(api_state->dapl_id) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on DAPL");
 
     /* Release the DCPL */
     if (0 != api_state->dcpl_id && H5P_DATASET_CREATE_DEFAULT != api_state->dcpl_id)
