@@ -668,7 +668,7 @@ passing them up and down the VOL chain. Each passthrough VOL must define an obje
 The object wrapping structure should contain the information necessary to recursively unwrap the object - at a minimum, this is the object provided from and the ID of the next connector in the stack.
 The wrap context should contain the information necessary to recursively wrap the object - at a minimum, this is the ID and the wrap context of the next VOL connector in the stack.
 
-Each callback should use <em>H5VL<callback></em> to recursively invoke the same callback in all lower passthrough VOl connectors.
+Each callback should use <em>H5VL&lt;callback&gt;</em> to recursively invoke the same callback in all lower passthrough VOl connectors.
 
 <em>Wrap class for object wrapping routines, H5VLconnector.h</em>
 \code
@@ -684,7 +684,7 @@ typedef struct H5VL_wrap_class_t {
 \subsubsection subsubsecVOLRefWrapobj wrap: get_object
 Retrieves the underlying object from a wrapped object. Should return a pointer to the underlying object belonging to the terminal VOL connector.
 
-This will generally be done by unwrapping this VOL's object wrapping structure, before recursively calling <em>H5VLget_object</em> to invoke the <get_object>
+This will generally be done by unwrapping this VOL's object wrapping structure, before recursively calling <em>H5VLget_object</em> to invoke the <em>get_object</em>
 callback for all lower VOL connectors which define it. <em>H5VLget_object</em> requires the object returned by the next VOL and the next VOL's ID. Both of 
 these fields should be stored by the VOL somehow, generally on the wrapped object structure.
 
@@ -773,7 +773,7 @@ unwrap it - at a minimum, the object provided from and the ID of the next VOL co
 </table>
 
 \subsubsection subsubsecVOLRefWrapunwrap wrap: unwrap_object
-Unwrap an object from connector. Any resources allocated during <em>wrap_object<em> should be released and cleaned up here.
+Unwrap an object from connector. Any resources allocated during <em>wrap_object</em> should be released and cleaned up here.
 
 This callback should clean up this VOL's object wrapping structure before recursively invoking <em>H5VLunwrap_object</em>.
 
