@@ -43,6 +43,9 @@ for arg in $@ ; do
       showconfigure
       exit $status
       ;;
+    -show)
+      echo @_PKG_CONFIG_COMPILER@ $@ `pkg-config --define-variable=prefix=$dir --cflags --libs @_PKG_CONFIG_LIBNAME@`
+      ;;
     *)
       @_PKG_CONFIG_COMPILER@ $@ `pkg-config --define-variable=prefix=$dir --cflags --libs @_PKG_CONFIG_LIBNAME@`
       status=$?
