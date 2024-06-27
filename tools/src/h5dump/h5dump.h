@@ -31,8 +31,8 @@
  * \li <strong>--version</strong> Print the library version number and exit
  *
  * \subsection subsec_cltools_h5dump_options_file File Options
- * \li <strong>--contents</strong>   Print a list of the file contents and exit
- *                                   Optional value 1 also prints attributes.
+ * \li <strong>--contents</strong>   Print a list of the file contents, group and dataset
+ *              names and exit. Optional value 1 also prints attributes, --contents=1.
  * \li <strong>--superblock</strong> Print the content of the super block
  * \li <strong>--header</strong>     Print the header only; no data is displayed
  * \li <strong>--filedriver=D</strong> Specify which driver to open the file with
