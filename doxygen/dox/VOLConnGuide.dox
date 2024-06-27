@@ -55,8 +55,7 @@ and, although it is nearing its final form, may change further before the stable
 for 2022.
 
 \subsection subsecVOLRelated VOL-Related HDF5 Header Files
-Use of the VOL, including topics such as registration and loading VOL plugins, is described in the \ref
-H5VL_UG.
+Use of the VOL, including topics such as registration and loading VOL plugins, is described in the \ref H5VL_UG.
 
 Public header Files you will need to be familiar with include:
 <table>
@@ -69,8 +68,7 @@ Public header Files you will need to be familiar with include:
 <tr>
 <td>H5VLconnector.h
 </td>
-<td>Main header for connector authors. Contains definitions for the main VOL struct and callbacks, enum
-values, etc.
+<td>Main header for connector authors. Contains definitions for the main VOL struct and callbacks, enum values, etc.
 </td>
 </tr>
 <tr>
@@ -82,8 +80,7 @@ values, etc.
 <tr>
 <td>H5VLnative.h
 </td>
-<td>Native VOL connector header. May be useful if your connector will attempt to implement native HDF5 API
-calls that are handled via the optional callbacks.
+<td>Native VOL connector header. May be useful if your connector will attempt to implement native HDF5 API calls that are handled via the optional callbacks.
 </td>
 </tr>
 <tr>
@@ -104,9 +101,9 @@ When building a VOL connector, you have several options:
 
 <h4>Library</h4>
 The connector can be built as a normal shared or static library. Software that uses your connector will have
-to link to it just like any other library. This can be convenient since you don't have to deal with plugin
-paths and searching for the connector at runtime, but it also means that software which uses your connector
-will have to be built and linked against it.
+to link to it just like any other library. This can be convenient since you don't have to deal with plugin paths
+and searching for the connector at runtime, but it also means that software which uses your connector will
+have to be built and linked against it.
 
 <h4>Plugin</h4>
 You can also build your connector as a dynamically loaded plugin. The mechanism for this is the same
@@ -121,9 +118,8 @@ to be built with certain compile/link options. The VOL connector template does a
 
 The HDF5 library's plugin loading code will call #H5PLget_plugin_type
 to determine the type of plugin(e.g.; filter, VOL) and #H5PLget_plugin_info
-to get the class struct, which allows the library to query the plugin for its name and value to see if it has
-found a requested plugin. When a match is found, the library will use the class struct to register the
-connector and map its callbacks.
+to get the class struct, which allows the library to query the plugin for its name and value to see if it has found
+a requested plugin. When a match is found, the library will use the class struct to register the connector and map its callbacks.
 
 For the HDF5 library to be able to load an external plugin dynamically, the plugin developer has to define
 two public routines with the following name and signature:
@@ -140,8 +136,10 @@ const void *H5PLget_plugin_info(void) { return &template_class_g; }
 \endcode
 
 \ref H5PLget_plugin_type should return the library type which should always be #H5PL_TYPE_VOL.
-#H5PLget_plugin_info should return a pointer to the plugin structure defining the VOL plugin with all the
-callbacks. For example, consider an external plugin defined as: \code static const H5VL_class_t H5VL_foo_g = {
+#H5PLget_plugin_info should return a pointer to the plugin structure defining the VOL plugin with all the callbacks.
+For example, consider an external plugin defined as:
+\code
+  static const H5VL_class_t H5VL_foo_g = {
       2,     // version
       12345, // value
       "foo", // name
@@ -184,8 +182,8 @@ In HDF5 1.13.0, the <em>version</em> field will be 2, indicating the connector t
 #H5VL_class_t struct.  Version 1 of the struct was never formally released and only available in the
 develop branch of the HDF5 git repository. Version 0 is used in the deprecated HDF5 1.12.x branch.
 
-Every connector needs a <em>name</em> and <em>value</em>. The library will use these when loading and
-registering the connector (as described in the \ref H5VL_UG), so they should be unique in your ecosystem.
+Every connector needs a <em>name</em> and <em>value</em>. The library will use these when loading and registering the
+connector (as described in the \ref H5VL_UG), so they should be unique in your ecosystem.
 
 VOL connector values are integers, with a maximum value of 65535. Values from 0 to 255 are reserved
 for internal use by The HDF Group. The native VOL connector has a value of 0. Values of 256 to 511
@@ -193,8 +191,8 @@ are for connector testing and should not be found in the wild. Values of 512 to 
 connectors.
 
 As is the case with HDF5 filters, The HDF Group can assign you an official VOL connector value. Please
-contact <a href="help@hdfgroup.org">help@hdfgroup.org</a> for help with this. We currently do not register
-connector names, though the name you've chosen will appear on the registered VOL connectors page.
+contact <a href="help@hdfgroup.org">help@hdfgroup.org</a> for help with this. We currently do not register connector names, though the
+name you've chosen will appear on the registered VOL connectors page.
 
 As noted above, registered VOL connectors will be listed at:
 <a href="https://\DOCURL/registered_vol_connectors.html">Registered VOL Connectors</a>
@@ -203,9 +201,10 @@ A new \b conn_version field has been added to the class struct for 1.13. This fi
 the library so its use is determined by the connector author. Best practices for this field will be determined
 in the near future and this part of the guide will be updated.
 
-The \b cap_flags field is used to determine the capabilities of the VOL connector. At this time, the use of
-this field is limited to indicating thread-safety, asynchronous capabilities, and ability to produce native
-HDF5 files. Supported flags can be found in \ref H5VLconnector.h. \code
+The \b cap_flags field is used to determine the capabilities of the VOL connector. At this time, the use of this
+field is limited to indicating thread-safety, asynchronous capabilities, and ability to produce native HDF5
+files. Supported flags can be found in \ref H5VLconnector.h.
+\code
 // Capability flags for connector
 #define H5VL_CAP_FLAG_NONE     0        // No special connector capabilities
 #define H5VL_CAP_FLAG_THREADSAFE 0x01   // Connector is threadsafe
@@ -239,9 +238,9 @@ demonstrate this process.
 \subsection subsecVOLFillIn Fill In VOL Callbacks
 For each file object you support in your connector (including the file itself), you will need to create a
 data struct to hold whatever file object metadata that are needed by your connector. For example, a data
-structure for a VOL connector based on text files might have a file struct that contains a file pointer for
-the text file, buffers used for caching data, etc. Pointers to these data structures are where your
-connector's state is stored and are returned to the HDF5 library from the create/open/etc. callbacks such as
+structure for a VOL connector based on text files might have a file struct that contains a file pointer for the
+text file, buffers used for caching data, etc. Pointers to these data structures are where your connector's
+state is stored and are returned to the HDF5 library from the create/open/etc. callbacks such as
 <em>dataset create</em>.
 
 Once you have your data structures, you'll need to create your own implementations of the callback functions
@@ -249,12 +248,11 @@ and map them via your #H5VL_class_t struct.
 
 \subsection subsecVOLOpt Handling Optional Operations
 Handling optional operations has changed significantly in HDF5 1.13.0. In the past, optional operations were
-specified using an integer <em>opt_type</em> parameter. This proved to be a problem with pass-through
-connectors, though, as it was possible to have <em>opt_type</em> clash if two connectors used the same
-<em>opt_type</em> values.
+specified using an integer <em>opt_type</em> parameter. This proved to be a problem with pass-through connectors,
+though, as it was possible to have <em>opt_type</em> clash if two connectors used the same <em>opt_type</em> values.
 
-The new scheme allows a connector to register an optional operation with the library and receive a
-dynamically-allocated <em>opt_type</em> value for the operation.
+The new scheme allows a connector to register an optional operation with the library and receive a dynamically-allocated
+<em>opt_type</em> value for the operation.
 
 The following API calls can be used to manage the optional operations:
 \code
@@ -263,15 +261,14 @@ The following API calls can be used to manage the optional operations:
   herr_t H5VLunregister_opt_operation(H5VL_subclass_t subcls, const char *op_name)
 \endcode
 
-The <em>register</em> call is used to register an operation for a subclass (file, etc.) and the
-<em>opt_type</em> parameter that the library assigned to the operation will be returned via the
-<em>opt_val</em> parameter. This value can then be passed to one of the subclass-specific API calls (listed
-below). If you need to find an existing optional call's assigned <em>opt_type</em> value by name, you can use
-the <em>find</em> call.
+The <em>register</em> call is used to register an operation for a subclass (file, etc.) and the <em>opt_type</em> parameter
+that the library assigned to the operation will be returned via the <em>opt_val</em> parameter. This value can then
+be passed to one of the subclass-specific API calls (listed below). If you need to find an existing optional
+call's assigned <em>opt_type</em> value by name, you can use the <em>find</em> call.
 
-One recommended way to handle optional calls is to <em>register</em> all the optional calls at startup, saving
-the values in connector state, then use these cached values in your optional calls. The assigned values should
-be unregistered using the <em>unregister</em> call when the connector shuts down.
+One recommended way to handle optional calls is to <em>register</em> all the optional calls at startup, saving the
+values in connector state, then use these cached values in your optional calls. The assigned values should be
+unregistered using the <em>unregister</em> call when the connector shuts down.
 
 Subclass-specific optional calls:
 \code
@@ -303,17 +300,17 @@ This is an evolving set of tests, so see the documentation in that repository fo
 You may want to clone and modify and/or extend these tests for use with your own connector.
 
 In the future, we plan to modify the HDF5 test suite that ships with the library to use a future VOL
-capabilities flags scheme to selectively run tests that a particular connector supports. As this is a large
-task, it may be some time before that work is complete.
+capabilities flags scheme to selectively run tests that a particular connector supports. As this is a large task,
+it may be some time before that work is complete.
 
 \subsection subsecVOLPassthrough Passthrough Connectors
 Coming Soon
 
-Note:
-Passthrough VOL connectors should avoid doing anything with the file in the open and create
-callbacks except opening it. If connectors need to do anything else they should use the post
-open callback (H5VL_NATIVE_FILE_POST_OPEN op_type for the file "optional" callback),
-making sure to perform operations on the file only after passing the post open call down to
+Note: 
+Passthrough VOL connectors should avoid doing anything with the file in the open and create 
+callbacks except opening it. If connectors need to do anything else they should use the post 
+open callback (H5VL_NATIVE_FILE_POST_OPEN op_type for the file "optional" callback), 
+making sure to perform operations on the file only after passing the post open call down to 
 the terminal connector.  The post open callback is made for both file open and file create calls.
 
 \subsection subsecVOLAsync Asynchronous Operations
@@ -330,31 +327,31 @@ Each VOL connector should be of type #H5VL_class_t:
 </tr>
 </table>
 
-The <em>version</em> field is the version of the #H5VL_class_t struct. This is identical to how the
-<em>version</em> field is used in the #H5Z_class2_t struct for filters.
+The <em>version</em> field is the version of the #H5VL_class_t struct. This is identical to how the <em>version</em> field is
+used in the #H5Z_class2_t struct for filters.
 
-The <em>value</em> field is a unique integer identifier that should be between 512 and 65535 for external,
-non-library connectors.
+The <em>value</em> field is a unique integer identifier that should be between 512 and 65535 for external, non-library
+connectors.
 
 The <em>name</em> field is a string that uniquely identifies the VOL connector name.
 
 The <em>conn_version</em> is the connector version. This is currently not used by the library.
 
-The <em>cap_flags</em> holds bitwise capability/feature flags that determine which operations and capabilities
-are supported by a the VOL connector. These fields were enumerated in the previous section.
+The <em>cap_flags</em> holds bitwise capability/feature flags that determine which operations and capabilities are
+supported by a the VOL connector. These fields were enumerated in the previous section.
 
-The <em>initialize</em> field is a function pointer to a routine that a connector implements to set up or
-initialize access to the connector. Implementing this function by the connector is not required since some
-connectors do not require any set up to start accessing the connector. In that case, the value of the function
-pointer should be set to NULL. Connector specific variables that are required to be passed from users should
-be passed through the VOL initialize property list. Generic properties can be added to this property class for
-user-defined connectors that cannot modify the HDF5 library to add internal properties. For more information
-consult the property list reference manual pages.
+The <em>initialize</em> field is a function pointer to a routine that a connector implements to set up or initialize
+access to the connector. Implementing this function by the connector is not required since some connectors
+do not require any set up to start accessing the connector. In that case, the value of the function pointer
+should be set to NULL. Connector specific variables that are required to be passed from users should be
+passed through the VOL initialize property list. Generic properties can be added to this property class
+for user-defined connectors that cannot modify the HDF5 library to add internal properties. For more
+information consult the property list reference manual pages.
 
-The <em>terminate</em> field is a function pointer to a routine that a connector implements to terminate or
-finalize access to the connector. Implementing this function by the connector is not required since some
-connectors do not require any termination phase to the connector. In that case, the value of the function
-pointer should be set to NULL.
+The <em>terminate</em> field is a function pointer to a routine that a connector implements to terminate or finalize
+access to the connector. Implementing this function by the connector is not required since some connectors
+do not require any termination phase to the connector. In that case, the value of the function pointer should
+be set to NULL.
 
 The rest of the fields in the #H5VL_class_t struct are "subclasses" that define all the VOL function callbacks
 that are mapped to from the HDF5 API layer. Those subclasses are categorized into three categories, VOL
@@ -366,9 +363,9 @@ with connector strings) and with wrapping and unwrapping objects for passthrough
 Data Model classes are those that provide functionality for accessing an HDF5 container and objects in that
 container as defined by the HDF5 data model.
 
-Infrastructure / Service classes are those that provide services for users that are not related to the data
-model specifically. Asynchronous operations, for example, are a service that most connectors can implement, so
-we add a class for it in the VOL structure.
+Infrastructure / Service classes are those that provide services for users that are not related to the data model
+specifically. Asynchronous operations, for example, are a service that most connectors can implement, so we
+add a class for it in the VOL structure.
 
 If a service becomes generic enough and common among many connectors, a class for it should be added
 to the VOL structure. However, many connectors can/will provide services that are not shared by other
@@ -381,11 +378,10 @@ user to interpret the type of the operation. All classes and their defined callb
 following sub-sections.
 
 To handle that large set of API routines, each class in the Data Model category has three generic callbacks,
-<em>get</em>, <em>specific</em>, and <em>optional</em> to handle the three set of API operations outline above
-respectively. To handle the varying parameters that can be passed to the callback, each callback will take a
-struct parameter that includes an enum <em>get/specific</em> or integer <em>optional</em> field indicating the
-operation and a union of the possible parameters <em>get/specific</em> or void pointer to the parameters
-<em>optional</em>.
+<em>get</em>, <em>specific</em>, and <em>optional</em> to handle the three set of API operations outline above respectively. To
+handle the varying parameters that can be passed to the callback, each callback will take a struct parameter
+that includes an enum <em>get/specific</em> or integer <em>optional</em> field indicating the operation and a union of the
+possible parameters <em>get/specific</em> or void pointer to the parameters <em>optional</em>.
 
 The optional args struct used for all optional operations:
 \code
@@ -396,16 +392,16 @@ typedef struct H5VL_optional_args_t {
 } H5VL_optional_args_t;
 \endcode
 
-The <em>opt_type</em> member is the value assigned by the library when the optional operation was registered
-(or <em>defined</em> in the case of the native VOL connector) and the <em>args</em> member is a pointer to the
-optional operation's parameters (usually passed in as a struct).
+The <em>opt_type</em> member is the value assigned by the library when the optional operation was registered (or
+<em>defined</em> in the case of the native VOL connector) and the <em>args</em> member is a pointer to the optional
+operation's parameters (usually passed in as a struct).
 
 Note that this differs from the HDF5 1.12.x scheme, which used <em>va_lists</em>.
 
-The <em>optional</em> callback is a free for all callback where anything from the API layer is passed in
-directly. This callback is used to support connector specific operations in the API that other connectors
-should or would not know about. More information about types and the arguments for each type will be detailed
-in the corresponding class arguments.
+The <em>optional</em> callback is a free for all callback where anything from the API layer is passed in directly.
+This callback is used to support connector specific operations in the API that other connectors should or
+would not know about. More information about types and the arguments for each type will be detailed in
+the corresponding class arguments.
 
 \subsection subsecVOLRefMap Mapping the API to the Callbacks
 The callback interface defined for the VOL has to be general enough to handle all the HDF5 API operations
@@ -419,10 +415,10 @@ to retrieve if they have to for particular operations, without having to add arg
 callback function.</li>
 <li>A pointer to a request <em>(void **req)</em> to handle asynchronous operations if the HDF5 library adds
 support for them in future releases. hat pointer is set by the VOL connector to a request object it
-creates to manage progress on that asynchronous operation. If the <em>req</em> is <em>NULL</em>, that means
-that the API operation is blocking and so the connector would not execute the operation asynchronously. If the
-connector does not support asynchronous operations, it needs not to worry about this field and leaves it
-unset.</li>
+creates to manage progress on that asynchronous operation. If the <em>req</em> is <em>NULL</em>, that means that the
+API operation is blocking and so the connector would not execute the operation asynchronously. If
+the connector does not support asynchronous operations, it needs not to worry about this field and
+leaves it unset.</li>
 </ul>
 
 In order to keep the number of the VOL object classes and callbacks concise and readable, it was decided
@@ -467,7 +463,7 @@ typedef enum H5VL_loc_type_t {
 
   // location defined by object, path, and index in H5VL_loc_by_idx_t
   H5VL_OBJECT_BY_IDX,
-
+  
   // location defined by token (e.g. physical address) in H5VL_loc_by_token_t
   H5VL_OBJECT_BY_TOKEN,
 } H5VL_loc_type_t;
@@ -492,26 +488,27 @@ typedef struct H5VL_loc_by_token {
 
 \subsection subsecVOLRefConn Connector Information Callbacks
 This section's callbacks involve the connector-specific information that will be associated with the VOL in
-the fapl via <b>H5Pset_fapl_<name></b> et al. This data is copied into the fapl so the library needs these
-functions to manage this in a way that prevents resource leaks.
+the fapl via <b>H5Pset_fapl_<name></b> et al. This data is copied into the fapl so the library needs these functions to
+manage this in a way that prevents resource leaks.
 
-The <em>to_str</em> and <em>from_str</em> callbacks are used to convert the connector-specific data to and
-from a configuration string. There is no official way to construct VOL configuration strings, so the format
-used (JSON, XML, getopt-style processing, etc.) is up to the connector author. These connector configuration
-strings can be used to set up a VOL connector via mechanisms like command-line parameters and environment
+The <em>to_str</em> and <em>from_str</em> callbacks are used to convert the connector-specific data to and from a configuration
+string. There is no official way to construct VOL configuration strings, so the format used (JSON,
+XML, getopt-style processing, etc.) is up to the connector author. These connector configuration strings
+can be used to set up a VOL connector via mechanisms like command-line parameters and environment
 variables.
 
 <em>Info class for connector information routines, H5VLconnector.h</em>
 \code
-// VOL connector info fields & callbacks
+// VOL connector info fields & callbacks 
 typedef struct H5VL_info_class_t {
     size_t size;                     // Size of the VOL info
     void *(*copy)(const void *info); // Callback to create a copy of the VOL info
     herr_t (*cmp)(int *cmp_value, const void *info1, const void *info2); // Callback to compare VOL info
     herr_t (*free)(void *info);                       // Callback to release a VOL info
     herr_t (*to_str)(const void *info, char **str);   // Callback to serialize connector's info into a string
-    herr_t (*from_str)(const char *str, void **info); // Callback to deserialize a string into connector's
-info } H5VL_info_class_t; \endcode
+    herr_t (*from_str)(const char *str, void **info); // Callback to deserialize a string into connector's info
+} H5VL_info_class_t;
+\endcode
 
 \subsubsection subsubsecVOLRefConnsize info: size
 The <em>size</em> field indicates the size required to store any special information that the connector needs.
@@ -531,9 +528,12 @@ If the connector requires no special information, set this field to zero.
 </table>
 
 \subsubsection subsubsecVOLRefConncopy info: copy
-The <em>copy</em> callback is invoked when the connector is selected for use with <b>H5Pset_fapl_<name></b>,
-the connector-specific set call, etc. Where possible, the information should be deep copied in such a way that
-the original data can be freed. <table> <tr> <th>Signature:</th>
+The <em>copy</em> callback is invoked when the connector is selected for use with <b>H5Pset_fapl_<name></b>, the
+connector-specific set call, etc. Where possible, the information should be deep copied in such a way that the original
+data can be freed.
+<table>
+<tr>
+<th>Signature:</th>
 </tr>
 <tr>
 <td>
@@ -555,8 +555,11 @@ the original data can be freed. <table> <tr> <th>Signature:</th>
 </table>
 
 \subsubsection subsubsecVOLRefConncmp info: cmp
-The <em>cmp</em> callback is used to determine if two connector-specific data structs are identical and helps
-the library manage connector resources. <table> <tr> <th>Signature:</th>
+The <em>cmp</em> callback is used to determine if two connector-specific data structs are identical and helps the library
+manage connector resources.
+<table>
+<tr>
+<th>Signature:</th>
 </tr>
 <tr>
 <td>
@@ -580,8 +583,11 @@ the library manage connector resources. <table> <tr> <th>Signature:</th>
 </table>
 
 \subsubsection subsubsecVOLRefConnfree info: free
-The <em>free</em> callback is used to clean up the connector-specific information that was copied when set in
-the fapl via the <em>copy</em> callback. <table> <tr> <th>Signature:</th>
+The <em>free</em> callback is used to clean up the connector-specific information that was copied when set in the
+fapl via the <em>copy</em> callback.
+<table>
+<tr>
+<th>Signature:</th>
 </tr>
 <tr>
 <td>
@@ -603,8 +609,11 @@ the fapl via the <em>copy</em> callback. <table> <tr> <th>Signature:</th>
 </table>
 
 \subsubsection subsubsecVOLRefConnto info: to_str
-The <em>to_str</em> callback converts a connector-specific information structure to a connector-specific
-configuration string. It is the opposite of the <em>from_str</em> callback. <table> <tr> <th>Signature:</th>
+The <em>to_str</em> callback converts a connector-specific information structure to a connector-specific configuration
+string. It is the opposite of the <em>from_str</em> callback.
+<table>
+<tr>
+<th>Signature:</th>
 </tr>
 <tr>
 <td>
@@ -627,8 +636,11 @@ configuration string. It is the opposite of the <em>from_str</em> callback. <tab
 </table>
 
 \subsubsection subsubsecVOLRefConnfrom info: from_str
-The <em>from_str</em> callback converts a connector-specific configuration string to a connector-specific
-information structure. It is the opposite of the <em>to_str</em> callback. <table> <tr> <th>Signature:</th>
+The <em>from_str</em> callback converts a connector-specific configuration string to a connector-specific information
+structure. It is the opposite of the <em>to_str</em> callback.
+<table>
+<tr>
+<th>Signature:</th>
 </tr>
 <tr>
 <td>
@@ -652,33 +664,29 @@ information structure. It is the opposite of the <em>to_str</em> callback. <tabl
 
 \subsection subsecVOLRefWrap Object Wrap Callbacks
 The object wrap callbacks are used by passthrough connectors to wrap/unwrap objects and contexts when
-passing them up and down the VOL chain. Each passthrough VOL must define an object wrapping structure and a
-wrap context. The object wrapping structure should contain the information necessary to recursively unwrap the
-object - at a minimum, this is the object provided from and the ID of the next connector in the stack. The
-wrap context should contain the information necessary to recursively wrap the object - at a minimum, this is
-the ID and the wrap context of the next VOL connector in the stack.
+passing them up and down the VOL chain. Each passthrough VOL must define an object wrapping structure and a wrap context.
+The object wrapping structure should contain the information necessary to recursively unwrap the object - at a minimum, this is the object provided from and the ID of the next connector in the stack.
+The wrap context should contain the information necessary to recursively wrap the object - at a minimum, this is the ID and the wrap context of the next VOL connector in the stack.
 
-Each callback should use <em>H5VL<callback></em> to recursively invoke the same callback in all lower
-passthrough VOl connectors.
+Each callback should use <em>H5VL<callback></em> to recursively invoke the same callback in all lower passthrough VOl connectors.
 
 <em>Wrap class for object wrapping routines, H5VLconnector.h</em>
 \code
 typedef struct H5VL_wrap_class_t {
     void *(*get_object)(const void *obj);    // Callback to retrieve underlying object
-    herr_t (*get_wrap_ctx)(const void *obj, void **wrap_ctx); // Callback to retrieve the object wrapping
-context for the connector void *(*wrap_object)(void *obj, H5I_type_t obj_type, void *wrap_ctx); // Callback to
-wrap a library object void *(*unwrap_object)(void *obj);       // Callback to unwrap a library object herr_t
-(*free_wrap_ctx)(void *wrap_ctx); // Callback to release the object wrapping context for the connector }
-H5VL_wrap_class_t; \endcode
+    herr_t (*get_wrap_ctx)(const void *obj, void **wrap_ctx); // Callback to retrieve the object wrapping context for the connector
+    void *(*wrap_object)(void *obj, H5I_type_t obj_type, void *wrap_ctx); // Callback to wrap a library object
+    void *(*unwrap_object)(void *obj);       // Callback to unwrap a library object
+    herr_t (*free_wrap_ctx)(void *wrap_ctx); // Callback to release the object wrapping context for the connector
+} H5VL_wrap_class_t;
+\endcode
 
 \subsubsection subsubsecVOLRefWrapobj wrap: get_object
-Retrieves the underlying object from a wrapped object. Should return a pointer to the underlying object
-belonging to the terminal VOL connector.
+Retrieves the underlying object from a wrapped object. Should return a pointer to the underlying object belonging to the terminal VOL connector.
 
-This will generally be done by unwrapping this VOL's object wrapping structure, before recursively calling
-<em>H5VLget_object</em> to invoke the <get_object> callback for all lower VOL connectors which define it.
-<em>H5VLget_object</em> requires the object returned by the next VOL and the next VOL's ID. Both of these
-fields should be stored by the VOL somehow, generally on the wrapped object structure.
+This will generally be done by unwrapping this VOL's object wrapping structure, before recursively calling <em>H5VLget_object</em> to invoke the <get_object>
+callback for all lower VOL connectors which define it. <em>H5VLget_object</em> requires the object returned by the next VOL and the next VOL's ID. Both of 
+these fields should be stored by the VOL somehow, generally on the wrapped object structure.
 
 This callback should not cleanup or modify the provided object wrapping structure.
 <table>
@@ -734,10 +742,10 @@ Any resources this callback allocates should be freed within <em>free_wrap_ctx</
 </table>
 
 \subsubsection subsubsecVOLRefWrapwrap wrap: wrap_object
-Asks a connector to wrap an underlying object. This callback should use <em>H5VLwrap_object</em>
+Asks a connector to wrap an underlying object. This callback should use <em>H5VLwrap_object</em> 
 to recursively have the object wrapped by all lower VOL connectors before performing its own wrapping.
 
-The wrapped object should provide the information necessary for <em>unwrap_object</em> to recursively
+The wrapped object should provide the information necessary for <em>unwrap_object</em> to recursively 
 unwrap it - at a minimum, the object provided from and the ID of the next VOL connector.
 <table>
 <tr>
@@ -765,11 +773,9 @@ unwrap it - at a minimum, the object provided from and the ID of the next VOL co
 </table>
 
 \subsubsection subsubsecVOLRefWrapunwrap wrap: unwrap_object
-Unwrap an object from connector. Any resources allocated during <em>wrap_object<em> should be released and
-cleaned up here.
+Unwrap an object from connector. Any resources allocated during <em>wrap_object<em> should be released and cleaned up here.
 
-This callback should clean up this VOL's object wrapping structure before recursively invoking
-<em>H5VLunwrap_object</em>.
+This callback should clean up this VOL's object wrapping structure before recursively invoking <em>H5VLunwrap_object</em>.
 
 <table>
 <tr>
@@ -795,9 +801,11 @@ This callback should clean up this VOL's object wrapping structure before recurs
 </table>
 
 \subsubsection subsubsecVOLRefWrapfree wrap: free_wrap_ctx
-Release a VOL connector's object wrapping context. This should free any resources allocated during
-<em>get_wrap_ctx</em>, and recursively invoke <em>H5VLfree_wrap_ctx</em> to execute the free callback for the
-lower VOL connectors in the stack. <table> <tr> <th>Signature:</th>
+Release a VOL connector's object wrapping context. This should free any resources allocated during <em>get_wrap_ctx</em>, and recursively invoke <em>H5VLfree_wrap_ctx</em>
+to execute the free callback for the lower VOL connectors in the stack.
+<table>
+<tr>
+<th>Signature:</th>
 </tr>
 <tr>
 <td>
@@ -841,15 +849,17 @@ typedef struct H5VL_attr_class_t {
 \endcode
 
 \subsubsection subsubsecVOLRefAttrcreate attr: create
-The <em>create</em> callback in the attribute class creates an attribute object in the container of the
-location object and returns a pointer to the attribute structure containing information to access the
-attribute in future calls. <table> <tr> <th>Signature:</th>
+The <em>create</em> callback in the attribute class creates an attribute object in the container of the location object
+and returns a pointer to the attribute structure containing information to access the attribute in future calls.
+<table>
+<tr>
+<th>Signature:</th>
 </tr>
 <tr>
 <td>
 \code
-  void *(*create)(void *obj, H5VL_loc_params_t *loc_params, const char *attr_name, hid_t type_id, hid_t
-space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req); \endcode
+  void *(*create)(void *obj, H5VL_loc_params_t *loc_params, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
+\endcode
 </td>
 </tr>
 <tr>
@@ -874,15 +884,16 @@ space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req); \endcode
 </table>
 
 \subsubsection subsubsecVOLRefAttropen attr: open
-The <em>open</em> callback in the attribute class opens an attribute object in the container of the location
-object and returns a pointer to the attribute structure containing information to access the attribute in
-future calls.<table> <tr> <th>Signature:</th>
+The <em>open</em> callback in the attribute class opens an attribute object in the container of the location object and
+returns a pointer to the attribute structure containing information to access the attribute in future calls.<table>
+<tr>
+<th>Signature:</th>
 </tr>
 <tr>
 <td>
 \code
-  void *(*open)(void *obj, H5VL_loc_params_t *loc_params, const char *attr_name, hid_t aapl_id, hid_t dxpl_id,
-void **req); \endcode
+  void *(*open)(void *obj, H5VL_loc_params_t *loc_params, const char *attr_name, hid_t aapl_id, hid_t dxpl_id, void **req);
+\endcode
 </td>
 </tr>
 <tr>
@@ -904,8 +915,11 @@ void **req); \endcode
 </table>
 
 \subsubsection subsubsecVOLRefAttrread attr: read
-The <em>read</em> callback in the attribute class reads data from the attribute object and returns an
-<em>herr_t</em> indicating success or failure. <table> <tr> <th>Signature:</th>
+The <em>read</em> callback in the attribute class reads data from the attribute object and returns an <em>herr_t</em> indicating
+success or failure.
+<table>
+<tr>
+<th>Signature:</th>
 </tr>
 <tr>
 <td>
@@ -931,8 +945,11 @@ The <em>read</em> callback in the attribute class reads data from the attribute 
 </table>
 
 \subsubsection subsubsecVOLRefAttrwrite attr: write
-The <em>write</em> callback in the attribute class writes data to the attribute object and returns an
-<em>herr_t</em> indicating success or failure. <table> <tr> <th>Signature:</th>
+The <em>write</em> callback in the attribute class writes data to the attribute object and returns an <em>herr_t</em> indicating
+success or failure.
+<table>
+<tr>
+<th>Signature:</th>
 </tr>
 <tr>
 <td>
@@ -958,8 +975,10 @@ The <em>write</em> callback in the attribute class writes data to the attribute 
 </table>
 
 \subsubsection subsubsecVOLRefAttrget attr: get
-The <em>get</em> callback in the attribute class retrieves information about the attribute as specified in the
-<em>get_type</em> parameter. It returns an <em>herr_t</em> indicating success or failure <table> <tr>
+The <em>get</em> callback in the attribute class retrieves information about the attribute as specified in the <em>get_type</em> parameter.
+It returns an <em>herr_t</em> indicating success or failure
+<table>
+<tr>
 <th>Signature:</th>
 </tr>
 <tr>
@@ -1045,37 +1064,45 @@ typedef struct H5VL_attr_get_args_t {
 } H5VL_attr_get_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefAttrspec attr : specific The<em> specific</ em>
-                                                   callback in the attribute class implements specific
-                                                       operations on HDF5 attributes as specified in the<em>
-                                                               specific_type</ em>
-                                                               parameter.It returns an<em>
-                                                                                    herr_t</ em>
-                                                                       indicating   success or
-    failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*specific)(void *obj, H5VL_loc_params_t *loc_params, H5VL_attr_specific_args_t *args,
-                                        hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : The location object where the operation needs to happen
-          .loc_params(IN)
-    : A pointer to the location parameters as explained in
-      "Mapping the API to the Callbacks".args(IN / OUT)
-    : A pointer to the arguments struct.dxpl_id(IN)
-    : The data transfer property list
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
+\subsubsection subsubsecVOLRefAttrspec attr: specific
+The <em>specific</em> callback in the attribute class implements specific operations on HDF5 attributes as specified
+in the <em>specific_type</em> parameter.  It returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*specific)(void *obj, H5VL_loc_params_t *loc_params, H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj        (IN): The location object where the operation needs to happen.
+  loc_params (IN): A pointer to the location parameters as explained in "Mapping the API to the Callbacks".
+  args   (IN/OUT): A pointer to the arguments struct.
+  dxpl_id    (IN): The data transfer property list.
+  req    (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
 
 \code
-      /* Values for attribute 'specific' operation */
-      typedef enum H5VL_attr_specific_t {
-          H5VL_ATTR_DELETE,        /* H5Adelete(_by_name)  */
-          H5VL_ATTR_DELETE_BY_IDX, /* H5Adelete_by_idx     */
-          H5VL_ATTR_EXISTS,        /* H5Aexists(_by_name)  */
-          H5VL_ATTR_ITER,          /* H5Aiterate(_by_name) */
-          H5VL_ATTR_RENAME         /* H5Arename(_by_name)  */
-      } H5VL_attr_specific_t;
+/* Values for attribute 'specific' operation */
+typedef enum H5VL_attr_specific_t {
+    H5VL_ATTR_DELETE,        /* H5Adelete(_by_name)  */
+    H5VL_ATTR_DELETE_BY_IDX, /* H5Adelete_by_idx     */
+    H5VL_ATTR_EXISTS,        /* H5Aexists(_by_name)  */
+    H5VL_ATTR_ITER,          /* H5Aiterate(_by_name) */
+    H5VL_ATTR_RENAME         /* H5Arename(_by_name)  */
+} H5VL_attr_specific_t;
 
 /* Parameters for attribute 'iterate' operation */
 typedef struct H5VL_attr_iterate_args_t {
@@ -1125,34 +1152,49 @@ typedef struct H5VL_attr_specific_args_t {
 } H5VL_attr_specific_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefAttropt attr : optional The<em> optional</ em>
-                                                  callback in the attribute class implements
-                                                      connector specific operations on an HDF5 attribute.It
-                                                          returns                              an<em>
-                                                                                               herr_t</ em>
-                                                                  indicating                   success or
-    failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : The container or
-      object where the operation needs to happen.args(IN / OUT)
-    : A pointer to the arguments struct.dxpl_id(IN)
-    : The data transfer property list
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table> Each connector that requires connector
-              - specific operations should compare the value of the<em> op_type</ em> field of the
-              #H5VL_optional_args_t struct with the values returned from calling
-              #H5VLregister_opt_operation to determine how to handle the optional call
-          and
-          interpret the arguments passed in the struct.
+\subsubsection subsubsecVOLRefAttropt attr: optional
+The <em>optional</em> callback in the attribute class implements connector specific operations on an HDF5 attribute.
+It returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj      (IN): The container or object where the operation needs to happen.
+  args (IN/OUT): A pointer to the arguments struct.
+  dxpl_id  (IN): The data transfer property list.
+  req  (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+Each connector that requires connector-specific operations should compare the value of the <em>op_type</em> field of
+the #H5VL_optional_args_t struct with the values returned from calling #H5VLregister_opt_operation to
+determine how to handle the optional call and interpret the arguments passed in the struct.
 
-\subsubsection subsubsecVOLRefAttrclose attr : close The<em> close</ em> callback in the attribute
-                                                class terminates access to the attribute object
-          and free all resources it was consuming,
-and returns an<em> herr_t</ em> indicating success or failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t(*close)(void *attr, hid_t dxpl_id, void **req);
+\subsubsection subsubsecVOLRefAttrclose attr: close
+The <em>close</em> callback in the attribute class terminates access to the attribute object and free all resources it
+was consuming, and returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*close)(void *attr, hid_t dxpl_id, void **req);
 \endcode
 </td>
 </tr>
@@ -1193,121 +1235,177 @@ typedef struct H5VL_dataset_class_t {
 } H5VL_dataset_class_t;
 \endcode
 
-\subsubsection subsubsecVOLRefDsetcreate dataset
-    : create                              The<em>
-                                          create</ em>
-              callback in the dataset class creates
-                  a dataset object in the container of the location object and returns a pointer to the
-                      dataset structure containing information to access the dataset in future calls.<table>
-      <tr><th>
-                             Signature : </ th></ tr><tr><td>
-\code void *(*create)(void *obj, H5VL_loc_params_t *loc_params, const char *name, hid_t lcpl_id,
-                       hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id,
-                       void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : Pointer to an object where the dataset needs to be created or
-      where the look - up of the target object needs to start
-                           .loc_params(IN)
-    : Pointer to the location parameters as explained in
-      "Mapping the API to the Callbacks".The type can be only H5VL_OBJECT_BY_SELF in
-      this callback.name(IN)
-    : The name of the dataset to be created.lcpl_id(IN)
-    : The link creation property list.type_id(IN)
-    : The datatype of the dataset.space_id(IN)
-    : The dataspace of the dataset.dcpl_id(IN)
-    : The dataset creation property list.dapl_id(IN)
-    : The dataset access property list.dxpl_id(IN)
-    : The data transfer property list
-                           .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
-
-\subsubsection subsubsecVOLRefDsetopen dataset
-    : open The<em> open</ em> callback in the dataset
-      class opens a dataset object in the container of the location object
-          and returns a pointer to the dataset structure containing
-                  information to access the dataset in future calls.<table><tr><th> Signature
-    : </ th></ tr><tr><td>
-\code void * (*open)(void *obj, H5VL_loc_params_t *loc_params, const char *name, hid_t dapl_id,
-                      hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : Pointer to an object where the dataset needs to be opened or
-      where the look - up of the target object needs to start
-                           .loc_params(IN)
-    : Pointer to the location parameters as explained in
-      "Mapping the API to the Callbacks".The type can be only H5VL_OBJECT_BY_SELF in
-      this callback.name(IN)
-    : The name of the dataset to be opened.dapl_id(IN)
-    : The dataset access property list.dxpl_id(IN)
-    : The data transfer property list
-                           .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
-
-\subsubsection subsubsecVOLRefDsetread dataset : read The<em> read</ em> callback in the dataset
-                                                  class reads data from the dataset object
-          and returns an<em> herr_t</ em> indicating success
-      or
-      failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t(*read)(void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
-                                          void *buf, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code dset(IN)
-    : Pointer to the dataset object.mem_type_id(IN)
-    : The memory datatype of the data.mem_space_id(IN)
-    : The memory dataspace selection.file_space_id(IN)
-    : The file dataspace selection.dxpl_id(IN)
-    : The data transfer property list.buf(OUT)
-    : Data buffer to be read into
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
-
-\subsubsection subsubsecVOLRefDsetwrite dataset : write The<em> write</ em> callback in the dataset
-                                                   class writes data to the dataset object
-        and returns an<em> herr_t</ em> indicating success
-    or failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t(*write)(void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
-                                           const void *buf, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code dset(IN)
-    : Pointer to the dataset object.mem_type_id(IN)
-    : The memory datatype of the data.mem_space_id(IN)
-    : The memory dataspace selection.file_space_id(IN)
-    : The file dataspace selection.dxpl_id(IN)
-    : The data transfer property list.buf(IN)
-    : Data buffer to be written from
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector
-          .
-\endcode</ td></ tr></ table>
-
-\subsubsection subsubsecVOLRefDsetget dataset
-    : get The<em> get</ em> callback in the dataset class retrieves information about the dataset as specified
-      in the<em> get_type</ em> parameter.It returns an<em> herr_t</ em> indicating success
-    or failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t(*get)(void *dset, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code dset(IN)
-    : The dataset object where
-      information needs to be retrieved from.args(IN / OUT)
-    : A pointer to the arguments struct.dxpl_id(IN)
-    : The data transfer property list
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
+\subsubsection subsubsecVOLRefDsetcreate dataset: create
+The <em>create</em> callback in the dataset class creates a dataset object in the container of the location object and
+returns a pointer to the dataset structure containing information to access the dataset in future calls.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
 \code
-      /* Values for dataset 'get' operation */
-      typedef enum H5VL_dataset_get_t {
-          H5VL_DATASET_GET_DAPL,         /* access property list                */
-          H5VL_DATASET_GET_DCPL,         /* creation property list              */
-          H5VL_DATASET_GET_SPACE,        /* dataspace                           */
-          H5VL_DATASET_GET_SPACE_STATUS, /* space status                        */
-          H5VL_DATASET_GET_STORAGE_SIZE, /* storage size                        */
-          H5VL_DATASET_GET_TYPE          /* datatype                            */
-      } H5VL_dataset_get_t;
+  void *(*create)(void *obj, H5VL_loc_params_t *loc_params, const char *name, hid_t lcpl_id,hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj        (IN): Pointer to an object where the dataset needs to be created or where the look-up of
+                   the target object needs to start.
+  loc_params (IN): Pointer to the location parameters as explained in "Mapping the API to the Callbacks".
+                   The type can be only H5VL_OBJECT_BY_SELF in this callback.
+  name       (IN): The name of the dataset to be created.
+  lcpl_id    (IN): The link creation property list.
+  type_id    (IN): The datatype of the dataset.
+  space_id   (IN): The dataspace of the dataset.
+  dcpl_id    (IN): The dataset creation property list.
+  dapl_id    (IN): The dataset access property list.
+  dxpl_id    (IN): The data transfer property list.
+  req    (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+
+\subsubsection subsubsecVOLRefDsetopen dataset: open
+The <em>open</em> callback in the dataset class opens a dataset object in the container of the location object and
+returns a pointer to the dataset structure containing information to access the dataset in future calls.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  void *(*open)(void *obj, H5VL_loc_params_t *loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj        (IN): Pointer to an object where the dataset needs to be opened or where the look-up of the target object needs to start.
+  loc_params (IN): Pointer to the location parameters as explained in "Mapping the API to the Callbacks".
+                   The type can be only H5VL_OBJECT_BY_SELF in this callback.
+  name       (IN): The name of the dataset to be opened.
+  dapl_id    (IN): The dataset access property list.
+  dxpl_id    (IN): The data transfer property list.
+  req    (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+
+\subsubsection subsubsecVOLRefDsetread dataset: read
+The <em>read</em> callback in the dataset class reads data from the dataset object and returns an <em>herr_t</em> indicating
+success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*read)(void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, void *buf, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  dset          (IN): Pointer to the dataset object.
+  mem_type_id   (IN): The memory datatype of the data.
+  mem_space_id  (IN): The memory dataspace selection.
+  file_space_id (IN): The file dataspace selection.
+  dxpl_id       (IN): The data transfer property list.
+  buf          (OUT): Data buffer to be read into.
+  req       (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+
+\subsubsection subsubsecVOLRefDsetwrite dataset: write
+The <em>write</em> callback in the dataset class writes data to the dataset object and returns an <em>herr_t</em> indicating
+success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*write)(void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, const void *buf, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  dset          (IN): Pointer to the dataset object.
+  mem_type_id   (IN): The memory datatype of the data.
+  mem_space_id  (IN): The memory dataspace selection.
+  file_space_id (IN): The file dataspace selection.
+  dxpl_id       (IN): The data transfer property list.
+  buf           (IN): Data buffer to be written from.
+  req       (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+
+\subsubsection subsubsecVOLRefDsetget dataset: get
+The <em>get</em> callback in the dataset class retrieves information about the dataset as specified in the <em>get_type</em>
+parameter.It returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*get)(void *dset, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  dset     (IN): The dataset object where information needs to be retrieved from.
+  args (IN/OUT): A pointer to the arguments struct.
+  dxpl_id  (IN): The data transfer property list.
+  req  (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+\code
+/* Values for dataset 'get' operation */
+typedef enum H5VL_dataset_get_t {
+    H5VL_DATASET_GET_DAPL,         /* access property list                */
+    H5VL_DATASET_GET_DCPL,         /* creation property list              */
+    H5VL_DATASET_GET_SPACE,        /* dataspace                           */
+    H5VL_DATASET_GET_SPACE_STATUS, /* space status                        */
+    H5VL_DATASET_GET_STORAGE_SIZE, /* storage size                        */
+    H5VL_DATASET_GET_TYPE          /* datatype                            */
+} H5VL_dataset_get_t;
 
 /* Parameters for dataset 'get' operations */
 typedef struct H5VL_dataset_get_args_t {
@@ -1348,30 +1446,41 @@ typedef struct H5VL_dataset_get_args_t {
 } H5VL_dataset_get_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefDsetspec dataset : specific The<em> specific</ em>
-                                                      callback in the dataset class implements specific
-                                                          operations on HDF5 datasets as specified in the<em>
-                                                                  specific_type</ em>
-                                                                  parameter.It returns an<em>
-                                                                                       herr_t</ em>
-                                                                          indicating   success or
-    failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*specific)(void *obj, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : The dset where the operation needs to happen.args(IN / OUT)
-    : A pointer to the arguments struct.dxpl_id(IN)
-    : The data transfer property list
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
+\subsubsection subsubsecVOLRefDsetspec dataset: specific
+The <em>specific</em> callback in the dataset class implements specific operations on HDF5 datasets as specified in
+the <em>specific_type</em> parameter. It returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
 \code
-      /* Values for dataset 'specific' operation */
-      typedef enum H5VL_dataset_specific_t {
-          H5VL_DATASET_SET_EXTENT, /* H5Dset_extent                       */
-          H5VL_DATASET_FLUSH,      /* H5Dflush                            */
-          H5VL_DATASET_REFRESH     /* H5Drefresh                          */
-      } H5VL_dataset_specific_t;
+  herr_t (*specific)(void *obj, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj      (IN): The dset where the operation needs to happen.
+  args (IN/OUT): A pointer to the arguments struct.
+  dxpl_id  (IN): The data transfer property list.
+  req  (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+\code
+/* Values for dataset 'specific' operation */
+typedef enum H5VL_dataset_specific_t {
+    H5VL_DATASET_SET_EXTENT, /* H5Dset_extent                       */
+    H5VL_DATASET_FLUSH,      /* H5Dflush                            */
+    H5VL_DATASET_REFRESH     /* H5Drefresh                          */
+} H5VL_dataset_specific_t;
 
 /* Parameters for dataset 'specific' operations */
 typedef struct H5VL_dataset_specific_args_t {
@@ -1397,35 +1506,49 @@ typedef struct H5VL_dataset_specific_args_t {
 } H5VL_dataset_specific_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefDsetopt dataset : optional The<em> optional</ em>
-                                                     callback in the dataset class implements
-                                                         connector specific operations on an HDF5 dataset.It
-                                                             returns                              an<em>
-                                                                                                  herr_t</ em>
-                                                                     indicating                   success or
-    failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : The container or
-      object where the operation needs to happen.args(IN / OUT)
-    : A pointer to the arguments struct.dxpl_id(IN)
-    : The data transfer property list
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table> Each connector that requires connector
-              - specific operations should compare the value of the<em> op_type</ em> field of the
-              #H5VL_optional_args_t struct with the values returned from calling
-              #H5VLregister_opt_operation to determine how to handle the optional call
-          and
-          interpret the arguments passed in the struct.
+\subsubsection subsubsecVOLRefDsetopt dataset: optional
+The <em>optional</em> callback in the dataset class implements connector specific operations on an HDF5 dataset.
+It returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj      (IN): The container or object where the operation needs to happen.
+  args (IN/OUT): A pointer to the arguments struct.
+  dxpl_id  (IN): The data transfer property list.
+  req  (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+Each connector that requires connector-specific operations should compare the value of the <em>op_type</em> field of
+the #H5VL_optional_args_t struct with the values returned from calling #H5VLregister_opt_operation to
+determine how to handle the optional call and interpret the arguments passed in the struct.
 
-\subsubsection subsubsecVOLRefDsetclose dataset : close The<em> close</ em> callback in the dataset
-                                                   class terminates access to the dataset object
-          and free all resources it was consuming and returns an<em> herr_t</ em> indicating success
-      or
-      failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t(*close)(void *dset, hid_t dxpl_id, void **req);
+\subsubsection subsubsecVOLRefDsetclose dataset: close
+The <em>close</em> callback in the dataset class terminates access to the dataset object and free all resources it was
+consuming and returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*close)(void *dset, hid_t dxpl_id, void **req);
 \endcode
 </td>
 </tr>
@@ -1469,78 +1592,111 @@ typedef struct H5VL_datatype_class_t {
 } H5VL_datatype_class_t;
 \endcode
 
-\subsubsection subsubsecVOLRefDTypecommit datatype
-    : commit                               The<em>
-                                           commit</ em>
-              callback in the named datatype class creates
-                  a datatype object in the container of the location object and returns a pointer to the
-                      datatype structure containing information to access the datatype in future calls.<table>
-      <tr><th>
-                             Signature : </ th></ tr><tr><td>
-\code void *(*commit)(void *obj, H5VL_loc_params_t *loc_params, const char *name, hid_t type_id,
-                       hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : Pointer to an object where the datatype needs to be committed or
-      where the look - up of the target object needs to start
-                           .loc_params(IN)
-    : Pointer to location parameters as explained in "Mapping the API to the Callbacks".In this call,
-the location type is always H5VL_OBJECT_BY_SELF.name(IN)
-    : The name of the datatype to be created.typeid(IN)
-    : The transient datatype identifier to be committed.lcpl_id(IN)
-    : The link creation property list.tcpl_id(IN)
-    : The datatype creation property list.tapl_id(IN)
-    : The datatype access property list.dxpl_id(IN)
-    : The data transfer property list
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
-
-\subsubsection subsubsecVOLRefDTypeopen datatype
-    : open The<em> open</ em> callback in the named datatype
-      class opens a previously committed datatype object in the container of the location object
-    and returns a pointer to the datatype structure containing
-            information to access the datatype in future calls.<table><tr><th> Signature
-    : </ th></ tr><tr><td>
+\subsubsection subsubsecVOLRefDTypecommit datatype: commit
+The <em>commit</em> callback in the named datatype class creates a datatype object in the container of the location
+object and returns a pointer to the datatype structure containing information to access the datatype in
+future calls.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
 \code
-      void * (*open)(void *obj, H5VL_loc_params_t *loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id,
-                     void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : Pointer to an object where the datatype needs to be opened or
-      where the look - up of the target object needs to start
-                           .loc_params(IN)
-    : Pointer to location parameters as explained in "Mapping the API to the Callbacks".In this call,
-the location type is always H5VL_OBJECT_BY_SELF.name(IN)
-    : The name of the datatype to be opened.tapl_id(IN)
-    : The datatype access property list.dxpl_id(IN)
-    : The data transfer property list
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector
-          .
-\endcode</ td></ tr></ table>
-
-\subsubsection subsubsecVOLRefDTypeget datatype
-    : get The<em> get</ em> callback in the named datatype
-      class retrieves information about the named datatype as specified in
-      thegettypeparameter.It returns an<em> herr_t</ em> indicating success
-    or failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t(*get)(void *obj, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : The named datatype to retrieve information from.args(IN / OUT)
-    : A pointer to the arguments struct.dxpl_id(IN)
-    : The data transfer property list
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
+  void *(*commit)(void *obj, H5VL_loc_params_t *loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
 \code
-      /* Values for datatype 'get' operation */
-      typedef enum H5VL_datatype_get_t {
-          H5VL_DATATYPE_GET_BINARY_SIZE, /* Get size of serialized form of transient type */
-          H5VL_DATATYPE_GET_BINARY,      /* Get serialized form of transient type         */
-          H5VL_DATATYPE_GET_TCPL         /* Datatype creation property list               */
-      } H5VL_datatype_get_t;
+  obj        (IN): Pointer to an object where the datatype needs to be committed or where the look-up of the target object needs to start.
+  loc_params (IN): Pointer to location parameters as explained in "Mapping the API to the Callbacks".
+                   In this call, the location type is always H5VL_OBJECT_BY_SELF.
+  name       (IN): The name of the datatype to be created.
+  typeid     (IN): The transient datatype identifier to be committed.
+  lcpl_id    (IN): The link creation property list.
+  tcpl_id    (IN): The datatype creation property list.
+  tapl_id    (IN): The datatype access property list.
+  dxpl_id    (IN): The data transfer property list.
+  req    (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+
+\subsubsection subsubsecVOLRefDTypeopen datatype: open
+The <em>open</em> callback in the named datatype class opens a previously committed datatype object in the container
+of the location object and returns a pointer to the datatype structure containing information to access the
+datatype in future calls.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  void *(*open) (void *obj, H5VL_loc_params_t *loc_params, const char * name, hid_t tapl_id, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj        (IN): Pointer to an object where the datatype needs to be opened or where the look-up
+                   of the target object needs to start.
+  loc_params (IN): Pointer to location parameters as explained in "Mapping the API to the Callbacks".
+                   In this call, the location type is always H5VL_OBJECT_BY_SELF.
+  name       (IN): The name of the datatype to be opened.
+  tapl_id    (IN): The datatype access property list.
+  dxpl_id    (IN): The data transfer property list.
+  req    (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+
+\subsubsection subsubsecVOLRefDTypeget datatype: get
+The <em>get</em> callback in the named datatype class retrieves information about the named datatype as specified
+in thegettypeparameter.It returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*get) (void *obj, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj      (IN): The named datatype to retrieve information from.
+  args (IN/OUT): A pointer to the arguments struct.
+  dxpl_id  (IN): The data transfer property list.
+  req  (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+\code
+/* Values for datatype 'get' operation */
+typedef enum H5VL_datatype_get_t {
+    H5VL_DATATYPE_GET_BINARY_SIZE, /* Get size of serialized form of transient type */
+    H5VL_DATATYPE_GET_BINARY,      /* Get serialized form of transient type         */
+    H5VL_DATATYPE_GET_TCPL         /* Datatype creation property list               */
+} H5VL_datatype_get_t;
 
 /* Parameters for datatype 'get' operations */
 typedef struct H5VL_datatype_get_args_t {
@@ -1567,33 +1723,41 @@ typedef struct H5VL_datatype_get_args_t {
 } H5VL_datatype_get_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefDTypespec datatype : specific The<em> specific</ em> callback in the
-                                                        datatype class implements specific operations on HDF5
-                                                            named datatypes as specified in the<em>
-                                                                    specific_type</ em>
-                                                                    parameter.It returns an<em>
-                                                                                         herr_t</ em>
-                                                                            indicating   success or
-    failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*specific)(void *obj, H5VL_loc_params_t *loc_params, H5VL_object_specific_args_t *args,
-                                        hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : The container or object where the operation needs to happen
-                           .loc_params(IN)
-    : Pointer to location parameters as explained in
-      "Mapping the API to the Callbacks".args(IN / OUT)
-    : A pointer to the arguments struct.dxpl_id(IN)
-    : The data transfer property list
-                           .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
+\subsubsection subsubsecVOLRefDTypespec datatype: specific
+The <em>specific</em> callback in the datatype class implements specific operations on HDF5 named datatypes as
+specified in the <em>specific_type</em> parameter.  It returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
 \code
-      /* Values for datatype 'specific' operation */
-      typedef enum H5VL_datatype_specific_t {
-          H5VL_DATATYPE_FLUSH,  /* H5Tflush */
-          H5VL_DATATYPE_REFRESH /* H5Trefresh */
-      } H5VL_datatype_specific_t;
+  herr_t (*specific)(void *obj, H5VL_loc_params_t *loc_params, H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj        (IN): The container or object where the operation needs to happen.
+  loc_params (IN): Pointer to location parameters as explained in "Mapping the API to the Callbacks".
+  args   (IN/OUT): A pointer to the arguments struct.
+  dxpl_id    (IN): The data transfer property list.
+  req    (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+\code
+/* Values for datatype 'specific' operation */
+typedef enum H5VL_datatype_specific_t {
+    H5VL_DATATYPE_FLUSH,  /* H5Tflush */
+    H5VL_DATATYPE_REFRESH /* H5Trefresh */
+} H5VL_datatype_specific_t;
 
 /* Parameters for datatype 'specific' operations */
 typedef struct H5VL_datatype_specific_args_t {
@@ -1614,36 +1778,50 @@ typedef struct H5VL_datatype_specific_args_t {
 } H5VL_datatype_specific_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefDTypeopt datatype : optional The<em> optional</ em> callback in the
-                                                       datatype class implements connector specific operations
-                                                           on an HDF5 datatype.It returns an<em>
-                                                                                          herr_t</ em>
-                                                                   indicating             success or
-    failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : The container or
-      object where the operation needs to happen.args(IN / OUT)
-    : A pointer to the arguments struct.dxpl_id(IN)
-    : The data transfer property list
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
+\subsubsection subsubsecVOLRefDTypeopt datatype: optional
+The <em>optional</em> callback in the datatype class implements connector specific operations on an HDF5 datatype.
+It returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj      (IN): The container or object where the operation needs to happen.
+  args (IN/OUT): A pointer to the arguments struct.
+  dxpl_id  (IN): The data transfer property list.
+  req  (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
 
-      Each connector that requires connector
-              - specific operations should compare the value of the<em> op_type</ em> field of the
-              #H5VL_optional_args_t struct with the values returned from calling
-              #H5VLregister_opt_operation to determine how to handle the optional call
-          and
-          interpret the arguments passed in the struct.
+Each connector that requires connector-specific operations should compare the value of the <em>op_type</em> field of
+the #H5VL_optional_args_t struct with the values returned from calling #H5VLregister_opt_operation to
+determine how to handle the optional call and interpret the arguments passed in the struct.
 
-\subsubsection subsubsecVOLRefDTypeclose datatype : close The<em> close</ em> callback in the named datatype
-                                                     class terminates access to the datatype object
-          and free all resources it was consuming and returns an<em> herr_t</ em> indicating success
-      or
-      failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t(*close)(void *dt, hid_t dxpl_id, void **req);
+\subsubsection subsubsecVOLRefDTypeclose datatype: close
+The <em>close</em> callback in the named datatype class terminates access to the datatype object and free all
+resources it was consuming and returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*close) (void *dt, hid_t dxpl_id, void **req);
 \endcode
 </td>
 </tr>
@@ -1679,62 +1857,98 @@ typedef struct H5VL_file_class_t {
 } H5VL_file_class_t;
 \endcode
 
-\subsubsection subsubsecVOLRefFilecreate file
-    : create                              The<em>
-                                          create</ em>
-              callback in the file class should create a container and
-                  returns a pointer to the file structure created by the connector containing information to
-                      access the container in future calls.<table><tr><th>
-                                                     Signature : </ th></ tr><tr><td>
-\code void *(*create)(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_tdxpl_id,
-                                      void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code name(IN)
-    : The name of the container to be created.flags(IN)
-    : The creation flags of the container.fcpl_id(IN)
-    : The file creation property list.fapl_id(IN)
-    : The file access property list.dxpl_id(IN)
-    : The data transfer property list
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
+\subsubsection subsubsecVOLRefFilecreate file: create
+The <em>create</em> callback in the file class should create a container and returns a pointer to the file structure
+created by the connector containing information to access the container in future calls.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  void *(*create)(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_tdxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  name    (IN): The name of the container to be created.
+  flags   (IN): The creation flags of the container.
+  fcpl_id (IN): The file creation property list.
+  fapl_id (IN): The file access property list.
+  dxpl_id (IN): The data transfer property list.
+  req (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
 
-\subsubsection subsubsecVOLRefFileopen file : open The<em> open</ em> callback in the file
-                                               class should open a container
-    and returns a pointer to the file structure created by the connector containing
-            information to access the container in future calls.<table><tr><th> Signature
-    : </ th></ tr><tr><td>
+\subsubsection subsubsecVOLRefFileopen file: open
+The <em>open</em> callback in the file class should open a container and returns a pointer to the file structure created
+by the connector containing information to access the container in future calls.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
 \code
-      void * (*open)(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code name(IN)
-    : The name of the container to open.flags(IN)
-    : The open flags of the container.fapl_id(IN)
-    : The file access property list.dxpl_id(IN)
-    : The data transfer property list
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector
-          .
-\endcode</ td></ tr></ table>
+  void *(*open)(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  name    (IN): The name of the container to open.
+  flags   (IN): The open flags of the container.
+  fapl_id (IN): The file access property list.
+  dxpl_id (IN): The data transfer property list.
+  req (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
 
-\subsubsection subsubsecVOLRefFileget file
-    : get The<em> get</ em> callback in the file class should retrieve information about the container as
-      specified in the<em> get_type</ em> parameter.It returns an<em> herr_t</ em> indicating success
-    or failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t(*get)(void *obj, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th>             Arguments : </ th></ tr><tr><td>
+\subsubsection subsubsecVOLRefFileget file: get
+The <em>get</em> callback in the file class should retrieve information about the container as specified in the <em>get_type</em>
+parameter. It returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
 \code
-                                         obj(IN)
-    : The container or object where information needs to be retrieved from
-                           .args(IN / OUT)
-    : A pointer to the arguments struct.dxpl_id(IN)
-    : The data transfer property list
-                           .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
+  herr_t (*get)(void *obj, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
 \code
-      /* Info for H5VL_FILE_GET_CONT_INFO */
-      typedef struct H5VL_file_cont_info_t {
+  obj      (IN): The container or object where information needs to be retrieved from.
+  args (IN/OUT): A pointer to the arguments struct.
+  dxpl_id  (IN): The data transfer property list.
+  req  (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+\code
+/* Info for H5VL_FILE_GET_CONT_INFO */
+typedef struct H5VL_file_cont_info_t {
     unsigned version;       /* version information (keep first) */
     uint64_t feature_flags; /* Container feature flags          */
                             /* (none currently defined)         */
@@ -1816,34 +2030,43 @@ typedef struct H5VL_file_get_args_t {
 } H5VL_file_get_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefFilespec file
-    : specific                          The<em>
-                                        specific</ em>
-              callback in the file class implements specific operations on HDF5 files as specified in the<em>
-                      specific_type</ em>
-                      parameter.It returns an<em>
-                                           herr_t</ em>
-                              indicating   success or
-    failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*specific)(void *obj, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : The container or object where the operation needs to happen
-                           .args(IN / OUT)
-    : A pointer to the arguments struct.dxpl_id(IN)
-    : The data transfer property list
-                           .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
+\subsubsection subsubsecVOLRefFilespec file: specific
+The <em>specific</em> callback in the file class implements specific operations on HDF5 files as specified in the
+<em>specific_type</em> parameter. It returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
 \code
-      /* Values for file 'specific' operation */
-      typedef enum H5VL_file_specific_t {
-          H5VL_FILE_FLUSH,         /* Flush file                       */
-          H5VL_FILE_REOPEN,        /* Reopen the file                  */
-          H5VL_FILE_IS_ACCESSIBLE, /* Check if a file is accessible    */
-          H5VL_FILE_DELETE,        /* Delete a file                    */
-          H5VL_FILE_IS_EQUAL       /* Check if two files are the same  */
-      } H5VL_file_specific_t;
+  herr_t (*specific)(void *obj, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj      (IN): The container or object where the operation needs to happen.
+  args (IN/OUT): A pointer to the arguments struct.
+  dxpl_id  (IN): The data transfer property list.
+  req  (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+\code
+/* Values for file 'specific' operation */
+typedef enum H5VL_file_specific_t {
+    H5VL_FILE_FLUSH,         /* Flush file                       */
+    H5VL_FILE_REOPEN,        /* Reopen the file                  */
+    H5VL_FILE_IS_ACCESSIBLE, /* Check if a file is accessible    */
+    H5VL_FILE_DELETE,        /* Delete a file                    */
+    H5VL_FILE_IS_EQUAL       /* Check if two files are the same  */
+} H5VL_file_specific_t;
 
 /* Parameters for file 'specific' operations */
 typedef struct H5VL_file_specific_args_t {
@@ -1884,33 +2107,49 @@ typedef struct H5VL_file_specific_args_t {
 } H5VL_file_specific_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefFileopt file : optional The<em> optional</ em>
-                                                  callback in the file class implements connector specific
-                                                      operations on an HDF5 container.It returns an<em>
-                                                                                                 herr_t</ em>
-                                                              indicating                         success or
-    failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : The container or
-      object where the operation needs to happen.args(IN / OUT)
-    : A pointer to the arguments struct.dxpl_id(IN)
-    : The data transfer property list
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table> Each connector that requires connector
-              - specific operations should compare the value of the<em> op_type</ em> field of the
-              #H5VL_optional_args_t struct with the values returned from calling
-              #H5VLregister_opt_operation to determine how to handle the optional call
-          and
-          interpret the arguments passed in the struct.
+\subsubsection subsubsecVOLRefFileopt file: optional
+The <em>optional</em> callback in the file class implements connector specific operations on an HDF5 container. It
+returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj      (IN): The container or object where the operation needs to happen.
+  args (IN/OUT): A pointer to the arguments struct.
+  dxpl_id  (IN): The data transfer property list.
+  req  (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+Each connector that requires connector-specific operations should compare the value of the <em>op_type</em> field of
+the #H5VL_optional_args_t struct with the values returned from calling #H5VLregister_opt_operation to
+determine how to handle the optional call and interpret the arguments passed in the struct.
 
-\subsubsection subsubsecVOLRefFileclose file : close The<em> close</ em> callback in the file
-                                                class should terminate access to the file object
-          and free all resources it was consuming,
-and returns an<em> herr_t</ em> indicating success or failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t(*close)(void *file, hid_t dxpl_id, void **req);
+\subsubsection subsubsecVOLRefFileclose file: close
+The <em>close</em> callback in the file class should terminate access to the file object and free all resources it was
+consuming, and returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*close)(void *file, hid_t dxpl_id, void **req);
 \endcode
 </td>
 </tr>
@@ -1947,78 +2186,108 @@ typedef struct H5VL_group_class_t {
 } H5VL_group_class_t;
 \endcode
 
-\subsubsection subsubsecVOLRefGrpcreate group
-    : create                             The<em>
-                                         create</ em>
-              callback in the group class creates a group object in the container of the location object and
-                  returns a pointer to the group structure containing information to access the group in
-                      future calls.<table><tr><th>
-                             Signature : </ th></ tr><tr><td>
-\code void *(*create)(void *obj, H5VL_loc_params_t *loc_params, const char *name, hid_t gcpl_id,
-                                      hid_t gapl_id, hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : Pointer to an object where the group needs to be created or where the look - up of the target object
-                                                                                   needs to start
-                                                                                       .loc_params(IN)
-    : Pointer to the location parameters as explained in
-      "Mapping the API to the Callbacks".The type can be only H5VL_OBJECT_BY_SELF in
-      this callback.name(IN)
-    : The name of the group to be created.dcpl_id(IN)
-    : The group creation property list.It contains all the group creation
-      properties in addition to the link creation property list of the create
-      operation(an hid_t) that can be retrieved with the property H5VL_GRP_LCPL_ID.gapl_id(IN)
-    : The group access property list.dxpl_id(IN)
-    : The data transfer property list.req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
-
-\subsubsection subsubsecVOLRefGrpopen group
-    : open The<em> open</ em> callback in the group
-      class opens a group object in the container of the location
-      object and returns a pointer to the group structure containing information to access the group in future
-                                                                          calls.<table><tr><th> Signature
-    : </ th></ tr><tr><td>
-\code void * (*open)(void *obj, H5VL_loc_params_t *loc_params, const char *name, hid_t gapl_id,
-                      hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : Pointer to an object where the group needs to be opened or
-      where the look - up of the target object needs to start
-                           .loc_params(IN)
-    : Pointer to the location parameters as explained in
-      "Mapping the API to the Callbacks".The type can be only H5VL_OBJECT_BY_SELF in
-      this callback.name(IN)
-    : The name of the group to be opened.gapl_id(IN)
-    : The group access property list.dxpl_id(IN)
-    : The data transfer property list
-                           .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector
-                           .
-\endcode</ td></ tr></ table>
-
-\subsubsection subsubsecVOLRefGrpget group
-    : get The<em> get</ em> callback in the group class retrieves information about the group as specified in
-      the<em> get_type</ em> parameter.It returns an<em> herr_t</ em> indicating success
-      or
-      failure
-          .<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t(*get)(void *obj, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req)
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : The group object where
-      information needs to be retrieved from.args(IN / OUT)
-    : A pointer to the arguments struct.dxpl_id(IN)
-    : The data transfer property list
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
+\subsubsection subsubsecVOLRefGrpcreate group: create
+The <em>create</em> callback in the group class creates a group object in the container of the location object and
+returns a pointer to the group structure containing information to access the group in future calls.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
 \code
-      /* Values for group 'get' operation */
-      typedef enum H5VL_group_get_t{
-          H5VL_GROUP_GET_GCPL, /* group creation property list     */
-          H5VL_GROUP_GET_INFO  /* group info                       */
-      } H5VL_group_get_t;
+  void *(*create)(void *obj, H5VL_loc_params_t *loc_params, const char *name, hid_t gcpl_id,hid_t gapl_id, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj        (IN): Pointer to an object where the group needs to be created or where the look-up of
+                   the target object needs to start.
+  loc_params (IN): Pointer to the location parameters as explained in "Mapping the API to the Callbacks".
+                   The type can be only H5VL_OBJECT_BY_SELF in this callback.
+  name       (IN): The name of the group to be created.
+  dcpl_id    (IN): The group creation property list. It contains all the group creation properties in
+                   addition to the link creation property list of the create operation (an hid_t) that can be
+                   retrieved with the property H5VL_GRP_LCPL_ID.
+  gapl_id    (IN): The group access property list.
+  dxpl_id    (IN): The data transfer property list.
+  req    (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+
+\subsubsection subsubsecVOLRefGrpopen group: open
+The <em>open</em> callback in the group class opens a group object in the container of the location object and returns
+a pointer to the group structure containing information to access the group in future calls.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  void *(*open)(void *obj, H5VL_loc_params_t *loc_params, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj        (IN): Pointer to an object where the group needs to be opened or where the look-up of the target object needs to start.
+  loc_params (IN): Pointer to the location parameters as explained in "Mapping the API to the Callbacks".
+                   The type can be only H5VL_OBJECT_BY_SELF in this callback.
+  name       (IN): The name of the group to be opened.
+  gapl_id    (IN): The group access property list.
+  dxpl_id    (IN): The data transfer property list.
+  req    (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+
+\subsubsection subsubsecVOLRefGrpget group: get
+The <em>get</em> callback  in  the  group  class  retrieves  information  about  the  group  as  specified  in  the <em>get_type</em>
+parameter.  It returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*get)(void *obj, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req)
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj        (IN): The group object where information needs to be retrieved from.
+  args   (IN/OUT): A pointer to the arguments struct.
+  dxpl_id    (IN): The data transfer property list.
+  req    (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+\code
+/* Values for group 'get' operation */
+typedef enum H5VL_group_get_t {
+    H5VL_GROUP_GET_GCPL, /* group creation property list     */
+    H5VL_GROUP_GET_INFO  /* group info                       */
+} H5VL_group_get_t;
 
 /* Parameters for group 'get_info' operation */
 typedef struct H5VL_group_get_info_args_t {
@@ -2043,35 +2312,43 @@ typedef struct H5VL_group_get_args_t {
 } H5VL_group_get_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefGrpspec group : specific The<em> specific</ em>
-                                                   callback in the group class implements specific operations
-                                                       on HDF5 groups as specified in the<em>
-                                                                                      specific_type</ em>
-                                                               parameter.It returns an<em>
-                                                                                    herr_t</ em>
-                                                                       indicating   success or
-    failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*specific)(void *obj, H5VL_loc_params_t *loc_params, H5VL_object_specific_args_t *args,
-                                        hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : The container or object where the operation needs to happen
-                           .loc_params(IN)
-    : Pointer to the location parameters as explained in
-      "Mapping the API to the Callbacks".args(IN / OUT)
-    : A pointer to the arguments struct.dxpl_id(IN)
-    : The data transfer property list
-                           .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
+\subsubsection subsubsecVOLRefGrpspec group: specific
+The <em>specific</em> callback in the group class implements specific operations on HDF5 groups as specified in the
+<em>specific_type</em> parameter.  It returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
 \code
-      /* Values for group 'specific' operation */
-      typedef enum H5VL_group_specific_t {
-          H5VL_GROUP_MOUNT,   /* Mount a file on a group          */
-          H5VL_GROUP_UNMOUNT, /* Unmount a file on a group        */
-          H5VL_GROUP_FLUSH,   /* H5Gflush                         */
-          H5VL_GROUP_REFRESH  /* H5Grefresh                       */
-      } H5VL_group_specific_t;
+  herr_t (*specific)(void *obj, H5VL_loc_params_t *loc_params, H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj        (IN): The container or object where the operation needs to happen.
+  loc_params (IN): Pointer to the location parameters as explained in "Mapping the API to the Callbacks".
+  args   (IN/OUT): A pointer to the arguments struct.
+  dxpl_id    (IN): The data transfer property list.
+  req    (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+\code
+/* Values for group 'specific' operation */
+typedef enum H5VL_group_specific_t {
+    H5VL_GROUP_MOUNT,   /* Mount a file on a group          */
+    H5VL_GROUP_UNMOUNT, /* Unmount a file on a group        */
+    H5VL_GROUP_FLUSH,   /* H5Gflush                         */
+    H5VL_GROUP_REFRESH  /* H5Grefresh                       */
+} H5VL_group_specific_t;
 
 /* Parameters for group 'mount' operation */
 typedef struct H5VL_group_spec_mount_args_t {
@@ -2107,33 +2384,49 @@ typedef struct H5VL_group_specific_args_t {
 } H5VL_group_specific_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefGrpopt group : optional The<em> optional</ em>
-                                                  callback in the group class implements connector specific
-                                                      operations on an HDF5 group.It returns an<em>
-                                                                                             herr_t</ em>
-                                                              indicating                     success or
-    failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : The container or
-      object where the operation needs to happen.args(IN / OUT)
-    : A pointer to the arguments struct.dxpl_id(IN)
-    : The data transfer property list
-          .req(IN / OUT)
-    : A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table> Each connector that requires connector
-              - specific operations should compare the value of the<em> op_type</ em> field of the
-              #H5VL_optional_args_t struct with the values returned from calling
-              #H5VLregister_opt_operation to determine how to handle the optional call
-          and
-          interpret the arguments passed in the struct.
+\subsubsection subsubsecVOLRefGrpopt group: optional
+The <em>optional</em> callback in the group class implements connector specific operations on an HDF5 group.  It
+returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj        (IN): The container or object where the operation needs to happen.
+  args   (IN/OUT): A pointer to the arguments struct.
+  dxpl_id    (IN): The data transfer property list.
+  req    (IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+Each connector that requires connector-specific operations should compare the value of the <em>op_type</em> field of
+the #H5VL_optional_args_t struct with the values returned from calling #H5VLregister_opt_operation to
+determine how to handle the optional call and interpret the arguments passed in the struct.
 
-\subsubsection subsubsecVOLRefGrpclose group : close The<em> close</ em> callback in the group
-                                                class terminates access to the group object
-          and frees all resources it was consuming,
-and returns an<em> herr_t</ em> indicating success or failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t(*close)(void *group, hid_t dxpl_id, void **req);
+\subsubsection subsubsecVOLRefGrpclose group: close
+The <em>close</em> callback in the group class terminates access to the group object and frees all resources it was
+consuming, and returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*close)(void *group, hid_t dxpl_id, void **req);
 \endcode
 </td>
 </tr>
@@ -2243,14 +2536,17 @@ typedef struct H5VL_link_create_args_t {
 } H5VL_link_create_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefLinkcopy link : copy The<em> copy</ em> callback in the link class copies
-                                                   a link within the HDF5 container.It returns an<em>
-                                                                                               herr_t</ em>
-                                                           indicating                          success or
-    failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*copy)(void *src_obj, H5VL_loc_params_t *loc_params1, void *dst_obj,
-                                        H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id,
-                                        hid_t dxpl_id, void **req);
+\subsubsection subsubsecVOLRefLinkcopy link: copy
+The <em>copy</em> callback in the link class copies a link within the HDF5 container. It returns an <em>herr_t</em> indicating
+success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*copy)(void *src_obj, H5VL_loc_params_t *loc_params1, void *dst_obj, H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
 \endcode
 </td>
 </tr>
@@ -2442,14 +2738,17 @@ typedef struct H5VL_link_specific_args_t {
 } H5VL_link_specific_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefLinkopt link : optional The<em> optional</ em>
-                                                  callback in the link class implements connector specific
-                                                      operations on an HDF5 link.It returns an<em>
-                                                                                            herr_t</ em>
-                                                              indicating                    success or
-    failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*optional)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optional_args_t *args,
-                                        hid_t dxpl_id, void **req);
+\subsubsection subsubsecVOLRefLinkopt link: optional
+The <em>optional</em> callback in the link class implements connector specific operations on an HDF5 link. It returns
+an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*optional)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 \endcode
 </td>
 </tr>
@@ -2494,15 +2793,17 @@ typedef struct H5VL_object_class_t {
 } H5VL_object_class_t;
 \endcode
 
-\subsubsection subsubsecVOLRefObjopen object
-    : open                             The<em>
-                                       open</ em>
-              callback in the object class opens the object in the container of the location object and
-                  returns a pointer to the object structure containing information to access the object in
-                      future calls.<table><tr><th>
-                             Signature : </ th></ tr><tr><td>
-\code void *(*open)(void *obj, H5VL_loc_params_t *loc_params, H5I_type_t *opened_type, hid_t dxpl_id,
-                                      void **req);
+\subsubsection subsubsecVOLRefObjopen object: open
+The <em>open</em> callback in the object class opens the object in the container of the location object and returns a
+pointer to the object structure containing information to access the object in future calls.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  void *(*open)(void *obj, H5VL_loc_params_t *loc_params, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
 \endcode
 </td>
 </tr>
@@ -2629,35 +2930,45 @@ typedef struct H5VL_object_get_args_t {
 } H5VL_object_get_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefObjspec object : specific The<em> specific</ em>
-                                                    callback in the object class implements specific
-                                                        operations on HDF5 objects as specified in the<em>
-                                                                specific_type</ em>
-                                                                parameter.It returns an<em>
-                                                                                     herr_t</ em>
-                                                                        indicating   success or
-    failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*specific)(void *obj, H5VL_loc_params_t *loc_params, H5VL_object_specific_args_t *args,
-                                        hid_t dxpl_id, void **req);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : A location object where he operation needs to happen
-          .loc_params(IN)
-    : Pointer to the location parameters
-      for the destination object as explained in "Mapping the API to the Callbacks".args(IN / OUT) :
-    A pointer to the arguments struct.dxpl_id(IN) : The data transfer property list.req IN / OUT) :
-    A pointer to the asynchronous request of the operation created by the connector.
-\endcode</ td></ tr></ table>
+\subsubsection subsubsecVOLRefObjspec object: specific
+The <em>specific</em> callback in the object class implements specific operations on HDF5 objects as specified in
+the <em>specific_type</em> parameter.  It returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
 \code
-    /* Values for object 'specific' operation */
-    typedef enum H5VL_object_specific_t {
-        H5VL_OBJECT_CHANGE_REF_COUNT, /* H5Oincr/decr_refcount             */
-        H5VL_OBJECT_EXISTS,           /* H5Oexists_by_name                 */
-        H5VL_OBJECT_LOOKUP,           /* Lookup object                     */
-        H5VL_OBJECT_VISIT,            /* H5Ovisit(_by_name)                */
-        H5VL_OBJECT_FLUSH,            /* H5{D|G|O|T}flush                  */
-        H5VL_OBJECT_REFRESH           /* H5{D|G|O|T}refresh                */
-    } H5VL_object_specific_t;
+  herr_t (*specific)(void *obj, H5VL_loc_params_t *loc_params, H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj        (IN): A location object where he operation needs to happen.
+  loc_params (IN): Pointer to the location parameters for the destination object as explained in "Mapping the API to the Callbacks".
+  args   (IN/OUT): A pointer to the arguments struct.
+  dxpl_id    (IN): The data transfer property list.
+  req     IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
+\endcode
+</td>
+</tr>
+</table>
+\code
+/* Values for object 'specific' operation */
+typedef enum H5VL_object_specific_t {
+    H5VL_OBJECT_CHANGE_REF_COUNT, /* H5Oincr/decr_refcount             */
+    H5VL_OBJECT_EXISTS,           /* H5Oexists_by_name                 */
+    H5VL_OBJECT_LOOKUP,           /* Lookup object                     */
+    H5VL_OBJECT_VISIT,            /* H5Ovisit(_by_name)                */
+    H5VL_OBJECT_FLUSH,            /* H5{D|G|O|T}flush                  */
+    H5VL_OBJECT_REFRESH           /* H5{D|G|O|T}refresh                */
+} H5VL_object_specific_t;
 
 /* Parameters for object 'visit' operation */
 typedef struct H5VL_object_visit_args_t {
@@ -2705,14 +3016,17 @@ typedef struct H5VL_object_specific_args_t {
 } H5VL_object_specific_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefObjopt object : optional The<em> optional</ em>
-                                                   callback in the object class implements connector specific
-                                                       operations on an HDF5 object.It returns an<em>
-                                                                                               herr_t</ em>
-                                                               indicating                      success or
-    failure.<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*optional)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optional_args_t *args,
-                                        hid_t dxpl_id, void **req);
+\subsubsection subsubsecVOLRefObjopt object: optional
+The <em>optional</em> callback in the object class implements connector specific operations on an HDF5 object.  It
+returns an <em>herr_t</em> indicating success or failure.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*optional)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 \endcode
 </td>
 </tr>
@@ -2745,26 +3059,41 @@ typedef struct H5VL_introspect_class_t {
 } H5VL_introspect_class_t;
 \endcode
 
-\subsubsection subsubsecVOLRefIntrospectcls introspect
-    : get_conn_cls Get a                     connector's #H5VL_class_t struct. <table><tr><th>
-          Signature : </ th></ tr><tr><td>
-\code herr_t (*get_conn_cls)(void *obj, H5VL_get_conn_lvl_t lvl, const struct H5VL_class_t **conn_cls);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : The VOL object.lvl(IN)
-    : Current
-    or terminal connector.cls(OUT)
-    : A const pointer to the connector.
-\endcode</ td></ tr></ table><em> The "lvl" argument is an enum
-    : </ em>
+\subsubsection subsubsecVOLRefIntrospectcls introspect: get_conn_cls
+Get a connector's #H5VL_class_t struct.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
 \code
-      /* "Levels" for 'get connector class' introspection callback */
-      typedef enum H5VL_get_conn_lvl_t {
-          H5VL_GET_CONN_LVL_CURR, /* Get "current" connector (for this object) */
-          H5VL_GET_CONN_LVL_TERM  /* Get "terminal" connector (for this object) */
-                                  /* (Recursively called, for pass-through connectors) */
-                                  /* (Connectors that "split" must choose which connector to return) */
-      } H5VL_get_conn_lvl_t;
+  herr_t (*get_conn_cls)(void *obj, H5VL_get_conn_lvl_t lvl, const struct H5VL_class_t **conn_cls);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj  (IN): The VOL object.
+  lvl  (IN): Current or terminal connector.
+  cls (OUT): A const pointer to the connector.
+\endcode
+</td>
+</tr>
+</table>
+<em>The "lvl" argument is an enum:</em>
+\code
+/* "Levels" for 'get connector class' introspection callback */
+typedef enum H5VL_get_conn_lvl_t {
+    H5VL_GET_CONN_LVL_CURR, /* Get "current" connector (for this object) */
+    H5VL_GET_CONN_LVL_TERM  /* Get "terminal" connector (for this object) */
+                            /* (Recursively called, for pass-through connectors) */
+                            /* (Connectors that "split" must choose which connector to return) */
+} H5VL_get_conn_lvl_t;
 \endcode
 
 \subsubsection subsubsecVOLRefIntrospecflags introspect: get_cap_flags
@@ -2803,33 +3132,42 @@ Query a class for a capability or functionality.
 <td>
 \code
   herr_t (*opt_query)(void *obj, H5VL_subclass_t cls, int opt_type, hbool_t *supported);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : The VOL object.cls(IN)
-    : The VOL 'class' to query.opt_type(IN)
-    : The specific option to query.supported(OUT)
-    : Whether the operation is supported
-    or not .
-\endcode</ td></ tr></ table><em> The "cls" argument is an enum
-    : </ em>
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
 \code
-      // Enum type for each VOL subclass
-      // (Used for various queries, etc)
-      typedef enum H5VL_subclass_t {
-          H5VL_SUBCLS_NONE,     // Operations outside of a subclass
-          H5VL_SUBCLS_INFO,     // 'Info' subclass
-          H5VL_SUBCLS_WRAP,     // 'Wrap' subclass
-          H5VL_SUBCLS_ATTR,     // 'Attribute' subclass
-          H5VL_SUBCLS_DATASET,  // 'Dataset' subclass
-          H5VL_SUBCLS_DATATYPE, // 'Named datatype' subclass
-          H5VL_SUBCLS_FILE,     // 'File' subclass
-          H5VL_SUBCLS_GROUP,    // 'Group' subclass
-          H5VL_SUBCLS_LINK,     // 'Link' subclass
-          H5VL_SUBCLS_OBJECT,   // 'Object' subclass
-          H5VL_SUBCLS_REQUEST,  // 'Request' subclass
-          H5VL_SUBCLS_BLOB,     // 'Blob' subclass
-          H5VL_SUBCLS_TOKEN     // 'Token' subclass
-      } H5VL_subclass_t;
+  obj        (IN): The VOL object.
+  cls        (IN): The VOL 'class' to query.
+  opt_type   (IN): The specific option to query.
+  supported (OUT): Whether the operation is supported or not.
+\endcode
+</td>
+</tr>
+</table>
+<em>The "cls" argument is an enum:</em>
+\code
+// Enum type for each VOL subclass
+// (Used for various queries, etc)
+typedef enum H5VL_subclass_t {
+    H5VL_SUBCLS_NONE,     // Operations outside of a subclass
+    H5VL_SUBCLS_INFO,     // 'Info' subclass
+    H5VL_SUBCLS_WRAP,     // 'Wrap' subclass
+    H5VL_SUBCLS_ATTR,     // 'Attribute' subclass
+    H5VL_SUBCLS_DATASET,  // 'Dataset' subclass
+    H5VL_SUBCLS_DATATYPE, // 'Named datatype' subclass
+    H5VL_SUBCLS_FILE,     // 'File' subclass
+    H5VL_SUBCLS_GROUP,    // 'Group' subclass
+    H5VL_SUBCLS_LINK,     // 'Link' subclass
+    H5VL_SUBCLS_OBJECT,   // 'Object' subclass
+    H5VL_SUBCLS_REQUEST,  // 'Request' subclass
+    H5VL_SUBCLS_BLOB,     // 'Blob' subclass
+    H5VL_SUBCLS_TOKEN     // 'Token' subclass
+} H5VL_subclass_t;
 \endcode
 
 \subsection subsecVOLRefReq Request (Async) Callbacks
@@ -2856,33 +3194,49 @@ and the connector callback succeeds.
 <td>
 \code
   herr_t (*wait)(void *req, uint64_t timeout, H5VL_request_status_t *status);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code req(IN)
-    : The async request on which to wait.timeout(IN)
-    : The timeout value.status(IN)
-    : The status.
-\endcode</ td></ tr></ table><em> The "status" argument is an enum
-    : </ em>
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
 \code
-      /* Status values for async request operations */
-      typedef enum H5VL_request_status_t {
-          H5VL_REQUEST_STATUS_IN_PROGRESS, /* Operation has not yet completed                       */
-          H5VL_REQUEST_STATUS_SUCCEED,     /* Operation has completed, successfully                 */
-          H5VL_REQUEST_STATUS_FAIL,        /* Operation has completed, but failed                   */
-          H5VL_REQUEST_STATUS_CANT_CANCEL, /* An attempt to cancel this operation was made, but it  */
-                                           /*  can't be canceled immediately.  The operation has    */
-                                           /*  not completed successfully or failed, and is not yet */
-                                           /*  in progress.  Another attempt to cancel it may be    */
-                                           /*  attempted and may (or may not) succeed.              */
-          H5VL_REQUEST_STATUS_CANCELED     /* Operation has not completed and was canceled          */
-      } H5VL_request_status_t;
+  req     (IN): The async request on which to wait.
+  timeout (IN): The timeout value.
+  status  (IN): The status.
+\endcode
+</td>
+</tr>
+</table>
+<em>The "status" argument is an enum:</em>
+\code
+/* Status values for async request operations */
+typedef enum H5VL_request_status_t {
+    H5VL_REQUEST_STATUS_IN_PROGRESS, /* Operation has not yet completed                       */
+    H5VL_REQUEST_STATUS_SUCCEED,     /* Operation has completed, successfully                 */
+    H5VL_REQUEST_STATUS_FAIL,        /* Operation has completed, but failed                   */
+    H5VL_REQUEST_STATUS_CANT_CANCEL, /* An attempt to cancel this operation was made, but it  */
+                                     /*  can't be canceled immediately.  The operation has    */
+                                     /*  not completed successfully or failed, and is not yet */
+                                     /*  in progress.  Another attempt to cancel it may be    */
+                                     /*  attempted and may (or may not) succeed.              */
+    H5VL_REQUEST_STATUS_CANCELED     /* Operation has not completed and was canceled          */
+} H5VL_request_status_t;
 \endcode
 
-\subsubsection subsubsecVOLRefReqnotify request
-    : notify Registers a user callback to be invoked when an asynchronous operation
-          completes.Releases the request if connector callback succeeds.<table><tr><th>
-              Signature : </ th></ tr><tr><td>
-\code herr_t (*notify)(void *req, H5VL_request_notify_t cb, void *ctx);
+\subsubsection subsubsecVOLRefReqnotify request: notify
+Registers a user callback to be invoked when an asynchronous operation completes. Releases the request if
+connector callback succeeds.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*notify)(void *req, H5VL_request_notify_t cb, void *ctx);
 \endcode
 </td>
 </tr>
@@ -2913,42 +3267,68 @@ and the connector callback succeeds.
 <td>
 \code
   herr_t (*cancel)(void *req, H5VL_request_status_t *status);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code req(IN)
-    : The async request to be cancelled.status(IN)
-    : The status.
-\endcode</ td></ tr></ table><em> The "status" argument is an enum
-    : </ em>
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
 \code
-      /* Status values for async request operations */
-      typedef enum H5VL_request_status_t {
-          H5VL_REQUEST_STATUS_IN_PROGRESS, /* Operation has not yet completed                       */
-          H5VL_REQUEST_STATUS_SUCCEED,     /* Operation has completed, successfully                 */
-          H5VL_REQUEST_STATUS_FAIL,        /* Operation has completed, but failed                   */
-          H5VL_REQUEST_STATUS_CANT_CANCEL, /* An attempt to cancel this operation was made, but it  */
-                                           /*  can't be canceled immediately.  The operation has    */
-                                           /*  not completed successfully or failed, and is not yet */
-                                           /*  in progress.  Another attempt to cancel it may be    */
-                                           /*  attempted and may (or may not) succeed.              */
-          H5VL_REQUEST_STATUS_CANCELED     /* Operation has not completed and was canceled          */
-      } H5VL_request_status_t;
+  req    (IN): The async request to be cancelled.
+  status (IN): The status.
+\endcode
+</td>
+</tr>
+</table>
+<em>The "status" argument is an enum:</em>
+\code
+/* Status values for async request operations */
+typedef enum H5VL_request_status_t {
+    H5VL_REQUEST_STATUS_IN_PROGRESS, /* Operation has not yet completed                       */
+    H5VL_REQUEST_STATUS_SUCCEED,     /* Operation has completed, successfully                 */
+    H5VL_REQUEST_STATUS_FAIL,        /* Operation has completed, but failed                   */
+    H5VL_REQUEST_STATUS_CANT_CANCEL, /* An attempt to cancel this operation was made, but it  */
+                                     /*  can't be canceled immediately.  The operation has    */
+                                     /*  not completed successfully or failed, and is not yet */
+                                     /*  in progress.  Another attempt to cancel it may be    */
+                                     /*  attempted and may (or may not) succeed.              */
+    H5VL_REQUEST_STATUS_CANCELED     /* Operation has not completed and was canceled          */
+} H5VL_request_status_t;
 \endcode
 
-\subsubsection subsubsecVOLRefReqspec                         request
-    : specific Perform a specific operation on an asynchronous request.<table><tr><th>
-          Signature : </ th></ tr><tr><td>
-\code                       herr_t (*specific)(void *req, H5VL_request_specific_args_t *args);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code req(IN)
-    : The async request on which to perform the operation.args(IN / OUT)
-    : A pointer to the arguments struct.
-\endcode</ td></ tr></ table>
+\subsubsection subsubsecVOLRefReqspec request: specific
+Perform a specific operation on an asynchronous request.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
 \code
-      /* Values for async request 'specific' operation */
-      typedef enum H5VL_request_specific_t {
-          H5VL_REQUEST_GET_ERR_STACK, /* Retrieve error stack for failed operation */
-          H5VL_REQUEST_GET_EXEC_TIME  /* Retrieve execution time for operation */
-      } H5VL_request_specific_t;
+  herr_t (*specific)(void *req, H5VL_request_specific_args_t *args);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  req      (IN): The async request on which to perform the operation.
+  args (IN/OUT): A pointer to the arguments struct.
+\endcode
+</td>
+</tr>
+</table>
+\code
+/* Values for async request 'specific' operation */
+typedef enum H5VL_request_specific_t {
+    H5VL_REQUEST_GET_ERR_STACK, /* Retrieve error stack for failed operation */
+    H5VL_REQUEST_GET_EXEC_TIME  /* Retrieve execution time for operation */
+} H5VL_request_specific_t;
 
 /* Parameters for request 'specific' operations */
 typedef struct H5VL_request_specific_args_t {
@@ -2980,20 +3360,35 @@ Perform a connector-specific operation for a request.
 <td>
 \code
   herr_t (*optional)(void *req, H5VL_optional_args_t *args);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code req(IN)
-    : The async request on which to perform the operation.args(IN / OUT)
-    : A pointer to the arguments struct.
-\endcode</ td></ tr></ table> Each connector that requires connector
-        - specific operations should compare the value of the<em> op_type</ em> field of the
-        #H5VL_optional_args_t struct with the values returned from calling
-        #H5VLregister_opt_operation to determine how to handle the optional call
-    and interpret the arguments passed in the struct
-            .
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  req      (IN): The async request on which to perform the operation.
+  args (IN/OUT): A pointer to the arguments struct.
+\endcode
+</td>
+</tr>
+</table>
+Each connector that requires connector-specific operations should compare the value of the <em>op_type</em> field of
+the #H5VL_optional_args_t struct with the values returned from calling #H5VLregister_opt_operation to
+determine how to handle the optional call and interpret the arguments passed in the struct.
 
-\subsubsection subsubsecVOLRefReqfree request : free Frees an asynchronous request.<table><tr><th> Signature
-    : </ th></ tr><tr><td>
-\code herr_t(*free)(void *req);
+\subsubsection subsubsecVOLRefReqfree request: free
+Frees an asynchronous request.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*free)(void *req);
 \endcode
 </td>
 </tr>
@@ -3020,53 +3415,97 @@ typedef struct H5VL_blob_class_t {
 } H5VL_blob_class_t;
 \endcode
 
-\subsubsection subsubsecVOLRefBlobput blob : put Put a blob through the VOL.<table><tr><th> Signature
-    : </ th></ tr><tr><td>
-\code                       herr_t (*put)(void *obj, const void *buf, size_t size, void *blob_id, void *ctx);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : Pointer to the blob container.buf(IN)
-    : Pointer to the blob.size(IN)
-    : Size of the blob.blob_id(OUT)
-    : Pointer to the blob's connector-specific ID. ctx(IN)
-    : Connector
-    - specific blob context
-          .
-\endcode</ td></ tr></ table>
-
-\subsubsection subsubsecVOLRefBlobget blob : get Get a blob through the VOL.<table><tr><th> Signature
-    : </ th></ tr><tr><td>
-\code herr_t(*get)(void *obj, const void *blob_id, void *buf, size_t size, void *ctx);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : Pointer to the blob container
-          .blob_id(IN)
-    : Pointer to the blob's connector-specific ID. buf(IN / OUT)
-    : Pointer to the blob.size(IN)
-    : Size of the blob.ctx(IN)
-    : Connector
-    - specific blob context
-          .
-\endcode</ td></ tr></ table>
-
-\subsubsection subsubsecVOLRefBlobspec blob
-    : specific Perform a defined operation on a blob via the VOL.<table><tr><th> Signature
-    : </ th></ tr><tr><td>
-\code herr_t(*specific)(void *obj, void *blob_id, H5VL_blob_specific_args_t *args);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj(IN)
-    : Pointer to the blob container
-          .blob_id(IN)
-    : Pointer to the blob's connector-specific ID. args(IN / OUT)
-    : A pointer to the arguments struct.
-\endcode</ td></ tr></ table>
+\subsubsection subsubsecVOLRefBlobput blob: put
+Put a blob through the VOL.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
 \code
-      /* Values for 'blob' 'specific' operation */
-      typedef enum H5VL_blob_specific_t {
-          H5VL_BLOB_DELETE, /* Delete a blob (by ID) */
-          H5VL_BLOB_ISNULL, /* Check if a blob ID is "null" */
-          H5VL_BLOB_SETNULL /* Set a blob ID to the connector's "null" blob ID value */
-      } H5VL_blob_specific_t;
+  herr_t (*put)(void *obj, const void *buf, size_t size, void *blob_id, void *ctx);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj      (IN): Pointer to the blob container.
+  buf      (IN): Pointer to the blob.
+  size     (IN): Size of the blob.
+  blob_id (OUT): Pointer to the blob's connector-specific ID.
+  ctx      (IN): Connector-specific blob context.
+\endcode
+</td>
+</tr>
+</table>
+
+\subsubsection subsubsecVOLRefBlobget blob: get
+Get a blob through the VOL.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*get)(void *obj, const void *blob_id, void *buf, size_t size, void *ctx);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj     (IN): Pointer to the blob container.
+  blob_id (IN): Pointer to the blob's connector-specific ID.
+  buf (IN/OUT): Pointer to the blob.
+  size    (IN): Size of the blob.
+  ctx     (IN): Connector-specific blob context.
+\endcode
+</td>
+</tr>
+</table>
+
+\subsubsection subsubsecVOLRefBlobspec blob: specific
+Perform a defined operation on a blob via the VOL.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*specific)(void *obj, void *blob_id, H5VL_blob_specific_args_t *args);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj      (IN): Pointer to the blob container.
+  blob_id  (IN): Pointer to the blob's connector-specific ID.
+  args (IN/OUT): A pointer to the arguments struct.
+\endcode
+</td>
+</tr>
+</table>
+\code
+/* Values for 'blob' 'specific' operation */
+typedef enum H5VL_blob_specific_t {
+    H5VL_BLOB_DELETE, /* Delete a blob (by ID) */
+    H5VL_BLOB_ISNULL, /* Check if a blob ID is "null" */
+    H5VL_BLOB_SETNULL /* Set a blob ID to the connector's "null" blob ID value */
+} H5VL_blob_specific_t;
 
 /* Parameters for blob 'specific' operations */
 typedef struct H5VL_blob_specific_args_t {
@@ -3088,10 +3527,16 @@ typedef struct H5VL_blob_specific_args_t {
 } H5VL_blob_specific_args_t;
 \endcode
 
-\subsubsection subsubsecVOLRefBlobopt     blob
-    : optional Perform a                   connector -
-      specific operation on a blob via the VOL<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t (*optional)(void *obj, void *blob_id, H5VL_optional_args_t *args);
+\subsubsection subsubsecVOLRefBlobopt blob: optional
+Perform a connector-specific operation on a blob via the VOL
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*optional)(void *obj, void *blob_id, H5VL_optional_args_t *args);
 \endcode
 </td>
 </tr>
@@ -3122,10 +3567,16 @@ typedef struct H5VL_token_class_t {
 } H5VL_token_class_t;
 \endcode
 
-\subsubsection subsubsecVOLRefTokencmp                token
-    : cmp Compares two tokens and outputs a value like strcmp.<table><tr><th>
-          Signature : </ th></ tr><tr><td>
-\code herr_t (*cmp)(void *obj, const H5O_token_t *token1, const H5O_token_t *token2, int *cmp_value);
+\subsubsection subsubsecVOLRefTokencmp token: cmp
+Compares two tokens and outputs a value like strcmp.
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t (*cmp)(void *obj, const H5O_token_t *token1, const H5O_token_t *token2, int *cmp_value);
 \endcode
 </td>
 </tr>
@@ -3458,39 +3909,85 @@ released with a call to #H5VLclose.
 <td>
 \code
   ssize_t H5VLget_connector_name(hid_t id, char *name /*out*/, size_t size);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code id(IN)
-    : The object identifier to check.name(OUT)
-    : Buffer pointer to put the connector name.If NULL,
-the library just returns thesize required to store the connector name
-        .size(IN)
-    : the size of the passed in buffer.
-\endcode</ td></ tr>
-      </ table> Retrieves the name of a VOL connector given an object identifier that was created
-    / opened ith it.On success,
-the name length is returned.
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  id    (IN): The object identifier to check.
+  name (OUT): Buffer pointer to put the connector name. If NULL, the library just returns thesize required to store the connector name.
+  size  (IN): the size of the passed in buffer.
+\endcode
+</td>
+</tr>
+</table>
+Retrieves the name of a VOL connector given an object identifier that was created/opened  ith it. On
+success, the name length is returned.
 
-\subsubsection subsubsecVOLNewPubclose H5VLclose<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t H5VLclose(hid_t connector_id);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code connector_id(IN)
-    : A valid identifier of the connector to close.
-\endcode</ td></ tr></ table> Shuts down access to the connector that the identifier points to
-    and release resources associated with it.
+\subsubsection subsubsecVOLNewPubclose H5VLclose
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t H5VLclose(hid_t connector_id);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  connector_id (IN): A valid identifier of the connector to close.
+\endcode
+</td>
+</tr>
+</table>
+Shuts down access to the connector that the identifier points to and release resources associated with it.
 
-\subsubsection subsubsecVOLNewPubunreg H5VLunregister_connector<table><tr><th> Signature
-    : </ th></ tr><tr><td>
-\code herr_t H5VLunregister_connector(hid_t connector_id);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code connector_id(IN)
-    : A valid identifier of the connector to unregister.
-\endcode</ td></ tr></ table> Unregisters a connector from the library
-    and return a positive value on success otherwise return a negative value
-            .The native VOL connector cannot be unregistered(this will return a negative #herr_t value)
-            .
+\subsubsection subsubsecVOLNewPubunreg H5VLunregister_connector
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t H5VLunregister_connector(hid_t connector_id);
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  connector_id (IN): A valid identifier of the connector to unregister.
+\endcode
+</td>
+</tr>
+</table>
+Unregisters a connector from the library and return a positive value on success otherwise return a negative
+value. The native VOL connector cannot be unregistered (this will return a negative #herr_t value).
 
-\subsubsection subsubsecVOLNewPubquery H5VLquery_optional<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t *flags);
+\subsubsection subsubsecVOLNewPubquery H5VLquery_optional
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t *flags);
 \endcode
 </td>
 </tr>
@@ -3515,15 +4012,14 @@ but also give a sense of the option's behavior (useful for pass-through connecto
 
 Bitwise query flag values:
 \code
-#define H5VL_OPT_QUERY_SUPPORTED       0x0001 /* VOL connector supports this operation */
-#define H5VL_OPT_QUERY_READ_DATA       0x0002 /* Operation reads data for object */
-#define H5VL_OPT_QUERY_WRITE_DATA      0x0004 /* Operation writes data for object */
-#define H5VL_OPT_QUERY_QUERY_METADATA  0x0008 /* Operation reads metadata for object */
-#define H5VL_OPT_QUERY_MODIFY_METADATA 0x0010 /* Operation modifies metadata for object */
-#define H5VL_OPT_QUERY_COLLECTIVE                                                                            \
-    0x0020 /* Operation is collective (operations without this flag are assumed to be independent) */
-#define H5VL_OPT_QUERY_NO_ASYNC  0x0040 /* Operation may NOT be executed asynchronously */
-#define H5VL_OPT_QUERY_MULTI_OBJ 0x0080 /* Operation involves multiple objects */
+  #define H5VL_OPT_QUERY_SUPPORTED       0x0001 /* VOL connector supports this operation */
+  #define H5VL_OPT_QUERY_READ_DATA       0x0002 /* Operation reads data for object */
+  #define H5VL_OPT_QUERY_WRITE_DATA      0x0004 /* Operation writes data for object */
+  #define H5VL_OPT_QUERY_QUERY_METADATA  0x0008 /* Operation reads metadata for object */
+  #define H5VL_OPT_QUERY_MODIFY_METADATA 0x0010 /* Operation modifies metadata for object */
+  #define H5VL_OPT_QUERY_COLLECTIVE      0x0020 /* Operation is collective (operations without this flag are assumed to be independent) */
+  #define H5VL_OPT_QUERY_NO_ASYNC        0x0040 /* Operation may NOT be executed asynchronously */
+  #define H5VL_OPT_QUERY_MULTI_OBJ       0x0080 /* Operation involves multiple objects */
 \endcode
 
 \subsection subsecVOLNewConn H5VLconnector.h
@@ -3570,14 +4066,31 @@ it wants to use and is able to obtain a pointer for the connector structure to p
 <td>
 \code
   void *H5VLobject(hid_t obj_id);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code obj_id(IN)
-    : identifier of the object to dereference.
-\endcode</ td></ tr></ table> Retrieves a pointer to the VOL object from an HDF5 file
-    or object identifier.
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  obj_id (IN): identifier of the object to dereference.
+\endcode
+</td>
+</tr>
+</table>
+Retrieves a pointer to the VOL object from an HDF5 file or object identifier.
 
-\subsubsection subsubsecVOLNewConnget H5VLget_file_type<table><tr><th> Signature : </ th></ tr><tr><td>
-\code hid_t H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id);
+\subsubsection subsubsecVOLNewConnget H5VLget_file_type
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  hid_t H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id);
 \endcode
 </td>
 </tr>
@@ -3667,18 +4180,34 @@ found in this header as well. A list of these functions is included as an append
 <td>
 \code
   herr_t H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code cmp(OUT)
-    : a value like strcmp.connector_id1(IN)
-    : the ID of the first connector to compare
-          .connector_id2(IN)
-    : the ID of the second connector to compare
-\endcode</ td></ tr></ table> Compares two connectors(given by the connector IDs) to see
-      if they refer to the same connector underneath.Returns a positive value on success
-    and a negative value on errors.
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  cmp          (OUT): a value like strcmp.
+  connector_id1 (IN): the ID of the first connector to compare.
+  connector_id2 (IN): the ID of the second connector to compare
+\endcode
+</td>
+</tr>
+</table>
+Compares two connectors (given by the connector IDs) to see if they refer to the same connector underneath.
+Returns a positive value on success and a negative value on errors.
 
-\subsubsection subsubsecVOLNewPasswrap H5VLwrap_register<table><tr><th> Signature : </ th></ tr><tr><td>
-\code hid_t H5VLwrap_register(void *obj, H5I_type_t type);
+\subsubsection subsubsecVOLNewPasswrap H5VLwrap_register
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  hid_t  H5VLwrap_register(void *obj, H5I_type_t type);
 \endcode
 </td>
 </tr>
@@ -3715,14 +4244,32 @@ he type must be a VOL-managed object class:
 <td>
 \code
   herr_t H5VLretrieve_lib_state(void **state);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code state(OUT)
-    : the library state.
-\endcode</ td></ tr></ table> Retrieves a copy of the internal state of the HDF5 library,
-so that it can be restored later.Returns a positive value on success and a negative value on errors.
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  state (OUT): the library state.
+\endcode
+</td>
+</tr>
+</table>
+Retrieves a copy of the internal state of the HDF5 library, so that it can be restored later. Returns a positive
+value on success and a negative value on errors.
 
-\subsubsection subsubsecVOLNewPassstar H5VLstart_lib_state<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t H5VLstart_lib_state(void);
+\subsubsection subsubsecVOLNewPassstar H5VLstart_lib_state
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t H5VLstart_lib_state(void);
 \endcode
 </td>
 </tr>
@@ -3739,22 +4286,47 @@ on errors.
 <td>
 \code
   herr_t H5VLrestore_lib_state(const void *state);
-\endcode</ td></ tr><tr><th> Arguments : </ th></ tr><tr><td>
-\code state(IN)
-    : the library state.
-\endcode</ td></ tr>
-      </ table> Restores the internal state of the HDF5 library.Returns a positive value on success
-    and a negative value on errors.
+\endcode
+</td>
+</tr>
+<tr>
+<th>Arguments:</th>
+</tr>
+<tr>
+<td>
+\code
+  state (IN): the library state.
+\endcode
+</td>
+</tr>
+</table>
+Restores the internal state of the HDF5 library. Returns a positive value on success and a negative value on errors.
 
-\subsubsection subsubsecVOLNewPassfinish H5VLfinish_lib_state<table><tr><th> Signature : </ th></ tr><tr><td>
-\code herr_t H5VLfinish_lib_state(void);
-\endcode</ td></ tr></ table> Closes the state of the library,
-    undoing the effects
-        of #H5VLstart_lib_state.Returns a positive value on success and a negative value on errors.
+\subsubsection subsubsecVOLNewPassfinish H5VLfinish_lib_state
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t H5VLfinish_lib_state(void);
+\endcode
+</td>
+</tr>
+</table>
+Closes the state of the library, undoing the effects of #H5VLstart_lib_state. Returns a positive value on
+success and a negative value on errors.
 
-\subsubsection subsubsecVOLNewPassfree H5VLfree_lib_state<table><tr>
-    <th> Signature : </ th></ tr><tr><td>
-\code herr_t H5VLfree_lib_state(void *state);
+\subsubsection subsubsecVOLNewPassfree H5VLfree_lib_state
+<table>
+<tr>
+<th>Signature:</th>
+</tr>
+<tr>
+<td>
+\code
+  herr_t H5VLfree_lib_state(void *state);
 \endcode
 </td>
 </tr>
@@ -4359,5 +4931,6 @@ H5_DLL herr_t H5VLoptional(void *obj, hid_t connector_id, H5VL_optional_args_t *
 #define H5VL_NATIVE_OBJECT_GET_NATIVE_INFO          5 /* H5Oget_native_info(_by_idx, _by_name)        */
 \endcode
 
-    <hr>
-        Navigate back : \ref index "Main" / \ref VOL_Connector * /
+<hr>
+Navigate back: \ref index "Main" / \ref VOL_Connector
+*/
