@@ -1719,7 +1719,7 @@ H5FD__subfiling_init_context(int64_t context_id, const char *prefix_env, const c
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't create new subfiling object");
 
     /* Set non-zero fields */
-    sf_context->h5_file_id      = file_id;
+    sf_context->h5_file_id = file_id;
     if (H5TS_mutex_init(&sf_context->mutex, H5TS_MUTEX_TYPE_PLAIN) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't init subfiling context's mutex");
     sf_context->sf_context_id   = context_id;

@@ -1443,12 +1443,13 @@ H5FD__ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *en
 
 #ifdef H5_SUBFILING_DEBUG
     H5FD__subfiling_log(entry_ptr->wk_req.context_id,
-                     "%s: request %d completed with ret %d. op = %d, req = (%lld, %lld, %lld), "
-                     "q-ed/disp/ops_pend = %d/%d/%d.",
-                     __func__, entry_ptr->counter, entry_ptr->wk_ret, (entry_ptr->wk_req.tag),
-                     (long long)(entry_ptr->wk_req.header[0]), (long long)(entry_ptr->wk_req.header[1]),
-                     (long long)(entry_ptr->wk_req.header[2]), ioc_data->io_queue.num_pending,
-                     ioc_data->io_queue.num_in_progress, H5TS_atomic_load_int(&ioc_data->sf_io_ops_pending));
+                        "%s: request %d completed with ret %d. op = %d, req = (%lld, %lld, %lld), "
+                        "q-ed/disp/ops_pend = %d/%d/%d.",
+                        __func__, entry_ptr->counter, entry_ptr->wk_ret, (entry_ptr->wk_req.tag),
+                        (long long)(entry_ptr->wk_req.header[0]), (long long)(entry_ptr->wk_req.header[1]),
+                        (long long)(entry_ptr->wk_req.header[2]), ioc_data->io_queue.num_pending,
+                        ioc_data->io_queue.num_in_progress,
+                        H5TS_atomic_load_int(&ioc_data->sf_io_ops_pending));
 
     /*
      * If this I/O request is a truncate or "get eof" op, make sure
