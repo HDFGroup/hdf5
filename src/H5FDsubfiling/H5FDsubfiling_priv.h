@@ -38,7 +38,6 @@
 #include "H5Pprivate.h"    /* Property lists                           */
 
 #include "H5subfiling_common.h"
-#include "H5subfiling_err.h"
 
 #define DRIVER_INFO_MESSAGE_MAX_INFO   65536
 #define DRIVER_INFO_MESSAGE_MAX_LENGTH 65552 /* MAX_INFO + sizeof(info_header_t) */
