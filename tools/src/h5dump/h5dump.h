@@ -24,7 +24,7 @@
  *
  * \subsection subsec_cltools_h5dump_error Error Report Option
  * \li <strong>--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
- *                                           Optional value 2 also prints file open errors.
+ *             Optional value 2 also prints file open errors, --enable-error-stack=2.
  *
  * \subsection subsec_cltools_h5dump_options Options
  * \li <strong>--help</strong>    Print a usage message and exit
@@ -120,10 +120,16 @@
  * each dimension. \b START is optional and will default to 0 in each dimension.
  *
  * \li <strong>--start=START</strong>    Offset of start of subsetting selection
+ *  \b START - is a list of integers the number of which are equal to the
+ *      number of dimensions in the dataspace being queried.<br />
  * \li <strong>--stride=STRIDE</strong>  Hyperslab stride
+ *  \b COUNT - is a list of integers the number of which are equal to the
+ *      number of dimensions in the dataspace being queried.<br />
  * \li <strong>--count=COUNT</strong>    Number of blocks to include in selection
+ *  \b STRIDE - is a list of integers the number of which are equal to the
+ *      number of dimensions in the dataspace being queried.<br />
  * \li <strong>--block=BLOCK</strong>    Size of block in hyperslab
- *  \b START, \b COUNT, \b STRIDE, and \b BLOCK - is a list of integers the number of which are equal to the
+ *  \b BLOCK - is a list of integers the number of which are equal to the
  *      number of dimensions in the dataspace being queried.<br />
  *      (Alternate compact form of subsetting is described in the Reference Manual)
  *

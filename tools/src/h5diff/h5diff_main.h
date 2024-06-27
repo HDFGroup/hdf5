@@ -29,7 +29,7 @@
  *
  * \subsection subsec_cltools_h5diff_error Error Report
  * \li <strong>--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
- *                        Optional value 2 also prints file open errors.
+ *            Optional value 2 also prints file open errors, --enable-error-stack=2.
  *
  * \subsection subsec_cltools_h5diff_options Options
  * \li  <strong>--help</strong> Print a usage message and exit.
@@ -72,7 +72,7 @@
  * \li <strong>--vfd-info-2</strong> VFD-specific info to pass to the VFL driver used for
  *                           opening the second HDF5 file specified
  * \li <strong>--follow-symlinks</strong>
- *         Follow symbolic links (soft links and external links and compare the)
+ *         Follow symbolic links (soft links and external links) and compare the
  *         links' target objects.<br />
  *         If symbolic link(s) with the same name exist in the files being
  *         compared, then determine whether the target of each link is an existing
@@ -104,15 +104,15 @@
  * \li <strong>--nan</strong> Avoid NaNs detection
  * \li <strong>--count=C</strong> Print differences up to C. C must be a positive integer.
  * \li <strong>--delta=D</strong>
- *         Print difference if (|a-b| > D). D must be a positive number. Where a
+ *         Print difference if (|a-b| > D). D must be a positive number, where a
  *         is the data point value in file1 and b is the data point value in file2.
  *         Can not use with '--relative' or '--use-system-epsilon'.
  * \li <strong>--relative=R</strong>
- *         Print difference if (|(a-b)/b| > R). R must be a positive number. Where a
+ *         Print difference if (|(a-b)/b| > R). R must be a positive number, where a
  *         is the data point value in file1 and b is the data point value in file2.
  *         Can not use with '--delta' or '--use-system-epsilon'.
  * \li <strong>--use-system-epsilon</strong>
- *         Print difference if (|a-b| > EPSILON), EPSILON is system defined value. Where a
+ *         Print difference if (|a-b| > EPSILON), EPSILON is system defined value, where a
  *         is the data point value in file1 and b is the data point value in file2.
  *         If the system epsilon is not defined,one of the following predefined
  *         values will be used:

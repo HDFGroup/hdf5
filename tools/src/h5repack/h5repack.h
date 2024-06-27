@@ -27,7 +27,7 @@
  *
  * \subsection subsec_cltools_h5repack_error Error Report Option
  * \li <strong>--enable-error-stack</strong>    Prints messages from the HDF5 error stack as they occur.
- *                             Optional value 2 also prints file open errors.
+ *             Optional value 2 also prints file open errors, --enable-error-stack=2.
  *
  * \subsection subsec_cltools_h5repack_options Options
  * \li <strong>--help</strong>           Print a usage message and exit
