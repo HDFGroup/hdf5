@@ -148,8 +148,15 @@ endif ()
 #  Check for the math library "m"
 #-----------------------------------------------------------------------------
 if (MINGW OR NOT WINDOWS)
-  CHECK_LIBRARY_EXISTS_CONCAT ("m" ceil     ${HDF_PREFIX}_HAVE_LIBM)
-  CHECK_LIBRARY_EXISTS_CONCAT ("dl" dlopen     ${HDF_PREFIX}_HAVE_LIBDL)
+  if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+    # the m and dl libraries haven't existed on macOS as discrete libraries
+    # for a number of macOS versions. For convenience, CMake seems to provide
+    # some magic that automatically these flags on macOS. This means that
+    # these checks don't give accurate results, which adversely impacts the
+    # contents of the pkg-config files
+    CHECK_LIBRARY_EXISTS_CONCAT ("m" ceil     ${HDF_PREFIX}_HAVE_LIBM)
+    CHECK_LIBRARY_EXISTS_CONCAT ("dl" dlopen     ${HDF_PREFIX}_HAVE_LIBDL)
+  endif()
   CHECK_LIBRARY_EXISTS_CONCAT ("ws2_32" WSAStartup  ${HDF_PREFIX}_HAVE_LIBWS2_32)
   CHECK_LIBRARY_EXISTS_CONCAT ("wsock32" gethostbyname ${HDF_PREFIX}_HAVE_LIBWSOCK32)
 endif ()
