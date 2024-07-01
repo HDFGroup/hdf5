@@ -21,7 +21,7 @@ jobs:
     steps:
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
         - name: Get Sources
-          uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+          uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
           with:
             fetch-depth: 0
             ref: '${{ github.head_ref || github.ref_name }}'
@@ -36,7 +36,7 @@ jobs:
             file: '${{ inputs.use_hdf }}-*.*'
 
         - name: Setup AWS CLI
-          uses: aws-actions/configure-aws-credentials@v1
+          uses: aws-actions/configure-aws-credentials@v4
           with:
                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

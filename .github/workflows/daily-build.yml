@@ -16,7 +16,7 @@ jobs:
       hdf5-name: ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}
 
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v4.1.7
 
     - name: Get hdf5 release base name
       uses: dsaltares/fetch-gh-release-asset@master
