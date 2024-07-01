@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 3.12.0)
+cmake_minimum_required(VERSION 3.18)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
-
 project(ZLIB C)
 
 set(VERSION "1.3")
@@ -8,6 +7,8 @@ set(VERSION "1.3")
 #-----------------------------------------------------------------------------
 # Basic ZLIB stuff here
 #-----------------------------------------------------------------------------
+set (CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 set (ZLIB_PACKAGE_EXT ${HDF_PACKAGE_EXT})
 set (HDF_USE_GNU_DIRS ${HDF5_USE_GNU_DIRS})
 set (CMAKE_OSX_ARCHITECTURES ${CMAKE_OSX_ARCHITECTURES})
@@ -20,31 +21,6 @@ if (WINDOWS)
   set (HAVE_STDDEF_H 1)
   set (HAVE_SYS_TYPES_H 1)
 endif ()
-
-#-----------------------------------------------------------------------------
-# Define some CMake variables for use later in the project
-#-----------------------------------------------------------------------------
-set (ZLIB_RESOURCES_DIR          ${HDF_RESOURCES_DIR}/ZLIB)
-set (ZLIB_SRC_DIR                ${ZLIB_SOURCE_DIR})
-
-#-----------------------------------------------------------------------------
-# Targets built within this project are exported at Install time for use
-# by other projects
-#-----------------------------------------------------------------------------
-if (NOT ZLIB_EXPORTED_TARGETS)
-  set (ZLIB_EXPORTED_TARGETS "zlib-targets")
-endif ()
-
-set (CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-HDF_DIR_PATHS(ZLIB)
-
-#-----------------------------------------------------------------------------
-# All libs/tests/examples need the main include directories
-#-----------------------------------------------------------------------------
-set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
-    "${ZLIB_BINARY_DIR};${ZLIB_SOURCE_DIR};${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-)
 
 include(CheckTypeSize)
 include(CheckFunctionExists)
@@ -90,6 +66,68 @@ endif()
 #
 check_include_file(unistd.h Z_HAVE_UNISTD_H)
 
+#-----------------------------------------------------------------------------
+# Define some CMake variables for use later in the project
+#-----------------------------------------------------------------------------
+set (ZLIB_RESOURCES_DIR          ${HDF_RESOURCES_DIR}/ZLIB)
+set (ZLIB_SRC_DIR                ${ZLIB_SOURCE_DIR})
+
+#-----------------------------------------------------------------------------
+# Set the core names of all the libraries
+#-----------------------------------------------------------------------------
+set (ZLIB_LIB_CORENAME            "zlib-static")
+
+#-----------------------------------------------------------------------------
+# Set the true names of all the libraries if customized by external project
+#-----------------------------------------------------------------------------
+set (ZLIB_LIB_NAME            "${ZLIB_EXTERNAL_LIB_PREFIX}${ZLIB_LIB_CORENAME}")
+
+#-----------------------------------------------------------------------------
+# Set the target names of all the libraries
+#-----------------------------------------------------------------------------
+set (ZLIB_LIB_TARGET            "${ZLIB_LIB_CORENAME}")
+
+# parse the full version number from zlib.h and include in ZLIB_FULL_VERSION
+file(READ ${CMAKE_CURRENT_SOURCE_DIR}/zlib.h _zlib_h_contents)
+string(REGEX REPLACE ".*#define[ \t]+ZLIB_VERSION[ \t]+\"([-0-9A-Za-z.]+)\".*"
+    "\\1" ZLIB_FULL_VERSION ${_zlib_h_contents})
+
+set (zlib_VERS_MAJOR 1)
+set (zlib_VERS_MINOR 3)
+set (zlib_VERS_RELEASE 0)
+
+#-----------------------------------------------------------------------------
+set (ZLIB_PACKAGE "zlib")
+set (ZLIB_PACKAGE_NAME "ZLIB")
+set (ZLIB_PACKAGE_VERSION "${zlib_VERS_MAJOR}.${zlib_VERS_MINOR}")
+set (ZLIB_PACKAGE_VERSION_MAJOR "${zlib_VERS_MAJOR}.${zlib_VERS_MINOR}")
+set (ZLIB_PACKAGE_VERSION_MINOR "${zlib_VERS_RELEASE}")
+set (ZLIB_PACKAGE_STRING "${ZLIB_PACKAGE_NAME} ${ZLIB_PACKAGE_VERSION}")
+set (ZLIB_PACKAGE_TARNAME "${ZLIB_PACKAGE_NAME}${ZLIB_PACKAGE_EXT}")
+set (ZLIB_PACKAGE_URL "http://www.hdfgroup.org")
+set (ZLIB_PACKAGE_BUGREPORT "help@hdfgroup.org")
+set (ZLIB_PACKAGE_SOVERSION "${zlib_VERS_MAJOR}.${zlib_VERS_MINOR}.${zlib_VERS_RELEASE}")
+set (ZLIB_PACKAGE_SOVERSION_MAJOR "${zlib_VERS_MAJOR}")
+
+HDF_DIR_PATHS(${ZLIB_PACKAGE_NAME})
+
+#-----------------------------------------------------------------------------
+# Targets built within this project are exported at Install time for use
+# by other projects
+#-----------------------------------------------------------------------------
+if (NOT ZLIB_EXPORTED_TARGETS)
+  set (ZLIB_EXPORTED_TARGETS "zlib-targets")
+endif ()
+
+set_global_variable (ZLIB_LIBRARIES_TO_EXPORT "")
+
+#-----------------------------------------------------------------------------
+# All libs/tests/examples need the main include directories
+#-----------------------------------------------------------------------------
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
+    "${ZLIB_BINARY_DIR};${ZLIB_SOURCE_DIR};${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+)
+
 if(MSVC)
     set(CMAKE_DEBUG_POSTFIX "d")
     add_definitions (-D_BIND_TO_CURRENT_VCLIBS_VERSION=1)
@@ -115,9 +153,9 @@ configure_file(	${CMAKE_CURRENT_SOURCE_DIR}/zconf.h.cmakein
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR})
 
 
-#============================================================================
-# zlib
-#============================================================================
+#-----------------------------------------------------------------------------
+# Define ZLIB Library
+#-----------------------------------------------------------------------------
 
 set(ZLIB_PUBLIC_HDRS
     ${CMAKE_CURRENT_BINARY_DIR}/zconf.h
@@ -152,47 +190,40 @@ set(ZLIB_SRCS
     zutil.c
 )
 
-# parse the full version number from zlib.h and include in ZLIB_FULL_VERSION
-file(READ ${CMAKE_CURRENT_SOURCE_DIR}/zlib.h _zlib_h_contents)
-string(REGEX REPLACE ".*#define[ \t]+ZLIB_VERSION[ \t]+\"([-0-9A-Za-z.]+)\".*"
-    "\\1" ZLIB_FULL_VERSION ${_zlib_h_contents})
-
-add_library(zlib-static STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+add_library(${ZLIB_LIB_TARGET} STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
 if (MSVC AND CMAKE_CL_64)
-  set_target_properties (zlib-static PROPERTIES STATIC_LIBRARY_FLAGS "/machine:x64")
+  set_target_properties (${ZLIB_LIB_TARGET} PROPERTIES STATIC_LIBRARY_FLAGS "/machine:x64")
 endif ()
-target_include_directories(zlib-static PRIVATE "${CMAKE_BINARY_DIR}")
-set_target_properties(zlib-static PROPERTIES
+target_include_directories(${ZLIB_LIB_TARGET} PRIVATE "${CMAKE_BINARY_DIR}")
+set_target_properties(${ZLIB_LIB_TARGET} PROPERTIES
     PUBLIC_HEADER ""
     LINKER_LANGUAGE C
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
-set_global_variable (ZLIB_LIBRARIES_TO_EXPORT "zlib-static")
-set (install_targets zlib-static)
 
 #-----------------------------------------------------------------------------
-# Compiler specific flags : Shouldn't there be compiler tests for these
+# Compiler specific flags
 #-----------------------------------------------------------------------------
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  target_compile_options(zlib-static PRIVATE -Wno-strict-prototypes -Wno-implicit-function-declaration)
+  target_compile_options(${ZLIB_LIB_TARGET} PRIVATE -Wno-strict-prototypes -Wno-implicit-function-declaration)
 endif ()
 if (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM" OR CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
-  target_compile_options(zlib-static PRIVATE -Wno-implicit-function-declaration)
+  target_compile_options(${ZLIB_LIB_TARGET} PRIVATE -Wno-implicit-function-declaration)
+endif ()
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  target_compile_options(${ZLIB_LIB_TARGET} PRIVATE -fmessage-length=0)
 endif ()
 
-#-----------------------------------------------------------------------------
-# This is in here to help some of the GCC based IDES like Eclipse
-# and code blocks parse the compiler errors and warnings better.
-#-----------------------------------------------------------------------------
-if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  target_compile_options(zlib-static PRIVATE -fmessage-length=0)
-endif ()
+set_target_properties(${ZLIB_LIB_TARGET} PROPERTIES OUTPUT_NAME zlib-static)
+
+set_global_variable (ZLIB_LIBRARIES_TO_EXPORT "${ZLIB_LIB_TARGET}")
+set (install_targets${ZLIB_LIB_TARGET})
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 if (ZLIB_EXPORTED_TARGETS)
-  INSTALL_TARGET_PDB (zlib-static ${ZLIB_INSTALL_BIN_DIR} libraries)
+  INSTALL_TARGET_PDB (${ZLIB_LIB_TARGET} ${ZLIB_INSTALL_BIN_DIR} libraries)
 
   install (
       TARGETS
@@ -217,7 +248,7 @@ set (SHARE_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/${ZLIB_INSTALL_CMAKE_DIR}" )
 set (CURRENT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" )
 configure_package_config_file (
     ${ZLIB_RESOURCES_DIR}/zlib-config.cmake.in
-    "${ZLIB_BINARY_DIR}/zlib-config.cmake"
+    "${ZLIB_BINARY_DIR}/${ZLIB_LIB_TARGET}${ZLIB_PACKAGE_EXT}-config.cmake"
     INSTALL_DESTINATION "${ZLIB_INSTALL_CMAKE_DIR}"
     PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
     INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
@@ -228,16 +259,16 @@ configure_package_config_file (
 #-----------------------------------------------------------------------------
 set (INCLUDE_INSTALL_DIR ${ZLIB_INSTALL_INCLUDE_DIR})
 set (SHARE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${ZLIB_INSTALL_CMAKE_DIR}" )
-set (CURRENT_BUILD_DIR "${CMAKE_INSTALL_PREFIX}" )
+set (CURRENT_BUILD_DIR "${CMAKE_INSTALL_PREFIX}")
 configure_package_config_file (
     ${ZLIB_RESOURCES_DIR}/zlib-config.cmake.in
-    "${ZLIB_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/zlib-config.cmake"
+    "${ZLIB_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${ZLIB_LIB_TARGET}${ZLIB_PACKAGE_EXT}-config.cmake"
     INSTALL_DESTINATION "${ZLIB_INSTALL_CMAKE_DIR}"
     PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
 )
 if (NOT ZLIB_EXTERNALLY_CONFIGURED)
   install (
-      FILES ${ZLIB_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/zlib-config.cmake
+      FILES ${ZLIB_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${ZLIB_LIB_TARGET}${ZLIB_PACKAGE_EXT}-config.cmake
       DESTINATION ${ZLIB_INSTALL_CMAKE_DIR}
       COMPONENT configinstall
   )
@@ -249,10 +280,10 @@ endif ()
 if (NOT ZLIB_EXTERNALLY_CONFIGURED)
   configure_file (
       ${ZLIB_RESOURCES_DIR}/zlib-config-version.cmake.in
-      ${ZLIB_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/zlib-config-version.cmake @ONLY
+      ${ZLIB_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${ZLIB_LIB_TARGET}${ZLIB_PACKAGE_EXT}-config-version.cmake @ONLY
   )
   install (
-      FILES ${ZLIB_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/zlib-config-version.cmake
+      FILES ${ZLIB_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${ZLIB_LIB_TARGET}${ZLIB_PACKAGE_EXT}-config-version.cmake
       DESTINATION ${ZLIB_INSTALL_CMAKE_DIR}
       COMPONENT configinstall
   )
@@ -265,7 +296,7 @@ if (NOT ZLIB_EXTERNALLY_CONFIGURED)
   install (
       EXPORT ${ZLIB_EXPORTED_TARGETS}
       DESTINATION ${ZLIB_INSTALL_CMAKE_DIR}
-      FILE zlib-targets.cmake
+      FILE ${ZLIB_LIB_TARGET}${ZLIB_PACKAGE_EXT}-targets.cmake
       NAMESPACE ${PACKAGE_NAMESPACE}
       COMPONENT configinstall
   )
@@ -277,9 +308,9 @@ endif ()
 if (NOT ZLIB_EXTERNALLY_CONFIGURED)
   export (
       TARGETS ${ZLIB_LIBRARIES_TO_EXPORT}
-      FILE zlib-targets.cmake
+      FILE ${ZLIB_LIB_TARGET}${ZLIB_PACKAGE_EXT}-targets.cmake
       NAMESPACE ${PACKAGE_NAMESPACE}
   )
-  export (PACKAGE zlib)
+  export (PACKAGE ${ZLIB_LIB_TARGET}${ZLIB_PACKAGE_EXT})
 endif ()
 
