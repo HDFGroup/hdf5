@@ -20,20 +20,20 @@ verbose=yes
 nerrors=0
 
 # HDF5 compile commands, assuming they are in your $PATH.
-H5CC=$HDF5_HOME/bin/h5cc
+H5FC=$HDF5_HOME/bin/h5fc
 LD_LIBRARY_PATH=$HDF5_HOME/lib
 export LD_LIBRARY_PATH
 
-if ! test -f $H5CC; then
-    echo "Set paths for H5CC and LD_LIBRARY_PATH in test.sh"
+if ! test -f $H5FC; then
+    echo "Set paths for H5FC and LD_LIBRARY_PATH in test.sh"
     echo "Set environment variable HDF5_HOME to the hdf5 install dir"
-    echo "h5cc was not found at $H5CC"
+    echo "h5fc was not found at $H5FC"
     exit $EXIT_FAILURE
 fi
 
-H5DUMP=`echo $H5CC | sed -e 's/\/[^/]*$/\/h5dump/'`;
-H5_LIBVER=$($H5CC -showconfig | grep -i "HDF5 Version:" | sed 's/^.* //g' | sed 's/[-].*//g')
-H5_APIVER=$($H5CC -showconfig | grep -i "Default API mapping:" | sed 's/^.* //g' | sed 's/v//g' | sed 's/1/1_/')
+H5DUMP=`echo $H5FC | sed -e 's/\/[^/]*$/\/h5dump/'`;
+H5_LIBVER=$($H5FC -showconfig | grep -i "HDF5 Version:" | sed 's/^.* //g' | sed 's/[-].*//g')
+H5_APIVER=$($H5FC -showconfig | grep -i "Default API mapping:" | sed 's/^.* //g' | sed 's/v//g' | sed 's/1/1_/')
 
 H5_MAJORVER=$(echo $H5_LIBVER | cut -f1 -d'.'  | sed -E 's/\./_/g')
 H5_MINORVER=$(echo $H5_LIBVER | cut -f2 -d'.'  | sed -E 's/\./_/g')
@@ -82,30 +82,36 @@ version_compare() {
   fi
 }
 
+FORTRAN_2003_CONDITIONAL_F="@FORTRAN_2003_CONDITIONAL_F@"
 
-topics="array arrayatt bit bitatt cmpd cmpdatt cpxcmpd cpxcmpdatt enum enumatt float floatatt \
-int intatt opaque opaqueatt string stringatt vlstring vlstringatt \
-commit"
+topics="vlstring"
+
+if [ "$FORTRAN_2003_CONDITIONAL_F" = "Xyes" ]; then
+    topics="arrayatt_F03 array_F03 bitatt_F03 bit_F03 cmpdatt_F03 cmpd_F03 \
+            Cstring_F03 enumatt_F03 enum_F03 floatatt_F03 float_F03 \
+            intatt_F03 int_F03 opaqueatt_F03 opaque_F03 \
+            string_F03 $topics"
+fi
 
 return_val=0
 
 for topic in $topics
 do
-    $H5CC $srcdir/h5ex_t_$topic.c -o h5ex_t_$topic
+    $H5FC $srcdir/h5ex_t_$topic.F90 -o h5ex_t_$topic
 done
 
 for topic in $topics
 do
     fname=h5ex_t_$topic
-    $ECHO_N "Testing C/H5T/$fname...$ECHO_C"
+    $ECHO_N "Testing FORTRAN/H5T/$fname...$ECHO_C"
     exout ./$fname >tmp.test
-    cmp -s tmp.test $srcdir/tfiles/16/$fname.tst
+    cmp -s tmp.test $srcdir/tfiles/18/$fname.tst
     status=$?
     if test $status -ne 0
     then
         echo "  FAILED!"
     else
-        if [[ $fname == "h5ex_t_cpxcmpd" || $fname == "h5ex_t_cpxcmpdatt" ]]
+        if [[ $fname == "h5ex_t_cpxcmpd_F03" || $fname == "h5ex_t_cpxcmpdatt_F03" ]]
         then
             targ="-n"
         else
@@ -145,19 +151,23 @@ else
   fi
 fi
 
-topics="objref objrefatt regref regrefatt"
+if [ "$FORTRAN_2003_CONDITIONAL_F" = "Xyes" ]; then
+    topics="objrefatt_F03 objref_F03 regrefatt_F03 regref_F03"
+else
+    topics=""
+fi
 
 for topic in $topics
 do
-    $H5CC $srcdir/h5ex_t_$topic.c -o h5ex_t_$topic
+    $H5FC $srcdir/h5ex_t_$topic.F90 -o h5ex_t_$topic
 done
 
 for topic in $topics
 do
     fname=h5ex_t_$topic
-    $ECHO_N "Testing C/H5T/$fname...$ECHO_C"
+    $ECHO_N "Testing FORTRAN/H5T/$fname...$ECHO_C"
     exout ./$fname >tmp.test
-    cmp -s tmp.test $srcdir/tfiles/16/$fname.tst
+    cmp -s tmp.test $srcdir/tfiles/18/$fname.tst
     status=$?
     if test $status -ne 0
     then
@@ -192,11 +202,15 @@ do
     return_val=`expr $status + $return_val`
 done
 
-topics="vlen vlenatt"
+topics=""
+version_compare "$H5_LIBVER" "1.10.0"
+if [ "$version_lt" = 0 ]; then
+  topics=" vlenatt_F03 vlen_F03"
+fi
 
 for topic in $topics
 do
-    $H5CC $srcdir/h5ex_t_$topic.c -o h5ex_t_$topic
+    $H5FC $srcdir/h5ex_t_$topic.F90 -o h5ex_t_$topic
 done
 
 for topic in $topics
@@ -204,7 +218,7 @@ do
     fname=h5ex_t_$topic
     $ECHO_N "Testing C/H5T/$fname...$ECHO_C"
     exout ./$fname >tmp.test
-    cmp -s tmp.test $srcdir/tfiles/16/$fname.tst
+    cmp -s tmp.test $srcdir/tfiles/18/$fname.tst
     status=$?
     if test $status -ne 0
     then
@@ -229,22 +243,22 @@ do
     return_val=`expr $status + $return_val`
 done
 
-$H5CC $srcdir/h5ex_t_convert.c -o h5ex_t_convert
+$H5FC $srcdir/h5ex_t_convert.F90 -o h5ex_t_convert
 
-fname=h5ex_t_convert
-$ECHO_N "Testing C/H5T/$fname...$ECHO_C"
-exout ./$fname >tmp.test
-cmp -s tmp.test $srcdir/tfiles/16/$fname.tst
-status=$?
-if test $status -ne 0
-then
-    echo "  FAILED!"
-else
-    echo "  Passed"
-fi
-return_val=`expr $status + $return_val`
+#fname=h5ex_t_convert
+#$ECHO_N "Testing FORTRAN/H5T/$fname...$ECHO_C"
+#exout ./$fname >tmp.test
+#cmp -s tmp.test $srcdir/tfiles/18/$fname.test
+#status=$?
+#if test $status -ne 0
+#then
+#    echo "  FAILED!"
+#else
+#    echo "  Passed"
+#fi
+#return_val=`expr $status + $return_val`
 
 
 rm -f tmp.test
-echo "$return_val tests failed in C/H5T/"
+echo "$return_val tests failed in /FORTRAN/H5T/"
 exit $return_val

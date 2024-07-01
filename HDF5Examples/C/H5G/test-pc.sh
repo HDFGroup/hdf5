@@ -184,6 +184,7 @@ return_val=`expr $status + $return_val`
 rm -f h5ex_g_compact1.h5
 rm -f h5ex_g_compact2.h5
 
+$H5CC $srcdir/h5ex_g_phase.c -o h5ex_g_phase
 
 $ECHO_N "Testing C/H5G/h5ex_g_phase...$ECHO_C"
 exout ./h5ex_g_phase >tmp.test

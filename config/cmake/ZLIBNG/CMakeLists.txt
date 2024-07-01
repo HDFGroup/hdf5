@@ -1167,7 +1167,7 @@ configure_package_config_file (
 #-----------------------------------------------------------------------------
 set (INCLUDE_INSTALL_DIR ${ZLIB_INSTALL_INCLUDE_DIR})
 set (SHARE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${ZLIB_INSTALL_CMAKE_DIR}" )
-set (CURRENT_BUILD_DIR "${CMAKE_INSTALL_PREFIX}" )
+set (CURRENT_BUILD_DIR "${CMAKE_INSTALL_PREFIX}")
 configure_package_config_file (
     ${ZLIB_RESOURCES_DIR}/zlib-config.cmake.in
     "${ZLIB_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/zlib-config.cmake"
