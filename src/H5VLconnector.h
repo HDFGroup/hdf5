@@ -845,7 +845,8 @@ typedef struct H5VL_info_class_t {
 } H5VL_info_class_t;
 
 /* VOL object wrap / retrieval callbacks */
-/* (These only need to be implemented by "pass through" VOL connectors) */
+/* (These must be implemented by "pass through" VOL connectors, and should not be implemented by terminal VOL
+ * connectors) */
 typedef struct H5VL_wrap_class_t {
     void *(*get_object)(const void *obj); /* Callback to retrieve underlying object       */
     herr_t (*get_wrap_ctx)(

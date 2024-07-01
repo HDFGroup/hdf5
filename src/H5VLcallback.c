@@ -739,7 +739,10 @@ done:
 /*---------------------------------------------------------------------------
  * Function:    H5VLget_wrap_ctx
  *
- * Purpose:     Get a VOL connector's object wrapping context
+ * Purpose:     Get a VOL connector's object wrapping context. The output
+ *              wrap context is stored in memory allocated by the VOL callback
+ *              under *wrap_ctx and must be freed by the caller through
+ *              H5VLfree_wrap_ctx().
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
