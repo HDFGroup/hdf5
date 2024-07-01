@@ -91,8 +91,11 @@ are tentative.
 | Release | New Features |
 | ------- | ------------ |
 | 1.14.5 | oss-fuzz fixes, ros3 VFD improvements |
+| 1.14.6 | Last maintenance release of 1.14 |
 | 1.16.0 | Complex number support, updated library defaults (cache sizes, etc.) |
 | 2.0.0 | Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, semantic versioning |
+
+Some HDF5 2.0.0 features listed here may be released in a 1.16.x release.
 
 This list of feature release versions is also tentative, and the specific release
 in which a feature is introduced may change.
