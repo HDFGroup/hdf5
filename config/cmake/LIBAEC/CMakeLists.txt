@@ -22,30 +22,30 @@ if (WINDOWS)
 endif ()
 
 if (NOT WINDOWS)
-include(TestBigEndian)
-test_big_endian(WORDS_BIGENDIAN)
+  include (TestBigEndian)
+  test_big_endian (WORDS_BIGENDIAN)
 endif ()
 
 # Check for __builtin_clzll for faster decoding
-include(CheckCSourceCompiles)
+include (CheckCSourceCompiles)
 check_c_source_compiles(
   "int main(void)\n{return __builtin_clzll(1LL);}"
   HAVE_DECL___BUILTIN_CLZLL)
 
-if(NOT HAVE_DECL___BUILTIN_CLZLL)
+if (NOT HAVE_DECL___BUILTIN_CLZLL)
   # With MSVC we can use _BitScanReverse64
-  check_c_source_compiles(
+  check_c_source_compiles (
     "int main(void){unsigned long foo; unsigned __int64 bar=1LL;
 return _BitScanReverse64(&foo, bar);}"
     HAVE_BSR64)
-endif()
+endif ()
 
-include(CheckSymbolExists)
-check_symbol_exists(snprintf "stdio.h" HAVE_SNPRINTF)
-if(NOT HAVE_SNPRINTF)
-  check_symbol_exists(_snprintf "stdio.h" HAVE__SNPRINTF)
-  check_symbol_exists(_snprintf_s "stdio.h" HAVE__SNPRINTF_S)
-endif()
+include (CheckSymbolExists)
+check_symbol_exists (snprintf "stdio.h" HAVE_SNPRINTF)
+if (NOT HAVE_SNPRINTF)
+  check_symbol_exists (_snprintf "stdio.h" HAVE__SNPRINTF)
+  check_symbol_exists (_snprintf_s "stdio.h" HAVE__SNPRINTF_S)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Define some CMake variables for use later in the project
@@ -101,8 +101,17 @@ endif ()
 
 set_global_variable (LIBAEC_LIBRARIES_TO_EXPORT "")
 
+#-----------------------------------------------------------------------------
+# All libs/tests/examples need the main include directories
+#-----------------------------------------------------------------------------
+set_directory_properties (PROPERTIES INCLUDE_DIRECTORIES
+    "${LIBAEC_BINARY_DIR};${LIBAEC_SOURCE_DIR}/src;${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+)
 
-set (CMAKE_POSITION_INDEPENDENT_CODE ON)
+if (MSVC)
+  set (CMAKE_MFC_FLAG 0)
+  set(CMAKE_DEBUG_POSTFIX "d")
+endif ()
 
 set (EXE_EXT "")
 if (WIN32)
@@ -110,10 +119,6 @@ if (WIN32)
   add_compile_definitions (_BIND_TO_CURRENT_VCLIBS_VERSION=1)
   add_compile_definitions (_CRT_SECURE_NO_WARNINGS)
   add_compile_definitions (_CONSOLE)
-endif ()
-
-if (MSVC)
-  set (CMAKE_MFC_FLAG 0)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -139,13 +144,6 @@ configure_file (${LIBAEC_RESOURCES_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/
 configure_file(
   "include/libaec.h.in"
   "${CMAKE_CURRENT_BINARY_DIR}/libaec.h")
-
-#-----------------------------------------------------------------------------
-# All libs/tests/examples need the main include directories
-#-----------------------------------------------------------------------------
-set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
-    "${LIBAEC_BINARY_DIR};${LIBAEC_SOURCE_DIR}/src;${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-)
 
 #-----------------------------------------------------------------------------
 # Define LIBAEC Library
