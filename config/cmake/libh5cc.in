@@ -23,9 +23,10 @@ dir=$(
 ) || exit
 prg=$dir/bin/$(basename -- "$prg") || exit
 
-printf '%s\n' "$prg"
-printf 'dir is %s\n' "$dir"
+#printf '%s\n' "$prg"
+#printf 'dir is %s\n' "$dir"
 
+pc_args=""
 
 # Show the configuration summary of the library recorded in the
 # libhdf5.settings file residing in the lib directory.
@@ -44,10 +45,15 @@ for arg in $@ ; do
       exit $status
       ;;
     -show)
-      echo @_PKG_CONFIG_COMPILER@ $@ `pkg-config --define-variable=prefix=$dir --cflags --libs @_PKG_CONFIG_LIBNAME@`
+      echo @_PKG_CONFIG_COMPILER@ $@ `pkg-config $pc_args --define-variable=prefix=$dir --cflags --libs @_PKG_CONFIG_LIBNAME@`
+      exit $status
+      ;;
+    --*)
+      # gather pkg-config specific options
+      pc_args="$pc_args $arg"
       ;;
     *)
-      @_PKG_CONFIG_COMPILER@ $@ `pkg-config --define-variable=prefix=$dir --cflags --libs @_PKG_CONFIG_LIBNAME@`
+      @_PKG_CONFIG_COMPILER@ $@ `pkg-config $pc_args --define-variable=prefix=$dir --cflags --libs @_PKG_CONFIG_LIBNAME@`
       status=$?
       exit $status
       ;;
