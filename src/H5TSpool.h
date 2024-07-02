@@ -142,7 +142,7 @@ done:
         /* Release the task queue's mutex, if we're still holding it */
         /* (Can only happen on failure) */
         if (H5_UNLIKELY(have_queue_mutex))
-           H5TS_mutex_unlock(&pool->queue_mutex);
+            H5TS_mutex_unlock(&pool->queue_mutex);
         if (task)
             free(task);
     }
