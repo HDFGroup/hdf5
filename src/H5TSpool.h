@@ -91,9 +91,7 @@ H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
     herr_t            ret_value        = SUCCEED;
 
     /* Sanity checks */
-    if (H5_UNLIKELY(NULL == pool))
-        return FAIL;
-    if (H5_UNLIKELY(NULL == func))
+    if (H5_UNLIKELY(NULL == pool || NULL == func))
         return FAIL;
 
     /* Allocate & initialize new task */
@@ -139,16 +137,15 @@ H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx)
         ret_value = FAIL;
 
 done:
-    /* Release the task queue's mutex, if we're still holding it */
-    /* (Can only happen on failure) */
-    if (H5_UNLIKELY(have_queue_mutex))
-        if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->queue_mutex) < 0))
-            ret_value = FAIL;
-
     /* Free the task, on failure */
-    if (H5_UNLIKELY(ret_value < 0))
+    if (H5_UNLIKELY(ret_value < 0)) {
+        /* Release the task queue's mutex, if we're still holding it */
+        /* (Can only happen on failure) */
+        if (H5_UNLIKELY(have_queue_mutex))
+           H5TS_mutex_unlock(&pool->queue_mutex);
         if (task)
             free(task);
+    }
 
     return (ret_value);
 } /* end H5TS_pool_add_task() */

@@ -122,7 +122,6 @@ static H5TS_THREAD_RETURN_TYPE
 H5TS__pool_do(void *_pool)
 {
     H5TS_pool_t      *pool             = (H5TS_pool_t *)_pool; /* Pool for threads */
-    bool              have_queue_mutex = false; /* Whether we're holding the task queue's mutex */
     H5TS_thread_ret_t ret_value        = (H5TS_thread_ret_t)0;
 
     /* Acquire tasks and invoke them, until pool is shut down */
@@ -131,12 +130,11 @@ H5TS__pool_do(void *_pool)
 
         /* Wait for task */
         if (H5_UNLIKELY(H5TS_semaphore_wait(&pool->sem) < 0))
-            HGOTO_DONE((H5TS_thread_ret_t)-1);
+            return ((H5TS_thread_ret_t)-1);
 
         /* Acquire the mutex for the task queue */
         if (H5_UNLIKELY(H5TS_mutex_lock(&pool->queue_mutex) < 0))
-            HGOTO_DONE((H5TS_thread_ret_t)-1);
-        have_queue_mutex = true;
+            return ((H5TS_thread_ret_t)-1);
 
         /* Check if we have a task */
         if (H5_LIKELY(pool->head)) {
@@ -149,8 +147,7 @@ H5TS__pool_do(void *_pool)
 
             /* Release the task queue's mutex */
             if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->queue_mutex) < 0))
-                HGOTO_DONE((H5TS_thread_ret_t)-1);
-            have_queue_mutex = false;
+                return ((H5TS_thread_ret_t)-1);
 
             /* Invoke function for task */
             (*task->func)(task->ctx);
@@ -160,15 +157,14 @@ H5TS__pool_do(void *_pool)
         }
         else {
             assert(pool->shutdown);
+
+            /* Release the task queue's mutex */
+            if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->queue_mutex) < 0))
+                return ((H5TS_thread_ret_t)-1);
+
             break;
         }
     }
-
-done:
-    /* Release the task queue's mutex, if we're holding it */
-    if (H5_LIKELY(have_queue_mutex))
-        if (H5_UNLIKELY(H5TS_mutex_unlock(&pool->queue_mutex) < 0))
-            ret_value = (H5TS_thread_ret_t)-1;
 
     return (ret_value);
 } /* end H5TS__pool_do() */
