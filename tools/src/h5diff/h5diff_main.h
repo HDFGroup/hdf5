@@ -112,12 +112,10 @@
  *         is the data point value in file1 and \b b is the data point value in file2.
  *         Can not use with '--delta' or '--use-system-epsilon'.
  * \li <strong>--use-system-epsilon</strong>
- *         Print difference if (<strong>|a-b| > EPSILON</strong>), \b EPSILON is system defined value, where \b a
- *         is the data point value in file1 and \b b is the data point value in file2.
- *         If the system epsilon is not defined,one of the following predefined
- *         values will be used:
- *         <ul><li><code style="background-color:whitesmoke;">FLT_EPSILON = 1.19209E-07</code> for
- *             floating-point type</li>
+ *         Print difference if (<strong>|a-b| > EPSILON</strong>), \b EPSILON is system defined value, where
+ * \b a is the data point value in file1 and \b b is the data point value in file2. If the system epsilon is
+ * not defined,one of the following predefined values will be used: <ul><li><code
+ * style="background-color:whitesmoke;">FLT_EPSILON = 1.19209E-07</code> for floating-point type</li>
  *             <li><code style="background-color:whitesmoke;">DBL_EPSILON = 2.22045E-16</code>
  *             for double precision</li></ul>
  *         type Can not use with '--relative' or '--delta'.
