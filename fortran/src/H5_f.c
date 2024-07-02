@@ -539,6 +539,7 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5f_flags[27] = (int_f)H5F_LIBVER_V110;
     h5f_flags[28] = (int_f)H5F_LIBVER_V112;
     h5f_flags[29] = (int_f)H5F_LIBVER_V114;
+    h5f_flags[30] = (int_f)H5F_LIBVER_V116;
 
     /*
      *  H5FD flags
