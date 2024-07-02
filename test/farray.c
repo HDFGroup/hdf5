@@ -1628,6 +1628,7 @@ main(void)
     farray_iter_type_t  curr_iter;                        /* Current iteration type being worked on */
     hid_t               fapl           = H5I_INVALID_HID; /* File access property list for data files */
     unsigned            nerrors        = 0;               /* Cumulative error count */
+    time_t              curr_time;                        /* Current time, for seeding random number generator */
     bool                api_ctx_pushed = false;           /* Whether API context pushed */
 
     /* Reset library */
