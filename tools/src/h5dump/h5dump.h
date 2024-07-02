@@ -31,8 +31,8 @@
  * \li <strong>--version</strong> Print the library version number and exit
  *
  * \subsection subsec_cltools_h5dump_options_file File Options
- * \li <strong>--contents</strong>   Print a list of the file contents, group and dataset
- *              names and exit. Optional value 1 also prints attributes, --contents=1.
+ * \li <strong>--contents</strong>   Print a list of the file contents, group and dataset,
+ *              names and values, then exit. Optional value 1 also prints attributes, --contents=1.
  * \li <strong>--superblock</strong> Print the content of the super block
  * \li <strong>--header</strong>     Print the header only; no data is displayed
  * \li <strong>--filedriver=D</strong> Specify which driver to open the file with
@@ -120,16 +120,16 @@
  * each dimension. \b START is optional and will default to 0 in each dimension.
  *
  * \li <strong>--start=START</strong>    Offset of start of subsetting selection
- *  \b START - is a list of integers the number of which are equal to the
+ *  \b START - is a list of integers, the number of which are equal to the
  *      number of dimensions in the dataspace being queried.<br />
  * \li <strong>--stride=STRIDE</strong>  Hyperslab stride
- *  \b COUNT - is a list of integers the number of which are equal to the
+ *  \b COUNT - is a list of integers, the number of which are equal to the
  *      number of dimensions in the dataspace being queried.<br />
  * \li <strong>--count=COUNT</strong>    Number of blocks to include in selection
- *  \b STRIDE - is a list of integers the number of which are equal to the
+ *  \b STRIDE - is a list of integers, the number of which are equal to the
  *      number of dimensions in the dataspace being queried.<br />
  * \li <strong>--block=BLOCK</strong>    Size of block in hyperslab
- *  \b BLOCK - is a list of integers the number of which are equal to the
+ *  \b BLOCK - is a list of integers, the number of which are equal to the
  *      number of dimensions in the dataspace being queried.<br />
  *      (Alternate compact form of subsetting is described in the Reference Manual)
  *

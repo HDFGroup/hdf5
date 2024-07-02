@@ -18,7 +18,7 @@
  * \section sec_cltools_h5diff h5diff
  *
  * \subsection subsec_cltools_h5diff_intro Introduction
- * With h5diff, you can compare objects between a HDF5 file and another file.
+ * With h5diff, you can compare objects between an HDF5 file and objects in another or the same HDF5 file.
  *
  * \subsection subsec_cltools_h5diff_usage Usage
  * <h4> h5diff [OPTIONS] file1 file2 [obj1[ obj2]]</h4>
@@ -102,18 +102,18 @@
  *         and h5diff returns an exit code of 2.
  * \li <strong>--compare</strong> List objects that are not comparable
  * \li <strong>--nan</strong> Avoid NaNs detection
- * \li <strong>--count=C</strong> Print differences up to C. C must be a positive integer.
+ * \li <strong>--count=C</strong> Print differences up to \b C. \b C must be a positive integer.
  * \li <strong>--delta=D</strong>
- *         Print difference if (|a-b| > D). D must be a positive number, where a
+ *         Print difference if (<strong>|a-b| > D</strong>). \b D must be a positive number, where \b a
  *         is the data point value in file1 and b is the data point value in file2.
  *         Can not use with '--relative' or '--use-system-epsilon'.
  * \li <strong>--relative=R</strong>
- *         Print difference if (|(a-b)/b| > R). R must be a positive number, where a
- *         is the data point value in file1 and b is the data point value in file2.
+ *         Print difference if (<strong>|(a-b)/b| > R</strong>). \b R must be a positive number, where \b a
+ *         is the data point value in file1 and \b b is the data point value in file2.
  *         Can not use with '--delta' or '--use-system-epsilon'.
  * \li <strong>--use-system-epsilon</strong>
- *         Print difference if (|a-b| > EPSILON), EPSILON is system defined value, where a
- *         is the data point value in file1 and b is the data point value in file2.
+ *         Print difference if (<strong>|a-b| > EPSILON</strong>), \b EPSILON is system defined value, where \b a
+ *         is the data point value in file1 and \b b is the data point value in file2.
  *         If the system epsilon is not defined,one of the following predefined
  *         values will be used:
  *         <ul><li><code style="background-color:whitesmoke;">FLT_EPSILON = 1.19209E-07</code> for
@@ -168,7 +168,7 @@
  * \li 4) <strong>Symbolic links</strong>
  *      The paths to the target objects are compared.
  *      (The option --follow-symlinks overrides the default behavior when
- *       symbolic links are compared.).
+ *       symbolic links are compared.)
  *
  * \subsubsection subsubsec_cltools_h5diff_subset Subsetting Options
  * \li <strong>--no-compact-subset</strong>  Disable compact form of subsetting and allow the use
