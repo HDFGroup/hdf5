@@ -235,12 +235,13 @@ const H5S_select_class_t H5S_sel_hyper[1] = {{
 }};
 
 /* Format version bounds for dataspace hyperslab selection */
-const unsigned H5O_sds_hyper_ver_bounds[] = {
+static const unsigned H5O_sds_hyper_ver_bounds[] = {
     H5S_HYPER_VERSION_1, /* H5F_LIBVER_EARLIEST */
     H5S_HYPER_VERSION_1, /* H5F_LIBVER_V18 */
     H5S_HYPER_VERSION_2, /* H5F_LIBVER_V110 */
     H5S_HYPER_VERSION_3, /* H5F_LIBVER_V112 */
     H5S_HYPER_VERSION_3, /* H5F_LIBVER_V114 */
+    H5S_HYPER_VERSION_3, /* H5F_LIBVER_V116 */
     H5S_HYPER_VERSION_3  /* H5F_LIBVER_LATEST */
 };
 
