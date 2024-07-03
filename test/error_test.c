@@ -456,8 +456,7 @@ error:
 static herr_t
 test_create(void)
 {
-    const char *err_func = "test_create";    /* Function name for pushing error */
-    const char *err_msg  = "Error message";  /* Error message for pushing error */
+    const char *err_msg = "Error message";   /* Error message for pushing error */
     ssize_t     err_num;                     /* Number of errors on stack */
     hid_t       estack_id = H5I_INVALID_HID; /* Error stack ID */
 
@@ -471,7 +470,7 @@ test_create(void)
         TEST_ERROR;
 
     /* Push an error with a long description */
-    if (H5Epush(estack_id, __FILE__, err_func, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s",
+    if (H5Epush(estack_id, __FILE__, __func__, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s",
                 err_msg) < 0)
         TEST_ERROR;
 
@@ -512,14 +511,13 @@ error:
 static herr_t
 test_copy(void)
 {
-    const char *err_func = "test_copy";      /* Function name for pushing error */
-    const char *err_msg  = "Error message";  /* Error message for pushing error */
+    const char *err_msg = "Error message";   /* Error message for pushing error */
     ssize_t     err_num;                     /* Number of errors on stack */
     hid_t       estack_id = H5I_INVALID_HID; /* Error stack ID */
     herr_t      ret;                         /* Generic return value */
 
     /* Push an error with a long description */
-    if (H5Epush(H5E_DEFAULT, __FILE__, err_func, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s",
+    if (H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s",
                 err_msg) < 0)
         TEST_ERROR;
 
@@ -581,7 +579,6 @@ error:
 static herr_t
 test_append(void)
 {
-    const char *err_func = "test_append";      /* Function name for pushing error */
     const char *err_msg1 = "Error message #1"; /* Error message #1 for pushing error */
     const char *err_msg2 = "Error message #2"; /* Error message #2 for pushing error */
     ssize_t     err_num;                       /* Number of errors on stack */
@@ -590,7 +587,7 @@ test_append(void)
     herr_t      ret;                           /* Generic return value */
 
     /* Push an error */
-    if (H5Epush(H5E_DEFAULT, __FILE__, err_func, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s",
+    if (H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s",
                 err_msg1) < 0)
         TEST_ERROR;
 
@@ -613,7 +610,7 @@ test_append(void)
         TEST_ERROR;
 
     /* Push an error on stack #2 */
-    if (H5Epush(estack_id2, __FILE__, err_func, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_CREATE, "%s",
+    if (H5Epush(estack_id2, __FILE__, __func__, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_CREATE, "%s",
                 err_msg2) < 0)
         TEST_ERROR;
 
@@ -660,7 +657,7 @@ test_append(void)
         TEST_ERROR;
 
     /* Append error stack #2 to error stack #1, and close stack #2 */
-    if (H5Eappend_stack(estack_id1, estack_id2, true) < 0)
+    if (H5Eappend_stack(estack_id1, estack_id2, TRUE) < 0)
         TEST_ERROR;
 
     /* Try to close error stack #2.  Should fail because H5Eappend_stack
@@ -684,6 +681,166 @@ test_append(void)
 error:
     return -1;
 } /* end test_append() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_pause
+ *
+ * Purpose:     Test pausing error stacks
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_pause(void)
+{
+    const char *err_msg1 = "Error message #1"; /* Error message #1 for pushing error */
+    ssize_t     err_num;                       /* Number of errors on stack */
+    hid_t       estack_id1 = H5I_INVALID_HID;  /* Error stack ID */
+    hbool_t     is_paused;                     /* Whether error stack is paused */
+    herr_t      ret;                           /* Generic return value */
+
+    /* Push an error */
+    if (H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s",
+                err_msg1) < 0)
+        TEST_ERROR;
+
+    /* Copy error stack, which clears the original */
+    if ((estack_id1 = H5Eget_current_stack()) < 0)
+        TEST_ERROR;
+
+    /* Check the number of errors on stack #1 */
+    err_num = H5Eget_num(estack_id1);
+    if (err_num != 1)
+        TEST_ERROR;
+
+    /* Check for bad arguments */
+    is_paused = TRUE;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eis_paused(H5I_INVALID_HID, &is_paused);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+
+    /* Verify that default stack is not paused */
+    is_paused = TRUE;
+    if (H5Eis_paused(H5E_DEFAULT, &is_paused) < 0)
+        TEST_ERROR;
+    if (FALSE != is_paused)
+        TEST_ERROR;
+
+    /* Verify that application stack is not paused */
+    is_paused = TRUE;
+    if (H5Eis_paused(estack_id1, &is_paused) < 0)
+        TEST_ERROR;
+    if (FALSE != is_paused)
+        TEST_ERROR;
+
+    /* Check for bad arguments */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Epause_stack(H5I_INVALID_HID);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    /* Check for bad arguments */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eresume_stack(H5I_INVALID_HID);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+
+    /* Pause error stack */
+    if (H5Epause_stack(estack_id1) < 0)
+        TEST_ERROR;
+
+    /* Check if stack is paused */
+    is_paused = FALSE;
+    if (H5Eis_paused(estack_id1, &is_paused) < 0)
+        TEST_ERROR;
+    if (TRUE != is_paused)
+        TEST_ERROR;
+
+    /* Resume error stack */
+    if (H5Eresume_stack(estack_id1) < 0)
+        TEST_ERROR;
+
+    /* Check if stack is paused */
+    is_paused = TRUE;
+    if (H5Eis_paused(estack_id1, &is_paused) < 0)
+        TEST_ERROR;
+    if (FALSE != is_paused)
+        TEST_ERROR;
+
+    /* Check for resuming too many times */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eresume_stack(estack_id1);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+
+    /* Check if stack is paused, after trying to resume too many times */
+    is_paused = TRUE;
+    if (H5Eis_paused(estack_id1, &is_paused) < 0)
+        TEST_ERROR;
+    if (FALSE != is_paused)
+        TEST_ERROR;
+
+    /* Close error stack */
+    if (H5Eclose_stack(estack_id1) < 0)
+        TEST_ERROR;
+
+    /* Pause default error stack */
+    if (H5Epause_stack(H5E_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Check if stack is paused */
+    is_paused = FALSE;
+    if (H5Eis_paused(H5E_DEFAULT, &is_paused) < 0)
+        TEST_ERROR;
+    if (TRUE != is_paused)
+        TEST_ERROR;
+
+    /* Resume error stack */
+    if (H5Eresume_stack(H5E_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Check if stack is paused */
+    is_paused = TRUE;
+    if (H5Eis_paused(H5E_DEFAULT, &is_paused) < 0)
+        TEST_ERROR;
+    if (FALSE != is_paused)
+        TEST_ERROR;
+
+    /* Check for resuming too many times */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eresume_stack(H5E_DEFAULT);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+
+    /* Check if stack is paused, after trying to resume too many times */
+    is_paused = TRUE;
+    if (H5Eis_paused(H5E_DEFAULT, &is_paused) < 0)
+        TEST_ERROR;
+    if (FALSE != is_paused)
+        TEST_ERROR;
+
+    return 0;
+
+error:
+    return -1;
+} /* end test_pause() */
 
 /*-------------------------------------------------------------------------
  * Function:    close_error
@@ -868,6 +1025,10 @@ main(void)
     if (test_append() < 0)
         TEST_ERROR;
 
+    /* Test pausing error stacks */
+    if (test_pause() < 0)
+        TEST_ERROR;
+
     /* Close error information */
     if (close_error() < 0)
         TEST_ERROR;
@@ -888,7 +1049,8 @@ main(void)
     if (test_filter_error(filename, fapl) < 0)
         TEST_ERROR;
 
-    h5_clean_files(FILENAME, fapl);
+    h5_delete_all_test_files(FILENAME, fapl);
+    H5Pclose(fapl);
 
     free(ipoints2);
     free(ipoints2_data);

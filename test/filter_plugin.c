@@ -1441,7 +1441,7 @@ main(void)
         hid_t my_fapl_id;
 
         /* Testing setup */
-        h5_reset();
+        h5_test_init();
 
         /* Get a VFD-dependent filename */
         if ((old_ff_fapl_id = h5_fileaccess()) < 0)
@@ -1491,7 +1491,7 @@ main(void)
                 TEST_ERROR;
         }
 
-        /* Restore the default error handler (set in h5_reset()) */
+        /* Restore the default error handler (set in h5_test_init()) */
         h5_restore_err();
 
         /*******************************************************************/
@@ -1501,7 +1501,7 @@ main(void)
         puts("\nTesting reading data with with dynamic plugin filters:");
 
         /* Close the library so that all loaded plugin libraries are unloaded */
-        h5_reset();
+        h5_test_init();
         if ((old_ff_fapl_id = h5_fileaccess()) < 0)
             TEST_ERROR;
 
@@ -1542,7 +1542,7 @@ main(void)
                 TEST_ERROR;
         }
 
-        /* Restore the default error handler (set in h5_reset()) */
+        /* Restore the default error handler (set in h5_test_init()) */
         h5_restore_err();
 
         /*******************************************************************/
@@ -1550,7 +1550,7 @@ main(void)
         /*******************************************************************/
 
         /* Close the library so that all loaded plugin libraries are unloaded */
-        h5_reset();
+        h5_test_init();
         if ((old_ff_fapl_id = h5_fileaccess()) < 0)
             TEST_ERROR;
 
@@ -1588,7 +1588,7 @@ main(void)
                 TEST_ERROR;
         }
         else {
-            /* Restore the default error handler (set in h5_reset()) */
+            /* Restore the default error handler (set in h5_test_init()) */
             h5_restore_err();
 
             if (H5Pclose(old_ff_fapl_id) < 0)

@@ -42,7 +42,7 @@ HDF_DIR_PATHS(ZLIB)
 #-----------------------------------------------------------------------------
 # All libs/tests/examples need the main include directories
 #-----------------------------------------------------------------------------
-set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES 
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
     "${ZLIB_BINARY_DIR};${ZLIB_SOURCE_DIR};${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
 )
 

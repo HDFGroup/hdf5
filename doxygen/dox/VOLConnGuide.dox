@@ -664,7 +664,11 @@ structure. It is the opposite of the <em>to_str</em> callback.
 
 \subsection subsecVOLRefWrap Object Wrap Callbacks
 The object wrap callbacks are used by passthrough connectors to wrap/unwrap objects and contexts when
-passing them up and down the VOL chain.
+passing them up and down the VOL chain. Each passthrough VOL must define an object wrapping structure and a wrap context.
+The object wrapping structure should contain the information necessary to recursively unwrap the object - at a minimum, this is the object provided from and the ID of the next connector in the stack.
+The wrap context should contain the information necessary to recursively wrap the object - at a minimum, this is the ID and the wrap context of the next VOL connector in the stack.
+
+Each callback should use <em>H5VL&lt;callback&gt;</em> to recursively invoke the same callback in all lower passthrough VOl connectors.
 
 <em>Wrap class for object wrapping routines, H5VLconnector.h</em>
 \code
@@ -678,7 +682,13 @@ typedef struct H5VL_wrap_class_t {
 \endcode
 
 \subsubsection subsubsecVOLRefWrapobj wrap: get_object
-Retrieves an underlying object.
+Retrieves the underlying object from a wrapped object. Should return a pointer to the underlying object belonging to the terminal VOL connector.
+
+This will generally be done by unwrapping this VOL's object wrapping structure, before recursively calling <em>H5VLget_object</em> to invoke the <em>get_object</em>
+callback for all lower VOL connectors which define it. <em>H5VLget_object</em> requires the object returned by the next VOL and the next VOL's ID. Both of 
+these fields should be stored by the VOL somehow, generally on the wrapped object structure.
+
+This callback should not cleanup or modify the provided object wrapping structure.
 <table>
 <tr>
 <th>Signature:</th>
@@ -696,7 +706,7 @@ Retrieves an underlying object.
 <tr>
 <td>
 \code
-  obj  (IN): Object being unwrapped.
+  obj  (IN): The object to be unwrapped.
 \endcode
 </td>
 </tr>
@@ -704,6 +714,9 @@ Retrieves an underlying object.
 
 \subsubsection subsubsecVOLRefWrapctx wrap: get_wrap_ctx
 Get a VOL connector's object wrapping context.
+
+The context should be returned in dynamically allocated memory under <em>*wrap_ctx</em>.
+Any resources this callback allocates should be freed within <em>free_wrap_ctx</em>.
 <table>
 <tr>
 <th>Signature:</th>
@@ -721,7 +734,7 @@ Get a VOL connector's object wrapping context.
 <tr>
 <td>
 \code
-  obj      (IN):  Object for which we need a context.
+  obj      (IN):  Object wrapped by this VOL connector, for which we need a context.
   wrap_ctx (OUT): Context.
 \endcode
 </td>
@@ -729,7 +742,11 @@ Get a VOL connector's object wrapping context.
 </table>
 
 \subsubsection subsubsecVOLRefWrapwrap wrap: wrap_object
-Asks a connector to wrap an underlying object.
+Asks a connector to wrap an underlying object. This callback should use <em>H5VLwrap_object</em> 
+to recursively have the object wrapped by all lower VOL connectors before performing its own wrapping.
+
+The wrapped object should provide the information necessary for <em>unwrap_object</em> to recursively 
+unwrap it - at a minimum, the object provided from and the ID of the next VOL connector.
 <table>
 <tr>
 <th>Signature:</th>
@@ -747,7 +764,7 @@ Asks a connector to wrap an underlying object.
 <tr>
 <td>
 \code
-  obj       (IN): Object being wrapped.
+  obj       (IN): The object to be wrapped.
   obj_type  (IN): Object type (see H5Ipublic.h).
   wrap_ctx  (IN): Context.
 \endcode
@@ -756,7 +773,10 @@ Asks a connector to wrap an underlying object.
 </table>
 
 \subsubsection subsubsecVOLRefWrapunwrap wrap: unwrap_object
-Unwrap an object from connector.
+Unwrap an object from connector. Any resources allocated during <em>wrap_object</em> should be released and cleaned up here.
+
+This callback should clean up this VOL's object wrapping structure before recursively invoking <em>H5VLunwrap_object</em>.
+
 <table>
 <tr>
 <th>Signature:</th>
@@ -774,14 +794,15 @@ Unwrap an object from connector.
 <tr>
 <td>
 \code
-  obj  (IN): Object being unwrapped.
+  obj  (IN): Object to be unwrapped.
 \endcode
 </td>
 </tr>
 </table>
 
 \subsubsection subsubsecVOLRefWrapfree wrap: free_wrap_ctx
-Release a VOL connector's object wrapping context.
+Release a VOL connector's object wrapping context. This should free any resources allocated during <em>get_wrap_ctx</em>, and recursively invoke <em>H5VLfree_wrap_ctx</em>
+to execute the free callback for the lower VOL connectors in the stack.
 <table>
 <tr>
 <th>Signature:</th>

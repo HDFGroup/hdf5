@@ -77,11 +77,12 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
  * trying something that's likely or expected to fail.  The code to try can
  * be nested between calls to H5Eget_auto() and H5Eset_auto(), but it's
  * easier just to use this macro like:
+ *
  *     H5E_BEGIN_TRY {
  *        ...stuff here that's likely to fail...
  *      } H5E_END_TRY
  *
- * Warning: don't break, return, or longjmp() from the body of the loop or
+ * Warning: don't break, return, or longjmp() from the block of code or
  *        the error reporting won't be properly restored!
  *
  * These two macros still use the old API functions for backward compatibility
@@ -322,6 +323,71 @@ H5_DLL hid_t H5Eget_current_stack(void);
  * \since 1.14.0
  */
 H5_DLL herr_t H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_stack);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief * Check if pushing errors on an error stack is paused
+ *
+ * \estack_id{stack_id}
+ * \param[out] is_paused Flag whether stack is paused
+ * \return \herr_t
+ *
+ * \details H5Eis_paused() can be used within HDF5 VOL connectors and other
+ *          dynamically loaded components to check if the HDF5 library, or other
+ *          component has paused pushing error on the default error stack or
+ *          an application stack.
+ *
+ *          The library may pause pushing errors on the default error stack
+ *          when performing "speculative" operations, such as testing for the
+ *          existence of something that could be located at one of many
+ *          locations. \p stack_id is the error stack to query, and the value
+ *          pointed to by \p is_paused is set to TRUE/FALSE.
+ *
+ *          If an error occurs while attempting to query the status of \p stack_id,
+ *          the value pointed to by \p is_paused is unchanged.
+ *
+ * \since 1.14.5
+ */
+H5_DLL herr_t H5Eis_paused(hid_t stack_id, hbool_t *is_paused);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief * Pause pushing errors on an error stack
+ *
+ * \estack_id{stack_id}
+ * \return \herr_t
+ *
+ * \details H5Epause_stack() pauses pushing errors on an error stack.  Pushing
+ *          an error on a paused error stack will be ignored (not fail).
+ *
+ *          H5Eresume_stack() is used to allow errors to be pushed on a stack.
+ *          Calls to H5Epause_stack() and H5Eresume_stack() must be matched.
+ *
+ *          Calls to H5Epause_stack()/H5Eresume_stack() may be nested.
+ *
+ * \since 1.14.5
+ */
+H5_DLL herr_t H5Epause_stack(hid_t stack_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief * Resume pushing errors on an error stack
+ *
+ * \estack_id{stack_id}
+ * \return \herr_t
+ *
+ * \details H5Eresume_stack() resumes pushing errors on an error stack.
+ *
+ *          Calls to H5Epause_stack() and H5Eresume_stack() must be matched.
+ *
+ *          Calls to H5Epause_stack()/H5Eresume_stack() may be nested.
+ *
+ * \since 1.14.5
+ */
+H5_DLL herr_t H5Eresume_stack(hid_t stack_id);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E

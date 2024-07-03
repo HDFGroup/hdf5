@@ -114,6 +114,7 @@ typedef struct H5E_stack_t {
     H5E_entry_t   entries[H5E_MAX_ENTRIES]; /* Array of error entries */
     H5E_auto_op_t auto_op;                  /* Operator for 'automatic' error reporting */
     void         *auto_data;                /* Callback data for 'automatic error reporting */
+    unsigned      paused;                   /* Whether error reporting is paused (>0) for this stack */
 } H5E_stack_t;
 
 /*****************************/

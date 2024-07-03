@@ -38,9 +38,6 @@
 #define FILENAME_LEN 1024
 
 /* test routines */
-#ifdef H5_HAVE_PARALLEL
-static unsigned verify_page_buffering_disabled(hid_t orig_fapl, const char *driver_name);
-#else
 #define NUM_DSETS 5
 #define NX        100
 #define NY        50
@@ -54,11 +51,8 @@ static unsigned test_stats_collection(hid_t orig_fapl, const char *driver_name);
 /* helper routines */
 static unsigned create_file(char *filename, hid_t fcpl, hid_t fapl);
 static unsigned open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size);
-#endif /* H5_HAVE_PARALLEL */
 
 static const char *FILENAME[] = {"filepaged", NULL};
-
-#ifndef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
  * Function:    create_file()
@@ -289,7 +283,6 @@ error:
     H5E_END_TRY
     return 1;
 }
-#endif /* H5_HAVE_PARALLEL */
 
 /*
  *
@@ -352,8 +345,6 @@ error:
     return 1;
 
 } /* set_multi_split() */
-
-#ifndef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
  * Function:    test_args()
@@ -2043,121 +2034,6 @@ error:
 
     return 1;
 } /* test_stats_collection */
-#endif /* #ifndef H5_HAVE_PARALLEL */
-
-/*-------------------------------------------------------------------------
- * Function:    verify_page_buffering_disabled()
- *
- * Purpose:     This function should only be called in parallel
- *              builds.
- *
- *              At present, page buffering should be disabled in parallel
- *              builds.  Verify this.
- *
- * Return:      0 if test is successful
- *              1 if test fails
- *
- *-------------------------------------------------------------------------
- */
-
-#ifdef H5_HAVE_PARALLEL
-static unsigned
-verify_page_buffering_disabled(hid_t orig_fapl, const char *driver_name)
-{
-    char  filename[FILENAME_LEN];    /* Filename to use */
-    hid_t file_id = H5I_INVALID_HID; /* File ID */
-    hid_t fcpl    = H5I_INVALID_HID;
-    hid_t fapl    = H5I_INVALID_HID;
-
-    TESTING("Page Buffering Disabled");
-    h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
-
-    /* first, try to create a file with page buffering enabled */
-
-    if ((fapl = H5Pcopy(orig_fapl)) < 0)
-        TEST_ERROR;
-
-    if (set_multi_split(driver_name, fapl, 4096) != 0)
-        TEST_ERROR;
-
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        FAIL_STACK_ERROR;
-
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
-        FAIL_STACK_ERROR;
-
-    if (H5Pset_file_space_page_size(fcpl, 4096) < 0)
-        FAIL_STACK_ERROR;
-
-    if (H5Pset_page_buffer_size(fapl, 4096 * 8, 0, 0) < 0)
-        FAIL_STACK_ERROR;
-
-    /* try to create  the file -- should fail */
-    H5E_BEGIN_TRY
-    {
-        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
-    }
-    H5E_END_TRY
-
-    if (file_id >= 0)
-        TEST_ERROR;
-
-    /* now, create a file, close it, and then try to open it with page
-     * buffering enabled.
-     */
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        FAIL_STACK_ERROR;
-
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
-        FAIL_STACK_ERROR;
-
-    if (H5Pset_file_space_page_size(fcpl, 4096) < 0)
-        FAIL_STACK_ERROR;
-
-    /* create the file */
-    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
-
-    /* close the file */
-    if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
-
-    /* try to open the file using the fapl prepared above which enables
-     * page buffering.  Should fail.
-     */
-    H5E_BEGIN_TRY
-    {
-        file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl);
-    }
-    H5E_END_TRY
-
-    if (file_id >= 0)
-        TEST_ERROR;
-
-    if (H5Pclose(fcpl) < 0)
-        FAIL_STACK_ERROR;
-
-    if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
-
-    PASSED();
-
-    return 0;
-
-error:
-
-    H5E_BEGIN_TRY
-    {
-        H5Pclose(fapl);
-        H5Pclose(fcpl);
-        H5Fclose(file_id);
-    }
-    H5E_END_TRY
-
-    return 1;
-
-} /* verify_page_buffering_disabled() */
-#endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
  * Function:    main()
@@ -2177,7 +2053,7 @@ main(void)
     const char *driver_name    = NULL;            /* File Driver value from environment */
     bool        api_ctx_pushed = false;           /* Whether API context pushed */
 
-    h5_reset();
+    h5_test_init();
 
     /* Get the VFD to use */
     driver_name = h5_get_test_driver_name();
@@ -2203,13 +2079,6 @@ main(void)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 
-#ifdef H5_HAVE_PARALLEL
-
-    puts("Page Buffering is disabled for parallel.");
-    nerrors += verify_page_buffering_disabled(fapl, driver_name);
-
-#else /* H5_HAVE_PARALLEL */
-
     nerrors += test_args(fapl, driver_name);
     nerrors += test_raw_data_handling(fapl, driver_name);
     nerrors += test_lru_processing(fapl, driver_name);
@@ -2217,9 +2086,8 @@ main(void)
     nerrors += test_stats_collection(fapl, driver_name);
     nerrors += test_pb_fapl_tolerance_at_open();
 
-#endif /* H5_HAVE_PARALLEL */
-
-    h5_clean_files(FILENAME, fapl);
+    h5_delete_all_test_files(FILENAME, fapl);
+    H5Pclose(fapl);
 
     if (nerrors)
         goto error;

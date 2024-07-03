@@ -32,7 +32,7 @@ else
    TESTSERIAL_DIR=
 endif
 
-# Subdirectories in build order, not including examples directory
+# Subdirectories in build order
 ## Only recurse into subdirectories if HDF5 is configured to use Fortran.
 if BUILD_FORTRAN_CONDITIONAL
    SUBDIRS=src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR)
@@ -40,22 +40,6 @@ if BUILD_FORTRAN_CONDITIONAL
 endif
 
 # All directories that have Makefiles
-DIST_SUBDIRS=src test testpar examples
-
-# Install examples
-install-examples uninstall-examples:
-	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
-
-installcheck-local:
-	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
-
-# Clean examples when check-clean is invoked
-check-clean ::
-	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
-	@for d in X $(SUBDIRS) examples; do                                   \
-	    if test $$d != X && test $$d != .; then                           \
-	        (set -x; cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;     \
-	    fi;                                                               \
-	done
+DIST_SUBDIRS=src test testpar
 
 include $(top_srcdir)/config/conclude.am

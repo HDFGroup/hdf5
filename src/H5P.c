@@ -323,8 +323,8 @@ done:
     routine returns an error value.
 
         The 'delete' callback is called when a property is deleted from a
-    property list.  H5P_prp_del_func_t is defined as:
-        typedef herr_t (*H5P_prp_del_func_t)(hid_t prop_id, const char *name,
+    property list.  H5P_prp_delete_func_t is defined as:
+        typedef herr_t (*H5P_prp_delete_func_t)(hid_t prop_id, const char *name,
             size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list the property is deleted from.
@@ -502,8 +502,8 @@ done:
     routine returns an error value.
 
         The 'delete' callback is called when a property is deleted from a
-    property list.  H5P_prp_del_func_t is defined as:
-        typedef herr_t (*H5P_prp_del_func_t)(hid_t prop_id, const char *name,
+    property list.  H5P_prp_delete_func_t is defined as:
+        typedef herr_t (*H5P_prp_delete_func_t)(hid_t prop_id, const char *name,
             size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list the property is deleted from.
@@ -1331,8 +1331,8 @@ done:
     property information will be copied from the source class into the
     destination class.
 
-    If a property is copied from one list to another, the property will be
-    first deleted from the destination list (generating a call to the 'close'
+    If a property is copied from one list to another list that already contains the property,
+    the property will be first deleted from the destination list (generating a call to the 'del'
     callback for the property, if one exists) and then the property is copied
     from the source list to the destination list (generating a call to the
     'copy' callback for the property, if one exists).
@@ -1397,8 +1397,10 @@ done:
     Returns non-negative on success, negative on failure.
  DESCRIPTION
         Removes a property from a property list class.  Future property lists
-    created of that class will not contain this property.  Existing property
-    lists containing this property are not affected.
+    created of that class will not contain this property. Existing property lists
+    which still use the default value for this property will have this property removed.
+    Existing property lists which have modified this property will not be affected.
+
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -1419,7 +1421,7 @@ H5Punregister(hid_t pclass_id, const char *name)
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
 
-    /* Remove the property list from class */
+    /* Remove the property from property list class */
     if ((ret_value = H5P__unregister(pclass, name)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to remove property from class");
 

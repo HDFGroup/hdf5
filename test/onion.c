@@ -4913,7 +4913,7 @@ main(void)
 
     printf("Testing Onion VFD functionality.\n");
 
-    h5_reset();
+    h5_test_init();
 
     /* The onion VFD only supports the sec2 VFD under the hood, so skip this
      * test when the environment variable has been set to something else

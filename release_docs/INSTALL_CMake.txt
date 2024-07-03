@@ -1186,7 +1186,7 @@ See RELEASE.txt in the release_notes/ directory for the list of platforms
 tested for this release.
 
 Instructions for building and testing HDF5 using autotools can be found in the
-INSTALL_Auto.txt file found in this folder.
+INSTALL_Autotools.txt file found in this folder.
 
 
 ========================================================================

@@ -287,7 +287,7 @@ typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id, void
 /**
  * \brief Callback function for H5Pcreate_class()
  *
- * \param[in] prop_id    The identifier of the property list class being created
+ * \param[in] prop_id    The identifier of the property list class being closed
  * \param[in] close_data User pointer to any close data required
  * \return \herr_t
  *
@@ -352,7 +352,7 @@ typedef H5P_prp_cb2_t H5P_prp_get_func_t;
  * \brief Callback function for encoding property values
  *
  * \param[in]  value The property value to be encoded
- * \param[out] buf   The encoded property value
+ * \param[out] buf   Pointer to encoding buffer pointer
  * \param[out] size  The size of \p buf
  * \return \herr_t
  *

@@ -4518,9 +4518,6 @@ AC_CONFIG_FILES([Makefile
                  tools/test/h5stat/testh5stat.sh
                  tools/src/h5perf/Makefile
                  tools/test/perform/Makefile
-                 examples/Makefile
-                 examples/run-c-ex.sh
-                 examples/testh5cc.sh
                  bin/h5cc
                  bin/Makefile
                  c++/Makefile
@@ -4528,18 +4525,12 @@ AC_CONFIG_FILES([Makefile
                  c++/src/h5c++
                  c++/test/Makefile
                  c++/test/H5srcdir_str.h
-                 c++/examples/Makefile
-                 c++/examples/run-c++-ex.sh
-                 c++/examples/testh5c++.sh
                  fortran/Makefile
                  fortran/src/h5fc
                  fortran/src/Makefile
                  fortran/src/H5fort_type_defines.h
                  fortran/test/Makefile
                  fortran/testpar/Makefile
-                 fortran/examples/Makefile
-                 fortran/examples/run-fortran-ex.sh
-                 fortran/examples/testh5fc.sh
                  java/Makefile
                  java/src/Makefile
                  java/src/jni/Makefile

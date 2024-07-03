@@ -92,6 +92,7 @@ typedef struct {
     h5tools_vfd_info_t        vfd_info[2];             /* VFD information for input file, output file */
     bool                      custom_vol[2];           /* Using a custom input, output VOL? */
     bool                      custom_vfd[2];           /* Using a custom input, output VFD? */
+    size_t                    page_cache;              /* Size to request for page buffer cache */
 } diff_opt_t;
 
 /*-------------------------------------------------------------------------

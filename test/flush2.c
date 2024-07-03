@@ -231,7 +231,7 @@ main(void)
     H5E_auto2_t func;                      /* for shutting off error reporting         */
     bool        driver_is_default_vfd_compatible;
 
-    h5_reset();
+    h5_test_init();
     if ((fapl_id = h5_fileaccess()) < 0)
         PUTS_ERROR("bad vfd-dependent fapl");
 

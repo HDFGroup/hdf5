@@ -402,9 +402,7 @@ main(int argc, char **argv)
     AddTest("split", test_split_comm_access, NULL, "dataset using split communicators", PARATESTFILE);
     AddTest("h5oflusherror", test_oflush, NULL, "H5Oflush failure", PARATESTFILE);
 
-#ifdef PB_OUT /* temporary: disable page buffering when parallel */
     AddTest("page_buffer", test_page_buffer_access, NULL, "page buffer usage in parallel", PARATESTFILE);
-#endif
 
     AddTest("props", test_file_properties, NULL, "Coll Metadata file property settings", PARATESTFILE);
 
@@ -604,8 +602,7 @@ main(int argc, char **argv)
         TestSummary();
 
     /* Clean up test files */
-    h5_clean_files(FILENAME, fapl);
-
+    h5_delete_all_test_files(FILENAME, fapl);
     H5Pclose(fapl);
 
     nerrors += GetTestNumErrs();

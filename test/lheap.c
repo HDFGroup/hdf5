@@ -55,7 +55,7 @@ main(void)
     bool        driver_is_default_compatible;
 
     /* Reset library */
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     /* Push API context */

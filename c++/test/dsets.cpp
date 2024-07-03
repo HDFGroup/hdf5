@@ -17,7 +17,6 @@
 
    EXTERNAL ROUTINES/VARIABLES:
      These routines are in the test directory of the C library:
-        h5_reset() -- in h5test.c, resets the library by closing it
         h5_fileaccess() -- in h5test.c, returns a file access template
 
  ***************************************************************************/

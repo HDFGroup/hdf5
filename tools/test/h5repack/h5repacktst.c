@@ -384,7 +384,7 @@ main(void)
         GOERROR;
     if (h5repack_verify(FNAME0, FNAME0OUT, &pack_options) <= 0)
         GOERROR;
-    if (h5repack_cmp_pl(FNAME0, pack_options.fin_fapl, FNAME0OUT, pack_options.fout_fapl) <= 0)
+    if (h5repack_cmp_pl(FNAME0, FNAME0OUT, &pack_options) <= 0)
         GOERROR;
     if (h5repack_end(&pack_options) < 0)
         GOERROR;
@@ -404,7 +404,7 @@ main(void)
             GOERROR;
         if (h5repack_verify(FNAME1, FNAME1OUT, &pack_options) <= 0)
             GOERROR;
-        if (h5repack_cmp_pl(FNAME1, pack_options.fin_fapl, FNAME1OUT, pack_options.fout_fapl) <= 0)
+        if (h5repack_cmp_pl(FNAME1, FNAME1OUT, &pack_options) <= 0)
             GOERROR;
         if (h5repack_end(&pack_options) < 0)
             GOERROR;
@@ -424,7 +424,7 @@ main(void)
         GOERROR;
     if (h5repack_verify(FNAME2, FNAME2OUT, &pack_options) <= 0)
         GOERROR;
-    if (h5repack_cmp_pl(FNAME2, pack_options.fin_fapl, FNAME2OUT, pack_options.fout_fapl) <= 0)
+    if (h5repack_cmp_pl(FNAME2, FNAME2OUT, &pack_options) <= 0)
         GOERROR;
     if (h5repack_end(&pack_options) < 0)
         GOERROR;
@@ -443,7 +443,7 @@ main(void)
         GOERROR;
     if (h5repack_verify(FNAME3, FNAME3OUT, &pack_options) <= 0)
         GOERROR;
-    if (h5repack_cmp_pl(FNAME3, pack_options.fin_fapl, FNAME3OUT, pack_options.fout_fapl) <= 0)
+    if (h5repack_cmp_pl(FNAME3, FNAME3OUT, &pack_options) <= 0)
         GOERROR;
     if (h5repack_end(&pack_options) < 0)
         GOERROR;
@@ -1127,7 +1127,7 @@ main(void)
             GOERROR;
         if (h5repack_verify(FNAME7, FNAME7OUT, &pack_options) <= 0)
             GOERROR;
-        if (h5repack_cmp_pl(FNAME7, pack_options.fin_fapl, FNAME7OUT, pack_options.fout_fapl) <= 0)
+        if (h5repack_cmp_pl(FNAME7, FNAME7OUT, &pack_options) <= 0)
             GOERROR;
         if (h5repack_end(&pack_options) < 0)
             GOERROR;
@@ -1732,7 +1732,8 @@ main(void)
         hid_t fapl;
 
         fapl = h5_fileaccess();
-        h5_clean_files(H5REPACK_FILENAMES, fapl);
+        h5_delete_all_test_files(H5REPACK_FILENAMES, fapl);
+        H5Pclose(fapl);
     }
 
     puts("All h5repack tests passed.");
@@ -3973,17 +3974,18 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     float buf82[3][2] = {{1, 2}, {3, 4}, {5, 6}}; /* float */
 
     /* create 3D attributes with dimension [4][3][2], 24 elements */
-    hsize_t    dims3[3]     = {4, 3, 2};
-    hsize_t    dims3r[3]    = {1, 1, 1};
-    char       buf13[24][3] = {"ab", "cd", "ef", "gh", "ij", "kl", "mn", "pq", "rs", "tu", "vw", "xz",
-                         "AB", "CD", "EF", "GH", "IJ", "KL", "MN", "PQ", "RS", "TU", "VW", "XZ"}; /* string */
-    char       buf23[4][3][2]; /* bitfield, opaque */
-    s_t        buf33[4][3][2]; /* compound */
-    hobj_ref_t buf43[1][1][1]; /* reference */
-    hvl_t      buf53[4][3][2]; /* vlen */
-    int        buf63[24][3];   /* array */
-    int        buf73[4][3][2]; /* integer */
-    float      buf83[4][3][2]; /* float */
+    hsize_t dims3[3]     = {4, 3, 2};
+    hsize_t dims3r[3]    = {1, 1, 1};
+    char    buf13[24][2] = {
+        "ab", "cd", "ef", "gh", "ij", "kl", "mn", "pq", "rs", "tu", "vw", "xz", "AB",
+        "CD", "EF", "GH", "IJ", "KL", "MN", "PQ", "RS", "TU", "VW", "XZ"}; /* string, NO NUL fixed length */
+    char       buf23[4][3][2];                                                /* bitfield, opaque */
+    s_t        buf33[4][3][2];                                                /* compound */
+    hobj_ref_t buf43[1][1][1];                                                /* reference */
+    hvl_t      buf53[4][3][2];                                                /* vlen */
+    int        buf63[24][3];                                                  /* array */
+    int        buf73[4][3][2];                                                /* integer */
+    float      buf83[4][3][2];                                                /* float */
 
     /*-------------------------------------------------------------------------
      * 1D
@@ -4788,7 +4790,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
     /* create 1D attributes with dimension [2], 2 elements */
     hsize_t    dims[1]    = {2};
-    char       buf1[2][3] = {"ab", "de"};            /* string */
+    char       buf1[2][2] = {"ab", "de"};            /* string, NO NUL fixed length */
     char       buf2[2]    = {1, 2};                  /* bitfield, opaque */
     s_t        buf3[2]    = {{1, 2}, {3, 4}};        /* compound */
     hobj_ref_t buf4[2];                              /* reference */
@@ -4801,8 +4803,8 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
     /* create 2D attributes with dimension [3][2], 6 elements */
     hsize_t    dims2[2]    = {3, 2};
-    char       buf12[6][3] = {"ab", "cd", "ef", "gh", "ij", "kl"};                /* string */
-    char       buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};                            /* bitfield, opaque */
+    char       buf12[6][2] = {"ab", "cd", "ef", "gh", "ij", "kl"}; /* string, NO NUL fixed length */
+    char       buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};             /* bitfield, opaque */
     s_t        buf32[6]    = {{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 10}, {11, 12}}; /* compound */
     hobj_ref_t buf42[3][2];                                                       /* reference */
     e_t        buf452[3][2];                                                      /* enum */
@@ -4812,17 +4814,18 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     float buf82[3][2] = {{1, 2}, {3, 4}, {5, 6}}; /* float */
 
     /* create 3D attributes with dimension [4][3][2], 24 elements */
-    hsize_t    dims3[3]     = {4, 3, 2};
-    char       buf13[24][3] = {"ab", "cd", "ef", "gh", "ij", "kl", "mn", "pq", "rs", "tu", "vw", "xz",
-                         "AB", "CD", "EF", "GH", "IJ", "KL", "MN", "PQ", "RS", "TU", "VW", "XZ"}; /* string */
-    char       buf23[4][3][2];  /* bitfield, opaque */
-    s_t        buf33[4][3][2];  /* compound */
-    hobj_ref_t buf43[4][3][2];  /* reference */
-    e_t        buf453[4][3][2]; /* enum */
-    hvl_t      buf53[4][3][2];  /* vlen */
-    int        buf63[24][3];    /* array */
-    int        buf73[4][3][2];  /* integer */
-    float      buf83[4][3][2];  /* float */
+    hsize_t dims3[3]     = {4, 3, 2};
+    char    buf13[24][2] = {
+        "ab", "cd", "ef", "gh", "ij", "kl", "mn", "pq", "rs", "tu", "vw", "xz", "AB",
+        "CD", "EF", "GH", "IJ", "KL", "MN", "PQ", "RS", "TU", "VW", "XZ"}; /* string, NO NUL fixed length */
+    char       buf23[4][3][2];                                                /* bitfield, opaque */
+    s_t        buf33[4][3][2];                                                /* compound */
+    hobj_ref_t buf43[4][3][2];                                                /* reference */
+    e_t        buf453[4][3][2];                                               /* enum */
+    hvl_t      buf53[4][3][2];                                                /* vlen */
+    int        buf63[24][3];                                                  /* array */
+    int        buf73[4][3][2];                                                /* integer */
+    float      buf83[4][3][2];                                                /* float */
 
     /*-------------------------------------------------------------------------
      * 1D attributes

@@ -144,7 +144,7 @@ main(void)
     unsigned latest_format;                 /* default or latest file format        */
     int      nerrors = 0;                   /* number of errors                     */
 
-    h5_reset();
+    h5_test_init();
 
     /* Get a fapl for the old (default) file format */
     fapl_id_old = h5_fileaccess();

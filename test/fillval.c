@@ -2626,7 +2626,7 @@ main(int argc, char *argv[])
         } /* end for */
     }     /* end if */
 
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)

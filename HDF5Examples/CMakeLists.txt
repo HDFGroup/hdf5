@@ -1,10 +1,11 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 project (H5EXAMPLES C)
 
 #-----------------------------------------------------------------------------
 # Define some CMake variables for use later in the project
 #-----------------------------------------------------------------------------
 set (H5EX_C_SRC_DIR          ${H5EXAMPLES_SOURCE_DIR}/C)
+set (H5EX_CXX_SRC_DIR        ${H5EXAMPLES_SOURCE_DIR}/CXX)
 set (H5EX_F90_SRC_DIR        ${H5EXAMPLES_SOURCE_DIR}/FORTRAN)
 set (H5EX_JAVA_DIR           ${H5EXAMPLES_SOURCE_DIR}/JAVA)
 #-----------------------------------------------------------------------------
@@ -144,7 +145,7 @@ if (${H5_LIBVER_DIR} GREATER 16)
   set (H5_FC_FUNC  "H5_FC_FUNC(name,NAME) name ## _")
   set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) name ## _")
   if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/FORTRAN" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/FORTRAN")
-    option (HDF_BUILD_FORTRAN "Build FORTRAN support" OFF)
+    option (HDF_BUILD_FORTRAN "Build examples FORTRAN support" OFF)
     if (HDF_BUILD_FORTRAN AND HDF5_BUILD_FORTRAN)
       set (H5EX_LINK_Fortran_LIBS ${H5EX_HDF5_LINK_LIBS})
 
@@ -170,7 +171,7 @@ if (${H5_LIBVER_DIR} GREATER 16)
     # Option to build JAVA examples
     #-----------------------------------------------------------------------------
     if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/JAVA" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/JAVA")
-      option (HDF_BUILD_JAVA "Build JAVA support" OFF)
+      option (HDF_BUILD_JAVA "Build examples JAVA support" OFF)
     else ()
       set (HDF_BUILD_JAVA OFF CACHE BOOL "Build examples JAVA support" FORCE)
     endif ()
@@ -179,10 +180,19 @@ if (${H5_LIBVER_DIR} GREATER 16)
   endif ()
 
   #-----------------------------------------------------------------------------
+  # Build the CPP Examples
+  #-----------------------------------------------------------------------------
+  if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/CXX" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/CXX")
+    option (HDF_BUILD_CPP_LIB "Build examples C++ support" OFF)
+  else ()
+    set (HDF_BUILD_CPP_LIB OFF CACHE BOOL "Build examples C++ support" FORCE)
+  endif ()
+
+  #-----------------------------------------------------------------------------
   # Option to build filter examples
   #-----------------------------------------------------------------------------
   if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/C/H5FLT" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/C/H5FLT")
-    option (HDF_BUILD_FILTERS "Test filter support" OFF)
+    option (HDF_BUILD_FILTERS "Build examples PLUGIN filter support" OFF)
     if (HDF_BUILD_FILTERS AND HDF5_ENABLE_PLUGIN_SUPPORT)
       if(DEFINED ENV{HDF5_PLUGIN_PATH})
         message (STATUS "ENV PATH=$ENV{HDF5_PLUGIN_PATH}")
@@ -203,6 +213,7 @@ if (${H5_LIBVER_DIR} GREATER 16)
 else ()
   set (HDF_BUILD_FORTRAN OFF} CACHE BOOL "Build examples FORTRAN support" FORCE)
   set (HDF_BUILD_JAVA OFF CACHE BOOL "Build examples JAVA support" FORCE)
+  set (HDF_BUILD_CPP_LIB OFF CACHE BOOL "Build examples C++ support" FORCE)
   set (HDF_BUILD_FILTERS OFF CACHE BOOL "Build examples PLUGIN filter support" FORCE)
 endif ()
 
@@ -215,5 +226,8 @@ if (HDF_BUILD_FORTRAN AND HDF5_BUILD_FORTRAN)
 endif ()
 if (HDF_BUILD_JAVA AND HDF5_BUILD_JAVA)
   add_subdirectory (JAVA)
+endif ()
+if (HDF_BUILD_CPP_LIB AND HDF5_BUILD_CPP_LIB)
+  add_subdirectory (CXX)
 endif ()
 

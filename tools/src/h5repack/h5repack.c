@@ -80,6 +80,10 @@ h5repack_init(pack_opt_t *options, int verbose, bool latest)
     options->high_bound = H5F_LIBVER_LATEST;
     options->fin_fapl   = H5P_DEFAULT;
     options->fout_fapl  = H5P_DEFAULT;
+    options->fin_vol    = false;
+    options->fin_vfd    = false;
+    options->fout_vol   = false;
+    options->fout_vfd   = false;
 
     for (n = 0; n < H5_REPACK_MAX_NFILTERS; n++) {
         options->filter_g[n].filtn     = -1;
@@ -793,7 +797,7 @@ check_objects(const char *fname, pack_opt_t *options)
      * open the file
      *-------------------------------------------------------------------------
      */
-    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, options->fin_fapl, (options->fin_fapl != H5P_DEFAULT),
+    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, options->fin_fapl, (options->fin_vol || options->fin_vfd),
                              NULL, 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname, H5FOPENERROR);
 

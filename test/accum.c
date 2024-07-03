@@ -91,7 +91,7 @@ main(void)
     puts("Testing the metadata accumulator");
 
     /* File access property list */
-    h5_reset();
+    h5_test_init();
     if ((fapl = h5_fileaccess()) < 0)
         FAIL_STACK_ERROR;
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);

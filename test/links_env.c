@@ -157,7 +157,7 @@ main(void)
         exit(EXIT_SUCCESS);
     }
 
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     nerrors += external_link_env(fapl, false) < 0 ? 1 : 0;

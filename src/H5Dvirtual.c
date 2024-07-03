@@ -875,16 +875,14 @@ H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *vir
         intent = H5F_INTENT(vdset->oloc.file);
 
         /* Try opening the file */
-        src_file = H5F_prefix_open_file(vdset->oloc.file, H5F_PREFIX_VDS, vdset->shared->vds_prefix,
-                                        source_dset->file_name, intent,
-                                        vdset->shared->layout.storage.u.virt.source_fapl);
+        if (H5F_prefix_open_file(true, &src_file, vdset->oloc.file, H5F_PREFIX_VDS, vdset->shared->vds_prefix,
+                                 source_dset->file_name, intent,
+                                 vdset->shared->layout.storage.u.virt.source_fapl) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENFILE, FAIL, "can't try opening file");
 
         /* If we opened the source file here, we should close it when leaving */
         if (src_file)
             src_file_open = true;
-        else
-            /* Reset the error stack */
-            H5E_clear_stack();
     } /* end if */
     else
         /* Source file is ".", use the virtual dataset's file */

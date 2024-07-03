@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 project (HDF5Examples_FORTRAN_H5PAR Fortran)
 
 # --------------------------------------------------------------------
@@ -28,7 +28,6 @@ foreach (example_name ${examples})
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_110_API}>:-DH5_USE_110_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_112_API}>:-DH5_USE_112_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_114_API}>:-DH5_USE_114_API>"
-          "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_116_API}>:-DH5_USE_116_API>"
   )
   target_include_directories (${EXAMPLE_VARNAME}_f90_${example_name} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
   target_link_libraries (${EXAMPLE_VARNAME}_f90_${example_name} ${H5EX_LINK_Fortran_LIBS})
@@ -38,14 +37,11 @@ endforeach ()
 if (H5EX_BUILD_TESTING)
   macro (ADD_GREP_TEST testname mumprocs)
     add_test (
-        NAME ${EXAMPLE_VARNAME}_f90_${testname}-clearall
+        NAME MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clearall
         COMMAND    ${CMAKE_COMMAND}
             -E remove
             ${testname}.h5
     )
-    if (last_test)
-      set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname}-clearall PROPERTIES DEPENDS ${last_test})
-    endif ()
     add_test (NAME MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname} COMMAND "${CMAKE_COMMAND}"
         -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${mumprocs};${MPIEXEC_PREFLAGS};$<TARGET_FILE:${EXAMPLE_VARNAME}_f90_${testname}>;${MPIEXEC_POSTFLAGS}"
         -D "TEST_ARGS:STRING="
@@ -57,8 +53,15 @@ if (H5EX_BUILD_TESTING)
         -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
         -P "${H5EX_RESOURCES_DIR}/grepTest.cmake"
     )
-    set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}-clearall)
-    set (last_test "MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}")
+    set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clearall)
+    add_test (
+        NAME MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clean
+        COMMAND    ${CMAKE_COMMAND}
+            -E remove
+            ${testname}.h5
+    )
+    set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clean PROPERTIES DEPENDS MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname})
+    set (last_test "MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clean")
   endmacro ()
 
   # Ensure that 24 is a multiple of the number of processes.

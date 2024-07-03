@@ -342,7 +342,7 @@ main(void)
     char filename[1024];
     int  nerrors = 0;
 
-    h5_reset();
+    h5_test_init();
 
     /*
      * Skip tests for VFDs that aren't compatible with default VFD.

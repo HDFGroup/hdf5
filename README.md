@@ -69,7 +69,6 @@ conversation.  Please read the [instructions](https://forum.hdfgroup.org/t/quick
 ) pertaining to the Forum's use and configuration.
 
 
-
 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
 Periodically development code snapshots are provided at the following URL:
