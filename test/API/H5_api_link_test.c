@@ -27270,8 +27270,8 @@ link_visit_0_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
 static void
 cleanup_files(void)
 {
-    H5Fdelete(EXTERNAL_LINK_TEST_FILE_NAME, H5P_DEFAULT);
-    H5Fdelete(EXTERNAL_LINK_INVALID_PARAMS_TEST_FILE_NAME, H5P_DEFAULT);
+    remove_test_file(test_path_prefix, EXTERNAL_LINK_TEST_FILE_NAME);
+    remove_test_file(test_path_prefix, EXTERNAL_LINK_INVALID_PARAMS_TEST_FILE_NAME);
 }
 
 int

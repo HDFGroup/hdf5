@@ -788,10 +788,12 @@ remove_test_file(const char *prefix, const char *filename)
     else
         test_file = filename;
 
-    if (H5Fdelete(test_file, H5P_DEFAULT) < 0) {
-        printf("    couldn't remove file '%s'\n", test_file);
-        ret_value = FAIL;
-        goto done;
+    if (HDaccess(test_file, F_OK) != -1) {
+        if (H5Fdelete(test_file, H5P_DEFAULT) < 0) {
+            printf("    couldn't remove file '%s'\n", test_file);
+            ret_value = FAIL;
+            goto done;
+        }
     }
 
 done:

@@ -4750,10 +4750,6 @@ test_object_copy_between_files(void)
         TEST_ERROR;
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
-    snprintf(filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
-             OBJECT_COPY_BETWEEN_FILES_TEST_FILE_NAME);
-    if (H5Fdelete(filename, H5P_DEFAULT) < 0)
-        TEST_ERROR;
 
     PASSED();
 
@@ -5713,12 +5709,6 @@ test_object_visit(void)
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
     if (H5Fclose(file_id2) < 0)
-        TEST_ERROR;
-    snprintf(filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
-             OBJECT_VISIT_TEST_FILE_NAME);
-    if (H5Fdelete(filename, H5P_DEFAULT) < 0)
-        TEST_ERROR;
-    if (H5Fdelete(visit_filename, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
     PASSED();
@@ -7375,6 +7365,23 @@ object_visit_noop_callback(hid_t o_id, const char *name, const H5O_info2_t *obje
     return 0;
 }
 
+/*
+ * Cleanup temporary test files
+ */
+static void
+cleanup_files(void)
+{
+    char filename[H5_API_TEST_FILENAME_MAX_LENGTH];
+
+    snprintf(filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
+             OBJECT_COPY_BETWEEN_FILES_TEST_FILE_NAME);
+    remove_test_file(NULL, filename);
+
+    snprintf(filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
+             OBJECT_VISIT_TEST_FILE_NAME);
+    remove_test_file(NULL, filename);
+}
+
 int
 H5_api_object_test(void)
 {
@@ -7392,6 +7399,9 @@ H5_api_object_test(void)
     }
 
     printf("\n");
+
+    printf("Cleaning up testing files\n");
+    cleanup_files();
 
     return nerrors;
 }
