@@ -339,7 +339,8 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_args_t *args, hid_t H5_
 
         /* H5Fis_accessible */
         case H5VL_FILE_IS_ACCESSIBLE: {
-            if (H5F__is_hdf5(args->args.is_accessible.filename, args->args.is_accessible.fapl_id, args->args.is_accessible.accessible) < 0)
+            if (H5F__is_hdf5(args->args.is_accessible.filename, args->args.is_accessible.fapl_id,
+                             args->args.is_accessible.accessible) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "error in HDF5 file check");
 
             break;
