@@ -4196,7 +4196,6 @@ test_object_copy_between_files(void)
     hid_t       attr_space_id   = H5I_INVALID_HID;
     hid_t       space_id        = H5I_INVALID_HID;
     hid_t       ocpypl_id       = H5I_INVALID_HID;
-    char        filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 
     TESTING_MULTIPART("object copying between files");
 
@@ -5068,7 +5067,6 @@ test_object_visit(void)
     hssize_t num_elems  = 0;
     size_t   elem_size  = 0;
     char     visit_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    char     filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 
     TESTING_MULTIPART("object visiting");
 
@@ -7371,15 +7369,8 @@ object_visit_noop_callback(hid_t o_id, const char *name, const H5O_info2_t *obje
 static void
 cleanup_files(void)
 {
-    char filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-
-    snprintf(filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
-             OBJECT_COPY_BETWEEN_FILES_TEST_FILE_NAME);
-    remove_test_file(NULL, filename);
-
-    snprintf(filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
-             OBJECT_VISIT_TEST_FILE_NAME);
-    remove_test_file(NULL, filename);
+    remove_test_file(test_path_prefix, OBJECT_COPY_BETWEEN_FILES_TEST_FILE_NAME);
+    remove_test_file(test_path_prefix, OBJECT_VISIT_TEST_FILE_NAME);
 }
 
 int
