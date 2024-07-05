@@ -315,7 +315,7 @@ H5TS__tinfo_init(void)
     if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_tinfo_mtx_s, H5TS_MUTEX_TYPE_PLAIN)) < 0)
         ret_value = FAIL;
 
-    /* Initialize key for thread-specific API contexts */
+        /* Initialize key for thread-specific API contexts */
 #ifdef H5_HAVE_WIN_THREADS
     if (H5_UNLIKELY(H5TS_key_create(&H5TS_thrd_info_key_g, NULL) < 0))
         ret_value = FAIL;
