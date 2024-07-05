@@ -84,7 +84,7 @@ H5TSmutex_acquire(unsigned lock_count, bool *acquired)
     FUNC_ENTER_API_NAMECHECK_ONLY
 
     /* Acquire the "API" lock */
-    if (H5_UNLIKELY(H5TS__mutex_acquire(lock_count, acquired) < 0))
+    if (H5_UNLIKELY(H5TS__api_mutex_acquire(lock_count, acquired) < 0))
         HGOTO_DONE(FAIL);
 
 done:
@@ -133,7 +133,7 @@ H5TSmutex_release(unsigned *lock_count)
 
     /* Release the "API" lock */
     *lock_count = 0;
-    if (H5_UNLIKELY(H5TS__mutex_release(lock_count) < 0))
+    if (H5_UNLIKELY(H5TS__api_mutex_release(lock_count) < 0))
         ret_value = FAIL;
 
     FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)

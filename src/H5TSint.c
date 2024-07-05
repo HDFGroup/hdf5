@@ -158,7 +158,7 @@ H5TS_term_package(void)
 } /* end H5TS_term_package() */
 
 /*--------------------------------------------------------------------------
- * Function:    H5TS__mutex_acquire
+ * Function:    H5TS__api_mutex_acquire
  *
  * Purpose:     Attempts to acquire the API lock, without blocking
  *
@@ -170,7 +170,7 @@ H5TS_term_package(void)
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS__mutex_acquire(unsigned lock_count, bool *acquired)
+H5TS__api_mutex_acquire(unsigned lock_count, bool *acquired)
 {
     herr_t ret_value = SUCCEED;
 
@@ -190,7 +190,7 @@ H5TS__mutex_acquire(unsigned lock_count, bool *acquired)
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS__mutex_acquire() */
+} /* end H5TS__api_mutex_acquire() */
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS_api_lock
@@ -234,7 +234,7 @@ done:
 } /* end H5TS_api_lock() */
 
 /*--------------------------------------------------------------------------
- * Function:    H5TS__mutex_release
+ * Function:    H5TS__api_mutex_release
  *
  * Purpose:     Release the global "API" lock for accessing the HDF5 library.
  *              Passes back the previous lock count to the caller in a
@@ -245,7 +245,7 @@ done:
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS__mutex_release(unsigned *lock_count)
+H5TS__api_mutex_release(unsigned *lock_count)
 {
     herr_t ret_value = SUCCEED;
 
@@ -264,7 +264,7 @@ H5TS__mutex_release(unsigned *lock_count)
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* H5TS__mutex_release */
+} /* H5TS__api_mutex_release */
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS_api_unlock
@@ -312,7 +312,8 @@ H5TS__tinfo_init(void)
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Initialize the critical section for modifying the thread info globals */
-    H5TS_mutex_init(&H5TS_tinfo_mtx_s, H5TS_MUTEX_TYPE_PLAIN);
+    if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_tinfo_mtx_s, H5TS_MUTEX_TYPE_PLAIN)) < 0)
+        ret_value = FAIL;
 
     /* Initialize key for thread-specific API contexts */
 #ifdef H5_HAVE_WIN_THREADS

@@ -227,8 +227,8 @@ extern H5TS_key_t H5TS_thrd_info_key_g;
 /******************************/
 #ifdef H5_HAVE_THREADSAFE
 H5_DLL herr_t H5TS__init(void);
-H5_DLL herr_t H5TS__mutex_acquire(unsigned lock_count, bool *acquired);
-H5_DLL herr_t H5TS__mutex_release(unsigned *lock_count);
+H5_DLL herr_t H5TS__api_mutex_acquire(unsigned lock_count, bool *acquired);
+H5_DLL herr_t H5TS__api_mutex_release(unsigned *lock_count);
 H5_DLL herr_t H5TS__tinfo_init(void);
 H5_DLL void   H5TS__tinfo_destroy(void *tinfo_node);
 H5_DLL herr_t H5TS__tinfo_term(void);
