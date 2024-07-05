@@ -2674,10 +2674,11 @@ cleanup_files(void)
     char file_name[64];
     int  i;
 
-    H5Fdelete(ASYNC_API_TEST_FILE, H5P_DEFAULT);
+    remove_test_file(NULL, ASYNC_API_TEST_FILE);
+
     for (i = 0; i <= max_printf_file; i++) {
         snprintf(file_name, sizeof(file_name), ASYNC_API_TEST_FILE_PRINTF, i);
-        H5Fdelete(file_name, H5P_DEFAULT);
+        remove_test_file(NULL, file_name);
     } /* end for */
 }
 
