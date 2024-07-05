@@ -1610,7 +1610,7 @@ h5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f *name_size, _fcd name, o
     herr_t   status;
     size_t   c_namelen;
     char    *c_name = NULL;
-    off_t    c_offset;
+    HDoff_t  c_offset;
     hsize_t  size;
 
     c_namelen = (size_t)*name_size;
