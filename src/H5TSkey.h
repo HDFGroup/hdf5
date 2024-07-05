@@ -53,43 +53,8 @@
 /*******************/
 
 #ifdef H5_HAVE_C11_THREADS
-/*-------------------------------------------------------------------------
- * Function: H5TS_key_set_value
- *
- * Purpose:  Set a thread-specific value for a thread-local key
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static inline herr_t
-H5TS_key_set_value(H5TS_key_t key, void *value)
-{
-    /* Set the value for this thread */
-    if (H5_UNLIKELY(tss_set(key, value) != thrd_success))
-        return FAIL;
-
-    return SUCCEED;
-} /* end H5TS_key_set_value() */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS_key_get_value
- *
- * Purpose:  Get a thread-specific value for a thread-local key
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static inline herr_t
-H5TS_key_get_value(H5TS_key_t key, void **value)
-{
-    /* Get the value for this thread */
-    /* NOTE: tss_get() can't fail */
-    *value = tss_get(key);
-
-    return SUCCEED;
-} /* end H5TS_key_get_value() */
+#define H5TS_key_set_value(key,value)   (H5_UNLIKELY(tss_set((key), (value)) != thrd_success) ? FAIL : SUCCEED)
+#define H5TS_key_get_value(key,value)   (*(value) = tss_get(key), SUCCEED)
 
 #else
 #ifdef H5_HAVE_WIN_THREADS
@@ -134,43 +99,9 @@ H5TS_key_get_value(H5TS_key_t key, void **value)
 } /* end H5TS_key_get_value() */
 
 #else
-/*-------------------------------------------------------------------------
- * Function: H5TS_key_set_value
- *
- * Purpose:  Set a thread-specific value for a thread-local key
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static inline herr_t
-H5TS_key_set_value(H5TS_key_t key, void *value)
-{
-    /* Set the value for this thread */
-    if (H5_UNLIKELY(pthread_setspecific(key, value)))
-        return FAIL;
 
-    return SUCCEED;
-} /* end H5TS_key_set_value() */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS_key_get_value
- *
- * Purpose:  Get a thread-specific value for a thread-local key
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static inline herr_t
-H5TS_key_get_value(H5TS_key_t key, void **value)
-{
-    /* Get the value for this thread */
-    /* NOTE: pthread_getspecific() can't fail */
-    *value = pthread_getspecific(key);
-
-    return SUCCEED;
-} /* end H5TS_key_get_value() */
+#define H5TS_key_set_value(key,value)   (H5_UNLIKELY(pthread_setspecific((key), (value))) ? FAIL : SUCCEED)
+#define H5TS_key_get_value(key,value)   (*(value) = pthread_getspecific(key), SUCCEED)
 
 #endif
 #endif

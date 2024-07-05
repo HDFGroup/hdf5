@@ -94,7 +94,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 } /* end H5TS_mutex_unlock() */
 #else
 
-#define H5TS_mutex_lock(mutex)   ((H5_UNLIKELY(pthread_mutex_lock(mutex))) ? FAIL : SUCCEED)
+#define H5TS_mutex_lock(mutex)   (H5_UNLIKELY(pthread_mutex_lock(mutex)) ? FAIL : SUCCEED)
 #define H5TS_mutex_unlock(mutex) (H5_UNLIKELY(pthread_mutex_unlock(mutex)) ? FAIL : SUCCEED)
 
 #endif
