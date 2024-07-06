@@ -53,8 +53,8 @@
 /*******************/
 
 #ifdef H5_HAVE_C11_THREADS
-#define H5TS_key_set_value(key,value)   (H5_UNLIKELY(tss_set((key), (value)) != thrd_success) ? FAIL : SUCCEED)
-#define H5TS_key_get_value(key,value)   (*(value) = tss_get(key), SUCCEED)
+#define H5TS_key_set_value(key, value) (H5_UNLIKELY(tss_set((key), (value)) != thrd_success) ? FAIL : SUCCEED)
+#define H5TS_key_get_value(key, value) (*(value) = tss_get(key), SUCCEED)
 
 #else
 #ifdef H5_HAVE_WIN_THREADS
@@ -100,8 +100,8 @@ H5TS_key_get_value(H5TS_key_t key, void **value)
 
 #else
 
-#define H5TS_key_set_value(key,value)   (H5_UNLIKELY(pthread_setspecific((key), (value))) ? FAIL : SUCCEED)
-#define H5TS_key_get_value(key,value)   (*(value) = pthread_getspecific(key), SUCCEED)
+#define H5TS_key_set_value(key, value) (H5_UNLIKELY(pthread_setspecific((key), (value))) ? FAIL : SUCCEED)
+#define H5TS_key_get_value(key, value) (*(value) = pthread_getspecific(key), SUCCEED)
 
 #endif
 #endif
