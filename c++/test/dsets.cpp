@@ -16,8 +16,8 @@
                C dataset interface (H5D)
 
    EXTERNAL ROUTINES/VARIABLES:
-     These routines are in the test directory of the C library:
-        h5_fileaccess() -- in h5test.c, returns a file access template
+     These routines are in the tools library:
+        h5tools_get_new_fapl() -- in tools/lib, returns a file access template
 
  ***************************************************************************/
 
@@ -31,7 +31,6 @@ using std::endl;
 #include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
-#include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
 
 const H5std_string FILE1("dataset.h5");
@@ -108,12 +107,12 @@ test_create(H5File &file)
         // Get and verify the name of this dataset, using
         // H5std_string getObjName()
         H5std_string ds_name = dataset->getObjName();
-        verify_val(ds_name, DSET_DEFAULT_NAME_PATH, "DataSet::getObjName", __LINE__, __FILE__);
+        verify_val(ds_name, DSET_DEFAULT_NAME_PATH, "DataSet::getObjName", __LINE__, __FILE__, "ds_name");
 
         // Get and verify the comment from this dataset, using
         // H5std_string getComment(const H5std_string& name, <buf_size=0, by default>)
         H5std_string comment = file.getComment(DSET_DEFAULT_NAME);
-        verify_val(comment, "This is a dataset", "DataSet::getComment", __LINE__, __FILE__);
+        verify_val(comment.c_str(), "This is a dataset", "DataSet::getComment", __LINE__, __FILE__, "comment");
 
         // Close the dataset when accessing is completed
         delete dataset;
@@ -1094,7 +1093,7 @@ test_getnativeinfo(H5File &file)
         H5O_native_info_t ninfo;
         memset(&ninfo, 0, sizeof(ninfo));
         dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
-        verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__, "nchunks");
         dataset.close();
 
         // Open the dataset we created above and then close it.  This is one
@@ -1102,7 +1101,7 @@ test_getnativeinfo(H5File &file)
         dataset = file.openDataSet(DSET_DEFAULT_NAME);
         memset(&ninfo, 0, sizeof(ninfo));
         dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_ALL);
-        verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__, "nchunks");
         dataset.close();
 
         PASSED();
@@ -1152,17 +1151,15 @@ test_chunk_cache(const FileAccPropList &fapl)
         double w0_1 = 0.0, w0_4 = 0.0;
         fapl_def.getCache(mdc_nelmts, nslots_1, nbytes_1, w0_1);
         dapl.getChunkCache(nslots_4, nbytes_4, w0_4);
-        verify_val(nslots_1, nslots_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__);
-        verify_val(nbytes_1, nbytes_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__);
-        if (abs(w0_1 - w0_4) > DBL_EPSILON)
-            TestErrPrintf("%d: w0_1 and w0_4 different: w0_1=%f, "
-                          "w0_4=%f\n",
-                          __LINE__, w0_1, w0_4);
+        verify_val(nslots_1, nslots_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__, "nslots_1");
+        verify_val(nbytes_1, nbytes_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__, "nbytes_1");
+        if (fabs(w0_1 - w0_4) > DBL_EPSILON)
+            display_difference(w0_1, w0_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__, "w0_1");
 
         // Set a link access property on dapl to verify property list inheritance
         dapl.setNumLinks(134);
         size_t nlinks = dapl.getNumLinks();
-        verify_val(static_cast<long>(nlinks), 134, "DSetAccPropList::getNumLinks", __LINE__, __FILE__);
+        verify_val(static_cast<long>(nlinks), 134, "DSetAccPropList::getNumLinks", __LINE__, __FILE__, "nlinks");
 
         // Make a copy of the external fapl
         FileAccPropList fapl_local(fapl);
@@ -1199,9 +1196,11 @@ test_chunk_cache(const FileAccPropList &fapl)
         nslots_4 = nbytes_4 = 0;
         w0_4                = 0.0;
         dapl2.getChunkCache(nslots_4, nbytes_4, w0_4);
-        verify_val(nslots_2, nslots_4, "DSetCreatPropList::getChunkCache", __LINE__, __FILE__);
-        verify_val(nbytes_2, nbytes_4, "DSetCreatPropList::getChunkCache", __LINE__, __FILE__);
-        verify_val(H5_DBL_ABS_EQUAL(w0_2, w0_4), 1, "DSetCreatPropList::getChunkCache", __LINE__, __FILE__);
+        verify_val(nslots_2, nslots_4, "DSetCreatPropList::getChunkCache", __LINE__, __FILE__, "nslots_2");
+        verify_val(nbytes_2, nbytes_4, "DSetCreatPropList::getChunkCache", __LINE__, __FILE__, "nbytes_2");
+
+        if (fabs(w0_2 - w0_4) > DBL_EPSILON)
+            display_difference(w0_2, w0_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__, "w0_1");
 
         // Set new values on original dapl
         size_t nslots_3 = nslots_1 * 2;
@@ -1220,9 +1219,10 @@ test_chunk_cache(const FileAccPropList &fapl)
 
         // Retrieve and verify the raw data chunk cache parameters
         dapl3.getChunkCache(nslots_4, nbytes_4, w0_4);
-        verify_val(nslots_3, nslots_4, "DSetCreatPropList::getLayout", __LINE__, __FILE__);
-        verify_val(nbytes_3, nbytes_4, "DSetCreatPropList::getLayout", __LINE__, __FILE__);
-        verify_val(H5_DBL_ABS_EQUAL(w0_3, w0_4), 1, "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+        verify_val(nslots_3, nslots_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__, "nslots_3");
+        verify_val(nbytes_3, nbytes_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__, "nbytes_3");
+        if (fabs(w0_3 - w0_4) > DBL_EPSILON)
+            display_difference(w0_3, w0_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__, "w0_3");
 
         PASSED();
         return 0;
@@ -1274,7 +1274,7 @@ test_virtual()
         // Get the current layout, should be default, H5D_CONTIGUOUS
         H5D_layout_t layout = dcpl.getLayout();
         verify_val(static_cast<long>(layout), static_cast<long>(H5D_CONTIGUOUS),
-                   "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+                   "DSetCreatPropList::getLayout", __LINE__, __FILE__, "layout");
 
         // Create fixed mapping
         hsize_t dims[RANK];
@@ -1297,7 +1297,7 @@ test_virtual()
         // Get and verify the new layout
         layout = dcpl.getLayout();
         verify_val(static_cast<long>(layout), static_cast<long>(H5D_VIRTUAL), "DSetCreatPropList::getLayout",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "layout");
 
         PASSED();
         return 0;
@@ -1379,8 +1379,8 @@ test_read_string(H5File &file)
     try {
         const H5std_string  DATASET_NAME("test_read_string");
         const unsigned long NX           = 8;
-        const char          DATA[NX]     = {'a', 0, 0, 0, 0, 0, 0, 'Z'};
-        const H5std_string  EXPECTED_STR = H5std_string(DATA, NX);
+        const char          DS_DATA[NX]     = {'a', 0, 0, 0, 0, 0, 0, 'Z'};
+        const H5std_string  EXPECTED_STR = H5std_string(DS_DATA, NX);
         H5std_string        str;
 
         /*
@@ -1391,7 +1391,7 @@ test_read_string(H5File &file)
         hsize_t   dimsf[RANK1] = {NX};
         DataSpace dataspace(RANK1, dimsf);
         DataSet   dataset = file.createDataSet(DATASET_NAME, datatype, dataspace);
-        dataset.write(DATA, datatype);
+        dataset.write(DS_DATA, datatype);
         dataset.close();
 
         /*
@@ -1402,8 +1402,8 @@ test_read_string(H5File &file)
         dataset = file.openDataSet(DATASET_NAME);
         dataset.read(str, datatype);
         dataset.close();
-        verify_val(str.length(), NX, "test_read_string", __LINE__, __FILE__);
-        verify_val(str, EXPECTED_STR, "test_read_string", __LINE__, __FILE__);
+        verify_val(str.length(), NX, "test_read_string", __LINE__, __FILE__, "length");
+        verify_val(str, EXPECTED_STR, "test_read_string", __LINE__, __FILE__, "str");
 
         /*
          * Write the H5std_string back to the dataset.
@@ -1420,8 +1420,8 @@ test_read_string(H5File &file)
         dataset = file.openDataSet(DATASET_NAME);
         dataset.read(str, datatype);
         dataset.close();
-        verify_val(str.length(), NX, "test_read_string", __LINE__, __FILE__);
-        verify_val(str, EXPECTED_STR, "test_read_string", __LINE__, __FILE__);
+        verify_val(str.length(), NX, "test_read_string", __LINE__, __FILE__, "length");
+        verify_val(str, EXPECTED_STR, "test_read_string", __LINE__, __FILE__, "str");
 
         /*
          * Success
@@ -1454,7 +1454,7 @@ extern "C" void
 test_dset()
 {
     hid_t fapl_id;
-    fapl_id     = h5_fileaccess(); // in h5test.c, returns a file access template
+    fapl_id = h5tools_get_new_fapl(H5P_DEFAULT); // in tools/lib
     int nerrors = 0;               // keep track of number of failures occur
 
     try {
@@ -1508,6 +1508,6 @@ test_dset()
 extern "C" void
 cleanup_dsets()
 {
-    HDremove(FILE1.c_str());
-    HDremove(FILE_ACCPLIST.c_str());
+    remove(FILE1.c_str());
+    remove(FILE_ACCPLIST.c_str());
 } // cleanup_dsets

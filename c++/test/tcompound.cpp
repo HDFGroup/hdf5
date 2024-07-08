@@ -23,7 +23,6 @@ using std::endl;
 #include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
-#include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
 
 /* Number of elements in each test */
@@ -606,13 +605,13 @@ test_compound_7()
         tid1.insertMember("c", HOFFSET(s1_typ_t, c), PredType::NATIVE_LONG);
 
         size_t type_size = tid1.getSize();
-        verify_val(type_size, sizeof(s1_typ_t), "DataType::getSize", __LINE__, __FILE__);
+        verify_val(type_size, sizeof(s1_typ_t), "DataType::getSize", __LINE__, __FILE__, "type_size");
 
         CompType tid2;
         tid2.copy(tid1);
 
         type_size = tid2.getSize();
-        verify_val_noteq(type_size, sizeof(s2_typ_t), "DataType::getSize", __LINE__, __FILE__);
+        verify_val_noteq(type_size, sizeof(s2_typ_t), "DataType::getSize", __LINE__, __FILE__, "type_size");
 
         /* Should not be able to insert field past end of compound datatype */
         try {
@@ -668,7 +667,7 @@ test_compound_set_size()
 
         // Verify that the compound is not packed
         // bool packed = dtype.packed(); // not until C library provides API
-        // verify_val(packed, FALSE, "DataType::packed", __LINE__, __FILE__);
+        // verify_val(packed, FALSE, "DataType::packed", __LINE__, __FILE__, "packed");
 
         dtype.commit(file, "dtype");
 
@@ -687,25 +686,25 @@ test_compound_set_size()
 
         // Verify that the compound is not packed
         // packed = dtype_tmp.packed(); // not until C library provides API
-        // verify_val(packed, FALSE, "DataType::packed", __LINE__, __FILE__);
+        // verify_val(packed, FALSE, "DataType::packed", __LINE__, __FILE__, "packed");
 
         // Expand the type, and verify that it became unpacked
         dtype.setSize(33);
         // packed = dtype.packed(); // not until C library provides API
-        // verify_val(packed, FALSE, "DataType::packed", __LINE__, __FILE__);
+        // verify_val(packed, FALSE, "DataType::packed", __LINE__, __FILE__, "packed");
 
         // Verify setSize() actually set size
         size_t new_size = dtype.getSize();
-        verify_val(static_cast<long>(new_size), 33, "DataType::getSize", __LINE__, __FILE__);
+        verify_val(static_cast<long>(new_size), 33, "DataType::getSize", __LINE__, __FILE__, "new_size");
 
         // Shrink the type, and verify that it became packed
         dtype.setSize(32);
         // packed = dtype.packed(); // not until C library provides API
-        // verify_val(packed, TRUE, "DataType::packed", __LINE__, __FILE__);
+        // verify_val(packed, TRUE, "DataType::packed", __LINE__, __FILE__, "packed");
 
         // Verify setSize() actually set size again
         new_size = dtype.getSize();
-        verify_val(static_cast<long>(new_size), 32, "DataType::getSize", __LINE__, __FILE__);
+        verify_val(static_cast<long>(new_size), 32, "DataType::getSize", __LINE__, __FILE__, "new_size");
 
         /* Close types and file */
         dtype_tmp.close();
@@ -731,9 +730,6 @@ test_compound_set_size()
 extern "C" void
 test_compound()
 {
-    // Output message about test being performed
-    MESSAGE(5, ("Testing Compound Data Type operations\n"));
-
     test_compound_1();        // various things about compound data types
     test_compound_2();        // compound element reordering
     test_compound_3();        // compound datatype subset conversions
@@ -755,5 +751,5 @@ test_compound()
 extern "C" void
 cleanup_compound()
 {
-    HDremove(COMPFILE.c_str());
+    remove(COMPFILE.c_str());
 } // cleanup_file

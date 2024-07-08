@@ -21,16 +21,125 @@
 #ifndef H5cpputil_H
 #define H5cpputil_H
 
-#include "h5test.h"
+#include "h5tools.h"
 
 using namespace H5;
 using std::cerr;
 using std::endl;
 
-#define MESSAGE(V, A)                                                                                        \
+extern size_t   n_tests_passed_g;
+extern size_t   n_tests_failed_g;
+extern size_t   n_tests_skipped_g;
+
+/* Number of seconds to wait before killing a test (requires alarm(2)) */
+#define H5_ALARM_SEC 1200 /* default is 20 minutes */
+
+/* Routines for operating on the list of tests (for the "all in one" tests) */
+char       *h5cpp_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
+void        TestUsage(void);
+void        AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void),
+                               const char *TheDescr);
+void        TestInfo(const char *ProgName);
+void        TestParseCmdLine(int argc, char *argv[]);
+void        PerformTests(void);
+void        TestSummary(void);
+void        TestCleanup(void);
+void        TestShutdown(void);
+ /* void        TestInit(const char *ProgName, void (*private_usage)(void),
+                                int (*private_parser)(int ac, char *av[]));
+ */ 
+int         GetTestSummary(void);
+int         GetTestCleanup(void);
+int         SetTestNoCleanup(void);
+int         GetTestExpress(void);
+int         SetTestExpress(int newval);
+int         GetTestNumErrs(void);
+void        IncTestNumErrs(void);
+const void *GetTestParameters(void);
+const char    *h5cpp_get_test_driver_name(void);
+void        TestAlarmOn(void);
+void        TestAlarmOff(void);
+
+/* Return srcdir path */
+const char *h5cpp_get_srcdir(void);
+
+/* Append the test file name to the srcdir path and return the whole string */
+const char *h5cpp_get_srcdir_filename(const char *filename);
+
+/*
+ * The name of the test is printed by saying TESTING("something") which will
+ * result in the string `Testing something' being flushed to standard output.
+ * If a test passes, fails, or is skipped then the PASSED(), H5_FAILED(), or
+ * SKIPPED() macro should be called.  After H5_FAILED() or SKIPPED() the caller
+ * should print additional information to stdout indented by at least four
+ * spaces.  If the h5_errors() is used for automatic error handling then
+ * the H5_FAILED() macro is invoked automatically when an API function fails.
+ */
+#define TESTING(WHAT)                                                                                        \
     do {                                                                                                     \
-        if (HDGetTestVerbosity() > (V))                                                                      \
-            print_func A;                                                                                    \
+        printf("Testing %-62s", WHAT);                                                                       \
+        fflush(stdout);                                                                                      \
+        n_tests_run_g++;                                                                                     \
+    } while (0)
+#define TESTING_2(WHAT)                                                                                      \
+    do {                                                                                                     \
+        printf("  Testing %-60s", WHAT);                                                                     \
+        fflush(stdout);                                                                                      \
+        n_tests_run_g++;                                                                                     \
+    } while (0)
+#define PASSED()                                                                                             \
+    do {                                                                                                     \
+        puts(" PASSED");                                                                                     \
+        fflush(stdout);                                                                                      \
+        n_tests_passed_g++;                                                                                  \
+    } while (0)
+#define H5_FAILED()                                                                                          \
+    do {                                                                                                     \
+        puts("*FAILED*");                                                                                    \
+        fflush(stdout);                                                                                      \
+        n_tests_failed_g++;                                                                                  \
+    } while (0)
+#define H5_WARNING()                                                                                         \
+    do {                                                                                                     \
+        puts("*WARNING*");                                                                                   \
+        fflush(stdout);                                                                                      \
+    } while (0)
+#define SKIPPED()                                                                                            \
+    do {                                                                                                     \
+        puts(" -SKIP-");                                                                                     \
+        fflush(stdout);                                                                                      \
+        n_tests_skipped_g++;                                                                                 \
+    } while (0)
+#define PUTS_ERROR(s)                                                                                        \
+    do {                                                                                                     \
+        puts(s);                                                                                             \
+        AT();                                                                                                \
+        goto error;                                                                                          \
+    } while (0)
+#define TEST_ERROR                                                                                           \
+    do {                                                                                                     \
+        H5_FAILED();                                                                                         \
+        AT();                                                                                                \
+        goto error;                                                                                          \
+    } while (0)
+#define STACK_ERROR                                                                                          \
+    do {                                                                                                     \
+        H5Eprint2(H5E_DEFAULT, stdout);                                                                      \
+        goto error;                                                                                          \
+    } while (0)
+#define FAIL_STACK_ERROR                                                                                     \
+    do {                                                                                                     \
+        H5_FAILED();                                                                                         \
+        AT();                                                                                                \
+        H5Eprint2(H5E_DEFAULT, stdout);                                                                      \
+        goto error;                                                                                          \
+    } while (0)
+#define FAIL_PUTS_ERROR(s)                                                                                   \
+    do {                                                                                                     \
+        H5_FAILED();                                                                                         \
+        AT();                                                                                                \
+        puts(s);                                                                                             \
+        goto error;                                                                                          \
     } while (0)
 #define SUBTEST(TEST)                                                                                        \
     do {                                                                                                     \
@@ -40,6 +149,7 @@ using std::endl;
 
 int  check_values(hsize_t i, hsize_t j, int apoint, int acheck);
 void check_values(const char *value, const char *msg, int line, const char *file_name);
+void display_error(const char *msg, const char *where, int line, const char *file_name);
 int  test_report(int, const H5std_string &);
 void issue_fail_msg(const char *where, int line, const char *file_name, const char *message = "");
 void issue_fail_msg(const char *where, int line, const char *file_name, const char *func_name,
@@ -61,22 +171,25 @@ class TestFailedException : public Exception {
 
 // Overloaded/Template functions to verify values and display proper info
 
+// MESSAGE
+void MESSAGE(int num);
+void MESSAGE(const char *msg);
+void MESSAGE(const char *msg, const char *desc, const char *name);
+
 // Verifies
-void verify_val(const char *x, const char *value, const char *where, int line, const char *file_name);
+void verify_val(const char *x, const char *value, const char *where, int line, const char *file_name, const char *var);
+void verify_val(const H5std_string& x, const H5std_string& value, const char *where, int line, const char *file_name, const char *var);
 
 template <class Type1, class Type2>
 void
-verify_val(Type1 x, Type2 value, const char *where, int line, const char *file_name)
+verify_val(Type1 x, Type2 value, const char *where, int line, const char *file_name, const
+ char *var)
 {
-    if (GetTestVerbosity() >= VERBO_HI) {
-        cerr << endl;
-        cerr << "   Call to routine: " << where << " at line " << line << " in " << file_name << " had value "
-             << x << endl;
-    }
+   /* cerr << endl << "verify_val template" << endl;
+ */ 
     if (x != value) {
         cerr << endl;
-        cerr << "*** UNEXPECTED VALUE from " << where << " should be " << value << ", but is " << x
-             << " at line " << line << " in " << file_name << endl;
+        cerr << "*** UNEXPECTED VALUE at line " << line << " from" << file_name << "::" << where << "(): " << var << " should be <" << value << ">, but is <" << x << ">" << endl;
         IncTestNumErrs();
         throw TestFailedException(where, "");
     }
@@ -84,33 +197,24 @@ verify_val(Type1 x, Type2 value, const char *where, int line, const char *file_n
 
 template <class Type1, class Type2>
 void
-verify_val(Type1 x, Type2 value, const char *msg, const char *file_name, int line)
+verify_val_noteq(Type1 x, Type2 value, const char *where, int line, const char *file_name, const char *var)
 {
-    if (x != value) {
-        cerr << endl;
-        cerr << "*** UNEXPECTED VALUE: " << file_name << ":line " << line << ": " << msg
-             << " different: " << x << ", should be " << value << endl;
-        IncTestNumErrs();
-        throw TestFailedException(file_name, msg);
-    }
-}
-
-template <class Type1, class Type2>
-void
-verify_val_noteq(Type1 x, Type2 value, const char *where, int line, const char *file_name)
-{
-    if (GetTestVerbosity() >= VERBO_HI) {
-        cerr << endl;
-        cerr << "   Call to routine: " << where << " at line " << line << " in " << file_name << " had value "
-             << x << endl;
-    }
     if (x == value) {
         cerr << endl;
-        cerr << "*** UNEXPECTED VALUE from " << where << " should not be " << value << " at line " << line
-             << " in " << file_name << endl;
+        cerr << "*** UNEXPECTED VALUE at line " << line << " from " << file_name << "::" << where << "(): " << var << " should not be " << value << endl;
         IncTestNumErrs();
         throw TestFailedException(where, "");
     }
+}
+
+template <class Type1, class Type2>
+void
+display_difference(Type1 x, Type2 value, const char *where, int line, const char *file_name, const char *var)
+{
+    cerr << endl;
+    cerr << "*** UNEXPECTED VALUE at line " << line << " from" << file_name << "::" << where << "(): " << var << " should be " << value << ", but is " << x << endl;
+    IncTestNumErrs();
+    throw TestFailedException(where, "");
 }
 
 template <class Type1, class Type2>
@@ -185,5 +289,6 @@ void cleanup_array(void);
 void cleanup_genprop(void);
 void cleanup_misc(void);
 */
+
 
 #endif

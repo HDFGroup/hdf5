@@ -24,7 +24,6 @@ using std::endl;
 #include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
-#include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
 
 const H5std_string FILENAME("tdatatransform.h5");
@@ -64,7 +63,7 @@ test_transfplist()
         memset(c_to_f_read, 0, tran_len + 1);
         dxpl_c_to_f_copy.getDataTransform(c_to_f_read, tran_len + 1);
         verify_val(const_cast<const char *>(c_to_f_read), const_cast<const char *>(c_to_f),
-                   "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+                   "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__, "c_to_f_read");
         free(c_to_f_read);
 
         //
@@ -79,14 +78,14 @@ test_transfplist()
         memset(c_to_f_read, 0, tran_len + 1);
         dxpl_c_to_f.getDataTransform(c_to_f_read, tran_len + 1);
         verify_val(const_cast<const char *>(c_to_f_read), const_cast<const char *>(c_to_f),
-                   "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+                   "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__, "c_to_f_read");
         free(c_to_f_read);
 
         // Get and verify the expression with:
         // H5std_string DSetMemXferPropList::getDataTransform()
         H5std_string simple_read = dxpl_simple.getDataTransform();
-        verify_val(const_cast<const char *>(simple_read.c_str()), const_cast<const char *>(simple),
-                   "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+        verify_val(simple_read.c_str(), const_cast<const char *>(simple),
+                   "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__, "simple_read");
 
         // Get and verify the expression with:
         // ssize_t getDataTransform(char* exp, const size_t buf_size)
@@ -95,7 +94,7 @@ test_transfplist()
         memset(utrans_inv_read, 0, tran_len + 1);
         dxpl_utrans_inv.getDataTransform(utrans_inv_read, tran_len + 1);
         verify_val(const_cast<const char *>(utrans_inv_read), const_cast<const char *>(utrans_inv),
-                   "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+                   "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__, "utrans_inv_read");
         free(utrans_inv_read);
 
         PASSED();
@@ -116,9 +115,6 @@ test_transfplist()
 extern "C" void
 test_dsproplist()
 {
-    // Output message about test being performed
-    MESSAGE(5, ("Testing Generic Dataset Property Lists\n"));
-
     test_transfplist(); // test set/getDataTransform()
 
 } // test_dsproplist()
@@ -134,5 +130,5 @@ test_dsproplist()
 extern "C" void
 cleanup_dsproplist()
 {
-    HDremove(FILENAME.c_str());
+    remove(FILENAME.c_str());
 }

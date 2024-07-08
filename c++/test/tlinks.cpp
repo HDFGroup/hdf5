@@ -24,7 +24,6 @@ using std::endl;
 #include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
-#include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
 
 #define NAME_BUF_SIZE 1024
@@ -71,7 +70,7 @@ test_basic_links(hid_t fapl_id, hbool_t new_format)
         else
             SUBTEST("Link creation");
 
-        h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+        h5cpp_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
         H5File file(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
         // Create simple dataspace
@@ -110,13 +109,13 @@ test_basic_links(hid_t fapl_id, hbool_t new_format)
         // Verify link values before closing the file
 
         H5std_string softlink_val = file.getLinkval("grp1/soft");
-        verify_val(softlink_val, "/dset1", "H5File::getLinkval grp1/soft", __LINE__, __FILE__);
+        verify_val(softlink_val, "/dset1", "H5File::getLinkval grp1/soft", __LINE__, __FILE__, "softlink_val");
 
         H5std_string dngllink_val = file.getLinkval("grp1/dangle");
-        verify_val(dngllink_val, "foobar", "H5File::getLinkval grp1/dangle", __LINE__, __FILE__);
+        verify_val(dngllink_val, "foobar", "H5File::getLinkval grp1/dangle", __LINE__, __FILE__, "dngllink_val");
 
         H5std_string reclink_val = file.getLinkval("grp1/recursive");
-        verify_val(reclink_val, "/grp1/recursive", "H5File::getLinkval grp1/recursive", __LINE__, __FILE__);
+        verify_val(reclink_val, "/grp1/recursive", "H5File::getLinkval grp1/recursive", __LINE__, __FILE__, "reclink_val");
 
     } // end of try block
     catch (Exception &E) {
@@ -141,10 +140,10 @@ test_basic_links(hid_t fapl_id, hbool_t new_format)
 
         // Verify link values
         H5std_string softlink_val = file.getLinkval("grp1/soft");
-        verify_val(softlink_val, "/dset1", "H5File::getLinkval grp1/soft", __LINE__, __FILE__);
+        verify_val(softlink_val, "/dset1", "H5File::getLinkval grp1/soft", __LINE__, __FILE__, "softlink_val");
 
         H5std_string reclink_val = file.getLinkval("grp1/recursive");
-        verify_val(reclink_val, "/grp1/recursive", "H5File::getLinkval grp1/recursive", __LINE__, __FILE__);
+        verify_val(reclink_val, "/grp1/recursive", "H5File::getLinkval grp1/recursive", __LINE__, __FILE__, "reclink_val");
 
         PASSED();
     } // end of try block
@@ -182,7 +181,7 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
         FileAccPropList fapl(fapl_id);
 
         // Create a new file.
-        h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+        h5cpp_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
         H5File file(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
         // Create and link a group with the default LCPL.
@@ -202,7 +201,7 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
         // Check that its character encoding is the default.
         linfo = file.getLinkInfo("/type");
         verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_ASCII),
-                   "Character encoding is not default", __LINE__, __FILE__);
+                   "Character encoding is not default", __LINE__, __FILE__, "linfo.cset");
 
         // Create a simple dataspace.
         dims[0] = H5L_DIM1;
@@ -216,7 +215,7 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
         // Check that its character encoding is the default.
         linfo = file.getLinkInfo("/dataset");
         verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_ASCII),
-                   "Character encoding is not default", __LINE__, __FILE__);
+                   "Character encoding is not default", __LINE__, __FILE__, "linfo.cset");
 
         // Create a link creation property list with the UTF-8 character encoding.
         LinkCreatPropList lcpl;
@@ -229,7 +228,7 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
         // Check that its character encoding is UTF-8.
         linfo = file.getLinkInfo(GROUP2NAME);
         verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_UTF8),
-                   "Character encoding is not UTF-8", __LINE__, __FILE__);
+                   "Character encoding is not UTF-8", __LINE__, __FILE__, "linfo.cset");
 
         PASSED();
     } // end of try block
@@ -262,9 +261,9 @@ test_move(hid_t fapl_id, hbool_t new_format)
         FileAccPropList fapl(fapl_id);
 
         // Create two new files
-        h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+        h5cpp_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
         H5File file_a(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
-        h5_fixname(FILENAME[1], fapl_id, filename, sizeof filename);
+        h5cpp_fixname(FILENAME[1], fapl_id, filename, sizeof filename);
         H5File file_b(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
         // Create groups in first file
@@ -405,9 +404,9 @@ test_copy(hid_t fapl_id, hbool_t new_format)
 
     try {
         // Create two new files
-        h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+        h5cpp_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
         H5File file_a(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl_id);
-        h5_fixname(FILENAME[1], fapl_id, filename, sizeof filename);
+        h5cpp_fixname(FILENAME[1], fapl_id, filename, sizeof filename);
         H5File file_b(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl_id);
 
         // Create groups in first file
@@ -545,7 +544,7 @@ test_num_links(hid_t fapl_id, hbool_t new_format)
         // Use the file access template id to create a file access prop. list.
         FileAccPropList fapl(fapl_id);
 
-        h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+        h5cpp_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
         H5File file(filename, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
 
         LinkAccPropList lapl;
@@ -554,7 +553,7 @@ test_num_links(hid_t fapl_id, hbool_t new_format)
 
         // Read it back and verify
         size_t read_nlinks = lapl.getNumLinks();
-        verify_val(read_nlinks, nlinks, "LinkAccPropList::setNumLinks", __LINE__, __FILE__);
+        verify_val(read_nlinks, nlinks, "LinkAccPropList::setNumLinks", __LINE__, __FILE__, "read_nlinks");
 
         PASSED();
     } // end of try block
@@ -631,7 +630,7 @@ test_visit(hid_t fapl_id, hbool_t new_format)
         FileAccPropList fapl(fapl_id);
 
         // Build the hdf5 file name and create the file
-        h5_fixname(FILENAME[3], fapl_id, filename, sizeof filename);
+        h5cpp_fixname(FILENAME[3], fapl_id, filename, sizeof filename);
         H5File *file = new H5File(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
         // Create a group
@@ -714,11 +713,8 @@ test_links()
     hid_t    fapl_id, fapl2_id; /* File access property lists */
     unsigned new_format;        /* Whether to use the new format or not */
 
-    if ((fapl_id = h5_fileaccess()) < 0)
-        throw Exception("test_links", "Unable to get file access property list");
+    fapl_id = h5tools_get_new_fapl(H5P_DEFAULT); // in tools/lib
 
-    // Output message about test being performed
-    MESSAGE(5, ("Testing Various Links\n"));
     try {
         /* Copy the file access property list */
         if ((fapl2_id = H5Pcopy(fapl_id)) < 0)
@@ -752,8 +748,7 @@ test_links()
         /* Close 2nd FAPL */
         H5Pclose(fapl2_id);
 
-        h5_delete_all_test_files(FILENAME, fapl_id);
-        H5Pclose(fapl_id);
+        cleanup_links();
     }
     catch (Exception &E) {
         issue_fail_msg("test_links()", __LINE__, __FILE__, E.getCDetailMsg());
@@ -773,4 +768,5 @@ cleanup_links()
 {
     HDremove(FILENAME[0]);
     HDremove(FILENAME[1]);
+    HDremove(FILENAME[3]);
 }

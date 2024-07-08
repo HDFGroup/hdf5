@@ -21,7 +21,6 @@
 #include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
-#include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
 
 const H5std_string FILE_OBJECTS("tobjects.h5");
@@ -83,7 +82,7 @@ test_get_objname()
         if (name_len > 4) {
             char *grp1_name = new char[5];
             name_len        = grp1.getObjName(grp1_name, 5);
-            verify_val(const_cast<const char *>(grp1_name), "/Top", "Group::getObjName", __LINE__, __FILE__);
+            verify_val(const_cast<const char *>(grp1_name), "/Top", "Group::getObjName", __LINE__, __FILE__, "grp1_name");
             delete[] grp1_name;
         }
 
@@ -103,10 +102,10 @@ test_get_objname()
         // H5std_string getObjName() and
         // ssize_t getObjName(H5std_string& obj_name, size_t len = 0)
         H5std_string ds_name = dsinfile.getObjName();
-        verify_val(ds_name, DSET_IN_FILE_PATH, "DataSet::getObjName", __LINE__, __FILE__);
+        verify_val(ds_name, DSET_IN_FILE_PATH, "DataSet::getObjName", __LINE__, __FILE__, "ds_name");
 
         name_len = dsingrp.getObjName(ds_name); // default len
-        verify_val(ds_name, DSET_IN_GRP1_PATH, "DataSet::getObjName", __LINE__, __FILE__);
+        verify_val(ds_name, DSET_IN_GRP1_PATH, "DataSet::getObjName", __LINE__, __FILE__, "ds_name");
 
         // Close dataset
         dsingrp.close();
@@ -117,7 +116,7 @@ test_get_objname()
         // Get and verify the name of the dataset that belongs to subgroup
         // 1.2, using H5std_string getObjName()
         ds_name = dsingrp.getObjName();
-        verify_val(ds_name, DSET_IN_GRP1_2_PATH, "DataSet::getObjName", __LINE__, __FILE__);
+        verify_val(ds_name, DSET_IN_GRP1_2_PATH, "DataSet::getObjName", __LINE__, __FILE__, "ds_name");
 
         // Close dataset
         dsingrp.close();
@@ -126,7 +125,7 @@ test_get_objname()
         // overload: ssize_t getObjName(H5std_string& obj_name, size_t len = 0)
         dsingrp  = grp1_2.openDataSet(DSET_IN_GRP1_2);
         name_len = dsingrp.getObjName(ds_name);
-        verify_val(ds_name, DSET_IN_GRP1_2_PATH, "DataSet::getObjName", __LINE__, __FILE__);
+        verify_val(ds_name, DSET_IN_GRP1_2_PATH, "DataSet::getObjName", __LINE__, __FILE__, "ds_name");
 
         // Everything will be closed as they go out of scope
 
@@ -169,54 +168,54 @@ test_existance()
 
         // Check if GROUP1 exists in the file
         bool exists = file.nameExists(GROUP1);
-        verify_val(exists, TRUE, "Group::nameExists GROUP1_1", __LINE__, __FILE__);
+        verify_val(exists, TRUE, "Group::nameExists GROUP1_1", __LINE__, __FILE__, "exists");
         // Deprecated
         exists = file.exists(GROUP1);
-        verify_val(exists, TRUE, "Group::exists GROUP1_1", __LINE__, __FILE__);
+        verify_val(exists, TRUE, "Group::exists GROUP1_1", __LINE__, __FILE__, "exists");
 
         // Open GROUP1
         Group grp1 = file.openGroup(GROUP1);
 
         // Check if GROUP1_1 and GROUP1_2 exist in GROUP1
         exists = grp1.nameExists(GROUP1_1);
-        verify_val(exists, TRUE, "Group::nameExists GROUP1_1", __LINE__, __FILE__);
+        verify_val(exists, TRUE, "Group::nameExists GROUP1_1", __LINE__, __FILE__, "exists");
         exists = grp1.nameExists(GROUP1_2);
-        verify_val(exists, TRUE, "Group::nameExists GROUP1_2", __LINE__, __FILE__);
+        verify_val(exists, TRUE, "Group::nameExists GROUP1_2", __LINE__, __FILE__, "exists");
         // Deprecated
         exists = grp1.exists(GROUP1_1);
-        verify_val(exists, TRUE, "Group::exists GROUP1_1", __LINE__, __FILE__);
+        verify_val(exists, TRUE, "Group::exists GROUP1_1", __LINE__, __FILE__, "exists");
         exists = grp1.exists(GROUP1_2);
-        verify_val(exists, TRUE, "Group::exists GROUP1_2", __LINE__, __FILE__);
+        verify_val(exists, TRUE, "Group::exists GROUP1_2", __LINE__, __FILE__, "exists");
 
         // Check if DSET_IN_GRP1 exists in GROUP1
         exists = grp1.nameExists(DSET_IN_GRP1);
-        verify_val(exists, TRUE, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__);
+        verify_val(exists, TRUE, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__, "exists");
         // Deprecated
         exists = grp1.exists(DSET_IN_GRP1);
-        verify_val(exists, TRUE, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__);
+        verify_val(exists, TRUE, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__, "exists");
 
         // Open GROUP1_2
         Group grp1_2 = grp1.openGroup(GROUP1_2);
 
         // Check if DSET_IN_GRP1_2 exists in GROUP1_2
         exists = grp1_2.nameExists(DSET_IN_GRP1_2);
-        verify_val(exists, TRUE, "Group::nameExists DSET_IN_GRP1_2", __LINE__, __FILE__);
+        verify_val(exists, TRUE, "Group::nameExists DSET_IN_GRP1_2", __LINE__, __FILE__, "exists");
         // Deprecated
         exists = grp1_2.exists(DSET_IN_GRP1_2);
-        verify_val(exists, TRUE, "Group::exists DSET_IN_GRP1_2", __LINE__, __FILE__);
+        verify_val(exists, TRUE, "Group::exists DSET_IN_GRP1_2", __LINE__, __FILE__, "exists");
 
         // Check if a dataset exists given dataset as location with full path name
         DataSet dset1 = file.openDataSet(DSET_IN_FILE);
         exists        = dset1.nameExists("/Top Group/Dataset_in_Group_1");
-        verify_val(exists, TRUE, "Group::nameExists given dataset with full path name", __LINE__, __FILE__);
+        verify_val(exists, TRUE, "Group::nameExists given dataset with full path name", __LINE__, __FILE__, "exists");
 
         exists = grp1_2.nameExists(DSET_IN_GRP1);
-        verify_val(exists, FALSE, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__);
+        verify_val(exists, FALSE, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__, "exists");
         // Deprecated
         exists = dset1.exists("/Top Group/Dataset_in_Group_1");
-        verify_val(exists, TRUE, "Group::exists given dataset with full path name", __LINE__, __FILE__);
+        verify_val(exists, TRUE, "Group::exists given dataset with full path name", __LINE__, __FILE__, "exists");
         exists = grp1_2.exists(DSET_IN_GRP1);
-        verify_val(exists, FALSE, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__);
+        verify_val(exists, FALSE, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__, "exists");
 
         // Everything will be closed as they go out of scope
 
@@ -260,7 +259,7 @@ test_get_objname_ontypes()
 
         // Get and verify its name
         H5std_string inttype_name = inttype.getObjName();
-        verify_val(inttype_name, "/INT type of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
+        verify_val(inttype_name, "/INT type of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__, "inttype_name");
 
         // Close the type then open it again to test getting its name, but
         // with the constructor this time
@@ -269,7 +268,7 @@ test_get_objname_ontypes()
 
         // Get and verify its name
         H5std_string std_b8le_name = std_b8le.getObjName();
-        verify_val(std_b8le_name, "/INT type of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
+        verify_val(std_b8le_name, "/INT type of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__, "std_b8le_name");
 
         // Make copy of a predefined type and save it
         DataType dtype(PredType::STD_B8LE);
@@ -285,21 +284,21 @@ test_get_objname_ontypes()
 
         // Get and verify its name
         H5std_string type_name = dtype.getObjName();
-        verify_val(type_name, "/STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
+        verify_val(type_name, "/STD_B8LE", "DataType::getObjName", __LINE__, __FILE__, "type_name");
 
         // Close the type and open it again with the constructor then test
         // getting its name
         dtype.close();
         DataType dtype2(file, "STD_B8LE");
         type_name = dtype2.getObjName();
-        verify_val(type_name, "/STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
+        verify_val(type_name, "/STD_B8LE", "DataType::getObjName", __LINE__, __FILE__, "type_name");
 
         // Test getting type's name from copied type
         DataType copied_type;
         copied_type.copy(dtype2);
         copied_type.commit(file, "copy of STD_B8LE");
         type_name = copied_type.getObjName();
-        verify_val(type_name, "/copy of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
+        verify_val(type_name, "/copy of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__, "type_name");
 
         // Test copying an integer predefined type
         IntType new_int_type(PredType::NATIVE_INT);
@@ -308,8 +307,8 @@ test_get_objname_ontypes()
         new_int_type.commit(grp, "IntType NATIVE_INT");
         ssize_t name_len = new_int_type.getObjName(type_name); // default len
         verify_val(name_len, static_cast<ssize_t>(strlen("/typetests/IntType NATIVE_INT")),
-                   "DataType::getObjName", __LINE__, __FILE__);
-        verify_val(type_name, "/typetests/IntType NATIVE_INT", "DataType::getObjName", __LINE__, __FILE__);
+                   "DataType::getObjName", __LINE__, __FILE__, "name_len");
+        verify_val(type_name, "/typetests/IntType NATIVE_INT", "DataType::getObjName", __LINE__, __FILE__, "type_name");
 
         // Close everything or they can be closed when objects go out of scope
         dtype2.close();
@@ -354,20 +353,20 @@ test_get_objtype()
         // H5O_type_t childObjType(const H5std_string& objname)
         H5O_type_t objtype = file.childObjType(DSET_IN_FILE);
         verify_val(static_cast<long>(objtype), static_cast<long>(H5O_TYPE_DATASET), "DataSet::childObjType",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "objtype");
 
         // Get and verify object type with
         // H5O_type_t childObjType(const char* objname)
         objtype = grp1.childObjType(GROUP1_1.c_str());
         verify_val(static_cast<long>(objtype), static_cast<long>(H5O_TYPE_GROUP), "DataSet::childObjType",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "objtype");
 
         // Get and verify object type with
         // H5O_type_t childObjType(hsize_t index, H5_index_t index_type,
         // H5_iter_order_t order, const char* objname=".")
         objtype = grp1.childObjType(1, H5_INDEX_NAME, H5_ITER_INC);
         verify_val(static_cast<long>(objtype), static_cast<long>(H5O_TYPE_NAMED_DATATYPE),
-                   "DataSet::childObjType", __LINE__, __FILE__);
+                   "DataSet::childObjType", __LINE__, __FILE__, "objtype");
 
         // Get and verify object type with
         // H5O_type_t childObjType(hsize_t index,
@@ -375,7 +374,7 @@ test_get_objtype()
         // H5_iter_order_t order=H5_ITER_INC, const char* objname=".")
         objtype = grp1.childObjType(2);
         verify_val(static_cast<long>(objtype), static_cast<long>(H5O_TYPE_GROUP), "DataSet::childObjType",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "objtype");
 
         // Everything will be closed as they go out of scope
 
@@ -444,19 +443,19 @@ test_open_object_header()
         // Make sure that each is the right kind of ID
         H5I_type_t id_type = IdComponent::getHDFObjType(obj_grp);
         verify_val(static_cast<long>(id_type), static_cast<long>(H5I_GROUP), "H5Iget_type for group ID",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "id_type");
         id_type = IdComponent::getHDFObjType(obj_dtype);
         verify_val(static_cast<long>(id_type), static_cast<long>(H5I_DATATYPE), "H5Iget_type for datatype ID",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "id_type");
         id_type = IdComponent::getHDFObjType(obj_dset);
         verify_val(static_cast<long>(id_type), static_cast<long>(H5I_DATASET), "H5Iget_type for dataset ID",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "id_type");
 
         /* Do something more complex with each of the IDs to make sure */
 
         Group   grp2(obj_grp);
         hsize_t num_objs = grp2.getNumObjs();
-        verify_val(static_cast<long>(num_objs), 1, "H5Gget_info", __LINE__, __FILE__);
+        verify_val(static_cast<long>(num_objs), 1, "H5Gget_info", __LINE__, __FILE__, "num_objs");
         // There should be one object, the datatype
 
         // Close datatype object opened from the file
@@ -465,7 +464,7 @@ test_open_object_header()
         dset.setId(obj_dset);
         dspace         = dset.getSpace();
         bool is_simple = dspace.isSimple();
-        verify_val(is_simple, true, "isSimple", __LINE__, __FILE__);
+        verify_val(is_simple, true, "isSimple", __LINE__, __FILE__, "is_simple");
         dspace.close();
 
         // Open datatype object from the group
@@ -474,7 +473,7 @@ test_open_object_header()
         dtype.setId(obj_dtype);
         H5T_class_t type_class = dtype.getClass();
         verify_val(static_cast<long>(type_class), static_cast<long>(H5T_INTEGER), "H5Tget_class", __LINE__,
-                   __FILE__);
+                   __FILE__, "type_class");
         dtype.close();
 
         // Close datatype object
@@ -485,7 +484,7 @@ test_open_object_header()
 
         // Try doing something with group, the ID should still work
         num_objs = grp2.getNumObjs();
-        verify_val(static_cast<long>(num_objs), 1, "H5Gget_info", __LINE__, __FILE__);
+        verify_val(static_cast<long>(num_objs), 1, "H5Gget_info", __LINE__, __FILE__, "num_objs");
 
         // Close the cloned group
         grp2.close();
@@ -543,7 +542,7 @@ test_getobjectinfo_same_file()
         // file number
         grp1.getObjinfo(oinfo1);
         grp2.getObjinfo(oinfo2);
-        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__);
+        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__, "oinfo1.fileno");
 
         // Close groups and file
         grp1.close();
@@ -566,7 +565,7 @@ test_getobjectinfo_same_file()
         // file number
         grp1.getObjinfo(oinfo1);
         grp2.getObjinfo(oinfo2);
-        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__);
+        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__, "oinfo1.fileno");
 
         // Reset object info
         memset(&oinfo1, 0, sizeof(oinfo1));
@@ -574,7 +573,7 @@ test_getobjectinfo_same_file()
 
         file1.getObjinfo(GROUP1NAME, oinfo1);
         file1.getObjinfo(GROUP2NAME, oinfo2);
-        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjectInfo", __LINE__, __FILE__);
+        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjectInfo", __LINE__, __FILE__, "oinfo1.fileno");
 
         // Close groups and files
         grp1.close();
@@ -631,7 +630,7 @@ test_intermediate_groups()
 
         // Verify value of create missing groups flag
         bool crt_int_grps = lcpl.getCreateIntermediateGroup();
-        verify_val(crt_int_grps, true, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__);
+        verify_val(crt_int_grps, true, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__, "crt_int_grps");
 
         // Create GROUP12NAME with creating missing groups
         Group grp12(file.createGroup(GROUP12NAME, lcpl));
@@ -654,7 +653,7 @@ test_intermediate_groups()
 
         // Verify value of create missing groups flag
         crt_int_grps = lcpl.getCreateIntermediateGroup();
-        verify_val(crt_int_grps, false, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__);
+        verify_val(crt_int_grps, false, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__, "crt_int_grps");
 
         try {
             Group grp14_false(file.createGroup(GROUP14NAME, lcpl));
@@ -665,7 +664,7 @@ test_intermediate_groups()
         // Set the flag to create missing groups set to TRUE
         lcpl.setCreateIntermediateGroup(true);
         crt_int_grps = lcpl.getCreateIntermediateGroup();
-        verify_val(crt_int_grps, true, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__);
+        verify_val(crt_int_grps, true, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__, "crt_int_grps");
 
         // Create GROUP14NAME with the use of link create plist
         Group grp14(file.createGroup(GROUP14NAME, lcpl));
@@ -720,9 +719,6 @@ test_intermediate_groups()
 extern "C" void
 test_object()
 {
-    // Output message about test being performed
-    MESSAGE(5, ("Testing Object Functions\n"));
-
     test_get_objname();             // Test get object name from groups/datasets
     test_existance();               // Test check for object existence
     test_get_objname_ontypes();     // Test get object name from types

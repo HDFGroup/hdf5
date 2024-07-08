@@ -15,8 +15,8 @@
    tfile.cpp - HDF5 C++ testing the file I/O features
 
    EXTERNAL ROUTINES/VARIABLES:
-     These routines are in the test directory of the C library:
-        h5_fileaccess() -- in h5test.c, returns a file access template
+     These routines are in the tools library:
+        h5tools_get_new_fapl() -- in tools/lib, returns a file access template
 
  ***************************************************************************/
 #include <iostream>
@@ -27,7 +27,6 @@ using std::endl;
 #include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
-#include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
 
 const hsize_t      F1_USERBLOCK_SIZE = 0;
@@ -142,17 +141,17 @@ test_file_create()
 
         hsize_t ublock = tmpl1.getUserblock();
         verify_val(static_cast<long>(ublock), static_cast<long>(F1_USERBLOCK_SIZE),
-                   "FileCreatPropList::getUserblock", __LINE__, __FILE__);
+                   "FileCreatPropList::getUserblock", __LINE__, __FILE__, "ublock");
 
         size_t parm1, parm2; // file-creation parameters
         tmpl1.getSizes(parm1, parm2);
-        verify_val(parm1, F1_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
-        verify_val(parm2, F1_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+        verify_val(parm1, F1_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__, "parm1");
+        verify_val(parm2, F1_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__, "parm2");
 
         unsigned iparm1, iparm2; // file-creation parameters
         tmpl1.getSymk(iparm1, iparm2);
-        verify_val(iparm1, F1_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
-        verify_val(iparm2, F1_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+        verify_val(iparm1, F1_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__, "iparm1");
+        verify_val(iparm2, F1_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__, "iparm2");
 
         // tmpl1 is automatically closed; if error occurs, it'll be
         // caught in the catch block
@@ -198,17 +197,17 @@ test_file_create()
         // Get the file-creation parameters
         hsize_t ublock = tmpl1->getUserblock();
         verify_val(static_cast<long>(ublock), static_cast<long>(F2_USERBLOCK_SIZE),
-                   "FileCreatPropList::getUserblock", __LINE__, __FILE__);
+                   "FileCreatPropList::getUserblock", __LINE__, __FILE__, "ublock");
 
         size_t parm1, parm2; // file-creation parameters
         tmpl1->getSizes(parm1, parm2);
-        verify_val(parm1, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
-        verify_val(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+        verify_val(parm1, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__, "parm1");
+        verify_val(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__, "parm2");
 
         unsigned iparm1, iparm2; // file-creation parameters
         tmpl1->getSymk(iparm1, iparm2);
-        verify_val(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
-        verify_val(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+        verify_val(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__, "iparm1");
+        verify_val(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__, "iparm2");
 
         // Clone the file-creation template
         FileCreatPropList tmpl2;
@@ -231,15 +230,15 @@ test_file_create()
         // Get the file-creation parameters
         ublock = tmpl1->getUserblock();
         verify_val(static_cast<long>(ublock), static_cast<long>(F3_USERBLOCK_SIZE),
-                   "FileCreatPropList::getUserblock", __LINE__, __FILE__);
+                   "FileCreatPropList::getUserblock", __LINE__, __FILE__, "ublock");
 
         tmpl1->getSizes(parm1, parm2);
-        verify_val(parm1, F3_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
-        verify_val(parm2, F3_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+        verify_val(parm1, F3_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__, "parm1");
+        verify_val(parm2, F3_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__, "parm2");
 
         tmpl1->getSymk(iparm1, iparm2);
-        verify_val(iparm1, F3_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
-        verify_val(iparm2, F3_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+        verify_val(iparm1, F3_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__, "iparm1");
+        verify_val(iparm2, F3_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__, "iparm2");
 
         // Release file-creation template
         delete tmpl1;
@@ -278,17 +277,17 @@ test_file_open()
         // Get the file-creation parameters
         hsize_t ublock = tmpl1.getUserblock();
         verify_val(static_cast<long>(ublock), static_cast<long>(F2_USERBLOCK_SIZE),
-                   "FileCreatPropList::getUserblock", __LINE__, __FILE__);
+                   "FileCreatPropList::getUserblock", __LINE__, __FILE__, "ublock");
 
         size_t parm1, parm2; // file-creation parameters
         tmpl1.getSizes(parm1, parm2);
-        verify_val(parm1, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
-        verify_val(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+        verify_val(parm1, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__, "parm1");
+        verify_val(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__, "parm2");
 
         unsigned iparm1, iparm2; // file-creation parameters
         tmpl1.getSymk(iparm1, iparm2);
-        verify_val(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
-        verify_val(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+        verify_val(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__, "iparm1");
+        verify_val(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__, "iparm2");
 
         // Test H5File constructor with existing file id
         H5File file2(file1.getId());
@@ -340,7 +339,7 @@ test_file_size()
     SUBTEST("File Size");
 
     hid_t fapl_id;
-    fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
+    fapl_id = h5tools_get_new_fapl(H5P_DEFAULT); // in tools/lib
 
     try {
         // Use the file access template id to create a file access prop.
@@ -400,7 +399,7 @@ test_file_num()
     SUBTEST("File Number");
 
     hid_t fapl_id;
-    fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
+    fapl_id = h5tools_get_new_fapl(H5P_DEFAULT); // in tools/lib
 
     try {
         // Use the file access template id to create a file access prop.
@@ -475,14 +474,14 @@ test_file_name()
 
         // Get file name from the file instance.
         file_name = file4.getFileName();
-        verify_val(file_name, FILE4, "H5File::getFileName", __LINE__, __FILE__);
+        verify_val(file_name, FILE4, "H5File::getFileName", __LINE__, __FILE__, "file_name");
 
         // Create a group in the root group.
         Group group(file4.createGroup(GROUPNAME, 0));
 
         // Get and verify file name via a group.
         file_name = group.getFileName();
-        verify_val(file_name, FILE4, "Group::getFileName", __LINE__, __FILE__);
+        verify_val(file_name, FILE4, "Group::getFileName", __LINE__, __FILE__, "file_name");
 
         // Create the data space.
         hsize_t   dims[RANK] = {NX, NY};
@@ -493,14 +492,14 @@ test_file_name()
 
         // Get and verify file name via a dataset.
         file_name = dataset.getFileName();
-        verify_val(file_name, FILE4, "DataSet::getFileName", __LINE__, __FILE__);
+        verify_val(file_name, FILE4, "DataSet::getFileName", __LINE__, __FILE__, "file_name");
 
         // Create an attribute for the dataset.
         Attribute attr(dataset.createAttribute(DATTRNAME, PredType::NATIVE_INT, space));
 
         // Get and verify file name via an attribute.
         file_name = attr.getFileName();
-        verify_val(file_name, FILE4, "Attribute::getFileName", __LINE__, __FILE__);
+        verify_val(file_name, FILE4, "Attribute::getFileName", __LINE__, __FILE__, "file_name");
 
         // Create a compound datatype.
         CompType comp_type(sizeof(s1_t));
@@ -514,7 +513,7 @@ test_file_name()
 
         // Get and verify file name via a committed datatype.
         comp_type.getFileName();
-        verify_val(file_name, FILE4, "CompType::getFileName", __LINE__, __FILE__);
+        verify_val(file_name, FILE4, "CompType::getFileName", __LINE__, __FILE__, "file_name");
         PASSED();
     } // end of try block
 
@@ -590,40 +589,40 @@ test_file_attribute()
         // Get and verify the number of all objects in the file
         // Current: 1 file, 2 file attr, 1 ds, and 1 ds attr.
         ssize_t num_objs = file5.getObjCount(H5F_OBJ_ALL);
-        verify_val(num_objs, 5, "H5File::getObjCount", __LINE__, __FILE__);
+        verify_val(num_objs, 5, "H5File::getObjCount", __LINE__, __FILE__, "num_objs");
 
         num_objs = file5.getObjCount(H5F_OBJ_GROUP);
-        verify_val(num_objs, 0, "H5File::getObjCount(H5F_OBJ_GROUP)", __LINE__, __FILE__);
+        verify_val(num_objs, 0, "H5File::getObjCount(H5F_OBJ_GROUP)", __LINE__, __FILE__, "num_objs");
         num_objs = file5.getObjCount(H5F_OBJ_DATASET);
-        verify_val(num_objs, 1, "H5File::getObjCount(H5F_OBJ_DATASET)", __LINE__, __FILE__);
+        verify_val(num_objs, 1, "H5File::getObjCount(H5F_OBJ_DATASET)", __LINE__, __FILE__, "num_objs");
         num_objs = file5.getObjCount(H5F_OBJ_ATTR);
-        verify_val(num_objs, 3, "H5File::getObjCount(H5F_OBJ_ATTR)", __LINE__, __FILE__);
+        verify_val(num_objs, 3, "H5File::getObjCount(H5F_OBJ_ATTR)", __LINE__, __FILE__, "num_objs");
         num_objs = file5.getObjCount(H5F_OBJ_DATATYPE);
-        verify_val(num_objs, 0, "H5File::getObjCount(H5F_OBJ_DATATYPE)", __LINE__, __FILE__);
+        verify_val(num_objs, 0, "H5File::getObjCount(H5F_OBJ_DATATYPE)", __LINE__, __FILE__, "num_objs");
         num_objs = file5.getObjCount(H5F_OBJ_FILE);
-        verify_val(num_objs, 1, "H5File::getObjCount(H5F_OBJ_FILE)", __LINE__, __FILE__);
+        verify_val(num_objs, 1, "H5File::getObjCount(H5F_OBJ_FILE)", __LINE__, __FILE__, "num_objs");
 
         // Get the file name using the attributes
         H5std_string fname = fattr1.getFileName();
-        verify_val(fname, FILE5, "H5File::getFileName()", __LINE__, __FILE__);
+        verify_val(fname, FILE5, "H5File::getFileName()", __LINE__, __FILE__, "fname");
 
         fname.clear();
         fname = dattr.getFileName();
-        verify_val(fname, FILE5, "H5File::getFileName()", __LINE__, __FILE__);
+        verify_val(fname, FILE5, "H5File::getFileName()", __LINE__, __FILE__, "fname");
 
         // Get the class of a file attribute's datatype
         H5T_class_t atclass = fattr1.getTypeClass();
         verify_val(static_cast<long>(atclass), static_cast<long>(H5T_FLOAT), "Attribute::getTypeClass()",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "atclass");
 
         // Get and verify the number of attributes attached to a file
         int n_attrs = file5.getNumAttrs();
-        verify_val(n_attrs, 2, "H5File::getNumAttrs()", __LINE__, __FILE__);
+        verify_val(n_attrs, 2, "H5File::getNumAttrs()", __LINE__, __FILE__, "n_attrs");
 
         // Get and verify the number of attributes attached to a dataset
         n_attrs = 0;
         n_attrs = dataset.getNumAttrs();
-        verify_val(n_attrs, 1, "DataSet::getNumAttrs()", __LINE__, __FILE__);
+        verify_val(n_attrs, 1, "DataSet::getNumAttrs()", __LINE__, __FILE__, "n_attrs");
 
         // Read back attribute's data
         memset(rdata, 0, sizeof(rdata));
@@ -678,13 +677,13 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create, H5F
          * Make sure the root group has the correct object header version
          */
         unsigned obj_version = file.childObjVersion(ROOTGROUP);
-        verify_val(obj_version, oh_vers_create, "H5File::childObjVersion", __LINE__, __FILE__);
+        verify_val(obj_version, oh_vers_create, "H5File::childObjVersion", __LINE__, __FILE__, "obj_version");
 
         // Verify object header version another way
         H5O_native_info_t ninfo;
         memset(&ninfo, 0, sizeof(ninfo));
         file.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
-        verify_val(ninfo.hdr.version, oh_vers_create, "H5File::getNativeObjinfo", __LINE__, __FILE__);
+        verify_val(ninfo.hdr.version, oh_vers_create, "H5File::getNativeObjinfo", __LINE__, __FILE__, "ninfo.hdr.version");
 
         /*
          * Reopen the file and make sure the root group still has the correct
@@ -697,7 +696,7 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create, H5F
         file.openFile(FILE6, H5F_ACC_RDWR, fapl);
 
         obj_version = file.childObjVersion(ROOTGROUP);
-        verify_val(obj_version, oh_vers_create, "H5File::childObjVersion", __LINE__, __FILE__);
+        verify_val(obj_version, oh_vers_create, "H5File::childObjVersion", __LINE__, __FILE__, "obj_version");
 
         /*
          * Create a group named "/G1" in the file, and make sure it has the correct
@@ -706,12 +705,12 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create, H5F
         Group group = file.createGroup(GROUP1);
 
         obj_version = group.objVersion();
-        verify_val(obj_version, oh_vers_mod, "Group::objVersion", __LINE__, __FILE__);
+        verify_val(obj_version, oh_vers_mod, "Group::objVersion", __LINE__, __FILE__, "obj_version");
 
         // Verify object header version another way
         memset(&ninfo, 0, sizeof(ninfo));
         group.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
-        verify_val(ninfo.hdr.version, oh_vers_mod, "Group::getNativeObjinfo", __LINE__, __FILE__);
+        verify_val(ninfo.hdr.version, oh_vers_mod, "Group::getNativeObjinfo", __LINE__, __FILE__, "ninfo.hdr.version");
 
         group.close(); // close "/G1"
 
@@ -722,7 +721,7 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create, H5F
         group = file.createGroup(SUBGROUP3);
 
         obj_version = group.objVersion();
-        verify_val(obj_version, oh_vers_mod, "Group::objVersion", __LINE__, __FILE__);
+        verify_val(obj_version, oh_vers_mod, "Group::objVersion", __LINE__, __FILE__, "obj_version");
 
         group.close(); // close "/G1/G3"
 
@@ -730,7 +729,7 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create, H5F
          * Make sure the root group still has the correct object header version
          */
         obj_version = file.childObjVersion(ROOTGROUP);
-        verify_val(obj_version, oh_vers_create, "H5File::childObjVersion", __LINE__, __FILE__);
+        verify_val(obj_version, oh_vers_create, "H5File::childObjVersion", __LINE__, __FILE__, "obj_version");
 
         // Everything should be closed as they go out of scope
     } // end of try block
@@ -796,21 +795,21 @@ test_commonfg()
 
         // Get and verify file name via a dataset.
         H5std_string file_name = dataset.getFileName();
-        verify_val(file_name, FILE4, "DataSet::getFileName", __LINE__, __FILE__);
+        verify_val(file_name, FILE4, "DataSet::getFileName", __LINE__, __FILE__, "file_name");
 
         // Create an attribute for the dataset.
         Attribute attr(dataset.createAttribute(DATTRNAME, PredType::NATIVE_INT, space));
 
         // Get and verify file name via an attribute.
         file_name = attr.getFileName();
-        verify_val(file_name, FILE4, "Attribute::getFileName", __LINE__, __FILE__);
+        verify_val(file_name, FILE4, "Attribute::getFileName", __LINE__, __FILE__, "file_name");
 
         // Create an attribute for the file via root group.
         Attribute rootg_attr(rootgroup.createAttribute(FATTRNAME, PredType::NATIVE_INT, space));
 
         // Get and verify file name via an attribute.
         file_name = attr.getFileName();
-        verify_val(file_name, FILE4, "Attribute::getFileName", __LINE__, __FILE__);
+        verify_val(file_name, FILE4, "Attribute::getFileName", __LINE__, __FILE__, "file_name");
 
         PASSED();
     } // end of try block
@@ -853,9 +852,9 @@ test_file_info()
         // Get the file's version information.
         H5F_info2_t finfo;
         tempfile.getFileInfo(finfo);
-        verify_val(static_cast<long>(finfo.super.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(finfo.super.version), 0, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.super.version");
+        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.free.version");
+        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.sohm.version");
 
         // Close the file.
         tempfile.close();
@@ -868,14 +867,14 @@ test_file_info()
 
         // Verify file space information.
         verify_val(static_cast<long>(out_strategy), static_cast<long>(H5F_FSPACE_STRATEGY_FSM_AGGR),
-                   "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(out_persist, FALSE, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(static_cast<long>(out_threshold), 1, "H5File::getFileInfo", __LINE__, __FILE__);
+                   "H5File::getFileInfo", __LINE__, __FILE__, "out_strategy");
+        verify_val(out_persist, FALSE, "H5File::getFileInfo", __LINE__, __FILE__, "out_persist");
+        verify_val(static_cast<long>(out_threshold), 1, "H5File::getFileInfo", __LINE__, __FILE__, "out_threshold");
 
         /* Retrieve file space page size */
         hsize_t out_fsp_psize = fcpl.getFileSpacePagesize();
         verify_val(out_fsp_psize, FSP_SIZE_DEF, "FileCreatPropList::getFileSpacePagesize", __LINE__,
-                   __FILE__);
+                   __FILE__, "out_fsp_psize");
 
         // Set various file information.
         fcpl.setUserblock(F2_USERBLOCK_SIZE);
@@ -901,9 +900,9 @@ test_file_info()
 
         // Get the file's version information.
         file7.getFileInfo(finfo);
-        verify_val(static_cast<long>(finfo.super.version), 2, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(finfo.super.version), 2, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.super.version");
+        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.free.version");
+        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.sohm.version");
 
         // Close the file.
         file7.close();
@@ -916,26 +915,26 @@ test_file_info()
 
         // Get the file's version information.
         file7.getFileInfo(finfo);
-        verify_val(static_cast<long>(finfo.super.version), 2, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(finfo.super.version), 2, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.super.version");
+        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.free.version");
+        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.sohm.version");
 
         // Retrieve the property values & check them.
         hsize_t userblock = fcpl2.getUserblock();
-        verify_val(userblock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
+        verify_val(userblock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__, "userblock");
 
         size_t off_size = 0, len_size = 0;
         fcpl2.getSizes(off_size, len_size);
-        verify_val(off_size, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
-        verify_val(len_size, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+        verify_val(off_size, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__, "off_size");
+        verify_val(len_size, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__, "len_size");
 
         unsigned sym_ik = 0, sym_lk = 0;
         fcpl2.getSymk(sym_ik, sym_lk);
-        verify_val(sym_ik, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
-        verify_val(sym_lk, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+        verify_val(sym_ik, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__, "sym_ik");
+        verify_val(sym_lk, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__, "sym_lk");
 
         unsigned istore_ik = fcpl2.getIstorek();
-        verify_val(istore_ik, F2_ISTORE, "FileCreatPropList::getIstorek", __LINE__, __FILE__);
+        verify_val(istore_ik, F2_ISTORE, "FileCreatPropList::getIstorek", __LINE__, __FILE__, "istore_ik");
 
         /*  ret=H5Pget_shared_mesg_nindexes(fcpl2,&nindexes);
         CHECK(ret, FAIL, "H5Pget_shared_mesg_nindexes");
@@ -945,12 +944,12 @@ test_file_info()
         // Get and verify the file space info from the creation property list */
         fcpl2.getFileSpaceStrategy(out_strategy, out_persist, out_threshold);
         verify_val(static_cast<long>(out_strategy), static_cast<long>(strategy),
-                   "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
-        verify_val(out_persist, persist, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
-        verify_val(out_threshold, threshold, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
+                   "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__, "out_strategy");
+        verify_val(out_persist, persist, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__, "out_persist");
+        verify_val(out_threshold, threshold, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__, "out_threshold");
 
         out_fsp_psize = fcpl2.getFileSpacePagesize();
-        verify_val(out_fsp_psize, FSP_SIZE512, "FileCreatPropList::getFileSpacePagesize", __LINE__, __FILE__);
+        verify_val(out_fsp_psize, FSP_SIZE512, "FileCreatPropList::getFileSpacePagesize", __LINE__, __FILE__, "out_fsp_psize");
 
         PASSED();
     } // end of try block
@@ -970,9 +969,6 @@ test_file_info()
 extern "C" void
 test_file()
 {
-    // Output message about test being performed
-    MESSAGE(5, ("Testing File I/O Operations\n"));
-
     test_file_create();    // Test file creation (also creation templates)
     test_file_open();      // Test file opening
     test_file_size();      // Test file size

@@ -23,7 +23,6 @@ using std::endl;
 #include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
-#include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
 
 /* Number of datasets for group iteration test */
@@ -148,7 +147,7 @@ test_iter_group(FileAccPropList &fapl)
         info.command = RET_ZERO;
         idx          = 0;
         ret          = H5Literate2(file.getId(), H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
-        verify_val(ret, SUCCEED, "H5Literate", __LINE__, __FILE__);
+        verify_val(ret, SUCCEED, "H5Literate", __LINE__, __FILE__, "ret");
 
         DataType datatype(PredType::NATIVE_INT);
 
@@ -188,7 +187,7 @@ test_iter_group(FileAccPropList &fapl)
 
         // Get the number of object in the root group
         hsize_t nobjs = root_group.getNumObjs();
-        verify_val(static_cast<long>(nobjs), NDATASETS + 2, "H5Gget_info", __LINE__, __FILE__);
+        verify_val(static_cast<long>(nobjs), NDATASETS + 2, "H5Gget_info", __LINE__, __FILE__, "nobjs");
 
         H5std_string obj_name;
         for (hsize_t i = 0; i < nobjs; i++) {
@@ -281,7 +280,7 @@ test_iter_group(FileAccPropList &fapl)
     info.command = RET_ZERO;
     idx = 0;
     if((ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) > 0)
-        TestErrPrintf("Group iteration function didn't return zero correctly!\n");
+        display_error("Group iteration function didn't return zero correctly!", "test_iter_group", __LINE__, __FILE__);
 
     /* Test all objects in group, when callback always returns 1 */
     /* This also tests the "restarting" ability, because the index changes */
@@ -290,24 +289,21 @@ test_iter_group(FileAccPropList &fapl)
     idx = 0;
     while((ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) > 0) {
         /* Verify return value from iterator gets propagated correctly */
-        verify_val(ret, 2, "H5Literate", __LINE__, __FILE__);
+        verify_val(ret, 2, "H5Literate", __LINE__, __FILE__, "ret");
 
         /* Increment the number of times "2" is returned */
         i++;
 
         /* Verify that the index is the correct value */
-        verify_val(idx, (hsize_t)i, "H5Literate", __LINE__, __FILE__);
+        verify_val(idx, (hsize_t)i, "H5Literate", __LINE__, __FILE__, "idx");
         if(idx > (NDATASETS + 2))
-            TestErrPrintf("Group iteration function walked too far!\n");
+            display_error("Group iteration function walked too far!", "test_iter_group", __LINE__, __FILE__);
 
         /* Verify that the correct name is retrieved */
-        if(strcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
-            TestErrPrintf("Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n", (unsigned)(idx - 1), lnames[(size_t)(idx - 1)]);
+        verify_val(info.name, lnames[(size_t)(idx - 1)], "H5Literate", __LINE__, __FILE__, "info.name");
     } /* end while */
-    verify_val(ret, -1, "H5Literate", __LINE__, __FILE__);
 
-    if(i != (NDATASETS + 2))
-        TestErrPrintf("%u: Group iteration function didn't perform multiple iterations correctly!\n", __LINE__);
+    verify_val(i, NDATASETS + 2, "H5Literate", __LINE__, __FILE__, "i");
 
     /* Test all objects in group, when callback changes return value */
     /* This also tests the "restarting" ability, because the index changes */
@@ -316,24 +312,23 @@ test_iter_group(FileAccPropList &fapl)
     idx = 0;
     while((ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) >= 0) {
         /* Verify return value from iterator gets propagated correctly */
-        verify_val(ret, 1, "H5Literate", __LINE__, __FILE__);
+        verify_val(ret, 1, "H5Literate", __LINE__, __FILE__, "ret");
 
         /* Increment the number of times "1" is returned */
         i++;
 
         /* Verify that the index is the correct value */
-        verify_val(idx, (hsize_t)(i + 10), "H5Literate", __LINE__, __FILE__);
+        verify_val(idx, (hsize_t)(i + 10), "H5Literate", __LINE__, __FILE__, "idx");
         if(idx > (NDATASETS + 2))
-            TestErrPrintf("Group iteration function walked too far!\n");
+            display_error("Group iteration function walked too far!", "test_iter_group", __LINE__, __FILE__);
 
         /* Verify that the correct name is retrieved */
-        if(strcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
-            TestErrPrintf("Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n", (unsigned)(idx - 1), lnames[(size_t)(idx - 1)]);
+        verify_val(info.name, lnames[(size_t)(idx - 1)], "H5Literate", __LINE__, __FILE__, "info.name");
     } /* end while */
-    verify_val(ret, -1, "H5Literate", __LINE__, __FILE__);
+    verify_val(ret, -1, "H5Literate", __LINE__, __FILE__, "ret");
 
     if(i != 42 || idx != 52)
-        TestErrPrintf("%u: Group iteration function didn't perform multiple iterations correctly!\n", __LINE__);
+        display_error("Group iteration function didn't perform multiple iterations correctly!", "test_iter_group", __LINE__, __FILE__);
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
@@ -367,7 +362,7 @@ printelems(const Group &group, const H5std_string &dsname, const H5std_string &a
         unsigned     idx = 0;
         Attribute    a1(group.openAttribute(idx));
         H5std_string aname = a1.getName();
-        verify_val(aname, atname, "printelems", __LINE__, __FILE__);
+        verify_val(aname, atname, "printelems", __LINE__, __FILE__, "aname");
 
         a1.close();
     }
@@ -442,9 +437,6 @@ test_HDFFV_9920()
 extern "C" void
 test_iterate()
 {
-    // Output message about test being performed
-    MESSAGE(5, ("Testing Iterate Feature\n"));
-
     // Create access property with latest library version.
     FileAccPropList fapl;
     fapl.setLibverBounds(H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);

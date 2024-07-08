@@ -26,7 +26,6 @@ using std::endl;
 #include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
-#include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
 
 const H5std_string FILE_BASIC("tattr_basic.h5");
@@ -37,12 +36,13 @@ const H5std_string FILE_DTYPE("tattr_dtype.h5");
 const H5std_string ATTR_TMP_NAME("temp_attr_name");
 const H5std_string FATTR_TMP_NAME("temp_fattr_name");
 const size_t       ATTR_MAX_DIMS = 7;
+const int          VAR_LEN = 80; /* Length of variable name */
 
 /* 3-D dataset with fixed dimensions */
 const int     SPACE1_RANK = 3;
-const hsize_t SPACE1_DIM1 = 3;
-const hsize_t SPACE1_DIM2 = 15;
-const hsize_t SPACE1_DIM3 = 13;
+const int     SPACE1_DIM1 = 3;
+const int     SPACE1_DIM2 = 15;
+const int     SPACE1_DIM3 = 13;
 
 /* Object names */
 const H5std_string DSET1_NAME("Dataset1");
@@ -52,7 +52,7 @@ const H5std_string TYPE1_NAME("/Type");
 /* Attribute Rank & Dimensions */
 const H5std_string ATTR1_NAME("Attr1");
 const int          ATTR1_RANK             = 1;
-const hsize_t      ATTR1_DIM1             = 3;
+const int          ATTR1_DIM1             = 3;
 int                attr_data1[ATTR1_DIM1] = {512, -234, 98123}; /* Test data for 1st attribute */
 
 // File attribute, using the same rank and dimensions as ATTR1_NAME's
@@ -61,22 +61,23 @@ const H5std_string FATTR2_NAME("File Attr2");
 
 const H5std_string ATTR2_NAME("Attr2");
 const int          ATTR2_RANK          = 2;
-const hsize_t      ATTR2_DIM1          = 2;
-const hsize_t      ATTR2_DIM2          = 2;
+const int          ATTR2_DIM1          = 2;
+const int          ATTR2_DIM2          = 2;
 int attr_data2[ATTR2_DIM1][ATTR2_DIM2] = {{7614, -416}, {197814, -3}}; /* Test data for 2nd attribute */
 
 const H5std_string ATTR3_NAME("Attr3");
-const int          ATTR3_RANK                                     = 3;
-const hsize_t      ATTR3_DIM1                                     = 2;
-const hsize_t      ATTR3_DIM2                                     = 2;
-const hsize_t      ATTR3_DIM3                                     = 2;
+const int          ATTR3_RANK          = 3;
+const int          ATTR3_DIM1          = 2;
+const int          ATTR3_DIM2          = 2;
+const int          ATTR3_DIM3          = 2;
+
 double             attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3] = {
     {{2.3, -26.1}, {0.123, -10.0}}, {{981724.2, -0.91827}, {2.0, 23.0}}}; /* Test data for 3rd attribute */
 
 const H5std_string ATTR4_NAME("Attr4");
 const int          ATTR4_RANK = 2;
-const hsize_t      ATTR4_DIM1 = 2;
-const hsize_t      ATTR4_DIM2 = 2;
+const int          ATTR4_DIM1 = 2;
+const int          ATTR4_DIM2 = 2;
 
 const H5std_string ATTR4_FIELDNAME1("i");
 const H5std_string ATTR4_FIELDNAME2("d");
@@ -115,7 +116,7 @@ test_attr_basic_write(FileAccPropList &fapl)
     hsize_t dims2[]                = {ATTR1_DIM1};
     hsize_t dims3[]                = {ATTR2_DIM1, ATTR2_DIM2};
     int     read_data1[ATTR1_DIM1] = {0}; // Buffer for reading 1st attribute
-    hsize_t i;
+    int     i;
 
     // Output message about test being performed
     SUBTEST("Basic Attribute Writing Functions");
@@ -168,11 +169,11 @@ test_attr_basic_write(FileAccPropList &fapl)
         ds_attr1.read(PredType::NATIVE_INT, read_data1);
 
         // Verify values read in
-        for (i = 0; i < ATTR1_DIM1; i++)
-            if (attr_data1[i] != read_data1[i])
-                TestErrPrintf("%d: attribute data different: attr_data1[%" PRIuHSIZE
-                              "]=%d,read_data1[%" PRIuHSIZE "]=%d\n",
-                              __LINE__, i, attr_data1[i], i, read_data1[i]);
+        for (i = 0; i < ATTR1_DIM1; i++) {
+            char var[VAR_LEN];
+            sprintf(var, "read_data1[%d]", i);
+            verify_val(read_data1[i], attr_data1[i], "DataSet::read", __LINE__, __FILE__, var);
+        }
 
         // Create two more attributes for this dataset, but only write to one.
         Attribute ds_attr2 = dataset.createAttribute(ATTR2_NAME, PredType::NATIVE_INT, att_space);
@@ -185,11 +186,11 @@ test_attr_basic_write(FileAccPropList &fapl)
         ds_attr2.read(PredType::NATIVE_INT, read_data1);
 
         // Verify values read in
-        for (i = 0; i < ATTR1_DIM1; i++)
-            if (attr_data1a[i] != read_data1[i])
-                TestErrPrintf("%d: attribute data different: attr_data1a[%" PRIuHSIZE
-                              "]=%d,read_data1[%" PRIuHSIZE "]=%d\n",
-                              __LINE__, i, attr_data1a[i], i, read_data1[i]);
+        for (i = 0; i < ATTR1_DIM1; i++) {
+            char var[VAR_LEN];
+            sprintf(var, "read_data1[%d]", i);
+            verify_val(read_data1[i], attr_data1a[i], "Attribute::read", __LINE__, __FILE__, var);
+        }
 
         // Close both attributes
         ds_attr1.close();
@@ -212,7 +213,7 @@ test_attr_basic_write(FileAccPropList &fapl)
         // Check storage size for attribute
         hsize_t attr_size = gr_attr.getStorageSize();
         verify_val(static_cast<long>(attr_size), static_cast<long>(ATTR2_DIM1 * ATTR2_DIM2 * sizeof(int)),
-                   "Attribute::getStorageSize", __LINE__, __FILE__);
+                   "Attribute::getStorageSize", __LINE__, __FILE__, "attr_size");
 
         // Try to create the same attribute again (should fail)
         try {
@@ -231,7 +232,7 @@ test_attr_basic_write(FileAccPropList &fapl)
         // Check storage size for attribute
         attr_size = gr_attr.getStorageSize();
         verify_val(static_cast<long>(attr_size), static_cast<long>(ATTR2_DIM1 * ATTR2_DIM2 * sizeof(int)),
-                   "Attribute::getStorageSize", __LINE__, __FILE__);
+                   "Attribute::getStorageSize", __LINE__, __FILE__, "attr_size");
 
         PASSED();
     } // end try block
@@ -302,9 +303,9 @@ test_attr_getname(FileAccPropList &fapl)
         name_size         = fattr1.getName(fattr1_name, buf_size + 1);
         CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
         verify_val(static_cast<size_t>(name_size), FATTR1_NAME.length(), "Attribute::getName", __LINE__,
-                   __FILE__);
-        verify_val(const_cast<const char *>(fattr1_name), FATTR1_NAME, "Attribute::getName", __LINE__,
-                   __FILE__);
+                   __FILE__, "name_size");
+        verify_val(const_cast<const char *>(fattr1_name), const_cast<const char *>(FATTR1_NAME.c_str()), "Attribute::getName", __LINE__,
+                   __FILE__, "fattr1_name");
         delete[] fattr1_name;
 
         // 2. With arbitrary buf_size that is smaller than the name's length.
@@ -316,9 +317,9 @@ test_attr_getname(FileAccPropList &fapl)
         name_size = fattr1.getName(fattr1_name, buf_size + 1);
         CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
         verify_val(static_cast<size_t>(name_size), FATTR1_NAME.size(), "Attribute::getName", __LINE__,
-                   __FILE__);
+                   __FILE__, "name_size");
         verify_val(const_cast<const char *>(fattr1_name), const_cast<const char *>(short_name),
-                   "Attribute::getName", __LINE__, __FILE__);
+                   "Attribute::getName", __LINE__, __FILE__, "fattr1_name");
         delete[] fattr1_name;
 
         // 3. With a buf_size that equals the name's length.
@@ -327,7 +328,7 @@ test_attr_getname(FileAccPropList &fapl)
         memset(fattr1_name, 0, buf_size + 1);
         name_size = fattr1.getName(fattr1_name, buf_size + 1);
         CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
-        verify_val(fattr1_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+        verify_val(fattr1_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__, "fattr1_name");
         delete[] fattr1_name;
 
         // B. Get attribute name with
@@ -336,19 +337,19 @@ test_attr_getname(FileAccPropList &fapl)
         buf_size = 4;
         H5std_string fattr1_name2;
         name_size = fattr1.getName(fattr1_name2, buf_size);
-        verify_val(fattr1_name2, "File", "Attribute::getName", __LINE__, __FILE__);
+        verify_val(fattr1_name2, "File", "Attribute::getName", __LINE__, __FILE__, "fattr1_name2");
 
         // Same test as above, but with deprecated overloaded function
         // ssize_t Attribute::getName(size_t buf_size, H5std_string& attr_name)
         // using buffer smaller than the actual name
         H5std_string fattr1_name2a;
         name_size = fattr1.getName(fattr1_name2a, buf_size);
-        verify_val(fattr1_name2a, "File", "Attribute::getName", __LINE__, __FILE__);
+        verify_val(fattr1_name2a, "File", "Attribute::getName", __LINE__, __FILE__, "fattr1_name2a");
 
         // C. Get file attribute's name with
         // H5std_string Attribute::getName()
         H5std_string fattr1_name3 = fattr1.getName();
-        verify_val(fattr1_name3, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+        verify_val(fattr1_name3, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__, "fattr1_name3");
 
         //
         // D. Test getName getting part of an attribute's name using
@@ -368,13 +369,13 @@ test_attr_getname(FileAccPropList &fapl)
 
         size_t       len         = 4;
         H5std_string dattr_name1 = attr1.getName(len);
-        verify_val(dattr_name1, "Attr", "Attribute::getName", __LINE__, __FILE__);
+        verify_val(dattr_name1, "Attr", "Attribute::getName", __LINE__, __FILE__, "dattr_name1");
 
         // E. Get dataset's attribute name with
         // H5std_string Attribute::getName(H5std_string attr_name, buf_size=0)
         H5std_string dattr_name2;
         name_size = attr1.getName(dattr_name2);
-        verify_val(dattr_name2, ATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+        verify_val(dattr_name2, ATTR1_NAME, "Attribute::getName", __LINE__, __FILE__, "dattr_name2");
 
         PASSED();
     } // end try block
@@ -395,8 +396,8 @@ test_attr_getname(FileAccPropList &fapl)
 static void
 test_attr_rename(FileAccPropList &fapl)
 {
-    int     read_data1[ATTR1_DIM1] = {0}; // Buffer for reading the attribute
-    hsize_t i;
+    int read_data1[ATTR1_DIM1] = {0}; // Buffer for reading the attribute
+    int i;
 
     // Output message about test being performed
     SUBTEST("Checking for Existence and Renaming Attribute");
@@ -420,10 +421,10 @@ test_attr_rename(FileAccPropList &fapl)
 
         // Verify new attribute name
         H5std_string fattr_name = fattr1.getName();
-        verify_val(fattr_name, FATTR_TMP_NAME, "Attribute::getName", __LINE__, __FILE__);
+        verify_val(fattr_name, FATTR_TMP_NAME, "Attribute::getName", __LINE__, __FILE__, "fattr_name");
 
         int num_attrs = fid1.getNumAttrs();
-        verify_val(num_attrs, 2, "Attribute::getNumAttrs", __LINE__, __FILE__);
+        verify_val(num_attrs, 2, "Attribute::getNumAttrs", __LINE__, __FILE__, "num_attrs");
 
         // Change first file attribute back to the original name
         fid1.renameAttr(FATTR_TMP_NAME, FATTR1_NAME);
@@ -446,17 +447,17 @@ test_attr_rename(FileAccPropList &fapl)
 
         // Verify new attribute name
         H5std_string attr_name = attr1.getName();
-        verify_val(attr_name, ATTR_TMP_NAME, "Attribute::getName", __LINE__, __FILE__);
+        verify_val(attr_name, ATTR_TMP_NAME, "Attribute::getName", __LINE__, __FILE__, "attr_name");
 
         // Read attribute information immediately, without closing attribute
         attr1.read(PredType::NATIVE_INT, read_data1);
 
         // Verify values read in
-        for (i = 0; i < ATTR1_DIM1; i++)
-            if (attr_data1[i] != read_data1[i])
-                TestErrPrintf("%d: attribute data different: attr_data1[%" PRIuHSIZE
-                              "]=%d,read_data1[%" PRIuHSIZE "]=%d\n",
-                              __LINE__, i, attr_data1[i], i, read_data1[i]);
+        for (i = 0; i < ATTR1_DIM1; i++) {
+            char var[VAR_LEN];
+            sprintf(var, "read_data1[%d]", i);
+            verify_val(read_data1[i], attr_data1[i], "Attribute::read", __LINE__, __FILE__, var);
+        }
 
         // Close attribute
         attr1.close();
@@ -471,17 +472,17 @@ test_attr_rename(FileAccPropList &fapl)
 
         // Verify second attribute name
         H5std_string attr2_name = attr2.getName();
-        verify_val(attr2_name, ATTR2_NAME, "Attribute::getName", __LINE__, __FILE__);
+        verify_val(attr2_name, ATTR2_NAME, "Attribute::getName", __LINE__, __FILE__, "attr2_name");
 
         // Read attribute information immediately, without closing attribute
         attr2.read(PredType::NATIVE_INT, read_data1);
 
         // Verify values read in
-        for (i = 0; i < ATTR1_DIM1; i++)
-            if (attr_data1a[i] != read_data1[i])
-                TestErrPrintf("%d: attribute data different: attr_data1a[%" PRIuHSIZE
-                              "]=%d,read_data1[%" PRIuHSIZE "]=%d\n",
-                              __LINE__, i, attr_data1a[i], i, read_data1[i]);
+        for (i = 0; i < ATTR1_DIM1; i++) {
+            char var[VAR_LEN];
+            sprintf(var, "read_data1[%d]", i);
+            verify_val(read_data1[i], attr_data1a[i], "Attribute::read", __LINE__, __FILE__, var);
+        }
 
         // Close attribute
         attr2.close();
@@ -513,7 +514,7 @@ test_attr_rename(FileAccPropList &fapl)
 static void
 test_attr_basic_read(FileAccPropList &fapl)
 {
-    hsize_t i, j;
+    int i, j;
 
     // Output message about test being performed
     SUBTEST("Basic Attribute Reading Functions");
@@ -527,13 +528,13 @@ test_attr_basic_read(FileAccPropList &fapl)
 
         // Verify the correct number of attributes
         int num_attrs = dataset.getNumAttrs();
-        verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__, "num_attrs");
 
         // Verify the correct number of attributes another way
         H5O_info2_t oinfo;
         memset(&oinfo, 0, sizeof(oinfo));
         dataset.getObjinfo(oinfo, H5O_INFO_NUM_ATTRS);
-        verify_val(static_cast<long>(oinfo.num_attrs), 3, "DataSet::getObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(oinfo.num_attrs), 3, "DataSet::getObjinfo", __LINE__, __FILE__, "oinfo.num_attrs");
 
         // Open an attribute for the dataset
         Attribute ds_attr = dataset.openAttribute(ATTR1_NAME);
@@ -543,11 +544,11 @@ test_attr_basic_read(FileAccPropList &fapl)
         ds_attr.read(PredType::NATIVE_INT, &read_data1);
 
         // Verify values read in
-        for (i = 0; i < ATTR1_DIM1; i++)
-            if (attr_data1[i] != read_data1[i])
-                TestErrPrintf("%d: attribute data different: attr_data1[%" PRIuHSIZE
-                              "]=%d, read_data1[%" PRIuHSIZE "]=%d\n",
-                              __LINE__, i, attr_data1[i], i, read_data1[i]);
+        for (i = 0; i < ATTR1_DIM1; i++) {
+            char var[VAR_LEN];
+            sprintf(var, "read_data1[%d]", i);
+            verify_val(read_data1[i], attr_data1[i], "Attribute::read", __LINE__, __FILE__, var);
+        }
 
         /*
          *                Test attribute with group
@@ -557,12 +558,12 @@ test_attr_basic_read(FileAccPropList &fapl)
 
         // Verify the correct number of attributes
         num_attrs = group.getNumAttrs();
-        verify_val(num_attrs, 1, "Group::getNumAttrs", __LINE__, __FILE__);
+        verify_val(num_attrs, 1, "Group::getNumAttrs", __LINE__, __FILE__, "num_attrs");
 
         // Verify the correct number of attributes another way
         memset(&oinfo, 0, sizeof(oinfo));
         group.getObjinfo(oinfo, H5O_INFO_NUM_ATTRS);
-        verify_val(static_cast<long>(oinfo.num_attrs), 1, "Group::getObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(oinfo.num_attrs), 1, "Group::getObjinfo", __LINE__, __FILE__, "oinfo.num_attrs");
 
         // Open an attribute for the group
         Attribute gr_attr = group.openAttribute(ATTR2_NAME);
@@ -574,14 +575,14 @@ test_attr_basic_read(FileAccPropList &fapl)
         gr_attr.read(PredType::NATIVE_INT, read_data2);
 
         // Verify values read in
-        for (i = 0; i < ATTR2_DIM1; i++)
-            for (j = 0; j < ATTR2_DIM2; j++)
-                if (attr_data2[i][j] != read_data2[i][j]) {
-                    TestErrPrintf("%d: attribute data different: attr_data2[%" PRIuHSIZE "][%" PRIuHSIZE
-                                  "]=%d, "
-                                  "read_data2[%" PRIuHSIZE "][%" PRIuHSIZE "]=%d\n",
-                                  __LINE__, i, j, attr_data2[i][j], i, j, read_data2[i][j]);
-                }
+        for (i = 0; i < ATTR2_DIM1; i++) {
+            for (j = 0; j < ATTR2_DIM2; j++) {
+                char var[VAR_LEN];
+                sprintf(var, "read_data2[%d][%d]", i, j);
+                verify_val(read_data2[i][j], attr_data2[i][j], "Attribute::read", __LINE__, __FILE__, var);
+            }
+        }                                                       
+
         PASSED();
     } // end try block
 
@@ -682,13 +683,13 @@ test_attr_compound_read(FileAccPropList &fapl)
 
         // Verify the correct number of attributes
         int num_attrs = dataset.getNumAttrs();
-        verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__, "num_attrs");
 
         // Verify the correct number of attributes another way
         H5O_info2_t oinfo;
         memset(&oinfo, 0, sizeof(oinfo));
         dataset.getObjinfo(oinfo, H5O_INFO_NUM_ATTRS);
-        verify_val(static_cast<long>(oinfo.num_attrs), 1, "DataSet::getObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(oinfo.num_attrs), 1, "DataSet::getObjinfo", __LINE__, __FILE__, "oinfo.num_attrs");
 
         // Open 1st attribute for the dataset
         Attribute attr = dataset.openAttribute(static_cast<unsigned>(0));
@@ -700,29 +701,29 @@ test_attr_compound_read(FileAccPropList &fapl)
 
         // Get the rank of the dataspace and verify it
         int rank = space.getSimpleExtentNdims();
-        verify_val(rank, ATTR4_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
+        verify_val(rank, ATTR4_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__, "rank");
 
         // Get the dims of the dataspace and verify them
         int ndims = space.getSimpleExtentDims(dims);
-        verify_val(ndims, ATTR4_RANK, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        verify_val(ndims, ATTR4_RANK, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__, "ndims");
         verify_val(static_cast<long>(dims[0]), static_cast<long>(ATTR4_DIM1),
-                   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+                   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__, "dims[0]");
         verify_val(static_cast<long>(dims[1]), static_cast<long>(ATTR4_DIM2),
-                   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+                   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__, "dims[1]");
 
         // Get the class of the datatype that is used by attr
         H5T_class_t type_class = attr.getTypeClass();
 
         // Verify that the type is of compound datatype
         verify_val(static_cast<long>(type_class), static_cast<long>(H5T_COMPOUND), "Attribute::getTypeClass",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "type_class");
 
         // Get the compound datatype
         CompType datatype = attr.getCompType();
 
         // Verify the number of fields in the datatype, which must be 3
         int fields = datatype.getNmembers();
-        verify_val(fields, 3, "CompType::getNmembers", __LINE__, __FILE__);
+        verify_val(fields, 3, "CompType::getNmembers", __LINE__, __FILE__, "fields");
 
         // Verify that the fields have the same names as when the type
         // was created
@@ -730,83 +731,82 @@ test_attr_compound_read(FileAccPropList &fapl)
             H5std_string fieldname = datatype.getMemberName(static_cast<unsigned>(j));
             if (!((fieldname == ATTR4_FIELDNAME1) || (fieldname == ATTR4_FIELDNAME2) ||
                   (fieldname == ATTR4_FIELDNAME3)))
-                TestErrPrintf("%d:invalid field name for field #%d: %s\n", __LINE__, j, fieldname.c_str());
+                display_error("invalid field name", "test_attr_compound_read", __LINE__, __FILE__);
         }
 
         offset = datatype.getMemberOffset(0);
-        verify_val(offset, attr4_field1_off, "DataType::getMemberOffset", __LINE__, __FILE__);
+        verify_val(offset, attr4_field1_off, "DataType::getMemberOffset", __LINE__, __FILE__, "offset");
 
         offset = datatype.getMemberOffset(1);
-        verify_val(offset, attr4_field2_off, "DataType::getMemberOffset", __LINE__, __FILE__);
+        verify_val(offset, attr4_field2_off, "DataType::getMemberOffset", __LINE__, __FILE__, "offset");
 
         offset = datatype.getMemberOffset(2);
-        verify_val(offset, attr4_field3_off, "DataType::getMemberOffset", __LINE__, __FILE__);
+        verify_val(offset, attr4_field3_off, "DataType::getMemberOffset", __LINE__, __FILE__, "offset");
 
         /* Verify each field's type, class & size */
 
         // Get and verify the type class of the first member
         type_class = datatype.getMemberClass(0);
         verify_val(static_cast<long>(type_class), static_cast<long>(H5T_INTEGER), "DataType::getMemberClass",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "type_class");
         // Get and verify the order of this member's type
         IntType     i_type = datatype.getMemberIntType(0);
         H5T_order_t order  = i_type.getOrder();
         verify_val(static_cast<long>(order), static_cast<long>(PredType::NATIVE_INT.getOrder()),
-                   "DataType::getOrder", __LINE__, __FILE__);
+                   "DataType::getOrder", __LINE__, __FILE__, "order");
 
         // Get and verify the size of this member's type
         size = i_type.getSize();
-        verify_val(size, PredType::NATIVE_INT.getSize(), "DataType::getSize", __LINE__, __FILE__);
+        verify_val(size, PredType::NATIVE_INT.getSize(), "DataType::getSize", __LINE__, __FILE__, "size");
 
         // Get and verify class, order, and size of the second member's type
         type_class = datatype.getMemberClass(1);
         verify_val(static_cast<long>(type_class), static_cast<long>(H5T_FLOAT), "DataType::getMemberClass",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "type_class");
         FloatType f_type = datatype.getMemberFloatType(1);
         order            = f_type.getOrder();
         verify_val(static_cast<long>(order), static_cast<long>(PredType::NATIVE_DOUBLE.getOrder()),
-                   "DataType::getOrder", __LINE__, __FILE__);
+                   "DataType::getOrder", __LINE__, __FILE__, "order");
         size = f_type.getSize();
-        verify_val(size, PredType::NATIVE_DOUBLE.getSize(), "DataType::getSize", __LINE__, __FILE__);
+        verify_val(size, PredType::NATIVE_DOUBLE.getSize(), "DataType::getSize", __LINE__, __FILE__, "size");
 
         // Get and verify class, order, and size of the third member's type
         type_class = datatype.getMemberClass(2);
         verify_val(static_cast<long>(type_class), static_cast<long>(H5T_INTEGER), "DataType::getMemberClass",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "type_class");
         // Note: H5T_INTEGER is correct here!
 
         StrType s_type = datatype.getMemberStrType(2);
         order          = s_type.getOrder();
         verify_val(static_cast<long>(order), static_cast<long>(PredType::NATIVE_SCHAR.getOrder()),
-                   "DataType::getOrder", __LINE__, __FILE__);
+                   "DataType::getOrder", __LINE__, __FILE__, "order");
         size = s_type.getSize();
-        verify_val(size, PredType::NATIVE_SCHAR.getSize(), "DataType::getSize", __LINE__, __FILE__);
+        verify_val(size, PredType::NATIVE_SCHAR.getSize(), "DataType::getSize", __LINE__, __FILE__, "size");
 
         // Read attribute information
         attr.read(datatype, read_data4);
 
         // Verify values read in
-        hsize_t ii, jj;
-        for (ii = 0; ii < ATTR4_DIM1; ii++)
-            for (jj = 0; jj < ATTR4_DIM2; jj++)
-                if (memcmp(&attr_data4[ii][jj], &read_data4[ii][jj], sizeof(struct attr4_struct)) != 0) {
-                    TestErrPrintf("%d:attribute data different: attr_data4[%" PRIuHSIZE "][%" PRIuHSIZE
-                                  "].i=%d, "
-                                  "read_data4[%" PRIuHSIZE "][%" PRIuHSIZE "].i=%d\n",
-                                  __LINE__, ii, jj, attr_data4[ii][jj].i, ii, jj, read_data4[ii][jj].i);
-                    TestErrPrintf("%d:attribute data different: attr_data4[%" PRIuHSIZE "][%" PRIuHSIZE
-                                  "].d=%f, "
-                                  "read_data4[%" PRIuHSIZE "][%" PRIuHSIZE "].d=%f\n",
-                                  __LINE__, ii, jj, attr_data4[ii][jj].d, ii, jj, read_data4[ii][jj].d);
-                    TestErrPrintf("%d:attribute data different: attr_data4[%" PRIuHSIZE "][%" PRIuHSIZE
-                                  "].c=%c, "
-                                  "read_data4[%" PRIuHSIZE "][%" PRIuHSIZE "].c=%c\n",
-                                  __LINE__, ii, jj, attr_data4[ii][jj].c, ii, jj, read_data4[ii][jj].c);
-                } /* end if */
+        int i, j;
+        for (i = 0; i < ATTR4_DIM1; i++)
+            for (j = 0; j < ATTR4_DIM2; j++)
+                if (memcmp(&attr_data4[i][j], &read_data4[i][j], sizeof(struct attr4_struct)) != 0) {
+                    char var[VAR_LEN];
+                    sprintf(var, "read_data4[%d][%d].%c", i, j, 'i');
+                    verify_val(read_data4[i][j].i, attr_data4[i][j].i, "Attribute::read", __LINE__, __FILE__, var);
+
+                    sprintf(var, "read_data4[%d][%d].%c", i, j, 'd');
+                    if (abs(read_data4[i][j].d - attr_data4[i][j].d) > DBL_EPSILON) {
+                        display_difference(read_data4[i][j].d, attr_data4[i][j].d, "DSetAccPropList::getChunkCache", __LINE__, __FILE__, "w0_1");
+                    }
+
+                    sprintf(var, "read_data4[%d][%d].%c", i, j, 'c');
+                    verify_val(read_data4[i][j].c, attr_data4[i][j].c, "Attribute::read", __LINE__, __FILE__, var);
+                }
 
         // Verify name
         H5std_string attr_name = attr.getName();
-        verify_val(attr_name, ATTR4_NAME, "Attribute::getName", __LINE__, __FILE__);
+        verify_val(attr_name, ATTR4_NAME, "Attribute::getName", __LINE__, __FILE__, "attr_name");
     } // end try block
 
     catch (Exception &E) {
@@ -915,7 +915,7 @@ test_attr_scalar_read(FileAccPropList &fapl)
 
         // Verify the correct number of attributes
         int num_attrs = dataset.getNumAttrs();
-        verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__, "num_attrs");
 
         // Open an attribute for the dataset
         Attribute ds_attr = dataset.openAttribute(ATTR5_NAME);
@@ -924,9 +924,7 @@ test_attr_scalar_read(FileAccPropList &fapl)
         float read_data2 = 0.0; // Buffer for reading 1st attribute
         ds_attr.read(PredType::NATIVE_FLOAT, &read_data2);
         if (abs(read_data2 - attr_data5) > FLT_EPSILON)
-            TestErrPrintf("%d: attribute data different: read_data2=%f, "
-                          "attr_data5=%f\n",
-                          __LINE__, static_cast<double>(read_data2), static_cast<double>(attr_data5));
+            display_difference(read_data2, attr_data5, "Attribute::read", __LINE__, __FILE__, "read_data2");
 
         // Get the dataspace of the attribute
         DataSpace att_space = ds_attr.getSpace();
@@ -934,7 +932,7 @@ test_attr_scalar_read(FileAccPropList &fapl)
         // Make certain the dataspace is scalar
         H5S_class_t space_type = att_space.getSimpleExtentType();
         verify_val(static_cast<long>(space_type), static_cast<long>(H5S_SCALAR),
-                   "DataSpace::getSimpleExtentType", __LINE__, __FILE__);
+                   "DataSpace::getSimpleExtentType", __LINE__, __FILE__, "space_type");
 
         PASSED();
     } // end try block
@@ -1036,7 +1034,7 @@ test_attr_mult_read(FileAccPropList &fapl)
     int     read_data1[ATTR1_DIM1]                         = {0};     // Buffer for reading 1st attribute
     int     read_data2[ATTR2_DIM1][ATTR2_DIM2]             = {{0}};   // Buffer for reading 2nd attribute
     double  read_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3] = {{{0}}}; // Buffer for reading 3rd attribute
-    hsize_t i, j, k;
+    int     i, j, k;
 
     // Output message about test being performed
     SUBTEST("Multiple Attribute Reading Functions");
@@ -1050,7 +1048,7 @@ test_attr_mult_read(FileAccPropList &fapl)
 
         // Verify the correct number of attributes
         int num_attrs = dataset.getNumAttrs();
-        verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__, "num_attrs");
 
         // Open 1st attribute for the dataset
         Attribute attr = dataset.openAttribute(static_cast<unsigned>(0));
@@ -1062,14 +1060,12 @@ test_attr_mult_read(FileAccPropList &fapl)
 
         // Get the rank of the dataspace and verify it
         int rank = space.getSimpleExtentNdims();
-        verify_val(rank, ATTR1_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
+        verify_val(rank, ATTR1_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__, "rank");
 
         // Get the dims of the dataspace and verify them
         hsize_t dims[ATTR_MAX_DIMS]; // Attribute dimensions
         (void)space.getSimpleExtentDims(dims);
-        if (dims[0] != ATTR1_DIM1)
-            TestErrPrintf("%d:attribute dimensions different: dims[0]=%d, should be %" PRIuHSIZE "\n",
-                          __LINE__, static_cast<int>(dims[0]), ATTR1_DIM1);
+        verify_val(dims[0], static_cast<long unsigned>(ATTR1_DIM1), "DataSpace::getSimpleExtentDims", __LINE__, __FILE__, "dims[0]");
 
         /* Verify Datatype */
 
@@ -1078,7 +1074,7 @@ test_attr_mult_read(FileAccPropList &fapl)
 
         // Verify that the type is of integer datatype
         verify_val(static_cast<long>(type_class), static_cast<long>(H5T_INTEGER), "Attribute::getTypeClass",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "type_class");
 
         // Get the integer datatype
         IntType i_type1 = attr.getIntType();
@@ -1086,25 +1082,25 @@ test_attr_mult_read(FileAccPropList &fapl)
         // Get and verify the order of this type
         H5T_order_t order = i_type1.getOrder();
         verify_val(static_cast<long>(order), static_cast<long>(PredType::NATIVE_INT.getOrder()),
-                   "DataType::getOrder", __LINE__, __FILE__);
+                   "DataType::getOrder", __LINE__, __FILE__, "order");
 
         // Get and verify the size of this type
         size_t size = i_type1.getSize();
-        verify_val(size, PredType::NATIVE_INT.getSize(), "DataType::getSize", __LINE__, __FILE__);
+        verify_val(size, PredType::NATIVE_INT.getSize(), "DataType::getSize", __LINE__, __FILE__, "size");
 
         // Read attribute information
         attr.read(PredType::NATIVE_INT, read_data1);
 
         // Verify values read in
-        for (i = 0; i < ATTR1_DIM1; i++)
-            if (attr_data1[i] != read_data1[i])
-                TestErrPrintf("%d: attribute data different: attr_data1[%" PRIuHSIZE
-                              "]=%d,read_data1[%" PRIuHSIZE "]=%d\n",
-                              __LINE__, i, attr_data1[i], i, read_data1[i]);
+        for (i = 0; i < ATTR1_DIM1; i++) {
+            char var[VAR_LEN];
+            sprintf(var, "read_data1[%d]", i);
+            verify_val(read_data1[i], attr_data1[i], "Attribute::read", __LINE__, __FILE__, var);
+        }
 
         // Verify Name
         H5std_string attr_name = attr.getName();
-        verify_val(attr_name, ATTR1_NAME, "DataType::getName", __LINE__, __FILE__);
+        verify_val(attr_name, ATTR1_NAME, "DataType::getName", __LINE__, __FILE__, "attr_name");
 
         attr.close();
         space.close();
@@ -1119,15 +1115,15 @@ test_attr_mult_read(FileAccPropList &fapl)
 
         // Get the rank of the dataspace and verify it
         rank = space.getSimpleExtentNdims();
-        verify_val(rank, ATTR2_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
+        verify_val(rank, ATTR2_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__, "rank");
 
         // Get the dims of the dataspace and verify them
         (void)space.getSimpleExtentDims(dims);
 
         verify_val(static_cast<long>(dims[0]), static_cast<long>(ATTR2_DIM1),
-                   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+                   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__, "dims[0]");
         verify_val(static_cast<long>(dims[1]), static_cast<long>(ATTR2_DIM2),
-                   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+                   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__, "dims[1]");
 
         /* Verify Datatype */
 
@@ -1136,7 +1132,7 @@ test_attr_mult_read(FileAccPropList &fapl)
 
         // Verify that the type is of integer datatype
         verify_val(static_cast<long>(type_class), static_cast<long>(H5T_INTEGER), "Attribute::getTypeClass",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "type_class");
 
         // Get the integer datatype
         IntType i_type2 = attr.getIntType();
@@ -1144,28 +1140,28 @@ test_attr_mult_read(FileAccPropList &fapl)
         // Get and verify the order of this type
         order = i_type2.getOrder();
         verify_val(static_cast<long>(order), static_cast<long>(PredType::NATIVE_INT.getOrder()),
-                   "DataType::getOrder", __LINE__, __FILE__);
+                   "DataType::getOrder", __LINE__, __FILE__, "order");
 
         // Get and verify the size of this type
         size = i_type2.getSize();
-        verify_val(size, PredType::NATIVE_INT.getSize(), "DataType::getSize", __LINE__, __FILE__);
+        verify_val(size, PredType::NATIVE_INT.getSize(), "DataType::getSize", __LINE__, __FILE__, "size");
 
         // Read attribute information
         attr.read(PredType::NATIVE_INT, read_data2);
         // attr.read(i_type, read_data2);
 
         // Verify values read in
-        for (i = 0; i < ATTR2_DIM1; i++)
-            for (j = 0; j < ATTR2_DIM2; j++)
-                if (attr_data2[i][j] != read_data2[i][j])
-                    TestErrPrintf("%d: attribute data different: attr_data2[%" PRIuHSIZE "][%" PRIuHSIZE
-                                  "]=%d, "
-                                  "read_data2[%" PRIuHSIZE "][%" PRIuHSIZE "]=%d\n",
-                                  __LINE__, i, j, attr_data2[i][j], i, j, read_data2[i][j]);
+        for (i = 0; i < ATTR2_DIM1; i++) {
+            for (j = 0; j < ATTR2_DIM2; j++) {
+                char var[VAR_LEN];
+                sprintf(var, "read_data2[%d][%d]", i, j);
+                verify_val(read_data2[i][j], attr_data2[i][j], "Attribute::read", __LINE__, __FILE__, var);
+            }
+        }
 
         // Verify Name
         attr_name = attr.getName();
-        verify_val(attr_name, ATTR2_NAME, "DataType::getName", __LINE__, __FILE__);
+        verify_val(attr_name, ATTR2_NAME, "DataType::getName", __LINE__, __FILE__, "attr_name");
         attr.close();
         space.close();
 
@@ -1179,16 +1175,16 @@ test_attr_mult_read(FileAccPropList &fapl)
 
         // Get the rank of the dataspace and verify it
         rank = space.getSimpleExtentNdims();
-        verify_val(rank, ATTR3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
+        verify_val(rank, ATTR3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__, "rank");
 
         // Get the dims of the dataspace and verify them
         (void)space.getSimpleExtentDims(dims);
-        verify_val(static_cast<long>(dims[0]), static_cast<long>(ATTR3_DIM1), "attribute dimensions",
-                   __FILE__, __LINE__);
-        verify_val(static_cast<long>(dims[1]), static_cast<long>(ATTR3_DIM2), "attribute dimensions",
-                   __FILE__, __LINE__);
-        verify_val(static_cast<long>(dims[2]), static_cast<long>(ATTR3_DIM3), "attribute dimensions",
-                   __FILE__, __LINE__);
+        verify_val(static_cast<long>(dims[0]), static_cast<long>(ATTR3_DIM1), "DataSpace::getSimpleExtentDims",
+                   __LINE__, __FILE__, "attribute dimensions");
+        verify_val(static_cast<long>(dims[1]), static_cast<long>(ATTR3_DIM2), "DataSpace::getSimpleExtentDims",
+                   __LINE__, __FILE__, "attribute dimensions");
+        verify_val(static_cast<long>(dims[2]), static_cast<long>(ATTR3_DIM3), "DataSpace::getSimpleExtentDims",
+                   __LINE__, __FILE__, "attribute dimensions");
 
         /* Verify Datatype */
 
@@ -1197,7 +1193,7 @@ test_attr_mult_read(FileAccPropList &fapl)
 
         // Verify that the type is of compound datatype
         verify_val(static_cast<long>(type_class), static_cast<long>(H5T_FLOAT), "Attribute::getTypeClass",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "type_class");
 
         // Get the double datatype
         FloatType f_type = attr.getFloatType();
@@ -1205,11 +1201,11 @@ test_attr_mult_read(FileAccPropList &fapl)
         // Get and verify the order of this type
         order = f_type.getOrder();
         verify_val(static_cast<long>(order), static_cast<long>(PredType::NATIVE_DOUBLE.getOrder()),
-                   "DataType::getOrder", __LINE__, __FILE__);
+                   "DataType::getOrder", __LINE__, __FILE__, "order");
 
         // Get and verify the size of this type
         size = f_type.getSize();
-        verify_val(size, PredType::NATIVE_DOUBLE.getSize(), "DataType::getSize", __LINE__, __FILE__);
+        verify_val(size, PredType::NATIVE_DOUBLE.getSize(), "DataType::getSize", __LINE__, __FILE__, "size");
 
         // Read attribute information
         attr.read(PredType::NATIVE_DOUBLE, read_data3);
@@ -1217,16 +1213,17 @@ test_attr_mult_read(FileAccPropList &fapl)
         // Verify values read in
         for (i = 0; i < ATTR3_DIM1; i++)
             for (j = 0; j < ATTR3_DIM2; j++)
-                for (k = 0; k < ATTR3_DIM3; k++)
-                    if (abs(attr_data3[i][j][k] - read_data3[i][j][k]) > DBL_EPSILON)
-                        TestErrPrintf("%d: attribute data different: attr_data3[%" PRIuHSIZE "][%" PRIuHSIZE
-                                      "][%" PRIuHSIZE "]=%f, "
-                                      "read_data3[%" PRIuHSIZE "][%" PRIuHSIZE "][%" PRIuHSIZE "]=%f\n",
-                                      __LINE__, i, j, k, attr_data3[i][j][k], i, j, k, read_data3[i][j][k]);
+                for (k = 0; k < ATTR3_DIM3; k++) {
+                    if (abs(attr_data3[i][j][k] - read_data3[i][j][k]) > DBL_EPSILON) {
+                        char var[VAR_LEN];
+                        sprintf(var, "read_data3[%d][%d][%d]", i, j, k);
+                        display_difference(read_data3[i][j][k], attr_data3[i][j][k], "Attribute::read", __LINE__, __FILE__, var);
+                    }
+                }
 
         // Verify Name
         attr_name = attr.getName();
-        verify_val(attr_name, ATTR3_NAME, "DataType::getName", __LINE__, __FILE__);
+        verify_val(attr_name, ATTR3_NAME, "DataType::getName", __LINE__, __FILE__, "attr_name");
 
         PASSED();
     } // end try block
@@ -1258,19 +1255,19 @@ test_attr_delete(FileAccPropList &fapl)
 
         // Get the number of file attributes
         int num_attrs = fid1.getNumAttrs();
-        verify_val(num_attrs, 2, "H5File::getNumAttrs", __LINE__, __FILE__);
+        verify_val(num_attrs, 2, "H5File::getNumAttrs", __LINE__, __FILE__, "num_attrs");
 
         // Delete the second file attribute
         fid1.removeAttr(FATTR2_NAME);
 
         // Get the number of file attributes
         num_attrs = fid1.getNumAttrs();
-        verify_val(num_attrs, 1, "H5File::getNumAttrs", __LINE__, __FILE__);
+        verify_val(num_attrs, 1, "H5File::getNumAttrs", __LINE__, __FILE__, "num_attrs");
 
         // Verify the name of the only file attribute left
         Attribute fattr = fid1.openAttribute(static_cast<unsigned>(0));
         attr_name       = fattr.getName();
-        verify_val(attr_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+        verify_val(attr_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__, "attr_name");
         fattr.close();
 
         // Test deleting non-existing attribute
@@ -1280,7 +1277,7 @@ test_attr_delete(FileAccPropList &fapl)
 
         // Verify the correct number of attributes
         num_attrs = dataset.getNumAttrs();
-        verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__, "num_attrs");
 
         // Try to delete bogus attribute, should fail
         try {
@@ -1298,14 +1295,14 @@ test_attr_delete(FileAccPropList &fapl)
 
         // Verify the correct number of attributes
         num_attrs = dataset.getNumAttrs();
-        verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__, "num_attrs");
 
         // Delete an attribute
         dataset.removeAttr(ATTR2_NAME);
 
         // Verify the correct number of attributes
         num_attrs = dataset.getNumAttrs();
-        verify_val(num_attrs, 2, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        verify_val(num_attrs, 2, "DataSet::getNumAttrs", __LINE__, __FILE__, "num_attrs");
 
 #if 0 // commented this test out, awaiting HDFFV-11327 resolution
       // Open 1st attribute for the dataset
@@ -1313,7 +1310,7 @@ test_attr_delete(FileAccPropList &fapl)
 
         // Verify Name
         attr_name = attr.getName();
-        verify_val(attr_name, ATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+        verify_val(attr_name, ATTR1_NAME, "Attribute::getName", __LINE__, __FILE__, "attr_name");
 
         // Close attribute
         attr.close();
@@ -1323,7 +1320,7 @@ test_attr_delete(FileAccPropList &fapl)
 
         // Verify Name
         attr_name = attr.getName();
-        verify_val(attr_name, ATTR3_NAME, "Attribute::getName", __LINE__, __FILE__);
+        verify_val(attr_name, ATTR3_NAME, "Attribute::getName", __LINE__, __FILE__, "attr_name");
 
         attr.close();
 #endif
@@ -1344,7 +1341,7 @@ test_attr_delete(FileAccPropList &fapl)
 
         // Verify the correct number of attributes
         num_attrs = dataset.getNumAttrs();
-        verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__, "num_attrs");
 
 #if 0 // commented this test out, awaiting HDFFV-11327 resolution
       // Open the only attribute for the dataset (formally 3rd)
@@ -1352,7 +1349,7 @@ test_attr_delete(FileAccPropList &fapl)
 
         // Verify Name
         attr_name = attr.getName();
-        verify_val(attr_name, ATTR3_NAME, "Attribute::getName", __LINE__, __FILE__);
+        verify_val(attr_name, ATTR3_NAME, "Attribute::getName", __LINE__, __FILE__, "attr_name");
         // Close attribute
         attr.close();
 #endif
@@ -1362,7 +1359,7 @@ test_attr_delete(FileAccPropList &fapl)
 
         // Verify the correct number of attributes
         num_attrs = dataset.getNumAttrs();
-        verify_val(num_attrs, 0, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        verify_val(num_attrs, 0, "DataSet::getNumAttrs", __LINE__, __FILE__, "num_attrs");
 
         // Try removing a deleted attribute, should fail
         try {
@@ -1400,29 +1397,17 @@ test_attr_dtype_shared(FileAccPropList &fapl)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     H5G_stat_t statbuf; // Object's information
 #endif
-    h5_stat_size_t filesize; // Size of file after modifications
 
     // Output message about test being performed
     SUBTEST("Shared Datatypes with Attributes");
 
     try {
-        h5_stat_size_t empty_filesize        = 0; // Size of empty file
-        bool           is_default_vfd_compat = false;
 
         // Create a file
         H5File fid1(FILE_DTYPE, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
         // Close file
         fid1.close();
-
-        h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &is_default_vfd_compat);
-
-        if (is_default_vfd_compat) {
-            // Get size of file
-            empty_filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
-            if (empty_filesize < 0)
-                TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
-        }
 
         // Open the file again
         fid1.openFile(FILE_DTYPE, H5F_ACC_RDWR);
@@ -1441,7 +1426,7 @@ test_attr_dtype_shared(FileAccPropList &fapl)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             // Check reference count on named datatype
             fid1.getObjinfo(TYPE1_NAME, statbuf);
-            verify_val(static_cast<int>(statbuf.nlink), 1, "DataType::getObjinfo", __LINE__, __FILE__);
+            verify_val(static_cast<int>(statbuf.nlink), 1, "DataType::getObjinfo", __LINE__, __FILE__, "statbuf.nlink");
 #endif
 
             // Create dataspace for dataset
@@ -1452,7 +1437,7 @@ test_attr_dtype_shared(FileAccPropList &fapl)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             // Check reference count on named datatype
             fid1.getObjinfo(TYPE1_NAME, statbuf);
-            verify_val(static_cast<int>(statbuf.nlink), 2, "H5File::getObjinfo", __LINE__, __FILE__);
+            verify_val(static_cast<int>(statbuf.nlink), 2, "H5File::getObjinfo", __LINE__, __FILE__, "statbuf.nlink");
 #endif
 
             // Create attribute on dataset
@@ -1461,7 +1446,7 @@ test_attr_dtype_shared(FileAccPropList &fapl)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             // Check reference count on named datatype
             fid1.getObjinfo(TYPE1_NAME, statbuf);
-            verify_val(static_cast<int>(statbuf.nlink), 3, "DataSet::getObjinfo", __LINE__, __FILE__);
+            verify_val(static_cast<int>(statbuf.nlink), 3, "DataSet::getObjinfo", __LINE__, __FILE__, "statbuf.nlink");
 #endif
 
             // Close attribute
@@ -1474,7 +1459,7 @@ test_attr_dtype_shared(FileAccPropList &fapl)
             // Check reference count on named datatype
             fid1.getObjinfo(TYPE1_NAME, statbuf);
             verify_val(static_cast<int>(statbuf.nlink), 2, "DataSet::getObjinfo after DataSet::removeAttr",
-                       __LINE__, __FILE__);
+                       __LINE__, __FILE__, "statbuf.nlink");
 #endif
 
             // Create attribute on dataset
@@ -1483,7 +1468,7 @@ test_attr_dtype_shared(FileAccPropList &fapl)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             // Check reference count on named datatype
             fid1.getObjinfo(TYPE1_NAME, statbuf);
-            verify_val(static_cast<int>(statbuf.nlink), 3, "DataSet::createAttribute", __LINE__, __FILE__);
+            verify_val(static_cast<int>(statbuf.nlink), 3, "DataSet::createAttribute", __LINE__, __FILE__, "statbuf.nlink");
 #endif
 
             // Write data into the attribute
@@ -1511,7 +1496,7 @@ test_attr_dtype_shared(FileAccPropList &fapl)
 
             // Read data from the attribute
             attr2->read(PredType::NATIVE_INT, &rdata);
-            verify_val(data, rdata, "Attribute::read", __LINE__, __FILE__);
+            verify_val(rdata, data, "Attribute::read", __LINE__, __FILE__, "rdata");
 
             // Close attribute and dataset
             delete attr2;
@@ -1520,7 +1505,7 @@ test_attr_dtype_shared(FileAccPropList &fapl)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             // Check reference count on named datatype
             fid1.getObjinfo(TYPE1_NAME, statbuf);
-            verify_val(static_cast<int>(statbuf.nlink), 3, "DataSet::openAttribute", __LINE__, __FILE__);
+            verify_val(static_cast<int>(statbuf.nlink), 3, "DataSet::openAttribute", __LINE__, __FILE__, "statbuf.nlink");
 #endif
         } // end of second enclosing
 
@@ -1530,7 +1515,7 @@ test_attr_dtype_shared(FileAccPropList &fapl)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         // Check reference count on named datatype
         fid1.getObjinfo(TYPE1_NAME, statbuf);
-        verify_val(static_cast<int>(statbuf.nlink), 1, "H5File::unlink", __LINE__, __FILE__);
+        verify_val(static_cast<int>(statbuf.nlink), 1, "H5File::unlink", __LINE__, __FILE__, "statbuf.nlink");
 #endif
 
         // Unlink the named datatype
@@ -1538,13 +1523,6 @@ test_attr_dtype_shared(FileAccPropList &fapl)
 
         // Close file
         fid1.close();
-
-        if (is_default_vfd_compat) {
-            // Check size of file
-            filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
-            verify_val(static_cast<long>(filesize), static_cast<long>(empty_filesize), "Checking file size",
-                       __LINE__, __FILE__);
-        }
 
         PASSED();
     } // end try block
@@ -1612,9 +1590,7 @@ test_string_attr(FileAccPropList &fapl)
         // Read and verify the attribute string as a string of chars.
         char flstring_att_check[ATTR_LEN];
         gr_flattr1.read(fls_type, flstring_att_check);
-        if (strcmp(flstring_att_check, ATTRSTR_DATA.c_str()) != 0)
-            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",
-                          __LINE__, ATTRSTR_DATA.c_str(), flstring_att_check);
+        verify_val(const_cast<const char *>(flstring_att_check), const_cast<const char *>(ATTRSTR_DATA.c_str()), "Attribute::read", __LINE__, __FILE__, "flstring_att_check");
 
         // Read and verify the attribute string as a string of chars; buffer
         // is dynamically allocated.
@@ -1622,9 +1598,8 @@ test_string_attr(FileAccPropList &fapl)
         char  *fl_dyn_string_att_check;
         fl_dyn_string_att_check = new char[attr_size + 1];
         gr_flattr1.read(fls_type, fl_dyn_string_att_check);
-        if (strcmp(fl_dyn_string_att_check, ATTRSTR_DATA.c_str()) != 0)
-            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",
-                          __LINE__, ATTRSTR_DATA.c_str(), fl_dyn_string_att_check);
+
+        verify_val(const_cast<const char *>(fl_dyn_string_att_check), const_cast<const char *>(ATTRSTR_DATA.c_str()), "Attribute::read", __LINE__, __FILE__, "fl_dyn_string_att_check");
         delete[] fl_dyn_string_att_check;
 
         /* Test Attribute::read(...,H5std_string& strg) with FL string */
@@ -1632,25 +1607,19 @@ test_string_attr(FileAccPropList &fapl)
         // Read and verify the attribute string as an std::string.
         H5std_string read_flstr1;
         gr_flattr1.read(fls_type, read_flstr1);
-        if (read_flstr1 != ATTRSTR_DATA)
-            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,read_flstr1=%s\n", __LINE__,
-                          ATTRSTR_DATA.c_str(), read_flstr1.c_str());
+        verify_val(static_cast<const H5std_string>(read_flstr1), static_cast<const H5std_string>(ATTRSTR_DATA), "Attribute::read", __LINE__, __FILE__, "read_flstr1");
 
         // Read and verify the attribute string as a string of chars.
         strcpy(flstring_att_check, "");
         gr_flattr2.read(fls_type, flstring_att_check);
-        if (strcmp(flstring_att_check, ATTRSTR_DATA.c_str()) != 0)
-            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",
-                          __LINE__, ATTRSTR_DATA.c_str(), flstring_att_check);
+        verify_val(const_cast<const char *>(flstring_att_check), const_cast<const char *>(ATTRSTR_DATA.c_str()), "Attribute::read", __LINE__, __FILE__, "flstring_att_check");
 
         /* Test Attribute::read(...,H5std_string& strg) with FL string */
 
         // Read and verify the attribute string as an std::string.
         H5std_string read_flstr2;
         gr_flattr2.read(fls_type, read_flstr2);
-        if (read_flstr2 != ATTRSTR_DATA)
-            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,read_flstr2=%s\n", __LINE__,
-                          ATTRSTR_DATA.c_str(), read_flstr2.c_str());
+        verify_val(static_cast<const H5std_string>(read_flstr2), ATTRSTR_DATA, "Attribute::read", __LINE__, __FILE__, "read_flstr2");
 
         //
         // Variable-lenth string attributes
@@ -1668,18 +1637,15 @@ test_string_attr(FileAccPropList &fapl)
         // Read and verify the attribute string as a string of chars.
         char *string_att_check;
         gr_vlattr.read(vls_type, &string_att_check);
-        if (strcmp(string_att_check, ATTRSTR_DATA.c_str()) != 0)
-            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,string_att_check=%s\n",
-                          __LINE__, ATTRSTR_DATA.c_str(), string_att_check);
+        verify_val(const_cast<const char *>(string_att_check), ATTRSTR_DATA.c_str(), "Attribute::read", __LINE__, __FILE__, "flstring_att_check");
         free(string_att_check);
 
         /* Test Attribute::read(...,H5std_string& strg) with VL string */
         // Read and verify the attribute string as an std::string.
         H5std_string read_str;
         gr_vlattr.read(vls_type, read_str);
-        if (read_str != ATTRSTR_DATA)
-            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,read_str=%s\n", __LINE__,
-                          ATTRSTR_DATA.c_str(), read_str.c_str());
+        verify_val(static_cast<const H5std_string>(read_str), static_cast<const H5std_string>(ATTRSTR_DATA), "Attribute::read", __LINE__, __FILE__, "read_str");
+
         PASSED();
     } // end try block
 
@@ -1770,12 +1736,6 @@ test_attr_dense_create(FileCreatPropList &fcpl, FileAccPropList &fapl)
         // Close file
         fid1.close();
 
-        // Get size of file
-        h5_stat_size_t empty_filesize; // Size of empty file
-        empty_filesize = h5_get_file_size(FILE_CRTPROPS.c_str(), fapl.getId());
-        if (empty_filesize < 0)
-            TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
-
         // Re-open file
         fid1.openFile(FILE_CRTPROPS, H5F_ACC_RDWR, fapl);
 
@@ -1792,8 +1752,8 @@ test_attr_dense_create(FileCreatPropList &fcpl, FileAccPropList &fapl)
 
         // Retrieve limits for compact/dense attribute storage
         dcpl.getAttrPhaseChange(max_compact, min_dense);
-        verify_val(max_compact, MAX_COMPACT_DEF, "DSetCreatPropList::getAttrPhaseChange", __LINE__, __FILE__);
-        verify_val(min_dense, MIN_DENSE_DEF, "DSetCreatPropList::getAttrPhaseChange", __LINE__, __FILE__);
+        verify_val(max_compact, MAX_COMPACT_DEF, "DSetCreatPropList::getAttrPhaseChange", __LINE__, __FILE__, "max_compact");
+        verify_val(min_dense, MIN_DENSE_DEF, "DSetCreatPropList::getAttrPhaseChange", __LINE__, __FILE__, "min_dense");
 
         // Set new compact/dense attribute storage limits to some random numbers
         dcpl.setAttrPhaseChange(7, 5);
@@ -1801,9 +1761,9 @@ test_attr_dense_create(FileCreatPropList &fcpl, FileAccPropList &fapl)
         // Retrieve limits for compact/dense attribute storage and verify them
         dcpl.getAttrPhaseChange(max_compact, min_dense);
         verify_val(max_compact, static_cast<unsigned>(7), "DSetCreatPropList::getAttrPhaseChange", __LINE__,
-                   __FILE__);
+                   __FILE__, "max_compact");
         verify_val(min_dense, static_cast<unsigned>(5), "DSetCreatPropList::getAttrPhaseChange", __LINE__,
-                   __FILE__);
+                   __FILE__, "min_dense");
 
         // Close property list
         dcpl.close();
@@ -1881,7 +1841,7 @@ test_attr_corder_create_basic(FileCreatPropList &fcpl, FileAccPropList &fapl)
         unsigned crt_order_flags = 0;
         crt_order_flags          = dcpl.getAttrCrtOrder();
         verify_val(static_cast<long>(crt_order_flags), 0, "DSetCreatPropList::getAttrCrtOrder", __LINE__,
-                   __FILE__);
+                   __FILE__, "crt_order_flags");
 
         // Setting invalid combination of a attribute order creation order
         // indexing on should fail
@@ -1901,7 +1861,7 @@ test_attr_corder_create_basic(FileCreatPropList &fcpl, FileAccPropList &fapl)
         dcpl.setAttrCrtOrder(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED);
         crt_order_flags = dcpl.getAttrCrtOrder();
         verify_val(crt_order_flags, static_cast<unsigned>(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED),
-                   "DSetCreatPropList::getAttrCrtOrder", __LINE__, __FILE__);
+                   "DSetCreatPropList::getAttrCrtOrder", __LINE__, __FILE__, "crt_order_flags");
 
         // Create dataspace for dataset
         DataSpace ds_space(H5S_SCALAR);
@@ -1937,7 +1897,7 @@ test_attr_corder_create_basic(FileCreatPropList &fcpl, FileAccPropList &fapl)
         // Query the attribute creation properties
         crt_order_flags = dcpl.getAttrCrtOrder();
         verify_val(crt_order_flags, static_cast<unsigned>(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED),
-                   "DSetCreatPropList::getAttrCrtOrder", __LINE__, __FILE__);
+                   "DSetCreatPropList::getAttrCrtOrder", __LINE__, __FILE__, "crt_order_flags");
 
         PASSED();
     } // end try block
@@ -1958,9 +1918,6 @@ test_attr_corder_create_basic(FileCreatPropList &fcpl, FileAccPropList &fapl)
 extern "C" void
 test_attr()
 {
-    // Output message about test being performed
-    MESSAGE(5, ("Testing Attributes\n"));
-
     try {
         // Create a default file access property list
         FileAccPropList fapl;
@@ -1988,11 +1945,11 @@ test_attr()
 
             // Set the file access proplist for the type of format
             if (new_format) {
-                MESSAGE(7, ("testing with new file format\n"));
+                MESSAGE(("\n*** Testing with NEW file format ***\n"));
                 curr_fapl = fapl_new;
             }
             else {
-                MESSAGE(7, ("testing with old file format\n"));
+                MESSAGE("*** Testing with OLD file format ***\n");
                 curr_fapl = fapl;
             }
 
@@ -2043,10 +2000,10 @@ test_attr()
 extern "C" void
 cleanup_attr()
 {
-    HDremove(FILE_BASIC.c_str());
-    HDremove(FILE_COMPOUND.c_str());
-    HDremove(FILE_SCALAR.c_str());
-    HDremove(FILE_MULTI.c_str());
-    HDremove(FILE_DTYPE.c_str());
-    HDremove(FILE_CRTPROPS.c_str());
+    remove(FILE_BASIC.c_str());
+    remove(FILE_COMPOUND.c_str());
+    remove(FILE_SCALAR.c_str());
+    remove(FILE_MULTI.c_str());
+    remove(FILE_DTYPE.c_str());
+    remove(FILE_CRTPROPS.c_str());
 }

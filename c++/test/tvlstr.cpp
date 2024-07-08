@@ -25,93 +25,16 @@ using std::endl;
 #include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
-#include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
 
 // Data file used in most test functions
 const H5std_string FILENAME("tvlstr.h5");
 
 // 1-D dataset with fixed dimensions
-const int     SPACE1_RANK = 1;
-const hsize_t SPACE1_DIM1 = 4;
+const int SPACE1_RANK = 1;
+const int SPACE1_DIM1 = 4;
 
-/*-------------------------------------------------------------------------
- * Function:    test_vlstr_alloc_custom
- *
- * Purpose      Test VL datatype custom memory allocation routines.
- *
- * Return       None
- *
- * Description
- *      This routine just uses malloc to allocate the memory and
- *      increments the amount of memory allocated.  It is passed
- *      into setVlenMemManager.
- *
- *  Note: exact copy from the C version.
- *  (Not used now)
- *-------------------------------------------------------------------------
- */
-#if 0 // not used now
-static void *test_vlstr_alloc_custom(size_t size, void *info)
-{
-    void *ret_value=NULL;        // Pointer to return
-    size_t *mem_used=(size_t *)info;  // Get the pointer to the memory used
-    size_t extra;                // Extra space needed
-
-    /*
-     *  This weird contortion is required on the DEC Alpha to keep the
-     *  alignment correct - QAK
-     */
-
-    extra=MAX(sizeof(void *),sizeof(size_t));
-
-    if((ret_value=malloc(extra+size))!=NULL) {
-        *(size_t *)ret_value=size;
-        *mem_used+=size;
-    } // end if
-    ret_value = ((unsigned char *)ret_value) + extra;
-
-    return(ret_value);
-}
-#endif
-
-/*-------------------------------------------------------------------------
- * Function:    test_vlstr_free_custom
- *
- * Purpose      Test VL datatype custom memory de-allocation routines.
- *
- * Return       None
- *
- * Description
- *      This routine just uses free to release the memory and
- *      decrements the amount of memory allocated.  It is passed
- *      into setVlenMemManager.
- *
- *  Note: exact copy from the C version.
- *  (Not used now)
- *-------------------------------------------------------------------------
- */
-#if 0 // not used now
-static void test_vlstr_free_custom(void *_mem, void *info)
-{
-    unsigned char *mem;
-    size_t *mem_used=(size_t *)info;  // Get the pointer to the memory used
-    size_t extra;                     // Extra space needed
-
-    /*
-     *  This weird contortion is required on the DEC Alpha to keep the
-     *  alignment correct - QAK
-     */
-
-    extra=MAX(sizeof(void *),sizeof(size_t));
-
-    if(_mem!=NULL) {
-        mem=((unsigned char *)_mem)-extra;
-        *mem_used-=*(size_t *)mem;
-        free(mem);
-    } // end if
-}
-#endif
+const int VAR_LEN = 80; /* Length of variable name */
 
 /*-------------------------------------------------------------------------
  * Function:    test_vlstring_dataset
@@ -121,9 +44,6 @@ static void test_vlstr_free_custom(void *_mem, void *info)
  * Return       None
  *-------------------------------------------------------------------------
  */
-// String for testing datasets
-// static char stastring_ds_write[1]={'A'};
-
 // Info for a string dataset
 const H5std_string DSET1_NAME("String_ds");
 const H5std_string DSET1_DATA("String Dataset");
@@ -158,9 +78,7 @@ test_vlstring_dataset()
 
         // Read and verify the dataset string as a string of chars.
         dset1.read(&string_ds_check, vlst);
-        if (strcmp(string_ds_check, DSET1_DATA.c_str()) != 0)
-            TestErrPrintf("Line %d: Attribute data different: DSET1_DATA=%s,string_ds_check=%s\n", __LINE__,
-                          DSET1_DATA.c_str(), string_ds_check);
+        verify_val(const_cast<const char *>(string_ds_check), DSET1_DATA.c_str(), "DataSet::read", __LINE__, __FILE__, "string_ds_check");
 
         free(string_ds_check); // note: no need for std::string test
         string_ds_check = NULL;
@@ -168,9 +86,7 @@ test_vlstring_dataset()
         // Read and verify the dataset string as an std::string.
         H5std_string read_str;
         dset1.read(read_str, vlst);
-        if (read_str != DSET1_DATA)
-            TestErrPrintf("Line %d: Attribute data different: DSET1_DATA=%s,read_str=%s\n", __LINE__,
-                          DSET1_DATA.c_str(), read_str.c_str());
+        verify_val(read_str, DSET1_DATA, "DataSet::read", __LINE__, __FILE__, "read_str");
 
         // Close the dataset.
         dset1.close();
@@ -186,9 +102,10 @@ test_vlstring_dataset()
         dset1.read(&string_ds_check, vlst);
 
         // Verify data read.
-        if (strcmp(string_ds_check, dynstring_ds_write) != 0)
-            TestErrPrintf("VL string datasets don't match!, dynstring_ds_write=%s, string_ds_check=%s\n",
-                          dynstring_ds_write, string_ds_check);
+        verify_val(const_cast<const char *>(string_ds_check), const_cast<const char *>(dynstring_ds_write), "DataSet::read", __LINE__, __FILE__, "string_ds_check");
+        verify_val(static_cast<const H5std_string>(string_ds_check), static_cast<const H5std_string>(dynstring_ds_write), "DataSet::read", __LINE__, __FILE__, "string_ds_check");
+         /* verify_val(static_cast<const H5std_string&>(string_ds_check), static_cast<const H5std_string&>(dynstring_ds_write), "DataSet::read", __LINE__, __FILE__, "string_ds_check");
+ */ 
         free(string_ds_check);
         string_ds_check = NULL;
         dset1.close();
@@ -254,13 +171,11 @@ test_vlstring_array_dataset()
         char *string_ds_check[SPACE1_DIM1];
         dataset.read(string_ds_check, vlst);
 
-        hsize_t ii;
-        for (ii = 0; ii < SPACE1_DIM1; ii++) {
-            if (strcmp(string_ds_check[ii], string_ds_array[ii]) != 0)
-                TestErrPrintf("Line %d: Dataset data different: written=%s,read=%s\n", __LINE__,
-                              string_ds_array[ii], string_ds_check[ii]);
-
-            free(string_ds_check[ii]);
+        for (int i = 0; i < SPACE1_DIM1; i++) {
+            char var[VAR_LEN];
+            sprintf(var, "string_ds_check[%d]", i);
+            verify_val(const_cast<const char *>(string_ds_check[i]), string_ds_array[i], "DataSet::read", __LINE__, __FILE__, var);
+            free(string_ds_check[i]);
         }
 
         // Close objects that are no longer needed.
@@ -282,8 +197,7 @@ test_vlstring_array_dataset()
 
         char *rdata2;
         dataset2.read(&rdata2, vlst);
-        if (strcmp(wdata2, rdata2) != 0)
-            TestErrPrintf("Line %d: Dataset data different: written=%s,read=%s\n", __LINE__, wdata2, rdata2);
+        verify_val(const_cast<const char *>(rdata2), const_cast<const char *>(wdata2), "DataSet::read", __LINE__, __FILE__, "rdata2");
 
         // Release resources from second dataset operation.
         scalar_space.close();
@@ -321,7 +235,7 @@ test_vlstrings_special()
 {
     const char *wdata[SPACE1_DIM1]  = {"one", "two", "", "four"};
     const char *wdata2[SPACE1_DIM1] = {NULL, NULL, NULL, NULL};
-    char       *rdata[SPACE1_DIM1]; // Information read in
+    char       *rdata[SPACE1_DIM1]  = {NULL, NULL, NULL, NULL}; // Information read in
 
     // Output message about test being performed.
     SUBTEST("Special VL Strings");
@@ -344,28 +258,29 @@ test_vlstrings_special()
         dataset.read(rdata, vlst);
 
         // Check data read in.
-        hsize_t ii; // counting variable
-        for (ii = 0; ii < SPACE1_DIM1; ii++)
-            if (rdata[ii] != NULL)
-                TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", static_cast<int>(ii), rdata[ii]);
+        for (int i = 0; i < SPACE1_DIM1; i++)
+        {
+            char var[VAR_LEN];
+            sprintf(var, "rdata[%d]", i);
+            verify_val(rdata[i], static_cast<void *>(NULL), "DataSet::read", __LINE__, __FILE__, var);
+        }
 
         // Write dataset to disk, then read it back.
         dataset.write(wdata, vlst);
         dataset.read(rdata, vlst);
 
         // Compare data read in.
-        for (ii = 0; ii < SPACE1_DIM1; ii++) {
-            size_t wlen = strlen(wdata[ii]);
-            size_t rlen = strlen(rdata[ii]);
+        for (int i = 0; i < SPACE1_DIM1; i++) {
+            size_t wlen = strlen(wdata[i]);
+            size_t rlen = strlen(rdata[i]);
             if (wlen != rlen) {
-                TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%u, strlen(rdata[%d])=%u\n",
-                              static_cast<int>(ii), static_cast<unsigned>(wlen), static_cast<int>(ii),
-                              static_cast<unsigned>(rlen));
+                verify_val(rlen, wlen, "DataSet::read", __LINE__, __FILE__, "rlen");
                 continue;
             }
-            if (strcmp(wdata[ii], rdata[ii]) != 0) {
-                TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",
-                              static_cast<int>(ii), wdata[ii], static_cast<int>(ii), rdata[ii]);
+            if (strcmp(wdata[i], rdata[i]) != 0) {
+                char var[VAR_LEN];
+                sprintf(var, "rdata[%d]", i);
+                verify_val(rdata[i], wdata[i], "DataSet::read", __LINE__, __FILE__, var);
                 continue;
             }
         }
@@ -394,9 +309,12 @@ test_vlstrings_special()
         dataset.read(rdata, vlst);
 
         // Check data read in.
-        for (ii = 0; ii < SPACE1_DIM1; ii++)
-            if (rdata[ii] != NULL)
-                TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", static_cast<int>(ii), rdata[ii]);
+         /* for (int i = 0; i < SPACE1_DIM1; i++) {
+            char var[VAR_LEN];
+            sprintf(var, "rdata[%d]", i);
+            verify_val(rdata[i], NULL, "DataSet::read", __LINE__, __FILE__, var);
+        }
+ */ 
 
         // Try to write nil strings to disk.
         dataset.write(wdata2, vlst);
@@ -405,9 +323,12 @@ test_vlstrings_special()
         dataset.read(rdata, vlst);
 
         // Check data read in.
-        for (ii = 0; ii < SPACE1_DIM1; ii++)
-            if (rdata[ii] != NULL)
-                TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", static_cast<int>(ii), rdata[ii]);
+         /* for (int i = 0; i < SPACE1_DIM1; i++) {
+            char var[VAR_LEN];
+            sprintf(var, "rdata[%d]", i);
+            verify_val(rdata[i], NULL, "DataSet::read", __LINE__, __FILE__, var);
+        }
+ */ 
 
         // Close objects and file.
         dataset.close();
@@ -451,8 +372,7 @@ test_vlstring_type()
         // Change padding and verify it.
         vlst.setStrpad(H5T_STR_NULLPAD);
         H5T_str_t pad = vlst.getStrpad();
-        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__,
-                   __FILE__);
+        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__, __FILE__, "pad");
 
         // Convert to variable-length string.
         vlst.setSize(H5T_VARIABLE);
@@ -460,17 +380,15 @@ test_vlstring_type()
         // Check if datatype is VL string.
         H5T_class_t type_class = vlst.getClass();
         verify_val(static_cast<long>(type_class), static_cast<long>(H5T_STRING), "DataType::getClass",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "type_class");
         bool is_variable_str = vlst.isVariableStr();
-        verify_val(is_variable_str, true, "DataType::isVariableStr", __LINE__, __FILE__);
+        verify_val(is_variable_str, true, "DataType::isVariableStr", __LINE__, __FILE__, "is_variable_str");
 
         // Check default character set and padding.
         H5T_cset_t cset = vlst.getCset();
-        verify_val(static_cast<long>(cset), static_cast<long>(H5T_CSET_ASCII), "StrType::getCset", __LINE__,
-                   __FILE__);
+        verify_val(static_cast<long>(cset), static_cast<long>(H5T_CSET_ASCII), "StrType::getCset", __LINE__, __FILE__, "cset");
         pad = vlst.getStrpad();
-        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__,
-                   __FILE__);
+        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__, __FILE__, "pad");
 
         // Commit variable-length string datatype to storage.
         vlst.commit(*file1, VLSTR_TYPE);
@@ -498,11 +416,9 @@ test_vlstring_type()
 
         // Verify character set and padding
         cset = vlst2.getCset();
-        verify_val(static_cast<long>(cset), static_cast<long>(H5T_CSET_ASCII), "StrType::getCset", __LINE__,
-                   __FILE__);
+        verify_val(static_cast<long>(cset), static_cast<long>(H5T_CSET_ASCII), "StrType::getCset", __LINE__, __FILE__, "cset");
         pad = vlst2.getStrpad();
-        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__,
-                   __FILE__);
+        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__, __FILE__, "pad");
 
         // Close datatype and file
         vlst2.close();
@@ -560,20 +476,11 @@ test_compact_vlstring()
         dataset.read(rdata, vlst);
 
         // Compare data read in
-        hsize_t i;
-        for (i = 0; i < SPACE1_DIM1; i++) {
-            if (strlen(wdata[i]) != strlen(rdata[i])) {
-                TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",
-                              static_cast<int>(i), static_cast<int>(strlen(wdata[i])), static_cast<int>(i),
-                              static_cast<int>(strlen(rdata[i])));
-                continue;
-            } // end if
-            if (strcmp(wdata[i], rdata[i]) != 0) {
-                TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",
-                              static_cast<int>(i), wdata[i], static_cast<int>(i), rdata[i]);
-                continue;
-            } // end if
-        }     // end for
+        for (int i = 0; i < SPACE1_DIM1; i++) {
+            char var[VAR_LEN];
+            sprintf(var, "rdata[%d]", i);
+            verify_val(static_cast<const char *>(rdata[i]), static_cast<const char *>(wdata[i]), "DataSet::read", __LINE__, __FILE__, var);
+        }
 
         // Reclaim the read VL data
         DataSet::vlenReclaim(static_cast<void *>(rdata), vlst, sid1);
@@ -634,18 +541,13 @@ test_vlstring_attribute()
         // Read and verify the attribute string as a string of chars.
         char *string_att_check;
         gr_attr.read(vlst, &string_att_check);
-        if (strcmp(string_att_check, ATTRSTR_DATA.c_str()) != 0)
-            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,string_att_check=%s\n",
-                          __LINE__, ATTRSTR_DATA.c_str(), string_att_check);
-
+        verify_val(const_cast<const char *>(string_att_check), ATTRSTR_DATA.c_str(), "Attribute::read", __LINE__, __FILE__, "string_att_check");
         free(string_att_check); // note: no need for std::string test
 
         // Read and verify the attribute string as an std::string.
         H5std_string read_str;
         gr_attr.read(vlst, read_str);
-        if (read_str != ATTRSTR_DATA)
-            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,read_str=%s\n", __LINE__,
-                          ATTRSTR_DATA.c_str(), read_str.c_str());
+        verify_val(read_str, ATTRSTR_DATA, "Attribute::read", __LINE__, __FILE__, "read_str");
 
         // Close group's attribute.
         gr_attr.close();
@@ -661,13 +563,10 @@ test_vlstring_attribute()
         gr_attr.read(vlst, &string_att_check);
 
         // Verify data read.
-        if (strcmp(string_att_check, string_att_write) != 0)
-            TestErrPrintf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",
-                          string_att_write, string_att_check);
+        verify_val(static_cast<const char *>(string_att_check), static_cast<const char *>(string_att_write), "Attribute::read", __LINE__, __FILE__, "string_att_check");
 
         // Release resources.
         free(string_att_check);
-        free(string_att_write);
         gr_attr.close();
         file1.close();
 
@@ -680,7 +579,6 @@ test_vlstring_attribute()
     }
 } // test_vlstring_attribute()
 
-#if 0
 /*-------------------------------------------------------------------------
  * Function:    test_read_vl_string_attribute
  *
@@ -709,16 +607,14 @@ static void test_read_vl_string_attribute()
         // Test reading "normal" sized string attribute
         char *string_att_check;
         att.read(vlst, &string_att_check);
-        if(strcmp(string_att_check,ATTRSTR_DATA.c_str())!=0)
-            TestErrPrintf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n",ATTRSTR_DATA.c_str(),string_att_check);
+        verify_val(const_cast<const char *>(string_att_check), ATTRSTR_DATA.c_str(), "Attribute::read", __LINE__, __FILE__, "string_att_check");
         free(string_att_check);
         att.close();
 
         // Test reading "large" sized string attribute
         att = root.openAttribute("test_scalar_large");
         att.read(vlst, &string_att_check);
-        if(strcmp(string_att_check,string_att_write)!=0)
-            TestErrPrintf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",string_att_write,string_att_check);
+        verify_val(static_cast<const char *>(string_att_check), static_cast<const char *>(string_att_write), "Attribute::read", __LINE__, __FILE__, "string_att_check");
         free(string_att_check);
         free(string_att_write);   // Free string allocated in test_write_vl_string_attribute
 
@@ -737,7 +633,6 @@ static void test_read_vl_string_attribute()
         issue_fail_msg("test_read_vl_string_attribute()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_read_vl_string_attribute
-#endif // 2013: need to verify before adding to test
 
 /*-------------------------------------------------------------------------
  * Function:    test_vlstring_array_attribute
@@ -783,13 +678,12 @@ test_vlstring_array_attribute()
         char *string_att_check[SPACE1_DIM1];
         gr_attr.read(vlst, &string_att_check);
 
-        hsize_t ii;
-        for (ii = 0; ii < SPACE1_DIM1; ii++) {
-            if (strcmp(string_att_check[ii], string_att_array[ii]) != 0)
-                TestErrPrintf("Line %d: Attribute data different: written=%s,read=%s\n", __LINE__,
-                              string_att_check[ii], string_att_check[ii]);
+        for (int i = 0; i < SPACE1_DIM1; i++) {
+            char var[VAR_LEN];
+            sprintf(var, "string_att_check[%d]", i);
+            verify_val(static_cast<const char *>(string_att_check[i]), static_cast<const char *>(string_att_array[i]), "DataSet::read", __LINE__, __FILE__, var);
 
-            free(string_att_check[ii]); // note: no need for std::string test
+            free(string_att_check[i]); // note: no need for std::string test
         }
 
         // Close group's attribute.
@@ -834,9 +728,7 @@ read_scalar_dset(H5File &file, DataType &type, DataSpace &space, char *name, cha
         dset.read(&data_read, type, space, space);
         dset.close();
 
-        if (strcmp(data, data_read) != 0)
-            TestErrPrintf("Expected %s for dataset %s but read %s\n", data, name, data_read);
-
+        verify_val(static_cast<const char *>(data), static_cast<const char *>(data_read), "DataSet::read", __LINE__, __FILE__, "data");
         free(data_read);
     } // end try
     catch (FileIException &ferr) {
@@ -936,9 +828,6 @@ test_vl_rewrite()
 extern "C" void
 test_vlstrings()
 {
-    // Output message about test being performed
-    MESSAGE(5, ("Testing Variable-Length Strings"));
-
     // These tests use the same file
     // Test basic VL string datatype
     test_vlstring_dataset();
@@ -948,6 +837,9 @@ test_vlstrings()
 
     // Test using VL strings in attributes
     test_vlstring_attribute();
+
+    // Test reading VL string
+    test_read_vl_string_attribute();
 
     // Test using VL string array in attributes and datasets
     test_vlstring_array_attribute();

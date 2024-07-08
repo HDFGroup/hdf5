@@ -26,9 +26,7 @@ using std::endl;
 #include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
-#include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
-#include "H5srcdir.h"  // srcdir querying header file
 
 const H5std_string TESTFILE("th5s.h5");
 const H5std_string DATAFILE("th5s1.h5");
@@ -104,20 +102,20 @@ test_h5s_basic()
         hssize_t n; // Number of dataspace elements
         n = sid1.getSimpleExtentNpoints();
         verify_val(static_cast<long>(n), SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3,
-                   "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+                   "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__, "n");
 
         // Get the logical rank of dataspace sid1 and verify it
         int rank; // Logical rank of dataspace
         rank = sid1.getSimpleExtentNdims();
-        verify_val(rank, SPACE1_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
+        verify_val(rank, SPACE1_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__, "rank");
 
         // Retrieves dimension size of dataspace sid1 and verify it
         int     ndims;    // Number of dimensions
         hsize_t tdims[4]; // Dimension array to test with
         ndims = sid1.getSimpleExtentDims(tdims);
-        verify_val(ndims, SPACE1_RANK, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        verify_val(ndims, SPACE1_RANK, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__, "ndims");
         verify_val(memcmp(tdims, dims1, SPACE1_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "tdims");
 
         // Create simple dataspace sid2
         hsize_t   max2[] = {SPACE2_MAX1, SPACE2_MAX2, SPACE2_MAX3, SPACE2_MAX4};
@@ -126,19 +124,19 @@ test_h5s_basic()
         // Get simple extent npoints of dataspace sid2 and verify it
         n = sid2.getSimpleExtentNpoints();
         verify_val(static_cast<long>(n), SPACE2_DIM1 * SPACE2_DIM2 * SPACE2_DIM3 * SPACE2_DIM4,
-                   "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+                   "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__, "n");
 
         // Get the logical rank of dataspace sid2 and verify it
         rank = sid2.getSimpleExtentNdims();
-        verify_val(rank, SPACE2_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
+        verify_val(rank, SPACE2_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__, "rank");
 
         // Retrieves dimension size and max size of dataspace sid2 and
         // verify them
         ndims = sid2.getSimpleExtentDims(tdims, tmax);
         verify_val(memcmp(tdims, dims2, SPACE2_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "tdims");
         verify_val(memcmp(tmax, max2, SPACE2_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
-                   __LINE__, __FILE__);
+                   __LINE__, __FILE__, "tmax");
 
         // Check to be sure we can't create a simple data space that has too
         // many dimensions.
@@ -162,7 +160,7 @@ test_h5s_basic()
          */
         char *tmp_str = new char[TESTFILE.length() + 1];
         strcpy(tmp_str, TESTFILE.c_str());
-        const char *testfile = H5_get_srcdir_filename(tmp_str);
+        const char *testfile = h5cpp_get_srcdir_filename(tmp_str);
         delete[] tmp_str;
 
         // Create file
@@ -223,23 +221,23 @@ test_h5s_scalar_write()
         // n = H5Sget_simple_extent_npoints(sid1);
         hssize_t n; // Number of dataspace elements
         n = sid1.getSimpleExtentNpoints();
-        verify_val(static_cast<long>(n), 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+        verify_val(static_cast<long>(n), 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__, "n");
 
         int rank; // Logical rank of dataspace
         rank = sid1.getSimpleExtentNdims();
-        verify_val(rank, SPACE3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
+        verify_val(rank, SPACE3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__, "rank");
 
         // Retrieves dimension size of dataspace sid1 and verify it
         int     ndims;    // Number of dimensions
         hsize_t tdims[4]; // Dimension array to test with
         ndims = sid1.getSimpleExtentDims(tdims);
-        verify_val(ndims, 0, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        verify_val(ndims, 0, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__, "ndims");
 
         // Verify extent type
         H5S_class_t ext_type; // Extent type
         ext_type = sid1.getSimpleExtentType();
         verify_val(static_cast<long>(ext_type), static_cast<long>(H5S_SCALAR),
-                   "DataSpace::getSimpleExtentType", __LINE__, __FILE__);
+                   "DataSpace::getSimpleExtentType", __LINE__, __FILE__, "ext_type");
 
         // Create and write a dataset
         DataSet dataset = fid1.createDataSet("Dataset1", PredType::NATIVE_UINT, sid1);
@@ -279,19 +277,19 @@ test_h5s_scalar_read()
 
         // Get the number of dataspace elements
         hssize_t n = sid1.getSimpleExtentNpoints();
-        verify_val(static_cast<long>(n), 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+        verify_val(static_cast<long>(n), 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__, "n");
 
         // Get the logical rank of the dataspace
         int ndims = sid1.getSimpleExtentNdims();
-        verify_val(ndims, SPACE3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
+        verify_val(ndims, SPACE3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__, "ndims");
 
         ndims = sid1.getSimpleExtentDims(tdims);
-        verify_val(ndims, 0, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        verify_val(ndims, 0, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__, "ndims");
 
         // Read data back and verify it
         unsigned rdata; // Scalar data read in
         dataset.read(&rdata, PredType::NATIVE_UINT);
-        verify_val(rdata, space3_data, "DataSet::read", __LINE__, __FILE__);
+        verify_val(rdata, space3_data, "DataSet::read", __LINE__, __FILE__, "rdata");
 
         PASSED();
     } // end of try block
@@ -325,7 +323,7 @@ test_h5s_null()
 
         hssize_t n; // Number of dataspace elements
         n = sid1.getSimpleExtentNpoints();
-        verify_val(static_cast<long>(n), 0, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+        verify_val(static_cast<long>(n), 0, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__, "n");
 
         // Create a dataset
         DataSet dataset = fid1.createDataSet("Dataset1", PredType::NATIVE_UINT, sid1);
@@ -335,7 +333,7 @@ test_h5s_null()
 
         // Read the data.  Make sure no change to the buffer
         dataset.read(&space5_data, PredType::NATIVE_INT);
-        verify_val(space5_data, 7, "DataSet::read", __LINE__, __FILE__);
+        verify_val(space5_data, 7, "DataSet::read", __LINE__, __FILE__, "space5_data");
 
         PASSED();
     } // end of try block
@@ -379,15 +377,15 @@ test_h5s_compound_scalar_write()
 
         // Get the number of dataspace elements
         hssize_t n = sid1.getSimpleExtentNpoints();
-        verify_val(static_cast<long>(n), 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+        verify_val(static_cast<long>(n), 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__, "n");
 
         // Get the logical rank of the dataspace
         int ndims = sid1.getSimpleExtentNdims();
-        verify_val(ndims, SPACE3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
+        verify_val(ndims, SPACE3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__, "ndims");
 
         hsize_t tdims[4]; // Dimension array to test with
         ndims = sid1.getSimpleExtentDims(tdims);
-        verify_val(ndims, 0, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        verify_val(ndims, 0, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__, "ndims");
 
         // Create and write a dataset
         DataSet dataset = fid1.createDataSet("Dataset1", tid1, sid1);
@@ -428,14 +426,14 @@ test_h5s_compound_scalar_read()
 
         // Get the number of dataspace elements
         hssize_t n = sid1.getSimpleExtentNpoints();
-        verify_val(static_cast<long>(n), 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+        verify_val(static_cast<long>(n), 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__, "n");
 
         // Get the logical rank of the dataspace
         int ndims = sid1.getSimpleExtentNdims();
-        verify_val(ndims, SPACE3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
+        verify_val(ndims, SPACE3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__, "ndims");
 
         ndims = sid1.getSimpleExtentDims(tdims);
-        verify_val(ndims, 0, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        verify_val(ndims, 0, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__, "ndims");
 
         // Get the datatype of this dataset.
         CompType type(dataset);
@@ -445,15 +443,14 @@ test_h5s_compound_scalar_read()
 
         // Verify read data
         if (memcmp(&space4_data, &rdata, sizeof(struct space4_struct)) != 0) {
-            cerr << "scalar data different: space4_data.c1=" << space4_data.c1
-                 << ", read_data4.c1=" << rdata.c1 << endl;
-            cerr << "scalar data different: space4_data.u=" << space4_data.u << ", read_data4.u=" << rdata.u
-                 << endl;
-            cerr << "scalar data different: space4_data.f=" << space4_data.f << ", read_data4.f=" << rdata.f
-                 << endl;
-            TestErrPrintf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n", space4_data.c1,
-                          rdata.c2);
-        } // end if
+
+            verify_val(rdata.c1, space4_data.c1, "DataSet::read", __LINE__, __FILE__, "rdata.c1");
+            verify_val(rdata.u, space4_data.u, "DataSet::read", __LINE__, __FILE__, "rdata.u");
+            if (abs(rdata.f - space4_data.f) > FLT_EPSILON)
+                display_difference(rdata.f, space4_data.f, "DataSet::read", __LINE__, __FILE__, "rdata.f");
+            verify_val(rdata.c2, space4_data.c2, "DataSet::read", __LINE__, __FILE__, "rdata.c2");
+        }
+
         PASSED();
     } // end of try block
     catch (Exception &E) {
@@ -473,9 +470,6 @@ test_h5s_compound_scalar_read()
 extern "C" void
 test_h5s()
 {
-    // Output message about test being performed
-    MESSAGE(5, ("Testing Dataspaces\n"));
-
     test_h5s_basic();                 // Test basic H5S code
     test_h5s_scalar_write();          // Test scalar H5S writing code
     test_h5s_scalar_read();           // Test scalar H5S reading code

@@ -23,7 +23,6 @@ using std::endl;
 #include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
-#include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
 
 #ifdef H5_HAVE_FILTER_SZIP
@@ -146,7 +145,7 @@ test_szip_filter(H5File &file1)
     // Output message about test being performed
     SUBTEST("szip filter (with encoder)");
 
-    if (h5_szip_can_encode() == 1) {
+    if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
         char *tconv_buf = new char[1000];
         auto  points    = new int[DSET_DIM1][DSET_DIM2];
         auto  check     = new int[DSET_DIM1][DSET_DIM2];
@@ -229,11 +228,8 @@ const H5std_string FILE1("tfilters.h5");
 extern "C" void
 test_filters()
 {
-    // Output message about test being performed
-    MESSAGE(5, ("Testing Various Filters\n"));
-
     hid_t fapl_id;
-    fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
+    fapl_id = h5tools_get_new_fapl(H5P_DEFAULT); // in tools/lib
 
     try {
         // Use the file access template id to create a file access prop. list
