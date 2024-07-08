@@ -191,7 +191,8 @@ test_detect_type_class()
 
         // Native integers should be in the integer class
         in_class = DataType::detectClass(PredType::NATIVE_INT, H5T_INTEGER);
-        verify_val(in_class, true, "DataType::detectClass() with H5T_INTEGER", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, true, "DataType::detectClass() with H5T_INTEGER", __LINE__, __FILE__,
+                   "in_class");
 
         // Native integers should _not_ be in other classes
         in_class = DataType::detectClass(PredType::NATIVE_INT, H5T_FLOAT);
@@ -215,10 +216,12 @@ test_detect_type_class()
 
         // Make certain that atom_cmpd is a compound type,
         in_class = atom_cmpd.detectClass(H5T_COMPOUND);
-        verify_val(in_class, true, "CompType::detectClass() with H5T_COMPOUND", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, true, "CompType::detectClass() with H5T_COMPOUND", __LINE__, __FILE__,
+                   "in_class");
         // and that it contains a field of type integer
         in_class = atom_cmpd.detectClass(H5T_INTEGER);
-        verify_val(in_class, true, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, true, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__,
+                   "in_class");
         // and a field of type float,
         in_class = atom_cmpd.detectClass(H5T_FLOAT);
         verify_val(in_class, true, "CompType::detectClass() with H5T_FLOAT", __LINE__, __FILE__, "in_class");
@@ -239,7 +242,8 @@ test_detect_type_class()
         in_class = atom_arr.detectClass(H5T_ARRAY);
         verify_val(in_class, true, "CompType::detectClass() with H5T_ARRAY", __LINE__, __FILE__, "in_class");
         in_class = atom_arr.detectClass(H5T_REFERENCE);
-        verify_val(in_class, true, "CompType::detectClass() with H5T_REFERENCE", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, true, "CompType::detectClass() with H5T_REFERENCE", __LINE__, __FILE__,
+                   "in_class");
 
         // Make certain that an incorrect class is not detected
         in_class = atom_arr.detectClass(H5T_VLEN);
@@ -247,7 +251,8 @@ test_detect_type_class()
         in_class = atom_arr.detectClass(H5T_FLOAT);
         verify_val(in_class, false, "CompType::detectClass() with H5T_FLOAT", __LINE__, __FILE__, "in_class");
         in_class = atom_arr.detectClass(H5T_INTEGER);
-        verify_val(in_class, false, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, false, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__,
+                   "in_class");
 
         /*
          *  Test class of VL datatype
@@ -264,9 +269,11 @@ test_detect_type_class()
 
         // Make certain that an incorrect class is not detected
         in_class = atom_vlf.detectClass(H5T_COMPOUND);
-        verify_val(in_class, false, "CompType::detectClass() with H5T_COMPOUND", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, false, "CompType::detectClass() with H5T_COMPOUND", __LINE__, __FILE__,
+                   "in_class");
         in_class = atom_vlf.detectClass(H5T_INTEGER);
-        verify_val(in_class, false, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, false, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__,
+                   "in_class");
 
         /*
          *  Test class of VL datatype
@@ -280,11 +287,13 @@ test_detect_type_class()
         in_class = atom_vlc.detectClass(H5T_VLEN);
         verify_val(in_class, true, "CompType::detectClass() with H5T_VLEN", __LINE__, __FILE__, "in_class");
         in_class = atom_vlc.detectClass(H5T_INTEGER);
-        verify_val(in_class, true, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, true, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__,
+                   "in_class");
 
         // Make certain that an incorrect class is not detected
         in_class = atom_vlc.detectClass(H5T_STRING);
-        verify_val(in_class, false, "CompType::detectClass() with H5T_STRING", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, false, "CompType::detectClass() with H5T_STRING", __LINE__, __FILE__,
+                   "in_class");
 
         /*
          *  Test class of VL string datatype
@@ -316,13 +325,16 @@ test_detect_type_class()
 
         // Make certain that the correct classes can be detected
         in_class = cplx_cmpd.detectClass(H5T_COMPOUND);
-        verify_val(in_class, true, "CompType::detectClass() with H5T_COMPOUND", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, true, "CompType::detectClass() with H5T_COMPOUND", __LINE__, __FILE__,
+                   "in_class");
         in_class = cplx_cmpd.detectClass(H5T_ARRAY);
         verify_val(in_class, true, "CompType::detectClass() with H5T_ARRAY", __LINE__, __FILE__, "in_class");
         in_class = cplx_cmpd.detectClass(H5T_REFERENCE);
-        verify_val(in_class, true, "CompType::detectClass() with H5T_REFERENCE", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, true, "CompType::detectClass() with H5T_REFERENCE", __LINE__, __FILE__,
+                   "in_class");
         in_class = cplx_cmpd.detectClass(H5T_INTEGER);
-        verify_val(in_class, true, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, true, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__,
+                   "in_class");
         in_class = cplx_cmpd.detectClass(H5T_FLOAT);
         verify_val(in_class, true, "CompType::detectClass() with H5T_FLOAT", __LINE__, __FILE__, "in_class");
         in_class = cplx_cmpd.detectClass(H5T_STRING);
@@ -362,7 +374,8 @@ test_vltype()
         bool in_class = vltype.detectClass(H5T_VLEN);
         verify_val(in_class, true, "VarLenType::detectClass() with H5T_VLEN", __LINE__, __FILE__, "in_class");
         in_class = vltype.detectClass(H5T_INTEGER);
-        verify_val(in_class, true, "VarLenType::detectClass() with H5T_INTEGER", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, true, "VarLenType::detectClass() with H5T_INTEGER", __LINE__, __FILE__,
+                   "in_class");
 
         // Test copy constructor
         VarLenType vltype2(vltype);
@@ -372,11 +385,14 @@ test_vltype()
         verify_val(is_valid, true, "isValid on vltype2", __LINE__, __FILE__, "in_class");
 
         in_class = vltype2.detectClass(H5T_VLEN);
-        verify_val(in_class, true, "VarLenType::detectClass() with H5T_VLEN for vltype2", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, true, "VarLenType::detectClass() with H5T_VLEN for vltype2", __LINE__, __FILE__,
+                   "in_class");
         in_class = vltype2.detectClass(H5T_INTEGER);
-        verify_val(in_class, true, "VarLenType::detectClass() with H5T_INTEGER for vltype2", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, true, "VarLenType::detectClass() with H5T_INTEGER for vltype2", __LINE__,
+                   __FILE__, "in_class");
         in_class = vltype2.detectClass(H5T_FLOAT);
-        verify_val(in_class, false, "VarLenType::detectClass() with H5T_FLOAT for vltype2", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, false, "VarLenType::detectClass() with H5T_FLOAT for vltype2", __LINE__,
+                   __FILE__, "in_class");
 
         // Create a new file to use in this test
         H5File file(FILENAME[3], H5F_ACC_TRUNC);
@@ -399,9 +415,11 @@ test_vltype()
         // Trying to detect H5T_VLEN and H5T_FLOAT classes on this type,
         // should both be true
         in_class = vltype2.detectClass(H5T_VLEN);
-        verify_val(in_class, true, "VarLenType::detectClass() with H5T_VLEN for vltype2", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, true, "VarLenType::detectClass() with H5T_VLEN for vltype2", __LINE__, __FILE__,
+                   "in_class");
         in_class = first_vlt_again.detectClass(H5T_FLOAT);
-        verify_val(in_class, true, "VarLenType::detectClass() with H5T_FLOAT for first_vlt_again", __LINE__, __FILE__, "in_class");
+        verify_val(in_class, true, "VarLenType::detectClass() with H5T_FLOAT for first_vlt_again", __LINE__,
+                   __FILE__, "in_class");
 
         PASSED();
     } // end of try block
@@ -818,14 +836,18 @@ test_encode_decode()
         verify_val(cmptyp == *decoded_cmp_ptr, true, "DataType::decode", __LINE__, __FILE__, "cmptyp");
 
         // Verify again via querying member number and member index by name.
-        verify_val(decoded_cmp_ptr->getNmembers(), 4, "DataType::decode", __LINE__, __FILE__, "decoded_cmp_ptr's number of members");
-        verify_val(decoded_cmp_ptr->getMemberIndex("c"), 2, "DataType::decode", __LINE__, __FILE__, "Member index of 'c'");
+        verify_val(decoded_cmp_ptr->getNmembers(), 4, "DataType::decode", __LINE__, __FILE__,
+                   "decoded_cmp_ptr's number of members");
+        verify_val(decoded_cmp_ptr->getMemberIndex("c"), 2, "DataType::decode", __LINE__, __FILE__,
+                   "Member index of 'c'");
 
         // Create a CompType instance from the pointer and verify it
         CompType cmptyp_clone(*decoded_cmp_ptr);
         verify_val(cmptyp == cmptyp_clone, true, "DataType::decode", __LINE__, __FILE__, "cmptyp");
-        verify_val(cmptyp_clone.getNmembers(), 4, "DataType::decode", __LINE__, __FILE__, "(cmptyp_clone's number of members");
-        verify_val(cmptyp_clone.getMemberIndex("c"), 2, "DataType::decode", __LINE__, __FILE__, "Member index of 'c'");
+        verify_val(cmptyp_clone.getNmembers(), 4, "DataType::decode", __LINE__, __FILE__,
+                   "(cmptyp_clone's number of members");
+        verify_val(cmptyp_clone.getMemberIndex("c"), 2, "DataType::decode", __LINE__, __FILE__,
+                   "Member index of 'c'");
 
         delete decoded_cmp_ptr;
 
@@ -860,14 +882,18 @@ test_encode_decode()
         verify_val(enumtyp == *decoded_enum_ptr, true, "DataType::decode", __LINE__, __FILE__, "enumtyp");
 
         // Verify again via querying member number and member index by name.
-        verify_val(decoded_enum_ptr->getNmembers(), 5, "DataType::decode", __LINE__, __FILE__, "decoded_enum_ptr's number of members");
-        verify_val(decoded_enum_ptr->getMemberIndex("GREEN"), 1, "DataType::decode", __LINE__, __FILE__, "Member index of GREEN");
+        verify_val(decoded_enum_ptr->getNmembers(), 5, "DataType::decode", __LINE__, __FILE__,
+                   "decoded_enum_ptr's number of members");
+        verify_val(decoded_enum_ptr->getMemberIndex("GREEN"), 1, "DataType::decode", __LINE__, __FILE__,
+                   "Member index of GREEN");
 
         // Create a EnumType instance from the pointer and verify it
         EnumType enumtyp_clone(*decoded_enum_ptr);
         verify_val(enumtyp == enumtyp_clone, true, "DataType::decode", __LINE__, __FILE__, "enumtyp");
-        verify_val(enumtyp_clone.getNmembers(), 5, "DataType::decode", __LINE__, __FILE__, "enumtyp_clone's number of members");
-        verify_val(enumtyp_clone.getMemberIndex("GREEN"), 1, "DataType::decode", __LINE__, __FILE__, "Member index of GREEN");
+        verify_val(enumtyp_clone.getNmembers(), 5, "DataType::decode", __LINE__, __FILE__,
+                   "enumtyp_clone's number of members");
+        verify_val(enumtyp_clone.getMemberIndex("GREEN"), 1, "DataType::decode", __LINE__, __FILE__,
+                   "Member index of GREEN");
 
         delete decoded_enum_ptr;
 
@@ -889,7 +915,8 @@ test_encode_decode()
         StrType *decoded_str_ptr(static_cast<StrType *>(vlsttyp.decode()));
 
         verify_val(vlsttyp == *decoded_str_ptr, true, "DataType::decode", __LINE__, __FILE__, "vlsttyp");
-        verify_val(decoded_str_ptr->isVariableStr(), true, "DataType::decode", __LINE__, __FILE__, "decoded_str_ptr being variable-len string");
+        verify_val(decoded_str_ptr->isVariableStr(), true, "DataType::decode", __LINE__, __FILE__,
+                   "decoded_str_ptr being variable-len string");
 
         delete decoded_str_ptr;
 
@@ -901,7 +928,8 @@ test_encode_decode()
         // Create a StrType instance from the DataType object and verify it
         StrType decoded_vlsttyp(decoded_vlstr_ptr->getId());
         verify_val(vlsttyp == decoded_vlsttyp, true, "DataType::decode", __LINE__, __FILE__, "vlsttyp");
-        verify_val(decoded_vlsttyp.isVariableStr(), true, "DataType::decode", __LINE__, __FILE__, "decoded_vlsttyp being variable-len string");
+        verify_val(decoded_vlsttyp.isVariableStr(), true, "DataType::decode", __LINE__, __FILE__,
+                   "decoded_vlsttyp being variable-len string");
 
         delete decoded_vlstr_ptr;
 
@@ -935,7 +963,8 @@ test_encode_decode()
         // Create a ArrayType instance from the decoded pointer and verify it
         ArrayType decoded_arrtyp(decoded_dt_ptr->getId());
         verify_val(arrtyp == decoded_arrtyp, true, "DataType::decode", __LINE__, __FILE__, "arrtyp");
-        verify_val(decoded_arrtyp.getArrayNDims(), ARRAY1_RANK, "DataType::decode", __LINE__, __FILE__, "decoded_arrtyp's number of dimensions");
+        verify_val(decoded_arrtyp.getArrayNDims(), ARRAY1_RANK, "DataType::decode", __LINE__, __FILE__,
+                   "decoded_arrtyp's number of dimensions");
 
         delete decoded_dt_ptr;
 
@@ -983,7 +1012,8 @@ test_encode_decode()
 
         // H5std_string norm_string;
         // H5T_norm_t mant_norm = decoded_flttyp.getNorm(norm_string);
-        // verify_val(decoded_flttyp.isVariableStr(), true, "DataType::decode", __LINE__, __FILE__, "decoded_flttyp being variable-len string");
+        // verify_val(decoded_flttyp.isVariableStr(), true, "DataType::decode", __LINE__, __FILE__,
+        // "decoded_flttyp being variable-len string");
 
         delete decoded_flt_ptr;
 

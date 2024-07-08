@@ -683,7 +683,8 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create, H5F
         H5O_native_info_t ninfo;
         memset(&ninfo, 0, sizeof(ninfo));
         file.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
-        verify_val(ninfo.hdr.version, oh_vers_create, "H5File::getNativeObjinfo", __LINE__, __FILE__, "ninfo.hdr.version");
+        verify_val(ninfo.hdr.version, oh_vers_create, "H5File::getNativeObjinfo", __LINE__, __FILE__,
+                   "ninfo.hdr.version");
 
         /*
          * Reopen the file and make sure the root group still has the correct
@@ -710,7 +711,8 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create, H5F
         // Verify object header version another way
         memset(&ninfo, 0, sizeof(ninfo));
         group.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
-        verify_val(ninfo.hdr.version, oh_vers_mod, "Group::getNativeObjinfo", __LINE__, __FILE__, "ninfo.hdr.version");
+        verify_val(ninfo.hdr.version, oh_vers_mod, "Group::getNativeObjinfo", __LINE__, __FILE__,
+                   "ninfo.hdr.version");
 
         group.close(); // close "/G1"
 
@@ -852,9 +854,12 @@ test_file_info()
         // Get the file's version information.
         H5F_info2_t finfo;
         tempfile.getFileInfo(finfo);
-        verify_val(static_cast<long>(finfo.super.version), 0, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.super.version");
-        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.free.version");
-        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.sohm.version");
+        verify_val(static_cast<long>(finfo.super.version), 0, "H5File::getFileInfo", __LINE__, __FILE__,
+                   "finfo.super.version");
+        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__,
+                   "finfo.free.version");
+        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__,
+                   "finfo.sohm.version");
 
         // Close the file.
         tempfile.close();
@@ -869,12 +874,13 @@ test_file_info()
         verify_val(static_cast<long>(out_strategy), static_cast<long>(H5F_FSPACE_STRATEGY_FSM_AGGR),
                    "H5File::getFileInfo", __LINE__, __FILE__, "out_strategy");
         verify_val(out_persist, FALSE, "H5File::getFileInfo", __LINE__, __FILE__, "out_persist");
-        verify_val(static_cast<long>(out_threshold), 1, "H5File::getFileInfo", __LINE__, __FILE__, "out_threshold");
+        verify_val(static_cast<long>(out_threshold), 1, "H5File::getFileInfo", __LINE__, __FILE__,
+                   "out_threshold");
 
         /* Retrieve file space page size */
         hsize_t out_fsp_psize = fcpl.getFileSpacePagesize();
-        verify_val(out_fsp_psize, FSP_SIZE_DEF, "FileCreatPropList::getFileSpacePagesize", __LINE__,
-                   __FILE__, "out_fsp_psize");
+        verify_val(out_fsp_psize, FSP_SIZE_DEF, "FileCreatPropList::getFileSpacePagesize", __LINE__, __FILE__,
+                   "out_fsp_psize");
 
         // Set various file information.
         fcpl.setUserblock(F2_USERBLOCK_SIZE);
@@ -900,9 +906,12 @@ test_file_info()
 
         // Get the file's version information.
         file7.getFileInfo(finfo);
-        verify_val(static_cast<long>(finfo.super.version), 2, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.super.version");
-        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.free.version");
-        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.sohm.version");
+        verify_val(static_cast<long>(finfo.super.version), 2, "H5File::getFileInfo", __LINE__, __FILE__,
+                   "finfo.super.version");
+        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__,
+                   "finfo.free.version");
+        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__,
+                   "finfo.sohm.version");
 
         // Close the file.
         file7.close();
@@ -915,13 +924,17 @@ test_file_info()
 
         // Get the file's version information.
         file7.getFileInfo(finfo);
-        verify_val(static_cast<long>(finfo.super.version), 2, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.super.version");
-        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.free.version");
-        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__, "finfo.sohm.version");
+        verify_val(static_cast<long>(finfo.super.version), 2, "H5File::getFileInfo", __LINE__, __FILE__,
+                   "finfo.super.version");
+        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__,
+                   "finfo.free.version");
+        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__,
+                   "finfo.sohm.version");
 
         // Retrieve the property values & check them.
         hsize_t userblock = fcpl2.getUserblock();
-        verify_val(userblock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__, "userblock");
+        verify_val(userblock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__,
+                   "userblock");
 
         size_t off_size = 0, len_size = 0;
         fcpl2.getSizes(off_size, len_size);
@@ -945,11 +958,14 @@ test_file_info()
         fcpl2.getFileSpaceStrategy(out_strategy, out_persist, out_threshold);
         verify_val(static_cast<long>(out_strategy), static_cast<long>(strategy),
                    "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__, "out_strategy");
-        verify_val(out_persist, persist, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__, "out_persist");
-        verify_val(out_threshold, threshold, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__, "out_threshold");
+        verify_val(out_persist, persist, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__,
+                   "out_persist");
+        verify_val(out_threshold, threshold, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__,
+                   "out_threshold");
 
         out_fsp_psize = fcpl2.getFileSpacePagesize();
-        verify_val(out_fsp_psize, FSP_SIZE512, "FileCreatPropList::getFileSpacePagesize", __LINE__, __FILE__, "out_fsp_psize");
+        verify_val(out_fsp_psize, FSP_SIZE512, "FileCreatPropList::getFileSpacePagesize", __LINE__, __FILE__,
+                   "out_fsp_psize");
 
         PASSED();
     } // end of try block

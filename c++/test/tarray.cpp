@@ -31,7 +31,7 @@ const int          SPACE1_RANK = 1;
 const int          SPACE1_DIM1 = 4;
 const int          ARRAY1_RANK = 1;
 const int          ARRAY1_DIM1 = 4;
-const int          VAR_LEN = 80;
+const int          VAR_LEN     = 80;
 
 typedef enum flt_t { FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE, FLT_OTHER } flt_t;
 
@@ -69,17 +69,17 @@ test_array_compound_array()
     s1_t        rdata[SPACE1_DIM1][ARRAY1_DIM1]; // Information read in
     hsize_t     sdims1[] = {SPACE1_DIM1};
     hsize_t     tdims1[] = {ARRAY1_DIM1};
-    int         nmemb;            // Number of compound members
-    int         i, j, k;          // counting variables
-    H5T_class_t mclass;           // Datatype class for field
+    int         nmemb;   // Number of compound members
+    int         i, j, k; // counting variables
+    H5T_class_t mclass;  // Datatype class for field
 
     // Initialize array data to write
     for (i = 0; i < SPACE1_DIM1; i++)
         for (j = 0; j < ARRAY1_DIM1; j++) {
             wdata[i][j].i = static_cast<int>(i * 10 + j);
             for (k = 0; k < ARRAY1_DIM1; k++) {
-                float temp = static_cast<float>(i) * 10.0F + static_cast<float>(j) * 2.5F +
-                             static_cast<float>(k);
+                float temp =
+                    static_cast<float>(i) * 10.0F + static_cast<float>(j) * 2.5F + static_cast<float>(k);
                 wdata[i][j].f[k] = temp;
             }
         } // end for
@@ -135,7 +135,8 @@ test_array_compound_array()
 
         // Get and verify the type's name
         H5std_string type_name = named_type.getObjName();
-        verify_val(type_name, ARRAYTYPE_NAME, "DataType::getObjName tests constructor", __LINE__, __FILE__, "type_name");
+        verify_val(type_name, ARRAYTYPE_NAME, "DataType::getObjName tests constructor", __LINE__, __FILE__,
+                   "type_name");
         named_type.close();
 
         // Close all
@@ -362,16 +363,16 @@ test_array_info()
     s1_t        wdata[SPACE1_DIM1][ARRAY1_DIM1]; // Information to write
     hsize_t     sdims1[] = {SPACE1_DIM1};
     hsize_t     tdims1[] = {ARRAY1_DIM1};
-    int         i, j, k;   // counting variables
-    H5T_class_t mclass;    // Datatype class for field
+    int         i, j, k; // counting variables
+    H5T_class_t mclass;  // Datatype class for field
 
     // Initialize array data to write
     for (i = 0; i < SPACE1_DIM1; i++)
         for (j = 0; j < ARRAY1_DIM1; j++) {
             wdata[i][j].i = static_cast<int>(i * 10 + j);
             for (k = 0; k < ARRAY1_DIM1; k++) {
-                float temp = static_cast<float>(i) * 10.0F + static_cast<float>(j) * 2.5F +
-                             static_cast<float>(k);
+                float temp =
+                    static_cast<float>(i) * 10.0F + static_cast<float>(j) * 2.5F + static_cast<float>(k);
                 wdata[i][j].f[k] = temp;
             }
         }

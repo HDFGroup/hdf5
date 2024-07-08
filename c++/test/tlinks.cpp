@@ -109,13 +109,16 @@ test_basic_links(hid_t fapl_id, hbool_t new_format)
         // Verify link values before closing the file
 
         H5std_string softlink_val = file.getLinkval("grp1/soft");
-        verify_val(softlink_val, "/dset1", "H5File::getLinkval grp1/soft", __LINE__, __FILE__, "softlink_val");
+        verify_val(softlink_val, "/dset1", "H5File::getLinkval grp1/soft", __LINE__, __FILE__,
+                   "softlink_val");
 
         H5std_string dngllink_val = file.getLinkval("grp1/dangle");
-        verify_val(dngllink_val, "foobar", "H5File::getLinkval grp1/dangle", __LINE__, __FILE__, "dngllink_val");
+        verify_val(dngllink_val, "foobar", "H5File::getLinkval grp1/dangle", __LINE__, __FILE__,
+                   "dngllink_val");
 
         H5std_string reclink_val = file.getLinkval("grp1/recursive");
-        verify_val(reclink_val, "/grp1/recursive", "H5File::getLinkval grp1/recursive", __LINE__, __FILE__, "reclink_val");
+        verify_val(reclink_val, "/grp1/recursive", "H5File::getLinkval grp1/recursive", __LINE__, __FILE__,
+                   "reclink_val");
 
     } // end of try block
     catch (Exception &E) {
@@ -140,10 +143,12 @@ test_basic_links(hid_t fapl_id, hbool_t new_format)
 
         // Verify link values
         H5std_string softlink_val = file.getLinkval("grp1/soft");
-        verify_val(softlink_val, "/dset1", "H5File::getLinkval grp1/soft", __LINE__, __FILE__, "softlink_val");
+        verify_val(softlink_val, "/dset1", "H5File::getLinkval grp1/soft", __LINE__, __FILE__,
+                   "softlink_val");
 
         H5std_string reclink_val = file.getLinkval("grp1/recursive");
-        verify_val(reclink_val, "/grp1/recursive", "H5File::getLinkval grp1/recursive", __LINE__, __FILE__, "reclink_val");
+        verify_val(reclink_val, "/grp1/recursive", "H5File::getLinkval grp1/recursive", __LINE__, __FILE__,
+                   "reclink_val");
 
         PASSED();
     } // end of try block

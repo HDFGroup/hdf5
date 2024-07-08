@@ -112,7 +112,8 @@ test_create(H5File &file)
         // Get and verify the comment from this dataset, using
         // H5std_string getComment(const H5std_string& name, <buf_size=0, by default>)
         H5std_string comment = file.getComment(DSET_DEFAULT_NAME);
-        verify_val(comment.c_str(), "This is a dataset", "DataSet::getComment", __LINE__, __FILE__, "comment");
+        verify_val(comment.c_str(), "This is a dataset", "DataSet::getComment", __LINE__, __FILE__,
+                   "comment");
 
         // Close the dataset when accessing is completed
         delete dataset;
@@ -1093,7 +1094,8 @@ test_getnativeinfo(H5File &file)
         H5O_native_info_t ninfo;
         memset(&ninfo, 0, sizeof(ninfo));
         dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
-        verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__, "nchunks");
+        verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__,
+                   "nchunks");
         dataset.close();
 
         // Open the dataset we created above and then close it.  This is one
@@ -1101,7 +1103,8 @@ test_getnativeinfo(H5File &file)
         dataset = file.openDataSet(DSET_DEFAULT_NAME);
         memset(&ninfo, 0, sizeof(ninfo));
         dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_ALL);
-        verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__, "nchunks");
+        verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__,
+                   "nchunks");
         dataset.close();
 
         PASSED();
@@ -1159,7 +1162,8 @@ test_chunk_cache(const FileAccPropList &fapl)
         // Set a link access property on dapl to verify property list inheritance
         dapl.setNumLinks(134);
         size_t nlinks = dapl.getNumLinks();
-        verify_val(static_cast<long>(nlinks), 134, "DSetAccPropList::getNumLinks", __LINE__, __FILE__, "nlinks");
+        verify_val(static_cast<long>(nlinks), 134, "DSetAccPropList::getNumLinks", __LINE__, __FILE__,
+                   "nlinks");
 
         // Make a copy of the external fapl
         FileAccPropList fapl_local(fapl);
@@ -1379,7 +1383,7 @@ test_read_string(H5File &file)
     try {
         const H5std_string  DATASET_NAME("test_read_string");
         const unsigned long NX           = 8;
-        const char          DS_DATA[NX]     = {'a', 0, 0, 0, 0, 0, 0, 'Z'};
+        const char          DS_DATA[NX]  = {'a', 0, 0, 0, 0, 0, 0, 'Z'};
         const H5std_string  EXPECTED_STR = H5std_string(DS_DATA, NX);
         H5std_string        str;
 
@@ -1454,8 +1458,8 @@ extern "C" void
 test_dset()
 {
     hid_t fapl_id;
-    fapl_id = h5tools_get_new_fapl(H5P_DEFAULT); // in tools/lib
-    int nerrors = 0;               // keep track of number of failures occur
+    fapl_id     = h5tools_get_new_fapl(H5P_DEFAULT); // in tools/lib
+    int nerrors = 0;                                 // keep track of number of failures occur
 
     try {
         // Use the file access template id to create a file access prop.

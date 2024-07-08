@@ -27,27 +27,26 @@ using namespace H5;
 using std::cerr;
 using std::endl;
 
-extern size_t   n_tests_passed_g;
-extern size_t   n_tests_failed_g;
-extern size_t   n_tests_skipped_g;
+extern size_t n_tests_passed_g;
+extern size_t n_tests_failed_g;
+extern size_t n_tests_skipped_g;
 
 /* Number of seconds to wait before killing a test (requires alarm(2)) */
 #define H5_ALARM_SEC 1200 /* default is 20 minutes */
 
 /* Routines for operating on the list of tests (for the "all in one" tests) */
-char       *h5cpp_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
-void        TestUsage(void);
-void        AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void),
-                               const char *TheDescr);
-void        TestInfo(const char *ProgName);
-void        TestParseCmdLine(int argc, char *argv[]);
-void        PerformTests(void);
-void        TestSummary(void);
-void        TestCleanup(void);
-void        TestShutdown(void);
- /* void        TestInit(const char *ProgName, void (*private_usage)(void),
-                                int (*private_parser)(int ac, char *av[]));
- */ 
+char *h5cpp_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
+void  TestUsage(void);
+void  AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const char *TheDescr);
+void  TestInfo(const char *ProgName);
+void  TestParseCmdLine(int argc, char *argv[]);
+void  PerformTests(void);
+void  TestSummary(void);
+void  TestCleanup(void);
+void  TestShutdown(void);
+/* void        TestInit(const char *ProgName, void (*private_usage)(void),
+                               int (*private_parser)(int ac, char *av[]));
+*/
 int         GetTestSummary(void);
 int         GetTestCleanup(void);
 int         SetTestNoCleanup(void);
@@ -56,7 +55,7 @@ int         SetTestExpress(int newval);
 int         GetTestNumErrs(void);
 void        IncTestNumErrs(void);
 const void *GetTestParameters(void);
-const char    *h5cpp_get_test_driver_name(void);
+const char *h5cpp_get_test_driver_name(void);
 void        TestAlarmOn(void);
 void        TestAlarmOff(void);
 
@@ -177,19 +176,21 @@ void MESSAGE(const char *msg);
 void MESSAGE(const char *msg, const char *desc, const char *name);
 
 // Verifies
-void verify_val(const char *x, const char *value, const char *where, int line, const char *file_name, const char *var);
-void verify_val(const H5std_string& x, const H5std_string& value, const char *where, int line, const char *file_name, const char *var);
+void verify_val(const char *x, const char *value, const char *where, int line, const char *file_name,
+                const char *var);
+void verify_val(const H5std_string &x, const H5std_string &value, const char *where, int line,
+                const char *file_name, const char *var);
 
 template <class Type1, class Type2>
 void
-verify_val(Type1 x, Type2 value, const char *where, int line, const char *file_name, const
- char *var)
+verify_val(Type1 x, Type2 value, const char *where, int line, const char *file_name, const char *var)
 {
-   /* cerr << endl << "verify_val template" << endl;
- */ 
+    /* cerr << endl << "verify_val template" << endl;
+     */
     if (x != value) {
         cerr << endl;
-        cerr << "*** UNEXPECTED VALUE at line " << line << " from" << file_name << "::" << where << "(): " << var << " should be <" << value << ">, but is <" << x << ">" << endl;
+        cerr << "*** UNEXPECTED VALUE at line " << line << " from" << file_name << "::" << where
+             << "(): " << var << " should be <" << value << ">, but is <" << x << ">" << endl;
         IncTestNumErrs();
         throw TestFailedException(where, "");
     }
@@ -201,7 +202,8 @@ verify_val_noteq(Type1 x, Type2 value, const char *where, int line, const char *
 {
     if (x == value) {
         cerr << endl;
-        cerr << "*** UNEXPECTED VALUE at line " << line << " from " << file_name << "::" << where << "(): " << var << " should not be " << value << endl;
+        cerr << "*** UNEXPECTED VALUE at line " << line << " from " << file_name << "::" << where
+             << "(): " << var << " should not be " << value << endl;
         IncTestNumErrs();
         throw TestFailedException(where, "");
     }
@@ -212,7 +214,8 @@ void
 display_difference(Type1 x, Type2 value, const char *where, int line, const char *file_name, const char *var)
 {
     cerr << endl;
-    cerr << "*** UNEXPECTED VALUE at line " << line << " from" << file_name << "::" << where << "(): " << var << " should be " << value << ", but is " << x << endl;
+    cerr << "*** UNEXPECTED VALUE at line " << line << " from" << file_name << "::" << where << "(): " << var
+         << " should be " << value << ", but is " << x << endl;
     IncTestNumErrs();
     throw TestFailedException(where, "");
 }
@@ -289,6 +292,5 @@ void cleanup_array(void);
 void cleanup_genprop(void);
 void cleanup_misc(void);
 */
-
 
 #endif

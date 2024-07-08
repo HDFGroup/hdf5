@@ -311,7 +311,8 @@ test_reference_obj()
         // Check information in the referenced dataset
         sid1                = dset2.getSpace();
         hssize_t n_elements = sid1.getSimpleExtentNpoints();
-        verify_val(static_cast<long>(n_elements), 4, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__, "n_elements");
+        verify_val(static_cast<long>(n_elements), 4, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__,
+                   "n_elements");
 
         // Read from disk
         dset2.read(tbuf, PredType::NATIVE_UINT);
@@ -329,11 +330,13 @@ test_reference_obj()
         // Get group's comment using
         // H5std_string getComment(const char* name, <buf_size=0 by default>)
         H5std_string read_comment1 = group.getComment(".", 10);
-        verify_val(read_comment1.c_str(), write_comment, "Group::getComment", __LINE__, __FILE__, "read_comment1");
+        verify_val(read_comment1.c_str(), write_comment, "Group::getComment", __LINE__, __FILE__,
+                   "read_comment1");
 
         // Test with the old default value
         read_comment1 = group.getComment(".", 256);
-        verify_val(read_comment1.c_str(), write_comment, "Group::getComment", __LINE__, __FILE__, "read_comment1");
+        verify_val(read_comment1.c_str(), write_comment, "Group::getComment", __LINE__, __FILE__,
+                   "read_comment1");
 
         // Test that getComment handles failures gracefully, using
         // H5std_string getComment(const char* name, <buf_size=0 by default>)
@@ -669,8 +672,8 @@ test_reference_region_1D()
             // Get dataspace of dset3 the verify number of elements
             sid1  = dset3.getSpace();
             nelms = sid1.getSimpleExtentNpoints();
-            verify_val(static_cast<long>(nelms), 100, "DataSpace::getSimpleExtentNpoints", __LINE__,
-                       __FILE__, "nelms");
+            verify_val(static_cast<long>(nelms), 100, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__,
+                       "nelms");
         } // End of test DataSet::dereference
 
         { // Test DataSet constructor -by dereference
@@ -681,8 +684,8 @@ test_reference_region_1D()
             // Get dataspace of newds then verify number of elements
             sid1  = newds.getSpace();
             nelms = sid1.getSimpleExtentNpoints();
-            verify_val(static_cast<long>(nelms), 100, "DataSpace::getSimpleExtentNpoints", __LINE__,
-                       __FILE__, "nelms");
+            verify_val(static_cast<long>(nelms), 100, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__,
+                       "nelms");
 
             // Close objects for this mini test
             newds.close();
@@ -693,8 +696,8 @@ test_reference_region_1D()
         dset3.read(drbuf, PredType::STD_U8LE);
 
         for (tu8 = static_cast<uint8_t *>(drbuf), i = 0; i < SPACE3_DIM1; i++, tu8++)
-            verify_val(*tu8, static_cast<uint8_t>(i), "DataSpace::getSimpleExtentNpoints", __LINE__,
-                       __FILE__, "*tu8");
+            verify_val(*tu8, static_cast<uint8_t>(i), "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__,
+                       "*tu8");
 
         /*
          * Test getting the referenced region
@@ -723,39 +726,66 @@ test_reference_region_1D()
         verify_val(static_cast<long>(coords[1]), 3, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[1]");
         verify_val(static_cast<long>(coords[2]), 7, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[2]");
         verify_val(static_cast<long>(coords[3]), 8, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[3]");
-        verify_val(static_cast<long>(coords[4]), 12, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[4]");
-        verify_val(static_cast<long>(coords[5]), 13, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[5]");
-        verify_val(static_cast<long>(coords[6]), 17, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[6]");
-        verify_val(static_cast<long>(coords[7]), 18, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[7]");
-        verify_val(static_cast<long>(coords[8]), 22, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[8]");
-        verify_val(static_cast<long>(coords[9]), 23, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[9]");
-        verify_val(static_cast<long>(coords[10]), 27, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[10]");
-        verify_val(static_cast<long>(coords[11]), 28, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[11]");
-        verify_val(static_cast<long>(coords[12]), 32, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[12]");
-        verify_val(static_cast<long>(coords[13]), 33, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[13]");
-        verify_val(static_cast<long>(coords[14]), 37, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[14]");
-        verify_val(static_cast<long>(coords[15]), 38, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[15]");
-        verify_val(static_cast<long>(coords[16]), 42, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[16]");
-        verify_val(static_cast<long>(coords[17]), 43, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[17]");
-        verify_val(static_cast<long>(coords[18]), 47, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[18]");
-        verify_val(static_cast<long>(coords[19]), 48, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[19]");
-        verify_val(static_cast<long>(coords[20]), 52, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[20]");
-        verify_val(static_cast<long>(coords[21]), 53, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[21]");
-        verify_val(static_cast<long>(coords[22]), 57, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[22]");
-        verify_val(static_cast<long>(coords[23]), 58, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[23]");
-        verify_val(static_cast<long>(coords[24]), 62, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[24]");
-        verify_val(static_cast<long>(coords[25]), 63, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[25]");
-        verify_val(static_cast<long>(coords[26]), 67, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[26]");
-        verify_val(static_cast<long>(coords[27]), 68, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[27]");
-        verify_val(static_cast<long>(coords[28]), 72, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[28]");
-        verify_val(static_cast<long>(coords[29]), 73, "Hyperslab Coordinates", __LINE__, __FILE__, "coords[29]");
+        verify_val(static_cast<long>(coords[4]), 12, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[4]");
+        verify_val(static_cast<long>(coords[5]), 13, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[5]");
+        verify_val(static_cast<long>(coords[6]), 17, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[6]");
+        verify_val(static_cast<long>(coords[7]), 18, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[7]");
+        verify_val(static_cast<long>(coords[8]), 22, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[8]");
+        verify_val(static_cast<long>(coords[9]), 23, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[9]");
+        verify_val(static_cast<long>(coords[10]), 27, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[10]");
+        verify_val(static_cast<long>(coords[11]), 28, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[11]");
+        verify_val(static_cast<long>(coords[12]), 32, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[12]");
+        verify_val(static_cast<long>(coords[13]), 33, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[13]");
+        verify_val(static_cast<long>(coords[14]), 37, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[14]");
+        verify_val(static_cast<long>(coords[15]), 38, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[15]");
+        verify_val(static_cast<long>(coords[16]), 42, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[16]");
+        verify_val(static_cast<long>(coords[17]), 43, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[17]");
+        verify_val(static_cast<long>(coords[18]), 47, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[18]");
+        verify_val(static_cast<long>(coords[19]), 48, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[19]");
+        verify_val(static_cast<long>(coords[20]), 52, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[20]");
+        verify_val(static_cast<long>(coords[21]), 53, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[21]");
+        verify_val(static_cast<long>(coords[22]), 57, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[22]");
+        verify_val(static_cast<long>(coords[23]), 58, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[23]");
+        verify_val(static_cast<long>(coords[24]), 62, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[24]");
+        verify_val(static_cast<long>(coords[25]), 63, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[25]");
+        verify_val(static_cast<long>(coords[26]), 67, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[26]");
+        verify_val(static_cast<long>(coords[27]), 68, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[27]");
+        verify_val(static_cast<long>(coords[28]), 72, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[28]");
+        verify_val(static_cast<long>(coords[29]), 73, "Hyperslab Coordinates", __LINE__, __FILE__,
+                   "coords[29]");
 
         free(coords);
 
         // Check boundaries
         reg_sp.getSelectBounds(low, high);
         verify_val(static_cast<long>(low[0]), 2, "DataSpace::getSelectBounds", __LINE__, __FILE__, "low[0]");
-        verify_val(static_cast<long>(high[0]), 73, "DataSpace::getSelectBounds", __LINE__, __FILE__, "high[0]");
+        verify_val(static_cast<long>(high[0]), 73, "DataSpace::getSelectBounds", __LINE__, __FILE__,
+                   "high[0]");
 
         /* Close region space */
         reg_sp.close();
@@ -769,7 +799,8 @@ test_reference_region_1D()
 
         // Get and verify number of element points in the current selection
         hssize_t nelmspts = elm_sp.getSelectElemNpoints();
-        verify_val(static_cast<long>(nelmspts), 10, "DataSpace::getSelectNpoints", __LINE__, __FILE__, "nelmspts");
+        verify_val(static_cast<long>(nelmspts), 10, "DataSpace::getSelectNpoints", __LINE__, __FILE__,
+                   "nelmspts");
 
         /* Allocate space for the hyperslab blocks */
         coords =
@@ -795,7 +826,8 @@ test_reference_region_1D()
         // Check boundaries
         elm_sp.getSelectBounds(low, high);
         verify_val(static_cast<long>(low[0]), 3, "DataSpace::getSelectBounds", __LINE__, __FILE__, "low[0]");
-        verify_val(static_cast<long>(high[0]), 97, "DataSpace::getSelectBounds", __LINE__, __FILE__, "high[0]");
+        verify_val(static_cast<long>(high[0]), 97, "DataSpace::getSelectBounds", __LINE__, __FILE__,
+                   "high[0]");
 
         // Close element space
         elm_sp.close();

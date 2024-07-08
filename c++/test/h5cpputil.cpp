@@ -31,10 +31,10 @@ using namespace H5;
 static char srcdir_path[1024];
 static char srcdir_testpath[1024];
 
-bool subst_for_superblock = false;
-size_t   n_tests_passed_g  = 0;
-size_t   n_tests_failed_g  = 0;
-size_t   n_tests_skipped_g  = 0;
+bool   subst_for_superblock = false;
+size_t n_tests_passed_g     = 0;
+size_t n_tests_failed_g     = 0;
+size_t n_tests_skipped_g    = 0;
 
 /*
  * Definitions for the testing structure.
@@ -54,11 +54,11 @@ typedef struct TestStruct {
 /*
  * Variables used by testing framework.
  */
-static int         num_errs                         = 0;         /* Total number of errors during testing */
-static int         Summary                          = 0;         /* Show test summary. Default is no. */
-static int         CleanUp                          = 1;         /* Do cleanup or not. Default is yes. */
-static const char *TestProgName                     = NULL;
-vector<TestStruct> TestList;                                     /* Array of tests */
+static int         num_errs     = 0; /* Total number of errors during testing */
+static int         Summary      = 0; /* Show test summary. Default is no. */
+static int         CleanUp      = 1; /* Do cleanup or not. Default is yes. */
+static const char *TestProgName = NULL;
+vector<TestStruct> TestList; /* Array of tests */
 
 /*-------------------------------------------------------------------------
  * Function:    MESSAGE
@@ -131,8 +131,8 @@ issue_fail_msg(const char *where, int line, const char *file_name, const char *m
 {
     cerr << endl;
     cerr << ">>> FAILED in " << where << " at line " << line << " in " << file_name << " - " << message
-    << endl
-    << endl;
+         << endl
+         << endl;
 }
 
 /*-------------------------------------------------------------------------
@@ -149,9 +149,9 @@ issue_fail_msg(const char *where, int line, const char *file_name, const char *f
 {
     cerr << endl;
     cerr << ">>> FAILED in " << where << ": " << func_name << endl
-             << "    at line " << line << " in " << file_name << endl
-             << "    C library detail: " << message << endl
-             << endl;
+         << "    at line " << line << " in " << file_name << endl
+         << "    C library detail: " << message << endl
+         << endl;
 }
 
 /*-------------------------------------------------------------------------
@@ -213,7 +213,8 @@ check_values(const char *value, const char *msg, int line, const char *file_name
  */
 void
 display_error(const char *msg, const char *where, int line, const char *file_name)
-{                                                                                                   cerr << endl;
+{
+    cerr << endl;
     cerr << "*** ERROR at line " << line << " in " << file_name << "::" << where << "(): " << msg << endl;
     IncTestNumErrs();
     throw TestFailedException(where, "");
@@ -230,13 +231,15 @@ display_error(const char *msg, const char *where, int line, const char *file_nam
  *-------------------------------------------------------------------------
  */
 void
-verify_val(const char *x, const char *value, const char *where, int line, const char *file_name, const char *var)
+verify_val(const char *x, const char *value, const char *where, int line, const char *file_name,
+           const char *var)
 {
-   /* cerr << endl << "this verify_val const char *x and const char *value" << endl;
- */ 
+    /* cerr << endl << "this verify_val const char *x and const char *value" << endl;
+     */
     if (strcmp(x, value) != 0) {
         cerr << endl;
-        cerr << "*** UNEXPECTED VALUE at line " << line << " from " << file_name << "::" << where << "(): " << var << " should be " << value << endl;
+        cerr << "*** UNEXPECTED VALUE at line " << line << " from " << file_name << "::" << where
+             << "(): " << var << " should be " << value << endl;
         // IncTestNumErrs();
         throw TestFailedException(where, "");
     }
@@ -252,10 +255,11 @@ verify_val(const char *x, const char *value, const char *where, int line, const 
  *-------------------------------------------------------------------------
  */
 void
-verify_val(const H5std_string& x, const H5std_string& value, const char *where, int line, const char *file_name, const char *var)
+verify_val(const H5std_string &x, const H5std_string &value, const char *where, int line,
+           const char *file_name, const char *var)
 {
-   /* cerr << endl << "this verify_val const H5std_string& x and const H5std_string& value" << endl;
- */ 
+    /* cerr << endl << "this verify_val const H5std_string& x and const H5std_string& value" << endl;
+     */
     verify_val(x.c_str(), value.c_str(), where, line, file_name, var);
 }
 
@@ -329,7 +333,7 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
     }
 
     struct TestStruct aTest;
- 
+
     /* Set up test function */
     strcpy(aTest.Description, TheDescr);
     if (*TheName != '-') {
@@ -340,9 +344,9 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
         strcpy(aTest.Name, TheName + 1);
         aTest.SkipFlag = 1;
     }
-    aTest.Call       = TheCall;
-    aTest.Cleanup    = Cleanup;
-    aTest.NumErrors  = -1;
+    aTest.Call      = TheCall;
+    aTest.Cleanup   = Cleanup;
+    aTest.NumErrors = -1;
 
     // Insertion of an element using push_back()
     TestList.push_back(aTest);
@@ -365,9 +369,13 @@ TestUsage(void)
     cerr << "help      print out this information" << endl;
     cerr << endl << endl;
     cerr << "This program currently tests the following:" << endl << endl;
-    cerr << "Name" << "    " << "Description" << endl;
-    cerr << "----" << "    " << "-----------" << endl;
-    for (auto& aTest : TestList)
+    cerr << "Name"
+         << "    "
+         << "Description" << endl;
+    cerr << "----"
+         << "    "
+         << "-----------" << endl;
+    for (auto &aTest : TestList)
         cerr << aTest.Name << " -- " << aTest.Description << endl;
     cerr << endl;
 }
@@ -421,7 +429,7 @@ TestParseCmdLine(int argc, char *argv[])
 void
 PerformTests(void)
 {
-    for (auto& aTest : TestList) {
+    for (auto &aTest : TestList) {
         if (aTest.SkipFlag) {
             MESSAGE("Skipping", aTest.Description, aTest.Name);
         }
@@ -455,7 +463,7 @@ TestSummary(void)
     cerr << "Name of Test     Errors Description of Test" << endl;
     cerr << "---------------- ------ --------------------------------------" << endl;
 
-    for (auto& aTest : TestList) {
+    for (auto &aTest : TestList) {
         if (aTest.NumErrors == -1)
             cerr << aTest.Name << "N/A" << aTest.Description << endl;
         else {
@@ -474,7 +482,7 @@ TestCleanup(void)
     MESSAGE(("\nCleaning Up temp files...\n\n"));
 
     /* call individual cleanup routines in each source module */
-    for (auto& aTest : TestList)
+    for (auto &aTest : TestList)
         if (!aTest.SkipFlag && aTest.Cleanup != NULL)
             aTest.Cleanup();
 }
@@ -593,17 +601,17 @@ h5cpp_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
     /* Check HDF5_NOCLEANUP environment setting. */
     if (getenv(HDF5_NOCLEANUP))
-            SetTestNoCleanup();
+        SetTestNoCleanup();
 
     /* Check what prefix to use for test files. Process HDF5_PREFIX. */
     /*
      * First use the environment variable, then try the constant
      */
-        prefix = getenv("HDF5_PREFIX");
+    prefix = getenv("HDF5_PREFIX");
 
 #ifdef HDF5_PREFIX
-        if (!prefix)
-            prefix = HDF5_PREFIX;
+    if (!prefix)
+        prefix = HDF5_PREFIX;
 #endif /* HDF5_PREFIX */
 
     /* Prepend the prefix value to the base name */
@@ -625,7 +633,7 @@ h5cpp_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
                 memset(&buf, 0, sizeof(h5_stat_t));
                 if (HDstat(fullname, &buf) < 0)
                     /* The directory doesn't exist just yet */
-                    if (HDmkdir(fullname, static_cast<mode_t> (0755)) < 0 && errno != EEXIST)
+                    if (HDmkdir(fullname, static_cast<mode_t>(0755)) < 0 && errno != EEXIST)
                         /*
                          * We couldn't make the "/tmp/${USER,LOGIN}"
                          * subdirectory.  Default to PREFIX's original
@@ -642,7 +650,7 @@ h5cpp_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
             }
         }
         else {
-            if (snprintf(fullname, size, "%s/%s", prefix, base_name) == static_cast<int> (size))
+            if (snprintf(fullname, size, "%s/%s", prefix, base_name) == static_cast<int>(size))
                 /* Buffer is too small */
                 return NULL;
         }
@@ -714,10 +722,10 @@ TestAlarmOn(void)
 
     /* Get the alarm value from the environment variable, if set */
     if (env_val != NULL)
-        alarm_sec = static_cast<unsigned> (strtoul(env_val, (char **)NULL, 10));
+        alarm_sec = static_cast<unsigned>(strtoul(env_val, (char **)NULL, 10));
 
     /* Set the number of seconds before alarm goes off */
-    alarm(static_cast<unsigned> (alarm_sec));
+    alarm(static_cast<unsigned>(alarm_sec));
 #endif
 }
 
@@ -789,4 +797,3 @@ h5cpp_get_srcdir_filename(const char *filename)
     /* If not enough space, just return NULL */
     return NULL;
 } /* end h5cpp_get_srcdir_filename() */
-

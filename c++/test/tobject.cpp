@@ -82,7 +82,8 @@ test_get_objname()
         if (name_len > 4) {
             char *grp1_name = new char[5];
             name_len        = grp1.getObjName(grp1_name, 5);
-            verify_val(const_cast<const char *>(grp1_name), "/Top", "Group::getObjName", __LINE__, __FILE__, "grp1_name");
+            verify_val(const_cast<const char *>(grp1_name), "/Top", "Group::getObjName", __LINE__, __FILE__,
+                       "grp1_name");
             delete[] grp1_name;
         }
 
@@ -207,13 +208,15 @@ test_existance()
         // Check if a dataset exists given dataset as location with full path name
         DataSet dset1 = file.openDataSet(DSET_IN_FILE);
         exists        = dset1.nameExists("/Top Group/Dataset_in_Group_1");
-        verify_val(exists, TRUE, "Group::nameExists given dataset with full path name", __LINE__, __FILE__, "exists");
+        verify_val(exists, TRUE, "Group::nameExists given dataset with full path name", __LINE__, __FILE__,
+                   "exists");
 
         exists = grp1_2.nameExists(DSET_IN_GRP1);
         verify_val(exists, FALSE, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__, "exists");
         // Deprecated
         exists = dset1.exists("/Top Group/Dataset_in_Group_1");
-        verify_val(exists, TRUE, "Group::exists given dataset with full path name", __LINE__, __FILE__, "exists");
+        verify_val(exists, TRUE, "Group::exists given dataset with full path name", __LINE__, __FILE__,
+                   "exists");
         exists = grp1_2.exists(DSET_IN_GRP1);
         verify_val(exists, FALSE, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__, "exists");
 
@@ -259,7 +262,8 @@ test_get_objname_ontypes()
 
         // Get and verify its name
         H5std_string inttype_name = inttype.getObjName();
-        verify_val(inttype_name, "/INT type of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__, "inttype_name");
+        verify_val(inttype_name, "/INT type of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__,
+                   "inttype_name");
 
         // Close the type then open it again to test getting its name, but
         // with the constructor this time
@@ -268,7 +272,8 @@ test_get_objname_ontypes()
 
         // Get and verify its name
         H5std_string std_b8le_name = std_b8le.getObjName();
-        verify_val(std_b8le_name, "/INT type of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__, "std_b8le_name");
+        verify_val(std_b8le_name, "/INT type of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__,
+                   "std_b8le_name");
 
         // Make copy of a predefined type and save it
         DataType dtype(PredType::STD_B8LE);
@@ -308,7 +313,8 @@ test_get_objname_ontypes()
         ssize_t name_len = new_int_type.getObjName(type_name); // default len
         verify_val(name_len, static_cast<ssize_t>(strlen("/typetests/IntType NATIVE_INT")),
                    "DataType::getObjName", __LINE__, __FILE__, "name_len");
-        verify_val(type_name, "/typetests/IntType NATIVE_INT", "DataType::getObjName", __LINE__, __FILE__, "type_name");
+        verify_val(type_name, "/typetests/IntType NATIVE_INT", "DataType::getObjName", __LINE__, __FILE__,
+                   "type_name");
 
         // Close everything or they can be closed when objects go out of scope
         dtype2.close();
@@ -542,7 +548,8 @@ test_getobjectinfo_same_file()
         // file number
         grp1.getObjinfo(oinfo1);
         grp2.getObjinfo(oinfo2);
-        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__, "oinfo1.fileno");
+        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__,
+                   "oinfo1.fileno");
 
         // Close groups and file
         grp1.close();
@@ -565,7 +572,8 @@ test_getobjectinfo_same_file()
         // file number
         grp1.getObjinfo(oinfo1);
         grp2.getObjinfo(oinfo2);
-        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__, "oinfo1.fileno");
+        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__,
+                   "oinfo1.fileno");
 
         // Reset object info
         memset(&oinfo1, 0, sizeof(oinfo1));
@@ -573,7 +581,8 @@ test_getobjectinfo_same_file()
 
         file1.getObjinfo(GROUP1NAME, oinfo1);
         file1.getObjinfo(GROUP2NAME, oinfo2);
-        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjectInfo", __LINE__, __FILE__, "oinfo1.fileno");
+        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjectInfo", __LINE__, __FILE__,
+                   "oinfo1.fileno");
 
         // Close groups and files
         grp1.close();
@@ -630,7 +639,8 @@ test_intermediate_groups()
 
         // Verify value of create missing groups flag
         bool crt_int_grps = lcpl.getCreateIntermediateGroup();
-        verify_val(crt_int_grps, true, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__, "crt_int_grps");
+        verify_val(crt_int_grps, true, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__,
+                   "crt_int_grps");
 
         // Create GROUP12NAME with creating missing groups
         Group grp12(file.createGroup(GROUP12NAME, lcpl));
@@ -653,7 +663,8 @@ test_intermediate_groups()
 
         // Verify value of create missing groups flag
         crt_int_grps = lcpl.getCreateIntermediateGroup();
-        verify_val(crt_int_grps, false, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__, "crt_int_grps");
+        verify_val(crt_int_grps, false, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__,
+                   "crt_int_grps");
 
         try {
             Group grp14_false(file.createGroup(GROUP14NAME, lcpl));
@@ -664,7 +675,8 @@ test_intermediate_groups()
         // Set the flag to create missing groups set to TRUE
         lcpl.setCreateIntermediateGroup(true);
         crt_int_grps = lcpl.getCreateIntermediateGroup();
-        verify_val(crt_int_grps, true, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__, "crt_int_grps");
+        verify_val(crt_int_grps, true, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__,
+                   "crt_int_grps");
 
         // Create GROUP14NAME with the use of link create plist
         Group grp14(file.createGroup(GROUP14NAME, lcpl));

@@ -45,17 +45,16 @@ using std::endl;
 using namespace H5;
 
 #include "h5cpputil.h" // C++ utilility header file
-static const char *TestProgName                     = NULL;
+static const char *TestProgName = NULL;
 
 int
 main(int argc, char *argv[])
 {
     try {
-    /*
-     * Record the program name and private routines if provided.
-     */
-    TestProgName = argv[0];
- 
+        /*
+         * Record the program name and private routines if provided.
+         */
+        TestProgName = argv[0];
 
         // testing file creation and opening in tfile.cpp
         AddTest("tfile", test_file, cleanup_file, "File I/O Operations");
