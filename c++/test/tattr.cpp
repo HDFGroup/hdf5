@@ -800,7 +800,7 @@ test_attr_compound_read(FileAccPropList &fapl)
                                var);
 
                     sprintf(var, "read_data4[%d][%d].%c", i, j, 'd');
-                    if (abs(read_data4[i][j].d - attr_data4[i][j].d) > DBL_EPSILON) {
+                    if (fabs(read_data4[i][j].d - attr_data4[i][j].d) > DBL_EPSILON) {
                         display_difference(read_data4[i][j].d, attr_data4[i][j].d,
                                            "DSetAccPropList::getChunkCache", __LINE__, __FILE__, "w0_1");
                     }
@@ -929,7 +929,7 @@ test_attr_scalar_read(FileAccPropList &fapl)
         // Read attribute information
         float read_data2 = 0.0; // Buffer for reading 1st attribute
         ds_attr.read(PredType::NATIVE_FLOAT, &read_data2);
-        if (abs(read_data2 - attr_data5) > FLT_EPSILON)
+        if (fabs(read_data2 - attr_data5) > FLT_EPSILON)
             display_difference(read_data2, attr_data5, "Attribute::read", __LINE__, __FILE__, "read_data2");
 
         // Get the dataspace of the attribute
@@ -1221,7 +1221,7 @@ test_attr_mult_read(FileAccPropList &fapl)
         for (i = 0; i < ATTR3_DIM1; i++)
             for (j = 0; j < ATTR3_DIM2; j++)
                 for (k = 0; k < ATTR3_DIM3; k++) {
-                    if (abs(attr_data3[i][j][k] - read_data3[i][j][k]) > DBL_EPSILON) {
+                    if (fabs(attr_data3[i][j][k] - read_data3[i][j][k]) > DBL_EPSILON) {
                         char var[VAR_LEN];
                         sprintf(var, "read_data3[%d][%d][%d]", i, j, k);
                         display_difference(read_data3[i][j][k], attr_data3[i][j][k], "Attribute::read",

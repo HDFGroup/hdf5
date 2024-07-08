@@ -234,8 +234,6 @@ void
 verify_val(const char *x, const char *value, const char *where, int line, const char *file_name,
            const char *var)
 {
-    /* cerr << endl << "this verify_val const char *x and const char *value" << endl;
-     */
     if (strcmp(x, value) != 0) {
         cerr << endl;
         cerr << "*** UNEXPECTED VALUE at line " << line << " from " << file_name << "::" << where
@@ -258,8 +256,6 @@ void
 verify_val(const H5std_string &x, const H5std_string &value, const char *where, int line,
            const char *file_name, const char *var)
 {
-    /* cerr << endl << "this verify_val const H5std_string& x and const H5std_string& value" << endl;
-     */
     verify_val(x.c_str(), value.c_str(), where, line, file_name, var);
 }
 
@@ -491,7 +487,7 @@ TestCleanup(void)
  * Retrieve Summary request value.
  *     0 means no summary, 1 means yes.
  */
-H5_ATTR_PURE int
+int
 GetTestSummary(void)
 {
     return (Summary);
@@ -501,7 +497,7 @@ GetTestSummary(void)
  * Retrieve Cleanup request value.
  *     0 means no Cleanup, 1 means yes.
  */
-H5_ATTR_PURE int
+int
 GetTestCleanup(void)
 {
     return (CleanUp);
@@ -524,7 +520,7 @@ SetTestNoCleanup(void)
 /*
  * Retrieve the number of testing errors for the testing framework
  */
-H5_ATTR_PURE int
+int
 GetTestNumErrs(void)
 {
     return (num_errs);
