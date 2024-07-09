@@ -18,7 +18,8 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src, test, and c++/src directories
-AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/c++/src
+# AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/c++/src
+AM_CPPFLAGS+=-I$(top_srcdir)/tools/lib -I$(top_srcdir)/c++/src -I$(top_srcdir)/src
 
 # These are our main targets.  They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
@@ -26,7 +27,7 @@ TEST_PROG=testhdf5
 check_PROGRAMS=$(TEST_PROG)
 
 # The tests depend on the hdf5 library, test library, and the c++ library
-LDADD=$(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
+LDADD=$(LIBH5TOOLS) $(LIBH5CPP) $(LIBHDF5)
 
 testhdf5_SOURCES=testhdf5.cpp dsets.cpp tattr.cpp tarray.cpp	\
 	tcompound.cpp tdspl.cpp tfile.cpp tfilter.cpp th5s.cpp	\

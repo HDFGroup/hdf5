@@ -131,6 +131,10 @@ void MESSAGE(int num);
 void MESSAGE(const char *msg);
 void MESSAGE(const char *msg, const char *desc, const char *name);
 
+// Verifies value against expected
+void verify_val(const char *x, const char *value, const char *where, int line, const char *file_name, const char *var);
+void verify_val(const H5std_string& x, const H5std_string& value, const char *where, int line, const char *file_name, const char *var);
+
 template <class Type1, class Type2>
 void
 verify_val(Type1 x, Type2 value, const char *where, int line, const char *file_name, const char *var)
