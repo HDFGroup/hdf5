@@ -45,9 +45,9 @@ class TestFailedException : public Exception {
  * Some are duplicated from h5test.*
  */
 
-extern size_t   n_tests_passed_g;
-extern size_t   n_tests_failed_g;
-extern size_t   n_tests_skipped_g;
+extern size_t n_tests_passed_g;
+extern size_t n_tests_failed_g;
+extern size_t n_tests_skipped_g;
 
 /* Number of seconds to wait before killing a test (requires alarm(2)) */
 #define H5_ALARM_SEC 1200 /* default is 20 minutes */
@@ -55,27 +55,26 @@ extern size_t   n_tests_skipped_g;
 /*
  * Various functions for operating on the list of tests
  */
-char       *h5cpp_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
-void        TestUsage(void);
-void        AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void),
-                               const char *TheDescr);
-void        TestInfo(const char *ProgName);
-void        TestParseCmdLine(int argc, char *argv[]);
-void        PerformTests(void);
-void        TestSummary(void);
-void        TestCleanup(void);
-int         GetTestSummary(void);
-int         GetTestCleanup(void);
-int         SetTestNoCleanup(void);
-int         GetTestExpress(void);
-int         SetTestExpress(int newval);
-int         GetTestNumErrs(void);
-void        IncTestNumErrs(void);
-void        TestAlarmOn(void);
-void        TestAlarmOff(void);
+char *h5cpp_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
+void  TestUsage(void);
+void  AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const char *TheDescr);
+void  TestInfo(const char *ProgName);
+void  TestParseCmdLine(int argc, char *argv[]);
+void  PerformTests(void);
+void  TestSummary(void);
+void  TestCleanup(void);
+int   GetTestSummary(void);
+int   GetTestCleanup(void);
+int   SetTestNoCleanup(void);
+int   GetTestExpress(void);
+int   SetTestExpress(int newval);
+int   GetTestNumErrs(void);
+void  IncTestNumErrs(void);
+void  TestAlarmOn(void);
+void  TestAlarmOff(void);
 
 /* Checks the HDF5_DRIVER and HDF5_TEST_DRIVER environment variables */
-const char    *h5cpp_get_test_driver_name(void);
+const char *h5cpp_get_test_driver_name(void);
 
 /* Return srcdir path */
 const char *h5cpp_get_srcdir(void);
