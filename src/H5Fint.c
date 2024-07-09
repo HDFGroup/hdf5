@@ -1038,12 +1038,14 @@ H5F__is_hdf5(const char *name, hid_t fapl_id, bool *is_hdf5)
     H5FD_t       *lf        = NULL;        /* Low-level file struct            */
     H5F_shared_t *shared    = NULL;        /* Shared part of file              */
     haddr_t       sig_addr  = HADDR_UNDEF; /* Address of hdf5 file signature    */
+    bool          hdf5_found = false;      /* Found an HDF5 file */
     herr_t        ret_value = SUCCEED;     /* Return value                     */
 
     FUNC_ENTER_PACKAGE
 
-    /* Reset output parameter */
-    *is_hdf5 = false;
+    /* Check output parameter */
+    if (!is_hdf5)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid output param");
 
     /* Open the file */
     /* NOTE:    This now uses the fapl_id that was passed in, so H5Fis_accessible()
@@ -1059,20 +1061,24 @@ H5F__is_hdf5(const char *name, hid_t fapl_id, bool *is_hdf5)
      * to read through it will fail so we have to try this first.
      */
     if (NULL != (shared = H5F__sfile_search(lf)))
-        *is_hdf5 = true;
+        found_hdf5 = true;
     else {
         /* The file is an HDF5 file if the HDF5 file signature can be found */
-        if (H5FD_locate_signature(lf, &sig_addr) < 0)
+        if (H5FD_locate_signature(lf, &sig_addr) < 0) {
+            H5FD_close(lf);
             HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "error while trying to locate file signature");
-        *is_hdf5 = H5_addr_defined(sig_addr);
+        }
+        found_hdf5 = H5_addr_defined(sig_addr);
     }
 
-done:
     /* Close the file */
-    if (lf)
-        if (H5FD_close(lf) < 0 && true == *is_hdf5)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
+    if (H5FD_close(lf) < 0 && found_hdf5)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
+    /* Set output parameter */
+    *is_hdf5 = found_hdf5;
+
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__is_hdf5() */
 
