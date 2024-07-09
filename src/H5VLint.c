@@ -987,7 +987,7 @@ H5VL_conn_dec_rc(H5VL_t *connector)
     connector->nrefs--;
 
     /* Check for last reference */
-    if (0 == connector->nrefs) {
+    if (0 >= connector->nrefs) {
         if (H5I_dec_ref(connector->id) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector");
         H5FL_FREE(H5VL_t, connector);
