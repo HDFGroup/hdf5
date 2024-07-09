@@ -18,7 +18,6 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src, test, and c++/src directories
-# AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/c++/src
 AM_CPPFLAGS+=-I$(top_srcdir)/tools/lib -I$(top_srcdir)/c++/src -I$(top_srcdir)/src
 
 # These are our main targets.  They should be listed in the order to be
