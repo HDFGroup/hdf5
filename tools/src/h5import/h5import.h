@@ -103,7 +103,8 @@
  *     the compressed option.
  *
  * \subsection subsec_cltools_h5import_usage Usage
- *    <h4>h5import -h[elp], OR h5import \<infile\> -c[onfig] \<configfile\> [\<infile\> -c[config]\<confile2\>...] -o[utfile] \<outfile\></h4>
+ *    <h4>h5import -h[elp], OR h5import \<infile\> -c[onfig] \<configfile\> [\<infile\>
+ * -c[config]\<confile2\>...] -o[utfile] \<outfile\></h4>
  *
  * \subsection subsec_cltools_h5import_help Help
  * \li <strong>-h[elp]</strong>  Print a usage message and exit
@@ -148,7 +149,7 @@
  * \li <strong>DIMENSION-SIZES</strong>
  * \li <strong>OUTPUT-CLASS</strong>
  * \li <strong>OUTPUT-SIZE</strong>
-*
+ *
  * \subsubsection subsubsec_cltools_h5import_config_opt Optional KEYWORDS
  * \li <strong>OUTPUT-ARCHITECTURE</strong>
  * \li <strong>OUTPUT-BYTE-ORDER</strong>
@@ -251,9 +252,9 @@
  *     The default level of compression is 6.
  *
  * \li <strong>EXTERNAL-STORAGE</strong>
- *     String to denote the name of the non-HDF5 file to store data to. Cannot be used if \b CHUNKED-DIMENSIONS
- *     or \b COMPRESSION-TYPE or \b EXTENDIBLE-DATASET is specified.
- *     Value \<external-filename\>: the name of the external file as a string to be used.
+ *     String to denote the name of the non-HDF5 file to store data to. Cannot be used if \b
+ * CHUNKED-DIMENSIONS or \b COMPRESSION-TYPE or \b EXTENDIBLE-DATASET is specified. Value
+ * \<external-filename\>: the name of the external file as a string to be used.
  *
  * \li <strong>MAXIMUM-DIMENSIONS</strong>
  *     Integers separated by spaces to denote the maximum dimension sizes of all the
