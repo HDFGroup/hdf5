@@ -1035,11 +1035,11 @@ done:
 herr_t
 H5F__is_hdf5(const char *name, hid_t fapl_id, bool *is_hdf5)
 {
-    H5FD_t       *lf        = NULL;        /* Low-level file struct            */
-    H5F_shared_t *shared    = NULL;        /* Shared part of file              */
-    haddr_t       sig_addr  = HADDR_UNDEF; /* Address of hdf5 file signature    */
-    bool          hdf5_found = false;      /* Found an HDF5 file */
-    herr_t        ret_value = SUCCEED;     /* Return value                     */
+    H5FD_t       *lf         = NULL;        /* Low-level file struct            */
+    H5F_shared_t *shared     = NULL;        /* Shared part of file              */
+    haddr_t       sig_addr   = HADDR_UNDEF; /* Address of hdf5 file signature    */
+    bool          hdf5_found = false;       /* Found an HDF5 file */
+    herr_t        ret_value  = SUCCEED;     /* Return value                     */
 
     FUNC_ENTER_PACKAGE
 
