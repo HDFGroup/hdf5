@@ -34,7 +34,7 @@
  * \li <strong>--noop</strong>                Perform all the steps except the actual conversion
  *
  * \subsubsection subsubsec_cltools_h5format_convert_examples Usage Examples
- * \li 1) h5format_convert -dname=/group/dataset file_name
+ * \li 1) h5format_convert --dname=/group/dataset file_name
  *
  *      Convert the dataset </group/dataset> in the HDF5 file <file_name>:
  *      - chunked dataset: convert the chunk indexing type to version 1 B-tree
@@ -48,7 +48,7 @@
  *      - compact/contiguous dataset: downgrade the layout version to 3
  *      - virtual dataset: no action
  *
- * \li 3) h5format_convert --noop -dname=/group/dataset file_name
+ * \li 3) h5format_convert --noop --dname=/group/dataset file_name
  *
  *      Go through all the steps except the actual conversion when
  *      converting the dataset </group/dataset> in the HDF5 file <file_name>.
