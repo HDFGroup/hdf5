@@ -185,10 +185,11 @@ done:
 herr_t
 H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
 {
-    H5VL_object_t *vol_obj   = NULL;  /* VOL object associated with the ID */
-    bool           objs_incr = false; /* Whether the object count in the file was incremented */
-    H5F_t         *file      = NULL;
-    herr_t         ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *vol_obj      = NULL;  /* VOL object associated with the ID */
+    bool           objs_incr    = false; /* Whether the object count in the file was incremented */
+    H5F_t         *file         = NULL;
+    herr_t         ret_value    = SUCCEED; /* Return value */
+    bool           conn_id_incr = false;   /* Whether the VOL connector ID has been incremented */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -233,6 +234,7 @@ H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
          * If you don't do this, VDS refreshes can accidentally close the connector.
          */
         connector->nrefs++;
+        conn_id_incr = true;
 
         /* Close object & evict its metadata */
         if (H5O__refresh_metadata_close(oloc, &obj_loc, oid) < 0)
@@ -244,6 +246,7 @@ H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
 
         /* Restore the number of references on the VOL connector */
         connector->nrefs--;
+        conn_id_incr = false;
 
         /* Restore important datatype state */
         if (H5I_get_type(oid) == H5I_DATATYPE)
@@ -255,6 +258,10 @@ H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
 done:
     if (objs_incr && file)
         H5F_decr_nopen_objs(file);
+
+    if (vol_obj && vol_obj->connector)
+        if (conn_id_incr)
+            vol_obj->connector->nrefs--;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_refresh_metadata() */
