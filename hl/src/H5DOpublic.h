@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-/** \page H5DO_UG The HDF5 High Level Optimizations
+/** \page H5DO_UG HDF5 High Level Optimizations
  * @todo Under Construction
  */
 

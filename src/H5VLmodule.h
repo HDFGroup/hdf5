@@ -26,7 +26,7 @@
 #define H5_MY_PKG     H5VL
 #define H5_MY_PKG_ERR H5E_VOL
 
-/** \page H5VL_UG The HDF5 Virtual Object Layer (VOL)
+/** \page H5VL_UG HDF5 Virtual Object Layer (VOL)
  *
  * \section sec_vol The HDF5 Virtual Object Layer (VOL)
  *
