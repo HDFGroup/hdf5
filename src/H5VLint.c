@@ -265,8 +265,8 @@ H5VL_term_package(void)
                 /* Destroy the VOL connector ID group */
                 n += (H5I_dec_type_ref(H5I_VOL) > 0);
             } /* end else */
-        }     /* end else */
-    }         /* end else */
+        } /* end else */
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5VL_term_package() */
@@ -330,14 +330,14 @@ H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data)
             op_data->found_id = id;
             ret_value         = H5_ITER_STOP;
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else {
         assert(H5VL_GET_CONNECTOR_BY_VALUE == op_data->key.kind);
         if (cls->value == op_data->key.u.value) {
             op_data->found_id = id;
             ret_value         = H5_ITER_STOP;
         } /* end if */
-    }     /* end else */
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__get_connector_cb() */
@@ -425,7 +425,7 @@ H5VL__set_def_conn(void)
                     0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "can't register connector");
             } /* end else */
-        }     /* end else */
+        } /* end else */
 
         /* Was there any connector info specified in the environment variable? */
         if (NULL != (tok = HDstrtok_r(NULL, "\n\r", &lasts)))
@@ -627,8 +627,8 @@ H5VL_conn_copy(H5VL_connector_prop_t *connector_prop)
                 /* Set the connector info to the copy */
                 connector_prop->connector_info = new_connector_info;
             } /* end if */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -827,9 +827,14 @@ H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id, bool 
     if (NULL == (connector = H5VL_new_connector(connector_id)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, H5I_INVALID_HID, "can't create VOL connector object");
 
+    /* Increment reference count above 0 so that connector can be closed if VOL object creation fails */
+    connector->nrefs++;
+
     /* Get an ID for the VOL object */
     if ((ret_value = H5VL_register(type, obj, connector, app_ref)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle");
+
+    connector->nrefs--;
 
 done:
     /* Clean up on error */
@@ -982,12 +987,13 @@ H5VL_conn_dec_rc(H5VL_t *connector)
 
     /* Check arguments */
     assert(connector);
+    assert(connector->nrefs >= 0);
 
     /* Decrement refcount for connector */
     connector->nrefs--;
 
     /* Check for last reference */
-    if (0 >= connector->nrefs) {
+    if (0 == connector->nrefs) {
         if (H5I_dec_ref(connector->id) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector");
         H5FL_FREE(H5VL_t, connector);
