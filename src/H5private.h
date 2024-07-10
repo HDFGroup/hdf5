@@ -182,9 +182,9 @@
  * says FALLTHROUGH to reduce warnings on compilers that don't use
  * attributes but do respect fall-through comments.
  *
- * H5_ATTR_CONST is redefined in tools/h5repack/dynlib_rpk.c to quiet
- * gcc warnings (it has to use the public API and can't include this
- * file). Be sure to update that file if the #ifdefs change here.
+ * H5_ATTR_FORMAT and H5_ATTR_UNUSED are redefined in tools/lib/h5tools.h to
+ * avoid using this private header file there. Please be sure to update that
+ * file if the #ifdefs change here.
  */
 /* clang-format off */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)

@@ -17,7 +17,6 @@
 #define H5TOOLS_ERROR_H
 
 #include "H5Epublic.h"
-#include "H5Eprivate.h" /* Error handling       */
 
 /* tools-HDF5 Error variables */
 H5TOOLS_DLLVAR int   H5tools_INDENT_g;

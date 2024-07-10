@@ -17,6 +17,12 @@
 #define H5TOOLS_H
 
 #include "hdf5.h"
+
+#if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
+#   define H5_ATTR_FORMAT(X, Y, Z) __attribute__((format(X, Y, Z)))
+#   define H5_ATTR_UNUSED          __attribute__((unused))
+#endif
+
 #include "h5tools_error.h"
 
 #define ESCAPE_HTML         1
