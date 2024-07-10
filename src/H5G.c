@@ -935,8 +935,9 @@ H5Gclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 
 done:
-    if (connector && H5VL_conn_dec_rc(connector) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on connector");
+    if (connector && (H5ES_NONE != es_id))
+        if (H5VL_conn_dec_rc(connector) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gclose_async() */
