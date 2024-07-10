@@ -27,39 +27,41 @@
 /** \page H5R_UG HDF5 References
  *
  * \section sec_reference HDF5 References
- * HDF5 references allow users to reference existing HDF5 objects (file, group, dataset, named datatype, or attribute)
- * as well as selections within datasets.
+ * HDF5 references allow users to reference existing HDF5 objects (file, group, dataset, named datatype, or
+ *attribute) as well as selections within datasets.
  *
- * The original API, now deprecated, was extended in order to add the ability to reference attributes as well as objects in
- * external files. Additionally, there were some inherent limitations within the older API that restricted its use with
- * virtual object layer (VOL) connectors, which do not necessarily follow HDF5’s native file format.
+ * The original API, now deprecated, was extended in order to add the ability to reference attributes as well
+ *as objects in external files. Additionally, there were some inherent limitations within the older API that
+ *restricted its use with virtual object layer (VOL) connectors, which do not necessarily follow HDF5’s native
+ *file format.
  *
- * The newer API introduced a single opaque reference type, which not only has the advantage of hiding the internal
- * representation of references, but it also allows for future extensions to be added more seamlessly.
+ * The newer API introduced a single opaque reference type, which not only has the advantage of hiding the
+ *internal representation of references, but it also allows for future extensions to be added more seamlessly.
  *
  * \subsection subsec_reference_intro Introduction
- * The deprecated HDF5 reference API only allowed users to create references to HDF5 objects (groups, datasets)
- * and regions within a dataset. There were some limitations: it defined two separate reference types
+ * The deprecated HDF5 reference API only allowed users to create references to HDF5 objects (groups,
+ *datasets) and regions within a dataset. There were some limitations: it defined two separate reference types
  * #hobj_ref_t and #hdset_reg_ref_t; the former directly mapped to an #haddr_t type that did not allow for
- * external references, while the latter mapped to an HDF5 global heap entry, which was specific to native HDF5 and
- * was created and written to the file when the reference was created. This prevented users from creating
- * region references when the file is opened read-only, it was also not suitable for use outside of native HDF5 files.
- * The newer API addressed these limitations by introducing a single abstract #H5R_ref_t type as well as
- * missing reference types such as attribute references and external references (i.e., references to objects in an
- * external file).
+ * external references, while the latter mapped to an HDF5 global heap entry, which was specific to native
+ *HDF5 and was created and written to the file when the reference was created. This prevented users from
+ *creating region references when the file is opened read-only, it was also not suitable for use outside of
+ *native HDF5 files. The newer API addressed these limitations by introducing a single abstract #H5R_ref_t
+ *type as well as missing reference types such as attribute references and external references (i.e.,
+ *references to objects in an external file).
  *
  * \subsection subsec_reference_dep Deprecated API
  * There is no support for attribute references; references are only valid within the
- * container that they reference; the size of the reference types are tied to the definition of an haddr_t or an entry
- * in the file’s global heap, which only exists in native HDF5.
+ * container that they reference; the size of the reference types are tied to the definition of an haddr_t or
+ *an entry in the file’s global heap, which only exists in native HDF5.
  *
  * \subsubsection subsubsec_reference_limit Limitations
  * \li The #H5Rcreate signature forces users to constantly pass (#H5I_INVALID_HID) as a space_id, in the case
  * where the reference type is not a region reference.
  * \li The size of region
  * references was defined as the size required to encode a global heap ID, this definition forces
- * references to be written to the file at the time of their creation, hence preventing them to be created from a file
- * that is opened read-only (e.g, when creating references to a file that one does not want to/cannot modify).
+ * references to be written to the file at the time of their creation, hence preventing them to be created
+ *from a file that is opened read-only (e.g, when creating references to a file that one does not want
+ *to/cannot modify).
  *
  * \subsubsection subsubsec_reference_old_API Deprecated Methods
  * The original API before hdf5 1.12.0 is defined below:
@@ -164,12 +166,12 @@
  * References can be stored and retrieved from a file by invoking the #H5Dwrite and #H5Dread functions
  * with this single predefined type: #H5T_STD_REF.
  *
- * The advantage of a single type is that it becomes easier for users to mix references of different types. It is also
- * more in line with the opaque type now defined for references. Note that when reading references back from a
- * file, the library may, in consequence of this new design, allocate memory for each of these references. To
- * release the memory, one must either call #H5Rdestroy on each of the references or, for convenience, call
- * the new #H5Treclaim function on the buffer that contains the array of references (type can be compound
- * type, array).
+ * The advantage of a single type is that it becomes easier for users to mix references of different types. It
+ *is also more in line with the opaque type now defined for references. Note that when reading references back
+ *from a file, the library may, in consequence of this new design, allocate memory for each of these
+ *references. To release the memory, one must either call #H5Rdestroy on each of the references or, for
+ *convenience, call the new #H5Treclaim function on the buffer that contains the array of references (type can
+ *be compound type, array).
  *
  * As mentioned, instead of having separate routines for both vlen and reference types, we unify the existing:
  * \code
@@ -188,27 +190,29 @@
  *
  * It is important to note though that these routines only support the original reference types, noted as
  * #H5R_OBJECT1 and #H5R_DATASET_REGION1 respectively. Any other reference type passed to these routines
- * will return an error. For convenience and compatibility with previous versions of the library we define both
- * #H5R_OBJECT and #H5R_DATASET_REGION to map to the original reference types
- * \code
+ * will return an error. For convenience and compatibility with previous versions of the library we define
+ *both #H5R_OBJECT and #H5R_DATASET_REGION to map to the original reference types \code
  *   // Versions for compatibility
  *   #define H5R_OBJECT         H5R_OBJECT1
  *   #define H5R_DATASET_REGION H5R_DATASET_REGION1
  * \endcode
  *
- * When creating and accessing references through these deprecated routines, users are still expected to use the
- * datatypes which describe the #hobj_ref_t and #hdset_reg_ref_t types, #H5T_STD_REF_OBJ and #H5T_STD_REF_DSETREG.
+ * When creating and accessing references through these deprecated routines, users are still expected to use
+ *the datatypes which describe the #hobj_ref_t and #hdset_reg_ref_t types, #H5T_STD_REF_OBJ and
+ *#H5T_STD_REF_DSETREG.
  *
- * One important aspect of these changes is to ensure that previously written data can still be readable after those
- * revisions and that new files produced will not create any undefined behavior when used with previous versions
- * of the library. Backward as well as forward compatibility is summarized in the table:
+ * One important aspect of these changes is to ensure that previously written data can still be readable after
+ *those revisions and that new files produced will not create any undefined behavior when used with previous
+ *versions of the library. Backward as well as forward compatibility is summarized in the table:
  *
  * <table>
  * <tr>
- * <th>Version</th><th>Old File Format/Old API</th><th>Old File Format/New API</th><th>New File Format/Old API</th><th>New File Format/New API</th>
+ * <th>Version</th><th>Old File Format/Old API</th><th>Old File Format/New API</th><th>New File Format/Old
+ *API</th><th>New File Format/New API</th>
  * </tr>
  * <tr>
- * <td>&lt; 1.12.0</td><td>No change</td><td>N/A</td><td>Datatype version bump prevents from reading unknown reference types</td><td>N/A</td>
+ * <td>&lt; 1.12.0</td><td>No change</td><td>N/A</td><td>Datatype version bump prevents from reading unknown
+ *reference types</td><td>N/A</td>
  * </tr>
  * <tr>
  * <td>&ge; 1.12.0</td>
@@ -219,11 +223,12 @@
  * </tr>
  * </table>
  *
- * Because previous library versions do not have a way of detecting when new unknown references types are read,
- * we have to increment the global version of the datatypes, so that early detection can be done and the appropriate
- * error is returned to the user. For versions prior to this change, the library will return an error when the datatype
- * encountered has a version number greater than the currently supported version. Also, to prevent datatype
- * version changes in the future, all library branches are now patched to check for unknown reference types.
+ * Because previous library versions do not have a way of detecting when new unknown references types are
+ *read, we have to increment the global version of the datatypes, so that early detection can be done and the
+ *appropriate error is returned to the user. For versions prior to this change, the library will return an
+ *error when the datatype encountered has a version number greater than the currently supported version. Also,
+ *to prevent datatype version changes in the future, all library branches are now patched to check for unknown
+ *reference types.
  *
  * When reading old data with the new library version, one can either keep using the #H5T_STD_REF_OBJ
  * and #H5T_STD_REF_DSETREG datatypes, which can be queried when opening a dataset, for example using
@@ -236,11 +241,9 @@
  * \subsection subsec_reference_example Usage Examples
  *
  * \subsubsection subsubsec_reference_example_new External References
- * The example below illustrates the use of the new API with files that are opened read-only. Created references
- * to the objects in that file are stored into a separate file, and accessed from that file, without the user explicitly
- * opening the original file that was referenced.
- * \code
- *   #include <stdlib.h>
+ * The example below illustrates the use of the new API with files that are opened read-only. Created
+ *references to the objects in that file are stored into a separate file, and accessed from that file, without
+ *the user explicitly opening the original file that was referenced. \code #include <stdlib.h>
  *
  *   #include "hdf5.h"
  *   #include <assert.h>
@@ -314,11 +317,9 @@
  * \endcode
  *
  * \subsubsection subsubsec_reference_example_old Backward Compatibility and New API
- * The example below illustrates the use of the new API with a file that was written using the old-style reference
- * API, showing how one can take advantage of the automatic type conversion from old reference type to new
- * reference type.
- * \code
- *   #include <stdlib.h>
+ * The example below illustrates the use of the new API with a file that was written using the old-style
+ *reference API, showing how one can take advantage of the automatic type conversion from old reference type
+ *to new reference type. \code #include <stdlib.h>
  *
  *   #include "hdf5.h"
  *   #include <assert.h>
@@ -359,9 +360,8 @@
  *
  *       // Store reference in separate dataset using deprecated reference type
  *       space2 = H5Screate_simple(NDIMS, dset2_dims, NULL);
- *       dset2 = H5Dcreate2(file1, "references", H5T_STD_REF_OBJ, space2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
- *       H5Dwrite(dset2, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_buf);
- *       H5Dclose(dset2);
+ *       dset2 = H5Dcreate2(file1, "references", H5T_STD_REF_OBJ, space2, H5P_DEFAULT, H5P_DEFAULT,
+ *H5P_DEFAULT); H5Dwrite(dset2, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_buf); H5Dclose(dset2);
  *       H5Sclose(space2);
  *       H5Fclose(file1);
  *

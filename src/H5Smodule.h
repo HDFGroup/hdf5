@@ -976,8 +976,10 @@
  *
  * \subsection subsec_dataspace_refer References
  *
- * Another use of selections is to store a reference to a region of a dataset in the file or an external file. An HDF5 object reference
- * object is a pointer to an object (attribute, dataset, group, or committed datatype) in the file or an external file. A selection can
+ * Another use of selections is to store a reference to a region of a dataset in the file or an external file.
+ An HDF5 object reference
+ * object is a pointer to an object (attribute, dataset, group, or committed datatype) in the file or an
+ external file. A selection can
  * be used to create a pointer to a set of selected elements of a dataset, called a region reference. The
  * selection can be either a point selection or a hyperslab selection.
  *
