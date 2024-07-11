@@ -266,6 +266,13 @@ jobs:
 
       - name: List files in the space
         run: |
+              ls -l ${{ runner.workspace }}/build/_CPack_Packages/win64/NSIS
+              cat ${{ runner.workspace }}/build/_CPack_Packages/win64/NSIS/NSISOutput.log
+        continue-on-error: true
+        if:  matrix.os == 'windows-latest'
+
+      - name: List files in the space
+        run: |
               ls -l ${{ runner.workspace }}/build
 
       # Save files created by ctest script
