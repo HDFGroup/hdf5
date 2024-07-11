@@ -252,7 +252,7 @@
  *   #define H5FILE_NAME1 "refer_extern1.h5"
  *   #define H5FILE_NAME2 "refer_extern2.h5"
  *
- *   #define NDIMS 1 //* Number of dimensions
+ *   #define NDIMS 1 // Number of dimensions
  *   #define BUF_SIZE 4 // Size of example buffer
  *   #define NREFS 1 // Number of references
  *
