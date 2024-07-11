@@ -32,17 +32,18 @@
  *
  * The original API, now deprecated, was extended in order to add the ability to reference attributes as well
  * as objects in external files. Additionally, there were some inherent limitations within the older API that
- * restricted its use with virtual object layer (VOL) connectors, which do not necessarily follow HDF5’s native
- * file format.
+ * restricted its use with virtual object layer (VOL) connectors, which do not necessarily follow HDF5’s
+ * native file format.
  *
  * The newer API introduced a single opaque reference type, which not only has the advantage of hiding the
- * internal representation of references, but it also allows for future extensions to be added more seamlessly.
+ * internal representation of references, but it also allows for future extensions to be added more
+ * seamlessly.
  *
  * \subsection subsec_reference_intro Introduction
  * The deprecated HDF5 reference API only allowed users to create references to HDF5 objects (groups,
- * datasets) and regions within a dataset. There were some limitations: it defined two separate reference types
- * #hobj_ref_t and #hdset_reg_ref_t; the former directly mapped to an #haddr_t type that did not allow for
- * external references, while the latter mapped to an HDF5 global heap entry, which was specific to native
+ * datasets) and regions within a dataset. There were some limitations: it defined two separate reference
+ * types #hobj_ref_t and #hdset_reg_ref_t; the former directly mapped to an #haddr_t type that did not allow
+ * for external references, while the latter mapped to an HDF5 global heap entry, which was specific to native
  * HDF5 and was created and written to the file when the reference was created. This prevented users from
  * creating region references when the file is opened read-only, it was also not suitable for use outside of
  * native HDF5 files. The newer API addressed these limitations by introducing a single abstract #H5R_ref_t
@@ -167,11 +168,11 @@
  * with this single predefined type: #H5T_STD_REF.
  *
  * The advantage of a single type is that it becomes easier for users to mix references of different types. It
- * is also more in line with the opaque type now defined for references. Note that when reading references back
- * from a file, the library may, in consequence of this new design, allocate memory for each of these
+ * is also more in line with the opaque type now defined for references. Note that when reading references
+ * back from a file, the library may, in consequence of this new design, allocate memory for each of these
  * references. To release the memory, one must either call #H5Rdestroy on each of the references or, for
- * convenience, call the new #H5Treclaim function on the buffer that contains the array of references (type can
- * be compound type, array).
+ * convenience, call the new #H5Treclaim function on the buffer that contains the array of references (type
+ * can be compound type, array).
  *
  * As mentioned, instead of having separate routines for both vlen and reference types, we unify the existing:
  * \code
@@ -226,9 +227,9 @@
  * Because previous library versions do not have a way of detecting when new unknown references types are
  * read, we have to increment the global version of the datatypes, so that early detection can be done and the
  * appropriate error is returned to the user. For versions prior to this change, the library will return an
- * error when the datatype encountered has a version number greater than the currently supported version. Also,
- * to prevent datatype version changes in the future, all library branches are now patched to check for unknown
- * reference types.
+ * error when the datatype encountered has a version number greater than the currently supported version.
+ * Also, to prevent datatype version changes in the future, all library branches are now patched to check for
+ * unknown reference types.
  *
  * When reading old data with the new library version, one can either keep using the #H5T_STD_REF_OBJ
  * and #H5T_STD_REF_DSETREG datatypes, which can be queried when opening a dataset, for example using
@@ -242,9 +243,8 @@
  *
  * \subsubsection subsubsec_reference_example_new External References
  * The example below illustrates the use of the new API with files that are opened read-only. Created
- * references to the objects in that file are stored into a separate file, and accessed from that file, without
- * the user explicitly opening the original file that was referenced.
- * \code #include <stdlib.h>
+ * references to the objects in that file are stored into a separate file, and accessed from that file,
+ * without the user explicitly opening the original file that was referenced. \code #include <stdlib.h>
  *
  *   #include "hdf5.h"
  *   #include <assert.h>
