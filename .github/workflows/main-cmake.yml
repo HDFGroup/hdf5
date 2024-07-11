@@ -263,8 +263,11 @@ jobs:
       - name: CMake Run Package
         run: |
               cpack -C ${{ inputs.build_mode }} -V
-              ls -l ${{ runner.workspace }}/build/_CPack_Packages/win64/NSIS
-              cat ${{ runner.workspace }}/build/_CPack_Packages/win64/NSIS/NSISOutput.log
+              if [[ 'matrix.os' == 'windows-latest' ]]
+              then
+                ls -l ${{ runner.workspace }}/build/_CPack_Packages/win64/NSIS
+                cat ${{ runner.workspace }}/build/_CPack_Packages/win64/NSIS/NSISOutput.log
+              fi
         working-directory: ${{ runner.workspace }}/build
 
       - name: List files in the space
