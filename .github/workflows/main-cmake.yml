@@ -261,15 +261,11 @@ jobs:
         if: ${{ matrix.run_tests && (inputs.thread_safety == 'TS') }}
 
       - name: CMake Run Package
-        run: cpack -C ${{ inputs.build_mode }} -V
-        working-directory: ${{ runner.workspace }}/build
-
-      - name: List files in the space
         run: |
+              cpack -C ${{ inputs.build_mode }} -V
               ls -l ${{ runner.workspace }}/build/_CPack_Packages/win64/NSIS
               cat ${{ runner.workspace }}/build/_CPack_Packages/win64/NSIS/NSISOutput.log
-        continue-on-error: true
-        if:  matrix.os == 'windows-latest'
+        working-directory: ${{ runner.workspace }}/build
 
       - name: List files in the space
         run: |
