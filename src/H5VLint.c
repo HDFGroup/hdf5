@@ -982,7 +982,7 @@ H5VL_conn_dec_rc(H5VL_t *connector)
 
     /* Check arguments */
     assert(connector);
-    assert(connector->nrefs >= 0);
+    assert(connector->nrefs > 0);
 
     /* Decrement refcount for connector */
     connector->nrefs--;
@@ -1023,8 +1023,6 @@ H5VL_conn_dest(H5VL_t *connector)
     if (H5I_dec_ref(connector->id) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector");
     H5FL_FREE(H5VL_t, connector);
-
-    connector = NULL;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
