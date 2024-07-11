@@ -73,6 +73,7 @@ H5_DLL herr_t  H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, 
 H5_DLL herr_t  H5VL_conn_copy(H5VL_connector_prop_t *value);
 H5_DLL int64_t H5VL_conn_inc_rc(H5VL_t *connector);
 H5_DLL int64_t H5VL_conn_dec_rc(H5VL_t *connector);
+H5_DLL herr_t  H5VL_conn_dest(H5VL_t *connector);
 H5_DLL herr_t  H5VL_conn_free(const H5VL_connector_prop_t *info);
 H5_DLL herr_t  H5VL_get_cap_flags(const H5VL_connector_prop_t *prop, uint64_t *cap_flags);
 

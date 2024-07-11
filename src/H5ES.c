@@ -127,20 +127,15 @@ H5ESinsert_request(hid_t es_id, hid_t connector_id, void *request)
     if (NULL == (connector = H5VL_new_connector(connector_id)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCREATE, FAIL, "can't create VOL connector object");
 
-    /* Increment reference count above 0 so that connector can be closed if VOL object creation fails */
-    connector->nrefs++;
-
     /* Insert request into event set */
     if (H5ES__insert_request(es, connector, request) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "can't insert request into event set");
-
-    connector->nrefs--;
 
 done:
     /* Clean up on error */
     if (ret_value < 0)
         /* Release newly created connector.*/
-        if (connector && H5VL_conn_dec_rc(connector) < 0)
+        if (connector && (H5VL_conn_dest(connector) < 0))
             HDONE_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector");
 
     FUNC_LEAVE_API(ret_value)
