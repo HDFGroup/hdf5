@@ -76,7 +76,7 @@
  * \li <strong>--indexed=L2</strong>    Minimum number of links in the indexed format
  * \li <strong>--ssize=S[:F]</strong>   Shared object header message minimum size
  * \li <strong>--minimum=M</strong>     Do not apply the filter to datasets smaller than M
- * \li <strong>--file=E</strong>        Name of file E with the -f and -l options
+ * \li <strong>--file=E</strong>        Name of file E with the --file and --layout options
  * \li <strong>--ublock=U</strong>      Name of file U with user block data to be added
  * \li <strong>--block=B</strong>       Size of user block to be added
  * \li <strong>--metadata_block_size=A</strong>  Metadata block size for #H5Pset_meta_block_size
@@ -137,7 +137,7 @@
  *                 driver.
  * \li The default strategy when not set is \b FSM_AGGR without persisting free-space.
  *
- * \li <strong>FS_PERSIST</strong> is 1 to persisting free-space or 0 to not persisting free-space.
+ * \li <strong>FS_PERSIST</strong> is 1 for persisting free-space or 0 for not persisting free-space.
  *        The default when not set is not persisting free-space.
  *        The value is ignored for \b AGGR and \b NONE strategies.
  *
