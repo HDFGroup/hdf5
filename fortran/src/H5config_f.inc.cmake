@@ -105,12 +105,7 @@
 #define H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_FC_MAX_REAL_PRECISION@
 
 ! If C has quad precision
-#cmakedefine01 CMAKE_H5_HAVE_FLOAT128
-#if CMAKE_H5_HAVE_FLOAT128 == 0
-#undef H5_HAVE_FLOAT128
-#else
-#define H5_HAVE_FLOAT128
-#endif
+#define H5_HAVE_FLOAT128 @H5_HAVE_FLOAT128@
 
 ! Define if INTEGER*16 is available
 #define H5_HAVE_Fortran_INTEGER_SIZEOF_16 @H5_HAVE_Fortran_INTEGER_SIZEOF_16@

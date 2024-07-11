@@ -984,7 +984,7 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER, PARAMETER :: real_kind_15 = C_DOUBLE  !should map to REAL*8 on most modern processors
 
 ! Check if C has quad precision extension
-#ifdef H5_HAVE_FLOAT128
+#if H5_HAVE_FLOAT128 != 0
 ! Check if Fortran supports quad precision
 # if H5_PAC_FC_MAX_REAL_PRECISION > 26
     INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(31)
@@ -1090,7 +1090,7 @@ END SUBROUTINE test_array_compound_atomic
     CALL check("H5Dcreate_f",error, total_error)
     CALL H5Dcreate_f(file_id, dsetnamer8, h5kind_to_type(real_kind_15,H5_REAL_KIND), dspace_id, dset_idr8, error)
     CALL check("H5Dcreate_f",error, total_error)
-!#ifdef H5_HAVE_FLOAT128
+!#if H5_HAVE_FLOAT128 != 0
     CALL H5Dcreate_f(file_id, dsetnamer16, h5kind_to_type(real_kind_31,H5_REAL_KIND), dspace_id, dset_idr16, error)
     CALL check("H5Dcreate_f",error, total_error)
 !#endif
@@ -1123,7 +1123,7 @@ END SUBROUTINE test_array_compound_atomic
     f_ptr = C_LOC(dset_data_r15(1))
     CALL h5dwrite_f(dset_idr8, h5kind_to_type(real_kind_15,H5_REAL_KIND), f_ptr, error)
     CALL check("H5Dwrite_f",error, total_error)
-!#ifdef H5_HAVE_FLOAT128
+!#if H5_HAVE_FLOAT128 != 0
     f_ptr = C_LOC(dset_data_r31(1))
     CALL h5dwrite_f(dset_idr16, h5kind_to_type(real_kind_31,H5_REAL_KIND), f_ptr, error)
     CALL check("H5Dwrite_f",error, total_error)

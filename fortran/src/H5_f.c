@@ -128,7 +128,7 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
         if ((types[7] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0)
             return ret_value;
     } /*end else */
-#ifdef H5_HAVE_FLOAT128
+#if H5_HAVE_FLOAT128 != 0
     else if (sizeof(double_f) == sizeof(__float128)) {
         if ((types[7] = H5Tcopy(H5T_NATIVE_FLOAT)) < 0)
             return ret_value;

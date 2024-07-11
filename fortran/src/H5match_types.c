@@ -218,7 +218,7 @@ main(void)
             strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE");
             found_long_double = 1;
         }
-#ifdef H5_HAVE_FLOAT128
+#if H5_HAVE_FLOAT128 != 0
         /* Don't select a higher precision than Fortran can support */
         else if (sizeof(__float128) == RealKinds_SizeOf[i] && found_long_double == 1 &&
                  H5_PAC_FC_MAX_REAL_PRECISION > 28) {
@@ -233,7 +233,7 @@ main(void)
         }
 #endif
 #else /* There is no C_LONG_DOUBLE intrinsic */
-#ifdef H5_HAVE_FLOAT128
+#if H5_HAVE_FLOAT128 != 0
         /* Don't select a higher precision than Fortran can support */
         else if (sizeof(__float128) == RealKinds_SizeOf[i]) {
             writeTypedef("float", "__float128", RealKinds[i]);
@@ -413,7 +413,7 @@ main(void)
     }
     else if (H5_FORTRAN_NATIVE_DOUBLE_SIZEOF == sizeof(float))
         writeToFilesChr("float", "Fortran_DOUBLE", "double_f", H5_FORTRAN_NATIVE_DOUBLE_KIND, "C_FLOAT");
-#ifdef H5_HAVE_FLOAT128
+#if H5_HAVE_FLOAT128 != 0
     /* Don't select a higher precision than Fortran can support */
     else if (sizeof(__float128) == H5_FORTRAN_NATIVE_DOUBLE_SIZEOF && H5_PAC_FC_MAX_REAL_PRECISION > 28) {
         writeToFilesChr("float", "Fortran_DOUBLE", "double_f", H5_FORTRAN_NATIVE_DOUBLE_KIND,
