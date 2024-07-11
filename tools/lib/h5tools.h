@@ -22,8 +22,8 @@
 #define H5_ATTR_FORMAT(X, Y, Z) __attribute__((format(X, Y, Z)))
 #define H5_ATTR_UNUSED          __attribute__((unused))
 #else
-#   define H5_ATTR_FORMAT(X, Y, Z) /*void*/
-#   define H5_ATTR_UNUSED          /*void*/
+#define H5_ATTR_FORMAT(X, Y, Z) /*void*/
+#define H5_ATTR_UNUSED          /*void*/
 #endif
 
 #include "h5tools_error.h"
