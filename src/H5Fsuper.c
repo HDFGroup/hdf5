@@ -101,7 +101,9 @@ H5F__super_ext_create(H5F_t *f, H5O_loc_t *ext_ptr)
 
     /* Check for older version of superblock format that can't support superblock extensions */
     if (f->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_2)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "superblock extension not permitted with version %u of superblock", f->shared->sblock->super_vers);
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL,
+                    "superblock extension not permitted with version %u of superblock",
+                    f->shared->sblock->super_vers);
     else if (H5_addr_defined(f->shared->sblock->ext_addr))
         HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "superblock extension already exists?!?!");
     else {
@@ -274,8 +276,10 @@ H5F__update_super_ext_driver_msg(H5F_t *f)
                      */
                     drvinfo.len = driver_size;
                     drvinfo.buf = dbuf;
-                    if (H5F__super_ext_write_msg(f, H5O_DRVINFO_ID, &drvinfo, false, H5O_MSG_NO_FLAGS_SET) < 0)
-                        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "unable to update driver info header message");
+                    if (H5F__super_ext_write_msg(f, H5O_DRVINFO_ID, &drvinfo, false, H5O_MSG_NO_FLAGS_SET) <
+                        0)
+                        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
+                                    "unable to update driver info header message");
                 } /* end if driver_size > 0 */
             }     /* end if !H5F_HAS_FEATURE(f, H5FD_FEAT_IGNORE_DRVRINFO) */
         }         /* end if superblock extension exists */
@@ -307,7 +311,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
     H5P_genplist_t           *c_plist;          /* File creation property list  */
     H5FD_t                   *file;             /* File driver pointer */
     unsigned sblock_flags = H5AC__NO_FLAGS_SET; /* flags used in superblock unprotect call      */
-    haddr_t  super_addr = HADDR_UNDEF;          /* Absolute address of superblock */
+    haddr_t  super_addr   = HADDR_UNDEF;        /* Absolute address of superblock */
     haddr_t  eof;                               /* End of file address */
     unsigned rw_flags;                          /* Read/write permissions for file */
     bool     skip_eof_check = false;            /* Whether to skip checking the EOF value */
@@ -585,7 +589,10 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
 
         /* (Account for the stored EOA being absolute offset -QAK) */
         if ((eof + sblock->base_addr) < udata.stored_eof)
-            HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, FAIL, "truncated file: eof = %llu, sblock->base_addr = %llu, stored_eof = %llu", (unsigned long long)eof, (unsigned long long)sblock->base_addr, (unsigned long long)udata.stored_eof);
+            HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, FAIL,
+                        "truncated file: eof = %llu, sblock->base_addr = %llu, stored_eof = %llu",
+                        (unsigned long long)eof, (unsigned long long)sblock->base_addr,
+                        (unsigned long long)udata.stored_eof);
     }
 
     /*
@@ -614,11 +621,13 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
         /* extend EOA so we can read at least the fixed sized
          * portion of the driver info block
          */
-        if (H5FD_set_eoa(f->shared->lf, H5FD_MEM_SUPER, sblock->driver_addr + H5F_DRVINFOBLOCK_HDR_SIZE) < 0) /* will extend eoa later if required */
+        if (H5FD_set_eoa(f->shared->lf, H5FD_MEM_SUPER, sblock->driver_addr + H5F_DRVINFOBLOCK_HDR_SIZE) <
+            0) /* will extend eoa later if required */
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "set end of space allocation request failed");
 
         /* Look up the driver info block */
-        if (NULL == (drvinfo = (H5O_drvinfo_t *)H5AC_protect(f, H5AC_DRVRINFO, sblock->driver_addr, &drvrinfo_udata, rw_flags)))
+        if (NULL == (drvinfo = (H5O_drvinfo_t *)H5AC_protect(f, H5AC_DRVRINFO, sblock->driver_addr,
+                                                             &drvrinfo_udata, rw_flags)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "unable to load driver info block");
 
         /* Loading the driver info block is enough to set up the right info */
@@ -656,7 +665,8 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
          *      superblock version >= 2.
          */
         if (sblock->super_vers < HDF5_SUPERBLOCK_VERSION_2)
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid superblock - extension message should not be defined for version < 2");
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
+                        "invalid superblock - extension message should not be defined for version < 2");
 
         /* Check for superblock extension being located "outside" the stored
          *      'eoa' value, which can occur with the split/multi VFD.
@@ -731,7 +741,8 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
 
             /* Get message flags */
             if (H5O_msg_get_flags(&ext_loc, H5O_FSINFO_ID, &flags) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to message flags for free-space manager info message");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
+                            "unable to message flags for free-space manager info message");
 
             /* If message is NOT marked "unknown"--set up file space info  */
             if (!(flags & H5O_MSG_FLAG_WAS_UNKNOWN)) {
@@ -743,7 +754,8 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
                  */
                 if (H5P_exist_plist(fa_plist, H5F_ACS_NULL_FSM_ADDR_NAME) > 0)
                     if (H5P_get(fa_plist, H5F_ACS_NULL_FSM_ADDR_NAME, &f->shared->null_fsm_addr) < 0)
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get clearance for persisting fsm addr");
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
+                                    "can't get clearance for persisting fsm addr");
 
                 /* Retrieve the 'file space info' structure */
                 if (NULL == H5O_msg_read(&ext_loc, H5O_FSINFO_ID, &fsinfo))
@@ -751,7 +763,8 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
 
                 /* Version bounds check */
                 if (H5O_fsinfo_check_version(H5F_HIGH_BOUND(f), &fsinfo) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "File space info message's version out of bounds");
+                    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL,
+                                "File space info message's version out of bounds");
 
                 /* Update changed values */
                 if (f->shared->fs_version != fsinfo.version)
@@ -864,7 +877,8 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
                     if (f->shared->null_fsm_addr) {
                         if (H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, false,
                                                      H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
-                            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing fsinfo message to superblock extension");
+                            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
+                                        "error in writing fsinfo message to superblock extension");
                     }
                     else {
                         if (H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0) {
@@ -872,11 +886,14 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
                             f->shared->sblock = NULL;
 #endif /* JRM */
 
-                            HGOTO_ERROR(H5E_FILE, H5E_CANTDELETE, FAIL, "error in removing message from superblock extension");
+                            HGOTO_ERROR(H5E_FILE, H5E_CANTDELETE, FAIL,
+                                        "error in removing message from superblock extension");
                         }
 
-                        if (H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, true, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
-                            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing fsinfo message to superblock extension");
+                        if (H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, true,
+                                                     H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
+                            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
+                                        "error in writing fsinfo message to superblock extension");
                     }
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
                     f->shared->sblock = NULL;
@@ -911,7 +928,8 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
 
             /* Indicate to the cache that there's an image to load on first protect call */
             if (H5AC_load_cache_image_on_next_protect(f, mdci_msg.addr, mdci_msg.size, rw) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTLOAD, FAIL, "call to H5AC_load_cache_image_on_next_protect failed");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTLOAD, FAIL,
+                            "call to H5AC_load_cache_image_on_next_protect failed");
         } /* end if */
 
         /* Close superblock extension */
@@ -959,7 +977,8 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
                 f->shared->sblock = sblock;
 #endif /* JRM */
                 if (H5F__super_ext_write_msg(f, H5O_DRVINFO_ID, &drvinfo, false, H5O_MSG_NO_FLAGS_SET) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing message to superblock extension");
+                    HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
+                                "error in writing message to superblock extension");
 
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
                 f->shared->sblock = NULL;
@@ -971,7 +990,8 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
         else if (H5F_HAS_FEATURE(f, H5FD_FEAT_IGNORE_DRVRINFO)) {
             /* Remove the driver info message from the superblock extension */
             if (H5F__super_ext_remove_msg(f, H5O_DRVINFO_ID) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in removing message from superblock extension");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL,
+                            "error in removing message from superblock extension");
 
             /* Check if the superblock extension was removed */
             if (!H5_addr_defined(sblock->ext_addr))
@@ -1183,7 +1203,8 @@ H5F__super_init(H5F_t *f)
         if (userblock_size < alignment)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "userblock size must be > file object alignment");
         if (0 != (userblock_size % alignment))
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "userblock size must be an integral multiple of file object alignment");
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
+                        "userblock size must be an integral multiple of file object alignment");
     } /* end if */
 
     sblock->base_addr    = userblock_size;
@@ -1242,7 +1263,8 @@ H5F__super_init(H5F_t *f)
     H5AC_set_ring(H5AC_RING_SB, &orig_ring);
 
     /* Insert superblock into cache, pinned */
-    if (H5AC_insert_entry(f, H5AC_SUPERBLOCK, (haddr_t)0, sblock, H5AC__PIN_ENTRY_FLAG | H5AC__FLUSH_LAST_FLAG | H5AC__FLUSH_COLLECTIVELY_FLAG) < 0)
+    if (H5AC_insert_entry(f, H5AC_SUPERBLOCK, (haddr_t)0, sblock,
+                          H5AC__PIN_ENTRY_FLAG | H5AC__FLUSH_LAST_FLAG | H5AC__FLUSH_COLLECTIVELY_FLAG) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINS, FAIL, "can't add superblock to cache");
     sblock_in_cache = true;
 
@@ -1325,8 +1347,10 @@ H5F__super_init(H5F_t *f)
             btreek.btree_k[H5B_CHUNK_ID] = sblock->btree_k[H5B_CHUNK_ID];
             btreek.btree_k[H5B_SNODE_ID] = sblock->btree_k[H5B_SNODE_ID];
             btreek.sym_leaf_k            = sblock->sym_leaf_k;
-            if (H5O_msg_create(&ext_loc, H5O_BTREEK_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &btreek) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update v1 B-tree 'K' value header message");
+            if (H5O_msg_create(&ext_loc, H5O_BTREEK_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE,
+                               H5O_UPDATE_TIME, &btreek) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+                            "unable to update v1 B-tree 'K' value header message");
         } /* end if */
 
         /* Check for driver info to store */
@@ -1374,7 +1398,8 @@ H5F__super_init(H5F_t *f)
             for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
                 fsinfo.fs_addr[ptype - 1] = HADDR_UNDEF;
 
-            if (H5O_msg_create(&ext_loc, H5O_FSINFO_ID, H5O_MSG_FLAG_DONTSHARE | H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &fsinfo) < 0)
+            if (H5O_msg_create(&ext_loc, H5O_FSINFO_ID, H5O_MSG_FLAG_DONTSHARE | H5O_MSG_FLAG_MARK_IF_UNKNOWN,
+                               H5O_UPDATE_TIME, &fsinfo) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update free-space info header message");
         } /* end if */
     }     /* end if */
@@ -1386,7 +1411,8 @@ H5F__super_init(H5F_t *f)
 
             /* Allocate space for the driver info */
             if (NULL == (drvinfo = (H5O_drvinfo_t *)H5MM_calloc(sizeof(H5O_drvinfo_t))))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "memory allocation failed for driver info message");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for driver info message");
 
             /* Set up driver info message */
             /* (NOTE: All the actual information (name & driver information) is
@@ -1397,7 +1423,9 @@ H5F__super_init(H5F_t *f)
             H5_CHECKED_ASSIGN(drvinfo->len, size_t, H5FD_sb_size(f->shared->lf), hsize_t);
 
             /* Insert driver info block into cache */
-            if (H5AC_insert_entry(f, H5AC_DRVRINFO, sblock->driver_addr, drvinfo, H5AC__PIN_ENTRY_FLAG | H5AC__FLUSH_LAST_FLAG | H5AC__FLUSH_COLLECTIVELY_FLAG) < 0)
+            if (H5AC_insert_entry(f, H5AC_DRVRINFO, sblock->driver_addr, drvinfo,
+                                  H5AC__PIN_ENTRY_FLAG | H5AC__FLUSH_LAST_FLAG |
+                                      H5AC__FLUSH_COLLECTIVELY_FLAG) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINS, FAIL, "can't add driver info block to cache");
             drvinfo_in_cache   = true;
             f->shared->drvinfo = drvinfo;
@@ -1679,7 +1707,8 @@ H5F__super_ext_write_msg(H5F_t *f, unsigned id, void *mesg, bool may_create, uns
 
     /* Check if message with ID does not exist in the object header */
     if ((status = H5O_msg_exists(&ext_loc, id)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check object header for message or message exists");
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
+                    "unable to check object header for message or message exists");
 
     /* Check for creating vs. writing */
     if (may_create) {

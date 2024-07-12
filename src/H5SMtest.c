@@ -81,7 +81,8 @@ H5SM__get_mesg_count_test(H5F_t *f, unsigned type_id, size_t *mesg_count)
         cache_udata.f = f;
 
         /* Look up the master SOHM table */
-        if (NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, H5AC_SOHM_TABLE, H5F_SOHM_ADDR(f), &cache_udata, H5AC__READ_ONLY_FLAG)))
+        if (NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, H5AC_SOHM_TABLE, H5F_SOHM_ADDR(f),
+                                                                 &cache_udata, H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table");
 
         /* Find the correct index for this message type */

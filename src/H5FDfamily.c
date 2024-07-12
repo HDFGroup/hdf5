@@ -771,13 +771,15 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
          * Allow H5F_ACC_CREAT only on the first family member.
          */
         if (0 == file->nmembs) {
-            if (NULL == (file->memb[file->nmembs] = H5FDopen(memb_name, (0 == file->nmembs ? flags : t_flags), file->memb_fapl_id, HADDR_UNDEF)))
+            if (NULL == (file->memb[file->nmembs] = H5FDopen(memb_name, (0 == file->nmembs ? flags : t_flags),
+                                                             file->memb_fapl_id, HADDR_UNDEF)))
                 HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open member file");
         }
         else {
             H5E_PAUSE_ERRORS
             {
-                file->memb[file->nmembs] = H5FDopen(memb_name, (0 == file->nmembs ? flags : t_flags), file->memb_fapl_id, HADDR_UNDEF);
+                file->memb[file->nmembs] = H5FDopen(memb_name, (0 == file->nmembs ? flags : t_flags),
+                                                    file->memb_fapl_id, HADDR_UNDEF);
             }
             H5E_RESUME_ERRORS
 
@@ -1019,7 +1021,8 @@ H5FD__family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
             file->nmembs = MAX(file->nmembs, u + 1);
             snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, file->name, u);
             H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
-            if (NULL == (file->memb[u] = H5FDopen(memb_name, file->flags | H5F_ACC_CREAT, file->memb_fapl_id, (haddr_t)file->memb_size)))
+            if (NULL == (file->memb[u] = H5FDopen(memb_name, file->flags | H5F_ACC_CREAT, file->memb_fapl_id,
+                                                  (haddr_t)file->memb_size)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open member file");
         } /* end if */
 
@@ -1415,9 +1418,9 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
     bool                      default_config = false;
     hid_t                     memb_fapl_id   = H5I_INVALID_HID;
     unsigned                  current_member;
-    char                     *member_name  = NULL;
-    char                     *temp         = NULL;
-    herr_t                    ret_value    = SUCCEED;
+    char                     *member_name = NULL;
+    char                     *temp        = NULL;
+    herr_t                    ret_value   = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1465,7 +1468,8 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
             filename = temp;
         }
         else
-            HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "provided file name cannot generate unique sub-files");
+            HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL,
+                        "provided file name cannot generate unique sub-files");
     }
 
     /* Delete all the family members */
