@@ -12,36 +12,27 @@
 
 #include "H5_api_misc_test_parallel.h"
 
-/*
- * The array of parallel miscellaneous tests to be performed.
- */
-static int (*par_misc_tests[])(void) = {NULL};
+static void print_misc_test_header(const void *params);
 
-int
-H5_api_misc_test_parallel(void)
+static void
+print_misc_test_header(const void H5_ATTR_UNUSED *params)
 {
-    size_t i;
-    int    nerrors;
-
     if (MAINPROCESS) {
+        printf("\n");
         printf("**********************************************\n");
         printf("*                                            *\n");
         printf("*      API Parallel Miscellaneous Tests      *\n");
         printf("*                                            *\n");
         printf("**********************************************\n\n");
     }
+}
 
-    for (i = 0, nerrors = 0; i < ARRAY_LENGTH(par_misc_tests); i++) {
-        /* nerrors += (*par_misc_tests[i])() ? 1 : 0; */
+void
+H5_api_misc_test_parallel_add(void)
+{
+    /* Add a fake test to print out a header to distinguish different test interfaces */
+    AddTest("print_misc_test_header", print_misc_test_header, NULL, NULL, NULL, 0,
+            "Prints header for miscellaneous tests");
 
-        if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
-            if (MAINPROCESS)
-                printf("    MPI_Barrier() failed!\n");
-        }
-    }
-
-    if (MAINPROCESS)
-        printf("\n");
-
-    return nerrors;
+    /* No tests yet */
 }

@@ -15,7 +15,7 @@
 
 #include "H5_api_test.h"
 
-int H5_api_dataset_test(void);
+void H5_api_dataset_test_add(void);
 
 /************************************************
  *                                              *
