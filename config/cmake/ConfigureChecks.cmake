@@ -132,12 +132,10 @@ endif ()
 
 ## Check for non-standard extension quadmath.h
 
-CHECK_INCLUDE_FILES(quadmath.h C_HAVE_QUADMATH)
-if (C_HAVE_QUADMATH)
-  set(${HDF_PREFIX}_HAVE_QUADMATH_H 1)
-else ()
-  set(${HDF_PREFIX}_HAVE_QUADMATH_H 0)
-endif ()
+# gcc puts symbols like FLT128_DIG in quadmath.h instead of float.h, so
+# check for that. This is only used by the build system and doesn't need
+# to be exported to H5pubconf.h.
+CHECK_INCLUDE_FILES("quadmath.h" INCLUDE_QUADMATH_H)
 
 if (CYGWIN)
   set (CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_GNU_SOURCE")
@@ -714,23 +712,21 @@ if (HDF5_BUILD_FORTRAN)
 #include <stdio.h>\n\
 #define CHECK_FLOAT128 _SIZEOF___FLOAT128\n\
 #if CHECK_FLOAT128!=0\n\
-#if _HAVE_QUADMATH_H!=0\n\
-#include <quadmath.h>\n\
-#endif\n\
-#ifdef FLT128_DIG\n\
-#define C_FLT128_DIG FLT128_DIG\n\
+#  if ${INCLUDE_QUADMATH_H}!=0\n\
+#    include <quadmath.h>\n\
+#  endif\n\
+#  ifdef FLT128_DIG\n\
+#    define C_FLT128_DIG FLT128_DIG\n\
+#  else\n\
+#    define C_FLT128_DIG 0\n\
+#  endif\n\
 #else\n\
-#define C_FLT128_DIG 0\n\
+#  define C_FLT128_DIG 0\n\
 #endif\n\
-#else\n\
-#define C_FLT128_DIG 0\n\
-#endif\n\
-#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L\n\
 #define C_LDBL_DIG DECIMAL_DIG\n\
-#else\n\
-#define C_LDBL_DIG LDBL_DIG\n\
-#endif\n\nint main(void) {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
-         "
+\n\
+int main(void) {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
+        "
     )
 
     C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES PROG_OUTPUT4)

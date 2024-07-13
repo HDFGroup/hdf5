@@ -270,9 +270,6 @@
 /* Define to 1 if you have the <pwd.h> header file. */
 #cmakedefine H5_HAVE_PWD_H @H5_HAVE_PWD_H@
 
-/* Define to 1 if you have the <quadmath.h> header file. */
-#cmakedefine H5_HAVE_QUADMATH_H @H5_HAVE_QUADMATH_H@
-
 /* Define whether the Read-Only S3 virtual file driver (VFD) should be
    compiled */
 #cmakedefine H5_HAVE_ROS3_VFD @H5_HAVE_ROS3_VFD@

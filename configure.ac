@@ -794,15 +794,29 @@ AC_MSG_RESULT([$HDF_FORTRAN])
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## ----------------------------------------------------------------------
-  ## Check for GNU __float128 type
+  ## Check for __float128
+  ##
+  ## This is a GNU-specific floating-point type. In most cases, the
+  ## __float128 type can be used directly without any special headers, but
+  ## the floating-point constants usually require including quadmath.h
+  ## (instead of float.h).
+  ##
+  ## This is usually handled in software and is orders of magnitude slower
+  ## than hardware-supported floating-point math (Power systems can have
+  ## quad-precision hardware acceleration).
   ##
   HAVE_FLOAT128=0
-  HAVE_QUADMATH=0
   MY_FLT128_DIG=0
   MY_LDBL_DIG=0
 
   AC_CHECK_SIZEOF([__float128])
-  AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
+
+  ## gcc puts symbols like FLT128_DIG in quadmath.h instead of float.h,
+  ## so check for that before running the precision macro. Note that
+  ## using AC_CHECK_HEADER instead of AC_CHECK_HEADERS keeps the
+  ## H5_HAVE_QUADMATH_H symbol out of pubconf.
+  AC_CHECK_HEADER([quadmath.h], [INCLUDE_QUADMATH_H=1], [INCLUDE_QUADMATH_H=0])
+
   PAC_FC_LDBL_DIG
 
   AC_SUBST([PAC_C_MAX_REAL_PRECISION])
