@@ -553,8 +553,8 @@ AC_MSG_CHECKING([maximum decimal precision for C])
                 ]])
         ])
         AC_RUN_IFELSE([],[
-            LDBL_DIG=$(./conftest$EXEEXT 2>&1 | sed -n '1p')
-            FLT128_DIG=$(./conftest$EXEEXT 2>&1 | sed -n '2p')
+            MY_LDBL_DIG=$(./conftest$EXEEXT 2>&1 | sed -n '1p')
+            MY_FLT128_DIG=$(./conftest$EXEEXT 2>&1 | sed -n '2p')
         ],[
             AC_MSG_ERROR([C program fails to build or run!])
         ],[])

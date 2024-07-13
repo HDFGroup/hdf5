@@ -798,8 +798,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ##
   HAVE_FLOAT128=0
   HAVE_QUADMATH=0
-  FLT128_DIG=0
-  LDBL_DIG=0
+  MY_FLT128_DIG=0
+  MY_LDBL_DIG=0
 
   AC_CHECK_SIZEOF([__float128])
   AC_CHECK_SIZEOF([_Quad])
@@ -810,9 +810,9 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   if test "$ac_cv_sizeof___float128" != 0 && test "$FLT128_DIG" != 0 ; then
     AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
-    PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
+    PAC_C_MAX_REAL_PRECISION=$MY_FLT128_DIG
   else
-    PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
+    PAC_C_MAX_REAL_PRECISION=$MY_LDBL_DIG
   fi
   AC_DEFINE_UNQUOTED([PAC_C_MAX_REAL_PRECISION], $PAC_C_MAX_REAL_PRECISION, [Determine the maximum decimal precision in C])
   AC_MSG_RESULT([$PAC_C_MAX_REAL_PRECISION])
