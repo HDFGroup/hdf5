@@ -793,9 +793,9 @@ AC_MSG_RESULT([$HDF_FORTRAN])
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
-## ----------------------------------------------------------------------
-## Check for non-standard extension __FLOAT128
-##
+  ## ----------------------------------------------------------------------
+  ## Check for non-standard extension __float128
+  ##
   HAVE_FLOAT128=0
   HAVE_QUADMATH=0
   FLT128_DIG=0
