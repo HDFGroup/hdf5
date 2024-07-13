@@ -586,9 +586,6 @@
 /* The size of `unsigned', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_UNSIGNED @H5_SIZEOF_UNSIGNED@
 
-/* The size of `_Quad', as computed by sizeof. */
-#define H5_SIZEOF__QUAD @H5_SIZEOF__QUAD@
-
 /* The size of `_Float16', as computed by sizeof. */
 #define H5_SIZEOF__FLOAT16 @H5_SIZEOF__FLOAT16@
 

@@ -802,7 +802,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   MY_LDBL_DIG=0
 
   AC_CHECK_SIZEOF([__float128])
-  AC_CHECK_SIZEOF([_Quad])
   AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
   PAC_FC_LDBL_DIG
 

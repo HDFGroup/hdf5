@@ -655,13 +655,6 @@ if (HDF5_BUILD_FORTRAN)
     set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
   endif ()
 
-  HDF_CHECK_TYPE_SIZE(_Quad _SIZEOF__QUAD)
-  if (NOT _SIZEOF__QUAD)
-    set (${HDF_PREFIX}_SIZEOF__QUAD 0)
-  else ()
-    set (${HDF_PREFIX}_SIZEOF__QUAD ${_SIZEOF__QUAD})
-  endif ()
-
   if (NOT CMAKE_CROSSCOMPILING)
     #-----------------------------------------------------------------------------
     # The provided CMake C macros don't provide a general compile/run function
