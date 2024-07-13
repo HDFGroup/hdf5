@@ -536,22 +536,18 @@ AC_MSG_CHECKING([maximum decimal precision for C])
                 #include <stdio.h>
                 #define CHECK_FLOAT128 $ac_cv_sizeof___float128
                 #if CHECK_FLOAT128!=0
-                # if $HAVE_QUADMATH!=0
-                #include <quadmath.h>
-                # endif
-                # ifdef FLT128_DIG
-                #define C_FLT128_DIG FLT128_DIG
-                # else
-                #define C_FLT128_DIG 0
-                # endif
+                #  if $HAVE_QUADMATH!=0
+                #    include <quadmath.h>
+                #  endif
+                #  ifdef FLT128_DIG
+                #    define C_FLT128_DIG FLT128_DIG
+                #  else
+                #    define C_FLT128_DIG 0
+                #  endif
                 #else
-                #define C_FLT128_DIG 0
+                #  define C_FLT128_DIG 0
                 #endif
-                #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
                 #define C_LDBL_DIG DECIMAL_DIG
-                #else
-                #define C_LDBL_DIG LDBL_DIG
-                #endif
                 ],[[
                   fprintf(stderr, "%d\n%d\n", C_LDBL_DIG, C_FLT128_DIG);
                 ]])
