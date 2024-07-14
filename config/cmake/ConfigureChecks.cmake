@@ -739,7 +739,7 @@ if (HDF5_BUILD_FORTRAN)
 #include <float.h>\n\
 #include <stdio.h>\n\
 #if ${C_HAVE_FLOAT128}\n\
-#  if ${C_INCLUDE_QUADMATH_H}!=0\n\
+#  if ${C_INCLUDE_QUADMATH_H}\n\
 #    include <quadmath.h>\n\
 #  endif\n\
 #  ifdef FLT128_DIG\n\
