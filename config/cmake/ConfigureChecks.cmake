@@ -136,6 +136,12 @@ endif ()
 # check for that. This is only used by the build system and doesn't need
 # to be exported to H5pubconf.h.
 CHECK_INCLUDE_FILES("quadmath.h" INCLUDE_QUADMATH_H)
+  # Convert TRUE/FALSE to 0/1 for preprocessor values in test code, below
+  if (${INCLUDE_QUADMATH_H})
+    set(C_INCLUDE_QUADMATH_H 1)
+  else ()
+    set(C_INCLUDE_QUADMATH_H 0)
+  endif ()
 
 if (CYGWIN)
   set (CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_GNU_SOURCE")
@@ -733,7 +739,7 @@ if (HDF5_BUILD_FORTRAN)
 #include <float.h>\n\
 #include <stdio.h>\n\
 #if ${C_HAVE_FLOAT128}\n\
-#  if ${INCLUDE_QUADMATH_H}!=0\n\
+#  if ${C_INCLUDE_QUADMATH_H}!=0\n\
 #    include <quadmath.h>\n\
 #  endif\n\
 #  ifdef FLT128_DIG\n\
