@@ -534,14 +534,14 @@ dnl Depends on if __float128 and/or quadmath.h exist. We only support 128-bit
 dnl floats that work like GNU's quadmath.h __float128 type, which have the
 dnl precision stored in a symbol named FLT128_DIG.
 dnl
+dnl The MY_(LDBL|FLT128)_DIG variables are from configure.ac
+dnl
 AC_DEFUN([PAC_FC_LDBL_DIG],[
-AC_MSG_CHECKING([maximum decimal precision for C])
   AC_LANG_CONFTEST([
       AC_LANG_PROGRAM([
                 #include <float.h>
                 #include <stdio.h>
-                #define CHECK_FLOAT128 $ac_cv_sizeof___float128
-                #if CHECK_FLOAT128!=0
+                #if $HAVE___FLOAT128 != 0
                 #  if $INCLUDE_QUADMATH_H != 0
                 #    include <quadmath.h>
                 #  endif

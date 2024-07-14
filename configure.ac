@@ -794,41 +794,71 @@ AC_MSG_RESULT([$HDF_FORTRAN])
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## ----------------------------------------------------------------------
-  ## Check for __float128
+  ## __float128 checks
   ##
-  ## This is a GNU-specific floating-point type. In most cases, the
-  ## __float128 type can be used directly without any special headers, but
-  ## the floating-point constants usually require including quadmath.h
-  ## (instead of float.h).
+  ## If __float128 exists and we can determine its precision, we will use
+  ## it in the Fortran interface. The checks for this require that the
+  ## precision be specified via a symbol named FLT128_DIG, which might be
+  ## found in quadmath.h.
   ##
-  ## This is usually handled in software and is orders of magnitude slower
-  ## than hardware-supported floating-point math (Power systems can have
-  ## quad-precision hardware acceleration).
+  ## The checks here are based on the GNU __float128 extension type from
+  ## libquadmath, which is now part of gcc. Other compilers (clang, Intel)
+  ## also expose __float128 and/or __float128 may be an alias for some
+  ## other 128-bit floating point type.
   ##
-  HAVE_FLOAT128=0
-  MY_FLT128_DIG=0
-  MY_LDBL_DIG=0
-
-  AC_CHECK_SIZEOF([__float128])
+  ## 128-bit floating-point math is usually handled in software and is thus
+  ## orders of magnitude slower than hardware-supported floating-point math.
+  ##
+  AC_MSG_CHECKING([if __float128 exists])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[__float128 x; return 0;]])],
+               [HAVE___FLOAT128=1; AC_MSG_RESULT([yes])],
+               [HAVE___FLOAT128=0; AC_MSG_RESULT([no])]
+               )
 
   ## gcc puts symbols like FLT128_DIG in quadmath.h instead of float.h,
   ## so check for that before running the precision macro. Note that
   ## using AC_CHECK_HEADER instead of AC_CHECK_HEADERS keeps the
-  ## H5_HAVE_QUADMATH_H symbol out of pubconf.
+  ## H5_HAVE_QUADMATH_H symbol out of the public config header.
+  ##
   AC_CHECK_HEADER([quadmath.h], [INCLUDE_QUADMATH_H=1], [INCLUDE_QUADMATH_H=0])
 
+  ## ----------------------------------------------------------------------
+  ## Get the max decimal precision in C, checking both long double and
+  ## __float128 (if available)
+  ##
+  AC_MSG_CHECKING([maximum decimal precision for C])
+
+  MY_FLT128_DIG=0
+  MY_LDBL_DIG=0
+
+  ## Macro to compare long double and __float128 to see which has higher precision
   PAC_FC_LDBL_DIG
 
-  AC_SUBST([PAC_C_MAX_REAL_PRECISION])
-
+  ## Set results
   if test "$MY_FLT128_DIG" -gt "$MY_LDBL_DIG" ; then
-    AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
     PAC_C_MAX_REAL_PRECISION=$MY_FLT128_DIG
+    PRECISION_TYPE="(__float128)"
   else
     PAC_C_MAX_REAL_PRECISION=$MY_LDBL_DIG
+    PRECISION_TYPE="(long double)"
   fi
+  AC_MSG_RESULT([$PAC_C_MAX_REAL_PRECISION $PRECISION_TYPE])
+
+  ## Store results in config file
+  AC_SUBST([PAC_C_MAX_REAL_PRECISION])
   AC_DEFINE_UNQUOTED([PAC_C_MAX_REAL_PRECISION], $PAC_C_MAX_REAL_PRECISION, [Determine the maximum decimal precision in C])
-  AC_MSG_RESULT([$PAC_C_MAX_REAL_PRECISION])
+
+  ## Are we going to use __float128?
+  AC_MSG_CHECKING([if __float128 will be used in the Fortran wrappers])
+
+  if test "$MY_FLT128_DIG" -gt "$MY_LDBL_DIG" ; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 will be used in the Fortran wrappers])
+  else
+    ## Can't use __float128, but write an undef line anyway
+    AC_MSG_RESULT([no])
+    AH_TEMPLATE([HAVE_FLOAT128], [Determine if __float128 will be used in the Fortran wrappers])
+  fi
 
   ## ----------------------------------------------------------------------
   ## Define interface version
