@@ -586,9 +586,6 @@
 /* The size of `_Float16', as computed by sizeof. */
 #define H5_SIZEOF__FLOAT16 @H5_SIZEOF__FLOAT16@
 
-/* The size of `__float128', as computed by sizeof. */
-#define H5_SIZEOF___FLOAT128 @H5_SIZEOF___FLOAT128@
-
 /* Define if strict file format checks are enabled */
 #cmakedefine H5_STRICT_FORMAT_CHECKS @H5_STRICT_FORMAT_CHECKS@
 

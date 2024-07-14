@@ -644,15 +644,38 @@ endif()
 #-----------------------------------------------------------------------------
 
 if (HDF5_BUILD_FORTRAN)
-  HDF_CHECK_TYPE_SIZE(__float128 _SIZEOF___FLOAT128)
-  if (_SIZEOF___FLOAT128)
-    set (${HDF_PREFIX}_HAVE_FLOAT128 1)
-    set (${HDF_PREFIX}_SIZEOF___FLOAT128 ${_SIZEOF___FLOAT128})
+  # ----------------------------------------------------------------------
+  # __float128 checks
+  #
+  # If __float128 exists and we can determine its precision, we will use
+  # it in the Fortran interface. The checks for this require that the
+  # precision be specified via a symbol named FLT128_DIG, which might be
+  # found in quadmath.h.
+  #
+  # The checks here are based on the GNU __float128 extension type from
+  # libquadmath, which is now part of gcc. Other compilers (clang, Intel)
+  # also expose __float128 and/or __float128 may be an alias for some
+  # other 128-bit floating point type.
+  #
+  # 128-bit floating-point math is usually handled in software and is thus
+  # orders of magnitude slower than hardware-supported floating-point math.
+  #
+
+  #-----------------------------------------------------------------------------
+  # Is the __float128 type available?
+  #-----------------------------------------------------------------------------
+  HDF_FUNCTION_TEST (HAVE___FLOAT128)
+  # Convert TRUE/FALSE to 0/1 for preprocessor values in test code, below
+  if (${HAVE___FLOAT128})
+    set(C_HAVE_FLOAT128 1)
   else ()
-    set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-    set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
+    set(C_HAVE_FLOAT128 0)
   endif ()
 
+  #-----------------------------------------------------------------------------
+  # Get the max decimal precision in C, checking both long double and
+  # __float128 (if available)
+  #-----------------------------------------------------------------------------
   if (NOT CMAKE_CROSSCOMPILING)
     #-----------------------------------------------------------------------------
     # The provided CMake C macros don't provide a general compile/run function
@@ -673,7 +696,7 @@ if (HDF5_BUILD_FORTRAN)
         TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
             ${CMAKE_BINARY_DIR}
             ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
-            COMPILE_DEFINITIONS "-D_SIZEOF___FLOAT128=${H5_SIZEOF___FLOAT128};-D_HAVE_QUADMATH_H=${H5_HAVE_QUADMATH_H}"
+            COMPILE_DEFINITIONS "-D_HAVE_QUADMATH_H=${H5_HAVE_QUADMATH_H}"
             COMPILE_OUTPUT_VARIABLE COMPILEOUT
             ${_RUN_OUTPUT_VARIABLE} OUTPUT_VAR
         )
@@ -710,8 +733,7 @@ if (HDF5_BUILD_FORTRAN)
         "
 #include <float.h>\n\
 #include <stdio.h>\n\
-#define CHECK_FLOAT128 _SIZEOF___FLOAT128\n\
-#if CHECK_FLOAT128!=0\n\
+#if ${C_HAVE_FLOAT128}\n\
 #  if ${INCLUDE_QUADMATH_H}!=0\n\
 #    include <quadmath.h>\n\
 #  endif\n\
@@ -732,19 +754,21 @@ int main(void) {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\n
     C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES PROG_OUTPUT4)
     message (STATUS "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
 
-    # dnl The output from the above program will be:
-    # dnl  -- long double decimal precision  --  __float128 decimal precision
+    # The output from the above program will be:
+    #   -- long double decimal precision  --  __float128 decimal precision
 
-    list (GET PROG_OUTPUT4 0 H5_LDBL_DIG)
-    list (GET PROG_OUTPUT4 1 H5_FLT128_DIG)
+    list (GET PROG_OUTPUT4 0 MY_LDBL_DIG)
+    list (GET PROG_OUTPUT4 1 MY_FLT128_DIG)
 
-    if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL "0" OR FLT128_DIG EQUAL "0")
-      set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-      set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
-      set (_PAC_C_MAX_REAL_PRECISION ${H5_LDBL_DIG})
+    # Set configure output and behavior
+    if (${HAVE___FLOAT128} AND (${MY_FLT128_DIG} GREATER ${MY_LDBL_DIG}))
+      set (${HDF_PREFIX}_HAVE_FLOAT128 1)
+      set (_PAC_C_MAX_REAL_PRECISION ${MY_FLT128_DIG})
     else ()
-      set (_PAC_C_MAX_REAL_PRECISION ${H5_FLT128_DIG})
+      # No __float128 or the precision of __float128 <= that of long double
+      set (_PAC_C_MAX_REAL_PRECISION ${MY_LDBL_DIG})
     endif ()
+
     if (NOT ${_PAC_C_MAX_REAL_PRECISION})
       set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION 0)
     else ()

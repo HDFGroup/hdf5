@@ -363,13 +363,13 @@ set (PROG_SRC3
   "
 )
 FORTRAN_RUN ("SIZEOF NATIVE KINDs" ${PROG_SRC3} XX YY PAC_SIZEOF_NATIVE_KINDS_RESULT PROG_OUTPUT3)
-# dnl The output from the above program will be:
-# dnl    -- LINE 1 --  sizeof INTEGER
-# dnl    -- LINE 2 --  kind of INTEGER
-# dnl    -- LINE 3 --  sizeof REAL
-# dnl    -- LINE 4 --  kind of REAL
-# dnl    -- LINE 5 --  sizeof DOUBLE PRECISION
-# dnl    -- LINE 6 --  kind of DOUBLE PRECISION
+# The output from the above program will be:
+#    -- LINE 1 --  sizeof INTEGER
+#    -- LINE 2 --  kind of INTEGER
+#    -- LINE 3 --  sizeof REAL
+#    -- LINE 4 --  kind of REAL
+#    -- LINE 5 --  sizeof DOUBLE PRECISION
+#    -- LINE 6 --  kind of DOUBLE PRECISION
 #
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
 string (REGEX REPLACE "[\r\n]+" ";" PROG_OUTPUT3 "${PROG_OUTPUT3}")
@@ -402,11 +402,10 @@ endif ()
 
 set (${HDF_PREFIX}_FORTRAN_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
 
-# remove the invalid kind from the list
-if (NOT(${${HDF_PREFIX}_SIZEOF___FLOAT128} EQUAL 0))
-   if (NOT(${${HDF_PREFIX}_SIZEOF___FLOAT128} EQUAL ${max_real_fortran_sizeof})
-       AND NOT(${${HDF_PREFIX}_FORTRAN_SIZEOF_LONG_DOUBLE} EQUAL ${max_real_fortran_sizeof})
-       # account for the fact that the C compiler can have 16-byte __float128 and the fortran compiler only has 8-byte doubles,
+# Remove the invalid kind from the list
+if (${${HDF_PREFIX}_HAVE_FLOAT128})
+   if (NOT(16 EQUAL ${max_real_fortran_sizeof}) AND NOT(${${HDF_PREFIX}_FORTRAN_SIZEOF_LONG_DOUBLE} EQUAL ${max_real_fortran_sizeof})
+       # Account for the fact that the C compiler can have 16-byte __float128 and the fortran compiler only has 8-byte doubles,
        # so we don't want to remove the 8-byte fortran doubles.
        AND NOT(${PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF} EQUAL ${max_real_fortran_sizeof}))
      message (WARNING "
