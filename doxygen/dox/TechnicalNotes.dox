@@ -12,6 +12,8 @@
 \li \ref VDS
 \li \ref RELVERSION
 \li \ref VFL
+\li <a href="https://github.com/HDFGroup/arch-doc/blob/main/An_Overview_of_the_HDF5_Library_Architecture.v2.pdf">HDF5 Library Architecture Overview</a>
+\li \ref VOL_Connector
 
  */
 
