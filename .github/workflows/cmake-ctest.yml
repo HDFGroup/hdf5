@@ -1,6 +1,6 @@
 name: hdf5 dev ctest runs
 
-# Controls when the action will run. Triggers the workflow on a call
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
@@ -26,8 +26,6 @@ on:
 permissions:
   contents: read
 
-# A workflow run is made up of one or more jobs that can run sequentially or
-# in parallel
 jobs:
   build_and_test_win:
   # Windows w/ MSVC + CMake

@@ -1,5 +1,6 @@
 name: hdf5 dev CMake icx
 
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
@@ -17,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get Sources (Linux)
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
 
       - name: Install Dependencies (Linux)
         shell: bash
@@ -75,7 +76,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Get Sources (Windows)
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
 
       - name: Install Dependencies (Windows)
         run: choco install ninja

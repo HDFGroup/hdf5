@@ -1,5 +1,6 @@
 name: cve dev
 
+# Triggers the workflow on push or pull request or on demand
 on:
   workflow_dispatch:
   push:
@@ -27,7 +28,7 @@ jobs:
     name: CVE regression
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4.1.7
 
       - name: Install Autotools Dependencies (Linux)
         run: |
@@ -40,7 +41,7 @@ jobs:
           make
           sudo make install
       - name: Checkout CVE test repository
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
         with:
           repository: HDFGroup/cve_hdf5
           path: cve_hdf5

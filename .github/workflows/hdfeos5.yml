@@ -1,5 +1,6 @@
 name: hdfeos5 dev
 
+# Triggers the workflow on push or pull request or on demand
 on:
   workflow_dispatch:
   push:
@@ -27,7 +28,7 @@ jobs:
     name: Build hdfeos5
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4.1.7
 
       - name: Install Autotools Dependencies (Linux)
         run: |

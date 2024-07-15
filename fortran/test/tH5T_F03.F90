@@ -1090,10 +1090,8 @@ END SUBROUTINE test_array_compound_atomic
     CALL check("H5Dcreate_f",error, total_error)
     CALL H5Dcreate_f(file_id, dsetnamer8, h5kind_to_type(real_kind_15,H5_REAL_KIND), dspace_id, dset_idr8, error)
     CALL check("H5Dcreate_f",error, total_error)
-!#ifdef H5_HAVE_FLOAT128
     CALL H5Dcreate_f(file_id, dsetnamer16, h5kind_to_type(real_kind_31,H5_REAL_KIND), dspace_id, dset_idr16, error)
     CALL check("H5Dcreate_f",error, total_error)
-!#endif
   !
   ! Write the dataset.
   !
@@ -1123,11 +1121,9 @@ END SUBROUTINE test_array_compound_atomic
     f_ptr = C_LOC(dset_data_r15(1))
     CALL h5dwrite_f(dset_idr8, h5kind_to_type(real_kind_15,H5_REAL_KIND), f_ptr, error)
     CALL check("H5Dwrite_f",error, total_error)
-!#ifdef H5_HAVE_FLOAT128
     f_ptr = C_LOC(dset_data_r31(1))
     CALL h5dwrite_f(dset_idr16, h5kind_to_type(real_kind_31,H5_REAL_KIND), f_ptr, error)
     CALL check("H5Dwrite_f",error, total_error)
-!#endif
   !
   ! Close the file
   !

@@ -1,6 +1,6 @@
 name: hdf5 dev CMake CI
 
-# Controls when the action will run. Triggers the workflow on a call
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
@@ -17,9 +17,6 @@ on:
 permissions:
   contents: read
 
-# A workflow run is made up of one or more jobs that can run sequentially or
-# in parallel. We just have one job, but the matrix items defined below will
-# run in parallel.
 jobs:
 
   # A workflow that builds the library and runs all the tests
@@ -36,6 +33,7 @@ jobs:
         name:
           - "Windows MSVC"
           - "Ubuntu gcc"
+          - "MacOS-13 Clang"
           - "MacOS Clang"
 
         # This is where we list the bulk of the options for each configuration.
@@ -85,15 +83,35 @@ jobs:
             generator: "-G Ninja"
             run_tests: true
 
+            # MacOS w/ Clang + CMake
+            #
+            # We could also build with the Autotools via brew installing them,
+            # but that seems unnecessary
+          - name: "MacOS-13 Clang"
+            os: macos-13
+            cpp: OFF
+            fortran: ON
+            java: ON
+            docs: ON
+            libaecfc: ON
+            localaec: OFF
+            zlibfc: ON
+            localzlib: OFF
+            parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: OFF
+            ros3_vfd: OFF
+            generator: "-G Ninja"
+            run_tests: true
 
           # MacOS w/ Clang + CMake
           #
           # We could also build with the Autotools via brew installing them,
           # but that seems unnecessary
           - name: "MacOS Clang"
-            os: macos-13
-            cpp: ON
-            fortran: OFF
+            os: macos-latest
+            cpp: OFF
+            fortran: ON
             java: ON
             docs: ON
             libaecfc: ON
@@ -137,7 +155,16 @@ jobs:
 
       - name: Install Dependencies (macOS)
         run: brew install ninja
-        if: matrix.os == 'macos-13'
+        if: ${{ matrix.os == 'macos-13' || matrix.os == 'macos-latest' }}
+
+        # symlinks the compiler executables to a common location 
+      - name: Install GNU Fortran (macOS)
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+            compiler: gcc
+            version: 12
+        if: ${{ matrix.os == 'macos-13' || matrix.os == 'macos-latest' }}
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
@@ -153,7 +180,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
 
       #
       # CMAKE CONFIGURE
@@ -264,4 +291,4 @@ jobs:
               name: tgz-osx-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if: ${{ (matrix.os == 'macos-13') && (inputs.thread_safety != 'TS') }}
+        if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}

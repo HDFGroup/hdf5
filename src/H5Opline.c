@@ -88,6 +88,7 @@ const unsigned H5O_pline_ver_bounds[] = {
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V110 */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V112 */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V114 */
+    H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V116 */
     H5O_PLINE_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -301,15 +302,18 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
             name        = NULL;
         } /* end if */
         else {
-            H5Z_class2_t *cls; /* Filter class */
-
             /*
              * Get the filter name.  If the pipeline message has a name in it then
              * use that one.  Otherwise try to look up the filter and get the name
              * as it was registered.
              */
-            if (NULL == (name = filter->name) && (cls = H5Z_find(filter->id)))
-                name = cls->name;
+            if (NULL == (name = filter->name)) {
+                H5Z_class2_t *cls; /* Filter class */
+
+                H5Z_find(true, filter->id, &cls);
+                if (cls)
+                    name = cls->name;
+            }
             name_length = name ? strlen(name) + 1 : 0;
 
             /* Filter name length */
@@ -472,11 +476,14 @@ H5O__pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
         if (pline->version > H5O_PLINE_VERSION_1 && pline->filter[i].id < H5Z_FILTER_RESERVED)
             name_len = 0;
         else {
-            H5Z_class2_t *cls; /* Filter class */
-
             /* Get the name of the filter, same as done with H5O__pline_encode() */
-            if (NULL == (name = pline->filter[i].name) && (cls = H5Z_find(pline->filter[i].id)))
-                name = cls->name;
+            if (NULL == (name = pline->filter[i].name)) {
+                H5Z_class2_t *cls; /* Filter class */
+
+                H5Z_find(true, pline->filter[i].id, &cls);
+                if (cls)
+                    name = cls->name;
+            }
             name_len = name ? strlen(name) + 1 : 0;
         } /* end else */
 
