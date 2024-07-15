@@ -292,8 +292,8 @@ herr_t
 H5SM__get_index(const H5SM_master_table_t *table, unsigned type_id, ssize_t *idx)
 {
     unsigned type_flag;
-    ssize_t  found_index  = -1;
-    herr_t   ret_value    = SUCCEED; /* Return value */
+    ssize_t  found_index = -1;
+    herr_t   ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
