@@ -1454,15 +1454,16 @@ herr_t
 H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, char *signed_headers_dest,
                                    int _sh_size, hrb_t *http_request)
 {
-    hrb_node_t *node         = NULL;
-    const char *query_params = ""; /* unused at present */
-    herr_t      ret_value    = SUCCEED;
-    int         ret          = 0;
-    size_t      cr_size      = (size_t)_cr_size;
-    size_t      sh_size      = (size_t)_sh_size;
-    size_t      cr_len       = 0; /* working length of canonical request str */
-    size_t      sh_len       = 0; /* working length of signed headers str */
-    char        tmpstr[H5FD_ROS3_MAX_SECRET_TOK_LEN];
+    hrb_node_t  *node         = NULL;
+    const char  *query_params = ""; /* unused at present */
+    herr_t       ret_value    = SUCCEED;
+    int          ret          = 0;
+    size_t       cr_size      = (size_t)_cr_size;
+    size_t       sh_size      = (size_t)_sh_size;
+    size_t       cr_len       = 0; /* working length of canonical request str */
+    size_t       sh_len       = 0; /* working length of signed headers str */
+    char        *tmpstr       = NULL;
+    const size_t TMP_STR_SIZE = sizeof(char) * H5FD_ROS3_MAX_SECRET_TOK_LEN;
 
     /* "query params" refers to the optional element in the URL, e.g.
      *     http://bucket.aws.com/myfile.txt?max-keys=2&prefix=J
@@ -1491,18 +1492,20 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
     if (cr_len >= cr_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not enough space in canonical request");
 
-    /* TODO: compiler warning */
     ret = snprintf(canonical_request_dest, (cr_size - 1), "%s\n%s\n%s\n", http_request->verb,
                    http_request->resource, query_params);
     if (ret < 0 || (size_t)ret >= cr_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to compose canonical request first line");
 
+    if (NULL == (tmpstr = (char *)H5MM_calloc(TMP_STR_SIZE)))
+        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "unable to allocate space for temp string");
+
     /* write in canonical headers, building signed headers concurrently */
     node = http_request->first_header; /* assumed sorted */
     while (node != NULL) {
 
-        ret = snprintf(tmpstr, sizeof(tmpstr), "%s:%s\n", node->lowername, node->value);
-        if (ret < 0 || ret >= (int)sizeof(tmpstr))
+        ret = snprintf(tmpstr, TMP_STR_SIZE, "%s:%s\n", node->lowername, node->value);
+        if (ret < 0 || ret >= (int)TMP_STR_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to concatenate HTTP header %s:%s",
                         node->lowername, node->value);
         cr_len += strlen(tmpstr);
@@ -1510,8 +1513,8 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not enough space in canonical request");
         strcat(canonical_request_dest, tmpstr);
 
-        ret = snprintf(tmpstr, sizeof(tmpstr), "%s;", node->lowername);
-        if (ret < 0 || ret >= (int)sizeof(tmpstr))
+        ret = snprintf(tmpstr, TMP_STR_SIZE, "%s;", node->lowername);
+        if (ret < 0 || ret >= (int)TMP_STR_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to append semicolon to lowername %s",
                         node->lowername);
         sh_len += strlen(tmpstr);
@@ -1536,6 +1539,8 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
     strcat(canonical_request_dest, EMPTY_SHA256);
 
 done:
+    free(tmpstr);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_aws_canonical_request() */
 

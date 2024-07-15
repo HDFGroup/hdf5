@@ -8,7 +8,9 @@ Please refer to their <a href="https://gitlab.com/libeigen/eigen">GitLab reposit
 and the online version of their
 <a href="http://eigen.tuxfamily.org/dox/">Doxygen-based documentation</a>.
 Not only does Eigen set a standard as a piece of software, but also as an example
-of <em>documentation done right</em>.
+of <em>documentation done right</em>. And kudos to the
+<a href="https://github.com/jothepro/doxygen-awesome-css">Doxygen Awesome project</a>
+for their style sheets.
 
 \section about_documentation Documentation about Documentation
 
@@ -113,15 +115,5 @@ be
 \verbatim
 https://\RFCURL/my_great_rfc_name.pdf
 \endverbatim
-
-\subsection hosting How Do Updates and Changes Get Published?
-
-Currently, the files underlying this documentation website are stored in an
-bucket on AWS S3. The top-level bucket is <pre>s3://docs.hdfgroup.org/hdf5/</pre>
-There are folders for the <tt>development</tt> branch and all supported release
-version.
-
-Talk to your friendly IT-team if you need write access, or you need someone to
-push an updated version for you!
 
 */

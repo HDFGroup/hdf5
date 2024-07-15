@@ -344,7 +344,7 @@ typedef struct {
 typedef herr_t (*H5T_operator_t)(H5T_t *dt, void *op_data /*in,out*/);
 
 /*  Array of versions for Datatype */
-H5_DLLVAR const unsigned H5O_dtype_ver_bounds[H5F_LIBVER_NBOUNDS];
+H5_DLLVAR const unsigned H5O_dtype_ver_bounds[H5F_LIBVER_NBOUNDS + 1];
 
 /*
  * Alignment constraints for HDF5 types.  Accessing objects of these
