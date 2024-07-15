@@ -110,7 +110,7 @@ jobs:
           # but that seems unnecessary
           - name: "MacOS Clang"
             os: macos-latest
-            cpp: OFF
+            cpp: ON
             fortran: ON
             java: ON
             docs: ON
