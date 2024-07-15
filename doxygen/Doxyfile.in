@@ -689,6 +689,8 @@ FILE_PATTERNS  = H5*public.h H5*module.h H5*develop.h H5FD*.h \
                  *.F90 \
                  *.dox \
                  *.md \
+                 h5copy.h h5diff_main.h h5dump.h h5format_convert.h h5import.h h5jam.h h5ls.h h5repack.h h5stat.h \
+                 h5watch.h h5clear.h h5debug.h h5delete.h h5mkgrp.h h5repart.h \
                  H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5CommonFG.h H5CompType.h \
                  H5DataSet.h H5DataSpace.h H5DataType.h H5OcreatProp.h H5DaccProp.h H5DcreatProp.h \
                  H5DxferProp.h H5EnumType.h H5Exception.h H5FaccProp.h H5FcreatProp.h H5File.h \
@@ -1283,7 +1285,7 @@ ECLIPSE_DOC_ID         = org.doxygen.Project
 # The default value is: NO.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-DISABLE_INDEX          = YES
+DISABLE_INDEX          = NO
 
 # The GENERATE_TREEVIEW tag is used to specify whether a tree-like index
 # structure should be generated to display hierarchical information. If the tag

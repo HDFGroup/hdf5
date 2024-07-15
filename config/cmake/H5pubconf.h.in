@@ -143,7 +143,7 @@
 /* Determine if _Float16 is available */
 #cmakedefine H5_HAVE__FLOAT16 @H5_HAVE__FLOAT16@
 
-/* Determine if __float128 is available */
+/* Determine if __float128 will be used in the Fortran wrappers */
 #cmakedefine H5_HAVE_FLOAT128 @H5_HAVE_FLOAT128@
 
 /* Define to 1 if you have the `flock' function. */
@@ -263,9 +263,6 @@
 
 /* Define to 1 if you have the <pwd.h> header file. */
 #cmakedefine H5_HAVE_PWD_H @H5_HAVE_PWD_H@
-
-/* Define to 1 if you have the <quadmath.h> header file. */
-#cmakedefine H5_HAVE_QUADMATH_H @H5_HAVE_QUADMATH_H@
 
 /* Define whether the Read-Only S3 virtual file driver (VFD) should be
    compiled */
@@ -586,14 +583,8 @@
 /* The size of `unsigned', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_UNSIGNED @H5_SIZEOF_UNSIGNED@
 
-/* The size of `_Quad', as computed by sizeof. */
-#define H5_SIZEOF__QUAD @H5_SIZEOF__QUAD@
-
 /* The size of `_Float16', as computed by sizeof. */
 #define H5_SIZEOF__FLOAT16 @H5_SIZEOF__FLOAT16@
-
-/* The size of `__float128', as computed by sizeof. */
-#define H5_SIZEOF___FLOAT128 @H5_SIZEOF___FLOAT128@
 
 /* Define if strict file format checks are enabled */
 #cmakedefine H5_STRICT_FORMAT_CHECKS @H5_STRICT_FORMAT_CHECKS@

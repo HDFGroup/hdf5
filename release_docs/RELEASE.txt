@@ -777,6 +777,10 @@ New Features
 
     Tools:
     ------
+    - Add doxygen files for the tools
+
+      Implement the tools usage text as pages in doxygen.
+
     - Add option to adjust the page buffer size in tools
 
       The page buffer cache size for a file can now be adjusted using the
