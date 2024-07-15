@@ -47,6 +47,13 @@ New Features
 
     Configuration:
     -------------
+    - Corrected usage of FetchContent in the HDFLibMacros.cmake file.
+    
+      CMake version 3.30 changed the behavior of the FetchContent module to deprecate
+      the use of FetchContent_Populate() in favor of FetchContent_MakeAvailable(). Therefore,
+      the copying of HDF specialized CMakeLists.txt files to the dependent project's source
+      was implemented in the FetchContent_Declare() call.
+
     - Moved examples to the HDF5Examples folder in the source tree.
 
       Moved the C++ and Fortran examples from the examples folder to the HDF5Examples
