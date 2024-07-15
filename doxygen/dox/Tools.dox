@@ -1,0 +1,29 @@
+/** @page CommandTools Command Line Tools for HDF5 Files
+
+Navigate back: \ref index "Main"
+<hr>
+
+
+\section sec_cltools Command Line Tools for HDF5 Files
+There are several command line tools provided with HDF5.
+\li \ref sec_cltools_h5copy
+\li \ref sec_cltools_h5diff
+\li \ref sec_cltools_h5dump
+\li \ref sec_cltools_h5format_convert
+\li \ref sec_cltools_h5import
+\li \ref sec_cltools_h5jam
+\li \ref sec_cltools_h5ls
+\li \ref sec_cltools_h5repack
+\li \ref sec_cltools_h5stat
+\li \ref sec_cltools_h5clear
+\li \ref sec_cltools_h5debug
+\li \ref sec_cltools_h5delete
+\li \ref sec_cltools_h5mkgrp
+\li \ref sec_cltools_h5repart
+\li \ref sec_cltools_h5watch
+
+
+<hr>
+Navigate back: \ref index "Main"
+
+*/
