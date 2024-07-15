@@ -292,8 +292,8 @@ herr_t
 H5SM__get_index(const H5SM_master_table_t *table, unsigned type_id, ssize_t *idx)
 {
     unsigned type_flag;
-    ssize_t  indx      = -1;
-    herr_t   ret_value = SUCCEED; /* Return value */
+    ssize_t  found_index  = -1;
+    herr_t   ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -306,12 +306,12 @@ H5SM__get_index(const H5SM_master_table_t *table, unsigned type_id, ssize_t *idx
      */
     for (size_t x = 0; x < table->num_indexes; ++x)
         if (table->indexes[x].mesg_types & type_flag) {
-            indx = (ssize_t)x;
+            found_index = (ssize_t)x;
             break;
         }
 
     /* Set output parameter */
-    *idx = indx;
+    *idx = found_index;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
