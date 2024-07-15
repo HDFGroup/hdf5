@@ -1,7 +1,6 @@
 #! /bin/sh
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -11,14 +10,49 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
-srcdir=@srcdir@
+# This file is for use of h5cc created with the CMake process
+# HDF5_HOME is expected to be set
 
+srcdir=..
+builddir=.
+verbose=yes
+nerrors=0
 
-case $FC in
-*/*)    H5DUMP=`echo $FC | sed -e 's/\/[^/]*$/\/h5dump/'`;
-        test -x $H5DUMP || H5DUMP=h5dump;;
-*)      H5DUMP=h5dump;;
-esac
+# HDF5 compile commands, assuming they are in your $PATH.
+H5FC=$HDF5_HOME/bin/h5fc
+LD_LIBRARY_PATH=$HDF5_HOME/lib
+export LD_LIBRARY_PATH
+
+if ! test -f $H5FC; then
+    echo "Set paths for H5FC and LD_LIBRARY_PATH in test.sh"
+    echo "Set environment variable HDF5_HOME to the hdf5 install dir"
+    echo "h5fc was not found at $H5FC"
+    exit $EXIT_FAILURE
+fi
+
+H5DUMP=`echo $H5FC | sed -e 's/\/[^/]*$/\/h5dump/'`;
+H5_LIBVER=$($H5FC -showconfig | grep -i "HDF5 Version:" | sed 's/^.* //g' | sed 's/[-].*//g')
+H5_APIVER=$($H5FC -showconfig | grep -i "Default API mapping:" | sed 's/^.* //g' | sed 's/v//g' | sed 's/1/1_/')
+
+H5_MAJORVER=$(echo $H5_LIBVER | cut -f1 -d'.'  | sed -E 's/\./_/g')
+H5_MINORVER=$(echo $H5_LIBVER | cut -f2 -d'.'  | sed -E 's/\./_/g')
+H5_RELEASEVER=$(echo $H5_LIBVER | cut -f3 -d'.'  | sed -E 's/\./_/g')
+H5_LIBVER_DIR=$H5_MAJORVER$H5_MINORVER
+
+# Shell commands used in Makefiles
+RM="rm -rf"
+DIFF="diff -c"
+CMP="cmp -s"
+GREP='grep'
+CP="cp -p"  # Use -p to preserve mode,ownership,timestamps
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
+
+# setup plugin path
+ENVCMD="env HDF5_PLUGIN_PATH=$LD_LIBRARY_PATH/plugin"
+
+TESTDIR=$builddir
 
 
 case `echo "testing\c"; echo 1,2,3`,`echo -n testing; echo 1,2,3` in
@@ -47,8 +81,6 @@ version_compare() {
   fi
 }
 
-H5_LIBVER=@H5_LIBVER@
-H5_LIBVER_DIR=@H5_LIBVER_DIR@
 
 topics="alloc \
   checksum \
@@ -73,6 +105,11 @@ return_val=0
 
 #Remove external data file from h5ex_d_extern
 rm -f h5ex_d_extern.data
+
+for topic in $topics
+do
+    $H5FC $srcdir/h5ex_d_$topic.F90 -o h5ex_d_$topic
+done
 
 for topic in $topics
 do
@@ -152,6 +189,11 @@ else
 fi
 
 topics18="nbit"
+for topic in $topics18
+do
+    $H5FC $srcdir/h5ex_d_$topic.F90 -o h5ex_d_$topic
+done
+
 for topic in $topics18
 do
     fname=h5ex_d_$topic

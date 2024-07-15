@@ -1,7 +1,6 @@
 #! /bin/sh
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -11,14 +10,49 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
-srcdir=@srcdir@
+# This file is for use of h5cc created with the CMake process
+# HDF5_HOME is expected to be set
 
+srcdir=..
+builddir=.
+verbose=yes
+nerrors=0
 
-case $FC in
-*/*)    H5DUMP=`echo $FC | sed -e 's/\/[^/]*$/\/h5dump/'`;
-        test -x $H5DUMP || H5DUMP=h5dump;;
-*)      H5DUMP=h5dump;;
-esac
+# HDF5 compile commands, assuming they are in your $PATH.
+H5CC=$HDF5_HOME/bin/h5cc
+LD_LIBRARY_PATH=$HDF5_HOME/lib
+export LD_LIBRARY_PATH
+
+if ! test -f $H5CC; then
+    echo "Set paths for H5CC and LD_LIBRARY_PATH in test.sh"
+    echo "Set environment variable HDF5_HOME to the hdf5 install dir"
+    echo "h5cc was not found at $H5CC"
+    exit $EXIT_FAILURE
+fi
+
+H5DUMP=`echo $H5CC | sed -e 's/\/[^/]*$/\/h5dump/'`;
+H5_LIBVER=$($H5CC -showconfig | grep -i "HDF5 Version:" | sed 's/^.* //g' | sed 's/[-].*//g')
+H5_APIVER=$($H5CC -showconfig | grep -i "Default API mapping:" | sed 's/^.* //g' | sed 's/v//g' | sed 's/1/1_/')
+
+H5_MAJORVER=$(echo $H5_LIBVER | cut -f1 -d'.'  | sed -E 's/\./_/g')
+H5_MINORVER=$(echo $H5_LIBVER | cut -f2 -d'.'  | sed -E 's/\./_/g')
+H5_RELEASEVER=$(echo $H5_LIBVER | cut -f3 -d'.'  | sed -E 's/\./_/g')
+H5_LIBVER_DIR=$H5_MAJORVER$H5_MINORVER
+
+# Shell commands used in Makefiles
+RM="rm -rf"
+DIFF="diff -c"
+CMP="cmp -s"
+GREP='grep'
+CP="cp -p"  # Use -p to preserve mode,ownership,timestamps
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
+
+# setup plugin path
+ENVCMD="env HDF5_PLUGIN_PATH=$LD_LIBRARY_PATH/plugin"
+
+TESTDIR=$builddir
 
 
 case `echo "testing\c"; echo 1,2,3`,`echo -n testing; echo 1,2,3` in
@@ -47,26 +81,18 @@ version_compare() {
   fi
 }
 
-H5_LIBVER=@H5_LIBVER@
-H5_LIBVER_DIR=@H5_LIBVER_DIR@
 
-topics="alloc \
-  checksum \
-  chunk \
-  compact \
-  extern  \
-  fillval \
-  gzip \
-  hyper \
-  rdwr \
-  soint \
-  szip \
-  unlimmod"
+topics="alloc checksum chunk compact extern fillval gzip hyper \
+rdwr shuffle szip unlimadd unlimgzip unlimmod"
+topics18=""
 
-FORTRAN_2003_CONDITIONAL_F="@FORTRAN_2003_CONDITIONAL_F@"
-
-if [ "$FORTRAN_2003_CONDITIONAL_F" = "Xyes" ]; then
-   topics="$topics rdwr_kind"
+version_compare "$H5_LIBVER" "1.8.0"
+# check if HDF5 version is < 1.8.0
+if [ "$version_lt" = 1 ]; then
+    dir16="/16"
+else
+    dir16=""
+    topics18="nbit sofloat soint transform"
 fi
 
 return_val=0
@@ -76,31 +102,21 @@ rm -f h5ex_d_extern.data
 
 for topic in $topics
 do
+    $H5CC $srcdir/h5ex_d_$topic.c -o h5ex_d_$topic
+done
+
+for topic in $topics
+do
     fname=h5ex_d_$topic
-    $ECHO_N "Testing FORTRAN/H5D/$fname...$ECHO_C"
-    exout ./$fname >tmp.test
+    $ECHO_N "Testing C/H5D/$fname...$ECHO_C"
+    exout .$dir16/$fname >tmp.test
     status=$?
     if test $status -eq 1
     then
         echo "  Unsupported feature"
         status=0
     else
-        if [ "$topic" = "alloc" ]; then
-            # Check if the only difference is the size of the unallocated space. This
-            # was fixed later in HDF5 to be of zero size.
-            status=0
-            diff tmp.test $srcdir/tfiles/18/$fname.tst > tmp.diff
-            if [ $? -ne 0 ]; then
-               NumOfFinds=`grep -c "0 bytes" tmp.diff | wc -l`
-               rm -f tmp.diff
-               if [ "$NumOfFinds" -gt "1" ]; then
-                   status=1
-               fi
-            fi
-        else
-            cmp -s tmp.test $srcdir/tfiles/18/$fname.tst
-            status=$?
-        fi
+        cmp -s tmp.test $srcdir/tfiles/16/$fname.tst
         status=$?
         if test $status -ne 0
         then
@@ -108,24 +124,11 @@ do
         else
           dumpout $fname.h5 >tmp.test
           rm -f $fname.h5
-          cmp -s tmp.test $srcdir/tfiles/18/$fname.ddl
+          cmp -s tmp.test $srcdir/tfiles/16/$fname.ddl
           status=$?
           if test $status -ne 0
-          then 
-             # test to see if the only difference is because of big-endian and little-endian
-             diff tmp.test $srcdir/tfiles/18/$fname.ddl > tmp.diff
-             echo " "
-             NumOfFinds=`grep -c "DATATYPE" tmp.diff`
-             NumOfFinds=`expr $NumOfFinds \* 2`
-             NumOfLines=`wc -l <tmp.diff`
-             rm -f tmp.diff
-             if test $NumOfLines -gt $NumOfFinds 
-             then
-                echo "  FAILED!"
-             else
-                echo "  *Inconsequential difference* ... Passed"
-                status=0
-             fi
+          then
+              echo "  FAILED!"
           else
               echo "  Passed"
           fi
@@ -143,15 +146,22 @@ version_compare "$H5_LIBVER" "1.8.23"
 if [ "$version_lt" = 1 ]; then
     USE_ALT="22"
 else
-# check if HDF5 version is < 1.10.8
-  version_compare "$H5_LIBVER" "1.10.8"
-  if [ "$version_lt" = 1 ]; then
-    USE_ALT="07"
-    nbitdir="110"
+# check if HDF5 version is >= 1.10.0 and < 1.10.8
+  version_compare "$H5_LIBVER" "1.10.0"
+  if [ "$version_lt" = 0 ]; then
+    version_compare "$H5_LIBVER" "1.10.8"
+    if [ "$version_lt" = 1 ]; then
+      USE_ALT="07"
+      nbitdir="110"
+    fi
   fi
 fi
 
-topics18="nbit"
+for topic in $topics18
+do
+    $H5CC $srcdir/h5ex_d_$topic.c -o h5ex_d_$topic
+done
+
 for topic in $topics18
 do
     fname=h5ex_d_$topic
@@ -204,6 +214,8 @@ do
 done
 
 
+#Remove external data file from h5ex_d_extern
+rm -f h5ex_d_extern.data
 rm -f tmp.test
-echo "$return_val tests failed in FORTRAN/H5D/"
+echo "$return_val tests failed in C/H5D/"
 exit $return_val

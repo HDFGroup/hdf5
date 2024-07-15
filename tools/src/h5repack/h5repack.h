@@ -13,6 +13,231 @@
 #ifndef H5REPACK_H
 #define H5REPACK_H
 
+/** \page H5TOOL_RP_UG The HDF5 h5repack Tool
+ *
+ * \section sec_cltools_h5repack h5repack
+ *
+ * \subsection subsec_cltools_h5repack_intro Introduction
+ *  With h5repack, you can write an HDF5 file to a new file and change the layout for objects in the new file.
+ *
+ * \subsection subsec_cltools_h5repack_usage Usage
+ * <h4>h5repack [OPTIONS] file1 file2</h4>
+ * \li <strong>file1</strong> Input HDF5 File
+ * \li <strong>file2</strong> Output HDF5 File
+ *
+ * \subsection subsec_cltools_h5repack_error Error Report Option
+ * \li <strong>--enable-error-stack</strong>    Prints messages from the HDF5 error stack as they occur.
+ *             Optional value 2 also prints file open errors, --enable-error-stack=2.
+ *
+ * \subsection subsec_cltools_h5repack_options Options
+ * \li <strong>--help</strong>           Print a usage message and exit
+ * \li <strong>--verbose=N</strong>      Verbose mode, print object information.
+ *        N - is an integer greater than 1, 2 displays read/write timing
+ * \li <strong>--version</strong>        Print the library version number and exit
+ * \li <strong>--native</strong>         Use a native HDF5 type when repacking
+ * \li <strong>--page-buffer-size=N</strong>  Set the page buffer cache size, N=non-negative integers
+ * \li <strong>--src-vol-value</strong>  Value (ID) of the VOL connector to use for opening the
+ *                             input HDF5 file specified
+ * \li <strong>--src-vol-name</strong>   Name of the VOL connector to use for opening the input
+ *                             HDF5 file specified
+ * \li <strong>--src-vol-info</strong>   VOL-specific info to pass to the VOL connector used for
+ *                             opening the input HDF5 file specified
+ * \li <strong>--dst-vol-value</strong>  Value (ID) of the VOL connector to use for opening the
+ *                             output HDF5 file specified
+ * \li <strong>--dst-vol-name</strong>   Name of the VOL connector to use for opening the output
+ *                             HDF5 file specified
+ * \li <strong>--dst-vol-info</strong>   VOL-specific info to pass to the VOL connector used for
+ *                             opening the output HDF5 file specified
+ * \li <strong>--src-vfd-value</strong>  Value (ID) of the VFL driver to use for opening the
+ *                             input HDF5 file specified
+ * \li <strong>--src-vfd-name</strong>   Name of the VFL driver to use for opening the input
+ *                             HDF5 file specified
+ * \li <strong>--src-vfd-info</strong>   VFD-specific info to pass to the VFL driver used for
+ *                             opening the input HDF5 file specified
+ * \li <strong>--dst-vfd-value</strong>  Value (ID) of the VFL driver to use for opening the
+ *                             output HDF5 file specified
+ * \li <strong>--dst-vfd-name</strong>   Name of the VFL driver to use for opening the output
+ *                             HDF5 file specified
+ * \li <strong>--dst-vfd-info</strong>   VFD-specific info to pass to the VFL driver used for
+ *                             opening the output HDF5 file specified
+ * \li <strong>--latest</strong>         Use latest version of file format
+ *                             This option will take precedence over the options
+ *                             --low and --high
+ * \li <strong>--low=BOUND</strong>      The low bound for library release versions to use
+ *                             when creating objects in the file
+ *                             (default is #H5F_LIBVER_EARLIEST)
+ * \li <strong>--high=BOUND</strong>     The high bound for library release versions to use
+ *                             when creating objects in the file
+ *                             (default is #H5F_LIBVER_LATEST)
+ * \li <strong>--merge</strong>          Follow external soft link recursively and merge data
+ * \li <strong>--prune</strong>          Do not follow external soft links and remove link
+ * \li <strong>--merge --prune</strong>  Follow external link, merge data and remove dangling link
+ * \li <strong>--compact=L1</strong>    Maximum number of links in header messages
+ * \li <strong>--indexed=L2</strong>    Minimum number of links in the indexed format
+ * \li <strong>--ssize=S[:F]</strong>   Shared object header message minimum size
+ * \li <strong>--minimum=M</strong>     Do not apply the filter to datasets smaller than M
+ * \li <strong>--file=E</strong>        Name of file E with the --file and --layout options
+ * \li <strong>--ublock=U</strong>      Name of file U with user block data to be added
+ * \li <strong>--block=B</strong>       Size of user block to be added
+ * \li <strong>--metadata_block_size=A</strong>  Metadata block size for #H5Pset_meta_block_size
+ * \li <strong>--threshold=T</strong>   Threshold value for #H5Pset_alignment
+ * \li <strong>--alignment=A</strong>   Alignment value for #H5Pset_alignment
+ * \li <strong>--sort_by=Q</strong>     Sort groups and attributes by index Q
+ * \li <strong>--sort_order=Z</strong>  Sort groups and attributes by order Z
+ * \li <strong>--filter=FILT</strong>   Filter type
+ * \li <strong>--layout=LAYT</strong>   Layout type
+ * \li <strong>--fs_strategy=FS_STRATEGY</strong>  File space management strategy for
+ *                                    #H5Pset_file_space_strategy
+ * \li <strong>--fs_persist=FS_PERSIST</strong>    Persisting or not
+ *                                    persisting free-space for #H5Pset_file_space_strategy
+ * \li <strong>--fs_threshold=FS_THRESHOLD</strong> : Free-space section
+ *                                    threshold for #H5Pset_file_space_strategy
+ * \li <strong>--fs_pagesize=FS_PAGESIZE</strong>  File space page size for #H5Pset_file_space_page_size
+ *
+ * \subsubsection subsubsec_cltools_h5repack_options_args Arguments to Certain Options
+ * \li <strong>M</strong> - is an integer greater than 1, size of dataset in bytes (default is 0)
+ * \li <strong>E</strong> - is a filename.
+ * \li <strong>S</strong> - is an integer
+ * \li <strong>U</strong> - is a filename.
+ * \li <strong>T</strong> - is an integer
+ * \li <strong>A</strong> - is an integer greater than zero
+ * \li <strong>Q</strong> - is the sort index type for the input file. It can be "name" or
+ *         "creation_order" (default)
+ * \li <strong>Z</strong> - is the sort order type for the input file. It can be "descending" or
+ *          "ascending" (default)
+ * \li <strong>B</strong> - is the user block size, any value that is 512 or greater and is
+ *          a power of 2 (1024 default)
+ * \li <strong>F</strong> - is the shared object header message type, any of <dspace|dtype|fill|
+ *          pline|attr>. If F is not specified, S applies to all messages
+ *
+ * \subsubsection subsubsec_cltools_h5repack_options_bound Library Version Bounds
+ * <strong>BOUND</strong> is an integer indicating the library release versions to use when
+ *            creating objects in the file (see #H5Pset_libver_bounds()):
+ * \li <strong>0</strong> This is #H5F_LIBVER_EARLIEST in #H5F_libver_t struct
+ * \li <strong>1</strong> This is #H5F_LIBVER_V18 in #H5F_libver_t struct
+ * \li <strong>2</strong> This is #H5F_LIBVER_V110 in #H5F_libver_t struct
+ * \li <strong>3</strong> This is #H5F_LIBVER_V112 in #H5F_libver_t struct
+ * \li <strong>4</strong> This is #H5F_LIBVER_V114 in #H5F_libver_t struct
+ * \li <strong>5</strong> This is #H5F_LIBVER_V116 in #H5F_libver_t struct
+ * \li #H5F_LIBVER_LATEST is aliased to #H5F_LIBVER_V116 for this release
+ *
+ * \subsubsection subsubsec_cltools_h5repack_options_fs File Strategy Settings
+ * <strong>FS_STRATEGY</strong> is a string indicating the file space strategy used:
+ * \li <strong>FSM_AGGR</strong>
+ *                 The mechanisms used in managing file space are free-space
+ *                 managers, aggregators and virtual file driver.
+ * \li <strong>PAGE</strong>
+ *                 The mechanisms used in managing file space are free-space
+ *                 managers with embedded paged aggregation and virtual file driver.
+ * \li <strong>AGGR</strong>
+ *                 The mechanisms used in managing file space are aggregators and
+ *                 virtual file driver.
+ * \li <strong>NONE</strong>
+ *                 The mechanisms used in managing file space are virtual file
+ *                 driver.
+ * \li The default strategy when not set is \b FSM_AGGR without persisting free-space.
+ *
+ * \li <strong>FS_PERSIST</strong> is 1 for persisting free-space or 0 for not persisting free-space.
+ *        The default when not set is not persisting free-space.
+ *        The value is ignored for \b AGGR and \b NONE strategies.
+ *
+ * \li <strong>FS_THRESHOLD</strong> is the minimum size (in bytes) of free-space sections to be
+ *        tracked by the library. The default when not set is 1.
+ *        The value is ignored for \b AGGR and \b NONE strategies.
+ *
+ * \li <strong>FS_PAGESIZE</strong> is the size (in bytes) >=512 that is used by the library when
+ *        the file space strategy \b PAGE is used.
+ *        The default when not set is 4096.
+ *
+ * \subsubsection subsubsec_cltools_h5repack_options_filt Applying a Third-party Filter
+ * <strong>FILT</strong> - is a string with the format:
+ *
+ * \li <strong>\<objects list\>:\<name of filter\>=\<filter parameters\></strong>
+ *
+ * \li  <strong>\<objects list\></strong> is a comma separated list of object names, meaning apply
+ *          compression only to those objects. If no names are specified, the filter
+ *          is applied to all objects
+ * \li  <strong>\<name of filter\></strong> can be:
+ *          <ul><li><strong>GZIP</strong> to apply the HDF5 GZIP filter (GZIP compression)</li>
+ *          <li><strong>SZIP</strong> to apply the HDF5 SZIP filter (SZIP compression)</li>
+ *          <li><strong>SHUF</strong> to apply the HDF5 shuffle filter</li>
+ *          <li><strong>FLET</strong> to apply the HDF5 checksum filter</li>
+ *          <li><strong>NBIT</strong> to apply the HDF5 NBIT filter (NBIT compression)</li>
+ *          <li><strong>SOFF</strong> to apply the HDF5 Scale/Offset filter</li>
+ *          <li><strong>UD</strong>   to apply a user defined filter</li>
+ *          <li><strong>NONE</strong> to remove all filters</li></ul>
+ * \li  <strong>\<filter parameters\></strong> is optional filter parameter information
+ *          <ul><li><strong>GZIP=\<deflation level\></strong> from 1-9</li>
+ *          <li><strong>SZIP=<pixels per block,coding></strong> pixels per block is a even number in
+ *              2-32 and coding method is either EC or NN</li>
+ *          <li><strong>SHUF</strong> (no parameter)</li>
+ *          <li><strong>FLET</strong> (no parameter)</li>
+ *          <li><strong>NBIT</strong> (no parameter)</li>
+ *          <li><strong>SOFF=\<scale_factor,scale_type\></strong> scale_factor is an integer and scale_type
+ *              is either IN or DS</li>
+ *          <li><strong>UD=\<filter_number,filter_flag,cd_value_count,value1[,value2,...,valueN]\></strong>
+ *              <ul><li><strong>Required values</strong> filter_number, filter_flag, cd_value_count,
+ * value1</li> <li><strong>Optional values</strong> value2 to valueN</li> <li><strong>filter_flag</strong> 1
+ * is OPTIONAL or 0 is MANDATORY</li></ul></li> <li><strong>NONE</strong> (no parameter)</li></ul>
+ *
+ * \subsubsection subsubsec_cltools_h5repack_options_lay Layout Settings
+ * <strong>LAYT</strong> - is a string with the format:
+ *
+ * \li <strong>\<objects list\>:\<layout type\>=\<layout parameters\></strong>
+ *
+ * \li <strong>\<objects list\></strong> is a comma separated list of object names, meaning that
+ *          layout information is supplied for those objects. If no names are
+ *          specified, the layout type is applied to all objects
+ * \li <strong>\<layout type\></strong> can be:
+ *          <ul><li><strong>CHUNK</strong> to apply chunking layout</li>
+ *          <li><strong>COMPA</strong> to apply compact layout</li>
+ *          <li><strong>CONTI</strong> to apply contiguous layout</li></ul>
+ * \li <strong>\<layout parameters\></strong> is optional layout information
+ *          <ul><li><strong>CHUNK=DIM[xDIM...xDIM]</strong>, the chunk size of each dimension</li>
+ *          <li><strong>COMPA</strong> (no parameter)</li>
+ *          <li><strong>CONTI</strong> (no parameter)</li></ul>
+ *
+ * \subsubsection subsubsec_cltools_h5repack_options_note NOTE
+ *      The environment variable <strong>H5TOOLS_BUFSIZE</strong> can be set to
+ *      the number of MBs to change the default hyperslab buffer size from 32MB.
+ *      \code setenv H5TOOLS_BUFSIZE=64 to double the hyperslab buffer. \endcode
+ *
+ * \subsection subsec_cltools_h5repack_examples Usage Examples
+ *
+ * \li 1) h5repack --verbose --filter=GZIP=1 file1 file2
+ *
+ *      GZIP compression with level 1 to all objects
+ *
+ * \li 2) h5repack --verbose --filter=dset1:SZIP=8,NN file1 file2
+ *
+ *      SZIP compression with 8 pixels per block and NN coding method to object dset1
+ *
+ * \li 3) h5repack --verbose --layout=dset1,dset2:CHUNK=20x10 --filter=dset3,dset4,dset5:NONE file1 file2
+ *
+ *      Chunked layout, with a layout size of 20x10, to objects dset1 and dset2
+ *      and remove filters to objects dset3, dset4, dset5
+ *
+ * \li 4) h5repack --latest --compact=10 --ssize=20:dtype file1 file2
+ *
+ *      Using latest file format with maximum compact group size of 10 and
+ *      minimum shared datatype size of 20
+ *
+ * \li 5) h5repack --filter=SHUF --filter=GZIP=1 file1 file2
+ *
+ *      Add both filters SHUF and GZIP in this order to all datasets
+ *
+ * \li 6) h5repack --filter=UD=307,0,1,9 file1 file2
+ *
+ *      Add bzip2 filter to all datasets
+ *
+ * \li 7) h5repack --low=0 --high=1 file1 file2
+ *
+ *      Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via
+ *      H5Pset_libver_bounds() when creating the repacked file, file2
+ *
+ *
+ */
+
 #include "H5private.h"
 #include "hdf5.h"
 #include "h5trav.h"

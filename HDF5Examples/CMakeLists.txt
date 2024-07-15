@@ -27,6 +27,11 @@ if (NOT EXAMPLES_EXTERNALLY_CONFIGURED)
   #-----------------------------------------------------------------------------
   HDF5_SUPPORT (TRUE)
   APIVersion(${HDF5_VERSION} H5_LIBVER_DIR)
+
+  #-----------------------------------------------------------------------------
+  # Python support check
+  #-----------------------------------------------------------------------------
+  PYTHON_SUPPORT ()
 endif ()
 message (STATUS "HDF5 link libs: ${H5EX_HDF5_LINK_LIBS}")
 message (STATUS "HDF5 H5_LIBVER_DIR: ${H5_LIBVER_DIR} HDF5_VERSION_MAJOR: ${HDF5_VERSION_MAJOR}")
@@ -255,5 +260,8 @@ if (HDF_BUILD_JAVA AND HDF5_BUILD_JAVA)
 endif ()
 if (HDF_BUILD_CPP_LIB AND HDF5_BUILD_CPP_LIB)
   add_subdirectory (CXX)
+endif ()
+if (HDF_BUILD_PYTHON)
+  add_subdirectory (PYTHON)
 endif ()
 
