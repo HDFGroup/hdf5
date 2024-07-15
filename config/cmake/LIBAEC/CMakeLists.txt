@@ -1,12 +1,12 @@
 cmake_minimum_required (VERSION 3.18)
-PROJECT (LIBAEC C)
+project (LIBAEC C)
 
 #-----------------------------------------------------------------------------
 # Basic LIBAEC stuff here
 #-----------------------------------------------------------------------------
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_VISIBILITY_PRESET hidden)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set (CMAKE_C_STANDARD 99)
+set (CMAKE_C_VISIBILITY_PRESET hidden)
+set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set (LIBAEC_PACKAGE_EXT ${HDF_PACKAGE_EXT})
 set (HDF_USE_GNU_DIRS ${HDF5_USE_GNU_DIRS})
@@ -22,30 +22,30 @@ if (WINDOWS)
 endif ()
 
 if (NOT WINDOWS)
-include(TestBigEndian)
-test_big_endian(WORDS_BIGENDIAN)
+  include (TestBigEndian)
+  test_big_endian (WORDS_BIGENDIAN)
 endif ()
 
 # Check for __builtin_clzll for faster decoding
-include(CheckCSourceCompiles)
+include (CheckCSourceCompiles)
 check_c_source_compiles(
   "int main(void)\n{return __builtin_clzll(1LL);}"
   HAVE_DECL___BUILTIN_CLZLL)
 
-if(NOT HAVE_DECL___BUILTIN_CLZLL)
+if (NOT HAVE_DECL___BUILTIN_CLZLL)
   # With MSVC we can use _BitScanReverse64
-  check_c_source_compiles(
+  check_c_source_compiles (
     "int main(void){unsigned long foo; unsigned __int64 bar=1LL;
 return _BitScanReverse64(&foo, bar);}"
     HAVE_BSR64)
-endif()
+endif ()
 
-include(CheckSymbolExists)
-check_symbol_exists(snprintf "stdio.h" HAVE_SNPRINTF)
-if(NOT HAVE_SNPRINTF)
-  check_symbol_exists(_snprintf "stdio.h" HAVE__SNPRINTF)
-  check_symbol_exists(_snprintf_s "stdio.h" HAVE__SNPRINTF_S)
-endif()
+include (CheckSymbolExists)
+check_symbol_exists (snprintf "stdio.h" HAVE_SNPRINTF)
+if (NOT HAVE_SNPRINTF)
+  check_symbol_exists (_snprintf "stdio.h" HAVE__SNPRINTF)
+  check_symbol_exists (_snprintf_s "stdio.h" HAVE__SNPRINTF_S)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Define some CMake variables for use later in the project
@@ -89,7 +89,6 @@ set (LIBAEC_PACKAGE_BUGREPORT "help@hdfgroup.org")
 set (LIBAEC_PACKAGE_SOVERSION "${libaec_VERS_MAJOR}.${libaec_VERS_MINOR}.${libaec_VERS_RELEASE}")
 set (LIBAEC_PACKAGE_SOVERSION_MAJOR "${libaec_VERS_MAJOR}")
 
-
 HDF_DIR_PATHS(${LIBAEC_PACKAGE_NAME})
 
 #-----------------------------------------------------------------------------
@@ -100,38 +99,26 @@ if (NOT LIBAEC_EXPORTED_TARGETS)
   set (LIBAEC_EXPORTED_TARGETS "libaec-targets")
 endif ()
 
-#-----------------------------------------------------------------------------
-# To include a library in the list exported by the project AT BUILD TIME,
-# add it to this variable. This is NOT used by Make Install, but for projects
-# which include SZIP as a sub-project within their build tree
-#-----------------------------------------------------------------------------
 set_global_variable (LIBAEC_LIBRARIES_TO_EXPORT "")
 
 #-----------------------------------------------------------------------------
-# Mac OS X Options
+# All libs/tests/examples need the main include directories
 #-----------------------------------------------------------------------------
-if (LIBAEC_BUILD_FRAMEWORKS AND NOT BUILD_SHARED_LIBS)
-  set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries")
+set_directory_properties (PROPERTIES INCLUDE_DIRECTORIES
+    "${LIBAEC_BINARY_DIR};${LIBAEC_SOURCE_DIR}/src;${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+)
+
+if (MSVC)
+  set (CMAKE_MFC_FLAG 0)
+  set(CMAKE_DEBUG_POSTFIX "d")
 endif ()
 
-set (CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-#-----------------------------------------------------------------------------
-# When building utility executables that generate other (source) files :
-# we make use of the following variables defined in the root CMakeLists.
-# Certain systems may add /Debug or /Release to output paths
-# and we need to call the executable from inside the CMake configuration
-#-----------------------------------------------------------------------------
 set (EXE_EXT "")
 if (WIN32)
   set (EXE_EXT ".exe")
   add_compile_definitions (_BIND_TO_CURRENT_VCLIBS_VERSION=1)
   add_compile_definitions (_CRT_SECURE_NO_WARNINGS)
   add_compile_definitions (_CONSOLE)
-endif ()
-
-if (MSVC)
-  set (CMAKE_MFC_FLAG 0)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -159,24 +146,18 @@ configure_file(
   "${CMAKE_CURRENT_BINARY_DIR}/libaec.h")
 
 #-----------------------------------------------------------------------------
-# All libs/tests/examples need the main include directories
-#-----------------------------------------------------------------------------
-set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
-    "${LIBAEC_BINARY_DIR};${LIBAEC_SOURCE_DIR}/src;${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-)
-
-#-----------------------------------------------------------------------------
 # Define LIBAEC Library
 #-----------------------------------------------------------------------------
+
+set (LIBAEC_PUBLIC_HEADERS
+    ${CMAKE_CURRENT_BINARY_DIR}/libaec.h
+)
+
 set(LIBAEC_SRCS
     ${LIBAEC_SRC_DIR}/encode.c
     ${LIBAEC_SRC_DIR}/encode_accessors.c
     ${LIBAEC_SRC_DIR}/decode.c
     ${LIBAEC_SRC_DIR}/vector.c
-)
-
-set (LIBAEC_PUBLIC_HEADERS
-    ${CMAKE_CURRENT_BINARY_DIR}/libaec.h
 )
 
 add_library (${LIBAEC_LIB_TARGET} STATIC ${LIBAEC_SRCS} ${LIBAEC_PUBLIC_HEADERS})
@@ -186,7 +167,6 @@ target_include_directories (${LIBAEC_LIB_TARGET} PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>"
   "$<INSTALL_INTERFACE:include>")
 TARGET_C_PROPERTIES (${LIBAEC_LIB_TARGET} STATIC)
-target_link_libraries (${LIBAEC_LIB_TARGET} PRIVATE ${LINK_LIBS})
 H5_SET_LIB_OPTIONS (${LIBAEC_LIB_TARGET} ${LIBAEC_LIB_NAME} STATIC 0)
 set_target_properties (${LIBAEC_LIB_TARGET} PROPERTIES
     VERSION 0.0.12 SOVERSION 0
@@ -216,6 +196,7 @@ set_target_properties (${SZIP_LIB_TARGET} PROPERTIES
     LINKER_LANGUAGE C
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
+
 set_global_variable (LIBAEC_LIBRARIES_TO_EXPORT "${LIBAEC_LIBRARIES_TO_EXPORT};${SZIP_LIB_TARGET}")
 set (install_targets ${install_targets} ${SZIP_LIB_TARGET})
 
@@ -239,31 +220,6 @@ if (LIBAEC_EXPORTED_TARGETS)
 endif ()
 
 include (CMakePackageConfigHelpers)
-
-#-----------------------------------------------------------------------------
-# Add Target(s) to CMake Install for import into other projects
-#-----------------------------------------------------------------------------
-if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
-  install (
-      EXPORT ${LIBAEC_EXPORTED_TARGETS}
-      DESTINATION ${LIBAEC_INSTALL_CMAKE_DIR}
-      FILE ${LIBAEC_PACKAGE}${LIBAEC_PACKAGE_EXT}-targets.cmake
-      NAMESPACE ${PACKAGE_NAMESPACE}
-      COMPONENT configinstall
-  )
-endif ()
-
-#-----------------------------------------------------------------------------
-# Export all exported targets to the build tree for use by parent project
-#-----------------------------------------------------------------------------
-if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
-  export (
-      TARGETS ${LIBAEC_LIBRARIES_TO_EXPORT} ${LIBAEC_LIB_DEPENDENCIES}
-      FILE ${LIBAEC_PACKAGE}${LIBAEC_PACKAGE_EXT}-targets.cmake
-      NAMESPACE ${PACKAGE_NAMESPACE}
-  )
-  export (PACKAGE ${LIBAEC_PACKAGE}${LIBAEC_PACKAGE_EXT})
-endif ()
 
 #-----------------------------------------------------------------------------
 # Set includes needed for build
@@ -326,5 +282,30 @@ if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
       DESTINATION ${LIBAEC_INSTALL_CMAKE_DIR}
       COMPONENT configinstall
   )
+endif ()
+
+#-----------------------------------------------------------------------------
+# Add Target(s) to CMake Install for import into other projects
+#-----------------------------------------------------------------------------
+if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
+  install (
+      EXPORT ${LIBAEC_EXPORTED_TARGETS}
+      DESTINATION ${LIBAEC_INSTALL_CMAKE_DIR}
+      FILE ${LIBAEC_PACKAGE}${LIBAEC_PACKAGE_EXT}-targets.cmake
+      NAMESPACE ${PACKAGE_NAMESPACE}
+      COMPONENT configinstall
+  )
+endif ()
+
+#-----------------------------------------------------------------------------
+# Export all exported targets to the build tree for use by parent project
+#-----------------------------------------------------------------------------
+if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
+  export (
+      TARGETS ${LIBAEC_LIBRARIES_TO_EXPORT} ${LIBAEC_LIB_DEPENDENCIES}
+      FILE ${LIBAEC_PACKAGE}${LIBAEC_PACKAGE_EXT}-targets.cmake
+      NAMESPACE ${PACKAGE_NAMESPACE}
+  )
+  export (PACKAGE ${LIBAEC_PACKAGE}${LIBAEC_PACKAGE_EXT})
 endif ()
 
