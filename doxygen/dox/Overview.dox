@@ -20,20 +20,6 @@ while the \link Cookbook \endlink is focused on tasks. The different guide-type
 documents cover a mix of tasks, concepts, and reference, to help a specific
 <em>audience</em> succeed.
 
-\par Versions
-     Version-specific documentation (see the version in the title area) can be found
-     here:
-     - <a href="https://\DOXURL/index.html">HDF5 <code>develop</code> branch (this site)</a>
-     - <a href="https://hdfgroup.github.io/hdf5/v1_14/index.html">HDF5 1.14.x</a>
-     - <a href="https://\HDFURL/v1_12/index.html">HDF5 1.12.x</a>
-     - <a href="https://\HDFURL/v1_10/index.html">HDF5 1.10.x</a>
-     - <a href="https://\HDFURL/v1_8/index.html">HDF5 1.8.x</a>
-
-\par Search
-     If you are looking for a specific function, constant, type, etc., use the
-     search box in the top right-hand corner!\n Otherwise, check out the
-     \link FTS full-text search\endlink.
-
 \par Offline reading
      You can <a href="https://github.com/HDFGroup/hdf5/releases/download/snapshot/snapshot.doxygen.zip">download</a> it as an archive for offline reading.
 

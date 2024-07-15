@@ -105,6 +105,29 @@ macro (BASIC_SETTINGS varname)
   )
 endmacro ()
 
+macro (PYTHON_SUPPORT)
+  option (HDF_BUILD_PYTHON "Test Python3 support" OFF)
+  if (HDF_BUILD_PYTHON)
+    find_package (Python3 COMPONENTS Interpreter Development NumPy)
+    if (Python3_FOUND AND Python3_NumPy_FOUND)
+      include (ExternalProject)
+      EXTERNALPROJECT_ADD (h5py
+          GIT_REPOSITORY https://github.com/h5py/h5py.git
+          GIT_TAG master
+          UPDATE_COMMAND      ""
+          PATCH_COMMAND       ""
+          CONFIGURE_COMMAND   ""
+          BUILD_COMMAND       "${CMAKE_COMMAND}" -E env HDF5_DIR=${HDF5_ROOT} "${Python3_EXECUTABLE}" setup.py build
+          BUILD_IN_SOURCE     1
+          INSTALL_COMMAND     python3 -m pip --no-cache-dir install -v .
+      )
+    else ()
+      set (HDF_BUILD_PYTHON OFF CACHE BOOL "Test Python3 support" FORCE)
+      message (STATUS "Python3:${Python3_FOUND} or numpy:${Python3_NumPy_FOUND} not found - disable test of Python examples")
+    endif ()
+  endif ()
+endmacro ()
+
 macro (HDF5_SUPPORT)
   set (CMAKE_MODULE_PATH ${H5EX_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
   option (USE_SHARED_LIBS "Use Shared Libraries" ON)
