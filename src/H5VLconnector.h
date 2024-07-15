@@ -441,6 +441,14 @@ typedef enum H5VL_file_specific_t {
     H5VL_FILE_FLUSH,         /* Flush file                       */
     H5VL_FILE_REOPEN,        /* Reopen the file                  */
     H5VL_FILE_IS_ACCESSIBLE, /* Check if a file is accessible    */
+                             /* Note for VOL connector authors:  */
+                             /*  Only return an error from this  */
+                             /*  callback if it is not possible  */
+                             /*  to determine if a file (or      */
+                             /*  container) is accessible.       */
+                             /*  It is _not_ an error to return  */
+                             /*  a 'false' value for the         */
+                             /*  'accessible' argument.          */
     H5VL_FILE_DELETE,        /* Delete a file                    */
     H5VL_FILE_IS_EQUAL       /* Check if two files are the same  */
 } H5VL_file_specific_t;
