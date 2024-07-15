@@ -2944,7 +2944,7 @@ filled according to the value of this property. The padding can be:
  *
  * \subsubsection subsubsec_datatype_other_refs Reference
  * In HDF5, objects (groups, datasets, attributes, and committed datatypes) are usually accessed by name.
- * There is another way to access stored objects - by reference. Before HDF5 1.12.0, were only two
+ * There is another way to access stored objects - by reference. Before HDF5 1.12.0, there were only two
  * reference datatypes: object reference and region reference. Since 1.12.0, attribute references and
  * external references were added. And all references can be stored and retrieved from a file by invoking
  * the #H5Dwrite and #H5Dread functions with a single predefined type: #H5T_STD_REF.
