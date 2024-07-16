@@ -26,11 +26,11 @@
 #define H5_MY_PKG_ERR H5E_MAP
 
 /**
- * \page H5M_UG The HDF5 VOL Data Mapping
+ * \page H5M_UG HDF5 VOL Data Mapping
  * \Bold{The HDF5 Data Mapping can only be used with the HDF5 VOL connectors that
  * implement map objects.} The native HDF5 library does not support this feature.
  *
- * \section sec_map The HDF5 Map Object
+ * \section sec_map HDF5 Map Object
  *
  * \todo Describe the map life cycle.
  *
