@@ -853,7 +853,7 @@ done:
     /* Clean up on error */
     if (H5I_INVALID_HID == ret_value)
         /* Release newly created connector */
-        if (connector && (H5VL_conn_dest(connector) < 0))
+        if (connector && (H5VL_conn_dec_rc(connector) < 0))
             HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
                         "unable to decrement ref count on VOL connector")
 
@@ -1007,9 +1007,9 @@ H5VL_conn_dec_rc(H5VL_t *connector)
 
     /* Check for last reference */
     if (0 == connector->nrefs) {
-        if (H5VL_conn_dest(connector) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release VOL connector");
-
+        if (H5I_dec_ref(connector->id) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector");
+        H5FL_FREE(H5VL_t, connector);
         /* Set return value */
         ret_value = 0;
     } /* end if */
@@ -1020,31 +1020,6 @@ H5VL_conn_dec_rc(H5VL_t *connector)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_conn_dec_rc() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5VL__conn_dest
- *
- * Purpose:     Destroys a VOL connector struct. This should be used
- *              directly when cleaning up a VOL connector with no references.
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_conn_dest(H5VL_t *connector)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if (H5I_dec_ref(connector->id) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector");
-    H5FL_FREE(H5VL_t, connector);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__conn_dest() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_object_inc_rc
