@@ -1758,6 +1758,19 @@ Bug Fixes since HDF5-1.14.0 release
 
     Configuration
     -------------
+    - Fixed usage issue with FindZLIB.cmake module
+
+      When building HDF5 with CMake and relying on the FindZLIB.cmake module,
+      the Find module would correctly find the ZLIB library but not set an OUTPUT_NAME
+      on the target. Also, the target returned, ZLIB::ZLIB, was not in the ZLIB_LIBRARIES
+      variable. This caused issues when requesting the OUTPUT_NAME of the target in
+      the pkg-config settings.
+
+      Similar to HDF5_USE_LIBAEC_STATIC, "Find static AEC library", option, we added
+      a new option, HDF5_USE_ZLIB_STATIC, "Find static zlib library". These options
+      allow a user to specify whether to use a static or shared version of the compression
+      library in a find_package call.
+
     - Corrected usage of FetchContent in the HDFLibMacros.cmake file.
     
       CMake version 3.30 changed the behavior of the FetchContent module to deprecate

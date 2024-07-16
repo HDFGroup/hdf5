@@ -44,6 +44,17 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
       )
 endif ()
 
+# Whether the most recently called project() command, in the current scope or above,
+# was in the top level CMakeLists.txt file.
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.21.0")
+  if(NOT PROJECT_IS_TOP_LEVEL)
+    set (HDF5_EXTERNALLY_CONFIGURED 1)
+  endif()
+else()
+  if (NOT CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+    set (HDF5_EXTERNALLY_CONFIGURED 1)
+  endif()
+endif()
 #-----------------------------------------------------------------------------
 # Instructions for use : Sub-Project Build
 #
