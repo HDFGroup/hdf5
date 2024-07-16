@@ -30,7 +30,7 @@ typedef herr_t (*H5DS_iterate_t)(hid_t dset, unsigned dim, hid_t scale, void *vi
 extern "C" {
 #endif
 
-/** \page H5DS_UG The HDF5 High Level Dimension Scales
+/** \page H5DS_UG HDF5 High Level Dimension Scales
  * @todo Under Construction
  */
 

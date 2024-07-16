@@ -858,11 +858,45 @@ H5Tinsert (complex_id, "imaginary", HOFFSET(tmp,im), H5T_NATIVE_DOUBLE);
 \endcode
 
 \subsection subsecLBDtypeSpecRef Reference
-There are two types of Reference datatypes in HDF5:
+There are three types of Reference datatypes in HDF5:
+\li \ref subsubsecLBDtypeSpecRefStd
 \li \ref subsubsecLBDtypeSpecRefObj
 \li \ref subsubsecLBDtypeSpecRefDset
 
-\subsubsection subsubsecLBDtypeSpecRefObj Reference to objects
+\subsubsection subsubsecLBDtypeSpecRefStd Standard Reference
+HDF5 references allow users to reference existing HDF5 objects as well as selections within datasets. The
+original API, now deprecated, was extended in order to add the ability to reference attributes as well as objects in
+external files.
+
+The newer API introduced a single opaque reference type, which not only has the advantage of hiding the internal
+representation of references, but it also allows for future extensions to be added more seamlessly. The newer API 
+introduces a single abstract #H5R_ref_t type as well as attribute references and external references 
+(i.e., references to objects in an external file).
+
+A file, group, dataset, named datatype, or attribute may be the target of an object reference. 
+The object reference is created by
+#H5Rcreate_object with the name of an object which may be a file, group, dataset, named datatype, or attribute
+and the reference type #H5R_OBJECT. The object does not have to be open to create a reference to it.
+
+An object reference may also refer to a region (selection) of a dataset. The reference is created
+with #H5Rcreate_region. The dataspace for the region can be retrieved with a call to #H5Ropen_region.
+
+An object reference may also refer to a attribute. The reference is created
+with #H5Rcreate_attr. #H5Ropen_attr can be used to open the attribute by returning an identifier 
+to the attribute just as if #H5Aopen has been called.
+
+An object reference can be accessed by a call to #H5Ropen_object. 
+
+When the reference is to a dataset or dataset region, the #H5Ropen_object call returns an 
+identifier to the dataset just as if #H5Dopen has been called.
+When the reference is to an attribute, the #H5Ropen_object call returns an 
+identifier to the attribute just as if #H5Aopen has been called.
+
+The reference buffer from the #H5Rcreate_object call must be released by
+using #H5Rdestroy to avoid resource leaks and possible HDF5 library shutdown issues. And any identifiers 
+returned by #H5Ropen_object must be closed with the appropriate close call.
+
+\subsubsection subsubsecLBDtypeSpecRefObj Reference to objects - Deprecated
 In HDF5, objects (i.e. groups, datasets, and named datatypes) are usually accessed by name.
 There is another way to access stored objects -- by reference.
 
@@ -890,7 +924,7 @@ The following steps are involved:
 <li>Close all objects when the task is complete.</li>
 </ol>
 
-\subsubsection subsubsecLBDtypeSpecRefDset Reference to a dataset region
+\subsubsection subsubsecLBDtypeSpecRefDset Reference to a dataset region - Deprecated
 A dataset region reference points to a dataset selection in another dataset.
 A reference to the dataset selection (region) is constant for the life of the dataset.
 

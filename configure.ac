@@ -3551,7 +3551,7 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
     )
 
     # Check for threads availability
-    if test "x$HAVE_THREADS" = "xno"; then
+    if test "x$THREADS" = "xno"; then
       AC_MSG_ERROR([Subfiling VFD requires thread operations support.])
     fi
 
