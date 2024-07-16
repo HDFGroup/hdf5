@@ -598,10 +598,10 @@
  *     </tr>
  *     <tr>
  *       <td>
- * #H5T_STD_REF_OBJ
+ * #H5T_STD_REF
  *       </td>
  *       <td span='3'>
- * Reference to an entire object in a file
+ * Reference to an object in a file
  *       </td>
  *     </tr>
  *   </table>
@@ -2943,8 +2943,63 @@ filled according to the value of this property. The padding can be:
  * \endcode
  *
  * \subsubsection subsubsec_datatype_other_refs Reference
+ * In HDF5, objects (groups, datasets, attributes, and committed datatypes) are usually accessed by name.
+ * There is another way to access stored objects - by reference. Before HDF5 1.12.0, there were only two
+ * reference datatypes: object reference and region reference. Since 1.12.0, attribute references and
+ * external references were added. And all references can be stored and retrieved from a file by invoking
+ * the #H5Dwrite and #H5Dread functions with a single predefined type: #H5T_STD_REF.
+ *
+ * The first example below shows an example of code that creates
+ * references to four objects, and then writes the array of object references to a dataset. The second
+ * example below shows a dataset of datatype reference being read and one of the reference objects
+ * being dereferenced to obtain an object pointer.
+ *
+ * <em>Create object references and write to a dataset</em>
+ * \code
+ *   dataset = H5Dcreate (fid1, “Dataset3”, H5T_STD_REF, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ *
+ *   // Create reference to dataset
+ *   ret = H5Rcreate_object(fid1,“/Group1/Dataset1”, H5R_OBJECT, &wbuf[0]);
+ *
+ *   // Create reference to dataset
+ *   ret = H5Rcreate_object(fid1, “/Group1/Dataset2”, H5R_OBJECT, &wbuf[1]);
+ *
+ *   // Create reference to group
+ *   ret = H5Rcreate_object(fid1, “/Group1”, H5R_OBJECT, &wbuf[2]);
+ *
+ *   // Create reference to committed datatype
+ *   ret = H5Rcreate_object(fid1, “/Group1/Datatype1”, H5R_OBJECT, &wbuf[3]);
+ *
+ *   // Write selection to disk
+ *   ret = H5Dwrite(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
+ *
+ *   // Release buffers
+ *       status = H5Rdestroy(&wdata[0]);
+ *       status = H5Rdestroy(&wdata[1]);
+ *       status = H5Rdestroy(&wdata[2]);
+ *       status = H5Rdestroy(&wdata[3]);
+ * \endcode
+ *
+ * <em>Read a dataset with a reference datatype</em>
+ * \code
+ *   rbuf = (H5R_ref_t *)malloc(dims[0] * sizeof(H5R_ref_t));
+ *
+ *   // Read selection from disk
+ *   ret = H5Dread(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
+ *
+ *   // Open dataset object
+ *   dset2 = H5Ropen_object(&rbuf[0], H5P_DEFAULT, H5P_DEFAULT);
+ *
+ *   // Release buffers
+ *   status = H5Rdestroy(&rbuf[0]);
+ *   status = H5Rdestroy(&rbuf[1]);
+ *   status = H5Rdestroy(&rbuf[2]);
+ *   status = H5Rdestroy(&rbuf[3]);
+ * \endcode
+ *
+ * \subsubsection subsubsec_datatype_other_drefs Deprecated Reference
  * In HDF5, objects (groups, datasets, and committed datatypes) are usually accessed by name.
- * There is another way to access stored objects - by reference. There are two reference datatypes:
+ * There is another way to access stored objects - by reference. There are two deprecated reference datatypes:
  * object reference and region reference. Object reference objects are created with #H5Rcreate and
  * other calls (cross reference). These objects can be stored and retrieved in a dataset as elements
  * with reference datatype. The first example below shows an example of code that creates
@@ -3748,6 +3803,7 @@ filled according to the value of this property. The padding can be:
  *
  *   <atomic_type> ::= <integer> | <float> | <time> | <string> |
  *                     <bitfield> | <opaque> | <reference> | <enum>
+ *
  *   <integer> ::= H5T_STD_I8BE | H5T_STD_I8LE |
  *                 H5T_STD_I16BE | H5T_STD_I16LE |
  *                 H5T_STD_I32BE | H5T_STD_I32LE |
@@ -3761,18 +3817,22 @@ filled according to the value of this property. The padding can be:
  *                 H5T_NATIVE_INT | H5T_NATIVE_UINT |
  *                 H5T_NATIVE_LONG | H5T_NATIVE_ULONG |
  *                 H5T_NATIVE_LLONG | H5T_NATIVE_ULLONG
+ *
  *   <float> ::= H5T_IEEE_F16BE | H5T_IEEE_F16LE |
  *               H5T_IEEE_F32BE | H5T_IEEE_F32LE |
  *               H5T_IEEE_F64BE | H5T_IEEE_F64LE |
  *               H5T_NATIVE_FLOAT16 | H5T_NATIVE_FLOAT |
  *               H5T_NATIVE_DOUBLE | H5T_NATIVE_LDOUBLE
+ *
  *   <time> ::= H5T_TIME: not yet implemented
+ *
  *   <string> ::= H5T_STRING {
  *                    STRSIZE <strsize> ;
  *                    STRPAD <strpad> ;
  *                    CSET <cset> ;
  *                    CTYPE <ctype> ;
  *                }
+ *
  *   <strsize> ::= <int_value>
  *   <strpad> ::= H5T_STR_NULLTERM | H5T_STR_NULLPAD | H5T_STR_SPACEPAD
  *   <cset> ::= H5T_CSET_ASCII | H5T_CSET_UTF8
@@ -3789,7 +3849,7 @@ filled according to the value of this property. The padding can be:
  *                }
  *
  *   <reference> ::= H5T_REFERENCE { <ref_type> }
- *   <ref_type> ::= H5T_STD_REF_OBJECT | H5T_STD_REF_DSETREG
+ *   <ref_type> ::= H5T_STD_REF_OBJECT | H5T_STD_REF_DSETREG | H5T_STD_REF | UNDEFINED
  *
  *   <compound_type> ::= H5T_COMPOUND {
  *                           <member_type_def>+

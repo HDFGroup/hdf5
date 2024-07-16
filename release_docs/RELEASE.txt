@@ -1758,6 +1758,13 @@ Bug Fixes since HDF5-1.14.0 release
 
     Configuration
     -------------
+    - Corrected usage of FetchContent in the HDFLibMacros.cmake file.
+    
+      CMake version 3.30 changed the behavior of the FetchContent module to deprecate
+      the use of FetchContent_Populate() in favor of FetchContent_MakeAvailable(). Therefore,
+      the copying of HDF specialized CMakeLists.txt files to the dependent project's source
+      was implemented in the FetchContent_Declare() call.
+
     - Fixed/reverted an Autotools configure hack that causes problems on MacOS
 
       A sed line in configure.ac was added in the past to paper over some

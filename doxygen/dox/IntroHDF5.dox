@@ -298,19 +298,27 @@ hsize_t is used for dimensions
 Language specific files must be included in applications:
 <ul>
 <li>
-Python:   Add <code>"import h5py / import numpy"</code>
+<strong>Python</strong>:<br />
+<code>
+import h5py<br />
+import numpy
+</code>
 </li>
 <li>
-C:        Add <code>"#include hdf5.h"</code>
+<strong>C</strong>:<br />
+<code>"#include hdf5.h"</code>
 </li>
 <li>
-FORTRAN:  Add <code>"USE HDF5"</code> and call h5open_f and h5close_f to initialize and close the HDF5 FORTRAN interface
+<strong>FORTRAN</strong>:<br />
+<code>USE HDF5</code><br />
+and call h5open_f and h5close_f to initialize and close the HDF5 FORTRAN interface
 </li>
 <li>
-Java:     Add <code>"import hdf.hdf5lib.H5;
-                     import hdf.hdf5lib.HDF5Constants;"</code>
-</li>
-</ul>
+<strong>Java</strong>:<br />
+<code>
+import hdf.hdf5lib.H5;<br />
+import hdf.hdf5lib.HDF5Constants;
+</code>
 </li>
 </ul>
 
@@ -608,7 +616,7 @@ on the <a href="http://hdfeos.org/">HDF-EOS Tools and Information Center</a> pag
 \section secHDF5Examples Examples
 \li \ref LBExamples
 \li \ref ExAPI
-\li <a href="https://github.com/HDFGroup/hdf5/tree/develop/examples">Examples in the Source Code</a>
+\li <a href="https://github.com/HDFGroup/hdf5/tree/develop/HDF5Examples">Examples in the Source Code</a>
 \li <a href="https://\DSPURL/Other+Examples">Other Examples</a>
 
 \section secHDF5ExamplesCompile How To Compile

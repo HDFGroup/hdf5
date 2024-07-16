@@ -984,7 +984,164 @@ This dataset is much more complex. Also note that subsetting cannot be done on A
 
 See this <a href="https://\DOXURL/_l_b_datatypes.html">section</a> for more information on the Array datatype.
 
+\subsubsection subsubsecViewToolsViewDtypes_newref New References
+References were reworked in HDF5 1.12.0. The new reference datatype is #H5T_STD_REF. The old reference datatypes are deprecated.
+@see sec_reference.
+
 \subsubsection subsubsecViewToolsViewDtypes_objref Object Reference
+An Object Reference is a reference to an entire object (attribute, dataset, group, or named datatype).
+A dataset with an Object Reference datatype consists of one or more Object References.
+An Object Reference dataset can be used as an index to an HDF5 file.
+
+The <code style="background-color:whitesmoke;">/DS1</code> dataset in the following file (<code style="background-color:whitesmoke;">h5ex_t_objref.h5</code>) is an Object Reference dataset.
+It contains two references, one to group <code style="background-color:whitesmoke;">/G1</code> and the other to dataset <code style="background-color:whitesmoke;">/DS2</code>:
+\code
+$ h5dump h5ex_t_objref.h5
+HDF5 "h5ex_t_objref.h5" {
+GROUP "/" {
+   DATASET "DS1" {
+      DATATYPE  H5T_REFERENCE { H5T_STD_REF }
+      DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
+      DATA {
+         GROUP "h5ex_t_objref.h5/G1"
+         DATASET "h5ex_t_objref.h5/DS2"
+            DATA {
+            }
+      }
+   }
+   DATASET "DS2" {
+      DATATYPE  H5T_STD_I32LE
+      DATASPACE  NULL
+      DATA {
+      }
+   }
+   GROUP "G1" {
+   }
+}
+}
+\endcode
+
+\subsubsection subsubsecViewToolsViewDtypes_regref Region Reference
+A Region Reference is a reference to a selection within a dataset. A selection can be either
+individual elements or a hyperslab. In <code style="background-color:whitesmoke;">h5dump</code> you will see the name of the dataset along with
+the elements or slab that is selected. A dataset with a Region Reference datatype consists of
+one or more Region References.
+
+An example of a Region Reference dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.h5</code>) can be found on the
+\ref ExAPI page,
+under Datatypes. If you examine this dataset with <code style="background-color:whitesmoke;">h5dump</code> you will see that <code style="background-color:whitesmoke;">/DS1</code> is a
+Region Reference dataset as indicated by its datatype, highlighted in bold below:
+\code
+$ h5dump  h5ex_t_regref.h5
+HDF5 "h5ex_t_regref.h5" {
+GROUP "/" {
+   DATASET "DS1" {
+      DATATYPE  H5T_REFERENCE { H5T_STD_REF }
+      DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
+      DATA {
+         DATASET "h5ex_t_regref.h5/DS2"{
+            REGION_TYPE POINT  (0,1), (2,11), (1,0), (2,4)
+            DATATYPE  H5T_STD_I8LE
+            DATASPACE  SIMPLE { ( 3, 16 ) / ( 3, 16 ) }
+         }
+         DATASET "h5ex_t_regref.h5/DS2"  {
+            REGION_TYPE BLOCK  (0,0)-(0,2), (0,11)-(0,13), (2,0)-(2,2),
+             (2,11)-(2,13)
+            DATATYPE  H5T_STD_I8LE
+            DATASPACE  SIMPLE { ( 3, 16 ) / ( 3, 16 ) }
+         }
+      }
+   }
+   DATASET "DS2" {
+      DATATYPE  H5T_STD_I8LE
+      DATASPACE  SIMPLE { ( 3, 16 ) / ( 3, 16 ) }
+      DATA {
+      (0,0): 84, 104, 101, 32, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119,
+      (0,14): 110, 0,
+      (1,0): 102, 111, 120, 32, 106, 117, 109, 112, 115, 32, 111, 118, 101,
+      (1,13): 114, 32, 0,
+      (2,0): 116, 104, 101, 32, 53, 32, 108, 97, 122, 121, 32, 100, 111, 103,
+      (2,14): 115, 0
+      }
+   }
+}
+}
+\endcode
+
+It contains two Region References:
+\li A selection of four individual elements in dataset <code style="background-color:whitesmoke;">/DS2 : (0,1), (2,11), (1,0), (2,4)</code>
+See the #H5Sselect_elements API in the \ref UG for information on selecting individual elements.
+\li A selection of these blocks in dataset <code style="background-color:whitesmoke;">/DS2 : (0,0)-(0,2), (0,11)-(0,13), (2,0)-(2,2), (2,11)-(2,13)</code>
+See the #H5Sselect_hyperslab API in the \ref UG for how to do hyperslab selection.
+
+If you look at the code that creates the dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.c</code>) you will see that the
+first reference is created with these calls:
+\code
+  status = H5Sselect_elements (space, H5S_SELECT_SET, 4, coords[0]);
+  status = H5Rcreate_region(file, DATASET2, space, H5P_DEFAULT, &wdata[0]);
+\endcode
+
+where the buffer containing the coordinates to select is:
+\code
+   coords[4][2] = { {0,  1},
+                    {2, 11},
+                    {1,  0},
+                    {2,  4} },
+\endcode
+
+The second reference is created by calling,
+\code
+  status = H5Sselect_hyperslab (space, H5S_SELECT_SET, start, stride, count, block);
+  status = H5Rcreate_region(file, DATASET2, space, H5P_DEFAULT, &wdata[1]);
+\endcode
+where start, stride, count, and block have these values:
+\code
+     start[2] =  {0, 0},
+     stride[2] = {2, 11},
+     count[2] =  {2, 2},
+     block[2] =  {1, 3};
+\endcode
+
+These start, stride, count, and block values will select the elements shown in bold in the dataset:
+\code
+84 104 101 32 113 117 105  99 107  32  98 114 111 119 110 0
+102 111 120 32 106 117 109 112 115  32 111 118 101 114  32 0
+116 104 101 32  53  32 108  97 122 121  32 100 111 103 115 0
+\endcode
+
+If you use <code style="background-color:whitesmoke;">h5dump</code> to select a subset of dataset
+<code style="background-color:whitesmoke;">/DS2</code> with these start, stride, count, and block values, you will see that the same elements are selected:
+\code
+$ h5dump -d "/DS2" -s "0,0" -S "2,11" -c "2,2" -k "1,3" h5ex_t_regref.h5
+HDF5 "h5ex_t_regref.h5" {
+DATASET "/DS2" {
+   DATATYPE  H5T_STD_I8LE
+   DATASPACE  SIMPLE { ( 3, 16 ) / ( 3, 16 ) }
+   SUBSET {
+      START ( 0, 0 );
+      STRIDE ( 2, 11 );
+      COUNT ( 2, 2 );
+      BLOCK ( 1, 3 );
+      DATA {
+      (0,0): 84, 104, 101, 114, 111, 119,
+      (2,0): 116, 104, 101, 100, 111, 103
+      }
+   }
+}
+}
+\endcode
+
+NOTE that you must release the references created in the code with the #H5Rdestroy API.
+\code
+    status = H5Rdestroy(&wdata[0]);
+    status = H5Rdestroy(&wdata[1]);
+\endcode
+
+For more information on selections, see the tutorial topic on
+@ref LBDsetSubRW. Also see the
+\ref secViewToolsViewSub tutorial topic on using <code style="background-color:whitesmoke;">h5dump</code> to view a subset.
+
+\subsubsection subsubsecViewToolsViewDtypes_depr_objref Deprecated Object Reference
 An Object Reference is a reference to an entire object (dataset, group, or named datatype).
 A dataset with an Object Reference datatype consists of one or more Object References.
 An Object Reference dataset can be used as an index to an HDF5 file.
@@ -1014,7 +1171,7 @@ GROUP "/" {
 }
 \endcode
 
-\subsubsection subsubsecViewToolsViewDtypes_regref Region Reference
+\subsubsection subsubsecViewToolsViewDtypes_depr_regref Deprecated Region Reference
 A Region Reference is a reference to a selection within a dataset. A selection can be either
 individual elements or a hyperslab. In <code style="background-color:whitesmoke;">h5dump</code> you will see the name of the dataset along with
 the elements or slab that is selected. A dataset with a Region Reference datatype consists of
@@ -1057,7 +1214,6 @@ It contains two Region References:
 See the #H5Sselect_elements API in the \ref UG for information on selecting individual elements.
 \li A selection of these blocks in dataset <code style="background-color:whitesmoke;">/DS2 : (0,0)-(0,2), (0,11)-(0,13), (2,0)-(2,2), (2,11)-(2,13)</code>
 See the #H5Sselect_hyperslab API in the \ref UG for how to do hyperslab selection.
- 
 
 If you look at the code that creates the dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.c</code>) you will see that the
 first reference is created with these calls:

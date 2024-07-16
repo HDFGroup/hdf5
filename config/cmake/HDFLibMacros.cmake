@@ -11,31 +11,31 @@
 #
 #-------------------------------------------------------------------------------
 macro (EXTERNAL_ZLIB_LIBRARY compress_type)
+  if (HDF5_USE_ZLIB_NG)
+    set (zlib_folder "ZLIBNG")
+  else ()
+    set (zlib_folder "ZLIB")
+  endif ()
   if (${compress_type} MATCHES "GIT")
     FetchContent_Declare (HDF5_ZLIB
         GIT_REPOSITORY ${ZLIB_URL}
         GIT_TAG ${ZLIB_BRANCH}
+        PATCH_COMMAND ${CMAKE_COMMAND} -E copy
+            ${HDF_RESOURCES_DIR}/${zlib_folder}/CMakeLists.txt
+            <SOURCE_DIR>/CMakeLists.txt
     )
   elseif (${compress_type} MATCHES "TGZ")
     message (VERBOSE "Filter ZLIB file ${ZLIB_URL}")
     FetchContent_Declare (HDF5_ZLIB
         URL ${ZLIB_URL}
         URL_HASH ""
+        PATCH_COMMAND ${CMAKE_COMMAND} -E copy
+            ${HDF_RESOURCES_DIR}/${zlib_folder}/CMakeLists.txt
+            <SOURCE_DIR>/CMakeLists.txt
     )
   endif ()
-  FetchContent_GetProperties(HDF5_ZLIB)
-  if(NOT hdf5_zlib_POPULATED)
-    FetchContent_Populate(HDF5_ZLIB)
 
-    # Copy an additional/replacement files into the populated source
-    if (HDF5_USE_ZLIB_NG)
-      file(COPY ${HDF_RESOURCES_DIR}/ZLIBNG/CMakeLists.txt DESTINATION ${hdf5_zlib_SOURCE_DIR})
-    else ()
-      file(COPY ${HDF_RESOURCES_DIR}/ZLIB/CMakeLists.txt DESTINATION ${hdf5_zlib_SOURCE_DIR})
-    endif ()
-
-    add_subdirectory(${hdf5_zlib_SOURCE_DIR} ${hdf5_zlib_BINARY_DIR})
-  endif()
+  FetchContent_MakeAvailable(HDF5_ZLIB)
 
   add_library(${HDF_PACKAGE_NAMESPACE}zlib-static ALIAS zlib-static)
   set (H5_ZLIB_STATIC_LIBRARY "${HDF_PACKAGE_NAMESPACE}zlib-static")
@@ -54,23 +54,21 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
     FetchContent_Declare (SZIP
         GIT_REPOSITORY ${SZIP_URL}
         GIT_TAG ${SZIP_BRANCH}
+        PATCH_COMMAND ${CMAKE_COMMAND} -E copy
+            ${HDF_RESOURCES_DIR}/LIBAEC/CMakeLists.txt
+            <SOURCE_DIR>/CMakeLists.txt
     )
   elseif (${compress_type} MATCHES "TGZ")
     message (VERBOSE "Filter SZIP file ${SZIP_URL}")
     FetchContent_Declare (SZIP
         URL ${SZIP_URL}
         URL_HASH ""
+        PATCH_COMMAND ${CMAKE_COMMAND} -E copy
+            ${HDF_RESOURCES_DIR}/LIBAEC/CMakeLists.txt
+            <SOURCE_DIR>/CMakeLists.txt
     )
   endif ()
-  FetchContent_GetProperties(SZIP)
-  if(NOT szip_POPULATED)
-    FetchContent_Populate(SZIP)
-
-    # Copy an additional/replacement files into the populated source
-    file(COPY ${HDF_RESOURCES_DIR}/LIBAEC/CMakeLists.txt DESTINATION ${szip_SOURCE_DIR})
-
-    add_subdirectory(${szip_SOURCE_DIR} ${szip_BINARY_DIR})
-  endif()
+  FetchContent_MakeAvailable(SZIP)
 
   add_library (${HDF_PACKAGE_NAMESPACE}szaec-static ALIAS szaec-static)
   add_library (${HDF_PACKAGE_NAMESPACE}aec-static ALIAS aec-static)

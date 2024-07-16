@@ -53,86 +53,86 @@ The APIs are listed below:
 </th>
 </tr>
 <tr>
-<th><strong>H5</strong>
-</th>
+<td><strong>@ref H5_UG</strong>
+</td>
 <td>Library Functions: general-purpose H5 functions
 </td>
 </tr>
 <tr>
-<th><strong>H5A</strong>
-</th>
+<td><strong>@ref H5A_UG</strong>
+</td>
 <td>Annotation Interface: attribute access and manipulation routines
 </td>
 </tr>
 <tr>
-<th><strong>H5D</strong>
-</th>
+<td><strong>@ref H5D_UG</strong>
+</td>
 <td>Dataset Interface: dataset access and manipulation routines
 </td>
 </tr>
 <tr>
-<th><strong>H5E</strong>
-</th>
+<td><strong>@ref H5E_UG</strong>
+</td>
 <td>Error Interface: error handling routines
 </td>
 </tr>
 <tr>
-<th><strong>H5F</strong>
-</th>
+<td><strong>@ref H5F_UG</strong>
+</td>
 <td>File Interface: file access routines
 </td>
 </tr>
 <tr>
-<th><strong>H5G</strong>
-</th>
+<td><strong>@ref H5G_UG</strong>
+</td>
 <td>Group Interface: group creation and operation routines
 </td>
 </tr>
 <tr>
-<th><strong>H5I</strong>
-</th>
+<td><strong>@ref H5I_UG</strong>
+</td>
 <td>Identifier Interface: identifier routines
 </td>
 </tr>
 <tr>
-<th><strong>H5L</strong>
-</th>
+<td><strong>@ref H5L_UG</strong>
+</td>
 <td>Link Interface: link routines
 </td>
 </tr>
 <tr>
-<th><strong>H5O</strong>
-</th>
+<td><strong>@ref H5O_UG</strong>
+</td>
 <td>Object Interface: object routines
 </td>
 </tr>
 <tr>
-<th><strong>H5P</strong>
-</th>
+<td><strong>@ref H5P_UG</strong>
+</td>
 <td>Property List Interface: object property list manipulation routines
 </td>
 </tr>
 <tr>
-<th><strong>H5R</strong>
-</th>
+<td><strong>@ref H5R_UG</strong>
+</td>
 <td>Reference Interface: reference routines
 </td>
 </tr>
 <tr>
-<th><strong>H5S</strong>
-</th>
+<td><strong>@ref H5S_UG</strong>
+</td>
 <td>Dataspace Interface: dataspace definition and access routines
 </td>
 </tr>
 <tr>
-<th><strong>H5T</strong>
-</th>
+<td><strong>@ref H5T_UG</strong>
+</td>
 <td>Datatype Interface: datatype creation and manipulation routines
 </td>
 </tr>
 <tr>
-<th><strong>H5Z</strong>
-</th>
+<td><strong>@ref H5Z_UG</strong>
+</td>
 <td>Compression Interface: compression routine(s)
 </td>
 </tr>
@@ -189,25 +189,37 @@ in the HDF5Constants class and are prefixed with "HDF5Constants.".:
 
 \section LBProgTypes HDF5 library has its own defined types
 \li #hid_t is used for object handles
-\li hsize_t is used for dimensions
+\li #hsize_t is used for dimensions
 \li #herr_t is used for many return values
 
 \section LBProgLang Language specific files must be included in applications
 <ul>
 <li>
-Python:   Add <code>"import h5py / import numpy"</code>
+<strong>Python</strong>:<br />
+<code>
+import h5py<br />
+import numpy
+</code>
 </li>
 <li>
-C:        Add <code>"#include hdf5.h"</code>
+<strong>C</strong>:<br />
+<code>"#include hdf5.h"</code>
 </li>
 <li>
-FORTRAN:  Add <code>"USE HDF5"</code> and call h5open_f and h5close_f to initialize and close the HDF5 FORTRAN interface
+<strong>FORTRAN</strong>:<br />
+<code>USE HDF5</code><br />
+and call h5open_f and h5close_f to initialize and close the HDF5 FORTRAN interface
 </li>
 <li>
-Java:     Add <code>"import hdf.hdf5lib.H5;
-                     import hdf.hdf5lib.HDF5Constants;"</code>
+<strong>Java</strong>:<br />
+<code>
+import hdf.hdf5lib.H5;<br />
+import hdf.hdf5lib.HDF5Constants;
+</code>
 </li>
 </ul>
+
+@see @ref ExAPI for examples of using the HDF5 API.
 
 <hr>
 Previous Chapter \ref LBAPI - Next Chapter \ref LBFileCreate
@@ -461,23 +473,23 @@ Some of the HDF5 predefined atomic datatypes are listed below.
 <th><strong>Description</strong></th>
 </tr>
 <tr>
-<th><strong>H5T_STD_I32LE</strong></th>
+<td><strong>#H5T_STD_I32LE</strong></td>
 <td>Four-byte, little-endian, signed, two's complement integer</td>
 </tr>
 <tr>
-<th><strong>H5T_STD_U16BE</strong></th>
+<td><strong>#H5T_STD_U16BE</strong></td>
 <td>Two-byte, big-endian, unsigned integer</td>
 </tr>
 <tr>
-<th><strong>H5T_IEEE_F32BE</strong></th>
+<td><strong>#H5T_IEEE_F32BE</strong></td>
 <td>Four-byte, big-endian, IEEE floating point</td>
 </tr>
 <tr>
-<th><strong>H5T_IEEE_F64LE</strong></th>
+<td><strong>#H5T_IEEE_F64LE</strong></td>
 <td>Eight-byte, little-endian, IEEE floating point</td>
 </tr>
 <tr>
-<th><strong>H5T_C_S1</strong></th>
+<td><strong>#H5T_C_S1</strong></td>
 <td>One-byte, null-terminated string of eight-bit characters</td>
 </tr>
 </table>
@@ -492,42 +504,42 @@ Some of the HDF5 predefined atomic datatypes are listed below.
 <th span="2"><strong>C</strong></th>
 </tr>
 <tr>
-<th><strong>H5T_NATIVE_INT</strong></th>
+<td><strong>#H5T_NATIVE_INT</strong></td>
 <td>int</td>
 </tr>
 <tr>
-<th><strong>H5T_NATIVE_FLOAT</strong></th>
+<td><strong>#H5T_NATIVE_FLOAT</strong></td>
 <td>float</td>
 </tr>
 <tr>
-<th><strong>H5T_NATIVE_CHAR</strong></th>
+<td><strong>#H5T_NATIVE_CHAR</strong></td>
 <td>char</td>
 </tr>
 <tr>
-<th><strong>H5T_NATIVE_DOUBLE</strong></th>
+<td><strong>#H5T_NATIVE_DOUBLE</strong></td>
 <td>double</td>
 </tr>
 <tr>
-<th><strong>H5T_NATIVE_LDOUBLE</strong></th>
+<td><strong>#H5T_NATIVE_LDOUBLE</strong></td>
 <td>long double</td>
 </tr>
 <tr>
 <th span="2"><strong>Fortran</strong></th>
 </tr>
 <tr>
-<th><strong>H5T_NATIVE_INTEGER</strong></th>
+<td><strong>H5T_NATIVE_INTEGER</strong></td>
 <td>integer</td>
 </tr>
 <tr>
-<th><strong>H5T_NATIVE_REAL</strong></th>
+<td><strong>H5T_NATIVE_REAL</strong></td>
 <td>real</td>
 </tr>
 <tr>
-<th><strong>H5T_NATIVE_DOUBLE</strong></th>
+<td><strong>H5T_NATIVE_DOUBLE</strong></td>
 <td>double precision</td>
 </tr>
 <tr>
-<th><strong>H5T_NATIVE_CHARACTER</strong></th>
+<td><strong>H5T_NATIVE_CHARACTER</strong></td>
 <td>character</td>
 </tr>
 </table>
@@ -556,17 +568,17 @@ Property lists are a mechanism for modifying the default behavior when creating 
 more information on property lists see the \ref LBPropsList tutorial topic.
 
 The following property lists can be specified when creating a dataset:
-\li Dataset Creation Property List<br />
+\li <strong>Dataset Creation Property List</strong><br />
 When creating a dataset, HDF5 allows the user to specify how raw data is organized and/or compressed on
 disk. This information is stored in a dataset creation property list and passed to the dataset interface.
 The raw data on disk can be stored contiguously (in the same linear way that it is organized in memory),
 partitioned into chunks, stored externally, etc. In this tutorial, we use the default dataset creation
 property list (contiguous storage layout and no compression). For more information about dataset creation
 property lists, see \ref sec_dataset in the \ref UG.
-\li Link Creation Property List<br />
+\li <strong>Link Creation Property List</strong><br />
 The link creation property list governs creation of the link(s) by which a new dataset is accessed and the
 creation of any intermediate groups that may be missing.
-\li Dataset Access Property List<br />
+\li <strong>Dataset Access Property List</strong><br />
 Dataset access property lists are properties that can be specified when accessing a dataset.
 
 \section secLBDsetCreateSteps Steps to Create a Dataset
@@ -766,7 +778,7 @@ To read from or write to a dataset, the #H5Dread and #H5Dwrite routines are used
 
 <em>C</em>
 \code
-   status = H5Dread (set_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf );
+   status = H5Dread (set_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf);
    status = H5Dwrite (set_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf);
 \endcode
 
