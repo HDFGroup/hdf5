@@ -1202,12 +1202,8 @@ endif ()
 # Assuming they don't
 foreach (libs ${LINK_COMP_LIBS})
 #  set (_PKG_CONFIG_REQUIRES_PRIVATE "${_PKG_CONFIG_REQUIRES_PRIVATE} -l${libs}")
-if(TARGET ${libs})
   get_target_property (libname ${libs} OUTPUT_NAME)
   set (_PKG_CONFIG_LIBS_PRIVATE "${_PKG_CONFIG_LIBS_PRIVATE} -l${libname}")
-else ()
-    set (_PKG_CONFIG_LIBS_PRIVATE "${_PKG_CONFIG_LIBS_PRIVATE} -l${libs}")
-endif ()
 endforeach ()
 
 #if (BUILD_STATIC_LIBS)
