@@ -1746,6 +1746,14 @@ Bug Fixes since HDF5-1.14.0 release
 
     Configuration
     -------------
+    - Fixed usage issue with FindZLIB.cmake module
+
+      When building HDF5 with CMake and relying on the FindZLIB.cmake module,
+      the Find module would correctly find the ZLIB library but not set an OUTPUT_NAME
+      on the target. Also, the target returned, ZLIB::ZLIB, was not in the ZLIB_LIBRARIES
+      variable. This caused issues when requesting the OUTPUT_NAME of the target in
+      the pkg-config settings.
+
     - Fixed/reverted an Autotools configure hack that causes problems on MacOS
 
       A sed line in configure.ac was added in the past to paper over some
