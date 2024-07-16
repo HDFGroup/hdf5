@@ -98,6 +98,8 @@ if (HDF5_ENABLE_Z_LIB_SUPPORT)
         set (H5_ZLIB_HEADER "zlib.h")
         set (H5_ZLIB_INCLUDE_DIR_GEN ${ZLIB_INCLUDE_DIR})
         set (H5_ZLIB_INCLUDE_DIRS ${H5_ZLIB_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIR})
+        # The FindZLIB.cmake module does not set an OUTPUT_NAME
+        # on the target. The target returned is: ZLIB::ZLIB
         get_filename_component (libname ${ZLIB_LIBRARIES} NAME_WLE)
         string (REGEX REPLACE "^lib" "" libname ${libname})
         set_target_properties (ZLIB::ZLIB PROPERTIES OUTPUT_NAME zlib-static)
@@ -139,7 +141,7 @@ if (HDF5_ENABLE_SZIP_SUPPORT)
   if (NOT SZIP_USE_EXTERNAL)
     set(libaec_USE_STATIC_LIBS ${HDF5_USE_LIBAEC_STATIC})
     set(SZIP_FOUND FALSE)
-    find_package (SZIP NAMES ${LIBAEC_PACKAGE_NAME}${HDF_PACKAGE_EXT} COMPONENTS static shared)
+    find_package (SZIP NAMES ${LIBAEC_PACKAGE_NAME}${HDF_PACKAGE_EXT} COMPONENTS static)
     if (NOT SZIP_FOUND)
       find_package (SZIP) # Legacy find
     endif ()
