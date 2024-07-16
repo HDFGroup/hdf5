@@ -705,6 +705,10 @@ H5VL_register(H5I_type_t type, void *object, H5VL_t *vol_connector, bool app_ref
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register handle");
 
 done:
+    if (ret_value < 0)
+        if (vol_obj && H5VL_free_object(vol_obj) < 0)
+            HDONE_ERROR(H5E_VOL, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release VOL object");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_register() */
 
@@ -757,6 +761,13 @@ done:
  *
  * Purpose:     Utility function to create a connector for a connector ID.
  *
+ *              The 'nrefs' field generally indicates the number of VOL
+ *              objects which refer to this connector, but at creation
+ *              time nrefs is initialized to 1 to support cleanup on
+ *              error. After the first object is registered with the
+ *              connector, the nrefs field must be manually decremented
+ *              to remove this 'dummy' ref and allow proper cleanup later.
+ *
  * Return:      Success:    Pointer to a new connector object
  *              Failure:    NULL
  *
@@ -779,8 +790,9 @@ H5VL_new_connector(hid_t connector_id)
     /* Setup VOL info struct */
     if (NULL == (connector = H5FL_CALLOC(H5VL_t)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "can't allocate VOL connector struct");
-    connector->cls = cls;
-    connector->id  = connector_id;
+    connector->cls   = cls;
+    connector->id    = connector_id;
+    connector->nrefs = 1;
     if (H5I_inc_ref(connector->id, false) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL connector");
     conn_id_incr = true;
@@ -830,6 +842,12 @@ H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id, bool 
     /* Get an ID for the VOL object */
     if ((ret_value = H5VL_register(type, obj, connector, app_ref)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle");
+
+    /* Remove 'dummy' connector reference */
+    assert(connector->nrefs > 1);
+
+    if (H5VL_conn_dec_rc(connector) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector");
 
 done:
     /* Clean up on error */

@@ -131,6 +131,12 @@ H5ESinsert_request(hid_t es_id, hid_t connector_id, void *request)
     if (H5ES__insert_request(es, connector, request) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "can't insert request into event set");
 
+    /* Remove 'dummy' connector reference */
+    assert(connector->nrefs > 1);
+
+    if (H5VL_conn_dec_rc(connector) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector");
+
 done:
     /* Clean up on error */
     if (ret_value < 0)
