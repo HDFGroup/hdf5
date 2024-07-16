@@ -25,7 +25,7 @@
 #define H5_MY_PKG     H5F
 #define H5_MY_PKG_ERR H5E_FILE
 
-/** \page H5F_UG  The HDF5 File
+/** \page H5F_UG HDF5 File
  *
  * \section sec_file The HDF5 File
  * \subsection subsec_file_intro Introduction

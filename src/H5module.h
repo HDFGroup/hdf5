@@ -25,7 +25,7 @@
 #define H5_MY_PKG     H5
 #define H5_MY_PKG_ERR H5E_LIB
 
-/** \page H5DM_UG The HDF5 Data Model and File Structure
+/** \page H5DM_UG HDF5 Data Model and File Structure
  *
  * \section sec_data_model The HDF5 Data Model and File Structure
  * \subsection subsec_data_model_intro Introduction
@@ -606,7 +606,7 @@
  *
  */
 
-/** \page H5_UG The HDF5 Library and Programming Model
+/** \page H5_UG HDF5 Library and Programming Model
  *
  * \section sec_program The HDF5 Library and Programming Model
  * \subsection subsec_program_intro Introduction

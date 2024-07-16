@@ -17,8 +17,8 @@
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
-public class H5_CreateGroupAbsoluteRelative {
-    private static String FILENAME    = "H5_CreateGroupAbsoluteRelative.h5";
+public class HDF5GroupAbsoluteRelativeCreate {
+    private static String FILENAME    = "HDF5GroupAbsoluteRelativeCreate.h5";
     private static String GROUPNAME   = "MyGroup";
     private static String GROUPNAME_A = "GroupA";
     private static String GROUPNAME_B = "GroupB";
@@ -109,6 +109,6 @@ public class H5_CreateGroupAbsoluteRelative {
 
     public static void main(String[] args)
     {
-        H5_CreateGroupAbsoluteRelative.CreateGroupAbsoluteAndRelative();
+        HDF5GroupAbsoluteRelativeCreate.CreateGroupAbsoluteAndRelative();
     }
 }

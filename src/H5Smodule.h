@@ -974,7 +974,33 @@
  *
  * This section is under construction.
  *
- * \subsection subsec_dataspace_refer References to Dataset Regions
+ * \subsection subsec_dataspace_refer References
+ *
+ * Another use of selections is to store a reference to a region of a dataset in the file or an external file.
+ An HDF5 object reference
+ * object is a pointer to an object (attribute, dataset, group, or committed datatype) in the file or an
+ external file. A selection can
+ * be used to create a pointer to a set of selected elements of a dataset, called a region reference. The
+ * selection can be either a point selection or a hyperslab selection.
+ *
+ * A region reference is an object maintained by the HDF5 Library. The region reference can be stored in a
+ * dataset or attribute, and then read. The dataset or attribute is defined to have the special datatype,
+ * #H5T_STD_REF.
+ *
+ * To discover the elements and/or read the data, the region reference can be dereferenced to obtain the
+ * identifiers for the dataset and dataspace.
+ *
+ * For more information, \see subsubsec_datatype_other_refs.
+ *
+ * \subsubsection subsubsec_dataspace_refer_use Example Uses for Region References
+ *
+ * \subsubsection subsubsec_dataspace_refer_create Creating References to Regions
+ *
+ * \subsubsection subsubsec_dataspace_refer_read Reading References to Regions
+ *
+ * \subsection subsec_dataspace_deprecated_refer Deprecated References to Dataset Regions
+ * The API described in this section was deprecated since HDF5 1.12.0. Shown are
+ * examples and usage in use by applications written before 1.12.0.
  *
  * Another use of selections is to store a reference to a region of a dataset. An HDF5 object reference
  * object is a pointer to an object (dataset, group, or committed datatype) in the file. A selection can
@@ -992,7 +1018,7 @@
  *
  * For more information, \see subsubsec_datatype_other_refs.
  *
- * \subsubsection subsubsec_dataspace_refer_use Example Uses for Region References
+ * \subsubsection subsubsec_dataspace_deprecated_refer_use Deprecated Example Uses for Region References
  *
  * Region references are used to implement stored pointers to data within a dataset. For example, features
  * in a large dataset might be indexed by a table. See the figure below. This table could be stored as an
@@ -1016,7 +1042,7 @@
  * </table>
  *
  *
- * \subsubsection subsubsec_dataspace_refer_create Creating References to Regions
+ * \subsubsection subsubsec_dataspace_deprecated_refer_create Deprecated Creating References to Regions
  *
  * To create a region reference:
  * \li 1. Create or open the dataset that contains the region
@@ -1043,7 +1069,7 @@
  * and a reference is created using \ref H5Rcreate(). The call to \ref H5Rcreate() specifies the file,
  * dataset, and the dataspace with selection.
  *
- * <em>Create an array of region references</em>
+ * <em>Deprecated Create an array of region references</em>
  * \code
  *     // create an array of 4 region references
  *     hdset_reg_ref_t ref[4];
@@ -1085,7 +1111,7 @@
  * When all the references are created, the array of references is written to the dataset R1. The
  * dataset is declared to have datatype #H5T_STD_REF_DSETREG. See the example below.
  *
- * <em>Write the array of references to a dataset</em>
+ * <em>Deprecated Write the array of references to a dataset</em>
  * \code
  *     Hsize_t dimsr[1];
  *     dimsr[0] = 4;
@@ -1105,7 +1131,7 @@
  * \li The dataset must exist in the file when the reference is created; #H5Rcreate
  * \li The target dataset must be in the same file as the stored reference
  *
- * \subsubsection subsubsec_dataspace_refer_read Reading References to Regions
+ * \subsubsection subsubsec_dataspace_refer_deprecated_read Deprecated Reading References to Regions
  *
  * To retrieve data from a region reference, the reference must be read from the file, and then the data can
  * be retrieved. The steps are:
@@ -1127,7 +1153,7 @@
  * \li The target dataset must be present and accessible in the file
  * \li The selection must be a valid selection for the dataset
  *
- * <em>Read an array of region references; read from the first selection</em>
+ * <em>Deprecated Read an array of region references; read from the first selection</em>
  * \code
  *     dsetr_id = H5Dopen (file_id, "R1", H5P_DEFAULT);
  *     status = H5Dread(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_out);
