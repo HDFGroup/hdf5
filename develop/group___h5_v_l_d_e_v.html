@@ -1,12 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.7"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: VOL Developer</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -22,37 +23,24 @@
 /* @license-end */
 </script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="hdf5doxy.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
 <link href="hdf5doxy.css" rel="stylesheet" type="text/css">
-<!-- <link href="hdf5doxy.css" rel="stylesheet" type="text/css"/>
- -->
 <script type="text/javascript" src="hdf5_navtree_hacks.js"></script>
+<div style="background:#FFDDDD;font-size:120%;text-align:center;margin:0;padding:5px">Please, help us to better serve our user community by answering the following short survey:  <a href="https://www.hdfgroup.org/website-survey/">https://www.hdfgroup.org/website-survey/</a></div>
 </head>
 <body>
-<div style="background:#FFDDDD;font-size:120%;text-align:center;margin:0;padding:5px">Please, help us to better serve our user community by answering the following short survey:  <a href="https://www.hdfgroup.org/website-survey/">https://www.hdfgroup.org/website-survey/</a></div>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
 <div id="titlearea">
 <table cellspacing="0" cellpadding="0">
  <tbody>
- <tr style="height: 56px;">
+ <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
-  <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.96acf6c</span>
+  <td id="projectalign">
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.e6e098b</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
-   <td>        <div id="MSearchBox" class="MSearchBoxInactive">
-        <span class="left">
-          <span id="MSearchSelect"                onmouseover="return searchBox.OnSearchSelectShow()"                onmouseout="return searchBox.OnSearchSelectHide()">&#160;</span>
-          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
-               onfocus="searchBox.OnSearchFieldFocus(true)" 
-               onblur="searchBox.OnSearchFieldFocus(false)" 
-               onkeyup="searchBox.OnSearchFieldChange(event)"/>
-          </span><span class="right">
-            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
-          </span>
-        </div>
-</td>
  </tr>
  </tbody>
 </table>
@@ -64,6 +52,33 @@
 var searchBox = new SearchBox("searchBox", "search/",'.html');
 /* @license-end */
 </script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="_getting_started.html"><span>Getting&#160;started</span></a></li>
+      <li><a href="_u_g.html"><span>User&#160;Guide</span></a></li>
+      <li><a href="_r_m.html"><span>Reference&#160;Manual</span></a></li>
+      <li><a href="_cookbook.html"><span>Cookbook</span></a></li>
+      <li><a href="_t_n.html"><span>Technical&#160;Notes</span></a></li>
+      <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
+      <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
+      <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_about.html"><span>About</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect"                onmouseover="return searchBox.OnSearchSelectShow()"                onmouseout="return searchBox.OnSearchSelectHide()">&#160;</span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
 </div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
@@ -288,42 +303,42 @@ Functions</h2></td></tr>
 <div class="ttc" id="a_h5_ipublic_8h_html_a0045db7ff9c22ad35db6ae91662e1943"><div class="ttname"><a href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></div><div class="ttdeci">int64_t hid_t</div><div class="ttdef"><b>Definition</b> H5Ipublic.h:60</div></div>
 <div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:239</div></div>
 <div class="ttc" id="agroup___h5_v_l_d_e_f_html_ga81b40d59b53c498f8aa9d92d0afdde2c"><div class="ttname"><a href="group___h5_v_l_d_e_f.html#ga81b40d59b53c498f8aa9d92d0afdde2c">H5VL_class_value_t</a></div><div class="ttdeci">int H5VL_class_value_t</div><div class="ttdoc">VOL connector identifiers.</div><div class="ttdef"><b>Definition</b> H5VLpublic.h:144</div></div>
-<div class="ttc" id="astruct_h5_v_l__attr__class__t_html"><div class="ttname"><a href="struct_h5_v_l__attr__class__t.html">H5VL_attr_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:863</div></div>
-<div class="ttc" id="astruct_h5_v_l__blob__class__t_html"><div class="ttname"><a href="struct_h5_v_l__blob__class__t.html">H5VL_blob_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:993</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html"><div class="ttname"><a href="struct_h5_v_l__class__t.html">H5VL_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1012</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_a0a18753f3a24e91b75fd802b81f044a7"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a0a18753f3a24e91b75fd802b81f044a7">H5VL_class_t::initialize</a></div><div class="ttdeci">herr_t(* initialize)(hid_t vipl_id)</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1019</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_a27fe8e82cf2ce359010cc1d08af2e105"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a27fe8e82cf2ce359010cc1d08af2e105">H5VL_class_t::version</a></div><div class="ttdeci">unsigned version</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1014</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_a38be37dc57b556f87df46b0ea65c9ae0"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a38be37dc57b556f87df46b0ea65c9ae0">H5VL_class_t::dataset_cls</a></div><div class="ttdeci">H5VL_dataset_class_t dataset_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1028</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_a3da742717813fedde17f3ef9a739a3a5"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a3da742717813fedde17f3ef9a739a3a5">H5VL_class_t::link_cls</a></div><div class="ttdeci">H5VL_link_class_t link_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1032</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_a3da863f4634c64aeffe46cca882db43d"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a3da863f4634c64aeffe46cca882db43d">H5VL_class_t::terminate</a></div><div class="ttdeci">herr_t(* terminate)(void)</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1020</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_a4531586e75e64de257cf51b4b7c50d70"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a4531586e75e64de257cf51b4b7c50d70">H5VL_class_t::value</a></div><div class="ttdeci">H5VL_class_value_t value</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1015</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_a49a73ac039550d87d60b485727149cce"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a49a73ac039550d87d60b485727149cce">H5VL_class_t::datatype_cls</a></div><div class="ttdeci">H5VL_datatype_class_t datatype_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1029</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_a533cec569e2019874f02dd9552bcb68e"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a533cec569e2019874f02dd9552bcb68e">H5VL_class_t::optional</a></div><div class="ttdeci">herr_t(* optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1042</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_a6566afc54591b6c64dbec7bdc0bf0b58"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a6566afc54591b6c64dbec7bdc0bf0b58">H5VL_class_t::conn_version</a></div><div class="ttdeci">unsigned conn_version</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1017</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_a6f9e6afe57118c01efbd5805d6f6615d"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a6f9e6afe57118c01efbd5805d6f6615d">H5VL_class_t::group_cls</a></div><div class="ttdeci">H5VL_group_class_t group_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1031</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_a74d541c08c6c71946cc5a1e105ca5e51"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a74d541c08c6c71946cc5a1e105ca5e51">H5VL_class_t::wrap_cls</a></div><div class="ttdeci">H5VL_wrap_class_t wrap_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1024</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_a8f8f80d37794cde9472343e4487ba3eb"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a8f8f80d37794cde9472343e4487ba3eb">H5VL_class_t::name</a></div><div class="ttdeci">const char * name</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1016</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_a94fcae0c3e55fb9da64b99cf5ec0cc05"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a94fcae0c3e55fb9da64b99cf5ec0cc05">H5VL_class_t::file_cls</a></div><div class="ttdeci">H5VL_file_class_t file_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1030</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_ac4b405cf0a53f734d273232a82baf247"><div class="ttname"><a href="struct_h5_v_l__class__t.html#ac4b405cf0a53f734d273232a82baf247">H5VL_class_t::cap_flags</a></div><div class="ttdeci">uint64_t cap_flags</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1018</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_acd39460513ffed8d7d3eab4ebab54bb2"><div class="ttname"><a href="struct_h5_v_l__class__t.html#acd39460513ffed8d7d3eab4ebab54bb2">H5VL_class_t::token_cls</a></div><div class="ttdeci">H5VL_token_class_t token_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1039</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_adc5afcdccffe9dc3608ac8e23e8fea17"><div class="ttname"><a href="struct_h5_v_l__class__t.html#adc5afcdccffe9dc3608ac8e23e8fea17">H5VL_class_t::request_cls</a></div><div class="ttdeci">H5VL_request_class_t request_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1037</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_aea95f1ef7bfe9d0a06f5d7ba4d992b33"><div class="ttname"><a href="struct_h5_v_l__class__t.html#aea95f1ef7bfe9d0a06f5d7ba4d992b33">H5VL_class_t::attr_cls</a></div><div class="ttdeci">H5VL_attr_class_t attr_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1027</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_aee15298970b7178f78f92de98b7f8211"><div class="ttname"><a href="struct_h5_v_l__class__t.html#aee15298970b7178f78f92de98b7f8211">H5VL_class_t::object_cls</a></div><div class="ttdeci">H5VL_object_class_t object_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1033</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_aee571d79753251a1d6ebc1073254278c"><div class="ttname"><a href="struct_h5_v_l__class__t.html#aee571d79753251a1d6ebc1073254278c">H5VL_class_t::blob_cls</a></div><div class="ttdeci">H5VL_blob_class_t blob_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1038</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_afdbe51576a0f6360693757d6738111eb"><div class="ttname"><a href="struct_h5_v_l__class__t.html#afdbe51576a0f6360693757d6738111eb">H5VL_class_t::info_cls</a></div><div class="ttdeci">H5VL_info_class_t info_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1023</div></div>
-<div class="ttc" id="astruct_h5_v_l__class__t_html_aff81b23d1373b396d5eacda97bb4a6c6"><div class="ttname"><a href="struct_h5_v_l__class__t.html#aff81b23d1373b396d5eacda97bb4a6c6">H5VL_class_t::introspect_cls</a></div><div class="ttdeci">H5VL_introspect_class_t introspect_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1036</div></div>
-<div class="ttc" id="astruct_h5_v_l__dataset__class__t_html"><div class="ttname"><a href="struct_h5_v_l__dataset__class__t.html">H5VL_dataset_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:878</div></div>
-<div class="ttc" id="astruct_h5_v_l__datatype__class__t_html"><div class="ttname"><a href="struct_h5_v_l__datatype__class__t.html">H5VL_datatype_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:894</div></div>
-<div class="ttc" id="astruct_h5_v_l__file__class__t_html"><div class="ttname"><a href="struct_h5_v_l__file__class__t.html">H5VL_file_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:906</div></div>
-<div class="ttc" id="astruct_h5_v_l__group__class__t_html"><div class="ttname"><a href="struct_h5_v_l__group__class__t.html">H5VL_group_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:917</div></div>
-<div class="ttc" id="astruct_h5_v_l__info__class__t_html"><div class="ttname"><a href="struct_h5_v_l__info__class__t.html">H5VL_info_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:837</div></div>
-<div class="ttc" id="astruct_h5_v_l__introspect__class__t_html"><div class="ttname"><a href="struct_h5_v_l__introspect__class__t.html">H5VL_introspect_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:976</div></div>
-<div class="ttc" id="astruct_h5_v_l__link__class__t_html"><div class="ttname"><a href="struct_h5_v_l__link__class__t.html">H5VL_link_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:929</div></div>
-<div class="ttc" id="astruct_h5_v_l__object__class__t_html"><div class="ttname"><a href="struct_h5_v_l__object__class__t.html">H5VL_object_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:947</div></div>
+<div class="ttc" id="astruct_h5_v_l__attr__class__t_html"><div class="ttname"><a href="struct_h5_v_l__attr__class__t.html">H5VL_attr_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:871</div></div>
+<div class="ttc" id="astruct_h5_v_l__blob__class__t_html"><div class="ttname"><a href="struct_h5_v_l__blob__class__t.html">H5VL_blob_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1001</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html"><div class="ttname"><a href="struct_h5_v_l__class__t.html">H5VL_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1020</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_a0a18753f3a24e91b75fd802b81f044a7"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a0a18753f3a24e91b75fd802b81f044a7">H5VL_class_t::initialize</a></div><div class="ttdeci">herr_t(* initialize)(hid_t vipl_id)</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1027</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_a27fe8e82cf2ce359010cc1d08af2e105"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a27fe8e82cf2ce359010cc1d08af2e105">H5VL_class_t::version</a></div><div class="ttdeci">unsigned version</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1022</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_a38be37dc57b556f87df46b0ea65c9ae0"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a38be37dc57b556f87df46b0ea65c9ae0">H5VL_class_t::dataset_cls</a></div><div class="ttdeci">H5VL_dataset_class_t dataset_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1036</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_a3da742717813fedde17f3ef9a739a3a5"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a3da742717813fedde17f3ef9a739a3a5">H5VL_class_t::link_cls</a></div><div class="ttdeci">H5VL_link_class_t link_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1040</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_a3da863f4634c64aeffe46cca882db43d"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a3da863f4634c64aeffe46cca882db43d">H5VL_class_t::terminate</a></div><div class="ttdeci">herr_t(* terminate)(void)</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1028</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_a4531586e75e64de257cf51b4b7c50d70"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a4531586e75e64de257cf51b4b7c50d70">H5VL_class_t::value</a></div><div class="ttdeci">H5VL_class_value_t value</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1023</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_a49a73ac039550d87d60b485727149cce"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a49a73ac039550d87d60b485727149cce">H5VL_class_t::datatype_cls</a></div><div class="ttdeci">H5VL_datatype_class_t datatype_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1037</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_a533cec569e2019874f02dd9552bcb68e"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a533cec569e2019874f02dd9552bcb68e">H5VL_class_t::optional</a></div><div class="ttdeci">herr_t(* optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1050</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_a6566afc54591b6c64dbec7bdc0bf0b58"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a6566afc54591b6c64dbec7bdc0bf0b58">H5VL_class_t::conn_version</a></div><div class="ttdeci">unsigned conn_version</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1025</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_a6f9e6afe57118c01efbd5805d6f6615d"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a6f9e6afe57118c01efbd5805d6f6615d">H5VL_class_t::group_cls</a></div><div class="ttdeci">H5VL_group_class_t group_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1039</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_a74d541c08c6c71946cc5a1e105ca5e51"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a74d541c08c6c71946cc5a1e105ca5e51">H5VL_class_t::wrap_cls</a></div><div class="ttdeci">H5VL_wrap_class_t wrap_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1032</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_a8f8f80d37794cde9472343e4487ba3eb"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a8f8f80d37794cde9472343e4487ba3eb">H5VL_class_t::name</a></div><div class="ttdeci">const char * name</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1024</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_a94fcae0c3e55fb9da64b99cf5ec0cc05"><div class="ttname"><a href="struct_h5_v_l__class__t.html#a94fcae0c3e55fb9da64b99cf5ec0cc05">H5VL_class_t::file_cls</a></div><div class="ttdeci">H5VL_file_class_t file_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1038</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_ac4b405cf0a53f734d273232a82baf247"><div class="ttname"><a href="struct_h5_v_l__class__t.html#ac4b405cf0a53f734d273232a82baf247">H5VL_class_t::cap_flags</a></div><div class="ttdeci">uint64_t cap_flags</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1026</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_acd39460513ffed8d7d3eab4ebab54bb2"><div class="ttname"><a href="struct_h5_v_l__class__t.html#acd39460513ffed8d7d3eab4ebab54bb2">H5VL_class_t::token_cls</a></div><div class="ttdeci">H5VL_token_class_t token_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1047</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_adc5afcdccffe9dc3608ac8e23e8fea17"><div class="ttname"><a href="struct_h5_v_l__class__t.html#adc5afcdccffe9dc3608ac8e23e8fea17">H5VL_class_t::request_cls</a></div><div class="ttdeci">H5VL_request_class_t request_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1045</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_aea95f1ef7bfe9d0a06f5d7ba4d992b33"><div class="ttname"><a href="struct_h5_v_l__class__t.html#aea95f1ef7bfe9d0a06f5d7ba4d992b33">H5VL_class_t::attr_cls</a></div><div class="ttdeci">H5VL_attr_class_t attr_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1035</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_aee15298970b7178f78f92de98b7f8211"><div class="ttname"><a href="struct_h5_v_l__class__t.html#aee15298970b7178f78f92de98b7f8211">H5VL_class_t::object_cls</a></div><div class="ttdeci">H5VL_object_class_t object_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1041</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_aee571d79753251a1d6ebc1073254278c"><div class="ttname"><a href="struct_h5_v_l__class__t.html#aee571d79753251a1d6ebc1073254278c">H5VL_class_t::blob_cls</a></div><div class="ttdeci">H5VL_blob_class_t blob_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1046</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_afdbe51576a0f6360693757d6738111eb"><div class="ttname"><a href="struct_h5_v_l__class__t.html#afdbe51576a0f6360693757d6738111eb">H5VL_class_t::info_cls</a></div><div class="ttdeci">H5VL_info_class_t info_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1031</div></div>
+<div class="ttc" id="astruct_h5_v_l__class__t_html_aff81b23d1373b396d5eacda97bb4a6c6"><div class="ttname"><a href="struct_h5_v_l__class__t.html#aff81b23d1373b396d5eacda97bb4a6c6">H5VL_class_t::introspect_cls</a></div><div class="ttdeci">H5VL_introspect_class_t introspect_cls</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1044</div></div>
+<div class="ttc" id="astruct_h5_v_l__dataset__class__t_html"><div class="ttname"><a href="struct_h5_v_l__dataset__class__t.html">H5VL_dataset_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:886</div></div>
+<div class="ttc" id="astruct_h5_v_l__datatype__class__t_html"><div class="ttname"><a href="struct_h5_v_l__datatype__class__t.html">H5VL_datatype_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:902</div></div>
+<div class="ttc" id="astruct_h5_v_l__file__class__t_html"><div class="ttname"><a href="struct_h5_v_l__file__class__t.html">H5VL_file_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:914</div></div>
+<div class="ttc" id="astruct_h5_v_l__group__class__t_html"><div class="ttname"><a href="struct_h5_v_l__group__class__t.html">H5VL_group_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:925</div></div>
+<div class="ttc" id="astruct_h5_v_l__info__class__t_html"><div class="ttname"><a href="struct_h5_v_l__info__class__t.html">H5VL_info_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:845</div></div>
+<div class="ttc" id="astruct_h5_v_l__introspect__class__t_html"><div class="ttname"><a href="struct_h5_v_l__introspect__class__t.html">H5VL_introspect_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:984</div></div>
+<div class="ttc" id="astruct_h5_v_l__link__class__t_html"><div class="ttname"><a href="struct_h5_v_l__link__class__t.html">H5VL_link_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:937</div></div>
+<div class="ttc" id="astruct_h5_v_l__object__class__t_html"><div class="ttname"><a href="struct_h5_v_l__object__class__t.html">H5VL_object_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:955</div></div>
 <div class="ttc" id="astruct_h5_v_l__optional__args__t_html"><div class="ttname"><a href="struct_h5_v_l__optional__args__t.html">H5VL_optional_args_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:94</div></div>
-<div class="ttc" id="astruct_h5_v_l__request__class__t_html"><div class="ttname"><a href="struct_h5_v_l__request__class__t.html">H5VL_request_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:983</div></div>
-<div class="ttc" id="astruct_h5_v_l__token__class__t_html"><div class="ttname"><a href="struct_h5_v_l__token__class__t.html">H5VL_token_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1001</div></div>
-<div class="ttc" id="astruct_h5_v_l__wrap__class__t_html"><div class="ttname"><a href="struct_h5_v_l__wrap__class__t.html">H5VL_wrap_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:850</div></div>
+<div class="ttc" id="astruct_h5_v_l__request__class__t_html"><div class="ttname"><a href="struct_h5_v_l__request__class__t.html">H5VL_request_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:991</div></div>
+<div class="ttc" id="astruct_h5_v_l__token__class__t_html"><div class="ttname"><a href="struct_h5_v_l__token__class__t.html">H5VL_token_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:1009</div></div>
+<div class="ttc" id="astruct_h5_v_l__wrap__class__t_html"><div class="ttname"><a href="struct_h5_v_l__wrap__class__t.html">H5VL_wrap_class_t</a></div><div class="ttdef"><b>Definition</b> H5VLconnector.h:858</div></div>
 </div><!-- fragment --><dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>

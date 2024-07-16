@@ -25,21 +25,15 @@
 var NAVTREE =
 [
   [ "HDF5", "index.html", [
-    [ "Overview", "index.html", null ],
     [ "Getting started", "_getting_started.html", null ],
     [ "User Guide", "_u_g.html", null ],
     [ "Reference Manual", "_r_m.html", null ],
-    [ "Application Developer's Guide", "^https://\DSPURL/HDF5+Application+Developer%27s+Guide", null ],
-    [ "HDF5 Library Architecture Overview", "^https://github.com/HDFGroup/arch-doc/blob/main/An_Overview_of_the_HDF5_Library_Architecture.v2.pdf", null ],
-    [ "Specifications", "_s_p_e_c.html", null ],
     [ "Cookbook", "_cookbook.html", null ],
     [ "Technical Notes", "_t_n.html", null ],
-    [ "HDF5 VOL Connector Author Guide", "_v_o_l__connector.html", null ],
-    [ "HDF5 VOL User's Guide", "^https://\DSPURL/HDF5+VOL+User%27s+Guide", null ],
     [ "RFCs", "_r_f_c.html", null ],
-    [ "Full-Text Search", "_f_t_s.html", null ],
-    [ "About", "_about.html", null ],
-    [ "Glossary", "_g_l_s.html", null ]
+    [ "Specifications", "_s_p_e_c.html", null ],
+    [ "Glossary", "_g_l_s.html", null ],
+    [ "About", "_about.html", null ]
   ] ]
 ];
 
