@@ -1180,8 +1180,6 @@ CONTAINS
        c_name(1:1)(1:1) = C_NULL_CHAR
        name_len = H5Rget_attr_name(ref_ptr, c_name, 1_SIZE_T)
        IF(name_len.LT.0_SIZE_T) hdferr = H5I_INVALID_HID_F
-       ! Don't include the NULL term in the size
-       name_len = name_len - 1
     ELSE
        l = INT(LEN(name)+1,SIZE_T)
        IF(H5Rget_attr_name(ref_ptr, c_name, l) .LT. 0_SIZE_T)THEN
