@@ -670,7 +670,7 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Open dataset using the name from the referenced object */
-    ds1_from_name = H5Dopen(fid1, namebuf, H5P_DEFAULT);
+    ds1_from_name = H5Dopen2(fid1, namebuf, H5P_DEFAULT);
     CHECK(ds1_from_name, H5I_INVALID_HID, "H5Dopen");
 
     /* Check information in the dataset */
