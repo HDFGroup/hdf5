@@ -130,23 +130,23 @@ done:
 } /* H5TS_thread_detach() */
 
 /*--------------------------------------------------------------------------
- * Function: H5TS_thread_setcancelstate
+ * Function: H5TS_thread_yield
  *
- * Purpose:  Set cancellability state for a thread
+ * Purpose:  Yield thread execution
  *
  * Return:   Non-negative on success / Negative on failure
  *
  *--------------------------------------------------------------------------
  */
-herr_t
-H5TS_thread_setcancelstate(int H5_ATTR_UNUSED state, int H5_ATTR_UNUSED *oldstate)
+void
+H5TS_thread_yield(void)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* C11 threads are not cancelable, so this is a noop */
+    thrd_yield();
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
-} /* H5TS_thread_setcancelstate() */
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
+} /* H5TS_thread_yield() */
 #else
 #ifdef H5_HAVE_WIN_THREADS
 /*--------------------------------------------------------------------------
@@ -233,23 +233,23 @@ done:
 } /* H5TS_thread_detach() */
 
 /*--------------------------------------------------------------------------
- * Function: H5TS_thread_setcancelstate
+ * Function: H5TS_thread_yield
  *
- * Purpose:  Set cancellability state for a thread
+ * Purpose:  Yield thread execution
  *
  * Return:   Non-negative on success / Negative on failure
  *
  *--------------------------------------------------------------------------
  */
-herr_t
-H5TS_thread_setcancelstate(int H5_ATTR_UNUSED state, int H5_ATTR_UNUSED *oldstate)
+void
+H5TS_thread_yield(void)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Windows threads are not cancelable, so this is a noop */
+    SwitchToThread();
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
-} /* H5TS_thread_setcancelstate() */
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
+} /* H5TS_thread_yield() */
 #else
 /*--------------------------------------------------------------------------
  * Function: H5TS_thread_create
@@ -321,28 +321,23 @@ done:
 } /* H5TS_thread_detach() */
 
 /*--------------------------------------------------------------------------
- * Function: H5TS_thread_setcancelstate
+ * Function: H5TS_thread_yield
  *
- * Purpose:  Set cancellability state for a thread
+ * Purpose:  Yield thread execution
  *
  * Return:   Non-negative on success / Negative on failure
  *
  *--------------------------------------------------------------------------
  */
-herr_t
-H5TS_thread_setcancelstate(int state, int *oldstate)
+void
+H5TS_thread_yield(void)
 {
-    herr_t ret_value = SUCCEED;
-
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Set cancellation state, and remember previous state */
-    if (H5_UNLIKELY(pthread_setcancelstate(state, oldstate)))
-        HGOTO_DONE(FAIL);
+    sched_yield();
 
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* H5TS_thread_setcancelstate() */
+    FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
+} /* H5TS_thread_yield() */
 #endif
 #endif
 #endif /* H5_HAVE_THREADS */
