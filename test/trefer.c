@@ -33,7 +33,6 @@
 #define FILE_REF_EXT2      "trefer_ext2.h5"
 #define FILE_REF_COMPAT    "trefer_compat.h5"
 
-
 /* 1-D dataset with fixed dimensions */
 #define SPACE1_RANK 1
 #define SPACE1_DIM1 4
@@ -83,7 +82,7 @@ typedef struct s2_t {
 #define ATTR1_REF_OBJ "Attr1"
 #define ATTR2_REF_OBJ "Attr2"
 #define ATTR3_REF_OBJ "Attr3"
-#define NAME_SIZE  16
+#define NAME_SIZE     16
 
 #define MAX_ITER_CREATE 1000
 #define MAX_ITER_WRITE  MAX_ITER_CREATE
@@ -444,15 +443,15 @@ test_reference_params(void)
 static void
 test_reference_obj(void)
 {
-    hid_t fid1;       /* HDF5 File IDs                    */
-    hid_t dataset,    /* Dataset ID                       */
-        ds1_from_name,/* Dataset ID returned by H5Dopen2 using a dataset name */
-        ds2_from_name,/* Dataset ID returned by H5Dopen2 using a dataset name */
-        ref_ds1,      /* Dereferenced dataset ID          */
-        ref_ds2;      /* Dereferenced dataset ID          */
-    hid_t      group; /* Group ID                         */
-    hid_t      sid1;  /* Dataspace ID                     */
-    hid_t      tid1;  /* Datatype ID                      */
+    hid_t fid1;        /* HDF5 File IDs                    */
+    hid_t dataset,     /* Dataset ID                       */
+        ds1_from_name, /* Dataset ID returned by H5Dopen2 using a dataset name */
+        ds2_from_name, /* Dataset ID returned by H5Dopen2 using a dataset name */
+        ref_ds1,       /* Dereferenced dataset ID          */
+        ref_ds2;       /* Dereferenced dataset ID          */
+    hid_t      group;  /* Group ID                         */
+    hid_t      sid1;   /* Dataspace ID                     */
+    hid_t      tid1;   /* Datatype ID                      */
     hsize_t    dims1[] = {SPACE1_DIM1};
     hid_t      dapl_id; /* Dataset access property list     */
     H5R_ref_t *wbuf,    /* buffer to write to disk          */
@@ -461,7 +460,7 @@ test_reference_obj(void)
     unsigned  *ibuf, *obuf;
     unsigned   i, j;     /* Counters                         */
     ssize_t    namelen;  /* String buffer size return value  */
-    char       *namebuf; /* Buffer for attribute's or dataset's name */
+    char      *namebuf;  /* Buffer for attribute's or dataset's name */
     H5O_type_t obj_type; /* Object type                      */
     herr_t     ret;      /* Generic return value             */
 
@@ -628,7 +627,7 @@ test_reference_obj(void)
     VERIFY(namelen, strlen(FILE_REF_OBJ), "H5Dget_file_name");
 
     /* Get the file name for the reference */
-    namebuf = (char *) malloc((size_t)namelen + 1);
+    namebuf = (char *)malloc((size_t)namelen + 1);
     namelen = H5Rget_file_name(&rbuf[0], (char *)namebuf, (size_t)namelen + 1);
     CHECK(namelen, FAIL, "H5Dget_file_name");
 
@@ -642,8 +641,8 @@ test_reference_obj(void)
     CHECK(namelen, FAIL, "H5Rget_obj_name");
     VERIFY(namelen, strlen(DS1_REF_OBJ), "H5Rget_obj_name");
 
-    namebuf = (char *) malloc((size_t)namelen + 1);
-    namelen = H5Rget_obj_name(&rbuf[0], H5P_DEFAULT, namebuf, (size_t)namelen+1);
+    namebuf = (char *)malloc((size_t)namelen + 1);
+    namelen = H5Rget_obj_name(&rbuf[0], H5P_DEFAULT, namebuf, (size_t)namelen + 1);
     CHECK(namelen, FAIL, "H5Rget_obj_name");
     VERIFY(strcmp(namebuf, DS1_REF_OBJ), 0, "strcmp namebuf vs DS1_REF_OBJ");
 
@@ -701,8 +700,8 @@ test_reference_obj(void)
     CHECK(namelen, FAIL, "H5Rget_obj_name");
     VERIFY(namelen, strlen(DS2_REF_OBJ), "H5Rget_obj_name");
 
-    namebuf = (char *) malloc((size_t)namelen + 1);
-    namelen = H5Rget_obj_name(&rbuf[1], H5P_DEFAULT, namebuf, (size_t)namelen+1);
+    namebuf = (char *)malloc((size_t)namelen + 1);
+    namelen = H5Rget_obj_name(&rbuf[1], H5P_DEFAULT, namebuf, (size_t)namelen + 1);
     CHECK(namelen, FAIL, "H5Rget_obj_name");
     VERIFY(strcmp(namebuf, DS2_REF_OBJ), 0, "strcmp namebuf vs DS2_REF_OBJ");
 
@@ -2453,16 +2452,16 @@ test_reference_group(void)
 static void
 test_reference_attr(void)
 {
-    hid_t     fid;     /* HDF5 File ID */
-    hid_t     dataset; /* Dataset ID */
-    hid_t     group;   /* Group ID */
-    hid_t     attr;    /* Attribute ID */
-    hid_t     sid;     /* Dataspace ID */
-    hid_t     tid;     /* Datatype ID */
+    hid_t     fid;             /* HDF5 File ID */
+    hid_t     dataset;         /* Dataset ID */
+    hid_t     group;           /* Group ID */
+    hid_t     attr;            /* Attribute ID */
+    hid_t     sid;             /* Dataspace ID */
+    hid_t     tid;             /* Datatype ID */
     hid_t     attr1_from_name; /* Attribute ID returned by H5Aopen using an attribute name */
     hid_t     attr2_from_name; /* Attribute ID returned by H5Aopen using an attribute name */
-    hid_t     ref_attr1;      /* Dereferenced attribute ID          */
-    hid_t     ref_attr3;      /* Dereferenced attribute ID          */
+    hid_t     ref_attr1;       /* Dereferenced attribute ID          */
+    hid_t     ref_attr3;       /* Dereferenced attribute ID          */
     hsize_t   dims[] = {SPACE1_DIM1};
     hid_t     dapl_id;               /* Dataset access property list */
     H5R_ref_t ref_wbuf[SPACE1_DIM1], /* Buffer to write to disk */
@@ -2470,7 +2469,7 @@ test_reference_attr(void)
     unsigned   wbuf[SPACE1_DIM1], rbuf[SPACE1_DIM1];
     unsigned   i;        /* Local index variables */
     ssize_t    namelen;  /* String buffer size return value  */
-    char       *namebuf; /* Buffer for attribute's or dataset's name */
+    char      *namebuf;  /* Buffer for attribute's or dataset's name */
     H5O_type_t obj_type; /* Object type */
     herr_t     ret;      /* Generic return value */
 
@@ -2647,8 +2646,8 @@ test_reference_attr(void)
     CHECK(namelen, FAIL, "H5Rget_attr_name");
     VERIFY(namelen, strlen(ATTR1_REF_OBJ), "H5Rget_obj_name");
 
-    namebuf = (char *) malloc((size_t)namelen + 1);
-    namelen = H5Rget_attr_name(&ref_rbuf[0], namebuf, (size_t)namelen+1);
+    namebuf = (char *)malloc((size_t)namelen + 1);
+    namelen = H5Rget_attr_name(&ref_rbuf[0], namebuf, (size_t)namelen + 1);
     CHECK(namelen, FAIL, "H5Rget_attr_name");
     VERIFY(strcmp(namebuf, ATTR1_REF_OBJ), 0, "strcmp namebuf vs ATTR1_REF_OBJ");
 
@@ -2706,8 +2705,8 @@ test_reference_attr(void)
     CHECK(namelen, FAIL, "H5Rget_attr_name");
     VERIFY(namelen, strlen(ATTR2_REF_OBJ), "H5Rget_obj_name");
 
-    namebuf = (char *) malloc((size_t)namelen + 1);
-    namelen = H5Rget_attr_name(&ref_rbuf[2], namebuf, (size_t)namelen+1);
+    namebuf = (char *)malloc((size_t)namelen + 1);
+    namelen = H5Rget_attr_name(&ref_rbuf[2], namebuf, (size_t)namelen + 1);
     CHECK(namelen, FAIL, "H5Rget_attr_name");
     VERIFY(strcmp(namebuf, ATTR2_REF_OBJ), 0, "strcmp namebuf vs ATTR2_REF_OBJ");
 
@@ -2734,8 +2733,8 @@ test_reference_attr(void)
     CHECK(namelen, FAIL, "H5Rget_attr_name");
     VERIFY(namelen, strlen(ATTR3_REF_OBJ), "H5Rget_obj_name");
 
-    namebuf = (char *) malloc((size_t)namelen + 1);
-    namelen = H5Rget_attr_name(&ref_rbuf[3], namebuf, (size_t)namelen+1);
+    namebuf = (char *)malloc((size_t)namelen + 1);
+    namelen = H5Rget_attr_name(&ref_rbuf[3], namebuf, (size_t)namelen + 1);
     CHECK(namelen, FAIL, "H5Rget_attr_name");
     VERIFY(strcmp(namebuf, ATTR3_REF_OBJ), 0, "strcmp namebuf vs ATTR3_REF_OBJ");
 
