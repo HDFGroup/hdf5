@@ -162,4 +162,6 @@ H5TS_atomic_destroy_uint(H5TS_atomic_uint_t *obj)
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* end H5TS_atomic_destroy_uint() */
 
+#endif /* H5_HAVE_STDATOMIC_H */
+
 #endif /* H5_HAVE_THREADS */
