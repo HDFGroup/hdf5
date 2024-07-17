@@ -121,8 +121,8 @@ done:
 static H5TS_THREAD_RETURN_TYPE
 H5TS__pool_do(void *_pool)
 {
-    H5TS_pool_t      *pool       = (H5TS_pool_t *)_pool; /* Pool for threads */
-    H5TS_thread_ret_t ret_value  = (H5TS_thread_ret_t)0;
+    H5TS_pool_t      *pool      = (H5TS_pool_t *)_pool; /* Pool for threads */
+    H5TS_thread_ret_t ret_value = (H5TS_thread_ret_t)0;
 
     /* Acquire tasks and invoke them, until pool is shut down */
     while (1) {
@@ -252,7 +252,7 @@ herr_t
 H5TS_pool_destroy(H5TS_pool_t *pool)
 {
     bool   have_queue_mutex = false; /* Whether we're holding the task queue mutex */
-    herr_t ret_value  = SUCCEED;
+    herr_t ret_value        = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 

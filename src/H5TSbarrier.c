@@ -79,7 +79,7 @@ H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count)
         HGOTO_DONE(FAIL);
 
 #ifdef H5_HAVE_PTHREAD_BARRIER
-        /* Initialize the barrier */
+    /* Initialize the barrier */
     if (H5_UNLIKELY(pthread_barrier_init(barrier, NULL, count)))
         HGOTO_DONE(FAIL);
 #else

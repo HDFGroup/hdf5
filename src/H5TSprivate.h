@@ -46,9 +46,9 @@
 #define H5TS_ONCE_INITIALIZER ONCE_FLAG_INIT
 
 /* Thread macros */
-#define H5TS_thread_self()         thrd_current()
-#define H5TS_thread_equal(t1, t2)  thrd_equal((t1), (t2))
-#define H5TS_THREAD_RETURN_TYPE    H5TS_thread_ret_t
+#define H5TS_thread_self()        thrd_current()
+#define H5TS_thread_equal(t1, t2) thrd_equal((t1), (t2))
+#define H5TS_THREAD_RETURN_TYPE   H5TS_thread_ret_t
 
 /* Mutex macros */
 #define H5TS_MUTEX_TYPE_PLAIN     mtx_plain
@@ -59,9 +59,9 @@
 #define H5TS_ONCE_INITIALIZER     INIT_ONCE_STATIC_INIT
 
 /* Thread macros */
-#define H5TS_thread_self()         GetCurrentThread()
-#define H5TS_thread_equal(t1, t2)  (GetThreadId(t1) == GetThreadId(t2))
-#define H5TS_THREAD_RETURN_TYPE    H5TS_thread_ret_t WINAPI
+#define H5TS_thread_self()        GetCurrentThread()
+#define H5TS_thread_equal(t1, t2) (GetThreadId(t1) == GetThreadId(t2))
+#define H5TS_THREAD_RETURN_TYPE   H5TS_thread_ret_t WINAPI
 
 /* Mutex macros */
 #define H5TS_MUTEX_TYPE_PLAIN     0
@@ -221,7 +221,7 @@ typedef struct {
 typedef pthread_barrier_t H5TS_barrier_t;
 #else
 typedef struct H5TS_barrier_t {
-    unsigned     count;
+    unsigned           count;
     H5TS_atomic_uint_t openings;
     H5TS_atomic_uint_t generation;
 } H5TS_barrier_t;
@@ -355,7 +355,7 @@ H5_DLL void   H5TS_thread_yield(void);
 H5_DLL herr_t H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads);
 /* Thread pool add task call is defined in H5TSpool.h */
 static inline herr_t H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx);
-H5_DLL herr_t H5TS_pool_destroy(H5TS_pool_t *pool);
+H5_DLL herr_t        H5TS_pool_destroy(H5TS_pool_t *pool);
 
 /* Emulated C11 atomics */
 #if !(defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus))
@@ -366,16 +366,16 @@ static inline int  H5TS_atomic_load_int(H5TS_atomic_int_t *obj);
 static inline void H5TS_atomic_store_int(H5TS_atomic_int_t *obj, int desired);
 static inline int  H5TS_atomic_fetch_add_int(H5TS_atomic_int_t *obj, int arg);
 static inline int  H5TS_atomic_fetch_sub_int(H5TS_atomic_int_t *obj, int arg);
-H5_DLL void H5TS_atomic_destroy_int(H5TS_atomic_int_t *obj);
+H5_DLL void        H5TS_atomic_destroy_int(H5TS_atomic_int_t *obj);
 
 /* atomic_uint */
-H5_DLL void     H5TS_atomic_init_uint(H5TS_atomic_uint_t *obj, unsigned desired);
+H5_DLL void H5TS_atomic_init_uint(H5TS_atomic_uint_t *obj, unsigned desired);
 /* Atomic 'unsigned' load, store, etc. calls are defined in H5TSatomic.h */
 static inline unsigned H5TS_atomic_load_uint(H5TS_atomic_uint_t *obj);
 static inline void     H5TS_atomic_store_uint(H5TS_atomic_uint_t *obj, unsigned desired);
 static inline unsigned H5TS_atomic_fetch_add_uint(H5TS_atomic_uint_t *obj, unsigned arg);
 static inline unsigned H5TS_atomic_fetch_sub_uint(H5TS_atomic_uint_t *obj, unsigned arg);
-H5_DLL void     H5TS_atomic_destroy_uint(H5TS_atomic_uint_t *obj);
+H5_DLL void            H5TS_atomic_destroy_uint(H5TS_atomic_uint_t *obj);
 
 /* void * _Atomic (atomic void pointer) */
 H5_DLL void H5TS_atomic_init_voidp(H5TS_atomic_voidp_t *obj, void *desired);
@@ -390,7 +390,7 @@ H5_DLL void         H5TS_atomic_destroy_voidp(H5TS_atomic_voidp_t *obj);
 H5_DLL herr_t H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count);
 /* Barrier wait call is defined in H5TSbarrier.h */
 static inline herr_t H5TS_barrier_wait(H5TS_barrier_t *barrier);
-H5_DLL herr_t H5TS_barrier_destroy(H5TS_barrier_t *barrier);
+H5_DLL herr_t        H5TS_barrier_destroy(H5TS_barrier_t *barrier);
 
 H5_DLL herr_t H5TS_semaphore_init(H5TS_semaphore_t *sem, unsigned initial_count);
 /* Semaphore signal & wait calls are defined in H5TSsemaphore.h */
