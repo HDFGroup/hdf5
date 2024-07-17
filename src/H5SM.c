@@ -169,7 +169,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t *fc_plist, const H5O_loc_t *ext_loc)
     /* Allocate the SOHM indexes as an array. */
     if (NULL == (table->indexes =
                      (H5SM_index_header_t *)H5FL_ARR_MALLOC(H5SM_index_header_t, (size_t)table->num_indexes)))
-        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, FAIL, "memory allocation failed for SOHM indexes");
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTALLOC, FAIL, "memory allocation failed for SOHM indexes");
 
     /* Initialize all of the indexes, but don't allocate space for them to
      * hold messages until we actually need to write to them.
@@ -195,7 +195,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t *fc_plist, const H5O_loc_t *ext_loc)
 
     /* Allocate space for the table on disk */
     if (HADDR_UNDEF == (table_addr = H5MF_alloc(f, H5FD_MEM_SOHM_TABLE, (hsize_t)table->table_size)))
-        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, FAIL, "file allocation failed for SOHM table");
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTALLOC, FAIL, "file allocation failed for SOHM table");
 
     /* Cache the new table */
     if (H5AC_insert_entry(f, H5AC_SOHM_TABLE, table_addr, table, H5AC__NO_FLAGS_SET) < 0)
@@ -288,12 +288,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
-H5SM__get_index(const H5SM_master_table_t *table, unsigned type_id)
+herr_t
+H5SM__get_index(const H5SM_master_table_t *table, unsigned type_id, ssize_t *idx)
 {
-    size_t   x;
     unsigned type_flag;
-    ssize_t  ret_value = FAIL;
+    ssize_t  found_index = -1;
+    herr_t   ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -304,13 +304,15 @@ H5SM__get_index(const H5SM_master_table_t *table, unsigned type_id)
     /* Search the indexes until we find one that matches this flag or we've
      * searched them all.
      */
-    for (x = 0; x < table->num_indexes; ++x)
-        if (table->indexes[x].mesg_types & type_flag)
-            HGOTO_DONE((ssize_t)x);
+    for (size_t x = 0; x < table->num_indexes; ++x)
+        if (table->indexes[x].mesg_types & type_flag) {
+            found_index = (ssize_t)x;
+            break;
+        }
 
-    /* At this point, ret_value is either the location of the correct
-     * index or it's still FAIL because we didn't find an index.
-     */
+    /* Set output parameter */
+    *idx = found_index;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__get_index() */
@@ -401,8 +403,10 @@ H5SM_get_fheap_addr(H5F_t *f, unsigned type_id, haddr_t *fheap_addr)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table");
 
     /* Look up index for message type */
-    if ((index_num = H5SM__get_index(table, type_id)) < 0)
-        HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to find correct SOHM index");
+    if (H5SM__get_index(table, type_id, &index_num) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "unable to check for SOHM index");
+    if (index_num < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to find correct SOHM index");
 
     /* Retrieve heap address for index */
     *fheap_addr = table->indexes[index_num].heap_addr;
@@ -611,9 +615,9 @@ H5SM__create_list(H5F_t *f, H5SM_index_header_t *header)
 
     /* Allocate list in memory */
     if (NULL == (list = H5FL_CALLOC(H5SM_list_t)))
-        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for SOHM list");
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTALLOC, HADDR_UNDEF, "file allocation failed for SOHM list");
     if (NULL == (list->messages = (H5SM_sohm_t *)H5FL_ARR_CALLOC(H5SM_sohm_t, num_entries)))
-        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for SOHM list");
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTALLOC, HADDR_UNDEF, "file allocation failed for SOHM list");
 
     /* Initialize messages in list */
     for (x = 0; x < num_entries; x++)
@@ -624,7 +628,7 @@ H5SM__create_list(H5F_t *f, H5SM_index_header_t *header)
 
     /* Allocate space for the list on disk */
     if (HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_SOHM_INDEX, (hsize_t)header->list_size)))
-        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for SOHM list");
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTALLOC, HADDR_UNDEF, "file allocation failed for SOHM list");
 
     /* Put the list into the cache */
     if (H5AC_insert_entry(f, H5AC_SOHM_LIST, addr, list, H5AC__NO_FLAGS_SET) < 0)
@@ -943,10 +947,10 @@ H5SM_can_share(H5F_t *f, H5SM_master_table_t *table, ssize_t *sohm_index_num, un
     /* Find the right index for this message type.  If there is no such index
      * then this type of message isn't shareable
      */
-    if ((index_num = H5SM__get_index(my_table, type_id)) < 0) {
-        H5E_clear_stack(); /*ignore error*/
+    if (H5SM__get_index(my_table, type_id, &index_num) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "unable to check for SOHM index");
+    if (index_num < 0)
         HGOTO_DONE(false);
-    } /* end if */
 
     /* If the message isn't big enough, don't bother sharing it */
     if (0 == (mesg_size = H5O_msg_raw_size(f, type_id, true, mesg)))
@@ -1234,7 +1238,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, bool def
     if ((buf_size = H5O_msg_raw_size(f, type_id, true, mesg)) == 0)
         HGOTO_ERROR(H5E_SOHM, H5E_BADSIZE, FAIL, "can't find message size");
     if (NULL == (encoding_buf = H5MM_malloc(buf_size)))
-        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, FAIL, "can't allocate buffer for encoding");
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTALLOC, FAIL, "can't allocate buffer for encoding");
     if (H5O_msg_encode(f, type_id, true, (unsigned char *)encoding_buf, mesg) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTENCODE, FAIL, "can't encode message to be shared");
 
@@ -1536,7 +1540,9 @@ H5SM_delete(H5F_t *f, H5O_t *open_oh, H5O_shared_t *sh_mesg)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table");
 
     /* Find the correct index and try to delete from it */
-    if ((index_num = H5SM__get_index(table, type_id)) < 0)
+    if (H5SM__get_index(table, type_id, &index_num) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "unable to check for SOHM index");
+    if (index_num < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to find correct SOHM index");
 
     /* If mesg_buf is not NULL, the message's reference count has reached
@@ -2110,7 +2116,9 @@ H5SM_get_refcount(H5F_t *f, unsigned type_id, const H5O_shared_t *sh_mesg, hsize
         HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table");
 
     /* Find the correct index and find the message in it */
-    if ((index_num = H5SM__get_index(table, type_id)) < 0)
+    if (H5SM__get_index(table, type_id, &index_num) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "unable to check for SOHM index");
+    if (index_num < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to find correct SOHM index");
     header = &(table->indexes[index_num]);
 
@@ -2241,7 +2249,7 @@ H5SM__read_iter_op(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
 
         /* Allocate buffer to return the message in */
         if (NULL == (udata->encoding_buf = H5MM_malloc(udata->buf_size)))
-            HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed");
+            HGOTO_ERROR(H5E_SOHM, H5E_CANTALLOC, H5_ITER_ERROR, "memory allocation failed");
 
         /* Copy the encoded message into the buffer to return */
         H5MM_memcpy(udata->encoding_buf, mesg->raw, udata->buf_size);
@@ -2275,7 +2283,7 @@ H5SM__read_mesg_fh_cb(const void *obj, size_t obj_len, void *_udata)
 
     /* Allocate a buffer to hold the message */
     if (NULL == (udata->encoding_buf = H5MM_malloc(obj_len)))
-        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, FAIL, "memory allocation failed");
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTALLOC, FAIL, "memory allocation failed");
 
     /* Copy the message from the heap */
     H5MM_memcpy(udata->encoding_buf, obj, obj_len);
