@@ -85,75 +85,6 @@ done:
 } /* end H5TS_cond_init() */
 
 /*-------------------------------------------------------------------------
- * Function: H5TS_cond_wait
- *
- * Purpose:  Wait on a condition variable
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_cond_wait(H5TS_cond_t *cond, H5TS_mutex_t *mutex)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    if (H5_UNLIKELY(cnd_wait(cond, mutex) != thrd_success))
-        HGOTO_DONE(FAIL);
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_cond_wait() */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS_cond_signal
- *
- * Purpose:  Unblock a thread waiting for a condition variable
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_cond_signal(H5TS_cond_t *cond)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    if (H5_UNLIKELY(cnd_signal(cond) != thrd_success))
-        HGOTO_DONE(FAIL);
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_cond_signal() */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS_cond_broadcast
- *
- * Purpose:  Unblock all threads waiting for a condition variable
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_cond_broadcast(H5TS_cond_t *cond)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    if (H5_UNLIKELY(cnd_broadcast(cond) != thrd_success))
-        HGOTO_DONE(FAIL);
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_cond_broadcast() */
-
-/*-------------------------------------------------------------------------
  * Function: H5TS_cond_destroy
  *
  * Purpose:  Destroy a H5TS_cond_t (does not free it)
@@ -195,67 +126,6 @@ H5TS_cond_init(H5TS_cond_t *cond)
 } /* end H5TS_cond_init() */
 
 /*-------------------------------------------------------------------------
- * Function: H5TS_cond_wait
- *
- * Purpose:  Wait on a condition variable
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_cond_wait(H5TS_cond_t *cond, H5TS_mutex_t *mutex)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    if (H5_UNLIKELY(!SleepConditionVariableCS(cond, mutex, INFINITE)))
-        HGOTO_DONE(FAIL);
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_cond_wait() */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS_cond_signal
- *
- * Purpose:  Unblock a thread waiting for a condition variable
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_cond_signal(H5TS_cond_t *cond)
-{
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    WakeConditionVariable(cond);
-
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
-} /* end H5TS_cond_signal() */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS_cond_broadcast
- *
- * Purpose:  Unblock all threads waiting for a condition variable
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_cond_broadcast(H5TS_cond_t *cond)
-{
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    WakeAllConditionVariable(cond);
-
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
-} /* end H5TS_cond_broadcast() */
-
-/*-------------------------------------------------------------------------
  * Function: H5TS_cond_destroy
  *
  * Purpose:  Destroy a H5TS_cond_t (does not free it)
@@ -273,9 +143,7 @@ H5TS_cond_destroy(H5TS_cond_t *cond)
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
 } /* end H5TS_cond_destroy() */
-
 #else
-
 /*-------------------------------------------------------------------------
  * Function: H5TS_cond_init
  *
@@ -298,75 +166,6 @@ H5TS_cond_init(H5TS_cond_t *cond)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_cond_init() */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS_cond_wait
- *
- * Purpose:  Wait on a condition variable
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_cond_wait(H5TS_cond_t *cond, H5TS_mutex_t *mutex)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    if (H5_UNLIKELY(pthread_cond_wait(cond, mutex)))
-        HGOTO_DONE(FAIL);
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_cond_wait() */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS_cond_signal
- *
- * Purpose:  Unblock a thread waiting for a condition variable
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_cond_signal(H5TS_cond_t *cond)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    if (H5_UNLIKELY(pthread_cond_signal(cond)))
-        HGOTO_DONE(FAIL);
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_cond_signal() */
-
-/*-------------------------------------------------------------------------
- * Function: H5TS_cond_broadcast
- *
- * Purpose:  Unblock all threads waiting for a condition variable
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_cond_broadcast(H5TS_cond_t *cond)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    if (H5_UNLIKELY(pthread_cond_broadcast(cond)))
-        HGOTO_DONE(FAIL);
-
-done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
-} /* end H5TS_cond_broadcast() */
 
 /*-------------------------------------------------------------------------
  * Function: H5TS_cond_destroy

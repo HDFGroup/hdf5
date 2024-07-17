@@ -32,11 +32,11 @@
 
 H5TS_THREAD_RETURN_TYPE tts_dcreate_creator(void *);
 
-typedef struct thread_info {
+typedef struct thr_info {
     int         id;
     hid_t       file;
     const char *dsetname;
-} thread_info;
+} thr_info;
 
 /*
  * Set individual dataset names (rather than generated the names
@@ -46,7 +46,7 @@ const char *dsetname[NUM_THREAD] = {"zero",   "one",      "two",      "three",  
                                     "six",    "seven",    "eight",    "nine",   "ten",  "eleven",
                                     "twelve", "thirteen", "fourteen", "fifteen"};
 
-thread_info thread_out[NUM_THREAD];
+thr_info thread_out[NUM_THREAD];
 
 /*
  **********************************************************************
@@ -120,13 +120,13 @@ tts_dcreate(void)
 H5TS_THREAD_RETURN_TYPE
 tts_dcreate_creator(void *_thread_data)
 {
-    hid_t           dataspace = H5I_INVALID_HID;
-    hid_t           dataset   = H5I_INVALID_HID;
-    herr_t          status;
-    hsize_t         dimsf[1]; /* dataset dimensions */
-    struct thread_info thread_data;
+    hid_t              dataspace = H5I_INVALID_HID;
+    hid_t              dataset   = H5I_INVALID_HID;
+    herr_t             status;
+    hsize_t            dimsf[1]; /* dataset dimensions */
+    struct thr_info thread_data;
 
-    memcpy(&thread_data, _thread_data, sizeof(struct thread_info));
+    memcpy(&thread_data, _thread_data, sizeof(struct thr_info));
 
     /* define dataspace for dataset */
     dimsf[0]  = 1;
