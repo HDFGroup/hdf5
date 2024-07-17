@@ -272,9 +272,6 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
   if (WIN32)
     set (CPACK_GENERATOR "ZIP")
 
-    if (NSIS_EXECUTABLE)
-      list (APPEND CPACK_GENERATOR "NSIS")
-    endif ()
     # Installers for 32- vs. 64-bit CMake:
     #  - Root install directory (displayed to end user at installer-run time)
     #  - "NSIS package/display name" (text used in the installer GUI)

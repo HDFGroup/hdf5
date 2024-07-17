@@ -1,12 +1,5 @@
 /** \page UG HDF5 User Guide
 
-<center>
-HDF5 Release 1.14
-
-\image html HDFG-logo.png "The HDF Group"
-
-</center>
-
 \ref sec_data_model
 \li \ref subsec_data_model_intro
 \li \ref subsec_data_model_abstract
@@ -315,6 +308,8 @@ HDF5 Release 1.14
 \li \ref subsec_async_intro
 
 \ref sec_map
+
+\ref sec_cltools
 
 \ref sec_addition
 

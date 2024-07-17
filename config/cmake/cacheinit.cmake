@@ -52,6 +52,7 @@ set (ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.3" C
 set (ZLIB_USE_LOCALCONTENT ON CACHE BOOL "Use local file for ZLIB FetchContent" FORCE)
 set (ZLIB_GIT_URL "https://github.com/madler/zlib.git" CACHE STRING "Use ZLIB from  GitHub repository" FORCE)
 set (ZLIB_GIT_BRANCH "develop" CACHE STRING "" FORCE)
+set (HDF5_USE_ZLIB_STATIC ON CACHE BOOL "Use static zlib library" FORCE)
 
 set (ZLIBNG_PACKAGE_NAME "zlib-ng" CACHE STRING "Name of ZLIBNG package" FORCE)
 set (ZLIBNG_TGZ_NAME "2.1.6.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
@@ -65,6 +66,7 @@ set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/do
 set (LIBAEC_USE_LOCALCONTENT ON CACHE BOOL "Use local file for LIBAEC FetchContent" FORCE)
 set (LIBAEC_GIT_URL "https://github.com/MathisRosenhauer/libaec.git" CACHE STRING "Use LIBAEC from  GitHub repository" FORCE)
 set (LIBAEC_GIT_BRANCH "v1.1.3" CACHE STRING "" FORCE)
+set (HDF5_USE_LIBAEC_STATIC ON CACHE BOOL "Use static AEC library" FORCE)
 
 ########################
 # API test options

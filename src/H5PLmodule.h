@@ -26,7 +26,7 @@
 #define H5_MY_PKG     H5PL
 #define H5_MY_PKG_ERR H5E_PLUGIN
 
-/** \page H5PL_UG The HDF5 Plugins
+/** \page H5PL_UG HDF5 Plugins
  *
  * \section sec_filter_plugins HDF5 Filter Plugins
  *
