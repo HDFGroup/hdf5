@@ -240,7 +240,7 @@ jobs:
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
-            -DHDF5_USE_ZLIBNG:BOOL=ON \
+            -DHDF5_USE_ZLIB_NG:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash
 
