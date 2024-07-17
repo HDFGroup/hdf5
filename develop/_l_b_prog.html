@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.e6e098b</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.b3e1d6b</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -159,22 +159,29 @@ APIs vary with different languages</h1>
 HDF5 library has its own defined types</h1>
 <ul>
 <li><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> is used for object handles </li>
-<li>hsize_t is used for dimensions </li>
+<li><a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> is used for dimensions </li>
 <li><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> is used for many return values</li>
 </ul>
 <h1><a class="anchor" id="LBProgLang"></a>
 Language specific files must be included in applications</h1>
 <ul>
 <li>
-Python: Add <code>"import h5py / import numpy"</code>  </li>
+<b>Python</b>:<br  />
+ <code> import h5py<br  />
+ import numpy </code>  </li>
 <li>
-C: Add <code>"#include hdf5.h"</code>  </li>
+<b>C</b>:<br  />
+ <code>"#include hdf5.h"</code>  </li>
 <li>
-FORTRAN: Add <code>"USE HDF5"</code> and call h5open_f and h5close_f to initialize and close the HDF5 FORTRAN interface  </li>
+<b>FORTRAN</b>:<br  />
+ <code>USE HDF5</code><br  />
+ and call h5open_f and h5close_f to initialize and close the HDF5 FORTRAN interface  </li>
 <li>
-Java: Add <code>"import hdf.hdf5lib.H5;
-                     import hdf.hdf5lib.HDF5Constants;"</code>  </li>
+<b>Java</b>:<br  />
+ <code> import <a class="el" href="classhdf_1_1hdf5lib_1_1_h5.html">hdf.hdf5lib.H5</a>;<br  />
+ import <a class="el" href="classhdf_1_1hdf5lib_1_1_h_d_f5_constants.html">hdf.hdf5lib.HDF5Constants</a>; </code>  </li>
 </ul>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="_ex_a_p_i.html">Examples by API</a> for examples of using the HDF5 API.</dd></dl>
 <hr  />
 <p> Previous Chapter <a class="el" href="_l_b_a_p_i.html">The HDF5 API</a> - Next Chapter <a class="el" href="_l_b_file_create.html">Creating an HDF5 File</a></p>
 <p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_getting_started.html">Getting Started with HDF5</a> / <a class="el" href="_learn_basics.html">Learning the Basics</a> </p>

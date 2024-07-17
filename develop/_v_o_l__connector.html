@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.e6e098b</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.b3e1d6b</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -124,7 +124,7 @@ $(document).ready(function(){initNavTree('_v_o_l__connector.html',''); initResiz
 <div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> </p><hr  />
 <h1><a class="anchor" id="secVOLIntro"></a>
 Introduction</h1>
-<p>The Virtual Object Layer (VOL) is an abstraction layer in the HDF5 library which intercepts all API calls that could potentially access objects in an HDF5 container and forwards those calls to object drivers referred to as <em>VOL connectors</em>. The architecture of this feature is described in the <a class="el" href="_h5_v_l__u_g.html">The HDF5 Virtual Object Layer (VOL)</a> and VOL Architecture and Internals Documentation and will not be duplicated here.</p>
+<p>The Virtual Object Layer (VOL) is an abstraction layer in the HDF5 library which intercepts all API calls that could potentially access objects in an HDF5 container and forwards those calls to object drivers referred to as <em>VOL connectors</em>. The architecture of this feature is described in the <a class="el" href="_h5_v_l__u_g.html">HDF5 Virtual Object Layer (VOL)</a> and VOL Architecture and Internals Documentation and will not be duplicated here.</p>
 <p>This guide is for people who are interested in developing their own VOL connector for the HDF5 library. It is assumed that the reader has good knowledge of the VOL architecture obtained by reading the VOL architectural design document.</p>
 <h1><a class="anchor" id="secVOLCreate"></a>
 Creating a New Connector</h1>
@@ -149,7 +149,7 @@ The HDF5 1.12.x VOL Interface Is DEPRECATED</h2>
 <p>Note also that HDF5 1.13.0 is considered an unstable branch, and the API and file format are subject to change ("unstable" means "not yet finalized", not "buggy"). The VOL feature is under active development and, although it is nearing its final form, may change further before the stable HDF5 1.14.0 release targeted for 2022.</p>
 <h2><a class="anchor" id="subsecVOLRelated"></a>
 VOL-Related HDF5 Header Files</h2>
-<p>Use of the VOL, including topics such as registration and loading VOL plugins, is described in the <a class="el" href="_h5_v_l__u_g.html">The HDF5 Virtual Object Layer (VOL)</a>.</p>
+<p>Use of the VOL, including topics such as registration and loading VOL plugins, is described in the <a class="el" href="_h5_v_l__u_g.html">HDF5 Virtual Object Layer (VOL)</a>.</p>
 <p>Public header Files you will need to be familiar with include: </p><table class="doxtable">
 <tr>
 <td><a class="el" href="_h5_v_lpublic_8h.html">H5VLpublic.h</a>  </td><td>Public VOL header.   </td></tr>
@@ -169,7 +169,7 @@ Library vs Plugin vs Internal</h2>
 <h4>Library</h4>
 <p>The connector can be built as a normal shared or static library. Software that uses your connector will have to link to it just like any other library. This can be convenient since you don't have to deal with plugin paths and searching for the connector at runtime, but it also means that software which uses your connector will have to be built and linked against it.</p>
 <h4>Plugin</h4>
-<p>You can also build your connector as a dynamically loaded plugin. The mechanism for this is the same mechanism used to dynamically load HDF5 filter plugins. This can allow use of your connector via the VOL environment variable, without modifying the application, but requires your plugin to be discoverable at runtime. See the <a class="el" href="_h5_v_l__u_g.html">The HDF5 Virtual Object Layer (VOL)</a> for more information about using HDF5 plugins.</p>
+<p>You can also build your connector as a dynamically loaded plugin. The mechanism for this is the same mechanism used to dynamically load HDF5 filter plugins. This can allow use of your connector via the VOL environment variable, without modifying the application, but requires your plugin to be discoverable at runtime. See the <a class="el" href="_h5_v_l__u_g.html">HDF5 Virtual Object Layer (VOL)</a> for more information about using HDF5 plugins.</p>
 <p>To build your connector as a plugin, you will have to include <b><a class="el" href="_h5_p_lextern_8h.html">H5PLextern.h</a></b> (a public header distributed with the library) and implement the <a class="el" href="_h5_p_lextern_8h.html#a11942aa6c2beef4a76faa83b77feacd5">H5PLget_plugin_type</a> <a class="el" href="_h5_p_lextern_8h.html#a12bc51a0ed6df8d85b2fb6c4410cd1cd">H5PLget_plugin_info</a> calls, both of which are trivial to code up. It also often requires your connector to be built with certain compile/link options. The VOL connector template does all of these things.</p>
 <p>The HDF5 library's plugin loading code will call <a class="el" href="_h5_p_lextern_8h.html#a11942aa6c2beef4a76faa83b77feacd5">H5PLget_plugin_type</a> to determine the type of plugin(e.g.; filter, VOL) and <a class="el" href="_h5_p_lextern_8h.html#a12bc51a0ed6df8d85b2fb6c4410cd1cd">H5PLget_plugin_info</a> to get the class struct, which allows the library to query the plugin for its name and value to see if it has found a requested plugin. When a match is found, the library will use the class struct to register the connector and map its callbacks.</p>
 <p>For the HDF5 library to be able to load an external plugin dynamically, the plugin developer has to define two public routines with the following name and signature: </p><div class="fragment"><div class="line"><a class="code hl_enumeration" href="_h5_p_lpublic_8h.html#a8d48cb770a80a3f84c969ec03b34d86f">H5PL_type_t</a> <a class="code hl_function" href="_h5_p_lextern_8h.html#a11942aa6c2beef4a76faa83b77feacd5">H5PLget_plugin_type</a>(<span class="keywordtype">void</span>);</div>
@@ -203,7 +203,7 @@ Build Files / VOL Template</h2>
 H5VL_class_t Boilerplate</h2>
 <p>Several fields in the H5VLclasststruct will need to be filled in.</p>
 <p>In HDF5 1.13.0, the <em>version</em> field will be 2, indicating the connector targets version 2 of the <a class="el" href="struct_h5_v_l__class__t.html">H5VL_class_t</a> struct. Version 1 of the struct was never formally released and only available in the develop branch of the HDF5 git repository. Version 0 is used in the deprecated HDF5 1.12.x branch.</p>
-<p>Every connector needs a <em>name</em> and <em>value</em>. The library will use these when loading and registering the connector (as described in the <a class="el" href="_h5_v_l__u_g.html">The HDF5 Virtual Object Layer (VOL)</a>), so they should be unique in your ecosystem.</p>
+<p>Every connector needs a <em>name</em> and <em>value</em>. The library will use these when loading and registering the connector (as described in the <a class="el" href="_h5_v_l__u_g.html">HDF5 Virtual Object Layer (VOL)</a>), so they should be unique in your ecosystem.</p>
 <p>VOL connector values are integers, with a maximum value of 65535. Values from 0 to 255 are reserved for internal use by The HDF Group. The native VOL connector has a value of 0. Values of 256 to 511 are for connector testing and should not be found in the wild. Values of 512 to 65535 are for external connectors.</p>
 <p>As is the case with HDF5 filters, The HDF Group can assign you an official VOL connector value. Please contact <a href="help@hdfgroup.org">help@hdfgroup.org</a> for help with this. We currently do not register connector names, though the name you've chosen will appear on the registered VOL connectors page.</p>
 <p>As noted above, registered VOL connectors will be listed at: <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/registered_vol_connectors.html">Registered VOL Connectors</a></p>
@@ -3139,7 +3139,7 @@ H5VLregister_connector_by_name</h3>
 <div class="line">vipl_id        (IN): An ID for a VOL initialization property list (vipl).</div>
 </div><!-- fragment -->   </td></tr>
 </table>
-<p>Registers a VOL connector with the HDF5 library given the name of the connector and returns an identifier for it (<a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a> on errors). If the connector is already registered, the library will create a new identifier for it and returns it to the user; otherwise the library will search the plugin path for a connector of that name, loading and registering it, returning an ID for it, if found. See the <a class="el" href="_h5_v_l__u_g.html">The HDF5 Virtual Object Layer (VOL)</a> for more information on loading plugins and the search paths.</p>
+<p>Registers a VOL connector with the HDF5 library given the name of the connector and returns an identifier for it (<a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a> on errors). If the connector is already registered, the library will create a new identifier for it and returns it to the user; otherwise the library will search the plugin path for a connector of that name, loading and registering it, returning an ID for it, if found. See the <a class="el" href="_h5_v_l__u_g.html">HDF5 Virtual Object Layer (VOL)</a> for more information on loading plugins and the search paths.</p>
 <h3><a class="anchor" id="subsubsecVOLNewPubregval"></a>
 H5VLregister_connector_by_value</h3>
 <table class="doxtable">

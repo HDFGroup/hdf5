@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.e6e098b</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.b3e1d6b</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -344,17 +344,24 @@ hsize_t is used for dimensions  </li>
 </ul>
 </li>
 <li>
-Language specific files must be included in applications: <ul>
+<p class="startli">Language specific files must be included in applications: </p><ul>
 <li>
-Python: Add <code>"import h5py / import numpy"</code>  </li>
+<b>Python</b>:<br  />
+ <code> import h5py<br  />
+ import numpy </code>  </li>
 <li>
-C: Add <code>"#include hdf5.h"</code>  </li>
+<b>C</b>:<br  />
+ <code>"#include hdf5.h"</code>  </li>
 <li>
-FORTRAN: Add <code>"USE HDF5"</code> and call h5open_f and h5close_f to initialize and close the HDF5 FORTRAN interface  </li>
+<b>FORTRAN</b>:<br  />
+ <code>USE HDF5</code><br  />
+ and call h5open_f and h5close_f to initialize and close the HDF5 FORTRAN interface  </li>
 <li>
-Java: Add <code>"import hdf.hdf5lib.H5;
-                     import hdf.hdf5lib.HDF5Constants;"</code>  </li>
+<b>Java</b>:<br  />
+ <code> import <a class="el" href="classhdf_1_1hdf5lib_1_1_h5.html">hdf.hdf5lib.H5</a>;<br  />
+ import <a class="el" href="classhdf_1_1hdf5lib_1_1_h_d_f5_constants.html">hdf.hdf5lib.HDF5Constants</a>; </code>  </li>
 </ul>
+<p class="endli"></p>
 </li>
 </ul>
 <h2><a class="anchor" id="subsec_intro_pm_file"></a>

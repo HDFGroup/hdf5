@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.e6e098b</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.b3e1d6b</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -642,8 +642,122 @@ Array</h3>
 </div><!-- fragment --><p> In other words, it is an array of four elements, in which each element is a 3 by 5 array of <a class="el" href="group___p_d_t_s_t_d.html#ga591a85b894eab3e3ab1a2ccd9b3be565">H5T_STD_I64LE</a>.</p>
 <p>This dataset is much more complex. Also note that subsetting cannot be done on Array datatypes.</p>
 <p>See this <a href="https://hdfgroup.github.io/hdf5/develop/_l_b_datatypes.html">section</a> for more information on the Array datatype.</p>
+<h3><a class="anchor" id="subsubsecViewToolsViewDtypes_newref"></a>
+New References</h3>
+<p>References were reworked in HDF5 1.12.0. The new reference datatype is <a class="el" href="group___p_d_t_s_t_d.html#ga342d286867f160739f9f5359303759cc">H5T_STD_REF</a>. The old reference datatypes are deprecated. </p><dl class="section see"><dt>See also</dt><dd>sec_reference.</dd></dl>
 <h3><a class="anchor" id="subsubsecViewToolsViewDtypes_objref"></a>
 Object Reference</h3>
+<p>An Object Reference is a reference to an entire object (attribute, dataset, group, or named datatype). A dataset with an Object Reference datatype consists of one or more Object References. An Object Reference dataset can be used as an index to an HDF5 file.</p>
+<p>The <code style="background-color:whitesmoke;">/DS1</code> dataset in the following file (<code style="background-color:whitesmoke;">h5ex_t_objref.h5</code>) is an Object Reference dataset. It contains two references, one to group <code style="background-color:whitesmoke;">/G1</code> and the other to dataset <code style="background-color:whitesmoke;">/DS2</code>: </p><div class="fragment"><div class="line">$ h5dump h5ex_t_objref.h5</div>
+<div class="line">HDF5 <span class="stringliteral">&quot;h5ex_t_objref.h5&quot;</span> {</div>
+<div class="line">GROUP <span class="stringliteral">&quot;/&quot;</span> {</div>
+<div class="line">   DATASET <span class="stringliteral">&quot;DS1&quot;</span> {</div>
+<div class="line">      DATATYPE  <a class="code hl_enumvalue" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a5850e0b9353a5e7aeb615fb943d4e9cd">H5T_REFERENCE</a> { <a class="code hl_define" href="group___p_d_t_s_t_d.html#ga342d286867f160739f9f5359303759cc">H5T_STD_REF</a> }</div>
+<div class="line">      DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }</div>
+<div class="line">      DATA {</div>
+<div class="line">         GROUP <span class="stringliteral">&quot;h5ex_t_objref.h5/G1&quot;</span></div>
+<div class="line">         DATASET <span class="stringliteral">&quot;h5ex_t_objref.h5/DS2&quot;</span></div>
+<div class="line">            DATA {</div>
+<div class="line">            }</div>
+<div class="line">      }</div>
+<div class="line">   }</div>
+<div class="line">   DATASET <span class="stringliteral">&quot;DS2&quot;</span> {</div>
+<div class="line">      DATATYPE  <a class="code hl_define" href="group___p_d_t_s_t_d.html#ga8db8c9c2bcc457f9f8526c8fcb81218b">H5T_STD_I32LE</a></div>
+<div class="line">      DATASPACE  NULL</div>
+<div class="line">      DATA {</div>
+<div class="line">      }</div>
+<div class="line">   }</div>
+<div class="line">   GROUP <span class="stringliteral">&quot;G1&quot;</span> {</div>
+<div class="line">   }</div>
+<div class="line">}</div>
+<div class="line">}</div>
+<div class="ttc" id="a_h5_tpublic_8h_html_a071841985f647f69516dbe77d93167f2a5850e0b9353a5e7aeb615fb943d4e9cd"><div class="ttname"><a href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a5850e0b9353a5e7aeb615fb943d4e9cd">H5T_REFERENCE</a></div><div class="ttdeci">@ H5T_REFERENCE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:39</div></div>
+<div class="ttc" id="agroup___p_d_t_s_t_d_html_ga342d286867f160739f9f5359303759cc"><div class="ttname"><a href="group___p_d_t_s_t_d.html#ga342d286867f160739f9f5359303759cc">H5T_STD_REF</a></div><div class="ttdeci">#define H5T_STD_REF</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:428</div></div>
+</div><!-- fragment --><h3><a class="anchor" id="subsubsecViewToolsViewDtypes_regref"></a>
+Region Reference</h3>
+<p>A Region Reference is a reference to a selection within a dataset. A selection can be either individual elements or a hyperslab. In <code style="background-color:whitesmoke;">h5dump</code> you will see the name of the dataset along with the elements or slab that is selected. A dataset with a Region Reference datatype consists of one or more Region References.</p>
+<p>An example of a Region Reference dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.h5</code>) can be found on the <a class="el" href="_ex_a_p_i.html">Examples by API</a> page, under Datatypes. If you examine this dataset with <code style="background-color:whitesmoke;">h5dump</code> you will see that <code style="background-color:whitesmoke;">/DS1</code> is a Region Reference dataset as indicated by its datatype, highlighted in bold below: </p><div class="fragment"><div class="line">$ h5dump  h5ex_t_regref.h5</div>
+<div class="line">HDF5 <span class="stringliteral">&quot;h5ex_t_regref.h5&quot;</span> {</div>
+<div class="line">GROUP <span class="stringliteral">&quot;/&quot;</span> {</div>
+<div class="line">   DATASET <span class="stringliteral">&quot;DS1&quot;</span> {</div>
+<div class="line">      DATATYPE  <a class="code hl_enumvalue" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a5850e0b9353a5e7aeb615fb943d4e9cd">H5T_REFERENCE</a> { <a class="code hl_define" href="group___p_d_t_s_t_d.html#ga342d286867f160739f9f5359303759cc">H5T_STD_REF</a> }</div>
+<div class="line">      DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }</div>
+<div class="line">      DATA {</div>
+<div class="line">         DATASET <span class="stringliteral">&quot;h5ex_t_regref.h5/DS2&quot;</span>{</div>
+<div class="line">            REGION_TYPE POINT  (0,1), (2,11), (1,0), (2,4)</div>
+<div class="line">            DATATYPE  <a class="code hl_define" href="group___p_d_t_s_t_d.html#gaeaa5eb139424ba27d5af8925f1aa9593">H5T_STD_I8LE</a></div>
+<div class="line">            DATASPACE  SIMPLE { ( 3, 16 ) / ( 3, 16 ) }</div>
+<div class="line">         }</div>
+<div class="line">         DATASET <span class="stringliteral">&quot;h5ex_t_regref.h5/DS2&quot;</span>  {</div>
+<div class="line">            REGION_TYPE BLOCK  (0,0)-(0,2), (0,11)-(0,13), (2,0)-(2,2),</div>
+<div class="line">             (2,11)-(2,13)</div>
+<div class="line">            DATATYPE  <a class="code hl_define" href="group___p_d_t_s_t_d.html#gaeaa5eb139424ba27d5af8925f1aa9593">H5T_STD_I8LE</a></div>
+<div class="line">            DATASPACE  SIMPLE { ( 3, 16 ) / ( 3, 16 ) }</div>
+<div class="line">         }</div>
+<div class="line">      }</div>
+<div class="line">   }</div>
+<div class="line">   DATASET <span class="stringliteral">&quot;DS2&quot;</span> {</div>
+<div class="line">      DATATYPE  <a class="code hl_define" href="group___p_d_t_s_t_d.html#gaeaa5eb139424ba27d5af8925f1aa9593">H5T_STD_I8LE</a></div>
+<div class="line">      DATASPACE  SIMPLE { ( 3, 16 ) / ( 3, 16 ) }</div>
+<div class="line">      DATA {</div>
+<div class="line">      (0,0): 84, 104, 101, 32, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119,</div>
+<div class="line">      (0,14): 110, 0,</div>
+<div class="line">      (1,0): 102, 111, 120, 32, 106, 117, 109, 112, 115, 32, 111, 118, 101,</div>
+<div class="line">      (1,13): 114, 32, 0,</div>
+<div class="line">      (2,0): 116, 104, 101, 32, 53, 32, 108, 97, 122, 121, 32, 100, 111, 103,</div>
+<div class="line">      (2,14): 115, 0</div>
+<div class="line">      }</div>
+<div class="line">   }</div>
+<div class="line">}</div>
+<div class="line">}</div>
+<div class="ttc" id="agroup___p_d_t_s_t_d_html_gaeaa5eb139424ba27d5af8925f1aa9593"><div class="ttname"><a href="group___p_d_t_s_t_d.html#gaeaa5eb139424ba27d5af8925f1aa9593">H5T_STD_I8LE</a></div><div class="ttdeci">#define H5T_STD_I8LE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:303</div></div>
+</div><!-- fragment --><p>It contains two Region References: </p><ul>
+<li>A selection of four individual elements in dataset <code style="background-color:whitesmoke;">/DS2 : (0,1), (2,11), (1,0), (2,4)</code> See the <a class="el" href="group___h5_s.html#ga2f4407dd73d0ec37e5d9e80e4382483d" title="Selects array elements to be included in the selection for a dataspace.">H5Sselect_elements</a> API in the <a class="el" href="_u_g.html">HDF5 User Guide</a> for information on selecting individual elements. </li>
+<li>A selection of these blocks in dataset <code style="background-color:whitesmoke;">/DS2 : (0,0)-(0,2), (0,11)-(0,13), (2,0)-(2,2), (2,11)-(2,13)</code> See the <a class="el" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d" title="Selects a hyperslab region to add to the current selected region.">H5Sselect_hyperslab</a> API in the <a class="el" href="_u_g.html">HDF5 User Guide</a> for how to do hyperslab selection.</li>
+</ul>
+<p>If you look at the code that creates the dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.c</code>) you will see that the first reference is created with these calls: </p><div class="fragment"><div class="line">status = <a class="code hl_function" href="group___h5_s.html#ga2f4407dd73d0ec37e5d9e80e4382483d">H5Sselect_elements</a> (space, <a class="code hl_enumvalue" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a>, 4, coords[0]);</div>
+<div class="line">status = <a class="code hl_function" href="group___h5_r.html#ga60134eb917afbe89aa23eb25a30d249b">H5Rcreate_region</a>(file, DATASET2, space, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, &amp;wdata[0]);</div>
+<div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:228</div></div>
+<div class="ttc" id="a_h5_spublic_8h_html_a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550"><div class="ttname"><a href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a></div><div class="ttdeci">@ H5S_SELECT_SET</div><div class="ttdef"><b>Definition</b> H5Spublic.h:87</div></div>
+<div class="ttc" id="agroup___h5_r_html_ga60134eb917afbe89aa23eb25a30d249b"><div class="ttname"><a href="group___h5_r.html#ga60134eb917afbe89aa23eb25a30d249b">H5Rcreate_region</a></div><div class="ttdeci">herr_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, H5R_ref_t *ref_ptr)</div><div class="ttdoc">Creates a region reference.</div></div>
+<div class="ttc" id="agroup___h5_s_html_ga2f4407dd73d0ec37e5d9e80e4382483d"><div class="ttname"><a href="group___h5_s.html#ga2f4407dd73d0ec37e5d9e80e4382483d">H5Sselect_elements</a></div><div class="ttdeci">herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op, size_t num_elem, const hsize_t *coord)</div><div class="ttdoc">Selects array elements to be included in the selection for a dataspace.</div></div>
+</div><!-- fragment --><p>where the buffer containing the coordinates to select is: </p><div class="fragment"><div class="line">coords[4][2] = { {0,  1},</div>
+<div class="line">                 {2, 11},</div>
+<div class="line">                 {1,  0},</div>
+<div class="line">                 {2,  4} },</div>
+</div><!-- fragment --><p>The second reference is created by calling, </p><div class="fragment"><div class="line">status = <a class="code hl_function" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d">H5Sselect_hyperslab</a> (space, <a class="code hl_enumvalue" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a>, start, stride, count, block);</div>
+<div class="line">status = <a class="code hl_function" href="group___h5_r.html#ga60134eb917afbe89aa23eb25a30d249b">H5Rcreate_region</a>(file, DATASET2, space, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, &amp;wdata[1]);</div>
+<div class="ttc" id="agroup___h5_s_html_ga6adfdf1b95dc108a65bf66e97d38536d"><div class="ttname"><a href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d">H5Sselect_hyperslab</a></div><div class="ttdeci">herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[])</div><div class="ttdoc">Selects a hyperslab region to add to the current selected region.</div></div>
+</div><!-- fragment --><p> where start, stride, count, and block have these values: </p><div class="fragment"><div class="line">start[2] =  {0, 0},</div>
+<div class="line">stride[2] = {2, 11},</div>
+<div class="line">count[2] =  {2, 2},</div>
+<div class="line">block[2] =  {1, 3};</div>
+</div><!-- fragment --><p>These start, stride, count, and block values will select the elements shown in bold in the dataset: </p><div class="fragment"><div class="line">84 104 101 32 113 117 105  99 107  32  98 114 111 119 110 0</div>
+<div class="line">102 111 120 32 106 117 109 112 115  32 111 118 101 114  32 0</div>
+<div class="line">116 104 101 32  53  32 108  97 122 121  32 100 111 103 115 0</div>
+</div><!-- fragment --><p>If you use <code style="background-color:whitesmoke;">h5dump</code> to select a subset of dataset <code style="background-color:whitesmoke;">/DS2</code> with these start, stride, count, and block values, you will see that the same elements are selected: </p><div class="fragment"><div class="line">$ h5dump -d <span class="stringliteral">&quot;/DS2&quot;</span> -s <span class="stringliteral">&quot;0,0&quot;</span> -S <span class="stringliteral">&quot;2,11&quot;</span> -c <span class="stringliteral">&quot;2,2&quot;</span> -k <span class="stringliteral">&quot;1,3&quot;</span> h5ex_t_regref.h5</div>
+<div class="line">HDF5 <span class="stringliteral">&quot;h5ex_t_regref.h5&quot;</span> {</div>
+<div class="line">DATASET <span class="stringliteral">&quot;/DS2&quot;</span> {</div>
+<div class="line">   DATATYPE  <a class="code hl_define" href="group___p_d_t_s_t_d.html#gaeaa5eb139424ba27d5af8925f1aa9593">H5T_STD_I8LE</a></div>
+<div class="line">   DATASPACE  SIMPLE { ( 3, 16 ) / ( 3, 16 ) }</div>
+<div class="line">   SUBSET {</div>
+<div class="line">      START ( 0, 0 );</div>
+<div class="line">      STRIDE ( 2, 11 );</div>
+<div class="line">      COUNT ( 2, 2 );</div>
+<div class="line">      BLOCK ( 1, 3 );</div>
+<div class="line">      DATA {</div>
+<div class="line">      (0,0): 84, 104, 101, 114, 111, 119,</div>
+<div class="line">      (2,0): 116, 104, 101, 100, 111, 103</div>
+<div class="line">      }</div>
+<div class="line">   }</div>
+<div class="line">}</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>NOTE that you must release the references created in the code with the <a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy</a> API. </p><div class="fragment"><div class="line">status = <a class="code hl_function" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095">H5Rdestroy</a>(&amp;wdata[0]);</div>
+<div class="line">status = <a class="code hl_function" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095">H5Rdestroy</a>(&amp;wdata[1]);</div>
+<div class="ttc" id="agroup___h5_r_html_ga026114e6c23588bf89bb473eb9e4d095"><div class="ttname"><a href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095">H5Rdestroy</a></div><div class="ttdeci">herr_t H5Rdestroy(H5R_ref_t *ref_ptr)</div><div class="ttdoc">Closes a reference.</div></div>
+</div><!-- fragment --><p>For more information on selections, see the tutorial topic on <a class="el" href="_l_b_dset_sub_r_w.html">Reading From or Writing To a Subset of a Dataset</a>. Also see the <a class="el" href="_view_tools_view.html#secViewToolsViewSub">Dataset Subset</a> tutorial topic on using <code style="background-color:whitesmoke;">h5dump</code> to view a subset.</p>
+<h3><a class="anchor" id="subsubsecViewToolsViewDtypes_depr_objref"></a>
+Deprecated Object Reference</h3>
 <p>An Object Reference is a reference to an entire object (dataset, group, or named datatype). A dataset with an Object Reference datatype consists of one or more Object References. An Object Reference dataset can be used as an index to an HDF5 file.</p>
 <p>The <code style="background-color:whitesmoke;">/DS1</code> dataset in the following file (<code style="background-color:whitesmoke;">h5ex_t_objref.h5</code>) is an Object Reference dataset. It contains two references, one to group <code style="background-color:whitesmoke;">/G1</code> and the other to dataset <code style="background-color:whitesmoke;">/DS2</code>: </p><div class="fragment"><div class="line">$ h5dump h5ex_t_objref.h5</div>
 <div class="line">HDF5 <span class="stringliteral">&quot;h5ex_t_objref.h5&quot;</span> {</div>
@@ -665,9 +779,8 @@ Object Reference</h3>
 <div class="line">   }</div>
 <div class="line">}</div>
 <div class="line">}</div>
-<div class="ttc" id="a_h5_tpublic_8h_html_a071841985f647f69516dbe77d93167f2a5850e0b9353a5e7aeb615fb943d4e9cd"><div class="ttname"><a href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a5850e0b9353a5e7aeb615fb943d4e9cd">H5T_REFERENCE</a></div><div class="ttdeci">@ H5T_REFERENCE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:39</div></div>
-</div><!-- fragment --><h3><a class="anchor" id="subsubsecViewToolsViewDtypes_regref"></a>
-Region Reference</h3>
+</div><!-- fragment --><h3><a class="anchor" id="subsubsecViewToolsViewDtypes_depr_regref"></a>
+Deprecated Region Reference</h3>
 <p>A Region Reference is a reference to a selection within a dataset. A selection can be either individual elements or a hyperslab. In <code style="background-color:whitesmoke;">h5dump</code> you will see the name of the dataset along with the elements or slab that is selected. A dataset with a Region Reference datatype consists of one or more Region References.</p>
 <p>An example of a Region Reference dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.h5</code>) can be found on the <a class="el" href="_ex_a_p_i.html">Examples by API</a> page, under Datatypes. If you examine this dataset with <code style="background-color:whitesmoke;">h5dump</code> you will see that <code style="background-color:whitesmoke;">/DS1</code> is a Region Reference dataset as indicated by its datatype, highlighted in bold below: </p><div class="fragment"><div class="line">$ h5dump  h5ex_t_regref.h5</div>
 <div class="line">HDF5 <span class="stringliteral">&quot;h5ex_t_regref.h5&quot;</span> {</div>
@@ -694,7 +807,6 @@ Region Reference</h3>
 <div class="line">   }</div>
 <div class="line">}</div>
 <div class="line">}</div>
-<div class="ttc" id="agroup___p_d_t_s_t_d_html_gaeaa5eb139424ba27d5af8925f1aa9593"><div class="ttname"><a href="group___p_d_t_s_t_d.html#gaeaa5eb139424ba27d5af8925f1aa9593">H5T_STD_I8LE</a></div><div class="ttdeci">#define H5T_STD_I8LE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:303</div></div>
 <div class="ttc" id="agroup___p_d_t_s_t_d_html_gaf5cb0d5cec3d40d8b3ac27512f86895e"><div class="ttname"><a href="group___p_d_t_s_t_d.html#gaf5cb0d5cec3d40d8b3ac27512f86895e">H5T_STD_REF_DSETREG</a></div><div class="ttdeci">#define H5T_STD_REF_DSETREG</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:423</div></div>
 </div><!-- fragment --><p>It contains two Region References: </p><ul>
 <li>A selection of four individual elements in dataset <code style="background-color:whitesmoke;">/DS2 : (0,1), (2,11), (1,0), (2,4)</code> See the <a class="el" href="group___h5_s.html#ga2f4407dd73d0ec37e5d9e80e4382483d" title="Selects array elements to be included in the selection for a dataspace.">H5Sselect_elements</a> API in the <a class="el" href="_u_g.html">HDF5 User Guide</a> for information on selecting individual elements. </li>
@@ -703,16 +815,13 @@ Region Reference</h3>
 <p>If you look at the code that creates the dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.c</code>) you will see that the first reference is created with these calls: </p><div class="fragment"><div class="line">status = <a class="code hl_function" href="group___h5_s.html#ga2f4407dd73d0ec37e5d9e80e4382483d">H5Sselect_elements</a> (space, <a class="code hl_enumvalue" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a>, 4, coords[0]);</div>
 <div class="line">status = <a class="code hl_function" href="group___h5_r.html#ga0ac6997b5de26b11d91a95de2869950d">H5Rcreate</a> (&amp;wdata[0], file, DATASET2, <a class="code hl_define" href="_h5_rpublic_8h.html#a2a28c48c03a4616a02f9157fca4b2df0">H5R_DATASET_REGION</a>, space);</div>
 <div class="ttc" id="a_h5_rpublic_8h_html_a2a28c48c03a4616a02f9157fca4b2df0"><div class="ttname"><a href="_h5_rpublic_8h.html#a2a28c48c03a4616a02f9157fca4b2df0">H5R_DATASET_REGION</a></div><div class="ttdeci">#define H5R_DATASET_REGION</div><div class="ttdef"><b>Definition</b> H5Rpublic.h:625</div></div>
-<div class="ttc" id="a_h5_spublic_8h_html_a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550"><div class="ttname"><a href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a></div><div class="ttdeci">@ H5S_SELECT_SET</div><div class="ttdef"><b>Definition</b> H5Spublic.h:87</div></div>
 <div class="ttc" id="agroup___h5_r_html_ga0ac6997b5de26b11d91a95de2869950d"><div class="ttname"><a href="group___h5_r.html#ga0ac6997b5de26b11d91a95de2869950d">H5Rcreate</a></div><div class="ttdeci">herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t space_id)</div><div class="ttdoc">Creates a reference.</div></div>
-<div class="ttc" id="agroup___h5_s_html_ga2f4407dd73d0ec37e5d9e80e4382483d"><div class="ttname"><a href="group___h5_s.html#ga2f4407dd73d0ec37e5d9e80e4382483d">H5Sselect_elements</a></div><div class="ttdeci">herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op, size_t num_elem, const hsize_t *coord)</div><div class="ttdoc">Selects array elements to be included in the selection for a dataspace.</div></div>
 </div><!-- fragment --><p>where the buffer containing the coordinates to select is: </p><div class="fragment"><div class="line">coords[4][2] = { {0,  1},</div>
 <div class="line">                 {2, 11},</div>
 <div class="line">                 {1,  0},</div>
 <div class="line">                 {2,  4} },</div>
 </div><!-- fragment --><p>The second reference is created by calling, </p><div class="fragment"><div class="line">status = <a class="code hl_function" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d">H5Sselect_hyperslab</a> (space, <a class="code hl_enumvalue" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a>, start, stride, count, block);</div>
 <div class="line">status = <a class="code hl_function" href="group___h5_r.html#ga0ac6997b5de26b11d91a95de2869950d">H5Rcreate</a> (&amp;wdata[1], file, DATASET2, <a class="code hl_define" href="_h5_rpublic_8h.html#a2a28c48c03a4616a02f9157fca4b2df0">H5R_DATASET_REGION</a>, space);</div>
-<div class="ttc" id="agroup___h5_s_html_ga6adfdf1b95dc108a65bf66e97d38536d"><div class="ttname"><a href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d">H5Sselect_hyperslab</a></div><div class="ttdeci">herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[])</div><div class="ttdoc">Selects a hyperslab region to add to the current selected region.</div></div>
 </div><!-- fragment --><p> where start, stride, count, and block have these values: </p><div class="fragment"><div class="line">start[2] =  {0, 0},</div>
 <div class="line">stride[2] = {2, 11},</div>
 <div class="line">count[2] =  {2, 2},</div>
