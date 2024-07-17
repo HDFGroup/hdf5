@@ -44,7 +44,6 @@ jobs:
       - name: Checkout HDF5
         uses: actions/checkout@v4.1.7
         with:
-          repository: HDFGroup/hdf5
           path: hdf5
 
       - name: Configure HDF5 with REST VOL connector
