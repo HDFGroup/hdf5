@@ -212,9 +212,9 @@ H5TS_mutex_init(H5TS_mutex_t *mutex, int type)
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Create mutex attribute */
-        if (H5_UNLIKELY(pthread_mutexattr_init(&_attr)))
-            HGOTO_DONE(FAIL);
-        attr = &_attr;
+    if (H5_UNLIKELY(pthread_mutexattr_init(&_attr)))
+        HGOTO_DONE(FAIL);
+    attr = &_attr;
 
     /* Set up recursive mutex, if requested */
     if (H5TS_MUTEX_TYPE_RECURSIVE == type) {

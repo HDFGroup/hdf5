@@ -120,10 +120,10 @@ tts_dcreate(void)
 H5TS_THREAD_RETURN_TYPE
 tts_dcreate_creator(void *_thread_data)
 {
-    hid_t              dataspace = H5I_INVALID_HID;
-    hid_t              dataset   = H5I_INVALID_HID;
-    herr_t             status;
-    hsize_t            dimsf[1]; /* dataset dimensions */
+    hid_t           dataspace = H5I_INVALID_HID;
+    hid_t           dataset   = H5I_INVALID_HID;
+    herr_t          status;
+    hsize_t         dimsf[1]; /* dataset dimensions */
     struct thr_info thread_data;
 
     memcpy(&thread_data, _thread_data, sizeof(struct thr_info));
