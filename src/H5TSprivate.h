@@ -85,13 +85,14 @@
 /* Atomics macros */
 #if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 /* atomic_int */
-#define H5TS_atomic_init_int(obj, desired)                atomic_init((obj), (desired))
-#define H5TS_atomic_load_int(obj)                         atomic_load(obj)
-#define H5TS_atomic_store_int(obj, desired)               atomic_store((obj), (desired))
-#define H5TS_atomic_compare_exchange_strong_int(obj, exp, des) atomic_compare_exchange_strong((obj), (exp), (des))
-#define H5TS_atomic_fetch_add_int(obj, arg)               atomic_fetch_add((obj), (arg))
-#define H5TS_atomic_fetch_sub_int(obj, arg)               atomic_fetch_sub((obj), (arg))
-#define H5TS_atomic_destroy_int(obj)                      /* void */
+#define H5TS_atomic_init_int(obj, desired)  atomic_init((obj), (desired))
+#define H5TS_atomic_load_int(obj)           atomic_load(obj)
+#define H5TS_atomic_store_int(obj, desired) atomic_store((obj), (desired))
+#define H5TS_atomic_compare_exchange_strong_int(obj, exp, des)                                               \
+    atomic_compare_exchange_strong((obj), (exp), (des))
+#define H5TS_atomic_fetch_add_int(obj, arg) atomic_fetch_add((obj), (arg))
+#define H5TS_atomic_fetch_sub_int(obj, arg) atomic_fetch_sub((obj), (arg))
+#define H5TS_atomic_destroy_int(obj)        /* void */
 
 /* atomic_uint */
 #define H5TS_atomic_init_uint(obj, desired)  atomic_init((obj), (desired))
