@@ -26,7 +26,7 @@
 #define H5_MY_PKG     H5VL
 #define H5_MY_PKG_ERR H5E_VOL
 
-/** \page H5VL_UG The HDF5 Virtual Object Layer (VOL)
+/** \page H5VL_UG HDF5 Virtual Object Layer (VOL)
  *
  * \section sec_vol The HDF5 Virtual Object Layer (VOL)
  *
@@ -361,6 +361,10 @@
  * \code
  *     htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id)
  * \endcode
+ *
+ * Note also that an error is only returned if it is not possible to determine
+ * if a file (or container) is accessible.  It is not an error to return 'false'
+ * for whether the file is accessible.
  *
  * <h4> H5Oget_info[1|2]() → H5Oget_info3() and H5Oget_native_info()</h4>
  * The \ref H5Oget_info1() and \ref H5Oget_info2() family of HDF5 API calls are often

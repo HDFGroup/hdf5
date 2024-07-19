@@ -105,6 +105,29 @@ macro (BASIC_SETTINGS varname)
   )
 endmacro ()
 
+macro (PYTHON_SUPPORT)
+  option (HDF_BUILD_PYTHON "Test Python3 support" OFF)
+  if (HDF_BUILD_PYTHON)
+    find_package (Python3 COMPONENTS Interpreter Development NumPy)
+    if (Python3_FOUND AND Python3_NumPy_FOUND)
+      include (ExternalProject)
+      EXTERNALPROJECT_ADD (h5py
+          GIT_REPOSITORY https://github.com/h5py/h5py.git
+          GIT_TAG master
+          UPDATE_COMMAND      ""
+          PATCH_COMMAND       ""
+          CONFIGURE_COMMAND   ""
+          BUILD_COMMAND       "${CMAKE_COMMAND}" -E env HDF5_DIR=${HDF5_ROOT} "${Python3_EXECUTABLE}" setup.py build
+          BUILD_IN_SOURCE     1
+          INSTALL_COMMAND     python3 -m pip --no-cache-dir install -v .
+      )
+    else ()
+      set (HDF_BUILD_PYTHON OFF CACHE BOOL "Test Python3 support" FORCE)
+      message (STATUS "Python3:${Python3_FOUND} or numpy:${Python3_NumPy_FOUND} not found - disable test of Python examples")
+    endif ()
+  endif ()
+endmacro ()
+
 macro (HDF5_SUPPORT)
   set (CMAKE_MODULE_PATH ${H5EX_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
   option (USE_SHARED_LIBS "Use Shared Libraries" ON)
@@ -204,7 +227,20 @@ macro (HDF5_SUPPORT)
         if (HDF_BUILD_JAVA AND HDF5_Java_FOUND)
           if (${HDF5_BUILD_JAVA})
             set (CMAKE_JAVA_INCLUDE_PATH "${CMAKE_JAVA_INCLUDE_PATH};${HDF5_JAVA_INCLUDE_DIRS}")
-            set (H5EX_JAVA_LIBRARY ${HDF5_JAVA_LIBRARY})
+            if (HDF5_BUILD_MODE)
+              string(TOUPPER "${HDF5_BUILD_MODE}" UPPER_BUILD_TYPE)
+              get_target_property(libsoname ${HDF5_JAVA_LIBRARY} IMPORTED_SONAME_${UPPER_BUILD_TYPE})
+            elseif (HDF_CFG_NAME)
+              string(TOUPPER "${HDF_CFG_NAME}" UPPER_BUILD_TYPE)
+              get_target_property(libsoname ${HDF5_JAVA_LIBRARY} IMPORTED_SONAME_${UPPER_BUILD_TYPE})
+            else()
+              get_target_property(libsoname ${HDF5_JAVA_LIBRARY} IMPORTED_SONAME)
+            endif()
+            get_filename_component (libname ${libsoname} NAME_WE)
+            string (REGEX REPLACE "^lib" "" libname ${libname})
+            message (STATUS "HDF5 lib:${HDF5_JAVA_LIBRARY} OR ${libsoname} OR ${libname}")
+            set (H5EX_JAVA_LIBRARY ${libname})
+#            set (H5EX_JAVA_LIBRARY $<TARGET_FILE_BASE_NAME:${HDF5_JAVA_LIBRARY}>)
             set (H5EX_JAVA_LIBRARIES ${HDF5_JAVA_LIBRARY})
             message (STATUS "HDF5 lib:${H5EX_JAVA_LIBRARY} jars:${HDF5_JAVA_INCLUDE_DIRS}}")
           else ()

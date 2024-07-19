@@ -7369,15 +7369,8 @@ object_visit_noop_callback(hid_t o_id, const char *name, const H5O_info2_t *obje
 static void
 cleanup_files(void)
 {
-    char filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-
-    snprintf(filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
-             OBJECT_COPY_BETWEEN_FILES_TEST_FILE_NAME);
-    H5Fdelete(filename, H5P_DEFAULT);
-
-    snprintf(filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
-             OBJECT_VISIT_TEST_FILE_NAME);
-    H5Fdelete(filename, H5P_DEFAULT);
+    remove_test_file(test_path_prefix, OBJECT_COPY_BETWEEN_FILES_TEST_FILE_NAME);
+    remove_test_file(test_path_prefix, OBJECT_VISIT_TEST_FILE_NAME);
 }
 
 int

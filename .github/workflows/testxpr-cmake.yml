@@ -34,7 +34,7 @@ jobs:
            echo "FC=gfortran-12" >> $GITHUB_ENV
 
       - name: Get Sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
 
       - name: CMake Configure
         shell: bash

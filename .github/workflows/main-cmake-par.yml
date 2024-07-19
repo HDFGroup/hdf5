@@ -23,7 +23,7 @@ jobs:
     name: "Parallel GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4.1.7
 
       - name: Install Linux Dependencies
         run: |
@@ -42,6 +42,7 @@ jobs:
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           CC=mpicc cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            --log-level=VERBOSE \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \

@@ -427,7 +427,7 @@ CONTAINS
 !!
 !! \brief Opens HDF5 file.
 !!
-!! \param name         Name of the file to acecss.
+!! \param name         Name of the file to access.
 !! \param access_flags File access flags. Allowable values are:
 !!                     \li H5F_ACC_RDWR_F
 !!                     \li H5F_ACC_RDONLY_F

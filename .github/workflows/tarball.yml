@@ -85,7 +85,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
         with:
           path: hdfsrc
           ref: '${{needs.check_commits.outputs.branch_ref }}'

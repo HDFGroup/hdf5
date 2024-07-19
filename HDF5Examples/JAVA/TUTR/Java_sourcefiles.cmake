@@ -9,6 +9,7 @@ set (HDF_JAVA_EXAMPLES
     HDF5DatasetRead.java
     HDF5GroupDatasetCreate.java
     HDF5SubsetSelect.java
+    HDF5GroupAbsoluteRelativeCreate.java
 )
 if (H5_LIBVER_DIR EQUAL 110)
   set (HDF_JAVA_EXAMPLES ${HDF_JAVA_EXAMPLES}

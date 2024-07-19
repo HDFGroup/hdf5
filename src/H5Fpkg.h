@@ -411,7 +411,7 @@ H5_DLLVAR htri_t ignore_disabled_locks_g;
 H5_DLL herr_t H5F__post_open(H5F_t *f);
 H5_DLL H5F_t *H5F__reopen(H5F_t *f);
 H5_DLL herr_t H5F__flush(H5F_t *f);
-H5_DLL htri_t H5F__is_hdf5(const char *name, hid_t fapl_id);
+H5_DLL herr_t H5F__is_hdf5(const char *name, hid_t fapl_id, bool *is_hdf5);
 H5_DLL herr_t H5F__get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len, size_t *image_len);
 H5_DLL herr_t H5F__get_info(H5F_t *f, H5F_info2_t *finfo);
 H5_DLL herr_t H5F__format_convert(H5F_t *f);

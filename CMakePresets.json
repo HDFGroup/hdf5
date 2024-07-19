@@ -36,7 +36,9 @@
         "HDF5_PACKAGE_EXTLIBS": "ON",
         "HDF5_USE_ZLIB_NG": "OFF",
         "ZLIB_USE_LOCALCONTENT": "OFF",
-        "LIBAEC_USE_LOCALCONTENT": "OFF"
+        "LIBAEC_USE_LOCALCONTENT": "OFF",
+        "HDF5_USE_ZLIB_STATIC": "ON",
+        "HDF5_USE_LIBAEC_STATIC": "ON"
       }
     },
     {
