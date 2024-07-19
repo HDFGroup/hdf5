@@ -1,4 +1,4 @@
-name: hdf5 publish files in HDFVIEW from branch to S3
+name: hdf5 publish files in HDF5 folder from branch to S3
 
 # Triggers the workflow on demand
 on:
