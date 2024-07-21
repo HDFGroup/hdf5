@@ -810,6 +810,11 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
 
     handle->filesize = (size_t)content_length;
 
+#if S3COMMS_CURL_VERBOSITY == 1
+    fprintf(stdout, " -- size: %ju\n", content_length);
+    fflush(stdout);
+#endif
+
     /**********************
      * UNDO HEAD SETTINGS *
      **********************/
@@ -1118,6 +1123,12 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (ret <= 0 || ret >= S3COMMS_MAX_RANGE_STRING_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format HTTP Range value");
     }
+
+#if S3COMMS_CURL_VERBOSITY == 1
+    fprintf(stdout, "%s: Bytes %" PRIuHADDR " - %" PRIuHADDR ", Request Size: %zu\n", handle->httpverb,
+            offset, offset + len - 1, len);
+    fflush(stdout);
+#endif
 
     /*******************
      * COMPILE REQUEST *
