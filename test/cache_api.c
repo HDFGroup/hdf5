@@ -1858,6 +1858,15 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
     /* test H5Fget_mdc_config().  */
 
+    /* Create an ID to use in the H5Fset_mdc_config/H5Fget_mdc_config tests */
+    hid_t dtype_id = H5Tcopy(H5T_NATIVE_INT);
+
+    if (dtype_id < 0) {
+
+        pass         = false;
+        failure_mssg = "H5Tcopy() failed.\n";
+    }
+
     scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
     if (pass) {
 
@@ -1876,6 +1885,18 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
             pass         = false;
             failure_mssg = "H5Fget_mdc_config() accepted invalid file_id.";
+        }
+
+        H5E_BEGIN_TRY
+        {
+            result = H5Fget_mdc_config(dtype_id, &scratch); /* not a file ID */
+        }
+        H5E_END_TRY
+
+        if (result >= 0) {
+
+            pass         = false;
+            failure_mssg = "H5Fget_mdc_config() accepted an ID that is not a file ID.";
         }
     }
 
@@ -1941,6 +1962,27 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
             pass         = false;
             failure_mssg = "H5Fset_mdc_config() accepted bad invalid file_id.";
         }
+
+        H5E_BEGIN_TRY
+        {
+            result = H5Fset_mdc_config(dtype_id, &default_config);
+        }
+        H5E_END_TRY
+
+        if (result >= 0) {
+
+            pass         = false;
+            failure_mssg = "H5Fset_mdc_config() accepted an ID that is not a file ID.";
+        }
+    }
+
+    /* Close the temporary datatype */
+    result = H5Tclose(dtype_id);
+
+    if (result < 0) {
+
+        pass         = false;
+        failure_mssg = "H5Tclose() failed.\n";
     }
 
     if (pass) {
@@ -2049,6 +2091,37 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
             pass         = false;
             failure_mssg = "H5Freset_mdc_hit_rate_stats() accepted bad file_id.";
+        }
+
+        /* Create an ID to use in the next test */
+        hid_t scalarsp_id = H5Screate(H5S_SCALAR);
+
+        if (scalarsp_id < 0) {
+
+            pass         = false;
+            failure_mssg = "H5Screate() failed.\n";
+        }
+
+        /* Try to call H5Freset_mdc_hit_rate_stats with an inappropriate ID */
+        H5E_BEGIN_TRY
+        {
+            result = H5Freset_mdc_hit_rate_stats(scalarsp_id);
+        }
+        H5E_END_TRY
+
+        if (result >= 0) {
+
+            pass         = false;
+            failure_mssg = "H5Freset_mdc_hit_rate_stats() accepted an ID that is not a file_id.";
+        }
+
+        /* Close the temporary dataspace */
+        result = H5Sclose(scalarsp_id);
+
+        if (result < 0) {
+
+            pass         = false;
+            failure_mssg = "H5Sclose() failed.\n";
         }
     }
 
