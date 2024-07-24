@@ -19,8 +19,8 @@
 #include "H5Ipkg.h"
 
 /* Defines used in test_appropriate_ids */
-#define FILE_NAME   "tid.h5"
-#define DSET_NAME   "Dataset 1"
+#define FILE_NAME "tid.h5"
+#define DSET_NAME "Dataset 1"
 
 static herr_t
 free_wrapper(void *p, void H5_ATTR_UNUSED **_ctx)
@@ -1394,7 +1394,7 @@ test_appropriate_ids(void)
     hid_t    space_id = H5I_INVALID_HID;
     hsize_t  dims     = 2;
     hssize_t free_space;
-    herr_t   ret      = SUCCEED;     /* Generic return value */
+    herr_t   ret = SUCCEED; /* Generic return value */
 
     /* Create file create property list */
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
@@ -1452,7 +1452,7 @@ test_appropriate_ids(void)
 
     H5E_BEGIN_TRY
     {
-        unsigned intent; /* File access flags */
+        unsigned intent;                       /* File access flags */
         ret = H5Fget_intent(dset_id, &intent); /* dset_id is not file ID */
     }
     H5E_END_TRY
@@ -1461,7 +1461,7 @@ test_appropriate_ids(void)
     H5E_BEGIN_TRY
     {
         unsigned long fileno = 0;
-        ret = H5Fget_fileno(dset_id, &fileno); /* dset_id is not file ID */
+        ret                  = H5Fget_fileno(dset_id, &fileno); /* dset_id is not file ID */
     }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Fget_fileno");
@@ -1475,7 +1475,7 @@ test_appropriate_ids(void)
 
     H5E_BEGIN_TRY
     {
-        void *os_file_handle = NULL; /* OS file handle */
+        void *os_file_handle = NULL;                                    /* OS file handle */
         ret = H5Fget_vfd_handle(fapl_id, H5P_DEFAULT, &os_file_handle); /* fapl_id is not file ID */
     }
     H5E_END_TRY
