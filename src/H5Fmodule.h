@@ -892,7 +892,7 @@
  * HDF5 File Image Operations</a>
  * section for information on more advanced usage of the Memory file driver, and
  * @see <a
- * href="https://docs.hdfgroup.org/archive/support/HDF5/doc/Advanced/ModifiedRegionWrites/ModifiedRegionWrites.pdf">
+ * href="https://\DOCURL/advanced_topics/ModifiedRegionWrites.pdf">
  * Modified Region Writes</a>
  * section for information on how to set write operations so that only modified regions are written
  * to storage.

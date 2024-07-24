@@ -17,7 +17,7 @@
 
 \li \ref IMG
 \li \ref TBL
-\li <a href="https://support.hdfgroup.org/HDF5/doc/HL/H5DS_Spec.pdf">
+\li <a href="https://\DOCURL/HL/H5DS_Spec.pdf">
       HDF5 Dimension Scale Specification</a>
 
 */
