@@ -6,7 +6,7 @@ ALIASES += THG="The HDF Group"
 # Default URL for HDF Group Files
 ALIASES += HDFURL="support.hdfgroup.org"
 # URL for archived files
-ALIASES += ARCURL="\HDFURL/archive/hdf5"
+ALIASES += ARCURL="\HDFURL/archive/support/hdf5"
 # URL for RFCs
 ALIASES += RFCURL="\HDFURL/documentation/HDF5/rfc"
 # URL for documentation
