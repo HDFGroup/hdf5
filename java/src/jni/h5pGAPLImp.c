@@ -11,8 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifdef __cplusplus
-    extern "C"
-{
+extern "C" {
 #endif /* __cplusplus */
 
 #include <stdlib.h>
@@ -20,10 +19,10 @@
 #include "h5jni.h"
 #include "h5pGAPLImp.h"
 
-    /*
-     * Pointer to the JNI's Virtual Machine; used for callback functions.
-     */
-    /* extern JavaVM *jvm; */
+/*
+ * Pointer to the JNI's Virtual Machine; used for callback functions.
+ */
+/* extern JavaVM *jvm; */
 
 #ifdef __cplusplus
 } /* end extern "C" */
