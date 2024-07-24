@@ -86,9 +86,9 @@ H5TS_barrier_wait(H5TS_barrier_t *barrier)
             H5TS_atomic_fetch_add_uint(&barrier->generation, 1);
         }
         else {
-            /* Not the last thread, when for the generation to change */
+            /* Not the last thread, wait for the generation to change */
             while (H5TS_atomic_load_uint(&barrier->generation) == my_generation)
-                ;
+                H5TS_thread_yield();
         }
     }
 #endif
