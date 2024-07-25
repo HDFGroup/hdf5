@@ -12,8 +12,9 @@ on:
         description: 'hdf5 target bucket directory'
         type: string
         required: true
-    permissions:
-      contents: read
+
+permissions:
+  contents: read
 
 jobs:
   publish-tag:
