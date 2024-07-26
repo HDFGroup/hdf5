@@ -1765,7 +1765,7 @@ H5_DLL herr_t H5Derase(hid_t dset_id, hid_t file_space_id, hid_t dxpl_id);
  *
  * \return \herr_t
  *
- \ \details H5Dwrite_struct_chunk() writes a structured chunk specified by its 
+ * \details H5Dwrite_struct_chunk() writes a structured chunk specified by its 
  *          logical offset \p offset to dataset \p dset_id. The HDF5 library assembles 
  *          the structured chunk according to the information provided in the 
  *          \p chunk_info parameter and using data pointed by \p buf. 
