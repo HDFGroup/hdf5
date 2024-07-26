@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Registered VOL Connectors | The HDF Group</title>
+<meta name="generator" content="Jekyll v3.9.5" />
+<meta property="og:title" content="Registered VOL Connectors" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Ensuring long-term access and usability of HDF data and supporting users of HDF technologies" />
+<meta property="og:description" content="Ensuring long-term access and usability of HDF data and supporting users of HDF technologies" />
+<link rel="canonical" href="https://portal.hdfgroup.org/documentation/hdf5-docs/registered_vol_connectors.html" />
+<meta property="og:url" content="https://portal.hdfgroup.org/documentation/hdf5-docs/registered_vol_connectors.html" />
+<meta property="og:site_name" content="The HDF Group" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Registered VOL Connectors" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Ensuring long-term access and usability of HDF data and supporting users of HDF technologies","headline":"Registered VOL Connectors","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"https://portal.hdfgroup.org/assets/img/logo.png"}},"url":"https://portal.hdfgroup.org/documentation/hdf5-docs/registered_vol_connectors.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+<!--    <link rel="stylesheet" href="/assets/css/style.css?v=e011e078b5794b660e81d8f8d7fb9977d1f23787"> -->
+<!--    <link rel="stylesheet" href="../assets/css/style.css"> -->
+  <!-- <link rel="stylesheet" href="/assets/css/style.css"> -->
+  <link rel="stylesheet" href="https://portal.hdfgroup.org/assets/css/style.css">
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <![endif]-->
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'G-XQWF3YLCRQ', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+         <h1><a href="https://portal.hdfgroup.org/">The HDF Group</a></h1>
+       
+
+        
+          <a href="/"><img src="/assets/img/logo.png" alt="Logo" /></a>
+         
+
+  <p>
+          
+        </p>
+      <ul>
+       <li><a href="https://www.hdfgroup.org/solutions/priority-support/">HDF Software Priority Support</a>
+        <li><a href="https://www.hdfgroup.org/solutions/consulting/">HDF Consulting</a></li>
+        <li><a href="/downloads/index.html">Downloads</a></li>
+        <li><a href="/documentation/index.html">Documentation</a></li>
+        <li><a href="https://forum.hdfgroup.org">Community Forum</a></li>
+        <li><a href="https://help.hdfgroup.org">Help Desk</a></li>
+        <li><A href="https://www.hdfgroup.org/licenses">Licenses</A></li>
+      </ul>
+        <br>
+  <!-- 
+        
+
+        
+        <p class="view"><a href="https://github.com/HDFGroup">View My GitHub Profile</a></p>
+        
+
+        
+        -->
+        
+        <h3>Got HDF5?</h3>
+        <a href="https://myhdf5.hdfgroup.org/"><img src="/assets/img/view-HDF5-file-in-browser.png" alt="Visualization of an HDF5 file"></a>
+        <br>
+        Curious to see what’s inside? Try <a href="https://myhdf5.hdfgroup.org/">this</a>
+
+        <div style="font-size: smaller;">(This free tool will show you the contents of an HDF5 file in your browser, without any data leaving your computer! For more info, check out <a href="https://h5web.panosc.eu/" target=new>H5Web</a>.)</div>
+      </header>
+      <section>
+
+      <h1 id="registered-vol-connectors">Registered VOL Connectors</h1>
+
+<p>Members of the HDF5 users community can register VOL connectors for use with HDF5. To register a VOL connector please contact <a href="https://help.hdfgroup.org">The HDF Helpdesk</a> with the following information:</p>
+
+<ul>
+  <li>Contact information for the developer requesting a new identifier</li>
+  <li>Short description of the new connector</li>
+  <li>Links to any relevant information including licensing information</li>
+</ul>
+
+<p>Here is the current policy regarding VOL connector identifier assignment: Valid VOL connector identifiers can have values from 0 through 255 for connectors defined by the HDF5 library. Values 256 through 511 are available for testing new VOL connectors.  Subsequent values should be obtained by contacting the <a href="https://help.hdfgroup.org">The HDF Help Desk</a>.</p>
+
+<p>Please contact the maintainer of a VOL connector for help implementing the plugin.</p>
+
+<h2 id="list-of-vol-connectors-registered-with-the-hdf-group">List of VOL Connectors Registered with The HDF Group</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Connector</th>
+      <th>Connector Identifier</th>
+      <th>Search Name*</th>
+      <th>Short Description</th>
+      <th>URL</th>
+      <th>Contacts</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Asynchronous I/O</td>
+      <td>512</td>
+      <td>async</td>
+      <td>Provides support for asynchronous operations to HDF5</td>
+      <td><a href="https://github.com/hpc-io/vol-async">https://github.com/hpc-io/vol-async</a></td>
+      <td>Suren Byna (sbyna at lbl dot gov)</td>
+    </tr>
+    <tr>
+      <td>Cache</td>
+      <td>513</td>
+      <td>cache</td>
+      <td>Provides support for multi-level, multi-location data caching to dataset I/O operations</td>
+      <td><a href="https://github.com/hpc-io/vol-cache">https://github.com/hpc-io/vol-cache</a></td>
+      <td>Suren Byna (sbyna at lbl dot gov)</td>
+    </tr>
+    <tr>
+      <td>Log-based</td>
+      <td>514</td>
+      <td>LOG</td>
+      <td>The log-based VOL plugin stores HDF5 datasets in a log-based storage layout.<br />In this layout, data of multiple write requests made by an MPI process are appended one after another in the file. Such I/O strategy can avoid the expensive inter-process communication and I/O serialization due to file lock contentions when storing data in the canonical order. Through the log-based VOL, existing HDF5 programs can achieve a better parallel write performance with minimal changes to their codes.</td>
+      <td><a href="https://github.com/DataLib-ECP/vol-log-based/blob/master/README.md">https://github.com/DataLib-ECP/vol-log-based/blob/master/README.md</a></td>
+      <td>Kai Yuan Hou <br /> (khl7265 at ece dot northwestern dot edu)</td>
+    </tr>
+    <tr>
+      <td>DAOS</td>
+      <td>4004</td>
+      <td>daos</td>
+      <td>Designed to utilize the DAOS object storage system by use of the DAOS API <br /> https://doi.org/10.1109/TPDS.2021.3097884</td>
+      <td><a href="https://github.com/HDFGroup/vol-daos">https://github.com/HDFGroup/vol-daos</a> <br /> <a href="https://github.com/HDFGroup/vol-daos/blob/master/docs/design_doc.pdf">HDF5 DAOS VOL Connector Design</a> <br /> <a href="https://github.com/HDFGroup/vol-daos/blob/master/docs/users_guide.pdf">HDF5 DAOS VOL Connector User’s Guide</a></td>
+      <td>help at hdfgroup dot org</td>
+    </tr>
+    <tr>
+      <td>native</td>
+      <td>0</td>
+      <td>native</td>
+      <td> </td>
+      <td> </td>
+      <td>help at hdfgroup dot org</td>
+    </tr>
+    <tr>
+      <td>pass-through</td>
+      <td>517</td>
+      <td>pass_through_ext</td>
+      <td>Provides a simple example of a pass-through VOL connector</td>
+      <td><a href="https://github.com/hpc-io/vol-external-passthrough">https://github.com/hpc-io/vol-external-passthrough</a></td>
+      <td>Suren Byna (sbyna at lbl dot gov)</td>
+    </tr>
+    <tr>
+      <td>dset-split</td>
+      <td>518</td>
+      <td>dset-split</td>
+      <td>Creates separate sub files for each dataset created and mounts these sub-files as external links in the main file. It enables versioning of HDF5 files at a dataset boundary.</td>
+      <td><a href="https://github.com/hpc-io/vol-dset-split">https://github.com/hpc-io/vol-dset-split</a></td>
+      <td>Annmary Justine (annmary dot roy at hpe dot com)</td>
+    </tr>
+    <tr>
+      <td>PDC-VOL</td>
+      <td>519</td>
+      <td>PDC-VOL</td>
+      <td>It is a terminal VOL that reads and writes HDF5 objects to the PDC system</td>
+      <td><a href="https://github.com/hpc-io/pdc">https://github.com/hpc-io/pdc</a> <a href="https://github.com/hpc-io/vol-pdc">https://github.com/hpc-io/vol-pdc</a></td>
+      <td>Houjun Tang (htang4 at lbl dot gov)</td>
+    </tr>
+    <tr>
+      <td>REST</td>
+      <td>520</td>
+      <td>REST</td>
+      <td>Designed to utilize web-based storage systems by use of the HDF5 REST APIs</td>
+      <td><a href="https://github.com/HDFGroup/vol-rest">https://github.com/HDFGroup/vol-rest</a></td>
+      <td>Matthew Larson (mlarson at hdfgroup dot org)</td>
+    </tr>
+    <tr>
+      <td>LowFive</td>
+      <td>521</td>
+      <td>LowFive</td>
+      <td>A new data transport layer based on the HDF5 data model, for in situ workflows. Executables using LowFive can communicate in situ (using in-memory data and MPI message passing), reading and writing traditional HDF5 files to physical storage, and combining the two modes.</td>
+      <td><a href="https://github.com/diatomic/LowFive">https://github.com/diatomic/LowFive</a></td>
+      <td>Tom Peterka (tpeterka at mcs dot anl dot gov) <br /> Dmitriy Morozov (dmorozov at lbl dot gov)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>*The Search Name provides a mechanism for searching for a VOL.</p>
+
+<h2 id="list-of-prototype-vol-connectors">List of Prototype VOL Connectors</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Connector</th>
+      <th>Connector Identifier</th>
+      <th>Search Name*</th>
+      <th>Short Description</th>
+      <th>URL</th>
+      <th>Contacts</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>rados</td>
+      <td>unassigned</td>
+      <td>rados</td>
+      <td>Prototype VOL connector to access data in RADOS</td>
+      <td><a href="https://github.com/HDFGroup/vol-rados">https://github.com/HDFGroup/vol-rados</a></td>
+      <td>help at hdfgroup dot org</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>*The Search Name provides a mechanism for searching for a VOL.</p>
+
+
+      </section>
+      <footer>
+        
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+  </body>
+</html>
