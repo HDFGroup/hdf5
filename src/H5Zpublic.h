@@ -263,12 +263,11 @@ typedef enum H5Z_cb_return_t {
 typedef H5Z_cb_return_t (*H5Z_filter_func_t)(H5Z_filter_t filter, void *buf, size_t buf_size, void *op_data);
 //! <!-- [H5Z_filter_func_t_snip] -->
 
-
 /* TBD: */
 /* Convenience flag used by H5Pset_filter2() to specify a section of the sparse chunk to be filtered */
-#define H5Z_FLAG_SPARSE_SELECTION   0
-#define H5Z_FLAG_SPARSE_FIXED_DATA  1
-#define H5Z_FLAG_SPARSE_VL_DATA     2
+#define H5Z_FLAG_SPARSE_SELECTION  0
+#define H5Z_FLAG_SPARSE_FIXED_DATA 1
+#define H5Z_FLAG_SPARSE_VL_DATA    2
 
 #ifdef __cplusplus
 extern "C" {

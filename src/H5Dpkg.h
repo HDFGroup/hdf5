@@ -756,15 +756,20 @@ H5_DLL herr_t H5D__chunk_stats(const H5D_t *dset, bool headers);
 #endif /* H5D_CHUNK_DEBUG */
 
 /* Functions that operate on H5D_SPARSE_CHUNK storage */
-H5_DLL hid_t H5D__get_defined(const H5D_t *dset, const H5S_t *fspace);
+H5_DLL hid_t  H5D__get_defined(const H5D_t *dset, const H5S_t *fspace);
 H5_DLL herr_t H5D__erase(const H5D_t *dset, const H5S_t *fspace);
-H5_DLL herr_t H5D__write_struct_chunk_direct(H5D_t *dset, hsize_t *offset, H5D_struct_chunk_info_t *chunk_info, void *buf[]);
-H5_DLL herr_t H5D__read_struct_chunk_direct(const H5D_t *dset, hsize_t *offset, H5D_struct_chunk_info_t *chunk_info, void *buf[]);
-H5_DLL herr_t H5D__get_struct_chunk_info(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_t chunk_idx, hsize_t *offset,
-                    H5D_struct_chunk_info_t *chunk_info, haddr_t *addr, hsize_t *chunk_size);
-H5_DLL herr_t H5D__get_struct_chunk_info_by_coord(const H5D_t *dset, const hsize_t *offset, H5D_struct_chunk_info_t *chunk_info,
-                    haddr_t *addr, hsize_t *chunk_size);
-H5_DLL herr_t  H5D__struct_chunk_iter(H5D_t *dset, H5D_struct_chunk_iter_op_t cb, void *op_data);
+H5_DLL herr_t H5D__write_struct_chunk_direct(H5D_t *dset, hsize_t *offset,
+                                             H5D_struct_chunk_info_t *chunk_info, void *buf[]);
+H5_DLL herr_t H5D__read_struct_chunk_direct(const H5D_t *dset, hsize_t *offset,
+                                            H5D_struct_chunk_info_t *chunk_info, void *buf[]);
+H5_DLL herr_t H5D__get_struct_chunk_info(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space,
+                                         hsize_t chunk_idx, hsize_t *offset,
+                                         H5D_struct_chunk_info_t *chunk_info, haddr_t *addr,
+                                         hsize_t *chunk_size);
+H5_DLL herr_t H5D__get_struct_chunk_info_by_coord(const H5D_t *dset, const hsize_t *offset,
+                                                  H5D_struct_chunk_info_t *chunk_info, haddr_t *addr,
+                                                  hsize_t *chunk_size);
+H5_DLL herr_t H5D__struct_chunk_iter(H5D_t *dset, H5D_struct_chunk_iter_op_t cb, void *op_data);
 
 /* format convert */
 H5_DLL herr_t H5D__chunk_format_convert(H5D_t *dset, H5D_chk_idx_info_t *idx_info,

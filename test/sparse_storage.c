@@ -58,7 +58,7 @@ static const char *FILENAME[] = {"sparse",                    /* 0 */
                                  NULL};
 #define FILENAME_BUF_SIZE 1024
 
-#define SPARSE_DSET     "sparse_dset"
+#define SPARSE_DSET "sparse_dset"
 
 #define RANK     2
 #define NX       10
@@ -73,8 +73,8 @@ static const char *FILENAME[] = {"sparse",                    /* 0 */
  * Function:    test_sparse_data
  *
  * Purpose:     Verify APIs for handling sparse data:
- *              --H5Dget_defined() 
- *              --H5Derase() 
+ *              --H5Dget_defined()
+ *              --H5Derase()
  *
  * Return:      Success:        0
  *              Failure:        -1
@@ -83,16 +83,16 @@ static const char *FILENAME[] = {"sparse",                    /* 0 */
 static herr_t
 test_sparse_data(hid_t fapl)
 {
-    char  filename[FILENAME_BUF_SIZE];  /* File name */
-    hid_t fid   = H5I_INVALID_HID;
-    hid_t sid   = H5I_INVALID_HID;
-    hid_t sid1 = H5I_INVALID_HID;    
-    hid_t sid2 = H5I_INVALID_HID;    
-    hid_t dcpl = H5I_INVALID_HID;
-    hid_t   did = H5I_INVALID_HID;
-    hsize_t dim[1]  = {50};     /* 1-d dataspace */
-    hsize_t chunk_dim[1] = {5}; /* Chunk size */
-    int wbuf[50];               /* Write buffer */
+    char    filename[FILENAME_BUF_SIZE]; /* File name */
+    hid_t   fid          = H5I_INVALID_HID;
+    hid_t   sid          = H5I_INVALID_HID;
+    hid_t   sid1         = H5I_INVALID_HID;
+    hid_t   sid2         = H5I_INVALID_HID;
+    hid_t   dcpl         = H5I_INVALID_HID;
+    hid_t   did          = H5I_INVALID_HID;
+    hsize_t dim[1]       = {50}; /* 1-d dataspace */
+    hsize_t chunk_dim[1] = {5};  /* Chunk size */
+    int     wbuf[50];            /* Write buffer */
 
     TESTING("APIs for handling sparse data");
 
@@ -116,18 +116,22 @@ test_sparse_data(hid_t fapl)
     if (H5Pset_chunk(dcpl, 1, chunk_dim) < 0)
         FAIL_STACK_ERROR;
 
-    if ((did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
-                          H5P_DEFAULT)) < 0)
+    if ((did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
     /* Write sparse data to the dataset */
     memset(wbuf, 0, sizeof(wbuf));
 
     /* Initialize and write sparse data to the dataset */
-    wbuf[1] = 1;
-    wbuf[12] = 12; wbuf[13] = 13; wbuf[14] = 14;
-    wbuf[22] = 22; wbuf[23] = 23; wbuf[24] = 24;
-    wbuf[48] = 48; wbuf[49] = 49;
+    wbuf[1]  = 1;
+    wbuf[12] = 12;
+    wbuf[13] = 13;
+    wbuf[14] = 14;
+    wbuf[22] = 22;
+    wbuf[23] = 23;
+    wbuf[24] = 24;
+    wbuf[48] = 48;
+    wbuf[49] = 49;
     if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
         TEST_ERROR;
 
@@ -199,18 +203,18 @@ error:
 static herr_t
 test_sparse_direct_chunk(hid_t fapl)
 {
-    char    filename[FILENAME_BUF_SIZE];  /* File name */
-    hid_t   fid = H5I_INVALID_HID;
-    hid_t   did = H5I_INVALID_HID;
-    hid_t   sid = H5I_INVALID_HID; 
-    hid_t   dcpl = H5I_INVALID_HID;
-    hid_t   dxpl = H5I_INVALID_HID;
+    char  filename[FILENAME_BUF_SIZE]; /* File name */
+    hid_t fid  = H5I_INVALID_HID;
+    hid_t did  = H5I_INVALID_HID;
+    hid_t sid  = H5I_INVALID_HID;
+    hid_t dcpl = H5I_INVALID_HID;
+    hid_t dxpl = H5I_INVALID_HID;
 
     hsize_t dims[2]       = {NX, NY};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
 
-    int     buf[NX][NY];
+    int buf[NX][NY];
 
     TESTING("APIs for direct chunk I/O on structured chunks");
 
@@ -238,8 +242,7 @@ test_sparse_direct_chunk(hid_t fapl)
     /*
      * Create a new dataset within the file using dcpl
      */
-    if ((did =
-             H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
@@ -249,31 +252,31 @@ test_sparse_direct_chunk(hid_t fapl)
         /* TBD: for H5D_SPARSE_CHUNK */
 
         H5D_struct_chunk_info_t wr_chk_info;
-        uint16_t wr_filter_mask[2] = {0,0};
-        hsize_t wr_offset[2] = {0, 0};
-        size_t wr_section_size[2] = {32,48};
-        void *wr_buf[2];
-        hsize_t wr_buf0[4] = {3,2,4,4};                /* Encoded coordinates: [3,2] - [4,4] */
-        hsize_t wr_buf1[6] = {66,69,72,96,99,102};     /* Data: 66,69,72,96,99,102 */
+        uint16_t                wr_filter_mask[2]  = {0, 0};
+        hsize_t                 wr_offset[2]       = {0, 0};
+        size_t                  wr_section_size[2] = {32, 48};
+        void                   *wr_buf[2];
+        hsize_t                 wr_buf0[4] = {3, 2, 4, 4}; /* Encoded coordinates: [3,2] - [4,4] */
+        hsize_t                 wr_buf1[6] = {66, 69, 72, 96, 99, 102}; /* Data: 66,69,72,96,99,102 */
 
         wr_buf[0] = wr_buf0;
         wr_buf[1] = wr_buf1;
 
         H5D_struct_chunk_info_t rd_chk_info;
-        uint16_t rd_filter_mask[2] = {0,0};
-        hsize_t rd_offset[2] = {0, 0};
-        hsize_t rd_section_size[2];
-        void *rd_buf[2];
-        hsize_t rd_buf0[20];     /* coordinates */
-        hsize_t rd_buf1[20];     /* Data */
+        uint16_t                rd_filter_mask[2] = {0, 0};
+        hsize_t                 rd_offset[2]      = {0, 0};
+        hsize_t                 rd_section_size[2];
+        void                   *rd_buf[2];
+        hsize_t                 rd_buf0[20]; /* coordinates */
+        hsize_t                 rd_buf1[20]; /* Data */
 
         rd_buf[0] = rd_buf0;
         rd_buf[1] = rd_buf1;
 
-        wr_chk_info.type = 4;   /* should be H5D_SPARSE_CHUNK */
-        wr_chk_info.num_sections = 2;
-        wr_chk_info.filter_mask = wr_filter_mask;
-        wr_chk_info.section_size = wr_section_size;
+        wr_chk_info.type              = 4; /* should be H5D_SPARSE_CHUNK */
+        wr_chk_info.num_sections      = 2;
+        wr_chk_info.filter_mask       = wr_filter_mask;
+        wr_chk_info.section_size      = wr_section_size;
         wr_chk_info.section_orig_size = wr_section_size;
 
         /* Write the structured chunk at offset [0,0] */
@@ -292,11 +295,10 @@ test_sparse_direct_chunk(hid_t fapl)
         if ((did = H5Dopen2(fid, SPARSE_DSET, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
 
-
-        rd_chk_info.type = 4;   /* should be H5D_SPARSE_CHUNK */
-        rd_chk_info.num_sections = 2;
-        rd_chk_info.filter_mask = rd_filter_mask;
-        rd_chk_info.section_size = rd_section_size;
+        rd_chk_info.type              = 4; /* should be H5D_SPARSE_CHUNK */
+        rd_chk_info.num_sections      = 2;
+        rd_chk_info.filter_mask       = rd_filter_mask;
+        rd_chk_info.section_size      = rd_section_size;
         rd_chk_info.section_orig_size = rd_section_size;
 
         /* Read the structured chunk at offset [0,0] */
@@ -329,7 +331,6 @@ error:
         H5Pclose(dcpl);
         H5Pclose(dxpl);
         H5Fclose(fid);
-
     }
     H5E_END_TRY
 
@@ -348,34 +349,36 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-verify_get_struct_chunk_info(hid_t did, hid_t sid, hsize_t chk_index, const hsize_t H5_ATTR_UNUSED *exp_offset,
-                      H5D_struct_chunk_info_t H5_ATTR_UNUSED exp_chunk_info[], hsize_t H5_ATTR_UNUSED exp_chk_size)
+verify_get_struct_chunk_info(hid_t did, hid_t sid, hsize_t chk_index,
+                             const hsize_t H5_ATTR_UNUSED          *exp_offset,
+                             H5D_struct_chunk_info_t H5_ATTR_UNUSED exp_chunk_info[],
+                             hsize_t H5_ATTR_UNUSED                 exp_chk_size)
 {
-    hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
-    hsize_t  out_chk_size  = 0;      /* Size of an allocated/written chunk */
-    haddr_t  out_addr      = 0;      /* Address of an allocated/written chunk */
+    hsize_t                 out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
+    hsize_t                 out_chk_size  = 0;      /* Size of an allocated/written chunk */
+    haddr_t                 out_addr      = 0;      /* Address of an allocated/written chunk */
     H5D_struct_chunk_info_t out_chunk_info[50];
 
     /* Get info of the chunk specified by chk_index */
-    if (H5Dget_struct_chunk_info(did, sid, chk_index, out_offset, out_chunk_info, &out_addr, &out_chk_size) < 0)
+    if (H5Dget_struct_chunk_info(did, sid, chk_index, out_offset, out_chunk_info, &out_addr, &out_chk_size) <
+        0)
         TEST_ERROR;
 
 #ifdef TBD
 
-        /* Verify info from H5Dget_struct_chunk_info() with expected chunk info */
+    /* Verify info from H5Dget_struct_chunk_info() with expected chunk info */
 
-        if (out_offset[0] != exp_offset[0])
-            FAIL_PUTS_ERROR("unexpected offset[0]");
-        if (out_offset[1] != exp_offset[1])
-            FAIL_PUTS_ERROR("unexpected offset[1]");
+    if (out_offset[0] != exp_offset[0])
+        FAIL_PUTS_ERROR("unexpected offset[0]");
+    if (out_offset[1] != exp_offset[1])
+        FAIL_PUTS_ERROR("unexpected offset[1]");
 
-        Compare out_chunk_info with exp_chunk_info
+    Compare out_chunk_info with exp_chunk_info
 
-        if (HADDR_UNDEF == out_addr)
-            FAIL_PUTS_ERROR("address cannot be HADDR_UNDEF");
+        if (HADDR_UNDEF == out_addr) FAIL_PUTS_ERROR("address cannot be HADDR_UNDEF");
 
-        if (out_chk_size != exp_chk_size)
-            FAIL_PUTS_ERROR("unexpected chunk size");
+    if (out_chk_size != exp_chk_size)
+        FAIL_PUTS_ERROR("unexpected chunk size");
 
 #endif
 
@@ -399,12 +402,12 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-verify_get_struct_chunk_info_by_coord(hid_t did, hsize_t *offset, 
-                                      H5D_struct_chunk_info_t H5_ATTR_UNUSED exp_chunk_info[], 
-                                      hsize_t H5_ATTR_UNUSED exp_chk_size)
+verify_get_struct_chunk_info_by_coord(hid_t did, hsize_t *offset,
+                                      H5D_struct_chunk_info_t H5_ATTR_UNUSED exp_chunk_info[],
+                                      hsize_t H5_ATTR_UNUSED                 exp_chk_size)
 {
-    hsize_t  out_chk_size     = 0; /* Size of an allocated/written chunk */
-    haddr_t  out_addr         = 0; /* Address of an allocated/written chunk */
+    hsize_t                 out_chk_size = 0; /* Size of an allocated/written chunk */
+    haddr_t                 out_addr     = 0; /* Address of an allocated/written chunk */
     H5D_struct_chunk_info_t out_chunk_info[50];
 
     /* Get info of the chunk at logical coordinates specified by offset */
@@ -420,8 +423,7 @@ verify_get_struct_chunk_info_by_coord(hid_t did, hsize_t *offset,
 
         Compare out_chunk_info with exp_chunk_info
 
-        if (out_chk_size != exp_chk_size)
-            FAIL_PUTS_ERROR("unexpected chunk size");
+            if (out_chk_size != exp_chk_size) FAIL_PUTS_ERROR("unexpected chunk size");
     }
 #endif
 
@@ -434,29 +436,29 @@ error:
 } /* verify_get_struct_chunk_info_by_coord() */
 
 typedef struct struct_chunk_iter_info_t {
-    hsize_t  offset[2];
+    hsize_t                  offset[2];
     H5D_struct_chunk_info_t *chunk_info;
-    haddr_t  addr;
-    hsize_t  chunk_size;
+    haddr_t                  addr;
+    hsize_t                  chunk_size;
 } struct_chunk_iter_info_t;
 
 typedef struct struct_chunk_iter_udata_t {
     struct_chunk_iter_info_t *struct_chunk_info;
-    int                last_index;
+    int                       last_index;
 } struct_chunk_iter_udata_t;
 
-
 static int
-iter_cb_struct(const hsize_t *offset, H5D_struct_chunk_info_t *chunk_info, haddr_t *addr, hsize_t *chunk_size, void *op_data)
+iter_cb_struct(const hsize_t *offset, H5D_struct_chunk_info_t *chunk_info, haddr_t *addr, hsize_t *chunk_size,
+               void *op_data)
 {
     struct_chunk_iter_udata_t *cidata = (struct_chunk_iter_udata_t *)op_data;
-    int                 idx    = cidata->last_index + 1;
+    int                        idx    = cidata->last_index + 1;
 
-    cidata->struct_chunk_info[idx].offset[0]   = offset[0];
-    cidata->struct_chunk_info[idx].offset[1]   = offset[1];
-    cidata->struct_chunk_info[idx].chunk_info =  chunk_info;
-    cidata->struct_chunk_info[idx].addr        = *addr;
-    cidata->struct_chunk_info[idx].chunk_size  = *chunk_size;
+    cidata->struct_chunk_info[idx].offset[0]  = offset[0];
+    cidata->struct_chunk_info[idx].offset[1]  = offset[1];
+    cidata->struct_chunk_info[idx].chunk_info = chunk_info;
+    cidata->struct_chunk_info[idx].addr       = *addr;
+    cidata->struct_chunk_info[idx].chunk_size = *chunk_size;
 
     cidata->last_index++;
 
@@ -478,24 +480,24 @@ iter_cb_struct(const hsize_t *offset, H5D_struct_chunk_info_t *chunk_info, haddr
 static int
 test_sparse_direct_chunk_query(hid_t fapl)
 {
-    char               filename[FILENAME_BUF_SIZE];          /* File name */
-    hid_t              fid           = H5I_INVALID_HID;      /* File ID */
-    hid_t              sid           = H5I_INVALID_HID;      /* Dataspace ID */
-    hid_t              did           = H5I_INVALID_HID;      /* Dataset ID */
-    hid_t              dcpl          = H5I_INVALID_HID;      /* Creation plist */
-    hsize_t            dims[2]       = {NX, NY};             /* Dataset dimensions */
-    hsize_t            chunk_dims[2] = {CHUNK_NX, CHUNK_NY}; /* Chunk dimensions */
+    char    filename[FILENAME_BUF_SIZE];          /* File name */
+    hid_t   fid           = H5I_INVALID_HID;      /* File ID */
+    hid_t   sid           = H5I_INVALID_HID;      /* Dataspace ID */
+    hid_t   did           = H5I_INVALID_HID;      /* Dataset ID */
+    hid_t   dcpl          = H5I_INVALID_HID;      /* Creation plist */
+    hsize_t dims[2]       = {NX, NY};             /* Dataset dimensions */
+    hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY}; /* Chunk dimensions */
 
-    struct_chunk_iter_info_t  chunk_infos[2];                /* Chunk infos filled up by iterator */
-    struct_chunk_iter_udata_t udata;                         /* udata for iteration */
-    H5D_struct_chunk_info_t chk_info;
+    struct_chunk_iter_info_t  chunk_infos[2]; /* Chunk infos filled up by iterator */
+    struct_chunk_iter_udata_t udata;          /* udata for iteration */
+    H5D_struct_chunk_info_t   chk_info;
 
-    uint16_t filter_mask[2] = {0,0};
-    hsize_t offset[2] = {0, 0};
-    size_t section_size[2] = {32,48};
-    void *write_buf[2];
-    hsize_t in0[4] = {3,2,4,4};                /* Encoded coordinates: [3,2] - [4,4] */
-    hsize_t in1[6] = {66,69,72,96,99,102};     /* Data: 66,69,72,96,99,102 */
+    uint16_t filter_mask[2]  = {0, 0};
+    hsize_t  offset[2]       = {0, 0};
+    size_t   section_size[2] = {32, 48};
+    void    *write_buf[2];
+    hsize_t  in0[4] = {3, 2, 4, 4};              /* Encoded coordinates: [3,2] - [4,4] */
+    hsize_t  in1[6] = {66, 69, 72, 96, 99, 102}; /* Data: 66,69,72,96,99,102 */
 
     TESTING("APIs for direct chunk I/O query on structured chunk");
 
@@ -522,18 +524,17 @@ test_sparse_direct_chunk_query(hid_t fapl)
         TEST_ERROR;
 
     /* Create a new dataset using dcpl creation properties */
-    did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
-                      H5P_DEFAULT);
+    did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     if (did < 0)
         TEST_ERROR;
 
     write_buf[0] = in0;
     write_buf[1] = in1;
 
-    chk_info.type = 4;      /* should be H5D_SPARSE_CHUNK */
-    chk_info.num_sections = 2;
-    chk_info.filter_mask = filter_mask;
-    chk_info.section_size = section_size;
+    chk_info.type              = 4; /* should be H5D_SPARSE_CHUNK */
+    chk_info.num_sections      = 2;
+    chk_info.filter_mask       = filter_mask;
+    chk_info.section_size      = section_size;
     chk_info.section_orig_size = section_size;
 
     /* Write the structured chunk at offset */
@@ -557,7 +558,7 @@ test_sparse_direct_chunk_query(hid_t fapl)
 
     /* For now, H5Dstruct_chunk_iter() just returns SUCCEED without actual iteration */
     udata.struct_chunk_info = chunk_infos;
-    udata.last_index = -1;
+    udata.last_index        = -1;
     if (H5Dstruct_chunk_iter(did, H5P_DEFAULT, &iter_cb_struct, &udata) < 0)
         TEST_ERROR;
 
@@ -590,7 +591,6 @@ error:
     return 1;
 } /* test_sparse_direct_chunk_query() */
 
-
 /*-------------------------------------------------------------------------
  *
  * Function:    test_sparse_filter()
@@ -610,17 +610,16 @@ error:
 static int
 test_sparse_filter(hid_t fapl)
 {
-    char               filename[FILENAME_BUF_SIZE];          /* File name */
-    hid_t              fid           = H5I_INVALID_HID;      /* File ID */
-    hid_t              sid           = H5I_INVALID_HID;      /* Dataspace ID */
-    hid_t              did           = H5I_INVALID_HID;      /* Dataset ID */
-    hid_t              dcpl          = H5I_INVALID_HID;      /* Creation plist */
-    hsize_t            dims[2]       = {NX, NY};             /* Dataset dimensions */
-    hsize_t            chunk_dims[2] = {CHUNK_NX, CHUNK_NY}; /* Chunk dimensions */
-    int                nfilters;
-    H5Z_filter_t       filtn;
-    uint64_t           flags;
-    
+    char         filename[FILENAME_BUF_SIZE];          /* File name */
+    hid_t        fid           = H5I_INVALID_HID;      /* File ID */
+    hid_t        sid           = H5I_INVALID_HID;      /* Dataspace ID */
+    hid_t        did           = H5I_INVALID_HID;      /* Dataset ID */
+    hid_t        dcpl          = H5I_INVALID_HID;      /* Creation plist */
+    hsize_t      dims[2]       = {NX, NY};             /* Dataset dimensions */
+    hsize_t      chunk_dims[2] = {CHUNK_NX, CHUNK_NY}; /* Chunk dimensions */
+    int          nfilters;
+    H5Z_filter_t filtn;
+    uint64_t     flags;
 
     TESTING("APIs for structured chunk filtering");
 
@@ -650,8 +649,7 @@ test_sparse_filter(hid_t fapl)
         TEST_ERROR;
 
     /* Create a new dataset using dcpl creation properties */
-    did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
-                      H5P_DEFAULT);
+    did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
 
     /* TBD: verify nfilters is correct; for now it is 0 */
     nfilters = H5Pget_nfilters2(dcpl, H5Z_FLAG_SPARSE_SELECTION);
@@ -681,12 +679,13 @@ test_sparse_filter(hid_t fapl)
         TEST_ERROR;
 
     /* TBD: Modify the filter's flags to optional */
-    if (H5Pmodify_filter2(dcpl, H5Z_FLAG_SPARSE_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, 0, NULL) < 0)
+    if (H5Pmodify_filter2(dcpl, H5Z_FLAG_SPARSE_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, 0, NULL) <
+        0)
         FAIL_STACK_ERROR;
 
     /* TBD: verify that flags is H5Z_FLAG_OPTIONAL */
     if (H5Pget_filter_by_id3(dcpl, H5Z_FLAG_SPARSE_SELECTION, H5Z_FILTER_DEFLATE, &flags, NULL, NULL, 0, NULL,
-                                           NULL) < 0)
+                             NULL) < 0)
         FAIL_STACK_ERROR;
 
     /* TBD: Remove the filter */
@@ -699,7 +698,6 @@ test_sparse_filter(hid_t fapl)
     /* For now: just verify it's 0 */
     if (filtn != H5Z_FILTER_NONE)
         TEST_ERROR;
-
 
     /* Release resource */
     if (H5Dclose(did) < 0)
@@ -768,7 +766,7 @@ iter_cb(const hsize_t *offset, unsigned filter_mask, haddr_t addr, hsize_t size,
  *             --H5Dget_chunk_info()
  *             --H5Dget_chunk_info_by_coord()
  *             --H5Dchunk_iter()
- *          Verify the following dense chunk APIs will succeed for 
+ *          Verify the following dense chunk APIs will succeed for
  *          H5D_SPARSE_CHUNK layout:
  *              --H5Dread_chunk()
  *              --H5Dget_chunk_storage_size()
@@ -788,14 +786,14 @@ test_dense_chunk_api_on_sparse(hid_t fapl)
     hid_t              dcpl          = H5I_INVALID_HID;      /* Creation plist */
     hsize_t            dims[2]       = {NX, NY};             /* Dataset dimensions */
     hsize_t            chunk_dims[2] = {CHUNK_NX, CHUNK_NY}; /* Chunk dimensions */
-    chunk_iter_info_t  chunk_infos[2];                       
-    chunk_iter_udata_t udata;                                
-    hsize_t nchunks = 0;
-    hsize_t chunk_nbytes; 
-    hsize_t offset[2]  = {0, 0};
-    int direct_buf[CHUNK_NX][CHUNK_NY]; 
-    haddr_t addr = 0;
-    uint32_t filters = 0;
+    chunk_iter_info_t  chunk_infos[2];
+    chunk_iter_udata_t udata;
+    hsize_t            nchunks = 0;
+    hsize_t            chunk_nbytes;
+    hsize_t            offset[2] = {0, 0};
+    int                direct_buf[CHUNK_NX][CHUNK_NY];
+    haddr_t            addr    = 0;
+    uint32_t           filters = 0;
 
     TESTING("APIs for direct chunk I/O: dense chunk functions on sparse layout");
 
@@ -823,12 +821,11 @@ test_dense_chunk_api_on_sparse(hid_t fapl)
         TEST_ERROR;
 
     /* Create a new dataset using dcpl creation properties */
-        did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
-                      H5P_DEFAULT);
+    did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     if (did < 0)
         TEST_ERROR;
 
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Dwrite_chunk(did, H5P_DEFAULT, 0, offset, CHK_SIZE, direct_buf);
     }
@@ -836,25 +833,25 @@ test_dense_chunk_api_on_sparse(hid_t fapl)
     /* TBD: set return status and verify that it should fail */
 
     H5E_BEGIN_TRY
-        {
-            H5Dget_chunk_info(did, H5S_ALL, 0, NULL, NULL, &addr, NULL);
-        }
+    {
+        H5Dget_chunk_info(did, H5S_ALL, 0, NULL, NULL, &addr, NULL);
+    }
     H5E_END_TRY
     /* TBD: set return status and verify that it should fail */
 
     H5E_BEGIN_TRY
-        {
-            H5Dget_chunk_info_by_coord(did, offset, NULL, &addr, NULL);
-        }
+    {
+        H5Dget_chunk_info_by_coord(did, offset, NULL, &addr, NULL);
+    }
     H5E_END_TRY
     /* TBD: set return status and verify that it should fail */
 
     H5E_BEGIN_TRY
-        {
-            udata.chunk_info = chunk_infos;
-            udata.last_index = -1;
-            H5Dchunk_iter(did, H5P_DEFAULT,  &iter_cb, &udata);
-        }
+    {
+        udata.chunk_info = chunk_infos;
+        udata.last_index = -1;
+        H5Dchunk_iter(did, H5P_DEFAULT, &iter_cb, &udata);
+    }
     H5E_END_TRY
     /* TBD: set return status and verify that it should fail */
 
@@ -901,7 +898,7 @@ error:
  *
  * Purpose:     Tests for sparse data
  *              Tests are copied and modified from:
- *               --test/dsets.c 
+ *               --test/dsets.c
  *               --test/direct_chunk.c
  *               --test/chunk_info.c
  *

@@ -567,13 +567,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pmodify_filter2
  *
- * Purpose:     Modifies the specified FILTER in the filter pipeline for a 
+ * Purpose:     Modifies the specified FILTER in the filter pipeline for a
  *              specified SECTION_NUMBER of the structured chunk.
- *  
- *              The PLIST_ID argument is either a dataset or group creation
- *              creation property list.  
  *
- *              The SECTION_NUMBER argument is the specified section of the 
+ *              The PLIST_ID argument is either a dataset or group creation
+ *              creation property list.
+ *
+ *              The SECTION_NUMBER argument is the specified section of the
  *              structured chunk
  *
  *              The FILTER arguments specifies the filter identifier
@@ -589,12 +589,12 @@ done:
  *              The FLAGS argument is a bit vector of the following fields:
  *
  *              H5Z_FLAG_OPTIONAL(0x0001)
- *              If this bit is set then the filter is optional.  
+ *              If this bit is set then the filter is optional.
  *              If the filter fails during an H5Dwrite() operation then the filter
  *              is just excluded from the pipeline for the chunk for which it
  *              failed; the filter will not participate in the pipeline
- *              during an H5Dread() of the chunk.  
- *              If this bit is clear and the filter fails then the entire 
+ *              during an H5Dread() of the chunk.
+ *              If this bit is clear and the filter fails then the entire
  *              I/O operation fails.
  *              If this bit is set but encoding is disabled for a filter,
  *              attempting to write will generate an error.
@@ -628,9 +628,9 @@ H5Pmodify_filter2(hid_t plist_id, uint64_t H5_ATTR_UNUSED section_number, H5Z_fi
 
     Call new H5P_modify_filter() with buf_size and buf instead of cd_nelmts and cd_values
 
-    /* Modify the filter parameters of the I/O pipeline */
-    if (H5P_modify_filter(plist, filter, flags, cd_nelmts, cd_values) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't modify filter");
+        /* Modify the filter parameters of the I/O pipeline */
+        if (H5P_modify_filter(plist, filter, flags, cd_nelmts, cd_values) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't modify filter");
 #endif
 
     /* For now, just return SUCCEED */
@@ -646,7 +646,7 @@ done:
  *        end of the data or link output filter pipeline
  *
  *        The PLIST_ID argument is a dataset creation or group
- *        creation property list.  
+ *        creation property list.
  *
  *        The SECTION_NUMBER argument specified the section of the
  *        structured chunk to which the filter is applied.
@@ -669,9 +669,9 @@ done:
  *        filter fails during an H5Dwrite() operation then the filter
  *        is just excluded from the pipeline for the chunk for which it
  *        failed; the filter will not participate in the pipeline
- *        during an H5Dread() of the chunk.  
+ *        during an H5Dread() of the chunk.
  *
- *        If this bit is clear and the filter fails then the entire I/O 
+ *        If this bit is clear and the filter fails then the entire I/O
  *        operation fails.
  *
  *        If this bit is set but encoding is disabled for a filter,
@@ -682,7 +682,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_filter2(hid_t plist_id, uint64_t H5_ATTR_UNUSED section_number, H5Z_filter_t filter, uint64_t flags, 
+H5Pset_filter2(hid_t plist_id, uint64_t H5_ATTR_UNUSED section_number, H5Z_filter_t filter, uint64_t flags,
                size_t buf_size, const void *buf)
 {
     H5P_genplist_t *plist;               /* Property list */
@@ -739,10 +739,10 @@ done:
  *        filter fails during an H5Dwrite() operation then the filter
  *        is just excluded from the pipeline for the chunk for which it
  *        failed; the filter will not participate in the pipeline
- *        during an H5Dread() of the chunk.  
+ *        during an H5Dread() of the chunk.
  *
- *        If this bit is clear and the filter fails then the entire I/O 
- *        operation fails.  
+ *        If this bit is clear and the filter fails then the entire I/O
+ *        operation fails.
  *
  *        If this bit is set but encoding is disabled for a filter,
  *        attempting to write will generate an error.
@@ -755,22 +755,21 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__set_filter2(H5P_genplist_t H5_ATTR_UNUSED *plist, uint64_t H5_ATTR_UNUSED section_number, 
+H5P__set_filter2(H5P_genplist_t H5_ATTR_UNUSED *plist, uint64_t H5_ATTR_UNUSED section_number,
                  H5Z_filter_t H5_ATTR_UNUSED filter, uint64_t H5_ATTR_UNUSED flags,
                  size_t H5_ATTR_UNUSED buf_size, const void H5_ATTR_UNUSED *buf)
 {
-    herr_t      ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef TBD
-    Need to set up new H5O_pline_t message
-    Need to do something similar like H5P__set_filter1() as below: 
+    Need to set up new H5O_pline_t message Need to do something similar like H5P__set_filter1() as below :
 
-    /* Check if filter is already available */
-    if ((filter_avail = H5Z_filter_avail(filter)) < 0)
+        /* Check if filter is already available */
+        if ((filter_avail = H5Z_filter_avail(filter)) < 0)
 
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't check filter availability");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't check filter availability");
 
     /* Get the pipeline property to append to */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
@@ -789,7 +788,6 @@ H5P__set_filter2(H5P_genplist_t H5_ATTR_UNUSED *plist, uint64_t H5_ATTR_UNUSED s
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__set_filter2() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_filter
@@ -957,10 +955,10 @@ done:
  *
  * Purpose:    Returns the number of filters in the data or link
  *        pipeline depending on whether PLIST_ID is a dataset creation
- *        or group creation property list.  
- *        In each pipeline the filters are numbered from zero through 
- *        N-1 where N is the value returned by this function.  
- *        During output to the file the filters of a pipeline are applied 
+ *        or group creation property list.
+ *        In each pipeline the filters are numbered from zero through
+ *        N-1 where N is the value returned by this function.
+ *        During output to the file the filters of a pipeline are applied
  *        in increasing order (the inverse is true for input).
  *
  *        The SECTION_NUMBER argument specified the section of the
@@ -1002,8 +1000,6 @@ H5Pget_nfilters2(hid_t plist_id, uint64_t H5_ATTR_UNUSED section_number)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_nfilters2 */
-
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_filter2
@@ -1089,24 +1085,24 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_filter3
  *
- * Purpose:    This is the query counterpart of H5Pset_filter2().  
+ * Purpose:    This is the query counterpart of H5Pset_filter2().
  *        It retrieves information for a filter in the pipeline for a
  *        specified section of the structured chunk.
  *        The information returned is about a particular filter number in
  *        the filter pipeline depending on whether PLIST_ID is a
- *        dataset creation or group creation property list.  
+ *        dataset creation or group creation property list.
  *
  *        On input:
  *        SECTION_NUMBER is the specified section of the structured chunk
  *
- *        IDX should be a value between zero and N-1 as described 
+ *        IDX should be a value between zero and N-1 as described
  *        for H5Pget_nfilters().
  *
  *        BUF_SIZE indicates the size in bytes of the buffer pointed to
- *        by BUF which is allocated by the caller.  On exit, it contains the 
- *        values defined by the filter.  
+ *        by BUF which is allocated by the caller.  On exit, it contains the
+ *        values defined by the filter.
  *
- *        FILTER_CONFIG is a bit field containing encode/decode flags from H5Zpublic.h.  
+ *        FILTER_CONFIG is a bit field containing encode/decode flags from H5Zpublic.h.
  *
  *        The function will return failure if the filter number is out of range.
  *
@@ -1116,12 +1112,13 @@ done:
  *-------------------------------------------------------------------------
  */
 H5Z_filter_t
-H5Pget_filter3(hid_t H5_ATTR_UNUSED plist_id, uint64_t H5_ATTR_UNUSED section_number, unsigned H5_ATTR_UNUSED idx, 
-               uint64_t H5_ATTR_UNUSED *flags /*out*/, size_t H5_ATTR_UNUSED *buf_size /*in,out*/, 
-               void H5_ATTR_UNUSED *buf /*out*/, size_t H5_ATTR_UNUSED namelen, char H5_ATTR_UNUSED name[] /*out*/,
+H5Pget_filter3(hid_t H5_ATTR_UNUSED plist_id, uint64_t H5_ATTR_UNUSED section_number,
+               unsigned H5_ATTR_UNUSED idx, uint64_t H5_ATTR_UNUSED *flags /*out*/,
+               size_t H5_ATTR_UNUSED *buf_size /*in,out*/, void H5_ATTR_UNUSED *buf /*out*/,
+               size_t H5_ATTR_UNUSED namelen, char H5_ATTR_UNUSED name[] /*out*/,
                unsigned H5_ATTR_UNUSED *filter_config /*out*/)
 {
-    H5Z_filter_t             ret_value; /* return value */
+    H5Z_filter_t ret_value; /* return value */
 
     FUNC_ENTER_API(H5Z_FILTER_ERROR)
 
@@ -1132,7 +1129,8 @@ H5Pget_filter3(hid_t H5_ATTR_UNUSED plist_id, uint64_t H5_ATTR_UNUSED section_nu
     --Call new H5P__get_filter() routine with buf_size and buf in place of cd_nelemts and cd_values
 
     /* Check args */
-    if (cd_nelmts || cd_values) {
+    if (cd_nelmts || cd_values)
+    {
         /*
          * It's likely that users forget to initialize this on input, so
          * we'll check that it has a reasonable value.  The actual number
@@ -1300,8 +1298,8 @@ done:
  *             It retrieves information for a filter specified by its identifier
  *             in the pipeline for a specified section of the structured chunk.
  *             The information returned is about about a particular filter
- *             identifier in the filter pipeline depending on whether 
- *             PLIST_ID is a dataset creation or group creation property list.  
+ *             identifier in the filter pipeline depending on whether
+ *             PLIST_ID is a dataset creation or group creation property list.
  *
  *             On input:
  *             SECTION_NUMBER is the specified section of the structured chunk
@@ -1310,9 +1308,9 @@ done:
  *
  *             BUF_SIZE indicates the size in bytes of the buffer pointed to
  *             by BUF which is allocated by the caller.  On exit, it contains
- *             size of the values defined by the filter.  
+ *             size of the values defined by the filter.
  *
- *             FILTER_CONFIG is a bit field containing encode/decode flags 
+ *             FILTER_CONFIG is a bit field containing encode/decode flags
  *             from H5Zpublic.h.
  *
  *             If the filter is not set for the property list, an error will be returned.
@@ -1323,13 +1321,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_filter_by_id3(hid_t H5_ATTR_UNUSED plist_id, uint64_t H5_ATTR_UNUSED section_number, 
-                     H5Z_filter_t id, uint64_t H5_ATTR_UNUSED *flags /*out*/,
-                     size_t H5_ATTR_UNUSED *buf_size /*in,out*/, void H5_ATTR_UNUSED *buf /*out*/, 
-                     size_t H5_ATTR_UNUSED namelen, char H5_ATTR_UNUSED name[] /*out*/, 
-                     unsigned H5_ATTR_UNUSED *filter_config /*out*/)
+H5Pget_filter_by_id3(hid_t H5_ATTR_UNUSED plist_id, uint64_t H5_ATTR_UNUSED section_number, H5Z_filter_t id,
+                     uint64_t H5_ATTR_UNUSED *flags /*out*/, size_t H5_ATTR_UNUSED *buf_size /*in,out*/,
+                     void H5_ATTR_UNUSED *buf /*out*/, size_t H5_ATTR_UNUSED namelen,
+                     char H5_ATTR_UNUSED name[] /*out*/, unsigned H5_ATTR_UNUSED *filter_config /*out*/)
 {
-    herr_t          ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -1337,12 +1334,12 @@ H5Pget_filter_by_id3(hid_t H5_ATTR_UNUSED plist_id, uint64_t H5_ATTR_UNUSED sect
     if (id < 0 || id > H5Z_FILTER_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID value out of range");
 
-#ifdef TBD 
-    --Check arguments buf_size and buf instead of cd_nelmts and cd_values
-    --Call new H5P_get_filter_by_id() routine with buf_size and buf in place 
-      of cd_nelemts and cd_values
+#ifdef TBD
+    --Check arguments buf_size and buf instead of cd_nelmts  and cd_values-- Call new H5P_get_filter_by_id()
+        routine with buf_size and buf in place of cd_nelemts and cd_values
 
-    if (cd_nelmts || cd_values) {
+        if (cd_nelmts || cd_values)
+    {
         /*
          * It's likely that users forget to initialize this on input, so
          * we'll check that it has a reasonable value.  The actual number
@@ -1499,7 +1496,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Premove_filter2(hid_t H5_ATTR_UNUSED plist_id, uint64_t H5_ATTR_UNUSED section_number, 
+H5Premove_filter2(hid_t H5_ATTR_UNUSED plist_id, uint64_t H5_ATTR_UNUSED section_number,
                   H5Z_filter_t H5_ATTR_UNUSED filter)
 {
     H5P_genplist_t *plist;               /* Property list */

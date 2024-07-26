@@ -205,7 +205,7 @@ done:
  * Purpose:     Frees memory allocated by H5VL__native_dataset_io_setup()
  *
  * Return:      SUCCEED/FAIL
- 
+
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -499,7 +499,7 @@ H5VL__native_dataset_get(void *obj, H5VL_dataset_get_args_t *args, hid_t H5_ATTR
 
         /* H5Dget_defined */
         case H5VL_DATASET_GET_DEFINED: {
-            const H5S_t                          *fspace    = NULL;
+            const H5S_t *fspace = NULL;
 
             assert(dset->shared);
             assert(dset->shared->space);
@@ -508,7 +508,8 @@ H5VL__native_dataset_get(void *obj, H5VL_dataset_get_args_t *args, hid_t H5_ATTR
             if (args->args.get_defined.file_space_id == H5S_ALL)
                 fspace = dset->shared->space;
             else /*  otherwise, use the given space ID */
-                if (NULL == (fspace = (const H5S_t *)H5I_object_verify(args->args.get_defined.file_space_id, H5I_DATASPACE)))
+                if (NULL == (fspace = (const H5S_t *)H5I_object_verify(args->args.get_defined.file_space_id,
+                                                                       H5I_DATASPACE)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID");
 
             /* Call private function */
@@ -570,9 +571,10 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_args_t *args, hid
 
         /* H5Derase */
         case H5VL_DATASET_ERASE: {
-            const H5S_t                          *fspace    = NULL;
+            const H5S_t *fspace = NULL;
 
-            if (NULL == (fspace = (const H5S_t *)H5I_object_verify(args->args.erase.file_space_id, H5I_DATASPACE)))
+            if (NULL ==
+                (fspace = (const H5S_t *)H5I_object_verify(args->args.erase.file_space_id, H5I_DATASPACE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID");
 
             if (H5D__erase(dset, fspace) < 0)
@@ -857,7 +859,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array");
 
             /* Read the structured chunk */
-            if (H5D__read_struct_chunk_direct(dset, offset_copy, read_struct_chunk_args->chunk_info, 
+            if (H5D__read_struct_chunk_direct(dset, offset_copy, read_struct_chunk_args->chunk_info,
                                               read_struct_chunk_args->buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read structured chunk data");
 
@@ -892,8 +894,9 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
 
         /* H5Dget_struct_chunk_info */
         case H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_IDX: {
-            H5VL_native_dataset_get_struct_chunk_info_by_idx_t *gcibi_args = &opt_args->get_struct_chunk_info_by_idx;
-            const H5S_t                                 *space;
+            H5VL_native_dataset_get_struct_chunk_info_by_idx_t *gcibi_args =
+                &opt_args->get_struct_chunk_info_by_idx;
+            const H5S_t *space;
 
             assert(dset->shared);
             assert(dset->shared->space);
@@ -912,7 +915,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
 
             /* Call private function */
             if (H5D__get_struct_chunk_info(dset, space, gcibi_args->chunk_idx, gcibi_args->offset,
-                                    gcibi_args->chunk_info, gcibi_args->addr, gcibi_args->chunk_size) < 0)
+                                           gcibi_args->chunk_info, gcibi_args->addr,
+                                           gcibi_args->chunk_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get struct chunk info by index");
 
             break;
@@ -920,7 +924,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
 
         /* H5Dget_struct_chunk_info_by_coord */
         case H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_COORD: {
-            H5VL_native_dataset_get_struct_chunk_info_by_coord_t *gcibc_args = &opt_args->get_struct_chunk_info_by_coord;
+            H5VL_native_dataset_get_struct_chunk_info_by_coord_t *gcibc_args =
+                &opt_args->get_struct_chunk_info_by_coord;
 
             assert(dset->shared);
 
@@ -930,7 +935,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
 
             /* Call private function */
             if (H5D__get_struct_chunk_info_by_coord(dset, gcibc_args->offset, gcibc_args->chunk_info,
-                                             gcibc_args->addr, gcibc_args->chunk_size) < 0)
+                                                    gcibc_args->addr, gcibc_args->chunk_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
                             "can't get struct chunk info by its logical coordinates");
 
@@ -947,8 +952,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a sparse chunk dataset");
 
             /* Call private function */
-            if ((ret_value = H5D__struct_chunk_iter(dset, opt_args->struct_chunk_iter.op, opt_args->struct_chunk_iter.op_data)) <
-                0)
+            if ((ret_value = H5D__struct_chunk_iter(dset, opt_args->struct_chunk_iter.op,
+                                                    opt_args->struct_chunk_iter.op_data)) < 0)
                 HERROR(H5E_DATASET, H5E_BADITER, "struct chunk iteration failed");
 
             break;
