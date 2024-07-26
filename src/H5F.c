@@ -118,7 +118,7 @@ H5Fget_create_plist(hid_t file_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* check args */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier");
 
     /* Set up VOL callback arguments */
@@ -164,7 +164,7 @@ H5Fget_access_plist(hid_t file_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier");
 
     /* Set up VOL callback arguments */
@@ -439,7 +439,7 @@ H5Fget_vfd_handle(hid_t file_id, hid_t fapl_id, void **file_handle /*out*/)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file handle pointer");
 
     /* Get the file object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
 
     /* Set up VOL callback arguments */
@@ -1555,7 +1555,7 @@ H5Fget_intent(hid_t file_id, unsigned *intent_flags /*out*/)
         H5VL_file_get_args_t vol_cb_args; /* Arguments to VOL callback */
 
         /* Get the internal file structure */
-        if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+        if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
 
         /* Set up VOL callback arguments */
@@ -1594,7 +1594,7 @@ H5Fget_fileno(hid_t file_id, unsigned long *fnumber /*out*/)
         H5VL_file_get_args_t vol_cb_args; /* Arguments to VOL callback */
 
         /* Get the internal file structure */
-        if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+        if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
 
         /* Set up VOL callback arguments */
@@ -1631,7 +1631,7 @@ H5Fget_freespace(hid_t file_id)
     FUNC_ENTER_API((-1))
 
     /* Get the file object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid file identifier");
 
     /* Set up VOL callback arguments */
@@ -1789,7 +1789,7 @@ H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config /*out*/)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config ptr");
 
     /* Get the file object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
 
     /* Set up VOL callback arguments */
@@ -1827,7 +1827,7 @@ H5Fset_mdc_config(hid_t file_id, const H5AC_cache_config_t *config_ptr)
     FUNC_ENTER_API(FAIL)
 
     /* Get the file object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
 
     /* Set up VOL callback arguments */
@@ -1959,7 +1959,7 @@ H5Freset_mdc_hit_rate_stats(hid_t file_id)
     FUNC_ENTER_API(FAIL)
 
     /* Get the file object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
 
     /* Set up VOL callback arguments */
