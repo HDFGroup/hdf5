@@ -2447,3 +2447,362 @@ H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t op, void *op_dat
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dchunk_iter() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dget_defined
+ *
+ * Purpose:     Retrieves a dataspace with a selection containing all defined
+ *              elements that are also selected in the input argument
+ *              "file_space_id".
+ *
+ * Return:      Success:    For H5D_SPARSE_CHUNK layout, this function returns
+ *                          a dataspace ID with a selection containing all
+ *                          defined elements that are also selected in
+ *                          "file_space_id".
+ *                          For other layouts, this function returns a copy of
+ *                          "file_space_id".
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Dget_defined(hid_t dset_id, hid_t file_space_id, hid_t dxpl_id)
+{
+    H5VL_object_t          *vol_obj = NULL;              /* Dataset for this operation */
+    H5VL_dataset_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
+    hid_t                   ret_value = H5I_INVALID_HID; /* Return value         */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+
+    /* Check args */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid dataset identifier");
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID");
+
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                 = H5VL_DATASET_GET_DEFINED;
+    vol_cb_args.args.get_defined.file_space_id = file_space_id;
+    vol_cb_args.args.get_defined.space_id = H5I_INVALID_HID;
+
+    /* Get the dataspace with defined elements */
+    if (H5VL_dataset_get(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, H5I_INVALID_HID, "can't get dataspce with defined elements");
+
+    /* Set return value */
+    ret_value = vol_cb_args.args.get_defined.space_id;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dget_defined() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Derase
+ *
+ * Purpose:     Deletes elements from a dataset causing them to no longer be defined
+ *              This function is only useful for datasets with H5D_SPARSE_CHUNK layout.
+ *              For other layouts this function will return an error.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Derase(hid_t dset_id, hid_t file_space_id, hid_t dxpl_id)
+{
+    H5VL_object_t          *vol_obj = NULL;              /* Dataset for this operation */
+    H5VL_dataset_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
+    herr_t                       ret_value = SUCCEED; /* Return value                 */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid dataset identifier");
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID");
+
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type            = H5VL_DATASET_ERASE;
+    vol_cb_args.args.erase.file_space_id = file_space_id;
+
+    /* Deletes elements from a dataset causing them to no longer be defined */
+    if (H5VL_dataset_specific(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to erase elements in dataset");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Derase() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dwrite_struct_chunk
+ *
+ * Purpose:     Writes an entire structured chunk to the file directly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dwrite_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, 
+                      H5D_struct_chunk_info_t *chunk_info, void *buf[])
+{
+    H5VL_object_t                      *vol_obj;       /* Dataset for this operation   */
+    H5VL_optional_args_t                vol_cb_args;   /* Arguments to VOL callback */
+    H5VL_native_dataset_optional_args_t dset_opt_args; /* Arguments for optional operation */
+    herr_t                              ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset ID");
+    if (!offset)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offset cannot be NULL");
+    if (!chunk_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "chunk_info cannot be NULL");
+    if (!buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf array not provided");
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID");
+
+    /* Set up VOL callback arguments */
+    dset_opt_args.write_struct_chunk.offset  = offset;
+    dset_opt_args.write_struct_chunk.chunk_info = chunk_info;
+    dset_opt_args.write_struct_chunk.buf     = buf;
+    vol_cb_args.op_type               = H5VL_NATIVE_DATASET_WRITE_STRUCT_CHUNK;
+    vol_cb_args.args                  = &dset_opt_args;
+
+    /* Write chunk */
+    if (H5VL_dataset_optional(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write unprocessed chunk data");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dwrite_struct_chunk() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dread_struct_chunk
+ *
+ * Purpose:     Reads an entire structured chunk from the file directly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5Dread_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset,
+                      H5D_struct_chunk_info_t *chunk_info, void *buf[] /*out*/)
+{
+    H5VL_object_t                      *vol_obj;             /* Dataset for this operation   */
+    H5VL_optional_args_t                vol_cb_args;         /* Arguments to VOL callback */
+    H5VL_native_dataset_optional_args_t dset_opt_args;       /* Arguments for optional operation */
+    herr_t                              ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID");
+    if (!offset)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offset cannot be NULL");
+    if (!chunk_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "chunk_info cannot be NULL");
+    if (!buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf array cannot be NULL");
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID");
+
+    /* Set up VOL callback arguments */
+    dset_opt_args.read_struct_chunk.offset  = offset;
+    dset_opt_args.read_struct_chunk.chunk_info = chunk_info;
+    dset_opt_args.read_struct_chunk.buf     = buf;
+    vol_cb_args.op_type              = H5VL_NATIVE_DATASET_READ_STRUCT_CHUNK;
+    vol_cb_args.args                 = &dset_opt_args;
+
+    /* Read the raw chunk */
+    if (H5VL_dataset_optional(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dread_struct_chunk() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dget_struct_chunk_info
+ *
+ * Purpose:     Retrieves structured chunk information using chunk index
+ *
+ * Parameters:
+ *              hid_t dset_id;          IN: Dataset ID
+ *              hid_t fspace_id;        IN: File dataspace selection ID
+ *              hsize_t chunk_idx;      IN: Chunk index
+ *              hsize_t *offset         OUT: Logical position of the chunk's first
+ *                                           element in the array
+ *              H5D_struct_chunk_info_t *chunk_info OUT: Information about the structured chunk
+ *              haddr_t *addr           OUT: Chunk address in the file
+ *              hsize_t *chunk_size     OUT: Chunk size in bytes
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dget_struct_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chunk_idx, hsize_t *offset /*out*/,
+                  H5D_struct_chunk_info_t *chunk_info/*out*/, haddr_t *addr /*out*/, hsize_t *chunk_size /*out*/)
+{
+    H5VL_object_t                      *vol_obj = NULL; /* Dataset for this operation */
+    H5VL_optional_args_t                vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_native_dataset_optional_args_t dset_opt_args;  /* Arguments for optional operation */
+    herr_t                              ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (NULL == offset && NULL == chunk_info && NULL == addr && NULL == chunk_size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "invalid arguments, must have at least one non-null output argument");
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier");
+
+    /* Set up VOL callback arguments */
+    dset_opt_args.get_struct_chunk_info_by_idx.fspace_id   = fspace_id;
+    dset_opt_args.get_struct_chunk_info_by_idx.chunk_idx   = chunk_idx;
+    dset_opt_args.get_struct_chunk_info_by_idx.offset      = offset;
+    dset_opt_args.get_struct_chunk_info_by_idx.chunk_info  = chunk_info;
+    dset_opt_args.get_struct_chunk_info_by_idx.addr        = addr;
+    dset_opt_args.get_struct_chunk_info_by_idx.chunk_size  = chunk_size;
+    vol_cb_args.op_type                             = H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_IDX;
+    vol_cb_args.args                                = &dset_opt_args;
+
+    /* Call private function to get the chunk info given the chunk's index */
+    if (H5VL_dataset_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info by index");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Dget_struct_chunk_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dget_struct_chunk_info_by_coord
+ *
+ * Purpose:     Retrieves information about a chunk specified by its logical
+ *              coordinates.
+ *
+ * Parameters:
+ *              hid_t dset_id;          IN: Dataset ID
+ *              hsize_t *offset         IN: Logical position of the chunk's first
+ *                                          element in the array
+ *              H5D_struct_chunk_info_t *chunk_info OUT: Information about the structured chunk
+ *              haddr_t *addr           OUT: Chunk address in the file
+ *              hsize_t *chunk_size     OUT: Chunk size in bytes
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dget_struct_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, H5D_struct_chunk_info_t *chunk_info/*out*/,
+                           haddr_t *addr /*out*/, hsize_t *chunk_size /*out*/)
+{
+    H5VL_object_t                      *vol_obj = NULL; /* Dataset for this operation */
+    H5VL_optional_args_t                vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_native_dataset_optional_args_t dset_opt_args;  /* Arguments for optional operation */
+    herr_t                              ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier");
+    if (NULL == chunk_info && NULL == addr && NULL == chunk_size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "invalid arguments, must have at least one non-null output argument");
+    if (NULL == offset)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument (null)");
+
+    /* Set up VOL callback arguments */
+    dset_opt_args.get_struct_chunk_info_by_coord.offset      = offset;
+    dset_opt_args.get_struct_chunk_info_by_coord.chunk_info  = chunk_info;
+    dset_opt_args.get_struct_chunk_info_by_coord.addr        = addr;
+    dset_opt_args.get_struct_chunk_info_by_coord.chunk_size  = chunk_size;
+    vol_cb_args.op_type                               = H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_COORD;
+    vol_cb_args.args                                  = &dset_opt_args;
+
+    /* Call private function to get the chunk info given the chunk's index */
+    if (H5VL_dataset_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info by its logical coordinates");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dget_struct_chunk_info_by_coord() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dstruct_chunk_iter
+ *
+ * Purpose:     Iterates over all structured chunks in dataset calling
+ *              the user specified callback function, "cb", and the 
+ *              callback's required data, "op_data".
+ *
+ * Parameters:
+ *              hid_t dset_id;          IN: Dataset ID
+ *              hid_t dxpl_id;          IN: Dataset transfer property list ID
+ *              H5D_struct_chunk_iter_op_t cb  IN: Callback function provided by user; called for every chunk
+ *              void *op_data           IN/OUT: User-defined data passed on to user callback.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dstruct_chunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_struct_chunk_iter_op_t op, void *op_data)
+{
+    H5VL_object_t                      *vol_obj = NULL; /* Dataset for this operation */
+    H5VL_optional_args_t                vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_native_dataset_optional_args_t dset_opt_args;  /* Arguments for optional operation */
+    herr_t                              ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier");
+    if (NULL == op)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid callback to chunk iteration");
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID");
+
+    /* Set up VOL callback arguments */
+    dset_opt_args.struct_chunk_iter.op      = op;
+    dset_opt_args.struct_chunk_iter.op_data = op_data;
+    vol_cb_args.op_type              = H5VL_NATIVE_DATASET_STRUCT_CHUNK_ITER;
+    vol_cb_args.args                 = &dset_opt_args;
+
+    /* Iterate over the chunks */
+    if ((ret_value = H5VL_dataset_optional(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL)) < 0)
+        HERROR(H5E_DATASET, H5E_BADITER, "error iterating over dataset chunks");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dstruct_chunk_iter() */

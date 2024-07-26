@@ -70,7 +70,7 @@ TEST_PROG= testhdf5 \
            enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
            dangle dtransform reserved cross_read freespace mf vds file_image \
            unregister cache_logging cork swmr thread_id vol timer event_set \
-		   onion
+		   onion sparse_storage
 
 # List programs to be built when testing here
 #

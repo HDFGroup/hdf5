@@ -221,7 +221,8 @@ typedef enum H5VL_dataset_get_t {
     H5VL_DATASET_GET_SPACE,        /* dataspace                           */
     H5VL_DATASET_GET_SPACE_STATUS, /* space status                        */
     H5VL_DATASET_GET_STORAGE_SIZE, /* storage size                        */
-    H5VL_DATASET_GET_TYPE          /* datatype                            */
+    H5VL_DATASET_GET_TYPE,          /* datatype                            */
+    H5VL_DATASET_GET_DEFINED       /* dataspace selection of defined elements */
 } H5VL_dataset_get_t;
 
 /* Parameters for dataset 'get' operations */
@@ -259,6 +260,13 @@ typedef struct H5VL_dataset_get_args_t {
         struct {
             hid_t type_id; /* Datatype ID (OUT) */
         } get_type;
+
+        /* H5VL_DATASET_GET_DEFINED */
+        struct {
+            hid_t file_space_id;    /* file dataspace selection to be queried (IN) */
+            hid_t space_id;         /* dataspace selection of defined elements (OUT) */
+        } get_defined;
+
     } args;
 } H5VL_dataset_get_args_t;
 
@@ -266,7 +274,8 @@ typedef struct H5VL_dataset_get_args_t {
 typedef enum H5VL_dataset_specific_t {
     H5VL_DATASET_SET_EXTENT, /* H5Dset_extent                       */
     H5VL_DATASET_FLUSH,      /* H5Dflush                            */
-    H5VL_DATASET_REFRESH     /* H5Drefresh                          */
+    H5VL_DATASET_REFRESH,    /* H5Drefresh                          */
+    H5VL_DATASET_ERASE,      /* H5Derase                            */
 } H5VL_dataset_specific_t;
 
 /* Parameters for dataset 'specific' operations */
@@ -289,6 +298,11 @@ typedef struct H5VL_dataset_specific_args_t {
         struct {
             hid_t dset_id; /* Dataset ID (IN) */
         } refresh;
+
+        /* H5VL_DATASET_ERASE */
+        struct {
+            hid_t file_space_id;    /* file dataspace selection to be erased (IN) */
+        } erase;
     } args;
 } H5VL_dataset_specific_args_t;
 

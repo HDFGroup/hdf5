@@ -64,6 +64,11 @@ typedef union H5VL_native_attr_optional_args_t {
 /* NOTE: If new values are added here, the H5VL__native_introspect_opt_query
  *      routine must be updated.
  */
+/* TBD: the existing H5VL_NATIVE_DATASET_CHUNK_ITER is not added to 
+ *      H5VL__native_introspect_opt_query, therefore I didn't add 
+ *      H5VL_NATIVE_DATASET_STRUCT_CHUNK_ITER to H5VL__native_introspect_opt_query either.
+ *      Check for sure later.
+ */
 #define H5VL_NATIVE_DATASET_FORMAT_CONVERT          0  /* H5Dformat_convert (internal) */
 #define H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE    1  /* H5Dget_chunk_index_type      */
 #define H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE  2  /* H5Dget_chunk_storage_size    */
@@ -75,6 +80,11 @@ typedef union H5VL_native_attr_optional_args_t {
 #define H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE       8  /* H5Dvlen_get_buf_size         */
 #define H5VL_NATIVE_DATASET_GET_OFFSET              9  /* H5Dget_offset                */
 #define H5VL_NATIVE_DATASET_CHUNK_ITER              10 /* H5Dchunk_iter                */
+#define H5VL_NATIVE_DATASET_READ_STRUCT_CHUNK       11 /* H5Dread_struct_chunk         */
+#define H5VL_NATIVE_DATASET_WRITE_STRUCT_CHUNK      12 /* H5Dwrite_struct_chunk        */
+#define H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_IDX   13 /* H5Dget_struct_chunk_info           */
+#define H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_COORD 14 /* H5Dget_struct_chunk_info_by_coord   */
+#define H5VL_NATIVE_DATASET_STRUCT_CHUNK_ITER       15 /* H5Dstruct_chunk_iter         */
 /* NOTE: If values over 1023 are added, the H5VL_RESERVED_NATIVE_OPTIONAL macro
  *      must be updated.
  */
@@ -93,6 +103,21 @@ typedef struct H5VL_native_dataset_chunk_write_t {
     uint32_t       size;
     const void    *buf;
 } H5VL_native_dataset_chunk_write_t;
+
+/* TBD: can we use the same struct for both read and write operations? */
+/* Parameters for native connector's dataset 'read struct chunk' operation */
+typedef struct H5VL_native_dataset_read_struct_chunk_t {
+    const hsize_t *offset;
+    H5D_struct_chunk_info_t *chunk_info;
+    void          **buf;
+} H5VL_native_dataset_read_struct_chunk_t;
+
+/* Parameters for native connector's dataset 'write struct chunk' operation */
+typedef struct H5VL_native_dataset_write_struct_chunk_t {
+    const hsize_t *offset;
+    H5D_struct_chunk_info_t *chunk_info;
+    void    **buf;
+} H5VL_native_dataset_write_struct_chunk_t;
 
 /* Parameters for native connector's dataset 'get vlen buf size' operation */
 typedef struct H5VL_native_dataset_get_vlen_buf_size_t {
@@ -130,6 +155,24 @@ typedef struct H5VL_native_dataset_get_chunk_info_by_coord_t {
     haddr_t       *addr;        /* Address of chunk in file (OUT) */
     hsize_t       *size;        /* Size of chunk in file (OUT) */
 } H5VL_native_dataset_get_chunk_info_by_coord_t;
+
+/* Parameters for native connector's dataset 'get struct chunk info by idx' operation */
+typedef struct H5VL_native_dataset_get_struct_chunk_info_by_idx_t {
+    hid_t     fspace_id;    /* File dataspace selection */
+    hsize_t   chunk_idx;    /* Chunk index */
+    hsize_t   *offset;      /* Logical position of the chunk's first element in the array (OUT) */
+    H5D_struct_chunk_info_t *chunk_info;    /* Information about the structured chunk (OUT) */
+    haddr_t  *addr;         /* Chunk address in the file (OUT) */
+    hsize_t  *chunk_size;   /* Chunk size in bytes (OUT) */
+} H5VL_native_dataset_get_struct_chunk_info_by_idx_t;
+
+/* Parameters for native connector's dataset 'get struct chunk info by coord' operation */
+typedef struct H5VL_native_dataset_get_struct_chunk_info_by_coord_t {
+    const hsize_t *offset;      /* Logical position of the chunk's first element in the array */
+    H5D_struct_chunk_info_t *chunk_info;    /* Information about the structured chunk (OUT) */
+    haddr_t       *addr;        /* Chunk address in the file (OUT) */
+    hsize_t       *chunk_size;  /* Chunk size in bytes (OUT) */
+} H5VL_native_dataset_get_struct_chunk_info_by_coord_t;
 
 /* Parameters for native connector's dataset 'optional' operations */
 typedef union H5VL_native_dataset_optional_args_t {
@@ -172,6 +215,24 @@ typedef union H5VL_native_dataset_optional_args_t {
         H5D_chunk_iter_op_t op;      /* Chunk iteration callback */
         void               *op_data; /* Context to pass to iteration callback */
     } chunk_iter;
+
+    /* H5VL_NATIVE_DATASET_WRITE_STRUCT_CHUNK */
+    H5VL_native_dataset_write_struct_chunk_t write_struct_chunk;
+
+    /* H5VL_NATIVE_DATASET_READ_STRUCT_CHUNK */
+    H5VL_native_dataset_read_struct_chunk_t read_struct_chunk;
+
+    /* H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_IDX */
+    H5VL_native_dataset_get_struct_chunk_info_by_idx_t get_struct_chunk_info_by_idx;
+
+    /* H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_COORD */
+    H5VL_native_dataset_get_struct_chunk_info_by_coord_t get_struct_chunk_info_by_coord;
+
+    /* H5VL_NATIVE_DATASET_STRUCT_CHUNK_ITER */
+    struct {
+        H5D_struct_chunk_iter_op_t op;       /* Structured chunk iteration callback */
+        void                       *op_data; /* Context to pass to iteration callback */
+    } struct_chunk_iter;
 
 } H5VL_native_dataset_optional_args_t;
 

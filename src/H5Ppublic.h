@@ -2069,6 +2069,7 @@ H5_DLL herr_t H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_fla
  *
  */
 H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_dense);
+
 /**
  * \ingroup OCPL
  *
@@ -2136,6 +2137,75 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *f
 /**
  * \ingroup OCPL
  *
+ * \brief Returns information for a filter in the pipeline for a specified section
+ *        of the structured chunk
+ *
+ * \ocpl_id{plist_id}
+ * \param[in]     section_number    An integer specifying section number of the structured chunk
+ * \param[in]     idx               Sequence number within the filter pipeline of
+ *                                  the filter for which information is sought
+ * \param[out]    flags             Bit vector specifying certain general properties 
+ *                                  of the filter
+ * \param[in,out] buf_size          Size in bytes of \p buf buffer
+ * \param[out]    buf               Buffer with auxiliary data for the filter
+ * \param[in]     namelen           Anticipated number of characters in \p name
+ * \param[out]    name              Name of the filter
+ * \param[out]    filter_config     Bit field, as described in H5Zget_filter_info()
+ *
+ * \return Returns a negative value on failure, and the filter identifier
+ *         if successful (see #H5Z_filter_t):
+ *         - #H5Z_FILTER_DEFLATE     Data compression filter,
+ *                                    employing the gzip algorithm
+ *         - #H5Z_FILTER_SHUFFLE     Data shuffling filter
+ *         - #H5Z_FILTER_FLETCHER32  Error detection filter, employing the
+ *                                     Fletcher32 checksum algorithm
+ *         - #H5Z_FILTER_SZIP        Data compression filter, employing the
+ *                                     SZIP algorithm
+ *         - #H5Z_FILTER_NBIT        Data compression filter, employing the
+ *                                     N-bit algorithm
+ *         - #H5Z_FILTER_SCALEOFFSET Data compression filter, employing the
+ *                                     scale-offset algorithm
+ *
+ * \details H5Pget_filter3() returns information about a filter for a specified
+ *          section in the structured chunk.  The filter is specified
+ *          by its filter number, in a filter pipeline specified by the property
+ *          list with which it is associated.
+ *
+ *          \p plist_id must be a dataset or group creation property list.
+ *
+ *          \p section_number is an integer specifying a section in the
+ *          structured chunk.
+ *
+ *          \p idx is a value between zero and N-1, as described in
+ *          H5Pget_nfilters(). The function will return a negative value if
+ *          the filter number is out of range.
+ *
+ *          The structure of the \p flags argument is discussed in
+ *          H5Pset_filter2().
+ *
+ *          On input, \p buf_size indicates the size of the buffer pointerd
+ *          to by \p buf, as allocated by the caller; on return,
+ *          \p buf_size contains the size of the values defined by the filter.
+ *
+ *          If \p name is a pointer to an array of at least \p namelen bytes,
+ *          the filter name will be copied into that array. The name will be
+ *          null terminated if \p namelen is large enough. The filter name
+ *          returned will be the name appearing in the file, the name
+ *          registered for the filter, or an empty string.
+ *
+ *          \p filter_config is the bit field described in
+ *          H5Zget_filter_info().
+ *
+ * \since 1.x.x
+ *
+ */
+H5_DLL H5Z_filter_t H5Pget_filter3(hid_t plist_id, uint64_t section_number, unsigned idx, 
+                                   uint64_t *flags /*out*/, size_t *buf_size /*in,out*/, void *buf /*out*/, 
+                                   size_t namelen /*in*/, char name[] /*out*/, unsigned *filter_config /*out*/);
+
+/**
+ * \ingroup OCPL
+ *
  * \brief Returns information about the specified filter
  *
  * \ocpl_id{plist_id}
@@ -2194,6 +2264,71 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsig
 /**
  * \ingroup OCPL
  *
+ * \brief Returns information for a filter specified by its identifier in the
+ *        pipeline for a specified section of the structured chunk
+ *
+ * \ocpl_id{plist_id}
+ * \param[in]     section_number    An integer specifying section number of the structured chunk
+ * \param[in]     filter_id     Filter identifier
+ * \param[out]    flags         Bit vector specifying certain general
+ *                              properties of the filter
+ * \param[in,out] buf_size      Size in bytes of \p buf buffer
+ * \param[out]    buf           Auxiliary data for the filter
+ * \param[in]     namelen       Length of filter name and number of
+ *                              elements in \p name
+ * \param[out]    name[]        Name of filter
+ * \param[out]    filter_config Bit field, as described in
+ *                              H5Zget_filter_info()
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_filter_by_id3() returns information about a filter
+ *          for a specified section in the structured chunk with the 
+ *          filter identifier specified in \p filter_id.
+ *
+ *          \p plist_id must be a dataset or group creation property list
+ *          and \p filter_id must be in the associated filter pipeline.
+ *
+ *          \p section_number is an integer specifying a section in the
+ *          structured chunk.
+ *
+ *          The \p filter_id and \p flags parameters are used in the same
+ *          manner as described in the discussion of H5Pset_filter2().
+ *
+ *          Aside from the fact that they are used for output, the
+ *          parameters \p buf_size and \p buf are used in the same
+ *          manner as described in the discussion of H5Pset_filter2().
+ *          On input, the \p buf_size parameter indicates the size in
+ *          bytes of the buffer pointed to by \p buf which is allocated
+ *          by the calling program; on exit it contains the size of the
+ *          values defined by the filter.
+ *
+ *          On input, the \p namelen parameter indicates the number of
+ *          characters allocated for the filter name by the calling program
+ *          in the array \p name[]. On exit \p name[] contains the name of the
+ *          filter with one character of the name in each element of the
+ *          array.
+ *
+ *          \p filter_config is the bit field described in
+ *          H5Zget_filter_info().
+ *
+ *          If the filter specified in \p filter_id is not set for the
+ *          property list, an error will be returned and
+ *          H5Pget_filter_by_id3() will fail.
+ *
+ * \version 1.8.5 Function extended to work with group creation property
+ *                lists.
+ *
+ * \since 1.x.x
+ *
+ */
+H5_DLL herr_t H5Pget_filter_by_id3(hid_t plist_id, uint64_t section_number, H5Z_filter_t filter_id, 
+                                   uint64_t *flags /*out*/, size_t *buf_size /*in,out*/, void *buf /*out*/, 
+                                   size_t namelen /*in*/, char name[] /*out*/, unsigned *filter_config /*out*/);
+
+/**
+ * \ingroup OCPL
+ *
  * \brief Returns the number of filters in the pipeline
  *
  * \ocpl_id{plist_id}
@@ -2216,6 +2351,36 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsig
  *
  */
 H5_DLL int H5Pget_nfilters(hid_t plist_id);
+
+
+/**
+ * \ingroup OCPL
+ *
+ * \brief Returns the number of filters in the pipeline for a section of the structured chunk
+ *
+ * \ocpl_id{plist_id}
+ * \param[in] section_number    An integer specifying section number of the structured chunk
+ *
+ * \return  Returns the number of filters in the pipeline if successful;
+ *          otherwise returns a negative value.
+ *
+ * \details H5Pget_nfilters2() returns the number of filters defined in the
+ *          filter pipeline for the section \p section_number that is
+ *          associated with the property list \p plist_id.
+ *
+ *          In each pipeline, the filters are numbered from 0 through \Code{N-1},
+ *          where \c N is the value returned by this function. During output to
+ *          the file, the filters are applied in increasing order; during
+ *          input from the file, they are applied in decreasing order.
+ *
+ *          H5Pget_nfilters() returns the number of filters in the pipeline
+ *          for the section \p section_number, including zero (0) if there are none.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL int H5Pget_nfilters2(hid_t plist_id, uint64_t section_number);
+
 /**
  * \ingroup OCPL
  *
@@ -2248,6 +2413,7 @@ H5_DLL int H5Pget_nfilters(hid_t plist_id);
  *
  */
 H5_DLL herr_t H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times);
+
 /**
  * \ingroup OCPL
  *
@@ -2277,6 +2443,43 @@ H5_DLL herr_t H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times);
  */
 H5_DLL herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts,
                                const unsigned int cd_values[/*cd_nelmts*/]);
+
+/**
+ * \ingroup OCPL
+ *
+ * \brief Modifies a filter in the filter pipeline for a specified section of the 
+ *        structured chunk
+ *
+ * \ocpl_id{plist_id}
+ * \param[in] section_number    An integer specifying section number of the structured chunk
+ * \param[in] filter      Filter to be modified
+ * \param[in] flags       Bit vector specifying certain general properties
+ *                        of the filter
+ * \param[in] buf_size    Size in bytes of \p buf buffer
+ * \param[in] buf         Auxiliary data for the filter
+ *
+ * \return \herr_t
+ *
+ * \details H5Pmodify_filter2() modifies the specified \p filter in the
+ *          filter pipeline for a specified section of the structured
+ *          chunk. 
+ *
+ *          \p section_number is an integer specifying a section in the
+ *          structured chunk.
+ *
+ *          The \p plist_id parameter must be a dataset or group creation 
+ *          property list.
+ *
+ *          The \p filter, \p flags \p buf_size, and \p buf
+ *          parameters are used in the same manner and accept the same
+ *          values as described in the discussion of H5Pset_filter3().
+ *
+ * \since 1.x.x
+ *
+ */
+H5_DLL herr_t H5Pmodify_filter2(hid_t plist_id, uint64_t section_number, H5Z_filter_t filter, 
+                                uint64_t flags, size_t buf_size, const void *buf);
+
 /**
  * \ingroup OCPL
  *
@@ -2343,6 +2546,77 @@ H5_DLL herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int
  *
  */
 H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);
+
+/**
+ * \ingroup OCPL
+ *
+ * \brief    Removes a filter in the filter pipeline for a specified section
+ *           of the structured chunk
+ *
+ * \ocpl_id{plist_id}
+ * \param[in] section_number    An integer specifying section number of the structured chunk
+ * \param[in] filter            Filter to be deleted
+ *
+ * \return \herr_t
+ *
+ * \details H5Premove_filter2() removes the specified \p filter for a specified
+ *          \p section_number from the filter pipeline in the dataset or 
+ *          group creation property list \p plist_id.
+ *
+ *          The \p section_number is an integer specifying a section in the
+ *          structured chunk.
+ *
+ *          The \p filter parameter specifies the filter to be removed.
+ *          Valid values for use in \p filter are as follows:
+ *
+ *          <table>
+ *           <tr>
+ *            <td>#H5Z_FILTER_ALL</td>
+ *            <td>Removes all filters from the filter pipeline</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_DEFLATE</td>
+ *            <td>Data compression filter, employing the gzip
+ *                algorithm</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_SHUFFLE</td>
+ *            <td>Data shuffling filter</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_FLETCHER32</td>
+ *            <td>Error detection filter, employing the Fletcher32
+ *                checksum algorithm</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_SZIP</td>
+ *            <td>Data compression filter, employing the SZIP
+ *                algorithm</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_NBIT</td>
+ *            <td>Data compression filter, employing the N-Bit
+ *                algorithm</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_SCALEOFFSET</td>
+ *            <td>Data compression filter, employing the scale-offset
+ *                algorithm</td>
+ *           </tr>
+ *          </table>
+ *
+ *          Additionally, user-defined filters can be removed with this
+ *          routine by passing the filter identifier with which they were
+ *          registered with the HDF5 library.
+ *
+ *          Attempting to remove a filter that is not in the filter
+ *          pipeline is an error.
+ *
+ * \since 1.x.x
+ *
+ */
+H5_DLL herr_t H5Premove_filter2(hid_t plist_id, uint64_t section_number, H5Z_filter_t filter);
+
 /**
  * \ingroup OCPL
  *
@@ -2489,6 +2763,7 @@ H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, uns
  *
  */
 H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
+
 /**
  * \ingroup OCPL
  *
@@ -2757,6 +3032,323 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  */
 H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts,
                             const unsigned int c_values[]);
+
+/**
+ * \ingroup OCPL
+ *
+ * \brief Adds a filter to the filter pipeline for a specified section of the structured chunk
+ *
+ * \ocpl_id{plist_id}
+ * \param[in] section_number    An integer specifying section number of the structured chunk
+ * \param[in] filter            Filter identifier for the filter to be added to the
+ *                              pipeline
+ * \param[in] flags             Bit vector specifying certain general properties of
+ *                              the filter
+ * \param[in] buf_size          Size in bytes of \p buf buffer
+ * \param[in] buf               Buffer with an auxiliary data for the filter
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_filter2() adds a filter and corresponding properties to the end 
+ *          of an output filter pipeline.  This function can be used with 
+ *          both current chunked storage and structured chunk storage 
+ *          including sparse chunk.  It also addresses deficiency of 
+ *          H5Pset_filter1() in passing the filter’s data as described below.
+ *          
+ *          Note the following differences with H5Pset_filter1():
+ *          - This function accepts a new parameter \p section_number that 
+ *            specifies the section of the structured chunk to which the filter is applied. 
+ *            For chunked storage, there is just one section.
+ *          - Data type for the \p flags parameter is changed to uint64_t to provide 
+ *            more flexibility to the VOL connectors that use the function. 
+ *          - This function passes the filter’s data by using a void pointer to a buffer 
+ *            with auxiliary data for the filter instead of unsigned int c_values[].
+ *
+ *          \p plist_id must be either a dataset creation property list or
+ *          group creation property list identifier. If \p plist_id is a
+ *          dataset creation property list identifier, the filter is added
+ *          to the raw data filter pipeline.
+ *
+ *          If \p plist_id is a group creation property list identifier,
+ *          the filter is added to the link filter pipeline, which filters
+ *          the fractal heap used to store most of the link metadata in
+ *          certain types of groups. The only predefined filters that can
+ *          be set in a group creation property list are the gzip filter
+ *          (#H5Z_FILTER_DEFLATE) and the Fletcher32 error detection filter
+ *          (#H5Z_FILTER_FLETCHER32).
+ *
+ *          \p section_number specifies the section number. The value 
+ *          is 0 to 255 when native HDF5 file format is used.
+ *          For sparse chunk, the convenience flag can be used to specify
+ *          a section of the structured chunk to be filtered as described below:
+ *
+ *          <table>
+ *           <tr>
+ *            <td>#H5Z_FLAG_SPARSE_SELECTION</td>
+ *            <td>Adds the filter to the filter pipeline for the encoded 
+ *                selection section of the sparse chunk. It has the same 
+ *                effect as passing 0. The flag will be ignored if the 
+ *                structured chunk is not sparse.
+ *            </td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FLAG_SPARSE_FIXED_DATA</td>
+ *            <td>Adds the filter to the filter pipeline for section 1 of 
+ *                the sparse chunk. It has the same effect as passing 1. 
+ *            </td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FLAG_SPARSE_VL_DATA</td>
+ *            <td>Adds the filter to the filter pipeline for section 2 of 
+ *                the sparse chunk if data has variable-length datatype. 
+ *                It has the same effect as passing 2.
+ *            </td>
+ *           </tr>
+ *          </table>
+ *
+ *          \p buf points to \p buf_size bytes of buffer
+ *          which are auxiliary data for the filter. The values are typically
+ *          used as parameters to control the filter. In a filter's
+ *          \p set_local method (called from \p H5Dcreate), the values are
+ *          interpreted and possibly modified before they are used to control
+ *          the filter. These, possibly modified values, are then stored in
+ *          the dataset object header as auxiliary data for the filter.
+ *
+ *          The \p flags argument is a bit vector with the following
+ *          fields specifying certain general properties of the filter:
+ *
+ *          <table>
+ *           <tr>
+ *            <td>#H5Z_FLAG_OPTIONAL</td>
+ *            <td>If this bit is set then the filter is optional. If the
+ *                filter fails (see below) during an H5Dwrite() operation
+ *                then the filter is just excluded from the pipeline for
+ *                the chunk for which it failed; the filter will not
+ *                participate in the pipeline during an H5Dread() of the
+ *                chunk. This is commonly used for compression filters:
+ *                if the filter result would be larger than the input,
+ *                then the compression filter returns failure and the
+ *                uncompressed data is stored in the file.<br /><br />
+ *                This flag should not be set for the Fletcher32 checksum
+ *                filter as it will bypass the checksum filter without
+ *                reporting checksum errors to an application.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FLAG_MANDATORY</td>
+ *            <td>If the filter is required, that is, set to mandatory,
+ *                and the filter fails, the library's behavior depends
+ *                on whether the chunk cache is in use:
+ *                \li If the chunk cache is enabled, data chunks will
+ *                    be flushed to the file during H5Dclose() and the
+ *                    library will return the failure in H5Dclose().
+ *                \li When the chunk cache is disabled or not big enough,
+ *                    or the chunk is being evicted from the cache, the
+ *                    failure will happen during H5Dwrite().
+ *
+ *                In each case, the library will still write to the file
+ *                all data chunks that were processed by the filter
+ *                before the failure occurred.<br /><br />
+ *                For example, assume that an application creates a
+ *                dataset of four chunks, the chunk cache is enabled and
+ *                is big enough to hold all four chunks, and the filter
+ *                fails when it tries to write the fourth chunk. The
+ *                actual flush of the chunks will happen during
+ *                H5Dclose(), not H5Dwrite(). By the time H5Dclose()
+ *                fails, the first three chunks will have been written
+ *                to the file. Even though H5Dclose() fails, all the
+ *                resources will be released and the file can be closed
+ *                properly. <br /><br />
+ *                If, however, the filter fails on the second chunk, only
+ *                the first chunk will be written to the file as nothing
+ *                further can be written once the filter fails.</td>
+ *           </tr>
+ *          </table>
+ *
+ *          The \p filter parameter specifies the filter to be set. Valid
+ *          pre-defined filter identifiers are as follows:
+ *
+ *          <table>
+ *           <tr>
+ *            <td>#H5Z_FILTER_DEFLATE</td>
+ *            <td>Data compression filter, employing the gzip
+ *                algorithm</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_SHUFFLE</td>
+ *            <td>Data shuffling filter</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_FLETCHER32</td>
+ *            <td>Error detection filter, employing the Fletcher32
+ *                checksum algorithm</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_SZIP</td>
+ *            <td>Data compression filter, employing the SZIP
+ *                algorithm</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_NBIT</td>
+ *            <td>Data compression filter, employing the N-Bit
+ *                algorithm</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_SCALEOFFSET</td>
+ *            <td>Data compression filter, employing the scale-offset
+ *                algorithm</td>
+ *           </tr>
+ *          </table>
+ *          Also see H5Pset_edc_check() and H5Pset_filter_callback().
+ *          TBD: The behavior is the same for H5Pset_edc_check() but the
+ *          functionality is not implemented for varible-length data.
+ *
+ * \note TBD: review/modify/add the info in the following note section
+ *       for structured chunk v.s. dense chunks.
+ *
+ * \note When a non-empty filter pipeline is used with a group creation
+ *       property list, the group will be created with the new group file
+ *       format. The filters will come into play only when dense storage
+ *       is used (see H5Pset_link_phase_change()) and will be applied to
+ *       the group's fractal heap. The fractal heap will contain most of
+ *       the group's link metadata, including link names.
+ *
+ * \note When working with group creation property lists, if you are
+ *       adding a filter that is not in HDF5's set of predefined filters,
+ *       i.e., a user-defined or third-party filter, you must first
+ *       determine that the filter will work for a group. See the
+ *       discussion of the set local and can apply callback functions
+ *       in H5Zregister().
+ *
+ * \note If multiple filters are set for a property list, they will be
+ *       applied to each chunk of raw data for datasets or each block
+ *       of the fractal heap for groups in the order in which they were
+ *       set.
+ *
+ * \note Filters can be applied only to chunked datasets; 
+ *       they cannot be used with other dataset storage methods, such as 
+ *       contiguous, compact, or external datasets.
+ *
+ * \note Dataset elements of variable-length and dataset region
+ *       reference datatypes are stored in separate structures in the
+ *       file called heaps. Filters cannot currently be applied to
+ *       these heaps.
+ *
+ * \note <b>Filter Behavior in HDF5:</b><br />
+ *       Filters can be inserted into the HDF5 pipeline to perform
+ *       functions such as compression and conversion. As such, they are
+ *       a very flexible aspect of HDF5; for example, a user-defined
+ *       filter could provide encryption for an HDF5 dataset.
+ *
+ * \note A filter can be declared as either required or optional.
+ *       Required is the default status; optional status must be
+ *       explicitly declared.
+ *
+ * \note A required filter that fails or is not defined causes an
+ *       entire output operation to fail; if it was applied when the
+ *       data was written, such a filter will cause an input operation
+ *       to fail.
+ *
+ * \note The following table summarizes required filter behavior.
+ *          <table>
+ *           <tr>
+ *            <th></th>
+ *            <th>Required FILTER_X not available</th>
+ *            <th>FILTER_X available</th>
+ *           </tr>
+ *           <tr>
+ *            <td>H5Pset_<FILTER_X></td>
+ *            <td>Will fail.</td>
+ *            <td>Will succeed.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>H5Dwrite with FILTER_X set</td>
+ *            <td>Will fail.</td>
+ *            <td>Will succeed; FILTER_X will be applied to
+ *                the data.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>H5Dread with FILTER_X set</td>
+ *            <td>Will fail.</td>
+ *            <td>Will succeed.</td>
+ *           </tr>
+ *          </table>
+ * \note An optional filter can be set for an HDF5 dataset even when
+ *       the filter is not available. Such a filter can then be
+ *       applied to the dataset when it becomes available on the
+ *       original system or when the file containing the dataset is
+ *       processed on a system on which it is available.
+ *
+ * \note A filter can be declared as optional through the use of the
+ *       #H5Z_FLAG_OPTIONAL flag with H5Pset_filter().
+ *
+ * \note Consider a situation where one is creating files that will
+ *       normally be used only on systems where the optional (and
+ *       fictional) filter FILTER_Z is routinely available. One can
+ *       create those files on system A, which lacks FILTER_Z, create
+ *       chunked datasets in the files with FILTER_Z defined in the
+ *       dataset creation property list, and even write data to those
+ *       datasets. The dataset object header will indicate that FILTER_Z
+ *       has been associated with this dataset. But since system A does
+ *       not have FILTER_Z, dataset chunks will be written without it
+ *       being applied.
+ *
+ * \note HDF5 has a mechanism for determining whether chunks are
+ *       actually written with the filters specified in the object
+ *       header, so while the filter remains unavailable, system A will
+ *       be able to read the data. Once the file is moved to system B,
+ *       where FILTER_Z is available, HDF5 will apply FILTER_Z to any
+ *       data rewritten or new data written in these datasets. Dataset
+ *       chunks that have been written on system B will then be
+ *       unreadable on system A; chunks that have not been re-written
+ *       since being written on system A will remain readable on system
+ *       A. All chunks will be readable on system B.
+ *
+ * \note The following table summarizes optional filter behavior.
+ *          <table>
+ *           <tr>
+ *            <th></th>
+ *            <th>FILTER_Z not available</th>
+ *            <th>FILTER_Z available<br /> with encode and decode</th>
+ *            <th>FILTER_Z available decode only</th>
+ *           </tr>
+ *           <tr>
+ *            <td>H5Pset_<FILTER_Z></td>
+ *            <td>Will succeed.</td>
+ *            <td>Will succeed.</td>
+ *            <td>Will succeed.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>H5Dread with FILTER_Z set</td>
+ *            <td>Will succeed if FILTER_Z has not actually<br />
+ *                been applied to data.</td>
+ *            <td>Will succeed.</td>
+ *            <td>Will succeed.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>H5Dwrite with FILTER_Z set</td>
+ *            <td>Will succeed;<br /> of the structured chunto k
+ *                FILTER_Z will not be applied to the data.</td>
+ *            <td>Will succeed;<br />
+ *            FILTER_Z will be applied to the data.</td>
+ *            <td>Will succeed;<br />
+ *            FILTER_Z will not be applied to the data.</td>
+ *           </tr>
+ *          </table>
+ * \note The above principles apply generally in the use of HDF5
+ *       optional filters insofar as HDF5 does as much as possible to
+ *       complete an operation when an optional filter is unavailable.
+ *       (The SZIP filter is an exception to this rule; see H5Pset_szip()
+ *       for details.)
+ *
+ * \see \ref_filter_pipe, \ref_group_impls
+ *
+ * \version 1.8.5 Function applied to group creation property lists.
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pset_filter2(hid_t plist_id, uint64_t section_number, H5Z_filter_t filter, uint64_t flags, 
+                            size_t buf_size, const void *buf);
+
 /**
  * \ingroup OCPL
  *

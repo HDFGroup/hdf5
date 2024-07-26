@@ -205,7 +205,7 @@ done:
  * Purpose:     Frees memory allocated by H5VL__native_dataset_io_setup()
  *
  * Return:      SUCCEED/FAIL
- *
+ 
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -497,6 +497,27 @@ H5VL__native_dataset_get(void *obj, H5VL_dataset_get_args_t *args, hid_t H5_ATTR
             break;
         }
 
+        /* H5Dget_defined */
+        case H5VL_DATASET_GET_DEFINED: {
+            const H5S_t                          *fspace    = NULL;
+
+            assert(dset->shared);
+            assert(dset->shared->space);
+
+            /* When default dataspace is given, use the dataset's dataspace */
+            if (args->args.get_defined.file_space_id == H5S_ALL)
+                fspace = dset->shared->space;
+            else /*  otherwise, use the given space ID */
+                if (NULL == (fspace = (const H5S_t *)H5I_object_verify(args->args.get_defined.file_space_id, H5I_DATASPACE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID");
+
+            /* Call private function */
+            if ((args->args.get_defined.space_id = H5D__get_defined(dset, fspace)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace of defined elements");
+
+            break;
+        }
+
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from dataset");
     } /* end switch */
@@ -543,6 +564,19 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_args_t *args, hid
         case H5VL_DATASET_REFRESH: {
             if (H5D__refresh(dset, args->args.refresh.dset_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to refresh dataset");
+
+            break;
+        }
+
+        /* H5Derase */
+        case H5VL_DATASET_ERASE: {
+            const H5S_t                          *fspace    = NULL;
+
+            if (NULL == (fspace = (const H5S_t *)H5I_object_verify(args->args.erase.file_space_id, H5I_DATASPACE)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID");
+
+            if (H5D__erase(dset, fspace) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to erase dataset elements");
 
             break;
         }
@@ -631,7 +665,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         case H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE: {
             H5VL_native_dataset_get_chunk_storage_size_t *gcss_args = &opt_args->get_chunk_storage_size;
 
-            /* Make sure the dataset is chunked */
+            /* Make sure the dataset is chunked or sparse chunk */
+            /* TBD: H5Dget_chunk_storage_storage() is supposed to work for both dense and sparse chunk */
             if (H5D_CHUNKED != dset->shared->layout.type)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
 
@@ -657,7 +692,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 if (NULL == (space = (const H5S_t *)H5I_object_verify(gnc_args->space_id, H5I_DATASPACE)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID");
 
-            /* Make sure the dataset is chunked */
+            /* Make sure the dataset is chunked or sparse chunk */
+            /* TBD: H5Dget_num_chunks() is supposed to work for both dense and sparse chunk */
             if (H5D_CHUNKED != dset->shared->layout.type)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
 
@@ -722,6 +758,9 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
             /* Check arguments */
             if (NULL == dset->oloc.file)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file");
+
+            /* Make sure the dataset is chunked or sparse chunk */
+            /* TBD: H5Dread_chunk() is supposed to work for sparse chunk */
             if (H5D_CHUNKED != dset->shared->layout.type)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
 
@@ -747,6 +786,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
             /* Check arguments */
             if (NULL == dset->oloc.file)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file");
+
             if (H5D_CHUNKED != dset->shared->layout.type)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
 
@@ -794,6 +834,122 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
             if ((ret_value = H5D__chunk_iter(dset, opt_args->chunk_iter.op, opt_args->chunk_iter.op_data)) <
                 0)
                 HERROR(H5E_DATASET, H5E_BADITER, "chunk iteration failed");
+
+            break;
+        }
+
+        /* H5Dread_struct_chunk */
+        case H5VL_NATIVE_DATASET_READ_STRUCT_CHUNK: {
+            H5VL_native_dataset_read_struct_chunk_t *read_struct_chunk_args = &opt_args->read_struct_chunk;
+            hsize_t offset_copy[H5O_LAYOUT_NDIMS]; /* Internal copy of chunk offset */
+
+            /* Check arguments */
+            if (NULL == dset->oloc.file)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file");
+            /* TBD: check for H5D_SPARSE_CHUNK */
+            if (H5D_CHUNKED != dset->shared->layout.type)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
+
+            /* Copy the user's offset array so we can be sure it's terminated properly.
+             * (we don't want to mess with the user's buffer).
+             */
+            if (H5D__chunk_get_offset_copy(dset, read_struct_chunk_args->offset, offset_copy) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array");
+
+            /* Read the structured chunk */
+            if (H5D__read_struct_chunk_direct(dset, offset_copy, read_struct_chunk_args->chunk_info, 
+                                              read_struct_chunk_args->buf) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read structured chunk data");
+
+            break;
+        }
+
+        /* H5Dwrite_struct_chunk */
+        case H5VL_NATIVE_DATASET_WRITE_STRUCT_CHUNK: {
+            H5VL_native_dataset_write_struct_chunk_t *write_struct_chunk_args = &opt_args->write_struct_chunk;
+            hsize_t offset_copy[H5O_LAYOUT_NDIMS]; /* Internal copy of chunk offset */
+
+            /* Check arguments */
+            if (NULL == dset->oloc.file)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file");
+            /* TBD: check for H5D_SPARSE_CHUNK */
+            if (H5D_CHUNKED != dset->shared->layout.type)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
+
+            /* Copy the user's offset array so we can be sure it's terminated properly.
+             * (we don't want to mess with the user's buffer).
+             */
+            if (H5D__chunk_get_offset_copy(dset, write_struct_chunk_args->offset, offset_copy) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array");
+
+            /* Write the structured chunk */
+            if (H5D__write_struct_chunk_direct(dset, offset_copy, write_struct_chunk_args->chunk_info,
+                                               write_struct_chunk_args->buf) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write structured chunk data");
+
+            break;
+        }
+
+        /* H5Dget_struct_chunk_info */
+        case H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_IDX: {
+            H5VL_native_dataset_get_struct_chunk_info_by_idx_t *gcibi_args = &opt_args->get_struct_chunk_info_by_idx;
+            const H5S_t                                 *space;
+
+            assert(dset->shared);
+            assert(dset->shared->space);
+
+            /* TBD: is this true for structured chunk */
+            /* When default dataspace is given, use the dataset's dataspace */
+            if (gcibi_args->fspace_id == H5S_ALL)
+                space = dset->shared->space;
+            else /*  otherwise, use the given space ID */
+                if (NULL == (space = (const H5S_t *)H5I_object_verify(gcibi_args->fspace_id, H5I_DATASPACE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID");
+
+            /* TBD: Make sure the dataset is H5D_SPARSE_CHUNK */
+            if (H5D_CHUNKED != dset->shared->layout.type)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a sparse chunk dataset");
+
+            /* Call private function */
+            if (H5D__get_struct_chunk_info(dset, space, gcibi_args->chunk_idx, gcibi_args->offset,
+                                    gcibi_args->chunk_info, gcibi_args->addr, gcibi_args->chunk_size) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get struct chunk info by index");
+
+            break;
+        }
+
+        /* H5Dget_struct_chunk_info_by_coord */
+        case H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_COORD: {
+            H5VL_native_dataset_get_struct_chunk_info_by_coord_t *gcibc_args = &opt_args->get_struct_chunk_info_by_coord;
+
+            assert(dset->shared);
+
+            /* TBD: Make sure the dataset is H5D_SPARSE_CHUNK */
+            if (H5D_CHUNKED != dset->shared->layout.type)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a sparse chunk dataset");
+
+            /* Call private function */
+            if (H5D__get_struct_chunk_info_by_coord(dset, gcibc_args->offset, gcibc_args->chunk_info,
+                                             gcibc_args->addr, gcibc_args->chunk_size) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                            "can't get struct chunk info by its logical coordinates");
+
+            break;
+        }
+
+        /* H5Dstruct_chunk_iter */
+        case H5VL_NATIVE_DATASET_STRUCT_CHUNK_ITER: {
+            /* Sanity check */
+            assert(dset->shared);
+
+            /* TBD: Make sure the dataset is H5D_SPARSE_CHUNK */
+            if (H5D_CHUNKED != dset->shared->layout.type)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a sparse chunk dataset");
+
+            /* Call private function */
+            if ((ret_value = H5D__struct_chunk_iter(dset, opt_args->struct_chunk_iter.op, opt_args->struct_chunk_iter.op_data)) <
+                0)
+                HERROR(H5E_DATASET, H5E_BADITER, "struct chunk iteration failed");
 
             break;
         }
