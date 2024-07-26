@@ -2486,9 +2486,9 @@ H5Dget_defined(hid_t dset_id, hid_t file_space_id, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID");
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type                 = H5VL_DATASET_GET_DEFINED;
+    vol_cb_args.op_type                        = H5VL_DATASET_GET_DEFINED;
     vol_cb_args.args.get_defined.file_space_id = file_space_id;
-    vol_cb_args.args.get_defined.space_id = H5I_INVALID_HID;
+    vol_cb_args.args.get_defined.space_id      = H5I_INVALID_HID;
 
     /* Get the dataspace with defined elements */
     if (H5VL_dataset_get(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL) < 0)
@@ -2515,7 +2515,7 @@ done:
 herr_t
 H5Derase(hid_t dset_id, hid_t file_space_id, hid_t dxpl_id)
 {
-    H5VL_object_t          *vol_obj = NULL;              /* Dataset for this operation */
+    H5VL_object_t               *vol_obj = NULL;      /* Dataset for this operation */
     H5VL_dataset_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                       ret_value = SUCCEED; /* Return value                 */
 
@@ -2532,7 +2532,7 @@ H5Derase(hid_t dset_id, hid_t file_space_id, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID");
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type            = H5VL_DATASET_ERASE;
+    vol_cb_args.op_type                  = H5VL_DATASET_ERASE;
     vol_cb_args.args.erase.file_space_id = file_space_id;
 
     /* Deletes elements from a dataset causing them to no longer be defined */
@@ -2553,12 +2553,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dwrite_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, 
+H5Dwrite_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset,
                       H5D_struct_chunk_info_t *chunk_info, void *buf[])
 {
-    H5VL_object_t                      *vol_obj;       /* Dataset for this operation   */
-    H5VL_optional_args_t                vol_cb_args;   /* Arguments to VOL callback */
-    H5VL_native_dataset_optional_args_t dset_opt_args; /* Arguments for optional operation */
+    H5VL_object_t                      *vol_obj;             /* Dataset for this operation   */
+    H5VL_optional_args_t                vol_cb_args;         /* Arguments to VOL callback */
+    H5VL_native_dataset_optional_args_t dset_opt_args;       /* Arguments for optional operation */
     herr_t                              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2580,11 +2580,11 @@ H5Dwrite_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID");
 
     /* Set up VOL callback arguments */
-    dset_opt_args.write_struct_chunk.offset  = offset;
+    dset_opt_args.write_struct_chunk.offset     = offset;
     dset_opt_args.write_struct_chunk.chunk_info = chunk_info;
-    dset_opt_args.write_struct_chunk.buf     = buf;
-    vol_cb_args.op_type               = H5VL_NATIVE_DATASET_WRITE_STRUCT_CHUNK;
-    vol_cb_args.args                  = &dset_opt_args;
+    dset_opt_args.write_struct_chunk.buf        = buf;
+    vol_cb_args.op_type                         = H5VL_NATIVE_DATASET_WRITE_STRUCT_CHUNK;
+    vol_cb_args.args                            = &dset_opt_args;
 
     /* Write chunk */
     if (H5VL_dataset_optional(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL) < 0)
@@ -2604,8 +2604,8 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5Dread_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset,
-                      H5D_struct_chunk_info_t *chunk_info, void *buf[] /*out*/)
+H5Dread_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, H5D_struct_chunk_info_t *chunk_info,
+                     void *buf[] /*out*/)
 {
     H5VL_object_t                      *vol_obj;             /* Dataset for this operation   */
     H5VL_optional_args_t                vol_cb_args;         /* Arguments to VOL callback */
@@ -2631,11 +2631,11 @@ H5Dread_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID");
 
     /* Set up VOL callback arguments */
-    dset_opt_args.read_struct_chunk.offset  = offset;
+    dset_opt_args.read_struct_chunk.offset     = offset;
     dset_opt_args.read_struct_chunk.chunk_info = chunk_info;
-    dset_opt_args.read_struct_chunk.buf     = buf;
-    vol_cb_args.op_type              = H5VL_NATIVE_DATASET_READ_STRUCT_CHUNK;
-    vol_cb_args.args                 = &dset_opt_args;
+    dset_opt_args.read_struct_chunk.buf        = buf;
+    vol_cb_args.op_type                        = H5VL_NATIVE_DATASET_READ_STRUCT_CHUNK;
+    vol_cb_args.args                           = &dset_opt_args;
 
     /* Read the raw chunk */
     if (H5VL_dataset_optional(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL) < 0)
@@ -2666,7 +2666,8 @@ done:
  */
 herr_t
 H5Dget_struct_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chunk_idx, hsize_t *offset /*out*/,
-                  H5D_struct_chunk_info_t *chunk_info/*out*/, haddr_t *addr /*out*/, hsize_t *chunk_size /*out*/)
+                         H5D_struct_chunk_info_t *chunk_info /*out*/, haddr_t *addr /*out*/,
+                         hsize_t *chunk_size /*out*/)
 {
     H5VL_object_t                      *vol_obj = NULL; /* Dataset for this operation */
     H5VL_optional_args_t                vol_cb_args;    /* Arguments to VOL callback */
@@ -2683,14 +2684,14 @@ H5Dget_struct_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chunk_idx, hsiz
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier");
 
     /* Set up VOL callback arguments */
-    dset_opt_args.get_struct_chunk_info_by_idx.fspace_id   = fspace_id;
-    dset_opt_args.get_struct_chunk_info_by_idx.chunk_idx   = chunk_idx;
-    dset_opt_args.get_struct_chunk_info_by_idx.offset      = offset;
-    dset_opt_args.get_struct_chunk_info_by_idx.chunk_info  = chunk_info;
-    dset_opt_args.get_struct_chunk_info_by_idx.addr        = addr;
-    dset_opt_args.get_struct_chunk_info_by_idx.chunk_size  = chunk_size;
-    vol_cb_args.op_type                             = H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_IDX;
-    vol_cb_args.args                                = &dset_opt_args;
+    dset_opt_args.get_struct_chunk_info_by_idx.fspace_id  = fspace_id;
+    dset_opt_args.get_struct_chunk_info_by_idx.chunk_idx  = chunk_idx;
+    dset_opt_args.get_struct_chunk_info_by_idx.offset     = offset;
+    dset_opt_args.get_struct_chunk_info_by_idx.chunk_info = chunk_info;
+    dset_opt_args.get_struct_chunk_info_by_idx.addr       = addr;
+    dset_opt_args.get_struct_chunk_info_by_idx.chunk_size = chunk_size;
+    vol_cb_args.op_type                                   = H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_IDX;
+    vol_cb_args.args                                      = &dset_opt_args;
 
     /* Call private function to get the chunk info given the chunk's index */
     if (H5VL_dataset_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
@@ -2719,8 +2720,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dget_struct_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, H5D_struct_chunk_info_t *chunk_info/*out*/,
-                           haddr_t *addr /*out*/, hsize_t *chunk_size /*out*/)
+H5Dget_struct_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset,
+                                  H5D_struct_chunk_info_t *chunk_info /*out*/, haddr_t *addr /*out*/,
+                                  hsize_t *chunk_size /*out*/)
 {
     H5VL_object_t                      *vol_obj = NULL; /* Dataset for this operation */
     H5VL_optional_args_t                vol_cb_args;    /* Arguments to VOL callback */
@@ -2739,12 +2741,12 @@ H5Dget_struct_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, H5D_stru
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument (null)");
 
     /* Set up VOL callback arguments */
-    dset_opt_args.get_struct_chunk_info_by_coord.offset      = offset;
-    dset_opt_args.get_struct_chunk_info_by_coord.chunk_info  = chunk_info;
-    dset_opt_args.get_struct_chunk_info_by_coord.addr        = addr;
-    dset_opt_args.get_struct_chunk_info_by_coord.chunk_size  = chunk_size;
-    vol_cb_args.op_type                               = H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_COORD;
-    vol_cb_args.args                                  = &dset_opt_args;
+    dset_opt_args.get_struct_chunk_info_by_coord.offset     = offset;
+    dset_opt_args.get_struct_chunk_info_by_coord.chunk_info = chunk_info;
+    dset_opt_args.get_struct_chunk_info_by_coord.addr       = addr;
+    dset_opt_args.get_struct_chunk_info_by_coord.chunk_size = chunk_size;
+    vol_cb_args.op_type = H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_COORD;
+    vol_cb_args.args    = &dset_opt_args;
 
     /* Call private function to get the chunk info given the chunk's index */
     if (H5VL_dataset_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
@@ -2758,7 +2760,7 @@ done:
  * Function:    H5Dstruct_chunk_iter
  *
  * Purpose:     Iterates over all structured chunks in dataset calling
- *              the user specified callback function, "cb", and the 
+ *              the user specified callback function, "cb", and the
  *              callback's required data, "op_data".
  *
  * Parameters:
@@ -2796,8 +2798,8 @@ H5Dstruct_chunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_struct_chunk_iter_op_t op
     /* Set up VOL callback arguments */
     dset_opt_args.struct_chunk_iter.op      = op;
     dset_opt_args.struct_chunk_iter.op_data = op_data;
-    vol_cb_args.op_type              = H5VL_NATIVE_DATASET_STRUCT_CHUNK_ITER;
-    vol_cb_args.args                 = &dset_opt_args;
+    vol_cb_args.op_type                     = H5VL_NATIVE_DATASET_STRUCT_CHUNK_ITER;
+    vol_cb_args.args                        = &dset_opt_args;
 
     /* Iterate over the chunks */
     if ((ret_value = H5VL_dataset_optional(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL)) < 0)

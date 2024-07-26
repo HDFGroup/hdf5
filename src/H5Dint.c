@@ -4014,14 +4014,14 @@ H5D_get_dcpl_id(const H5D_obj_create_t *d)
 /*-------------------------------------------------------------------------
  * Function: H5D__get_defined
  *
- * Purpose:  Returns the dataspace ID with selection of defined elements 
+ * Purpose:  Returns the dataspace ID with selection of defined elements
  *
  * Return:   Success:    ID for dataspace
  *           Failure:    FAIL
  *
  *-------------------------------------------------------------------------
  */
-hid_t 
+hid_t
 H5D__get_defined(const H5D_t H5_ATTR_UNUSED *dset, const H5S_t *fspace)
 {
     H5S_t *space     = NULL;
@@ -4052,7 +4052,7 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
 
     FUNC_LEAVE_NOAPI(ret_value)
-    
+
 } /* H5D__get_defined() */
 
 /*-------------------------------------------------------------------------
@@ -4065,10 +4065,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5D__erase(const H5D_t H5_ATTR_UNUSED *dset, const H5S_t H5_ATTR_UNUSED *fspace)
 {
-    herr_t                   ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 

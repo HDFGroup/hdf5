@@ -128,24 +128,21 @@ typedef enum H5D_vds_view_t {
 } H5D_vds_view_t;
 //! <!-- [H5D_vds_view_t_snip] -->
 
-
 //! <!-- [H5D_struct_chunk_info_t_snip] -->
 /**
  * Used by APIs for direct chunk chunk I/O on filtered and non-filtered structured chunks
  */
 typedef struct H5D_struct_chunk_info_t {
-    H5D_layout_t type;          /* Type of the structured chunk */
-    uint8_t num_sections;       /* Number of sections in the structured chunk */
-    uint16_t *filter_mask;      /* Array of "num_sections" size  */
-                                /* Contains filter mask for each section */
-    size_t *section_size;       /* Array of "num_sections" size */
-                                /* Contains the size of each section */
-    size_t *section_orig_size;  /* Array of "num_sections" size */
-                                /* Contains the original size of each section */
+    H5D_layout_t type;         /* Type of the structured chunk */
+    uint8_t      num_sections; /* Number of sections in the structured chunk */
+    uint16_t    *filter_mask;  /* Array of "num_sections" size  */
+                               /* Contains filter mask for each section */
+    size_t *section_size;      /* Array of "num_sections" size */
+                               /* Contains the size of each section */
+    size_t *section_orig_size; /* Array of "num_sections" size */
+                               /* Contains the original size of each section */
 } H5D_struct_chunk_info_t;
 //! <!-- [H5D_struct_chunk_info_t_snip] -->
-
-
 
 //! <!-- [H5D_append_cb_t_snip] -->
 /**
@@ -288,8 +285,8 @@ typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, unsigned filter_mask, 
  * \since 1.x.x
  *
  */
-typedef int (*H5D_struct_chunk_iter_op_t)(const hsize_t *offset, H5D_struct_chunk_info_t *chunk_info, 
-                                    haddr_t *addr, hsize_t *chunk_size, void *op_data);
+typedef int (*H5D_struct_chunk_iter_op_t)(const hsize_t *offset, H5D_struct_chunk_info_t *chunk_info,
+                                          haddr_t *addr, hsize_t *chunk_size, void *op_data);
 //! <!-- [H5D_struct_chunk_iter_op_t_snip] -->
 
 /********************/
@@ -1688,22 +1685,22 @@ H5_DLL herr_t H5Dclose(hid_t dset_id);
  * \dset_id                 to get the selection of defined elements from
  * \param[in] file_space_id Dataspace identifier containing the selection of elements to
  *                          be queried if they are defined
- * \dxpl_id                 
+ * \dxpl_id
  *
- * \return Returns a dataspace with a selection containing all defined elements 
- *         that are also selected in \p file_space_id if successful; 
+ * \return Returns a dataspace with a selection containing all defined elements
+ *         that are also selected in \p file_space_id if successful;
  *         otherwise returns #H5I_INVALID_HID.
  *
- * \details H5Dget_defined() retrieves a dataspace with only the defined 
- *          elements of a (subset of) dataset selected. The dataset is specified 
- *          by its identifier \p dset_id, and data transfer properties are defined 
- *          by \p dxpl_id. The subset of the dataset to search for defined values is 
- *          given by the selection in \p file_space_id. Setting \p file_space_id to 
- *          #H5S_ALL causes this function to return a selection containing all defined 
+ * \details H5Dget_defined() retrieves a dataspace with only the defined
+ *          elements of a (subset of) dataset selected. The dataset is specified
+ *          by its identifier \p dset_id, and data transfer properties are defined
+ *          by \p dxpl_id. The subset of the dataset to search for defined values is
+ *          given by the selection in \p file_space_id. Setting \p file_space_id to
+ *          #H5S_ALL causes this function to return a selection containing all defined
  *          values in the dataset.
  *
- *          This function is only useful for datasets with layout TBD: H5D_SPARSE_CHUNK. 
- *          For other layouts this function will simply return a copy of \p file_space_id, 
+ *          This function is only useful for datasets with layout TBD: H5D_SPARSE_CHUNK.
+ *          For other layouts this function will simply return a copy of \p file_space_id,
  *          as all elements are defined for non-sparse datasets.
  *
  * \since 1.x.x
@@ -1724,19 +1721,19 @@ H5_DLL hid_t H5Dget_defined(hid_t dset_id, hid_t file_space_id, hid_t dxpl_id);
  *
  * \dset_id                 to erase elements from
  * \param[in] file_space_id Dataspace identifier containing the selection of elements to
- *                          be erased 
+ *                          be erased
  * \dxpl_id
  *
  * \return \herr_t
  *
- * \details H5Derase() deletes elements from a dataset, specified by its identifier \p dset_id, 
- *          causing them to no longer be defined.  The part of the dataset to erase is defined 
- *          by \p file_space_id.  After this operation, reading from these elements 
- *          will return fill values, and the elements will no longer be included in the 
- *          selection returned by H5Dget_defined().  
+ * \details H5Derase() deletes elements from a dataset, specified by its identifier \p dset_id,
+ *          causing them to no longer be defined.  The part of the dataset to erase is defined
+ *          by \p file_space_id.  After this operation, reading from these elements
+ *          will return fill values, and the elements will no longer be included in the
+ *          selection returned by H5Dget_defined().
  *
- *          This function is only useful for datasets with layout TBD:H5D_SPARSE_CHUNK. 
- *          For other layouts this function will return an error. 
+ *          This function is only useful for datasets with layout TBD:H5D_SPARSE_CHUNK.
+ *          For other layouts this function will return an error.
  *
  * \since 1.x.x
  *
@@ -1765,16 +1762,16 @@ H5_DLL herr_t H5Derase(hid_t dset_id, hid_t file_space_id, hid_t dxpl_id);
  *
  * \return \herr_t
  *
- \ \details H5Dwrite_struct_chunk() writes a structured chunk specified by its 
- *          logical offset \p offset to dataset \p dset_id. The HDF5 library assembles 
- *          the structured chunk according to the information provided in the 
- *          \p chunk_info parameter and using data pointed by \p buf. 
- *          \p buf is an array of pointers to the buffers containing data for each 
- *          section of the structured chunk. 
+ \ \details H5Dwrite_struct_chunk() writes a structured chunk specified by its
+ *          logical offset \p offset to dataset \p dset_id. The HDF5 library assembles
+ *          the structured chunk according to the information provided in the
+ *          \p chunk_info parameter and using data pointed by \p buf.
+ *          \p buf is an array of pointers to the buffers containing data for each
+ *          section of the structured chunk.
  *
- *          Initially, this function will support only sparse chunks of the 
- *          fixed-size data. Such chunks have only two sections: one for the 
- *          encoded selection and the second one for data elements. 
+ *          Initially, this function will support only sparse chunks of the
+ *          fixed-size data. Such chunks have only two sections: one for the
+ *          encoded selection and the second one for data elements.
  *
  * \attention Exercise caution when using H5Dread_struct_chunk() and
  *          H5Dwrite_struct_chunk(), as they read and write data chunks directly
@@ -1807,21 +1804,21 @@ H5_DLL herr_t H5Dwrite_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t 
  *                                  dataspace
  * \param[in,out]   chunk_info      Information about the structured chunk
  * \param[out]      buf             Array of pointers to the sections of structured chunk;
- *                                  the size of the array is equal to the number of 
+ *                                  the size of the array is equal to the number of
  *                                  sections in the structured chunk
  *
  * \return \herr_t
  *
- * \details H5Dread_struct_chunk() reads a structured chunk as specified by its logical 
- *          offset \p offset in a chunked dataset \p dset_id and places data into the provided 
- *          buffers pointed by \p buf. Information about the structured chunk is returned via 
- *          the \p chunk_info parameter. \p buf is an array of pointers to the buffers into which 
- *          data for each section of the structured chunk will be read into. It is 
- *          application’s responsibility to allocate buffers of the appropriate size. 
+ * \details H5Dread_struct_chunk() reads a structured chunk as specified by its logical
+ *          offset \p offset in a chunked dataset \p dset_id and places data into the provided
+ *          buffers pointed by \p buf. Information about the structured chunk is returned via
+ *          the \p chunk_info parameter. \p buf is an array of pointers to the buffers into which
+ *          data for each section of the structured chunk will be read into. It is
+ *          application’s responsibility to allocate buffers of the appropriate size.
  *
- *          Initially, this function will support only sparse chunks of the fixed-size data. 
- *          Such chunk has only two sections: one for the encoded selection and the second 
- *          one for data elements. 
+ *          Initially, this function will support only sparse chunks of the fixed-size data.
+ *          Such chunk has only two sections: one for the encoded selection and the second
+ *          one for data elements.
  *
  * \attention Exercise caution when using H5Dread_struct_chunk() and
  *          H5Dwrite_struct_chunk(), as they read and write data chunks directly
@@ -1839,7 +1836,7 @@ H5_DLL herr_t H5Dwrite_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t 
  * \since 1.x.x
  *
  */
-H5_DLL herr_t H5Dread_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, 
+H5_DLL herr_t H5Dread_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset,
                                    H5D_struct_chunk_info_t *chunk_info, void *buf[]);
 
 /**
@@ -1859,23 +1856,23 @@ H5_DLL herr_t H5Dread_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *
  * \return \herr_t
  *
  * \details H5Dget_struct_chunk_info() retrieves the offset coordinates,
- *          \p offset, structured chunk information, \p chunk_info, 
- *          chunk's address, \p addr, and the size, \p chunk_size, 
+ *          \p offset, structured chunk information, \p chunk_info,
+ *          chunk's address, \p addr, and the size, \p chunk_size,
  *          for the dataset specified by the identifier \p dset_id and
- *          the chunk specified by the index, \p chunk_idx.  
- *          The chunk belongs to a set of chunks in the selection 
- *          specified by \p fspace_id.  If the queried chunk 
- *          does not exist in the file, the size will be set to 0 and 
- *          address to #HADDR_UNDEF.  \c NULL can be passed in for 
+ *          the chunk specified by the index, \p chunk_idx.
+ *          The chunk belongs to a set of chunks in the selection
+ *          specified by \p fspace_id.  If the queried chunk
+ *          does not exist in the file, the size will be set to 0 and
+ *          address to #HADDR_UNDEF.  \c NULL can be passed in for
  *          any \p out parameters.
  *
  * \note    Prior to HDF5 1.14.4, the reported address did not take the
  *          user block into account.
  *
- *          \p chunk_idx is the chunk index in the selection.  
- *          The index value may have a value of 0 up 
+ *          \p chunk_idx is the chunk index in the selection.
+ *          The index value may have a value of 0 up
  *          to the number of chunks stored in the file that
- *          have a nonempty intersection with the file dataspace. 
+ *          have a nonempty intersection with the file dataspace.
  *
  *          \note As of 1.10.5, the dataspace intersection is not yet
  *          supported. Hence, the index is of all the written chunks.
@@ -1898,7 +1895,8 @@ H5_DLL herr_t H5Dread_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *
  *
  */
 H5_DLL herr_t H5Dget_struct_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chunk_idx, hsize_t *offset,
-                                H5D_struct_chunk_info_t *chunk_info, haddr_t *addr, hsize_t *chunk_size);
+                                       H5D_struct_chunk_info_t *chunk_info, haddr_t *addr,
+                                       hsize_t *chunk_size);
 
 /**
  * --------------------------------------------------------------------------
@@ -1915,9 +1913,9 @@ H5_DLL herr_t H5Dget_struct_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t c
  *
  * \return \herr_t
  *
- * \details H5Dget_struct_chunk_info_by_coord() retrieves the structured 
- *          information \p chunk_info, chunk's address, \p addr and the 
- *          size, \p chunk_size, for the dataset specified by 
+ * \details H5Dget_struct_chunk_info_by_coord() retrieves the structured
+ *          information \p chunk_info, chunk's address, \p addr and the
+ *          size, \p chunk_size, for the dataset specified by
  *          the identifier \p dset_id and the chunk specified by its
  *          coordinates \p offset.
  *
@@ -1927,7 +1925,7 @@ H5_DLL herr_t H5Dget_struct_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t c
  *
  *          If the queried chunk does not exist in the file, the size will
  *          be set to 0 and address to \c HADDR_UNDEF.  The value pointed
- *          to by \p chunk_info will not be modified.  \c NULL can be passed 
+ *          to by \p chunk_info will not be modified.  \c NULL can be passed
  *          in for any \p out parameters.
  *
  * \note    Prior to HDF5 1.14.4, the reported address did not take the
@@ -1938,8 +1936,9 @@ H5_DLL herr_t H5Dget_struct_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t c
  * \since 1.x.x
  *
  */
-H5_DLL herr_t H5Dget_struct_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, 
-                                        H5D_struct_chunk_info_t *chunk_info, haddr_t *addr, hsize_t *chunk_size);
+H5_DLL herr_t H5Dget_struct_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset,
+                                                H5D_struct_chunk_info_t *chunk_info, haddr_t *addr,
+                                                hsize_t *chunk_size);
 
 /**
  * --------------------------------------------------------------------------
@@ -1954,7 +1953,7 @@ H5_DLL herr_t H5Dget_struct_chunk_info_by_coord(hid_t dset_id, const hsize_t *of
  *
  * \return \herr_t
  *
- * \details H5Dstruct_chunk_iter iterates over all structured chunks in the dataset, 
+ * \details H5Dstruct_chunk_iter iterates over all structured chunks in the dataset,
  *          calling the user supplied callback \p cb, and the callback's required
  *          data \p op_data.
  *
@@ -1972,7 +1971,8 @@ H5_DLL herr_t H5Dget_struct_chunk_info_by_coord(hid_t dset_id, const hsize_t *of
  * \since 1.x.x
  *
  */
-H5_DLL herr_t H5Dstruct_chunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_struct_chunk_iter_op_t cb, void *op_data);
+H5_DLL herr_t H5Dstruct_chunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_struct_chunk_iter_op_t cb,
+                                   void *op_data);
 
 /**
  * --------------------------------------------------------------------------

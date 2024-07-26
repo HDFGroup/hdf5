@@ -221,7 +221,7 @@ typedef enum H5VL_dataset_get_t {
     H5VL_DATASET_GET_SPACE,        /* dataspace                           */
     H5VL_DATASET_GET_SPACE_STATUS, /* space status                        */
     H5VL_DATASET_GET_STORAGE_SIZE, /* storage size                        */
-    H5VL_DATASET_GET_TYPE,          /* datatype                            */
+    H5VL_DATASET_GET_TYPE,         /* datatype                            */
     H5VL_DATASET_GET_DEFINED       /* dataspace selection of defined elements */
 } H5VL_dataset_get_t;
 
@@ -263,8 +263,8 @@ typedef struct H5VL_dataset_get_args_t {
 
         /* H5VL_DATASET_GET_DEFINED */
         struct {
-            hid_t file_space_id;    /* file dataspace selection to be queried (IN) */
-            hid_t space_id;         /* dataspace selection of defined elements (OUT) */
+            hid_t file_space_id; /* file dataspace selection to be queried (IN) */
+            hid_t space_id;      /* dataspace selection of defined elements (OUT) */
         } get_defined;
 
     } args;
@@ -301,7 +301,7 @@ typedef struct H5VL_dataset_specific_args_t {
 
         /* H5VL_DATASET_ERASE */
         struct {
-            hid_t file_space_id;    /* file dataspace selection to be erased (IN) */
+            hid_t file_space_id; /* file dataspace selection to be erased (IN) */
         } erase;
     } args;
 } H5VL_dataset_specific_args_t;

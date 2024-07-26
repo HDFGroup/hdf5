@@ -2144,7 +2144,7 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *f
  * \param[in]     section_number    An integer specifying section number of the structured chunk
  * \param[in]     idx               Sequence number within the filter pipeline of
  *                                  the filter for which information is sought
- * \param[out]    flags             Bit vector specifying certain general properties 
+ * \param[out]    flags             Bit vector specifying certain general properties
  *                                  of the filter
  * \param[in,out] buf_size          Size in bytes of \p buf buffer
  * \param[out]    buf               Buffer with auxiliary data for the filter
@@ -2199,9 +2199,10 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *f
  * \since 1.x.x
  *
  */
-H5_DLL H5Z_filter_t H5Pget_filter3(hid_t plist_id, uint64_t section_number, unsigned idx, 
-                                   uint64_t *flags /*out*/, size_t *buf_size /*in,out*/, void *buf /*out*/, 
-                                   size_t namelen /*in*/, char name[] /*out*/, unsigned *filter_config /*out*/);
+H5_DLL H5Z_filter_t H5Pget_filter3(hid_t plist_id, uint64_t section_number, unsigned idx,
+                                   uint64_t *flags /*out*/, size_t *buf_size /*in,out*/, void *buf /*out*/,
+                                   size_t namelen /*in*/, char name[] /*out*/,
+                                   unsigned *filter_config /*out*/);
 
 /**
  * \ingroup OCPL
@@ -2283,7 +2284,7 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsig
  * \return \herr_t
  *
  * \details H5Pget_filter_by_id3() returns information about a filter
- *          for a specified section in the structured chunk with the 
+ *          for a specified section in the structured chunk with the
  *          filter identifier specified in \p filter_id.
  *
  *          \p plist_id must be a dataset or group creation property list
@@ -2322,9 +2323,10 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsig
  * \since 1.x.x
  *
  */
-H5_DLL herr_t H5Pget_filter_by_id3(hid_t plist_id, uint64_t section_number, H5Z_filter_t filter_id, 
-                                   uint64_t *flags /*out*/, size_t *buf_size /*in,out*/, void *buf /*out*/, 
-                                   size_t namelen /*in*/, char name[] /*out*/, unsigned *filter_config /*out*/);
+H5_DLL herr_t H5Pget_filter_by_id3(hid_t plist_id, uint64_t section_number, H5Z_filter_t filter_id,
+                                   uint64_t *flags /*out*/, size_t *buf_size /*in,out*/, void *buf /*out*/,
+                                   size_t namelen /*in*/, char name[] /*out*/,
+                                   unsigned *filter_config /*out*/);
 
 /**
  * \ingroup OCPL
@@ -2351,7 +2353,6 @@ H5_DLL herr_t H5Pget_filter_by_id3(hid_t plist_id, uint64_t section_number, H5Z_
  *
  */
 H5_DLL int H5Pget_nfilters(hid_t plist_id);
-
 
 /**
  * \ingroup OCPL
@@ -2447,7 +2448,7 @@ H5_DLL herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int
 /**
  * \ingroup OCPL
  *
- * \brief Modifies a filter in the filter pipeline for a specified section of the 
+ * \brief Modifies a filter in the filter pipeline for a specified section of the
  *        structured chunk
  *
  * \ocpl_id{plist_id}
@@ -2462,12 +2463,12 @@ H5_DLL herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int
  *
  * \details H5Pmodify_filter2() modifies the specified \p filter in the
  *          filter pipeline for a specified section of the structured
- *          chunk. 
+ *          chunk.
  *
  *          \p section_number is an integer specifying a section in the
  *          structured chunk.
  *
- *          The \p plist_id parameter must be a dataset or group creation 
+ *          The \p plist_id parameter must be a dataset or group creation
  *          property list.
  *
  *          The \p filter, \p flags \p buf_size, and \p buf
@@ -2477,8 +2478,8 @@ H5_DLL herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int
  * \since 1.x.x
  *
  */
-H5_DLL herr_t H5Pmodify_filter2(hid_t plist_id, uint64_t section_number, H5Z_filter_t filter, 
-                                uint64_t flags, size_t buf_size, const void *buf);
+H5_DLL herr_t H5Pmodify_filter2(hid_t plist_id, uint64_t section_number, H5Z_filter_t filter, uint64_t flags,
+                                size_t buf_size, const void *buf);
 
 /**
  * \ingroup OCPL
@@ -2560,7 +2561,7 @@ H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);
  * \return \herr_t
  *
  * \details H5Premove_filter2() removes the specified \p filter for a specified
- *          \p section_number from the filter pipeline in the dataset or 
+ *          \p section_number from the filter pipeline in the dataset or
  *          group creation property list \p plist_id.
  *
  *          The \p section_number is an integer specifying a section in the
@@ -3049,19 +3050,19 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  *
  * \return \herr_t
  *
- * \details H5Pset_filter2() adds a filter and corresponding properties to the end 
- *          of an output filter pipeline.  This function can be used with 
- *          both current chunked storage and structured chunk storage 
- *          including sparse chunk.  It also addresses deficiency of 
+ * \details H5Pset_filter2() adds a filter and corresponding properties to the end
+ *          of an output filter pipeline.  This function can be used with
+ *          both current chunked storage and structured chunk storage
+ *          including sparse chunk.  It also addresses deficiency of
  *          H5Pset_filter1() in passing the filter’s data as described below.
- *          
+ *
  *          Note the following differences with H5Pset_filter1():
- *          - This function accepts a new parameter \p section_number that 
- *            specifies the section of the structured chunk to which the filter is applied. 
+ *          - This function accepts a new parameter \p section_number that
+ *            specifies the section of the structured chunk to which the filter is applied.
  *            For chunked storage, there is just one section.
- *          - Data type for the \p flags parameter is changed to uint64_t to provide 
- *            more flexibility to the VOL connectors that use the function. 
- *          - This function passes the filter’s data by using a void pointer to a buffer 
+ *          - Data type for the \p flags parameter is changed to uint64_t to provide
+ *            more flexibility to the VOL connectors that use the function.
+ *          - This function passes the filter’s data by using a void pointer to a buffer
  *            with auxiliary data for the filter instead of unsigned int c_values[].
  *
  *          \p plist_id must be either a dataset creation property list or
@@ -3077,7 +3078,7 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  *          (#H5Z_FILTER_DEFLATE) and the Fletcher32 error detection filter
  *          (#H5Z_FILTER_FLETCHER32).
  *
- *          \p section_number specifies the section number. The value 
+ *          \p section_number specifies the section number. The value
  *          is 0 to 255 when native HDF5 file format is used.
  *          For sparse chunk, the convenience flag can be used to specify
  *          a section of the structured chunk to be filtered as described below:
@@ -3085,22 +3086,22 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  *          <table>
  *           <tr>
  *            <td>#H5Z_FLAG_SPARSE_SELECTION</td>
- *            <td>Adds the filter to the filter pipeline for the encoded 
- *                selection section of the sparse chunk. It has the same 
- *                effect as passing 0. The flag will be ignored if the 
+ *            <td>Adds the filter to the filter pipeline for the encoded
+ *                selection section of the sparse chunk. It has the same
+ *                effect as passing 0. The flag will be ignored if the
  *                structured chunk is not sparse.
  *            </td>
  *           </tr>
  *           <tr>
  *            <td>#H5Z_FLAG_SPARSE_FIXED_DATA</td>
- *            <td>Adds the filter to the filter pipeline for section 1 of 
- *                the sparse chunk. It has the same effect as passing 1. 
+ *            <td>Adds the filter to the filter pipeline for section 1 of
+ *                the sparse chunk. It has the same effect as passing 1.
  *            </td>
  *           </tr>
  *           <tr>
  *            <td>#H5Z_FLAG_SPARSE_VL_DATA</td>
- *            <td>Adds the filter to the filter pipeline for section 2 of 
- *                the sparse chunk if data has variable-length datatype. 
+ *            <td>Adds the filter to the filter pipeline for section 2 of
+ *                the sparse chunk if data has variable-length datatype.
  *                It has the same effect as passing 2.
  *            </td>
  *           </tr>
@@ -3224,8 +3225,8 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  *       of the fractal heap for groups in the order in which they were
  *       set.
  *
- * \note Filters can be applied only to chunked datasets; 
- *       they cannot be used with other dataset storage methods, such as 
+ * \note Filters can be applied only to chunked datasets;
+ *       they cannot be used with other dataset storage methods, such as
  *       contiguous, compact, or external datasets.
  *
  * \note Dataset elements of variable-length and dataset region
@@ -3346,8 +3347,8 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  * \since 1.6.0
  *
  */
-H5_DLL herr_t H5Pset_filter2(hid_t plist_id, uint64_t section_number, H5Z_filter_t filter, uint64_t flags, 
-                            size_t buf_size, const void *buf);
+H5_DLL herr_t H5Pset_filter2(hid_t plist_id, uint64_t section_number, H5Z_filter_t filter, uint64_t flags,
+                             size_t buf_size, const void *buf);
 
 /**
  * \ingroup OCPL
