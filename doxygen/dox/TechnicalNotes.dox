@@ -7,7 +7,7 @@
 \li \ref subsubsec_dataset_transfer_filter
 \li \ref IOFLOW
 \li \ref TNMDC
-\li \ref MT
+\li \ref thread-safe-lib
 \li \ref SWMR
 \li \ref VDS
 \li \ref RELVERSION
@@ -16,12 +16,6 @@
 \li \ref VOL_Connector
 
  */
-
-/** \page MT HDF5 Thread Safe library
-
-\htmlinclude ThreadSafeLibrary.html
-
-*/
 
 /** \page IOFLOW HDF5 Raw I/O Flow Notes
 

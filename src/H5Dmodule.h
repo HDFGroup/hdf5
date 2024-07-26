@@ -887,7 +887,7 @@ filter.</td>
  * It is clear that the internal HDF5 filter mechanism, while extensible, does not work well with third-party
  * filters. It would be a maintenance nightmare to keep adding and supporting new compression methods
  * in HDF5. For any set of HDF5 “internal” filters, there always will be data with which the “internal”
-filters
+ * filters
  * will not achieve the optimal performance needed to address data I/O and storage problems. Thus the
  * internal HDF5 filter mechanism is enhanced to address the issues discussed above.
  *
@@ -901,7 +901,7 @@ filters
  *
  * When an application reads data compressed with a third-party HDF5 filter, the HDF5 Library will search
  * for the required filter plugin, register the filter with the library (if the filter function is not
-registered) and
+ * registered) and
  * apply it to the data on the read operation.
  *
  * For more information,
