@@ -423,7 +423,7 @@ H5FD__family_fapl_get(H5FD_t *_file)
     FUNC_ENTER_PACKAGE
 
     if (NULL == (fa = (H5FD_family_fapl_t *)H5MM_calloc(sizeof(H5FD_family_fapl_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "memory allocation failed");
 
     fa->memb_size = file->memb_size;
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(file->memb_fapl_id)))
@@ -463,7 +463,7 @@ H5FD__family_fapl_copy(const void *_old_fa)
     FUNC_ENTER_PACKAGE
 
     if (NULL == (new_fa = (H5FD_family_fapl_t *)H5MM_malloc(sizeof(H5FD_family_fapl_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "memory allocation failed");
 
     /* Copy the fields of the structure */
     H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_family_fapl_t));
@@ -671,7 +671,7 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
 
     /* Initialize file from file access properties */
     if (NULL == (file = (H5FD_family_t *)H5MM_calloc(sizeof(H5FD_family_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct");
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct");
     if (H5P_FILE_ACCESS_DEFAULT == fapl_id) {
         H5FD_family_fapl_t default_fa;
 
@@ -760,7 +760,7 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
 
             assert(n > 0);
             if (NULL == (x = (H5FD_t **)H5MM_realloc(file->memb, n * sizeof(H5FD_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to reallocate members");
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to reallocate members");
             file->amembs = n;
             file->memb   = x;
         } /* end if */
@@ -770,18 +770,23 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
          * otherwise an open failure means that we've reached the last member.
          * Allow H5F_ACC_CREAT only on the first family member.
          */
-        H5E_BEGIN_TRY
-        {
-            file->memb[file->nmembs] =
-                H5FDopen(memb_name, (0 == file->nmembs ? flags : t_flags), file->memb_fapl_id, HADDR_UNDEF);
+        if (0 == file->nmembs) {
+            if (NULL == (file->memb[file->nmembs] = H5FDopen(memb_name, (0 == file->nmembs ? flags : t_flags),
+                                                             file->memb_fapl_id, HADDR_UNDEF)))
+                HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open member file");
         }
-        H5E_END_TRY
-        if (!file->memb[file->nmembs]) {
-            if (0 == file->nmembs)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open member file");
-            H5E_clear_stack();
-            break;
+        else {
+            H5E_PAUSE_ERRORS
+            {
+                file->memb[file->nmembs] = H5FDopen(memb_name, (0 == file->nmembs ? flags : t_flags),
+                                                    file->memb_fapl_id, HADDR_UNDEF);
+            }
+            H5E_RESUME_ERRORS
+
+            if (!file->memb[file->nmembs])
+                break;
         }
+
         file->nmembs++;
     }
 
@@ -1005,7 +1010,7 @@ H5FD__family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
             H5FD_t **x = (H5FD_t **)H5MM_realloc(file->memb, n * sizeof(H5FD_t *));
 
             if (!x)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block");
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate memory block");
             file->amembs = n;
             file->memb   = x;
             file->nmembs = u;
@@ -1015,14 +1020,9 @@ H5FD__family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
         if (u >= file->nmembs || !file->memb[u]) {
             file->nmembs = MAX(file->nmembs, u + 1);
             snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, file->name, u);
-            H5E_BEGIN_TRY
-            {
-                H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
-                file->memb[u] = H5FDopen(memb_name, file->flags | H5F_ACC_CREAT, file->memb_fapl_id,
-                                         (haddr_t)file->memb_size);
-            }
-            H5E_END_TRY
-            if (NULL == file->memb[u])
+            H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
+            if (NULL == (file->memb[u] = H5FDopen(memb_name, file->flags | H5F_ACC_CREAT, file->memb_fapl_id,
+                                                  (haddr_t)file->memb_size)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open member file");
         } /* end if */
 
@@ -1082,7 +1082,7 @@ H5FD__family_get_eof(const H5FD_t *_file, H5FD_mem_t type)
      * loop with i==0.
      */
     assert(file->nmembs > 0);
-    for (i = (int)file->nmembs - 1; i >= 0; --i) {
+    for (i = (int)(file->nmembs - 1); i >= 0; --i) {
         if ((eof = H5FD_get_eof(file->memb[i], type)) != 0)
             break;
         if (0 == i)
@@ -1418,10 +1418,9 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
     bool                      default_config = false;
     hid_t                     memb_fapl_id   = H5I_INVALID_HID;
     unsigned                  current_member;
-    char                     *member_name  = NULL;
-    char                     *temp         = NULL;
-    herr_t                    delete_error = FAIL;
-    herr_t                    ret_value    = SUCCEED;
+    char                     *member_name = NULL;
+    char                     *temp        = NULL;
+    herr_t                    ret_value   = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1488,18 +1487,22 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
          * Note that this means that any missing files in the family will leave
          * undeleted members behind.
          */
-        H5E_BEGIN_TRY
-        {
-            delete_error = H5FD_delete(member_name, memb_fapl_id);
-        }
-        H5E_END_TRY
-        if (FAIL == delete_error) {
-            if (0 == current_member)
+        if (0 == current_member) {
+            if (H5FD_delete(member_name, memb_fapl_id) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete member file");
-            else
-                H5E_clear_stack();
-            break;
         }
+        else {
+            herr_t delete_error;
+
+            H5E_PAUSE_ERRORS
+            {
+                delete_error = H5FD_delete(member_name, memb_fapl_id);
+            }
+            H5E_RESUME_ERRORS
+            if (delete_error < 0)
+                break;
+        }
+
         current_member++;
     } /* end while */
 

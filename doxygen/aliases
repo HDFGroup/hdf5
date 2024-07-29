@@ -3,18 +3,26 @@ ALIASES += THG="The HDF Group"
 ################################################################################
 # Default URLs             (Note that md files do not use any aliases)
 ################################################################################
+# Default URL for HDF Group Files
 ALIASES += HDFURL="docs.hdfgroup.org/hdf5"
+# URL for archived files
 ALIASES += ARCURL="docs.hdfgroup.org/archive/support/HDF5/doc"
+# URL for RFCs
 ALIASES += RFCURL="docs.hdfgroup.org/hdf5/rfc"
+# URL for documentation
 ALIASES += DSPURL="portal.hdfgroup.org/display/HDF5"
 ALIASES += DOCURL="portal.hdfgroup.org/documentation/hdf5-docs"
+# URL for downloads
 ALIASES += DWNURL="portal.hdfgroup.org/downloads"
 ALIASES += AEXURL="support.hdfgroup.org/ftp/HDF5/examples"
 # doxygen subdir (develop, v1_14)
 ALIASES += DOXURL="hdfgroup.github.io/hdf5/develop"
 #branch name (develop, hdf5_1_14)
 ALIASES += SRCURL="github.com/HDFGroup/hdf5/blob/develop"
-
+#Other projects that contribute to HDF5
+ALIASES += PRJURL="\HDFURL/projects"
+ALIASES += HVURL="github.com/HDFGroup/hdfview/blob/master"
+ALIASES += PLURL="github.com/HDFGroup/hdf5_plugins/blob/master"
 ################################################################################
 # Styling
 ################################################################################
@@ -387,8 +395,8 @@ ALIASES += str_pad_type="<table><tr><td>#H5T_STR_NULLTERM</td><td>0</td><td>Null
 ALIASES += see_virtual=" \see Supporting Functions: H5Pget_layout(), H5Pset_layout(), H5Sget_regular_hyperslab(), H5Sis_regular_hyperslab(), H5Sselect_hyperslab() \see VDS Functions: H5Pget_virtual_count(), H5Pget_virtual_dsetname(), H5Pget_virtual_filename(), H5Pget_virtual_prefix(), H5Pget_virtual_printf_gap(), H5Pget_virtual_srcspace(), H5Pget_virtual_view(), H5Pget_virtual_vspace(), H5Pset_virtual(), H5Pset_virtual_prefix(), H5Pset_virtual_printf_gap(), H5Pset_virtual_view()"
 ALIASES += obj_info_fields="<table><tr><th>Flag</th><th>Purpose</th></tr><tr><td>#H5O_INFO_BASIC</td><td>Fill in the fileno, addr, type, and rc fields</td></tr><tr> <td>#H5O_INFO_TIME</td><td>Fill in the atime, mtime, ctime, and btime fields</td></tr><tr> <td>#H5O_INFO_NUM_ATTRS</td> <td>Fill in the num_attrs field</td></tr><tr><td>#H5O_INFO_HDR</td><td>Fill in the num_attrs field</td></tr><tr><td>#H5O_INFO_META_SIZE</td><td>Fill in the meta_size field</td></tr><tr><td>#H5O_INFO_ALL</td><td>#H5O_INFO_BASIC | #H5O_INFO_TIME | #H5O_INFO_NUM_ATTRS | #H5O_INFO_HDR | #H5O_INFO_META_SIZE</td></tr></table>"
 
-ALIASES += details_namelen{2}="Up to \p size characters of the \1 name are returned in \p name; additional characters, if any, are not returned to the user application.\n\n If the length of the \1 name, which determines the required value of \p size, is unknown, a preliminary call to \2() with the last two parameters set to NULL and zero respectively can be made. The return value of this call will be the size in bytes of the \1 name. That value, plus 1 for a NULL terminator, must then be assigned to \p size for a second \2() call, which will retrieve the actual \1 name.
-ALIASES += details_namelen_plusone{2}="Up to \p size characters of the \1 name are returned in \p name; additional characters, if any, are not returned to the user application.\n\n If the length of the \1 name, which determines the required value of \p size, is unknown, a preliminary call to \2() with the last two parameters set to NULL and zero respectively can be made. The return value of this call will be the size in bytes of the \1 name plus 1 for a NULL terminator. That value must then be assigned to \p size for a second \2() call, which will retrieve the actual \1 name.
+ALIASES += details_namelen{2}="Up to \p size characters of the \1 name are returned in \p name; additional characters, if any, are not returned to the user application.\n\n If the length of the \1 name, which determines the required value of \p size, is unknown, a preliminary call to \2() with the last two parameters set to NULL and zero respectively can be made. The return value of this call will be the size in bytes of the \1 name. That value, plus 1 for a NULL terminator, must then be assigned to \p size for a second \2() call, which will retrieve the actual \1 name."
+ALIASES += details_namelen_plusone{2}="Up to \p size characters of the \1 name are returned in \p name; additional characters, if any, are not returned to the user application.\n\n If the length of the \1 name, which determines the required value of \p size, is unknown, a preliminary call to \2() with the last two parameters set to NULL and zero respectively can be made. The return value of this call will be the size in bytes of the \1 name plus 1 for a NULL terminator. That value must then be assigned to \p size for a second \2() call, which will retrieve the actual \1 name."
 
 
 ################################################################################
