@@ -23,7 +23,6 @@ ALIASES += SRCURL="github.com/HDFGroup/hdf5/blob/hdf5_1_14"
 ALIASES += PRJURL="\HDFURL/projects"
 ALIASES += HVURL="github.com/HDFGroup/hdfview/blob/master"
 ALIASES += PLURL="github.com/HDFGroup/hdf5_plugins/blob/master"
->>>>>>> e716059... Update doxygen Learn Basics / example refs. Add Reference sections (#4640)
 ################################################################################
 # Styling
 ################################################################################
