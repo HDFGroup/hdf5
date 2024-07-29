@@ -491,6 +491,22 @@ test_vltypes_vlen_atomic(void)
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dvlen_get_buf_size");
 
+    /* Try to call H5Dvlen_get_buf_size with a wrong ID */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dvlen_get_buf_size(tid1, dataset, sid2, &size); /* IDs in wrong order */
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Dvlen_get_buf_size");
+
+    /* Try to call H5Dvlen_get_buf_size with a wrong ID */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dvlen_get_buf_size(fid1, tid1, sid2, &size); /* not a dataset ID */
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Dvlen_get_buf_size");
+
     /* Read dataset from disk */
     ret = H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, xfer_pid, rdata);
     CHECK(ret, FAIL, "H5Dread");
