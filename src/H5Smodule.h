@@ -1038,7 +1038,8 @@
  *
  * The example below shows code to create the array of region references. The references are created in an
  * array of type #H5R_ref_t. Each region is defined as a selection on the dataspace of the dataset,
- * and a reference is created using \ref H5Rcreate_region(). The call to \ref H5Rcreate_region() specifies the file,
+ * and a reference is created using \ref H5Rcreate_region(). The call to \ref H5Rcreate_region() specifies the
+ file,
  * dataset, and the dataspace with selection.
  *
  * <em>Create an array of region references</em>
