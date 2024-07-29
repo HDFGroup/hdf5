@@ -117,7 +117,7 @@ H5_HLDLL herr_t H5DSwith_new_ref(hid_t obj_id, hbool_t *with_new_ref);
  *
  *          Entries are created in the #DIMENSION_LIST and
  *          #REFERENCE_LIST attributes, as defined in section 4.2 of
- *          <a href="https://\DOCURL/HL/H5DS_Spec.pdf">
+ *          <a href="https://docs.hdfgroup.org/documentation/HDF5/HL/H5DS_Spec.pdf">
  *          HDF5 Dimension Scale Specification</a>.
  *
  *          Fails if:

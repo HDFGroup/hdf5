@@ -262,7 +262,7 @@ FORTRAN routines are similar; they begin with “h5*” and end with “_f”.
 <li>
 Java routines are similar; the routine names begin with “H5*” and are prefixed with “H5.” as the class. Constants are
 in the HDF5Constants class and are prefixed with "HDF5Constants.". The function arguments
-are usually similar, @see @ref HDF5LIB
+are usually similar, see @ref HDF5LIB
 </li>
 </ul>
 For example:

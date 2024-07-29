@@ -297,7 +297,7 @@ H5_HLRDLL herr_t H5LRcopy_region(hid_t obj_id,
  *          - #H5_ITER_NATIVE   Fastest available order
  *
  *          For more detailed information on these two parameters,
- *          @see H5Lvisit().
+ *          see H5Lvisit().
  *
  *          \p ref_type specifies the type of the reference to be used.
  *          Valid values include the following:

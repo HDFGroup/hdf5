@@ -59,7 +59,7 @@
  * attached directly to that object
  *
  * \subsection subsec_error_H5A Attribute Function Summaries
- * @see H5A reference manual
+ * see @ref H5A reference manual
  *
  * \subsection subsec_attribute_program Programming Model for Attributes
  *
@@ -97,26 +97,6 @@
  * \li Read and/or write the attribute data
  * \li Close the attribute
  * \li Close the primary data object (if appropriate)
- *
- * <table>
- * <tr><th>Create</th><th>Update</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5A_examples.c create
- *   </td>
- *   <td>
- *   \snippet{lineno} H5A_examples.c update
- *   </td>
- * <tr><th>Read</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5A_examples.c read
- *   </td>
- *   <td>
- *   \snippet{lineno} H5A_examples.c delete
- *   </td>
- * </tr>
- * </table>
  *
  * \subsection subsec_attribute_work Working with Attributes
  *
@@ -376,7 +356,7 @@
  * An HDF5 attribute is a small metadata object describing the nature and/or intended usage of a primary data
  * object. A primary data object may be a dataset, group, or committed datatype.
  *
- * @see sec_attribute
+ * @see \ref sec_attribute
  *
  */
 
