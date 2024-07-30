@@ -17136,7 +17136,7 @@ main(void)
     if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)
         TEST_ERROR;
 
-    if (TestExpress > 1)
+    if (TestExpress > 0)
         printf("***Express test mode %d.  Some tests may be skipped\n", TestExpress);
 
     /* Copy the file access property list */

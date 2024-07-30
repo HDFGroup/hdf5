@@ -15982,7 +15982,7 @@ main(void)
      *      Activate full testing when this feature is re-enabled
      *      in the future for parallel build.
      */
-    if (TestExpress > 1)
+    if (TestExpress > 0)
         printf("***Express test mode %d.  Some tests may be skipped\n", TestExpress);
     else if (TestExpress == 0) {
 #ifdef H5_HAVE_PARALLEL

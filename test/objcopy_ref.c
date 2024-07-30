@@ -1823,7 +1823,7 @@ main(void)
     h5_test_init();
     fapl = h5_fileaccess();
 
-    if (TestExpress > 1)
+    if (TestExpress > 0)
         printf("***Express test mode %d.  Some tests may be skipped\n", TestExpress);
 
     /* Copy the file access property list */
