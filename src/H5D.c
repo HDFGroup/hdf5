@@ -1874,7 +1874,7 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *s
     FUNC_ENTER_API(FAIL)
 
     /* Check args */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(dataset_id)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dataset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier");
     if (H5I_DATATYPE != H5I_get_type(type_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype identifier");
