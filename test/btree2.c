@@ -9927,7 +9927,7 @@ main(void)
     localTestExpress = TestExpress;
 
     /* For the Direct I/O driver, skip intensive tests due to poor performance */
-    if (localTestExpress < 2 && strcmp(driver_name, "direct"))
+    if (localTestExpress < 2 && !strcmp(driver_name, "direct"))
         localTestExpress = 2;
 
     if (localTestExpress > 0)
