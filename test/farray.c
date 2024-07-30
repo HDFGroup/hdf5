@@ -1634,7 +1634,7 @@ main(void)
     h5_test_init();
     fapl = h5_fileaccess();
     if (TestExpress > 1)
-        printf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode %d.  Some tests may be skipped\n", TestExpress);
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename_g, sizeof(filename_g));

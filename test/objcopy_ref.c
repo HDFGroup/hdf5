@@ -1824,7 +1824,7 @@ main(void)
     fapl = h5_fileaccess();
 
     if (TestExpress > 1)
-        printf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode %d.  Some tests may be skipped\n", TestExpress);
 
     /* Copy the file access property list */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
