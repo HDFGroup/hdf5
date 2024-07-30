@@ -9916,14 +9916,14 @@ main(void)
     unsigned         nerrors = 0;               /* Cumulative error count */
     unsigned         reopen;                    /* Whether to reopen B-tree during tests */
     const char      *driver_name;
-    bool             api_ctx_pushed = false;    /* Whether API context pushed */
-    int              localTestExpress;          /* localized TestExpress */
+    bool             api_ctx_pushed = false; /* Whether API context pushed */
+    int              localTestExpress;       /* localized TestExpress */
 
     driver_name = h5_get_test_driver_name();
 
     /* Reset library */
     h5_test_init();
-    fapl = h5_fileaccess();
+    fapl             = h5_fileaccess();
     localTestExpress = TestExpress;
 
     /* For the Direct I/O driver, skip intensive tests due to poor performance */
