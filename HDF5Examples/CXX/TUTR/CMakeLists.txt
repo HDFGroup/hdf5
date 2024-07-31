@@ -33,7 +33,7 @@ if (H5EX_BUILD_TESTING)
             -E remove
             ${testname}.h5
     )
-    if (HDF5_USING_ANALYSIS_TOOL)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME ${EXAMPLE_VARNAME}_cpp_ex_${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${EXAMPLE_VARNAME}_cpp_ex_${testname}>)
       set_tests_properties (${EXAMPLE_VARNAME}_cpp_ex_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_cpp_ex_${testname}-clearall)
     else ()

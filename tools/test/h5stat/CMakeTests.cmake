@@ -81,12 +81,12 @@
 
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_USING_ANALYSIS_TOOL)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-    else (HDF5_USING_ANALYSIS_TOOL)
+    else ()
       add_test (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -110,12 +110,12 @@
 
   macro (ADD_H5_ERR_TEST resultfile resultcode errtext)
     # If using memchecker add tests without using scripts
-    if (HDF5_USING_ANALYSIS_TOOL)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-    else (HDF5_USING_ANALYSIS_TOOL)
+    else ()
       add_test (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -141,12 +141,12 @@
 
   macro (ADD_H5_CMP_TEST resultfile resultcode errtext)
     # If using memchecker add tests without using scripts
-    if (HDF5_USING_ANALYSIS_TOOL)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-    else (HDF5_USING_ANALYSIS_TOOL)
+    else ()
       add_test (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"

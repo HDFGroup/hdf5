@@ -411,7 +411,7 @@
 
   macro (ADD_SH5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_USING_ANALYSIS_TOOL)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -441,7 +441,7 @@
 
   macro (ADD_PH5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_USING_ANALYSIS_TOOL)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME MPI_TEST_H5DIFF-${resultfile} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARGN})
       set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
       if (${resultcode})
@@ -485,7 +485,7 @@
 
   macro (ADD_SH5_CMP_TEST resultfile resultcode result_errcheck)
     # If using memchecker add tests without using scripts
-    if (HDF5_USING_ANALYSIS_TOOL)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -516,7 +516,7 @@
 
   macro (ADD_PH5_CMP_TEST resultfile resultcode result_errcheck)
     # If using memchecker add tests without using scripts
-    if (HDF5_USING_ANALYSIS_TOOL)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME MPI_TEST_H5DIFF-${resultfile} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARGN})
       set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
       if (${resultcode})
@@ -551,7 +551,7 @@
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       if ("${resultcode}" STREQUAL "2")
         add_test (
             NAME H5DIFF_UD-${testname}

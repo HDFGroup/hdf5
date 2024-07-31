@@ -139,7 +139,7 @@
 
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_USING_ANALYSIS_TOOL)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
       set_tests_properties (H5LS-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
@@ -172,7 +172,7 @@
 
   macro (ADD_H5_ERR_TEST resultfile resultcode result_errcheck)
     # If using memchecker add tests without using scripts
-    if (HDF5_USING_ANALYSIS_TOOL)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
       set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       if ("${resultcode}" STREQUAL "1")
@@ -203,7 +203,7 @@
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5LS_UD-${testname}-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -320,28 +320,22 @@
     # rather than "IEEE 16-bit little-endian float".
     if (H5_WORDS_BIGENDIAN)
       ADD_H5_TEST (tfloat16_be 0 -w80 -v tfloat16_be.h5)
-      if (NOT HDF5_USING_ANALYSIS_TOOL)
-        ADD_H5_TEST (tfloat16_be_nosupport 0 -w80 -v tfloat16_be.h5)
-        set_tests_properties (H5LS-tfloat16_be_nosupport PROPERTIES WILL_FAIL "true")
-      endif ()
+      ADD_H5_TEST (tfloat16_be_nosupport 0 -w80 -v tfloat16_be.h5)
+      set_tests_properties (H5LS-tfloat16_be_nosupport PROPERTIES WILL_FAIL "true")
     else ()
       ADD_H5_TEST (tfloat16 0 -w80 -v tfloat16.h5)
-      if (NOT HDF5_USING_ANALYSIS_TOOL)
-        ADD_H5_TEST (tfloat16_nosupport 0 -w80 -v tfloat16.h5)
-        set_tests_properties (H5LS-tfloat16_nosupport PROPERTIES WILL_FAIL "true")
-     endif ()
+      ADD_H5_TEST (tfloat16_nosupport 0 -w80 -v tfloat16.h5)
+      set_tests_properties (H5LS-tfloat16_nosupport PROPERTIES WILL_FAIL "true")
     endif ()
   else ()
     # If support is NOT available for _Float16 type, the first two tests
     # will fail as the types will be printed out as
     # "IEEE 16-bit little-endian float" and "IEEE 16-bit big-endian float"
     # rather than "native _Float16"
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
-      ADD_H5_TEST (tfloat16 0 -w80 -v tfloat16.h5)
-      set_tests_properties (H5LS-tfloat16 PROPERTIES WILL_FAIL "true")
-      ADD_H5_TEST (tfloat16_be 0 -w80 -v tfloat16_be.h5)
-      set_tests_properties (H5LS-tfloat16_be PROPERTIES WILL_FAIL "true")
-    endif ()
+    ADD_H5_TEST (tfloat16 0 -w80 -v tfloat16.h5)
+    set_tests_properties (H5LS-tfloat16 PROPERTIES WILL_FAIL "true")
+    ADD_H5_TEST (tfloat16_be 0 -w80 -v tfloat16_be.h5)
+    set_tests_properties (H5LS-tfloat16_be PROPERTIES WILL_FAIL "true")
     ADD_H5_TEST (tfloat16_nosupport 0 -w80 -v tfloat16.h5)
     ADD_H5_TEST (tfloat16_be_nosupport 0 -w80 -v tfloat16_be.h5)
   endif ()
