@@ -48,7 +48,7 @@
 #define ATTR_NAME   "root_attr"
 #define NUM_THREADS 32
 
-void *tts_attr_vlen_thread(void *);
+H5TS_THREAD_RETURN_TYPE tts_attr_vlen_thread(void *);
 
 void
 tts_attr_vlen(void)
@@ -105,18 +105,19 @@ tts_attr_vlen(void)
     CHECK(ret, H5I_INVALID_HID, "H5Tclose");
 
     /* Start multiple threads and execute tts_attr_vlen_thread() for each thread */
-    for (i = 0; i < NUM_THREADS; i++) {
-        threads[i] = H5TS_create_thread(tts_attr_vlen_thread, NULL, NULL);
-    }
+    for (i = 0; i < NUM_THREADS; i++)
+        if (H5TS_thread_create(&threads[i], tts_attr_vlen_thread, NULL) < 0)
+            TestErrPrintf("thread # %d did not start", i);
 
     /* Wait for the threads to end */
     for (i = 0; i < NUM_THREADS; i++)
-        H5TS_wait_for_thread(threads[i]);
+        if (H5TS_thread_join(threads[i], NULL) < 0)
+            TestErrPrintf("thread %d failed to join", i);
 
 } /* end tts_attr_vlen() */
 
 /* Start execution for each thread */
-void *
+H5TS_THREAD_RETURN_TYPE
 tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
 {
     hid_t       fid  = H5I_INVALID_HID; /* File ID */
@@ -163,7 +164,7 @@ tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
     ret = H5Tclose(atid);
     CHECK(ret, FAIL, "H5Aclose");
 
-    return NULL;
+    return (H5TS_thread_ret_t)0;
 } /* end tts_attr_vlen_thread() */
 
 void
