@@ -39,15 +39,12 @@
 
 #ifdef H5_HAVE_THREADSAFE
 /*
- * The per-thread error stack. pthread_once() initializes a special
- * key that will be used by all threads to create a stack specific to
- * each thread individually. The association of stacks to threads will
- * be handled by the pthread library.
+ * The per-thread error stack.
  *
  * In order for this macro to work, H5E__get_my_stack() must be preceded
  * by "H5E_stack_t *estack =".
  */
-#define H5E__get_my_stack() H5E__get_stack()
+#define H5E__get_my_stack() H5TS_get_err_stack()
 #else /* H5_HAVE_THREADSAFE */
 /*
  * The current error stack.
@@ -137,9 +134,6 @@ H5_DLLVAR hid_t H5E_last_min_id_g;
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-#ifdef H5_HAVE_THREADSAFE
-H5_DLL H5E_stack_t *H5E__get_stack(void);
-#endif /* H5_HAVE_THREADSAFE */
 H5_DLL H5E_cls_t   *H5E__register_class(const char *cls_name, const char *lib_name, const char *version);
 H5_DLL ssize_t      H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size);
 H5_DLL H5E_msg_t   *H5E__create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg);

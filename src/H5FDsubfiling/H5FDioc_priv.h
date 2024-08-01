@@ -17,12 +17,6 @@
 #ifndef H5FDioc_priv_H
 #define H5FDioc_priv_H
 
-/********************/
-/* Standard Headers */
-/********************/
-
-#include <stdatomic.h>
-
 /**************/
 /* H5 Headers */
 /**************/
@@ -35,12 +29,9 @@
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Pprivate.h"  /* Property lists                           */
+#include "H5TSprivate.h" /* Threadsafety                             */
 
 #include "H5subfiling_common.h"
-
-#include "mercury_thread.h"
-#include "mercury_thread_mutex.h"
-#include "mercury_thread_pool.h"
 
 /*
  * Some definitions for debugging the IOC VFD
@@ -211,9 +202,8 @@ typedef struct ioc_io_queue_entry {
     bool                       in_progress;
     uint32_t                   counter;
 
-    sf_work_request_t     wk_req;
-    struct hg_thread_work thread_wk;
-    int                   wk_ret;
+    sf_work_request_t wk_req;
+    int               wk_ret;
 
     /* statistics */
 #ifdef H5FD_IOC_COLLECT_STATS
@@ -369,7 +359,7 @@ typedef struct ioc_io_queue {
     int32_t               num_failed;
     int32_t               q_len;
     uint32_t              req_counter;
-    hg_thread_mutex_t     q_mutex;
+    H5TS_mutex_t          q_mutex;
 
     /* statistics */
 #ifdef H5FD_IOC_COLLECT_STATS

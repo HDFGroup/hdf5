@@ -47,6 +47,18 @@ New Features
 
     Configuration:
     -------------
+    - Added configuration option for internal threading/concurrency support:
+
+          CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)
+          Autotools:  --enable-threads    (yes/no) (Default: yes)
+
+      This option enables support for threading and concurrency algorithms
+      within the HDF5 library.  It is required for, but separate from, the
+      'threadsafe' configure option, which makes the HDF5 API safe to call from
+      multiple threads.  It is possible to enable the 'threads' option and
+      disable the 'threadsafe' option, but not vice versa.  The 'threads' option
+      must be on to enable the subfiling VFD.
+
     - Moved examples to the HDF5Examples folder in the source tree.
 
       Moved the C++ and Fortran examples from the examples folder to the HDF5Examples

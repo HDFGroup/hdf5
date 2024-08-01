@@ -439,7 +439,7 @@ if (MINGW OR NOT WINDOWS)
   foreach (other_test
       HAVE_ATTRIBUTE
       HAVE_BUILTIN_EXPECT
-      SYSTEM_SCOPE_THREADS
+      PTHREAD_BARRIER
       HAVE_SOCKLEN_T
   )
     HDF_FUNCTION_TEST (${other_test})
@@ -582,12 +582,6 @@ if (MINGW OR NOT WINDOWS)
   endif ()
 endif ()
 
-# Check for clock_gettime() CLOCK_MONOTONIC_COARSE
-set (CMAKE_EXTRA_INCLUDE_FILES time.h)
-check_type_size(CLOCK_MONOTONIC_COARSE CLOCK_MONOTONIC_COARSE_SIZE)
-if (HAVE_CLOCK_MONOTONIC_COARSE_SIZE)
-  set (${HDF_PREFIX}_HAVE_CLOCK_MONOTONIC_COARSE 1)
-endif ()
 unset (CMAKE_EXTRA_INCLUDE_FILES)
 
 #-----------------------------------------------------------------------------
