@@ -52,7 +52,7 @@ jobs:
                 aws s3 sync ./HDF5 s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/downloads --delete
 
         - name: Uncompress source (Linux)
-          run: tar -zxvf ${{ github.workspace }}/HDF5/${{ inputs.file_name }}.doxygen.zip
+          run: unzip ${{ github.workspace }}/HDF5/${{ inputs.file_name }}.doxygen.zip
 
         - name: Sync userguide to S3 bucket
           run: |
