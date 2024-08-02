@@ -344,4 +344,4 @@ H5TS_atomic_compare_exchange_strong_voidp(H5TS_atomic_voidp_t *obj, void **expec
     return ret_value;
 } /* end H5TS_atomic_compare_exchange_strong_voidp() */
 
-#endif /* H5_HAVE_THREADS */
+#endif /* H5_HAVE_STDATOMIC_H */
