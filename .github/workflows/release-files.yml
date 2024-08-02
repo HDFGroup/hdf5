@@ -73,7 +73,7 @@ jobs:
 
       # Get files created by tarball script
       - name: Get doxygen (Linux)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: docs-doxygen
               path: ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
@@ -82,94 +82,94 @@ jobs:
         run: zip -r ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip ./${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
 
       - name: Get tgz-tarball (Linux)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
 
       - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
 
       # Get files created by cmake-ctest script
       - name: Get published binary (Windows)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: zip-vs2022_cl-binary
               path: ${{ github.workspace }}
 
       - name: Get published msi binary (Windows)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: msi-vs2022_cl-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (MacOS)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: tgz-osx-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (Linux)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: tgz-ubuntu-2204_gcc-binary
               path: ${{ github.workspace }}
 
       - name: Get published deb binary (Linux)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: deb-ubuntu-2204_gcc-binary
               path: ${{ github.workspace }}
 
       - name: Get published rpm binary (Linux)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: rpm-ubuntu-2204_gcc-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (Linux S3)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: tgz-ubuntu-2204_gcc_s3-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (Windows_intel)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: zip-vs2022_intel-binary
               path: ${{ github.workspace }}
 
       - name: Get published msi binary (Windows_intel)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: msi-vs2022_intel-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (Linux_intel)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: tgz-ubuntu-2204_intel-binary
               path: ${{ github.workspace }}
 
       - name: Get published abi reports (Linux)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: abi-reports
               path: ${{ github.workspace }}
 
       - name: Get published nonversioned source (tgz)
         if: ${{ (inputs.use_environ == 'release') }}
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: tgz-tarball-nover
               path: ${{ github.workspace }}
 
       - name: Get published nonversioned source (zip)
         if: ${{ (inputs.use_environ == 'release') }}
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: zip-tarball-nover
               path: ${{ github.workspace }}
@@ -202,7 +202,7 @@ jobs:
           echo "${{ steps.get-file-base.outputs.FILE_BASE }}" > ./last-file.txt
 
       - name: Get NEWSLETTER
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: NEWSLETTER
               path: ${{ github.workspace }}
@@ -214,7 +214,7 @@ jobs:
       - name: PreRelease tag
         id: create_prerelease
         if: ${{ (inputs.use_environ == 'snapshots') }}
-        uses: softprops/action-gh-release@a74c6b72af54cfa997e81df42d94703d6313a2d0 # v2.0.6
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: true
@@ -241,7 +241,7 @@ jobs:
       - name: Release tag
         id: create_release
         if: ${{ (inputs.use_environ == 'release') }}
-        uses: softprops/action-gh-release@a74c6b72af54cfa997e81df42d94703d6313a2d0 # v2.0.6
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: false
