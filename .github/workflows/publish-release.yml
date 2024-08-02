@@ -56,5 +56,5 @@ jobs:
 
         - name: Sync userguide to S3 bucket
           run: |
-                aws s3 sync ./HDF5/doxygen s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/documentation/doxygen --delete
+                aws s3 sync ./HDF5/${{ inputs.file_name }}.doxygen s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/documentation/doxygen --delete
 
