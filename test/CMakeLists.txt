@@ -575,12 +575,9 @@ target_include_directories (ttsafe PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (ttsafe STATIC)
   target_link_libraries (ttsafe PRIVATE ${HDF5_TEST_LIB_TARGET})
-  if (NOT WIN32)
-    target_link_libraries (ttsafe PRIVATE "$<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>")
-  endif ()
 else ()
   TARGET_C_PROPERTIES (ttsafe SHARED)
-  target_link_libraries (ttsafe PRIVATE ${HDF5_TEST_LIBSH_TARGET} "$<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>")
+  target_link_libraries (ttsafe PRIVATE ${HDF5_TEST_LIBSH_TARGET})
 endif ()
 set_target_properties (ttsafe PROPERTIES FOLDER test)
 
