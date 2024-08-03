@@ -1079,8 +1079,8 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, bool follow_link, H5G_s
 
     /* Compose the path to the object by eliminating any trailing '.' components */
     name_len = strlen(name);
-    last = name + (name_len - 1);
-    while(name_len > 0) {
+    last     = name + (name_len - 1);
+    while (name_len > 0) {
         /* Trim trailing '/'s & '.'s*/
         if ('/' == *last || '.' == *last) {
             name_len--;

@@ -134,10 +134,10 @@ H5G__component(const char *name, size_t *size_p)
 char *
 H5G_normalize(const char *name)
 {
-    char    *norm;             /* Pointer to the normalized string */
-    size_t   s, d;             /* Positions within the strings */
-    bool     last_slash;       /* Flag to indicate last character was a slash */
-    char    *ret_value = NULL; /* Return value */
+    char  *norm;             /* Pointer to the normalized string */
+    size_t s, d;             /* Positions within the strings */
+    bool   last_slash;       /* Flag to indicate last character was a slash */
+    char  *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
