@@ -1051,6 +1051,9 @@ herr_t
 H5G__get_objinfo(const H5G_loc_t *loc, const char *name, bool follow_link, H5G_stat_t *statbuf /*out*/)
 {
     H5G_trav_goi_t udata;               /* User data for callback */
+    char          *obj_path = NULL;     /* Actual path to object */
+    const char    *last;                /* Pointer to last character in name string */
+    size_t         name_len;            /* Length of name */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1074,12 +1077,31 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, bool follow_link, H5G_s
                      H5G__get_objinfo_cb, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist");
 
+    /* Compose the path to the object by eliminating any trailing '.' components */
+    name_len = strlen(name);
+    last = name + (name_len - 1);
+    while(name_len > 0) {
+        /* Trim trailing '/'s & '.'s*/
+        if ('/' == *last || '.' == *last) {
+            name_len--;
+            last--;
+        }
+        else
+            break;
+    }
+    if (name_len > 0) {
+        if (NULL == (obj_path = H5MM_strdup(name)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, FAIL, "memory allocation failed for object path string");
+
+        *(obj_path + name_len) = '\0';
+    }
+
     /* If we're pointing at a soft or UD link, get the real link length and type */
-    if (0 != strcmp(name, ".") && statbuf && follow_link == 0) {
+    if (obj_path && statbuf && follow_link == 0) {
         H5L_info2_t linfo; /* Link information buffer */
 
         /* Get information about link to the object */
-        if (H5L_get_info(loc, name, &linfo) < 0)
+        if (H5L_get_info(loc, obj_path, &linfo) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get link info");
 
         if (linfo.type != H5L_TYPE_HARD) {
@@ -1095,6 +1117,8 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, bool follow_link, H5G_s
     }
 
 done:
+    H5MM_xfree(obj_path);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_objinfo() */
 
