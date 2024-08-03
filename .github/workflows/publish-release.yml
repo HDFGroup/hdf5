@@ -8,12 +8,17 @@ on:
         description: 'HDF5 Release version tag'
         type: string
         required: true
+      file_name:
+        description: 'HDF5 Release file name base'
+        type: string
+        required: true
       target_dir:
         description: 'HDF5 target bucket directory'
         type: string
         required: true
-    permissions:
-      contents: read
+
+permissions:
+  contents: read
 
 jobs:
   publish-tag:
@@ -47,9 +52,9 @@ jobs:
                 aws s3 sync ./HDF5 s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/downloads --delete
 
         - name: Uncompress source (Linux)
-          run: tar -zxvf ${{ github.workspace }}/HDF5/${{ inputs.use_hdf }}.doxygen.tar.gz
+          run: unzip ${{ github.workspace }}/HDF5/${{ inputs.file_name }}.doxygen.zip
 
         - name: Sync userguide to S3 bucket
           run: |
-                aws s3 sync ./HDF5/doxygen s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/documentation/doxygen --delete
+                aws s3 sync ./${{ inputs.file_name }}.doxygen s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/documentation/doxygen --delete
 

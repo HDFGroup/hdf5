@@ -64,23 +64,21 @@ SIMPLE_TEST(timezone = 0);
 
 #endif /* HAVE_TIMEZONE */
 
-#ifdef SYSTEM_SCOPE_THREADS
-#include <stdlib.h>
+#ifdef PTHREAD_BARRIER
 #include <pthread.h>
 
 int main(void)
 {
-    pthread_attr_t attribute;
+    pthread_barrier_t barr;
     int ret;
 
-    pthread_attr_init(&attribute);
-    ret = pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
+    ret = pthread_barrier_init(&barr, NULL, 1);
     if (ret == 0)
         return 0;
     return 1;
 }
 
-#endif /* SYSTEM_SCOPE_THREADS */
+#endif /* PTHREAD_BARRIER */
 
 #ifdef HAVE_SOCKLEN_T
 

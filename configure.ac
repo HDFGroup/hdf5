@@ -2140,8 +2140,182 @@ AM_CONDITIONAL([BUILD_SHARED_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xye
 AC_CACHE_SAVE
 
 ## ----------------------------------------------------------------------
-## Enable thread-safe version of library.  It requires Pthreads support
-## on POSIX systems.
+## Enable library-internal concurrency capabilities (threads, atomic operations,
+## mutual exclusion, condition variables, and thread-specific storage).
+##
+## Note, this is required for enabling the threadsafe API feature, but does
+## _not_ enable it, or provide threadsafety to applications calling HDF5 API
+## routines.  *Both* --enable-threads _and_ --enable-threadsafe must be provided
+## to enable threadsafety to applications.
+##
+## C11 threads (and atomics) are preferred and if available, will be chosen
+## over pthreads or Windows threading.
+##
+## We usually pick up the system Pthreads library, so --with-pthread
+## is only necessary if you are using a custom Pthreads library or if
+## your OS hides its implementation in an unusual location.
+##
+## On Windows, we use Win32 threads and no special configuration should be
+## required to use them.
+##
+AC_SUBST([THREADS])
+
+## Default is to attempt to enable thread support
+if test "X-$THREADS" = X- ; then
+  THREADS=yes
+fi
+
+
+AC_ARG_ENABLE([threads],
+              [AS_HELP_STRING([--enable-threads],
+                              [Enable threads capability. A prerequisite for enabling threadsafe API calls.
+                              [default=yes]
+                              ])],
+              [THREADS=$enableval])
+
+if test "X$THREADS" = "Xyes"; then
+    ## Allow other thread packages instead of Pthreads
+    allow_pthreads="yes"
+
+    ## ----------------------------------------------------------------------
+    ## Is the Pthreads library present?  It has a header file `pthread.h' and
+    ## a library `-lpthread' and their locations might be specified with the
+    ## `--with-pthread' command-line switch.  The value is an include path
+    ## and/or a library path.  If the library path is specified then it must
+    ## be preceded by a comma.
+    ##
+    ## The default is to use Pthreads when building with the Autotools, unless
+    ## the compiler has C11 threads or we're building w/ MinGW.
+    ##
+    ## Currently C11 threads will take priority over Pthreads and Win32 threads
+    ##
+    AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
+    AC_ARG_WITH([pthread],
+                [AS_HELP_STRING([--with-pthread=DIR],
+                                [Specify alternative path to Pthreads library when
+                                thread-safe capability is built. Set this to
+                                'yes' or the location of Pthreads when building
+                                with a compiler that has C11 threads or
+                                with MinGW and you would rather use Pthreads
+                                than C11 or Win32 threads.])],,
+                [withval=default])
+
+    ## Check for C11 threads, we want to use C11 threads unless the builder
+    ## explicitly specifies --with-pthreads=(yes | path(s))
+    AC_SUBST([HAVE_C11_THREADS]) HAVE_C11_THREADS=no
+    # Comment out check for C11 threads for now, since it conflicts with the
+    # current --std=c99 compile flags at configuration time.  When we switch to
+    # --std=c11, this can be uncommented.
+    #AC_CHECK_HEADERS([threads.h],[HAVE_THREADS_H="yes"],[HAVE_THREADS_H="no"])
+    if test "x$HAVE_THREADS_H" = "xyes"; then
+        # Default or no --> C11 threads
+        if test "$withval" = "default" -o "$withval" = "no" ; then
+            allow_pthreads="no"
+            unset HAVE_PTHREAD
+            AC_DEFINE([HAVE_C11_THREADS], [yes], [Define to yes if you have C11 threads])
+        fi
+    fi
+
+    ## If we're on MinGW, we want to use Win32 threads unless the builder
+    ## explicitly specifies --with-pthreads=(yes | path(s))
+    AC_SUBST([HAVE_WIN_THREADS]) HAVE_WIN_THREADS=no
+    if test -n "$HDF_MINGW" -a "$HDF_MINGW" = "yes" ; then
+        # Default or no --> Win32 threads
+        if test "$withval" = "default" -o "$withval" = "no" ; then
+            allow_pthreads="no"
+            unset HAVE_PTHREAD
+            AC_DEFINE([HAVE_WIN_THREADS], [yes], [Define to yes if you have win32 threads])
+        fi
+    fi
+
+    if test "$allow_pthreads" = "yes" ; then
+        case "$withval" in
+            default | yes)
+                AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
+                if test "x$HAVE_PTHREAD" = "xyes"; then
+                    AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+                fi
+                ;;
+            no)
+                AC_MSG_ERROR([Must use Pthreads with thread safety on non-Windows systems])
+                ;;
+            *)
+                case "$withval" in
+                    *,*)
+                        pthread_inc="`echo $withval | cut -f1 -d,`"
+                        pthread_lib="`echo $withval | cut -f2 -d, -s`"
+                        ;;
+                    *)
+                        if test -n "$withval"; then
+                            pthread_inc="$withval/include"
+                            pthread_lib="$withval/lib"
+                        fi
+                        ;;
+                esac
+
+                if test -n "$pthread_inc"; then
+                    saved_CPPFLAGS="$CPPFLAGS"
+                    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+                    CPPFLAGS="$CPPFLAGS -I$pthread_inc"
+                    AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
+                    AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset HAVE_PTHREAD])
+                else
+                    AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
+                fi
+
+                if test "x$HAVE_PTHREAD" = "xyes"; then
+                    if test -n "$pthread_lib"; then
+                        saved_LDFLAGS="$LDFLAGS"
+                        saved_AM_LDFLAGS="$AM_LDFLAGS"
+                        LDFLAGS="$LDFLAGS -L$pthread_lib"
+                        AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
+                        AC_CHECK_LIB([pthread], [pthread_self],,
+                                     [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD])
+                    else
+                        AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+                    fi
+                fi
+                ;;
+        esac
+
+        ## If using Pthreads, check for barrier routines
+        if test "x$HAVE_PTHREAD" = "xyes"; then
+            AC_CHECK_DECL([pthread_barrier_init],
+                          [AC_DEFINE([HAVE_PTHREAD_BARRIER], [1],
+                              [Define if has pthread_barrier_*() routines])],
+                          [],
+                          [[#include <pthread.h>]])
+        fi
+
+    fi # end of Pthreads checks
+
+    ## Check for C11 atomics
+    AC_CHECK_HEADERS([stdatomic.h],[HAVE_STDATOMIC_H="yes"],[HAVE_STDATOMIC_H="no"])
+
+fi # end of threads processing
+
+# Check to verify that a threading package was found
+AC_MSG_CHECKING([for threads support])
+if test "x$HAVE_PTHREAD" = "xno" -a "x$HAVE_WIN_THREADS" = "xno" -a "x$HAVE_C11_THREADS" = "xno"; then
+  THREADS=no
+fi
+
+case "X-$THREADS" in
+  X-no)
+    AC_MSG_RESULT([no])
+    ;;
+  X-yes)
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_THREADS], [1], [Define if we have internal threads support])
+    ;;
+  *)
+    AC_MSG_RESULT([error])
+    AC_MSG_ERROR([\'$enableval\' is not a valid threads setting])
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Enable thread-safe version of library (requires threads support)
 ##
 AC_SUBST([THREADSAFE])
 
@@ -2195,14 +2369,17 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
+if test "X${enable_threadsafe}" = "Xyes" -a "X$THREADS" = "Xno"; then
+    AC_MSG_ERROR([--enable-threadsafe given, but no threading package found.])
+fi
 
 case "X-$THREADSAFE" in
   X-|X-no)
     AC_MSG_RESULT([no])
     ;;
   X-yes)
-    THREADSAFE=yes
     AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
     ;;
   *)
     AC_MSG_RESULT([error])
@@ -2210,128 +2387,6 @@ case "X-$THREADSAFE" in
     ;;
 esac
 
-if test "X$THREADSAFE" = "Xyes"; then
-    AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
-
-    ## ----------------------------------------------------------------------
-    ## Is the Pthreads library present?  It has a header file `pthread.h' and
-    ## a library `-lpthread' and their locations might be specified with the
-    ## `--with-pthread' command-line switch.  The value is an include path
-    ## and/or a library path.  If the library path is specified then it must
-    ## be preceded by a comma.
-    ##
-    ## The default is to use Pthreads when building with the Autotools, unless
-    ## we're building w/ MinGW.
-    AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
-    AC_ARG_WITH([pthread],
-                [AS_HELP_STRING([--with-pthread=DIR],
-                                [Specify alternative path to Pthreads library when
-                                thread-safe capability is built. Set this to
-                                'yes' or the location of Pthreads when building
-                                with MinGW and you would rather use Pthreads
-                                than Win32 threads.])],,
-                [withval=default])
-
-    ## If we're on MinGW, we want to use Win32 threads unless the builder
-    ## explicitly specifies --with-pthreads=(yes | path(s))
-    mingw_use_win32_threads="no"
-    if test -n "$HDF_MINGW" -a "$HDF_MINGW" = "yes" ; then
-        # Default or no --> Win32 threads
-        if test "$withval" = "default" -o "$withval" = "no" ; then
-            mingw_use_win32_threads="yes"
-            unset HAVE_PTHREAD
-            AC_DEFINE([HAVE_WIN_THREADS], [1], [Define to 1 if you have win32 threads])
-        fi
-    fi
-
-    if test "$mingw_use_win32_threads" = "no" ; then
-        case "$withval" in
-            default | yes)
-                AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
-                if test "x$HAVE_PTHREAD" = "xyes"; then
-                    AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
-                fi
-                ;;
-            no)
-                AC_MSG_ERROR([Must use Pthreads with thread safety on non-Windows systems])
-                ;;
-            *)
-                case "$withval" in
-                    *,*)
-                        pthread_inc="`echo $withval | cut -f1 -d,`"
-                        pthread_lib="`echo $withval | cut -f2 -d, -s`"
-                        ;;
-                    *)
-                        if test -n "$withval"; then
-                            pthread_inc="$withval/include"
-                            pthread_lib="$withval/lib"
-                        fi
-                        ;;
-                esac
-
-                if test -n "$pthread_inc"; then
-                    saved_CPPFLAGS="$CPPFLAGS"
-                    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-                    CPPFLAGS="$CPPFLAGS -I$pthread_inc"
-                    AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
-                    AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset HAVE_PTHREAD])
-                else
-                    AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
-                fi
-
-                if test "x$HAVE_PTHREAD" = "xyes"; then
-                    if test -n "$pthread_lib"; then
-                        saved_LDFLAGS="$LDFLAGS"
-                        saved_AM_LDFLAGS="$AM_LDFLAGS"
-                        LDFLAGS="$LDFLAGS -L$pthread_lib"
-                        AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
-                        AC_CHECK_LIB([pthread], [pthread_self],,
-                                     [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD])
-                    else
-                        AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
-                    fi
-                fi
-                ;;
-        esac
-
-        ## ----------------------------------------------------------------------
-        ## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
-        ## is supported on this system
-        ##
-        ## Unfortunately, this probably needs to be an AC_RUN_IFELSE since
-        ## it's impossible to determine if PTHREAD_SCOPE_SYSTEM is
-        ## supported a priori. POSIX.1-2001 requires that a conformant
-        ## system need only support one of SYSTEM or PROCESS scopes.
-        ##
-        ## CROSS-COMPILING: Use a pessimistic 'no'. You can hand-hack the config
-        ##                  file if you know otherwise.
-        AC_MSG_CHECKING([Pthreads supports system scope])
-        AC_CACHE_VAL([hdf5_cv_system_scope_threads],
-            [AC_RUN_IFELSE(
-            [AC_LANG_PROGRAM([
-                #include <stdlib.h>
-                #include <pthread.h>
-            ],[
-                pthread_attr_t attribute;
-                int ret;
-
-                pthread_attr_init(&attribute);
-                ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-                exit(ret==0 ? 0 : 1);
-            ])]
-            , [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no], [hdf5_cv_system_scope_threads=no])])
-
-        if test ${hdf5_cv_system_scope_threads} = "yes"; then
-            AC_DEFINE([SYSTEM_SCOPE_THREADS], [1],
-                      [Define if your system supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM) call.])
-            AC_MSG_RESULT([yes])
-        else
-            AC_MSG_RESULT([no])
-            AC_MSG_NOTICE([Always 'no' if cross-compiling. Edit the config file if your platform supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM).])
-        fi
-
-    fi # end of Pthreads checks
-fi # end of threadsafe processing
 
 ## ----------------------------------------------------------------------
 ## Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
@@ -2904,8 +2959,8 @@ AC_SUBST([INTERNAL_DEBUG_OUTPUT])
 ## too specialized or have huge performance hits. These
 ## are not listed in the "all" packages list.
 ##
-## all_packages="AC,B2,CX,D,F,FA,FL,FS,MM,O,T,Z"
-all_packages="AC,B2,CX,D,F,MM,O,T,Z"
+## all_packages="AC,B2,CX,D,F,FA,FL,FS,MM,O,T,TS,Z"
+all_packages="AC,B2,CX,D,F,MM,O,T,TS,Z"
 
 case "X-$INTERNAL_DEBUG_OUTPUT" in
   X-yes|X-all)
@@ -3447,11 +3502,9 @@ fi
 ## Check if Subfiling I/O driver is enabled by --enable-subfiling-vfd
 ##
 AC_SUBST([SUBFILING_VFD])
-AC_SUBST([HAVE_MERCURY])
 
 ## Default is no subfiling VFD
 SUBFILING_VFD=no
-HAVE_MERCURY="no"
 
 ## Always include subfiling directory so public header files are available
 H5_CPPFLAGS="$H5_CPPFLAGS -I$ac_abs_confdir/src/H5FDsubfiling"
@@ -3497,39 +3550,10 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
        ]
     )
 
-    # Set-up mercury
-    HAVE_MERCURY="yes"
-    mercury_dir="$ac_abs_confdir/src/H5FDsubfiling/mercury"
-    mercury_inc="$mercury_dir/src/util"
-
-    H5_CPPFLAGS="$H5_CPPFLAGS -I$mercury_inc"
-
-    HAVE_STDATOMIC_H="yes"
-    AC_CHECK_HEADERS([stdatomic.h],,[HAVE_STDATOMIC_H="no"])
-    if test "x$HAVE_STDATOMIC_H" = "xno"; then
-      AC_MSG_ERROR([Subfiling VFD requires atomic operations support. C11 stdatomic.h NOT available.])
+    # Check for threads availability
+    if test "x$THREADS" = "xno"; then
+      AC_MSG_ERROR([Subfiling VFD requires thread operations support.])
     fi
-
-    # Checks for libraries.
-    AC_SEARCH_LIBS([shm_open], [rt])
-    AC_CHECK_LIB([pthread], [pthread_self],[], [echo "Error: Required library pthread not found." && exit 1])
-
-    # Perform various checks for Mercury util code
-    AC_CHECK_DECL([PTHREAD_MUTEX_ADAPTIVE_NP],
-                  [AC_DEFINE([HAVE_PTHREAD_MUTEX_ADAPTIVE_NP], [1],
-                      [Define if has PTHREAD_MUTEX_ADAPTIVE_NP])],
-                  [],
-                  [[#include <pthread.h>]])
-    AC_CHECK_DECL([pthread_condattr_setclock],
-                  [AC_DEFINE([HAVE_PTHREAD_CONDATTR_SETCLOCK], [1],
-                      [Define if has pthread_condattr_setclock()])],
-                  [],
-                  [[#include <pthread.h>]])
-    AC_CHECK_DECL([CLOCK_MONOTONIC_COARSE],
-                  [AC_DEFINE([HAVE_CLOCK_MONOTONIC_COARSE], [1],
-                      [Define if has CLOCK_MONOTONIC_COARSE])],
-                  [],
-                  [[#include <time.h>]])
 
 else
     AC_MSG_RESULT([no])
@@ -3539,8 +3563,6 @@ fi
 AM_CONDITIONAL([SUBFILING_VFD_CONDITIONAL], [test "X$SUBFILING_VFD" = "Xyes"])
 # IOC VFD is currently only built when subfiling is enabled
 AM_CONDITIONAL([IOC_VFD_CONDITIONAL], [test "X$SUBFILING_VFD" = "Xyes"])
-# Mercury is currently only needed if  subfiling is enabled
-AM_CONDITIONAL([HAVE_MERCURY_CONDITIONAL], [test "X$HAVE_MERCURY" = "Xyes"])
 
 
 ## ----------------------------------------------------------------------

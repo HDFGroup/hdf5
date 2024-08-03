@@ -60,7 +60,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -86,11 +86,15 @@ jobs:
           cmake --workflow --preset=${{ inputs.preset_name }}-MSVC --fresh
         shell: bash
 
-      - name: Publish binary (Windows)
-        id: publish-ctest-binary
+      - name: Create build folders (Windows)
         run: |
           mkdir "${{ runner.workspace }}/build"
           mkdir "${{ runner.workspace }}/build/hdf5"
+        shell: bash
+
+      - name: Publish binary (Windows)
+        id: publish-ctest-binary
+        run: |
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/README.md -Destination ${{ runner.workspace }}/build/hdf5/
@@ -102,8 +106,6 @@ jobs:
       - name: Publish msi binary (Windows)
         id: publish-ctest-msi-binary
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/README.md -Destination ${{ runner.workspace }}/build/hdf5/
@@ -164,7 +166,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -273,6 +275,12 @@ jobs:
         with:
           version: "1.9.7"
 
+      - name: Set up JDK 19
+        uses: actions/setup-java@v4
+        with:
+          java-version: '19'
+          distribution: 'temurin'
+
       - name: Set file base name (MacOS)
         id: set-file-base
         run: |
@@ -288,7 +296,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (MacOS)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -326,7 +334,7 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx.tar.gz hdf5
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx13.tar.gz hdf5
         shell: bash
 
       - name: List files in the space (MacOS)
@@ -336,6 +344,95 @@ jobs:
 
       # Save files created by ctest script
       - name: Save published binary (MacOS)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-osx13-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-osx13.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_mac_latest:
+  # MacOS w/ Clang + CMake
+  #
+    name: "MacOS Clang CMake"
+    runs-on: macos-latest
+    steps:
+      - name: Install Dependencies (MacOS_latest)
+        run: brew install ninja
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.9.7"
+
+      - name: Set up JDK 19
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set file base name (MacOS_latest)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (MacOS_latest)
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (MacOS_latest)
+        run: |
+              ls ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Uncompress source (MacOS_latest)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      # symlinks the compiler executables to a common location 
+      - name: Setup GNU Fortran
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: gcc
+          version: 12
+
+      - name: Run ctest (MacOS_latest)
+        id: run-ctest
+        run: |
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
+          cmake --workflow --preset=${{ inputs.preset_name }}-OSX-Clang --fresh
+        shell: bash
+
+      - name: Publish binary (MacOS_latest)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cd "${{ runner.workspace }}/build"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx.tar.gz hdf5
+        shell: bash
+
+      - name: List files in the space (MacOS_latest)
+        run: |
+              ls ${{ github.workspace }}
+              ls -l ${{ runner.workspace }}
+
+      # Save files created by ctest script
+      - name: Save published binary (MacOS_latest)
         uses: actions/upload-artifact@v4
         with:
               name: tgz-osx-binary
@@ -369,7 +466,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux S3)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -447,7 +544,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows_intel)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -477,11 +574,15 @@ jobs:
           cmake --workflow --preset=${{ inputs.preset_name }}-win-Intel --fresh
         shell: pwsh
 
-      - name: Publish binary (Windows_intel)
-        id: publish-ctest-binary
+      - name: Create build folders (Windows_intel)
         run: |
           mkdir "${{ runner.workspace }}/build"
           mkdir "${{ runner.workspace }}/build/hdf5"
+        shell: bash
+
+      - name: Publish binary (Windows_intel)
+        id: publish-ctest-binary
+        run: |
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/build/hdf5/
@@ -493,8 +594,6 @@ jobs:
       - name: Publish msi binary (Windows_intel)
         id: publish-ctest-msi-binary
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/build/hdf5/
@@ -557,7 +656,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_intel)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}

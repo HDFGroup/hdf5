@@ -35,7 +35,7 @@
 #define DATASETNAME "IntData"
 #define NUM_THREADS 16
 
-void *tts_acreate_thread(void *);
+H5TS_THREAD_RETURN_TYPE tts_acreate_thread(void *);
 
 typedef struct acreate_data_struct {
     hid_t dataset;
@@ -102,11 +102,13 @@ tts_acreate(void)
         attrib_data->datatype      = datatype;
         attrib_data->dataspace     = dataspace;
         attrib_data->current_index = i;
-        threads[i]                 = H5TS_create_thread(tts_acreate_thread, NULL, attrib_data);
+        if (H5TS_thread_create(&threads[i], tts_acreate_thread, attrib_data) < 0)
+            TestErrPrintf("thread # %d did not start", i);
     }
 
     for (i = 0; i < NUM_THREADS; i++)
-        H5TS_wait_for_thread(threads[i]);
+        if (H5TS_thread_join(threads[i], NULL) < 0)
+            TestErrPrintf("thread %d failed to join", i);
 
     /* verify the correctness of the test */
     for (i = 0; i < NUM_THREADS; i++) {
@@ -136,7 +138,7 @@ tts_acreate(void)
     CHECK(status, FAIL, "H5Fclose");
 } /* end tts_acreate() */
 
-void *
+H5TS_THREAD_RETURN_TYPE
 tts_acreate_thread(void *client_data)
 {
     hid_t  attribute = H5I_INVALID_HID;
@@ -161,7 +163,8 @@ tts_acreate_thread(void *client_data)
     CHECK(status, FAIL, "H5Awrite");
     status = H5Aclose(attribute);
     CHECK(status, FAIL, "H5Aclose");
-    return NULL;
+
+    return (H5TS_thread_ret_t)0;
 } /* end tts_acreate_thread() */
 
 void
