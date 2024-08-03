@@ -1043,8 +1043,14 @@ h5_show_hostname(void)
 #ifdef H5_HAVE_PARALLEL
     int mpi_rank, mpi_initialized, mpi_finalized;
 #endif
+#ifdef H5_HAVE_THREADSAFE
+    uint64_t thread_id = 0; /* ID of thread */
 
-    /* try show the process or thread id in multiple processes cases*/
+    if (H5TS_thread_id(&thread_id) < 0)
+        return;
+#endif
+
+        /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
     MPI_Initialized(&mpi_initialized);
     MPI_Finalized(&mpi_finalized);
@@ -1057,11 +1063,11 @@ h5_show_hostname(void)
     }
 #ifdef H5_HAVE_THREADSAFE
     else
-        printf("thread %" PRIu64 ".", H5TS_thread_id());
+        printf("thread %" PRIu64 ".", thread_id);
 #endif
 #else
 #ifdef H5_HAVE_THREADSAFE
-    printf("thread %" PRIu64 ".", H5TS_thread_id());
+    printf("thread %" PRIu64 ".", thread_id);
 #endif
 #endif
 #ifdef H5_HAVE_WIN32_API

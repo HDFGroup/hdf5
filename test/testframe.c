@@ -590,7 +590,7 @@ TestErrPrintf(const char *format, ...)
  * Set (control) which test will be tested.
  * SKIPTEST: skip this test
  * ONLYTEST: do only this test
- * BEGINETEST: skip all tests before this test
+ * BEGINTEST: skip all tests before this test
  *
  */
 void

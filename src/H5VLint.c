@@ -578,6 +578,12 @@ done:
     if (NULL == ret_value) {
         if (conn_rc_incr && H5VL_conn_dec_rc(vol_connector) < 0)
             HDONE_ERROR(H5E_VOL, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector");
+
+        if (new_vol_obj) {
+            if (wrap_obj && new_vol_obj->data)
+                (void)H5VL_object_unwrap(new_vol_obj);
+            (void)H5FL_FREE(H5VL_object_t, new_vol_obj);
+        }
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -698,7 +704,7 @@ H5VL_register(H5I_type_t type, void *object, H5VL_t *vol_connector, bool app_ref
     /* Set up VOL object for the passed-in data */
     /* (Does not wrap object, since it's from a VOL callback) */
     if (NULL == (vol_obj = H5VL__new_vol_obj(type, object, vol_connector, false)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "can't create VOL object");
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, H5I_INVALID_HID, "can't create VOL object");
 
     /* Register VOL object as _object_ type, for future object API calls */
     if ((ret_value = H5I_register(type, vol_obj, app_ref)) < 0)
