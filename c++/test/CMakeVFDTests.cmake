@@ -23,7 +23,7 @@ H5_CREATE_VFD_DIR()
 ##############################################################################
 ##############################################################################
 macro (ADD_VFD_TEST vfdname resultcode)
-  if (NOT HDF5_USING_ANALYSIS_TOOL)
+  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
     add_test (
         NAME CPP_VFD-${vfdname}-cpp_testhdf5
         COMMAND "${CMAKE_COMMAND}"
