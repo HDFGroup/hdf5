@@ -89,8 +89,7 @@ tts_semaphore_pingpong(void)
     herr_t        result;
 
     /* Test set up */
-    /* NOTE: ping semaphore starts at 1 */
-    result = H5TS_semaphore_init(&test_info.ping_sem, 1);
+    result = H5TS_semaphore_init(&test_info.ping_sem, 0);
     CHECK_I(result, "H5TS_semaphore_init");
     result = H5TS_semaphore_init(&test_info.pong_sem, 0);
     CHECK_I(result, "H5TS_semaphore_init");
@@ -101,6 +100,10 @@ tts_semaphore_pingpong(void)
     CHECK_I(result, "H5TS_thread_create");
     result = H5TS_thread_create(&pong_thread, pong, &test_info);
     CHECK_I(result, "H5TS_thread_create");
+
+    /* Release ping thread */
+    result = H5TS_semaphore_signal(&test_info.ping_sem);
+    CHECK_I(result, "H5TS_semaphore_signal");
 
     /* Join ping & pong threads */
     result = H5TS_thread_join(ping_thread, NULL);
