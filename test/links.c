@@ -2045,6 +2045,28 @@ test_deprec(hid_t fapl, bool new_format)
         TEST_ERROR;
     } /* end if */
 
+    /* Test for using "." for the object name */
+    if (H5Gget_objinfo(group1_id, ".", false, &sb_hard2) < 0)
+        FAIL_STACK_ERROR;
+
+    if (memcmp(&sb_hard1.objno, sb_hard2.objno, sizeof(sb_hard1.objno)) != 0) {
+        H5_FAILED();
+        puts("    Hard link test failed.  Link seems not to point to the ");
+        puts("    expected file location.");
+        TEST_ERROR;
+    } /* end if */
+
+    /* Test for using "." for the object name with a path */
+    if (H5Gget_objinfo(file_id, "///.//./group1///././.", false, &sb_hard2) < 0)
+        FAIL_STACK_ERROR;
+
+    if (memcmp(&sb_hard1.objno, sb_hard2.objno, sizeof(sb_hard1.objno)) != 0) {
+        H5_FAILED();
+        puts("    Hard link test failed.  Link seems not to point to the ");
+        puts("    expected file location.");
+        TEST_ERROR;
+    } /* end if */
+
     /* Test the soft link */
     if (H5Gget_objinfo(file_id, "/group2/soft_link_to_group1", false, &sb_soft1) < 0)
         FAIL_STACK_ERROR;
