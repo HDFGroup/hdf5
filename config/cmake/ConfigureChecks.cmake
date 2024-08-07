@@ -127,7 +127,7 @@ CHECK_INCLUDE_FILE_CONCAT ("arpa/inet.h"     ${HDF_PREFIX}_HAVE_ARPA_INET_H)
 if (WINDOWS)
   CHECK_INCLUDE_FILE_CONCAT ("shlwapi.h"         ${HDF_PREFIX}_HAVE_SHLWAPI_H)
   # Checking for StrStrIA in the library is not reliable for mingw32 to stdcall
-  set (LINK_LIBS ${LINK_LIBS} "shlwapi")
+  set (SHLWAPI_LIB "shlwapi")
 endif ()
 
 ## Check for non-standard extension quadmath.h
