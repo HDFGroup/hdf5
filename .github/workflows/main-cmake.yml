@@ -208,6 +208,7 @@ jobs:
             -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
+            -DHDF5_PACK_MACOSX_DMG:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash
         if: ${{ inputs.thread_safety != 'TS' && matrix.os != 'macos-13' && matrix.os != 'macos-latest' }}
@@ -235,6 +236,7 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_PACK_MACOSX_DMG:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash
         if: ${{ inputs.thread_safety == 'TS' }}
@@ -263,6 +265,8 @@ jobs:
             -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             -DHDF5_PACK_MACOSX_DMG:BOOL=ON \
+            -DHDF5_BUILD_FRAMEWORKS:BOOL=ON \
+            -DHDF5_PACK_MACOSX_FRAMEWORK:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash
         if: ${{ inputs.thread_safety != 'TS' && (matrix.os == 'macos-13' || matrix.os == 'macos-latest') }}
@@ -321,10 +325,26 @@ jobs:
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if: ${{ (matrix.os == 'macos-13') && (inputs.thread_safety != 'TS') }}
 
+      - name: Save published dmg binary (Mac)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-osx13-${{ inputs.build_mode }}-dmg-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Darwin.dmg
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if: ${{ (matrix.os == 'macos-13') && (inputs.thread_safety != 'TS') }}
+
       - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@v4
         with:
               name: tgz-osx-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}
+
+      - name: Save published dmg binary (Mac_latest)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-osx-${{ inputs.build_mode }}-dmg-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Darwin.dmg
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}
