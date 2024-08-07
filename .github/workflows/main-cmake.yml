@@ -210,7 +210,7 @@ jobs:
             -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash
-        if: ${{ inputs.thread_safety != 'TS' && matrix.os != 'macos-13' || matrix.os != 'macos-latest' }}
+        if: ${{ inputs.thread_safety != 'TS' && matrix.os != 'macos-13' && matrix.os != 'macos-latest' }}
 
       - name: CMake Configure (Thread-Safe)
         run: |
@@ -237,7 +237,7 @@ jobs:
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash
-        if: ${{ inputs.thread_safety == 'TS' && matrix.os != 'macos-13' || matrix.os != 'macos-latest' }}
+        if: ${{ inputs.thread_safety == 'TS' }}
 
       - name: CMake Configure (MacOS)
         run: |
@@ -265,7 +265,7 @@ jobs:
             -DHDF5_PACK_MACOSX_DMG:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash
-        if: ${{ inputs.thread_safety != 'TS' && matrix.os == 'macos-13' || matrix.os == 'macos-latest' }}
+        if: ${{ inputs.thread_safety != 'TS' && (matrix.os == 'macos-13' || matrix.os == 'macos-latest') }}
 
       #
       # BUILD
