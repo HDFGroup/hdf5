@@ -337,6 +337,18 @@ jobs:
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx13.tar.gz hdf5
         shell: bash
 
+      - name: Publish dmg binary (MacOS)
+        id: publish-ctest-dmg-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build/hdf5dmg"
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build/hdf5dmg
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5dmg
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/build/hdf5dmg
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.dmg ${{ runner.workspace }}/build/hdf5dmg
+          cd "${{ runner.workspace }}/build"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx13.dmg.tar.gz hdf5dmg
+        shell: bash
+
       - name: List files in the space (MacOS)
         run: |
               ls ${{ github.workspace }}
@@ -348,6 +360,13 @@ jobs:
         with:
               name: tgz-osx13-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-osx13.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save published dmg binary (MacOS)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-osx13-dmg-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-osx13.dmg.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_mac_latest:
@@ -426,6 +445,18 @@ jobs:
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx.tar.gz hdf5
         shell: bash
 
+      - name: Publish dmg binary (MacOS_latest)
+        id: publish-ctest-dmg-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build/hdf5dmg"
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build/hdf5dmg
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5dmg
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/build/hdf5dmg
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.dmg.tar.gz ${{ runner.workspace }}/build/hdf5dmg
+          cd "${{ runner.workspace }}/build"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx.tar.gz hdf5dmg
+        shell: bash
+
       - name: List files in the space (MacOS_latest)
         run: |
               ls ${{ github.workspace }}
@@ -437,6 +468,13 @@ jobs:
         with:
               name: tgz-osx-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-osx.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save published dmg binary (MacOS_latest)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-osx-dmg-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-osx.dmg.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_S3_linux:
