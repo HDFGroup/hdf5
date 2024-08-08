@@ -33,7 +33,6 @@ jobs:
         name:
           - "Windows MSVC"
           - "Ubuntu gcc"
-          - "MacOS-13 Clang"
           - "MacOS Clang"
 
         # This is where we list the bulk of the options for each configuration.
@@ -80,27 +79,6 @@ jobs:
             mirror_vfd: ON
             direct_vfd: ON
             ros3_vfd: ON
-            generator: "-G Ninja"
-            run_tests: true
-
-            # MacOS w/ Clang + CMake
-            #
-            # We could also build with the Autotools via brew installing them,
-            # but that seems unnecessary
-          - name: "MacOS-13 Clang"
-            os: macos-13
-            cpp: OFF
-            fortran: ON
-            java: ON
-            docs: ON
-            libaecfc: ON
-            localaec: OFF
-            zlibfc: ON
-            localzlib: OFF
-            parallel: OFF
-            mirror_vfd: ON
-            direct_vfd: OFF
-            ros3_vfd: OFF
             generator: "-G Ninja"
             run_tests: true
 
@@ -155,7 +133,7 @@ jobs:
 
       - name: Install Dependencies (macOS)
         run: brew install ninja
-        if: ${{ matrix.os == 'macos-13' || matrix.os == 'macos-latest' }}
+        if: ${{ matrix.os == 'macos-latest' }}
 
         # symlinks the compiler executables to a common location 
       - name: Install GNU Fortran (macOS)
@@ -164,7 +142,7 @@ jobs:
         with:
             compiler: gcc
             version: 12
-        if: ${{ matrix.os == 'macos-13' || matrix.os == 'macos-latest' }}
+        if: ${{ matrix.os == 'macos-latest' }}
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
@@ -285,18 +263,18 @@ jobs:
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  ${{ (matrix.os == 'ubuntu-latest') && (inputs.thread_safety != 'TS') }}
 
-      - name: Save published binary (Mac)
-        uses: actions/upload-artifact@v4
-        with:
-            name: tgz-osx13-${{ inputs.build_mode }}-binary
-            path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
-            if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if: ${{ (matrix.os == 'macos-13') && (inputs.thread_safety != 'TS') }}
-
       - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@v4
         with:
               name: tgz-osx-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}
+
+      - name: Save published dmg binary (Mac_latest)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-osx-${{ inputs.build_mode }}-dmg-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Darwin.dmg
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}
