@@ -39,6 +39,7 @@ endif ()
 # does, it appends library to the list.
 #-----------------------------------------------------------------------------
 set (LINK_LIBS "")
+set (LINK_PUB_LIBS "")
 macro (CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
   CHECK_LIBRARY_EXISTS ("${LIBRARY};${LINK_LIBS}" ${SYMBOL} "" ${VARIABLE})
   if (${VARIABLE})
@@ -127,7 +128,7 @@ CHECK_INCLUDE_FILE_CONCAT ("arpa/inet.h"     ${HDF_PREFIX}_HAVE_ARPA_INET_H)
 if (WINDOWS)
   CHECK_INCLUDE_FILE_CONCAT ("shlwapi.h"         ${HDF_PREFIX}_HAVE_SHLWAPI_H)
   # Checking for StrStrIA in the library is not reliable for mingw32 to stdcall
-  set (SHLWAPI_LIB "shlwapi")
+  set (LINK_PUB_LIBS ${LINK_PUB_LIBS} "shlwapi")
 endif ()
 
 ## Check for non-standard extension quadmath.h
