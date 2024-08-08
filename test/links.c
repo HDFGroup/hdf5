@@ -9132,7 +9132,8 @@ external_set_elink_fapl1(hid_t fapl, bool new_format)
         TEST_ERROR;
 
     /* open target object A */
-    oidA = H5Oopen(fid, "ext_linkA", lapl_idA);
+    if ((oidA = H5Oopen(fid, "ext_linkA", lapl_idA)) < 0)
+        TEST_ERROR;
 
     /* should succeed in opening the target object A in the current working directory */
     if (oidA < 0) {
@@ -9148,7 +9149,8 @@ external_set_elink_fapl1(hid_t fapl, bool new_format)
         TEST_ERROR;
 
     /* open target object B */
-    oidB = H5Oopen(fid, "ext_linkB", lapl_idB);
+    if ((oidB = H5Oopen(fid, "ext_linkB", lapl_idB)) < 0)
+        TEST_ERROR;
 
     /* should succeed in opening the target object B in the current working directory */
     if (oidB < 0) {
@@ -10118,7 +10120,8 @@ external_set_elink_cb(hid_t fapl, bool new_format)
     if (h5_using_parallel_driver(fapl, &driver_is_parallel) < 0)
         TEST_ERROR;
 
-    base_driver = H5Pget_driver(fapl);
+    if ((base_driver = H5Pget_driver(fapl)) < 0)
+        TEST_ERROR;
 
     /* Core file driver has issues when used as the member file driver for a family file */
     /* Family file driver cannot be used with family or multi drivers for member files */
@@ -13437,7 +13440,8 @@ external_file_cache(hid_t fapl, bool new_format)
     H5F_sfile_assert_num(0);
 
     /* Close fapl */
-    H5Pclose(my_fapl);
+    if (H5Pclose(my_fapl) < 0)
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
