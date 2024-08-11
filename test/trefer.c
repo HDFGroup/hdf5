@@ -2470,6 +2470,8 @@ test_reference_attr(void)
     unsigned   i;        /* Local index variables */
     ssize_t    namelen;  /* String buffer size return value  */
     char      *namebuf;  /* Buffer for attribute's or dataset's name */
+    char   *attr_name = NULL; /* name of attribute, from H5A */
+    ssize_t attr_name_size;   /* size of attribute name */
     H5O_type_t obj_type; /* Object type */
     herr_t     ret;      /* Generic return value */
 
@@ -2683,6 +2685,27 @@ test_reference_attr(void)
 
     ret = (int)H5Sget_simple_extent_npoints(sid);
     VERIFY(ret, SPACE1_DIM1, "H5Sget_simple_extent_npoints");
+
+    /* Verify attribute name */
+    attr_name_size = H5Aget_name(attr1_from_name, (size_t)0, NULL);
+    CHECK(attr_name_size, FAIL, "H5Aget_name");
+
+    if (attr_name_size > 0) {
+        attr_name = (char *)calloc((size_t)(attr_name_size + 1), sizeof(char));
+        CHECK_PTR(attr_name, "calloc");
+
+        if (attr_name) {
+            ret = (herr_t)H5Aget_name(attr1_from_name, (size_t)(attr_name_size + 1), attr_name);
+            CHECK(ret, FAIL, "H5Aget_name");
+
+            /* Verify the name info between the H5A and H5R APIs */
+            ret = strcmp(attr_name, namebuf);
+            VERIFY(ret, 0, "H5Aget_name vs H5Rget_attr_name");
+            VERIFY(attr_name_size, namelen, "H5Aget_name vs H5Rget_attr_name");
+
+            free(attr_name);
+        } /* end if */
+    }     /* end if */
 
     /* Read attribute data from disk */
     ret = H5Aread(attr1_from_name, H5T_NATIVE_UINT, rbuf);
