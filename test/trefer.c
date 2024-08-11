@@ -2467,13 +2467,13 @@ test_reference_attr(void)
     H5R_ref_t ref_wbuf[SPACE1_DIM1], /* Buffer to write to disk */
         ref_rbuf[SPACE1_DIM1];       /* Buffer read from disk */
     unsigned   wbuf[SPACE1_DIM1], rbuf[SPACE1_DIM1];
-    unsigned   i;        /* Local index variables */
-    ssize_t    namelen;  /* String buffer size return value  */
-    char      *namebuf;  /* Buffer for attribute's or dataset's name */
-    char   *attr_name = NULL; /* name of attribute, from H5A */
-    ssize_t attr_name_size;   /* size of attribute name */
-    H5O_type_t obj_type; /* Object type */
-    herr_t     ret;      /* Generic return value */
+    unsigned   i;                /* Local index variables */
+    ssize_t    namelen;          /* String buffer size return value  */
+    char      *namebuf;          /* Buffer for attribute's or dataset's name */
+    char      *attr_name = NULL; /* name of attribute, from H5A */
+    ssize_t    attr_name_size;   /* size of attribute name */
+    H5O_type_t obj_type;         /* Object type */
+    herr_t     ret;              /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Attribute Reference Functions\n"));
