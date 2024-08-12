@@ -2196,6 +2196,11 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *f
  *          \p filter_config is the bit field described in
  *          H5Zget_filter_info().
  *
+ * \par Example
+ * \snippet H5P_sparse_examples.c struct_chunk_filter2
+ *
+ * \see H5Pset_filter2(), H5Pget_filter_by_id3()
+ *
  * \since 1.x.x
  *
  */
@@ -2320,6 +2325,11 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsig
  * \version 1.8.5 Function extended to work with group creation property
  *                lists.
  *
+ * \par Example
+ * \snippet H5P_sparse_examples.c struct_chunk_filter2
+ *
+ * \see H5Pset_filter2(), H5Pget_filter3()
+ *
  * \since 1.x.x
  *
  */
@@ -2376,6 +2386,11 @@ H5_DLL int H5Pget_nfilters(hid_t plist_id);
  *
  *          H5Pget_nfilters() returns the number of filters in the pipeline
  *          for the section \p section_number, including zero (0) if there are none.
+ *
+ * \par Example
+ * \snippet H5P_sparse_examples.c struct_chunk_filter
+ *
+ * \see H5Pset_filter2, H5Pget_filter3
  *
  * \since 1.0.0
  *
@@ -2473,7 +2488,12 @@ H5_DLL herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int
  *
  *          The \p filter, \p flags \p buf_size, and \p buf
  *          parameters are used in the same manner and accept the same
- *          values as described in the discussion of H5Pset_filter3().
+ *          values as described in the discussion of H5Pset_filter2().
+ *
+ * \par Example
+ * \snippet H5P_sparse_examples.c struct_chunk_filter2
+ *
+ * \see H5Premove_filter2(), H5Pset_filter2()
  *
  * \since 1.x.x
  *
@@ -2612,6 +2632,12 @@ H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);
  *
  *          Attempting to remove a filter that is not in the filter
  *          pipeline is an error.
+ *
+ *
+ * \par Example
+ * \snippet H5P_sparse_examples.c struct_chunk_filter2
+ *
+ * \see H5Pmodify_filter2(), H5Pset_filter2()
  *
  * \since 1.x.x
  *
@@ -3341,7 +3367,11 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  *       (The SZIP filter is an exception to this rule; see H5Pset_szip()
  *       for details.)
  *
+ * \par Example
+ * \snippet H5P_sparse_examples.c struct_chunk_filter
+ *
  * \see \ref_filter_pipe, \ref_group_impls
+ *       H5Pget_nfilters2(), H5Pget_filter3(), H5Pmodify_filter2()
  *
  * \version 1.8.5 Function applied to group creation property lists.
  * \since 1.6.0
@@ -6527,6 +6557,7 @@ H5_DLL herr_t H5Pfill_value_defined(hid_t plist, H5D_fill_value_t *status);
  *
  */
 H5_DLL herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t *alloc_time /*out*/);
+
 /**
  * \ingroup DCPL
  *
@@ -6549,6 +6580,39 @@ H5_DLL herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t *alloc_time /*o
  *
  */
 H5_DLL int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[] /*out*/);
+
+/**
+ * \ingroup DCPL
+ *
+ * \brief Retrieves the size of chunks and the structured chunk storage type
+ *        for the raw data of a dataset with structured chunk layout
+ *
+ * \dcpl_id{plist_id}
+ * \param[in]  max_ndims Size of the \p dims array
+ * \param[out] dim Array to store the chunk dimensions
+ * \param[out] flag Flag to store the structured chunk storage type
+ *
+ * \return Returns chunk dimensionality if successful;
+ *         otherwise returns a negative value.
+ *
+ * \details H5Pget_struct_chunk() retrieves the size of chunks and the
+ *          structured chunk storage type for the raw data
+ *          of a structured chunk layout dataset. This function is only valid for
+ *          dataset creation property lists. At most, \p max_ndims elements
+ *          of \p dim will be initialized.
+ *
+ *          The type of structured chunk storage used will be retrieved in
+ *          \p flag. The value can be #H5D_SPARSE_CHUNK for storing sparse data
+ *          of any datatype or #H5D_VL_CHUNK for storing dense data of 
+ *          variable-length datatype.
+ *
+ * \see H5Pset_struct_chunk(), H5Pget_chunk()
+ *
+ * \since 1.x.x
+ *
+ */
+H5_DLL int H5Pget_struct_chunk(hid_t plist_id, int max_ndims, hsize_t dim[] /*out*/, unsigned *flag /*out*/);
+
 /**
  *
  * \ingroup DCPL
@@ -6971,6 +7035,7 @@ H5_DLL hid_t H5Pget_virtual_vspace(hid_t dcpl_id, size_t index);
  *
  */
 H5_DLL herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time);
+
 /**
  * \ingroup DCPL
  *
@@ -7014,6 +7079,56 @@ H5_DLL herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time);
  *
  */
 H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/]);
+
+/**
+ * \ingroup DCPL
+ *
+ * \brief Sets the size of chunks and the structured chunk storage type 
+ *        used to store a dataset with structured chunked layout
+ *
+ * \dcpl_id{plist_id}
+ * \param[in] ndims  The number of dimensions of each chunk
+ * \param[in] dim    An array defining the size, in dataset elements, of
+ *                   each chunk
+ * \param[in] flag   Flag that indicates the structured chunk storage type
+ *
+ * \return \herr_t
+ * \details H5Pset_struct_chunk() sets the size of chunks and the structured
+ *          chunk storage type used to store a dataset with structured chunk
+ *          chunked layout. This function is only valid for dataset
+ *          creation property lists.
+ *
+ *          The \p ndims parameter currently must be the same size as the
+ *          rank of the dataset.
+ *
+ *          The values of the \p dim array define the size of the chunks
+ *          to store the dataset's raw data. The unit of measure for \p dim
+ *          values is dataset elements.
+ *
+ *          The parameter \p flag indicates the type of structured chunk storage.
+ *          The value can be #H5D_SPARSE_CHUNK for storing sparse data of
+ *          any datatype or #H5D_VL_CHUNK for storing dense data of 
+ *          variable-length datatype.
+ *
+ *          As a side-effect of this function, the layout of the dataset is
+ *          changed to #H5D_STRUCT_CHUNK, if it is not already so set.
+ *
+ * \note Chunk size cannot exceed the size of a fixed-size dataset. For
+ *       example, a dataset consisting of a 5x4 fixed-size array cannot be
+ *       defined with 10x10 chunks.
+ * \note Structured chunk does not have 4GB limit on the chunk size as the 
+ *       “dense” chunk has due to API limitations.
+ *
+ * \par Example:
+ * \snippet H5D_sparse_examples.c get_defined
+ *
+ * \see H5Pget_struct_chunk(), H5Pset_chunk()
+ *
+ * \since x.x.x
+ *
+ */
+H5_DLL herr_t H5Pset_struct_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/], unsigned flag);
+
 /**
  * \ingroup DCPL
  *
@@ -7288,6 +7403,9 @@ H5_DLL herr_t H5Pset_shuffle(hid_t plist_id);
  *                           the file.
  *           - #H5D_VIRTUAL: Draw raw data from multiple datasets in
  *                           different files.
+ *           - #H5D_STRUCT_CHUNK: Compose of two or more sections 
+ *                                which together will describe the values
+ *                                in a chunk.
  *
  *          Note that a compact storage layout may affect writing data to
  *          the dataset with parallel applications. See the note in

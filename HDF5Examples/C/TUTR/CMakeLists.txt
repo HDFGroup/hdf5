@@ -83,7 +83,7 @@ if (H5EX_BUILD_TESTING)
   )
 
   macro (ADD_H5_TEST testname)
-    if (HDF5_USING_ANALYSIS_TOOL)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME ${EXAMPLE_VARNAME}_tutr_${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${EXAMPLE_VARNAME}_tutr_${testname}>)
     else ()
       add_test (

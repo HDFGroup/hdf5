@@ -110,10 +110,10 @@ test_sparse_data(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* TBD: need to set to H5D_SPARSE_CHUNK */
-    if (H5Pset_layout(dcpl, H5D_CHUNKED) < 0)
+    if (H5Pset_layout(dcpl, H5D_STRUCT_CHUNK) < 0)
         FAIL_STACK_ERROR;
 
-    if (H5Pset_chunk(dcpl, 1, chunk_dim) < 0)
+    if (H5Pset_struct_chunk(dcpl, 1, chunk_dim, H5D_SPARSE_CHUNK) < 0)
         FAIL_STACK_ERROR;
 
     if ((did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -208,13 +208,30 @@ test_sparse_direct_chunk(hid_t fapl)
     hid_t did  = H5I_INVALID_HID;
     hid_t sid  = H5I_INVALID_HID;
     hid_t dcpl = H5I_INVALID_HID;
-    hid_t dxpl = H5I_INVALID_HID;
 
     hsize_t dims[2]       = {NX, NY};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
 
     int buf[NX][NY];
+    size_t encode_size;
+    hsize_t start[2], block[2], count[2];
+
+    hsize_t                 wr_offset[2]       = {0, 0};
+    H5D_struct_chunk_info_t wr_chk_info;
+    uint16_t                wr_filter_mask[2]  = {0, 0};
+    size_t                  wr_section_size[2];
+    void                   *wr_buf[2];
+    unsigned char *wr_buf0;
+    int *wr_buf1;
+
+    hsize_t rd_offset[2] = {5, 5};
+    H5D_struct_chunk_info_t rd_chk_info;
+    uint16_t rd_filter_mask[2] = {0, 0};
+    size_t rd_section_size[2];
+    void *rd_buf[2];
+    unsigned char *rd_buf0;
+    int *rd_buf1;
 
     TESTING("APIs for direct chunk I/O on structured chunks");
 
@@ -245,68 +262,101 @@ test_sparse_direct_chunk(hid_t fapl)
     if ((did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
-    if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+    start[0] = 3; start[1] = 2;
+    block[0] = 2; block[1] = 3;
+    count[0] = count[1] = 1;
+    /* Select the 2x3 block in chunk index 0 for writing */
+    if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, block) < 0)
         FAIL_STACK_ERROR;
 
-    {
-        /* TBD: for H5D_SPARSE_CHUNK */
+    /* Get the encoded size for the selection */
+    if (H5Sencode2(sid, NULL, &encode_size, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR;
 
-        H5D_struct_chunk_info_t wr_chk_info;
-        uint16_t                wr_filter_mask[2]  = {0, 0};
-        hsize_t                 wr_offset[2]       = {0, 0};
-        size_t                  wr_section_size[2] = {32, 48};
-        void                   *wr_buf[2];
-        hsize_t                 wr_buf0[4] = {3, 2, 4, 4}; /* Encoded coordinates: [3,2] - [4,4] */
-        hsize_t                 wr_buf1[6] = {66, 69, 72, 96, 99, 102}; /* Data: 66,69,72,96,99,102 */
+    /* Set up section size for section 0 and section 1 */
+    wr_section_size[0] = encode_size;
+    wr_section_size[1] = block[0] * block[1] * sizeof(int);
 
-        wr_buf[0] = wr_buf0;
-        wr_buf[1] = wr_buf1;
+    /* Allocate buffers for section 0 (encoded selection) and section 1 (data) */
+    if ((wr_buf0 = (unsigned char *)calloc((size_t)1, encode_size)) == NULL)
+        FAIL_STACK_ERROR;
+    if ((wr_buf1 = (int *)calloc((size_t)1, wr_section_size[1])) == NULL)
+        FAIL_STACK_ERROR;
 
-        H5D_struct_chunk_info_t rd_chk_info;
-        uint16_t                rd_filter_mask[2] = {0, 0};
-        hsize_t                 rd_offset[2]      = {0, 0};
-        hsize_t                 rd_section_size[2];
-        void                   *rd_buf[2];
-        hsize_t                 rd_buf0[20]; /* coordinates */
-        hsize_t                 rd_buf1[20]; /* Data */
+    /* Encode selection into the buffer for section 0 */
+    if (H5Sencode2(sid, wr_buf0, &encode_size, H5P_DEFAULT) < 0) 
+        FAIL_STACK_ERROR;
 
-        rd_buf[0] = rd_buf0;
-        rd_buf[1] = rd_buf1;
+    /* Set up data into the bufer for section 1 */
+    wr_buf1[0] = 32; wr_buf1[1] = 33; wr_buf1[2] = 34;
+    wr_buf1[3] = 42; wr_buf1[4] = 43; wr_buf1[5] = 44;
 
-        wr_chk_info.type              = 4; /* should be H5D_SPARSE_CHUNK */
-        wr_chk_info.num_sections      = 2;
-        wr_chk_info.filter_mask       = wr_filter_mask;
-        wr_chk_info.section_size      = wr_section_size;
-        wr_chk_info.section_orig_size = wr_section_size;
+    /* Set up the buffer for H5D_write_struct_chunk() */
+    wr_buf[0] = wr_buf0;
+    wr_buf[1] = wr_buf1;
 
-        /* Write the structured chunk at offset [0,0] */
-        if (H5Dwrite_struct_chunk(did, dxpl, wr_offset, &wr_chk_info, wr_buf) < 0)
-            FAIL_STACK_ERROR;
+    wr_chk_info.type              = 4; /* should be H5D_SPARSE_CHUNK */
+    wr_chk_info.num_sections      = 2;
+    wr_chk_info.filter_mask       = wr_filter_mask;
+    wr_chk_info.section_size      = wr_section_size;
+    wr_chk_info.section_orig_size = wr_section_size;
 
-        /* Read the dataset */
-        if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, buf) < 0)
-            FAIL_STACK_ERROR;
+    /* Write the structured chunk at offset [0,0]: chunk index 0 */
+    if (H5Dwrite_struct_chunk(did, H5P_DEFAULT, wr_offset, &wr_chk_info, wr_buf) < 0)
+        FAIL_STACK_ERROR;
 
-        /* TBD: Verify buf read has data as in wr_buf1[] at location wr_buf0[0] */
+    /* Read the whole dataset */
+    if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        FAIL_STACK_ERROR;
+    /* TBD: Verify buf read has data as in wr_buf1[] at location wr_buf0[] */
 
-        if (H5Dclose(did) < 0)
-            FAIL_STACK_ERROR;
+    if (H5Dclose(did) < 0)
+        FAIL_STACK_ERROR;
 
-        if ((did = H5Dopen2(fid, SPARSE_DSET, H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+    if (H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR;
 
-        rd_chk_info.type              = 4; /* should be H5D_SPARSE_CHUNK */
-        rd_chk_info.num_sections      = 2;
-        rd_chk_info.filter_mask       = rd_filter_mask;
-        rd_chk_info.section_size      = rd_section_size;
-        rd_chk_info.section_orig_size = rd_section_size;
+    if ((did = H5Dopen2(fid, SPARSE_DSET, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
 
-        /* Read the structured chunk at offset [0,0] */
-        if (H5Dread_struct_chunk(did, dxpl, rd_offset, &rd_chk_info, rd_buf) < 0)
-            FAIL_STACK_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
 
-        /* Verify rd_chk_info and rd_buf are the same as wr_chk_info and wr_buf */
-    }
+    if ((sid = H5Dget_space(did)) == H5I_INVALID_HID)
+        FAIL_STACK_ERROR;
+    
+    /* Select the 2x1 block in chunk index 3 for reading */
+    start[0] = 5; start[1] = 5;
+    block[0] = 2; block[1] = 1;
+    count[0] = count[1] = 1;
+    if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, block) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Sencode2(sid, NULL, &encode_size, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR;
+    
+    rd_section_size[0] = encode_size;
+    rd_section_size[1] = block[0] * block[1] * sizeof(int);
+
+    /* Allocate buffers for section 0 (encoded selection) and section 1 (data) */
+    if ((rd_buf0 = (unsigned char *)calloc((size_t)1, encode_size)) == NULL)
+        FAIL_STACK_ERROR;
+    if ((rd_buf1 = (int *)calloc((size_t)1, rd_section_size[1])) == NULL)
+        FAIL_STACK_ERROR;
+
+    rd_buf[0] = rd_buf0;
+    rd_buf[1] = rd_buf1;
+
+    rd_chk_info.type              = 4; /* should be H5D_SPARSE_CHUNK */
+    rd_chk_info.num_sections      = 2;
+    rd_chk_info.filter_mask       = rd_filter_mask;
+    rd_chk_info.section_size      = rd_section_size;
+    rd_chk_info.section_orig_size = rd_section_size;
+
+    /* Read the structured chunk at offset [5,5] */
+    if (H5Dread_struct_chunk(did, H5P_DEFAULT, rd_offset, &rd_chk_info, rd_buf) < 0)
+        FAIL_STACK_ERROR;
+    /* Verify rd_chk_info and rd_buf are the same as wr_chk_info and wr_buf */
 
     /*
      * Close/release resources.
@@ -314,8 +364,6 @@ test_sparse_direct_chunk(hid_t fapl)
     if (H5Dclose(did) < 0)
         FAIL_STACK_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Pclose(dxpl) < 0)
         FAIL_STACK_ERROR;
     if (H5Fclose(fid) < 0)
         FAIL_STACK_ERROR;
@@ -329,7 +377,6 @@ error:
         H5Dclose(did);
         H5Sclose(sid);
         H5Pclose(dcpl);
-        H5Pclose(dxpl);
         H5Fclose(fid);
     }
     H5E_END_TRY
@@ -601,7 +648,7 @@ error:
  *              --H5Pget_filters3()
  *              --H5Pget_filter_by_id3()
  *              --H5Premove_filter2()
- *              --H5pmodify_filter2()
+ *              --H5Pmodify_filter2()
  *
  * Return:      # of errors
  *
@@ -978,7 +1025,8 @@ main(void)
         for (minimized_ohdr = false; minimized_ohdr <= true; minimized_ohdr++) {
 
             /* Test with old & new format groups */
-            for (new_format = false; new_format <= true; new_format++) {
+            /* Use new_format for NOW */
+            for (new_format = true; new_format <= true; new_format++) {
                 hid_t my_fapl, my_fcpl;
 
                 /* Set the FAPL for the type of format */

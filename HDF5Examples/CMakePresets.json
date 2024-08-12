@@ -49,6 +49,8 @@
       "description": "MSVC Standard Config for x64 (Release)",
       "inherits": [
         "ci-x64-Release-MSVC",
+        "ci-StdJava",
+        "ci-StdFortran",
         "ci-StdShar"
       ]
     },
@@ -57,6 +59,8 @@
       "description": "Clang Standard Config for x64 (Release)",
       "inherits": [
         "ci-x64-Release-Clang",
+        "ci-StdJava",
+        "ci-StdFortran",
         "ci-StdShar"
       ]
     },
@@ -65,6 +69,8 @@
       "description": "GNUC Standard Config for x64 (Release)",
       "inherits": [
         "ci-x64-Release-GNUC",
+        "ci-StdJava",
+        "ci-StdFortran",
         "ci-StdShar"
       ]
     },
@@ -73,6 +79,8 @@
       "description": "Intel Standard Config for x64 (Release)",
       "inherits": [
         "ci-x64-Release-Intel",
+        "ci-StdJava",
+        "ci-StdFortran",
         "ci-StdShar"
       ]
     }
@@ -98,7 +106,7 @@
       "name": "ci-StdShar-GNUC",
       "description": "GNUC Standard Build for x64 (Release)",
       "configurePreset": "ci-StdShar-GNUC",
-      "verbose": false,
+      "verbose": true,
       "inherits": [
         "ci-x64-Release-GNUC"
       ]
@@ -107,7 +115,7 @@
       "name": "ci-StdShar-Intel",
       "description": "Intel Standard Build for x64 (Release)",
       "configurePreset": "ci-StdShar-Intel",
-      "verbose": false,
+      "verbose": true,
       "inherits": [
         "ci-x64-Release-Intel"
       ]

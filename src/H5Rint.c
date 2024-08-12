@@ -837,7 +837,7 @@ H5R__get_attr_name(const H5R_ref_priv_t *ref, char *buf, size_t size)
         buf[copy_len] = '\0';
     }
 
-    ret_value = (ssize_t)(attr_name_len + 1);
+    ret_value = (ssize_t)(attr_name_len);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__get_attr_name() */

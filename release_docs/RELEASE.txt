@@ -47,6 +47,18 @@ New Features
 
     Configuration:
     -------------
+    - Added configuration option for internal threading/concurrency support:
+
+          CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)
+          Autotools:  --enable-threads    (yes/no) (Default: yes)
+
+      This option enables support for threading and concurrency algorithms
+      within the HDF5 library.  It is required for, but separate from, the
+      'threadsafe' configure option, which makes the HDF5 API safe to call from
+      multiple threads.  It is possible to enable the 'threads' option and
+      disable the 'threadsafe' option, but not vice versa.  The 'threads' option
+      must be on to enable the subfiling VFD.
+
     - Moved examples to the HDF5Examples folder in the source tree.
 
       Moved the C++ and Fortran examples from the examples folder to the HDF5Examples
@@ -811,6 +823,15 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed H5Rget_attr_name to return the length of the attribute's name
+      without the null terminator
+
+      H5Rget_file_name and H5Rget_obj_name both return the name's length
+      without the null terminator.  H5Rget_attr_name now behaves consistently
+      with the other two APIs.  Going forward, all the get character string
+      APIs in HDF5 will be modified/written in this manner, regarding the
+      length of a character string.
+
     - Fixed library to allow usage of page buffering feature for serial file
       access with parallel builds of HDF5
 
