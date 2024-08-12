@@ -250,7 +250,7 @@
       ]
     },
     {
-      "name": "ci-StdShar-OSX-Clang",
+      "name": "ci-StdShar-MACOS-Clang",
       "configurePreset": "ci-StdShar-Clang",
       "inherits": [
         "ci-x64-Release-Clang"
@@ -352,11 +352,11 @@
       ]
     },
     {
-      "name": "ci-StdShar-OSX-Clang",
+      "name": "ci-StdShar-MACOS-Clang",
       "steps": [
         {"type": "configure", "name": "ci-StdShar-Clang"},
         {"type": "build", "name": "ci-StdShar-Clang"},
-        {"type": "test", "name": "ci-StdShar-OSX-Clang"},
+        {"type": "test", "name": "ci-StdShar-MACOS-Clang"},
         {"type": "package", "name": "ci-StdShar-Clang"}
       ]
     },
