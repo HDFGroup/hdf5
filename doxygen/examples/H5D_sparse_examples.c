@@ -517,7 +517,7 @@ fail_file:;
             goto fail_get_info;
         }
 
-        // Use the offset just retrieved to obtain structured chunk info by coordindates
+        // Use the offset just retrieved to obtain structured chunk info by coordinates
         if (H5Dget_struct_chunk_info_by_coord(did, offset, NULL, &addr, &chunk_size) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_get_info;

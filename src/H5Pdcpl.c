@@ -3607,7 +3607,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_struct_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/], unsigned flag)
+H5Pset_struct_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/], unsigned H5_ATTR_UNUSED flag)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     H5O_layout_t    chunk_layout;        /* Layout information for setting chunk info */
@@ -3637,7 +3637,7 @@ H5Pset_struct_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/], uns
         chunk_layout.u.chunk.dim[u] = (uint32_t)dim[u]; /* Store user's chunk dimensions */
     }                                                   /* end for */
 
-    /* TBD: should set fields u.struct_chunk e.g. struct_type */
+    /* TBD: should set fields u.struct_chunk e.g. struct_type to parameter flag */
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))

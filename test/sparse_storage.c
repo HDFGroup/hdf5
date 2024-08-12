@@ -289,7 +289,7 @@ test_sparse_direct_chunk(hid_t fapl)
     if (H5Sencode2(sid, wr_buf0, &encode_size, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
-    /* Set up data into the bufer for section 1 */
+    /* Set up data into the buffer for section 1 */
     wr_buf1[0] = 32;
     wr_buf1[1] = 33;
     wr_buf1[2] = 34;
