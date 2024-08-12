@@ -655,7 +655,7 @@ typedef struct H5O_layout_chunk_t {
 
 typedef struct H5O_layout_struct_chunk_t {
     /* TBD: may add more fields or modify fields for structured chunk */
-    unsigned          struct_type;                   /* Structured chunk storage type */
+    unsigned struct_type;                            /* Structured chunk storage type */
                                                      /* NOW: H5D_SPARSE_CHUNK, H5D_VL_CHUK */
     H5D_chunk_index_t idx_type;                      /* Type of chunk index               */
     uint8_t           flags;                         /* Chunk layout flags                */
@@ -681,7 +681,7 @@ typedef struct H5O_layout_t {
     unsigned                       version; /* Version of message                */
     const struct H5D_layout_ops_t *ops;     /* Pointer to data layout I/O operations */
     union {
-        H5O_layout_chunk_t chunk; /* Information for chunked layout    */
+        H5O_layout_chunk_t        chunk;        /* Information for chunked layout    */
         H5O_layout_struct_chunk_t struct_chunk; /* Information for structured chunk layout    */
     } u;
     H5O_storage_t storage; /* Information for storing dataset elements */

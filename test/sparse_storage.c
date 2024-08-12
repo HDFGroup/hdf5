@@ -213,25 +213,25 @@ test_sparse_direct_chunk(hid_t fapl)
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
 
-    int buf[NX][NY];
-    size_t encode_size;
+    int     buf[NX][NY];
+    size_t  encode_size;
     hsize_t start[2], block[2], count[2];
 
-    hsize_t                 wr_offset[2]       = {0, 0};
+    hsize_t                 wr_offset[2] = {0, 0};
     H5D_struct_chunk_info_t wr_chk_info;
-    uint16_t                wr_filter_mask[2]  = {0, 0};
+    uint16_t                wr_filter_mask[2] = {0, 0};
     size_t                  wr_section_size[2];
     void                   *wr_buf[2];
-    unsigned char *wr_buf0;
-    int *wr_buf1;
+    unsigned char          *wr_buf0;
+    int                    *wr_buf1;
 
-    hsize_t rd_offset[2] = {5, 5};
+    hsize_t                 rd_offset[2] = {5, 5};
     H5D_struct_chunk_info_t rd_chk_info;
-    uint16_t rd_filter_mask[2] = {0, 0};
-    size_t rd_section_size[2];
-    void *rd_buf[2];
-    unsigned char *rd_buf0;
-    int *rd_buf1;
+    uint16_t                rd_filter_mask[2] = {0, 0};
+    size_t                  rd_section_size[2];
+    void                   *rd_buf[2];
+    unsigned char          *rd_buf0;
+    int                    *rd_buf1;
 
     TESTING("APIs for direct chunk I/O on structured chunks");
 
@@ -262,8 +262,10 @@ test_sparse_direct_chunk(hid_t fapl)
     if ((did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
-    start[0] = 3; start[1] = 2;
-    block[0] = 2; block[1] = 3;
+    start[0] = 3;
+    start[1] = 2;
+    block[0] = 2;
+    block[1] = 3;
     count[0] = count[1] = 1;
     /* Select the 2x3 block in chunk index 0 for writing */
     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, block) < 0)
@@ -284,12 +286,16 @@ test_sparse_direct_chunk(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Encode selection into the buffer for section 0 */
-    if (H5Sencode2(sid, wr_buf0, &encode_size, H5P_DEFAULT) < 0) 
+    if (H5Sencode2(sid, wr_buf0, &encode_size, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     /* Set up data into the bufer for section 1 */
-    wr_buf1[0] = 32; wr_buf1[1] = 33; wr_buf1[2] = 34;
-    wr_buf1[3] = 42; wr_buf1[4] = 43; wr_buf1[5] = 44;
+    wr_buf1[0] = 32;
+    wr_buf1[1] = 33;
+    wr_buf1[2] = 34;
+    wr_buf1[3] = 42;
+    wr_buf1[4] = 43;
+    wr_buf1[5] = 44;
 
     /* Set up the buffer for H5D_write_struct_chunk() */
     wr_buf[0] = wr_buf0;
@@ -324,17 +330,19 @@ test_sparse_direct_chunk(hid_t fapl)
 
     if ((sid = H5Dget_space(did)) == H5I_INVALID_HID)
         FAIL_STACK_ERROR;
-    
+
     /* Select the 2x1 block in chunk index 3 for reading */
-    start[0] = 5; start[1] = 5;
-    block[0] = 2; block[1] = 1;
+    start[0] = 5;
+    start[1] = 5;
+    block[0] = 2;
+    block[1] = 1;
     count[0] = count[1] = 1;
     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, block) < 0)
         FAIL_STACK_ERROR;
 
     if (H5Sencode2(sid, NULL, &encode_size, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    
+
     rd_section_size[0] = encode_size;
     rd_section_size[1] = block[0] * block[1] * sizeof(int);
 

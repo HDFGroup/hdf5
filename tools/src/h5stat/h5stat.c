@@ -1281,7 +1281,10 @@ print_dataset_info(const iter_t *iter)
             printf("\tDataset layout counts[%s]: %lu\n",
                    (u == H5D_COMPACT
                         ? "COMPACT"
-                        : (u == H5D_CONTIGUOUS ? "CONTIG" : (u == H5D_CHUNKED ? "CHUNKED" : (u == H5D_VIRTUAL ? "VIRTUAL" : "STRUCT_CHUNK")))),
+                        : (u == H5D_CONTIGUOUS
+                               ? "CONTIG"
+                               : (u == H5D_CHUNKED ? "CHUNKED"
+                                                   : (u == H5D_VIRTUAL ? "VIRTUAL" : "STRUCT_CHUNK")))),
                    iter->dset_layouts[u]);
         printf("\tNumber of external files : %lu\n", iter->nexternal);
 

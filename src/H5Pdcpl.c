@@ -161,12 +161,12 @@
 #ifdef TBD
 #define H5D_DEF_LAYOUT_STRUCT_CHUNK                                                                          \
     {                                                                                                        \
-        H5D_STRUCT_CHUNK, H5O_LAYOUT_VERSION_5, H5D_LOPS_CHUNK, {.struct_chunk = H5D_DEF_LAYOUT_STRUCT_CHUNK_INIT},          \
-            H5D_DEF_STORAGE_CHUNK                                                                            \
-    }                                                                                                        
+        H5D_STRUCT_CHUNK, H5O_LAYOUT_VERSION_5, H5D_LOPS_CHUNK,                                              \
+            {.struct_chunk = H5D_DEF_LAYOUT_STRUCT_CHUNK_INIT}, H5D_DEF_STORAGE_CHUNK                        \
+    }
 #endif
 /* TBD: same as H5D_CHUNKED */
-#define H5D_DEF_LAYOUT_STRUCT_CHUNK                                                                                 \
+#define H5D_DEF_LAYOUT_STRUCT_CHUNK                                                                          \
     {                                                                                                        \
         H5D_CHUNKED, H5O_LAYOUT_VERSION_DEFAULT, H5D_LOPS_CHUNK, {H5D_DEF_LAYOUT_CHUNK_INIT},                \
             H5D_DEF_STORAGE_CHUNK                                                                            \
@@ -316,11 +316,11 @@ static const H5O_efl_t H5D_def_efl_g = H5D_CRT_EXT_FILE_LIST_DEF;     /* Default
 static const unsigned H5O_ohdr_min_g = H5D_CRT_MIN_DSET_HDR_SIZE_DEF; /* Default object header minimization */
 
 /* Defaults for each type of layout */
-static const H5O_layout_t H5D_def_layout_compact_g = H5D_DEF_LAYOUT_COMPACT;
-static const H5O_layout_t H5D_def_layout_contig_g  = H5D_DEF_LAYOUT_CONTIG;
-static const H5O_layout_t H5D_def_layout_chunk_g   = H5D_DEF_LAYOUT_CHUNK;
-static const H5O_layout_t H5D_def_layout_struct_chunk_g   = H5D_DEF_LAYOUT_STRUCT_CHUNK;
-static const H5O_layout_t H5D_def_layout_virtual_g = H5D_DEF_LAYOUT_VIRTUAL;
+static const H5O_layout_t H5D_def_layout_compact_g      = H5D_DEF_LAYOUT_COMPACT;
+static const H5O_layout_t H5D_def_layout_contig_g       = H5D_DEF_LAYOUT_CONTIG;
+static const H5O_layout_t H5D_def_layout_chunk_g        = H5D_DEF_LAYOUT_CHUNK;
+static const H5O_layout_t H5D_def_layout_struct_chunk_g = H5D_DEF_LAYOUT_STRUCT_CHUNK;
+static const H5O_layout_t H5D_def_layout_virtual_g      = H5D_DEF_LAYOUT_VIRTUAL;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dcrt_reg_prop
@@ -1997,7 +1997,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_chunk() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_chunk
  *
@@ -3598,7 +3597,7 @@ done:
  * Purpose:	Sets the number of dimensions and the size of each chunk to
  *		the values specified.  The dimensionality of the chunk should
  *		match the dimensionality of the dataspace.
- *		It also sets the structured chunk storage type to FLAG. 
+ *		It also sets the structured chunk storage type to FLAG.
  *
  *		As a side effect, the layout method is changed to
  *		H5D_STRUCT_CHUNK.

@@ -6603,7 +6603,7 @@ H5_DLL int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[] /*out*/);
  *
  *          The type of structured chunk storage used will be retrieved in
  *          \p flag. The value can be #H5D_SPARSE_CHUNK for storing sparse data
- *          of any datatype or #H5D_VL_CHUNK for storing dense data of 
+ *          of any datatype or #H5D_VL_CHUNK for storing dense data of
  *          variable-length datatype.
  *
  * \see H5Pset_struct_chunk(), H5Pget_chunk()
@@ -7083,7 +7083,7 @@ H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*
 /**
  * \ingroup DCPL
  *
- * \brief Sets the size of chunks and the structured chunk storage type 
+ * \brief Sets the size of chunks and the structured chunk storage type
  *        used to store a dataset with structured chunked layout
  *
  * \dcpl_id{plist_id}
@@ -7107,7 +7107,7 @@ H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*
  *
  *          The parameter \p flag indicates the type of structured chunk storage.
  *          The value can be #H5D_SPARSE_CHUNK for storing sparse data of
- *          any datatype or #H5D_VL_CHUNK for storing dense data of 
+ *          any datatype or #H5D_VL_CHUNK for storing dense data of
  *          variable-length datatype.
  *
  *          As a side-effect of this function, the layout of the dataset is
@@ -7116,7 +7116,7 @@ H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*
  * \note Chunk size cannot exceed the size of a fixed-size dataset. For
  *       example, a dataset consisting of a 5x4 fixed-size array cannot be
  *       defined with 10x10 chunks.
- * \note Structured chunk does not have 4GB limit on the chunk size as the 
+ * \note Structured chunk does not have 4GB limit on the chunk size as the
  *       “dense” chunk has due to API limitations.
  *
  * \par Example:
@@ -7403,7 +7403,7 @@ H5_DLL herr_t H5Pset_shuffle(hid_t plist_id);
  *                           the file.
  *           - #H5D_VIRTUAL: Draw raw data from multiple datasets in
  *                           different files.
- *           - #H5D_STRUCT_CHUNK: Compose of two or more sections 
+ *           - #H5D_STRUCT_CHUNK: Compose of two or more sections
  *                                which together will describe the values
  *                                in a chunk.
  *

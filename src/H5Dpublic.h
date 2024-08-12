@@ -52,11 +52,10 @@ typedef enum H5D_layout_t {
 } H5D_layout_t;
 //! <!-- [H5D_layout_t_snip] -->
 
-
 /* Types of H5D_STRUCT_CHUNK storage */
 /* TBD: H5D_SPARSE_CHUNK is the default storage type for H5D_STRUCT_CHUNK layout when not specified */
-#define H5D_SPARSE_CHUNK    0 /* To store sparse data of any datatype */
-#define H5D_VL_CHUNK        1 /* To store dense data of variable-length datatype */
+#define H5D_SPARSE_CHUNK 0 /* To store sparse data of any datatype */
+#define H5D_VL_CHUNK     1 /* To store dense data of variable-length datatype */
 
 //! <!-- [H5D_chunk_index_t_snip] -->
 /**
@@ -1769,12 +1768,12 @@ H5_DLL herr_t H5Derase(hid_t dset_id, hid_t file_space_id, hid_t dxpl_id);
  *
  * \return \herr_t
  *
- * \details H5Dwrite_struct_chunk() writes a structured chunk specified by its 
- *          logical offset \p offset to dataset \p dset_id. The HDF5 library assembles 
- *          the structured chunk according to the information provided in the 
- *          \p chunk_info parameter and using data pointed by \p buf. 
- *          \p buf is an array of pointers to the buffers containing data for each 
- *          section of the structured chunk. 
+ * \details H5Dwrite_struct_chunk() writes a structured chunk specified by its
+ *          logical offset \p offset to dataset \p dset_id. The HDF5 library assembles
+ *          the structured chunk according to the information provided in the
+ *          \p chunk_info parameter and using data pointed by \p buf.
+ *          \p buf is an array of pointers to the buffers containing data for each
+ *          section of the structured chunk.
  *
  *          Initially, this function will support only sparse chunks of the
  *          fixed-size data. Such chunks have only two sections: one for the
@@ -1913,7 +1912,8 @@ H5_DLL herr_t H5Dread_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *
  *
  * \since 1.x.x
  *
- * \see H5Dget_struct_chunk_info_by_coord(), H5Dstruct_chunk_iter(), H5Dwrite_struct_chunk(), H5Dread_struct_chunk()
+ * \see H5Dget_struct_chunk_info_by_coord(), H5Dstruct_chunk_iter(), H5Dwrite_struct_chunk(),
+ * H5Dread_struct_chunk()
  *
  */
 H5_DLL herr_t H5Dget_struct_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chunk_idx, hsize_t *offset,
