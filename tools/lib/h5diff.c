@@ -1746,7 +1746,7 @@ handle_worker_request(char *worker_tasks, int *n_busy_tasks, diff_opt_t *opts, h
     MPI_Status         status;
     int                task_idx  = 0;
     int                source    = 0;
-    herr_t             ret_value = H5DIFF_NO_ERR;
+    diff_err_t         ret_value = H5DIFF_NO_ERR;
 
     /* Must have at least one busy worker task */
     assert(*n_busy_tasks > 0);

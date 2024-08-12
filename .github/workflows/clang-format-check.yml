@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.7
     - name: Run clang-format style check for C and Java code
-      uses: DoozyX/clang-format-lint-action@v0.13
+      uses: DoozyX/clang-format-lint-action@v0.17
       with:
         source: '.'
         extensions: 'c,h,cpp,hpp,java'

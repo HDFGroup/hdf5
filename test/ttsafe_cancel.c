@@ -17,7 +17,7 @@
  *
  * The main thread spawns a child to perform a series of dataset writes
  * to a hdf5 file. The main thread and child thread synchronizes within
- * a callback function called during a H5Diterate call afterwhich the
+ * a callback function called during a H5Diterate call after which the
  * main thread attempts to cancel the child thread.
  *
  * The cancellation should only work after the child thread has safely
@@ -30,7 +30,7 @@
 #include "ttsafe.h"
 
 #ifdef H5_HAVE_THREADSAFE
-#ifndef H5_HAVE_WIN_THREADS
+#ifdef H5_HAVE_PTHREAD_H
 
 #define FILENAME    "ttsafe_cancel.h5"
 #define DATASETNAME "commonname"
@@ -47,31 +47,19 @@ typedef struct cleanup_struct {
     hid_t dataspace;
 } cancel_cleanup_t;
 
-pthread_t       childthread;
-pthread_mutex_t mutex;
-pthread_cond_t  cond;
+pthread_t             childthread;
+static H5TS_barrier_t barrier;
 
 void
 tts_cancel(void)
 {
-    pthread_attr_t            attribute;
-    hid_t                     dataset;
-    int                       buffer;
-    int H5_ATTR_NDEBUG_UNUSED ret;
+    hid_t dataset;
+    int   buffer;
+    int   ret;
 
-    /* make thread scheduling global */
-    ret = pthread_attr_init(&attribute);
-    assert(ret == 0);
-#ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
-    ret = pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-    assert(ret == 0);
-#endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
-
-    /* Initialize mutex & condition variables */
-    ret = pthread_mutex_init(&mutex, NULL);
-    assert(ret == 0);
-    ret = pthread_cond_init(&cond, NULL);
-    assert(ret == 0);
+    /* Initialize barrier */
+    ret = H5TS_barrier_init(&barrier, 2);
+    CHECK_I(ret, "H5TS_barrier_init");
 
     /*
      * Create a hdf5 file using H5F_ACC_TRUNC access, default file
@@ -79,9 +67,10 @@ tts_cancel(void)
      */
     cancel_file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     assert(cancel_file >= 0);
-    ret = pthread_create(&childthread, &attribute, tts_cancel_thread, NULL);
+    ret = pthread_create(&childthread, NULL, tts_cancel_thread, NULL);
     assert(ret == 0);
-    tts_cancel_barrier();
+    ret = H5TS_barrier_wait(&barrier);
+    assert(ret == 0);
     ret = pthread_cancel(childthread);
     assert(ret == 0);
 
@@ -98,9 +87,8 @@ tts_cancel(void)
     ret = H5Fclose(cancel_file);
     assert(ret >= 0);
 
-    /* Destroy the thread attribute */
-    ret = pthread_attr_destroy(&attribute);
-    assert(ret == 0);
+    ret = H5TS_barrier_destroy(&barrier);
+    CHECK_I(ret, "H5TS_barrier_destroy");
 } /* end tts_cancel() */
 
 void *
@@ -177,7 +165,9 @@ tts_cancel_callback(void *elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_ATTR_U
     int    value   = *(int *)elem;
     herr_t status;
 
-    tts_cancel_barrier();
+    status = H5TS_barrier_wait(&barrier);
+    CHECK_I(status, "H5TS_barrier_wait");
+
     HDsleep(3);
 
     if (value != 1) {
@@ -208,37 +198,7 @@ cancellation_cleanup(void *arg)
     CHECK(status, FAIL, "H5Tclose");
     status = H5Sclose(cleanup_structure->dataspace);
     CHECK(status, FAIL, "H5Sclose");
-
-    /* retained for debugging */
-    /*  print_func("cancellation noted, cleaning up ... \n"); */
 } /* end cancellation_cleanup() */
-
-/*
- * Artificial (and specific to this test) barrier to keep track of whether
- * both the main and child threads have reached a point in the program.
- */
-void
-tts_cancel_barrier(void)
-{
-    static int count = 2;
-    int        status;
-
-    status = pthread_mutex_lock(&mutex);
-    VERIFY(status, 0, "pthread_mutex_lock");
-
-    if (count != 1) {
-        count--;
-        status = pthread_cond_wait(&cond, &mutex);
-        VERIFY(status, 0, "pthread_cond_wait");
-    }
-    else {
-        status = pthread_cond_signal(&cond);
-        VERIFY(status, 0, "pthread_cond_signal");
-    }
-
-    status = pthread_mutex_unlock(&mutex);
-    VERIFY(status, 0, "pthread_mutex_unlock");
-} /* end tts_cancel_barrier() */
 
 void
 cleanup_cancel(void)
@@ -246,5 +206,5 @@ cleanup_cancel(void)
     HDunlink(FILENAME);
 }
 
-#endif /*H5_HAVE_WIN_THREADS*/
+#endif /*H5_HAVE_PTHREAD_H*/
 #endif /*H5_HAVE_THREADSAFE*/

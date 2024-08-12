@@ -39,6 +39,7 @@ endif ()
 # does, it appends library to the list.
 #-----------------------------------------------------------------------------
 set (LINK_LIBS "")
+set (LINK_PUB_LIBS "")
 macro (CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
   CHECK_LIBRARY_EXISTS ("${LIBRARY};${LINK_LIBS}" ${SYMBOL} "" ${VARIABLE})
   if (${VARIABLE})
@@ -127,7 +128,7 @@ CHECK_INCLUDE_FILE_CONCAT ("arpa/inet.h"     ${HDF_PREFIX}_HAVE_ARPA_INET_H)
 if (WINDOWS)
   CHECK_INCLUDE_FILE_CONCAT ("shlwapi.h"         ${HDF_PREFIX}_HAVE_SHLWAPI_H)
   # Checking for StrStrIA in the library is not reliable for mingw32 to stdcall
-  set (LINK_LIBS ${LINK_LIBS} "shlwapi")
+  set (LINK_PUB_LIBS ${LINK_PUB_LIBS} "shlwapi")
 endif ()
 
 ## Check for non-standard extension quadmath.h
@@ -439,7 +440,7 @@ if (MINGW OR NOT WINDOWS)
   foreach (other_test
       HAVE_ATTRIBUTE
       HAVE_BUILTIN_EXPECT
-      SYSTEM_SCOPE_THREADS
+      PTHREAD_BARRIER
       HAVE_SOCKLEN_T
   )
     HDF_FUNCTION_TEST (${other_test})
@@ -582,12 +583,6 @@ if (MINGW OR NOT WINDOWS)
   endif ()
 endif ()
 
-# Check for clock_gettime() CLOCK_MONOTONIC_COARSE
-set (CMAKE_EXTRA_INCLUDE_FILES time.h)
-check_type_size(CLOCK_MONOTONIC_COARSE CLOCK_MONOTONIC_COARSE_SIZE)
-if (HAVE_CLOCK_MONOTONIC_COARSE_SIZE)
-  set (${HDF_PREFIX}_HAVE_CLOCK_MONOTONIC_COARSE 1)
-endif ()
 unset (CMAKE_EXTRA_INCLUDE_FILES)
 
 #-----------------------------------------------------------------------------

@@ -184,7 +184,7 @@
   endmacro ()
 
   macro (ADD_XML_H5_TEST resultfile resultcode)
-    if (HDF5_USING_ANALYSIS_TOOL)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP_XML-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> --xml ${ARGN})
       if (${resultcode})
         set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES WILL_FAIL "true")

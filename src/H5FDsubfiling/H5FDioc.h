@@ -174,18 +174,6 @@ H5_DLL herr_t H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config);
  *
  */
 H5_DLL herr_t H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out);
-/**
- * \brief Internal routine for managing exclusive access to critical sections
- *        by the #H5FD_IOC driver's worker threads. Not meant to be called
- *        directly by an HDF5 application
- */
-H5_DLL void H5FD_ioc_begin_thread_exclusive(void);
-/**
- * \brief Internal routine for managing exclusive access to critical sections
- *        by the #H5FD_IOC driver's worker threads. Not meant to be called
- *        directly by an HDF5 application
- */
-H5_DLL void H5FD_ioc_end_thread_exclusive(void);
 
 #ifdef __cplusplus
 }

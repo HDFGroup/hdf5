@@ -73,14 +73,9 @@ static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *fla
 static const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0};
 static const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 1;
 
-/* statically initialize block for pthread_once call used in initializing */
-/* the first global mutex                                                 */
-#ifdef H5_HAVE_THREADSAFE
-H5_api_t H5_g;
-#else
+/* Library init / term status (global) */
 bool H5_libinit_g = false; /* Library hasn't been initialized */
 bool H5_libterm_g = false; /* Library isn't being shutdown */
-#endif
 
 char        H5_lib_vers_info_g[] = H5_VERS_INFO;
 static bool H5_dont_atexit_g     = false;
@@ -213,13 +208,14 @@ H5_init_library(void)
      */
     if (!H5_dont_atexit_g) {
 
-#if defined(H5_HAVE_THREADSAFE) && defined(H5_HAVE_WIN_THREADS)
-        /* Clean up Win32 thread resources. Pthreads automatically cleans up.
-         * This must be entered before the library cleanup code so it's
+#if defined(H5_HAVE_THREADSAFE)
+        /* Clean up thread resources.
+         *
+         * This must be pushed before the library cleanup code so it's
          * executed in LIFO order (i.e., last).
          */
-        (void)atexit(H5TS_win32_process_exit);
-#endif /* H5_HAVE_THREADSAFE && H5_HAVE_WIN_THREADS */
+        (void)atexit(H5TS_term_package);
+#endif /* H5_HAVE_THREADSAFE */
 
         /* Normal library termination code */
         (void)atexit(H5_term_library);
@@ -302,14 +298,12 @@ H5_term_library(void)
     int         nprinted;
     H5E_auto2_t func;
 
-#ifdef H5_HAVE_THREADSAFE
-    /* explicit locking of the API */
-    H5_FIRST_THREAD_INIT
+    /* Acquire the API lock */
+    H5CANCEL_DECL
     H5_API_LOCK
-#endif
 
     /* Don't do anything if the library is already closed */
-    if (!(H5_INIT_GLOBAL))
+    if (!H5_INIT_GLOBAL)
         goto done;
 
     /* Indicate that the library is being shut down */
@@ -506,9 +500,8 @@ H5_term_library(void)
     /* Don't pop the API context (i.e. H5CX_pop), since it's been shut down already */
 
 done:
-#ifdef H5_HAVE_THREADSAFE
+    /* Release API lock */
     H5_API_UNLOCK
-#endif /* H5_HAVE_THREADSAFE */
 
     return;
 } /* end H5_term_library() */
@@ -1247,63 +1240,3 @@ H5is_library_terminating(bool *is_terminating /*out*/)
 
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5is_library_terminating() */
-
-#if defined(H5_HAVE_THREADSAFE) && defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_HAVE_WIN32_API) &&         \
-    defined(H5_HAVE_WIN_THREADS)
-/*-------------------------------------------------------------------------
- * Function:    DllMain
- *
- * Purpose:     Handles various conditions in the library on Windows.
- *
- *    NOTE:     The main purpose of this is for handling Win32 thread cleanup
- *              on thread/process detach.
- *
- *              Only enabled when the shared Windows library is built with
- *              thread safety enabled.
- *
- * Return:      true on success, false on failure
- *
- *-------------------------------------------------------------------------
- */
-BOOL WINAPI
-DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved)
-{
-    /* Don't add our function enter/leave macros since this function will be
-     * called before the library is initialized.
-     *
-     * NOTE: Do NOT call any CRT functions in DllMain!
-     * This includes any functions that are called by from here!
-     */
-
-    BOOL fOkay = true;
-
-    switch (fdwReason) {
-        case DLL_PROCESS_ATTACH:
-            break;
-
-        case DLL_PROCESS_DETACH:
-            break;
-
-        case DLL_THREAD_ATTACH:
-#ifdef H5_HAVE_WIN_THREADS
-            if (H5TS_win32_thread_enter() < 0)
-                fOkay = false;
-#endif /* H5_HAVE_WIN_THREADS */
-            break;
-
-        case DLL_THREAD_DETACH:
-#ifdef H5_HAVE_WIN_THREADS
-            if (H5TS_win32_thread_exit() < 0)
-                fOkay = false;
-#endif /* H5_HAVE_WIN_THREADS */
-            break;
-
-        default:
-            /* Shouldn't get here */
-            fOkay = false;
-            break;
-    }
-
-    return fOkay;
-}
-#endif /* H5_HAVE_WIN32_API && H5_BUILT_AS_DYNAMIC_LIB && H5_HAVE_WIN_THREADS && H5_HAVE_THREADSAFE*/
