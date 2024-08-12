@@ -815,7 +815,7 @@ Bug Fixes since HDF5-1.14.0 release
       without the null terminator
 
       H5Rget_file_name and H5Rget_obj_name both return the name's length
-      without the null termintor.  H5Rget_attr_name now behaves consistently
+      without the null terminator.  H5Rget_attr_name now behaves consistently
       with the other two APIs.  Going forward, all the get character string
       APIs in HDF5 will be modified/written in this manner, regarding the
       length of a character string.
