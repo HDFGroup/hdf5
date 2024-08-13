@@ -496,7 +496,7 @@ jobs:
           then
             SIGN_VAL=$(echo "true");
           else
-            SIGN_VAL=$(echo "false");'
+            SIGN_VAL=$(echo "false");
           fi
           echo "BINSIGN=$SIGN_VAL" >> $GITHUB_OUTPUT
         shell: bash
