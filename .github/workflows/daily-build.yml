@@ -64,7 +64,7 @@ jobs:
     if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
 
   call-workflow-release:
-    needs: [call-workflow-tarball, call-workflow-ctest, call-workflow-abi]
+    needs: [get-old-names, call-workflow-tarball, call-workflow-ctest, call-workflow-abi]
     permissions:
       contents: write # In order to allow tag creation
     uses: ./.github/workflows/release-files.yml

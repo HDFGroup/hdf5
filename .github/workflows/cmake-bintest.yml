@@ -161,7 +161,7 @@ jobs:
       - name: Get published binary (MacOS_latest)
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-          name: tgz-osx-${{ inputs.build_mode }}-binary
+          name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
           path: ${{ github.workspace }}
 
       - name: Uncompress hdf5 binary (MacOS_latest)
@@ -201,6 +201,6 @@ jobs:
           HDF5_PLUGIN_PATH: ${{ steps.set-hdf5lib-name.outputs.HDF5_PLUGIN_PATH }}
         run: |
           cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples"
-          cmake --workflow --preset=ci-StdShar-OSX-Clang --fresh
+          cmake --workflow --preset=ci-StdShar-MACOS-Clang --fresh
         shell: bash
 

@@ -50,8 +50,8 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-osx.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-osx.dmg.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.dmg.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm.tar.gz

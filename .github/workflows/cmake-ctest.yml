@@ -358,7 +358,7 @@ jobs:
         id: run-ctest
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
-          cmake --workflow --preset=${{ inputs.preset_name }}-OSX-Clang --fresh
+          cmake --workflow --preset=${{ inputs.preset_name }}-MACOS-Clang --fresh
         shell: bash
 
       - name: Publish binary (MacOS_latest)
@@ -371,7 +371,7 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx.tar.gz hdf5
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz hdf5
         shell: bash
 
       - name: Publish dmg binary (MacOS_latest)
@@ -384,7 +384,7 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/builddmg/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.dmg ${{ runner.workspace }}/builddmg/hdf5
           cd "${{ runner.workspace }}/builddmg"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx.dmg.tar.gz hdf5
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg.tar.gz hdf5
         shell: bash
 
       - name: List files in the space (MacOS_latest)
@@ -396,15 +396,15 @@ jobs:
       - name: Save published binary (MacOS_latest)
         uses: actions/upload-artifact@v4
         with:
-              name: tgz-osx-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-osx.tar.gz
+              name: tgz-macos14_clang-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published dmg binary (MacOS_latest)
         uses: actions/upload-artifact@v4
         with:
-              name: tgz-osx-dmg-binary
-              path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-osx.dmg.tar.gz
+              name: tgz-macos14_clang-dmg-binary
+              path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_S3_linux:
