@@ -10,9 +10,9 @@ ALIASES += ARCURL="\HDFURL/archive/support/HDF5/doc"
 # URL for RFCs
 ALIASES += RFCURL="\HDFURL/hdf5/rfc"
 # URL for documentation
-ALIASES += DOCURL="\HDFURL/releases/HDF5/documentation"
+ALIASES += DOCURL="\HDFURL/releases/hdf5/documentation"
 # URL for downloads
-ALIASES += DWNURL="\HDFURL/releases/HDF5/downloads"
+ALIASES += DWNURL="\HDFURL/releases/hdf5/downloads"
 ALIASES += AEXURL="\HDFURL/archive/support/ftp/HDF5/examples"
 # doxygen subdir (develop, v1_14)
 ALIASES += DOXURL="hdfgroup.github.io/hdf5/develop"
