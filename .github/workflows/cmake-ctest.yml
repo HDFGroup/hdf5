@@ -59,14 +59,12 @@ jobs:
 
       - name: Check Secrets exists
         id: set-signing-state
-        env: 
-            super_secret: ${{ secrets.AZURE_ENDPOINT }}
         run: |
-          if [[ '${{ env.super_secret }}' == '' ]]
+          if [ '${{ secrets.AZURE_ENDPOINT }}' != '' ];
           then
-            SIGN_VAL=$(echo "false")
+            SIGN_VAL=$(echo "true");
           else
-            SIGN_VAL=$(echo "true")
+            SIGN_VAL=$(echo "false");
           fi
           echo "BINSIGN=$SIGN_VAL" >> $GITHUB_OUTPUT
         shell: bash
@@ -493,14 +491,12 @@ jobs:
 
       - name: Check Secrets exists
         id: set-signing-state
-        env: 
-            super_secret: ${{ secrets.AZURE_ENDPOINT }}
         run: |
-          if [[ '${{ env.super_secret }}' == '' ]]
+          if [ '${{ secrets.AZURE_ENDPOINT }}' != '' ];
           then
-            SIGN_VAL=$(echo "false")
+            SIGN_VAL=$(echo "true");
           else
-            SIGN_VAL=$(echo "true")
+            SIGN_VAL=$(echo "false");'
           fi
           echo "BINSIGN=$SIGN_VAL" >> $GITHUB_OUTPUT
         shell: bash
