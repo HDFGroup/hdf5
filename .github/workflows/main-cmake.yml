@@ -266,7 +266,7 @@ jobs:
       - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@v4
         with:
-              name: tgz-osx-${{ inputs.build_mode }}-binary
+              name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}
@@ -274,7 +274,7 @@ jobs:
       - name: Save published dmg binary (Mac_latest)
         uses: actions/upload-artifact@v4
         with:
-              name: tgz-osx-${{ inputs.build_mode }}-dmg-binary
+              name: tgz-macos14_clang-${{ inputs.build_mode }}-dmg-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.dmg
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}
