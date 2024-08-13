@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.48aaf0c</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.d875f74</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -819,7 +819,7 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a> retrieves the attribute name for the attribute reference pointed to by <code>ref_ptr</code>.</p>
 <p>Up to <code>size</code> characters of the attribute name are returned in <code>name</code>; additional characters, if any, are not returned to the user application.<br  />
 <br  />
- If the length of the attribute name, which determines the required value of <code>size</code>, is unknown, a preliminary call to <a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a> with the last two parameters set to NULL and zero respectively can be made. The return value of this call will be the size in bytes of the attribute name plus 1 for a NULL terminator. That value must then be assigned to <code>size</code> for a second <a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a> call, which will retrieve the actual attribute name.</p>
+ If the length of the attribute name, which determines the required value of <code>size</code>, is unknown, a preliminary call to <a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a> with the last two parameters set to NULL and zero respectively can be made. The return value of this call will be the size in bytes of the attribute name. That value, plus 1 for a NULL terminator, must then be assigned to <code>size</code> for a second <a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a> call, which will retrieve the actual attribute name.</p>
 <dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
