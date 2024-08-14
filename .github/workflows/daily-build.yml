@@ -85,5 +85,5 @@ jobs:
       file_base: ${{ needs.get-old-names.outputs.hdf5-name }}
       use_tag: snapshot
       use_environ: snapshots
-    if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
+    if: ${{ (needs.call-workflow-tarball.outputs.has_changes == 'true') && (needs.get-old-names.outputs.hdf5-name != needs.call-workflow-tarball.outputs.file_base) }}
 
