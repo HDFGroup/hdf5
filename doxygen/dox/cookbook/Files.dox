@@ -20,7 +20,7 @@ free space tracking information via H5Pset_file_space_strategy().
 Free space tracking is supported only in HDF5 versions 1.10.x and higher.
 This has implications for the accessibility of your HDF5 files and
 should be considered carefully. If compatibility with previous versions of
-HDF5 must be maintained, space reclamation via \Code{h5repack} might be an option.\n
+HDF5 must be maintained, space reclamation via \TText{h5repack} might be an option.\n
 The file space strategy #H5F_FSPACE_STRATEGY_FSM_AGGR is not the only option
 that supports free-space tracking. #H5F_FSPACE_STRATEGY_PAGE is another option,
 which adds paged allocation and is used most effectively with page buffering.\n
@@ -37,7 +37,7 @@ See \ref CB_MaintainCompat for HDF5 compatibility implications.
 \subsection CB_RemoveUnusedSpace Removing Unused Space from HDF5 Files
 
 \par Problem
-Based on estimates or \Code{h5stat} output you know that a large portion
+Based on estimates or \TText{h5stat} output you know that a large portion
 of an HDF5 file consists of free or unaccounted space, and you would like
 to remove it.
 
@@ -58,7 +58,7 @@ The user block begins at offset 0 and must be at least 512 bytes and a power
 of 2. The HDF5 library ignores any content between the beginning of the
 file and the end of the user block.\n
 You can add or strip a user block to/from an existing HDF5 file with the
-\Code{h5jam}/\Code{h5unjam} tool, respectively.
+\TText{h5jam}/\TText{h5unjam} tool, respectively.
 \warning
 If you try to embed content into the user block for use by other applications,
 pay close attention to how they handle space beyond the last used byte in the

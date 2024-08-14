@@ -692,9 +692,9 @@ H5_DLL hid_t H5Gopen1(hid_t loc_id, const char *name);
  *          If \p link_type is #H5G_LINK_SOFT, then \p cur_name can be anything
  *          and is interpreted at lookup time relative to the group which
  *          contains the final component of \p new_name. For instance, if \p
- *          cur_name is \Code{./foo}, \p new_name is \Code{./x/y/bar}, and a
- *          request is made for \Code{./x/y/bar}, then the actual object looked
- *          up is \Code{./x/y/./foo}.
+ *          cur_name is \TText{./foo}, \p new_name is \TText{./x/y/bar}, and a
+ *          request is made for \TText{./x/y/bar}, then the actual object looked
+ *          up is \TText{./x/y/./foo}.
 
  * \version 1.8.0 Function deprecated in this release.
  *
@@ -730,9 +730,9 @@ H5_DLL herr_t H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, c
  *          If \p link_type is #H5G_LINK_SOFT, then \p cur_name can be anything
  *          and is interpreted at lookup time relative to the group which
  *          contains the final component of \p new_name. For instance, if \p
- *          current_name is \Code{./foo}, \p new_name is \Code{./x/y/bar}, and a
- *          request is made for \Code{./x/y/bar}, then the actual object looked
- *          up is \Code{./x/y/./foo}.
+ *          current_name is \TText{./foo}, \p new_name is \TText{./x/y/bar}, and a
+ *          request is made for \TText{./x/y/bar}, then the actual object looked
+ *          up is \TText{./x/y/./foo}.
  *
  * \version 1.8.0 Function deprecated in this release.
  *
@@ -895,7 +895,7 @@ H5_DLL herr_t H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *
  *
  * \fgdt_loc_id
  * \param[in] name Name of the object whose comment is to be set or reset
- *                 name must be \Code{'.'} (dot) if \p loc_id fully specifies
+ *                 name must be \TText{'.'} (dot) if \p loc_id fully specifies
  *                 the object for which the comment is to be set.
  * \param[in] comment The new comment
  *
@@ -937,7 +937,7 @@ H5_DLL herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment
  *
  * \fgdt_loc_id
  * \param[in] name Name of the object whose comment is to be set or reset
- *                 name must be \Code{'.'} (dot) if \p loc_id fully specifies
+ *                 name must be \TText{'.'} (dot) if \p loc_id fully specifies
  *                 the object for which the comment is to be set.
  * \param[in] bufsize Maximum number of comment characters to be returned in \p buf.
  * \param[in] buf The comment
@@ -1160,7 +1160,7 @@ H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link
  *
  *          If the size of the provided buffer \p name is less or equal the
  *          actual object name length, the object name is truncated to
- *          \Code{max_size - 1} characters.
+ *          \TText{max_size - 1} characters.
  *
  *          Note that if the size of the object's name is unknown, a preliminary
  *          call to H5Gget_objname_by_idx() with \p name set to \c NULL will

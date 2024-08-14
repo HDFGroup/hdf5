@@ -67,7 +67,7 @@ H5_DLL hid_t H5FD_multi_init(void);
  *          usage type that will be associated with a file.
  *
  *          The array \p memb_name should be a name generator (a
- *          \Code{printf}-style format with a \Code{%s} which will be replaced
+ *          \TText{printf}-style format with a \TText{%s} which will be replaced
  *          with the name passed to H5FDopen(), usually from H5Fcreate() or
  *          H5Fopen()).
  *
@@ -99,7 +99,7 @@ H5_DLL hid_t H5FD_multi_init(void);
  *          \p memb_name
  *          </td>
  *          <td>
- *          The default string is \Code{%s-X.h5} where \c X is one of the following letters:
+ *          The default string is \TText{%s-X.h5} where \c X is one of the following letters:
  *          - \c s for #H5FD_MEM_SUPER
  *          - \c b for #H5FD_MEM_BTREE
  *          - \c r for #H5FD_MEM_DRAW
@@ -115,12 +115,12 @@ H5_DLL hid_t H5FD_multi_init(void);
  *          <td>
  *          The default setting is that the address space is equally divided
  *          among all of the elements:
- *          - #H5FD_MEM_SUPER \Code{-> 0 * (HADDR_MAX/6)}
- *          - #H5FD_MEM_BTREE \Code{-> 1 * (HADDR_MAX/6)}
- *          - #H5FD_MEM_DRAW \Code{-> 2 * (HADDR_MAX/6)}
- *          - #H5FD_MEM_GHEAP \Code{-> 3 * (HADDR_MAX/6)}
- *          - #H5FD_MEM_LHEAP \Code{-> 4 * (HADDR_MAX/6)}
- *          - #H5FD_MEM_OHDR \Code{-> 5 * (HADDR_MAX/6)}
+ *          - #H5FD_MEM_SUPER \TText{-> 0 * (HADDR_MAX/6)}
+ *          - #H5FD_MEM_BTREE \TText{-> 1 * (HADDR_MAX/6)}
+ *          - #H5FD_MEM_DRAW \TText{-> 2 * (HADDR_MAX/6)}
+ *          - #H5FD_MEM_GHEAP \TText{-> 3 * (HADDR_MAX/6)}
+ *          - #H5FD_MEM_LHEAP \TText{-> 4 * (HADDR_MAX/6)}
+ *          - #H5FD_MEM_OHDR \TText{-> 5 * (HADDR_MAX/6)}
  *          </td>
  *          </tr>
  *          </table>
@@ -154,7 +154,7 @@ H5_DLL hid_t H5FD_multi_init(void);
  *                   memb_name, memb_addr, true);
  * \endcode
  *
- * \version 1.6.3 \p memb_name parameter type changed to \Code{const char* const*}.
+ * \version 1.6.3 \p memb_name parameter type changed to \TText{const char* const*}.
  * \since 1.4.0
  */
 H5_DLL herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl,
@@ -206,7 +206,7 @@ H5_DLL herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/, hid
  *          \p meta_ext is the filename extension for the metadata file. The
  *          extension is appended to the name passed to H5FDopen(), usually from
  *          H5Fcreate() or H5Fopen(), to form the name of the metadata file. If
- *          the string \Code{%s} is used in the extension, it works like the
+ *          the string \TText{%s} is used in the extension, it works like the
  *          name generator as in H5Pset_fapl_multi().
  *
  *          \p meta_plist_id is the file access property list identifier for the
@@ -215,7 +215,7 @@ H5_DLL herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/, hid
  *          \p raw_ext is the filename extension for the raw data file. The
  *          extension is appended to the name passed to H5FDopen(), usually from
  *          H5Fcreate() or H5Fopen(), to form the name of the raw data file. If
- *          the string \Code{%s} is used in the extension, it works like the
+ *          the string \TText{%s} is used in the extension, it works like the
  *          name generator as in H5Pset_fapl_multi().
  *
  *          \p raw_plist_id is the file access property list identifier for the
