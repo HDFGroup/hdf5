@@ -640,13 +640,13 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  *          denote a valid link access property list identifier. A call to
  *          H5Lexists() with arguments \c file, \c "/", and \c lapl
  *          returns a positive value; in other words,
- *          \Code{H5Lexists(file, "/", lapl)} returns a positive value.
+ *          \TText{H5Lexists(file, "/", lapl)} returns a positive value.
  *          In the HDF5 1.8 release, this function returns 0.</li>
  *       <li>Let \c root denote a valid HDF5 group identifier that refers to the
  *          root group of an HDF5 file, and let \c lapl denote a valid link
  *          access property list identifier. A call to H5Lexists() with
  *          arguments c root, \c "/", and \c lapl returns a positive value;
- *          in other words, \Code{H5Lexists(root, "/", lapl)} returns a positive
+ *          in other words, \TText{H5Lexists(root, "/", lapl)} returns a positive
  *          value. In the HDF5 1.8 release, this function returns 0.</li>
  *       </ol>
  *       Note that the function accepts link names and path names. This is

@@ -533,7 +533,7 @@
  *           do not clear the error stack. Otherwise, any function which does
  *           not have an underscore immediately after the package name will
  *           clear the error stack. For instance, H5Fopen() clears the error
- *           stack while \Code{H5F_open} does not.
+ *           stack while \TText{H5F_open} does not.
  *
  * \internal An error stack has a fixed maximum size. If this size is exceeded
  *           then the stack will be truncated and only the inner-most functions

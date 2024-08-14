@@ -755,72 +755,72 @@ H5_DLLVAR hid_t H5T_VAX_F64_g;
 #define H5T_NATIVE_CHAR (CHAR_MIN ? H5T_NATIVE_SCHAR : H5T_NATIVE_UCHAR)
 /**
  * \ingroup PDTNAT
- * C-style \Code{signed char}
+ * C-style \TText{signed char}
  */
 #define H5T_NATIVE_SCHAR (H5OPEN H5T_NATIVE_SCHAR_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{unsigned char}
+ * C-style \TText{unsigned char}
  */
 #define H5T_NATIVE_UCHAR (H5OPEN H5T_NATIVE_UCHAR_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{short}
+ * C-style \TText{short}
  */
 #define H5T_NATIVE_SHORT (H5OPEN H5T_NATIVE_SHORT_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{unsigned short}
+ * C-style \TText{unsigned short}
  */
 #define H5T_NATIVE_USHORT (H5OPEN H5T_NATIVE_USHORT_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{int}
+ * C-style \TText{int}
  */
 #define H5T_NATIVE_INT (H5OPEN H5T_NATIVE_INT_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{unsigned int}
+ * C-style \TText{unsigned int}
  */
 #define H5T_NATIVE_UINT (H5OPEN H5T_NATIVE_UINT_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{long}
+ * C-style \TText{long}
  */
 #define H5T_NATIVE_LONG (H5OPEN H5T_NATIVE_LONG_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{unsigned long}
+ * C-style \TText{unsigned long}
  */
 #define H5T_NATIVE_ULONG (H5OPEN H5T_NATIVE_ULONG_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{long long}
+ * C-style \TText{long long}
  */
 #define H5T_NATIVE_LLONG (H5OPEN H5T_NATIVE_LLONG_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{unsigned long long}
+ * C-style \TText{unsigned long long}
  */
 #define H5T_NATIVE_ULLONG (H5OPEN H5T_NATIVE_ULLONG_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{_Float16}
+ * C-style \TText{_Float16}
  */
 #define H5T_NATIVE_FLOAT16 (H5OPEN H5T_NATIVE_FLOAT16_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{float}
+ * C-style \TText{float}
  */
 #define H5T_NATIVE_FLOAT (H5OPEN H5T_NATIVE_FLOAT_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{double}
+ * C-style \TText{double}
  */
 #define H5T_NATIVE_DOUBLE (H5OPEN H5T_NATIVE_DOUBLE_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{long double}
+ * C-style \TText{long double}
  */
 #define H5T_NATIVE_LDOUBLE (H5OPEN H5T_NATIVE_LDOUBLE_g)
 /**
