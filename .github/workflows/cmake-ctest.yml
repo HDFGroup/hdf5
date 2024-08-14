@@ -40,11 +40,32 @@ permissions:
   contents: read
 
 jobs:
+  check-secret:
+    name: Check Secrets exists
+    runs-on: ubuntu-latest
+    outputs:
+      sign-state: ${{ steps.set-signing-state.outputs.BINSIGN }}
+    steps:
+      - name: Identify Signing Status
+        id: set-signing-state
+        env: 
+            signing_secret: ${{ secrets.AZURE_ENDPOINT }}
+        run: |
+          if [[ '${{ env.signing_secret }}' == '' ]]
+          then
+            SIGN_VAL=$(echo "false")
+          else
+            SIGN_VAL=$(echo "true")
+          fi
+          echo "BINSIGN=$SIGN_VAL" >> $GITHUB_OUTPUT
+        shell: bash
+
   build_and_test_win:
   # Windows w/ MSVC + CMake
   #
     name: "Windows MSVC CTest"
     runs-on: windows-latest
+    needs: [check-secret]
     steps:
       - name: Install Dependencies (Windows)
         run: choco install ninja
@@ -56,18 +77,6 @@ jobs:
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
-
-      - name: Check Secrets exists
-        id: set-signing-state
-        run: |
-          if [ '${{ secrets.AZURE_ENDPOINT }}' != '' ];
-          then
-            SIGN_VAL=$(echo "true");
-          else
-            SIGN_VAL=$(echo "false");
-          fi
-          echo "BINSIGN=$SIGN_VAL" >> $GITHUB_OUTPUT
-        shell: bash
 
       - name: Set file base name (Windows)
         id: set-file-base
@@ -125,7 +134,7 @@ jobs:
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
-        if: ${{ steps.set-signing-state.BINSIGN == 'true' }}
+        if: ${{ needs.check-secret.outputs.sign-state == 'true' }}
 
       - name: Publish binary (Windows)
         id: publish-ctest-binary
@@ -179,6 +188,7 @@ jobs:
   #
     name: "Ubuntu gcc CMake"
     runs-on: ubuntu-latest
+    needs: [check-secret]
     steps:
       - name: Install CMake Dependencies (Linux)
         run: |
@@ -303,6 +313,7 @@ jobs:
   #
     name: "MacOS Clang CMake"
     runs-on: macos-latest
+    needs: [check-secret]
     steps:
       - name: Install Dependencies (MacOS_latest)
         run: brew install ninja
@@ -485,21 +496,10 @@ jobs:
   #
     name: "Windows Intel CTest"
     runs-on: windows-latest
+    needs: [check-secret]
     steps:
       - name: Install Dependencies (Windows_intel)
         run: choco install ninja
-
-      - name: Check Secrets exists
-        id: set-signing-state
-        run: |
-          if [ '${{ secrets.AZURE_ENDPOINT }}' != '' ];
-          then
-            SIGN_VAL=$(echo "true");
-          else
-            SIGN_VAL=$(echo "false");
-          fi
-          echo "BINSIGN=$SIGN_VAL" >> $GITHUB_OUTPUT
-        shell: bash
 
       - name: add oneAPI to env
         uses: fortran-lang/setup-fortran@v1
@@ -563,12 +563,12 @@ jobs:
           endpoint: ${{ secrets.AZURE_ENDPOINT }}
           trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-          files-folder: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC
+          files-folder: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel
           files-folder-filter: msi
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
-        if: ${{ steps.set-signing-state.BINSIGN == 'true' }}
+        if: ${{ needs.check-secret.outputs.sign-state == 'true' }}
 
       - name: Publish binary (Windows_intel)
         id: publish-ctest-binary
@@ -622,6 +622,7 @@ jobs:
   #
     name: "Ubuntu Intel CMake"
     runs-on: ubuntu-latest
+    needs: [check-secret]
     steps:
       - name: Install CMake Dependencies (Linux_intel)
         run: |
