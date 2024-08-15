@@ -1738,8 +1738,8 @@ H5_DLL hid_t H5Dget_defined(hid_t dset_id, hid_t file_space_id, hid_t dxpl_id);
  *          and the elements will no longer be included in the selection returned by
  *          H5Dget_defined().
  *
- *          This function is only applicable to the datasets with structured chunk layout 
- *          of the H5D_SPARSE_CHUNK type.  For other layouts this function will return 
+ *          This function is only applicable to the datasets with structured chunk layout
+ *          of the H5D_SPARSE_CHUNK type.  For other layouts this function will return
  *          an error.
  *
  * \par Example:
