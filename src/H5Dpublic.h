@@ -53,8 +53,8 @@ typedef enum H5D_layout_t {
 //! <!-- [H5D_layout_t_snip] -->
 
 /* Types of H5D_STRUCT_CHUNK storage */
-#define H5D_SPARSE_CHUNK 0      /* To store sparse data of any datatype */
-#define H5D_VL_CHUNK     1      /* To store dense data of variable-length datatype */
+#define H5D_SPARSE_CHUNK 0 /* To store sparse data of any datatype */
+#define H5D_VL_CHUNK     1 /* To store dense data of variable-length datatype */
 
 //! <!-- [H5D_chunk_index_t_snip] -->
 /**
@@ -1734,8 +1734,8 @@ H5_DLL hid_t H5Dget_defined(hid_t dset_id, hid_t file_space_id, hid_t dxpl_id);
  * \details H5Derase() deletes elements from a dataset, specified by its identifier \p dset_id,
  *          causing them to no longer be defined.  The part of the dataset to erase is defined
  *          by \p file_space_id and the data transfer properties are defined by \p dxpl_id.
- *          After this operation, reading from these elements will return fill values, 
- *          and the elements will no longer be included in the selection returned by 
+ *          After this operation, reading from these elements will return fill values,
+ *          and the elements will no longer be included in the selection returned by
  *          H5Dget_defined().
  *
  *          This function is only useful for datasets with #H5D_STRUCT_CHUNK layout.
