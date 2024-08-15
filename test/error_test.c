@@ -191,7 +191,7 @@ init_error(void)
         TEST_ERROR;
 
     /* Account for null terminator */
-    if (cls_size != H5Eget_class_name(ERR_CLS, cls_name, (size_t)cls_size+1))
+    if (cls_size != H5Eget_class_name(ERR_CLS, cls_name, (size_t)cls_size + 1))
         TEST_ERROR;
     if (strcmp(ERR_CLS_NAME, cls_name) != 0)
         TEST_ERROR;
