@@ -764,7 +764,7 @@ H5_DLL herr_t H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo, h
  *
  * \return \herr_t
  *
- * \details H5get_info_by_idx2() returns the metadata for a link in a group
+ * \details H5Lget_info_by_idx2() returns the metadata for a link in a group
  *          according to a specified field or index and a specified order. The
  *          link for which information is to be returned is specified by \p
  *          idx_type, \p order, and \p n as follows:
@@ -819,7 +819,7 @@ H5_DLL herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index
  * \return Returns the size of the link name if successful; otherwise returns a
  *         negative value.
  *
- * \details H5get_name_by_idx() retrieves the name of the \Emph{n}-th link in a
+ * \details H5Lget_name_by_idx() retrieves the name of the \Emph{n}-th link in a
  *          group, according to the specified order, \p order, within a specified
  *          field or index, \p idx_type.
  *
@@ -835,10 +835,7 @@ H5_DLL herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index
  *          If \p loc_id specifies the group in which the link resides,
  *          \p group_name can be a dot (\c .).
  *
- *          The size in bytes of name is specified in \p size. If \p size is
- *          unknown, it can be determined via an initial H5Lget_name_by_idx()
- *          call with name set to NULL; the function's return value will be the
- *          size of the name.
+ *          \details_namelen{link,H5Lget_name_by_idx}
  *
  * \note Please note that in order for the specified index to correspond to the
  *       creation order index, \p order must be set to #H5_ITER_INC or
@@ -1578,7 +1575,7 @@ H5_DLL herr_t H5Lget_info1(hid_t loc_id, const char *name, H5L_info1_t *linfo /*
  *             the function H5Lget_info_by_idx2() and the macro
  *             H5Lget_info_by_idx().
  *
- * \details H5get_info_by_idx1() returns the metadata for a link in a group
+ * \details H5Lget_info_by_idx1() returns the metadata for a link in a group
  *          according to a specified field or index and a specified order.
  *
  *          The link for which information is to be returned is specified by \p

@@ -420,9 +420,11 @@ H5_DLL herr_t H5Eclose_stack(hid_t stack_id);
  *          by the class identifier. If a non-NULL pointer is passed in for \p
  *          name and \p size is greater than zero, the class name of \p size
  *          long is returned. The length of the error class name is also
- *          returned. If NULL is passed in as \p name, only the length of class
- *          name is returned. If zero is returned, it means no name. The user is
- *          responsible for allocating sufficient buffer space for the name.
+ *          returned.
+ *
+ *          \details_namelen{error class,H5Eget_class_name}
+ *
+ *          If zero is returned, it means the error class has no name.
  *
  * \since 1.8.0
  */
