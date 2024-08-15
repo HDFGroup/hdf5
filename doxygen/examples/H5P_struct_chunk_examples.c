@@ -39,12 +39,6 @@ main(void)
             goto fail_dcpl;
         }
 
-        // Set dataset layout to sparse chunk */
-        if (H5Pset_layout(dcpl, H5D_SPARSE_CHUNK) < 0) {
-            ret_val = EXIT_FAILURE;
-            goto fail_set_layout;
-        }
-
         // Set to sparse chunked dataset
         if (H5Pset_struct_chunk(dcpl, 1, chunk_dim, H5D_SPARSE_CHUNK) < 0) {
             ret_val = EXIT_FAILURE;

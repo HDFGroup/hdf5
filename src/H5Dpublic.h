@@ -53,9 +53,8 @@ typedef enum H5D_layout_t {
 //! <!-- [H5D_layout_t_snip] -->
 
 /* Types of H5D_STRUCT_CHUNK storage */
-/* TBD: H5D_SPARSE_CHUNK is the default storage type for H5D_STRUCT_CHUNK layout when not specified */
-#define H5D_SPARSE_CHUNK 0 /* To store sparse data of any datatype */
-#define H5D_VL_CHUNK     1 /* To store dense data of variable-length datatype */
+#define H5D_SPARSE_CHUNK 0      /* To store sparse data of any datatype */
+#define H5D_VL_CHUNK     1      /* To store dense data of variable-length datatype */
 
 //! <!-- [H5D_chunk_index_t_snip] -->
 /**
@@ -1710,7 +1709,7 @@ H5_DLL herr_t H5Dclose(hid_t dset_id);
  *          as all elements are defined for non-sparse datasets.
  *
  * \par Example:
- * \snippet H5D_sparse_examples.c get_defined
+ * \snippet H5D_struct_chunk_examples.c get_defined
  *
  * \since 1.x.x
  *
@@ -1734,15 +1733,16 @@ H5_DLL hid_t H5Dget_defined(hid_t dset_id, hid_t file_space_id, hid_t dxpl_id);
  *
  * \details H5Derase() deletes elements from a dataset, specified by its identifier \p dset_id,
  *          causing them to no longer be defined.  The part of the dataset to erase is defined
- *          by \p file_space_id.  After this operation, reading from these elements
- *          will return fill values, and the elements will no longer be included in the
- *          selection returned by H5Dget_defined().
+ *          by \p file_space_id and the data transfer properties are defined by \p dxpl_id.
+ *          After this operation, reading from these elements will return fill values, 
+ *          and the elements will no longer be included in the selection returned by 
+ *          H5Dget_defined().
  *
- *          This function is only useful for datasets with layout TBD:H5D_SPARSE_CHUNK.
+ *          This function is only useful for datasets with #H5D_STRUCT_CHUNK layout.
  *          For other layouts this function will return an error.
  *
  * \par Example:
- * \snippet H5D_sparse_examples.c erase
+ * \snippet H5D_struct_chunk_examples.c erase
  *
  * \since 1.x.x
  *
@@ -1792,7 +1792,7 @@ H5_DLL herr_t H5Derase(hid_t dset_id, hid_t file_space_id, hid_t dxpl_id);
  * \note    TBD: need to verify the above notes info are true for structured chunk.
  *
  * \par Example:
- * \snippet H5D_sparse_examples.c direct_chunk_write
+ * \snippet H5D_struct_chunk_examples.c direct_chunk_write
  *
  * \since 1.x.x
  *
@@ -1845,7 +1845,7 @@ H5_DLL herr_t H5Dwrite_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t 
  * \note    TBD: need to verify the above notes info are true for structured chunk.
  *
  * \par Example:
- * \snippet H5D_sparse_examples.c direct_chunk_read
+ * \snippet H5D_struct_chunk_examples.c direct_chunk_read
  *
  * \since 1.x.x
  *
@@ -1908,7 +1908,7 @@ H5_DLL herr_t H5Dread_struct_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *
  *          structured chunk.
  *
  * \par Example
- * \snippet H5D_sparse_examples.c direct_chunk_get_info
+ * \snippet H5D_struct_chunk_examples.c direct_chunk_get_info
  *
  * \since 1.x.x
  *
@@ -1956,7 +1956,7 @@ H5_DLL herr_t H5Dget_struct_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t c
  * \note    TBD: need to verify the above notes info are true for structured chunk.
  *
  * \par Example
- * \snippet H5D_sparse_examples.c direct_chunk_get_info
+ * \snippet H5D_struct_chunk_examples.c direct_chunk_get_info
  *
  * \since 1.x.x
  *
@@ -1991,9 +1991,9 @@ H5_DLL herr_t H5Dget_struct_chunk_info_by_coord(hid_t dset_id, const hsize_t *of
  *
  * \par Example:
  * Print the info for each structured chunk
- * \snippet H5D_sparse_examples.c H5Dstruct_chunk_iter_cb
+ * \snippet H5D_struct_chunk_examples.c H5Dstruct_chunk_iter_cb
  * Iterate over all the structured chunks in the dataset.
- * \snippet H5D_sparse_examples.c direct_chunk_iter
+ * \snippet H5D_struct_chunk_examples.c direct_chunk_iter
  *
  * \since 1.x.x
  *
