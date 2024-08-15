@@ -7110,7 +7110,7 @@ H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*
  *          variable-length datatype.
  *
  *          As a side-effect of this function, the creation property is modified
- *          to #H5D_STRUCT_CHUNK storage layout, if it was previously set using 
+ *          to #H5D_STRUCT_CHUNK storage layout, if it was previously set using
  *          H5Pset_layout() function with any other storage layout type.
  *
  * \note Chunk size cannot exceed the size of a fixed-size dataset. For
