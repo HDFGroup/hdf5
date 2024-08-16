@@ -40,6 +40,13 @@ jobs:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       snap_name: hdf5-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
+    secrets:
+        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
+        AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+        AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
 
   call-workflow-abi:
     needs: [log-the-inputs, call-workflow-tarball, call-workflow-ctest]
