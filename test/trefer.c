@@ -618,21 +618,22 @@ test_reference_obj(void)
 
     /* Check file name for reference */
     namelen = H5Rget_file_name(&rbuf[0], NULL, 0);
-    CHECK(namelen, FAIL, "H5Dget_file_name");
-    VERIFY(namelen, strlen(FILE_REF_OBJ), "H5Dget_file_name");
+    CHECK(namelen, FAIL, "H5Rget_file_name");
+    VERIFY(namelen, strlen(FILE_REF_OBJ), "H5Rget_file_name");
 
     /* Make sure size parameter is ignored */
     namelen = H5Rget_file_name(&rbuf[0], NULL, 200);
-    CHECK(namelen, FAIL, "H5Dget_file_name");
-    VERIFY(namelen, strlen(FILE_REF_OBJ), "H5Dget_file_name");
+    CHECK(namelen, FAIL, "H5Rget_file_name");
+    VERIFY(namelen, strlen(FILE_REF_OBJ), "H5Rget_file_name");
 
     /* Get the file name for the reference */
     namebuf = (char *)malloc((size_t)namelen + 1);
-    namelen = H5Rget_file_name(&rbuf[0], (char *)namebuf, (size_t)namelen + 1);
-    CHECK(namelen, FAIL, "H5Dget_file_name");
+    namelen = H5Rget_file_name(&rbuf[0], namebuf, (size_t)namelen + 1);
+    CHECK(namelen, FAIL, "H5Rget_file_name");
+    VERIFY(strcmp(namebuf, FILE_REF_OBJ), 0, "namebuf vs FILE_REF_OBJ");
+    VERIFY(namelen, strlen(FILE_REF_OBJ), "H5Rget_file_name");
 
-    ret = !((strcmp(namebuf, FILE_REF_OBJ) == 0) && (namelen == strlen(FILE_REF_OBJ)));
-    CHECK(ret, FAIL, "H5Literate");
+    free(namebuf);
 
     /* Testing Dataset1 */
 
@@ -644,7 +645,8 @@ test_reference_obj(void)
     namebuf = (char *)malloc((size_t)namelen + 1);
     namelen = H5Rget_obj_name(&rbuf[0], H5P_DEFAULT, namebuf, (size_t)namelen + 1);
     CHECK(namelen, FAIL, "H5Rget_obj_name");
-    VERIFY(strcmp(namebuf, DS1_REF_OBJ), 0, "strcmp namebuf vs DS1_REF_OBJ");
+    VERIFY(strcmp(namebuf, DS1_REF_OBJ), 0, "namebuf vs DS1_REF_OBJ");
+    VERIFY(namelen, strlen(DS1_REF_OBJ), "H5Rget_obj_name");
 
     /* Open dataset object */
     ref_ds1 = H5Ropen_object(&rbuf[0], H5P_DEFAULT, dapl_id);
@@ -697,13 +699,12 @@ test_reference_obj(void)
 
     /* Getting the name of the referenced object and verify it */
     namelen = H5Rget_obj_name(&rbuf[1], H5P_DEFAULT, NULL, 0);
-    CHECK(namelen, FAIL, "H5Rget_obj_name");
     VERIFY(namelen, strlen(DS2_REF_OBJ), "H5Rget_obj_name");
 
     namebuf = (char *)malloc((size_t)namelen + 1);
     namelen = H5Rget_obj_name(&rbuf[1], H5P_DEFAULT, namebuf, (size_t)namelen + 1);
-    CHECK(namelen, FAIL, "H5Rget_obj_name");
-    VERIFY(strcmp(namebuf, DS2_REF_OBJ), 0, "strcmp namebuf vs DS2_REF_OBJ");
+    VERIFY(namelen, strlen(DS2_REF_OBJ), "H5Rget_obj_name");
+    VERIFY(strcmp(namebuf, DS2_REF_OBJ), 0, "namebuf vs DS2_REF_OBJ");
 
     /* Open dataset object */
     ref_ds2 = H5Ropen_object(&rbuf[1], H5P_DEFAULT, dapl_id);
