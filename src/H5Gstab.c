@@ -190,8 +190,11 @@ H5G__stab_create(H5O_loc_t *grp_oloc, const H5O_ginfo_t *ginfo, H5O_stab_t *stab
 
     /* Adjust the size hint, if necessary */
     if (ginfo->lheap_size_hint == 0)
-        heap_hint = 8 + /* "null" name inserted for B-tree */
-            (ginfo->est_num_entries * H5HL_ALIGN(ginfo->est_name_len + 1)) + /* estimated size of names for links, aligned for inserting into local heap */
+        heap_hint =
+            8 + /* "null" name inserted for B-tree */
+            (ginfo->est_num_entries *
+             H5HL_ALIGN(ginfo->est_name_len +
+                        1)) + /* estimated size of names for links, aligned for inserting into local heap */
             H5HL_SIZEOF_FREE(grp_oloc->file); /* Free list entry in local heap */
     else
         heap_hint = ginfo->lheap_size_hint;
@@ -955,8 +958,8 @@ herr_t
 H5G__stab_valid(H5O_loc_t *grp_oloc, H5O_stab_t *alt_stab)
 {
     H5O_stab_t stab;                /* Current symbol table */
-    H5HL_t    *heap      = NULL;    /* Pointer to local heap */
-    bool       changed   = false;   /* Whether stab has been modified */
+    H5HL_t    *heap    = NULL;      /* Pointer to local heap */
+    bool       changed = false;     /* Whether stab has been modified */
     herr_t     bt_status;           /* B-tree status */
     herr_t     ret_value = SUCCEED; /* Return value */
 
@@ -971,9 +974,11 @@ H5G__stab_valid(H5O_loc_t *grp_oloc, H5O_stab_t *alt_stab)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to read symbol table message");
 
     /* Check if the symbol table message's b-tree address is valid */
-    H5E_PAUSE_ERRORS {
+    H5E_PAUSE_ERRORS
+    {
         bt_status = H5B_valid(grp_oloc->file, H5B_SNODE, stab.btree_addr);
-    } H5E_RESUME_ERRORS
+    }
+    H5E_RESUME_ERRORS
 
     if (bt_status < 0) {
         /* Address is invalid, try the b-tree address in the alternate symbol table message */
@@ -988,9 +993,11 @@ H5G__stab_valid(H5O_loc_t *grp_oloc, H5O_stab_t *alt_stab)
     }     /* end if */
 
     /* Check if the symbol table message's heap address is valid */
-    H5E_PAUSE_ERRORS {
+    H5E_PAUSE_ERRORS
+    {
         heap = H5HL_protect(grp_oloc->file, stab.heap_addr, H5AC__READ_ONLY_FLAG);
-    } H5E_RESUME_ERRORS
+    }
+    H5E_RESUME_ERRORS
 
     if (NULL == heap) {
         /* Address is invalid, try the heap address in the alternate symbol table message */
