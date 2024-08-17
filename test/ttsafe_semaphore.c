@@ -20,14 +20,14 @@
 
 #if defined(H5_HAVE_THREADS)
 
-#define NUM_PINGPONG (1000 * 1000)
+#define NUM_PINGPONG     (1000 * 1000)
 #define NUM_CLIENTSERVER (50 * 1000)
 
 #define NUM_THREADS 16
 
 typedef struct {
-    H5TS_semaphore_t   ping_sem, pong_sem;
-    unsigned counter;
+    H5TS_semaphore_t ping_sem, pong_sem;
+    unsigned         counter;
 } pingpong_t;
 
 typedef struct {
