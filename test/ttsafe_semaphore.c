@@ -23,7 +23,7 @@
 #define NUM_THREADS 16
 
 #if defined(H5_HAVE_STDATOMIC_H)
-#define NUM_PINGPONG     (1000 * 1000)
+#define NUM_PINGPONG (1000 * 1000)
 
 typedef struct {
     H5TS_semaphore_t   ping_sem, pong_sem;
