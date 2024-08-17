@@ -589,7 +589,7 @@ H5_DLL ssize_t H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *name, si
  * \details H5Rget_attr_name() retrieves the attribute name for the
  *          attribute reference pointed to by \p ref_ptr.
  *
- *          \details_namelen_plusone{attribute,H5Rget_attr_name}
+ *          \details_namelen{attribute,H5Rget_attr_name}
  *
  * \since 1.12.0
  *

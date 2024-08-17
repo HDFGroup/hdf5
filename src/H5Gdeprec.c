@@ -185,12 +185,12 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 
         /* Get the group info property */
         if (H5P_get(gc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get group info");
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5I_INVALID_HID, "can't get group info");
 
         /* Set the non-default local heap size hint */
         H5_CHECKED_ASSIGN(ginfo.lheap_size_hint, uint32_t, size_hint, size_t);
         if (H5P_set(gc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, H5I_INVALID_HID, "can't set group info");
+            HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set group info");
     }
     else
         tmp_gcpl = H5P_GROUP_CREATE_DEFAULT;
@@ -822,7 +822,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op, void *o
 
     /* Get the object pointer */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
-        HGOTO_ERROR(H5E_ID, H5E_BADTYPE, (-1), "invalid identifier");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid identifier");
 
     /* Set up VOL callback arguments */
     grp_opt_args.iterate_old.loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -980,7 +980,7 @@ H5G__get_objinfo_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char *name, 
 
         /* Common code to retrieve the file's fileno */
         if (H5F_get_fileno((obj_loc ? obj_loc : grp_loc)->oloc->file, &statbuf->fileno[0]) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno");
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to read fileno");
 
         /* Info for soft and UD links is gotten by H5L_get_info. If we have
          *      a hard link, follow it and get info on the object
@@ -994,16 +994,16 @@ H5G__get_objinfo_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char *name, 
             /* (don't need index & heap info) */
             assert(obj_loc);
             if (H5O_get_info(obj_loc->oloc, &dm_info, H5O_INFO_BASIC | H5O_INFO_TIME) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get data model object info");
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get data model object info");
             if (H5O_get_native_info(obj_loc->oloc, &nat_info, H5O_INFO_HDR) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get native object info");
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get native object info");
 
             /* Get mapped object type */
             statbuf->type = H5G_map_obj_type(dm_info.type);
 
             /* Get object number (i.e. address) for object */
             if (H5VL_native_token_to_addr(obj_loc->oloc->file, H5I_FILE, dm_info.token, &obj_addr) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL,
+                HGOTO_ERROR(H5E_SYM, H5E_CANTUNSERIALIZE, FAIL,
                             "can't deserialize object token into address");
 
             statbuf->objno[0] = (unsigned long)(obj_addr);
@@ -1051,6 +1051,9 @@ herr_t
 H5G__get_objinfo(const H5G_loc_t *loc, const char *name, bool follow_link, H5G_stat_t *statbuf /*out*/)
 {
     H5G_trav_goi_t udata;               /* User data for callback */
+    char          *obj_path = NULL;     /* Actual path to object */
+    const char    *last;                /* Pointer to last character in name string */
+    size_t         name_len;            /* Length of name */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1074,24 +1077,37 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, bool follow_link, H5G_s
                      H5G__get_objinfo_cb, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist");
 
-    /* If we're pointing at a soft or UD link, get the real link length and type */
-    if (statbuf && follow_link == 0) {
-        H5L_info2_t linfo; /* Link information buffer */
-        herr_t      ret;
-
-        /* Get information about link to the object. If this fails, e.g.
-         * because the object is ".", just treat the object as a hard link. */
-        H5E_BEGIN_TRY
-        {
-            ret = H5L_get_info(loc, name, &linfo);
+    /* Compose the path to the object by eliminating any trailing '.' components */
+    name_len = strlen(name);
+    last     = name + (name_len - 1);
+    while (name_len > 0) {
+        /* Trim trailing '/'s & '.'s*/
+        if ('/' == *last || '.' == *last) {
+            name_len--;
+            last--;
         }
-        H5E_END_TRY
+        else
+            break;
+    }
+    if (name_len > 0) {
+        if (NULL == (obj_path = H5MM_strdup(name)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, FAIL, "memory allocation failed for object path string");
 
-        if (ret >= 0 && linfo.type != H5L_TYPE_HARD) {
+        *(obj_path + name_len) = '\0';
+    }
+
+    /* If we're pointing at a soft or UD link, get the real link length and type */
+    if (obj_path && statbuf && follow_link == 0) {
+        H5L_info2_t linfo; /* Link information buffer */
+
+        /* Get information about link to the object */
+        if (H5L_get_info(loc, obj_path, &linfo) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get link info");
+
+        if (linfo.type != H5L_TYPE_HARD) {
             statbuf->linklen = linfo.u.val_size;
-            if (linfo.type == H5L_TYPE_SOFT) {
+            if (linfo.type == H5L_TYPE_SOFT)
                 statbuf->type = H5G_LINK;
-            }
             else {
                 /* UD link. H5L_get_info checked for invalid link classes */
                 assert(linfo.type >= H5L_TYPE_UD_MIN && linfo.type <= H5L_TYPE_MAX);
@@ -1101,6 +1117,8 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, bool follow_link, H5G_s
     }
 
 done:
+    H5MM_xfree(obj_path);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_objinfo() */
 
@@ -1133,7 +1151,7 @@ H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name /*out*/, size_t size
     size_t               name_len = 0; /* Length of object name */
     ssize_t              ret_value;    /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(-1)
 
     /* Set up collective metadata if appropriate */
     if (H5CX_set_loc(loc_id) < 0)

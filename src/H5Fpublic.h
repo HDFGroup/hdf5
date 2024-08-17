@@ -1113,7 +1113,7 @@ H5_DLL herr_t H5Fset_mdc_config(hid_t file_id, const H5AC_cache_config_t *config
  * \return \herr_t
  *
  * \details H5Fget_mdc_hit_rate() queries the metadata cache of the target file to obtain its hit rate
- *          \Code{(cache hits / (cache hits + cache misses))} since the last time hit rate statistics
+ *          \TText{(cache hits / (cache hits + cache misses))} since the last time hit rate statistics
  *          were reset. If the cache has not been accessed since the last time the hit rate stats were
  *          reset, the hit rate is defined to be 0.0.
  *
@@ -1293,22 +1293,22 @@ H5_DLL herr_t H5Fget_info2(hid_t obj_id, H5F_info2_t *file_info);
  *          library and logarithmic base 10.
  *
  *          If read retries are incurred for a metadata entry \c i, the library will
- *          allocate memory for \Code{retries[i] (nbins * sizeof(uint32_t)} and store
+ *          allocate memory for \TText{retries[i] (nbins * sizeof(uint32_t)} and store
  *          the collection of retries there. If there are no retries for a metadata entry
- *          \c i, \Code{retries[i]} will be NULL. After a call to this routine, users should
- *          free each \Code{retries[i]} that is non-NULL, otherwise resource leak will occur.
+ *          \c i, \TText{retries[i]} will be NULL. After a call to this routine, users should
+ *          free each \TText{retries[i]} that is non-NULL, otherwise resource leak will occur.
  *
  *          For the library default read attempts of 100 for SWMR access, nbins will be 2
  *          as depicted below:
- *          \li \Code{retries[i][0]} is the number of 1 to 9 read retries.
- *          \li \Code{retries[i][1]} is the number of 10 to 99 read retries.
+ *          \li \TText{retries[i][0]} is the number of 1 to 9 read retries.
+ *          \li \TText{retries[i][1]} is the number of 10 to 99 read retries.
  *          For the library default read attempts of 1 for non-SWMR access, \c nbins will
- *          be 0 and each \Code{retries[i]} will be NULL.
+ *          be 0 and each \TText{retries[i]} will be NULL.
  *
- *          The following table lists the 21 metadata entries of \Code{retries[]}:
+ *          The following table lists the 21 metadata entries of \TText{retries[]}:
  *          <table>
  *          <tr>
- *          <th>Index for \Code{retries[]}</th>
+ *          <th>Index for \TText{retries[]}</th>
  *          <th>Metadata entries<sup>*</sup></th>
  *          </tr>
  *          <tr><td>0</td><td>Object header (version 2)</td></tr>
@@ -1784,20 +1784,20 @@ H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
  * pass the same values for \p file_id and \p flag.
  *
  * This function is available only when the HDF5 library is configured with parallel support
- * (\Code{--enable-parallel | HDF5_ENABLE_PARALLEL}). It is useful only when used with the #H5FD_MPIO driver
+ * (\TText{--enable-parallel | HDF5_ENABLE_PARALLEL}). It is useful only when used with the #H5FD_MPIO driver
  * (see H5Pset_fapl_mpio()).
  * \endparblock
  *
  * \attention
  * \parblock
- * H5Fset_mpi_atomicity() calls \Code{MPI_File_set_atomicity} underneath and is not supported
- * if the execution platform does not support \Code{MPI_File_set_atomicity}. When it is
+ * H5Fset_mpi_atomicity() calls \TText{MPI_File_set_atomicity} underneath and is not supported
+ * if the execution platform does not support \TText{MPI_File_set_atomicity}. When it is
  * supported and used, the performance of data access operations may drop significantly.
  *
- * In certain scenarios, even when \Code{MPI_File_set_atomicity} is supported, setting
+ * In certain scenarios, even when \TText{MPI_File_set_atomicity} is supported, setting
  * atomicity with H5Fset_mpi_atomicity() and \p flag set to 1 does not always yield
  * strictly atomic updates. For example, some H5Dwrite() calls translate to multiple
- * \Code{MPI_File_write_at} calls. This happens in all cases where the high-level file
+ * \TText{MPI_File_write_at} calls. This happens in all cases where the high-level file
  * access routine translates to multiple lower level file access routines.
  * The following scenarios will raise this issue:
  * \li Non-contiguous file access using independent I/O

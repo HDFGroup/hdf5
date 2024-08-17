@@ -651,7 +651,7 @@ H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *rel
  *          example:
  *
  *          An official HDF5 release is labelled as follows:
- *          HDF5 Release \Code{\<majnum\>.\<minnum\>.\<relnum\>}\n
+ *          HDF5 Release \TText{\<majnum\>.\<minnum\>.\<relnum\>}\n
  *          For example, in HDF5 Release 1.8.5:
  *          \li 1 is the major version number, \p majnum.
  *          \li 8 is the minor version number, \p minnum.
@@ -835,15 +835,15 @@ H5_DLL void *H5allocate_memory(size_t size, hbool_t clear);
  *          This function is intended to have the semantics of realloc():
  *
  *          <table>
- *            <tr><td>\Code{H5resize_memory(buffer, size)}</td>
+ *            <tr><td>\TText{H5resize_memory(buffer, size)}</td>
  *                <td>Resizes buffer. Returns pointer to resized buffer.</td></tr>
- *            <tr><td>\Code{H5resize_memory(NULL, size)}</td>
+ *            <tr><td>\TText{H5resize_memory(NULL, size)}</td>
  *                <td>Allocates memory using HDF5 Library allocator.
  *                    Returns pointer to new buffer</td></tr>
- *            <tr><td>\Code{H5resize_memory(buffer, 0)}</td>
+ *            <tr><td>\TText{H5resize_memory(buffer, 0)}</td>
  *                <td>Frees memory using HDF5 Library allocator.
  *                    Returns NULL.</td></tr>
- *            <tr><td>\Code{H5resize_memory(NULL, 0)}</td>
+ *            <tr><td>\TText{H5resize_memory(NULL, 0)}</td>
  *                <td>Returns NULL (undefined in C standard).</td></tr>
  *          </table>
  *

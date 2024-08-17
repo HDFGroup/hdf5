@@ -299,7 +299,7 @@ if (H5EX_BUILD_TESTING)
   add_custom_target(${EXAMPLE_VARNAME}_example_files ALL COMMENT "Copying files needed by example tests" DEPENDS ${example_files_list})
 
   foreach (h5_file ${dyn_examples})
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       if (${h5_file} MATCHES "h5ex_d_zfp")
         ## special filter
         ADD_H5_TEST (h5ex_d_zfp FILTERALL)

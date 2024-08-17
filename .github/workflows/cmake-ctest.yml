@@ -22,16 +22,50 @@ on:
         type: string
         required: true
         default: snapshots
+    secrets:
+        AZURE_TENANT_ID:
+            required: true
+        AZURE_CLIENT_ID:
+            required: true
+        AZURE_CLIENT_SECRET:
+            required: true
+        AZURE_ENDPOINT:
+            required: true
+        AZURE_CODE_SIGNING_NAME:
+            required: true
+        AZURE_CERT_PROFILE_NAME:
+            required: true
 
 permissions:
   contents: read
 
 jobs:
+  check-secret:
+    name: Check Secrets exists
+    runs-on: ubuntu-latest
+    outputs:
+      sign-state: ${{ steps.set-signing-state.outputs.BINSIGN }}
+    steps:
+      - name: Identify Signing Status
+        id: set-signing-state
+        env: 
+            signing_secret: ${{ secrets.AZURE_ENDPOINT }}
+        run: |
+          if [[ '${{ env.signing_secret }}' == '' ]]
+          then
+            SIGN_VAL=$(echo "false")
+          else
+            SIGN_VAL=$(echo "true")
+          fi
+          echo "BINSIGN=$SIGN_VAL" >> $GITHUB_OUTPUT
+        shell: bash
+
   build_and_test_win:
   # Windows w/ MSVC + CMake
   #
     name: "Windows MSVC CTest"
     runs-on: windows-latest
+    needs: [check-secret]
     steps:
       - name: Install Dependencies (Windows)
         run: choco install ninja
@@ -86,15 +120,27 @@ jobs:
           cmake --workflow --preset=${{ inputs.preset_name }}-MSVC --fresh
         shell: bash
 
-      - name: Create build folders (Windows)
-        run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-        shell: bash
+      - name: Sign files with Trusted Signing
+        uses: azure/trusted-signing-action@v0.4.0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+          files-folder: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC
+          files-folder-filter: msi
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+        if: ${{ needs.check-secret.outputs.sign-state == 'true' }}
 
       - name: Publish binary (Windows)
         id: publish-ctest-binary
         run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/README.md -Destination ${{ runner.workspace }}/build/hdf5/
@@ -106,11 +152,13 @@ jobs:
       - name: Publish msi binary (Windows)
         id: publish-ctest-msi-binary
         run: |
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/README.md -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.msi
-          cd "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/buildmsi"
+          mkdir "${{ runner.workspace }}/buildmsi/hdf5"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/buildmsi/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/buildmsi/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/README.md -Destination ${{ runner.workspace }}/buildmsi/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace }}/buildmsi/hdf5/ -Include *.msi
+          cd "${{ runner.workspace }}/buildmsi"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi.zip hdf5
         shell: pwsh
 
@@ -132,7 +180,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: msi-vs2022_cl-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi.zip
+              path: ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_linux:
@@ -140,6 +188,7 @@ jobs:
   #
     name: "Ubuntu gcc CMake"
     runs-on: ubuntu-latest
+    needs: [check-secret]
     steps:
       - name: Install CMake Dependencies (Linux)
         run: |
@@ -237,7 +286,6 @@ jobs:
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-      # Save files created by ctest script
       - name: Save published binary deb (Linux)
         uses: actions/upload-artifact@v4
         with:
@@ -245,7 +293,6 @@ jobs:
               path: ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-      # Save files created by ctest script
       - name: Save published binary rpm (Linux)
         uses: actions/upload-artifact@v4
         with:
@@ -261,100 +308,12 @@ jobs:
               path: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/hdf5lib_docs/html
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-  build_and_test_mac:
-  # MacOS w/ Clang + CMake
-  #
-    name: "MacOS Clang CMake"
-    runs-on: macos-13
-    steps:
-      - name: Install Dependencies (MacOS)
-        run: brew install ninja
-
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@v1
-        with:
-          version: "1.9.7"
-
-      - name: Set up JDK 19
-        uses: actions/setup-java@v4
-        with:
-          java-version: '19'
-          distribution: 'temurin'
-
-      - name: Set file base name (MacOS)
-        id: set-file-base
-        run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
-          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'release' ]]
-          then
-            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
-          else
-            SOURCE_NAME_BASE=$(echo "hdfsrc")
-          fi
-          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
-
-      # Get files created by release script
-      - name: Get tgz-tarball (MacOS)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
-        with:
-              name: tgz-tarball
-              path: ${{ github.workspace }}
-
-      - name: List files for the space (MacOS)
-        run: |
-              ls ${{ github.workspace }}
-              ls ${{ runner.workspace }}
-
-      - name: Uncompress source (MacOS)
-        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
-
-      # symlinks the compiler executables to a common location 
-      - name: Setup GNU Fortran
-        uses: fortran-lang/setup-fortran@v1
-        id: setup-fortran
-        with:
-          compiler: gcc
-          version: 12
-
-      - name: Run ctest (MacOS)
-        id: run-ctest
-        run: |
-          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
-          cmake --workflow --preset=${{ inputs.preset_name }}-OSX-Clang --fresh
-        shell: bash
-
-      - name: Publish binary (MacOS)
-        id: publish-ctest-binary
-        run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
-          cd "${{ runner.workspace }}/build"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx13.tar.gz hdf5
-        shell: bash
-
-      - name: List files in the space (MacOS)
-        run: |
-              ls ${{ github.workspace }}
-              ls -l ${{ runner.workspace }}
-
-      # Save files created by ctest script
-      - name: Save published binary (MacOS)
-        uses: actions/upload-artifact@v4
-        with:
-              name: tgz-osx13-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-osx13.tar.gz
-              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-
   build_and_test_mac_latest:
   # MacOS w/ Clang + CMake
   #
     name: "MacOS Clang CMake"
     runs-on: macos-latest
+    needs: [check-secret]
     steps:
       - name: Install Dependencies (MacOS_latest)
         run: brew install ninja
@@ -410,7 +369,7 @@ jobs:
         id: run-ctest
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
-          cmake --workflow --preset=${{ inputs.preset_name }}-OSX-Clang --fresh
+          cmake --workflow --preset=${{ inputs.preset_name }}-MACOS-Clang --fresh
         shell: bash
 
       - name: Publish binary (MacOS_latest)
@@ -423,7 +382,20 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx.tar.gz hdf5
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz hdf5
+        shell: bash
+
+      - name: Publish dmg binary (MacOS_latest)
+        id: publish-ctest-dmg-binary
+        run: |
+          mkdir "${{ runner.workspace }}/builddmg"
+          mkdir "${{ runner.workspace }}/builddmg/hdf5"
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/builddmg/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/builddmg/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/builddmg/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.dmg ${{ runner.workspace }}/builddmg/hdf5
+          cd "${{ runner.workspace }}/builddmg"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg.tar.gz hdf5
         shell: bash
 
       - name: List files in the space (MacOS_latest)
@@ -435,8 +407,15 @@ jobs:
       - name: Save published binary (MacOS_latest)
         uses: actions/upload-artifact@v4
         with:
-              name: tgz-osx-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-osx.tar.gz
+              name: tgz-macos14_clang-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save published dmg binary (MacOS_latest)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-macos14_clang-dmg-binary
+              path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_S3_linux:
@@ -517,6 +496,7 @@ jobs:
   #
     name: "Windows Intel CTest"
     runs-on: windows-latest
+    needs: [check-secret]
     steps:
       - name: Install Dependencies (Windows_intel)
         run: choco install ninja
@@ -574,15 +554,27 @@ jobs:
           cmake --workflow --preset=${{ inputs.preset_name }}-win-Intel --fresh
         shell: pwsh
 
-      - name: Create build folders (Windows_intel)
-        run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-        shell: bash
+      - name: Sign files with Trusted Signing (Windows_intel)
+        uses: azure/trusted-signing-action@v0.4.0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+          files-folder: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel
+          files-folder-filter: msi
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+        if: ${{ needs.check-secret.outputs.sign-state == 'true' }}
 
       - name: Publish binary (Windows_intel)
         id: publish-ctest-binary
         run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/build/hdf5/
@@ -594,11 +586,13 @@ jobs:
       - name: Publish msi binary (Windows_intel)
         id: publish-ctest-msi-binary
         run: |
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.msi
-          cd "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/buildmsi"
+          mkdir "${{ runner.workspace }}/buildmsi/hdf5"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/buildmsi/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/buildmsi/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/buildmsi/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/buildmsi/hdf5/ -Include *.msi
+          cd "${{ runner.workspace }}/buildmsi"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi.zip hdf5
         shell: pwsh
 
@@ -620,7 +614,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: msi-vs2022_intel-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi.zip
+              path: ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_linux_intel:
@@ -628,6 +622,7 @@ jobs:
   #
     name: "Ubuntu Intel CMake"
     runs-on: ubuntu-latest
+    needs: [check-secret]
     steps:
       - name: Install CMake Dependencies (Linux_intel)
         run: |

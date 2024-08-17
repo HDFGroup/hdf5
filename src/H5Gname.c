@@ -134,10 +134,10 @@ H5G__component(const char *name, size_t *size_p)
 char *
 H5G_normalize(const char *name)
 {
-    char    *norm;             /* Pointer to the normalized string */
-    size_t   s, d;             /* Positions within the strings */
-    unsigned last_slash;       /* Flag to indicate last character was a slash */
-    char    *ret_value = NULL; /* Return value */
+    char  *norm;             /* Pointer to the normalized string */
+    size_t s, d;             /* Positions within the strings */
+    bool   last_slash;       /* Flag to indicate last character was a slash */
+    char  *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -146,22 +146,22 @@ H5G_normalize(const char *name)
 
     /* Duplicate the name, to return */
     if (NULL == (norm = H5MM_strdup(name)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for normalized string");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, NULL, "memory allocation failed for normalized string");
 
     /* Walk through the characters, omitting duplicated '/'s */
     s = d      = 0;
-    last_slash = 0;
+    last_slash = false;
     while (name[s] != '\0') {
         if (name[s] == '/')
             if (last_slash)
                 ;
             else {
                 norm[d++]  = name[s];
-                last_slash = 1;
+                last_slash = true;
             } /* end else */
         else {
             norm[d++]  = name[s];
-            last_slash = 0;
+            last_slash = false;
         } /* end else */
         s++;
     } /* end while */
