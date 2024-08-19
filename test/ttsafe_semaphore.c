@@ -18,7 +18,7 @@
 
 #include "ttsafe.h"
 
-#if defined(H5_HAVE_THREADS) && defined(H5_HAVE_STDATOMIC_H)
+#if defined(H5_HAVE_THREADS)
 
 #define NUM_PINGPONG     (1000 * 1000)
 #define NUM_CLIENTSERVER (50 * 1000)
@@ -40,6 +40,7 @@ static H5TS_THREAD_RETURN_TYPE
 ping(void *_test_info)
 {
     pingpong_t       *test_info = (pingpong_t *)_test_info;
+    unsigned          count;
     herr_t            result;
     H5TS_thread_ret_t ret_value = 0;
 
@@ -47,11 +48,11 @@ ping(void *_test_info)
         result = H5TS_semaphore_wait(&test_info->ping_sem);
         CHECK_I(result, "H5TS_semaphore_wait");
 
-        test_info->counter++;
+        count = ++test_info->counter;
 
         result = H5TS_semaphore_signal(&test_info->pong_sem);
         CHECK_I(result, "H5TS_semaphore_signal");
-    } while (test_info->counter < NUM_PINGPONG);
+    } while (count < NUM_PINGPONG);
 
     return ret_value;
 }
@@ -60,6 +61,7 @@ static H5TS_THREAD_RETURN_TYPE
 pong(void *_test_info)
 {
     pingpong_t       *test_info = (pingpong_t *)_test_info;
+    unsigned          count;
     herr_t            result;
     H5TS_thread_ret_t ret_value = 0;
 
@@ -67,11 +69,11 @@ pong(void *_test_info)
         result = H5TS_semaphore_wait(&test_info->pong_sem);
         CHECK_I(result, "H5TS_semaphore_wait");
 
-        test_info->counter++;
+        count = ++test_info->counter;
 
         result = H5TS_semaphore_signal(&test_info->ping_sem);
         CHECK_I(result, "H5TS_semaphore_signal");
-    } while (test_info->counter < NUM_PINGPONG);
+    } while (count < NUM_PINGPONG);
 
     return ret_value;
 }
@@ -268,4 +270,4 @@ tts_semaphore(void)
     tts_semaphore_clientserver();
 } /* end tts_semaphore() */
 
-#endif /* defined(H5_HAVE_THREADS) && defined(H5_HAVE_STDATOMIC_H) */
+#endif /* defined(H5_HAVE_THREADS) */

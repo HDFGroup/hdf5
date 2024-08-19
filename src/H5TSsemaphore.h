@@ -179,7 +179,7 @@ H5TS_semaphore_wait(H5TS_semaphore_t *sem)
  *
  * Purpose:  Increments (unlocks) the semaphore.  If the semaphore's value
  *           becomes greater than zero, then another thread blocked in a wait
- *           call will be woken up and proceed to lock the semaphore.
+ *           call will proceed to lock the semaphore.
  *
  * Return:   Non-negative on success / Negative on failure
  *
