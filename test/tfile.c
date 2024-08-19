@@ -8102,6 +8102,49 @@ test_min_dset_ohdr(void)
 
 /****************************************************************
 **
+**  test_unseekable_file():
+**    Test that attempting to open an unseekable file fails gracefully
+**    without a segfault (see hdf5#1498)
+****************************************************************/
+static void
+test_unseekable_file(void)
+{
+    hid_t file_id = H5I_INVALID_HID; /* File ID */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing creating/opening an unseekable file\n"));
+
+    /* Creation */
+#ifdef H5_HAVE_WIN32_API
+    file_id = H5Fcreate("NUL", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+#else
+    file_id = H5Fcreate("/dev/null", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+#endif
+
+    H5Fclose(file_id);
+
+    /* Open, truncate */
+#ifdef H5_HAVE_WIN32_API
+    file_id = H5Fopen("NUL", H5F_ACC_TRUNC, H5P_DEFAULT);
+#else
+    file_id = H5Fopen("/dev/null", H5F_ACC_TRUNC, H5P_DEFAULT);
+#endif
+
+    H5Fclose(file_id);
+
+    /* Open, RDWR */
+#ifdef H5_HAVE_WIN32_API
+    file_id = H5Fopen("NUL", H5F_ACC_RDWR, H5P_DEFAULT);
+#else
+    file_id = H5Fopen("/dev/null", H5F_ACC_RDWR, H5P_DEFAULT);
+#endif
+
+    H5Fclose(file_id);
+
+    exit(EXIT_SUCCESS);
+}
+/****************************************************************
+**
 **  test_deprec():
 **    Test deprecated functionality.
 **
@@ -8419,10 +8462,11 @@ test_file(void)
 
     test_libver_bounds(); /* Test compatibility for file space management */
     test_libver_bounds_low_high(driver_name);
-    test_libver_macros();  /* Test the macros for library version comparison */
-    test_libver_macros2(); /* Test the macros for library version comparison */
-    test_incr_filesize();  /* Test H5Fincrement_filesize() and H5Fget_eoa() */
-    test_min_dset_ohdr();  /* Test dataset object header minimization */
+    test_libver_macros();   /* Test the macros for library version comparison */
+    test_libver_macros2();  /* Test the macros for library version comparison */
+    test_incr_filesize();   /* Test H5Fincrement_filesize() and H5Fget_eoa() */
+    test_min_dset_ohdr();   /* Test dataset object header minimization */
+    test_unseekable_file(); /* Test attempting to open/create an unseekable file */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     test_file_ishdf5(driver_name); /* Test detecting HDF5 files correctly */
     test_deprec(driver_name);      /* Test deprecated routines */
