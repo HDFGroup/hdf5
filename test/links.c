@@ -1976,14 +1976,14 @@ test_deprec(hid_t fapl, bool new_format)
         FAIL_STACK_ERROR;
 
     /* Returned length should be the same as strlen of the comment */
-    if (len != strlen("comment"))
+    if ((size_t)len != strlen("comment"))
         FAIL_STACK_ERROR;
 
     /* Get and verify the comment */
     if (H5Gget_comment(file_id, "group1", (size_t)len+1, tmpstr) < 0)
         FAIL_STACK_ERROR;
     if (strcmp(tmpstr, "comment") != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create links using H5Glink and H5Glink2 */
     if (H5Glink(file_id, H5G_LINK_HARD, "group2", "group1/link_to_group2") < 0)
