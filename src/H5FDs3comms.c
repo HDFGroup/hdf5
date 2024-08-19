@@ -1751,6 +1751,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     unsigned setting_i     = 0;
     int      found_setting = 0;
     char    *line_buffer   = &(buffer[0]);
+    size_t   end           = 0;
 
     FUNC_ENTER_PACKAGE
 
@@ -1761,8 +1762,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     /* look for start of profile */
     do {
         /* clear buffer */
-        for (buffer_i = 0; buffer_i < 128; buffer_i++)
-            buffer[buffer_i] = 0;
+        memset(buffer, 0, 128);
 
         line_buffer = fgets(line_buffer, 128, file);
         if (line_buffer == NULL) /* reached end of file */
@@ -1772,8 +1772,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     /* extract credentials from lines */
     do {
         /* clear buffer */
-        for (buffer_i = 0; buffer_i < 128; buffer_i++)
-            buffer[buffer_i] = 0;
+        memset(buffer, 0, 128);
 
         /* collect a line from file */
         line_buffer = fgets(line_buffer, 128, file);
@@ -1812,10 +1811,11 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
                 strncpy(setting_pointers[setting_i], (const char *)line_buffer, strlen(line_buffer));
 
                 /* "trim" tailing whitespace by replacing with null terminator*/
-                buffer_i = 0;
-                while (!isspace(setting_pointers[setting_i][buffer_i]))
-                    buffer_i++;
-                setting_pointers[setting_i][buffer_i] = '\0';
+                end = strlen(line_buffer) - 1;
+                while (end >= 0 && isspace((unsigned char)setting_pointers[setting_i][end])) {
+                    setting_pointers[setting_i][end] = '\0';
+                    end--;
+                }
 
                 break; /* have read setting; don't compare with others */
             }          /* end if possible name match */
