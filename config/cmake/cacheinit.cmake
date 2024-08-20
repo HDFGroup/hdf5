@@ -130,6 +130,14 @@ set (BLOSC2_TGZ_NAME "c-blosc2-2.14.4.tar.gz" CACHE STRING "Use BLOSC2 from comp
 
 set (BLOSC2_PACKAGE_NAME "blosc2" CACHE STRING "Name of BLOSC2 package" FORCE)
 
+set (BLOSC2_ZLIB_GIT_URL "https://github.com/madler/zlib.git" CACHE STRING "Use ZLIB from  GitHub repository" FORCE)
+set (BLOSC2_ZLIB_GIT_BRANCH "develop" CACHE STRING "" FORCE)
+
+set (BLOSC2_ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.3" CACHE STRING "Use PLUGINS from original location" FORCE)
+set (BLOSC2_ZLIB_TGZ_NAME "zlib-1.3.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
+
+set (BLOSC2_ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of BLOSC2_ZLIB package" FORCE)
+
 ########
 # bzip2
 ########

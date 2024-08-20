@@ -38,9 +38,7 @@ void tts_is_threadsafe(void);
 #ifdef H5_HAVE_THREADS
 void tts_thread_pool(void);
 void tts_atomics(void);
-#ifdef H5_HAVE_STDATOMIC_H
 void tts_semaphore(void);
-#endif /* H5_HAVE_STDATOMIC_H */
 void tts_rec_rw_lock_smoke_check_1(void);
 void tts_rec_rw_lock_smoke_check_2(void);
 void tts_rec_rw_lock_smoke_check_3(void);
