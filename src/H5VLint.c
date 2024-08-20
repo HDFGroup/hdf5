@@ -1840,7 +1840,7 @@ H5VL__object(hid_t id, H5I_type_t obj_type)
         case H5I_ATTR:
         case H5I_MAP:
             /* get the object */
-            if (NULL == (vol_obj = (H5VL_object_t *)H5VL_vol_object(id)))
+            if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier");
             break;
 
