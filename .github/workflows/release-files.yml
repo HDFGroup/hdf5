@@ -281,7 +281,7 @@ jobs:
               ls ${{ runner.workspace }}
 
       - name: dev-only-docs
-        uses: peaceiris/actions-gh-pages@0b7567fde6f7517edcc13d8ffa2d89cd8734d47c # v4.0.0
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
