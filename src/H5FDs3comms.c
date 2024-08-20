@@ -1671,6 +1671,9 @@ H5FD_s3comms_HMAC_SHA256(const unsigned char *key, size_t key_len, const char *m
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    if (!key)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "signing key not provided");
+
     if (dest == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "destination cannot be null.");
 
@@ -1771,8 +1774,9 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
 
     /* extract credentials from lines */
     do {
-        /* clear buffer */
+        /* clear buffer and flag */
         memset(buffer, 0, 128);
+        found_setting = 0;
 
         /* collect a line from file */
         line_buffer = fgets(line_buffer, 128, file);
@@ -1812,7 +1816,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
 
                 /* "trim" tailing whitespace by replacing with null terminator*/
                 end = strlen(line_buffer) - 1;
-                while (end >= 0 && isspace((unsigned char)setting_pointers[setting_i][end])) {
+                while (end > 0 && isspace((int)setting_pointers[setting_i][end])) {
                     setting_pointers[setting_i][end] = '\0';
                     end--;
                 }
@@ -2173,7 +2177,7 @@ H5FD_s3comms_signing_key(unsigned char *md, const char *secret, const char *regi
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "`iso8601now` cannot be NULL.");
 
     AWS4_secret_len = 4 + strlen(secret) + 1;
-    AWS4_secret     = (char *)H5MM_malloc(sizeof(char *) * AWS4_secret_len);
+    AWS4_secret     = (char *)H5MM_malloc(AWS4_secret_len);
     if (AWS4_secret == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Could not allocate space.");
 
@@ -2188,10 +2192,13 @@ H5FD_s3comms_signing_key(unsigned char *md, const char *secret, const char *regi
     HMAC(EVP_sha256(), (const unsigned char *)AWS4_secret, (int)strlen(AWS4_secret),
          (const unsigned char *)iso8601now, 8, /* 8 --> length of 8 --> "yyyyMMDD"  */
          datekey, NULL);
+
     HMAC(EVP_sha256(), (const unsigned char *)datekey, SHA256_DIGEST_LENGTH, (const unsigned char *)region,
          strlen(region), dateregionkey, NULL);
+
     HMAC(EVP_sha256(), (const unsigned char *)dateregionkey, SHA256_DIGEST_LENGTH,
          (const unsigned char *)"s3", 2, dateregionservicekey, NULL);
+
     HMAC(EVP_sha256(), (const unsigned char *)dateregionservicekey, SHA256_DIGEST_LENGTH,
          (const unsigned char *)"aws4_request", 12, md, NULL);
 
