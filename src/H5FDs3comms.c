@@ -50,7 +50,7 @@
 /* manipulate verbosity of CURL output
  *
  * 0 -> no explicit curl output
- * 1 -> on error, print failure info to stderr
+ * 1 -> print: (1) failure info to stderr on error, (2) basic HTTP range GET info
  * 2 -> in addition to above, print information for all performs; sets all
  *      curl handles with CURLOPT_VERBOSE
  */
@@ -810,7 +810,7 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
 
     handle->filesize = (size_t)content_length;
 
-#if S3COMMS_CURL_VERBOSITY == 1
+#if S3COMMS_CURL_VERBOSITY > 0
     fprintf(stdout, " -- size: %ju\n", content_length);
     fflush(stdout);
 #endif
@@ -1124,7 +1124,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format HTTP Range value");
     }
 
-#if S3COMMS_CURL_VERBOSITY == 1
+#if S3COMMS_CURL_VERBOSITY > 0
     fprintf(stdout, "%s: Bytes %" PRIuHADDR " - %" PRIuHADDR ", Request Size: %zu\n", handle->httpverb,
             offset, offset + len - 1, len);
     fflush(stdout);
