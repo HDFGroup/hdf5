@@ -363,7 +363,7 @@ jobs:
         id: setup-fortran
         with:
           compiler: gcc
-          version: 12
+          version: 14
 
       - name: Run ctest (MacOS_latest)
         id: run-ctest
@@ -385,6 +385,15 @@ jobs:
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz hdf5
         shell: bash
 
+      - name: Notarize .dmg
+        uses: cocoalibs/xcode-notarization-action@v1
+        with:
+          app-path: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/HDF5-1.15.0-Darwin.dmg
+          apple-id: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+          password: ${{ secrets.MACOS_NOTARIZATION_PW }}
+          team-id: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+          xcode-path: '/Applications/Xcode_15.4.app'
+          
       - name: Publish dmg binary (MacOS_latest)
         id: publish-ctest-dmg-binary
         run: |
