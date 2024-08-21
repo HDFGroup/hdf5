@@ -135,11 +135,11 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
 
     if (H5L_SAME_LOC != src_loc_id)
         /* Get the location object */
-        if (NULL == (vol_obj1 = (H5VL_object_t *)H5I_object(src_loc_id)))
+        if (NULL == (vol_obj1 = H5VL_vol_object(src_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (H5L_SAME_LOC != dst_loc_id)
         /* Get the location object */
-        if (NULL == (vol_obj2 = (H5VL_object_t *)H5I_object(dst_loc_id)))
+        if (NULL == (vol_obj2 = H5VL_vol_object(dst_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Make sure that the VOL connectors are the same */
@@ -236,11 +236,11 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
 
     if (H5L_SAME_LOC != src_loc_id)
         /* Get the location object */
-        if (NULL == (vol_obj1 = (H5VL_object_t *)H5I_object(src_loc_id)))
+        if (NULL == (vol_obj1 = H5VL_vol_object(src_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (H5L_SAME_LOC != dst_loc_id)
         /* Get the location object */
-        if (NULL == (vol_obj2 = (H5VL_object_t *)H5I_object(dst_loc_id)))
+        if (NULL == (vol_obj2 = H5VL_vol_object(dst_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Make sure that the VOL connectors are the same */
@@ -675,7 +675,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_i
     loc_params.obj_type                     = H5I_get_type(link_loc_id);
 
     /* get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(link_loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(link_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Set up VOL callback arguments */
@@ -753,7 +753,7 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type, con
     loc_params.obj_type                     = H5I_get_type(link_loc_id);
 
     /* get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(link_loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(link_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Set up VOL callback arguments */
@@ -1043,7 +1043,7 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf /*out*/, size_t size, hid_t
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* Get the VOL object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Set up VOL callback arguments */
@@ -1107,7 +1107,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
     /* Get the VOL object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Set up VOL callback arguments */
@@ -1269,7 +1269,7 @@ H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo /*out*/, hid_t l
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* Get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Set up VOL callback arguments */
@@ -1328,7 +1328,7 @@ H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
     /* Get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Set up VOL callback arguments */
@@ -1514,7 +1514,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
     /* Get the VOL object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier");
 
     /* Set up VOL callback arguments */
@@ -1720,7 +1720,7 @@ H5Literate_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Set location struct fields */
@@ -1799,7 +1799,7 @@ H5Lvisit2(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterat
     loc_params.obj_type = H5I_get_type(group_id);
 
     /* Get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(group_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(group_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Set up VOL callback arguments */
@@ -1873,7 +1873,7 @@ H5Lvisit_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Set location struct fields */
