@@ -545,6 +545,7 @@ test_h5o_refcount(void)
     hid_t       grp, dset, dtype, dspace; /* Object identifiers */
     char        filename[1024];
     H5O_info2_t oinfo; /* Object info struct */
+    H5L_info2_t linfo; /* Buffer for H5Lget_info */
     hsize_t     dims[RANK];
     herr_t      ret; /* Value returned from API calls */
 
@@ -567,6 +568,10 @@ test_h5o_refcount(void)
     CHECK(dtype, FAIL, "H5Tcopy");
     ret = H5Tcommit2(fid, "datatype", dtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tcommit2");
+
+    /* Test passing a datatype ID to H5Lget_info2, it should not fail */
+    ret = H5Lget_info2(dtype, "/datatype", &linfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lget_info2");
 
     /* Create the data space for the dataset. */
     dims[0] = DIM0;
