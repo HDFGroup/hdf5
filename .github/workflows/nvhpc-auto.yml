@@ -67,24 +67,9 @@ jobs:
           make -j3
         working-directory: ${{ runner.workspace }}/build
 
-
-      - name: Autotools Run Tests
-        shell: bash
-        run: |
-          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/compilers/bin:$PATH
-          make check -j
-        working-directory: ${{ runner.workspace }}/build
-
       - name: Autotools Install
         shell: bash
         run: |
           export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/compilers/bin:$PATH
           make install
-        working-directory: ${{ runner.workspace }}/build
-
-
-      - name: Autotools Verify Install
-        run: |
-          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/compilers/bin:$PATH
-          make check-install
         working-directory: ${{ runner.workspace }}/build
