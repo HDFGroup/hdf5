@@ -1766,7 +1766,8 @@ done:
  *
  * Purpose:     Utility function to return the object pointer associated with
  *              an ID of the specified type. This routine is the same as
- *              H5VL_vol_object except it verifies the ID's type first.
+ *              H5VL_vol_object except it takes the additional argument
+ *              obj_type to verify the ID's type against.
  *
  * Return:      Success:        object pointer
  *              Failure:        NULL
