@@ -109,10 +109,12 @@ option (HDF_ENABLE_THREADS "Enable Threads" OFF)
 # threads enabled.
 if (HDF_ENABLE_THREADS AND HDF5_ENABLE_THREADS)
   # Check for threading package
-  set (THREADS_PREFER_PTHREAD_FLAG ON)
-  find_package (Threads)
   if (NOT Threads_FOUND)
-    message (FATAL_ERROR " **** threads option requires a threading package and none was found **** ")
+    set (THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package (Threads)
+    if (NOT Threads_FOUND)
+      message (FATAL_ERROR " **** threads option requires a threading package and none was found **** ")
+    endif ()
   endif ()
 endif ()
 
