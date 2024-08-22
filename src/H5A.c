@@ -1269,7 +1269,7 @@ done:
         const char *obj_name;   IN: Name of the object relative to location
         H5_index_t idx_type;    IN: Type of index to use
         H5_iter_order_t order;  IN: Order to iterate over index
-        hsize_t n;              IN: Index (0-based) attribute
+        hsize_t n;              IN: Index (0-based) of attribute to retrieve
         char *name;             IN: Buffer to store the name in
         size_t size;            IN: The size of the buffer to store the name in.
         hid_t lapl_id;          IN: Link access property list
