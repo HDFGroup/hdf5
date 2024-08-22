@@ -983,7 +983,7 @@ H5A__read_api_common(hid_t attr_id, hid_t dtype_id, void *buf, void **token_ptr,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf parameter can't be NULL");
 
     /* Get attribute object pointer */
-    if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (*vol_obj_ptr = H5VL_vol_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
 
     /* Read the attribute data */
@@ -1090,7 +1090,7 @@ H5Aget_space(hid_t attr_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check arguments */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not an attribute");
 
     /* Set up VOL callback arguments */
@@ -1134,7 +1134,7 @@ H5Aget_type(hid_t attr_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check arguments */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not an attribute");
 
     /* Set up VOL callback arguments */
@@ -1183,7 +1183,7 @@ H5Aget_create_plist(hid_t attr_id)
     assert(H5P_LST_ATTRIBUTE_CREATE_ID_g != -1);
 
     /* Check arguments */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not an attribute");
 
     /* Set up VOL callback arguments */
@@ -1234,7 +1234,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf /*out*/)
     FUNC_ENTER_API((-1))
 
     /* check arguments */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not an attribute");
     if (!buf && buf_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "buf cannot be NULL if buf_size is non-zero");
@@ -1352,7 +1352,7 @@ H5Aget_storage_size(hid_t attr_id)
     FUNC_ENTER_API(0)
 
     /* Check arguments */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an attribute");
 
     /* Set up VOL callback arguments */
@@ -1390,7 +1390,7 @@ H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/)
     FUNC_ENTER_API(FAIL)
 
     /* Check args */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
     if (!ainfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "attribute_info parameter cannot be NULL");
