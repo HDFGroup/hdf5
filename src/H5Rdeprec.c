@@ -267,12 +267,12 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
 
     /* Check if using native VOL connector */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL,
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5G_UNKNOWN,
                     "can't determine if VOL object is native connector object");
 
     /* Must use native VOL connector for this operation */
     if (!is_native_vol_obj)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_VOL, FAIL,
+        HGOTO_ERROR(H5E_REFERENCE, H5E_VOL, H5G_UNKNOWN,
                     "H5Rget_obj_type1 is only meant to be used with the native VOL connector");
 
     /* Get object type */
@@ -341,12 +341,12 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
 
     /* Check if using native VOL connector */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL,
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID,
                     "can't determine if VOL object is native connector object");
 
     /* Must use native VOL connector for this operation */
     if (!is_native_vol_obj)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_VOL, FAIL,
+        HGOTO_ERROR(H5E_REFERENCE, H5E_VOL, H5I_INVALID_HID,
                     "H5Rdereference1 is only meant to be used with the native VOL connector");
 
     /* Get object type */
@@ -614,12 +614,12 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *re
 
     /* Check if using native VOL connector */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL,
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID,
                     "can't determine if VOL object is native connector object");
 
     /* Must use native VOL connector for this operation */
     if (!is_native_vol_obj)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_VOL, FAIL,
+        HGOTO_ERROR(H5E_REFERENCE, H5E_VOL, H5I_INVALID_HID,
                     "H5Rdereference2 is only meant to be used with the native VOL connector");
 
     /* Get object type */
@@ -694,7 +694,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
                     "can't query if file uses native VOL connector");
 
     if (!is_native_vol_obj)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_VOL, FAIL,
+        HGOTO_ERROR(H5E_REFERENCE, H5E_VOL, H5I_INVALID_HID,
                     "H5Rget_region is only meant to be used with the native VOL connector");
 
     /* Get object type */

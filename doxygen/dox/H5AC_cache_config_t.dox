@@ -24,7 +24,7 @@
  *     Boolean field indicating whether the trace_file_name
  *     field should be used to open a trace file for the cache.
  *
- *     \Emph{*** DEPRECATED ***} Use \Code{H5Fstart/stop} logging functions instead
+ *     \Emph{*** DEPRECATED ***} Use \TText{H5Fstart/stop} logging functions instead
  *
  *     The trace file is a debugging feature that allow the capture of
  *     top level metadata cache requests for purposes of debugging and/or
@@ -42,7 +42,7 @@
  *     Boolean field indicating whether the current trace
  *     file (if any) should be closed.
  *
- *     \Emph{*** DEPRECATED ***} Use \Code{H5Fstart/stop} logging functions instead
+ *     \Emph{*** DEPRECATED ***} Use \TText{H5Fstart/stop} logging functions instead
  *
  *     See the above comments on the open_trace_file field.  This field
  *     should be set to \c FALSE unless there is an open trace file on the
@@ -54,7 +54,7 @@
  *     Full path of the trace file to be opened if the
  *     open_trace_file field is \c TRUE.
  *
- *     \Emph{*** DEPRECATED ***} Use \Code{H5Fstart/stop} logging functions instead
+ *     \Emph{*** DEPRECATED ***} Use \TText{H5Fstart/stop} logging functions instead
  *
  *     In the parallel case, an ascii representation of the mpi rank of
  *     the process will be appended to the file name to yield a unique
@@ -78,7 +78,7 @@
  *     soon as possible and monitor cache size.
  *
  *     At present, evictions can only be disabled if automatic
- *     cache resizing is also disabled (that is, \Code{(incr_mode ==
+ *     cache resizing is also disabled (that is, \TText{(incr_mode ==
  *     H5C_incr__off ) && ( decr_mode == H5C_decr__off )}).  There
  *     is no logical reason why this should be so, but it simplifies
  *     implementation and testing, and I can't think of any reason
@@ -95,7 +95,7 @@
  * \par initial_size
  *      If enabled, this field contain the size the cache is
  *      to be set to upon receipt of this structure.  Needless to say,
- *      initial_size must lie in the closed interval \Code{[min_size, max_size]}.
+ *      initial_size must lie in the closed interval \TText{[min_size, max_size]}.
  *
  * \par min_clean_fraction
  *      \c double in the range 0 to 1 indicating the fraction
@@ -105,13 +105,13 @@
  * \par max_size
  *      Maximum size to which the cache can be adjusted.  The
  *      supplied value must fall in the closed interval
- *      \Code{[MIN_MAX_CACHE_SIZE, MAX_MAX_CACHE_SIZE]}.  Also, \c max_size must
+ *      \TText{[MIN_MAX_CACHE_SIZE, MAX_MAX_CACHE_SIZE]}.  Also, \c max_size must
  *      be greater than or equal to \c min_size.
  *
  * \par min_size
  *      Minimum size to which the cache can be adjusted.  The
  *      supplied value must fall in the closed interval
- *      \Code{[H5C__MIN_MAX_CACHE_SIZE, H5C__MAX_MAX_CACHE_SIZE]}.  Also, \c min_size
+ *      \TText{[H5C__MIN_MAX_CACHE_SIZE, H5C__MAX_MAX_CACHE_SIZE]}.  Also, \c min_size
  *      must be less than or equal to \c max_size.
  *
  * \par epoch_length
@@ -122,7 +122,7 @@
  *
  *      At the end of an epoch, we discard prior hit rate data and start
  *      collecting afresh.  The epoch_length must lie in the closed
- *      interval \Code{[H5C__MIN_AR_EPOCH_LENGTH, H5C__MAX_AR_EPOCH_LENGTH]}.
+ *      interval \TText{[H5C__MIN_AR_EPOCH_LENGTH, H5C__MAX_AR_EPOCH_LENGTH]}.
  * \endparblock
  *
  *
@@ -201,8 +201,8 @@
  *      \li \c H5C_flash_incr__add_space:  Let \c x be either the size of a newly
  *          newly inserted entry, or the number of bytes by which the
  *          size of an existing entry has been increased.\n
- *          If \Code{x > flash_threshold * current max cache size},
- *          increase the current maximum cache size by \Code{x * flash_multiple}
+ *          If \TText{x > flash_threshold * current max cache size},
+ *          increase the current maximum cache size by \TText{x * flash_multiple}
  *          less any free space in the cache, and star a new epoch.  For
  *          now at least, pay no attention to the maximum increment.
  *
@@ -213,7 +213,7 @@
  *      With a little thought, it should be obvious that the above flash
  *      cache size increase algorithm is not sufficient for all circumstances
  *      -- for example, suppose the user round robins through
- *      \Code{(1/flash_threshold) +1} groups, adding one data set to each on each
+ *      \TText{(1/flash_threshold) +1} groups, adding one data set to each on each
  *      pass.  Then all will increase in size at about the same time, requiring
  *      the max cache size to at least double to maintain acceptable
  *      performance, however the above flash increment algorithm will not be
@@ -319,7 +319,7 @@
  *      This field contains the number of epochs an entry must remain
  *      unaccessed before it is evicted in an attempt to reduce the
  *      cache size.  If applicable, this field must lie in the range
- *      \Code{[1, H5C__MAX_EPOCH_MARKERS]}.
+ *      \TText{[1, H5C__MAX_EPOCH_MARKERS]}.
  * \endparblock
  *
  * \par apply_empty_reserve
