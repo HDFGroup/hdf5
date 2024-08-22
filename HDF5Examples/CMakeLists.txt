@@ -99,53 +99,38 @@ if (H5_HAVE_PARALLEL)
   INCLUDE_DIRECTORIES (${MPI_C_INCLUDE_DIRS})
 endif ()
 
-# Determine if a threading package is available on this system
-option (HDF5_ENABLE_THREADS "Enable thread support" ON)
-set (THREADS_PREFER_PTHREAD_FLAG ON)
-find_package (Threads)
-if (Threads_FOUND)
-  set (H5_HAVE_THREADS 1)
-  set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
-
-  # Determine which threading package to use
-  # Comment out check for C11 threads for now, since it conflicts with the
-  # current --std=c99 compile flags at configuration time.  When we switch to
-  # --std=c11, this can be uncommented.
-  #CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
-  if (WIN32)
-    # When Win32 is available, we use those threads
-    set (H5_HAVE_WIN_THREADS 1)
-  elseif (HAVE_THREADS_H)
-    # When C11 threads are available, those are the top choice
-    set (H5_HAVE_C11_THREADS 1)
-  elseif (CMAKE_USE_PTHREADS_INIT)
-    set (H5_HAVE_PTHREAD_H 1)
-  else ()
-    message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
+#-----------------------------------------------------------------------------
+# Option to use threads
+#-----------------------------------------------------------------------------
+option (HDF_ENABLE_THREADS "Enable Threads" OFF)
+# Note that HDF_ENABLE_THREADS is the CMake option for determining
+# whether to enable threads in the examples. HDF5_ENABLE_THREADS
+# is the CMake option determining whether HDF5 was configured with
+# threads enabled.
+if (HDF_ENABLE_THREADS AND HDF5_ENABLE_THREADS)
+  # Check for threading package
+  set (THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package (Threads)
+  if (NOT Threads_FOUND)
+    message (FATAL_ERROR " **** threads option requires a threading package and none was found **** ")
   endif ()
-
-  # Check for compiler support for atomic variables
-  CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
-  if (HAVE_STDATOMIC_H)
-    set (H5_HAVE_STDATOMIC_H 1)
-  endif()
 endif ()
 
 #-----------------------------------------------------------------------------
 # Option to use threadsafe
 #-----------------------------------------------------------------------------
-option (HDF_ENABLE_THREADSAFE "Enable Threadsafety" OFF)
+option (HDF_ENABLE_THREADSAFE "Enable Thread-safety" OFF)
 # Note that HDF_ENABLE_THREADSAFE is the CMake option for determining
 # whether to enable thread-safety in the examples. HDF5_ENABLE_THREADSAFE
 # is the CMake option determining whether HDF5 was configured with
-# thread-safety enabled.
-if (HDF_ENABLE_THREADSAFE AND HDF5_ENABLE_THREADSAFE)
+# thread-safety enabled. HDF5_ENABLE_THREADS
+# is the CMake option determining whether HDF5 was configured with
+# threads enabled.
+if (HDF_ENABLE_THREADSAFE AND HDF5_ENABLE_THREADSAFE AND HDF5_ENABLE_THREADS)
   # Check for threading package
   if (NOT Threads_FOUND)
     message (FATAL_ERROR " **** thread-safety option requires a threading package and none was found **** ")
   endif ()
-
-  set (H5_HAVE_THREADSAFE 1)
 endif ()
 
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES 
