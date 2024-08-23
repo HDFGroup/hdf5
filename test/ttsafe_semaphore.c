@@ -26,7 +26,7 @@
 #define NUM_THREADS 16
 
 typedef struct {
-    H5TS_semaphore_t ping_sem, pong_sem;
+    H5TS_semaphore_t   ping_sem, pong_sem;
     H5TS_atomic_uint_t counter;
 } pingpong_t;
 
@@ -72,7 +72,6 @@ pong(void *_test_info)
         result = H5TS_semaphore_signal(&test_info->ping_sem);
         CHECK_I(result, "H5TS_semaphore_signal");
     } while (H5TS_atomic_load_uint(&test_info->counter) < NUM_PINGPONG);
-
 
     return ret_value;
 }
