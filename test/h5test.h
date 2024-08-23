@@ -319,6 +319,14 @@ H5TEST_DLL herr_t         h5_using_parallel_driver(hid_t fapl_id, bool *driver_i
 H5TEST_DLL herr_t         h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *default_vfd_compatible);
 H5TEST_DLL bool           h5_driver_uses_multiple_files(const char *drv_name, unsigned flags);
 
+/* Random number functions that don't modify the underlying rand/random state.
+ * These use rand_r with a state pointer under the hood. The state is always
+ * initialized to the same value so that each process in the parallel tests
+ * always gets the same sequence.
+ */
+H5TEST_DLL int  h5_local_rand(void);
+H5TEST_DLL void h5_local_srand(unsigned int seed);
+
 /* Functions that will replace components of a FAPL */
 H5TEST_DLL herr_t h5_get_vfd_fapl(hid_t fapl_id);
 H5TEST_DLL herr_t h5_get_libver_fapl(hid_t fapl_id);
