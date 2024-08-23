@@ -8197,6 +8197,14 @@ test_deprec(const char *driver_name)
     fcpl = H5Fget_create_plist(file);
     CHECK(fcpl, FAIL, "H5Fget_create_plist");
 
+    /* Test passing in an ID that is not a file ID, should fail */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fset_latest_format(fcpl, true);
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Fset_latest_format");
+
     /* Get the file's version information */
     ret = H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
     CHECK(ret, FAIL, "H5Pget_version");
