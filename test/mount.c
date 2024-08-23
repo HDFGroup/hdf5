@@ -164,7 +164,7 @@ test_illegal(hid_t fapl)
 {
     hid_t file1 = H5I_INVALID_HID, file1b = H5I_INVALID_HID, file2 = H5I_INVALID_HID, file3 = H5I_INVALID_HID,
           file3b = H5I_INVALID_HID, mnt = H5I_INVALID_HID;
-    hid_t dtype = H5I_INVALID_HID;  /* To test invalid ID */
+    hid_t  dtype = H5I_INVALID_HID; /* To test invalid ID */
     char   filename1[1024], filename2[1024], filename3[1024];
     herr_t status;
 
