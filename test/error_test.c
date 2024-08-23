@@ -175,12 +175,13 @@ error:
 static herr_t
 init_error(void)
 {
-    ssize_t    cls_size = (ssize_t)strlen(ERR_CLS_NAME) + 1;
+    ssize_t    cls_size = (ssize_t)strlen(ERR_CLS_NAME);
     ssize_t    msg_size = (ssize_t)strlen(ERR_MIN_SUBROUTINE_MSG) + 1;
     char      *cls_name = NULL;
     char      *msg      = NULL;
     H5E_type_t msg_type;
 
+    /* Account for null terminator */
     if (NULL == (cls_name = (char *)malloc(strlen(ERR_CLS_NAME) + 1)))
         TEST_ERROR;
     if (NULL == (msg = (char *)malloc(strlen(ERR_MIN_SUBROUTINE_MSG) + 1)))
@@ -189,7 +190,8 @@ init_error(void)
     if ((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS)) < 0)
         TEST_ERROR;
 
-    if (cls_size != H5Eget_class_name(ERR_CLS, cls_name, (size_t)cls_size) + 1)
+    /* Account for null terminator */
+    if (cls_size != H5Eget_class_name(ERR_CLS, cls_name, (size_t)cls_size + 1))
         TEST_ERROR;
     if (strcmp(ERR_CLS_NAME, cls_name) != 0)
         TEST_ERROR;
