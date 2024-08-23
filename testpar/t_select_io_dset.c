@@ -1588,7 +1588,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned s
                  mwbuf ? "mwbuf" : "nomwbuf");
 
         /* Flip a coin to see if we're doing type conversion */
-        tconv = rand() % 2;
+        tconv = h5_local_rand() % 2;
         if (tconv)
             any_tconv = true;
 
@@ -2079,7 +2079,7 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned select, uns
         }
 
     /* Case c */
-    mm = rand() % (int)ndsets;
+    mm = h5_local_rand() % (int)ndsets;
     if (!mm)
         mm++;
 
@@ -2719,9 +2719,9 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, un
                 P_TEST_ERROR;
         }
         else {
-            if ((dset_dids[i] =
-                     H5Dcreate2(fid, dset_names[i], ((rand() % 2) ? H5T_NATIVE_LLONG : H5T_NATIVE_SHORT),
-                                file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i],
+                                           ((h5_local_rand() % 2) ? H5T_NATIVE_LLONG : H5T_NATIVE_SHORT),
+                                           file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
                 P_TEST_ERROR;
         }
     }
@@ -2790,7 +2790,7 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, un
      *   process 0: get 0 row; other processes: hyperslab
      */
 
-    mm = rand() % (int)ndsets;
+    mm = h5_local_rand() % (int)ndsets;
     if (mm == 0)
         mm++;
 
@@ -3169,7 +3169,7 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned select, un
             if ((mem_sids[i] = H5Screate_simple(1, block, NULL)) < 0)
                 P_TEST_ERROR;
 
-            mm = rand() % (int)ndsets;
+            mm = h5_local_rand() % (int)ndsets;
             if (mm == 0) {
                 dset_types[i] = DSET_WITH_NO_CONV;
                 snprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_nconv_dset%d_%s_%s_%s", i,
