@@ -59,6 +59,7 @@ static herr_t H5T__commit_api_common(hid_t loc_id, const char *name, hid_t type_
 static hid_t  H5T__open_api_common(hid_t loc_id, const char *name, hid_t tapl_id, void **token_ptr,
                                    H5VL_object_t **_vol_obj_ptr);
 static H5T_t *H5T__open_oid(const H5G_loc_t *loc);
+static herr_t H5T_destruct_datatype(void *datatype, H5VL_t *vol_connector);
 
 /*********************/
 /* Public Variables */
@@ -662,7 +663,7 @@ H5T__open_api_common(hid_t loc_id, const char *name, hid_t tapl_id, void **token
 done:
     /* Cleanup on error */
     if (H5I_INVALID_HID == ret_value)
-        if (dt && H5VL_datatype_close(*vol_obj_ptr, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if (dt && H5T_destruct_datatype(dt, (*vol_obj_ptr)->connector) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1036,9 +1037,6 @@ H5T_open(const H5G_loc_t *loc)
 
     /* Check if datatype was already open */
     if (NULL == (shared_fo = (H5T_shared_t *)H5FO_opened(loc->oloc->file, loc->oloc->addr))) {
-        /* Clear any errors from H5FO_opened() */
-        H5E_clear_stack();
-
         /* Open the datatype object */
         if (NULL == (dt = H5T__open_oid(loc)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
@@ -1262,6 +1260,41 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_construct_datatype() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_destruct_datatype
+ *
+ * Purpose:     Helper function to free a committed datatype object that
+ *              hasn't yet been wrapped within a VOL object. This usually
+ *              happens when a failure occurs during opening a committed
+ *              datatype. When this happens, the datatype must be wrapped
+ *              inside a temporary VOL object in order to route the close
+ *              operation through the stack of VOL connectors.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5T_destruct_datatype(void *datatype, H5VL_t *vol_connector)
+{
+    H5VL_object_t *vol_obj   = NULL;
+    herr_t         ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if (NULL == (vol_obj = H5VL_create_object(datatype, vol_connector)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't create VOL object for committed datatype");
+
+    if (H5VL_datatype_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release datatype");
+
+done:
+    if (vol_obj && H5VL_free_object(vol_obj) < 0)
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't free VOL object");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_destruct_datatype() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T_get_named_type

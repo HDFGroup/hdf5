@@ -36,7 +36,7 @@ jobs:
  
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
 
       #
       # CMAKE CONFIGURE
@@ -96,7 +96,7 @@ jobs:
  
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
 
       #
       # CMAKE CONFIGURE
@@ -156,7 +156,7 @@ jobs:
  
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
 
       #
       # CMAKE CONFIGURE
@@ -216,7 +216,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
 
       #
       # CMAKE CONFIGURE
@@ -227,6 +227,7 @@ jobs:
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             -G Ninja \
+            --log-level=VERBOSE \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
@@ -235,12 +236,12 @@ jobs:
             -DHDF5_BUILD_FORTRAN=ON \
             -DHDF5_BUILD_JAVA=ON \
             -DHDF5_BUILD_DOC=OFF \
-            -DLIBAEC_USE_LOCALCONTENT=ON \
-            -DZLIB_USE_LOCALCONTENT=ON \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
-            -DHDF5_USE_ZLIBNG:BOOL=ON \
+            -DHDF5_USE_ZLIB_NG:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash
 

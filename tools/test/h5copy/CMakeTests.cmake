@@ -259,7 +259,7 @@
         COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
     )
     # If using memchecker add tests without using scripts
-    if (HDF5_USING_ANALYSIS_TOOL)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5COPY-CMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
       if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5COPY-CMP-${testname} PROPERTIES WILL_FAIL "true")
@@ -292,7 +292,7 @@
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode infile sparam srcname dparam dstname cmpfile)
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
           NAME H5COPY_UD-${testname}-clear-objects
@@ -366,7 +366,7 @@
   endmacro ()
 
   macro (ADD_H5_UD_ERR_TEST testname resultcode infile sparam srcname dparam dstname cmpfile)
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
           NAME H5COPY_UD_ERR-${testname}-clear-objects
@@ -443,12 +443,12 @@
 
   macro (ADD_SIMPLE_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_USING_ANALYSIS_TOOL)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5COPY-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5COPY-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-    else (HDF5_USING_ANALYSIS_TOOL)
+    else ()
       add_test (
           NAME H5COPY-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -549,7 +549,7 @@
     ADD_H5_TEST2 (grp_dsets_rename 2 ${HDF_FILE1}.h5 grp_dsets grp_rename -v -s grp_dsets -d /grp_rename/grp_dsets)
   endif ()
 
-  # "Test copying objects into group hier. that doesn't exist yet in destination file"
+  # "Test copying objects into group that doesn't exist yet in destination file"
   ADD_H5_TEST (A_B1_simple 0 ${HDF_FILE1}.h5 -vp -s simple -d /A/B1/simple)
   ADD_H5_TEST (A_B2_simple2 0 ${HDF_FILE1}.h5 -vp -s simple -d /A/B2/simple2)
   ADD_H5_TEST (C_D_simple 0 ${HDF_FILE1}.h5 -vp -s /grp_dsets/simple -d /C/D/simple)

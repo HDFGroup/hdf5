@@ -198,6 +198,7 @@ $SRC_H5DUMP_TESTFILES/tst_onion_dset_1d.h5.onion
 LIST_OTHER_TEST_FILES="
 $SRC_H5DUMP_OUTFILES/charsets.ddl
 $SRC_H5DUMP_OUTFILES/file_space.ddl
+$SRC_H5DUMP_OUTFILES/file_space_cache.ddl
 $SRC_H5DUMP_OUTFILES/filter_fail.ddl
 $SRC_H5DUMP_OUTFILES/non_existing.ddl
 $SRC_H5DUMP_OUTFILES/infinite_loop.ddl
@@ -1254,6 +1255,7 @@ TOOLTEST tboot2.ddl --enable-error-stack -B tfcontents2.h5
 TOOLTEST tboot2A.ddl --enable-error-stack --boot-block tfcontents2.h5
 TOOLTEST tboot2B.ddl --enable-error-stack --superblock tfcontents2.h5
 TOOLTEST file_space.ddl --enable-error-stack -B file_space.h5
+TOOLTEST file_space_cache.ddl --enable-error-stack=2 --page-buffer-size=16384 -B file_space.h5
 
 # test -p with a non existing dataset
 GREPTEST ERRTXT "h5dump error: unable to get link info from" tperror.ddl --enable-error-stack -p -d bogus tfcontents1.h5

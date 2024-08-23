@@ -22,10 +22,11 @@ h2 {
     text-indent: 0px;
 }
 
-<!--
+/*
 A horizontal rule ( <hr />) should be placed on the line above
 each h2 tag. The h2 tags are used on the main sections along with
-the hr tags. -->h3 {
+the hr tags. */
+h3 {
     display: block;
     margin-top: 8px;
     margin-bottom: 8px;
@@ -52,20 +53,20 @@ p {
     text-indent: 0px;
 }
 
-<!--
+/*
 p.item {
     margin-left: 2em;
     text-indent: -2em
 }
 
--->
-<!--
+*/
+/*
 p.item2 {
     margin-left: 2em;
     text-indent: 2em
 }
 
--->
+*/
 table.format {
     border: solid;
     border-collapse: collapse;
@@ -88,6 +89,7 @@ table.format td {
 table.format caption {
     font-weight: bold;
     font-size: larger;
+    width: 800px;
 }
 
 table.note {
@@ -99,7 +101,7 @@ table.note {
 table.desc {
     border: solid;
     border-collapse: collapse;
-    caption-size: top;
+    caption-side: top;
     text-align: left;
     width: 80%;
 }
@@ -111,20 +113,21 @@ table.desc tr {
 table.desc th {
     border-style: ridge;
     font-size: larger;
-    padding: 4px; <!--
+    padding: 4px; /*
     text-decoration: underline;
-    -->
+    */
 }
 
 table.desc td {
-    border-style: ridge; <!--
-    padding: 4px; -->
+    border-style: ridge; /*
+    padding: 4px; */
     vertical-align: text-top;
 }
 
 table.desc caption {
     font-weight: bold;
     font-size: larger;
+    width: 800px;
 }
 
 table.list {
@@ -220,7 +223,9 @@ div {
     page-break-after: auto
 }
 </style>
-
+</head>
+<body>
+<div class="full_width_table">
 <center>
     <table border="0" width="90%">
         <tr>
@@ -15245,6 +15250,6 @@ The range of values represented by child[
         </tr>
     </table>
 </div>
-</head>
-<body></body>
+</div>
+</body>
 </html>

@@ -106,7 +106,8 @@ const char *LIBVER_NAMES[] = {"earliest", /* H5F_LIBVER_EARLIEST = 0  */
                               "v110",     /* H5F_LIBVER_V110 = 2      */
                               "v112",     /* H5F_LIBVER_V112 = 3      */
                               "v114",     /* H5F_LIBVER_V114 = 4      */
-                              "latest",   /* H5F_LIBVER_V116 = 5      */
+                              "v116",     /* H5F_LIBVER_V116 = 5      */
+                              "latest",   /* H5F_LIBVER_LATEST        */
                               NULL};
 
 /* Previous error reporting function */
@@ -141,29 +142,6 @@ h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data)
     H5Eprint2(estack, stdout);
     return 0;
 }
-
-/*-------------------------------------------------------------------------
- * Function:  h5_clean_files
- *
- * Purpose:  Cleanup temporary test files (always).
- *    base_name contains the list of test file names.
- *
- * Return:  void
- *
- *-------------------------------------------------------------------------
- */
-void
-h5_clean_files(const char *base_name[], hid_t fapl)
-{
-    int i;
-
-    for (i = 0; base_name[i]; i++) {
-        h5_delete_test_file(base_name[i], fapl);
-    }
-
-    /* Close the FAPL used to access the file */
-    H5Pclose(fapl);
-} /* end h5_clean_files() */
 
 /*-------------------------------------------------------------------------
  * Function:    h5_delete_test_file
@@ -239,7 +217,8 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 
     if (GetTestCleanup()) {
         /* Clean up files in base_name, and the FAPL */
-        h5_clean_files(base_name, fapl);
+        h5_delete_all_test_files(base_name, fapl);
+        H5Pclose(fapl);
 
         retval = 1;
     } /* end if */
@@ -249,29 +228,6 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 
     return retval;
 } /* end h5_cleanup() */
-
-/*-------------------------------------------------------------------------
- * Function:    h5_test_shutdown
- *
- * Purpose:     Performs any special test cleanup required before the test
- *              ends.
- *
- *              NOTE: This function should normally only be called once
- *              in a given test, usually just before leaving main(). It
- *              is intended for use in the single-file unit tests, not
- *              testhdf5.
- *
- * Return:      void
- *
- *-------------------------------------------------------------------------
- */
-void
-h5_test_shutdown(void)
-{
-
-    /* Restore the original error reporting routine */
-    h5_restore_err();
-} /* end h5_test_shutdown() */
 
 /*-------------------------------------------------------------------------
  * Function:    h5_restore_err
@@ -289,27 +245,6 @@ h5_restore_err(void)
     assert(err_func != NULL);
     H5Eset_auto2(H5E_DEFAULT, err_func, NULL);
     err_func = NULL;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    h5_reset
- *
- * Purpose:     Reset the library by closing it
- *
- * Return:      void
- *-------------------------------------------------------------------------
- */
-void
-h5_reset(void)
-{
-    fflush(stdout);
-    fflush(stderr);
-    H5close();
-
-    /* Save current error stack reporting routine and redirect to our local one */
-    assert(err_func == NULL);
-    H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
-    H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
 }
 
 /*-------------------------------------------------------------------------
@@ -337,6 +272,9 @@ h5_test_init(void)
     assert(err_func == NULL);
     H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
     H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
+
+    /* Retrieve the TestExpress mode */
+    GetTestExpress();
 } /* end h5_test_init() */
 
 /*-------------------------------------------------------------------------
@@ -1105,8 +1043,14 @@ h5_show_hostname(void)
 #ifdef H5_HAVE_PARALLEL
     int mpi_rank, mpi_initialized, mpi_finalized;
 #endif
+#ifdef H5_HAVE_THREADSAFE
+    uint64_t thread_id = 0; /* ID of thread */
 
-    /* try show the process or thread id in multiple processes cases*/
+    if (H5TS_thread_id(&thread_id) < 0)
+        return;
+#endif
+
+        /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
     MPI_Initialized(&mpi_initialized);
     MPI_Finalized(&mpi_finalized);
@@ -1119,11 +1063,11 @@ h5_show_hostname(void)
     }
 #ifdef H5_HAVE_THREADSAFE
     else
-        printf("thread %" PRIu64 ".", H5TS_thread_id());
+        printf("thread %" PRIu64 ".", thread_id);
 #endif
 #else
 #ifdef H5_HAVE_THREADSAFE
-    printf("thread %" PRIu64 ".", H5TS_thread_id());
+    printf("thread %" PRIu64 ".", thread_id);
 #endif
 #endif
 #ifdef H5_HAVE_WIN32_API

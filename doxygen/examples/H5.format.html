@@ -55,18 +55,18 @@
           text-indent: 0px;
           font-size: 100%;
         }
-      <!--
+      /*
       p.item {    margin-left: 2em;
                   text-indent: -2em
-             } -->
-               <!-- p.item2 { margin-left: 2em; text-indent: 2em} -->
+             } */
+      /* p.item2 { margin-left: 2em; text-indent: 2em} */
 
-                                                                  table.format {  border:solid;
-                                                                                  border-collapse:collapse;
-                                                                                  caption-side:top;
-                                                                                  text-align:center;
-                                                                                  width:80%;
-                                                                               }
+      table.format {  border:solid;
+                      border-collapse:collapse;
+                      caption-side:top;
+                      text-align:center;
+                      width:80%;
+                   }
       table.format th {   border:ridge;
                           padding:4px;
                           width:25%;
@@ -76,6 +76,7 @@
                       }
       table.format caption {  font-weight:bold;
                               font-size:larger;
+                              width: 800px;
                            }
 
       table.note {border:none;
@@ -85,7 +86,7 @@
 
       table.desc {    border:solid;
                       border-collapse:collapse;
-                      caption-size:top;
+                      caption-side:top;
                       text-align:left;
                       width:80%;
                  }
@@ -94,14 +95,15 @@
       table.desc th { border-style:ridge;
                       font-size:larger;
                       padding:4px;
-                      <!-- text-decoration:underline; -->
+                      /* text-decoration:underline; */
                     }
       table.desc td { border-style:ridge;
-                      <!-- padding: 4px; -->
-                                         vertical-align:text-top;
+                      /* padding: 4px; */
+                      vertical-align:text-top;
                     }
       table.desc caption {    font-weight:bold;
                               font-size:larger;
+                              width: 800px;
                          }
 
       table.list {    border:none;
@@ -184,7 +186,7 @@
   </head>
   <body>
     <!-- #EndLibraryItem -->
-
+    <div class="full_width_table">
     <center>
       <table border="0" width="90%">
         <tr>
@@ -20406,6 +20408,6 @@ disk address for the chunk.</p>
 <br />
 <br />
 
-
+</div>
 </body>
 </html>

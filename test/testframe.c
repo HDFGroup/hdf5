@@ -41,7 +41,7 @@ static int         num_errs                         = 0;         /* Total number
 int                TestVerbosity                    = VERBO_DEF; /* Default Verbosity is Low */
 static int         Summary                          = 0;         /* Show test summary. Default is no. */
 static int         CleanUp                          = 1;         /* Do cleanup or not. Default is yes. */
-static int         TestExpress                      = -1;   /* Do TestExpress or not. -1 means not set yet. */
+int                TestExpress                      = -1;   /* Do TestExpress or not. -1 means not set yet. */
 static TestStruct *Test                             = NULL; /* Array of tests */
 static unsigned    TestAlloc                        = 0;    /* Size of the Test array */
 static unsigned    Index                            = 0;
@@ -590,7 +590,7 @@ TestErrPrintf(const char *format, ...)
  * Set (control) which test will be tested.
  * SKIPTEST: skip this test
  * ONLYTEST: do only this test
- * BEGINETEST: skip all tests before this test
+ * BEGINTEST: skip all tests before this test
  *
  */
 void

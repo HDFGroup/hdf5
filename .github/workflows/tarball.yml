@@ -1,6 +1,6 @@
 name: hdf5 dev tarball
 
-# Controls when the action will run. Triggers the workflow on a schedule
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
@@ -34,8 +34,6 @@ on:
 permissions:
   contents: read
 
-# A workflow run is made up of one or more jobs that can run sequentially or
-# in parallel
 jobs:
   check_commits:
     name: Check for recent commits
@@ -87,7 +85,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
         with:
           path: hdfsrc
           ref: '${{needs.check_commits.outputs.branch_ref }}'

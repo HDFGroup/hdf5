@@ -1,6 +1,6 @@
 name: hdf5 examples bintest runs
 
-# Controls when the action will run. Triggers the workflow on a schedule
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
@@ -12,8 +12,6 @@ on:
 permissions:
   contents: read
 
-# A workflow run is made up of one or more jobs that can run sequentially or
-# in parallel
 jobs:
   test_binary_win:
   # Windows w/ MSVC + CMake
@@ -35,7 +33,7 @@ jobs:
 
       # Get files created by cmake-ctest script
       - name: Get published binary (Windows)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
               path: ${{ github.workspace }}/hdf5
@@ -109,7 +107,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Get published binary (Linux)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
               name: tgz-ubuntu-2204_gcc-${{ inputs.build_mode }}-binary
               path: ${{ github.workspace }}
@@ -145,31 +143,31 @@ jobs:
           cmake --workflow --preset=ci-StdShar-GNUC --fresh
         shell: bash
 
-  test_binary_mac:
+  test_binary_mac_latest:
   # MacOS w/ Clang + CMake
   #
     name: "MacOS Clang Binary Test"
-    runs-on: macos-13
+    runs-on: macos-latest
     steps:
-      - name: Install Dependencies (MacOS)
+      - name: Install Dependencies (MacOS_latest)
         run: brew install ninja doxygen
 
-      - name: Set up JDK 19
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '19'
+          java-version: '21'
           distribution: 'temurin'
 
-      - name: Get published binary (MacOS)
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+      - name: Get published binary (MacOS_latest)
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-              name: tgz-osx-${{ inputs.build_mode }}-binary
-              path: ${{ github.workspace }}
+          name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
+          path: ${{ github.workspace }}
 
-      - name: Uncompress hdf5 binary (MacOS)
+      - name: Uncompress hdf5 binary (MacOS_latest)
         run:  |
-            cd "${{ github.workspace }}"
-            tar -zxvf ${{ github.workspace }}/HDF5-*-Darwin.tar.gz --strip-components 1
+          cd "${{ github.workspace }}"
+          tar -zxvf ${{ github.workspace }}/HDF5-*-Darwin.tar.gz --strip-components 1
 
       - name: set hdf5lib name
         id: set-hdf5lib-name
@@ -179,30 +177,30 @@ jobs:
           echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
           echo "HDF5_PLUGIN_PATH=$HDF5_ROOT/lib/plugin" >> $GITHUB_OUTPUT
 
-      - name: List files for the binaries (MacOS)
+      - name: List files for the binaries (MacOS_latest)
         run: |
-            ls -l ${{ github.workspace }}/HDF_Group/HDF5
+          ls -l ${{ github.workspace }}/HDF_Group/HDF5
 
-      - name: List files for the space (MacOS)
+      - name: List files for the space (MacOS_latest)
         run: |
-              ls ${{ github.workspace }}
-              ls ${{ runner.workspace }}
+          ls ${{ github.workspace }}
+          ls ${{ runner.workspace }}
 
       # symlinks the compiler executables to a common location 
-      # - name: Setup GNU Fortran
-      #   uses: fortran-lang/setup-fortran@v1
-      #   id: setup-fortran
-      #   with:
-      #     compiler: gcc
-      #     version: 12
+      - name: Setup GNU Fortran
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: gcc
+          version: 14
 
-      - name: Run ctest (MacOS)
+      - name: Run ctest (MacOS_latest)
         id: run-ctest
         env:
           HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
           HDF5_PLUGIN_PATH: ${{ steps.set-hdf5lib-name.outputs.HDF5_PLUGIN_PATH }}
         run: |
           cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples"
-          cmake --workflow --preset=ci-StdShar-OSX-Clang --fresh
+          cmake --workflow --preset=ci-StdShar-MACOS-Clang --fresh
         shell: bash
 

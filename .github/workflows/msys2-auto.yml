@@ -1,5 +1,6 @@
 name: hdf5 dev Autotools MSys2
 
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
@@ -31,7 +32,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - name: Get Sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
 
       - name: '${{ matrix.icon }} Setup MSYS2'
         uses: msys2/setup-msys2@v2

@@ -4,7 +4,6 @@ HDF5 version 1.15.0 currently under development
 
 [![develop cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cmake.yml?branch=develop&label=HDF5%20develop%20CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/cmake.yml?query=branch%3Adevelop)
 [![develop autotools build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/autotools.yml?branch=develop&label=HDF5%20develop%20Autotools%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/autotools.yml?query=branch%3Adevelop)
-[![HDF-EOS5 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/hdfeos5.yml?branch=develop&label=HDF-EOS5)](https://github.com/HDFGroup/hdf5/actions/workflows/hdfeos5.yml?query=branch%3Adevelop)
 [![netCDF build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/netcdf.yml?branch=develop&label=netCDF)](https://github.com/HDFGroup/hdf5/actions/workflows/netcdf.yml?query=branch%3Adevelop)
 [![h5py build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/h5py.yml?branch=develop&label=h5py)](https://github.com/HDFGroup/hdf5/actions/workflows/h5py.yml?query=branch%3Adevelop)
 [![CVE regression](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cve.yml?branch=develop&label=CVE)](https://github.com/HDFGroup/hdf5/actions/workflows/cve.yml?query=branch%3Adevelop)
@@ -90,10 +89,12 @@ are tentative.
 
 | Release | New Features |
 | ------- | ------------ |
-| 1.14.4 | native float16 support, cloud-optimized HDF5 improvements |
-| 1.14.5 | Complex number support |
-| TBD | VFD SWMR |
-| 2.0.0 | TBD |
+| 1.14.5 | oss-fuzz fixes, ros3 VFD improvements |
+| 1.14.6 | Last maintenance release of 1.14 |
+| 1.16.0 | Complex number support, updated library defaults (cache sizes, etc.) |
+| 2.0.0 | Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, sparse datasets, improved storage for variable-length datatypes, better Unicode support (especially on Windows), semantic versioning |
+
+Some HDF5 2.0.0 features listed here may be released in a 1.16.x release.
 
 This list of feature release versions is also tentative, and the specific release
 in which a feature is introduced may change.

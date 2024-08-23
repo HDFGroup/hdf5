@@ -42,15 +42,12 @@
 
 #ifdef H5_HAVE_THREADSAFE
 /*
- * The per-thread API context. pthread_once() initializes a special
- * key that will be used by all threads to create a stack specific to
- * each thread individually. The association of contexts to threads will
- * be handled by the pthread library.
+ * The per-thread API context.
  *
  * In order for this macro to work, H5CX_get_my_context() must be preceded
  * by "H5CX_node_t **ctx =".
  */
-#define H5CX_get_my_context() H5CX__get_context()
+#define H5CX_get_my_context() H5TS_get_api_ctx_ptr()
 #else /* H5_HAVE_THREADSAFE */
 /*
  * The current API context.
@@ -170,17 +167,17 @@
  *      H5CX_TEST_SET_PROP and H5CX_SET_PROP macros to work properly.
  *
  * - "Return-and-read" properties that are returned to the application to send out introspection information,
- *      but are also queried by the library internally. Internal queries always retrieve the original value
- *      from the property list, and update the context's value to match. These properties have both a 'valid'
- *      and 'set' flag. <foo>_valid is true if the field has ever been populated from its underlying property
- *      list. <foo>_set flag is true if this field has ever been set on the context for application
- *      introspection. The naming of these fields is important for the H5CX_RETRIEVE_PROP_VALID_SET macro to
- *      work properly.
+ *      but are also queried by the library internally. If the context value has been 'set' by an accessor,
+ *      all future queries will return the stored value from the context, to avoid later queries overwriting
+ *      that stored value with the value from the property list.
  *
- *      Note that if a set operation is followed by an internal read, it is possible for <foo>_set to be true
- *      while the value in the context matches the underlying property list, resulting in a redundant write to
- *      the property list when the context is popped. Similarly, if a field has been set on the context but
- *      never read internally, <foo>_valid will be false despite the context containing a meaningful value.
+ *      These properties have both a 'valid' and 'set' flag. <foo>_valid is true if the field has ever been
+ *      populated from its underlying property list. <foo>_set flag is true if this field has ever been set on
+ *      the context for application introspection. The naming of these fields is important for the
+ *      H5CX_RETRIEVE_PROP_VALID_SET macro to work properly.
+ *
+ *      If a field has been set on the context but never read internally, <foo>_valid will be false
+ *      despite the context containing a meaningful cached value.
  */
 typedef struct H5CX_t {
     /* DXPL */
@@ -349,7 +346,9 @@ typedef struct H5CX_t {
     bool high_bound_valid;        /* Whether high_bound property is valid */
 
     /* Cached VOL settings */
-    H5VL_connector_prop_t vol_connector_prop; /* Property for VOL connector ID & info */
+    H5VL_connector_prop_t vol_connector_prop; /* Property for VOL connector ID & info
+                               This is treated as an independent field with
+                               no relation to the property H5F_ACS_VOL_CONN_NAME stored on the FAPL */
     bool  vol_connector_prop_valid;           /* Whether property for VOL connector ID & info is valid */
     void *vol_wrap_ctx;                       /* VOL connector's "wrap context" for creating IDs */
     bool  vol_wrap_ctx_valid; /* Whether VOL connector's "wrap context" for creating IDs is valid */
@@ -443,9 +442,6 @@ typedef struct H5CX_fapl_cache_t {
 /********************/
 /* Local Prototypes */
 /********************/
-#ifdef H5_HAVE_THREADSAFE
-static H5CX_node_t **H5CX__get_context(void);
-#endif /* H5_HAVE_THREADSAFE */
 static void         H5CX__push_common(H5CX_node_t *cnode);
 static H5CX_node_t *H5CX__pop_common(bool update_dxpl_props);
 
@@ -725,55 +721,6 @@ H5CX_term_package(void)
 
     FUNC_LEAVE_NOAPI(0)
 } /* end H5CX_term_package() */
-
-#ifdef H5_HAVE_THREADSAFE
-/*-------------------------------------------------------------------------
- * Function:	H5CX__get_context
- *
- * Purpose:	Support function for H5CX_get_my_context() to initialize and
- *              acquire per-thread API context stack.
- *
- * Return:	Success: Non-NULL pointer to head pointer of API context stack for thread
- *		Failure: NULL
- *
- *-------------------------------------------------------------------------
- */
-static H5CX_node_t **
-H5CX__get_context(void)
-{
-    H5CX_node_t **ctx = NULL;
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    ctx = (H5CX_node_t **)H5TS_get_thread_local_value(H5TS_apictx_key_g);
-
-    if (!ctx) {
-        /* No associated value with current thread - create one */
-#ifdef H5_HAVE_WIN_THREADS
-        /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
-        ctx = (H5CX_node_t **)LocalAlloc(LPTR, sizeof(H5CX_node_t *));
-#else
-        /* Use malloc here since this has to match the free in the
-         * destructor and we want to avoid the codestack there.
-         */
-        ctx = (H5CX_node_t **)malloc(sizeof(H5CX_node_t *));
-#endif /* H5_HAVE_WIN_THREADS */
-        assert(ctx);
-
-        /* Reset the thread-specific info */
-        *ctx = NULL;
-
-        /* (It's not necessary to release this in this API, it is
-         *      released by the "key destructor" set up in the H5TS
-         *      routines.  See calls to pthread_key_create() in H5TS.c -QAK)
-         */
-        H5TS_set_thread_local_value(H5TS_apictx_key_g, (void *)ctx);
-    } /* end if */
-
-    /* Set return value */
-    FUNC_LEAVE_NOAPI(ctx)
-} /* end H5CX__get_context() */
-#endif /* H5_HAVE_THREADSAFE */
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_pushed
@@ -1743,7 +1690,6 @@ H5CX_get_ring(void)
 } /* end H5CX_get_ring() */
 
 #ifdef H5_HAVE_PARALLEL
-
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_coll_metadata_read
  *
@@ -2351,7 +2297,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_data_transform
  *
- * Purpose:     Retrieves the I/O filter callback function for the current API call context.
+ * Purpose:     Retrieves the data transformation expression for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
  *
@@ -2370,6 +2316,9 @@ H5CX_get_data_transform(H5Z_data_xform_t **data_transform)
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
     assert(head && *head);
     assert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
+
+    /* This getter does not use H5CX_RETRIEVE_PROP_VALID in order to use H5P_peek instead of H5P_get.
+       This prevents invocation of the data transform property's library-defined copy callback */
 
     /* Check if the value has been retrieved already */
     if (!(*head)->ctx.data_transform_valid) {

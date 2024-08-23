@@ -120,6 +120,60 @@ char H5E_mpi_error_str[MPI_MAX_ERROR_STRING];
 int  H5E_mpi_error_str_len;
 #endif /* H5_HAVE_PARALLEL */
 
+/* Default value to initialize error stacks */
+static const H5E_stack_t H5E_err_stack_def = {
+    0, /* nused */
+    {  /*entries[] */
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}},
+     {false, {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}}},
+
+/* H5E_auto_op_t */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+#ifdef H5_USE_16_API_DEFAULT
+    {1, TRUE, (H5E_auto1_t)H5Eprint1, (H5E_auto2_t)H5E__print2, (H5E_auto1_t)H5Eprint1,
+     (H5E_auto2_t)H5E__print2},
+#else  /* H5_USE_16_API */
+    {2, TRUE, (H5E_auto1_t)H5Eprint1, (H5E_auto2_t)H5E__print2, (H5E_auto1_t)H5Eprint1,
+     (H5E_auto2_t)H5E__print2},
+#endif /* H5_USE_16_API_DEFAULT */
+#else  /* H5_NO_DEPRECATED_SYMBOLS */
+    {(H5E_auto2_t)H5E__print2},
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+    NULL, /* auto_data */
+    0     /* paused */
+};
+
 /* First & last major and minor error codes registered by the library */
 hid_t H5E_first_maj_id_g = H5I_INVALID_HID;
 hid_t H5E_last_maj_id_g  = H5I_INVALID_HID;
@@ -188,7 +242,6 @@ H5E_init(void)
         HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group");
 
 #ifndef H5_HAVE_THREADSAFE
-    H5E_stack_g[0].nused = 0;
     H5E__set_default_auto(H5E_stack_g);
 #endif /* H5_HAVE_THREADSAFE */
 
@@ -280,57 +333,6 @@ H5E_term_package(void)
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5E_term_package() */
-
-#ifdef H5_HAVE_THREADSAFE
-/*-------------------------------------------------------------------------
- * Function:    H5E__get_stack
- *
- * Purpose:     Support function for H5E__get_my_stack() to initialize and
- *              acquire per-thread error stack.
- *
- * Return:      Success:    Pointer to an error stack struct (H5E_t *)
- *
- *              Failure:    NULL
- *
- *-------------------------------------------------------------------------
- */
-H5E_stack_t *
-H5E__get_stack(void)
-{
-    H5E_stack_t *estack = NULL;
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    estack = (H5E_stack_t *)H5TS_get_thread_local_value(H5TS_errstk_key_g);
-
-    if (!estack) {
-        /* No associated value with current thread - create one */
-#ifdef H5_HAVE_WIN_THREADS
-        /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
-        estack = (H5E_stack_t *)LocalAlloc(LPTR, sizeof(H5E_stack_t));
-#else
-        /* Use malloc here since this has to match the free in the
-         * destructor and we want to avoid the codestack there.
-         */
-        estack = (H5E_stack_t *)malloc(sizeof(H5E_stack_t));
-#endif /* H5_HAVE_WIN_THREADS */
-        assert(estack);
-
-        /* Set the thread-specific info */
-        estack->nused = 0;
-        H5E__set_default_auto(estack);
-
-        /* (It's not necessary to release this in this API, it is
-         *      released by the "key destructor" set up in the H5TS
-         *      routines.  See calls to pthread_key_create() in H5TS.c -QAK)
-         */
-        H5TS_set_thread_local_value(H5TS_errstk_key_g, (void *)estack);
-    } /* end if */
-
-    /* Set return value */
-    FUNC_LEAVE_NOAPI(estack)
-} /* end H5E__get_stack() */
-#endif /* H5_HAVE_THREADSAFE */
 
 /*-------------------------------------------------------------------------
  * Function:    H5E__free_class
@@ -821,8 +823,7 @@ done:
 /*--------------------------------------------------------------------------
  * Function:    H5E__set_default_auto
  *
- * Purpose:     Initialize "automatic" error stack reporting info to library
- *              default
+ * Purpose:     Initialize error stack to library default
  *
  * Return:      SUCCEED/FAIL
  *
@@ -833,21 +834,8 @@ H5E__set_default_auto(H5E_stack_t *stk)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-#ifdef H5_USE_16_API_DEFAULT
-    stk->auto_op.vers = 1;
-#else  /* H5_USE_16_API */
-    stk->auto_op.vers = 2;
-#endif /* H5_USE_16_API_DEFAULT */
-
-    stk->auto_op.func1 = stk->auto_op.func1_default = (H5E_auto1_t)H5Eprint1;
-    stk->auto_op.func2 = stk->auto_op.func2_default = (H5E_auto2_t)H5E__print2;
-    stk->auto_op.is_default                         = true;
-#else  /* H5_NO_DEPRECATED_SYMBOLS */
-    stk->auto_op.func2 = (H5E_auto2_t)H5E__print2;
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-
-    stk->auto_data = NULL;
+    /* Initialize with default error stack */
+    memcpy(stk, &H5E_err_stack_def, sizeof(H5E_err_stack_def));
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5E__set_default_auto() */
@@ -933,7 +921,10 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     const char      *maj_str   = "No major description"; /* Major error description */
     const char      *min_str   = "No minor description"; /* Minor error description */
     bool             have_desc = true; /* Flag to indicate whether the error has a "real" description */
-    herr_t           ret_value = SUCCEED;
+#ifdef H5_HAVE_THREADSAFE
+    uint64_t thread_id = 0; /* ID of thread */
+#endif
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -961,6 +952,11 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
 
     /* Get error class info */
     cls_ptr = maj_ptr->cls;
+
+#ifdef H5_HAVE_THREADSAFE
+    if (H5TS_thread_id(&thread_id) < 0)
+        HGOTO_DONE(FAIL);
+#endif
 
     /* Print error class header if new class */
     if (eprint->cls.lib_name == NULL || strcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
@@ -991,12 +987,12 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
             } /* end if */
 #ifdef H5_HAVE_THREADSAFE
             else
-                fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
+                fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
         } /* end block */
 #else
 #ifdef H5_HAVE_THREADSAFE
-        fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
+        fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
 #endif
         fprintf(stream, ":\n");
@@ -1056,7 +1052,10 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     const char  *maj_str   = "No major description"; /* Major error description */
     const char  *min_str   = "No minor description"; /* Minor error description */
     bool         have_desc = true; /* Flag to indicate whether the error has a "real" description */
-    herr_t       ret_value = SUCCEED;
+#ifdef H5_HAVE_THREADSAFE
+    uint64_t thread_id = 0; /* ID of thread */
+#endif
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1090,6 +1089,11 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     if (!cls_ptr)
         HGOTO_DONE(FAIL);
 
+#ifdef H5_HAVE_THREADSAFE
+    if (H5TS_thread_id(&thread_id) < 0)
+        HGOTO_DONE(FAIL);
+#endif
+
     /* Print error class header if new class */
     if (eprint->cls.lib_name == NULL || strcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
         /* update to the new class information */
@@ -1119,12 +1123,12 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
             } /* end if */
 #ifdef H5_HAVE_THREADSAFE
             else
-                fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
+                fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
         } /* end block */
 #else
 #ifdef H5_HAVE_THREADSAFE
-        fprintf(stream, " thread %" PRIu64, H5TS_thread_id());
+        fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
 #endif
         fprintf(stream, ":\n");
@@ -1383,9 +1387,10 @@ herr_t
 H5E_printf_stack(const char *file, const char *func, unsigned line, hid_t maj_id, hid_t min_id,
                  const char *fmt, ...)
 {
-    va_list ap;                   /* Varargs info */
-    bool    va_started = false;   /* Whether the variable argument list is open */
-    herr_t  ret_value  = SUCCEED; /* Return value */
+    H5E_stack_t *estack;               /* Pointer to error stack to modify */
+    va_list      ap;                   /* Varargs info */
+    bool         va_started = false;   /* Whether the variable argument list is open */
+    herr_t       ret_value  = SUCCEED; /* Return value */
 
     /*
      * WARNING: We cannot call HERROR() from within this function or else we
@@ -1401,18 +1406,20 @@ H5E_printf_stack(const char *file, const char *func, unsigned line, hid_t maj_id
     assert(min_id >= H5E_first_min_id_g && min_id <= H5E_last_min_id_g);
     assert(fmt);
 
-    /* Note that the variable-argument parsing for the format is identical in
-     *      the H5Epush2() routine - correct errors and make changes in both
-     *      places. -QAK
-     */
-
-    /* Start the variable-argument parsing */
-    va_start(ap, fmt);
-    va_started = true;
-
-    /* Push the error on the stack */
-    if (H5E__push_stack(NULL, false, file, func, line, H5E_ERR_CLS_g, maj_id, min_id, fmt, &ap) < 0)
+    /* Get the 'default' error stack */
+    if (NULL == (estack = H5E__get_my_stack()))
         HGOTO_DONE(FAIL);
+
+    /* Check if error reporting is paused for this stack */
+    if (!estack->paused) {
+        /* Start the variable-argument parsing */
+        va_start(ap, fmt);
+        va_started = true;
+
+        /* Push the error on the stack */
+        if (H5E__push_stack(estack, false, file, func, line, H5E_ERR_CLS_g, maj_id, min_id, fmt, &ap) < 0)
+            HGOTO_DONE(FAIL);
+    }
 
 done:
     if (va_started)
@@ -1457,11 +1464,6 @@ H5E__push_stack(H5E_stack_t *estack, bool app_entry, const char *file, const cha
     assert(cls_id > 0);
     assert(maj_id > 0);
     assert(min_id > 0);
-
-    /* Check for 'default' error stack */
-    if (estack == NULL)
-        if (NULL == (estack = H5E__get_my_stack()))
-            HGOTO_DONE(FAIL);
 
     /*
      * Push the error if there's room.  Otherwise just forget it.
@@ -1688,8 +1690,9 @@ H5E_clear_stack(void)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Empty the error stack */
-    if (H5E__clear_entries(estack, estack->nused) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack");
+    if (estack->nused)
+        if (H5E__clear_entries(estack, estack->nused) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1791,3 +1794,80 @@ H5E_dump_api_stack(void)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_dump_api_stack() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E_pause_stack
+ *
+ * Purpose:     Pause pushing errors on the default error stack.
+ *
+ *              Generally used via the H5E_PAUSE_ERRORS / H5E_RESUME_ERRORS
+ *              macros.
+ *
+ *              When one needs to temporarily disable recording errors while
+ *              trying something that's likely or expected to fail.  The code
+ *              to try can be nested between these macros like:
+ *
+ *              H5E_PAUSE_ERRORS {
+ *                  ...stuff here that's likely to fail...
+ *              } H5E_RESUME_ERRORS
+ *
+ *              Warning: don't break, return, or longjmp() from the block of
+ *              code or the error reporting won't be properly restored!
+ *
+ * Return:      none
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5E_pause_stack(void)
+{
+    H5E_stack_t *estack = H5E__get_my_stack();
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    assert(estack);
+
+    /* Increment pause counter */
+    estack->paused++;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5E_pause_stack() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E_resume_stack
+ *
+ * Purpose:     Resume pushing errors on the default error stack.
+ *
+ *              Generally used via the H5E_PAUSE_ERRORS / H5E_RESUME_ERRORS
+ *              macros.
+ *
+ *              When one needs to temporarily disable recording errors while
+ *              trying something that's likely or expected to fail.  The code
+ *              to try can be nested between these macros like:
+ *
+ *              H5E_PAUSE_ERRORS {
+ *                  ...stuff here that's likely to fail...
+ *              } H5E_RESUME_ERRORS
+ *
+ *              Warning: don't break, return, or longjmp() from the block of
+ *              code or the error reporting won't be properly restored!
+ *
+ * Return:      none
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5E_resume_stack(void)
+{
+    H5E_stack_t *estack = H5E__get_my_stack();
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    assert(estack);
+    assert(estack->paused);
+
+    /* Decrement pause counter */
+    estack->paused--;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5E_resume_stack() */

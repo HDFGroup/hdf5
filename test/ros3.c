@@ -29,315 +29,6 @@
 
 #ifdef H5_HAVE_ROS3_VFD
 
-/* only include the testing macros if needed */
-
-/*****************************************************************************
- *
- * FILE-LOCAL TESTING MACROS
- *
- * Purpose:
- *
- *     1) Upon test failure, goto-jump to single-location teardown in test
- *        function. E.g., `error:` (consistency with HDF corpus) or
- *        `failed:` (reflects purpose).
- *            >>> using "error", in part because `H5E_BEGIN_TRY` expects it.
- *     2) Increase clarity and reduce overhead found with `TEST_ERROR`.
- *        e.g., "if(somefunction(arg, arg2) < 0) TEST_ERROR:"
- *        requires reading of entire line to know whether this if/call is
- *        part of the test setup, test operation, or a test unto itself.
- *     3) Provide testing macros with optional user-supplied failure message;
- *        if not supplied (NULL), generate comparison output in the spirit of
- *        test-driven development. E.g., "expected 5 but was -3"
- *        User messages clarify test's purpose in code, encouraging description
- *        without relying on comments.
- *     4) Configurable expected-actual order in generated comparison strings.
- *        Some prefer `VERIFY(expected, actual)`, others
- *        `VERIFY(actual, expected)`. Provide preprocessor ifdef switch
- *        to satisfy both parties, assuming one paradigm per test file.
- *        (One could #undef and redefine the flag through the file as desired,
- *         but _why_.)
- *
- *     Provided as courtesy, per consideration for inclusion in the library
- *     proper.
- *
- *     Macros:
- *
- *         JSVERIFY_EXP_ACT - ifdef flag, configures comparison order
- *         FAIL_IF()        - check condition
- *         FAIL_UNLESS()    - check _not_ condition
- *         JSVERIFY()       - long-int equality check; prints reason/comparison
- *         JSVERIFY_NOT()   - long-int inequality check; prints
- *         JSVERIFY_STR()   - string equality check; prints
- *
- *****************************************************************************/
-
-/*----------------------------------------------------------------------------
- *
- * ifdef flag: JSVERIFY_EXP_ACT
- *
- * JSVERIFY macros accept arguments as (EXPECTED, ACTUAL[, reason])
- *   default, if this is undefined, is (ACTUAL, EXPECTED[, reason])
- *
- *----------------------------------------------------------------------------
- */
-#define JSVERIFY_EXP_ACT 1L
-
-/*----------------------------------------------------------------------------
- *
- * Macro: JSFAILED_AT()
- *
- * Purpose:
- *
- *     Preface a test failure by printing "*FAILED*" and location to stdout
- *     Similar to `H5_FAILED(); AT();` from h5test.h
- *
- *     *FAILED* at somefile.c:12 in function_name()...
- *
- *----------------------------------------------------------------------------
- */
-#define JSFAILED_AT()                                                                                        \
-    {                                                                                                        \
-        printf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                              \
-    }
-
-/*----------------------------------------------------------------------------
- *
- * Macro: FAIL_IF()
- *
- * Purpose:
- *
- *     Make tests more accessible and less cluttered than
- *         `if (thing == otherthing()) TEST_ERROR`
- *         paradigm.
- *
- *     The following lines are roughly equivalent:
- *
- *         `if (myfunc() < 0) TEST_ERROR;` (as seen elsewhere in HDF tests)
- *         `FAIL_IF(myfunc() < 0)`
- *
- *     Prints a generic "FAILED AT" line to stdout and jumps to `error`,
- *     similar to `TEST_ERROR` in h5test.h
- *
- *----------------------------------------------------------------------------
- */
-#define FAIL_IF(condition)                                                                                   \
-    if (condition) {                                                                                         \
-        JSFAILED_AT()                                                                                        \
-        goto error;                                                                                          \
-    }
-
-/*----------------------------------------------------------------------------
- *
- * Macro: FAIL_UNLESS()
- *
- * Purpose:
- *
- *     TEST_ERROR wrapper to reduce cognitive overhead from "negative tests",
- *     e.g., "a != b".
- *
- *     Opposite of FAIL_IF; fails if the given condition is _not_ true.
- *
- *     `FAIL_IF( 5 != my_op() )`
- *     is equivalent to
- *     `FAIL_UNLESS( 5 == my_op() )`
- *     However, `JSVERIFY(5, my_op(), "bad return")` may be even clearer.
- *         (see JSVERIFY)
- *
- *----------------------------------------------------------------------------
- */
-#if 0 /* UNUSED */
-#define FAIL_UNLESS(condition)                                                                               \
-    if (!(condition)) {                                                                                      \
-        JSFAILED_AT()                                                                                        \
-        goto error;                                                                                          \
-    }
-#endif
-
-/*----------------------------------------------------------------------------
- *
- * Macro: JSERR_LONG()
- *
- * Purpose:
- *
- *     Print an failure message for long-int arguments.
- *     ERROR-AT printed first.
- *     If `reason` is given, it is printed on own line and newlined after
- *     else, prints "expected/actual" aligned on own lines.
- *
- *     *FAILED* at myfile.c:488 in somefunc()...
- *     forest must be made of trees.
- *
- *     or
- *
- *     *FAILED* at myfile.c:488 in somefunc()...
- *       ! Expected 425
- *       ! Actual   3
- *
- *----------------------------------------------------------------------------
- */
-static inline void
-jserr_long(long expected, long actual, const char *reason)
-{
-    if (reason != NULL) {
-        printf("%s\n", reason);
-    }
-    else {
-        printf("  ! Expected %ld\n  ! Actual   %ld\n", expected, actual);
-    }
-}
-
-#define JSERR_LONG(expected, actual, reason)                                                                 \
-    {                                                                                                        \
-        JSFAILED_AT()                                                                                        \
-        jserr_long((long)(expected), (long)(actual), (reason));                                              \
-    }
-
-/*----------------------------------------------------------------------------
- *
- * Macro: JSERR_STR()
- *
- * Purpose:
- *
- *     Print an failure message for string arguments.
- *     ERROR-AT printed first.
- *     If `reason` is given, it is printed on own line and newlined after
- *     else, prints "expected/actual" aligned on own lines.
- *
- *     *FAILED*  at myfile.c:421 in myfunc()...
- *     Blue and Red strings don't match!
- *
- *     or
- *
- *     *FAILED*  at myfile.c:421 in myfunc()...
- *     !!! Expected:
- *     this is my expected
- *     string
- *     !!! Actual:
- *     not what I expected at all
- *
- *----------------------------------------------------------------------------
- */
-static inline void
-jserr_str(const char *expected, const char *actual, const char *reason)
-{
-    if (reason != NULL) {
-        printf("%s\n", reason);
-    }
-    else {
-        printf("!!! Expected:\n%s\n!!!Actual:\n%s\n", expected, actual);
-    }
-}
-
-#define JSERR_STR(expected, actual, reason)                                                                  \
-    {                                                                                                        \
-        JSFAILED_AT()                                                                                        \
-        jserr_str((expected), (actual), (reason));                                                           \
-    }
-
-#ifdef JSVERIFY_EXP_ACT
-
-/*----------------------------------------------------------------------------
- *
- * Macro: JSVERIFY()
- *
- * Purpose:
- *
- *     Verify that two long integers are equal.
- *     If unequal, print failure message
- *     (with `reason`, if not NULL; expected/actual if NULL)
- *     and jump to `error` at end of function
- *
- *----------------------------------------------------------------------------
- */
-#define JSVERIFY(expected, actual, reason)                                                                   \
-    if ((long)(actual) != (long)(expected)) {                                                                \
-        JSERR_LONG((expected), (actual), (reason))                                                           \
-        goto error;                                                                                          \
-    } /* JSVERIFY */
-
-/*----------------------------------------------------------------------------
- *
- * Macro: JSVERIFY_NOT()
- *
- * Purpose:
- *
- *     Verify that two long integers are _not_ equal.
- *     If equal, print failure message
- *     (with `reason`, if not NULL; expected/actual if NULL)
- *     and jump to `error` at end of function
- *
- *----------------------------------------------------------------------------
- */
-#define JSVERIFY_NOT(expected, actual, reason)                                                               \
-    if ((long)(actual) == (long)(expected)) {                                                                \
-        JSERR_LONG((expected), (actual), (reason))                                                           \
-        goto error;                                                                                          \
-    } /* JSVERIFY_NOT */
-
-/*----------------------------------------------------------------------------
- *
- * Macro: JSVERIFY_STR()
- *
- * Purpose:
- *
- *     Verify that two strings are equal.
- *     If unequal, print failure message
- *     (with `reason`, if not NULL; expected/actual if NULL)
- *     and jump to `error` at end of function
- *
- *----------------------------------------------------------------------------
- */
-#define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                                 \
-        JSERR_STR((expected), (actual), (reason));                                                           \
-        goto error;                                                                                          \
-    } /* JSVERIFY_STR */
-
-#else
-/* JSVERIFY_EXP_ACT not defined
- *
- * Repeats macros above, but with actual/expected parameters reversed.
- */
-
-/*----------------------------------------------------------------------------
- * Macro: JSVERIFY()
- * See: JSVERIFY documentation above.
- *----------------------------------------------------------------------------
- */
-#define JSVERIFY(actual, expected, reason)                                                                   \
-    if ((long)(actual) != (long)(expected)) {                                                                \
-        JSERR_LONG((expected), (actual), (reason));                                                          \
-        goto error;                                                                                          \
-    } /* JSVERIFY */
-
-/*----------------------------------------------------------------------------
- * Macro: JSVERIFY_NOT()
- * See: JSVERIFY_NOT documentation above.
- *----------------------------------------------------------------------------
- */
-#define JSVERIFY_NOT(actual, expected, reason)                                                               \
-    if ((long)(actual) == (long)(expected)) {                                                                \
-        JSERR_LONG((expected), (actual), (reason))                                                           \
-        goto error;                                                                                          \
-    } /* JSVERIFY_NOT */
-
-/*----------------------------------------------------------------------------
- * Macro: JSVERIFY_STR()
- * See: JSVERIFY_STR documentation above.
- *----------------------------------------------------------------------------
- */
-#define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                                 \
-        JSERR_STR((expected), (actual), (reason));                                                           \
-        goto error;                                                                                          \
-    } /* JSVERIFY_STR */
-
-#endif /* ifdef/else JSVERIFY_EXP_ACT */
-
-/********************************
- * OTHER MACROS AND DEFINITIONS *
- ********************************/
-
 #define MAXADDR (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
 
 #define S3_TEST_PROFILE_NAME "ros3_vfd_test"
@@ -375,52 +66,25 @@ H5FD_ros3_fapl_t restricted_access_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, /* fapl 
 H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, false, "", "", ""};
 
 /*---------------------------------------------------------------------------
+ * Function:    test_fapl_config_validation
  *
- * Function: test_fapl_config_validation()
+ * Purpose:     Test ros3 fapl configurations and H5Pset/get_fapl_ros3()
  *
- * Purpose:
- *
- *     Test data consistency of fapl configuration.
- *     Tests `H5FD_ros3_validate_config` indirectly through `H5Pset_fapl_ros3`.
- *
- * Return:
- *
- *     PASSED : 0
- *     FAILED : 1
- *
+ * Return:      PASS : 0
+ *              FAIL : 1
  *---------------------------------------------------------------------------
  */
 static int
 test_fapl_config_validation(void)
 {
-
-    /*********************
-     * test-local macros *
-     *********************/
-
-    /*************************
-     * test-local structures *
-     *************************/
-
     struct testcase {
         const char      *msg;
         herr_t           expected;
         H5FD_ros3_fapl_t config;
     };
 
-    /************************
-     * test-local variables *
-     ************************/
-
-    hid_t            fapl_id = H5I_INVALID_HID; /* file access property list ID */
-    H5FD_ros3_fapl_t config;
-    H5FD_ros3_fapl_t fa_fetch;
-    herr_t           success  = SUCCEED;
-    unsigned int     i        = 0;
-    unsigned int     ncases   = 8;    /* should equal number of cases */
-    struct testcase *case_ptr = NULL; /* dumb work-around for possible     */
-                                      /* dynamic cases creation because    */
-                                      /* of compiler warnings Wlarger-than */
+    hid_t           fapl_id     = H5I_INVALID_HID;
+    const int       NCASES      = 8; /* Should equal number of cases */
     struct testcase cases_arr[] = {
         {
             "non-authenticating config allows empties.\n",
@@ -513,11 +177,7 @@ test_fapl_config_validation(void)
         },
     };
 
-    TESTING("ROS3 fapl configuration validation");
-
-    /*********
-     * TESTS *
-     *********/
+    TESTING("ros3 fapl configuration validation");
 
     if (false == s3_test_bucket_defined) {
         SKIPPED();
@@ -526,78 +186,67 @@ test_fapl_config_validation(void)
         return 0;
     }
 
-    for (i = 0; i < ncases; i++) {
+    for (int i = 0; i < NCASES; i++) {
 
-        /*---------------
-         * per-test setup
-         *---------------
-         */
-        case_ptr = &cases_arr[i];
-        fapl_id  = H5Pcreate(H5P_FILE_ACCESS);
-        FAIL_IF(fapl_id < 0) /* sanity-check */
+        struct testcase *case_ptr = &cases_arr[i]; /* Alias */
+        herr_t           ret;
 
-        /*-----------------------------------
-         * Actually test.
-         * Mute stack trace in failure cases.
-         *-----------------------------------
-         */
+        if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+            TEST_ERROR;
+
         H5E_BEGIN_TRY
         {
-            /* `H5FD_ros3_validate_config(...)` is static/private
-             * to src/ros3.c and cannot (and should not?) be tested directly?
-             * Instead, validate config through public api.
-             */
-            success = H5Pset_fapl_ros3(fapl_id, &case_ptr->config);
+            ret = H5Pset_fapl_ros3(fapl_id, &case_ptr->config);
         }
         H5E_END_TRY
 
-        JSVERIFY(case_ptr->expected, success, case_ptr->msg)
+        if (ret != case_ptr->expected)
+            FAIL_PUTS_ERROR(case_ptr->msg);
 
-        /* Make sure we can get back what we put in.
-         * Only valid if the fapl configuration does not result in error.
+        /* If H5Pset_fapl_ros3() succeeded, make sure H5Pget_fapl_ros3()
+         * returns what we put in.
          */
-        if (success == SUCCEED) {
-            config = case_ptr->config;
-            JSVERIFY(SUCCEED, H5Pget_fapl_ros3(fapl_id, &fa_fetch), "unable to get fapl")
+        if (ret == SUCCEED) {
+            H5FD_ros3_fapl_t config = case_ptr->config; /* Alias for this config */
+            H5FD_ros3_fapl_t conf_out;                  /* Config from fapl */
 
-            JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa_fetch.version, "invalid version number")
-            JSVERIFY(config.version, fa_fetch.version, "version number mismatch")
-            JSVERIFY(config.authenticate, fa_fetch.authenticate, "authentication flag mismatch")
-            JSVERIFY_STR(config.aws_region, fa_fetch.aws_region, NULL)
-            JSVERIFY_STR(config.secret_id, fa_fetch.secret_id, NULL)
-            JSVERIFY_STR(config.secret_key, fa_fetch.secret_key, NULL)
+            /* Get the config from the fapl */
+            if (H5Pget_fapl_ros3(fapl_id, &conf_out) < 0)
+                TEST_ERROR;
+
+            /* Make sure all fields match */
+            if (H5FD_CURR_ROS3_FAPL_T_VERSION != conf_out.version)
+                FAIL_PUTS_ERROR("invalid version number");
+            if (config.version != conf_out.version)
+                FAIL_PUTS_ERROR("version number mismatch");
+            if (config.authenticate != conf_out.authenticate)
+                FAIL_PUTS_ERROR("authentication flag mismatch");
+            if (strncmp(config.aws_region, conf_out.aws_region, H5FD_ROS3_MAX_REGION_LEN + 1))
+                FAIL_PUTS_ERROR("AWS region mismatch");
+            if (strncmp(config.secret_id, conf_out.secret_id, H5FD_ROS3_MAX_SECRET_ID_LEN + 1))
+                FAIL_PUTS_ERROR("secret ID mismatch");
+            if (strncmp(config.secret_key, conf_out.secret_key, H5FD_ROS3_MAX_SECRET_KEY_LEN + 1))
+                FAIL_PUTS_ERROR("secret key mismatch");
         }
 
-        /*-----------------------------
-         * per-test sanitation/teardown
-         *-----------------------------
-         */
-        FAIL_IF(FAIL == H5Pclose(fapl_id))
-        fapl_id = -1;
-
-    } /* for each test case */
+        if (H5Pclose(fapl_id) < 0)
+            TEST_ERROR;
+    }
 
     PASSED();
     return 0;
 
 error:
-    /***********
-     * CLEANUP *
-     ***********/
-
-    if (fapl_id < 0) {
-        H5E_BEGIN_TRY
-        {
-            (void)H5Pclose(fapl_id);
-        }
-        H5E_END_TRY
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
     }
+    H5E_END_TRY
     return 1;
-} /* test_fapl_config_validation */
+} /* end test_fapl_config_validation() */
 
 /*-------------------------------------------------------------------------
- *
- * Function:    test_ros3_fapl()
+ * Function:    test_ros3_fapl
  *
  * Purpose:     Tests the file handle interface for the ROS3 driver
  *
@@ -608,18 +257,13 @@ error:
  *              For now, test only fapl & flags.  Extend as the
  *              work on the VFD continues.
  *
- * Return:      Success:        0
- *              Failure:        1
- *
+ * Return:      PASS : 0
+ *              FAIL : 1
  *-------------------------------------------------------------------------
  */
 static int
-test_ros3_fapl(void)
+test_ros3_fapl_driver_flags(void)
 {
-    /************************
-     * test-local variables *
-     ************************/
-
     hid_t            fapl_id      = H5I_INVALID_HID; /* file access property list ID */
     hid_t            driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
     unsigned long    driver_flags = 0;               /* VFD feature flags            */
@@ -631,30 +275,24 @@ test_ros3_fapl(void)
         "plugh",                       /* secret_key    */
     };
 
-    TESTING("ROS3 fapl ");
+    TESTING("ros3 driver flags");
 
-    /* Set property list and file name for ROS3 driver.
-     */
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF(fapl_id < 0)
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(fapl_id, &ros3_fa_0) < 0)
+        TEST_ERROR;
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        TEST_ERROR;
 
-    FAIL_IF(FAIL == H5Pset_fapl_ros3(fapl_id, &ros3_fa_0))
+    /* Get VFD flags */
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR;
 
-    driver_id = H5Pget_driver(fapl_id);
-    FAIL_IF(driver_id < 0)
-
-    /****************
-     * Check that the VFD feature flags are correct
-     * SPEC MAY CHANGE
-     ******************/
-
-    FAIL_IF(H5FDdriver_query(driver_id, &driver_flags) < 0)
-
-    JSVERIFY_NOT(0, (driver_flags & H5FD_FEAT_DATA_SIEVE),
-                 "bit(s) in `driver_flags` must align with "
-                 "H5FD_FEAT_DATA_SIEVE")
-
-    JSVERIFY(H5FD_FEAT_DATA_SIEVE, driver_flags, "H5FD_FEAT_DATA_SIEVE should be the only supported flag")
+    /* Validate flags */
+    if (0 == (driver_flags & H5FD_FEAT_DATA_SIEVE))
+        FAIL_PUTS_ERROR("ros3 VFD should support H5FD_FEAT_DATA_SIEVE");
+    if (H5FD_FEAT_DATA_SIEVE != driver_flags)
+        FAIL_PUTS_ERROR("H5FD_FEAT_DATA_SIEVE should be the only supported flag");
 
     PASSED();
     return 0;
@@ -662,137 +300,42 @@ test_ros3_fapl(void)
 error:
     H5E_BEGIN_TRY
     {
-        (void)H5Pclose(fapl_id);
+        H5Pclose(fapl_id);
     }
     H5E_END_TRY
 
     return 1;
 
-} /* test_ros3_fapl() */
+} /* end test_ros3_fapl() */
 
 /*---------------------------------------------------------------------------
+ * Function:    test_vfl_open
  *
- * Function: test_vfd_open()
+ * Purpose:     Test the VFL "open" callback
  *
- * Purpose:
- *
- *     Demonstrate/specify VFD-level "Open" failure cases
- *
- * Return:
- *
- *     PASSED : 0
- *     FAILED : 1
- *
+ * Return:      PASS : 0
+ *              FAIL : 1
  *---------------------------------------------------------------------------
  */
 static int
-test_vfd_open(void)
+test_vfl_open(void)
 {
-
-    /*********************
-     * test-local macros *
-     *********************/
-
-#define FAPL_H5P_DEFAULT -2
-#define FAPL_FILE_ACCESS -3
-#define FAPL_ROS3_ANON   -4
-
-    /*************************
-     * test-local structures *
-     *************************/
-
     struct test_condition {
         const char *message;
         const char *url;
         unsigned    flags;
-        int         which_fapl;
+        hid_t       fapl;
         haddr_t     maxaddr;
     };
 
-    /************************
-     * test-local variables *
-     ************************/
+    /* struct test_condition tests[] defined after fapl initialization */
 
-    struct test_condition tests[] = {
-        {
-            "default property list (H5P_DEFAULT) is invalid",
-            url_text_public,
-            H5F_ACC_RDONLY,
-            FAPL_H5P_DEFAULT,
-            MAXADDR,
-        },
-        {
-            "generic file access property list is invalid",
-            url_text_public,
-            H5F_ACC_RDONLY,
-            FAPL_FILE_ACCESS,
-            MAXADDR,
-        },
-        {
-            "filename cannot be null",
-            NULL,
-            H5F_ACC_RDONLY,
-            FAPL_ROS3_ANON,
-            MAXADDR,
-        },
-        {
-            "filename cannot be empty",
-            "",
-            H5F_ACC_RDONLY,
-            FAPL_ROS3_ANON,
-            MAXADDR,
-        },
-        {
-            "filename must exist",
-            url_missing,
-            H5F_ACC_RDONLY,
-            FAPL_ROS3_ANON,
-            MAXADDR,
-        },
-        {
-            "read-write flag not supported",
-            url_text_public,
-            H5F_ACC_RDWR,
-            FAPL_ROS3_ANON,
-            MAXADDR,
-        },
-        {
-            "truncate flag not supported",
-            url_text_public,
-            H5F_ACC_TRUNC,
-            FAPL_ROS3_ANON,
-            MAXADDR,
-        },
-        {
-            "create flag not supported",
-            url_text_public,
-            H5F_ACC_CREAT,
-            FAPL_ROS3_ANON,
-            MAXADDR,
-        },
-        {
-            "EXCL flag not supported",
-            url_text_public,
-            H5F_ACC_EXCL,
-            FAPL_ROS3_ANON,
-            MAXADDR,
-        },
-        {
-            "maxaddr cannot be 0 (caught in `H5FD_open()`)",
-            url_text_public,
-            H5F_ACC_RDONLY,
-            FAPL_ROS3_ANON,
-            0,
-        },
-    };
-    H5FD_t  *fd               = NULL;
-    bool     curl_ready       = false;
-    hid_t    fapl_id          = H5I_INVALID_HID;
-    hid_t    fapl_file_access = H5I_INVALID_HID;
-    unsigned i                = 0;
-    unsigned tests_count      = 10;
+    H5FD_t   *fd              = NULL;
+    hid_t     ros3_fapl_id    = H5I_INVALID_HID;
+    hid_t     default_fapl_id = H5I_INVALID_HID;
+    const int TESTS_COUNT     = 10;
 
-    TESTING("ROS3 VFD-level open");
+    TESTING("ros3 VFD-level open");
 
     if (false == s3_test_bucket_defined) {
         SKIPPED();
@@ -801,136 +344,145 @@ test_vfd_open(void)
         return 0;
     }
 
-    FAIL_IF(CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))
-    curl_ready = true;
+    /* Set up fapls */
+    if ((default_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if ((ros3_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(ros3_fapl_id, &anonymous_fa) < 0)
+        TEST_ERROR;
 
-    fapl_file_access = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF(fapl_file_access < 0)
+    /* Set up test cases */
+    struct test_condition tests[] = {
+        {
+            "default property list (H5P_DEFAULT) is invalid",
+            url_text_public,
+            H5F_ACC_RDONLY,
+            H5P_DEFAULT,
+            MAXADDR,
+        },
+        {
+            "generic file access property list is invalid",
+            url_text_public,
+            H5F_ACC_RDONLY,
+            default_fapl_id,
+            MAXADDR,
+        },
+        {
+            "filename cannot be null",
+            NULL,
+            H5F_ACC_RDONLY,
+            ros3_fapl_id,
+            MAXADDR,
+        },
+        {
+            "filename cannot be empty",
+            "",
+            H5F_ACC_RDONLY,
+            ros3_fapl_id,
+            MAXADDR,
+        },
+        {
+            "filename must exist",
+            url_missing,
+            H5F_ACC_RDONLY,
+            ros3_fapl_id,
+            MAXADDR,
+        },
+        {
+            "read-write flag not supported",
+            url_text_public,
+            H5F_ACC_RDWR,
+            ros3_fapl_id,
+            MAXADDR,
+        },
+        {
+            "truncate flag not supported",
+            url_text_public,
+            H5F_ACC_TRUNC,
+            ros3_fapl_id,
+            MAXADDR,
+        },
+        {
+            "create flag not supported",
+            url_text_public,
+            H5F_ACC_CREAT,
+            ros3_fapl_id,
+            MAXADDR,
+        },
+        {
+            "EXCL flag not supported",
+            url_text_public,
+            H5F_ACC_EXCL,
+            ros3_fapl_id,
+            MAXADDR,
+        },
+        {
+            "maxaddr cannot be 0 (caught in `H5FD_open()`)",
+            url_text_public,
+            H5F_ACC_RDONLY,
+            ros3_fapl_id,
+            0,
+        },
+    };
 
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF(fapl_id < 0)
-    FAIL_IF(FAIL == H5Pset_fapl_ros3(fapl_id, &anonymous_fa))
-
-    /*********
-     * TESTS *
-     *********/
-
-    /* all the test cases that will _not_ open
-     */
-    for (i = 0; i < tests_count; i++) {
-        struct test_condition T        = tests[i];
-        hid_t                 _fapl_id = H5P_DEFAULT;
-
-        fd = NULL;
-
-        if (T.which_fapl == FAPL_FILE_ACCESS)
-            _fapl_id = fapl_file_access;
-        else if (T.which_fapl == FAPL_ROS3_ANON)
-            _fapl_id = fapl_id;
+    /* Test a variety of cases that are expected to fail */
+    for (int i = 0; i < TESTS_COUNT; i++) {
 
         H5E_BEGIN_TRY
         {
-            fd = H5FDopen(T.url, T.flags, _fapl_id, T.maxaddr);
+            fd = H5FDopen(tests[i].url, tests[i].flags, tests[i].fapl, tests[i].maxaddr);
         }
         H5E_END_TRY
+
         if (NULL != fd)
-            JSVERIFY(1, 0, T.message); /* wrapper to print message and fail */
+            FAIL_PUTS_ERROR(tests[i].message);
     }
 
-    FAIL_IF(NULL != fd)
+    /* Finally, show that a file can be opened */
+    if (NULL == (fd = H5FDopen(url_text_public, H5F_ACC_RDONLY, ros3_fapl_id, MAXADDR)))
+        TEST_ERROR;
+    if (H5FDclose(fd) < 0)
+        TEST_ERROR;
 
-    /* finally, show that a file can be opened
-     */
-    fd = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, MAXADDR);
-    FAIL_IF(NULL == fd)
-
-    /************
-     * TEARDOWN *
-     ************/
-
-    FAIL_IF(FAIL == H5FDclose(fd))
-    fd = NULL;
-
-    FAIL_IF(FAIL == H5Pclose(fapl_id))
-    fapl_id = -1;
-
-    FAIL_IF(FAIL == H5Pclose(fapl_file_access))
-    fapl_file_access = -1;
-
-    curl_global_cleanup();
-    curl_ready = false;
+    if (H5Pclose(default_fapl_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(ros3_fapl_id) < 0)
+        TEST_ERROR;
 
     PASSED();
     return 0;
 
 error:
-    /***********
-     * CLEANUP *
-     ***********/
-
-    if (fd) {
-        (void)H5FDclose(fd);
+    H5E_BEGIN_TRY
+    {
+        H5FDclose(fd);
+        H5Pclose(default_fapl_id);
+        H5Pclose(ros3_fapl_id);
     }
-    if (fapl_id >= 0) {
-        H5E_BEGIN_TRY
-        {
-            (void)H5Pclose(fapl_id);
-        }
-        H5E_END_TRY
-    }
-    if (fapl_file_access >= 0) {
-        H5E_BEGIN_TRY
-        {
-            (void)H5Pclose(fapl_file_access);
-        }
-        H5E_END_TRY
-    }
-    if (curl_ready == true) {
-        curl_global_cleanup();
-    }
+    H5E_END_TRY
 
     return 1;
 
-#undef FAPL_FILE_ACCESS
-#undef FAPL_H5P_DEFAULT
-#undef FAPL_ROS3_ANON
-
-} /* test_vfd_open */
+} /* end test_vfd_open() */
 
 /*---------------------------------------------------------------------------
+ * Function:    test_eof_eoa
  *
- * Function: test_eof_eoa()
+ * Purpose:     Demonstrate behavior of get_eof, get_eoa, and set_eoa
  *
- * Purpose:
- *
- *     Demonstrate behavior of get_eof, get_eoa, and set_eoa.
- *
- * Return:
- *
- *     PASSED : 0
- *     FAILED : 1
- *
+ * Return:      PASS : 0
+ *              FAIL : 1
  *---------------------------------------------------------------------------
  */
 static int
 test_eof_eoa(void)
 {
-
-    /*********************
-     * test-local macros *
-     *********************/
-
-    /*************************
-     * test-local structures *
-     *************************/
-
-    /************************
-     * test-local variables *
-     ************************/
-
-    H5FD_t *fd_shakespeare = NULL;
-    bool    curl_ready     = false;
-    hid_t   fapl_id        = H5I_INVALID_HID;
+    const haddr_t INITIAL_ADDR = 5458199; /* Fragile! */
+    const haddr_t LOWER_ADDR   = INITIAL_ADDR - (1024 * 1024);
+    const haddr_t HIGHER_ADDR  = INITIAL_ADDR + (1024 * 1024);
+    H5FD_t       *fd           = NULL;
+    hid_t         fapl_id      = H5I_INVALID_HID;
 
     TESTING("ROS3 eof/eoa gets and sets");
 
@@ -948,198 +500,69 @@ test_eof_eoa(void)
         return 0;
     }
 
-    /*********
-     * SETUP *
-     *********/
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
+        TEST_ERROR;
 
-    FAIL_IF(CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))
-    curl_ready = true;
+    /* Open and verify EOA and EOF in a sample file */
+    if (NULL == (fd = H5FDopen(url_text_restricted, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
+        TEST_ERROR;
+    if (INITIAL_ADDR != H5FDget_eof(fd, H5FD_MEM_DEFAULT))
+        FAIL_PUTS_ERROR("incorrect EOF (fragile - make sure the file size didn't change)");
+    if (H5FDget_eof(fd, H5FD_MEM_DEFAULT) != H5FDget_eof(fd, H5FD_MEM_DRAW))
+        FAIL_PUTS_ERROR("mismatch between DEFAULT and RAW memory types");
+    if (0 != H5FDget_eoa(fd, H5FD_MEM_DEFAULT))
+        FAIL_PUTS_ERROR("EOA should be unset by H5FDopen");
 
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF(0 > fapl_id)
-    FAIL_IF(FAIL == H5Pset_fapl_ros3(fapl_id, &restricted_access_fa))
+    /* Set EOA below EOF - should succeed w/ EOF changed and EOA unchanged */
+    if (H5FDset_eoa(fd, H5FD_MEM_DEFAULT, LOWER_ADDR) < 0)
+        TEST_ERROR;
+    if (INITIAL_ADDR != H5FDget_eof(fd, H5FD_MEM_DEFAULT))
+        FAIL_PUTS_ERROR("EOF changed when setting (lower) EOA");
+    if (LOWER_ADDR != H5FDget_eoa(fd, H5FD_MEM_DEFAULT))
+        FAIL_PUTS_ERROR("EOA unchanged when setting (lower) EOA");
 
-    fd_shakespeare = H5FDopen(url_text_restricted, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
-    FAIL_IF(NULL == fd_shakespeare)
+    /* Set EOA above EOF - should succeed w/ EOF changed and EOA unchanged */
+    if (H5FDset_eoa(fd, H5FD_MEM_DEFAULT, HIGHER_ADDR) < 0)
+        TEST_ERROR;
+    if (INITIAL_ADDR != H5FDget_eof(fd, H5FD_MEM_DEFAULT))
+        FAIL_PUTS_ERROR("EOF changed when setting (higher) EOA");
+    if (HIGHER_ADDR != H5FDget_eoa(fd, H5FD_MEM_DEFAULT))
+        FAIL_PUTS_ERROR("EOA unchanged when setting (higher) EOA");
 
-    /*********
-     * TESTS *
-     *********/
-
-    /* verify as found
-     */
-    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), NULL)
-    JSVERIFY(H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), H5FDget_eof(fd_shakespeare, H5FD_MEM_DRAW),
-             "mismatch between DEFAULT and RAW memory types")
-    JSVERIFY(0, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA should be unset by H5FDopen")
-
-    /* set EoA below EoF
-     */
-    JSVERIFY(SUCCEED, H5FDset_eoa(fd_shakespeare, H5FD_MEM_DEFAULT, 44442202), "unable to set EoA (lower)")
-    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EoF changed")
-    JSVERIFY(44442202, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA unchanged")
-
-    /* set EoA above EoF
-     */
-    JSVERIFY(SUCCEED, H5FDset_eoa(fd_shakespeare, H5FD_MEM_DEFAULT, 6789012), "unable to set EoA (higher)")
-    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EoF changed")
-    JSVERIFY(6789012, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA unchanged")
-
-    /************
-     * TEARDOWN *
-     ************/
-
-    FAIL_IF(FAIL == H5FDclose(fd_shakespeare))
-
-    FAIL_IF(FAIL == H5Pclose(fapl_id))
-    fapl_id = -1;
-
-    curl_global_cleanup();
-    curl_ready = false;
+    if (H5FDclose(fd) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
 
     PASSED();
     return 0;
 
 error:
-    /***********
-     * CLEANUP *
-     ***********/
-
-    if (fd_shakespeare)
-        (void)H5FDclose(fd_shakespeare);
-    if (true == curl_ready)
-        curl_global_cleanup();
-    if (fapl_id >= 0) {
-        H5E_BEGIN_TRY
-        {
-            (void)H5Pclose(fapl_id);
-        }
-        H5E_END_TRY
+    H5E_BEGIN_TRY
+    {
+        H5FDclose(fd);
+        H5Pclose(fapl_id);
     }
+    H5E_END_TRY
 
     return 1;
 
-} /* test_eof_eoa */
-
-/*-----------------------------------------------------------------------------
- *
- * Function: test_H5FDread_without_eoa_set_fails()
- *
- * Purpose:
- *
- *     Demonstrate a not-obvious constraint by the library, preventing
- *     file read before EoA is set
- *
- *-----------------------------------------------------------------------------
- */
-static int
-test_H5FDread_without_eoa_set_fails(void)
-{
-    char         buffer[256];
-    unsigned int i                = 0;
-    H5FD_t      *file_shakespeare = NULL;
-    hid_t        fapl_id          = H5I_INVALID_HID;
-
-    TESTING("ROS3 VFD read-eoa temporal coupling library limitation ");
-
-    if (s3_test_credentials_loaded == 0) {
-        SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
-        return 0;
-    }
-
-    if (false == s3_test_bucket_defined) {
-        SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
-        return 0;
-    }
-
-    /*********
-     * SETUP *
-     *********/
-
-    /* create ROS3 fapl
-     */
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF(fapl_id < 0)
-    FAIL_IF(FAIL == H5Pset_fapl_ros3(fapl_id, &restricted_access_fa))
-
-    file_shakespeare = H5FDopen(url_text_restricted, H5F_ACC_RDONLY, fapl_id, MAXADDR);
-    FAIL_IF(NULL == file_shakespeare)
-
-    JSVERIFY(0, H5FDget_eoa(file_shakespeare, H5FD_MEM_DEFAULT), "EoA should remain unset by H5FDopen")
-
-    for (i = 0; i < 256; i++)
-        buffer[i] = 0; /* zero buffer contents */
-
-    /********
-     * TEST *
-     ********/
-
-    H5E_BEGIN_TRY{/* mute stack trace on expected failure */
-                  JSVERIFY(FAIL, H5FDread(file_shakespeare, H5FD_MEM_DRAW, H5P_DEFAULT, 1200699, 102, buffer),
-                           "cannot read before eoa is set")} H5E_END_TRY
-    JSVERIFY_STR("", buffer, "buffer should remain untouched")
-
-    /************
-     * TEARDOWN *
-     ************/
-
-    FAIL_IF(FAIL == H5FDclose(file_shakespeare))
-    file_shakespeare = NULL;
-
-    FAIL_IF(FAIL == H5Pclose(fapl_id))
-    fapl_id = -1;
-
-    PASSED();
-    return 0;
-
-error:
-    /***********
-     * CLEANUP *
-     ***********/
-
-    if (file_shakespeare) {
-        (void)H5FDclose(file_shakespeare);
-    }
-    if (fapl_id >= 0) {
-        H5E_BEGIN_TRY
-        {
-            (void)H5Pclose(fapl_id);
-        }
-        H5E_END_TRY
-    }
-
-    return 1;
-
-} /* test_H5FDread_without_eoa_set_fails */
+} /* end test_eof_eoa() */
 
 /*---------------------------------------------------------------------------
+ * Function:    test_vfl_read
  *
- * Function: test_read()
+ * Purpose:     Test reading via the VFL API
  *
- * Purpose:
- *
- * Return:
- *
- *     PASSED : 0
- *     FAILED : 1
- *
+ * Return:      PASS : 0
+ *              FAIL : 1
  *---------------------------------------------------------------------------
  */
 static int
-test_read(void)
+test_vfl_read(void)
 {
-
-    /*********************
-     * test-local macros *
-     *********************/
-
-    /*************************
-     * test-local structures *
-     *************************/
     struct testcase {
         const char *message;  /* purpose of test case */
         haddr_t     eoa_set;  /* set file EOA to this prior to read */
@@ -1149,10 +572,7 @@ test_read(void)
         const char *expected; /* expected contents of buffer; failure ignores */
     };
 
-    /************************
-     * test-local variables *
-     ************************/
-    struct testcase cases[] = {
+    struct testcase tests[] = {
         {
             "successful range-get",
             6464,
@@ -1202,16 +622,12 @@ test_read(void)
             NULL,
         },
     };
-    unsigned        testcase_count = 6;
-    unsigned        test_i         = 0;
-    struct testcase test;
-    herr_t          open_return = FAIL;
-    char            buffer[S3_TEST_MAX_URL_SIZE];
-    unsigned int    i          = 0;
-    H5FD_t         *file_raven = NULL;
-    hid_t           fapl_id    = H5I_INVALID_HID;
+    const int TESTCASE_COUNT = 6;
+    char      buffer[S3_TEST_MAX_URL_SIZE];
+    H5FD_t   *fd      = NULL;
+    hid_t     fapl_id = H5I_INVALID_HID;
 
-    TESTING("ROS3 VFD read/range-gets");
+    TESTING("ros3 VFD read/range-gets");
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
@@ -1227,132 +643,162 @@ test_read(void)
         return 0;
     }
 
-    /*********
-     * SETUP *
-     *********/
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
+        TEST_ERROR;
 
-    /* create ROS3 fapl
-     */
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF(fapl_id < 0)
-    FAIL_IF(FAIL == H5Pset_fapl_ros3(fapl_id, &restricted_access_fa))
+    if (NULL == (fd = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
+        TEST_ERROR;
+    if (6464 != H5FDget_eof(fd, H5FD_MEM_DEFAULT))
+        FAIL_PUTS_ERROR("incorrect EOF (fragile - make sure the file size didn't change)");
 
-    /* open file
-     */
-    file_raven =
-        H5FDopen(                 /* will open with "authenticating" fapl */
-                 url_text_public, /* TODO: check return state: anon access of restricted says OK? (not NULL)
-                                   */
-                 H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF); /* Demonstrate success with "automatic" value */
-    FAIL_IF(NULL == file_raven)
+    for (int i = 0; i < TESTCASE_COUNT; i++) {
 
-    JSVERIFY(6464, H5FDget_eof(file_raven, H5FD_MEM_DEFAULT), NULL)
+        herr_t ret = FAIL;
 
-    /*********
-     * TESTS *
-     *********/
+        /* Per-test setup */
 
-    for (test_i = 0; test_i < testcase_count; test_i++) {
+        if (S3_TEST_MAX_URL_SIZE < tests[i].len)
+            FAIL_PUTS_ERROR("buffer too small!");
+        if (H5FD_set_eoa(fd, H5FD_MEM_DEFAULT, tests[i].eoa_set) < 0)
+            TEST_ERROR;
+        memset(buffer, 0, S3_TEST_MAX_URL_SIZE);
 
-        /* -------------- *
-         * per-test setup *
-         * -------------- */
-
-        test        = cases[test_i];
-        open_return = FAIL;
-
-        FAIL_IF(S3_TEST_MAX_URL_SIZE < test.len) /* buffer too small! */
-
-        FAIL_IF(FAIL == H5FD_set_eoa(file_raven, H5FD_MEM_DEFAULT, test.eoa_set))
-
-        for (i = 0; i < S3_TEST_MAX_URL_SIZE; i++) /* zero buffer contents */
-            buffer[i] = 0;
-
-        /* ------------ *
-         * conduct test *
-         * ------------ */
+        /* Check test config */
 
         H5E_BEGIN_TRY
         {
-            open_return = H5FDread(file_raven, H5FD_MEM_DRAW, H5P_DEFAULT, test.addr, test.len, buffer);
+            ret = H5FDread(fd, H5FD_MEM_DRAW, H5P_DEFAULT, tests[i].addr, tests[i].len, buffer);
         }
         H5E_END_TRY
 
-        JSVERIFY(test.success, open_return, test.message)
-        if (open_return == SUCCEED)
-            JSVERIFY_STR(test.expected, buffer, NULL)
+        if (tests[i].success != ret)
+            FAIL_PUTS_ERROR(tests[i].message);
+        if (ret == SUCCEED)
+            if (strncmp(tests[i].expected, buffer, S3_TEST_MAX_URL_SIZE))
+                FAIL_PUTS_ERROR("expected output is not the same");
+    }
 
-    } /* for each testcase */
-
-    /************
-     * TEARDOWN *
-     ************/
-
-    FAIL_IF(FAIL == H5FDclose(file_raven))
-    file_raven = NULL;
-
-    FAIL_IF(FAIL == H5Pclose(fapl_id))
-    fapl_id = -1;
+    if (H5FDclose(fd) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
 
     PASSED();
     return 0;
 
 error:
-    /***********
-     * CLEANUP *
-     ***********/
-
-    if (file_raven)
-        (void)H5FDclose(file_raven);
-    if (fapl_id >= 0) {
-        H5E_BEGIN_TRY
-        {
-            (void)H5Pclose(fapl_id);
-        }
-        H5E_END_TRY
+    H5E_BEGIN_TRY
+    {
+        H5FDclose(fd);
+        H5Pclose(fapl_id);
     }
+    H5E_END_TRY
 
     return 1;
 
-} /* test_read */
+} /* end test_vfl_read() */
+
+/*-----------------------------------------------------------------------------
+ * Function:    test_vfl_read_without_eoa_set_fails
+ *
+ * Purpose:     Demonstrate a not-obvious constraint by the library, preventing
+ *              file read before EOA is set
+ *
+ * Return:      PASS : 0
+ *              FAIL : 1
+ *-----------------------------------------------------------------------------
+ */
+static int
+test_vfl_read_without_eoa_set_fails(void)
+{
+    char    buffer[256];
+    H5FD_t *fd      = NULL;
+    hid_t   fapl_id = H5I_INVALID_HID;
+    herr_t  ret;
+
+    TESTING("ros3 VFD read-eoa temporal coupling library limitation");
+
+    if (s3_test_credentials_loaded == 0) {
+        SKIPPED();
+        puts("    s3 credentials are not loaded");
+        fflush(stdout);
+        return 0;
+    }
+
+    if (false == s3_test_bucket_defined) {
+        SKIPPED();
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        fflush(stdout);
+        return 0;
+    }
+
+    /* Set up fapl */
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
+        TEST_ERROR;
+
+    /* Open w/ VFL call */
+    if (NULL == (fd = H5FDopen(url_text_restricted, H5F_ACC_RDONLY, fapl_id, MAXADDR)))
+        TEST_ERROR;
+    if (0 != H5FDget_eoa(fd, H5FD_MEM_DEFAULT))
+        FAIL_PUTS_ERROR("EOA should remain unset by H5FDopen");
+
+    /* Try reading without EOA set (should fail) */
+    memset(buffer, 0, 256);
+    H5E_BEGIN_TRY
+    {
+        ret = H5FDread(fd, H5FD_MEM_DRAW, H5P_DEFAULT, 1200699, 102, buffer);
+    }
+    H5E_END_TRY
+    if (ret != FAIL)
+        FAIL_PUTS_ERROR("should not be able to read before eoa is set");
+    for (int i = 0; i < 256; i++) {
+        if (buffer[i] != 0)
+            FAIL_PUTS_ERROR("buffer should remain untouched");
+    }
+
+    if (H5FDclose(fd) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5FDclose(fd);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY
+
+    return 1;
+
+} /* end test_vfl_read_without_eoa_set_fails() */
 
 /*---------------------------------------------------------------------------
+ * Function:    test_noops_and_autofails
  *
- * Function: test_noops_and_autofails()
+ * Purpose:     Demonstrate the unavailable and do-nothing routines unique to
+ *              Read-Only VFD
  *
- * Purpose:
- *
- *     Demonstrate the unavailable and do-nothing routines unique to
- *     Read-Only VFD.
- *
- * Return:
- *
- *     PASSED : 0
- *     FAILED : 1
- *
+ * Return:      PASS : 0
+ *              FAIL : 1
  *---------------------------------------------------------------------------
  */
 static int
 test_noops_and_autofails(void)
 {
-    /*********************
-     * test-local macros *
-     *********************/
+    hid_t      fapl_id  = H5I_INVALID_HID;
+    H5FD_t    *fd       = NULL;
+    const char data[36] = "The Force shall be with you, always";
+    herr_t     ret;
 
-    /*************************
-     * test-local structures *
-     *************************/
-
-    /************************
-     * test-local variables *
-     ************************/
-
-    bool       curl_ready = false;
-    hid_t      fapl_id    = H5I_INVALID_HID;
-    H5FD_t    *file       = NULL;
-    const char data[36]   = "The Force shall be with you, always";
-
-    TESTING("ROS3 VFD always-fail and no-op routines");
+    TESTING("ros3 VFD always-fail and no-op routines");
 
     if (false == s3_test_bucket_defined) {
         SKIPPED();
@@ -1361,115 +807,76 @@ test_noops_and_autofails(void)
         return 0;
     }
 
-    /*********
-     * SETUP *
-     *********/
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(fapl_id, &anonymous_fa) < 0)
+        TEST_ERROR;
+    if (NULL == (fd = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
+        TEST_ERROR;
 
-    FAIL_IF(CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))
-    curl_ready = true;
+    /* Calls to write and truncate must fail */
+    H5E_BEGIN_TRY
+    {
+        ret = H5FDwrite(fd, H5FD_MEM_DRAW, H5P_DEFAULT, 1000, 35, data);
+    }
+    H5E_END_TRY
+    if (ret == SUCCEED)
+        FAIL_PUTS_ERROR("write calls must fail");
 
-    /* create ROS3 fapl
-     */
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF(fapl_id < 0)
-    JSVERIFY(SUCCEED, H5Pset_fapl_ros3(fapl_id, &anonymous_fa), NULL)
+    H5E_BEGIN_TRY
+    {
+        ret = H5FDtruncate(fd, H5P_DEFAULT, false);
+    }
+    H5E_END_TRY
+    if (ret == SUCCEED)
+        FAIL_PUTS_ERROR("truncate calls must fail");
 
-    /* open file
-     */
-    file = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
-    FAIL_IF(NULL == file)
+    H5E_BEGIN_TRY
+    {
+        ret = H5FDtruncate(fd, H5P_DEFAULT, true);
+    }
+    H5E_END_TRY
+    if (ret == SUCCEED)
+        FAIL_PUTS_ERROR("truncate calls must fail (closing flag set)");
 
-    /*********
-     * TESTS *
-     *********/
-
-    /* auto-fail calls to write and truncate
-     */
-    H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDwrite(file, H5FD_MEM_DRAW, H5P_DEFAULT, 1000, 35, data),
-                           "write must fail")} H5E_END_TRY
-
-    H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, false), "truncate must fail")} H5E_END_TRY
-
-    H5E_BEGIN_TRY{
-        JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, true), "truncate must fail (closing)")} H5E_END_TRY
-
-    /************
-     * TEARDOWN *
-     ************/
-
-    FAIL_IF(FAIL == H5FDclose(file))
-    file = NULL;
-
-    FAIL_IF(FAIL == H5Pclose(fapl_id))
-    fapl_id = -1;
-
-    curl_global_cleanup();
-    curl_ready = false;
+    if (H5FDclose(fd) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
 
     PASSED();
     return 0;
 
 error:
-    /***********
-     * CLEANUP *
-     ***********/
-
-    if (fapl_id >= 0) {
-        H5E_BEGIN_TRY
-        {
-            (void)H5Pclose(fapl_id);
-        }
-        H5E_END_TRY
+    H5E_BEGIN_TRY
+    {
+        H5FDclose(fd);
+        H5Pclose(fapl_id);
     }
-    if (file) {
-        (void)H5FDclose(file);
-    }
-    if (curl_ready == true) {
-        curl_global_cleanup();
-    }
+    H5E_END_TRY
 
     return 1;
 
-} /* test_noops_and_autofails*/
+} /* end test_noops_and_autofails() */
 
 /*---------------------------------------------------------------------------
+ * Function:    test_cmp
  *
- * Function: test_cmp()
+ * Purpose:     Verify file comparison behavior
  *
- * Purpose:
- *
- *     Verify "file comparison" behavior.
- *
- * Return:
- *
- *     PASSED : 0
- *     FAILED : 1
- *
+ * Return:      PASS : 0
+ *              FAIL : 1
  *---------------------------------------------------------------------------
  */
 static int
 test_cmp(void)
 {
-
-    /*********************
-     * test-local macros *
-     *********************/
-
-    /*************************
-     * test-local structures *
-     *************************/
-
-    /************************
-     * test-local variables *
-     ************************/
-
     H5FD_t *fd_raven   = NULL;
     H5FD_t *fd_shakes  = NULL;
     H5FD_t *fd_raven_2 = NULL;
-    bool    curl_ready = false;
     hid_t   fapl_id    = H5I_INVALID_HID;
 
-    TESTING("ROS3 cmp (comparison)");
+    TESTING("ros3 cmp (comparison)");
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
@@ -1485,112 +892,69 @@ test_cmp(void)
         return 0;
     }
 
-    /*********
-     * SETUP *
-     *********/
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
+        TEST_ERROR;
 
-    FAIL_IF(CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))
-    curl_ready = true;
+    /* Open files */
+    if (NULL == (fd_raven = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
+        TEST_ERROR;
+    if (NULL == (fd_shakes = H5FDopen(url_text_restricted, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
+        TEST_ERROR;
+    if (NULL == (fd_raven_2 = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
+        TEST_ERROR;
 
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF(0 > fapl_id)
-    JSVERIFY(SUCCEED, H5Pset_fapl_ros3(fapl_id, &restricted_access_fa), NULL)
+    /* Compare files */
+    if (0 != H5FDcmp(fd_raven, fd_raven_2))
+        FAIL_PUTS_ERROR("bad comparison (case 1)");
+    if (-1 != H5FDcmp(fd_raven, fd_shakes))
+        FAIL_PUTS_ERROR("bad comparison (case 2)");
+    if (-1 != H5FDcmp(fd_shakes, fd_raven_2))
+        FAIL_PUTS_ERROR("bad comparison (case 3)");
 
-    fd_raven = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
-    FAIL_IF(NULL == fd_raven)
-
-    fd_shakes = H5FDopen(url_text_restricted, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
-    FAIL_IF(NULL == fd_shakes)
-
-    fd_raven_2 = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
-    FAIL_IF(NULL == fd_raven_2)
-
-    /*********
-     * TESTS *
-     *********/
-
-    JSVERIFY(0, H5FDcmp(fd_raven, fd_raven_2), NULL)
-    JSVERIFY(-1, H5FDcmp(fd_raven, fd_shakes), NULL)
-    JSVERIFY(-1, H5FDcmp(fd_shakes, fd_raven_2), NULL)
-
-    /************
-     * TEARDOWN *
-     ************/
-
-    FAIL_IF(FAIL == H5FDclose(fd_raven))
-    fd_raven = NULL;
-    FAIL_IF(FAIL == H5FDclose(fd_shakes))
-    fd_shakes = NULL;
-    FAIL_IF(FAIL == H5FDclose(fd_raven_2))
-    fd_raven_2 = NULL;
-    FAIL_IF(FAIL == H5Pclose(fapl_id))
-    fapl_id = -1;
-
-    curl_global_cleanup();
-    curl_ready = false;
+    if (H5FDclose(fd_raven) < 0)
+        TEST_ERROR;
+    if (H5FDclose(fd_shakes) < 0)
+        TEST_ERROR;
+    if (H5FDclose(fd_raven_2) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
 
     PASSED();
     return 0;
 
 error:
-    /***********
-     * CLEANUP *
-     ***********/
-
-    if (fd_raven != NULL)
-        (void)H5FDclose(fd_raven);
-    if (fd_raven_2 != NULL)
-        (void)H5FDclose(fd_raven_2);
-    if (fd_shakes != NULL)
-        (void)H5FDclose(fd_shakes);
-    if (true == curl_ready)
-        curl_global_cleanup();
-    if (fapl_id >= 0) {
-        H5E_BEGIN_TRY
-        {
-            (void)H5Pclose(fapl_id);
-        }
-        H5E_END_TRY
+    H5E_BEGIN_TRY
+    {
+        H5FDclose(fd_raven);
+        H5FDclose(fd_shakes);
+        H5FDclose(fd_raven_2);
+        H5Pclose(fapl_id);
     }
+    H5E_END_TRY
 
     return 1;
 
-} /* test_cmp */
+} /* end test_cmp() */
 
 /*---------------------------------------------------------------------------
+ * Function:    test_ros3_access_modes
  *
- * Function: test_H5F_integration()
+ * Purpose:     Make sure ros3 files can only be opened read-only
  *
- * Purpose:
- *
- *     Demonstrate S3 file-open through H5F API.
- *
- * Return:
- *
- *     PASSED : 0
- *     FAILED : 1
- *
+ * Return:      PASS : 0
+ *              FAIL : 1
  *---------------------------------------------------------------------------
  */
 static int
-test_H5F_integration(void)
+test_ros3_access_modes(void)
 {
-    /*********************
-     * test-local macros *
-     *********************/
-
-    /*************************
-     * test-local structures *
-     *************************/
-
-    /************************
-     * test-local variables *
-     ************************/
-
-    hid_t file    = H5I_INVALID_HID;
+    hid_t fid     = H5I_INVALID_HID;
     hid_t fapl_id = H5I_INVALID_HID;
 
-    TESTING("S3 file access through HD5F library (H5F API)");
+    TESTING("ros3 access modes");
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
@@ -1606,76 +970,61 @@ test_H5F_integration(void)
         return 0;
     }
 
-    /*********
-     * SETUP *
-     *********/
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
+        TEST_ERROR;
 
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    FAIL_IF(0 > fapl_id)
-    FAIL_IF(FAIL == H5Pset_fapl_ros3(fapl_id, &restricted_access_fa))
+    /* Read-Write Open access is not allowed with this file driver */
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(url_h5_public, H5F_ACC_RDWR, fapl_id);
+    }
+    H5E_END_TRY
+    if (fid != H5I_INVALID_HID)
+        FAIL_PUTS_ERROR("should not be allowed to open a file read-write with the ros3 VFD");
 
-    /*********
-     * TESTS *
-     *********/
+    /* H5Fcreate() is not allowed with this file driver */
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fcreate(url_missing, H5F_ACC_RDONLY, H5P_DEFAULT, fapl_id);
+    }
+    H5E_END_TRY
+    if (fid != H5I_INVALID_HID)
+        FAIL_PUTS_ERROR("should not be allowed to create a file with the ros3 VFD");
 
-    /* Read-Write Open access is not allowed with this file driver.
-     */
-    H5E_BEGIN_TRY{FAIL_IF(0 <= H5Fopen(url_h5_public, H5F_ACC_RDWR, fapl_id))} H5E_END_TRY
+    /* Read-only access should succeed */
+    if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
 
-    /* H5Fcreate() is not allowed with this file driver.
-     */
-    H5E_BEGIN_TRY{FAIL_IF(0 <= H5Fcreate(url_missing, H5F_ACC_RDONLY, H5P_DEFAULT, fapl_id))} H5E_END_TRY
-
-    /* Successful open.
-     */
-    file = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id);
-    FAIL_IF(file < 0)
-
-    /************
-     * TEARDOWN *
-     ************/
-
-    FAIL_IF(FAIL == H5Fclose(file))
-    file = -1;
-
-    FAIL_IF(FAIL == H5Pclose(fapl_id))
-    fapl_id = -1;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
 
     PASSED();
     return 0;
 
 error:
-    /***********
-     * CLEANUP *
-     ***********/
-    printf("\nerror!");
-    fflush(stdout);
-
-    if (fapl_id >= 0) {
-        H5E_BEGIN_TRY
-        {
-            (void)H5Pclose(fapl_id);
-        }
-        H5E_END_TRY
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+        H5Pclose(fapl_id);
     }
-    if (file > 0)
-        (void)H5Fclose(file);
+    H5E_END_TRY
 
     return 1;
 
-} /* test_H5F_integration */
-
+} /* end test_ros3_access_modes() */
 #endif /* H5_HAVE_ROS3_VFD */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    main
  *
- * Purpose:     Tests the basic features of Virtual File Drivers
+ * Purpose:     Tests the basic functionality of the ros3 VFD
  *
- * Return:      Success: 0
- *              Failure: 1
- *
+ * Return:      Success:    EXIT_SUCCESS
+ *              Failure:    EXIT_FAILURE
  *-------------------------------------------------------------------------
  */
 int
@@ -1692,7 +1041,7 @@ main(void)
 #ifdef H5_HAVE_ROS3_VFD
 
     /************************
-     * initialize test urls *
+     * Initialize test urls *
      ************************/
 
     bucket_url_env = getenv("HDF5_ROS3_TEST_BUCKET_URL");
@@ -1709,39 +1058,37 @@ main(void)
                                         (const char *)s3_test_bucket_url,
                                         (const char *)S3_TEST_RESOURCE_TEXT_RESTRICTED)) {
         printf("* ros3 setup failed (text_restricted) ! *\n");
-        return 1;
+        return EXIT_FAILURE;
     }
     if (S3_TEST_MAX_URL_SIZE < snprintf(url_text_public, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
                                         (const char *)s3_test_bucket_url,
                                         (const char *)S3_TEST_RESOURCE_TEXT_PUBLIC)) {
         printf("* ros3 setup failed (text_public) ! *\n");
-        return 1;
+        return EXIT_FAILURE;
     }
     if (S3_TEST_MAX_URL_SIZE < snprintf(url_h5_public, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
                                         (const char *)s3_test_bucket_url,
                                         (const char *)S3_TEST_RESOURCE_H5_PUBLIC)) {
         printf("* ros3 setup failed (h5_public) ! *\n");
-        return 1;
+        return EXIT_FAILURE;
     }
     if (S3_TEST_MAX_URL_SIZE < snprintf(url_missing, S3_TEST_MAX_URL_SIZE, "%s/%s",
                                         (const char *)s3_test_bucket_url,
                                         (const char *)S3_TEST_RESOURCE_MISSING)) {
         printf("* ros3 setup failed (missing) ! *\n");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     /**************************************
-     * load credentials and prepare fapls *
+     * Load credentials and prepare fapls *
      **************************************/
 
-    /* "clear" profile data strings */
+    /* Clear profile data strings */
     s3_test_aws_access_key_id[0]     = '\0';
     s3_test_aws_secret_access_key[0] = '\0';
     s3_test_aws_region[0]            = '\0';
 
-    /* attempt to load test credentials
-     * if unable, certain tests will be skipped
-     */
+    /* Attempt to load test credentials - if unable, certain tests will be skipped */
     if (SUCCEED == H5FD_s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
                                                  s3_test_aws_secret_access_key, s3_test_aws_region)) {
         s3_test_credentials_loaded = 1;
@@ -1753,29 +1100,37 @@ main(void)
     }
 
     /******************
-     * commence tests *
+     * Commence tests *
      ******************/
 
-    h5_reset();
+    h5_test_init();
 
-    nerrors += test_fapl_config_validation();
-    nerrors += test_ros3_fapl();
-    nerrors += test_vfd_open();
-    nerrors += test_eof_eoa();
-    nerrors += test_H5FDread_without_eoa_set_fails();
-    nerrors += test_read();
-    nerrors += test_noops_and_autofails();
-    nerrors += test_cmp();
-    nerrors += test_H5F_integration();
+    if (CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT)) {
+        printf("Unable to set up curl, can't run ros3 tests\n");
+        nerrors++;
+    }
+
+    if (nerrors == 0) {
+        nerrors += test_fapl_config_validation();
+        nerrors += test_ros3_fapl_driver_flags();
+        nerrors += test_vfl_open();
+        nerrors += test_eof_eoa();
+        nerrors += test_vfl_read();
+        nerrors += test_vfl_read_without_eoa_set_fails();
+        nerrors += test_noops_and_autofails();
+        nerrors += test_cmp();
+        nerrors += test_ros3_access_modes();
+    }
+
+    curl_global_cleanup();
 
     if (nerrors > 0) {
         printf("***** %d ros3 TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
-        nerrors = 1;
+        return EXIT_FAILURE;
     }
-    else {
-        printf("All ros3 tests passed.\n");
-    }
-    return nerrors; /* 0 if no errors, 1 if any errors */
+
+    printf("All ros3 tests passed.\n");
+    return EXIT_SUCCESS;
 
 #else
 
@@ -1784,4 +1139,4 @@ main(void)
 
 #endif /* H5_HAVE_ROS3_VFD */
 
-} /* main() */
+} /* end main() */

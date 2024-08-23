@@ -23,9 +23,8 @@ jobs:
           #mpich
 
       - name: Checkout HDF5
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
         with:
-          repository: HDFGroup/hdf5
           path: hdf5
 
       # Log-based VOL currently doesn't have CMake support
@@ -56,7 +55,7 @@ jobs:
           echo "PATH=${{ runner.workspace }}/hdf5_build/bin:${PATH}" >> $GITHUB_ENV
 
       - name: Checkout Log-based VOL
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
         with:
           repository: HDFGroup/vol-log-based
           path: vol-log-based

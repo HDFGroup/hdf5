@@ -41,8 +41,8 @@ the <a href="https://www.oreilly.com/library/view/97-things-every/9780596809515/
      * \return Returns what you always wanted
      \endverbatim
    - Clearly indicate the parameter direction as \c in, \c out, or
-     \Code{in,out}
-   - Make reference to other parameters using \Code{\\p}
+     \TText{in,out}
+   - Make reference to other parameters using \TText{\\p}
 4. Preconditions
    - A set of preconditions that must be met.
      \verbatim

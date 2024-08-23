@@ -17,12 +17,6 @@
 #ifndef H5FDioc_priv_H
 #define H5FDioc_priv_H
 
-/********************/
-/* Standard Headers */
-/********************/
-
-#include <stdatomic.h>
-
 /**************/
 /* H5 Headers */
 /**************/
@@ -35,13 +29,9 @@
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Pprivate.h"  /* Property lists                           */
+#include "H5TSprivate.h" /* Threadsafety                             */
 
 #include "H5subfiling_common.h"
-#include "H5subfiling_err.h"
-
-#include "mercury_thread.h"
-#include "mercury_thread_mutex.h"
-#include "mercury_thread_pool.h"
 
 /*
  * Some definitions for debugging the IOC VFD
@@ -212,9 +202,8 @@ typedef struct ioc_io_queue_entry {
     bool                       in_progress;
     uint32_t                   counter;
 
-    sf_work_request_t     wk_req;
-    struct hg_thread_work thread_wk;
-    int                   wk_ret;
+    sf_work_request_t wk_req;
+    int               wk_ret;
 
     /* statistics */
 #ifdef H5FD_IOC_COLLECT_STATS
@@ -370,7 +359,7 @@ typedef struct ioc_io_queue {
     int32_t               num_failed;
     int32_t               q_len;
     uint32_t              req_counter;
-    hg_thread_mutex_t     q_mutex;
+    H5TS_mutex_t          q_mutex;
 
     /* statistics */
 #ifdef H5FD_IOC_COLLECT_STATS
@@ -411,17 +400,13 @@ extern int *H5FD_IOC_tag_ub_val_ptr;
 extern "C" {
 #endif
 
-H5_DLL int initialize_ioc_threads(void *_sf_context);
-H5_DLL int finalize_ioc_threads(void *_sf_context);
-
-H5_DLL herr_t ioc__write_independent_async(int64_t context_id, int64_t offset, int64_t elements,
-                                           const void *data, io_req_t **io_req);
-H5_DLL herr_t ioc__read_independent_async(int64_t context_id, int64_t offset, int64_t elements, void *data,
-                                          io_req_t **io_req);
-
-H5_DLL herr_t ioc__async_completion(MPI_Request *mpi_reqs, size_t num_reqs);
-
-H5_DLL int wait_for_thread_main(void);
+H5_DLL herr_t H5FD__ioc_init_threads(void *_sf_context);
+H5_DLL herr_t H5FD__ioc_finalize_threads(void *_sf_context);
+H5_DLL herr_t H5FD__ioc_write_independent_async(int64_t context_id, int64_t offset, int64_t elements,
+                                                const void *data, io_req_t **io_req);
+H5_DLL herr_t H5FD__ioc_read_independent_async(int64_t context_id, int64_t offset, int64_t elements,
+                                               void *data, io_req_t **io_req);
+H5_DLL herr_t H5FD__ioc_async_completion(MPI_Request *mpi_reqs, size_t num_reqs);
 
 #ifdef __cplusplus
 }

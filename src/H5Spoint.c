@@ -120,12 +120,13 @@ const H5S_select_class_t H5S_sel_point[1] = {{
 }};
 
 /* Format version bounds for dataspace point selection */
-const unsigned H5O_sds_point_ver_bounds[] = {
+static const unsigned H5O_sds_point_ver_bounds[] = {
     H5S_POINT_VERSION_1, /* H5F_LIBVER_EARLIEST */
     H5S_POINT_VERSION_1, /* H5F_LIBVER_V18 */
     H5S_POINT_VERSION_1, /* H5F_LIBVER_V110 */
     H5S_POINT_VERSION_2, /* H5F_LIBVER_V112 */
     H5S_POINT_VERSION_2, /* H5F_LIBVER_V114 */
+    H5S_POINT_VERSION_2, /* H5F_LIBVER_V116 */
     H5S_POINT_VERSION_2  /* H5F_LIBVER_LATEST */
 };
 

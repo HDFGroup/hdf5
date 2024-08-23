@@ -272,9 +272,8 @@ set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDwindows.h
 )
 
-# Append Subfiling VFD and Mercury sources to H5FD
-# interface if Subfiling VFD is built. Append Subfiling
-# VFD public headers to H5FD_HDRS regardless.
+# Append Subfiling VFD sources to H5FD interface if it is built.
+# Append Subfiling VFD public headers to H5FD_HDRS regardless.
 add_subdirectory (${H5FD_SUBFILING_DIR})
 
 IDE_GENERATED_PROPERTIES ("H5FD" "${H5FD_HDRS}" "${H5FD_SOURCES}" )
@@ -641,6 +640,20 @@ IDE_GENERATED_PROPERTIES ("H5T" "${H5T_HDRS}" "${H5T_SOURCES}" )
 
 set (H5TS_SOURCES
     ${HDF5_SRC_DIR}/H5TS.c
+    ${HDF5_SRC_DIR}/H5TSatomic.c
+    ${HDF5_SRC_DIR}/H5TSbarrier.c
+    ${HDF5_SRC_DIR}/H5TSc11.c
+    ${HDF5_SRC_DIR}/H5TScond.c
+    ${HDF5_SRC_DIR}/H5TSint.c
+    ${HDF5_SRC_DIR}/H5TSkey.c
+    ${HDF5_SRC_DIR}/H5TSmutex.c
+    ${HDF5_SRC_DIR}/H5TSonce.c
+    ${HDF5_SRC_DIR}/H5TSpool.c
+    ${HDF5_SRC_DIR}/H5TSpthread.c
+    ${HDF5_SRC_DIR}/H5TSrwlock.c
+    ${HDF5_SRC_DIR}/H5TSsemaphore.c
+    ${HDF5_SRC_DIR}/H5TSthread.c
+    ${HDF5_SRC_DIR}/H5TSwin.c
 )
 set (H5TS_HDRS
     ${HDF5_SRC_DIR}/H5TSdevelop.h
@@ -758,6 +771,7 @@ set (H5_MODULE_HEADERS
     ${HDF5_SRC_DIR}/H5SLmodule.h
     ${HDF5_SRC_DIR}/H5SMmodule.h
     ${HDF5_SRC_DIR}/H5Tmodule.h
+    ${HDF5_SRC_DIR}/H5TSmodule.h
     ${HDF5_SRC_DIR}/H5VLmodule.h
     ${HDF5_SRC_DIR}/H5Zmodule.h
 )
@@ -969,6 +983,7 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5Tpkg.h
     ${HDF5_SRC_DIR}/H5Tprivate.h
 
+    ${HDF5_SRC_DIR}/H5TSpkg.h
     ${HDF5_SRC_DIR}/H5TSprivate.h
 
     ${HDF5_SRC_DIR}/H5UCprivate.h
@@ -1084,11 +1099,11 @@ if (BUILD_STATIC_LIBS)
   TARGET_C_PROPERTIES (${HDF5_LIB_TARGET} STATIC)
   target_link_libraries (${HDF5_LIB_TARGET}
       PRIVATE ${LINK_LIBS} ${LINK_COMP_LIBS}
-      PUBLIC "$<$<NOT:$<PLATFORM_ID:Windows>>:${CMAKE_DL_LIBS}>" "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>"
+      PUBLIC "$<$<PLATFORM_ID:Windows>:${LINK_PUB_LIBS}>" "$<$<NOT:$<PLATFORM_ID:Windows>>:${CMAKE_DL_LIBS}>" "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>"
   )
   if (NOT WIN32)
     target_link_libraries (${HDF5_LIB_TARGET}
-      PRIVATE "$<$<OR:$<BOOL:${HDF5_ENABLE_THREADSAFE}>,$<BOOL:${HDF5_ENABLE_SUBFILING_VFD}>>:Threads::Threads>"
+      PRIVATE "$<$<OR:$<BOOL:${HDF5_ENABLE_THREADS}>,$<BOOL:${HDF5_ENABLE_SUBFILING_VFD}>>:Threads::Threads>"
     )
   endif ()
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT ${HDF5_LIB_TARGET})
@@ -1111,6 +1126,7 @@ if (BUILD_SHARED_LIBS)
           "H5_BUILT_AS_DYNAMIC_LIB"
           ${HDF_EXTRA_C_FLAGS}
       PRIVATE
+          "$<$<BOOL:${HDF5_ENABLE_THREADS}>:H5_HAVE_THREADS>"
           "$<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:H5_HAVE_THREADSAFE>"
           "$<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>"  # Enable tracing of the API
           "$<$<BOOL:${HDF5_ENABLE_DEBUG_APIS}>:${HDF5_DEBUG_APIS}>"
@@ -1119,8 +1135,7 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (${HDF5_LIBSH_TARGET} SHARED)
   target_link_libraries (${HDF5_LIBSH_TARGET}
       PRIVATE ${LINK_LIBS} ${LINK_COMP_LIBS}
-              "$<$<OR:$<BOOL:${HDF5_ENABLE_THREADSAFE}>,$<BOOL:${HDF5_ENABLE_SUBFILING_VFD}>>:Threads::Threads>"
-      PUBLIC "$<$<NOT:$<PLATFORM_ID:Windows>>:${CMAKE_DL_LIBS}>" "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>"
+      PUBLIC "$<$<PLATFORM_ID:Windows>:${LINK_PUB_LIBS}>" "$<$<NOT:$<PLATFORM_ID:Windows>>:${CMAKE_DL_LIBS}>" "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>" "$<$<OR:$<BOOL:${HDF5_ENABLE_THREADS}>,$<BOOL:${HDF5_ENABLE_SUBFILING_VFD}>>:Threads::Threads>"
   )
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_LIBSH_TARGET}")
   H5_SET_LIB_OPTIONS (${HDF5_LIBSH_TARGET} ${HDF5_LIB_NAME} SHARED "LIB")
@@ -1194,20 +1209,21 @@ if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
   set (PKGCONFIG_LIBNAME "${PKGCONFIG_LIBNAME}${CMAKE_DEBUG_POSTFIX}")
 endif ()
 
-foreach (libs ${LINK_LIBS})
-  set (_PKG_CONFIG_LIBS_PRIVATE "${_PKG_CONFIG_LIBS_PRIVATE} -l${libs}")
-endforeach ()
+#foreach (libs ${LINK_LIBS})
+#  set (_PKG_CONFIG_LIBS_PRIVATE "${_PKG_CONFIG_LIBS_PRIVATE} -l${libs}")
+#endforeach ()
 
 # The settings for the compression libs depends on if they have pkconfig support
 # Assuming they don't
 foreach (libs ${LINK_COMP_LIBS})
 #  set (_PKG_CONFIG_REQUIRES_PRIVATE "${_PKG_CONFIG_REQUIRES_PRIVATE} -l${libs}")
-  set (_PKG_CONFIG_LIBS_PRIVATE "${_PKG_CONFIG_LIBS_PRIVATE} -l${libs}")
+  get_target_property (libname ${libs} OUTPUT_NAME)
+  set (_PKG_CONFIG_LIBS_PRIVATE "${_PKG_CONFIG_LIBS_PRIVATE} -l${libname}")
 endforeach ()
 
-if (BUILD_STATIC_LIBS)
-  set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${PKGCONFIG_LIBNAME}")
-endif ()
+#if (BUILD_STATIC_LIBS)
+#  set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${PKGCONFIG_LIBNAME}")
+#endif ()
 if (BUILD_SHARED_LIBS)
   set (_PKG_CONFIG_SH_LIBS "${_PKG_CONFIG_SH_LIBS} -l${PKGCONFIG_LIBNAME}")
 endif ()

@@ -42,9 +42,8 @@ jobs:
           sudo apt-get install automake autoconf libtool libtool-bin libcurl4-openssl-dev libyajl-dev
 
       - name: Checkout HDF5
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
         with:
-          repository: HDFGroup/hdf5
           path: hdf5
 
       - name: Configure HDF5 with REST VOL connector
@@ -83,7 +82,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Checkout HSDS
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
         with:
           repository: HDFGroup/hsds
           path: ${{github.workspace}}/hsds

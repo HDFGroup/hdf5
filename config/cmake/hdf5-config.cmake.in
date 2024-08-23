@@ -29,6 +29,8 @@ set (${HDF5_PACKAGE_NAME}_VALID_COMPONENTS
     Tools
 )
 
+set (${HDF5_PACKAGE_NAME}_BUILD_MODE       @HDF_CFG_NAME@)
+
 #-----------------------------------------------------------------------------
 # User Options
 #-----------------------------------------------------------------------------
@@ -44,6 +46,7 @@ set (${HDF5_PACKAGE_NAME}_INSTALL_MOD_FORTRAN "@HDF5_INSTALL_MOD_FORTRAN@")
 set (${HDF5_PACKAGE_NAME}_BUILD_HL_LIB          @HDF5_BUILD_HL_LIB@)
 set (${HDF5_PACKAGE_NAME}_BUILD_SHARED_LIBS     @H5_ENABLE_SHARED_LIB@)
 set (${HDF5_PACKAGE_NAME}_BUILD_STATIC_LIBS     @H5_ENABLE_STATIC_LIB@)
+set (${HDF5_PACKAGE_NAME}_ENABLE_THREADS        @HDF5_ENABLE_THREADS@)
 set (${HDF5_PACKAGE_NAME}_ENABLE_THREADSAFE     @HDF5_ENABLE_THREADSAFE@)
 set (${HDF5_PACKAGE_NAME}_ENABLE_PARALLEL       @HDF5_ENABLE_PARALLEL@)
 set (${HDF5_PACKAGE_NAME}_DEFAULT_API_VERSION  "@DEFAULT_API_VERSION@")

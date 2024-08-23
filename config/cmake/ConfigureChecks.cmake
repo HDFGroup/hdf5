@@ -39,6 +39,7 @@ endif ()
 # does, it appends library to the list.
 #-----------------------------------------------------------------------------
 set (LINK_LIBS "")
+set (LINK_PUB_LIBS "")
 macro (CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
   CHECK_LIBRARY_EXISTS ("${LIBRARY};${LINK_LIBS}" ${SYMBOL} "" ${VARIABLE})
   if (${VARIABLE})
@@ -127,16 +128,20 @@ CHECK_INCLUDE_FILE_CONCAT ("arpa/inet.h"     ${HDF_PREFIX}_HAVE_ARPA_INET_H)
 if (WINDOWS)
   CHECK_INCLUDE_FILE_CONCAT ("shlwapi.h"         ${HDF_PREFIX}_HAVE_SHLWAPI_H)
   # Checking for StrStrIA in the library is not reliable for mingw32 to stdcall
-  set (LINK_LIBS ${LINK_LIBS} "shlwapi")
+  set (LINK_PUB_LIBS ${LINK_PUB_LIBS} "shlwapi")
 endif ()
 
 ## Check for non-standard extension quadmath.h
 
-CHECK_INCLUDE_FILES(quadmath.h C_HAVE_QUADMATH)
-if (C_HAVE_QUADMATH)
-  set(${HDF_PREFIX}_HAVE_QUADMATH_H 1)
+# gcc puts symbols like FLT128_DIG in quadmath.h instead of float.h, so
+# check for that. This is only used by the build system and doesn't need
+# to be exported to H5pubconf.h.
+CHECK_INCLUDE_FILES("quadmath.h" INCLUDE_QUADMATH_H)
+# Convert TRUE/FALSE to 0/1 for preprocessor values in test code, below
+if (${INCLUDE_QUADMATH_H})
+  set(C_INCLUDE_QUADMATH_H 1)
 else ()
-  set(${HDF_PREFIX}_HAVE_QUADMATH_H 0)
+  set(C_INCLUDE_QUADMATH_H 0)
 endif ()
 
 if (CYGWIN)
@@ -435,7 +440,7 @@ if (MINGW OR NOT WINDOWS)
   foreach (other_test
       HAVE_ATTRIBUTE
       HAVE_BUILTIN_EXPECT
-      SYSTEM_SCOPE_THREADS
+      PTHREAD_BARRIER
       HAVE_SOCKLEN_T
   )
     HDF_FUNCTION_TEST (${other_test})
@@ -578,12 +583,6 @@ if (MINGW OR NOT WINDOWS)
   endif ()
 endif ()
 
-# Check for clock_gettime() CLOCK_MONOTONIC_COARSE
-set (CMAKE_EXTRA_INCLUDE_FILES time.h)
-check_type_size(CLOCK_MONOTONIC_COARSE CLOCK_MONOTONIC_COARSE_SIZE)
-if (HAVE_CLOCK_MONOTONIC_COARSE_SIZE)
-  set (${HDF_PREFIX}_HAVE_CLOCK_MONOTONIC_COARSE 1)
-endif ()
 unset (CMAKE_EXTRA_INCLUDE_FILES)
 
 #-----------------------------------------------------------------------------
@@ -646,22 +645,38 @@ endif()
 #-----------------------------------------------------------------------------
 
 if (HDF5_BUILD_FORTRAN)
-  HDF_CHECK_TYPE_SIZE(__float128 _SIZEOF___FLOAT128)
-  if (_SIZEOF___FLOAT128)
-    set (${HDF_PREFIX}_HAVE_FLOAT128 1)
-    set (${HDF_PREFIX}_SIZEOF___FLOAT128 ${_SIZEOF___FLOAT128})
+  # ----------------------------------------------------------------------
+  # __float128 checks
+  #
+  # If __float128 exists and we can determine its precision, we will use
+  # it in the Fortran interface. The checks for this require that the
+  # precision be specified via a symbol named FLT128_DIG, which might be
+  # found in quadmath.h.
+  #
+  # The checks here are based on the GNU __float128 extension type from
+  # libquadmath, which is now part of gcc. Other compilers (clang, Intel)
+  # also expose __float128 and/or __float128 may be an alias for some
+  # other 128-bit floating point type.
+  #
+  # 128-bit floating-point math is usually handled in software and is thus
+  # orders of magnitude slower than hardware-supported floating-point math.
+  #
+
+  #-----------------------------------------------------------------------------
+  # Is the __float128 type available?
+  #-----------------------------------------------------------------------------
+  HDF_FUNCTION_TEST (HAVE___FLOAT128)
+  # Convert TRUE/FALSE to 0/1 for preprocessor values in test code, below
+  if (${HAVE___FLOAT128})
+    set(C_HAVE_FLOAT128 1)
   else ()
-    set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-    set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
+    set(C_HAVE_FLOAT128 0)
   endif ()
 
-  HDF_CHECK_TYPE_SIZE(_Quad _SIZEOF__QUAD)
-  if (NOT _SIZEOF__QUAD)
-    set (${HDF_PREFIX}_SIZEOF__QUAD 0)
-  else ()
-    set (${HDF_PREFIX}_SIZEOF__QUAD ${_SIZEOF__QUAD})
-  endif ()
-
+  #-----------------------------------------------------------------------------
+  # Get the max decimal precision in C, checking both long double and
+  # __float128 (if available)
+  #-----------------------------------------------------------------------------
   if (NOT CMAKE_CROSSCOMPILING)
     #-----------------------------------------------------------------------------
     # The provided CMake C macros don't provide a general compile/run function
@@ -682,7 +697,6 @@ if (HDF5_BUILD_FORTRAN)
         TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
             ${CMAKE_BINARY_DIR}
             ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
-            COMPILE_DEFINITIONS "-D_SIZEOF___FLOAT128=${H5_SIZEOF___FLOAT128};-D_HAVE_QUADMATH_H=${H5_HAVE_QUADMATH_H}"
             COMPILE_OUTPUT_VARIABLE COMPILEOUT
             ${_RUN_OUTPUT_VARIABLE} OUTPUT_VAR
         )
@@ -719,43 +733,42 @@ if (HDF5_BUILD_FORTRAN)
         "
 #include <float.h>\n\
 #include <stdio.h>\n\
-#define CHECK_FLOAT128 _SIZEOF___FLOAT128\n\
-#if CHECK_FLOAT128!=0\n\
-#if _HAVE_QUADMATH_H!=0\n\
-#include <quadmath.h>\n\
-#endif\n\
-#ifdef FLT128_DIG\n\
-#define C_FLT128_DIG FLT128_DIG\n\
+#if ${C_HAVE_FLOAT128}\n\
+#  if ${C_INCLUDE_QUADMATH_H}\n\
+#    include <quadmath.h>\n\
+#  endif\n\
+#  ifdef FLT128_DIG\n\
+#    define C_FLT128_DIG FLT128_DIG\n\
+#  else\n\
+#    define C_FLT128_DIG 0\n\
+#  endif\n\
 #else\n\
-#define C_FLT128_DIG 0\n\
+#  define C_FLT128_DIG 0\n\
 #endif\n\
-#else\n\
-#define C_FLT128_DIG 0\n\
-#endif\n\
-#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L\n\
 #define C_LDBL_DIG DECIMAL_DIG\n\
-#else\n\
-#define C_LDBL_DIG LDBL_DIG\n\
-#endif\n\nint main(void) {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
-         "
+\n\
+int main(void) {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
+        "
     )
 
     C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES PROG_OUTPUT4)
     message (STATUS "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
 
-    # dnl The output from the above program will be:
-    # dnl  -- long double decimal precision  --  __float128 decimal precision
+    # The output from the above program will be:
+    #   -- long double decimal precision  --  __float128 decimal precision
 
-    list (GET PROG_OUTPUT4 0 H5_LDBL_DIG)
-    list (GET PROG_OUTPUT4 1 H5_FLT128_DIG)
+    list (GET PROG_OUTPUT4 0 MY_LDBL_DIG)
+    list (GET PROG_OUTPUT4 1 MY_FLT128_DIG)
 
-    if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL "0" OR FLT128_DIG EQUAL "0")
-      set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-      set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
-      set (_PAC_C_MAX_REAL_PRECISION ${H5_LDBL_DIG})
+    # Set configure output and behavior
+    if (${HAVE___FLOAT128} AND (${MY_FLT128_DIG} GREATER ${MY_LDBL_DIG}))
+      set (${HDF_PREFIX}_HAVE_FLOAT128 1)
+      set (_PAC_C_MAX_REAL_PRECISION ${MY_FLT128_DIG})
     else ()
-      set (_PAC_C_MAX_REAL_PRECISION ${H5_FLT128_DIG})
+      # No __float128 or the precision of __float128 <= that of long double
+      set (_PAC_C_MAX_REAL_PRECISION ${MY_LDBL_DIG})
     endif ()
+
     if (NOT ${_PAC_C_MAX_REAL_PRECISION})
       set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION 0)
     else ()

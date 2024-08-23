@@ -489,7 +489,8 @@ main(void)
 
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
-    h5_clean_files(FILENAME, fapl_id);
+    h5_delete_all_test_files(FILENAME, fapl_id);
+    H5Pclose(fapl_id);
 
     free(ipoints2);
     free(ipoints2_data);

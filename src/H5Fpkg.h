@@ -411,7 +411,7 @@ H5_DLLVAR htri_t ignore_disabled_locks_g;
 H5_DLL herr_t H5F__post_open(H5F_t *f);
 H5_DLL H5F_t *H5F__reopen(H5F_t *f);
 H5_DLL herr_t H5F__flush(H5F_t *f);
-H5_DLL htri_t H5F__is_hdf5(const char *name, hid_t fapl_id);
+H5_DLL herr_t H5F__is_hdf5(const char *name, hid_t fapl_id, bool *is_hdf5);
 H5_DLL herr_t H5F__get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len, size_t *image_len);
 H5_DLL herr_t H5F__get_info(H5F_t *f, H5F_info2_t *finfo);
 H5_DLL herr_t H5F__format_convert(H5F_t *f);
@@ -460,11 +460,12 @@ H5_DLL herr_t H5F__set_mpi_atomicity(H5F_t *file, bool flag);
 
 /* External file cache routines */
 H5_DLL H5F_efc_t *H5F__efc_create(unsigned max_nfiles);
-H5_DLL H5F_t   *H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-H5_DLL unsigned H5F__efc_max_nfiles(H5F_efc_t *efc);
-H5_DLL herr_t   H5F__efc_release(H5F_efc_t *efc);
-H5_DLL herr_t   H5F__efc_destroy(H5F_efc_t *efc);
-H5_DLL herr_t   H5F__efc_try_close(H5F_t *f);
+H5_DLL herr_t     H5F__efc_open(bool try, H5F_efc_t *efc, H5F_t **file, const char *name, unsigned flags,
+                                hid_t fcpl_id, hid_t fapl_id);
+H5_DLL unsigned   H5F__efc_max_nfiles(H5F_efc_t *efc);
+H5_DLL herr_t     H5F__efc_release(H5F_efc_t *efc);
+H5_DLL herr_t     H5F__efc_destroy(H5F_efc_t *efc);
+H5_DLL herr_t     H5F__efc_try_close(H5F_t *f);
 
 /* Space allocation routines */
 H5_DLL haddr_t H5F__alloc(H5F_t *f, H5F_mem_t type, hsize_t size, haddr_t *frag_addr, hsize_t *frag_size);

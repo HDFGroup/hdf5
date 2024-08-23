@@ -34,7 +34,7 @@ jobs:
            echo "FC=gfortran-12" >> $GITHUB_ENV
 
       - name: Get Sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
 
       - name: CMake Configure
         shell: bash
@@ -61,6 +61,8 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
       - name: CMake Run Tests
+        env:
+          HDF5TestExpress: 0
         run: ctest . --parallel 2 -C ${{ matrix.build_mode }} -V -R H5TESTXPR
         working-directory: ${{ runner.workspace }}/build
 

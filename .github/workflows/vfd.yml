@@ -1,6 +1,6 @@
 name: hdf5 VFD CI
 
-# Run VFD CI daily at 07:00 CDT (12:00 UTC)
+# Run VFD CI daily at 07:00 CDT (12:00 UTC) or on demand
 on:
   workflow_dispatch:
   schedule:

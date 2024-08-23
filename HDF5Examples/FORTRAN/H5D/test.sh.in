@@ -151,7 +151,7 @@ else
   fi
 fi
 
-topics="nbit"
+topics18="nbit"
 for topic in $topics18
 do
     fname=h5ex_d_$topic

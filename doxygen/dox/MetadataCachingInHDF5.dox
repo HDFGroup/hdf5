@@ -508,7 +508,7 @@ The \ref H5AC_cache_config_t.min_clean_fraction "min_clean_fraction" sets the
 current minimum clean size as a fraction of the current max cache size. While
 this field was originally used only in the parallel version of the library, it
 now applies to the serial version as well. Its value must lie in the range
-\Code{[0.0, 1.0]}. 0.01 is reasonable in the serial case, and 0.3 in the
+\TText{[0.0, 1.0]}. 0.01 is reasonable in the serial case, and 0.3 in the
 parallel.
 
 A potential interaction, discovered at release 1.8.3, between the enforcement of
@@ -524,15 +524,15 @@ H5AC_cache_config_t.min_size "min_size" fields specify the range of maximum
 sizes that may be set for the cache by the automatic resize code. \ref
 H5AC_cache_config_t.min_size "min_size" must be less than or equal to
 \ref H5AC_cache_config_t.max_size "max_size", and both must lie in the range
-\Code{[H5C__MIN_MAX_CACHE_SIZE, H5C__MAX_MAX_CACHE_SIZE]} -- currently [1 KB,
+\TText{[H5C__MIN_MAX_CACHE_SIZE, H5C__MAX_MAX_CACHE_SIZE]} -- currently [1 KB,
 128 MB]. If you routinely run a cache size in the top half of this range, you
 should increase the hash table size. To do this, modify the \c
-H5C__HASH_TABLE_LEN \Code{\#define} in \c H5Cpkg.h and re-compile. At present,
+H5C__HASH_TABLE_LEN \TText{\#define} in \c H5Cpkg.h and re-compile. At present,
 \c H5C__HASH_TABLE_LEN must be a power of two.
 
 The \c epoch_length is the number of cache accesses between runs of the adaptive
 cache size control algorithms. It is ignored if these algorithms are turned
-off. It must lie in the range \Code{[H5C__MIN_AR_EPOCH_LENGTH,
+off. It must lie in the range \TText{[H5C__MIN_AR_EPOCH_LENGTH,
 H5C__MAX_AR_EPOCH_LENGTH]} -- currently [100, 1000000]. The above constants are
 defined in \c H5Cprivate.h. 50000 is a reasonable value.
 
@@ -570,7 +570,7 @@ fields in the section are then used as follows:
 
 \ref H5AC_cache_config_t.lower_hr_threshold "lower_hr_threshold" is the
 threshold below which the hit rate must fall to trigger an increase. The value
-must lie in the range \Code{[0.0 - 1.0]}. In my tests, a relatively high value
+must lie in the range \TText{[0.0 - 1.0]}. In my tests, a relatively high value
 seems to work best -- 0.9 for example.
 
 \ref H5AC_cache_config_t.increment "increment" is the factor by which the old
@@ -601,7 +601,7 @@ Let \c x be either the size of the newly inserted entry, the size of the newly
 loaded entry, or the number of bytes added to the size of the entry under
 consideration for triggering a flash cache size increase.
 
-If \Code{t < x}, the basic condition for a flash cache size increase is met, and
+If \TText{t < x}, the basic condition for a flash cache size increase is met, and
 we proceed as follows:
 
 Let \c space_needed equal \c x less the amount of free space in the cache.
@@ -622,11 +622,11 @@ use.
 
 The use of the \ref H5AC_cache_config_t.flash_threshold "flash_threshold" field
 is discussed above. It must be a floating-point value in the range of
-\Code{[0.1, 1.0]}. 0.25 is a reasonable value.
+\TText{[0.1, 1.0]}. 0.25 is a reasonable value.
 
 The use of the \ref H5AC_cache_config_t.flash_multiple "flash_multiple" field is
 also discussed above. It must be a floating-point value in the range of
-\Code{[0.1, 10.0]}. 1.4 is a reasonable value.
+\TText{[0.1, 10.0]}. 1.4 is a reasonable value.
 
 \subsection decrement Decrement Configuration
 
@@ -649,12 +649,12 @@ the decrement section are used as follows:
 
 \ref H5AC_cache_config_t.upper_hr_threshold "upper_hr_threshold" is the
 threshold above which the hit rate must rise to trigger cache size reduction. It
-must be in the range \Code{[0.0, 1.0]}. In my synthetic tests, very high values
+must be in the range \TText{[0.0, 1.0]}. In my synthetic tests, very high values
 like .9995 or .99995 seemed to work best.
 
 \ref H5AC_cache_config_t.decrement "decrement" is the factor by which the
 current maximum cache size is multiplied to obtain a tentative new maximum cache
-size. It must lie in the range \Code{[0.0, 1.0]}. Relatively large values like
+size. It must lie in the range \TText{[0.0, 1.0]}. Relatively large values like
 .9 seem to work best in my synthetic tests. Note that the actual size reduction
 may be smaller as required by \ref H5AC_cache_config_t.min_size "min_size" and
 \ref H5AC_cache_config_t.max_decrement "max_decrement" (discussed below).  \ref
@@ -676,7 +676,7 @@ decrement section are used as follows:
 
 \ref H5AC_cache_config_t.epochs_before_eviction "epochs_before_eviction" is the
 number of epochs an entry must reside unaccessed in the cache before it is
-evicted. This value must lie in the range \Code{[1, H5C__MAX_EPOCH_MARKERS]}. \c
+evicted. This value must lie in the range \TText{[1, H5C__MAX_EPOCH_MARKERS]}. \c
 H5C__MAX_EPOCH_MARKERS is defined in H5Cprivate.h, and is currently set to 10.
 
 \ref H5AC_cache_config_t.apply_max_decrement "apply_max_decrement" and \ref
@@ -702,7 +702,7 @@ H5AC_cache_config_t.upper_hr_threshold "upper_hr_threshold".
 
 Here, \ref H5AC_cache_config_t.upper_hr_threshold "upper_hr_threshold" is the
 threshold above which the hit rate must rise to trigger cache size reduction. It
-must be in the range \Code{[0.0, 1.0]}. In my synthetic tests, high values like
+must be in the range \TText{[0.0, 1.0]}. In my synthetic tests, high values like
 .999 seemed to work well.
 
 \subsection parallel Parallel Configuration

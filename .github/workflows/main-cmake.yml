@@ -1,6 +1,6 @@
 name: hdf5 dev CMake CI
 
-# Controls when the action will run. Triggers the workflow on a call
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
@@ -17,9 +17,6 @@ on:
 permissions:
   contents: read
 
-# A workflow run is made up of one or more jobs that can run sequentially or
-# in parallel. We just have one job, but the matrix items defined below will
-# run in parallel.
 jobs:
 
   # A workflow that builds the library and runs all the tests
@@ -85,15 +82,14 @@ jobs:
             generator: "-G Ninja"
             run_tests: true
 
-
           # MacOS w/ Clang + CMake
           #
           # We could also build with the Autotools via brew installing them,
           # but that seems unnecessary
           - name: "MacOS Clang"
-            os: macos-13
+            os: macos-latest
             cpp: ON
-            fortran: OFF
+            fortran: ON
             java: ON
             docs: ON
             libaecfc: ON
@@ -137,7 +133,16 @@ jobs:
 
       - name: Install Dependencies (macOS)
         run: brew install ninja
-        if: matrix.os == 'macos-13'
+        if: ${{ matrix.os == 'macos-latest' }}
+
+        # symlinks the compiler executables to a common location 
+      - name: Install GNU Fortran (macOS)
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+            compiler: gcc
+            version: 14
+        if: ${{ matrix.os == 'macos-latest' }}
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
@@ -153,7 +158,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
 
       #
       # CMAKE CONFIGURE
@@ -258,10 +263,18 @@ jobs:
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  ${{ (matrix.os == 'ubuntu-latest') && (inputs.thread_safety != 'TS') }}
 
-      - name: Save published binary (Mac)
+      - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@v4
         with:
-              name: tgz-osx-${{ inputs.build_mode }}-binary
+              name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if: ${{ (matrix.os == 'macos-13') && (inputs.thread_safety != 'TS') }}
+        if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}
+
+      - name: Save published dmg binary (Mac_latest)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-macos14_clang-${{ inputs.build_mode }}-dmg-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Darwin.dmg
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}

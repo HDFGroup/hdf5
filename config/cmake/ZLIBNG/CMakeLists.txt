@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.18)
+project(ZLIB VERSION ${ZLIB_HEADER_VERSION} LANGUAGES C)
+
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
 # If not specified on the command line, enable C11 as the default
@@ -26,8 +28,6 @@ string(REGEX REPLACE ".*#define[ \t]+ZLIBNG_VERSION[ \t]+\"([-0-9A-Za-z.]+)\".*"
         "\\1" ZLIBNG_HEADER_VERSION ${_zlib_h_contents})
 message(STATUS "ZLIB_HEADER_VERSION: ${ZLIB_HEADER_VERSION}")
 message(STATUS "ZLIBNG_HEADER_VERSION: ${ZLIBNG_HEADER_VERSION}")
-
-project(ZLIB VERSION ${ZLIB_HEADER_VERSION} LANGUAGES C)
 
 #-----------------------------------------------------------------------------
 # Basic ZLIB stuff here
@@ -983,9 +983,9 @@ if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
 endif()
 
 
-#============================================================================
-# zlib
-#============================================================================
+#-----------------------------------------------------------------------------
+# Define ZLIB Library
+#-----------------------------------------------------------------------------
 
 set(ZLIB_PUBLIC_HDRS
     ${CMAKE_CURRENT_BINARY_DIR}/zconf${SUFFIX}.h
@@ -1075,7 +1075,7 @@ set_global_variable (ZLIB_LIBRARIES_TO_EXPORT "zlib-static")
 set (install_targets zlib-static)
 
 #-----------------------------------------------------------------------------
-# Compiler specific flags : Shouldn't there be compiler tests for these
+# Compiler specific flags
 #-----------------------------------------------------------------------------
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   target_compile_options(zlib-static PRIVATE -Wno-strict-prototypes -Wno-implicit-function-declaration)
@@ -1167,7 +1167,7 @@ configure_package_config_file (
 #-----------------------------------------------------------------------------
 set (INCLUDE_INSTALL_DIR ${ZLIB_INSTALL_INCLUDE_DIR})
 set (SHARE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${ZLIB_INSTALL_CMAKE_DIR}" )
-set (CURRENT_BUILD_DIR "${CMAKE_INSTALL_PREFIX}" )
+set (CURRENT_BUILD_DIR "${CMAKE_INSTALL_PREFIX}")
 configure_package_config_file (
     ${ZLIB_RESOURCES_DIR}/zlib-config.cmake.in
     "${ZLIB_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/zlib-config.cmake"

@@ -255,7 +255,7 @@ main(void)
     char                 filename[1024];
     int                  i, j;
 
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     /* Initialize buffer and space */

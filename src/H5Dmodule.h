@@ -67,16 +67,20 @@
  * The dataset does not have to open to be linked or unlinked.
  *
  * \subsubsection subsubsec_dataset_intro_obj Object Reference
- * A dataset may be the target of an object reference. The object reference is created by
- * #H5Rcreate with the name of an object which may be a dataset and the reference type
+ * A file, group, dataset, named datatype, or attribute may be the target of an object reference.
+ * The object reference is created by
+ * #H5Rcreate_object with the name of an object which may be a dataset and the reference type
  * #H5R_OBJECT. The dataset does not have to be open to create a reference to it.
  *
  * An object reference may also refer to a region (selection) of a dataset. The reference is created
- * with #H5Rcreate and a reference type of #H5R_DATASET_REGION.
+ * with #H5Rcreate_region.
  *
- * An object reference can be accessed by a call to #H5Rdereference. When the reference is to a
- * dataset or dataset region, the #H5Rdereference call returns an identifier to the dataset just as if
+ * An object reference can be accessed by a call to #H5Ropen_object. When the reference is to a
+ * dataset or dataset region, the #H5Ropen_object call returns an identifier to the dataset just as if
  * #H5Dopen has been called.
+ *
+ * The reference buffer from the #H5Rcreate_object call must be released by
+ * using #H5Rdestroy to avoid resource leaks and possible HDF5 library shutdown issues.
  *
  * \subsubsection subsubsec_dataset_intro_attr Adding Attributes
  * A dataset may have user-defined attributes which are created with #H5Acreate and accessed

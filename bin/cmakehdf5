@@ -150,7 +150,7 @@ INSTALL_HDF5()
 	    install_file=./HDF5-${version}-Linux.sh
 	    $install_file  --skip-license $*
 	    ;;
-	Darwin)		# Mac OSX DMG file
+	Darwin)		# MacOS DMG file
 	    # These steps were a kludge. Need proper support from Cmake engineering.
 	    echo Darwin install step needs proper implementation. Quit.
 	    return 1

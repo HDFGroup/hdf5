@@ -3920,6 +3920,12 @@ test_delete_link(void)
         {
             TESTING_2("H5Ldelete_by_idx on hard link by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_BY_IDX)) {
+                SKIPPED();
+                printf("    by index isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_hard_crt_order_increasing);
+            }
+
             if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
                 SKIPPED();
                 printf("    creation order tracking isn't supported with this VOL connector\n");
@@ -4152,6 +4158,12 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_hard_crt_order_decreasing)
         {
             TESTING_2("H5Ldelete_by_idx on hard link by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_BY_IDX)) {
+                SKIPPED();
+                printf("    by index isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_hard_crt_order_decreasing);
+            }
 
             if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
                 SKIPPED();
@@ -4386,6 +4398,12 @@ test_delete_link(void)
         {
             TESTING_2("H5Ldelete_by_idx on hard link by alphabetical order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_BY_IDX)) {
+                SKIPPED();
+                printf("    by index isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_hard_name_order_increasing);
+            }
+
             if ((subgroup_id = H5Gcreate2(group_id, LINK_DELETE_TEST_SUBGROUP7_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -4613,6 +4631,12 @@ test_delete_link(void)
         {
             TESTING_2("H5Ldelete_by_idx on hard link by alphabetical order in decreasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_BY_IDX)) {
+                SKIPPED();
+                printf("    by index isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_hard_name_order_decreasing);
+            }
+
             if ((subgroup_id = H5Gcreate2(group_id, LINK_DELETE_TEST_SUBGROUP8_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -4839,6 +4863,12 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_soft_crt_order_increasing)
         {
             TESTING_2("H5Ldelete_by_idx on soft link by creation order in increasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_BY_IDX)) {
+                SKIPPED();
+                printf("    by index isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_soft_crt_order_increasing);
+            }
 
             if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
                 SKIPPED();
@@ -5076,6 +5106,12 @@ test_delete_link(void)
         {
             TESTING_2("H5Ldelete_by_idx on soft link by creation order in decreasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_BY_IDX)) {
+                SKIPPED();
+                printf("    by index isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_soft_crt_order_decreasing);
+            }
+
             if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
                 SKIPPED();
                 printf("    creation order tracking isn't supported with this VOL connector\n");
@@ -5312,6 +5348,12 @@ test_delete_link(void)
         {
             TESTING_2("H5Ldelete_by_idx on soft link by alphabetical order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_BY_IDX)) {
+                SKIPPED();
+                printf("    by index isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_soft_name_order_increasing);
+            }
+
             if ((subgroup_id = H5Gcreate2(group_id, LINK_DELETE_TEST_SUBGROUP11_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -5542,6 +5584,12 @@ test_delete_link(void)
         {
             TESTING_2("H5Ldelete_by_idx on soft link by alphabetical order in decreasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_BY_IDX)) {
+                SKIPPED();
+                printf("    by index isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_soft_name_order_decreasing);
+            }
+
             if ((subgroup_id = H5Gcreate2(group_id, LINK_DELETE_TEST_SUBGROUP12_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -5771,6 +5819,12 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_external_crt_order_increasing)
         {
             TESTING_2("H5Ldelete_by_idx on external link by creation order in increasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_BY_IDX)) {
+                SKIPPED();
+                printf("    by index isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_external_crt_order_increasing);
+            }
 
             if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
                 SKIPPED();
@@ -6054,6 +6108,12 @@ test_delete_link(void)
         {
             TESTING_2("H5Ldelete_by_idx on external link by creation order in decreasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_BY_IDX)) {
+                SKIPPED();
+                printf("    by index isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_external_crt_order_decreasing);
+            }
+
             if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
                 SKIPPED();
                 printf("    creation order tracking isn't supported with this VOL connector\n");
@@ -6336,6 +6396,12 @@ test_delete_link(void)
         {
             TESTING_2("H5Ldelete_by_idx on external link by alphabetical order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_BY_IDX)) {
+                SKIPPED();
+                printf("    by index isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_external_name_order_increasing);
+            }
+
             /* Create file for external link to reference */
             snprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
                      EXTERNAL_LINK_TEST_FILE_NAME);
@@ -6611,6 +6677,12 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_external_name_order_decreasing)
         {
             TESTING_2("H5Ldelete_by_idx on external link by alphabetical order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_BY_IDX)) {
+                SKIPPED();
+                printf("    by index isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_external_name_order_decreasing);
+            }
 
             /* Create file for external link to reference */
             snprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
@@ -27198,8 +27270,8 @@ link_visit_0_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
 static void
 cleanup_files(void)
 {
-    H5Fdelete(EXTERNAL_LINK_TEST_FILE_NAME, H5P_DEFAULT);
-    H5Fdelete(EXTERNAL_LINK_INVALID_PARAMS_TEST_FILE_NAME, H5P_DEFAULT);
+    remove_test_file(test_path_prefix, EXTERNAL_LINK_TEST_FILE_NAME);
+    remove_test_file(test_path_prefix, EXTERNAL_LINK_INVALID_PARAMS_TEST_FILE_NAME);
 }
 
 int

@@ -1,6 +1,6 @@
 name: hdf5 dev cmake CI
 
-# Controls when the action will run. Triggers the workflow on push or pull request
+# Triggers the workflow on push or pull request or on demand
 on:
   workflow_dispatch:
   push:
@@ -23,9 +23,6 @@ concurrency:
 permissions:
   contents: read
 
-# A workflow run is made up of one or more jobs that can run sequentially or
-# in parallel. We just have one job, but the matrix items defined below will
-# run in parallel.
 jobs:
     call-workflow-special-cmake:
       name: "CMake Special Workflows"

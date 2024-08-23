@@ -1,0 +1,60 @@
+name: hdf5 publishrelease
+
+# Triggers the workflow on demand
+on:
+  workflow_dispatch:
+    inputs:
+      use_tag:
+        description: 'HDF5 Release version tag'
+        type: string
+        required: true
+      file_name:
+        description: 'HDF5 Release file name base'
+        type: string
+        required: true
+      target_dir:
+        description: 'HDF5 target bucket directory'
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish-tag:
+    runs-on: ubuntu-latest
+    steps:
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+        - name: Get Sources
+          uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+          with:
+            fetch-depth: 0
+            ref: '${{ github.head_ref || github.ref_name }}'
+
+        - name: Get hdf5 release
+          uses: dsaltares/fetch-gh-release-asset@master
+          with:
+            repo: 'HDFGroup/hdf5'
+            version: 'tags/${{ inputs.use_tag }}'
+            regex: true
+            target: 'HDF5/'
+            file: '${{ inputs.use_hdf }}-*.*'
+
+        - name: Setup AWS CLI
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+                 aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                 aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                 aws-region: ${{ secrets.AWS_REGION }}
+
+        - name: Sync release to S3 bucket
+          run: |
+                aws s3 sync ./HDF5 s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/downloads --delete
+
+        - name: Uncompress source (Linux)
+          run: unzip ${{ github.workspace }}/HDF5/${{ inputs.file_name }}.doxygen.zip
+
+        - name: Sync userguide to S3 bucket
+          run: |
+                aws s3 sync ./${{ inputs.file_name }}.doxygen s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/documentation/doxygen --delete
+

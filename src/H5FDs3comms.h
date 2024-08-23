@@ -207,12 +207,6 @@
  * All data (`name`, `value`, `lowername`, and `cat`) are null-terminated
  * strings allocated specifically for their node.
  *
- *
- *
- * `magic` (unsigned long)
- *
- *     "unique" identifier number for the structure type
- *
  * `name` (char *)
  *
  *     Case-meaningful name of the HTTP field.
@@ -243,14 +237,12 @@
  *----------------------------------------------------------------------------
  */
 typedef struct hrb_node_t {
-    unsigned long      magic;
     char              *name;
     char              *value;
     char              *cat;
     char              *lowername;
     struct hrb_node_t *next;
 } hrb_node_t;
-#define S3COMMS_HRB_NODE_MAGIC 0x7F5757UL
 
 /*----------------------------------------------------------------------------
  *
@@ -279,14 +271,6 @@ typedef struct hrb_node_t {
  * "Host" and "Date" above, are created with a linked list of `hrb_node_t` and
  * included in the request by a pointer to the head of the list.
  *
- *
- *
- * `magic` (unsigned long)
- *
- *     "Magic" number confirming that this is an hrb_t structure and
- *     what operations are valid for it.
- *
- *     Must be S3COMMS_HRB_MAGIC to be valid.
  *
  * `body` (char *) :
  *
@@ -319,15 +303,13 @@ typedef struct hrb_node_t {
  *----------------------------------------------------------------------------
  */
 typedef struct {
-    unsigned long magic;
-    char         *body;
-    size_t        body_len;
-    hrb_node_t   *first_header;
-    char         *resource;
-    char         *verb;
-    char         *version;
+    char       *body;
+    size_t      body_len;
+    hrb_node_t *first_header;
+    char       *resource;
+    char       *verb;
+    char       *version;
 } hrb_t;
-#define S3COMMS_HRB_MAGIC 0x6DCC84UL
 
 /*----------------------------------------------------------------------------
  *
@@ -344,12 +326,6 @@ typedef struct {
  *  ^--^   ^-----------------------^ ^--^ ^---------^ ^-------------------^
  * Scheme             Host           Port  Resource        Query/-ies
  *
- *
- *
- * `magic` (unsigned long)
- *
- *     Structure identification and validation identifier.
- *     Identifies as `parsed_url_t` type.
  *
  * `scheme` (char *)
  *
@@ -382,14 +358,12 @@ typedef struct {
  *----------------------------------------------------------------------------
  */
 typedef struct {
-    unsigned long magic;
-    char         *scheme; /* required */
-    char         *host;   /* required */
-    char         *port;
-    char         *path;
-    char         *query;
+    char *scheme; /* required */
+    char *host;   /* required */
+    char *port;
+    char *path;
+    char *query;
 } parsed_url_t;
-#define S3COMMS_PARSED_URL_MAGIC 0x21D0DFUL
 
 /*----------------------------------------------------------------------------
  *
@@ -410,12 +384,6 @@ typedef struct {
  * _DO NOT_ share handle between threads: curl easy handle `curlhandle` has
  * undefined behavior if called to perform in multiple threads.
  *
- *
- *
- * `magic` (unsigned long)
- *
- *     "magic" number identifying this structure as unique type.
- *     MUST equal `S3R_MAGIC` to be valid.
  *
  * `curlhandle` (CURL)
  *
@@ -470,7 +438,6 @@ typedef struct {
  *----------------------------------------------------------------------------
  */
 typedef struct {
-    unsigned long  magic;
     CURL          *curlhandle;
     size_t         filesize;
     char          *httpverb;
@@ -480,8 +447,6 @@ typedef struct {
     unsigned char *signing_key;
     char          *token;
 } s3r_t;
-
-#define S3COMMS_S3R_MAGIC 0x44d8d79
 
 #ifdef __cplusplus
 extern "C" {
@@ -533,23 +498,13 @@ H5_DLL herr_t H5FD_s3comms_HMAC_SHA256(const unsigned char *key, size_t key_len,
 H5_DLL herr_t H5FD_s3comms_load_aws_profile(const char *name, char *key_id_out, char *secret_access_key_out,
                                             char *aws_region_out);
 
-H5_DLL herr_t H5FD_s3comms_nlowercase(char *dest, const char *s, size_t len);
-
 H5_DLL herr_t H5FD_s3comms_parse_url(const char *str, parsed_url_t **purl);
-
-H5_DLL herr_t H5FD_s3comms_percent_encode_char(char *repr, const unsigned char c, size_t *repr_len);
 
 H5_DLL herr_t H5FD_s3comms_signing_key(unsigned char *md, const char *secret, const char *region,
                                        const char *iso8601now);
 
 H5_DLL herr_t H5FD_s3comms_tostringtosign(char *dest, const char *req_str, const char *now,
                                           const char *region);
-
-H5_DLL herr_t H5FD_s3comms_trim(char *dest, char *s, size_t s_len, size_t *n_written);
-
-H5_DLL herr_t H5FD_s3comms_uriencode(char *dest, const char *s, size_t s_len, bool encode_slash,
-                                     size_t *n_written);
-
 #ifdef __cplusplus
 }
 #endif

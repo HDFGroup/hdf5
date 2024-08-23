@@ -439,11 +439,8 @@ H5I__destroy_type(H5I_type_t type)
         HGOTO_ERROR(H5E_ID, H5E_BADGROUP, FAIL, "invalid type");
 
     /* Close/clear/destroy all IDs for this type */
-    H5E_BEGIN_TRY
-    {
-        H5I_clear_type(type, true, false);
-    }
-    H5E_END_TRY /* don't care about errors */
+    if (H5I_clear_type(type, true, false) < 0)
+        HGOTO_ERROR(H5E_ID, H5E_CANTRELEASE, FAIL, "unable to release IDs for type");
 
     /* Check if we should release the ID class */
     if (type_info->cls->flags & H5I_CLASS_IS_APPLICATION)

@@ -26,6 +26,7 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
           3 : All level 2 information plus file names.
    -q, --quiet
          Quiet mode. Do not produce output.
+   --page-buffer-size=N    Set the page buffer cache size, N=non-negative integers
    --vol-value-1           Value (ID) of the VOL connector to use for opening the
                            first HDF5 file specified
    --vol-name-1            Name of the VOL connector to use for opening the first

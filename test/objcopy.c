@@ -17123,23 +17123,21 @@ main(void)
     hid_t       fcpl_shared, ocpl;
     unsigned    max_compact, min_dense;
     int         configuration; /* Configuration of tests. */
-    int         ExpressMode;
-    const char *driver_name; /* File Driver value from environment */
-    bool        same_file;   /* Whether to run tests that only use one file */
+    const char *driver_name;   /* File Driver value from environment */
+    bool        same_file;     /* Whether to run tests that only use one file */
     bool        driver_is_default_compatible;
 
     driver_name = h5_get_test_driver_name();
 
     /* Setup */
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)
         TEST_ERROR;
 
-    ExpressMode = GetTestExpress();
-    if (ExpressMode > 1)
-        printf("***Express test mode on.  Some tests may be skipped\n");
+    if (TestExpress > 0)
+        printf("***Express test mode %d.  Some tests may be skipped\n", TestExpress);
 
     /* Copy the file access property list */
     if ((fapl2 = H5Pcopy(fapl)) < 0)

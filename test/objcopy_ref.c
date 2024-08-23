@@ -1818,15 +1818,13 @@ main(void)
     hid_t    fcpl_shared, ocpl;
     unsigned max_compact, min_dense;
     int      configuration; /* Configuration of tests. */
-    int      ExpressMode;
 
     /* Setup */
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
-    ExpressMode = GetTestExpress();
-    if (ExpressMode > 1)
-        printf("***Express test mode on.  Some tests may be skipped\n");
+    if (TestExpress > 0)
+        printf("***Express test mode %d.  Some tests may be skipped\n", TestExpress);
 
     /* Copy the file access property list */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
