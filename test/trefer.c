@@ -2417,6 +2417,7 @@ test_reference_group(void)
                               H5P_DEFAULT);
     CHECK(size, (-1), "H5Lget_name_by_idx");
     VERIFY_STR(objname, DSETNAME2, "H5Lget_name_by_idx");
+    VERIFY(size, strlen(DSETNAME2), "H5Lget_name_by_idx");
 
     ret = H5Oget_info_by_idx3(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &oinfo, H5O_INFO_BASIC,
                               H5P_DEFAULT);

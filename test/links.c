@@ -1949,6 +1949,7 @@ test_deprec(hid_t fapl, bool new_format)
     hsize_t    num_objs; /* Number of objects in a group */
     char       filename[1024];
     char       tmpstr[1024];
+    int        len = 0; /* Length of comment */
 
     if (new_format)
         TESTING("backwards compatibility (w/new group format)");
@@ -1968,12 +1969,21 @@ test_deprec(hid_t fapl, bool new_format)
         FAIL_STACK_ERROR;
 
     /* Test H5Gset and get comment */
+
     if (H5Gset_comment(file_id, "group1", "comment") < 0)
         FAIL_STACK_ERROR;
-    if (H5Gget_comment(file_id, "group1", sizeof(tmpstr), tmpstr) < 0)
+    if ((len = H5Gget_comment(file_id, "group1", 0, NULL)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Returned length should be the same as strlen of the comment */
+    if ((size_t)len != strlen("comment"))
+        FAIL_STACK_ERROR;
+
+    /* Get and verify the comment */
+    if (H5Gget_comment(file_id, "group1", (size_t)len + 1, tmpstr) < 0)
         FAIL_STACK_ERROR;
     if (strcmp(tmpstr, "comment") != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create links using H5Glink and H5Glink2 */
     if (H5Glink(file_id, H5G_LINK_HARD, "group2", "group1/link_to_group2") < 0)

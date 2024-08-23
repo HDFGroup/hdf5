@@ -4296,6 +4296,7 @@ test_misc23(void)
     namelen = H5Iget_name(tmp_id, objname, (size_t)MISC23_NAME_BUF_SIZE);
     CHECK(namelen, FAIL, "H5Iget_name");
     VERIFY_STR(objname, "/A/B01/grp", "H5Iget_name");
+    VERIFY(namelen, strlen("/A/B01/grp"), "H5Iget_name");
 
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
