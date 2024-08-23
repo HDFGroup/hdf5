@@ -79,8 +79,6 @@ jobs:
 
       - name: Autotools Build
         shell: bash
-        env:
-          NPROCS: 2
         run: |
           export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/bin:/usr/local/bin:$PATH
           make -j3
@@ -89,8 +87,6 @@ jobs:
       # ph5diff tests are in the tools/tests directory so they will get run
       # here
       - name: Autotools Run Tests
-        env:
-          NPROCS: 2
         run: |
           export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/bin:/usr/local/bin:$PATH
           cd test && make check -j2 && cd ..
@@ -107,8 +103,6 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
       - name: Autotools Install
-        env:
-          NPROCS: 2
         run: |
           export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/bin:/usr/local/bin:$PATH
           make install
