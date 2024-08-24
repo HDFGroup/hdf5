@@ -45,9 +45,11 @@
 /********************/
 /* Local Prototypes */
 /********************/
+#ifdef H5_HAVE_THREADSAFE
 #if defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_HAVE_WIN32_API)
 static herr_t H5TS__win32_thread_enter(void);
 static herr_t H5TS__win32_thread_exit(void);
+#endif
 #endif
 
 /*********************/
