@@ -111,7 +111,7 @@ tts_semaphore_pingpong(void)
     result = H5TS_thread_join(pong_thread, NULL);
     CHECK_I(result, "H5TS_thread_join");
 
-    VERIFY(test_info.counter, (NUM_PINGPONG + 1), "ping pong");
+    VERIFY(H5TS_atomic_load_uint(&test_info.counter), (NUM_PINGPONG + 1), "ping pong");
 
     /* Destroy semaphores, etc. */
     result = H5TS_semaphore_destroy(&test_info.ping_sem);
