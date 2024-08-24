@@ -47,7 +47,7 @@ ping(void *_test_info)
         result = H5TS_semaphore_wait(&test_info->ping_sem);
         CHECK_I(result, "H5TS_semaphore_wait");
 
-        H5TS_atomic_fetch_add_uint(&test_info->counter, 1);
+        H5TS_atomic_fetch_add_uint(&test_info->counter, (unsigned)1);
 
         result = H5TS_semaphore_signal(&test_info->pong_sem);
         CHECK_I(result, "H5TS_semaphore_signal");
@@ -67,7 +67,7 @@ pong(void *_test_info)
         result = H5TS_semaphore_wait(&test_info->pong_sem);
         CHECK_I(result, "H5TS_semaphore_wait");
 
-        H5TS_atomic_fetch_add_uint(&test_info->counter, 1);
+        H5TS_atomic_fetch_add_uint(&test_info->counter, (unsigned)1);
 
         result = H5TS_semaphore_signal(&test_info->ping_sem);
         CHECK_I(result, "H5TS_semaphore_signal");
@@ -93,7 +93,7 @@ tts_semaphore_pingpong(void)
     CHECK_I(result, "H5TS_semaphore_init");
     result = H5TS_semaphore_init(&test_info.pong_sem, 0);
     CHECK_I(result, "H5TS_semaphore_init");
-    H5TS_atomic_init_uint(&test_info.counter, 0);
+    H5TS_atomic_init_uint(&test_info.counter, (unsigned)0);
 
     /* Start ping & pong threads */
     result = H5TS_thread_create(&ping_thread, ping, &test_info);
