@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.a03203a</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.5c5b727</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -502,7 +502,7 @@ Functions</h2></td></tr>
 <div class="line">            <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> group, child;</div>
 <div class="line">            <span class="keywordflow">if</span> ((group = <a class="code hl_function" href="group___h5_g.html#ga7397440085510728a2e2d22199e81980">H5Gcreate1</a>(file, <span class="stringliteral">&quot;mount_point&quot;</span>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)) != <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
 <div class="line">                <span class="keywordflow">if</span> ((child = <a class="code hl_function" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a>(<span class="stringliteral">&quot;f1.h5&quot;</span>, <a class="code hl_define" href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)) != <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
-<div class="line">                    <span class="keywordflow">if</span> (<a class="code hl_function" href="group___h5_f.html#ga7c4865fd36ee25d839725252150bb53b">H5Fmount</a>(group, <span class="stringliteral">&quot;.&quot;</span>, child, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &gt;= 0) {</div>
+<div class="line">                    <span class="keywordflow">if</span> (<a class="code hl_function" href="group___h5_f.html#ga9f5ca4c8695597e83568f9f4717fc083">H5Fmount</a>(group, <span class="stringliteral">&quot;.&quot;</span>, child, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &gt;= 0) {</div>
 <div class="line"> </div>
 <div class="line">                        <span class="comment">// do something useful w/ the mounted file</span></div>
 <div class="line">                    }</div>
@@ -519,7 +519,7 @@ Functions</h2></td></tr>
 <div class="line">        <span class="keywordflow">else</span></div>
 <div class="line">            ret_val = EXIT_FAILURE;</div>
 <div class="line">    }</div>
-<div class="ttc" id="agroup___h5_f_html_ga7c4865fd36ee25d839725252150bb53b"><div class="ttname"><a href="group___h5_f.html#ga7c4865fd36ee25d839725252150bb53b">H5Fmount</a></div><div class="ttdeci">herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist)</div><div class="ttdoc">Mounts an HDF5 file.</div></div>
+<div class="ttc" id="agroup___h5_f_html_ga9f5ca4c8695597e83568f9f4717fc083"><div class="ttname"><a href="group___h5_f.html#ga9f5ca4c8695597e83568f9f4717fc083">H5Fmount</a></div><div class="ttdeci">herr_t H5Fmount(hid_t loc_id, const char *name, hid_t child, hid_t plist)</div><div class="ttdoc">Mounts an HDF5 file.</div></div>
 <div class="ttc" id="agroup___h5_g_html_ga7397440085510728a2e2d22199e81980"><div class="ttname"><a href="group___h5_g.html#ga7397440085510728a2e2d22199e81980">H5Gcreate1</a></div><div class="ttdeci">hid_t H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)</div><div class="ttdoc">Creates a new group and links it into the file.</div></div>
 </div><!-- fragment --></dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
@@ -582,7 +582,7 @@ Functions</h2></td></tr>
 <div class="line">            <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> group, child;</div>
 <div class="line">            <span class="keywordflow">if</span> ((group = <a class="code hl_function" href="group___h5_g.html#ga7397440085510728a2e2d22199e81980">H5Gcreate1</a>(file, <span class="stringliteral">&quot;mount_point&quot;</span>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)) != <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
 <div class="line">                <span class="keywordflow">if</span> ((child = <a class="code hl_function" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a>(<span class="stringliteral">&quot;f1.h5&quot;</span>, <a class="code hl_define" href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)) != <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
-<div class="line">                    <span class="keywordflow">if</span> (<a class="code hl_function" href="group___h5_f.html#ga7c4865fd36ee25d839725252150bb53b">H5Fmount</a>(group, <span class="stringliteral">&quot;.&quot;</span>, child, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &gt;= 0) {</div>
+<div class="line">                    <span class="keywordflow">if</span> (<a class="code hl_function" href="group___h5_f.html#ga9f5ca4c8695597e83568f9f4717fc083">H5Fmount</a>(group, <span class="stringliteral">&quot;.&quot;</span>, child, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &gt;= 0) {</div>
 <div class="line"> </div>
 <div class="line">                        <span class="comment">// do something useful w/ the mounted file</span></div>
 <div class="line">                    }</div>
@@ -817,7 +817,9 @@ Functions</h2></td></tr>
 <li>An absolute name of the object, starting from <code>/</code>, the file's root group </li>
 <li>A dot (<code></code>.), if <code>loc_id</code> fully specifies the object</li>
 </ul>
-<p>At most bufsize characters, including a null-terminator, are returned in <code>buf</code>. The returned value is not null-terminated if the comment is longer than the supplied buffer. If the size of the comment is unknown, a preliminary <code><a class="el" href="group___h5_g.html#gac5a1c3e1ed4264d92cc02ca20afc57f4" title="Retrieves comment for specified object.">H5Gget_comment()</a></code> call will return the size of the comment, including space for the null-terminator.</p>
+<p>Up to <code>size</code> characters of the comment name are returned in <code>name</code>; additional characters, if any, are not returned to the user application.<br  />
+<br  />
+ If the length of the comment name, which determines the required value of <code>size</code>, is unknown, a preliminary call to <a class="el" href="group___h5_g.html#gac5a1c3e1ed4264d92cc02ca20afc57f4" title="Retrieves comment for specified object.">H5Gget_comment()</a> with the last two parameters set to NULL and zero respectively can be made. The return value of this call will be the size in bytes of the comment name. That value, plus 1 for a NULL terminator, must then be assigned to <code>size</code> for a second <a class="el" href="group___h5_g.html#gac5a1c3e1ed4264d92cc02ca20afc57f4" title="Retrieves comment for specified object.">H5Gget_comment()</a> call, which will retrieve the actual comment name.</p>
 <p>If an object does not have a comment, the empty string is returned in comment.</p>
 <dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>

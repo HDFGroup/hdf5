@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.a03203a</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.5c5b727</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -327,7 +327,7 @@ File Function Summaries</h2>
 <tr>
 <td><a class="el" href="group___h5_f.html#ga6055c2ea3438bd4aaf221eba66843225" title="Determines whether a file is in the HDF5 format.">H5Fis_hdf5</a> </td><td>Determines whether a file is in the HDF5 format.  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_f.html#ga7c4865fd36ee25d839725252150bb53b" title="Mounts an HDF5 file.">H5Fmount</a> </td><td>Mounts a file.  </td></tr>
+<td><a class="el" href="group___h5_f.html#ga9f5ca4c8695597e83568f9f4717fc083" title="Mounts an HDF5 file.">H5Fmount</a> </td><td>Mounts a file.  </td></tr>
 <tr>
 <td><a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen</a> </td><td>Opens an existing HDF5 file.  </td></tr>
 <tr>
@@ -339,7 +339,7 @@ File Function Summaries</h2>
 <tr>
 <td><a class="el" href="group___p_h5_f.html#ga087dbbf37cb5c451ae8a6f66b227f0fc" title="Sets the MPI atomicity mode.">H5Fset_mpi_atomicity</a> </td><td>Sets the MPI atomicity mode.  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_f.html#gae8f807d3f04a33f132ffb6c5295e897f" title="Unounts an HDF5 file.">H5Funmount</a> </td><td>Unmounts a file.  </td></tr>
+<td><a class="el" href="group___h5_f.html#ga79e80cbf6d9782402b353b763162779c" title="Un-mounts an HDF5 file.">H5Funmount</a> </td><td>Unmounts a file.  </td></tr>
 </table>
 <p><a class="anchor" id="fcpl_table_tag"></a>File creation property list functions (H5P) </p><div> <a class="anchor" id="table_fcpl_id"></a>
 <table class="doxtable">
@@ -864,8 +864,8 @@ Example with the File Access Property List</h3>
 <div class="ttc" id="a_h5_fpublic_8h_html_a402673dec5c537b27a49a9a8bd6140b4"><div class="ttname"><a href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a></div><div class="ttdeci">#define H5F_ACC_RDWR</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:49</div></div>
 </div><!-- fragment --><h2><a class="anchor" id="subsec_file_multiple"></a>
 Working with Multiple HDF5 Files</h2>
-<p>Multiple HDF5 files can be associated so that the files can be worked with as though all the information is in a single HDF5 file. A temporary association can be set up by means of the <a class="el" href="group___h5_f.html#ga7c4865fd36ee25d839725252150bb53b" title="Mounts an HDF5 file.">H5Fmount</a> function. A permanent association can be set up by means of the external link function <a class="el" href="group___h5_l.html#ga15dfaeb9b1c0b3136533cb97ee45e683" title="Creates an external link, a soft link to an object in a different file.">H5Lcreate_external</a>.</p>
-<p>The purpose of this section is to describe what happens when the <a class="el" href="group___h5_f.html#ga7c4865fd36ee25d839725252150bb53b" title="Mounts an HDF5 file.">H5Fmount</a> function is used to mount one file on another.</p>
+<p>Multiple HDF5 files can be associated so that the files can be worked with as though all the information is in a single HDF5 file. A temporary association can be set up by means of the <a class="el" href="group___h5_f.html#ga9f5ca4c8695597e83568f9f4717fc083" title="Mounts an HDF5 file.">H5Fmount</a> function. A permanent association can be set up by means of the external link function <a class="el" href="group___h5_l.html#ga15dfaeb9b1c0b3136533cb97ee45e683" title="Creates an external link, a soft link to an object in a different file.">H5Lcreate_external</a>.</p>
+<p>The purpose of this section is to describe what happens when the <a class="el" href="group___h5_f.html#ga9f5ca4c8695597e83568f9f4717fc083" title="Mounts an HDF5 file.">H5Fmount</a> function is used to mount one file on another.</p>
 <p>When a file is mounted on another, the mounted file is mounted at a group, and the root group of the mounted file takes the place of that group until the mounted file is unmounted or until the files are closed.</p>
 <p>The figure below shows two files before one is mounted on the other. File1 has two groups and three datasets. The group that is the target of the A link has links, Z and Y, to two of the datasets. The group that is the target of the B link has a link, W, to the other dataset. File2 has three groups and three datasets. The groups in File2 are the targets of the AA, BB, and CC links. The datasets in File2 are the targets of the ZZ, YY, and WW links.</p>
 <table class="doxtable">
@@ -887,11 +887,11 @@ File2 mounted on File1</div></div>
 </table>
 <p>Note: In the figure above, the dataset that is the target of the W link is not shown. That dataset is masked by the mounted file.</p>
 <p>If a file is mounted on a group that has members, those members are hidden until the mounted file is unmounted. There are two ways around this if you need to work with a group member. One is to mount the file on an empty group. Another is to open the group member before you mount the file. Opening the group member will return an identifier that you can use to locate the group member.</p>
-<p>The example below shows how <a class="el" href="group___h5_f.html#ga7c4865fd36ee25d839725252150bb53b" title="Mounts an HDF5 file.">H5Fmount</a> might be used to mount File2 onto File1.</p>
-<p><em>Using H5Fmount</em> </p><div class="fragment"><div class="line">status = <a class="code hl_function" href="group___h5_f.html#ga7c4865fd36ee25d839725252150bb53b">H5Fmount</a>(loc_id, <span class="stringliteral">&quot;/B&quot;</span>, child_id, plist_id)</div>
-<div class="ttc" id="agroup___h5_f_html_ga7c4865fd36ee25d839725252150bb53b"><div class="ttname"><a href="group___h5_f.html#ga7c4865fd36ee25d839725252150bb53b">H5Fmount</a></div><div class="ttdeci">herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist)</div><div class="ttdoc">Mounts an HDF5 file.</div></div>
+<p>The example below shows how <a class="el" href="group___h5_f.html#ga9f5ca4c8695597e83568f9f4717fc083" title="Mounts an HDF5 file.">H5Fmount</a> might be used to mount File2 onto File1.</p>
+<p><em>Using H5Fmount</em> </p><div class="fragment"><div class="line">status = <a class="code hl_function" href="group___h5_f.html#ga9f5ca4c8695597e83568f9f4717fc083">H5Fmount</a>(loc_id, <span class="stringliteral">&quot;/B&quot;</span>, child_id, plist_id)</div>
+<div class="ttc" id="agroup___h5_f_html_ga9f5ca4c8695597e83568f9f4717fc083"><div class="ttname"><a href="group___h5_f.html#ga9f5ca4c8695597e83568f9f4717fc083">H5Fmount</a></div><div class="ttdeci">herr_t H5Fmount(hid_t loc_id, const char *name, hid_t child, hid_t plist)</div><div class="ttdoc">Mounts an HDF5 file.</div></div>
 </div><!-- fragment --><p>Note: In the code example above, loc_id is the file identifier for File1, /B is the link path to the group where File2 is mounted, child_id is the file identifier for File2, and plist_id is a property list identifier. For more information, </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_g__u_g.html#sec_group">HDF5 Groups</a>.</dd></dl>
-<p>See the entries for <a class="el" href="group___h5_f.html#ga7c4865fd36ee25d839725252150bb53b" title="Mounts an HDF5 file.">H5Fmount</a>, <a class="el" href="group___h5_f.html#gae8f807d3f04a33f132ffb6c5295e897f" title="Unounts an HDF5 file.">H5Funmount</a>, and <a class="el" href="group___h5_l.html#ga15dfaeb9b1c0b3136533cb97ee45e683" title="Creates an external link, a soft link to an object in a different file.">H5Lcreate_external</a> in the HDF5 Reference Manual.</p>
+<p>See the entries for <a class="el" href="group___h5_f.html#ga9f5ca4c8695597e83568f9f4717fc083" title="Mounts an HDF5 file.">H5Fmount</a>, <a class="el" href="group___h5_f.html#ga79e80cbf6d9782402b353b763162779c" title="Un-mounts an HDF5 file.">H5Funmount</a>, and <a class="el" href="group___h5_l.html#ga15dfaeb9b1c0b3136533cb97ee45e683" title="Creates an external link, a soft link to an object in a different file.">H5Lcreate_external</a> in the HDF5 Reference Manual.</p>
 <p>Previous Chapter <a class="el" href="_h5__u_g.html#sec_program">The HDF5 Library and Programming Model</a> - Next Chapter <a class="el" href="_h5_g__u_g.html#sec_group">HDF5 Groups</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->

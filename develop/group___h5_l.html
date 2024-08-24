@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.a03203a</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.5c5b727</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -900,7 +900,7 @@ Note that the function accepts link names and path names. This is potentially mi
 <div class="ttc" id="a_h5_tpublic_8h_html_a03755b8370672668ddc7063add28e71a"><div class="ttname"><a href="_h5_tpublic_8h.html#a03755b8370672668ddc7063add28e71a">H5T_cset_t</a></div><div class="ttdeci">H5T_cset_t</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:93</div></div>
 <div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition</b> H5public.h:345</div></div>
 <div class="ttc" id="a_h5public_8h_html_ad470b00eccd2115c707c02de5fa1120d"><div class="ttname"><a href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></div><div class="ttdeci">bool hbool_t</div><div class="ttdef"><b>Definition</b> H5public.h:253</div></div>
-<div class="ttc" id="astruct_h5_l__info1__t_html"><div class="ttname"><a href="struct_h5_l__info1__t.html">H5L_info1_t</a></div><div class="ttdef"><b>Definition</b> H5Lpublic.h:1465</div></div>
+<div class="ttc" id="astruct_h5_l__info1__t_html"><div class="ttname"><a href="struct_h5_l__info1__t.html">H5L_info1_t</a></div><div class="ttdef"><b>Definition</b> H5Lpublic.h:1462</div></div>
 </div><!-- fragment --><p> In the above struct, type specifies the link class. Valid values include the following: </p><table class="doxtable">
 <tr>
 <td><a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48ab90f13082490fcd293a228b2785489e3">H5L_TYPE_HARD</a></td><td>Hard link</td></tr>
@@ -1100,7 +1100,7 @@ Note that the function accepts link names and path names. This is potentially mi
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000051">Deprecated:</a></b></dt><dd>As of HDF5-1.12 this function has been deprecated in favor of the function <a class="el" href="group___h5_l.html#gaecfb3ef8520e9224b24a151ff8459ba9" title="Retrieves metadata for a link in a group, according to the order within a field or index.">H5Lget_info_by_idx2()</a> and the macro <a class="el" href="group___h5_l.html#ga4db00b8b944eae68233438165c784b67">H5Lget_info_by_idx()</a>.</dd></dl>
-<p>H5get_info_by_idx1() returns the metadata for a link in a group according to a specified field or index and a specified order.</p>
+<p><a class="el" href="group___h5_l.html#ga7ed207f47e0e0f768f0d540c73e37e2a" title="Retrieves metadata for a link in a group, according to the order within a field or index.">H5Lget_info_by_idx1()</a> returns the metadata for a link in a group according to a specified field or index and a specified order.</p>
 <p>The link for which information is to be returned is specified by <code>idx_type</code>, <code>order</code>, and <code>n</code> as follows:</p>
 <ul>
 <li><code>idx_type</code> specifies the field by which the links in <code>group_name</code> are ordered. The links may be indexed on this field, in which case operations seeking specific links are likely to complete more quickly.</li>
@@ -1189,7 +1189,7 @@ Note that the function accepts link names and path names. This is potentially mi
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p>H5get_info_by_idx2() returns the metadata for a link in a group according to a specified field or index and a specified order. The link for which information is to be returned is specified by <code>idx_type</code>, <code>order</code>, and <code>n</code> as follows:</p>
+<p><a class="el" href="group___h5_l.html#gaecfb3ef8520e9224b24a151ff8459ba9" title="Retrieves metadata for a link in a group, according to the order within a field or index.">H5Lget_info_by_idx2()</a> returns the metadata for a link in a group according to a specified field or index and a specified order. The link for which information is to be returned is specified by <code>idx_type</code>, <code>order</code>, and <code>n</code> as follows:</p>
 <ul>
 <li><code>idx_type</code> specifies the field by which the links in <code>group_name</code> are ordered. The links may be indexed on this field, in which case operations seeking specific links are likely to complete more quickly.</li>
 <li><code>order</code> specifies the order in which the links are to be referenced for the purposes of this function.</li>
@@ -1280,7 +1280,7 @@ Note that the function accepts link names and path names. This is potentially mi
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns the size of the link name if successful; otherwise returns a negative value.</dd></dl>
-<p>H5get_name_by_idx() retrieves the name of the <em>n</em>-th link in a group, according to the specified order, <code>order</code>, within a specified field or index, <code>idx_type</code>.</p>
+<p><a class="el" href="group___h5_l.html#ga453ea40c3bb85ec8120dd17deed2bd90" title="Retrieves name of the n-th link in a group, according to the order within a specified field or index.">H5Lget_name_by_idx()</a> retrieves the name of the <em>n</em>-th link in a group, according to the specified order, <code>order</code>, within a specified field or index, <code>idx_type</code>.</p>
 <p><code>idx_type</code> specifies the index that is used. Valid values include the following: </p><table class="doxtable">
 <tr>
 <td><a class="el" href="_h5public_8h.html#a8203c78e10ab2d89d8bce688a31afad3a644e6701706be4d37660864336c7bd3e">H5_INDEX_NAME</a></td><td>Lexicographic order on name</td></tr>
@@ -1296,7 +1296,9 @@ Note that the function accepts link names and path names. This is potentially mi
 <td><a class="el" href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9a15eebaf7d85d5e37e918858634e29d01">H5_ITER_NATIVE</a></td><td>Fastest available order</td></tr>
 </table>
 <p>If <code>loc_id</code> specifies the group in which the link resides, <code>group_name</code> can be a dot (<code></code>.).</p>
-<p>The size in bytes of name is specified in <code>size</code>. If <code>size</code> is unknown, it can be determined via an initial <a class="el" href="group___h5_l.html#ga453ea40c3bb85ec8120dd17deed2bd90" title="Retrieves name of the n-th link in a group, according to the order within a specified field or index.">H5Lget_name_by_idx()</a> call with name set to NULL; the function's return value will be the size of the name.</p>
+<p>Up to <code>size</code> characters of the link name are returned in <code>name</code>; additional characters, if any, are not returned to the user application.<br  />
+<br  />
+ If the length of the link name, which determines the required value of <code>size</code>, is unknown, a preliminary call to <a class="el" href="group___h5_l.html#ga453ea40c3bb85ec8120dd17deed2bd90" title="Retrieves name of the n-th link in a group, according to the order within a specified field or index.">H5Lget_name_by_idx()</a> with the last two parameters set to NULL and zero respectively can be made. The return value of this call will be the size in bytes of the link name. That value, plus 1 for a NULL terminator, must then be assigned to <code>size</code> for a second <a class="el" href="group___h5_l.html#ga453ea40c3bb85ec8120dd17deed2bd90" title="Retrieves name of the n-th link in a group, according to the order within a specified field or index.">H5Lget_name_by_idx()</a> call, which will retrieve the actual link name.</p>
 <dl class="section note"><dt>Note</dt><dd>Please note that in order for the specified index to correspond to the creation order index, <code>order</code> must be set to <a class="el" href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9a80c3e083c0a77063b1a66553decfcb08">H5_ITER_INC</a> or <a class="el" href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9a2f123d7a4d68054e8aa2d0f1d0a3fcd2">H5_ITER_DEC</a> when calling <a class="el" href="group___h5_l.html#ga453ea40c3bb85ec8120dd17deed2bd90" title="Retrieves name of the n-th link in a group, according to the order within a specified field or index.">H5Lget_name_by_idx()</a>. </dd>
 <dd>
 The index <code>n</code> passed to <a class="el" href="group___h5_l.html#ga453ea40c3bb85ec8120dd17deed2bd90" title="Retrieves name of the n-th link in a group, according to the order within a specified field or index.">H5Lget_name_by_idx()</a> is the index of the link within the link table, sorted according to <code>order</code> and <code>idx_type</code>. If order is <a class="el" href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9a15eebaf7d85d5e37e918858634e29d01">H5_ITER_NATIVE</a>, then the link table is not sorted, and it does not matter what <code>idx_type</code> is. Specifying <a class="el" href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9a15eebaf7d85d5e37e918858634e29d01">H5_ITER_NATIVE</a> does not guarantee any particular order, only that it remains consistent.</dd></dl>
