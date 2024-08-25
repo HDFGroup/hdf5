@@ -20,14 +20,14 @@
 
 #if defined(H5_HAVE_THREADS)
 
-#define NUM_PINGPONG     (1000 * 1000)
+#define NUM_PINGPONG     (500 * 1000)
 #define NUM_CLIENTSERVER (50 * 1000)
 
 #define NUM_THREADS 16
 
 typedef struct {
-    H5TS_semaphore_t ping_sem, pong_sem;
-    unsigned         counter;
+    H5TS_semaphore_t   ping_sem, pong_sem;
+    H5TS_atomic_uint_t counter;
 } pingpong_t;
 
 typedef struct {
@@ -40,7 +40,6 @@ static H5TS_THREAD_RETURN_TYPE
 ping(void *_test_info)
 {
     pingpong_t       *test_info = (pingpong_t *)_test_info;
-    unsigned          count;
     herr_t            result;
     H5TS_thread_ret_t ret_value = 0;
 
@@ -48,11 +47,11 @@ ping(void *_test_info)
         result = H5TS_semaphore_wait(&test_info->ping_sem);
         CHECK_I(result, "H5TS_semaphore_wait");
 
-        count = ++test_info->counter;
+        H5TS_atomic_fetch_add_uint(&test_info->counter, (unsigned)1);
 
         result = H5TS_semaphore_signal(&test_info->pong_sem);
         CHECK_I(result, "H5TS_semaphore_signal");
-    } while (count < NUM_PINGPONG);
+    } while (H5TS_atomic_load_uint(&test_info->counter) < NUM_PINGPONG);
 
     return ret_value;
 }
@@ -61,7 +60,6 @@ static H5TS_THREAD_RETURN_TYPE
 pong(void *_test_info)
 {
     pingpong_t       *test_info = (pingpong_t *)_test_info;
-    unsigned          count;
     herr_t            result;
     H5TS_thread_ret_t ret_value = 0;
 
@@ -69,11 +67,11 @@ pong(void *_test_info)
         result = H5TS_semaphore_wait(&test_info->pong_sem);
         CHECK_I(result, "H5TS_semaphore_wait");
 
-        count = ++test_info->counter;
+        H5TS_atomic_fetch_add_uint(&test_info->counter, (unsigned)1);
 
         result = H5TS_semaphore_signal(&test_info->ping_sem);
         CHECK_I(result, "H5TS_semaphore_signal");
-    } while (count < NUM_PINGPONG);
+    } while (H5TS_atomic_load_uint(&test_info->counter) < NUM_PINGPONG);
 
     return ret_value;
 }
@@ -95,7 +93,7 @@ tts_semaphore_pingpong(void)
     CHECK_I(result, "H5TS_semaphore_init");
     result = H5TS_semaphore_init(&test_info.pong_sem, 0);
     CHECK_I(result, "H5TS_semaphore_init");
-    test_info.counter = 0;
+    H5TS_atomic_init_uint(&test_info.counter, (unsigned)0);
 
     /* Start ping & pong threads */
     result = H5TS_thread_create(&ping_thread, ping, &test_info);
@@ -113,13 +111,15 @@ tts_semaphore_pingpong(void)
     result = H5TS_thread_join(pong_thread, NULL);
     CHECK_I(result, "H5TS_thread_join");
 
-    VERIFY(test_info.counter, (NUM_PINGPONG + 1), "ping pong");
+    VERIFY(H5TS_atomic_load_uint(&test_info.counter), (NUM_PINGPONG + 1), "ping pong");
 
-    /* Destroy semaphores */
+    /* Destroy semaphores, etc. */
     result = H5TS_semaphore_destroy(&test_info.ping_sem);
     CHECK_I(result, "H5TS_semaphore_destroy");
     result = H5TS_semaphore_destroy(&test_info.pong_sem);
     CHECK_I(result, "H5TS_semaphore_destroy");
+
+    H5TS_atomic_destroy_uint(&test_info.counter);
 } /* end tts_semaphore_pingpong() */
 
 static H5TS_THREAD_RETURN_TYPE
