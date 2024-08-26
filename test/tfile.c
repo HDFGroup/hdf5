@@ -8104,7 +8104,7 @@ test_min_dset_ohdr(void)
 /****************************************************************
 **
 **  test_unseekable_file():
-**    Test that attempting to open an unseekable file fails gracefully
+**    Test that attempting to create/open an unseekable file fails gracefully
 **    without a segfault (see hdf5#1498)
 ****************************************************************/
 static void
@@ -8127,16 +8127,7 @@ test_unseekable_file(void)
 
     H5Fclose(file_id);
 
-    /* Open, truncate */
-#ifdef H5_HAVE_WIN32_API
-    file_id = H5Fopen("NUL", H5F_ACC_TRUNC, H5P_DEFAULT);
-#else
-    file_id = H5Fopen("/dev/null", H5F_ACC_TRUNC, H5P_DEFAULT);
-#endif
-
-    H5Fclose(file_id);
-
-    /* Open, RDWR */
+    /* Opening */
 #ifdef H5_HAVE_WIN32_API
     file_id = H5Fopen("NUL", H5F_ACC_RDWR, H5P_DEFAULT);
 #else
