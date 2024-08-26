@@ -443,7 +443,7 @@ extern "C" {
  * \details H5open() initializes the HDF5 library.
  *
  * \details When the HDF5 library is used in a C application, the library is
- *          automatically initialized when the first HDf5 function call is
+ *          automatically initialized when the first HDF5 function call is
  *          issued. If one finds that an HDF5 library function is failing
  *          inexplicably, H5open() can be called first. It is safe to call
  *          H5open() before an application issues any other function calls to
