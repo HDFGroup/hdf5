@@ -8125,7 +8125,8 @@ test_unseekable_file(void)
     file_id = H5Fcreate("/dev/null", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 #endif
 
-    H5Fclose(file_id);
+    /* Should fail without segfault */
+    VERIFY(file_id, H5I_INVALID_HID, "H5Fcreate");
 
     /* Opening */
 #ifdef H5_HAVE_WIN32_API
@@ -8134,7 +8135,7 @@ test_unseekable_file(void)
     file_id = H5Fopen("/dev/null", H5F_ACC_RDWR, H5P_DEFAULT);
 #endif
 
-    H5Fclose(file_id);
+    VERIFY(file_id, H5I_INVALID_HID, "H5Fopen");
 }
 /****************************************************************
 **
