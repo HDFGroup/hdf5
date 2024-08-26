@@ -1744,18 +1744,28 @@ done:
 herr_t
 H5VL_attr_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     assert(vol_obj);
 
+    /* Set wrapper info in API context */
+    if (H5VL_set_vol_wrapper(vol_obj) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
+    vol_wrapper_set = true;
+
     /* Call the corresponding internal VOL routine */
     if (H5VL__attr_close(vol_obj->data, vol_obj->connector->cls, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "attribute close failed");
 
 done:
+    /* Reset object wrapping info in API context */
+    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_close() */
 
