@@ -46,7 +46,8 @@ jobs:
           $GITHUB_WORKSPACE/configure \
             --enable-build-mode=${{ inputs.build_mode }} \
             --enable-shared \
-            --disable-fortran
+            --enable-cxx \
+            --enable-fortran
 
       - name: Autotools Build
         shell: bash
