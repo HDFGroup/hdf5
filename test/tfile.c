@@ -8115,6 +8115,9 @@ test_unseekable_file(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing creating/opening an unseekable file\n"));
 
+    /* Flush message in case this test segfaults */
+    fflush(stdout);
+
     /* Creation */
 #ifdef H5_HAVE_WIN32_API
     file_id = H5Fcreate("NUL", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -8141,8 +8144,6 @@ test_unseekable_file(void)
 #endif
 
     H5Fclose(file_id);
-
-    exit(EXIT_SUCCESS);
 }
 /****************************************************************
 **
