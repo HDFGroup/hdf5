@@ -752,7 +752,7 @@ test_h5o_plist(void)
     hid_t    grp, dset, dtype, dspace; /* Object identifiers */
     hid_t    fapl;                     /* File access property list */
     hid_t    gcpl, dcpl, tcpl;         /* Object creation properties */
-    hid_t    bad_pl=H5I_INVALID_HID;   /* Invalid property list dues to invalid arg */
+    hid_t    bad_pl = H5I_INVALID_HID; /* Invalid property list dues to invalid arg */
     char     filename[1024];
     unsigned def_max_compact, def_min_dense; /* Default phase change parameters */
     unsigned max_compact, min_dense;         /* Actual phase change parameters */
