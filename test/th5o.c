@@ -752,6 +752,7 @@ test_h5o_plist(void)
     hid_t    grp, dset, dtype, dspace; /* Object identifiers */
     hid_t    fapl;                     /* File access property list */
     hid_t    gcpl, dcpl, tcpl;         /* Object creation properties */
+    hid_t    bad_pl = H5I_INVALID_HID; /* Invalid property list dues to invalid arg */
     char     filename[1024];
     unsigned def_max_compact, def_min_dense; /* Default phase change parameters */
     unsigned max_compact, min_dense;         /* Actual phase change parameters */
@@ -853,6 +854,14 @@ test_h5o_plist(void)
     CHECK(tcpl, FAIL, "H5Tget_create_plist");
     dcpl = H5Dget_create_plist(dset);
     CHECK(dcpl, FAIL, "H5Dget_create_plist");
+
+    /* Test passing in a non-group identifier to the H5G API */
+    H5E_BEGIN_TRY
+    {
+        bad_pl = H5Gget_create_plist(dtype);
+    }
+    H5E_END_TRY
+    VERIFY(bad_pl, H5I_INVALID_HID, "H5Gget_create_plist");
 
     /* Retrieve attribute phase change values on each creation property list and verify */
     ret = H5Pget_attr_phase_change(gcpl, &max_compact, &min_dense);
