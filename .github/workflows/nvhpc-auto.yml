@@ -77,6 +77,7 @@ jobs:
           cd test && make check -j2 && cd ..
           cd tools && make check -j2 && cd ..
           cd hl && make check -j2 && cd ..
+          cd fortran && make check -j2 && cd ..
         working-directory: ${{ runner.workspace }}/build
 
       - name: Autotools Run Parallel Tests
