@@ -8104,45 +8104,38 @@ test_min_dset_ohdr(void)
 /****************************************************************
 **
 **  test_unseekable_file():
-**    Test that attempting to open an unseekable file fails gracefully
+**    Test that attempting to create/open an unseekable file fails gracefully
 **    without a segfault (see hdf5#1498)
 ****************************************************************/
 static void
 test_unseekable_file(void)
 {
-    hid_t file_id = H5I_INVALID_HID; /* File ID */
-
     /* Output message about test being performed */
     MESSAGE(5, ("Testing creating/opening an unseekable file\n"));
 
+    /* Flush message in case this test segfaults */
+    fflush(stdout);
+
     /* Creation */
 #ifdef H5_HAVE_WIN32_API
-    file_id = H5Fcreate("NUL", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    H5Fcreate("NUL", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 #else
-    file_id = H5Fcreate("/dev/null", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    H5Fcreate("/dev/null", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 #endif
 
-    H5Fclose(file_id);
+    /* Should fail without segfault */
+    /* TODO - Does not properly fail on all systems */
+    /* VERIFY(file_id, H5I_INVALID_HID, "H5Fcreate"); */
 
-    /* Open, truncate */
+    /* Opening */
 #ifdef H5_HAVE_WIN32_API
-    file_id = H5Fopen("NUL", H5F_ACC_TRUNC, H5P_DEFAULT);
+    H5Fopen("NUL", H5F_ACC_RDWR, H5P_DEFAULT);
 #else
-    file_id = H5Fopen("/dev/null", H5F_ACC_TRUNC, H5P_DEFAULT);
+    H5Fopen("/dev/null", H5F_ACC_RDWR, H5P_DEFAULT);
 #endif
 
-    H5Fclose(file_id);
-
-    /* Open, RDWR */
-#ifdef H5_HAVE_WIN32_API
-    file_id = H5Fopen("NUL", H5F_ACC_RDWR, H5P_DEFAULT);
-#else
-    file_id = H5Fopen("/dev/null", H5F_ACC_RDWR, H5P_DEFAULT);
-#endif
-
-    H5Fclose(file_id);
-
-    exit(EXIT_SUCCESS);
+    /* TODO - Does not properly fail on all systems */
+    /* VERIFY(file_id, H5I_INVALID_HID, "H5Fopen"); */
 }
 /****************************************************************
 **
