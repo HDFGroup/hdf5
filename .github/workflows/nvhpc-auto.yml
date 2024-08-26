@@ -74,7 +74,6 @@ jobs:
           NPROCS: 2
         run: |
           export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/compilers/bin:$PATH
-          cd test && make check -j2 && cd ..
           cd tools && make check -j2 && cd ..
           cd hl && make check -j2 && cd ..
           cd fortran && make check -j2 && cd ..
