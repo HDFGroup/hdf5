@@ -2117,6 +2117,22 @@ test_deprec(hid_t fapl, bool new_format)
     if (H5Gmove2(file_id, "group2", group1_id, "moved_group2") < 0)
         FAIL_STACK_ERROR;
 
+    /* Test passing in invalid ID */
+    H5E_BEGIN_TRY
+    {
+        if (H5Gmove2(0, "group2", group1_id, "moved_group2") >= 0)
+            TEST_ERROR;
+    }
+    H5E_END_TRY
+
+    /* Test passing in invalid ID */
+    H5E_BEGIN_TRY
+    {
+        if (H5Gmove2(file_id, "group2", 0, "moved_group2") >= 0)
+            TEST_ERROR;
+    }
+    H5E_END_TRY
+
     /* Ensure that both groups can be opened */
     if (H5Gclose(group2_id) < 0)
         FAIL_STACK_ERROR;
