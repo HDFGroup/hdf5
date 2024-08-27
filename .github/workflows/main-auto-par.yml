@@ -63,6 +63,7 @@ jobs:
             --with-default-api-version=v114 \
             --enable-shared \
             --enable-parallel \
+            --enable-subfiling-vfd \
             --disable-cxx \
             --enable-fortran \
             --disable-java \
