@@ -644,7 +644,7 @@
  *
  * \section sec_collective_calls_nomod Collective, unless target object will not be modified
  *    The following functions must normally be called collectively.
- *    If, however, the target object will <emphasis>not</emphasis> be modified,
+ *    If, however, the target object will <em>not</em> be modified,
  *    they may be called independently.
  *
     <table border="0" width="100%">
@@ -935,7 +935,7 @@
         #H5Topen1 at Release 1.8.0.
       </td>
       </tr>
-    </td><tr>
+    </td></tr>
     </table>
  *
  * \section sec_collective_calls_props Properties
