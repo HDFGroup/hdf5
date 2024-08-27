@@ -983,7 +983,7 @@ H5A__read_api_common(hid_t attr_id, hid_t dtype_id, void *buf, void **token_ptr,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf parameter can't be NULL");
 
     /* Get attribute object pointer */
-    if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (*vol_obj_ptr = H5VL_vol_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
 
     /* Read the attribute data */
@@ -1090,7 +1090,7 @@ H5Aget_space(hid_t attr_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check arguments */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not an attribute");
 
     /* Set up VOL callback arguments */
@@ -1134,7 +1134,7 @@ H5Aget_type(hid_t attr_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check arguments */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not an attribute");
 
     /* Set up VOL callback arguments */
@@ -1183,7 +1183,7 @@ H5Aget_create_plist(hid_t attr_id)
     assert(H5P_LST_ATTRIBUTE_CREATE_ID_g != -1);
 
     /* Check arguments */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not an attribute");
 
     /* Set up VOL callback arguments */
@@ -1218,7 +1218,7 @@ done:
 
  DESCRIPTION
         This function retrieves the name of an attribute for an attribute ID.
-    Up to 'buf_size' characters are stored in 'buf' followed by a '\0' string
+    Up to 'buf_size'-1 characters are stored in 'buf' followed by a '\0' string
     terminator.  If the name of the attribute is longer than 'buf_size'-1,
     the string terminator is stored in the last position of the buffer to
     properly terminate the string.
@@ -1234,7 +1234,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf /*out*/)
     FUNC_ENTER_API((-1))
 
     /* check arguments */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not an attribute");
     if (!buf && buf_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "buf cannot be NULL if buf_size is non-zero");
@@ -1258,20 +1258,32 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aget_name() */
 
-/*-------------------------------------------------------------------------
- * Function:	H5Aget_name_by_idx
- *
- * Purpose:	Retrieve the name of an attribute, according to the
- *		order within an index.
- *
- *              Same pattern of behavior as H5Iget_name.
- *
- * Return:	Success:	Non-negative length of name, with information
- *				in NAME buffer
- *		Failure:	Negative
- *
- *-------------------------------------------------------------------------
- */
+/*--------------------------------------------------------------------------
+ NAME
+    H5Aget_name_by_idx
+ PURPOSE
+    Retrieve the name of an attribute, according to the order within an index.
+ USAGE
+    ssize_t H5Aget_name_by_idx(loc_id, obj_name, idx_type, order, n, name, size, lapl_id)
+        hid_t loc_id;           IN: Object that attribute is attached to
+        const char *obj_name;   IN: Name of the object relative to location
+        H5_index_t idx_type;    IN: Type of index to use
+        H5_iter_order_t order;  IN: Order to iterate over index
+        hsize_t n;              IN: Index (0-based) of attribute to retrieve
+        char *name;             IN: Buffer to store the name in
+        size_t size;            IN: The size of the buffer to store the name in.
+        hid_t lapl_id;          IN: Link access property list
+ RETURNS
+    This function returns the length of the attribute's name (which may be
+    longer than 'buf_size') on success or negative for failure.
+
+ DESCRIPTION
+        This function retrieves the name of an attribute given its index.  Up
+    to 'buf_size'-1 characters are stored in 'buf' followed by a '\0' string
+    terminator.  If the name of the attribute is longer than 'buf_size'-1,
+    the string terminator is stored in the last position of the buffer to
+    properly terminate the string.
+--------------------------------------------------------------------------*/
 ssize_t
 H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                    char *name /*out*/, size_t size, hid_t lapl_id)
@@ -1352,7 +1364,7 @@ H5Aget_storage_size(hid_t attr_id)
     FUNC_ENTER_API(0)
 
     /* Check arguments */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an attribute");
 
     /* Set up VOL callback arguments */
@@ -1390,7 +1402,7 @@ H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/)
     FUNC_ENTER_API(FAIL)
 
     /* Check args */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
     if (!ainfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "attribute_info parameter cannot be NULL");

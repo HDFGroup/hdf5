@@ -340,7 +340,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Create the group */
@@ -507,7 +507,7 @@ H5Gget_create_plist(hid_t group_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(group_id, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a group ID");
 
     /* Set up VOL callback arguments */
@@ -960,7 +960,7 @@ H5Gflush(hid_t group_id)
     FUNC_ENTER_API(FAIL)
 
     /* Check args */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(group_id, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID");
 
     /* Set up collective metadata if appropriate */
@@ -998,7 +998,7 @@ H5Grefresh(hid_t group_id)
     FUNC_ENTER_API(FAIL)
 
     /* Check args */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(group_id, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID");
 
     /* Set up collective metadata if appropriate */

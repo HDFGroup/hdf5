@@ -43,13 +43,13 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
-            -G Ninja \
-            --log-level=VERBOSE \
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja --log-level=VERBOSE \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DHDF5_BUILD_FORTRAN:BOOL=ON \
+            -DHDF5_BUILD_CPP_LIB:BOOL=ON \
             -DLIBAEC_USE_LOCALCONTENT=OFF \
             -DZLIB_USE_LOCALCONTENT=OFF \
-            $GITHUB_WORKSPACE
+            ${{ github.workspace }}
 
       - name: CMake Build (Linux)
         shell: bash
@@ -97,7 +97,7 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           Set-Location -Path "${{ runner.workspace }}\\build"
-          cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DHDF5_BUILD_FORTRAN=ON -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF ${{ github.workspace }}
+          cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DHDF5_BUILD_FORTRAN=ON -DHDF5_BUILD_CPP_LIB=ON -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF ${{ github.workspace }}
 
       - name: CMake Build (Windows)
         shell: pwsh

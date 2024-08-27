@@ -79,24 +79,32 @@ jobs:
 
       - name: Autotools Build
         shell: bash
-        env:
-          NPROCS: 2
         run: |
           export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/bin:/usr/local/bin:$PATH
           make -j3
         working-directory: ${{ runner.workspace }}/build
 
+      # ph5diff tests are in the tools/tests directory so they will get run
+      # here, so leave NPROCS set here as well
       - name: Autotools Run Tests
         env:
           NPROCS: 2
         run: |
           export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/bin:/usr/local/bin:$PATH
-          make check -j
+          cd test && make check -j2 && cd ..
+          cd tools && make check -j2 && cd ..
+          cd hl && make check -j2 && cd ..
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Run Parallel Tests
+        env:
+          NPROCS: 2
+        run: |
+          export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/bin:/usr/local/bin:$PATH
+          cd testpar && make check && cd ..
         working-directory: ${{ runner.workspace }}/build
 
       - name: Autotools Install
-        env:
-          NPROCS: 2
         run: |
           export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/bin:/usr/local/bin:$PATH
           make install

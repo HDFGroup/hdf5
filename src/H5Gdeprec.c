@@ -719,11 +719,10 @@ done:
  *
  * Note:	Deprecated in favor of H5Oget_comment/H5Oget_comment_by_name
  *
- * Return:	Success:	Number of characters in the comment counting
- *				the null terminator.  The value returned may
- *				be larger than the BUFSIZE argument.
+ * Return:	Success: Number of characters in the comment.  The value
+ *                   returned may be larger than the BUFSIZE argument.
  *
- *		Failure:	Negative
+ *          Failure: Negative
  *
  *-------------------------------------------------------------------------
  */

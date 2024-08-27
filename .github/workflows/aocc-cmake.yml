@@ -89,5 +89,11 @@ jobs:
       - name: CMake Run Tests
         shell: bash
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+          ctest . -E MPI_TEST --parallel 2 -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: CMake Run Parallel Tests
+        shell: bash
+        run: |
+          ctest . -R MPI_TEST -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build

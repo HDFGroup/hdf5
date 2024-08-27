@@ -468,11 +468,11 @@ H5L__create_hard_api_common(hid_t cur_loc_id, const char *cur_name, hid_t link_l
 
     if (H5L_SAME_LOC != cur_loc_id)
         /* Get the current location object */
-        if (NULL == (curr_vol_obj = (H5VL_object_t *)H5VL_vol_object(cur_loc_id)))
+        if (NULL == (curr_vol_obj = H5VL_vol_object(cur_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (H5L_SAME_LOC != link_loc_id)
         /* Get the new location object */
-        if (NULL == (link_vol_obj = (H5VL_object_t *)H5VL_vol_object(link_loc_id)))
+        if (NULL == (link_vol_obj = H5VL_vol_object(link_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Make sure that the VOL connectors are the same */

@@ -1762,6 +1762,41 @@ done:
 } /* end H5VL_vol_object() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_vol_object_verify
+ *
+ * Purpose:     Utility function to return the object pointer associated with
+ *              an ID of the specified type. This routine is the same as
+ *              H5VL_vol_object except it takes the additional argument
+ *              obj_type to verify the ID's type against.
+ *
+ * Return:      Success:        object pointer
+ *              Failure:        NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5VL_object_t *
+H5VL_vol_object_verify(hid_t id, H5I_type_t obj_type)
+{
+    void          *obj       = NULL;
+    H5VL_object_t *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    if (NULL == (obj = H5I_object_verify(id, obj_type)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "identifier is not of specified type");
+
+    /* If this is a datatype, get the VOL object attached to the H5T_t struct */
+    if (H5I_DATATYPE == obj_type)
+        if (NULL == (obj = H5T_get_named_type((H5T_t *)obj)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype");
+
+    ret_value = (H5VL_object_t *)obj;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_object_data
  *
  * Purpose:     Correctly retrieve the 'data' field for a VOL object (H5VL_object),
