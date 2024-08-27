@@ -1,4 +1,4 @@
-| CVE issue number                                                                         | 1.14.0   | 1.14.1   | 1.14.2   | 1.14.3   | 1.14.3   |
+| CVE issue number                                                                         | 1.14.0   | 1.14.1   | 1.14.2   | 1.14.3   | 1.14.4   |
 | :-------------------------------------------------------------------------               | :-----   | :-----   | :-----   | :-----   | :-----   |
 | [CVE-2024-33877](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-33877)          | N/A      | N/A      | N/A      | N/A      | ✅       |
 | [CVE-2024-33876](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-33876)          | N/A      | N/A      | N/A      | N/A      | ✅       |
