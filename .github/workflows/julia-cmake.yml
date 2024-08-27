@@ -1,4 +1,4 @@
-name: hdf5 dev CMake julia
+name: hdf5 1.14 CMake julia
 
 on:
   workflow_call:
