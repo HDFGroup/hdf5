@@ -58,8 +58,7 @@ jobs:
             --enable-build-mode=${{ inputs.build_mode }} \
             --enable-fortran \
             --enable-shared \
-            --enable-parallel \
-            --enable-subfiling-vfd
+            --enable-parallel
 
       - name: Autotools Build
         shell: bash
