@@ -108,7 +108,7 @@ Periodically development code snapshots are provided at the following URL:
 
 Source packages for current and previous releases are located at:
     
-   https://portal.hdfgroup.org/Downloads
+   https://support.hdfgroup.org/downloads/HDF5
 
 Development code is available at our Github location:
     

@@ -1386,8 +1386,8 @@ H5_HLDLL herr_t H5LTget_attribute_info(hid_t loc_id, const char *obj_name, const
  *          \p lang_type definition of HDF5 datatypes.
  *          Currently, only the DDL(#H5LT_DDL) is supported.
  *          The complete DDL definition of HDF5 datatypes can be found in
- *          the last chapter of the
- *          <a href="https://\DSPURL/HDF5+User+Guides">
+ *          the specifications chapter of the
+ *          <a href="https://\DOXURL/_s_p_e_c.html">
  *          HDF5 User's Guide</a>.
  *
  * \par Example
@@ -1424,8 +1424,8 @@ H5_HLDLL hid_t H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type);
  *
  *          Currently only DDL (#H5LT_DDL) is supported for \p lang_type.
  *          The complete DDL definition of HDF5 data types can be found in
- *          the last chapter of the
- *          <a href="https://\DSPURL/HDF5+User+Guides">
+ *          the specifications chapter of the
+ *          <a href="https://\DOXURL/_s_p_e_c.html">
  *          HDF5 User's Guide</a>.
  *
  * \par Example
@@ -1625,7 +1625,7 @@ H5_HLDLL htri_t H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_obj
  * \note      **Recommended Reading:**
  * \note      This function is part of the file image operations feature set.
  *            It is highly recommended to study the guide
- *            <a href="https://\DSPURL/HDF5+File+Image+Operations">
+ *            <a href="https://\DOCURL/HDF5+File+Image+Operations">
  *            HDF5 File Image Operations</a> before using this feature set.\n
  *            See the “See Also” section below for links to other elements of
  *            HDF5 file image operations.
