@@ -74,6 +74,7 @@ jobs:
             --enable-build-mode=${{ inputs.build_mode }} \
             --enable-shared \
             --enable-parallel \
+            --enable-subfiling-vfd \
             LDFLAGS="-L/home/runner/work/hdf5/hdf5/aocc-compiler-4.2.0/lib \
             -L/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/lib"
 
