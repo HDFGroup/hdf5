@@ -315,7 +315,7 @@ done:
 /*--------------------------------------------------------------------------
  * Function:    H5TS__rec_rwlock_print_stats
  *
- * Purpose:     Print the supplied pthresds recursive R/W lock statistics.
+ * Purpose:     Print statistics for the supplied recursive R/W lock.
  *
  * Return:      Non-negative on success / Negative on failure
  *
