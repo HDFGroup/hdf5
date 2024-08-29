@@ -490,12 +490,12 @@ and one raw data file.</td>
 <tr>
 <td>#H5Pget_filter</td>
 <td>Returns information about a filter in a pipeline.
-The C function is a macro: \see \ref api-compat-macros.</td>
+The C function is a macro: @see @ref api-compat-macros.</td>
 </tr>
 <tr>
 <td>#H5Pget_filter_by_id</td>
 <td>Returns information about the specified filter.
-The C function is a macro: \see \ref api-compat-macros.</td>
+The C function is a macro: @see @ref api-compat-macros.</td>
 </tr>
 <tr>
 <td>#H5Pmodify_filter</td>
@@ -739,12 +739,12 @@ of the library for reading or writing the actual data.</td>
 <tr>
 <td>#H5Pget_filter</td>
 <td>Returns information about a filter in a pipeline. The
-C function is a macro: \see \ref api-compat-macros.</td>
+C function is a macro: @see @ref api-compat-macros.</td>
 </tr>
 <tr>
 <td>#H5Pget_filter_by_id</td>
 <td>Returns information about the specified filter. The
-C function is a macro: \see \ref api-compat-macros.</td>
+C function is a macro: @see @ref api-compat-macros.</td>
 </tr>
 <tr>
 <td>#H5Pget_nfilters</td>

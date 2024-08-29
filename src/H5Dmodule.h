@@ -887,7 +887,7 @@ filter.</td>
  * It is clear that the internal HDF5 filter mechanism, while extensible, does not work well with third-party
  * filters. It would be a maintenance nightmare to keep adding and supporting new compression methods
  * in HDF5. For any set of HDF5 “internal” filters, there always will be data with which the “internal”
-filters
+ * filters
  * will not achieve the optimal performance needed to address data I/O and storage problems. Thus the
  * internal HDF5 filter mechanism is enhanced to address the issues discussed above.
  *
@@ -901,7 +901,7 @@ filters
  *
  * When an application reads data compressed with a third-party HDF5 filter, the HDF5 Library will search
  * for the required filter plugin, register the filter with the library (if the filter function is not
-registered) and
+ * registered) and
  * apply it to the data on the read operation.
  *
  * For more information,
@@ -1496,7 +1496,7 @@ allocated if necessary.
  * the size of the memory datatype and the number of elements in the memory selection.
  *
  * Variable-length data are organized in two or more areas of memory. For more information,
- * \see \ref h4_vlen_datatype "Variable-length Datatypes".
+ * see \ref h4_vlen_datatype "Variable-length Datatypes".
  *
  * When writing data, the application creates an array of
  * vl_info_t which contains pointers to the elements. The elements might be, for example, strings.
@@ -2735,7 +2735,7 @@ allocated if necessary.
  * See The HDF Group website for further information regarding the SZip filter.
  *
  * \subsubsection subsubsec_dataset_filters_dyn Using Dynamically-Loadable Filters
- * \see \ref sec_filter_plugins for further information regarding the dynamically-loadable filters.
+ * see \ref sec_filter_plugins for further information regarding the dynamically-loadable filters.
  *
  * HDF has a filter plugin repository of useful third-party plugins that can used
  * <table>

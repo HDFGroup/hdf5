@@ -4,17 +4,16 @@ ALIASES += THG="The HDF Group"
 # Default URLs             (Note that md files do not use any aliases)
 ################################################################################
 # Default URL for HDF Group Files
-ALIASES += HDFURL="docs.hdfgroup.org/hdf5"
+ALIASES += HDFURL="support.hdfgroup.org"
 # URL for archived files
-ALIASES += ARCURL="docs.hdfgroup.org/archive/support/HDF5/doc"
+ALIASES += ARCURL="\HDFURL/archive/support/HDF5/doc"
 # URL for RFCs
-ALIASES += RFCURL="docs.hdfgroup.org/hdf5/rfc"
+ALIASES += RFCURL="\HDFURL/hdf5/rfc"
 # URL for documentation
-ALIASES += DSPURL="portal.hdfgroup.org/display/HDF5"
-ALIASES += DOCURL="portal.hdfgroup.org/documentation/hdf5-docs"
+ALIASES += DOCURL="\HDFURL/releases/hdf5/documentation"
 # URL for downloads
-ALIASES += DWNURL="portal.hdfgroup.org/downloads"
-ALIASES += AEXURL="support.hdfgroup.org/ftp/HDF5/examples"
+ALIASES += DWNURL="\HDFURL/releases/hdf5/downloads"
+ALIASES += AEXURL="\HDFURL/archive/support/ftp/HDF5/examples"
 # doxygen subdir (develop, v1_14)
 ALIASES += DOXURL="hdfgroup.github.io/hdf5/develop"
 #branch name (develop, hdf5_1_14)
@@ -259,13 +258,13 @@ ALIASES += sa_metadata_ops="\sa \li H5Pget_all_coll_metadata_ops() \li H5Pget_co
 
 ALIASES += ref_cons_semantics="<a href=\"https://\RFCURL/RFC%20PHDF5%20Consistency%20Semantics%20MC%20120328.docx.pdf\">Enabling a Strict Consistency Semantics Model in Parallel HDF5</a>"
 ALIASES += ref_file_image_ops="<a href=\"https://\RFCURL/HDF5FileImageOperations.pdf\">HDF5 File Image Operations</a>"
-ALIASES += ref_filter_pipe="<a href=\"https://\DSPURL/HDF5+Data+Flow+Pipeline+for+H5Dread\">Data Flow Pipeline for H5Dread()</a>"
+ALIASES += ref_filter_pipe="<a href=\"https://\DOCURL/HDF5+Data+Flow+Pipeline+for+H5Dread\">Data Flow Pipeline for H5Dread()</a>"
 ALIASES += ref_group_impls="<a href=\"https://\DOXURL/group___h5_g.html\">Group implementations in HDF5</a>"
 ALIASES += ref_h5lib_relver="<a href=\"https://\ARCURL/TechNotes/Version.html\">HDF5 Library Release Version Numbers</a>"
-ALIASES += ref_mdc_in_hdf5="<a href=\"https://\DSPURL/Metadata+Caching+in+HDF5\">Metadata Caching in HDF5</a>"
-ALIASES += ref_mdc_logging="<a href=\"https://\DSPURL/H5F_START_MDC_LOGGING\">Metadata Cache Logging</a>"
+ALIASES += ref_mdc_in_hdf5="<a href=\"https://\DOCURL/Metadata+Caching+in+HDF5\">Metadata Caching in HDF5</a>"
+ALIASES += ref_mdc_logging="<a href=\"https://\DOCURL/H5F_START_MDC_LOGGING\">Metadata Cache Logging</a>"
 ALIASES += ref_news_112="<a href=\"https://\DOCURL/release_specifics/new_features_1_12.html\">New Features in HDF5 Release 1.12</a>"
-ALIASES += ref_h5ocopy="<a href=\"https://\DSPURL/Copying+Committed+Datatypes+with+H5Ocopy\">Copying Committed Datatypes with H5Ocopy()</a>"
+ALIASES += ref_h5ocopy="<a href=\"https://\DOCURL/Copying+Committed+Datatypes+with+H5Ocopy\">Copying Committed Datatypes with H5Ocopy()</a>"
 ALIASES += ref_sencode_fmt_change="<a href=\"https://\RFCURL/H5Sencode_format.docx.pdf\">RFC H5Sencode() / H5Sdecode() Format Change</a>"
 ALIASES += ref_vlen_strings="\Emph{Creating variable-length string datatypes}"
 ALIASES += ref_vol_doc="VOL documentation"
