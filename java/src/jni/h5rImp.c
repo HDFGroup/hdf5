@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- *  For details of the HDF libraries, see the HDF Documentation at:
- *    https://portal.hdfgroup.org/documentation/index.html
- *
- */
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

@@ -183,7 +183,7 @@ to a new with a new layout.
 \section secLBDsetLayoutSource Sources of Information
 <a href="https://\DOCURL/chunking_in_hdf5.html">Chunking in HDF5</a>
 (See the documentation on <a href="https://\DOCURL/advanced_topics_list.html">Advanced Topics in HDF5</a>)
-\see \ref sec_plist in the HDF5 \ref UG.
+see \ref sec_plist in the HDF5 \ref UG.
 
 <hr>
 Previous Chapter \ref LBPropsList - Next Chapter \ref LBExtDset
@@ -251,7 +251,7 @@ The following operations are required in order to create a compressed dataset:
 \li Create the dataset.
 \li Close the dataset creation property list and dataset.
 
-For more information on compression, see the FAQ question on <a href="https://confluence.hdfgroup.org/display/HDF5/Using+Compression+in+HDF5">Using Compression in HDF5</a>.
+For more information on compression, see the FAQ question on <a href="https://\DOCURL/Using+Compression+in+HDF5">Using Compression in HDF5</a>.
 
 \section secLBComDsetProg Programming Example
 
@@ -720,7 +720,7 @@ Previous Chapter \ref LBQuiz - Next Chapter \ref LBCompiling
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-/** @page LBCompiling Compiling HDF5 Applications
+@page LBCompiling Compiling HDF5 Applications
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -969,13 +969,13 @@ or on WINDOWS you may need to add the path to the bin folder to PATH.
 
 \subsection subsecLBCompilingCMakeScripts CMake Scripts for Building Applications
 Simple scripts are provided for building applications with different languages and options.
-See <a href="https://confluence.hdfgroup.org/display/support/CMake+Scripts+for+Building+Applications">CMake Scripts for Building Applications</a>.
+See <a href="https://\DOCURL/CMake+Scripts+for+Building+Applications">CMake Scripts for Building Applications</a>.
 
 For a more complete script (and to help resolve issues) see the script provided with the HDF5 Examples project.
 
 \subsection subsecLBCompilingCMakeExamples HDF5 Examples
 The installed HDF5 can be verified by compiling the HDF5 Examples project, included with the CMake built HDF5 binaries
-in the share folder or you can go to the <a href="https://github.com/HDFGroup/hdf5-examples">HDF5 Examples</a> github repository.
+in the share folder or you can go to the <a href="https://\SRCURL/HDF5Examples">HDF5 Examples</a> in the HDF5 github repository.
 
 Go into the share directory and follow the instructions in USING_CMake_examples.txt to build the examples.
 
@@ -1035,9 +1035,11 @@ Previous Chapter \ref LBQuizAnswers - Next Chapter \ref LBTraining
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-*/
+@page LBTraining Training Videos
 
-/ref LBTraining
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+<a href="https://\DOCURL/Training+Videos">Training Videos</a>
 
 <hr>
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
