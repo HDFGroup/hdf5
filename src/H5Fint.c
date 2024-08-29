@@ -1786,7 +1786,7 @@ done:
  *        s: the open succeeds with flags combination from both the first and second opens
  *
  *        NOTE: If the 'try' flag is true, not opening the file with the
- *        "non-tentative" VFD 'open' call is not treated an error; SUCCEED is
+ *        "non-tentative" VFD 'open' call is not treated as an error; SUCCEED is
  *        returned, with the file ptr set to NULL.  If 'try' is false, failing
  *        the "non-tentative" VFD 'open' call generates an error.
  *
