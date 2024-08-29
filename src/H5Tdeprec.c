@@ -116,7 +116,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the object from the loc_id */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Commit the datatype */
@@ -167,7 +167,7 @@ H5Topen1(hid_t loc_id, const char *name)
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Open the datatype */
