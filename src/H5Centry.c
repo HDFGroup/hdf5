@@ -3131,7 +3131,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
         else
             empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
 
-        /* try to free up if necceary and if evictions are permitted.  Note
+        /* try to free up if necessary and if evictions are permitted.  Note
          * that if evictions are enabled, we will call H5C__make_space_in_cache()
          * regardless if the min_free_space requirement is not met.
          */

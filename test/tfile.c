@@ -2420,10 +2420,11 @@ test_file_getname(void)
     file_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file_id, FAIL, "H5Fcreate");
 
-    /* Get and verify file name */
+    /* Get and verify file name and its length */
     name_len = H5Fget_name(file_id, name, (size_t)TESTA_NAME_BUF_SIZE);
     CHECK(name_len, FAIL, "H5Fget_name");
     VERIFY_STR(name, FILE1, "H5Fget_name");
+    VERIFY(name_len, strlen(FILE1), "H5Fget_name");
 
     /* Create a group in the root group */
     group_id = H5Gcreate2(file_id, TESTA_GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -8103,45 +8104,38 @@ test_min_dset_ohdr(void)
 /****************************************************************
 **
 **  test_unseekable_file():
-**    Test that attempting to open an unseekable file fails gracefully
+**    Test that attempting to create/open an unseekable file fails gracefully
 **    without a segfault (see hdf5#1498)
 ****************************************************************/
 static void
 test_unseekable_file(void)
 {
-    hid_t file_id = H5I_INVALID_HID; /* File ID */
-
     /* Output message about test being performed */
     MESSAGE(5, ("Testing creating/opening an unseekable file\n"));
 
+    /* Flush message in case this test segfaults */
+    fflush(stdout);
+
     /* Creation */
 #ifdef H5_HAVE_WIN32_API
-    file_id = H5Fcreate("NUL", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    H5Fcreate("NUL", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 #else
-    file_id = H5Fcreate("/dev/null", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    H5Fcreate("/dev/null", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 #endif
 
-    H5Fclose(file_id);
+    /* Should fail without segfault */
+    /* TODO - Does not properly fail on all systems */
+    /* VERIFY(file_id, H5I_INVALID_HID, "H5Fcreate"); */
 
-    /* Open, truncate */
+    /* Opening */
 #ifdef H5_HAVE_WIN32_API
-    file_id = H5Fopen("NUL", H5F_ACC_TRUNC, H5P_DEFAULT);
+    H5Fopen("NUL", H5F_ACC_RDWR, H5P_DEFAULT);
 #else
-    file_id = H5Fopen("/dev/null", H5F_ACC_TRUNC, H5P_DEFAULT);
+    H5Fopen("/dev/null", H5F_ACC_RDWR, H5P_DEFAULT);
 #endif
 
-    H5Fclose(file_id);
-
-    /* Open, RDWR */
-#ifdef H5_HAVE_WIN32_API
-    file_id = H5Fopen("NUL", H5F_ACC_RDWR, H5P_DEFAULT);
-#else
-    file_id = H5Fopen("/dev/null", H5F_ACC_RDWR, H5P_DEFAULT);
-#endif
-
-    H5Fclose(file_id);
-
-    exit(EXIT_SUCCESS);
+    /* TODO - Does not properly fail on all systems */
+    /* VERIFY(file_id, H5I_INVALID_HID, "H5Fopen"); */
 }
 /****************************************************************
 **
@@ -8196,6 +8190,14 @@ test_deprec(const char *driver_name)
     /* Get the file's dataset creation property list */
     fcpl = H5Fget_create_plist(file);
     CHECK(fcpl, FAIL, "H5Fget_create_plist");
+
+    /* Test passing in an ID that is not a file ID, should fail */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fset_latest_format(fcpl, true);
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Fset_latest_format");
 
     /* Get the file's version information */
     ret = H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);

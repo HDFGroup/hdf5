@@ -874,7 +874,7 @@ H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle);
  *
  * \brief Mounts an HDF5 file
  *
- * \loc_id{loc}
+ * \fg_loc_id{loc_id}
  * \param[in] name Name of the group onto which the file specified by \p child
  *                 is to be mounted
  * \file_id{child}
@@ -898,13 +898,13 @@ H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle);
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
+H5_DLL herr_t H5Fmount(hid_t loc_id, const char *name, hid_t child, hid_t plist);
 /**
  * \ingroup H5F
  *
- * \brief Unounts an HDF5 file
+ * \brief Un-mounts an HDF5 file
  *
- * \loc_id{loc}
+ * \fg_loc_id{loc_id}
  * \param[in] name Name of the mount point
  *
  * \return \herr_t
@@ -922,7 +922,7 @@ H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
+H5_DLL herr_t H5Funmount(hid_t loc_id, const char *name);
 /**
  * \ingroup H5F
  *

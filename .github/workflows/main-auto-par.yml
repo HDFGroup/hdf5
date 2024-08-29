@@ -50,8 +50,9 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # AUTOTOOLS CONFIGURE
       - name: Autotools Configure
+        env:
+          NPROCS: 2
         run: |
           sh ./autogen.sh
           mkdir "${{ runner.workspace }}/build"
@@ -62,6 +63,7 @@ jobs:
             --with-default-api-version=v114 \
             --enable-shared \
             --enable-parallel \
+            --enable-subfiling-vfd \
             --disable-cxx \
             --enable-fortran \
             --disable-java \
@@ -71,7 +73,28 @@ jobs:
             --with-szlib=yes
         shell: bash
 
-      # BUILD
       - name: Autotools Build
         run: make -j3
         working-directory: ${{ runner.workspace }}/build
+
+      # ph5diff tests are in the tools/tests directory so they will get run
+      # here, so leave NPROCS set here as well
+      - name: Autotools Run Tests
+        env:
+          NPROCS: 2
+        run: |
+          cd test && make check -j2 && cd ..
+          cd tools && make check -j2 && cd ..
+          cd hl && make check -j2 && cd ..
+          cd fortran/test && make check -j2 && cd ../..
+        working-directory: ${{ runner.workspace }}/build
+        if: ${{ inputs.thread_safety == 'disable' }}
+
+      - name: Autotools Run Parallel Tests
+        env:
+          NPROCS: 2
+        run: |
+          cd testpar && make check && cd ..
+          cd fortran/testpar && make check -j2 && cd ../..
+        working-directory: ${{ runner.workspace }}/build
+        if: ${{ inputs.thread_safety == 'disable' }}

@@ -98,10 +98,10 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions			*/
-#include "H5Bpkg.h"      /* B-link trees				*/
-#include "H5CXprivate.h" /* API Contexts                         */
+#include "H5Bpkg.h"      /* B-link trees			*/
+#include "H5CXprivate.h" /* API Contexts                        */
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5FLprivate.h" /* Free Lists                          */
 #include "H5MFprivate.h" /* File memory management		*/
 #include "H5MMprivate.h" /* Memory management			*/
 
@@ -109,7 +109,7 @@
 /* Local Macros */
 /****************/
 #define H5B_SIZEOF_HDR(F)                                                                                    \
-    (H5_SIZEOF_MAGIC +       /*magic number				  */                                                          \
+    (H5_SIZEOF_MAGIC +       /*magic number			  */                                                           \
      4 +                     /*type, level, num entries		  */                                                \
      2 * H5F_SIZEOF_ADDR(F)) /*left and right sibling addresses	  */
 
@@ -234,7 +234,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *addr_p /*out
      * Cache the new B-tree node.
      */
     if (H5AC_insert_entry(f, H5AC_BT, *addr_p, bt, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't add B-tree root node to cache");
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINS, FAIL, "can't add B-tree root node to cache");
 
 done:
     if (ret_value < 0) {
@@ -245,7 +245,7 @@ done:
         if (bt)
             /* Destroy B-tree node */
             if (H5B__node_dest(bt) < 0)
-                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node");
+                HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL, "unable to destroy B-tree node");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -539,7 +539,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     /* Insert the object */
     if ((int)(my_ins = H5B__insert_helper(f, &bt_ud, type, lt_key, &lt_key_changed, md_key, udata, rt_key,
                                           &rt_key_changed, &split_bt_ud /*out*/)) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to insert key");
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert key");
 
     /* Check if the root node split */
     if (H5B_INS_NOOP == my_ins) {
@@ -585,7 +585,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 
     /* Move the location of the old root on the disk */
     if (H5AC_move_entry(f, H5AC_BT, bt_ud.addr, old_root_addr) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to move B-tree root node");
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTMOVE, FAIL, "unable to move B-tree root node");
     bt_ud.addr = old_root_addr;
 
     /* Update the split b-tree's left pointer to point to the new location */
@@ -609,7 +609,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 
     /* Insert the modified copy of the old root into the file again */
     if (H5AC_insert_entry(f, H5AC_BT, addr, new_root_bt, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to add old B-tree root node to cache");
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINS, FAIL, "unable to add old B-tree root node to cache");
 
 done:
     if (ret_value < 0)
@@ -857,8 +857,7 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
         /* Since we are to the left of the leftmost key there must not be a left
          * sibling */
         if (H5_addr_defined(bt->left))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
-                        "internal error: likely corrupt key values");
+            HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, H5B_INS_ERROR, "internal error: likely corrupt key values");
 #endif /* H5_STRICT_FORMAT_CHECKS */
     }
     else if (cmp > 0 && idx + 1 >= bt->nchildren) {
@@ -909,8 +908,7 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
         /* Since we are to the right of the rightmost key there must not be a
          * right sibling */
         if (H5_addr_defined(bt->right))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
-                        "internal error: likely corrupt key values");
+            HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, H5B_INS_ERROR, "internal error: likely corrupt key values");
 #endif /* H5_STRICT_FORMAT_CHECKS */
     }
     else if (cmp) {
@@ -1215,7 +1213,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
                       H5B__remove_helper(f, bt->child[idx], type, level + 1,
                                          H5B_NKEY(bt, shared, idx) /*out*/, lt_key_changed /*out*/, udata,
                                          H5B_NKEY(bt, shared, idx + 1) /*out*/, rt_key_changed /*out*/)) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, H5B_INS_ERROR, "key not found in subtree");
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTREMOVE, H5B_INS_ERROR, "key not found in subtree");
     }
     else if (type->remove) {
         /*
@@ -1225,7 +1223,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
          */
         if ((int)(ret_value = (type->remove)(f, bt->child[idx], H5B_NKEY(bt, shared, idx), lt_key_changed,
                                              udata, H5B_NKEY(bt, shared, idx + 1), rt_key_changed)) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, H5B_INS_ERROR, "key not found in leaf node");
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTREMOVE, H5B_INS_ERROR, "key not found in leaf node");
     }
     else {
         /*
@@ -1499,7 +1497,7 @@ H5B_remove(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     /* The actual removal */
     if (H5B_INS_ERROR ==
         H5B__remove_helper(f, addr, type, 0, lt_key, &lt_key_changed, udata, rt_key, &rt_key_changed))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to remove entry from B-tree");
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTREMOVE, FAIL, "unable to remove entry from B-tree");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1550,7 +1548,7 @@ H5B_delete(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
         /* Iterate over all children in node, deleting them */
         for (u = 0; u < bt->nchildren; u++)
             if (H5B_delete(f, type, bt->child[u], udata) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "unable to delete B-tree node");
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree node");
 
     } /* end if */
     else {
@@ -1563,7 +1561,7 @@ H5B_delete(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
                 /* Call user's callback for each entry */
                 if ((type->remove)(f, bt->child[u], H5B_NKEY(bt, shared, u), &lt_key_changed, udata,
                                    H5B_NKEY(bt, shared, u + 1), &rt_key_changed) < H5B_INS_NOOP)
-                    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "can't remove B-tree node");
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTREMOVE, FAIL, "can't remove B-tree node");
             } /* end for */
         }     /* end if */
     }         /* end else */
@@ -1826,7 +1824,7 @@ H5B__get_info_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr, const H5B_
     if (level > 0) {
         /* Keep following the left-most child until we reach a leaf node. */
         if (H5B__get_info_helper(f, type, left_child, info_udata) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "unable to list B-tree node");
+            HGOTO_ERROR(H5E_BTREE, H5E_BADITER, FAIL, "unable to list B-tree node");
     } /* end if */
 
 done:
@@ -1893,13 +1891,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-htri_t
+herr_t
 H5B_valid(H5F_t *f, const H5B_class_t *type, haddr_t addr)
 {
     H5B_t         *bt = NULL;           /* The B-tree */
     H5UC_t        *rc_shared;           /* Ref-counted shared info */
     H5B_cache_ud_t cache_udata;         /* User-data for metadata cache callback */
-    htri_t         ret_value = SUCCEED; /* Return value */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

@@ -2563,3 +2563,24 @@ h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)
 
     return ret_val;
 }
+
+/* Deterministic random number functions that don't modify the underlying
+ * C/POSIX library rand/random state, as this can cause spurious test failures.
+ *
+ * Adapted from the example code in the POSIX.1-2001 standard.
+ */
+
+static unsigned int next_g = 1;
+
+int
+h5_local_rand(void)
+{
+    next_g = next_g * 1103515245 + 12345;
+    return next_g & RAND_MAX;
+}
+
+void
+h5_local_srand(unsigned int seed)
+{
+    next_g = seed;
+}
