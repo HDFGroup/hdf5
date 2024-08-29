@@ -126,7 +126,7 @@ ReadGifImageDesc(GIFIMAGEDESC *GifImageDesc, /* Pointer to GIF image descriptor 
     GIFWORD i;               /* Loop counter                               */
     GIFWORD tableSize;       /* Number of entries in the Local Color Table */
     /* GIFBYTE Interlace; */ /* PackedField & 0x20 gives information on interlacing */
-    GIFBYTE *TempPtr;
+    GIFBYTE *TempPtr, *endPtr;
     int      ch, ch1;
 
     GifImageDesc->TableSize = 0;
@@ -182,17 +182,23 @@ ReadGifImageDesc(GIFIMAGEDESC *GifImageDesc, /* Pointer to GIF image descriptor 
     GifImageDesc->CodeSize = (GIFWORD) * (*MemGif2)++;
 
     /*GifImageDesc->GIFImage = ReadDataSubBlocks(FpGif);*/
-    if (!(GifImageDesc->GIFImage =
-              (GIFBYTE *)malloc((GifImageDesc->ImageWidth) * (GifImageDesc->ImageHeight)))) {
+    size_t bufferSize = (GifImageDesc->ImageWidth) * (GifImageDesc->ImageHeight);
+    if (!(GifImageDesc->GIFImage = (GIFBYTE *)malloc(bufferSize))) {
         printf("Out of memory");
         exit(EXIT_FAILURE);
     }
 
     TempPtr = GifImageDesc->GIFImage;
+    endPtr = TempPtr + bufferSize;
     do {
         ch = ch1 = (int)*(*MemGif2)++;
-        while (ch--)
+        while (ch--) {
+            if (TempPtr >= endPtr) {
+                printf("Buffer overflow detected!\n");
+                exit(EXIT_FAILURE);
+            }
             *TempPtr++ = *(*MemGif2)++;
+        }
     } while (ch1);
 
     return (0); /* No FILE stream error occurred */
