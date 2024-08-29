@@ -1,0 +1,37 @@
+name: fuzz
+on:
+  push:
+    branches:
+      - develop
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ matrix.sanitizer }}-${{ matrix.architecture }}-${{ github.ref }}
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [address, undefined, memory]
+        architecture: [x86_64]
+    permissions:
+      security-events: write
+
+    steps:
+      - name: Build Fuzzers
+        id: build
+        uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@master
+        with:
+          oss-fuzz-project-name: 'hdf5'
+          sanitizer: ${{ matrix.sanitizer }}
+          architecture: ${{ matrix.architecture }}
+          dry-run: false
+          keep-unaffected-fuzz-targets: true
+      - name: Run Fuzzers
+        uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
+        with:
+          oss-fuzz-project-name: 'hdf5'
+          fuzz-seconds: 600
+          output-sarif: true
+          sanitizer: ${{ matrix.sanitizer }}
+          dry-run: false
