@@ -359,8 +359,7 @@ done:
  *              the in-file datatype for values is defined by VAL_TYPE_ID.
  *              LOC_ID specifies the file to create the map object, but no
  *              link to the object is created.  Other options can be
- *              specified through the property lists LCPL_ID, MCPL_ID, and
- *              MAPL_ID.
+ *              specified through the property lists MCPL_ID and MAPL_ID.
  *
  *              The resulting ID should be linked into the file with
  *              H5Olink or it will be deleted when closed.
