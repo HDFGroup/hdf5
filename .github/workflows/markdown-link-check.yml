@@ -3,9 +3,6 @@ name: Check Markdown links
 # Triggers the workflow on push or pull request or on demand
 on:
   workflow_dispatch:
-  push:
-  pull_request:
-    branches: [ hdf5_1_14 ]
 
 # The config file handles things like http 500 errors from sites like GitLab
 # and http 200 responses

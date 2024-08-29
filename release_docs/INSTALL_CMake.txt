@@ -59,12 +59,11 @@ HDF Group recommends using the ctest script mode to build HDF5.
 -------------------------------------------------------------------------
 Individual files needed as mentioned in this document
 -------------------------------------------------------------------------
-CMake build script from https://github.com/HDFGroup/hdf5/tree/hdf5_1_14/config/cmake/scripts:
-    CTestScript.cmake
+Download from https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/config/cmake/scripts:
+    CTestScript.cmake  -- CMake build script
 
-Configuration files from https://github.com/HDFGroup/hdf5/tree/hdf5_1_14/config/cmake/scripts:
-    HDF5config.cmake
-    HDF5options.cmake
+    HDF5config.cmake   -- CMake configuration script
+    HDF5options.cmake  -- CMake configuration options script
 
 External compression plugin libraries from https://github.com/HDFGroup/hdf5_plugins:
     hdf5_plugins.tar.gz
