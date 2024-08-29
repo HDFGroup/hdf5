@@ -189,7 +189,7 @@ ReadGifImageDesc(GIFIMAGEDESC *GifImageDesc, /* Pointer to GIF image descriptor 
     }
 
     TempPtr = GifImageDesc->GIFImage;
-    endPtr = TempPtr + bufferSize;
+    endPtr  = TempPtr + bufferSize;
     do {
         ch = ch1 = (int)*(*MemGif2)++;
         while (ch--) {
