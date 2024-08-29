@@ -156,8 +156,8 @@ jobs:
           mkdir "${{ runner.workspace }}/buildmsi/hdf5"
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/buildmsi/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/buildmsi/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/README.md -Destination ${{ runner.workspace }}/buildmsi/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace }}/buildmsi/hdf5/ -Include *.msi
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-MSVC/README.md -Destination ${{ runner.workspace }}/buildmsi/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace }}/buildmsi/hdf5/ -Include *.msi
           cd "${{ runner.workspace }}/buildmsi"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi.zip hdf5
         shell: pwsh
@@ -379,8 +379,8 @@ jobs:
           mkdir "${{ runner.workspace }}/build/hdf5"
           cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz hdf5
         shell: bash
@@ -392,8 +392,8 @@ jobs:
           mkdir "${{ runner.workspace }}/builddmg/hdf5"
           cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/builddmg/hdf5
           cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/builddmg/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/builddmg/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.dmg ${{ runner.workspace }}/builddmg/hdf5
+          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/builddmg/hdf5
+          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Clang/*.dmg ${{ runner.workspace }}/builddmg/hdf5
           cd "${{ runner.workspace }}/builddmg"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.arm64.dmg.tar.gz hdf5
         shell: bash
@@ -584,12 +584,14 @@ jobs:
         shell: pwsh
 
       - name: Publish msi binary (Windows_intel)
+        id: publish-ctest-msi-binary
+        run: |
           mkdir "${{ runner.workspace }}/buildmsi"
           mkdir "${{ runner.workspace }}/buildmsi/hdf5"
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/buildmsi/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/buildmsi/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/buildmsi/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/buildmsi/hdf5/ -Include *.msi
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/buildmsi/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/buildmsi/hdf5/ -Include *.msi
           cd "${{ runner.workspace }}/buildmsi"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi.zip hdf5
         shell: pwsh
@@ -626,11 +628,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build doxygen graphviz
-
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@v1
-        with:
-          version: "1.10.0"
 
       - name: add oneAPI to env
         uses: fortran-lang/setup-fortran@v1
