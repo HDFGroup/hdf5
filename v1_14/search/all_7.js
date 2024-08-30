@@ -221,11 +221,15 @@ var searchData=
   ['glossary_218',['Glossary',['../_g_l_s.html',1,'']]],
   ['glossary_2edox_219',['Glossary.dox',['../_glossary_8dox.html',1,'']]],
   ['gmnow_220',['gmnow',['../_h5_f_ds3comms_8h.html#a94c0f5d0a3c8c6471c799e06128fb280',1,'H5FDs3comms.h']]],
-  ['group_221',['Group',['../class_h5_1_1_group.html#a7e478c67e5ff95bddc485d251576614c',1,'H5::Group::Group(const H5Location &amp;loc, const void *ref, H5R_type_t ref_type=H5R_OBJECT, const PropList &amp;plist=PropList::DEFAULT)'],['../class_h5_1_1_group.html#a0b29b9393b4b6856ac75b759f4166c13',1,'H5::Group::Group()'],['../class_h5_1_1_group.html#afa0350e4e9444888d3548719e67aca6a',1,'H5::Group::Group(const Group &amp;original)'],['../class_h5_1_1_group.html#a4ed5dc02f4eebc2b4086fd53220dd730',1,'H5::Group::Group(const hid_t group_id)'],['../class_h5_1_1_group.html',1,'Group']]],
-  ['group_20access_20properties_222',['Group Access Properties',['../group___g_a_p_l.html',1,'']]],
-  ['group_20creation_20properties_223',['Group Creation Properties',['../group___g_c_p_l.html',1,'']]],
-  ['group_5fcls_224',['group_cls',['../struct_h5_v_l__class__t.html#a6f9e6afe57118c01efbd5805d6f6615d',1,'H5VL_class_t']]],
-  ['groupiexception_225',['GroupIException',['../class_h5_1_1_group_i_exception.html#a03e8c450365a1ac129e8eb5ca92bcbb1',1,'H5::GroupIException::GroupIException(const std::string &amp;func_name, const std::string &amp;message=DEFAULT_MSG)'],['../class_h5_1_1_group_i_exception.html#a2d9e1cc81109cc84d451280e647897d0',1,'H5::GroupIException::GroupIException()'],['../class_h5_1_1_group_i_exception.html',1,'GroupIException']]],
-  ['groups_20_28h5g_29_226',['Groups (H5G)',['../group___h5_g.html',1,'']]],
-  ['grp_5fid_227',['grp_id',['../struct_h5_v_l__group__specific__args__t.html#a450c9c74199b4e8e327320e0f11e1a1b',1,'H5VL_group_specific_args_t']]]
+  ['group_221',['group',['../structpath__info.html#acc9ab9e534d95b851e488a4fdd883598',1,'path_info']]],
+  ['group_222',['Group',['../class_h5_1_1_group.html#a7e478c67e5ff95bddc485d251576614c',1,'H5::Group::Group(const H5Location &amp;loc, const void *ref, H5R_type_t ref_type=H5R_OBJECT, const PropList &amp;plist=PropList::DEFAULT)'],['../class_h5_1_1_group.html#a0b29b9393b4b6856ac75b759f4166c13',1,'H5::Group::Group()'],['../class_h5_1_1_group.html#afa0350e4e9444888d3548719e67aca6a',1,'H5::Group::Group(const Group &amp;original)'],['../class_h5_1_1_group.html#a4ed5dc02f4eebc2b4086fd53220dd730',1,'H5::Group::Group(const hid_t group_id)'],['../class_h5_1_1_group.html',1,'Group']]],
+  ['group_20access_20properties_223',['Group Access Properties',['../group___g_a_p_l.html',1,'']]],
+  ['group_20creation_20properties_224',['Group Creation Properties',['../group___g_c_p_l.html',1,'']]],
+  ['group_5fcls_225',['group_cls',['../struct_h5_v_l__class__t.html#a6f9e6afe57118c01efbd5805d6f6615d',1,'H5VL_class_t']]],
+  ['group_5ftable_226',['group_table',['../structh5dump__table__items__t.html#a33ebcd918b8a0ee0452bfb34a32e5193',1,'h5dump_table_items_t::group_table'],['../h5dump_8h.html#a33ebcd918b8a0ee0452bfb34a32e5193',1,'group_table:&#160;h5dump.h']]],
+  ['groupiexception_227',['GroupIException',['../class_h5_1_1_group_i_exception.html#a03e8c450365a1ac129e8eb5ca92bcbb1',1,'H5::GroupIException::GroupIException(const std::string &amp;func_name, const std::string &amp;message=DEFAULT_MSG)'],['../class_h5_1_1_group_i_exception.html#a2d9e1cc81109cc84d451280e647897d0',1,'H5::GroupIException::GroupIException()'],['../class_h5_1_1_group_i_exception.html',1,'GroupIException']]],
+  ['groups_20_28h5g_29_228',['Groups (H5G)',['../group___h5_g.html',1,'']]],
+  ['grp_5fcompact_229',['grp_compact',['../structpack__opt__t.html#a1ffa4566febe7d3f43796bf8f9ca5de1',1,'pack_opt_t']]],
+  ['grp_5fid_230',['grp_id',['../struct_h5_v_l__group__specific__args__t.html#a450c9c74199b4e8e327320e0f11e1a1b',1,'H5VL_group_specific_args_t']]],
+  ['grp_5findexed_231',['grp_indexed',['../structpack__opt__t.html#a513f3e52e29748e03e22cc69385e13b3',1,'pack_opt_t']]]
 ];

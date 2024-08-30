@@ -1,12 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.7"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: Programming Issues</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -22,37 +23,24 @@
 /* @license-end */
 </script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="hdf5doxy.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
 <link href="hdf5doxy.css" rel="stylesheet" type="text/css">
-<!-- <link href="hdf5doxy.css" rel="stylesheet" type="text/css"/>
- -->
 <script type="text/javascript" src="hdf5_navtree_hacks.js"></script>
+<div style="background:#FFDDDD;font-size:120%;text-align:center;margin:0;padding:5px">Please, help us to better serve our user community by answering the following short survey:  <a href="https://www.hdfgroup.org/website-survey/">https://www.hdfgroup.org/website-survey/</a></div>
 </head>
 <body>
-<div style="background:#FFDDDD;font-size:120%;text-align:center;margin:0;padding:5px">Please, help us to better serve our user community by answering the following short survey:  <a href="https://www.hdfgroup.org/website-survey/">https://www.hdfgroup.org/website-survey/</a></div>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
 <div id="titlearea">
 <table cellspacing="0" cellpadding="0">
  <tbody>
- <tr style="height: 56px;">
+ <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
-  <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.14.5.1</span>
+  <td id="projectalign">
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.5.6467122</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
-   <td>        <div id="MSearchBox" class="MSearchBoxInactive">
-        <span class="left">
-          <span id="MSearchSelect"                onmouseover="return searchBox.OnSearchSelectShow()"                onmouseout="return searchBox.OnSearchSelectHide()">&#160;</span>
-          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
-               onfocus="searchBox.OnSearchFieldFocus(true)" 
-               onblur="searchBox.OnSearchFieldFocus(false)" 
-               onkeyup="searchBox.OnSearchFieldChange(event)"/>
-          </span><span class="right">
-            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
-          </span>
-        </div>
-</td>
  </tr>
  </tbody>
 </table>
@@ -64,6 +52,33 @@
 var searchBox = new SearchBox("searchBox", "search/",'.html');
 /* @license-end */
 </script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="_getting_started.html"><span>Getting&#160;started</span></a></li>
+      <li><a href="_u_g.html"><span>User&#160;Guide</span></a></li>
+      <li><a href="_r_m.html"><span>Reference&#160;Manual</span></a></li>
+      <li><a href="_cookbook.html"><span>Cookbook</span></a></li>
+      <li><a href="_t_n.html"><span>Technical&#160;Notes</span></a></li>
+      <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
+      <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
+      <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_about.html"><span>About</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect"                onmouseover="return searchBox.OnSearchSelectShow()"                onmouseout="return searchBox.OnSearchSelectHide()">&#160;</span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
 </div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
@@ -144,22 +159,29 @@ APIs vary with different languages</h1>
 HDF5 library has its own defined types</h1>
 <ul>
 <li><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> is used for object handles </li>
-<li>hsize_t is used for dimensions </li>
+<li><a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> is used for dimensions </li>
 <li><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> is used for many return values</li>
 </ul>
 <h1><a class="anchor" id="LBProgLang"></a>
 Language specific files must be included in applications</h1>
 <ul>
 <li>
-Python: Add <code>"import h5py / import numpy"</code>  </li>
+<b>Python</b>:<br  />
+ <code> import h5py<br  />
+ import numpy </code>  </li>
 <li>
-C: Add <code>"#include hdf5.h"</code>  </li>
+<b>C</b>:<br  />
+ <code>"#include hdf5.h"</code>  </li>
 <li>
-FORTRAN: Add <code>"USE HDF5"</code> and call h5open_f and h5close_f to initialize and close the HDF5 FORTRAN interface  </li>
+<b>FORTRAN</b>:<br  />
+ <code>USE HDF5</code><br  />
+ and call h5open_f and h5close_f to initialize and close the HDF5 FORTRAN interface  </li>
 <li>
-Java: Add <code>"import hdf.hdf5lib.H5;
-                     import hdf.hdf5lib.HDF5Constants;"</code>  </li>
+<b>Java</b>:<br  />
+ <code> import <a class="el" href="classhdf_1_1hdf5lib_1_1_h5.html">hdf.hdf5lib.H5</a>;<br  />
+ import <a class="el" href="classhdf_1_1hdf5lib_1_1_h_d_f5_constants.html">hdf.hdf5lib.HDF5Constants</a>; </code>  </li>
 </ul>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="_ex_a_p_i.html">Examples by API</a> for examples of using the HDF5 API.</dd></dl>
 <hr  />
 <p> Previous Chapter <a class="el" href="_l_b_a_p_i.html">The HDF5 API</a> - Next Chapter <a class="el" href="_l_b_file_create.html">Creating an HDF5 File</a></p>
 <p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_getting_started.html">Getting Started with HDF5</a> / <a class="el" href="_learn_basics.html">Learning the Basics</a> </p>
@@ -169,6 +191,7 @@ Java: Add <code>"import hdf.hdf5lib.H5;
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
+    <li class="navelem"><a class="el" href="_learn_basics.html">Learning the Basics</a></li>
     <li class="footer">Generated by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>

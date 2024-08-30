@@ -1,12 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.7"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: A Brief Introduction to Parallel HDF5</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -22,37 +23,24 @@
 /* @license-end */
 </script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="hdf5doxy.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
 <link href="hdf5doxy.css" rel="stylesheet" type="text/css">
-<!-- <link href="hdf5doxy.css" rel="stylesheet" type="text/css"/>
- -->
 <script type="text/javascript" src="hdf5_navtree_hacks.js"></script>
+<div style="background:#FFDDDD;font-size:120%;text-align:center;margin:0;padding:5px">Please, help us to better serve our user community by answering the following short survey:  <a href="https://www.hdfgroup.org/website-survey/">https://www.hdfgroup.org/website-survey/</a></div>
 </head>
 <body>
-<div style="background:#FFDDDD;font-size:120%;text-align:center;margin:0;padding:5px">Please, help us to better serve our user community by answering the following short survey:  <a href="https://www.hdfgroup.org/website-survey/">https://www.hdfgroup.org/website-survey/</a></div>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
 <div id="titlearea">
 <table cellspacing="0" cellpadding="0">
  <tbody>
- <tr style="height: 56px;">
+ <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
-  <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.14.5.1</span>
+  <td id="projectalign">
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.5.6467122</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
-   <td>        <div id="MSearchBox" class="MSearchBoxInactive">
-        <span class="left">
-          <span id="MSearchSelect"                onmouseover="return searchBox.OnSearchSelectShow()"                onmouseout="return searchBox.OnSearchSelectHide()">&#160;</span>
-          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
-               onfocus="searchBox.OnSearchFieldFocus(true)" 
-               onblur="searchBox.OnSearchFieldFocus(false)" 
-               onkeyup="searchBox.OnSearchFieldChange(event)"/>
-          </span><span class="right">
-            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
-          </span>
-        </div>
-</td>
  </tr>
  </tbody>
 </table>
@@ -64,6 +52,33 @@
 var searchBox = new SearchBox("searchBox", "search/",'.html');
 /* @license-end */
 </script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="_getting_started.html"><span>Getting&#160;started</span></a></li>
+      <li><a href="_u_g.html"><span>User&#160;Guide</span></a></li>
+      <li><a href="_r_m.html"><span>Reference&#160;Manual</span></a></li>
+      <li><a href="_cookbook.html"><span>Cookbook</span></a></li>
+      <li><a href="_t_n.html"><span>Technical&#160;Notes</span></a></li>
+      <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
+      <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
+      <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_about.html"><span>About</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect"                onmouseover="return searchBox.OnSearchSelectShow()"                onmouseout="return searchBox.OnSearchSelectHide()">&#160;</span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
 </div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
@@ -132,7 +147,7 @@ Overview of Parallel HDF5 (PHDF5) Design</h1>
 <h2><a class="anchor" id="subsec_pintro_prog"></a>
 Parallel Programming with HDF5</h2>
 <p>This tutorial assumes that you are somewhat familiar with parallel programming with MPI (Message Passing Interface).</p>
-<p>If you are not familiar with parallel programming, here is a tutorial that may be of interest: <a href="http://www.nersc.gov/users/training/online-tutorials/introduction-to-scientific-i-o/?show_all=1">Tutorial on HDF5 I/O tuning at NERSC</a></p>
+<p>If you are not familiar with parallel programming, here is a tutorial that may be of interest: <a href="https://portal.hdfgroup.org/documentation/hdf5-docs/hdf5_topics/2016_NERSC_Introduction_to_Scientific_IO.pdf">Tutorial on HDF5 I/O tuning at NERSC</a>. (NOTE: As of 2024, the specific systems described in this tutorial are outdated.)</p>
 <p>Some of the terms that you must understand in this tutorial are: </p><ul>
 <li>
 <p class="startli"><b>MPI Communicator</b> Allows a group of processes to communicate with each other.</p>
@@ -210,7 +225,9 @@ Close the file. </li>
 <div class="line">35       ! Setup file access property list with parallel I/O access.</div>
 <div class="line">36       !</div>
 <div class="line">37 CALL h5pcreate_f(H5P_FILE_ACCESS_F, plist_id, error) 38 CALL h5pset_fapl_mpio_f(plist_id, comm, info, error)</div>
-</div><!-- fragment --><p>The following example programs create an HDF5 file using Parallel HDF5: <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/C/H5PAR/ph5_file_create.c">C: file_create.c</a> <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/FORTRAN/H5PAR/ph5_f90_file_create.F90">F90: file_create.F90</a></p>
+</div><!-- fragment --><p>The following example programs create an HDF5 file using Parallel HDF5:</p>
+<p><a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/C/H5PAR/ph5_file_create.c">C: ph5_file_create.c</a></p>
+<p><a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/FORTRAN/H5PAR/ph5_f90_file_create.F90">F90: ph5_f90_file_create.F90</a></p>
 <h2><a class="anchor" id="subsec_pintro_create_dset"></a>
 Creating and Accessing a Dataset with PHDF5</h2>
 <p>The programming model for creating and accessing a dataset is as follows: </p><ol>
@@ -267,7 +284,9 @@ Do this by first passing a data transfer property list class type to: <a class="
 <div class="line">115       !</div>
 <div class="line">116       CALL h5dwrite_f (dset_id, H5T_NATIVE_INTEGER, data, dimsfi, error, &amp;</div>
 <div class="line">117          file_space_id = filespace, mem_space_id = memspace, xfer_prp = plist_id)</div>
-</div><!-- fragment --><p>The following example programs create an HDF5 dataset using Parallel HDF5: <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/C/H5PAR/ph5_dataset.c">C: dataset.c</a> <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/FORTRAN/H5PAR/ph5_f90_dataset.F90">F90: dataset.F90</a></p>
+</div><!-- fragment --><p>The following example programs create an HDF5 dataset using Parallel HDF5:</p>
+<p><a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/C/H5PAR/ph5_dataset.c">C: ph5_dataset.c</a></p>
+<p><a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/FORTRAN/H5PAR/ph5_f90_dataset.F90">F90: ph5_f90_dataset.F90</a></p>
 <h3><a class="anchor" id="subsec_pintro_hyperslabs"></a>
 Hyperslabs</h3>
 <p>The programming model for writing and reading hyperslabs is: /li Each process defines the memory and file hyperslabs. /li Each process executes a partial write/read call which is either collective or independent.</p>

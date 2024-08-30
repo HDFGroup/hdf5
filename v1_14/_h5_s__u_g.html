@@ -1,12 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.7"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: Dataspaces and Partial I/O</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -22,37 +23,24 @@
 /* @license-end */
 </script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="hdf5doxy.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
 <link href="hdf5doxy.css" rel="stylesheet" type="text/css">
-<!-- <link href="hdf5doxy.css" rel="stylesheet" type="text/css"/>
- -->
 <script type="text/javascript" src="hdf5_navtree_hacks.js"></script>
+<div style="background:#FFDDDD;font-size:120%;text-align:center;margin:0;padding:5px">Please, help us to better serve our user community by answering the following short survey:  <a href="https://www.hdfgroup.org/website-survey/">https://www.hdfgroup.org/website-survey/</a></div>
 </head>
 <body>
-<div style="background:#FFDDDD;font-size:120%;text-align:center;margin:0;padding:5px">Please, help us to better serve our user community by answering the following short survey:  <a href="https://www.hdfgroup.org/website-survey/">https://www.hdfgroup.org/website-survey/</a></div>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
 <div id="titlearea">
 <table cellspacing="0" cellpadding="0">
  <tbody>
- <tr style="height: 56px;">
+ <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
-  <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.14.5.1</span>
+  <td id="projectalign">
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.5.6467122</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
-   <td>        <div id="MSearchBox" class="MSearchBoxInactive">
-        <span class="left">
-          <span id="MSearchSelect"                onmouseover="return searchBox.OnSearchSelectShow()"                onmouseout="return searchBox.OnSearchSelectHide()">&#160;</span>
-          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
-               onfocus="searchBox.OnSearchFieldFocus(true)" 
-               onblur="searchBox.OnSearchFieldFocus(false)" 
-               onkeyup="searchBox.OnSearchFieldChange(event)"/>
-          </span><span class="right">
-            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
-          </span>
-        </div>
-</td>
  </tr>
  </tbody>
 </table>
@@ -64,6 +52,33 @@
 var searchBox = new SearchBox("searchBox", "search/",'.html');
 /* @license-end */
 </script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="_getting_started.html"><span>Getting&#160;started</span></a></li>
+      <li><a href="_u_g.html"><span>User&#160;Guide</span></a></li>
+      <li><a href="_r_m.html"><span>Reference&#160;Manual</span></a></li>
+      <li><a href="_cookbook.html"><span>Cookbook</span></a></li>
+      <li><a href="_t_n.html"><span>Technical&#160;Notes</span></a></li>
+      <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
+      <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
+      <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_about.html"><span>About</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect"                onmouseover="return searchBox.OnSearchSelectShow()"                onmouseout="return searchBox.OnSearchSelectHide()">&#160;</span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
 </div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
@@ -212,7 +227,8 @@ Dataspace Programming Model</h3>
 <div class="line">    . . .</div>
 <div class="line">    dims[0]  = NX;</div>
 <div class="line">    dims[1]  = NY;</div>
-<div class="line">    dataspace = <a class="code hl_function" href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a>(RANK, dims, NULL);</div>
+<div class="line">    dataspace = <a class="code hl_function" href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a>(<a class="code hl_define" href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a>, dims, NULL);</div>
+<div class="ttc" id="ah5import_8h_html_a4e76a9ce86d91fa75775a7ae3f8d3aa5"><div class="ttname"><a href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a></div><div class="ttdeci">#define RANK</div><div class="ttdef"><b>Definition</b> h5import.h:335</div></div>
 </div><!-- fragment --><div class="fragment"><div class="line">! Fortran</div>
 <div class="line">    INTEGER, PARAMETER :: NX = 3</div>
 <div class="line">    INTEGER, PARAMETER :: NX = 5</div>
@@ -325,7 +341,7 @@ Data Selection</h3>
 <p>A selection is created by applying one or more selections to a dataspace. A selection may override any other selections (<a class="el" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a>) or may be “Ored” with previous selections on the same dataspace (<a class="el" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fa1a8dc2bbb8d8268d6e7665a4664b9ad8">H5S_SELECT_OR</a>). In the latter case, the resulting selection is the union of the selection and all previously selected selections. Arbitrary sets of points from a dataspace can be selected by specifying an appropriate set of selections.</p>
 <p>Two selections are used in data transfer, so the source and destination must be compatible, as described below.</p>
 <p>There are two forms of selection, hyperslab and point. A selection must be either a point selection or a set of hyperslab selections. Selections cannot be mixed.</p>
-<p>The definition of a selection within a dataspace, not the data in the selection, cannot be saved to the file unless the selection definition is saved as a region reference. For more information, see <a class="el" href="_h5_s__u_g.html#subsec_dataspace_refer">References to Dataset Regions</a>.</p>
+<p>The definition of a selection within a dataspace, not the data in the selection, cannot be saved to the file unless the selection definition is saved as a region reference. For more information, see <a class="el" href="_h5_s__u_g.html#subsec_dataspace_refer">References</a>.</p>
 <h4>Hyperslab Selection</h4>
 <p>A hyperslab is a selection of elements from a hyper rectangle. An HDF5 hyperslab is a rectangular pattern defined by four arrays. The four arrays are summarized in the table below.</p>
 <p>The offset defines the origin of the hyperslab in the original dataspace.</p>
@@ -704,13 +720,26 @@ Write data to separate points</div></div>
 Dataspace Selection Operations and Data Transfer</h2>
 <p>This section is under construction.</p>
 <h2><a class="anchor" id="subsec_dataspace_refer"></a>
-References to Dataset Regions</h2>
+References</h2>
+<p>Another use of selections is to store a reference to a region of a dataset in the file or an external file. An HDF5 object reference object is a pointer to an object (attribute, dataset, group, or committed datatype) in the file or an external file. A selection can be used to create a pointer to a set of selected elements of a dataset, called a region reference. The selection can be either a point selection or a hyperslab selection.</p>
+<p>A region reference is an object maintained by the HDF5 Library. The region reference can be stored in a dataset or attribute, and then read. The dataset or attribute is defined to have the special datatype, <a class="el" href="group___p_d_t_s_t_d.html#ga342d286867f160739f9f5359303759cc">H5T_STD_REF</a>.</p>
+<p>To discover the elements and/or read the data, the region reference can be dereferenced to obtain the identifiers for the dataset and dataspace.</p>
+<p>For more information, </p><dl class="section see"><dt>See also</dt><dd>subsubsec_datatype_other_refs.</dd></dl>
+<h3><a class="anchor" id="subsubsec_dataspace_refer_use"></a>
+Example Uses for Region References</h3>
+<h3><a class="anchor" id="subsubsec_dataspace_refer_create"></a>
+Creating References to Regions</h3>
+<h3><a class="anchor" id="subsubsec_dataspace_refer_read"></a>
+Reading References to Regions</h3>
+<h2><a class="anchor" id="subsec_dataspace_deprecated_refer"></a>
+Deprecated References to Dataset Regions</h2>
+<p>The API described in this section was deprecated since HDF5 1.12.0. Shown are examples and usage in use by applications written before 1.12.0.</p>
 <p>Another use of selections is to store a reference to a region of a dataset. An HDF5 object reference object is a pointer to an object (dataset, group, or committed datatype) in the file. A selection can be used to create a pointer to a set of selected elements of a dataset, called a region reference. The selection can be either a point selection or a hyperslab selection.</p>
 <p>A region reference is an object maintained by the HDF5 Library. The region reference can be stored in a dataset or attribute, and then read. The dataset or attribute is defined to have the special datatype, <a class="el" href="group___p_d_t_s_t_d.html#gaf5cb0d5cec3d40d8b3ac27512f86895e">H5T_STD_REF_DSETREG</a>.</p>
 <p>To discover the elements and/or read the data, the region reference can be dereferenced. The <a class="el" href="group___h5_r.html#ga5dc19b9d1833af66c5e1f819f2c05c4a">H5Rdereference</a> call returns an identifier for the dataset, and then the selected dataspace can be retrieved with a call to <a class="el" href="group___h5_r.html#ga1702d609e85b9edd3d1e526a0276484f" title="Sets up a dataspace and selection as specified by a region reference.">H5Rget_region()</a>. The selected dataspace can be used to read the selected data elements.</p>
 <p>For more information, </p><dl class="section see"><dt>See also</dt><dd>subsubsec_datatype_other_refs.</dd></dl>
-<h3><a class="anchor" id="subsubsec_dataspace_refer_use"></a>
-Example Uses for Region References</h3>
+<h3><a class="anchor" id="subsubsec_dataspace_deprecated_refer_use"></a>
+Deprecated Example Uses for Region References</h3>
 <p>Region references are used to implement stored pointers to data within a dataset. For example, features in a large dataset might be indexed by a table. See the figure below. This table could be stored as an HDF5 dataset with a compound datatype, for example, with a field for the name of the feature and a region reference to point to the feature in the dataset. See the second figure below.</p>
 <table class="doxtable">
 <tr>
@@ -728,8 +757,8 @@ Features indexed by a table</div></div>
 Storing the table with a compound datatype</div></div>
    </td></tr>
 </table>
-<h3><a class="anchor" id="subsubsec_dataspace_refer_create"></a>
-Creating References to Regions</h3>
+<h3><a class="anchor" id="subsubsec_dataspace_deprecated_refer_create"></a>
+Deprecated Creating References to Regions</h3>
 <p>To create a region reference: </p><ul>
 <li>1. Create or open the dataset that contains the region </li>
 <li>2. Get the dataspace for the dataset </li>
@@ -747,7 +776,7 @@ A file with three datasets</div></div>
 </table>
 <p><em>Note: In the figure above, R1 is a 1 D array of region pointers; each pointer refers to a selection in one dataset.</em></p>
 <p>The example below shows code to create the array of region references. The references are created in an array of type <a class="el" href="structhdset__reg__ref__t.html">hdset_reg_ref_t</a>. Each region is defined as a selection on the dataspace of the dataset, and a reference is created using <a class="el" href="group___h5_r.html#ga0ac6997b5de26b11d91a95de2869950d">H5Rcreate()</a>. The call to <a class="el" href="group___h5_r.html#ga0ac6997b5de26b11d91a95de2869950d">H5Rcreate()</a> specifies the file, dataset, and the dataspace with selection.</p>
-<p><em>Create an array of region references</em> </p><div class="fragment"><div class="line"><span class="comment">// create an array of 4 region references</span></div>
+<p><em>Deprecated Create an array of region references</em> </p><div class="fragment"><div class="line"><span class="comment">// create an array of 4 region references</span></div>
 <div class="line"><a class="code hl_struct" href="structhdset__reg__ref__t.html">hdset_reg_ref_t</a> ref[4];</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Create a reference to the first hyperslab in the first Dataset.</span></div>
@@ -787,7 +816,7 @@ A file with three datasets</div></div>
 <div class="ttc" id="agroup___h5_s_html_gac59773d4a0953cb2db0ed57a05699095"><div class="ttname"><a href="group___h5_s.html#gac59773d4a0953cb2db0ed57a05699095">H5Sselect_none</a></div><div class="ttdeci">herr_t H5Sselect_none(hid_t spaceid)</div><div class="ttdoc">Resets the selection region to include no elements.</div></div>
 <div class="ttc" id="astructhdset__reg__ref__t_html"><div class="ttname"><a href="structhdset__reg__ref__t.html">hdset_reg_ref_t</a></div><div class="ttdef"><b>Definition</b> H5Rpublic.h:86</div></div>
 </div><!-- fragment --><p>When all the references are created, the array of references is written to the dataset R1. The dataset is declared to have datatype <a class="el" href="group___p_d_t_s_t_d.html#gaf5cb0d5cec3d40d8b3ac27512f86895e">H5T_STD_REF_DSETREG</a>. See the example below.</p>
-<p><em>Write the array of references to a dataset</em> </p><div class="fragment"><div class="line">Hsize_t dimsr[1];</div>
+<p><em>Deprecated Write the array of references to a dataset</em> </p><div class="fragment"><div class="line">Hsize_t dimsr[1];</div>
 <div class="line">dimsr[0] = 4;</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Dataset with references.</span></div>
@@ -805,8 +834,8 @@ A file with three datasets</div></div>
 <li>The dataset must exist in the file when the reference is created; <a class="el" href="group___h5_r.html#ga0ac6997b5de26b11d91a95de2869950d" title="Creates a reference.">H5Rcreate</a> </li>
 <li>The target dataset must be in the same file as the stored reference</li>
 </ul>
-<h3><a class="anchor" id="subsubsec_dataspace_refer_read"></a>
-Reading References to Regions</h3>
+<h3><a class="anchor" id="subsubsec_dataspace_refer_deprecated_read"></a>
+Deprecated Reading References to Regions</h3>
 <p>To retrieve data from a region reference, the reference must be read from the file, and then the data can be retrieved. The steps are: </p><ul>
 <li>1. Open the dataset or attribute containing the reference objects </li>
 <li>2. Read the reference object(s) </li>
@@ -818,7 +847,7 @@ Reading References to Regions</h3>
 <li>The target dataset must be present and accessible in the file </li>
 <li>The selection must be a valid selection for the dataset</li>
 </ul>
-<p><em>Read an array of region references; read from the first selection</em> </p><div class="fragment"><div class="line">dsetr_id = <a class="code hl_define" href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a> (file_id, <span class="stringliteral">&quot;R1&quot;</span>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
+<p><em>Deprecated Read an array of region references; read from the first selection</em> </p><div class="fragment"><div class="line">dsetr_id = <a class="code hl_define" href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a> (file_id, <span class="stringliteral">&quot;R1&quot;</span>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
 <div class="line">status = <a class="code hl_function" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c">H5Dread</a>(dsetr_id, <a class="code hl_define" href="group___p_d_t_s_t_d.html#gaf5cb0d5cec3d40d8b3ac27512f86895e">H5T_STD_REF_DSETREG</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, ref_out);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Dereference the first reference.</span></div>
@@ -929,7 +958,7 @@ Sample Programs</h2>
 <div class="line">    <span class="comment">// size dataset.</span></div>
 <div class="line">    dims[0] = NX;</div>
 <div class="line">    dims[1] = NY;</div>
-<div class="line">    dataspace = <a class="code hl_function" href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a>(RANK, dims, NULL);</div>
+<div class="line">    dataspace = <a class="code hl_function" href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a>(<a class="code hl_define" href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a>, dims, NULL);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">//  Create a new dataset within the file using defined dataspace and</span></div>
 <div class="line">    <span class="comment">//  datatype and default dataset creation properties.</span></div>

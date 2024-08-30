@@ -1,12 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.7"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: HDF5 Datasets</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -22,37 +23,24 @@
 /* @license-end */
 </script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="hdf5doxy.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
 <link href="hdf5doxy.css" rel="stylesheet" type="text/css">
-<!-- <link href="hdf5doxy.css" rel="stylesheet" type="text/css"/>
- -->
 <script type="text/javascript" src="hdf5_navtree_hacks.js"></script>
+<div style="background:#FFDDDD;font-size:120%;text-align:center;margin:0;padding:5px">Please, help us to better serve our user community by answering the following short survey:  <a href="https://www.hdfgroup.org/website-survey/">https://www.hdfgroup.org/website-survey/</a></div>
 </head>
 <body>
-<div style="background:#FFDDDD;font-size:120%;text-align:center;margin:0;padding:5px">Please, help us to better serve our user community by answering the following short survey:  <a href="https://www.hdfgroup.org/website-survey/">https://www.hdfgroup.org/website-survey/</a></div>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
 <div id="titlearea">
 <table cellspacing="0" cellpadding="0">
  <tbody>
- <tr style="height: 56px;">
+ <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
-  <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.14.5.1</span>
+  <td id="projectalign">
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.5.6467122</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
-   <td>        <div id="MSearchBox" class="MSearchBoxInactive">
-        <span class="left">
-          <span id="MSearchSelect"                onmouseover="return searchBox.OnSearchSelectShow()"                onmouseout="return searchBox.OnSearchSelectHide()">&#160;</span>
-          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
-               onfocus="searchBox.OnSearchFieldFocus(true)" 
-               onblur="searchBox.OnSearchFieldFocus(false)" 
-               onkeyup="searchBox.OnSearchFieldChange(event)"/>
-          </span><span class="right">
-            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
-          </span>
-        </div>
-</td>
  </tr>
  </tbody>
 </table>
@@ -64,6 +52,33 @@
 var searchBox = new SearchBox("searchBox", "search/",'.html');
 /* @license-end */
 </script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="_getting_started.html"><span>Getting&#160;started</span></a></li>
+      <li><a href="_u_g.html"><span>User&#160;Guide</span></a></li>
+      <li><a href="_r_m.html"><span>Reference&#160;Manual</span></a></li>
+      <li><a href="_cookbook.html"><span>Cookbook</span></a></li>
+      <li><a href="_t_n.html"><span>Technical&#160;Notes</span></a></li>
+      <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
+      <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
+      <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_about.html"><span>About</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect"                onmouseover="return searchBox.OnSearchSelectShow()"                onmouseout="return searchBox.OnSearchSelectHide()">&#160;</span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
 </div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
@@ -127,9 +142,10 @@ Link/Unlink</h3>
 <p>A dataset can be added to a group with one of the H5Lcreate calls, and deleted from a group with <a class="el" href="group___h5_l.html#ga5b4e7f59f5d4bdae94fd8ce6875295cf" title="Removes a link from a group.">H5Ldelete</a>. The link and unlink operations use the name of an object, which may be a dataset. The dataset does not have to open to be linked or unlinked.</p>
 <h3><a class="anchor" id="subsubsec_dataset_intro_obj"></a>
 Object Reference</h3>
-<p>A dataset may be the target of an object reference. The object reference is created by <a class="el" href="group___h5_r.html#ga0ac6997b5de26b11d91a95de2869950d" title="Creates a reference.">H5Rcreate</a> with the name of an object which may be a dataset and the reference type <a class="el" href="_h5_rpublic_8h.html#ae1ffa09875ca6778df3a577592dacbd2">H5R_OBJECT</a>. The dataset does not have to be open to create a reference to it.</p>
-<p>An object reference may also refer to a region (selection) of a dataset. The reference is created with <a class="el" href="group___h5_r.html#ga0ac6997b5de26b11d91a95de2869950d" title="Creates a reference.">H5Rcreate</a> and a reference type of <a class="el" href="_h5_rpublic_8h.html#a2a28c48c03a4616a02f9157fca4b2df0">H5R_DATASET_REGION</a>.</p>
-<p>An object reference can be accessed by a call to <a class="el" href="group___h5_r.html#ga5dc19b9d1833af66c5e1f819f2c05c4a">H5Rdereference</a>. When the reference is to a dataset or dataset region, the <a class="el" href="group___h5_r.html#ga5dc19b9d1833af66c5e1f819f2c05c4a">H5Rdereference</a> call returns an identifier to the dataset just as if <a class="el" href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a> has been called.</p>
+<p>A file, group, dataset, named datatype, or attribute may be the target of an object reference. The object reference is created by <a class="el" href="group___h5_r.html#gad0fb6ec99ecefa602756a5682addfc69" title="Creates an object reference.">H5Rcreate_object</a> with the name of an object which may be a dataset and the reference type <a class="el" href="_h5_rpublic_8h.html#ae1ffa09875ca6778df3a577592dacbd2">H5R_OBJECT</a>. The dataset does not have to be open to create a reference to it.</p>
+<p>An object reference may also refer to a region (selection) of a dataset. The reference is created with <a class="el" href="group___h5_r.html#ga60134eb917afbe89aa23eb25a30d249b" title="Creates a region reference.">H5Rcreate_region</a>.</p>
+<p>An object reference can be accessed by a call to <a class="el" href="group___h5_r.html#gaa6692bd3a5b490c8db05b90a5888d0dd" title="Opens the HDF5 object referenced.">H5Ropen_object</a>. When the reference is to a dataset or dataset region, the <a class="el" href="group___h5_r.html#gaa6692bd3a5b490c8db05b90a5888d0dd" title="Opens the HDF5 object referenced.">H5Ropen_object</a> call returns an identifier to the dataset just as if <a class="el" href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a> has been called.</p>
+<p>The reference buffer from the <a class="el" href="group___h5_r.html#gad0fb6ec99ecefa602756a5682addfc69" title="Creates an object reference.">H5Rcreate_object</a> call must be released by using <a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy</a> to avoid resource leaks and possible HDF5 library shutdown issues.</p>
 <h3><a class="anchor" id="subsubsec_dataset_intro_attr"></a>
 Adding Attributes</h3>
 <p>A dataset may have user-defined attributes which are created with <a class="el" href="group___h5_a.html#ga4a76e4e5ab6eb0fd2aa7990d38d55f24">H5Acreate</a> and accessed through the <a class="el" href="group___h5_a.html">Attributes (H5A)</a> API. To create an attribute for a dataset, the dataset must be open, and the identifier is passed to <a class="el" href="group___h5_a.html#ga4a76e4e5ab6eb0fd2aa7990d38d55f24">H5Acreate</a>. The attributes of a dataset are discovered and opened using <a class="el" href="group___h5_a.html#ga5c05fade96b6b7e2299f56a5b1edb1c1" title="Opens an attribute specified by name.">H5Aopen_name</a>, <a class="el" href="group___h5_a.html#gadaa85276f2731ad78462a6fd27118470" title="Opens the attribute specified by its index.">H5Aopen_idx</a>, or <a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate</a>; these functions use the identifier of the dataset. An attribute can be deleted with <a class="el" href="group___h5_a.html#gada9fa3d6db52329f1fd55662de6ff6ba" title="Deletes an attribute from a specified location.">H5Adelete</a> which also uses the identifier of the dataset.</p>
