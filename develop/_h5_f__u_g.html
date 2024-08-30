@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.bca2806</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -134,7 +134,7 @@ Introduction</h2>
 <li>The use of file access property lists </li>
 <li>The use of low-level file drivers</li>
 </ul>
-<p>This chapter assumes an understanding of the material presented in the data model chapter. For more information, </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_d_m__u_g.html#sec_data_model">The HDF5 Data Model and File Structure</a>.</dd></dl>
+<p>This chapter assumes an understanding of the material presented in the data model chapter. For more information, see <a class="el" href="_h5_d_m__u_g.html#sec_data_model">The HDF5 Data Model and File Structure</a>.</p>
 <h2><a class="anchor" id="subsec_file_access_modes"></a>
 File Access Modes</h2>
 <p>There are two issues regarding file access: </p><ul>
@@ -167,10 +167,10 @@ Is a file to be opened with read-only or read-write access?</li>
 File Creation and File Access Properties</h2>
 <p>File creation and file access property lists control the more complex aspects of creating and accessing files.</p>
 <p>File creation property lists control the characteristics of a file such as the size of the userblock, a user-definable data block; the size of data address parameters; properties of the B-trees that are used to manage the data in the file; and certain HDF5 Library versioning information.</p>
-<p>For more information, </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_f__u_g.html#subsubsec_file_property_lists_props">File Creation Properties</a>.</dd></dl>
+<p>For more information, see <a class="el" href="_h5_f__u_g.html#subsubsec_file_property_lists_props">File Creation Properties</a>.</p>
 <p>This section has a more detailed discussion of file creation properties. If you have no special requirements for these file characteristics, you can simply specify <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a> for the default file creation property list when a file creation property list is called for.</p>
 <p>File access property lists control properties and means of accessing a file such as data alignment characteristics, metadata block and cache sizes, data sieve buffer size, garbage collection settings, and parallel I/O. Data alignment, metadata block and cache sizes, and data sieve buffer size are factors in improving I/O performance.</p>
-<p>For more information, </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_f__u_g.html#subsubsec_file_property_lists_access">File Access Properties</a>.</dd></dl>
+<p>For more information, see <a class="el" href="_h5_f__u_g.html#subsubsec_file_property_lists_access">File Access Properties</a>.</p>
 <p>This section has a more detailed discussion of file access properties. If you have no special requirements for these file access characteristics, you can simply specify <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a> for the default file access property list when a file access property list is called for.</p>
 <table class="doxtable">
 <caption>Figure 10 - More sample file structures</caption>
@@ -510,9 +510,8 @@ Creating or Opening an HDF5 File</h2>
 </div><!-- fragment --><p><a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen</a> opens an existing file with read-write access if <a class="el" href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a> is set and read-only access if <a class="el" href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a> is set.</p>
 <p>fapl_id is the file access property list identifier. Alternatively, <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a> indicates that the application relies on the default I/O access parameters. Creating and changing access property lists is documented further below.</p>
 <p>A file can be opened more than once via multiple <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen</a> calls. Each such call returns a unique file identifier and the file can be accessed through any of these file identifiers as long as they remain valid. Each of these file identifiers must be released by calling <a class="el" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124" title="Terminates access to an HDF5 file.">H5Fclose</a> when it is no longer needed.</p>
-<p>For more information, </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_f__u_g.html#subsubsec_file_property_lists_access">File Access Properties</a>. For more information, </dd>
-<dd>
-<a class="el" href="_h5_f__u_g.html#subsec_file_property_lists">File Property Lists</a>.</dd></dl>
+<p>For more information, see <a class="el" href="_h5_f__u_g.html#subsubsec_file_property_lists_access">File Access Properties</a>.</p>
+<p>For more information, see <a class="el" href="_h5_f__u_g.html#subsec_file_property_lists">File Property Lists</a>.</p>
 <h2><a class="anchor" id="subsec_file_closes"></a>
 Closing an HDF5 File</h2>
 <p><a class="el" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124" title="Terminates access to an HDF5 file.">H5Fclose</a> both closes a file and releases the file identifier returned by <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen</a> or <a class="el" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4" title="Creates an HDF5 file.">H5Fcreate</a>. <a class="el" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124" title="Terminates access to an HDF5 file.">H5Fclose</a> must be called when an application is done working with a file; while the HDF5 Library makes every effort to maintain file integrity, failure to call <a class="el" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124" title="Terminates access to an HDF5 file.">H5Fclose</a> may result in the file being abandoned in an incomplete or corrupted state.</p>
@@ -595,7 +594,7 @@ Alternate File Storage Layouts and Low-level File Drivers</h2>
 <li>More abstract situations such as virtual files</li>
 </ul>
 <p>This HDF5 address space is generally referred to as an HDF5 file regardless of its organization at the storage level.</p>
-<p>HDF5 employs an extremely flexible mechanism called the virtual file layer, or VFL, for file I/O. A full understanding of the VFL is only necessary if you plan to write your own drivers </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="_v_f_l.html">HDF5 Virtual File Layer</a> in the HDF5 Technical Notes.</dd></dl>
+<p>HDF5 employs an extremely flexible mechanism called the virtual file layer, or VFL, for file I/O. A full understanding of the VFL is only necessary if you plan to write your own drivers see <a class="el" href="_v_f_l.html">HDF5 Virtual File Layer</a> in the HDF5 Technical Notes.</p>
 <p>For our purposes here, it is sufficient to know that the low-level drivers used for file I/O reside in the VFL, as illustrated in the following figure. Note that H5FD_STREAM is not available with 1.8.x and later versions of the library.</p>
 <table class="doxtable">
 <tr>
@@ -650,7 +649,7 @@ I/O path from application to VFL and low-level drivers to storage</div></div>
 </table>
  </div><p>For more information, see the HDF5 Reference Manual entries for the function calls shown in the column on the right in the table above.</p>
 <p>Note that the low-level file drivers manage alternative file storage layouts. Dataset storage layouts (chunking, compression, and external dataset storage) are managed independently of file storage layouts.</p>
-<p>If an application requires a special-purpose low-level driver, the VFL provides a public API for creating one. For more information on how to create a driver, </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="_v_f_l.html">HDF5 Virtual File Layer</a> in the HDF5 Technical Notes.</dd></dl>
+<p>If an application requires a special-purpose low-level driver, the VFL provides a public API for creating one. For more information on how to create a driver, see <a class="el" href="_v_f_l.html">HDF5 Virtual File Layer</a> in the HDF5 Technical Notes.</p>
 <h3><a class="anchor" id="subsubsec_file_alternate_drivers_id"></a>
 Identifying the Previously‐used File Driver</h3>
 <p>When creating a new HDF5 file, no history exists, so the file driver must be specified if it is to be other than the default.</p>
@@ -743,9 +742,7 @@ Only one HDF5 file identifier can be opened for the file, the identifier returne
 The changes to the file will be discarded when access is terminated unless backing_store is set to 1</li>
 </ul>
 <p>Additional parameters may be added to these functions in the future.</p>
-<dl class="section see"><dt>See also</dt><dd><a href="https://portal.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html">HDF5 File Image Operations</a> section for information on more advanced <a class="el" href="h5import_8h.html#af2cb254df75f4b45ca0b0893f9f01979">usage</a> of the Memory file driver, and </dd>
-<dd>
-<a href="https://docs.hdfgroup.org/archive/support/HDF5/doc/Advanced/ModifiedRegionWrites/ModifiedRegionWrites.pdf">Modified Region Writes</a> section for information on how to set write operations so that only modified regions are written to storage.</dd></dl>
+<p>see <a href="https://support.hdfgroup.org/releases/hdf5/documentation/advanced_topics/file_image_ops.html">HDF5 File Image Operations</a> section for information on more advanced usage of the Memory file driver, and see <a href="https://support.hdfgroup.org/releases/hdf5/documentation/advanced_topics/ModifiedRegionWrites.pdf">Modified Region Writes</a> section for information on how to set write operations so that only modified regions are written to storage.</p>
 <h3><a class="anchor" id="subsubsec_file_alternate_drivers_family"></a>
 The Family Driver</h3>
 <p>HDF5 files can become quite large, and this can create problems on systems that do not support files larger than 2 gigabytes. The HDF5 file family mechanism is designed to solve the problems this creates by splitting the HDF5 file address space across several smaller files. This structure does not affect how metadata and raw data are stored: they are mixed in the address space just as they would be in a single, contiguous file.</p>

@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.bca2806</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -133,7 +133,7 @@ Introduction</h2>
 <p>The old API is similar to functionality discussed in <a class="el" href="_h5_e__u_g.html#subsec_error_ops">Basic Error Handling Operations</a>. The functionality discussed in <a class="el" href="_h5_e__u_g.html#subsec_error_adv">Advanced Error Handling Operations</a>,the ability of allowing applications to add their own error records, is the new design for the Error Handling API.</p>
 <h2><a class="anchor" id="subsec_error_H5E"></a>
 Error Handling Function Summaries</h2>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_e.html">Error Handling (H5E)</a> reference manual</dd></dl>
+<p>see <a class="el" href="group___h5_e.html">Error Handling (H5E)</a> reference manual</p>
 <h2><a class="anchor" id="subsec_error_program"></a>
 Programming Model for Error Handling</h2>
 <p>This section is under construction.</p>
@@ -142,20 +142,13 @@ Basic Error Handling Operations</h2>
 <p>Let us first try to understand the error stack. An error stack is a collection of error records. Error records can be pushed onto or popped off the error stack. By default, when an error occurs deep within the HDF5 Library, an error record is pushed onto an error stack and that function returns a failure indication. Its caller detects the failure, pushes another record onto the stack, and returns a failure indication. This continues until the API function called by the application returns a failure indication. The next API function being called will reset the error stack. All HDF5 Library error records belong to the same error class. For more information, see <a class="el" href="_h5_e__u_g.html#subsec_error_adv">Advanced Error Handling Operations</a>.</p>
 <h3><a class="anchor" id="subsubsec_error_ops_stack"></a>
 Error Stack and Error Message</h3>
-<p>In normal circumstances, an error causes the stack to be printed on the standard error stream automatically. This automatic error stack is the library's default stack. For all the functions in this section, whenever an error stack ID is needed as a parameter, <a class="el" href="_h5_epublic_8h.html#ad7ca07d2b387a59c7e8bcab22fa57455">H5E_DEFAULT</a> can be used to indicate the library's default stack. The first error record of the error stack, number #000, is produced by the API function itself and is usually sufficient to indicate to the application what went wrong. </p><table class="doxtable">
-<caption align="top">Example: An Error Message</caption>
-<tr>
-<td><p class="starttd"></p>
-<p class="intertd">If an application calls <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a> on a predefined datatype then the following message is printed on the standard error stream. This is a simple error that has only one component, the API function; other errors may have many components. </p>
-<p class="endtd"><code></p><pre>
-HDF5-DIAG: Error detected in HDF5 (1.10.9) thread 0.
-   #000: H5T.c line ### in <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a>: predefined datatype
-      major: Function argument
-      minor: Bad value
-        </pre><p></code>   </p>
-</td></tr>
-</table>
-<p>In the example above, we can see that an error record has a major message and a minor message. A major message generally indicates where the error happens. The location can be a dataset or a dataspace, for example. A minor message explains further details of the error. An example is “unable to open file”. Another specific detail about the error can be found at the end of the first line of each error record. This error description is usually added by the library designer to tell what exactly goes wrong. In the example above, the “predefined datatype” is an error description.</p>
+<p>In normal circumstances, an error causes the stack to be printed on the standard error stream automatically. This automatic error stack is the library's default stack. For all the functions in this section, whenever an error stack ID is needed as a parameter, <a class="el" href="_h5_epublic_8h.html#ad7ca07d2b387a59c7e8bcab22fa57455">H5E_DEFAULT</a> can be used to indicate the library's default stack. The first error record of the error stack, number #000, is produced by the API function itself and is usually sufficient to indicate to the application what went wrong.</p>
+<p>If an application calls <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a> on a predefined datatype then the following message is printed on the standard error stream. This is a simple error that has only one component, the API function; other errors may have many components.</p>
+<p><em>An Error Message Example</em> </p><div class="fragment"><div class="line">HDF5-DIAG: Error detected in HDF5 (1.10.9) thread 0.</div>
+<div class="line">   <span class="preprocessor">#000: H5T.c line ### in H5Tclose(): predefined datatype</span></div>
+<div class="line">      major: Function argument</div>
+<div class="line">      minor: Bad value</div>
+</div><!-- fragment --><p>In the example above, we can see that an error record has a major message and a minor message. A major message generally indicates where the error happens. The location can be a dataset or a dataspace, for example. A minor message explains further details of the error. An example is “unable to open file”. Another specific detail about the error can be found at the end of the first line of each error record. This error description is usually added by the library designer to tell what exactly goes wrong. In the example above, the “predefined datatype” is an error description.</p>
 <h3><a class="anchor" id="subsubsec_error_ops_print"></a>
 Print and Clear an Error Stack</h3>
 <p>Besides the automatic error report, the error stack can also be printed and cleared by the functions <a class="el" href="group___h5_e.html#gae86ab32e85028412c731cf0f2b8d1f56">H5Eprint2</a> and <a class="el" href="group___h5_e.html#gac9d90679c7879f3c4ebce858aaa9dfb2">H5Eclear2</a>. If an application wishes to make explicit calls to <a class="el" href="group___h5_e.html#gae86ab32e85028412c731cf0f2b8d1f56">H5Eprint2</a> to print the error stack, the automatic printing should be turned off to prevent error messages from being displayed twice (see <a class="el" href="group___h5_e.html#gaf0d6b18cd5160517fe5165b9a8443c69">H5Eset_auto2</a>).</p>
@@ -178,28 +171,28 @@ Mute Error Stack</h3>
 <div class="ttc" id="agroup___h5_e_html_gaa088620ef0b6c4ac2abcf57d61c8cdb8"><div class="ttname"><a href="group___h5_e.html#gaa088620ef0b6c4ac2abcf57d61c8cdb8">H5Eget_auto</a></div><div class="ttdeci">#define H5Eget_auto</div><div class="ttdef"><b>Definition</b> H5version.h:925</div></div>
 </div><!-- fragment --><p> The function above returns the current settings for the automatic error stack traversal function, func, and its data, client_data. If either or both of the arguments are null, then the value is not returned.</p>
 <p>An application can temporarily turn off error messages while “probing” a function. See the example below.</p>
-<p><em>Example: Turn off error messages while probing a function</em> </p><div class="fragment"><div class="line">***  Save old error handler  ***</div>
-<div class="line"> <a class="code hl_typedef" href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a> oldfunc;</div>
-<div class="line"> <span class="keywordtype">void</span> *old_client_data;</div>
-<div class="line"> <a class="code hl_function" href="group___h5_e.html#ga2eda33cbadd9be5bfddbaa91e863c936">H5Eget_auto2</a>(error_stack, &amp;old_func, &amp;old_client_data);</div>
-<div class="line"> ***  Turn off error handling  ***</div>
-<div class="line"> <a class="code hl_function" href="group___h5_e.html#gaf0d6b18cd5160517fe5165b9a8443c69">H5Eset_auto2</a>(error_stack, NULL, NULL);</div>
-<div class="line"> ***  Probe. Likely to fail, but that<span class="stringliteral">&#39;s okay  ***</span></div>
-<div class="line"><span class="stringliteral"> status = H5Fopen (......);</span></div>
-<div class="line"><span class="stringliteral"> ***  Restore previous error handler  ***</span></div>
-<div class="line"><span class="stringliteral"> H5Eset_auto2(error_stack, old_func, old_client_data);</span></div>
+<p><em>Example: Turn off error messages while probing a function</em> </p><div class="fragment"><div class="line"><span class="comment">//  Save old error handler</span></div>
+<div class="line"><a class="code hl_typedef" href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a> oldfunc;</div>
+<div class="line"><span class="keywordtype">void</span> *old_client_data;</div>
+<div class="line"><a class="code hl_function" href="group___h5_e.html#ga2eda33cbadd9be5bfddbaa91e863c936">H5Eget_auto2</a>(error_stack, &amp;old_func, &amp;old_client_data);</div>
+<div class="line"><span class="comment">//  Turn off error handling</span></div>
+<div class="line"><a class="code hl_function" href="group___h5_e.html#gaf0d6b18cd5160517fe5165b9a8443c69">H5Eset_auto2</a>(error_stack, NULL, NULL);</div>
+<div class="line"><span class="comment">//  Probe. Likely to fail, but that&#39;s okay</span></div>
+<div class="line">status = <a class="code hl_function" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a> (......);</div>
+<div class="line"><span class="comment">//  Restore previous error handler</span></div>
+<div class="line"><a class="code hl_function" href="group___h5_e.html#gaf0d6b18cd5160517fe5165b9a8443c69">H5Eset_auto2</a>(error_stack, old_func, old_client_data);</div>
 <div class="ttc" id="a_h5_epublic_8h_html_a0109c84ac574ac24abe6f7c7acab3fca"><div class="ttname"><a href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a></div><div class="ttdeci">herr_t(* H5E_auto2_t)(hid_t estack, void *client_data)</div><div class="ttdoc">Callback function for H5Eset_auto2()</div><div class="ttdef"><b>Definition</b> H5Epublic.h:199</div></div>
 <div class="ttc" id="agroup___h5_e_html_ga2eda33cbadd9be5bfddbaa91e863c936"><div class="ttname"><a href="group___h5_e.html#ga2eda33cbadd9be5bfddbaa91e863c936">H5Eget_auto2</a></div><div class="ttdeci">herr_t H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)</div><div class="ttdoc">Returns the settings for the automatic error stack traversal function and its data.</div></div>
+<div class="ttc" id="agroup___h5_f_html_gaa3f4f877b9bb591f3880423ed2bf44bc"><div class="ttname"><a href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a></div><div class="ttdeci">hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)</div><div class="ttdoc">Opens an existing HDF5 file.</div></div>
 </div><!-- fragment --><p>Or automatic printing can be disabled altogether and error messages can be explicitly printed.</p>
-<p><em>Example: Disable automatic printing and explicitly print error messages</em> </p><div class="fragment"><div class="line">***  Turn off error handling permanently  ***</div>
+<p><em>Example: Disable automatic printing and explicitly print error messages</em> </p><div class="fragment"><div class="line"><span class="comment">//  Turn off error handling permanently</span></div>
 <div class="line"><a class="code hl_function" href="group___h5_e.html#gaf0d6b18cd5160517fe5165b9a8443c69">H5Eset_auto2</a>(error_stack, NULL, NULL);</div>
-<div class="line">***  If failure, print error message  ***</div>
+<div class="line"><span class="comment">//  If failure, print error message</span></div>
 <div class="line"><span class="keywordflow">if</span> (<a class="code hl_function" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a> (....)&lt;0) {</div>
 <div class="line">    <a class="code hl_function" href="group___h5_e.html#gae86ab32e85028412c731cf0f2b8d1f56">H5Eprint2</a>(<a class="code hl_define" href="_h5_epublic_8h.html#ad7ca07d2b387a59c7e8bcab22fa57455">H5E_DEFAULT</a>, stderr);</div>
 <div class="line">    exit (1);</div>
 <div class="line">}</div>
 <div class="ttc" id="a_h5_epublic_8h_html_ad7ca07d2b387a59c7e8bcab22fa57455"><div class="ttname"><a href="_h5_epublic_8h.html#ad7ca07d2b387a59c7e8bcab22fa57455">H5E_DEFAULT</a></div><div class="ttdeci">#define H5E_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Epublic.h:25</div></div>
-<div class="ttc" id="agroup___h5_f_html_gaa3f4f877b9bb591f3880423ed2bf44bc"><div class="ttname"><a href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a></div><div class="ttdeci">hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)</div><div class="ttdoc">Opens an existing HDF5 file.</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="subsubsec_error_ops_custom_print"></a>
 Customized Printing of an Error Stack</h3>
 <p>Applications are allowed to define an automatic error traversal function other than the default <a class="el" href="group___h5_e.html#gaa7e93cb96b399e5853721258872435a8">H5Eprint()</a>. For instance, one can define a function that prints a simple, one‐line error message to the standard error stream and then exits. The first example below defines a such a function. The second example below installs the function as the error handler.</p>
@@ -233,7 +226,7 @@ Traverse an Error Stack with a Callback Function</h3>
 <div class="line">} <a class="code hl_struct" href="struct_h5_e__error2__t.html">H5E_error2_t</a>;</div>
 </div><!-- fragment --><p> The maj_num and min_num are major and minor error IDs, func_name is the name of the function where the error was detected, file_name and line locate the error within the HDF5 Library source code, and desc points to a description of the error.</p>
 <p>The following example shows a user‐defined callback function.</p>
-<p><em>Example: A user‐defined callback function</em> </p><div class="fragment"><div class="line">\#define MSG_SIZE 64</div>
+<p><em>A user‐defined callback function Example</em> </p><div class="fragment"><div class="line"><span class="preprocessor">#define MSG_SIZE 64</span></div>
 <div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div>
 <div class="line">custom_print_cb(<span class="keywordtype">unsigned</span> n, <span class="keyword">const</span> <a class="code hl_struct" href="struct_h5_e__error2__t.html">H5E_error2_t</a> *err_desc, <span class="keywordtype">void</span> *client_data)</div>
 <div class="line">{</div>
@@ -243,7 +236,7 @@ Traverse an Error Stack with a Callback Function</h3>
 <div class="line">    <span class="keywordtype">char</span> cls[MSG_SIZE];</div>
 <div class="line">    <span class="keyword">const</span> <span class="keywordtype">int</span> indent = 4;</div>
 <div class="line"> </div>
-<div class="line">    ***  Get descriptions <span class="keywordflow">for</span> the major and minor error numbers  ***</div>
+<div class="line">    <span class="comment">//  Get descriptions for the major and minor error numbers</span></div>
 <div class="line">    <span class="keywordflow">if</span>(<a class="code hl_function" href="group___h5_e.html#gaf360b8e61728b421ee78438e4f57a001">H5Eget_class_name</a>(err_desc-&gt;<a class="code hl_variable" href="struct_h5_e__error2__t.html#aeec7f232ca3cf2df54f166d02bd4a1ab">cls_id</a>, cls, MSG_SIZE) &lt; 0)</div>
 <div class="line">        TEST_ERROR;</div>
 <div class="line">    <span class="keywordflow">if</span>(<a class="code hl_function" href="group___h5_e.html#ga64714effca13c23c4f95529256621fa0">H5Eget_msg</a>(err_desc-&gt;<a class="code hl_variable" href="struct_h5_e__error2__t.html#a3602dbcfe9ecf12271a04ae00de5a41d">maj_num</a>, NULL, maj, MSG_SIZE) &lt; 0)</div>
@@ -273,32 +266,26 @@ Traverse an Error Stack with a Callback Function</h3>
 <h2><a class="anchor" id="subsec_error_adv"></a>
 Advanced Error Handling Operations</h2>
 <p>The section above, see <a class="el" href="_h5_e__u_g.html#subsec_error_ops">Basic Error Handling Operations</a>, discusses the basic error handling operations of the library. In that section, all the error records on the error stack are from the library itself. In this section, we are going to introduce the operations that allow an application program to push its own error records onto the error stack once it declares an error class of its own through the HDF5 Error API.</p>
-<table class="doxtable">
-<caption align="top">Example: An Error Report</caption>
-<tr>
-<td><p class="starttd"></p>
-<p class="intertd">An error report shows both the library's error record and the application's error records. See the example below. </p>
-<p class="endtd"><code></p><pre>
-Error Test-DIAG: Error detected in Error Program (1.0)
-        thread 8192:
-    #000: ../../hdf5/test/error_test.c line ### in main():
-        Error test failed
-      major: Error in test
-      minor: Error in subroutine
-    #001: ../../hdf5/test/error_test.c line ### in
-        test_error(): H5Dwrite failed as supposed to
-      major: Error in IO
-      minor: Error in H5Dwrite
-  HDF5-DIAG: Error detected in HDF5 (1.10.9) thread #####:
-    #002: ../../hdf5/src/H5Dio.c line ### in <a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite()</a>:
-        not a dataset
-      major: Invalid arguments to routine
-      minor: Inappropriate type
-      </pre><p></code>   </p>
-</td></tr>
-</table>
-<p>In the line above error record #002 in the example above, the starting phrase is HDF5. This is the error class name of the HDF5 Library. All of the library's error messages (major and minor) are in this default error class. The Error Test in the beginning of the line above error record #000 is the name of the application's error class. The first two error records, #000 and #001, are from application's error class. By definition, an error class is a group of major and minor error messages for a library (the HDF5 Library or an application library built on top of the HDF5 Library) or an application program. The error class can be registered for a library or program through the HDF5 Error API. Major and minor messages can be defined in an error class. An application will have object handles for the error class and for major and minor messages for further operation. See the example below.</p>
-<p><em>Example: The user‐defined error handler</em> </p><div class="fragment"><div class="line">\#define MSG_SIZE 64</div>
+<p>An error report shows both the library's error record and the application's error records. See the example below.</p>
+<p><em>An Error Report Example</em> </p><div class="fragment"><div class="line">Error Test-DIAG: Error detected in Error Program (1.0)</div>
+<div class="line">        thread 8192:</div>
+<div class="line">    <span class="preprocessor">#000: ../../hdf5/test/error_test.c line ### in main():</span></div>
+<div class="line">        Error test failed</div>
+<div class="line">      major: Error in test</div>
+<div class="line">      minor: Error in subroutine</div>
+<div class="line"><span class="preprocessor">    #001: ../../hdf5/test/error_test.c line ### in</span></div>
+<div class="line">        test_error(): <a class="code hl_function" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906">H5Dwrite</a> failed as supposed to</div>
+<div class="line">      major: Error in IO</div>
+<div class="line">      minor: Error in <a class="code hl_function" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906">H5Dwrite</a></div>
+<div class="line">  HDF5-DIAG: Error detected in HDF5 (1.10.9) thread #####:</div>
+<div class="line">    #002: ../../<a class="code hl_namespace" href="namespacehdf5.html">hdf5</a>/src/H5Dio.c line ### in <a class="code hl_function" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906">H5Dwrite</a>():</div>
+<div class="line">        not a dataset</div>
+<div class="line">      major: Invalid arguments to routine</div>
+<div class="line">      minor: Inappropriate type</div>
+<div class="ttc" id="agroup___h5_d_html_ga98f44998b67587662af8b0d8a0a75906"><div class="ttname"><a href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906">H5Dwrite</a></div><div class="ttdeci">herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, const void *buf)</div><div class="ttdoc">Writes raw data from a buffer to a dataset.</div></div>
+<div class="ttc" id="anamespacehdf5_html"><div class="ttname"><a href="namespacehdf5.html">hdf5</a></div><div class="ttdef"><b>Definition</b> HDF5.F90:26</div></div>
+</div><!-- fragment --><p>In the line above error record #002 in the example above, the starting phrase is HDF5. This is the error class name of the HDF5 Library. All of the library's error messages (major and minor) are in this default error class. The Error Test in the beginning of the line above error record #000 is the name of the application's error class. The first two error records, #000 and #001, are from application's error class. By definition, an error class is a group of major and minor error messages for a library (the HDF5 Library or an application library built on top of the HDF5 Library) or an application program. The error class can be registered for a library or program through the HDF5 Error API. Major and minor messages can be defined in an error class. An application will have object handles for the error class and for major and minor messages for further operation. See the example below.</p>
+<p><em>Example: The user‐defined error handler</em> </p><div class="fragment"><div class="line"><span class="preprocessor">#define MSG_SIZE 64</span></div>
 <div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div>
 <div class="line">custom_print_cb(<span class="keywordtype">unsigned</span> n, <span class="keyword">const</span> <a class="code hl_struct" href="struct_h5_e__error2__t.html">H5E_error2_t</a> *err_desc,</div>
 <div class="line"><span class="keywordtype">void</span>* client_data)</div>
@@ -309,7 +296,7 @@ Error Test-DIAG: Error detected in Error Program (1.0)
 <div class="line">    <span class="keywordtype">char</span> cls[MSG_SIZE];</div>
 <div class="line">    <span class="keyword">const</span> <span class="keywordtype">int</span> indent = 4;</div>
 <div class="line"> </div>
-<div class="line">    ***  Get descriptions <span class="keywordflow">for</span> the major and minor error numbers  ***</div>
+<div class="line">    <span class="comment">//  Get descriptions for the major and minor error numbers</span></div>
 <div class="line">    <span class="keywordflow">if</span>(<a class="code hl_function" href="group___h5_e.html#gaf360b8e61728b421ee78438e4f57a001">H5Eget_class_name</a>(err_desc-&gt;<a class="code hl_variable" href="struct_h5_e__error2__t.html#aeec7f232ca3cf2df54f166d02bd4a1ab">cls_id</a>, cls, MSG_SIZE) &lt; 0)</div>
 <div class="line">        TEST_ERROR;</div>
 <div class="line">    <span class="keywordflow">if</span>(<a class="code hl_function" href="group___h5_e.html#ga64714effca13c23c4f95529256621fa0">H5Eget_msg</a>(err_desc-&gt;<a class="code hl_variable" href="struct_h5_e__error2__t.html#a3602dbcfe9ecf12271a04ae00de5a41d">maj_num</a>, NULL, maj, MSG_SIZE) &lt; 0)</div>
@@ -349,13 +336,13 @@ More Error API Functions</h3>
 <div class="ttc" id="agroup___h5_e_html_ga0383710d3984d19d3d2006d1151b88a2"><div class="ttname"><a href="group___h5_e.html#ga0383710d3984d19d3d2006d1151b88a2">H5Eunregister_class</a></div><div class="ttdeci">herr_t H5Eunregister_class(hid_t class_id)</div><div class="ttdoc">Removes an error class.</div></div>
 </div><!-- fragment --><p> This function removes an error class from the Error API.</p>
 <p>The example below shows how an application creates an error class and error messages.</p>
-<p><em>Example: Create an error class and error messages</em> </p><div class="fragment"><div class="line">***  Create an error <span class="keyword">class  </span>***</div>
+<p><em>Example: Create an error class and error messages</em> </p><div class="fragment"><div class="line"><span class="comment">//  Create an error class</span></div>
 <div class="line">class_id = <a class="code hl_function" href="group___h5_e.html#ga70ecfb35ab871ddb1cd2dfa0ac5f740c">H5Eregister_class</a>(ERR_CLS_NAME, PROG_NAME, PROG_VERS);</div>
-<div class="line">***  Retrieve <span class="keyword">class </span>name  ***</div>
+<div class="line"><span class="comment">//  Retrieve class name</span></div>
 <div class="line"><a class="code hl_function" href="group___h5_e.html#gaf360b8e61728b421ee78438e4f57a001">H5Eget_class_name</a>(class_id, cls_name, cls_size);</div>
-<div class="line">***  Create a major error message in the <span class="keyword">class  </span>***</div>
+<div class="line"><span class="comment">//  Create a major error message in the class</span></div>
 <div class="line">maj_id = <a class="code hl_function" href="group___h5_e.html#ga99a705d98873dcdd1bb6f9d5eebc5afd">H5Ecreate_msg</a>(class_id, <a class="code hl_enumvalue" href="_h5_epublic_8h.html#a415162f1ce9b31241977d0a5857caa3cab0e1bfd4dab03f69f9a884e9079d3acc">H5E_MAJOR</a>, “... ...”);</div>
-<div class="line">***  Create a minor error message in the <span class="keyword">class  </span>***</div>
+<div class="line"><span class="comment">//  Create a minor error message in the class</span></div>
 <div class="line">min_id = <a class="code hl_function" href="group___h5_e.html#ga99a705d98873dcdd1bb6f9d5eebc5afd">H5Ecreate_msg</a>(class_id, <a class="code hl_enumvalue" href="_h5_epublic_8h.html#a415162f1ce9b31241977d0a5857caa3caabc45a68c0f04871387677c099abb338">H5E_MINOR</a>, “... ...”);</div>
 <div class="ttc" id="a_h5_epublic_8h_html_a415162f1ce9b31241977d0a5857caa3caabc45a68c0f04871387677c099abb338"><div class="ttname"><a href="_h5_epublic_8h.html#a415162f1ce9b31241977d0a5857caa3caabc45a68c0f04871387677c099abb338">H5E_MINOR</a></div><div class="ttdeci">@ H5E_MINOR</div><div class="ttdef"><b>Definition</b> H5Epublic.h:30</div></div>
 <div class="ttc" id="a_h5_epublic_8h_html_a415162f1ce9b31241977d0a5857caa3cab0e1bfd4dab03f69f9a884e9079d3acc"><div class="ttname"><a href="_h5_epublic_8h.html#a415162f1ce9b31241977d0a5857caa3cab0e1bfd4dab03f69f9a884e9079d3acc">H5E_MAJOR</a></div><div class="ttdeci">@ H5E_MAJOR</div><div class="ttdef"><b>Definition</b> H5Epublic.h:30</div></div>
@@ -389,32 +376,31 @@ Pushing an Application Error Message onto Error Stack</h3>
 <div class="ttc" id="agroup___h5_e_html_ga41c2ed13fd6aac6e413fe7383b9090fa"><div class="ttname"><a href="group___h5_e.html#ga41c2ed13fd6aac6e413fe7383b9090fa">H5Eclose_stack</a></div><div class="ttdeci">herr_t H5Eclose_stack(hid_t stack_id)</div><div class="ttdoc">Closes an error stack handle.</div></div>
 </div><!-- fragment --><p> This function closes the object handle for an error stack and releases its resources.</p>
 <p>The example below shows how an application pushes an error record onto the default error stack.</p>
-<p><em>Example: Pushing an error message to an error stack</em> </p><div class="fragment"><div class="line">***  Make call to HDF5 I/O routine  ***</div>
+<p><em>Example: Pushing an error message to an error stack</em> </p><div class="fragment"><div class="line"><span class="comment">//  Make call to HDF5 I/O routine</span></div>
 <div class="line"><span class="keywordflow">if</span>((dset_id=<a class="code hl_define" href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a>(file_id, dset_name, access_plist)) &lt; 0)</div>
 <div class="line">{</div>
-<div class="line">    ***  Push client error onto error stack  ***</div>
+<div class="line">    <span class="comment">//  Push client error onto error stack</span></div>
 <div class="line">    <a class="code hl_define" href="group___h5_e.html#ga4a7d9ca6b4f7bf521d29c85bbc5b7941">H5Epush</a>(<a class="code hl_define" href="_h5_epublic_8h.html#ad7ca07d2b387a59c7e8bcab22fa57455">H5E_DEFAULT</a>,__FILE__,FUNC,__LINE__,cls_id,</div>
 <div class="line">            CLIENT_ERR_MAJ_IO,CLIENT_ERR_MINOR_OPEN, “H5Dopen failed”);</div>
 <div class="line">}</div>
-<div class="line">***  Indicate error occurred in function  ***</div>
+<div class="line"><span class="comment">//  Indicate error occurred in function</span></div>
 <div class="line"><span class="keywordflow">return</span> 0;</div>
 <div class="ttc" id="a_h5version_8h_html_a7dba2e5b2045f31c0932123ffb54f7a3"><div class="ttname"><a href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a></div><div class="ttdeci">#define H5Dopen</div><div class="ttdef"><b>Definition</b> H5version.h:903</div></div>
 </div><!-- fragment --><p>The example below shows how an application registers the current error stack and creates an object handle to avoid another HDF5 function from clearing the error stack.</p>
 <p><em>Example: Registering the error stack</em> </p><div class="fragment"><div class="line"><span class="keywordflow">if</span> (<a class="code hl_function" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906">H5Dwrite</a>(dset_id, mem_type_id, mem_space_id, file_space_id, dset_xfer_plist_id, buf) &lt; 0)</div>
 <div class="line">{</div>
-<div class="line">    ***  Push client error onto error stack  ***</div>
+<div class="line">    <span class="comment">//  Push client error onto error stack</span></div>
 <div class="line">    <a class="code hl_function" href="group___h5_e.html#ga17c2790837a1c1ea7e56b65d3c00a920">H5Epush2</a>(<a class="code hl_define" href="_h5_epublic_8h.html#ad7ca07d2b387a59c7e8bcab22fa57455">H5E_DEFAULT</a>,__FILE__,FUNC,__LINE__,cls_id,</div>
 <div class="line">            CLIENT_ERR_MAJ_IO,CLIENT_ERR_MINOR_HDF5,</div>
 <div class="line">            “H5Dwrite failed”);</div>
-<div class="line">    ***  Preserve the error stack by assigning an <span class="keywordtype">object</span> handle to it  ***</div>
+<div class="line">    <span class="comment">//  Preserve the error stack by assigning an object handle to it</span></div>
 <div class="line">    error_stack = <a class="code hl_function" href="group___h5_e.html#gac66c0955a6d821a472a3a408cdc95ae6">H5Eget_current_stack</a>();</div>
-<div class="line">    ***  Close dataset  ***</div>
+<div class="line">    <span class="comment">//  Close dataset</span></div>
 <div class="line">    <a class="code hl_function" href="group___h5_d.html#gae47c3f38db49db127faf221624c30609">H5Dclose</a>(dset_id);</div>
-<div class="line">    ***  Replace the current error stack with the preserved one  ***</div>
+<div class="line">    <span class="comment">//  Replace the current error stack with the preserved one</span></div>
 <div class="line">    <a class="code hl_function" href="group___h5_e.html#ga155715dd456c2b62a0b567e970af3473">H5Eset_current_stack</a>(error_stack);</div>
 <div class="line">}</div>
 <div class="line"><span class="keywordflow">return</span> 0;</div>
-<div class="ttc" id="agroup___h5_d_html_ga98f44998b67587662af8b0d8a0a75906"><div class="ttname"><a href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906">H5Dwrite</a></div><div class="ttdeci">herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, const void *buf)</div><div class="ttdoc">Writes raw data from a buffer to a dataset.</div></div>
 <div class="ttc" id="agroup___h5_d_html_gae47c3f38db49db127faf221624c30609"><div class="ttname"><a href="group___h5_d.html#gae47c3f38db49db127faf221624c30609">H5Dclose</a></div><div class="ttdeci">herr_t H5Dclose(hid_t dset_id)</div><div class="ttdoc">Closes the specified dataset.</div></div>
 <div class="ttc" id="agroup___h5_e_html_ga17c2790837a1c1ea7e56b65d3c00a920"><div class="ttname"><a href="group___h5_e.html#ga17c2790837a1c1ea7e56b65d3c00a920">H5Epush2</a></div><div class="ttdeci">herr_t H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid_t cls_id, hid_t maj_id, hid_t min_id, const char *msg,...)</div><div class="ttdoc">Pushes a new error record onto an error stack.</div></div>
 </div><!-- fragment --><p>Previous Chapter <a class="el" href="_h5_a__u_g.html#sec_attribute">HDF5 Attributes</a> - Next Chapter <a class="el" href="_h5_p__u_g.html#sec_plist">Properties and Property Lists in HDF5</a> </p>

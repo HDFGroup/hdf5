@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.bca2806</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -1043,7 +1043,7 @@ Releasing Memory Resources</h3>
 <p>The system resources required for HDF5 objects such as datasets, datatypes, and dataspaces should be released once access to the object is no longer needed. This is accomplished via the appropriate close function. This is not unique to datasets but a general requirement when working with the HDF5 Library; failure to close objects will result in resource leaks.</p>
 <p>In the case where a dataset is created or data has been transferred, there are several objects that must be closed. These objects include datasets, datatypes, dataspaces, and property lists.</p>
 <p>The application program must free any memory variables and buffers it allocates. When accessing data from the file, the amount of memory required can be determined by calculating the size of the memory datatype and the number of elements in the memory selection.</p>
-<p>Variable-length data are organized in two or more areas of memory. For more information, </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_t__u_g.html#h4_vlen_datatype">Variable-length Datatypes</a>.</dd></dl>
+<p>Variable-length data are organized in two or more areas of memory. For more information, see <a class="el" href="_h5_t__u_g.html#h4_vlen_datatype">Variable-length Datatypes</a>.</p>
 <p>When writing data, the application creates an array of vl_info_t which contains pointers to the elements. The elements might be, for example, strings. In the file, the variable-length data is stored in two parts: a heap with the variable-length values of the data elements and an array of vl_info_t elements. When the data is read, the amount of memory required for the heap can be determined with the <a class="el" href="group___h5_d.html#ga0e97bbd8a8ee4a8b5b78ccce8547ce76" title="Determines the number of bytes required to store variable-length (VL) data.">H5Dvlen_get_buf_size</a> call.</p>
 <p>The data transfer property may be used to set a custom memory manager for allocating variable- length data for a <a class="el" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c" title="Reads raw data from a dataset into a provided buffer.">H5Dread</a>. This is set with the <a class="el" href="group___d_x_p_l.html#ga2220ab75de470b6a6d5b1173d12aa0cf" title="Sets the memory manager for variable-length datatype allocation in H5Dread() and H5Dvlen_reclaim()">H5Pset_vlen_mem_manager</a> call. To free the memory for variable-length data, it is necessary to visit each element, free the variable-length data, and reset the element. The application must free the memory it has allocated. For memory allocated by the HDF5 Library during a read, the <a class="el" href="group___h5_d.html#ga222a2fd93868e2524b2e42c3c6146119" title="Reclaims variable-length (VL) datatype memory buffers.">H5Dvlen_reclaim</a> function can be used to perform this operation.</p>
 <h3><a class="anchor" id="subsubsec_dataset_allocation_ext"></a>
@@ -1921,7 +1921,7 @@ Using the SZip Filter</h3>
 <p>See The HDF Group website for further information regarding the SZip filter.</p>
 <h3><a class="anchor" id="subsubsec_dataset_filters_dyn"></a>
 Using Dynamically-Loadable Filters</h3>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_p_l__u_g.html#sec_filter_plugins">HDF5 Filter Plugins</a> for further information regarding the dynamically-loadable filters.</dd></dl>
+<p>see <a class="el" href="_h5_p_l__u_g.html#sec_filter_plugins">HDF5 Filter Plugins</a> for further information regarding the dynamically-loadable filters.</p>
 <p>HDF has a filter plugin repository of useful third-party plugins that can used </p><table class="doxtable">
 <tr>
 <th>Filter</th><th>SetFilter Params </th></tr>

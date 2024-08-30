@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.bca2806</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -121,79 +121,88 @@ $(document).ready(function(){initNavTree('_v_d_s.html',''); initResizable(); });
   <div class="headertitle"><div class="title">Introduction to the Virtual Dataset - VDS</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><html>
-  <head>
-    <title>Introduction to the Virtual Dataset - VDS</title>
-
+<div class="textblock"><h1><a class="anchor" id="sec_vds_intro"></a>
+Introduction to VDS</h1>
 <p>The HDF5 Virtual Dataset (VDS) feature enables users to access data in a collection of HDF5 files as a single HDF5 dataset and to use the HDF5 APIs to work with that dataset.</p>
-<p>For example, your data may be collected into four files:</p>
-
-<p><img src="tutrvds-multimgs.png" alt="tutrvds-multimgs.png" width=750></center>
-
-<p>You can map the datasets in the four files into a single VDS that can be accessed just like any other dataset:</p>
-
-<p><img src="tutrvds-snglimg.png" alt="tutrvds-snglimg.png" width=500></center>
-
+<p>For example, your data may be collected into four files: <img src="tutrvds-multimgs.png" alt="tutrvds-multimgs.png" width="750" class="inline"/></p>
+<p>You can map the datasets in the four files into a single VDS that can be accessed just like any other dataset: <img src="tutrvds-snglimg.png" alt="tutrvds-snglimg.png" width="500" class="inline"/></p>
 <p>The mapping between a VDS and the HDF5 source datasets is persistent and transparent to an application. If a source file is missing the fill value will be displayed.</p>
 <p>See the Virtual (VDS) Documentation for complete details regarding the VDS feature.</p>
-<p>The VDS feature was implemented using hyperslab selection (H5S_SELECT_HYPERSLAB). See the tutorial on Reading From or Writing to a Subset of a Dataset for more information on selecting hyperslabs.</p>
-<p>Programming Model
-To create a Virtual Dataset you simply follow the HDF5 programming model and add a few additional API calls to map the source code datasets to the VDS.</p>
-<p>Following are the steps for creating a Virtual Dataset:</p>
-<p>Create the source datasets that will comprise the VDS
-Create the VDS: ‐ Define a datatype and dataspace (can be unlimited)
-‐ Define the dataset creation property list (including fill value)
-‐ (Repeat for each source dataset) Map elements from the source dataset to elements of the VDS:
-Select elements in the source dataset (source selection)
-Select elements in the virtual dataset (destination selection)
-Map destination selections to source selections (see Functions for Working with a VDS)</p>
-<p>‐ Call H5Dcreate using the properties defined above
-Access the VDS as a regular HDF5 dataset
-Close the VDS when finished</p>
-<p>Functions for Working with a VDS
-The H5P_SET_VIRTUAL API sets the mapping between virtual and source datasets. This is a dataset creation property list. Using this API will change the layout of the dataset to H5D_VIRTUAL. As with specifying any dataset creation property list, an instance of the property list is created, modified, passed into the dataset creation call and then closed:</p>
-<p>  dcpl = H5Pcreate (H5P_DATASET_CREATE);</p>
-<p>  src_space = H5screate_simple ...
-  status = H5Sselect_hyperslab (space, ...
-  status = H5Pset_virtual (dcpl, space, SRC_FILE[i], SRC_DATASET[i], src_space);</p>
-<p>  dset = H5Dcreate2 (file, DATASET, H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);</p>
-<p>  status = H5Pclose (dcpl);
-There are several other APIs introduced with Virtual Datasets, including query functions. For details see the complete list of HDF5 library APIs that support Virtual Datasets</p>
-<p>Limitations
-This feature requires HDF5-1.10.
-The number of source datasets is unlimited. However, there is a limit on the size of each source dataset.</p>
-<p>Programming Examples
-Example 1
-This example creates three HDF5 files, each with a one-dimensional dataset of 6 elements. The datasets in these files are the source datasets that are then used to create a 4 x 6 Virtual Dataset with a fill value of -1. The first three rows of the VDS are mapped to the data from the three source datasets as shown below:</p>
-<p><img src="tutrvds-ex.png" alt="tutrvds-ex.png" width=500></p>
-<p>In this example the three source datasets are mapped to the VDS with this code:</p>
-<pre><code>src\_space = H5Screate\_simple (RANK1, dims, NULL);
-for (i = 0; i &lt; 3; i++) {
-    start[0] = (hsize\_t)i;
-    /* Select i-th row in the virtual dataset; selection in the source datasets is the same. */
-    status = H5Sselect\_hyperslab (space, H5S\_SELECT\_SET, start, NULL, count, block);
-    status = H5Pset\_virtual (dcpl, space, SRC\_FILE[i], SRC\_DATASET[i], src\_space);
-}
-</code></pre>
-<p>After the VDS is created and closed, it is reopened. The property list is then queried to determine the layout of the dataset and its mappings, and the data in the VDS is read and printed.</p>
-<p>This example is in the HDF5 source code and can be obtained from here:</p>
-<p>C Example</p>
+<p>The VDS feature was implemented using hyperslab selection (<a class="el" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d" title="Selects a hyperslab region to add to the current selected region.">H5Sselect_hyperslab</a>). See the tutorial on Reading From or Writing to a Subset of a Dataset for more information on selecting hyperslabs.</p>
+<h2><a class="anchor" id="subsec_vds_intro_model"></a>
+Programming Model</h2>
+<p>To create a Virtual Dataset you simply follow the HDF5 programming model and add a few additional API calls to map the source code datasets to the VDS.</p>
+<p>Following are the steps for creating a Virtual Dataset: </p><ul>
+<li>Create the source datasets that will comprise the VDS </li>
+<li>Create the VDS: ‐ Define a datatype and dataspace (can be unlimited) </li>
+<li>Define the dataset creation property list (including fill value) </li>
+<li>(Repeat for each source dataset) Map elements from the source dataset to elements of the VDS </li>
+<li>Select elements in the source dataset (source selection) </li>
+<li>Select elements in the virtual dataset (destination selection) </li>
+<li>Map destination selections to source selections (see Functions for Working with a VDS) </li>
+<li>Call H5Dcreate using the properties defined above </li>
+<li>Access the VDS as a regular HDF5 dataset </li>
+<li>Close the VDS when finished</li>
+</ul>
+<h4>Functions for Working with a VDS</h4>
+<p>The <a class="el" href="group___d_c_p_l.html#gadec895092dbbedb94f85d9cacf8924f5" title="Sets the mapping between virtual and source datasets.">H5Pset_virtual</a> API sets the mapping between virtual and source datasets. This is a dataset creation property list. Using this API will change the layout of the dataset to <a class="el" href="_h5_dpublic_8h.html#a57e163d4c263b585ca2d904996f5e06ea5c213e4ca5ea394669873ce66f558ad4">H5D_VIRTUAL</a>. As with specifying any dataset creation property list, an instance of the property list is created, modified, passed into the dataset creation call and then closed: </p><div class="fragment"><div class="line">dcpl = <a class="code hl_function" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a> (<a class="code hl_define" href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a>);</div>
+<div class="line">src_space = H5screate_simple ...</div>
+<div class="line">status = <a class="code hl_function" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d">H5Sselect_hyperslab</a> (space, ...</div>
+<div class="line">status = <a class="code hl_function" href="group___d_c_p_l.html#gadec895092dbbedb94f85d9cacf8924f5">H5Pset_virtual</a> (dcpl, space, SRC_FILE[i], SRC_DATASET[i], src_space);</div>
+<div class="line">dset = <a class="code hl_function" href="group___h5_d.html#gabf62045119f4e9c512d87d77f2f992df">H5Dcreate2</a> (file, DATASET, <a class="code hl_define" href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a>, space, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, dcpl, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
+<div class="line">status = <a class="code hl_function" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a> (dcpl);</div>
+<div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:228</div></div>
+<div class="ttc" id="a_h5_ppublic_8h_html_afcd7f8186c404f3a1d768632eacba102"><div class="ttname"><a href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a></div><div class="ttdeci">#define H5P_DATASET_CREATE</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:68</div></div>
+<div class="ttc" id="agroup___d_c_p_l_html_gadec895092dbbedb94f85d9cacf8924f5"><div class="ttname"><a href="group___d_c_p_l.html#gadec895092dbbedb94f85d9cacf8924f5">H5Pset_virtual</a></div><div class="ttdeci">herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const char *src_dset_name, hid_t src_space_id)</div><div class="ttdoc">Sets the mapping between virtual and source datasets.</div></div>
+<div class="ttc" id="agroup___h5_d_html_gabf62045119f4e9c512d87d77f2f992df"><div class="ttname"><a href="group___h5_d.html#gabf62045119f4e9c512d87d77f2f992df">H5Dcreate2</a></div><div class="ttdeci">hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id)</div><div class="ttdoc">Creates a new dataset and links it into the file.</div></div>
+<div class="ttc" id="agroup___h5_s_html_ga6adfdf1b95dc108a65bf66e97d38536d"><div class="ttname"><a href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d">H5Sselect_hyperslab</a></div><div class="ttdeci">herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[])</div><div class="ttdoc">Selects a hyperslab region to add to the current selected region.</div></div>
+<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:780</div></div>
+<div class="ttc" id="agroup___p_l_c_r_html_ga5dce61149211d3ef319452aa598887fb"><div class="ttname"><a href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a></div><div class="ttdeci">herr_t H5Pclose(hid_t plist_id)</div><div class="ttdoc">Terminates access to a property list.</div></div>
+<div class="ttc" id="agroup___p_l_c_r_html_gaf1b11da01d4d45d788c45f8bc5f0cbfa"><div class="ttname"><a href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a></div><div class="ttdeci">hid_t H5Pcreate(hid_t cls_id)</div><div class="ttdoc">Creates a new property list as an instance of a property list class.</div></div>
+</div><!-- fragment --><p>There are several other APIs introduced with Virtual Datasets, including query functions. For details see the complete list of HDF5 library APIs that support Virtual Datasets.</p>
+<h4>Limitations</h4>
+<p>This feature was introduced in HDF5-1.10.</p>
+<p>The number of source datasets is unlimited. However, there is a limit on the size of each source dataset.</p>
+<h2><a class="anchor" id="subsec_vds_intro_examples"></a>
+Programming Examples</h2>
+<p><em>Example 1</em> This example creates three HDF5 files, each with a one-dimensional dataset of 6 elements. The datasets in these files are the source datasets that are then used to create a 4 x 6 Virtual Dataset with a fill value of -1. The first three rows of the VDS are mapped to the data from the three source datasets as shown below: <img src="tutrvds-ex.png" alt="tutrvds-ex.png" width="500" class="inline"/></p>
+<p>In this example the three source datasets are mapped to the VDS with this code: </p><div class="fragment"><div class="line"> &gt;</div>
+<div class="line">src_space = <a class="code hl_function" href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a> (RANK1, dims, NULL);</div>
+<div class="line"><span class="keywordflow">for</span> (i = 0; i &amp;lt; 3; i++) {</div>
+<div class="line">    start[0] = (<a class="code hl_typedef" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>)i;</div>
+<div class="line">    <span class="comment">// Select i-th row in the virtual dataset; selection in the source datasets is the same.</span></div>
+<div class="line">    status = <a class="code hl_function" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d">H5Sselect_hyperslab</a> (space, <a class="code hl_enumvalue" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a>, start, NULL, count, block);</div>
+<div class="line">    status = <a class="code hl_function" href="group___d_c_p_l.html#gadec895092dbbedb94f85d9cacf8924f5">H5Pset_virtual</a> (dcpl, space, SRC_FILE[i], SRC_DATASET[i], src_space);</div>
+<div class="line">}</div>
+<div class="line">endcode&gt;</div>
+<div class="line"> </div>
+<div class="line">After the VDS is created and closed, it is reopened. The <span class="keyword">property</span> list is then queried to determine the</div>
+<div class="line">layout of the dataset and its mappings, and the data in the VDS is read and printed.</div>
+<div class="line"> </div>
+<div class="line">This example is in the HDF5 source code and can be obtained from here:</div>
+<div class="line">&lt;h4&gt;C Example&lt;/h4&gt;</div>
+<div class="line">For details on compiling an HDF5 application: [ Compiling HDF5 Applications ]</div>
+<div class="line"> </div>
+<div class="line">&lt;h4&gt;Example 2&lt;/h4&gt;</div>
+<div class="line">This example shows how to use a C-style printf statement <span class="keywordflow">for</span> specifying multiple source datasets as one <span class="keyword">virtual</span></div>
+<div class="line">dataset. Only one mapping is required. In other words only one #<a class="code hl_function" href="group___d_c_p_l.html#gadec895092dbbedb94f85d9cacf8924f5">H5Pset_virtual</a> call is needed to map multiple datasets.</div>
+<div class="line">It creates a 2-dimensional unlimited VDS. Then it re-opens the file, makes queries, and reads the <span class="keyword">virtual</span> dataset.</div>
+<div class="line"> </div>
+<div class="line">The source datasets are specified as A-0, A-1, A-2, and A-3. These are mapped to the <span class="keyword">virtual</span> dataset with one call:</div>
+<div class="line">\code</div>
+<div class="line">status = <a class="code hl_function" href="group___d_c_p_l.html#gadec895092dbbedb94f85d9cacf8924f5">H5Pset_virtual</a> (dcpl, vspace, SRCFILE, <span class="stringliteral">&quot;A-%b&quot;</span>, src_space);</div>
+<div class="ttc" id="a_h5_spublic_8h_html_a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550"><div class="ttname"><a href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a></div><div class="ttdeci">@ H5S_SELECT_SET</div><div class="ttdef"><b>Definition</b> H5Spublic.h:87</div></div>
+<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition</b> H5public.h:301</div></div>
+<div class="ttc" id="agroup___h5_s_html_ga8e35eea5738b4805856eac7d595254ae"><div class="ttname"><a href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a></div><div class="ttdeci">hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[])</div><div class="ttdoc">Creates a new simple dataspace and opens it for access.</div></div>
+</div><!-- fragment --><p>The b indicates that the block count of the selection in the dimension should be used.</p>
+<h4>C Example</h4>
 <p>For details on compiling an HDF5 application: [ Compiling HDF5 Applications ]</p>
-<p>Example 2
-This example shows how to use a C-style printf statement for specifying multiple source datasets as one virtual dataset. Only one mapping is required. In other words only one H5P_SET_VIRTUAL call is needed to map multiple datasets. It creates a 2-dimensional unlimited VDS. Then it re-opens the file, makes queries, and reads the virtual dataset.</p>
-<p>The source datasets are specified as A-0, A-1, A-2, and A-3. These are mapped to the virtual dataset with one call:</p>
-<pre><code>status = H5Pset\_virtual (dcpl, vspace, SRCFILE, &quot;/A-%b&quot;, src\_space);
-</code></pre>
-<p>The %b indicates that the block count of the selection in the dimension should be used.</p>
-<p>C Example</p>
-<p>For details on compiling an HDF5 application: [ Compiling HDF5 Applications ]</p>
-<p>Using h5dump with a VDS
-The h5dump utility can be used to view a VDS. The h5dump output for a VDS looks exactly like that for any other dataset. If h5dump cannot find a source dataset then the fill value will be displayed.</p>
-<p>You can determine that a dataset is a VDS by looking at its properties with h5dump -p. It will display each source dataset mapping, beginning with Mapping 0. Below is an excerpt of the output of h5dump -p on the vds.h5 file created in Example 1.You can see that the entire source file a.h5 is mapped to the first row of the /VDS dataset:</p>
-
-<p><img src="tutrvds-map.png" alt="tutrvds-map.png" width=650></p>
-</body></html>
- </div></div><!-- contents -->
+<p>Using h5dump with a VDS The h5dump utility can be used to view a VDS. The h5dump output for a VDS looks exactly like that for any other dataset. If h5dump cannot find a source dataset then the fill value will be displayed.</p>
+<p>You can determine that a dataset is a VDS by looking at its properties with </p><div class="fragment"><div class="line">h5dump -p</div>
+</div><!-- fragment --><p> It will display each source dataset mapping, beginning with Mapping 0. Below is an excerpt of the output of </p><div class="fragment"><div class="line">h5dump -p</div>
+</div><!-- fragment --><p> on the vds.h5 file created in Example 1.You can see that the entire source file a.h5 is mapped to the first row of the VDS dataset.</p>
+<p><img src="tutrvds-map.png" alt="tutrvds-map.png" width="650" class="inline"/> </p>
+</div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
 <!-- start footer part -->
