@@ -15,7 +15,9 @@
 ##
 #
 # HDF5 High-Level Fortran Makefile(.in)
-
+#
+# Autoconf cannot figure out dependencies between modules; disable parallel make
+.NOTPARALLEL:
 include $(top_srcdir)/config/commence.am
 
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src -I$(top_srcdir)/hl/src

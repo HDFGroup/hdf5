@@ -28,6 +28,7 @@
 /** \page H5DM_UG HDF5 Data Model and File Structure
  *
  * \section sec_data_model The HDF5 Data Model and File Structure
+ *
  * \subsection subsec_data_model_intro Introduction
  * The Hierarchical Data Format (HDF) implements a model for managing and storing data. The
  * model includes an abstract data model and an abstract storage model (the data format), and
@@ -100,8 +101,11 @@
  * model, and stored in a storage medium. The stored objects include header blocks, free lists, data
  * blocks, B-trees, and other objects. Each group or dataset is stored as one or more header and data
  * blocks.
- * @see <a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>
- * for more information on how these objects are organized. The HDF5 library can also use other
+ *
+ * For more information on how these objects are organized;
+ * see <a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>
+ *
+ * The HDF5 library can also use other
  * libraries and modules such as compression.
  *
  * <table>
