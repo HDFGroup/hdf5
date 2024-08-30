@@ -819,8 +819,8 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
                         "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
                         "error message = '%s', buf = %p, total write size = %zu, bytes this sub-write = "
                         "%llu, offset = %llu",
-                        ctime(&mytime), file->filename, file->fd, myerrno, strerror(myerrno), buf,
-                        size, (unsigned long long)bytes_in, (unsigned long long)offset);
+                        ctime(&mytime), file->filename, file->fd, myerrno, strerror(myerrno), buf, size,
+                        (unsigned long long)bytes_in, (unsigned long long)offset);
         } /* end if */
 
         assert(bytes_wrote > 0);
