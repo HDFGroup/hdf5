@@ -1912,7 +1912,7 @@ typedef struct H5C_tag_info_t {
  *        the hash table.  Note that the index_size field (above)
  *        is also the sum of the sizes of all entries in the cache.
  *        Thus we should have the invariant that clean_index_size +
- *        dirty_index_size == index_size.
+ *        dirty_index_size = index_size.
  *
  *        WARNING:
  *           The value of the clean_index_size must not be mistaken for
@@ -1929,7 +1929,7 @@ typedef struct H5C_tag_info_t {
  *        the hash table.  Note that the index_size field (above)
  *        is also the sum of the sizes of all entries in the cache.
  *        Thus we should have the invariant that clean_index_size +
- *        dirty_index_size == index_size.
+ *        dirty_index_size = index_size.
  *
  * dirty_index_ring_size: Array of size_t of length H5C_RING_NTYPES used to
  *        maintain the sum of the sizes of all dirty entries in the
@@ -2025,12 +2025,12 @@ typedef struct H5C_tag_info_t {
  * The cost of maintaining the skip list is significant.  As it is only used
  * on flush and close, it is maintained only when needed.
  *
- * To do this, we add a flag to control maintenanace of the skip list.
+ * To do this, we add a flag to control maintenance of the skip list.
  * This flag is initially set to false, which disables all operations
  * on the skip list.
  *
  * At the beginning of either flush or close, we scan the index list,
- * insert all dirtly entries in the skip list, and enable operations
+ * insert all dirty entries in the skip list, and enable operations
  * on skip list by setting above control flag to true.
  *
  * In the case of a partial flush (i.e. flush tagged entries), we only
