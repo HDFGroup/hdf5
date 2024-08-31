@@ -26,9 +26,9 @@
 #define NUM_THREADS 16
 
 typedef struct {
-    H5TS_semaphore_t   ping_sem, pong_sem;
-    unsigned ping_counter;
-    unsigned pong_counter;
+    H5TS_semaphore_t ping_sem, pong_sem;
+    unsigned         ping_counter;
+    unsigned         pong_counter;
 } pingpong_t;
 
 typedef struct {
