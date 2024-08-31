@@ -8101,6 +8101,7 @@ test_min_dset_ohdr(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_min_dset_ohdr() */
 
+#ifndef __CYGWIN__
 /****************************************************************
 **
 **  test_unseekable_file():
@@ -8137,6 +8138,8 @@ test_unseekable_file(void)
     /* TODO - Does not properly fail on all systems */
     /* VERIFY(file_id, H5I_INVALID_HID, "H5Fopen"); */
 }
+#endif
+
 /****************************************************************
 **
 **  test_deprec():
@@ -8464,11 +8467,15 @@ test_file(void)
 
     test_libver_bounds(); /* Test compatibility for file space management */
     test_libver_bounds_low_high(driver_name);
-    test_libver_macros();   /* Test the macros for library version comparison */
-    test_libver_macros2();  /* Test the macros for library version comparison */
-    test_incr_filesize();   /* Test H5Fincrement_filesize() and H5Fget_eoa() */
-    test_min_dset_ohdr();   /* Test dataset object header minimization */
+    test_libver_macros();  /* Test the macros for library version comparison */
+    test_libver_macros2(); /* Test the macros for library version comparison */
+    test_incr_filesize();  /* Test H5Fincrement_filesize() and H5Fget_eoa() */
+    test_min_dset_ohdr();  /* Test dataset object header minimization */
+
+#ifndef __CYGWIN__
     test_unseekable_file(); /* Test attempting to open/create an unseekable file */
+#endif
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     test_file_ishdf5(driver_name); /* Test detecting HDF5 files correctly */
     test_deprec(driver_name);      /* Test deprecated routines */
