@@ -1938,7 +1938,7 @@ error:
  *-------------------------------------------------------------------------
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-#define NUM_OBJS    3   /* number of groups in FILENAME[0] file */
+#define NUM_OBJS 3 /* number of groups in FILENAME[0] file */
 static int
 test_deprec(hid_t fapl, bool new_format)
 {

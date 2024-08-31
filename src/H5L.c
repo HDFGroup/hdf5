@@ -94,9 +94,8 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
     H5VL_object_t    *vol_obj2 = NULL; /* Object of dst_id */
     H5VL_loc_params_t loc_params1;
     H5VL_loc_params_t loc_params2;
-    H5VL_object_t     tmp_vol_obj;         /* Temporary object */
-    H5I_type_t        src_id_type = H5I_BADID,
-                      dst_id_type = H5I_BADID;
+    H5VL_object_t     tmp_vol_obj; /* Temporary object */
+    H5I_type_t        src_id_type = H5I_BADID, dst_id_type = H5I_BADID;
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -209,9 +208,8 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
     H5VL_loc_params_t loc_params1;
     H5VL_object_t    *vol_obj2 = NULL; /* Object of dst_id */
     H5VL_loc_params_t loc_params2;
-    H5VL_object_t     tmp_vol_obj;         /* Temporary object */
-    H5I_type_t        src_id_type = H5I_BADID,
-                      dst_id_type = H5I_BADID;
+    H5VL_object_t     tmp_vol_obj; /* Temporary object */
+    H5I_type_t        src_id_type = H5I_BADID, dst_id_type = H5I_BADID;
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
