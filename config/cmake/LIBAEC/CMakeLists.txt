@@ -157,6 +157,7 @@ set(LIBAEC_SRCS
     ${LIBAEC_SRC_DIR}/encode.c
     ${LIBAEC_SRC_DIR}/encode_accessors.c
     ${LIBAEC_SRC_DIR}/decode.c
+    ${LIBAEC_SRC_DIR}/vector.c
 )
 
 set (LIBAEC_PUBLIC_HEADERS
