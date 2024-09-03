@@ -903,7 +903,7 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr, bool was_
  *
  * Note that flush dependencies are used to order flushes within rings.
  *
- * Note also that at the conceptual level, rings are argueably superfluous,
+ * Note also that at the conceptual level, rings are arguably superfluous,
  * as a similar effect could be obtained via the flush dependency mechanism.
  * However, this would require all entries in the cache to participate in a
  * flush dependency -- with the implied setup and takedown overhead and
