@@ -8116,6 +8116,12 @@ test_unseekable_file(void)
     /* Flush message in case this test segfaults */
     fflush(stdout);
 
+/* Segfault still occurs on Cygwin - see hdf5#4797 */
+#if defined(__CYGWIN__)
+    MESSAGE(5, (" -- SKIPPED --\n"));
+    return;
+#endif
+
     /* Creation */
 #ifdef H5_HAVE_WIN32_API
     H5Fcreate("NUL", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
