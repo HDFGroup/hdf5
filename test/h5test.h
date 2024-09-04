@@ -318,7 +318,7 @@ H5TEST_DLL bool           h5_using_default_driver(const char *drv_name);
 H5TEST_DLL herr_t         h5_using_parallel_driver(hid_t fapl_id, bool *driver_is_parallel);
 H5TEST_DLL herr_t         h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *default_vfd_compatible);
 H5TEST_DLL bool           h5_driver_uses_multiple_files(const char *drv_name, unsigned flags);
-
+H5TEST_DLL bool           h5_on_cygwin(void);
 /* Random number functions that don't modify the underlying rand/random state.
  * These use rand_r with a state pointer under the hood. The state is always
  * initialized to the same value so that each process in the parallel tests

@@ -2564,6 +2564,31 @@ h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)
     return ret_val;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    h5_on_cygwin
+
+ *
+ * Purpose:     Determine whether tests are running on Cygwin
+ *
+ * Return:      True if running on Cygwin, false otherwise.
+ *
+ *-------------------------------------------------------------------------
+ */
+bool
+h5_on_cygwin(void)
+{
+    bool  ret_value = false;
+    FILE *fp        = NULL;
+
+    /* If /cygdrive/ exists and is readable, assume HDF5 is running on Cygwin */
+    if ((fp = fopen("/cygdrive", "r")) != NULL) {
+        fclose(fp);
+        ret_value = true;
+    }
+
+    return ret_value;
+}
+
 /* Deterministic random number functions that don't modify the underlying
  * C/POSIX library rand/random state, as this can cause spurious test failures.
  *
