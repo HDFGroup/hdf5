@@ -340,9 +340,9 @@ hid_t file_id = H5Fcreate("file.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 [u5]: https://hdfgroup.github.io/hdf5/develop/group___d_c_p_l.html#ga85faefca58387bba409b65c470d7d851
 [u6]: https://hdfgroup.github.io/hdf5/develop/group___d_c_p_l.html#ga4335bb45b35386daa837b4ff1b9cd4a4
 [u7]: https://hdfgroup.github.io/hdf5/develop/group___d_c_p_l.html#ga6bd822266b31f86551a9a1d79601b6a2
-[u8]: https://support.hdfgroup.org/documentation/HDF5/parallel-compression-improvements-in-hdf5-1-13-1
-[u9]: https://support.hdfgroup.org/documentation/HDF5/chunking_in_hdf5.html
-[u10]: https://support.hdfgroup.org/documentation/HDF5/technotes/TechNote-HDF5-ImprovingIOPerformanceCompressedDatasets.pdf
+[u8]: https://support.hdfgroup.org/documentation/hdf5/parallel-compression-improvements-in-hdf5-1-13-1
+[u9]: https://support.hdfgroup.org/documentation/hdf5/chunking_in_hdf5.html
+[u10]: https://support.hdfgroup.org/documentation/hdf5/technotes/TechNote-HDF5-ImprovingIOPerformanceCompressedDatasets.pdf
 [u11]: https://hdfgroup.github.io/hdf5/develop/group___f_a_p_l.html#gab99d5af749aeb3896fd9e3ceb273677a
 [u12]: https://hdfgroup.github.io/hdf5/develop/group___f_c_p_l.html#ga167ff65f392ca3b7f1933b1cee1b9f70
 [u13]: https://hdfgroup.github.io/hdf5/develop/group___f_c_p_l.html#gad012d7f3c2f1e1999eb1770aae3a4963

@@ -114,7 +114,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 7. Choose the release branch
 8. Change ‘Release version tag’ name to 'hdf5_X.Y.Z.P'
     - P is some pre-release number.
-9. Send a message to the HDF forum indicating that a pre-release source package is available for testing at <e.g. https://github.com/HDFGroup/hdf5/releases/{hdf5-X.Y.Z-P}> and that feedback from the user community on their test results is being accepted.
+9. Send a message to the HDF forum indicating that a pre-release source package is available for testing at <e.g., <github.com releases URL>/{hdf5-X.Y.Z-P}> and that feedback from the user community on their test results is being accepted.
 10. Contact paying clients who are interested in testing the pre-release source package and inform them that it is available for testing and that feedback on their test results of the pre-release is appreciated.
 11. This should be automated and currently github binaries are not signed.
     - Follow the [How to sign binaries with digital certificates(this is missing)]() work instructions to sign each Windows and Mac binary package with a digital certificate.
@@ -167,13 +167,13 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u3]: https://github.com/HDFGroup/hdf5/blob/develop/COPYING
 [u4]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs
 [u5]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL
-[u6]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_Auto.txt
+[u6]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_Autotools.txt
 [u7]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_CMake.txt
 [u8]: https://github.com/HDFGroup/hdf5/blob/develop/.github/workflows/release.yml
 [u9]: https://github.com/HDFGroup/hdf5/blob/develop/config/lt_vers.am
 [u10]: https://github.com/HDFGroup/hdf5/blob/develop/bin/h5vers
 [u11]: https://github.com/HDFGroup/hdf5/blob/develop/src/CMakeLists.txt
 [u12]: https://github.com/HDFGroup/hdf5/blob/develop/configure.ac
-[u13]: https://support.hdfgroup.org/documentation/HDF5/v1_14/v1_14_4/api-compat-macros.html
+[u13]: https://support.hdfgroup.org/documentation/hdf5/v1_14/v1_14_4/api-compat-macros.html
 [u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14
 [u15]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot
