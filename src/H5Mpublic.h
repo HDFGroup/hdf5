@@ -264,8 +264,8 @@ H5_DLL hid_t  H5Mcreate_async(hid_t loc_id, const char *name, hid_t key_type_id,
  *          property lists \p mcpl_id and \p mapl_id.
  *
  *          The new map should be linked into the group hierarchy before being
- *          closed or it will be deleted. The dataset should be closed when the
- *          caller is no longer interested in it.
+ *          closed or it will be deleted. The map should be closed when the
+ *          caller no longer requires it.
  *
  * \since 1.12.0
  *

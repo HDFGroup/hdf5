@@ -7,23 +7,23 @@
  * for working with region references, hyperslab selections, and bit-fields.
  * These functions were created as part of a project supporting
  * NPP/NPOESS Data Production and Exploitation (
- * <a href="https://support.hdfgroup.org/projects/jpss/documentation">
- * project</a>, <a href="https://gamma.hdfgroup.org/ftp/pub/outgoing/NPOESS/source">
+ * <a href="https://\PRJURL/jpss/documentation">
+ * project</a>, <a href="https://\PRJURL/jpss/ftp/pub/outgoing/NPOESS/source">
  * software </a>).
  * While they were written to facilitate access to NPP, NPOESS, and JPSS
  * data in the HDF5 format, these functions may be useful to anyone working
  * with region references, hyperslab selections, or bit-fields.
  *
  * Note that these functions are not part of the standard HDF5 distribution; 
- * the <a href="https://gamma.hdfgroup.org/ftp/pub/outgoing/NPOESS/source">
+ * the <a href="https://\PRJURL/jpss/ftp/pub/outgoing/NPOESS/source">
  * software </a>
  * must be separately downloaded and installed.
  *
  * A comprehensive guide to this library,
- * <a href="https://support.hdfgroup.org/projects/jpss/documentation/HL/UG/NPOESS_HL-UG.pdf">
+ * <a href="https://\PRJURL/jpss/documentation/HL/UG/NPOESS_HL-UG.pdf">
  * <em>User Guide to the HDF5 High-level Library for Handling Region References and Hyperslab Selections</em></a>
  * is available at
- * https://support.hdfgroup.org/projects/jpss/documentation/HL/UG/NPOESS_HL-UG.pdf.
+ * https://\PRJURL/jpss/documentation/HL/UG/NPOESS_HL-UG.pdf.
  *
  * - \ref H5LRcopy_reference
  *        \n Copies data from the specified dataset to a new location and creates a reference to it.
@@ -297,7 +297,7 @@ H5_HLRDLL herr_t H5LRcopy_region(hid_t obj_id,
  *          - #H5_ITER_NATIVE   Fastest available order
  *
  *          For more detailed information on these two parameters,
- *          @see H5Lvisit().
+ *          see H5Lvisit().
  *
  *          \p ref_type specifies the type of the reference to be used.
  *          Valid values include the following:

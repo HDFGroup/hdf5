@@ -43,7 +43,7 @@
  * \li The use of low-level file drivers
  *
  * This chapter assumes an understanding of the material presented in the data model chapter. For
- * more information, @see @ref sec_data_model.
+ * more information, see \ref sec_data_model.
  *
  * \subsection subsec_file_access_modes File Access Modes
  * There are two issues regarding file access:
@@ -101,7 +101,7 @@
  * a user-definable data block; the size of data address parameters; properties of the B-trees that are
  * used to manage the data in the file; and certain HDF5 Library versioning information.
  *
- * For more information, @see @ref subsubsec_file_property_lists_props.
+ * For more information, see \ref subsubsec_file_property_lists_props.
  *
  * This section has a more detailed discussion of file creation properties. If you have no special
  * requirements for these file characteristics, you can simply specify #H5P_DEFAULT for the default
@@ -112,7 +112,7 @@
  * settings, and parallel I/O. Data alignment, metadata block and cache sizes, and data sieve buffer
  * size are factors in improving I/O performance.
  *
- * For more information, @see @ref subsubsec_file_property_lists_access.
+ * For more information, see \ref subsubsec_file_property_lists_access.
  *
  * This section has a more detailed discussion of file access properties. If you have no special
  * requirements for these file access characteristics, you can simply specify #H5P_DEFAULT for the
@@ -466,8 +466,9 @@
  * remain valid. Each of these file identifiers must be released by calling #H5Fclose when it is no
  * longer needed.
  *
- * For more information, @see @ref subsubsec_file_property_lists_access.
- * For more information, @see @ref subsec_file_property_lists.
+ * For more information, see \ref subsubsec_file_property_lists_access.
+ *
+ * For more information, see \ref subsec_file_property_lists.
  *
  * \subsection subsec_file_closes Closing an HDF5 File
  * #H5Fclose both closes a file and releases the file identifier returned by #H5Fopen or #H5Fcreate.
@@ -512,7 +513,7 @@
  * information for every property list function is provided in the \ref H5P
  * section of the HDF5 Reference Manual.
  *
- * For more information, @see @ref sec_plist.
+ * For more information, @see \ref sec_plist.
  *
  * \subsubsection subsubsec_file_property_lists_create Creating a Property List
  * If you do not wish to rely on the default file creation and access properties, you must first create
@@ -594,7 +595,7 @@
  * \subsubsection subsubsec_file_property_lists_access File Access Properties
  * This section discusses file access properties that are not related to the low-level file drivers. File
  * drivers are discussed separately later in this chapter.
- * For more information, @see @ref subsec_file_alternate_drivers.
+ * For more information, @see \ref subsec_file_alternate_drivers.
  *
  * File access property lists control various aspects of file I/O and structure.
  *
@@ -657,7 +658,7 @@
  *
  * HDF5 employs an extremely flexible mechanism called the virtual file layer, or VFL, for file
  * I/O. A full understanding of the VFL is only necessary if you plan to write your own drivers
- * @see \ref VFL in the HDF5 Technical Notes.
+ * see \ref VFL in the HDF5 Technical Notes.
  *
  * For our
  * purposes here, it is sufficient to know that the low-level drivers used for file I/O reside in the
@@ -690,7 +691,7 @@
  *
  * If an application requires a special-purpose low-level driver, the VFL provides a public API for
  * creating one. For more information on how to create a driver,
- * @see @ref VFL in the HDF5 Technical Notes.
+ * see \ref VFL in the HDF5 Technical Notes.
  *
  * \subsubsection subsubsec_file_alternate_drivers_id Identifying the Previously‐used File Driver
  * When creating a new HDF5 file, no history exists, so the file driver must be specified if it is to be
@@ -888,11 +889,11 @@
  *
  * Additional parameters may be added to these functions in the future.
  *
- * @see <a href="https://\DOCURL/advanced_topics/file_image_ops.html">
+ * see <a href="https://\DOCURL/advanced_topics/file_image_ops.html">
  * HDF5 File Image Operations</a>
  * section for information on more advanced usage of the Memory file driver, and
- * @see <a
- * href="https://docs.hdfgroup.org/archive/support/HDF5/doc/Advanced/ModifiedRegionWrites/ModifiedRegionWrites.pdf">
+ * see <a
+ * href="https://\DOCURL/advanced_topics/ModifiedRegionWrites.pdf">
  * Modified Region Writes</a>
  * section for information on how to set write operations so that only modified regions are written
  * to storage.
@@ -1070,7 +1071,7 @@
  * name is FILE. If the function does not find an existing file, it will create one. If it does find an
  * existing file, it will empty the file in preparation for a new set of data. The identifier for the
  * "new" file will be passed back to the application program.
- * For more information, @see @ref subsec_file_access_modes.
+ * For more information, @see \ref subsec_file_access_modes.
  *
  * <em>Creating a file with default creation and access properties</em>
  * \code
@@ -1182,7 +1183,7 @@
  * Note: In the code example above, loc_id is the file identifier for File1, /B is the link path to the
  * group where File2 is mounted, child_id is the file identifier for File2, and plist_id is a property
  * list identifier.
- * For more information, @see @ref sec_group.
+ * For more information, @see \ref sec_group.
  *
  * See the entries for #H5Fmount, #H5Funmount, and #H5Lcreate_external in the HDF5 Reference Manual.
  *

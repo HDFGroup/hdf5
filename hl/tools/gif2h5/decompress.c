@@ -296,6 +296,10 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
              * Build the hash table on-the-fly. No table is stored in the
              * file.
              */
+            if (FreeCode >= 4096) {
+                printf("Error: FreeCode out of bounds\n");
+                exit(EXIT_FAILURE);
+            }
             Prefix[FreeCode] = OldCode;
             Suffix[FreeCode] = FinChar;
             OldCode          = InCode;

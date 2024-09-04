@@ -5205,7 +5205,7 @@ H5_DLL herr_t H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
  *          current state of the logging flags.
  *
  *          The log format is described in [<em>Metadata Cache Logging</em>]
- *          (https://\DSPURL/Fine-tuning+the+Metadata+Cache).
+ *          (https://\DOCURL/advanced_topics/Fine-tuning+the+Metadata+Cache).
  *
  * \since 1.10.0
  *

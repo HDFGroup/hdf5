@@ -1786,7 +1786,7 @@ done:
  *        s: the open succeeds with flags combination from both the first and second opens
  *
  *        NOTE: If the 'try' flag is true, not opening the file with the
- *        "non-tentative" VFD 'open' call is not treated an error; SUCCEED is
+ *        "non-tentative" VFD 'open' call is not treated as an error; SUCCEED is
  *        returned, with the file ptr set to NULL.  If 'try' is false, failing
  *        the "non-tentative" VFD 'open' call generates an error.
  *
@@ -1985,7 +1985,7 @@ H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_i
     if ((ci_load || ci_write) && (flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE)))
         HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "can't have both SWMR and cache image");
 
-    /* Retain the name the file was opened with */
+    /* Retain the original filename. */
     file->open_name = H5MM_xstrdup(name);
 
     /* Short cuts */

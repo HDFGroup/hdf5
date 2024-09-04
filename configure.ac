@@ -3833,10 +3833,10 @@ AC_DEFINE_UNQUOTED([DEFAULT_PLUGINDIR], ["$default_plugindir"],
 ## for the speed optimization of hard conversions.  Soft conversions can
 ## actually benefit little.
 ##
-AC_MSG_CHECKING([whether exception handling functions is checked during data conversions])
+AC_MSG_CHECKING([whether exception handling functions are checked during data conversions])
 AC_ARG_ENABLE([dconv-exception],
               [AS_HELP_STRING([--enable-dconv-exception],
-                              [if exception handling functions is checked during
+                              [Check exception handling functions during
                               data conversions [default=yes]])],
               [DCONV_EXCEPTION=$enableval], [DCONV_EXCEPTION=yes])
 
@@ -3857,7 +3857,7 @@ fi
 AC_MSG_CHECKING([whether data accuracy is guaranteed during data conversions])
 AC_ARG_ENABLE([dconv-accuracy],
               [AS_HELP_STRING([--enable-dconv-accuracy],
-                              [if data accuracy is guaranteed during
+                              [Guarantee data accuracy during
                               data conversions [default=yes]])],
               [DATA_ACCURACY=$enableval], [DATA_ACCURACY=yes])
 

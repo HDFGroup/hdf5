@@ -979,7 +979,7 @@
  * <div>
  * \snippet{doc} tables/propertyLists.dox lcpl_table
  * </div>
- * @see STRCPL
+ * @see @ref STRCPL
  *
  * \defgroup ACPL Attribute Creation Properties
  * \ingroup STRCPL
@@ -988,7 +988,7 @@
  * \snippet{doc} tables/propertyLists.dox acpl_table
  * </div>
  *
- * @see STRCPL
+ * @see @ref STRCPL
  *
  * \defgroup LAPL Link Access Properties
  * \ingroup H5P
