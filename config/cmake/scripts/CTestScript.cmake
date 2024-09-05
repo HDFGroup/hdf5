@@ -51,15 +51,15 @@ endif ()
 set (BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
 
 # Launchers work only with Makefile and Ninja generators.
-if(NOT "${CTEST_CMAKE_GENERATOR}" MATCHES "Make|Ninja" OR LOCAL_SKIP_TEST)
-  set(CTEST_USE_LAUNCHERS 0)
-  set(ENV{CTEST_USE_LAUNCHERS_DEFAULT} 0)
-  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=OFF")
-else()
-  set(CTEST_USE_LAUNCHERS 1)
-  set(ENV{CTEST_USE_LAUNCHERS_DEFAULT} 1)
-  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON")
-endif()
+if (NOT "${CTEST_CMAKE_GENERATOR}" MATCHES "Make|Ninja" OR LOCAL_SKIP_TEST)
+  set (CTEST_USE_LAUNCHERS 0)
+  set (ENV{CTEST_USE_LAUNCHERS_DEFAULT} 0)
+  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=OFF")
+else ()
+  set (CTEST_USE_LAUNCHERS 1)
+  set (ENV{CTEST_USE_LAUNCHERS_DEFAULT} 1)
+  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON")
+endif ()
 
 #-----------------------------------------------------------------------------
 # MAC machines need special option
@@ -206,7 +206,7 @@ endif ()
 
 #-----------------------------------------------------------------------------
 ## -- set output to english
-set ($ENV{LC_MESSAGES}  "en_EN")
+set (ENV{LC_MESSAGES} "en_EN")
 
 # Print summary information.
 foreach (v
