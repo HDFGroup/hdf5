@@ -23,6 +23,12 @@ on:
         required: true
         default: snapshots
     secrets:
+        APPLE_CERTS_BASE64:
+            required: true
+        APPLE_CERTS_BASE64_PASSWD:
+            required: true
+        KEYCHAIN_PASSWD:
+            required: true
         AZURE_TENANT_ID:
             required: true
         AZURE_CLIENT_ID:
@@ -53,12 +59,14 @@ jobs:
         run: |
           if [[ '${{ env.signing_secret }}' == '' ]]
           then
-            SIGN_VAL=$(echo "false")
+            SIGN_VAL=$(echo 'notexists')
           else
-            SIGN_VAL=$(echo "true")
+            SIGN_VAL=$(echo 'exists')
           fi
           echo "BINSIGN=$SIGN_VAL" >> $GITHUB_OUTPUT
         shell: bash
+
+      - run: echo "signing is ${{ steps.set-signing-state.outputs.BINSIGN }}."
 
   build_and_test_win:
   # Windows w/ MSVC + CMake
@@ -114,7 +122,27 @@ jobs:
         run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
         shell: bash
 
+      - name: Install TrustedSigning (Windows)
+        run: |
+            Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile .\nuget.exe
+            .\nuget.exe install Microsoft.Windows.SDK.BuildTools -Version 10.0.22621.3233 -x
+            .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.53 -x
+        shell: pwsh
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: create-json
+        id: create-json
+        uses: jsdaniell/create-json@v1.2.3
+        with:
+            name: "credentials.json"
+            dir: 'hdfsrc'
+            json: '{"Endpoint": "${{ secrets.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ secrets.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ secrets.AZURE_CERT_PROFILE_NAME }}"}'
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
       - name: Run ctest (Windows)
+        env:
+          BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
+          SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-MSVC --fresh
@@ -134,7 +162,7 @@ jobs:
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
-        if: ${{ needs.check-secret.outputs.sign-state == 'true' }}
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
 
       - name: Publish binary (Windows)
         id: publish-ctest-binary
@@ -323,6 +351,28 @@ jobs:
         with:
           version: "1.9.7"
 
+      - name: Install the Apple certificate and provisioning profile
+        shell: bash
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
+          P12_PASSWORD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+        run: |
+            # create variables
+            CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+            KEYCHAIN_FILE=${{ vars.KEYCHAIN_NAME }}.keychain
+            # import certificate from secrets
+            echo $BUILD_CERTIFICATE_BASE64 | base64 --decode > $CERTIFICATE_PATH
+            security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+            security -v list-keychain -d user -s $KEYCHAIN_FILE
+            security -v list-keychains
+            security -v set-keychain-settings -lut 21600 $KEYCHAIN_FILE
+            security -v unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+            # import certificate to keychain
+            security -v import $CERTIFICATE_PATH -P $P12_PASSWORD -A -t cert -f pkcs12 -k $KEYCHAIN_FILE
+            security -v set-key-partition-list -S apple-tool:,codesign:,apple: -k $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
       - name: Set up JDK 19
         uses: actions/setup-java@v4
         with:
@@ -367,10 +417,99 @@ jobs:
 
       - name: Run ctest (MacOS_latest)
         id: run-ctest
+        env:
+          BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
+          SIGNER: ${{ vars.SIGNER }}
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
-          cmake --workflow --preset=${{ inputs.preset_name }}-MACOS-Clang --fresh
+          cmake --workflow --preset=${{ inputs.preset_name }}-macos-Clang --fresh
         shell: bash
+
+      - name: Sign dmg (MacOS_latest)
+        id: sign-dmg
+        env:
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+          SIGNER: ${{ vars.SIGNER }}
+          NOTARY_USER: ${{ vars.NOTARY_USER }}
+          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+        run: |
+          /usr/bin/codesign --force --timestamp --options runtime --entitlements ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/distribution.entitlements --verbose=4 --strict --sign ${{ env.SIGNER }} --deep ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Check dmg timestamp (MacOS_latest)
+        run: |
+          /usr/bin/codesign -dvv ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Verify dmg (MacOS_latest)
+        run: |
+          /usr/bin/hdiutil verify ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Notarize dmg (MacOS_latest)
+        id: notarize-dmg
+        env:
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+          SIGNER: ${{ vars.SIGNER }}
+          NOTARY_USER: ${{ vars.NOTARY_USER }}
+          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+        run: |
+          jsonout=$(/usr/bin/xcrun notarytool submit --wait --output-format json --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg)
+          echo "JSONOUT=$jsonout" >> $GITHUB_OUTPUT
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Get ID token (MacOS_latest)
+        id: get-id-token
+        run: |
+          echo "notary result is ${{ fromJson(steps.notarize-dmg.outputs.JSONOUT) }}"
+          token=${{ fromJson(steps.notarize-dmg.outputs.JSONOUT).id }}
+          echo "ID_TOKEN=$token" >> "$GITHUB_OUTPUT"
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: post notary check (MacOS_latest)
+        id: post-notary
+        env:
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+          SIGNER: ${{ vars.SIGNER }}
+          NOTARY_USER: ${{ vars.NOTARY_USER }}
+          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+        run: |
+          {
+            echo 'NOTARYOUT<<EOF'
+            /usr/bin/xcrun notarytool info --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ steps.get-id-token.outputs.ID_TOKEN }}
+            echo EOF
+          } >> $GITHUB_OUTPUT
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Get notary info (MacOS_latest)
+        id: get-notary-info
+        run: |
+          echo "notary info is ${{ steps.post-notary.outputs.NOTARYOUT }}."
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Staple dmg (MacOS_latest)
+        id: staple-dmg
+        env:
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+          SIGNER: ${{ vars.SIGNER }}
+          NOTARY_USER: ${{ vars.NOTARY_USER }}
+          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+        run: |
+          /usr/bin/xcrun stapler staple ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+        continue-on-error: true
 
       - name: Publish binary (MacOS_latest)
         id: publish-ctest-binary
@@ -379,8 +518,8 @@ jobs:
           mkdir "${{ runner.workspace }}/build/hdf5"
           cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz hdf5
         shell: bash
@@ -392,8 +531,8 @@ jobs:
           mkdir "${{ runner.workspace }}/builddmg/hdf5"
           cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/builddmg/hdf5
           cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/builddmg/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/builddmg/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.dmg ${{ runner.workspace }}/builddmg/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/README.md ${{ runner.workspace }}/builddmg/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg ${{ runner.workspace }}/builddmg/hdf5
           cd "${{ runner.workspace }}/builddmg"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.arm64.dmg.tar.gz hdf5
         shell: bash
@@ -568,7 +707,7 @@ jobs:
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
-        if: ${{ needs.check-secret.outputs.sign-state == 'true' }}
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
 
       - name: Publish binary (Windows_intel)
         id: publish-ctest-binary
