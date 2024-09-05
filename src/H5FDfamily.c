@@ -247,7 +247,8 @@ H5FD__family_get_default_printf_filename(const char *old_filename)
         if (file_extension) {
             intptr_t beginningLength = file_extension - old_filename;
 
-            snprintf(tmp_buffer, new_filename_len, "%.*s%s%s", (int)beginningLength, old_filename, suffix, file_extension);
+            snprintf(tmp_buffer, new_filename_len, "%.*s%s%s", (int)beginningLength, old_filename, suffix,
+                     file_extension);
         }
         else
             /* If the filename doesn't contain an extension at all, just insert
@@ -617,7 +618,9 @@ H5FD__family_sb_decode(H5FD_t *_file, const char H5_ATTR_UNUSED *name, const uns
 
         /* Check if member size from file access property is correct */
         if (msize != file->pmem_size)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "Family member size should be %lu.  But the size from file access property is %lu", (unsigned long)msize, (unsigned long)file->pmem_size);
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                        "Family member size should be %lu.  But the size from file access property is %lu",
+                        (unsigned long)msize, (unsigned long)file->pmem_size);
 
         /* Update member file size to the size saved in the superblock.
          * That's the size intended to be. */
@@ -768,11 +771,13 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
          * Allow H5F_ACC_CREAT only on the first family member.
          */
         if (0 == file->nmembs) {
-            if (H5FD_open(false, &file->memb[file->nmembs], memb_name, (0 == file->nmembs ? flags : t_flags), file->memb_fapl_id, HADDR_UNDEF) < 0)
+            if (H5FD_open(false, &file->memb[file->nmembs], memb_name, (0 == file->nmembs ? flags : t_flags),
+                          file->memb_fapl_id, HADDR_UNDEF) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open member file");
         }
         else {
-            if (H5FD_open(true, &file->memb[file->nmembs], memb_name, (0 == file->nmembs ? flags : t_flags), file->memb_fapl_id, HADDR_UNDEF) < 0)
+            if (H5FD_open(true, &file->memb[file->nmembs], memb_name, (0 == file->nmembs ? flags : t_flags),
+                          file->memb_fapl_id, HADDR_UNDEF) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open member file");
 
             if (!file->memb[file->nmembs])
@@ -1013,7 +1018,8 @@ H5FD__family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
             file->nmembs = MAX(file->nmembs, u + 1);
             snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, file->name, u);
             H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
-            if (H5FD_open(false, &file->memb[u], memb_name, file->flags | H5F_ACC_CREAT, file->memb_fapl_id, (haddr_t)file->memb_size) < 0)
+            if (H5FD_open(false, &file->memb[u], memb_name, file->flags | H5F_ACC_CREAT, file->memb_fapl_id,
+                          (haddr_t)file->memb_size) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "unable to open member file");
         } /* end if */
 
@@ -1459,7 +1465,8 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
             filename = temp;
         }
         else
-            HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "provided file name cannot generate unique sub-files");
+            HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL,
+                        "provided file name cannot generate unique sub-files");
     }
 
     /* Delete all the family members */
