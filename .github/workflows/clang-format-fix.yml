@@ -11,8 +11,10 @@ name: clang-format Commit Changes
 on: 
   workflow_dispatch:
   push:
+
 permissions:
   contents: read
+
 jobs:
   formatting-check:
     name: Commit Format Changes
@@ -21,9 +23,10 @@ jobs:
     permissions:
         contents: write # In order to allow EndBug/add-and-commit to commit changes
     steps:
-    - uses: actions/checkout@9a9194f87191a7e9055e3e9b95b8cfb13023bb08 # v4.1.7
+    - uses: actions/checkout@v4.1.7
+
     - name: Fix C and Java formatting issues detected by clang-format
-      uses: DoozyX/clang-format-lint-action@caa179272c6ee7f1d25dfb503ee0c410c26ebd98 # v0.13
+      uses: DoozyX/clang-format-lint-action@v0.18.2
       with:
         source: '.'
         extensions: 'c,h,cpp,hpp,java'
@@ -31,6 +34,7 @@ jobs:
         inplace: True
         style: file
         exclude: './config ./hl/src/H5LTanalyze.c ./hl/src/H5LTparse.c ./hl/src/H5LTparse.h ./src/H5Epubgen.h ./src/H5Einit.h ./src/H5Eterm.h ./src/H5Edefin.h ./src/H5version.h ./src/H5overflow.h'
+
     - uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
       with:
           author_name: github-actions
