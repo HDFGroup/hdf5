@@ -534,7 +534,7 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/README.md ${{ runner.workspace }}/builddmg/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg ${{ runner.workspace }}/builddmg/hdf5
           cd "${{ runner.workspace }}/builddmg"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.arm64.dmg.tar.gz hdf5
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg.tar.gz hdf5
         shell: bash
 
       - name: List files in the space (MacOS_latest)
