@@ -1938,12 +1938,14 @@ error:
  *-------------------------------------------------------------------------
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
+#define NUM_OBJS 3 /* number of groups in FILENAME[0] file */
 static int
 test_deprec(hid_t fapl, bool new_format)
 {
     hid_t      file_id   = H5I_INVALID_HID;
     hid_t      group1_id = H5I_INVALID_HID;
     hid_t      group2_id = H5I_INVALID_HID;
+    hid_t      group3_id = H5I_INVALID_HID;
     H5G_stat_t sb_hard1, sb_hard2, sb_soft1, sb_soft2;
     H5G_obj_t  obj_type; /* Object type */
     hsize_t    num_objs; /* Number of objects in a group */
@@ -1966,6 +1968,8 @@ test_deprec(hid_t fapl, bool new_format)
     if ((group1_id = H5Gcreate2(file_id, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
     if ((group2_id = H5Gcreate2(file_id, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+    if ((group3_id = H5Gcreate2(file_id, "group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
     /* Test H5Gset and get comment */
@@ -2022,7 +2026,7 @@ test_deprec(hid_t fapl, bool new_format)
     /* Test getting the number of objects in a group */
     if (H5Gget_num_objs(file_id, &num_objs) < 0)
         FAIL_STACK_ERROR;
-    if (num_objs != 2)
+    if (num_objs != NUM_OBJS)
         TEST_ERROR;
     if (H5Gget_num_objs(group1_id, &num_objs) < 0)
         FAIL_STACK_ERROR;
@@ -2113,9 +2117,43 @@ test_deprec(hid_t fapl, bool new_format)
 
     /* Test H5Gmove and H5Gmove2 */
     if (H5Gmove(file_id, "group1", "moved_group1") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gmove2(file_id, "group2", group1_id, "moved_group2") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
+    if (H5Gmove2(file_id, "group3", H5L_SAME_LOC, "moved_group3") < 0)
+        TEST_ERROR;
+    if (H5Gmove2(file_id, "moved_group3", group2_id, "moved_group3_to_group2") < 0)
+        TEST_ERROR;
+
+    /* Test H5Gmove2 with H5L_SAME_LOC */
+    if (H5Gmove2(group2_id, "moved_group3_to_group2", H5L_SAME_LOC, "group3_same_loc") < 0)
+        TEST_ERROR;
+
+    /* Test H5Gmove2 with H5L_SAME_LOC */
+    if (H5Gmove2(H5L_SAME_LOC, "moved_group1/moved_group2", file_id, "moved_group2_again") < 0)
+        TEST_ERROR;
+
+    /* Put back moved_group2 for subsequent tests */
+    if (H5Gmove2(file_id, "moved_group2_again", file_id, "moved_group1/moved_group2") < 0)
+        TEST_ERROR;
+
+    /* Test passing in invalid ID */
+    H5E_BEGIN_TRY
+    {
+        hid_t bad_id = H5I_BADID;
+        if (H5Gmove2(bad_id, "group2", group1_id, "moved_group2") >= 0)
+            TEST_ERROR;
+    }
+    H5E_END_TRY
+
+    /* Test passing in invalid ID */
+    H5E_BEGIN_TRY
+    {
+        hid_t bad_id = H5I_BADID;
+        if (H5Gmove2(file_id, "group2", bad_id, "moved_group2") >= 0)
+            TEST_ERROR;
+    }
+    H5E_END_TRY
 
     /* Ensure that both groups can be opened */
     if (H5Gclose(group2_id) < 0)
@@ -2129,6 +2167,8 @@ test_deprec(hid_t fapl, bool new_format)
         FAIL_STACK_ERROR;
 
     /* Close open IDs */
+    if (H5Gclose(group3_id) < 0)
+        FAIL_STACK_ERROR;
     if (H5Gclose(group2_id) < 0)
         FAIL_STACK_ERROR;
     if (H5Gclose(group1_id) < 0)
@@ -2154,6 +2194,7 @@ test_deprec(hid_t fapl, bool new_format)
 error:
     H5E_BEGIN_TRY
     {
+        H5Gclose(group3_id);
         H5Gclose(group2_id);
         H5Gclose(group1_id);
         H5Fclose(file_id);
@@ -3293,7 +3334,8 @@ external_link_closing_deprec(hid_t fapl, bool new_format)
     /* Test copy (as of this test, it uses the same code as move) */
     if (H5Lcopy(fid1, "elink/elink/elink", fid1, "elink/elink/elink_copied", H5P_DEFAULT, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    if (H5Lcopy(fid1, "elink/elink/elink", fid1, "elink/elink/elink/elink_copied2", H5P_DEFAULT,
+    /* Also exercise H5L_SAME_LOC */
+    if (H5Lcopy(H5L_SAME_LOC, "elink/elink/elink", fid1, "elink/elink/elink/elink_copied2", H5P_DEFAULT,
                 H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
@@ -4325,7 +4367,8 @@ lapl_nlinks_deprec(hid_t fapl, bool new_format)
      */
     if (H5Lcopy(fid, "soft17", fid, "soft17/newer_soft", H5P_DEFAULT, plist) < 0)
         TEST_ERROR;
-    if (H5Lmove(fid, "soft17/newer_soft", fid, "soft17/newest_soft", H5P_DEFAULT, plist) < 0)
+    /* Also exercise H5L_SAME_LOC */
+    if (H5Lmove(fid, "soft17/newer_soft", H5L_SAME_LOC, "soft17/newest_soft", H5P_DEFAULT, plist) < 0)
         TEST_ERROR;
 
     /* H5Olink */

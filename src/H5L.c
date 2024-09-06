@@ -94,7 +94,8 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
     H5VL_object_t    *vol_obj2 = NULL; /* Object of dst_id */
     H5VL_loc_params_t loc_params1;
     H5VL_loc_params_t loc_params2;
-    H5VL_object_t     tmp_vol_obj;         /* Temporary object */
+    H5VL_object_t     tmp_vol_obj; /* Temporary object */
+    H5I_type_t        src_id_type = H5I_BADID, dst_id_type = H5I_BADID;
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -106,6 +107,21 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no current name specified");
     if (!dst_name || !*dst_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified");
+
+    /* reset an ID in the case of H5L_SAME_LOC */
+    if (src_loc_id == H5L_SAME_LOC)
+        src_loc_id = dst_loc_id;
+    else if (dst_loc_id == H5L_SAME_LOC)
+        dst_loc_id = src_loc_id;
+
+    /* verify that src and dst IDs are either a file or a group ID */
+    src_id_type = H5I_get_type(src_loc_id);
+    if (!(H5I_GROUP == src_id_type || H5I_FILE == src_id_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID, src_loc_id");
+    dst_id_type = H5I_get_type(dst_loc_id);
+    if (!(H5I_GROUP == dst_id_type || H5I_FILE == dst_id_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID, dst_loc_id");
+
     if (lcpl_id != H5P_DEFAULT && (true != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list");
 
@@ -117,30 +133,27 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
     H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, ((src_loc_id != H5L_SAME_LOC) ? src_loc_id : dst_loc_id), true) <
-        0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, dst_loc_id, true) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Set location parameter for source object */
     loc_params1.type                         = H5VL_OBJECT_BY_NAME;
     loc_params1.loc_data.loc_by_name.name    = src_name;
     loc_params1.loc_data.loc_by_name.lapl_id = lapl_id;
-    loc_params1.obj_type                     = H5I_get_type(src_loc_id);
+    loc_params1.obj_type                     = src_id_type;
 
     /* Set location parameter for destination object */
     loc_params2.type                         = H5VL_OBJECT_BY_NAME;
     loc_params2.loc_data.loc_by_name.name    = dst_name;
     loc_params2.loc_data.loc_by_name.lapl_id = lapl_id;
-    loc_params2.obj_type                     = H5I_get_type(dst_loc_id);
+    loc_params2.obj_type                     = dst_id_type;
 
-    if (H5L_SAME_LOC != src_loc_id)
-        /* Get the location object */
-        if (NULL == (vol_obj1 = H5VL_vol_object(src_loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
-    if (H5L_SAME_LOC != dst_loc_id)
-        /* Get the location object */
-        if (NULL == (vol_obj2 = H5VL_vol_object(dst_loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    /* Get the location object */
+    if (NULL == (vol_obj1 = H5VL_vol_object(src_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    /* Get the location object */
+    if (NULL == (vol_obj2 = H5VL_vol_object(dst_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Make sure that the VOL connectors are the same */
     if (vol_obj1 && vol_obj2) {
@@ -195,7 +208,8 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
     H5VL_loc_params_t loc_params1;
     H5VL_object_t    *vol_obj2 = NULL; /* Object of dst_id */
     H5VL_loc_params_t loc_params2;
-    H5VL_object_t     tmp_vol_obj;         /* Temporary object */
+    H5VL_object_t     tmp_vol_obj; /* Temporary object */
+    H5I_type_t        src_id_type = H5I_BADID, dst_id_type = H5I_BADID;
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -209,6 +223,20 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified");
     if (lcpl_id != H5P_DEFAULT && (true != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list");
+
+    /* reset an ID in the case of H5L_SAME_LOC */
+    if (src_loc_id == H5L_SAME_LOC)
+        src_loc_id = dst_loc_id;
+    else if (dst_loc_id == H5L_SAME_LOC)
+        dst_loc_id = src_loc_id;
+
+    /* verify that src and dst IDs are either a file or a group ID */
+    src_id_type = H5I_get_type(src_loc_id);
+    if (!(H5I_GROUP == src_id_type || H5I_FILE == src_id_type) && src_loc_id != H5L_SAME_LOC)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID, src_loc_id");
+    dst_id_type = H5I_get_type(dst_loc_id);
+    if (!(H5I_GROUP == dst_id_type || H5I_FILE == dst_id_type) && dst_loc_id != H5L_SAME_LOC)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID, dst_loc_id");
 
     /* Check the link create property list */
     if (H5P_DEFAULT == lcpl_id)
@@ -226,22 +254,20 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
     loc_params1.type                         = H5VL_OBJECT_BY_NAME;
     loc_params1.loc_data.loc_by_name.name    = src_name;
     loc_params1.loc_data.loc_by_name.lapl_id = lapl_id;
-    loc_params1.obj_type                     = H5I_get_type(src_loc_id);
+    loc_params1.obj_type                     = src_id_type;
 
     /* Set location parameter for destination object */
     loc_params2.type                         = H5VL_OBJECT_BY_NAME;
     loc_params2.loc_data.loc_by_name.name    = dst_name;
     loc_params2.loc_data.loc_by_name.lapl_id = lapl_id;
-    loc_params2.obj_type                     = H5I_get_type(dst_loc_id);
+    loc_params2.obj_type                     = dst_id_type;
 
-    if (H5L_SAME_LOC != src_loc_id)
-        /* Get the location object */
-        if (NULL == (vol_obj1 = H5VL_vol_object(src_loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
-    if (H5L_SAME_LOC != dst_loc_id)
-        /* Get the location object */
-        if (NULL == (vol_obj2 = H5VL_vol_object(dst_loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    /* Get the location object */
+    if (NULL == (vol_obj1 = H5VL_vol_object(src_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    /* Get the location object */
+    if (NULL == (vol_obj2 = H5VL_vol_object(dst_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Make sure that the VOL connectors are the same */
     if (vol_obj1 && vol_obj2) {
