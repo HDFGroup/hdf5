@@ -54,7 +54,7 @@ libhdf5_hl_fortran_la_LIBADD=$(LIBH5_HL) $(LIBH5F)
 # actual lib file.
 install-exec-hook:
 	cd $(DESTDIR)$(libdir) && \
-	    if test -f libhdf_5hl_fortran.a -a \
+	    if test -f libhdf5_hl_fortran.a -a \
 	    ! -f libhdf5hl_fortran.a; then \
 	        $(LN_S) libhdf5_hl_fortran.a libhdf5hl_fortran.a; \
 	    fi; \
