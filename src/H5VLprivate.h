@@ -70,11 +70,13 @@ H5_DLL herr_t  H5VL_init_phase1(void);
 H5_DLL herr_t  H5VL_init_phase2(void);
 H5_DLL H5VL_connector_t *H5VL_new_connector(hid_t connector_id);
 H5_DLL herr_t  H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_class_t *cls2);
-H5_DLL herr_t  H5VL_conn_copy(H5VL_connector_prop_t *value);
 H5_DLL int64_t H5VL_conn_inc_rc(H5VL_connector_t *connector);
 H5_DLL int64_t H5VL_conn_dec_rc(H5VL_connector_t *connector);
-H5_DLL herr_t  H5VL_conn_free(const H5VL_connector_prop_t *info);
-H5_DLL herr_t  H5VL_get_cap_flags(const H5VL_connector_prop_t *prop, uint64_t *cap_flags);
+
+/* Connector property rountines */
+H5_DLL herr_t  H5VL_conn_prop_copy(H5VL_connector_prop_t *value);
+H5_DLL herr_t  H5VL_conn_prop_free(const H5VL_connector_prop_t *info);
+H5_DLL herr_t  H5VL_conn_prop_get_cap_flags(const H5VL_connector_prop_t *prop, uint64_t *cap_flags);
 
 /* Functions that deal with VOL connectors */
 union H5PL_key_t;

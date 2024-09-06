@@ -244,7 +244,7 @@ H5VL_term_package(void)
 
     if (H5VL_def_conn_s.connector_id > 0) {
         /* Release the default VOL connector */
-        (void)H5VL_conn_free(&H5VL_def_conn_s);
+        (void)H5VL_conn_prop_free(&H5VL_def_conn_s);
         H5VL_def_conn_s.connector_id   = -1;
         H5VL_def_conn_s.connector_info = NULL;
         n++;
@@ -373,7 +373,7 @@ H5VL__set_def_conn(void)
     /* (Can happen during testing -QAK) */
     if (H5VL_def_conn_s.connector_id > 0) {
         /* Release the default VOL connector */
-        (void)H5VL_conn_free(&H5VL_def_conn_s);
+        (void)H5VL_conn_prop_free(&H5VL_def_conn_s);
         H5VL_def_conn_s.connector_id   = -1;
         H5VL_def_conn_s.connector_info = NULL;
     } /* end if */
@@ -590,9 +590,9 @@ done:
 } /* end H5VL__new_vol_obj() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_conn_copy
+ * Function:    H5VL_conn_prop_copy
  *
- * Purpose:     Copy VOL connector ID & info.
+ * Purpose:     Copy VOL connector property.
  *
  * Note:        This is an "in-place" copy.
  *
@@ -602,7 +602,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_conn_copy(H5VL_connector_prop_t *connector_prop)
+H5VL_conn_prop_copy(H5VL_connector_prop_t *connector_prop)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -638,12 +638,12 @@ H5VL_conn_copy(H5VL_connector_prop_t *connector_prop)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_conn_copy() */
+} /* end H5VL_conn_prop_copy() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_conn_free
+ * Function:    H5VL_conn_prop_free
  *
- * Purpose:     Free VOL connector ID & info.
+ * Purpose:     Free VOL connector property
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -651,7 +651,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_conn_free(const H5VL_connector_prop_t *connector_prop)
+H5VL_conn_prop_free(const H5VL_connector_prop_t *connector_prop)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -675,7 +675,7 @@ H5VL_conn_free(const H5VL_connector_prop_t *connector_prop)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_conn_free() */
+} /* end H5VL_conn_prop_free() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_register
@@ -2822,7 +2822,7 @@ done:
 } /* end H5VL_setup_token_args() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_get_cap_flags
+ * Function:    H5VL_conn_prop_get_cap_flags
  *
  * Purpose:     Query capability flags for connector property.
  *
@@ -2835,7 +2835,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_get_cap_flags(const H5VL_connector_prop_t *connector_prop, uint64_t *cap_flags)
+H5VL_conn_prop_get_cap_flags(const H5VL_connector_prop_t *connector_prop, uint64_t *cap_flags)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2861,4 +2861,4 @@ H5VL_get_cap_flags(const H5VL_connector_prop_t *connector_prop, uint64_t *cap_fl
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_get_cap_flags() */
+} /* end H5VL_conn_prop_get_cap_flags() */

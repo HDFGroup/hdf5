@@ -5993,7 +5993,7 @@ H5Pget_vol_cap_flags(hid_t plist_id, uint64_t *cap_flags)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector property");
 
             /* Query the capability flags */
-            if (H5VL_get_cap_flags(&connector_prop, cap_flags) < 0)
+            if (H5VL_conn_prop_get_cap_flags(&connector_prop, cap_flags) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector capability flags");
         }
         else
@@ -6021,8 +6021,8 @@ H5P__facc_vol_create(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size
 
     FUNC_ENTER_PACKAGE
 
-    /* Make copy of the VOL connector */
-    if (H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+    /* Make copy of the VOL connector property */
+    if (H5VL_conn_prop_copy((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector");
 
 done:
@@ -6050,8 +6050,8 @@ H5P__facc_vol_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
     /* Sanity check */
     assert(value);
 
-    /* Make copy of VOL connector ID & info */
-    if (H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+    /* Make copy of VOL connector property */
+    if (H5VL_conn_prop_copy((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector");
 
 done:
@@ -6079,8 +6079,8 @@ H5P__facc_vol_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
     /* Sanity check */
     assert(value);
 
-    /* Make copy of VOL connector */
-    if (H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+    /* Make copy of VOL connector property */
+    if (H5VL_conn_prop_copy((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector");
 
 done:
@@ -6105,8 +6105,8 @@ H5P__facc_vol_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
 
     FUNC_ENTER_PACKAGE
 
-    /* Free the VOL connector ID & info */
-    if (H5VL_conn_free((H5VL_connector_prop_t *)value) < 0)
+    /* Free the VOL connector property */
+    if (H5VL_conn_prop_free((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release VOL connector");
 
 done:
@@ -6130,8 +6130,8 @@ H5P__facc_vol_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, 
 
     FUNC_ENTER_PACKAGE
 
-    /* Make copy of VOL connector */
-    if (H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+    /* Make copy of VOL connector property */
+    if (H5VL_conn_prop_copy((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector");
 
 done:
@@ -6214,8 +6214,8 @@ H5P__facc_vol_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size,
 
     FUNC_ENTER_PACKAGE
 
-    /* Free the VOL connector */
-    if (H5VL_conn_free((H5VL_connector_prop_t *)value) < 0)
+    /* Free the VOL connector property */
+    if (H5VL_conn_prop_free((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release VOL connector");
 
 done:
