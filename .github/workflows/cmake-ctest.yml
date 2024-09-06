@@ -135,7 +135,7 @@ jobs:
         uses: jsdaniell/create-json@v1.2.3
         with:
             name: "credentials.json"
-            dir: 'hdfsrc'
+            dir: '${{ steps.set-file-base.outputs.SOURCE_BASE }}'
             json: '{"Endpoint": "${{ secrets.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ secrets.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ secrets.AZURE_CERT_PROFILE_NAME }}"}'
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
 
@@ -554,7 +554,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: tgz-macos14_clang-dmg-binary
-              path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.arm64.dmg.tar.gz
+              path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_S3_linux:
@@ -683,11 +683,30 @@ jobs:
         run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
         shell: bash
 
+      - name: Install TrustedSigning (Windows)
+        run: |
+            Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile .\nuget.exe
+            .\nuget.exe install Microsoft.Windows.SDK.BuildTools -Version 10.0.22621.3233 -x
+            .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.53 -x
+        shell: pwsh
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: create-json
+        id: create-json
+        uses: jsdaniell/create-json@v1.2.3
+        with:
+            name: "credentials.json"
+            dir: '${{ steps.set-file-base.outputs.SOURCE_BASE }}'
+            json: '{"Endpoint": "${{ secrets.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ secrets.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ secrets.AZURE_CERT_PROFILE_NAME }}"}'
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
       - name: Run ctest (Windows_intel) with oneapi
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
           CXX: ${{ steps.setup-fortran.outputs.cxx }}
+          BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
+          SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-win-Intel --fresh
