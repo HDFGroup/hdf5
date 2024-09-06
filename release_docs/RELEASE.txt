@@ -1767,6 +1767,12 @@ Bug Fixes since HDF5-1.14.0 release
 
     Configuration
     -------------
+    - Changed name of libhdf5hl_fortran installed by autotools to libhdf5_hl_fortran.  The 
+      new name is consistent with the name of the lib when installed by CMake and with the 
+      other hl libs.  
+
+      Fixes GitHub issue #4811
+
     - Fixed usage issue with FindZLIB.cmake module
 
       When building HDF5 with CMake and relying on the FindZLIB.cmake module,
