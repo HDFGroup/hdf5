@@ -1181,9 +1181,8 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL__register_connector(const void *_cls, bool app_ref, hid_t vipl_id)
+H5VL__register_connector(const H5VL_class_t *cls, bool app_ref, hid_t vipl_id)
 {
-    const H5VL_class_t *cls       = (const H5VL_class_t *)_cls;
     H5VL_class_t       *saved     = NULL;
     hid_t               ret_value = H5I_INVALID_HID;
 
