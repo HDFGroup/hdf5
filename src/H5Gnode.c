@@ -288,7 +288,7 @@ H5G__node_create(H5F_t *f, H5B_ins_t H5_ATTR_UNUSED op, void *_lt_key, void H5_A
     assert(H5B_INS_FIRST == op);
 
     if (NULL == (sym = H5FL_CALLOC(H5G_node_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, FAIL, "memory allocation failed");
     sym->node_size = H5G_NODE_SIZE(f);
     if (HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_BTREE, (hsize_t)sym->node_size)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to allocate file space");
@@ -309,13 +309,12 @@ H5G__node_create(H5F_t *f, H5B_ins_t H5_ATTR_UNUSED op, void *_lt_key, void H5_A
         rt_key->offset = 0;
 
 done:
-    if (ret_value < 0) {
+    if (ret_value < 0)
         if (sym != NULL) {
             if (sym->entry != NULL)
                 sym->entry = H5FL_SEQ_FREE(H5G_entry_t, sym->entry);
             sym = H5FL_FREE(H5G_node_t, sym);
         } /* end if */
-    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__node_create() */
@@ -472,7 +471,7 @@ H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key, bool
      * Load the symbol table node for exclusive access.
      */
     if (NULL == (sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to protect symbol table node");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, FAIL, "unable to protect symbol table node");
 
     /*
      * Binary search.
@@ -504,7 +503,7 @@ H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key, bool
 
 done:
     if (sn && H5AC_unprotect(f, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node");
+        HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, FAIL, "unable to release symbol table node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__node_found() */
@@ -569,7 +568,7 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, bool H5_A
      * Load the symbol node.
      */
     if (NULL == (sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__NO_FLAGS_SET)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to protect symbol table node");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, H5B_INS_ERROR, "unable to protect symbol table node");
 
     /*
      * Where does the new symbol get inserted?	We use a binary search.
@@ -609,7 +608,7 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, bool H5_A
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR, "unable to split symbol table node");
 
         if (NULL == (snrt = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, *new_node_p, f, H5AC__NO_FLAGS_SET)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to split symbol table node");
+            HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, H5B_INS_ERROR, "unable to split symbol table node");
 
         H5MM_memcpy(snrt->entry, sn->entry + H5F_SYM_LEAF_K(f), H5F_SYM_LEAF_K(f) * sizeof(H5G_entry_t));
         snrt->nsyms = H5F_SYM_LEAF_K(f);
@@ -662,9 +661,9 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, bool H5_A
 
 done:
     if (snrt && H5AC_unprotect(f, H5AC_SNODE, *new_node_p, snrt, snrt_flags) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
+        HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to release symbol table node");
     if (sn && H5AC_unprotect(f, H5AC_SNODE, addr, sn, sn_flags) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
+        HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to release symbol table node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__node_insert() */
@@ -718,7 +717,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
 
     /* Load the symbol table */
     if (NULL == (sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__NO_FLAGS_SET)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to protect symbol table node");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, H5B_INS_ERROR, "unable to protect symbol table node");
 
     /* "Normal" removal of a single entry from the symbol table node */
     if (udata->common.name != NULL) {
@@ -860,7 +859,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
         tmp_oloc.file = f;
 
         /* Reduce the link count for all entries in this node */
-        for (idx = 0; idx < sn->nsyms; idx++) {
+        for (idx = 0; idx < sn->nsyms; idx++)
             if (!(H5G_CACHED_SLINK == sn->entry[idx].type)) {
                 /* Decrement the reference count */
                 assert(H5_addr_defined(sn->entry[idx].header));
@@ -870,7 +869,6 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, H5B_INS_ERROR,
                                 "unable to decrement object link count");
             } /* end if */
-        }     /* end for */
 
         /*
          * We are about to remove all the symbols in this node.  Free this
@@ -919,7 +917,7 @@ H5G__node_iterate(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
 
     /* Protect the symbol table node & local heap while we iterate over entries */
     if (NULL == (sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5_ITER_ERROR, "unable to load symbol table node");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load symbol table node");
 
     /*
      * Iterate over the symbol table node entries.
@@ -954,7 +952,7 @@ H5G__node_iterate(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
 done:
     /* Release resources */
     if (sn && H5AC_unprotect(f, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header");
+        HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__node_iterate() */
@@ -988,13 +986,13 @@ H5G__node_sumup(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
 
     /* Find the object node and add the number of symbol entries. */
     if (NULL == (sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5_ITER_ERROR, "unable to load symbol table node");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load symbol table node");
 
     *num_objs += sn->nsyms;
 
 done:
     if (sn && H5AC_unprotect(f, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header");
+        HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__node_sumup() */
@@ -1029,7 +1027,7 @@ H5G__node_by_idx(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
 
     /* Get a pointer to the symbol table node */
     if (NULL == (sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5_ITER_ERROR, "unable to load symbol table node");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load symbol table node");
 
     /* Find the node, locate the object symbol table entry and retrieve the name */
     if (udata->idx >= udata->num_objs && udata->idx < (udata->num_objs + sn->nsyms)) {
@@ -1051,7 +1049,7 @@ H5G__node_by_idx(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
 
 done:
     if (sn && H5AC_unprotect(f, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header");
+        HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__node_by_idx() */
@@ -1084,14 +1082,14 @@ H5G__node_init(H5F_t *f)
 
     /* Allocate & initialize global info for the shared structure */
     if (NULL == (shared = H5B_shared_new(f, H5B_SNODE, sizeof_rkey)))
-        HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed for shared B-tree info");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "memory allocation failed for shared B-tree info");
 
     /* Set up the "local" information for this file's groups */
     /* <none> */
 
     /* Make shared B-tree info reference counted */
     if (H5F_SET_GRP_BTREE_SHARED(f, H5UC_create(shared, H5B_shared_free)) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create ref-count wrapper for shared B-tree info");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1155,7 +1153,7 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr, const
 
     /* load the symbol table into memory from the source file */
     if (NULL == (sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5_ITER_ERROR, "unable to load symbol table node");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load symbol table node");
 
     /* copy object in this node one by one */
     for (i = 0; i < sn->nsyms; i++) {
@@ -1223,7 +1221,7 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr, const
             /* Copy the shared object from source to destination */
             if (H5O_copy_header_map(&tmp_src_oloc, &new_dst_oloc, cpy_info, true, &obj_type,
                                     (void **)&cpy_udata) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy object");
+                HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy object");
 
             /* Set up object creation info for symbol table insertion.  Only
              * case so far is for inserting old-style groups (for caching stab
@@ -1247,7 +1245,7 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr, const
             lnk.type = H5L_TYPE_SOFT;
             if ((lnk.u.soft.name =
                      (char *)H5HL_offset_into(udata->src_heap, src_ent->cache.slink.lval_offset)) == NULL)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5_ITER_ERROR, "unable to get link name");
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get link name");
 
             /* Sanity check soft link name, to detect running off the end of the heap block */
             max_link_len = udata->src_block_size - src_ent->cache.slink.lval_offset;
@@ -1288,7 +1286,7 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr, const
 
 done:
     if (sn && H5AC_unprotect(f, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header");
+        HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__node_copy() */
@@ -1325,7 +1323,7 @@ H5G__node_build_table(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr
      * because we're about to call an application function.
      */
     if (NULL == (sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5_ITER_ERROR, "unable to load symbol table node");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load symbol table node");
 
     /* Check if the link table needs to be extended */
     if ((udata->ltable->nlinks + sn->nsyms) >= udata->alloc_nlinks) {
@@ -1335,7 +1333,7 @@ H5G__node_build_table(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr
 
         /* Re-allocate the link table */
         if (NULL == (x = (H5O_link_t *)H5MM_realloc(udata->ltable->lnks, sizeof(H5O_link_t) * na)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed");
+            HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, H5_ITER_ERROR, "memory allocation failed");
         udata->ltable->lnks = x;
     } /* end if */
 
@@ -1355,7 +1353,7 @@ H5G__node_build_table(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr
 done:
     /* Release the locked items */
     if (sn && H5AC_unprotect(f, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header");
+        HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__node_build_table() */
@@ -1400,9 +1398,8 @@ H5G__node_iterate_size(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t H5_
 herr_t
 H5G_node_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, haddr_t heap_addr)
 {
-    H5G_node_t *sn   = NULL;
-    H5HL_t     *heap = NULL;
-    unsigned    u;                   /* Local index variable */
+    H5G_node_t *sn        = NULL;
+    H5HL_t     *heap      = NULL;
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1419,22 +1416,17 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, had
     /* Pin the heap down in memory */
     if (heap_addr > 0 && H5_addr_defined(heap_addr))
         if (NULL == (heap = H5HL_protect(f, heap_addr, H5AC__READ_ONLY_FLAG)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to protect symbol table heap");
+            HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, FAIL, "unable to protect symbol table heap");
 
-    /*
-     * If we couldn't load the symbol table node, then try loading the
-     * B-tree node.
-     */
-    if (NULL == (sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG))) {
-        H5G_bt_common_t udata; /*data to pass through B-tree	*/
+    /* Try loading symbol table node */
+    H5E_PAUSE_ERRORS
+    {
+        sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG);
+    }
+    H5E_RESUME_ERRORS
+    if (sn) {
+        unsigned u; /* Local index variable */
 
-        H5E_clear_stack(); /* discard that error */
-        udata.heap       = heap;
-        udata.block_size = H5HL_heap_get_size(heap);
-        if (H5B_debug(f, addr, stream, indent, fwidth, H5B_SNODE, &udata) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to debug B-tree node");
-    } /* end if */
-    else {
         fprintf(stream, "%*sSymbol Table Node...\n", indent, "");
         fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Dirty:", sn->cache_info.is_dirty ? "Yes" : "No");
         fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
@@ -1460,12 +1452,24 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, had
             H5G__ent_debug(sn->entry + u, stream, indent, fwidth, heap);
         } /* end for */
     }     /* end if */
+    /*
+     * If we couldn't load the symbol table node, then try loading the
+     * B-tree node.
+     */
+    else {
+        H5G_bt_common_t udata; /*data to pass through B-tree	*/
+
+        udata.heap       = heap;
+        udata.block_size = H5HL_heap_get_size(heap);
+        if (H5B_debug(f, addr, stream, indent, fwidth, H5B_SNODE, &udata) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to debug B-tree node");
+    } /* end else */
 
 done:
     if (sn && H5AC_unprotect(f, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node");
+        HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, FAIL, "unable to release symbol table node");
     if (heap && H5HL_unprotect(heap) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap");
+        HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, FAIL, "unable to unprotect symbol table heap");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_node_debug() */
