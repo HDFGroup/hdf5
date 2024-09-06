@@ -198,7 +198,7 @@ H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
         H5O_loc_t    obj_oloc;
         H5G_name_t   obj_path;
         H5O_shared_t cached_H5O_shared;
-        H5VL_t      *connector = NULL;
+        H5VL_connector_t      *connector = NULL;
 
         /* Hold a copy of the object's file pointer, since closing the object will
          * invalidate the file pointer in the oloc.
@@ -347,7 +347,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *obj_loc, H5VL_t *vol_connector,
+H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *obj_loc, H5VL_connector_t *vol_connector,
                             bool start_swmr)
 {
     void      *object = NULL;       /* Object for this operation */

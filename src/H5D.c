@@ -492,7 +492,7 @@ H5Dclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
     void          *token     = NULL;            /* Request token for async operation        */
     void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     H5VL_object_t *vol_obj   = NULL;            /* VOL object of dset_id */
-    H5VL_t        *connector = NULL;            /* VOL connector */
+    H5VL_connector_t        *connector = NULL;            /* VOL connector */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -931,7 +931,7 @@ H5D__read_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t m
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     void   *obj_local;                                /* Local buffer for obj */
     void  **obj = &obj_local;                         /* Array of object pointers */
-    H5VL_t *connector;                                /* VOL connector pointer */
+    H5VL_connector_t *connector;                                /* VOL connector pointer */
     size_t  i;                                        /* Local index variable */
     herr_t  ret_value = SUCCEED;                      /* Return value */
 
@@ -1233,7 +1233,7 @@ H5D__write_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t 
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     void   *obj_local;                                /* Local buffer for obj */
     void  **obj = &obj_local;                         /* Array of object pointers */
-    H5VL_t *connector;                                /* VOL connector pointer */
+    H5VL_connector_t *connector;                                /* VOL connector pointer */
     size_t  i;                                        /* Local index variable */
     herr_t  ret_value = SUCCEED;                      /* Return value */
 

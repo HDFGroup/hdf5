@@ -59,7 +59,7 @@ static herr_t H5T__commit_api_common(hid_t loc_id, const char *name, hid_t type_
 static hid_t  H5T__open_api_common(hid_t loc_id, const char *name, hid_t tapl_id, void **token_ptr,
                                    H5VL_object_t **_vol_obj_ptr);
 static H5T_t *H5T__open_oid(const H5G_loc_t *loc);
-static herr_t H5T_destruct_datatype(void *datatype, H5VL_t *vol_connector);
+static herr_t H5T_destruct_datatype(void *datatype, H5VL_connector_t *vol_connector);
 
 /*********************/
 /* Public Variables */
@@ -76,12 +76,6 @@ static herr_t H5T_destruct_datatype(void *datatype, H5VL_t *vol_connector);
 /*******************/
 /* Local Variables */
 /*******************/
-
-/* Declare a free list to manage the H5VL_t struct */
-H5FL_EXTERN(H5VL_t);
-
-/* Declare a free list to manage the H5VL_object_t struct */
-H5FL_EXTERN(H5VL_object_t);
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__commit_api_common
@@ -1276,7 +1270,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_destruct_datatype(void *datatype, H5VL_t *vol_connector)
+H5T_destruct_datatype(void *datatype, H5VL_connector_t *vol_connector)
 {
     H5VL_object_t *vol_obj   = NULL;
     herr_t         ret_value = FAIL;

@@ -3734,7 +3734,7 @@ H5F__start_swmr_write(H5F_t *f)
     H5G_name_t *obj_paths      = NULL;   /* Group hierarchy path */
     size_t      u;                       /* Local index variable */
     bool        setup         = false;   /* Boolean flag to indicate whether SWMR setting is enabled */
-    H5VL_t     *vol_connector = NULL;    /* VOL connector for the file */
+    H5VL_connector_t     *vol_connector = NULL;    /* VOL connector for the file */
     herr_t      ret_value     = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
