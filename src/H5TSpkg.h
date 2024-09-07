@@ -34,9 +34,9 @@
 
 /* Enable statistics for recursive R/W lock when H5TS debugging is enabled */
 #ifdef H5TS_DEBUG
-#define H5TS_ENABLE_REC_RW_LOCK_STATS 1
+#define H5TS_ENABLE_REC_RWLOCK_STATS 1
 #else
-#define H5TS_ENABLE_REC_RW_LOCK_STATS 0
+#define H5TS_ENABLE_REC_RWLOCK_STATS 0
 #endif
 
 /****************************/
@@ -57,10 +57,10 @@ typedef struct H5TS_api_info_t {
 } H5TS_api_info_t;
 #endif /* H5_HAVE_THREADSAFE */
 
-#if H5TS_ENABLE_REC_RW_LOCK_STATS
+#if H5TS_ENABLE_REC_RWLOCK_STATS
 /******************************************************************************
  *
- * Structure H5TS_rw_lock_stats_t
+ * Structure H5TS_rec_rwlock_stats_t
  *
  * Statistics for the recursive R/W lock.
  *
@@ -118,7 +118,7 @@ typedef struct H5TS_api_info_t {
  *
  ******************************************************************************/
 
-typedef struct H5TS_rw_lock_stats_t {
+typedef struct H5TS_rec_rwlock_stats_t {
     int64_t read_locks_granted;
     int64_t read_locks_released;
     int64_t real_read_locks_granted;
@@ -134,36 +134,35 @@ typedef struct H5TS_rw_lock_stats_t {
     int64_t max_write_lock_recursion_depth;
     int64_t write_locks_delayed;
     int64_t max_write_locks_pending;
-} H5TS_rw_lock_stats_t;
+} H5TS_rec_rwlock_stats_t;
 #endif
 
 /******************************************************************************
  *
- * Structure H5TS_rw_lock_t
+ * Structure H5TS_rec_rwlock_t
  *
  * A recursive readers / writer (R/W) lock.
  *
- * This structure holds the fields needed to implement a recursive R/W lock
- * that allows recursive write locks, and for the associated statistics
- * collection fields.
+ * This structure holds the fields needed to implement a recursive R/W lock that
+ * allows recursive write locks, and the associated statistics collection fields.
  *
  * Note that we can't use the pthreads or Win32 R/W locks: they permit
  * recursive read locks, but disallow recursive write locks.
  *
  * Individual fields are:
  *
- * mutex:       Mutex used to maintain mutual exclusion on the fields of
- *              of this structure.
+ * mutex:       Mutex used to maintain mutual exclusion on the fields of this
+ *              structure.
  *
  * lock_type:   Whether the lock is unused, a reader, or a writer.
  *
  * writers_cv:  Condition variable used for waiting writers.
  *
- * write_thread: The thread that owns a write lock, which is recursive
- *              for that thread.
+ * write_thread: The thread that owns a write lock, which is recursive for
+ *              that thread.
  *
- * rec_write_lock_count: The # of recursive write locks outstanding
- *              for the thread that owns the write lock.
+ * rec_write_lock_count: The # of recursive write locks outstanding for the
+ *              thread that owns the write lock.
  *
  * waiting_writers_count: The count of waiting writers.
  *
@@ -171,28 +170,27 @@ typedef struct H5TS_rw_lock_stats_t {
  *
  * reader_thread_count: The # of threads holding a read lock.
  *
- * rec_read_lock_count_key: Instance of thread-local key used to maintain
- *              a thread-specific recursive lock count for each thread
- *              holding a read lock.
+ * rec_read_lock_count_key: Instance of thread-local key used to maintain a
+ *              recursive lock count for each thread holding a read lock.
  *
- * is_key_registered: Flag to track if the rec_read_lock_count_key has been
+ * is_key_registered: Flag to track if the read_lock_count_key has been
  *              registered yet for a lock.
  *
- * stats:       Instance of H5TS_rw_lock_stats_t used to track
- *              statistics on the recursive R/W lock.
+ * stats:       Instance of H5TS_rec_rwlock_stats_t used to track statistics
+ *              on the lock.
  *
  ******************************************************************************/
 
 typedef enum {
-    H5TS_RW_LOCK_UNUSED = 0, /* Lock is currently unused */
-    H5TS_RW_LOCK_WRITE,      /* Lock is a recursive write lock */
-    H5TS_RW_LOCK_READ        /* Lock is a recursive read lock */
-} H5TS_rw_lock_type_t;
+    H5TS_REC_RWLOCK_UNUSED = 0, /* Lock is currently unused */
+    H5TS_REC_RWLOCK_WRITE,      /* Lock is a recursive write lock */
+    H5TS_REC_RWLOCK_READ        /* Lock is a recursive read lock */
+} H5TS_rec_rwlock_type_t;
 
-typedef struct H5TS_rw_lock_t {
+typedef struct H5TS_rec_rwlock_t {
     /* General fields */
-    H5TS_mutex_t        mutex;
-    H5TS_rw_lock_type_t lock_type;
+    H5TS_mutex_t           mutex;
+    H5TS_rec_rwlock_type_t lock_type;
 
     /* Writer fields */
     H5TS_cond_t   writers_cv;
@@ -206,11 +204,11 @@ typedef struct H5TS_rw_lock_t {
     H5TS_key_t  rec_read_lock_count_key;
     bool        is_key_registered;
 
-#if H5TS_ENABLE_REC_RW_LOCK_STATS
+#if H5TS_ENABLE_REC_RWLOCK_STATS
     /* Stats */
-    H5TS_rw_lock_stats_t stats;
+    H5TS_rec_rwlock_stats_t stats;
 #endif
-} H5TS_rw_lock_t;
+} H5TS_rec_rwlock_t;
 
 /*****************************/
 /* Package Private Variables */
@@ -237,11 +235,12 @@ H5_DLL herr_t H5TS__tinfo_term(void);
 #endif /* H5_HAVE_THREADSAFE */
 
 /* Recursive R/W lock related function declarations */
-H5_DLL herr_t H5TS__rw_lock_init(H5TS_rw_lock_t *rw_lock);
-H5_DLL herr_t H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock);
-H5_DLL herr_t H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock);
-H5_DLL herr_t H5TS__rw_unlock(H5TS_rw_lock_t *rw_lock);
-H5_DLL herr_t H5TS__rw_lock_destroy(H5TS_rw_lock_t *rw_lock);
+H5_DLL herr_t H5TS__rec_rwlock_init(H5TS_rec_rwlock_t *lock);
+H5_DLL herr_t H5TS__rec_rwlock_rdlock(H5TS_rec_rwlock_t *lock);
+H5_DLL herr_t H5TS__rec_rwlock_wrlock(H5TS_rec_rwlock_t *lock);
+H5_DLL herr_t H5TS__rec_rwlock_rdunlock(H5TS_rec_rwlock_t *lock);
+H5_DLL herr_t H5TS__rec_rwlock_wrunlock(H5TS_rec_rwlock_t *lock);
+H5_DLL herr_t H5TS__rec_rwlock_destroy(H5TS_rec_rwlock_t *lock);
 
 /* 'once' callbacks */
 #ifdef H5_HAVE_THREADSAFE
@@ -256,10 +255,10 @@ H5_DLL void H5TS__pthread_first_thread_init(void);
 #endif
 #endif /* H5_HAVE_THREADSAFE */
 
-#if H5TS_ENABLE_REC_RW_LOCK_STATS
-H5_DLL herr_t H5TS__rw_lock_get_stats(H5TS_rw_lock_t *rw_lock, H5TS_rw_lock_stats_t *stats);
-H5_DLL herr_t H5TS__rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock);
-H5_DLL herr_t H5TS__rw_lock_print_stats(const char *header_str, H5TS_rw_lock_stats_t *stats);
+#if H5TS_ENABLE_REC_RWLOCK_STATS
+H5_DLL herr_t H5TS__rec_rwlock_get_stats(H5TS_rec_rwlock_t *lock, H5TS_rec_rwlock_stats_t *stats);
+H5_DLL herr_t H5TS__rec_rwlock_reset_stats(H5TS_rec_rwlock_t *lock);
+H5_DLL herr_t H5TS__rec_rwlock_print_stats(const char *header_str, H5TS_rec_rwlock_stats_t *stats);
 #endif
 
 #endif /* H5_HAVE_THREADS */
