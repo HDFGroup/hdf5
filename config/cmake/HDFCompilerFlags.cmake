@@ -468,7 +468,8 @@ MARK_AS_ADVANCED (HDF5_ENABLE_OPTIMIZATION)
 
 #-----------------------------------------------------------------------------
 # The build-mode specific flags are not added to CMAKE_C_FLAGS, so create
-# a separate variable for them so they can be written out
+# a separate variable for them so they can be written out to libhdf5.settings
+# and H5build_settings.c
 #-----------------------------------------------------------------------------
 set (HDF5_BUILD_MODE_C_FLAGS "")
 set (HDF5_BUILD_MODE_Fortran_FLAGS "")
