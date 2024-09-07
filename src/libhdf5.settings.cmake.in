@@ -38,7 +38,7 @@ Languages:
                        CPPFLAGS: @CPPFLAGS@
                     H5_CPPFLAGS: @H5_CPPFLAGS@
                     AM_CPPFLAGS: @AM_CPPFLAGS@
-                         CFLAGS: @CMAKE_C_FLAGS@
+                         CFLAGS: @CMAKE_C_FLAGS@ @HDF5_BUILD_MODE_C_FLAGS@
                       H5_CFLAGS: @HDF5_CMAKE_C_FLAGS@
                       AM_CFLAGS: @AM_CFLAGS@
                Shared C Library: @H5_ENABLE_SHARED_LIB@

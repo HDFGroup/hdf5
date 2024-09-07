@@ -1044,6 +1044,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Generate the H5build_settings.c file
 #-----------------------------------------------------------------------------
+
 configure_file (${HDF5_SOURCE_DIR}/src/H5build_settings.cmake.c.in ${HDF5_SRC_BINARY_DIR}/H5build_settings.c @ONLY)
 
 if (BUILD_SHARED_LIBS)
