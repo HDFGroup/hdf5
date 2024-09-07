@@ -1236,6 +1236,7 @@ create_mirroring_split_fapl(const char *basename, struct mirrortest_filenames *n
     mirror_conf.handshake_port = opts->portno;
     if (strncpy(mirror_conf.remote_ip, opts->ip, H5FD_MIRROR_MAX_IP_LEN) == NULL)
         TEST_ERROR;
+    mirror_conf.remote_ip[H5FD_MIRROR_MAX_IP_LEN] = '\0';
     if ((splitter_config->wo_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
     if (H5Pset_fapl_mirror(splitter_config->wo_fapl_id, &mirror_conf) < 0)
@@ -1248,8 +1249,10 @@ create_mirroring_split_fapl(const char *basename, struct mirrortest_filenames *n
     /* Set file paths for w/o and logfile */
     if (strncpy(splitter_config->wo_path, (const char *)names->wo, H5FD_SPLITTER_PATH_MAX) == NULL)
         TEST_ERROR;
+    splitter_config->wo_path[H5FD_SPLITTER_PATH_MAX] = '\0';
     if (strncpy(splitter_config->log_file_path, (const char *)names->log, H5FD_SPLITTER_PATH_MAX) == NULL)
         TEST_ERROR;
+    splitter_config->log_file_path[H5FD_SPLITTER_PATH_MAX] = '\0';
 
     /* Create Splitter FAPL */
     if ((ret_value = H5Pcreate(H5P_FILE_ACCESS)) < 0)
