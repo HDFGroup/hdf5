@@ -95,6 +95,7 @@ typedef struct {
 static herr_t         H5VL__free_cls(H5VL_class_t *cls, void **request);
 static int            H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data);
 static void          *H5VL__wrap_obj(void *obj, H5I_type_t obj_type);
+static herr_t         H5VL__free_conn(H5VL_connector_t *connector);
 static H5VL_object_t *H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_connector_t *vol_connector, bool wrap_obj);
 static void          *H5VL__object(hid_t id, H5I_type_t obj_type);
 static herr_t         H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx);
@@ -773,7 +774,6 @@ H5VL_new_connector(hid_t connector_id)
 {
     H5VL_class_t *cls          = NULL;  /* VOL connector class */
     H5VL_connector_t       *connector    = NULL;  /* New VOL connector struct */
-    bool          conn_id_incr = false; /* Whether the VOL connector ID has been incremented */
     H5VL_connector_t       *ret_value    = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -787,25 +787,15 @@ H5VL_new_connector(hid_t connector_id)
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "can't allocate VOL connector struct");
     connector->cls = cls;
     connector->id  = connector_id;
-    if (H5I_inc_ref(connector->id, false) < 0)
+    if (H5I_inc_ref(connector->id, false) < 0) {
+        connector = H5FL_FREE(H5VL_connector_t, connector);
         HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL connector");
-    conn_id_incr = true;
+    }
 
     /* Set return value */
     ret_value = connector;
 
 done:
-    /* Clean up on error */
-    if (NULL == ret_value) {
-        /* Decrement VOL connector ID ref count on error */
-        if (conn_id_incr && H5I_dec_ref(connector_id) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector");
-
-        /* Free VOL connector struct */
-        if (NULL != connector)
-            connector = H5FL_FREE(H5VL_connector_t, connector);
-    } /* end if */
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_new_connector() */
 
@@ -905,7 +895,6 @@ H5VL_create_object_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id)
 {
     H5VL_class_t  *cls          = NULL;  /* VOL connector class */
     H5VL_connector_t        *connector    = NULL;  /* VOL connector struct */
-    bool           conn_id_incr = false; /* Whether the VOL connector ID has been incremented */
     H5VL_object_t *ret_value    = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -914,14 +903,9 @@ H5VL_create_object_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id)
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, NULL, "not a VOL connector ID");
 
-    /* Setup VOL info struct */
-    if (NULL == (connector = H5FL_CALLOC(H5VL_connector_t)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "can't allocate VOL info struct");
-    connector->cls = cls;
-    connector->id  = connector_id;
-    if (H5I_inc_ref(connector->id, false) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL connector");
-    conn_id_incr = true;
+    /* Create new connector object */
+    if (NULL == (connector = H5VL_new_connector(connector_id)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "can't create VOL connector");
 
     /* Set up VOL object for the passed-in data */
     /* (Wraps object, since it's a library object) */
@@ -930,15 +914,10 @@ H5VL_create_object_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id)
 
 done:
     /* Clean up on error */
-    if (!ret_value) {
-        /* Decrement VOL connector ID ref count on error */
-        if (conn_id_incr && H5I_dec_ref(connector_id) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector");
-
-        /* Free VOL connector struct */
-        if (NULL != connector)
-            connector = H5FL_FREE(H5VL_connector_t, connector);
-    } /* end if */
+    if (!ret_value)
+        /* Free VOL connector */
+        if (connector && H5VL__free_conn(connector) < 0)
+            HDONE_ERROR(H5E_VOL, H5E_CANTRELEASE, NULL, "unable to free VOL connector");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_create_object_using_vol_id() */
@@ -965,6 +944,7 @@ H5VL_conn_inc_rc(H5VL_connector_t *connector)
     /* Increment refcount for connector */
     connector->nrefs++;
 
+    /* Set return value */
     ret_value = connector->nrefs;
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -992,22 +972,45 @@ H5VL_conn_dec_rc(H5VL_connector_t *connector)
     /* Decrement refcount for connector */
     connector->nrefs--;
 
-    /* Check for last reference */
-    if (0 == connector->nrefs) {
-        if (H5I_dec_ref(connector->id) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector");
-        H5FL_FREE(H5VL_connector_t, connector);
+    /* Set return value */
+    ret_value = connector->nrefs;
 
-        /* Set return value */
-        ret_value = 0;
-    } /* end if */
-    else
-        /* Set return value */
-        ret_value = connector->nrefs;
+    /* Check for last reference */
+    if (0 == connector->nrefs)
+        if (H5VL__free_conn(connector) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to free VOL connector");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_conn_dec_rc() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__free_conn
+ *
+ * Purpose:     Free a connector object
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__free_conn(H5VL_connector_t *connector)
+{
+    herr_t         ret_value   = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check arguments */
+    assert(connector);
+    assert(0 == connector->nrefs);
+
+    if (H5I_dec_ref(connector->id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector");
+    H5FL_FREE(H5VL_connector_t, connector);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__conn_free() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_object_inc_rc
