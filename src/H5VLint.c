@@ -830,10 +830,9 @@ H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id, bool 
 done:
     /* Clean up on error */
     if (H5I_INVALID_HID == ret_value)
-        /* Release newly created connector */
-        if (connector && H5VL_conn_dec_rc(connector) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
-                        "unable to decrement ref count on VOL connector")
+        /* Free newly created connector */
+        if (connector && H5VL__free_conn(connector) < 0)
+            HDONE_ERROR(H5E_VOL, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to free VOL connector")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_register_using_vol_id() */
@@ -2232,8 +2231,7 @@ H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx)
     if (vol_wrap_ctx->obj_wrap_ctx)
         /* Release the VOL connector's object wrapping context */
         if ((*vol_wrap_ctx->connector->cls->wrap_cls.free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL,
-                        "unable to release connector's object wrapping context");
+            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release connector's object wrapping context");
 
     /* Decrement refcount on connector */
     if (H5VL_conn_dec_rc(vol_wrap_ctx->connector) < 0)
