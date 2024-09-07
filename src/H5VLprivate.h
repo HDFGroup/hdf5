@@ -36,6 +36,8 @@ typedef struct H5VL_connector_t {
     const H5VL_class_t *cls;    /* Pointer to connector class struct   */
     int64_t             nrefs;  /* Number of references to this struct */
     hid_t               id;     /* Identifier for the VOL connector                     */
+    struct H5VL_connector_t *next, *prev; /* Pointers to the next & previous */
+                                /* connectors in global list of active connectors */
 } H5VL_connector_t;
 
 /* Internal vol object structure returned to the API */

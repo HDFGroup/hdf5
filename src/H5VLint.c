@@ -132,6 +132,9 @@ H5FL_DEFINE(H5VL_object_t);
 /* Declare a free list to manage the H5VL_wrap_ctx_t struct */
 H5FL_DEFINE_STATIC(H5VL_wrap_ctx_t);
 
+/* List of currently active VOL connectors */
+static H5VL_connector_t *H5VL_conn_list_head_g = NULL;
+
 /* Default VOL connector */
 static H5VL_connector_prop_t H5VL_def_conn_s = {-1, NULL};
 
@@ -792,6 +795,14 @@ H5VL_new_connector(hid_t connector_id)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL connector");
     }
 
+    /* Add connector to list of active VOL connectors */
+    if (NULL == H5VL_conn_list_head_g)
+        H5VL_conn_list_head_g = connector;
+    else {
+        connector->next = H5VL_conn_list_head_g;
+        H5VL_conn_list_head_g->prev = connector;
+    }
+
     /* Set return value */
     ret_value = connector;
 
@@ -1003,8 +1014,22 @@ H5VL__free_conn(H5VL_connector_t *connector)
     assert(connector);
     assert(0 == connector->nrefs);
 
+    /* Remove connector from list of active VOL connectors */
+    if (H5VL_conn_list_head_g == connector) {
+        H5VL_conn_list_head_g = H5VL_conn_list_head_g->next;
+        if(H5VL_conn_list_head_g)
+            H5VL_conn_list_head_g->prev = NULL;
+    }
+    else {
+        if(connector->prev)
+            connector->prev->next = connector->next;
+        if(connector->next)
+            connector->next->prev = connector->prev;
+    }
+
     if (H5I_dec_ref(connector->id) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector");
+
     H5FL_FREE(H5VL_connector_t, connector);
 
 done:
