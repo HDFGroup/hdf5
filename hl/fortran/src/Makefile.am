@@ -24,10 +24,10 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_builddir)/hl/src
 AM_FCFLAGS+=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
 
 # Our main target, the high-level fortran library
-lib_LTLIBRARIES=libhdf5hl_fortran.la
+lib_LTLIBRARIES=libhdf5_hl_fortran.la
 
 # Add libtool numbers to the HDF5 HL Fortran library (from config/lt_vers.am)
-libhdf5hl_fortran_la_LDFLAGS= -version-info $(LT_HL_F_VERS_INTERFACE):$(LT_HL_F_VERS_REVISION):$(LT_HL_F_VERS_AGE) $(AM_LDFLAGS)
+libhdf5_hl_fortran_la_LDFLAGS= -version-info $(LT_HL_F_VERS_INTERFACE):$(LT_HL_F_VERS_REVISION):$(LT_HL_F_VERS_AGE) $(AM_LDFLAGS)
 
 # Some Fortran compilers can't build shared libraries, so sometimes we
 # want to build a shared C library and a static Fortran library.  If so,
@@ -43,26 +43,11 @@ endif
 #endif
 
 # List sources to include in the HDF5 HL Fortran library.
-libhdf5hl_fortran_la_SOURCES=H5DSfc.c H5LTfc.c H5IMfc.c H5IMcc.c H5TBfc.c \
+libhdf5_hl_fortran_la_SOURCES=H5DSfc.c H5LTfc.c H5IMfc.c H5IMcc.c H5TBfc.c \
 	H5DSff.F90 H5LTff.F90 H5TBff.F90 H5IMff.F90 H5DOff.F90 H5LTff_gen.F90 H5TBff_gen.F90
 
 # HDF5 HL Fortran library depends on HDF5 Library.
-libhdf5hl_fortran_la_LIBADD=$(LIBH5_HL) $(LIBH5F)
-
-# The name of the lib file doesn't follow the same pattern as the other hl lib
-# files, namely libhdf5_hl_*.  Add a symlink with the compliant name to the
-# actual lib file.
-install-exec-hook:
-	cd $(DESTDIR)$(libdir) && \
-	    if test -f libhdf5hl_fortran.a -a \
-	    ! -f libhdf5_hl_fortran.a; then \
-	        $(LN_S) libhdf5hl_fortran.a libhdf5_hl_fortran.a; \
-	    fi; \
-	    if test -f libhdf5hl_fortran.so -a \
-	    ! -f libhdf5_hl_fortran.so; then \
-	        $(LN_S) libhdf5hl_fortran.so libhdf5_hl_fortran.so; \
-	    fi;
-
+libhdf5_hl_fortran_la_LIBADD=$(LIBH5_HL) $(LIBH5F)
 
 # Fortran module files can have different extensions and different names
 # (e.g., different capitalizations) on different platforms.  Write rules

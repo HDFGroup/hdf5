@@ -296,7 +296,7 @@ if test "x$do_link" = "xyes"; then
   shared_link=""
 # conditionally link with the hl library
   if test "X$HL" = "Xhl"; then
-   libraries=" $libraries -lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 "
+   libraries=" $libraries -lhdf5_hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 "
   else
    libraries=" $libraries -lhdf5_fortran -lhdf5 "
   fi
