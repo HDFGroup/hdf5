@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.66cfc80</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.b757ea9</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -186,9 +186,9 @@ Tracking Free Space in HDF5 Files</h2>
 </div><!-- fragment --><dl class="section user"><dt>Discussion</dt><dd>Free space tracking is supported only in HDF5 versions 1.10.x and higher. This has implications for the accessibility of your HDF5 files and should be considered carefully. If compatibility with previous versions of HDF5 must be maintained, space reclamation via <code>h5repack</code> might be an option.<br  />
 The file space strategy <a class="el" href="_h5_fpublic_8h.html#a9cc492c4b5c936e48716a8dab3691bcca4eb2323fa7feed13452676d57cc27a87">H5F_FSPACE_STRATEGY_FSM_AGGR</a> is not the only option that supports free-space tracking. <a class="el" href="_h5_fpublic_8h.html#a9cc492c4b5c936e48716a8dab3691bccacd625bd864903e71132c9098929f5a0a">H5F_FSPACE_STRATEGY_PAGE</a> is another option, which adds paged allocation and is used most effectively with page buffering.<br  />
 For an in-depth account of HDF5 file space management, paged-allocation, and page buffering, see the following documents: <ul>
-<li><a href="https://support.hdfgroup.org/hdf5/rfc/FileSpaceManagement.pdf">HDF5 File Space Management</a> </li>
-<li><a href="https://support.hdfgroup.org/hdf5/rfc/paged_aggregation.pdf">HDF5 File Space Management: Paged Aggregation</a> </li>
-<li><a href="https://support.hdfgroup.org/hdf5/rfc/RFC-Page_Buffering.pdf">Page Buffering</a></li>
+<li><a href="https://support.hdfgroup.org/releases/hdf5/documentation/rfc/FileSpaceManagement.pdf">HDF5 File Space Management</a> </li>
+<li><a href="https://support.hdfgroup.org/releases/hdf5/documentation/rfc/paged_aggregation.pdf">HDF5 File Space Management: Paged Aggregation</a> </li>
+<li><a href="https://support.hdfgroup.org/releases/hdf5/documentation/rfc/RFC-Page_Buffering.pdf">Page Buffering</a></li>
 </ul>
 </dd></dl>
 <dl class="section user"><dt>See Also</dt><dd>See <a class="el" href="_accessibility.html#CB_MaintainCompat">Maintaining Compatibility with other HDF5 Library Versions</a> for HDF5 compatibility implications.</dd></dl>
