@@ -112,7 +112,7 @@ Source packages for current and previous releases are located at:
    https://support.hdfgroup.org/releases/hdf5/v1_14/index.html
 
    Archived releases:
-   https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/
+   https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/index.html
 
 Development code is available at our Github location:
 
