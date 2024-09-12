@@ -47,6 +47,12 @@ New Features
 
     Configuration:
     -------------
+    - Added signed Windows msi binary and signed Apple dmg binary files.
+
+      The release process now provides signed Windows and Apple installation
+      binaries in addition to the debian and rpm installation binaries. Also
+      these installer files are no longer compressed into packaged archives.
+
     - Added configuration option for internal threading/concurrency support:
 
           CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)
