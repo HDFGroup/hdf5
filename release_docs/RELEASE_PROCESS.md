@@ -54,10 +54,11 @@ For more information on the HDF5 versioning and backward and forward compatibili
 ### 4. Freeze Code (Release Manager | Test Automation Team)
 1. Transition from performing maintenance on software to preparing for its delivery.
 2. A few days before the code freeze, announce (via a product's developer mailing list and during team meetings) the pending freeze of the code for the release. On the day of the code freeze, send a "no more commits" message for the software being released and any third party software we develop that it depends on, as well as a "no more upgrades" message for other third party software the release depends on.
-        - Recently we haven’t announced a code freeze since it doesn’t take long to create the release branch and the support branch doesn’t need to remain frozen once the release branch is created. There are a few things that can be done on the support branch before the release branch is created, in particular updating the .so numbers. 
-3. Move all unresolved Milestone issues to the next release version in GitHub.
-4. Verify that frozen code branch satisfies all existing regression test cases, and give the 'OK' to the release coordinator once all daily test configurations are passing as expected after the date of the code freeze. If there are failing tests after the code freeze date, coordinate with maintainers responsible for the failures to ensure that either the changes causing the failures are corrected or reverted. 
-5. Verify release branches for third-party software used: SZIP, ZLIB, and Plugins; and announce release versions to hdf5lib@lists.hdfgroup.org.
+        - Recently we haven’t announced a code freeze since it doesn’t take long to create the release branch and the support branch doesn’t need to remain frozen once the release branch is created. There are a few things that can be done on the support branch before the release branch is created, in particular updating the .so numbers.  
+3. Be sure to complete all four steps for each deployed lib file in the process described in config/lt_vers.am and check that the .so numbers for lib files in binaries correctly indicate compatibility status with the previous release.  
+4. Move all unresolved Milestone issues to the next release version in GitHub.
+5. Verify that frozen code branch satisfies all existing regression test cases, and give the 'OK' to the release coordinator once all daily test configurations are passing as expected after the date of the code freeze. If there are failing tests after the code freeze date, coordinate with maintainers responsible for the failures to ensure that either the changes causing the failures are corrected or reverted. 
+6. Verify release branches for third-party software used: SZIP, ZLIB, and Plugins; and announce release versions to hdf5lib@lists.hdfgroup.org.
 
 ### 5. Update Interface Version (Release Manager | Product Manager)
 1. Verify interface additions, changes, and removals, and update the shared library interface version number.
