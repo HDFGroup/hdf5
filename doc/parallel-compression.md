@@ -333,8 +333,8 @@ hid_t file_id = H5Fcreate("file.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 ...
 ```
 
-[u1]: https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/C/H5PAR/ph5_filtered_writes.c
-[u2]: https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/C/H5PAR/ph5_filtered_writes_no_sel.c
+[u1]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/C/H5PAR/ph5_filtered_writes.c
+[u2]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/C/H5PAR/ph5_filtered_writes_no_sel.c
 [u3]: https://hdfgroup.github.io/hdf5/develop/group___h5_d.html#gaf6213bf3a876c1741810037ff2bb85d8
 [u4]: https://hdfgroup.github.io/hdf5/develop/group___h5_d.html#ga8eb1c838aff79a17de385d0707709915
 [u5]: https://hdfgroup.github.io/hdf5/develop/group___d_c_p_l.html#ga85faefca58387bba409b65c470d7d851
