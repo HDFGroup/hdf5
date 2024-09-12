@@ -15,16 +15,16 @@ final release.
 
 Links to HDF5 documentation can be found on:
 
-     https://support.hdfgroup.org/documentation/HDF5
+     https://support.hdfgroup.org/releases/hdf5/latest-docs.html
 
 The official HDF5 releases can be obtained from:
 
-     https://support.hdfgroup.org/downloads/HDF5/
+     https://support.hdfgroup.org/downloads/index.html
 
 Changes from Release to Release and New Features in the HDF5-1.16.x release series
 can be found at:
 
-     https://support.hdfgroup.org/documentation/HDF5/release_specific_info.html
+     https://support.hdfgroup.org/releases/hdf5/documentation/release_specific_info.html
 
 If you have any questions or comments, please send them to the HDF Help Desk:
 
