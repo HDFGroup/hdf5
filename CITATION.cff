@@ -9,4 +9,4 @@ authors:
     website: 'https://www.hdfgroup.org'
 repository-code: 'https://github.com/HDFGroup/hdf5'
 url: 'https://www.hdfgroup.org/HDF5/'
-repository-artifact: 'https://support.hdfgroup.org/downloads/HDF5'
+repository-artifact: 'https://support.hdfgroup.org/downloads/index.html'

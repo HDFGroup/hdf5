@@ -83,7 +83,7 @@
  * to be much more common than internal implementations.
  *
  * A list of VOL connectors can be found here:
- * <a href="https://\DOCURL/registered_vol_connectors.html">
+ * <a href="https://\DOCURL/registered_vol_connectors.md">
  * Registered VOL Connectors</a>
  *
  * This list is incomplete and only includes the VOL connectors that have been registered with

@@ -62,7 +62,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 ### 5. Update Interface Version (Release Manager | Product Manager)
 1. Verify interface additions, changes, and removals, and update the shared library interface version number.
 2. Execute the CI snapshot workflow.
-    - Actions - "[hdf5 release build][u8]" workflow and use the defaults.
+    - Actions - “[hdf5 release build][u8]” workflow and use the defaults.
 3. Download and inspect release build source and binary files.  Downloaded source files should build correctly, one or more binaries should install and run correctly.  There should be nothing missing nor any extraneous files that aren’t meant for release.
 4. Verify the interface compatibility reports between the current source and the previous release on the Github [Snapshots]u14] page.
     - The compatibility reports are produced by the CI and are viewable in the Github [Releases/snapshot][u15] section.
@@ -95,9 +95,9 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - `$ git push` 
 7. Update default configuration mode
     - `$ git checkout hdf5_X_Y_Z;` and `$ bin/switch_maint_mode -disable ./configure.ac` to disable `AM_MAINTAINER_MODE`. 
-    - Need to set option `HDF5_GENERATE_HEADERS` to `OFF`, currently in line 996 of [src/CMakeLists.txt][11].
+    - Need to set option `HDF5_GENERATE_HEADERS` to `OFF`, currently in line 996 of [src/CMakeLists.txt][u11].
     - Change the **release preparation branch**'s (i.e. hdf5_X_Y_Z) default configuration mode from development to production in [configure.ac][u12]. 
-    - Find "Determine build mode" in [configure.ac][u12]. 
+    - Find “Determine build mode” in [configure.ac][u12]. 
     - Change `default=debug` to `default=production` at the bottom of the `AS_HELP_STRING` for `--enable-build-mode`.
     - Under `if test "X-$BUILD_MODE" = X- ; then` change `BUILD_MODE=debug` to `BUILD_MODE=production`. 
     - Run `sh ./autogen.sh` to regenerate the UNIX build system files and commit the changes. (use `git status --ignored` to see the changes and `git add -f` to add all files. First delete any new files not to be committed, notably `src/H5public.h~` and `autom4te.cache/`.)
@@ -137,7 +137,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 
 ### 8. Finalize Release Notes (Release Manager)
 1. Perform a final review of release notes and ensure that any new changes made to the source, any new known issues discovered, and any additional tests run since the code freeze have been reflected in RELEASE.txt and other appropriate in-source documentation files (INSTALL_*, etc.). (Refer to the sub-steps of step 3 for what to check).
-2. Update the [RELEASE.txt][u1] in the **support** branch (i.e. hdf5_X_Y) to remove entries in "Bugs fixed" and "New Features" sections and increment the version number for the following release ("Bug fixes since X.Y.Z" - occurs twice).
+2. Update the [RELEASE.txt][u1] in the **support** branch (i.e. hdf5_X_Y) to remove entries in “Bugs fixed” and “New Features” sections and increment the version number for the following release (“Bug fixes since X.Y.Z” - occurs twice).
     - `$ git checkout hdf5_X_Y` 
     - `$ vi RELEASE.txt # update RELEASE.txt to clear it out` 
     - `$ git commit -m "Reset RELEASE.txt in preparation for the next release."` 
@@ -174,6 +174,6 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u10]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/bin/h5vers
 [u11]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/src/CMakeLists.txt
 [u12]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/configure.ac
-[u13]: https://support.hdfgroup.org/documentation/hdf5/v1_14/v1_14_4/api-compat-macros.html
+[u13]: https://hdfgroup.github.io/hdf5/v1_14/api-compat-macros.html
 [u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14
 [u15]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot

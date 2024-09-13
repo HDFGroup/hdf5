@@ -87,7 +87,7 @@ set (PLUGIN_GIT_URL "https://github.com/HDFGroup/hdf5_plugins.git" CACHE STRING 
 set (PLUGIN_GIT_BRANCH "master" CACHE STRING "" FORCE)
 set (H5PL_VERS_MAJOR "1" CACHE STRING "Major version of hdf5 package for PLUGIN package" FORCE)
 set (H5PL_VERS_MINOR "14" CACHE STRING "Minor version of hdf5 package for PLUGIN package" FORCE)
-set (H5PL_VERS_RELEASE "4" CACHE STRING "Release version of hdf5 package for PLUGIN package" FORCE)
+set (H5PL_VERS_RELEASE "5" CACHE STRING "Release version of hdf5 package for PLUGIN package" FORCE)
 
 #############
 # bitshuffle
