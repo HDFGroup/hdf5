@@ -41,7 +41,7 @@ Once a pull request is correctly formatted and passes **ALL** CI tests, it will 
 community members who can approve pull requests. The HDF Group developers will work with you to ensure that the pull request satisfies the acceptance
 criteria described in the next section.
 
-<h2 id="criteria">Acceptance criteria for a pull request</h2>
+<h2 id="workflow">Workflow</h2>
 
 We appreciate every contribution we receive, but we may not accept them all.  Those that we *do* satisfy the following criteria:
 

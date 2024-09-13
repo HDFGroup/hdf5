@@ -29,7 +29,7 @@ Obtaining HDF5 source code
    2. Obtain HDF5 source from Github
          development branch:  https://github.com/HDFGroup/hdf5
          last release:        https://github.com/HDFGroup/hdf5/releases/latest
-             hdf5-1_14_"X".tar.gz or hdf5-1_1
+             hdf5-1_14_"X".tar.gz or hdf5-1_14_"X".zip
 
       and put it in "myhdfstuff".
       Uncompress the file. There should be a hdf5-1.14."X" folder.

@@ -65,20 +65,20 @@ usage(const char *progname)
 /*-------------------------------------------------------------------------
  * Function:    get_size
  *
- * Purpose:    Reads a size option of the form `-XNS' where `X' is any
- *        letter, `N' is a multi-character positive decimal number, and
- *        `S' is an optional suffix letter in the set [GgMmk].  The
- *        option may also be split among two arguments as: `-X NS'.
- *        The input value of ARGNO is the argument number for the
- *        switch in the ARGV vector and ARGC is the number of entries
- *        in that vector.
+ * Purpose:     Reads a size option of the form `-XNS' where `X' is any
+ *              letter, `N' is a multi-character positive decimal number, and
+ *              `S' is an optional suffix letter in the set [GgMmk].  The
+ *              option may also be split among two arguments as: `-X NS'.
+ *              The input value of ARGNO is the argument number for the
+ *              switch in the ARGV vector and ARGC is the number of entries
+ *              in that vector.
  *
- * Return:    Success:    The value N multiplied according to the
- *                suffix S.  On return ARGNO will be the number
- *                of the next argument to process.
+ * Return:      Success:    The value N multiplied according to the
+ *                          suffix S.  On return ARGNO will be the number
+ *                          of the next argument to process.
  *
- *        Failure:    Calls usage() which exits with a non-zero
- *                status.
+ *              Failure:    Calls usage() which exits with a non-zero
+ *                          status.
  *
  *-------------------------------------------------------------------------
  */
@@ -126,13 +126,6 @@ get_size(const char *progname, int *argno, int argc, char *argv[])
 
 /*-------------------------------------------------------------------------
  * Function:    main
- *
- * Purpose:    Split an hdf5 file
- *
- * Return:    Success:
- *
- *        Failure:
- *
  *-------------------------------------------------------------------------
  */
 H5_GCC_CLANG_DIAG_OFF("format-nonliteral")

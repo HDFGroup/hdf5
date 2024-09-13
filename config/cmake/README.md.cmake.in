@@ -75,6 +75,6 @@ For more information see USING_CMake_Examples.txt in the install folder.
 ===========================================================================
 
 Documentation for this release can be found at the following URL:
-    https://support.hdfgroup.org/hdf5/@HDF5_PACKAGE_NAME@-@HDF5_PACKAGE_VERSION@/documentation/doxygen/index.html
+    https://support.hdfgroup.org/releases/hdf5/@${H5_VERS_MAJOR}@_@${H5_VERS_MINOR}@/@${H5_VERS_MAJOR}@_@${H5_VERS_MINOR}@_@${H5_VERS_RELEASE}@/documentation/doxygen/index.html
 
 Bugs should be reported to help@hdfgroup.org.
