@@ -49,7 +49,7 @@ CONTENTS
         include the Szip library with the encoder enabled. These can be found
         here:
 
-            https://support.hdfgroup.org/downloads/HDF5
+            https://support.hdfgroup.org/downloads/index.html
 
         Please notice that if HDF5 configure cannot find a valid Szip library,
         configure will not fail; in this case, the compression filter will

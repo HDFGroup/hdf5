@@ -95,7 +95,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - `$ git push` 
 7. Update default configuration mode
     - `$ git checkout hdf5_X_Y_Z;` and `$ bin/switch_maint_mode -disable ./configure.ac` to disable `AM_MAINTAINER_MODE`. 
-    - Need to set option `HDF5_GENERATE_HEADERS` to `OFF`, currently in line 996 of [src/CMakeLists.txt][11].
+    - Need to set option `HDF5_GENERATE_HEADERS` to `OFF`, currently in line 996 of [src/CMakeLists.txt][u11].
     - Change the **release preparation branch**'s (i.e. hdf5_X_Y_Z) default configuration mode from development to production in [configure.ac][u12]. 
     - Find “Determine build mode” in [configure.ac][u12]. 
     - Change `default=debug` to `default=production` at the bottom of the `AS_HELP_STRING` for `--enable-build-mode`.
@@ -174,6 +174,6 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u10]: https://github.com/HDFGroup/hdf5/blob/develop/bin/h5vers
 [u11]: https://github.com/HDFGroup/hdf5/blob/develop/src/CMakeLists.txt
 [u12]: https://github.com/HDFGroup/hdf5/blob/develop/configure.ac
-[u13]: https://support.hdfgroup.org/documentation/hdf5/v1_14/v1_14_4/api-compat-macros.html
+[u13]: https://hdfgroup.github.io/hdf5/develop/api-compat-macros.html
 [u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14
 [u15]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot

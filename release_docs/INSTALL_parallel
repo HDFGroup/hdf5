@@ -90,7 +90,7 @@ nodes.  They would probably work for other Cray systems but have
 not been verified.
 
 Obtain the HDF5 source code:
-    https://support.hdfgroup.org/downloads/HDF5
+    https://support.hdfgroup.org/downloads/index.html
 
 The entire build process should be done on a MOM node in an interactive allocation and on a file system accessible by all compute nodes.
 Request an interactive allocation with qsub:
