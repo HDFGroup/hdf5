@@ -273,7 +273,7 @@ jobs:
         id: publish-ctest-deb-binary
         run: |
           mkdir "${{ runner.workspace }}/builddeb"
-          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC/*.deb ${{ runner.workspace }}/builddeb/hdf5
+          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC/*.deb ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
         shell: bash
 
       - name: Publish rpm binary (Linux)
@@ -416,19 +416,19 @@ jobs:
           NOTARY_USER: ${{ vars.NOTARY_USER }}
           NOTARY_KEY: ${{ vars.NOTARY_KEY }}
         run: |
-          /usr/bin/codesign --force --timestamp --options runtime --entitlements ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/distribution.entitlements --verbose=4 --strict --sign ${{ env.SIGNER }} --deep ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+          /usr/bin/codesign --force --timestamp --options runtime --entitlements ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/distribution.entitlements --verbose=4 --strict --sign ${{ env.SIGNER }} --deep ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
 
       - name: Check dmg timestamp (MacOS_latest)
         run: |
-          /usr/bin/codesign -dvv ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+          /usr/bin/codesign -dvv ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
 
       - name: Verify dmg (MacOS_latest)
         run: |
-          /usr/bin/hdiutil verify ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+          /usr/bin/hdiutil verify ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
 
@@ -441,7 +441,7 @@ jobs:
           NOTARY_USER: ${{ vars.NOTARY_USER }}
           NOTARY_KEY: ${{ vars.NOTARY_KEY }}
         run: |
-          jsonout=$(/usr/bin/xcrun notarytool submit --wait --output-format json --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg)
+          jsonout=$(/usr/bin/xcrun notarytool submit --wait --output-format json --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-macos-Clang/*.dmg)
           echo "JSONOUT=$jsonout" >> $GITHUB_OUTPUT
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
@@ -488,7 +488,7 @@ jobs:
           NOTARY_USER: ${{ vars.NOTARY_USER }}
           NOTARY_KEY: ${{ vars.NOTARY_KEY }}
         run: |
-          /usr/bin/xcrun stapler staple ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+          /usr/bin/xcrun stapler staple ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
         continue-on-error: true
