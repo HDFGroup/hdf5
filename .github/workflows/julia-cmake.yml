@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get Sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
 
       - name: Install Dependencies
         shell: bash
@@ -63,7 +63,7 @@ jobs:
           arch: 'x64'
 
       - name: Get julia hdf5 source
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
         with:
           repository: JuliaIO/HDF5.jl
           path: .

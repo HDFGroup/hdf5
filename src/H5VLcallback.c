@@ -5100,6 +5100,10 @@ H5VL_link_move(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_pa
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity check */
+    assert(src_vol_obj);
+    assert(src_vol_obj->data);
+
     /* Set wrapper info in API context */
     vol_obj = (src_vol_obj->data ? src_vol_obj : dst_vol_obj);
     if (H5VL_set_vol_wrapper(vol_obj) < 0)

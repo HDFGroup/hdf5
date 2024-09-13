@@ -99,8 +99,8 @@ These steps are described in more detail below.
         <options> is:
             * H5EX_BUILD_TESTING:BOOL=ON
             * BUILD_SHARED_LIBS:BOOL=[ON | OFF]
-            * HDF_BUILD_FORTRAN:BOOL=[ON | OFF]
-            * HDF_BUILD_JAVA:BOOL=[ON | OFF]
+            * H5EX_BUILD_FORTRAN:BOOL=[ON | OFF]
+            * H5EX_BUILD_JAVA:BOOL=[ON | OFF]
 
         if the hdf5 library was built with a namespace (i.e. "hdf5::") add:
             -D HDF5_NAMESPACE:STRING=hdf5::

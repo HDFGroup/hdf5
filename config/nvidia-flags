@@ -92,7 +92,7 @@ if test "X-nvc" = "X-$cc_vendor" -o "X-nvcc" = "X-$cc_vendor"; then
     ###########
 
     NO_SYMBOLS_CFLAGS="-s"
-    SYMBOLS_CFLAGS="-g"
+    SYMBOLS_CFLAGS="-gopt"
 
     #############
     # Profiling #
@@ -106,9 +106,8 @@ if test "X-nvc" = "X-$cc_vendor" -o "X-nvcc" = "X-$cc_vendor"; then
     # Optimization #
     ################
 
-    HIGH_OPT_CFLAGS="-O1"         # -O2+ currently has test failures.
-    #DEBUG_OPT_CFLAGS="-gopt -O2"
-    DEBUG_OPT_CFLAGS="-gopt -O1"  # -O2+ currently has test failures.
+    HIGH_OPT_CFLAGS="-O3"
+    DEBUG_OPT_CFLAGS="-O1"  # -O0 can be very slow
     NO_OPT_CFLAGS="-O0"
 
     #################

@@ -96,6 +96,8 @@ Once a file is opened by the processes of a communicator:
 \li Multiple processes write to the same dataset.
 \li Each process writes to an individual dataset.
 
+@see \ref collective_calls
+
 Please refer to the Supported Configuration Features Summary in the release notes for the current release
 of HDF5 for an up-to-date list of the platforms that we support Parallel HDF5 on.
 
