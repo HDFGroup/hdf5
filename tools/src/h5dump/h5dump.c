@@ -333,10 +333,9 @@ usage(const char *prog)
     PRINTVALSTREAM(
         rawoutstream,
         "  D - is the file driver to use in opening the file. Acceptable values are available from\n");
-    PRINTVALSTREAM(
-        rawoutstream,
-        "      "
-        "https://support.hdfgroup.org/documentation/HDF5/registered_virtual_file_drivers_vfds.html.\n");
+    PRINTVALSTREAM(rawoutstream, "      "
+                                 "https://support.hdfgroup.org/releases/hdf5/documentation/"
+                                 "registered_virtual_file_drivers_vfds.md.\n");
     PRINTVALSTREAM(rawoutstream,
                    "      Without the file driver flag, the file will be opened with each driver in\n");
     PRINTVALSTREAM(rawoutstream, "      turn and in the order specified above until one driver succeeds\n");

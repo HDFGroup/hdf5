@@ -15,16 +15,16 @@ final release.
 
 Links to HDF5 documentation can be found on:
 
-     https://support.hdfgroup.org/documentation/HDF5
+     https://support.hdfgroup.org/releases/hdf5/latest-docs.html
 
 The official HDF5 releases can be obtained from:
 
-     https://support.hdfgroup.org/downloads/HDF5/
+     https://support.hdfgroup.org/downloads/index.html
 
 Changes from Release to Release and New Features in the HDF5-1.16.x release series
 can be found at:
 
-     https://support.hdfgroup.org/documentation/HDF5/release_specific_info.html
+     https://support.hdfgroup.org/releases/hdf5/documentation/release_specific_info.md
 
 If you have any questions or comments, please send them to the HDF Help Desk:
 
@@ -47,6 +47,12 @@ New Features
 
     Configuration:
     -------------
+    - Added signed Windows msi binary and signed Apple dmg binary files.
+
+      The release process now provides signed Windows and Apple installation
+      binaries in addition to the debian and rpm installation binaries. Also
+      these installer files are no longer compressed into packaged archives.
+
     - Added configuration option for internal threading/concurrency support:
 
           CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)
@@ -823,6 +829,24 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed a bug in the Subfiling VFD that could cause a buffer over-read
+      and memory allocation failures
+
+      When performing vector I/O with the Subfiling VFD, making use of the
+      vector I/O size extension functionality could cause the VFD to read
+      past the end of the "I/O sizes" array that is passed in. When an entry
+      in the "I/O sizes" array has the value 0 and that entry is at an array
+      index greater than 0, this signifies that the value in the preceding
+      array entry should be used for the rest of the I/O vectors, effectively
+      extending the last valid I/O size across the remaining entries. This
+      allows an application to save a bit on memory by passing in a smaller
+      "I/O sizes" array. The Subfiling VFD didn't implement a check for this
+      functionality in the portion of the code that generates I/O vectors,
+      causing it to read past the end of the "I/O sizes" array when it was
+      shorter than expected. This could also result in memory allocation
+      failures, as the nearby memory allocations are based off the values
+      read from that array, which could be uninitialized.
+
     - Fixed H5Rget_attr_name to return the length of the attribute's name
       without the null terminator
 

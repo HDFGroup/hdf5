@@ -5,7 +5,7 @@ project (HDF5Examples_FORTRAN_H5T Fortran)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
-  "${CMAKE_Fortran_MODULE_DIRECTORY}${HDF_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+  "${CMAKE_Fortran_MODULE_DIRECTORY}${H5EX_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
 )
 
 #-----------------------------------------------------------------------------
@@ -13,7 +13,7 @@ set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
 #-----------------------------------------------------------------------------
 include (Fortran_sourcefiles.cmake)
 
-#if (HDF_ENABLE_F2003)
+#if (H5EX_ENABLE_F2003)
   foreach (example_name ${f03_examples})
     add_executable (${EXAMPLE_VARNAME}_f90_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.F90)
     target_compile_options(${EXAMPLE_VARNAME}_f90_${example_name}
@@ -126,7 +126,7 @@ if (HDF5_BUILD_TOOLS)
     )
   endforeach ()
 
-  #if (HDF_ENABLE_F2003)
+  #if (H5EX_ENABLE_F2003)
     foreach (example_name ${f03_examples})
       if (NOT ${example_name} STREQUAL "h5ex_t_convert_F03")
         if (${example_name} STREQUAL "h5ex_t_vlen_F03" OR ${example_name} STREQUAL "h5ex_t_vlenatt_F03")
@@ -404,7 +404,7 @@ if (H5EX_BUILD_TESTING)
     endif ()
   endmacro ()
 
-  #if (HDF_ENABLE_F2003)
+  #if (H5EX_ENABLE_F2003)
     foreach (example_name ${f03_examples} ${common_examples})
       TEST_EXAMPLE (${example_name})
     endforeach ()
