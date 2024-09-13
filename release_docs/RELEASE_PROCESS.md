@@ -58,7 +58,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 3. Be sure to complete all four steps to update so numbers for each deployed lib file in the process described in config/lt_vers.am and check that the .so numbers for lib files in binaries correctly indicate compatibility status with the previous release.  
 4. Move all unresolved Milestone issues to the next release version in GitHub.
 5. Verify that frozen code branch satisfies all existing regression test cases, and give the 'OK' to the release coordinator once all daily test configurations are passing as expected after the date of the code freeze. If there are failing tests after the code freeze date, coordinate with maintainers responsible for the failures to ensure that either the changes causing the failures are corrected or reverted. 
-6. Verify release branches for third-party software used: SZIP, ZLIB, and Plugins; and announce release versions to hdf5lib@lists.hdfgroup.org.
+6. Verify release branches for third-party software used: SZIP, ZLIB, and Plugins; and announce release versions to hdf5lib@hdfgroup.org.
 
 ### 5. Update Interface Version (Release Manager | Product Manager)
 1. Verify interface additions, changes, and removals, and update the shared library interface version number.
