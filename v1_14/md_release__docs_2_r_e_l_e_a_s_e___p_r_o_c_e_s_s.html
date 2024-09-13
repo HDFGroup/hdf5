@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.5.6467122</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.5.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -138,7 +138,7 @@ Description (HDF5):</h1>
 <p>Maintenance releases are always forward compatible with regards to the HDF5 file format, meaning that:</p><ul>
 <li>HDF5 libraries and command line utilities can access files created by future maintenance versions of the library. Note that maintenance releases are NOT guaranteed to be interface-compatible, meaning that, on occasion, application source code will need updated and re-compiled against a new maintenance release when the interface changes. Interface changes are only made when absolutely necessary as deemed by the HDF5 product manager(s), and interface compatibility reports are published with each release to inform customers and users of any incompatibilities in the interface.</li>
 </ul>
-<p>For more information on the HDF5 versioning and backward and forward compatibility issues, see the <a href="https://hdfgroup.github.io/hdf5/develop/api-compat-macros.html">API Compatibility Macros</a> on the public website.</p>
+<p>For more information on the HDF5 versioning and backward and forward compatibility issues, see the <a href="https://hdfgroup.github.io/hdf5/v1_14/api-compat-macros.html">API Compatibility Macros</a> on the public website.</p>
 <h1><a class="anchor" id="autotoc_md226"></a>
 Participants:</h1>
 <ul>
@@ -176,7 +176,7 @@ Tasks:</h1>
 <li>Update current compiler information for each platform in the PLATFORMS TESTED section of <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs/RELEASE.txt">RELEASE.txt</a>.</li>
 <li>Review the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs/RELEASE.txt">RELEASE.txt</a> for formatting and language to verify that it corresponds to guidelines found in <b>[Writing Notes in a RELEASE.txt(this is missing)]()</b> File.</li>
 <li>Review and update, if needed, the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/README.md">README</a> and <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/COPYING">COPYING</a> files.</li>
-<li>Review and update all INSTALL_* files in <a href="https://github.com/HDFGroup/hdf5/tree/hdf5_1_14/release_docs">release_docs</a>, if needed.<ul>
+<li>Review and update all INSTALL_* files in <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs">release_docs</a>, if needed.<ul>
 <li><a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs/INSTALL">INSTALL</a> should be general info and not require extensive changes</li>
 <li><a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs/INSTALL_Autotools.txt">INSTALL_Autotools.txt</a> are the instructions for building under autotools.</li>
 <li><a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs/INSTALL_CMake.txt">INSTALL_CMake.txt</a> are the instructions for building under CMake.</li>
@@ -204,7 +204,7 @@ Tasks:</h1>
 </ul>
 </li>
 <li>Download and inspect release build source and binary files. Downloaded source files should build correctly, one or more binaries should install and run correctly. There should be nothing missing nor any extraneous files that aren’t meant for release.</li>
-<li>Verify the interface compatibility reports between the current source and the previous release on the Github <a href="https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14">Snapshots</a> page.<ul>
+<li>Verify the interface compatibility reports between the current source and the previous release on the Github [Snapshots]u14] page.<ul>
 <li>The compatibility reports are produced by the CI and are viewable in the Github <a href="https://github.com/HDFGroup/hdf5/releases/tag/snapshot">Releases/snapshot</a> section.</li>
 </ul>
 </li>
@@ -245,7 +245,7 @@ Tasks:</h1>
 <li><code>$ git push</code></li>
 </ul>
 </li>
-<li>Change the <b>release preparation branch</b>'s version number to X.Y.Z-{SR+1} using the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/bin/h5vers">bin/h5vers</a> script:<ul>
+<li>Change the <b>release preparation branch</b>'s version number to X.Y.Z-{SR+1} using the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/bin/h5vers">bin/h5vers</a>/bin/h5vers script:<ul>
 <li><code>$ git checkout hdf5_X_Y_Z;</code></li>
 <li><code>$ bin/h5vers -s X.Y.Z-{SR+1};</code></li>
 <li><code>$ git commit -m "Updated release preparation branch version number to X.Y.Z-{SR+1}"</code></li>
@@ -279,7 +279,7 @@ Tasks:</h1>
 <li>P is some pre-release number.</li>
 </ul>
 </li>
-<li>Send a message to the HDF forum indicating that a pre-release source package is available for testing at &lt;e.g. gamma.hdfgroup.org/ftp/pub/outgoing/hdf5/{hdf5-X.Y.Z-P}&gt; and that feedback from the user community on their test results is being accepted.</li>
+<li>Send a message to the HDF forum indicating that a pre-release source package is available for testing at &lt;e.g., &lt;github.com releases URL&gt;/{hdf5-X.Y.Z-P}&gt; and that feedback from the user community on their test results is being accepted.</li>
 <li>Contact paying clients who are interested in testing the pre-release source package and inform them that it is available for testing and that feedback on their test results of the pre-release is appreciated.</li>
 <li>This should be automated and currently github binaries are not signed.<ul>
 <li>Follow the [How to sign binaries with digital certificates(this is missing)]() work instructions to sign each Windows and Mac binary package with a digital certificate.</li>

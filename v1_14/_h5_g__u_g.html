@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.5.6467122</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.5.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -541,7 +541,7 @@ Creating Links</h3>
 <p>Consider the following example: assume that the group group2 can only be accessed via the following path, where top_group is a member of the file's root group: <em>/top_group/group1/group2/</em></p>
 <p>Using <a class="el" href="group___h5_l.html#ga0bbc7f9bf25c8aca9dd8433a325c8acb" title="Moves a link within an HDF5 file.">H5Lmove</a>, top_group is renamed to be a member ofgroup2. At this point, since top_group was the only route from the root group to group1, there is no longer a path by which one can access group1, group2, or any member datasets. And since top_group is now a member of group2, top_group itself and any member datasets have thereby also become inaccessible.</p>
 <h4>Mounting a File</h4>
-<p>An external link is a permanent connection between two files. A temporary connection can be set up with the <a class="el" href="group___h5_f.html#ga9f5ca4c8695597e83568f9f4717fc083" title="Mounts an HDF5 file.">H5Fmount</a> function. For more information, </p><dl class="section see"><dt>See also</dt><dd>sec_file. For more information, see the <a class="el" href="group___h5_f.html#ga9f5ca4c8695597e83568f9f4717fc083" title="Mounts an HDF5 file.">H5Fmount</a> function in the <a class="el" href="_r_m.html">HDF5 Reference Manual</a>.</dd></dl>
+<p>An external link is a permanent connection between two files. A temporary connection can be set up with the <a class="el" href="group___h5_f.html#ga9f5ca4c8695597e83568f9f4717fc083" title="Mounts an HDF5 file.">H5Fmount</a> function. For more information, </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_f__u_g.html#sec_file">The HDF5 File</a>. For more information, see the <a class="el" href="group___h5_f.html#ga9f5ca4c8695597e83568f9f4717fc083" title="Mounts an HDF5 file.">H5Fmount</a> function in the <a class="el" href="_r_m.html">HDF5 Reference Manual</a>.</dd></dl>
 <h3><a class="anchor" id="subsubsec_group_program_info"></a>
 Discovering Information about Objects</h3>
 <p>There is often a need to retrieve information about a particular object. The <a class="el" href="group___h5_l.html#ga97279697f3010a6ad31dd7f4341eb698">H5Lget_info</a> and <a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info</a> functions fill this niche by returning a description of the object or link in an <a class="el" href="_h5version_8h.html#af542682cfe46de7b0759e52a1608d1e4">H5L_info_t</a> or <a class="el" href="_h5version_8h.html#a5f76b0cdd6d68d61f11e46d4f06e50d4">H5O_info_t</a> structure.</p>

@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.5.6467122</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.5.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -171,6 +171,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:gac85972f70201429a93184408d40e4b09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a map object.  <br /></td></tr>
 <tr class="separator:gac85972f70201429a93184408d40e4b09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga978881a6ecbacc418232d318549307f2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_m.html#ga978881a6ecbacc418232d318549307f2">H5Mcreate_anon</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> key_type_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> val_type_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> mcpl_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> mapl_id)</td></tr>
+<tr class="memdesc:ga978881a6ecbacc418232d318549307f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a map object without linking it into a file.  <br /></td></tr>
 <tr class="separator:ga978881a6ecbacc418232d318549307f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga426fbeac4c90849f2ac1855447fb8d43"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_m.html#ga426fbeac4c90849f2ac1855447fb8d43">H5Mopen</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, const char *name, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> mapl_id)</td></tr>
 <tr class="memdesc:ga426fbeac4c90849f2ac1855447fb8d43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opens a map object.  <br /></td></tr>
@@ -361,6 +362,21 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Creates a map object without linking it into a file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">loc_id</td><td>Location identifier. The identifier may be that of a file, group, dataset, named datatype, or attribute. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">key_type_id</td><td>Datatype identifier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">val_type_id</td><td>Datatype identifier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mcpl_id</td><td>Map creation property list identifier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mapl_id</td><td>Map access property list identifier </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a map object identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>. The resulting ID should be linked into the file with H5Olink or it will be deleted when closed.</dd></dl>
+<p><a class="el" href="group___h5_m.html#ga978881a6ecbacc418232d318549307f2" title="Creates a map object without linking it into a file.">H5Mcreate_anon()</a> creates a new map object for storing key-value pairs. The in-file datatype for keys is defined by <code>key_type_id</code> and the in-file datatype for values is defined by <code>val_type_id</code>. <code>loc_id</code> specifies the file to create the map object, but no link to the object is created. Other options can be specified through the property lists <code>mcpl_id</code> and <code>mapl_id</code>.</p>
+<p>The new map should be linked into the group hierarchy before being closed or it will be deleted. The map should be closed when the caller no longer requires it.</p>
 <dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>

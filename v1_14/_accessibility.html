@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.5.6467122</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.5.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -167,7 +167,7 @@ In the example below, we restrict HDF5 item creation to the HDF5 1.8.x family of
 <div class="ttc" id="agroup___p_l_c_r_html_ga5dce61149211d3ef319452aa598887fb"><div class="ttname"><a href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a></div><div class="ttdeci">herr_t H5Pclose(hid_t plist_id)</div><div class="ttdoc">Terminates access to a property list.</div></div>
 <div class="ttc" id="agroup___p_l_c_r_html_gaf1b11da01d4d45d788c45f8bc5f0cbfa"><div class="ttname"><a href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a></div><div class="ttdeci">hid_t H5Pcreate(hid_t cls_id)</div><div class="ttdoc">Creates a new property list as an instance of a property list class.</div></div>
 </div><!-- fragment --></dd></dl>
-<dl class="section user"><dt>Discussion</dt><dd>See RFC <a href="https://docs.hdfgroup.org/hdf5/rfc/RFC-bounds.pdf">Setting Bounds for Object Creation in HDF5 1.10.0</a> for a detailed and comprehensive account of HDF5 versioning (library, file format spec., etc.) and the <a class="el" href="group___f_a_p_l.html#gacbe1724e7f70cd17ed687417a1d2a910" title="Controls the range of library release versions used when creating objects in a file.">H5Pset_libver_bounds()</a> function.<br  />
+<dl class="section user"><dt>Discussion</dt><dd>See RFC <a href="https://support.hdfgroup.org/releases/hdf5/documentation/rfc/RFC-bounds.pdf">Setting Bounds for Object Creation in HDF5 1.10.0</a> for a detailed and comprehensive account of HDF5 versioning (library, file format spec., etc.) and the <a class="el" href="group___f_a_p_l.html#gacbe1724e7f70cd17ed687417a1d2a910" title="Controls the range of library release versions used when creating objects in a file.">H5Pset_libver_bounds()</a> function.<br  />
 The default range <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a> (low) - <a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a> (high) offers the widest compatibility range, but may not be suitable for certain (feature-)use cases.<br  />
 The HDF5 library comes with a <em>forward-</em> and <em>backward-compatibility</em> guarantee: This means that the latest version of the library can always read HDF5 files created by a version realesed earlier (backward compatibility). It also means that a given release of the library can read the contents of HDF5 files created with later versions of the library as long as the files do not contain features introduced in later versions (forward compatibility).</dd></dl>
 <dl class="section user"><dt>See Also</dt><dd>See the recipe <a class="el" href="_attributes.html#CB_LargeAttributes">Creating "Large" HDF5 Attributes</a> for an example where we use HDF5 compatibility settings to enable the creation of large HDF5 attributes. </dd></dl>
