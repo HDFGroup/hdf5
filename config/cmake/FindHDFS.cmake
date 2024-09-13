@@ -8,7 +8,7 @@
 #  HDFS_FOUND, whether HDFS is found.
 
 execute_process(COMMAND $ENV{HADOOP_HOME}/bin/hadoop version OUTPUT_VARIABLE Hadoop_VERSION
-             RESULT_VARIABLE_VALUE Hadoop_RETURN)
+             RESULT_VARIABLE Hadoop_RETURN)
 
 # currently only looking in HADOOP_HOME
 find_path(HDFS_INCLUDE_DIR hdfs.h PATHS
