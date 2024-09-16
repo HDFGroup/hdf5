@@ -273,7 +273,7 @@ jobs:
         id: publish-ctest-deb-binary
         run: |
           mkdir "${{ runner.workspace }}/builddeb"
-          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC/*.deb ${{ runner.workspace }}/builddeb/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.deb ${{ runner.workspace }}/builddeb/hdf5
         shell: bash
 
       - name: Publish rpm binary (Linux)
