@@ -181,9 +181,9 @@ created the dataset layout cannot be changed. The h5repack utility can be used t
 to a new with a new layout.
 
 \section secLBDsetLayoutSource Sources of Information
-<a href="https://\DOCURL/chunking_in_hdf5.html">Chunking in HDF5</a>
-(See the documentation on <a href="https://\DOCURL/advanced_topics_list.html">Advanced Topics in HDF5</a>)
-see \ref sec_plist in the HDF5 \ref UG.
+<a href="https://\DOCURL/advanced_topics/chunking_in_hdf5.md">Chunking in HDF5</a>
+(See the documentation on <a href="https://\DOCURL/advanced_topics_list.md">Advanced Topics in HDF5</a>)
+\see \ref sec_plist in the HDF5 \ref UG.
 
 <hr>
 Previous Chapter \ref LBPropsList - Next Chapter \ref LBExtDset
@@ -201,7 +201,7 @@ certain initial dimensions, then to later increase the size of any of the initia
 
 HDF5 requires you to use chunking to define extendible datasets. This makes it possible to extend
 datasets efficiently without having to excessively reorganize storage. (To use chunking efficiently,
-be sure to see the advanced topic, <a href="https://\DOCURL/chunking_in_hdf5.html">Chunking in HDF5</a>.)
+be sure to see the advanced topic, <a href="https://\DOCURL/advanced_topics/chunking_in_hdf5.md">Chunking in HDF5</a>.)
 
 The following operations are required in order to extend a dataset:
 \li Declare the dataspace of the dataset to have unlimited dimensions for all dimensions that might eventually be extended.
@@ -243,7 +243,7 @@ Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 \section secLBComDsetCreate Creating a Compressed Dataset
 HDF5 requires you to use chunking to create a compressed dataset. (To use chunking efficiently,
-be sure to see the advanced topic, <a href="https://\DOCURL/chunking_in_hdf5.html">Chunking in HDF5</a>.)
+be sure to see the advanced topic, <a href="https://\DOCURL/advanced_topics/chunking_in_hdf5.md">Chunking in HDF5</a>.)
 
 The following operations are required in order to create a compressed dataset:
 \li Create a dataset creation property list.
@@ -251,7 +251,7 @@ The following operations are required in order to create a compressed dataset:
 \li Create the dataset.
 \li Close the dataset creation property list and dataset.
 
-For more information on compression, see the FAQ question on <a href="https://\DOCURL/Using+Compression+in+HDF5">Using Compression in HDF5</a>.
+For more information on compression, see the FAQ question on <a href="https://\DOCURL/hdf5_topics/UsingCompressionInHDF5.md">Using Compression in HDF5</a>.
 
 \section secLBComDsetProg Programming Example
 
@@ -968,8 +968,7 @@ or on WINDOWS you may need to add the path to the bin folder to PATH.
 \section secLBCompilingCMake Compiling an Application with CMake
 
 \subsection subsecLBCompilingCMakeScripts CMake Scripts for Building Applications
-Simple scripts are provided for building applications with different languages and options.
-See <a href="https://\DOCURL/CMake+Scripts+for+Building+Applications">CMake Scripts for Building Applications</a>.
+See <a href="https://\SRCURL/release_docs/USING_CMake_examples.txt">Using CMake to Build Applications</a> to build applications with different languages and options.
 
 For a more complete script (and to help resolve issues) see the script provided with the HDF5 Examples project.
 
@@ -977,7 +976,7 @@ For a more complete script (and to help resolve issues) see the script provided 
 The installed HDF5 can be verified by compiling the HDF5 Examples project, included with the CMake built HDF5 binaries
 in the share folder or you can go to the <a href="https://\SRCURL/HDF5Examples">HDF5 Examples</a> in the HDF5 github repository.
 
-Go into the share directory and follow the instructions in USING_CMake_examples.txt to build the examples.
+Go into the share directory and follow the instructions in <a href="https://\SRCURL/release_docs/USING_CMake_examples.txt">Using CMake to Build Examples</a> to build the examples.
 
 In general, users must first set the HDF5_ROOT environment variable to the installed location of the CMake
 configuration files for HDF5. For example, on Windows the following path might be set:
@@ -1031,17 +1030,8 @@ For example, on Unix the log files will be in:
 There are log files for the configure, test, and build. 
 
 <hr>
-Previous Chapter \ref LBQuizAnswers - Next Chapter \ref LBTraining
+Previous Chapter \ref LBQuizAnswers
 
-Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
-
-@page LBTraining Training Videos
-
-Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
-
-<a href="https://\DOCURL/Training+Videos">Training Videos</a>
-
-<hr>
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 */

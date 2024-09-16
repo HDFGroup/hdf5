@@ -135,9 +135,9 @@
  *
  * \subsubsection subsubsec_cltools_h5dump_options_args Option Argument Conventions
  * \li <strong>D</strong> - is the file driver to use in opening the file. Acceptable values are available
- * from https://support.hdfgroup.org/documentation/HDF5/registered_virtual_file_drivers_vfds.html. Without
- * the file driver flag, the file will be opened with each driver in turn and in the order specified above
- * until one driver succeeds in opening the file. See examples below for family, split, and multi driver
+ * from https://support.hdfgroup.org/releases/hdf5/documentation/registered_virtual_file_drivers_vfds.md.
+ * Without the file driver flag, the file will be opened with each driver in turn and in the order specified
+ * above until one driver succeeds in opening the file. See examples below for family, split, and multi driver
  * special file name usage.
  *
  * \li <strong>F</strong> - is a filename.

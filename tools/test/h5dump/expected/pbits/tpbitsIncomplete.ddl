@@ -105,7 +105,7 @@ usage: h5dump [OPTIONS] files
 
 --------------- Option Argument Conventions ---------------
   D - is the file driver to use in opening the file. Acceptable values are available from
-      https://support.hdfgroup.org/documentation/HDF5/registered_virtual_file_drivers_vfds.html.
+      https://support.hdfgroup.org/releases/hdf5/documentation/registered_virtual_file_drivers_vfds.md.
       Without the file driver flag, the file will be opened with each driver in
       turn and in the order specified above until one driver succeeds
       in opening the file.

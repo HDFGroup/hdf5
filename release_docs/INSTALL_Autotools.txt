@@ -334,7 +334,7 @@ III. Full installation instructions for source distributions
         (or '--with-pthread=DIR') flag to the configure script.
         For further information, see:
 
-           https://support.hdfgroup.org/documentation/HDF5/Questions+about+thread-safety+and+concurrent+access
+           https://support.hdfgroup.org/releases/hdf5/documentation/gen_topics/Questions+about+thread-safety+and+concurrent+access
 
         The high-level, C++, Fortran and Java interfaces are not compatible
         with the thread-safety option because the lock is not hoisted
@@ -492,7 +492,7 @@ IV. Using the Library
         For information on using HDF5 see the documentation, tutorials and examples
         found here:
 
-           https://support.hdfgroup.org/documentation/HDF5/index.html
+           https://support.hdfgroup.org/documentation/index.html
 
         A summary of the features included in the built HDF5 installation can be found
         in the libhdf5.settings file in the same directory as the static and/or

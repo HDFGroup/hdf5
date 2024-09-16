@@ -277,4 +277,71 @@ H5TS_atomic_fetch_sub_uint(H5TS_atomic_uint_t *obj, unsigned arg)
     return ret_value;
 } /* end H5TS_atomic_fetch_sub_uint() */
 
-#endif /* H5_HAVE_THREADS */
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_atomic_exchange_voidp
+ *
+ * Purpose:     Atomically replaces the value of an atomic 'void *' variable
+ *              and returns the value held previously.
+ *
+ * Return:      Returns the value of the atomic variable held previously
+ *
+ *--------------------------------------------------------------------------
+ */
+static inline void *
+H5TS_atomic_exchange_voidp(H5TS_atomic_voidp_t *obj, void *desired)
+{
+    void *ret_value;
+
+    /* Lock mutex that protects the "atomic" value */
+    H5TS_mutex_lock(&obj->mutex);
+
+    /* Get the current value */
+    ret_value = obj->value;
+
+    /* Set the value */
+    obj->value = desired;
+
+    /* Release the object's mutex */
+    H5TS_mutex_unlock(&obj->mutex);
+
+    return ret_value;
+} /* end H5TS_atomic_exchange_voidp() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_atomic_compare_exchange_strong_voidp
+ *
+ * Purpose:     Atomically compares the contents of 'obj' with 'expected', and
+ *              if those are bitwise equal, replaces the former with 'desired'
+ *              (performs read-modify-write operation). Otherwise, loads the
+ *              actual contents of 'obj' into '*expected' (performs load
+ *              operation).
+ *
+ * Return:      The result of the comparison: true if 'obj' was equal to
+ *              'expected', false otherwise.
+ *
+ *--------------------------------------------------------------------------
+ */
+static inline bool
+H5TS_atomic_compare_exchange_strong_voidp(H5TS_atomic_voidp_t *obj, void **expected, void *desired)
+{
+    bool ret_value;
+
+    /* Lock mutex that protects the "atomic" value */
+    H5TS_mutex_lock(&obj->mutex);
+
+    /* Compare 'obj' w/'expected' */
+    if (obj->value == *expected) {
+        obj->value = desired;
+        ret_value  = true;
+    }
+    else {
+        *expected = obj->value;
+        ret_value = false;
+    }
+    /* Release the object's mutex */
+    H5TS_mutex_unlock(&obj->mutex);
+
+    return ret_value;
+} /* end H5TS_atomic_compare_exchange_strong_voidp() */
+
+#endif /* H5_HAVE_STDATOMIC_H */

@@ -103,14 +103,18 @@ in which a feature is introduced may change.
 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
 Periodically development code snapshots are provided at the following URL:
-    
+
    https://github.com/HDFGroup/hdf5/releases/tag/snapshot
 
 Source packages for current and previous releases are located at:
-    
-   https://support.hdfgroup.org/downloads/hdf5
+
+   hdf5 1.14 releases:
+   https://support.hdfgroup.org/releases/hdf5/v1_14/index.html
+
+   Archived releases:
+   https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/index.html
 
 Development code is available at our Github location:
-    
+
    https://github.com/HDFGroup/hdf5.git
 

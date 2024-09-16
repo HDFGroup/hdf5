@@ -782,7 +782,7 @@
  * item must be closed separately.
  *
  * For more information,
- * @see <a href="http://\ARCURL/Advanced/UsingIdentifiers/index.html">Using Identifiers</a>
+ * @see <a href="http://\DOCURL/hdf5_topics/UsingIdentifiers.md">Using Identifiers</a>
  * in the HDF5 Application Developer's Guide under General Topics in HDF5.
  *
  * <h4>How Closing a File Effects Other Open Structural Elements</h4>
