@@ -196,14 +196,14 @@ static herr_t H5FD__subfiling_mirror_writes_to_stub(H5FD_subfiling_t *file, uint
                                                     const void *bufs[]);
 static herr_t H5FD__subfiling_generate_io_vectors(subfiling_context_t *sf_context, size_t in_count,
                                                   H5FD_mem_t types[], haddr_t file_offsets[],
-                                                  size_t nelemts[], H5_flexible_const_ptr_t bufs[],
-                                                  H5FD_subfiling_io_type_t io_type, size_t *ioreq_count,
-                                                  uint32_t *iovec_len, H5FD_mem_t **io_types,
-                                                  haddr_t **io_addrs, size_t **io_sizes,
-                                                  H5_flexible_const_ptr_t **io_bufs);
-static void   H5FD__subfiling_get_iovec_sizes(subfiling_context_t *sf_context, size_t in_count,
-                                              haddr_t file_offsets[], size_t nelemts[], size_t *max_iovec_depth,
-                                              size_t *max_num_subfiles);
+                                                  size_t io_sizes[], H5_flexible_const_ptr_t bufs[],
+                                                  H5FD_subfiling_io_type_t io_type, size_t *ioreq_count_out,
+                                                  uint32_t *iovec_len_out, H5FD_mem_t **io_types_out,
+                                                  haddr_t **io_addrs_out, size_t **io_sizes_out,
+                                                  H5_flexible_const_ptr_t **io_bufs_out);
+static herr_t H5FD__subfiling_get_iovec_sizes(subfiling_context_t *sf_context, size_t in_count,
+                                              haddr_t file_offsets[], size_t io_sizes[],
+                                              size_t *max_iovec_depth, size_t *max_num_subfiles);
 static herr_t H5FD__subfiling_translate_io_req_to_iovec(
     subfiling_context_t *sf_context, size_t iovec_idx, size_t iovec_len, size_t iovec_count, H5FD_mem_t type,
     haddr_t addr, size_t io_size, H5_flexible_const_ptr_t io_buf, H5FD_subfiling_io_type_t io_type,
@@ -2023,7 +2023,7 @@ H5FD__subfiling_io_helper(H5FD_subfiling_t *file, size_t io_count, H5FD_mem_t ty
             io_count,     /* IN:  Number of entries in `types`, `addrs`, `sizes` and `bufs` */
             types,        /* IN:  Array of memory types */
             addrs,        /* IN:  Array of starting file offsets */
-            sizes,        /* IN:  Array of I/O sizes (in terms of elements) */
+            sizes,        /* IN:  Array of I/O sizes */
             bufs,         /* IN:  Array of I/O buffers */
             io_type,      /* IN:  Type of I/O being performed (IO_TYPE_WRITE or IO_TYPE_READ) */
             &ioreq_count, /* OUT: Number of I/O requests to be made */
@@ -2335,30 +2335,30 @@ done:
  *                - the type of I/O being performed (IO_TYPE_WRITE or
  *                  IO_TYPE_READ)
  *
- *              ioreq_count (OUT)
+ *              ioreq_count_out (OUT)
  *                - the number of I/O requests needed to fully satisfy the
  *                  I/O operation
  *
- *              iovec_len (OUT)
+ *              iovec_len_out (OUT)
  *                - the size of each I/O vector (in terms of array elements)
  *                  for each I/O request to be made
  *
- *              io_types (OUT)
+ *              io_types_out (OUT)
  *                - I/O vector of memory types for the I/O operation.
  *                  Allocated by this function and must be freed by the
  *                  caller.
  *
- *              io_addrs (OUT)
+ *              io_addrs_out (OUT)
  *                - I/O vector of file addresses for the I/O operation.
  *                  Allocated by this function and must be freed by the
  *                  caller.
  *
- *              io_sizes (OUT)
+ *              io_sizes_out (OUT)
  *                - I/O vector of the I/O sizes for the I/O operation.
  *                  Allocated by this function and must be freed by the
  *                  caller.
  *
- *              io_bufs (OUT)
+ *              io_bufs_out (OUT)
  *                - I/O vector of the I/O buffers for the I/O operation.
  *                  Allocated by this function and must be freed by the
  *                  caller.
@@ -2368,10 +2368,11 @@ done:
  */
 static herr_t
 H5FD__subfiling_generate_io_vectors(subfiling_context_t *sf_context, size_t in_count, H5FD_mem_t types[],
-                                    haddr_t file_offsets[], size_t nelemts[], H5_flexible_const_ptr_t bufs[],
-                                    H5FD_subfiling_io_type_t io_type, size_t *ioreq_count,
-                                    uint32_t *iovec_len, H5FD_mem_t **io_types, haddr_t **io_addrs,
-                                    size_t **io_sizes, H5_flexible_const_ptr_t **io_bufs)
+                                    haddr_t file_offsets[], size_t io_sizes[], H5_flexible_const_ptr_t bufs[],
+                                    H5FD_subfiling_io_type_t io_type, size_t *ioreq_count_out,
+                                    uint32_t *iovec_len_out, H5FD_mem_t **io_types_out,
+                                    haddr_t **io_addrs_out, size_t **io_sizes_out,
+                                    H5_flexible_const_ptr_t **io_bufs_out)
 {
     H5_flexible_const_ptr_t *loc_io_bufs              = NULL;
     H5FD_mem_t              *loc_io_types             = NULL;
@@ -2395,18 +2396,18 @@ H5FD__subfiling_generate_io_vectors(subfiling_context_t *sf_context, size_t in_c
     assert(sf_context->topology);
     assert(types || in_count == 0);
     assert(file_offsets || in_count == 0);
-    assert(nelemts || in_count == 0);
+    assert(io_sizes || in_count == 0);
     assert(bufs || in_count == 0);
-    assert(ioreq_count);
-    assert(iovec_len);
-    assert(io_types);
-    assert(io_addrs);
-    assert(io_sizes);
-    assert(io_bufs);
+    assert(ioreq_count_out);
+    assert(iovec_len_out);
+    assert(io_types_out);
+    assert(io_addrs_out);
+    assert(io_sizes_out);
+    assert(io_bufs_out);
 
     /* Set some returned values early */
-    *ioreq_count = 0;
-    *iovec_len   = 0;
+    *ioreq_count_out = 0;
+    *iovec_len_out   = 0;
 
     /* Nothing to do */
     if (in_count == 0)
@@ -2416,10 +2417,15 @@ H5FD__subfiling_generate_io_vectors(subfiling_context_t *sf_context, size_t in_c
      * Do some initial pre-processing to determine how large of I/O vectors we
      * will need to allocate to satisfy the entire I/O request
      */
-    H5FD__subfiling_get_iovec_sizes(sf_context, in_count, file_offsets, nelemts, &max_iovec_depth,
-                                    &max_num_subfiles_touched);
+    if (H5FD__subfiling_get_iovec_sizes(sf_context, in_count, file_offsets, io_sizes, &max_iovec_depth,
+                                        &max_num_subfiles_touched) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't determine maximum I/O request size");
 
     tot_iovec_len = in_count * max_iovec_depth * max_num_subfiles_touched;
+
+    /* Nothing to do */
+    if (tot_iovec_len == 0)
+        HGOTO_DONE(SUCCEED);
 
 #ifdef H5_SUBFILING_DEBUG
     H5FD__subfiling_log(
@@ -2456,10 +2462,10 @@ H5FD__subfiling_generate_io_vectors(subfiling_context_t *sf_context, size_t in_c
         }
 
         if (!extend_sizes) {
-            if (io_idx > 0 && nelemts[io_idx] == 0)
+            if (io_idx > 0 && io_sizes[io_idx] == 0)
                 extend_sizes = true;
             else
-                io_size = nelemts[io_idx];
+                io_size = io_sizes[io_idx];
         }
 
         if (H5FD__subfiling_translate_io_req_to_iovec(sf_context, iovec_idx, max_num_subfiles_touched,
@@ -2469,13 +2475,13 @@ H5FD__subfiling_generate_io_vectors(subfiling_context_t *sf_context, size_t in_c
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't translate I/O request to I/O vectors");
     }
 
-    *ioreq_count = in_count * max_iovec_depth;
+    *ioreq_count_out = in_count * max_iovec_depth;
     H5_CHECK_OVERFLOW(max_num_subfiles_touched, size_t, uint32_t);
-    *iovec_len = (uint32_t)max_num_subfiles_touched;
-    *io_types  = loc_io_types;
-    *io_addrs  = loc_io_addrs;
-    *io_sizes  = loc_io_sizes;
-    *io_bufs   = loc_io_bufs;
+    *iovec_len_out = (uint32_t)max_num_subfiles_touched;
+    *io_types_out  = loc_io_types;
+    *io_addrs_out  = loc_io_addrs;
+    *io_sizes_out  = loc_io_sizes;
+    *io_bufs_out   = loc_io_bufs;
 
 done:
     if (ret_value < 0) {
@@ -2497,26 +2503,28 @@ done:
  *              info is used to calculate the total size of I/O vectors we
  *              need to allocate to satisfy an entire I/O request.
  *
- * Return:      Maximum I/O vector depth and maximum number of subfiles
- *              touched (can't fail)
+ * Return:      Non-negative on success/negative on failure
  *
  *-------------------------------------------------------------------------
  */
-static void
+static herr_t
 H5FD__subfiling_get_iovec_sizes(subfiling_context_t *sf_context, size_t in_count, haddr_t file_offsets[],
-                                size_t nelemts[], size_t *max_iovec_depth, size_t *max_num_subfiles)
+                                size_t io_sizes[], size_t *max_iovec_depth, size_t *max_num_subfiles)
 {
     int64_t stripe_size          = 0;
     int64_t block_size           = 0;
     size_t  loc_max_iovec_depth  = 0;
     size_t  loc_max_num_subfiles = 0;
+    size_t  io_size              = 0;
+    bool    extend_sizes         = false;
     int     num_subfiles         = 0;
+    herr_t  ret_value            = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     assert(sf_context);
     assert(file_offsets);
-    assert(nelemts);
+    assert(io_sizes);
     assert(max_iovec_depth);
     assert(max_num_subfiles);
 
@@ -2538,7 +2546,23 @@ H5FD__subfiling_get_iovec_sizes(subfiling_context_t *sf_context, size_t in_count
         size_t  cur_iovec_depth;
 
         H5_CHECKED_ASSIGN(cur_file_offset, int64_t, file_offsets[io_idx], haddr_t);
-        H5_CHECKED_ASSIGN(data_size, int64_t, nelemts[io_idx], size_t);
+
+        if (!extend_sizes) {
+            if (io_idx > 0 && io_sizes[io_idx] == 0)
+                extend_sizes = true;
+            else
+                io_size = io_sizes[io_idx];
+        }
+
+        H5_CHECKED_ASSIGN(data_size, int64_t, io_size, size_t);
+
+        if (cur_file_offset < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                        "file offset of %" PRIuHADDR " at index %zu too large; wrapped around",
+                        file_offsets[io_idx], io_idx);
+        if (data_size < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "I/O size of %zu at index %zu too large; wrapped around",
+                        io_size, io_idx);
 
         /*
          * Calculate the following from the starting file offset:
@@ -2645,7 +2669,8 @@ H5FD__subfiling_get_iovec_sizes(subfiling_context_t *sf_context, size_t in_count
     *max_iovec_depth  = loc_max_iovec_depth;
     *max_num_subfiles = loc_max_num_subfiles;
 
-    FUNC_LEAVE_NOAPI_VOID
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
