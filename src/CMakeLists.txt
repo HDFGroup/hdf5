@@ -725,8 +725,10 @@ set (H5Z_SOURCES
     ${HDF5_SRC_DIR}/H5Ztrans.c
 )
 if (H5_ZLIB_HEADER)
-  SET_PROPERTY(SOURCE ${HDF5_SRC_DIR}/H5Zdeflate.c PROPERTY
-      COMPILE_DEFINITIONS H5_ZLIB_HEADER="${H5_ZLIB_HEADER}")
+  message(STATUS "H5_ZLIB_HEADER=${H5_ZLIB_HEADER}")
+  set_source_files_properties(${HDF5_SRC_DIR}/H5Zdeflate.c
+               PROPERTIES COMPILE_DEFINITIONS H5_ZLIB_HEADER="${H5_ZLIB_HEADER}"
+  )
 endif ()
 
 
@@ -1093,6 +1095,7 @@ if (BUILD_STATIC_LIBS)
       PUBLIC
           ${HDF_EXTRA_C_FLAGS}
       PRIVATE
+#          H5_ZLIB_HEADER="${H5_ZLIB_HEADER}
           "$<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>" # Enable tracing of the API
           "$<$<BOOL:${HDF5_ENABLE_DEBUG_APIS}>:${HDF5_DEBUG_APIS}>"
           "$<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>"
@@ -1127,6 +1130,7 @@ if (BUILD_SHARED_LIBS)
           "H5_BUILT_AS_DYNAMIC_LIB"
           ${HDF_EXTRA_C_FLAGS}
       PRIVATE
+#          H5_ZLIB_HEADER="${H5_ZLIB_HEADER}
           "$<$<BOOL:${HDF5_ENABLE_THREADS}>:H5_HAVE_THREADS>"
           "$<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:H5_HAVE_THREADSAFE>"
           "$<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>"  # Enable tracing of the API

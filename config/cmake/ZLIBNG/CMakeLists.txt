@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
-project(ZLIB VERSION ${ZLIB_HEADER_VERSION} LANGUAGES C)
+project(ZLIB LANGUAGES C)
 
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
