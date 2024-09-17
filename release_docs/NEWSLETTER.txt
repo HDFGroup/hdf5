@@ -3,7 +3,12 @@ HDF5 version 1.14.5-2 currently under development
 Features included for the next major release:
 ----------------------------------------------------------------------------
 
-*
+* The release process now provides signed Windows and Mac installation binaries 
+  in addition to the Debian and rpm installation binaries. 
+* Added new routines for interacting with error stacks: H5Epause_stack, 
+  H5Eresume_stack, and H5Eis_paused.  These routines can be used to indicate 
+  that errors from a call to an HDF5 routine should not be pushed on to an error 
+  stack.
 
 ----------------------------------------------------------------------------
 Please see the full release notes for detailed information regarding this release,
