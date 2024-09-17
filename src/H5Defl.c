@@ -278,12 +278,12 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
 {
     int    fd = -1;
     size_t to_read;
+    size_t left_to_read;
 #ifndef NDEBUG
     hsize_t tempto_read;
 #endif /* NDEBUG */
     hsize_t skip = 0;
     haddr_t cur;
-    ssize_t n;
     size_t  u;                   /* Local index variable */
     char   *full_name = NULL;    /* File name with prefix */
     herr_t  ret_value = SUCCEED; /* Return value */
@@ -325,15 +325,43 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
 #else  /* NDEBUG */
         to_read  = MIN((size_t)(efl->slot[u].size - skip), (hsize_t)size);
 #endif /* NDEBUG */
-        if ((n = HDread(fd, buf, to_read)) < 0)
-            HGOTO_ERROR(H5E_EFL, H5E_READERROR, FAIL, "read error in external raw data file");
-        else if ((size_t)n < to_read)
-            memset(buf + n, 0, to_read - (size_t)n);
+
+        /* Inner loop - read to_read bytes from a single external file */
+        left_to_read = to_read;
+        while (left_to_read > 0) {
+            h5_posix_io_t     bytes_in   = 0;  /* # of bytes to read       */
+            h5_posix_io_ret_t bytes_read = -1; /* # of bytes actually read */
+
+            /* Trying to read more bytes than the return type can handle is
+             * undefined behavior in POSIX.
+             */
+            if (left_to_read > H5_POSIX_MAX_IO_BYTES)
+                bytes_in = H5_POSIX_MAX_IO_BYTES;
+            else
+                bytes_in = (h5_posix_io_t)left_to_read;
+
+            do {
+                bytes_read = HDread(fd, buf, bytes_in);
+            } while (-1 == bytes_read && EINTR == errno);
+
+            if (bytes_read < 0)
+                HGOTO_ERROR(H5E_EFL, H5E_READERROR, FAIL, "read error in external raw data file");
+
+            if (0 == bytes_read) {
+                /* End of file on disk, fill the remaining sectors to be read from this file with 0 */
+                memset(buf, 0, left_to_read);
+                bytes_read = (h5_posix_io_ret_t)left_to_read;
+            } /* end if */
+
+            left_to_read -= (size_t)bytes_read;
+            buf += bytes_read;
+        }
+
+        /* Prepare to advance to next external file */
         full_name = (char *)H5MM_xfree(full_name);
         HDclose(fd);
         fd = -1;
         size -= to_read;
-        buf += to_read;
         skip = 0;
         u++;
     } /* end while */
@@ -364,6 +392,7 @@ H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t siz
 {
     int    fd = -1;
     size_t to_write;
+    size_t left_to_write;
 #ifndef NDEBUG
     hsize_t tempto_write;
 #endif /* NDEBUG */
@@ -414,13 +443,39 @@ H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t siz
 #else  /* NDEBUG */
         to_write = MIN((size_t)(efl->slot[u].size - skip), size);
 #endif /* NDEBUG */
-        if ((size_t)HDwrite(fd, buf, to_write) != to_write)
-            HGOTO_ERROR(H5E_EFL, H5E_READERROR, FAIL, "write error in external raw data file");
+
+        /* Inner loop - write to_write bytes to a single external file */
+        left_to_write = to_write;
+        while (left_to_write > 0) {
+            h5_posix_io_t     bytes_in    = 0;  /* # of bytes to write         */
+            h5_posix_io_ret_t bytes_wrote = -1; /* # of bytes actually written */
+
+            /* Trying to write more bytes than the return type can handle is
+             * undefined behavior in POSIX.
+             */
+            if (left_to_write > H5_POSIX_MAX_IO_BYTES)
+                bytes_in = H5_POSIX_MAX_IO_BYTES;
+            else
+                bytes_in = (h5_posix_io_t)left_to_write;
+
+            do {
+                bytes_wrote = HDwrite(fd, buf, bytes_in);
+            } while (-1 == bytes_wrote && EINTR == errno);
+
+            if (bytes_wrote < 0)
+                HGOTO_ERROR(H5E_EFL, H5E_WRITEERROR, FAIL, "write error in external raw data file");
+            if (bytes_wrote == 0)
+                HGOTO_ERROR(H5E_EFL, H5E_WRITEERROR, FAIL, "wrote 0 bytes to external raw data file");
+
+            left_to_write -= (size_t)bytes_wrote;
+            buf += bytes_wrote;
+        }
+
+        /* Prepare to advance to next external file */
         full_name = (char *)H5MM_xfree(full_name);
         HDclose(fd);
         fd = -1;
         size -= to_write;
-        buf += to_write;
         skip = 0;
         u++;
     } /* end while */
