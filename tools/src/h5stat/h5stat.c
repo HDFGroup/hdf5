@@ -240,60 +240,78 @@ usage(const char *prog)
     PRINTSTREAM(rawoutstream, "usage: %s [OPTIONS] file\n", prog);
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "  ERROR\n");
-    PRINTVALSTREAM(rawoutstream, "   --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
     PRINTVALSTREAM(rawoutstream, "                         Optional value 2 also prints file open errors\n");
     PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "   -h, --help            Print a usage message and exit\n");
     PRINTVALSTREAM(rawoutstream, "   -V, --version         Print version number and exit\n");
     PRINTVALSTREAM(rawoutstream, "   -f, --file            Print file information\n");
-    PRINTVALSTREAM(rawoutstream, "   -F, --filemetadata    Print file space information for file's metadata\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   -F, --filemetadata    Print file space information for file's metadata\n");
     PRINTVALSTREAM(rawoutstream, "   -g, --group           Print group information\n");
-    PRINTVALSTREAM(rawoutstream, "   -l N, --links=N       Set the threshold for the # of links when printing\n");
-    PRINTVALSTREAM(rawoutstream, "                         information for small groups.  N is an integer greater\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   -l N, --links=N       Set the threshold for the # of links when printing\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                         information for small groups.  N is an integer greater\n");
     PRINTVALSTREAM(rawoutstream, "                         than 0.  The default threshold is 10.\n");
-    PRINTVALSTREAM(rawoutstream, "   -G, --groupmetadata   Print file space information for groups' metadata\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   -G, --groupmetadata   Print file space information for groups' metadata\n");
     PRINTVALSTREAM(rawoutstream, "   -d, --dset            Print dataset information\n");
-    PRINTVALSTREAM(rawoutstream, "   -m N, --dims=N        Set the threshold for the dimension sizes when printing\n");
-    PRINTVALSTREAM(rawoutstream, "                         information for small datasets.  N is an integer greater\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   -m N, --dims=N        Set the threshold for the dimension sizes when printing\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                         information for small datasets.  N is an integer greater\n");
     PRINTVALSTREAM(rawoutstream, "                         than 0.  The default threshold is 10.\n");
-    PRINTVALSTREAM(rawoutstream, "   -D, --dsetmetadata    Print file space information for datasets' metadata\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   -D, --dsetmetadata    Print file space information for datasets' metadata\n");
     PRINTVALSTREAM(rawoutstream, "   -T, --dtypemetadata   Print datasets' datatype information\n");
     PRINTVALSTREAM(rawoutstream, "   -A, --attribute       Print attribute information\n");
-    PRINTVALSTREAM(rawoutstream, "   -a N, --numattrs=N    Set the threshold for the # of attributes when printing\n");
     PRINTVALSTREAM(rawoutstream,
-                   "                         information for small # of attributes.  N is an integer greater\n");
+                   "   -a N, --numattrs=N    Set the threshold for the # of attributes when printing\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                         information for small # of attributes.  N is an integer greater\n");
     PRINTVALSTREAM(rawoutstream, "                         than 0.  The default threshold is 10.\n");
     PRINTVALSTREAM(rawoutstream, "   -s, --freespace       Print free space information\n");
     PRINTVALSTREAM(rawoutstream, "   -S, --summary         Print summary of file space information\n");
-    PRINTVALSTREAM(rawoutstream, "   --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers\n");
     PRINTVALSTREAM(rawoutstream, "   --s3-cred=<cred>      Access file on S3, using provided credential\n");
     PRINTVALSTREAM(rawoutstream, "                         <cred> :: (region,id,key)\n");
-    PRINTVALSTREAM(rawoutstream, "                         If <cred> == \"(,,)\", no authentication is used.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                         If <cred> == \"(,,)\", no authentication is used.\n");
     PRINTVALSTREAM(rawoutstream, "   --hdfs-attrs=<attrs>  Access a file on HDFS with given configuration\n");
     PRINTVALSTREAM(rawoutstream, "                         attributes.\n");
     PRINTVALSTREAM(rawoutstream, "                         <attrs> :: (<namenode name>,<namenode port>,\n");
     PRINTVALSTREAM(rawoutstream, "                                     <kerberos cache path>,<username>,\n");
     PRINTVALSTREAM(rawoutstream, "                                     <buffer size>)\n");
-    PRINTVALSTREAM(rawoutstream, "                         If an attribute is empty, a default value will be\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                         If an attribute is empty, a default value will be\n");
     PRINTVALSTREAM(rawoutstream, "                         used.\n");
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-value           Value (ID) of the VOL connector to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                         HDF5 file specified\n");
-    PRINTVALSTREAM(rawoutstream, "   --vol-name            Name of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vol-name            Name of the VOL connector to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                         HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-info            VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                         opening the HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream,
                    "                         If none of the above options are used to specify a VOL, then\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                         the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,\n");
     PRINTVALSTREAM(rawoutstream,
-                   "                         the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,\n");
-    PRINTVALSTREAM(rawoutstream, "                         if that environment variable is unset) will be used\n");
-    PRINTVALSTREAM(rawoutstream, "   --vfd-value           Value (ID) of the VFL driver to use for opening the\n");
+                   "                         if that environment variable is unset) will be used\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-value           Value (ID) of the VFL driver to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                         HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "   --vfd-name            Name of the VFL driver to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                         HDF5 file specified\n");
-    PRINTVALSTREAM(rawoutstream, "   --vfd-info            VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-info            VFD-specific info to pass to the VFL driver used for\n");
     PRINTVALSTREAM(rawoutstream, "                         opening the HDF5 file specified\n");
 }
 
