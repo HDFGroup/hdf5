@@ -50,7 +50,8 @@ New Features
     - Added signed Windows msi binary and signed Apple dmg binary files.
 
       The release process now provides signed Windows and Mac installation
-      binaries in addition to the Debian and rpm installation binaries. Installer
+      binaries in addition to the Debian and rpm installation binaries. The Mac 
+      binaries are built as universal binaries on an ARM-based Mac. Installer
       files are no longer compressed into packaged archives.
 
     - Moved examples to the HDF5Examples folder in the source tree.
