@@ -1532,7 +1532,7 @@ test_direct_chunk_read_no_cache(hid_t file)
             if (filter_mask != 0)
                 goto error;
 
-            /* Perform decompression from the source to the destination buffer */
+                /* Perform decompression from the source to the destination buffer */
 #if defined(H5_HAVE_ZLIBNG_H)
             ret = zng_uncompress(z_dst, &z_dst_nbytes, z_src, z_src_nbytes);
 #else
@@ -1727,7 +1727,7 @@ test_direct_chunk_read_cache(hid_t file, bool flush)
             if (filter_mask != 0)
                 goto error;
 
-            /* Perform decompression from the source to the destination buffer */
+                /* Perform decompression from the source to the destination buffer */
 #if defined(H5_HAVE_ZLIBNG_H)
             ret = zng_uncompress(z_dst, &z_dst_nbytes, z_src, z_src_nbytes);
 #else

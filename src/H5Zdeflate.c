@@ -75,11 +75,11 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
     if (flags & H5Z_FLAG_REVERSE) {
         /* Input; uncompress */
 #if defined(H5_HAVE_ZLIBNG_H)
-        zng_stream z_strm;             /* zlib parameters */
+        zng_stream z_strm; /* zlib parameters */
 #else
-        z_stream z_strm;             /* zlib parameters */
+        z_stream z_strm; /* zlib parameters */
 #endif
-        size_t   nalloc = *buf_size; /* Number of bytes for output (compressed) buffer */
+        size_t nalloc = *buf_size; /* Number of bytes for output (compressed) buffer */
 
         /* Allocate space for the compressed buffer */
         if (NULL == (outbuf = H5MM_malloc(nalloc)))
@@ -173,12 +173,12 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
         const Bytef *z_src = (const Bytef *)(*buf);
         Bytef       *z_dst; /*destination buffer		*/
 #if defined(H5_HAVE_ZLIBNG_H)
-        uLongf       z_dst_nbytes = (uLongf)zng_compressBound(nbytes);
+        uLongf z_dst_nbytes = (uLongf)zng_compressBound(nbytes);
 #else
-        uLongf       z_dst_nbytes = (uLongf)compressBound(nbytes);
+        uLongf z_dst_nbytes = (uLongf)compressBound(nbytes);
 #endif
-        uLong        z_src_nbytes = (uLong)nbytes;
-        int          aggression; /* Compression aggression setting */
+        uLong z_src_nbytes = (uLong)nbytes;
+        int   aggression; /* Compression aggression setting */
 
         /* Set the compression aggression level */
         H5_CHECKED_ASSIGN(aggression, int, cd_values[0], unsigned);
@@ -192,7 +192,7 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
 #if defined(H5_HAVE_ZLIBNG_H)
         status = zng_compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
 #else
-        status = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+        status              = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
 #endif
 
         /* Check for various zlib errors */
