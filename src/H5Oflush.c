@@ -227,27 +227,28 @@ H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
          */
         if (NULL == (vol_obj = H5VL_vol_object(oid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
-        connector = vol_obj->connector;
+        connector = H5VL_OBJ_CONNECTOR(vol_obj);
 
         /* Bump the number of references on the VOL connector.
          * If you don't do this, VDS refreshes can accidentally close the connector.
          */
-        connector->nrefs++;
+        H5VL_conn_inc_rc(connector);
 
         /* Close object & evict its metadata */
         if (H5O__refresh_metadata_close(oloc, &obj_loc, oid) < 0) {
-            connector->nrefs--;
+            H5VL_conn_dec_rc(connector);
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object");
         }
 
         /* Re-open the object, re-fetching its metadata */
         if (H5O_refresh_metadata_reopen(oid, H5P_DEFAULT, &obj_loc, connector, false) < 0) {
-            connector->nrefs--;
+            H5VL_conn_dec_rc(connector);
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object");
         }
 
         /* Restore the number of references on the VOL connector */
-        connector->nrefs--;
+        if (H5VL_conn_dec_rc(connector) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "can't decrement reference count for connector");
 
         /* Restore important datatype state */
         if (H5I_get_type(oid) == H5I_DATATYPE)

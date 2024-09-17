@@ -25,9 +25,6 @@
 /* Public Macros */
 /*****************/
 
-/* Identifier for the native VOL connector */
-#define H5VL_NATIVE (H5VL_native_register())
-
 /* Characteristics of the native VOL connector */
 #define H5VL_NATIVE_NAME    "native"
 #define H5VL_NATIVE_VALUE   H5_VOL_NATIVE /* enum value */
@@ -550,12 +547,6 @@ H5_DLL herr_t H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *
  * \since 1.12.0
  */
 H5_DLL herr_t H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr);
-
-/** @private
- *
- * \brief Register the native VOL connector and retrieve an ID for it
- */
-H5_DLL hid_t H5VL_native_register(void);
 
 #ifdef __cplusplus
 }

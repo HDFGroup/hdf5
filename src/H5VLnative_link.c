@@ -98,12 +98,10 @@ H5VL__native_link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_lo
                 else if (NULL == obj)
                     link_loc_p = cur_loc_p;
                 else if (cur_loc_p->oloc->file != link_loc_p->oloc->file)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                "source and destination should be in the same file.");
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should be in the same file.");
 
                 /* Create the link */
-                if (H5L__create_hard(cur_loc_p, cur_params->loc_data.loc_by_name.name, link_loc_p,
-                                     loc_params->loc_data.loc_by_name.name, lcpl_id) < 0)
+                if (H5L__create_hard(cur_loc_p, cur_params->loc_data.loc_by_name.name, link_loc_p, loc_params->loc_data.loc_by_name.name, lcpl_id) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link");
             }      /* end if */
             else { /* H5Olink */
@@ -120,8 +118,7 @@ H5VL__native_link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_lo
 
             if (H5G_loc_real(obj, loc_params->obj_type, &link_loc) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
-            if (H5L__create_soft(args->args.soft.target, &link_loc, loc_params->loc_data.loc_by_name.name,
-                                 lcpl_id) < 0)
+            if (H5L__create_soft(args->args.soft.target, &link_loc, loc_params->loc_data.loc_by_name.name, lcpl_id) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to create link");
 
             break;

@@ -39,6 +39,7 @@
 #include "H5Iprivate.h"  /* IDs                                  */
 #include "H5MMprivate.h" /* Memory management                    */
 #include "H5RSprivate.h" /* Reference-counted strings            */
+#include "H5VLprivate.h" /* Virtual Object Layer                 */
 
 /****************/
 /* Local Macros */
@@ -424,7 +425,7 @@ H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
     H5ES_get_requests_ctx_t *ctx       = (H5ES_get_requests_ctx_t *)_ctx; /* Callback context */
     int                      ret_value = H5_ITER_CONT;                    /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     assert(ev);
@@ -433,16 +434,18 @@ H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
 
     /* Get the connector ID for the event */
     if (ctx->connector_ids)
-        ctx->connector_ids[ctx->i] = ev->request->connector->id;
+        if ((ctx->connector_ids[ctx->i] = H5VL_conn_register(H5VL_OBJ_CONNECTOR(ev->request))) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTREGISTER, H5_ITER_ERROR, "unable to register VOL connector ID");
 
     /* Get the request for the event */
     if (ctx->requests)
-        ctx->requests[ctx->i] = ev->request->data;
+        ctx->requests[ctx->i] = H5VL_OBJ_DATA(ev->request);
 
     /* Check if we've run out of room in the arrays */
     if (++ctx->i == ctx->array_len)
         ret_value = H5_ITER_STOP;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__get_requests_cb() */
 

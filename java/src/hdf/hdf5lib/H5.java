@@ -15497,6 +15497,24 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5VLunregister_connector(long connector_id)
         throws HDF5LibraryException;
 
+    /**
+     * @ingroup JH5VL
+     *
+     * H5VLcmp_connector_cls Determines whether two connector identifiers refer to the same connector.
+     *
+     * @param conn_id1
+     *            IN: Identifier of connector to compare.
+     * @param conn_id2
+     *            IN: Identifier of connector to compare.
+     *
+     * @return true if the connector identifiers refer to the same connector, else false.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static native boolean H5VLcmp_connector_cls(long conn_id1, long conn_id2)
+        throws HDF5LibraryException;
+
     // /////// unimplemented ////////
     // hid_t H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id);
 

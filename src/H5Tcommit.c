@@ -136,7 +136,7 @@ H5T__commit_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype");
 
     /* Set up VOL object */
-    if (NULL == (new_obj = H5VL_create_object(data, (*vol_obj_ptr)->connector)))
+    if (NULL == (new_obj = H5VL_create_object(data, H5VL_OBJ_CONNECTOR(*vol_obj_ptr))))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't create VOL object for committed datatype");
 
     /* Set the committed type object to the VOL connector pointer in the H5T_t struct */
@@ -204,7 +204,7 @@ H5Tcommit_async(const char *app_file, const char *app_func, unsigned app_line, h
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE10(__func__, "*s*sIui*siiiii", app_file, app_func, app_line, loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert token into event set");
@@ -352,7 +352,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype");
 
     /* Setup VOL object */
-    if (NULL == (new_obj = H5VL_create_object(dt, vol_obj->connector)))
+    if (NULL == (new_obj = H5VL_create_object(dt, H5VL_OBJ_CONNECTOR(vol_obj))))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't create VOL object for committed datatype");
 
     /* Set the committed type object to the VOL connector pointer in the H5T_t struct */
@@ -646,18 +646,17 @@ H5T__open_api_common(hid_t loc_id, const char *name, hid_t tapl_id, void **token
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments");
 
     /* Open the datatype */
-    if (NULL == (dt = H5VL_datatype_open(*vol_obj_ptr, &loc_params, name, tapl_id, H5P_DATASET_XFER_DEFAULT,
-                                         token_ptr)))
+    if (NULL == (dt = H5VL_datatype_open(*vol_obj_ptr, &loc_params, name, tapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open named datatype");
 
     /* Register the type and return the ID */
-    if ((ret_value = H5VL_register(H5I_DATATYPE, dt, (*vol_obj_ptr)->connector, true)) < 0)
+    if ((ret_value = H5VL_register(H5I_DATATYPE, dt, H5VL_OBJ_CONNECTOR(*vol_obj_ptr), true)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register named datatype");
 
 done:
     /* Cleanup on error */
     if (H5I_INVALID_HID == ret_value)
-        if (dt && H5T_destruct_datatype(dt, (*vol_obj_ptr)->connector) < 0)
+        if (dt && H5T_destruct_datatype(dt, H5VL_OBJ_CONNECTOR(*vol_obj_ptr)) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -724,7 +723,7 @@ H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE7(__func__, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, tapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)

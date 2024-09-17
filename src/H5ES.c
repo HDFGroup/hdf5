@@ -122,10 +122,8 @@ H5ESinsert_request(hid_t es_id, hid_t connector_id, void *request)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier");
     if (NULL == request)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL request pointer");
-
-    /* Create new VOL connector object, using the connector ID */
-    if (NULL == (connector = H5VL_new_connector(connector_id)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCREATE, FAIL, "can't create VOL connector object");
+    if (NULL == (connector = H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID");
 
     /* Insert request into event set */
     if (H5ES__insert_request(es, connector, request) < 0)

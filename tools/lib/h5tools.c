@@ -671,12 +671,8 @@ h5tools_set_fapl_vol(hid_t fapl_id, h5tools_vol_info_t *vol_info)
                 /* Check for VOL connectors that ship with the library, then try
                  * registering by name if that fails.
                  */
-                if (!strcmp(vol_info->u.name, H5VL_NATIVE_NAME)) {
-                    connector_id = H5VL_NATIVE;
-                }
-                else if (!strcmp(vol_info->u.name, H5VL_PASSTHRU_NAME)) {
+                if (!strcmp(vol_info->u.name, H5VL_PASSTHRU_NAME))
                     connector_id = H5VL_PASSTHRU;
-                }
                 else {
                     /* NOTE: Not being able to pass in a VIPL may be a limitation for some
                      * connectors.
@@ -698,12 +694,8 @@ h5tools_set_fapl_vol(hid_t fapl_id, h5tools_vol_info_t *vol_info)
             }
             else {
                 /* Check for VOL connectors that ship with the library */
-                if (vol_info->u.value == H5VL_NATIVE_VALUE) {
-                    connector_id = H5VL_NATIVE;
-                }
-                else if (vol_info->u.value == H5VL_PASSTHRU_VALUE) {
+                if (vol_info->u.value == H5VL_PASSTHRU_VALUE)
                     connector_id = H5VL_PASSTHRU;
-                }
                 else {
                     /* NOTE: Not being able to pass in a VIPL may be a limitation for some
                      * connectors.

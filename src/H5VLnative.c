@@ -39,8 +39,8 @@
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
-/* The VOL connector identification number */
-static hid_t H5VL_NATIVE_ID_g = H5I_INVALID_HID;
+/* The native VOL connector */
+static H5VL_connector_t *H5VL_NATIVE_conn_g = NULL;
 
 /* Prototypes */
 static herr_t H5VL__native_term(void);
@@ -186,26 +186,25 @@ static const H5VL_class_t H5VL_native_cls_g = {
  *
  * Purpose:     Register the native VOL connector and retrieve an ID for it.
  *
- * Return:      Success:    The ID for the native connector
- *              Failure:    H5I_INVALID_HID
+ * Return:      Success:    A pointer to the native connector
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+H5VL_connector_t *
 H5VL_native_register(void)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    H5VL_connector_t *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Register the native VOL connector, if it isn't already */
-    if (H5I_INVALID_HID == H5VL_NATIVE_ID_g)
-        if ((H5VL_NATIVE_ID_g =
-                 H5VL__register_connector(&H5VL_native_cls_g, true, H5P_VOL_INITIALIZE_DEFAULT)) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, H5I_INVALID_HID, "can't create ID for native VOL connector");
+    if (NULL == H5VL_NATIVE_conn_g)
+        if (NULL == (H5VL_NATIVE_conn_g = H5VL__register_connector(&H5VL_native_cls_g, H5P_VOL_INITIALIZE_DEFAULT)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, NULL, "can't create ID for native VOL connector");
 
     /* Set return value */
-    ret_value = H5VL_NATIVE_ID_g;
+    ret_value = H5VL_NATIVE_conn_g;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -225,8 +224,8 @@ H5VL__native_term(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Reset VOL ID */
-    H5VL_NATIVE_ID_g = H5I_INVALID_HID;
+    /* Reset VOL */
+    H5VL_NATIVE_conn_g = NULL;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__native_term() */

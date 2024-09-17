@@ -5748,20 +5748,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
+H5P_set_vol(H5P_genplist_t *plist, H5VL_connector_t *connector, const void *vol_info)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (NULL == H5I_object_verify(vol_id, H5I_VOL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID");
+    /* Sanity check */
+    assert(connector);
 
     if (true == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         H5VL_connector_prop_t vol_prop; /* Property for VOL ID & info */
 
         /* Prepare the VOL connector property */
-        vol_prop.connector_id   = vol_id;
+        vol_prop.connector   = connector;
         vol_prop.connector_info = vol_info;
 
         /* Set the connector ID & info property */
@@ -5823,6 +5823,7 @@ herr_t
 H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
+    H5VL_connector_t *connector;        /* VOL connector */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -5830,11 +5831,11 @@ H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
     /* Check arguments */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-    if (NULL == H5I_object_verify(new_vol_id, H5I_VOL))
+    if (NULL == (connector = H5I_object_verify(new_vol_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file VOL ID");
 
     /* Set the VOL */
-    if (H5P_set_vol(plist, new_vol_id, new_vol_info) < 0)
+    if (H5P_set_vol(plist, connector, new_vol_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VOL");
 
 done:
@@ -5875,12 +5876,9 @@ H5Pget_vol_id(hid_t plist_id, hid_t *vol_id /*out*/)
         if (H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector info");
 
-        /* Increment the VOL ID's ref count */
-        if (H5I_inc_ref(connector_prop.connector_id, true) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VOL connector ID");
-
-        /* Set the connector ID to return */
-        *vol_id = connector_prop.connector_id;
+        /* Register an ID for the connector */
+        if ((*vol_id = H5VL_conn_register(connector_prop.connector)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VOL connector");
     } /* end if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
@@ -5922,17 +5920,10 @@ H5Pget_vol_info(hid_t plist_id, void **vol_info /*out*/)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector property");
 
         /* Copy connector info, if it exists */
-        if (connector_prop.connector_info) {
-            H5VL_class_t *connector; /* Pointer to connector */
-
-            /* Retrieve the connector for the ID */
-            if (NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop.connector_id)))
-                HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL connector ID");
-
+        if (connector_prop.connector_info)
             /* Allocate and copy connector info */
-            if (H5VL_copy_connector_info(connector, &new_connector_info, connector_prop.connector_info) < 0)
+            if (H5VL_copy_connector_info(connector_prop.connector, &new_connector_info, connector_prop.connector_info) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "connector info copy failed");
-        } /* end if */
 
         /* Set the connector info */
         *vol_info = new_connector_info;
@@ -6152,48 +6143,25 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED size)
+H5P__facc_vol_cmp(const void *_prop1, const void *_prop2, size_t H5_ATTR_UNUSED size)
 {
-    const H5VL_connector_prop_t *info1 =
-        (const H5VL_connector_prop_t *)_info1; /* Create local aliases for values */
-    const H5VL_connector_prop_t *info2 = (const H5VL_connector_prop_t *)_info2;
-    H5VL_class_t                *cls1, *cls2;   /* connector class for each property */
-    int                          cmp_value = 0; /* Value from comparison */
+    const H5VL_connector_prop_t *prop1 =
+        (const H5VL_connector_prop_t *)_prop1; /* Create local aliases for values */
+    const H5VL_connector_prop_t *prop2 = (const H5VL_connector_prop_t *)_prop2;
     herr_t H5_ATTR_NDEBUG_UNUSED status;        /* Status from info comparison */
     int                          ret_value = 0; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    assert(info1);
-    assert(info2);
+    assert(prop1);
+    assert(prop2);
     assert(size == sizeof(H5VL_connector_prop_t));
 
-    /* Compare connectors */
-    if (NULL == (cls1 = (H5VL_class_t *)H5I_object(info1->connector_id)))
-        HGOTO_DONE(-1);
-    if (NULL == (cls2 = (H5VL_class_t *)H5I_object(info2->connector_id)))
-        HGOTO_DONE(1);
-    status = H5VL_cmp_connector_cls(&cmp_value, cls1, cls2);
-    assert(status >= 0);
-    if (cmp_value != 0)
-        HGOTO_DONE(cmp_value);
-
-    /* At this point, we should be able to assume that we are dealing with
-     * the same connector class struct (or a copies of the same class struct)
-     */
-
-    /* Use one of the classes (cls1) info comparison routines to compare the
-     * info objects
-     */
-    assert(cls1->info_cls.cmp == cls2->info_cls.cmp);
-    status = H5VL_cmp_connector_info(cls1, &cmp_value, info1->connector_info, info2->connector_info);
+    /* Compare properties */
+    status = H5VL_conn_prop_cmp(&ret_value, prop1, prop2);
     assert(status >= 0);
 
-    /* Set return value */
-    ret_value = cmp_value;
-
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_vol_cmp() */
 

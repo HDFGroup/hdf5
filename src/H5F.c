@@ -598,12 +598,11 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Create a new file or truncate an existing file through the VOL */
-    if (NULL == (new_file = H5VL_file_create(&connector_prop, filename, flags, fcpl_id, fapl_id,
-                                             H5P_DATASET_XFER_DEFAULT, token_ptr)))
+    if (NULL == (new_file = H5VL_file_create(connector_prop.connector, filename, flags, fcpl_id, fapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file");
 
     /* Get an ID for the file */
-    if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, true)) < 0)
+    if ((ret_value = H5VL_register(H5I_FILE, new_file, connector_prop.connector, true)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle");
 
 done:
@@ -696,7 +695,7 @@ H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line, c
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE8(__func__, "*s*sIu*sIuiii", app_file, app_func, app_line, filename, flags, fcpl_id, fapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref(ret_value) < 0)
@@ -715,7 +714,7 @@ H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line, c
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE8(__func__, "*s*sIu*sIuiii", app_file, app_func, app_line, filename, flags, fcpl_id, fapl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set");
@@ -778,12 +777,11 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, void *
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL connector info in API context");
 
     /* Open the file through the VOL layer */
-    if (NULL == (new_file = H5VL_file_open(&connector_prop, filename, flags, fapl_id,
-                                           H5P_DATASET_XFER_DEFAULT, token_ptr)))
+    if (NULL == (new_file = H5VL_file_open(connector_prop.connector, filename, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file");
 
     /* Get an ID for the file */
-    if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, true)) < 0)
+    if ((ret_value = H5VL_register(H5I_FILE, new_file, connector_prop.connector, true)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle");
 
 done:
@@ -871,7 +869,7 @@ H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line, con
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE7(__func__, "*s*sIu*sIuii", app_file, app_func, app_line, filename, flags, fapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref(ret_value) < 0)
@@ -890,7 +888,7 @@ H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line, con
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE7(__func__, "*s*sIu*sIuii", app_file, app_func, app_line, filename, flags, fapl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set");
@@ -1001,7 +999,7 @@ H5Fflush_async(const char *app_file, const char *app_func, unsigned app_line, hi
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                 H5ARG_TRACE6(__func__, "*s*sIuiFsi", app_file, app_func, app_line, object_id, scope, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set");
@@ -1077,7 +1075,7 @@ H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
 
         /* Increase connector's refcount, so it doesn't get closed if closing
          * this file ID closes the file */
-        connector = vol_obj->connector;
+        connector = H5VL_OBJ_CONNECTOR(vol_obj);
         H5VL_conn_inc_rc(connector);
 
         /* Point at token for operation to set up */
@@ -1093,7 +1091,7 @@ H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE5(__func__, "*s*sIuii", app_file, app_func, app_line, file_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set");
@@ -1188,7 +1186,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
     H5VL_group_specific_args_t vol_cb_args;          /* Arguments to VOL callback */
     void                      *grp = NULL;           /* Root group opened */
     H5I_type_t                 loc_type;             /* ID type of location  */
-    int                        same_connector = 0; /* Whether parent and child files use the same connector */
+    htri_t                     same_connector; /* Whether parent and child files use the same connector */
     herr_t                     ret_value      = SUCCEED; /* Return value         */
 
     FUNC_ENTER_API(FAIL)
@@ -1234,7 +1232,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open group");
 
         /* Create a VOL object for the root group */
-        if (NULL == (loc_vol_obj = H5VL_create_object(grp, vol_obj->connector)))
+        if (NULL == (loc_vol_obj = H5VL_create_object(grp, H5VL_OBJ_CONNECTOR(vol_obj))))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "can't create VOL object for root group");
     } /* end if */
     else {
@@ -1248,18 +1246,15 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get child object");
 
     /* Check if both objects are associated with the same VOL connector */
-    if (H5VL_cmp_connector_cls(&same_connector, loc_vol_obj->connector->cls, child_vol_obj->connector->cls) <
-        0)
+    if ((same_connector = H5VL_conn_same_class(H5VL_OBJ_CONNECTOR(loc_vol_obj), H5VL_OBJ_CONNECTOR(child_vol_obj))) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCOMPARE, FAIL, "can't compare connector classes");
-    if (same_connector)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "can't mount file onto object from different VOL connector");
+    if (!same_connector)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't mount file onto object from different VOL connector");
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type         = H5VL_GROUP_MOUNT;
     vol_cb_args.args.mount.name = name;
-    vol_cb_args.args.mount.child_file =
-        child_vol_obj->data; /* Don't unwrap fully, so each connector can see its object */
+    vol_cb_args.args.mount.child_file = H5VL_OBJ_DATA(child_vol_obj); /* Don't unwrap fully, so each connector can see its object */
     vol_cb_args.args.mount.fmpl_id = plist_id;
 
     /* Perform the mount operation */
@@ -1344,7 +1339,7 @@ H5Funmount(hid_t loc_id, const char *name)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open group");
 
         /* Create a VOL object for the root group */
-        if (NULL == (loc_vol_obj = H5VL_create_object(grp, vol_obj->connector)))
+        if (NULL == (loc_vol_obj = H5VL_create_object(grp, H5VL_OBJ_CONNECTOR(vol_obj))))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "can't create VOL object for root group");
     } /* end if */
     else {
@@ -1415,7 +1410,7 @@ H5F__reopen_api_common(hid_t file_id, void **token_ptr)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file");
 
     /* Get an ID for the file */
-    if ((ret_value = H5VL_register(H5I_FILE, reopen_file, vol_obj->connector, true)) < 0)
+    if ((ret_value = H5VL_register(H5I_FILE, reopen_file, H5VL_OBJ_CONNECTOR(vol_obj), true)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle");
 
 done:
@@ -1499,7 +1494,7 @@ H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line, h
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE5(__func__, "*s*sIuii", app_file, app_func, app_line, file_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref(ret_value) < 0)
@@ -1518,7 +1513,7 @@ H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line, h
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE5(__func__, "*s*sIuii", app_file, app_func, app_line, file_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set");

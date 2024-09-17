@@ -211,20 +211,16 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "unable to get group location of error class, message or stack");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of error class, message or stack");
 
         case H5I_VFL:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "unable to get group location of a virtual file driver (VFD)");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of a virtual file driver (VFD)");
 
         case H5I_VOL:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "unable to get group location of a virtual object layer (VOL) connector");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of a virtual object layer (VOL) connector");
 
         case H5I_SPACE_SEL_ITER:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "unable to get group location of a dataspace selection iterator");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of a dataspace selection iterator");
 
         case H5I_EVENTSET:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of a event set");
@@ -233,7 +229,7 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
         case H5I_BADID:
         case H5I_NTYPES:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid location ID");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid location type");
     } /* end switch */
 
 done:
