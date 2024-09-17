@@ -316,7 +316,7 @@ test_es_get_requests(void)
     void  *requests[2];      /* Requests */
     int    req_targets[2];   /* Dummy targets for void * requests */
     size_t count;            /* # of events in set */
-    int cmp_value;           /* Comparison value */
+    int    cmp_value;        /* Comparison value */
     bool   op_failed;        /* Whether an operation failed (unused) */
 
     TESTING("event set get requests");

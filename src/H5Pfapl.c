@@ -5761,7 +5761,7 @@ H5P_set_vol(H5P_genplist_t *plist, H5VL_connector_t *connector, const void *vol_
         H5VL_connector_prop_t vol_prop; /* Property for VOL ID & info */
 
         /* Prepare the VOL connector property */
-        vol_prop.connector   = connector;
+        vol_prop.connector      = connector;
         vol_prop.connector_info = vol_info;
 
         /* Set the connector ID & info property */
@@ -5822,9 +5822,9 @@ done:
 herr_t
 H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
 {
-    H5P_genplist_t *plist;               /* Property list pointer */
-    H5VL_connector_t *connector;        /* VOL connector */
-    herr_t          ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t   *plist;               /* Property list pointer */
+    H5VL_connector_t *connector;           /* VOL connector */
+    herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -5922,7 +5922,8 @@ H5Pget_vol_info(hid_t plist_id, void **vol_info /*out*/)
         /* Copy connector info, if it exists */
         if (connector_prop.connector_info)
             /* Allocate and copy connector info */
-            if (H5VL_copy_connector_info(connector_prop.connector, &new_connector_info, connector_prop.connector_info) < 0)
+            if (H5VL_copy_connector_info(connector_prop.connector, &new_connector_info,
+                                         connector_prop.connector_info) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "connector info copy failed");
 
         /* Set the connector info */

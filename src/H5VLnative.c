@@ -200,7 +200,8 @@ H5VL_native_register(void)
 
     /* Register the native VOL connector, if it isn't already */
     if (NULL == H5VL_NATIVE_conn_g)
-        if (NULL == (H5VL_NATIVE_conn_g = H5VL__register_connector(&H5VL_native_cls_g, H5P_VOL_INITIALIZE_DEFAULT)))
+        if (NULL ==
+            (H5VL_NATIVE_conn_g = H5VL__register_connector(&H5VL_native_cls_g, H5P_VOL_INITIALIZE_DEFAULT)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, NULL, "can't create ID for native VOL connector");
 
     /* Set return value */

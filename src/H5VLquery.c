@@ -27,8 +27,8 @@
 /* Headers */
 /***********/
 
-#include "H5private.h"   /* Generic Functions                                */
-#include "H5VLpkg.h"     /* Virtual Object Layer                             */
+#include "H5private.h" /* Generic Functions                                */
+#include "H5VLpkg.h"   /* Virtual Object Layer                             */
 
 /****************/
 /* Local Macros */
@@ -147,4 +147,3 @@ H5VL_obj_reset_data(H5VL_object_t *vol_obj)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_obj_reset_data() */
-

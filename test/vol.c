@@ -2210,7 +2210,7 @@ test_vol_cap_flags(void)
     vol_env = getenv(HDF5_VOL_CONNECTOR);
     if (!vol_env || (0 == strcmp(vol_env, "native"))) {
         H5VL_connector_t *connector;
-        hid_t         connector_id;
+        hid_t             connector_id;
 
         if (H5Pget_vol_id(H5P_DEFAULT, &connector_id) < 0)
             TEST_ERROR;

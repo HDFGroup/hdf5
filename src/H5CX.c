@@ -940,10 +940,11 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
         if ((*api_state)->vol_connector_prop.connector) {
             /* Copy connector info, if it exists */
             if ((*api_state)->vol_connector_prop.connector_info) {
-                void         *new_connector_info = NULL; /* Copy of connector info */
+                void *new_connector_info = NULL; /* Copy of connector info */
 
                 /* Allocate and copy connector info */
-                if (H5VL_copy_connector_info((*api_state)->vol_connector_prop.connector, &new_connector_info, (*api_state)->vol_connector_prop.connector_info) < 0)
+                if (H5VL_copy_connector_info((*api_state)->vol_connector_prop.connector, &new_connector_info,
+                                             (*api_state)->vol_connector_prop.connector_info) < 0)
                     HGOTO_ERROR(H5E_CONTEXT, H5E_CANTCOPY, FAIL, "connector info copy failed");
                 (*api_state)->vol_connector_prop.connector_info = new_connector_info;
             } /* end if */
@@ -1022,7 +1023,8 @@ H5CX_restore_state(const H5CX_state_t *api_state)
 
     /* Restore the VOL connector info */
     if (api_state->vol_connector_prop.connector) {
-        H5MM_memcpy(&(*head)->ctx.vol_connector_prop, &api_state->vol_connector_prop, sizeof(H5VL_connector_prop_t));
+        H5MM_memcpy(&(*head)->ctx.vol_connector_prop, &api_state->vol_connector_prop,
+                    sizeof(H5VL_connector_prop_t));
         (*head)->ctx.vol_connector_prop_valid = true;
     } /* end if */
 
@@ -1082,8 +1084,10 @@ H5CX_free_state(H5CX_state_t *api_state)
     if (api_state->vol_connector_prop.connector) {
         /* Clean up any VOL connector info */
         if (api_state->vol_connector_prop.connector_info)
-            if (H5VL_free_connector_info(api_state->vol_connector_prop.connector, api_state->vol_connector_prop.connector_info) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object");
+            if (H5VL_free_connector_info(api_state->vol_connector_prop.connector,
+                                         api_state->vol_connector_prop.connector_info) < 0)
+                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTRELEASE, FAIL,
+                            "unable to release VOL connector info object");
 
         /* Decrement connector refcount */
         if (H5VL_conn_dec_rc(api_state->vol_connector_prop.connector) < 0)

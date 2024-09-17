@@ -78,7 +78,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     H5I_type_t        type   = *(H5I_type_t *)_udata;  /* User data */
     const H5G_name_t *path   = NULL;                   /* Path to file object */
     void             *object = NULL;                   /* Pointer to VOL connector object */
-    bool is_native;     /* Whether an object using the native VOL connector */
+    bool              is_native;                       /* Whether an object using the native VOL connector */
 
     FUNC_ENTER_PACKAGE_NOERR
 

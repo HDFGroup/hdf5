@@ -26,7 +26,7 @@
  *
  ********************************************************************/
 #include "ttsafe.h"
-#define H5VL_FRIEND     /* Suppress error about including H5VLpkg    */
+#define H5VL_FRIEND /* Suppress error about including H5VLpkg    */
 #define H5VL_TESTING
 #include "H5VLpkg.h" /* Virtual Object Layer                 */
 
@@ -66,7 +66,7 @@ tts_error(void)
     hid_t         dataset  = H5I_INVALID_HID;
     H5TS_thread_t threads[NUM_THREAD];
     int           value, i;
-    int         is_native;
+    int           is_native;
     herr_t        status;
 
     /* Must initialize these at runtime */

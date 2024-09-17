@@ -281,9 +281,9 @@ done:
 JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5VLcmp_connector_cls(JNIEnv *env, jclass clss, jlong conn_id1, jlong conn_id2)
 {
-    int cmp_value = 0;
-    jboolean bval = JNI_FALSE;
-    herr_t retValue = FAIL;
+    int      cmp_value = 0;
+    jboolean bval      = JNI_FALSE;
+    herr_t   retValue  = FAIL;
 
     UNUSED(clss);
 

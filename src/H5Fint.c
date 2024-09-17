@@ -300,7 +300,8 @@ H5F__set_vol_conn(H5F_t *file)
 
     /* Allocate and copy connector info, if it exists */
     if (connector_prop.connector_info)
-        if (H5VL_copy_connector_info(connector_prop.connector, &new_connector_info, connector_prop.connector_info) < 0)
+        if (H5VL_copy_connector_info(connector_prop.connector, &new_connector_info,
+                                     connector_prop.connector_info) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "connector info copy failed");
 
     /* Cache the connector & info for the container */
@@ -447,7 +448,7 @@ H5F_get_access_plist(H5F_t *f, bool app_ref)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set file driver ID & info");
 
     /* Set the VOL connector property */
-    connector_prop.connector = f->shared->vol_conn;
+    connector_prop.connector      = f->shared->vol_conn;
     connector_prop.connector_info = f->shared->vol_info;
     if (H5P_set(new_plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL connector ID & info");
@@ -3717,19 +3718,19 @@ done:
 herr_t
 H5F__start_swmr_write(H5F_t *f)
 {
-    bool        ci_load        = false;  /* whether MDC ci load requested */
-    bool        ci_write       = false;  /* whether MDC CI write requested */
-    size_t      grp_dset_count = 0;      /* # of open objects: groups & datasets */
-    size_t      nt_attr_count  = 0;      /* # of opened named datatypes  + opened attributes */
-    hid_t      *obj_ids        = NULL;   /* List of ids */
-    hid_t      *obj_apl_ids    = NULL;   /* List of access property lists */
-    H5G_loc_t  *obj_glocs      = NULL;   /* Group location of the object */
-    H5O_loc_t  *obj_olocs      = NULL;   /* Object location */
-    H5G_name_t *obj_paths      = NULL;   /* Group hierarchy path */
-    size_t      u;                       /* Local index variable */
-    bool        setup         = false;   /* Boolean flag to indicate whether SWMR setting is enabled */
-    H5VL_connector_t     *vol_connector = NULL;    /* VOL connector for the file */
-    herr_t      ret_value     = SUCCEED; /* Return value */
+    bool              ci_load        = false;  /* whether MDC ci load requested */
+    bool              ci_write       = false;  /* whether MDC CI write requested */
+    size_t            grp_dset_count = 0;      /* # of open objects: groups & datasets */
+    size_t            nt_attr_count  = 0;      /* # of opened named datatypes  + opened attributes */
+    hid_t            *obj_ids        = NULL;   /* List of ids */
+    hid_t            *obj_apl_ids    = NULL;   /* List of access property lists */
+    H5G_loc_t        *obj_glocs      = NULL;   /* Group location of the object */
+    H5O_loc_t        *obj_olocs      = NULL;   /* Object location */
+    H5G_name_t       *obj_paths      = NULL;   /* Group hierarchy path */
+    size_t            u;                       /* Local index variable */
+    bool              setup         = false;   /* Boolean flag to indicate whether SWMR setting is enabled */
+    H5VL_connector_t *vol_connector = NULL;    /* VOL connector for the file */
+    herr_t            ret_value     = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

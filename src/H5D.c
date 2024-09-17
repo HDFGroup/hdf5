@@ -489,11 +489,11 @@ done:
 herr_t
 H5Dclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id, hid_t es_id)
 {
-    void          *token     = NULL;            /* Request token for async operation        */
-    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    H5VL_object_t *vol_obj   = NULL;            /* VOL object of dset_id */
-    H5VL_connector_t        *connector = NULL;            /* VOL connector */
-    herr_t         ret_value = SUCCEED;         /* Return value */
+    void             *token     = NULL;            /* Request token for async operation        */
+    void            **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    H5VL_object_t    *vol_obj   = NULL;            /* VOL object of dset_id */
+    H5VL_connector_t *connector = NULL;            /* VOL connector */
+    herr_t            ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -929,11 +929,11 @@ H5D__read_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t m
     H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
-    void   *obj_local;                                /* Local buffer for obj */
-    void  **obj = &obj_local;                         /* Array of object pointers */
-    H5VL_connector_t *connector;                                /* VOL connector pointer */
-    size_t  i;                                        /* Local index variable */
-    herr_t  ret_value = SUCCEED;                      /* Return value */
+    void             *obj_local;                      /* Local buffer for obj */
+    void            **obj = &obj_local;               /* Array of object pointers */
+    H5VL_connector_t *connector;                      /* VOL connector pointer */
+    size_t            i;                              /* Local index variable */
+    herr_t            ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -979,7 +979,9 @@ H5D__read_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t m
         if ((cls_cmp = H5VL_conn_same_class(H5VL_OBJ_CONNECTOR(tmp_vol_obj), connector)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOMPARE, FAIL, "can't compare VOL connectors");
         if (!cls_cmp)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datasets are accessed through different VOL connectors and can't be used in the same I/O call");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+                        "datasets are accessed through different VOL connectors and can't be used in the "
+                        "same I/O call");
     }
 
     /* Get the default dataset transfer property list if the user didn't provide one */
@@ -989,7 +991,8 @@ H5D__read_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t m
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
 
     /* Read the data */
-    if (H5VL_dataset_read(count, obj, connector, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, token_ptr) < 0)
+    if (H5VL_dataset_read(count, obj, connector, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf,
+                          token_ptr) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
 
 done:
@@ -1232,11 +1235,11 @@ H5D__write_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t 
     H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
-    void   *obj_local;                                /* Local buffer for obj */
-    void  **obj = &obj_local;                         /* Array of object pointers */
-    H5VL_connector_t *connector;                                /* VOL connector pointer */
-    size_t  i;                                        /* Local index variable */
-    herr_t  ret_value = SUCCEED;                      /* Return value */
+    void             *obj_local;                      /* Local buffer for obj */
+    void            **obj = &obj_local;               /* Array of object pointers */
+    H5VL_connector_t *connector;                      /* VOL connector pointer */
+    size_t            i;                              /* Local index variable */
+    herr_t            ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1282,7 +1285,9 @@ H5D__write_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t 
         if ((cls_cmp = H5VL_conn_same_class(H5VL_OBJ_CONNECTOR(tmp_vol_obj), connector)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOMPARE, FAIL, "can't compare VOL connectors");
         if (!cls_cmp)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datasets are accessed through different VOL connectors and can't be used in the same I/O call");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+                        "datasets are accessed through different VOL connectors and can't be used in the "
+                        "same I/O call");
     }
 
     /* Get the default dataset transfer property list if the user didn't provide one */
@@ -1292,7 +1297,8 @@ H5D__write_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
 
     /* Write the data */
-    if (H5VL_dataset_write(count, obj, connector, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, token_ptr) < 0)
+    if (H5VL_dataset_write(count, obj, connector, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf,
+                           token_ptr) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
 
 done:

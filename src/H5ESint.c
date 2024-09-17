@@ -241,8 +241,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5ES__insert(H5ES_t *es, H5VL_connector_t *connector, void *request_token, const char *app_file, const char *app_func,
-             unsigned app_line, const char *caller, const char *api_args)
+H5ES__insert(H5ES_t *es, H5VL_connector_t *connector, void *request_token, const char *app_file,
+             const char *app_func, unsigned app_line, const char *caller, const char *api_args)
 {
     H5ES_event_t *ev          = NULL;    /* Event for request */
     bool          ev_inserted = false;   /* Flag to indicate that event is in active list */
@@ -314,7 +314,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_insert(hid_t es_id, H5VL_connector_t *connector, void *token, const char *caller, const char *caller_args, ...)
+H5ES_insert(hid_t es_id, H5VL_connector_t *connector, void *token, const char *caller,
+            const char *caller_args, ...)
 {
     H5ES_t     *es = NULL;             /* Event set for the operation */
     const char *app_file;              /* Application source file name */

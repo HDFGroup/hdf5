@@ -66,9 +66,9 @@
  * VOL connector, and the ID of the next VOL connector.
  */
 typedef struct H5VL_wrap_ctx_t {
-    unsigned rc;           /* Ref. count for the # of times the context was set / reset */
-    H5VL_connector_t  *connector;    /* VOL connector for "outermost" class to start wrap */
-    void    *obj_wrap_ctx; /* "wrap context" for outermost connector */
+    unsigned          rc;           /* Ref. count for the # of times the context was set / reset */
+    H5VL_connector_t *connector;    /* VOL connector for "outermost" class to start wrap */
+    void             *obj_wrap_ctx; /* "wrap context" for outermost connector */
 } H5VL_wrap_ctx_t;
 
 /* Information needed for iterating over the registered VOL connector hid_t IDs.
@@ -92,14 +92,14 @@ typedef struct {
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t         H5VL__free_cls(H5VL_class_t *cls);
-static void          *H5VL__wrap_obj(void *obj, H5I_type_t obj_type);
+static herr_t            H5VL__free_cls(H5VL_class_t *cls);
+static void             *H5VL__wrap_obj(void *obj, H5I_type_t obj_type);
 static H5VL_connector_t *H5VL__conn_create(H5VL_class_t *cls);
-static herr_t         H5VL__conn_find(H5PL_vol_key_t *key, H5VL_connector_t **connector);
-static herr_t         H5VL__conn_free(H5VL_connector_t *connector);
-static herr_t         H5VL__conn_free_id(H5VL_connector_t *connector, void H5_ATTR_UNUSED **request);
-static void          *H5VL__object(hid_t id, H5I_type_t obj_type);
-static herr_t         H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx);
+static herr_t            H5VL__conn_find(H5PL_vol_key_t *key, H5VL_connector_t **connector);
+static herr_t            H5VL__conn_free(H5VL_connector_t *connector);
+static herr_t            H5VL__conn_free_id(H5VL_connector_t *connector, void H5_ATTR_UNUSED **request);
+static void             *H5VL__object(hid_t id, H5I_type_t obj_type);
+static herr_t            H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx);
 
 /*********************/
 /* Package Variables */
@@ -115,9 +115,9 @@ static herr_t         H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx);
 
 /* VOL ID class */
 static const H5I_class_t H5I_VOL_CLS[1] = {{
-    H5I_VOL,                   /* ID class value */
-    0,                         /* Class flags */
-    0,                         /* # of reserved IDs for class */
+    H5I_VOL,                       /* ID class value */
+    0,                             /* Class flags */
+    0,                             /* # of reserved IDs for class */
     (H5I_free_t)H5VL__conn_free_id /* Callback routine for closing objects of this class */
 }};
 
@@ -250,7 +250,7 @@ H5VL_term_package(void)
     if (H5VL_def_conn_s.connector) {
         /* Release the default VOL connector */
         (void)H5VL_conn_prop_free(&H5VL_def_conn_s);
-        H5VL_def_conn_s.connector   = NULL;
+        H5VL_def_conn_s.connector      = NULL;
         H5VL_def_conn_s.connector_info = NULL;
         n++;
     } /* end if */
@@ -327,13 +327,13 @@ done:
 herr_t
 H5VL__set_def_conn(void)
 {
-    H5P_genplist_t *def_fapl;               /* Default file access property list */
-    H5P_genclass_t *def_fapclass;           /* Default file access property class */
-    const char     *env_var;                /* Environment variable for default VOL connector */
-    char           *buf          = NULL;    /* Buffer for tokenizing string */
-    H5VL_connector_t *connector = NULL;     /* VOL connector */
-    void           *vol_info     = NULL;    /* VOL connector info */
-    herr_t          ret_value    = SUCCEED; /* Return value */
+    H5P_genplist_t   *def_fapl;            /* Default file access property list */
+    H5P_genclass_t   *def_fapclass;        /* Default file access property class */
+    const char       *env_var;             /* Environment variable for default VOL connector */
+    char             *buf       = NULL;    /* Buffer for tokenizing string */
+    H5VL_connector_t *connector = NULL;    /* VOL connector */
+    void             *vol_info  = NULL;    /* VOL connector info */
+    herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -342,7 +342,7 @@ H5VL__set_def_conn(void)
     if (H5VL_def_conn_s.connector) {
         /* Release the default VOL connector */
         (void)H5VL_conn_prop_free(&H5VL_def_conn_s);
-        H5VL_def_conn_s.connector   = NULL;
+        H5VL_def_conn_s.connector      = NULL;
         H5VL_def_conn_s.connector_info = NULL;
     } /* end if */
 
@@ -357,7 +357,8 @@ H5VL__set_def_conn(void)
 
         /* Duplicate the string to parse, as it is modified as we go */
         if (NULL == (buf = H5MM_strdup(env_var)))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate memory for environment variable string");
+            HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL,
+                        "can't allocate memory for environment variable string");
 
         /* Get the first 'word' of the environment variable.
          * If it's nothing (environment variable was whitespace) return error.
@@ -383,7 +384,8 @@ H5VL__set_def_conn(void)
             } /* end if */
             else if (!strcmp(tok, "pass_through")) {
                 if (NULL == (connector = H5I_object(H5VL_PASSTHRU)))
-                    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get connector for internal pass-through VOL connector");
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL,
+                                "can't get connector for internal pass-through VOL connector");
 
                 /* Inc. refcount on connector object, so it can be uniformly released */
                 H5VL_conn_inc_rc(connector);
@@ -420,7 +422,8 @@ H5VL__set_def_conn(void)
 
     /* Change the default VOL for the default file access pclass */
     if (H5P_reset_vol_class(def_fapclass, &H5VL_def_conn_s) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set default VOL connector for default file access property class");
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL,
+                    "can't set default VOL connector for default file access property class");
 
     /* Get default file access plist */
     if (NULL == (def_fapl = H5I_object(H5P_FILE_ACCESS_DEFAULT)))
@@ -477,7 +480,8 @@ H5VL__wrap_obj(void *obj, H5I_type_t obj_type)
     /* If there is a VOL object wrapping context, wrap the object */
     if (vol_wrap_ctx) {
         /* Wrap object, using the VOL callback */
-        if (NULL == (ret_value = H5VL_wrap_object(vol_wrap_ctx->connector->cls, vol_wrap_ctx->obj_wrap_ctx, obj, obj_type)))
+        if (NULL == (ret_value = H5VL_wrap_object(vol_wrap_ctx->connector->cls, vol_wrap_ctx->obj_wrap_ctx,
+                                                  obj, obj_type)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't wrap object");
     } /* end if */
     else
@@ -582,10 +586,11 @@ H5VL_conn_prop_copy(H5VL_connector_prop_t *connector_prop)
 
             /* Copy connector info, if it exists */
             if (connector_prop->connector_info) {
-                void         *new_connector_info = NULL; /* Copy of connector info */
+                void *new_connector_info = NULL; /* Copy of connector info */
 
                 /* Allocate and copy connector info */
-                if (H5VL_copy_connector_info(connector_prop->connector, &new_connector_info, connector_prop->connector_info) < 0)
+                if (H5VL_copy_connector_info(connector_prop->connector, &new_connector_info,
+                                             connector_prop->connector_info) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "connector info copy failed");
 
                 /* Set the connector info to the copy */
@@ -625,8 +630,8 @@ H5VL_conn_prop_cmp(int *cmp_value, const H5VL_connector_prop_t *prop1, const H5V
         /* Set output comparison value */
         *cmp_value = 0;
     else {
-        H5VL_connector_t *conn1, *conn2; /* Connector for each property */
-        int              tmp_cmp_value = 0; /* Value from comparison */
+        H5VL_connector_t *conn1, *conn2;     /* Connector for each property */
+        int               tmp_cmp_value = 0; /* Value from comparison */
 
         /* Compare connectors' classes */
         conn1 = prop1->connector;
@@ -646,7 +651,8 @@ H5VL_conn_prop_cmp(int *cmp_value, const H5VL_connector_prop_t *prop1, const H5V
              */
             assert(conn1->cls->info_cls.cmp == conn2->cls->info_cls.cmp);
             tmp_cmp_value = 0;
-            if (H5VL_cmp_connector_info(conn1, &tmp_cmp_value, prop1->connector_info, prop2->connector_info) < 0)
+            if (H5VL_cmp_connector_info(conn1, &tmp_cmp_value, prop1->connector_info, prop2->connector_info) <
+                0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare connector class info");
 
             /* Set output comparison value */
@@ -681,7 +687,8 @@ H5VL_conn_prop_free(const H5VL_connector_prop_t *connector_prop)
             if (connector_prop->connector_info)
                 /* Free the connector info */
                 if (H5VL_free_connector_info(connector_prop->connector, connector_prop->connector_info) < 0)
-                    HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object");
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL,
+                                "unable to release VOL connector info object");
 
             /* Decrement reference count for connector ID */
             if (H5VL_conn_dec_rc(connector_prop->connector) < 0)
@@ -827,8 +834,8 @@ done:
 static H5VL_connector_t *
 H5VL__conn_create(H5VL_class_t *cls)
 {
-    H5VL_connector_t       *connector    = NULL;  /* New VOL connector struct */
-    H5VL_connector_t       *ret_value    = NULL;  /* Return value */
+    H5VL_connector_t *connector = NULL; /* New VOL connector struct */
+    H5VL_connector_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -842,7 +849,7 @@ H5VL__conn_create(H5VL_class_t *cls)
 
     /* Add connector to list of active VOL connectors */
     if (H5VL_conn_list_head_g) {
-        connector->next = H5VL_conn_list_head_g;
+        connector->next             = H5VL_conn_list_head_g;
         H5VL_conn_list_head_g->prev = connector;
     }
     H5VL_conn_list_head_g = connector;
@@ -897,7 +904,7 @@ done:
 static herr_t
 H5VL__conn_find(H5PL_vol_key_t *key, H5VL_connector_t **connector)
 {
-    H5VL_connector_t *node;     /* Current node in linked list */
+    H5VL_connector_t *node; /* Current node in linked list */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -907,7 +914,7 @@ H5VL__conn_find(H5PL_vol_key_t *key, H5VL_connector_t **connector)
 
     /* Iterate over linked list of active connectors */
     node = H5VL_conn_list_head_g;
-    while(node) {
+    while (node) {
         if (H5VL_GET_CONNECTOR_BY_NAME == key->kind) {
             if (0 == strcmp(node->cls->name, key->u.name)) {
                 *connector = node;
@@ -1015,7 +1022,7 @@ H5VL_conn_same_class(const H5VL_connector_t *conn1, const H5VL_connector_t *conn
     if (conn1 == conn2)
         HGOTO_DONE(TRUE);
     else {
-        int    cmp_value;           /* Comparison result */
+        int cmp_value; /* Comparison result */
 
         /* Compare connector classes */
         if (H5VL_cmp_connector_cls(&cmp_value, conn1->cls, conn2->cls) < 0)
@@ -1039,7 +1046,7 @@ done:
 static herr_t
 H5VL__conn_free(H5VL_connector_t *connector)
 {
-    herr_t         ret_value   = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1050,13 +1057,13 @@ H5VL__conn_free(H5VL_connector_t *connector)
     /* Remove connector from list of active VOL connectors */
     if (H5VL_conn_list_head_g == connector) {
         H5VL_conn_list_head_g = H5VL_conn_list_head_g->next;
-        if(H5VL_conn_list_head_g)
+        if (H5VL_conn_list_head_g)
             H5VL_conn_list_head_g->prev = NULL;
     }
     else {
-        if(connector->prev)
+        if (connector->prev)
             connector->prev->next = connector->next;
-        if(connector->next)
+        if (connector->next)
             connector->next->prev = connector->prev;
     }
 
@@ -1081,7 +1088,7 @@ done:
 static herr_t
 H5VL__conn_free_id(H5VL_connector_t *connector, void H5_ATTR_UNUSED **request)
 {
-    herr_t         ret_value   = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1163,7 +1170,7 @@ herr_t
 H5VL_object_is_native(const H5VL_object_t *obj, bool *is_native)
 {
     const H5VL_class_t *cls;                 /* VOL connector class structs for object */
-    H5VL_connector_t *native;                /* Native VOL connector */
+    H5VL_connector_t   *native;              /* Native VOL connector */
     int                 cmp_value;           /* Comparison result */
     herr_t              ret_value = SUCCEED; /* Return value */
 
@@ -1268,8 +1275,8 @@ H5VL_connector_t *
 H5VL__register_connector(const H5VL_class_t *cls, hid_t vipl_id)
 {
     H5VL_connector_t *connector = NULL;
-    H5VL_class_t       *saved     = NULL;
-    bool init_done = false;
+    H5VL_class_t     *saved     = NULL;
+    bool              init_done = false;
     H5VL_connector_t *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
@@ -1331,7 +1338,7 @@ H5VL_connector_t *
 H5VL__register_connector_by_class(const H5VL_class_t *cls, hid_t vipl_id)
 {
     H5VL_connector_t *connector = NULL; /* Connector for class */
-    H5PL_vol_key_t key;                 /* Info for connector search */
+    H5PL_vol_key_t    key;              /* Info for connector search */
     H5VL_connector_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1346,9 +1353,13 @@ H5VL__register_connector_by_class(const H5VL_class_t *cls, hid_t vipl_id)
     if (0 == strlen(cls->name))
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, NULL, "VOL connector class name cannot be the empty string");
     if (cls->info_cls.copy && !cls->info_cls.free)
-        HGOTO_ERROR( H5E_VOL, H5E_CANTREGISTER, NULL, "VOL connector must provide free callback for VOL info objects when a copy callback is provided");
+        HGOTO_ERROR(
+            H5E_VOL, H5E_CANTREGISTER, NULL,
+            "VOL connector must provide free callback for VOL info objects when a copy callback is provided");
     if (cls->wrap_cls.get_wrap_ctx && !cls->wrap_cls.free_wrap_ctx)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, NULL, "VOL connector must provide free callback for object wrapping contexts when a get callback is provided");
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, NULL,
+                    "VOL connector must provide free callback for object wrapping contexts when a get "
+                    "callback is provided");
 
     /* Set up data for find */
     key.kind   = H5VL_GET_CONNECTOR_BY_NAME;
@@ -1388,7 +1399,7 @@ H5VL_connector_t *
 H5VL__register_connector_by_name(const char *name, hid_t vipl_id)
 {
     H5VL_connector_t *connector = NULL; /* Connector for class */
-    H5PL_vol_key_t key;                 /* Info for connector search */
+    H5PL_vol_key_t    key;              /* Info for connector search */
     H5VL_connector_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1403,7 +1414,7 @@ H5VL__register_connector_by_name(const char *name, hid_t vipl_id)
 
     /* If not found, create a new connector */
     if (NULL == connector) {
-        H5PL_key_t plugin_key;
+        H5PL_key_t          plugin_key;
         const H5VL_class_t *cls;
 
         /* Try loading the connector */
@@ -1442,7 +1453,7 @@ H5VL_connector_t *
 H5VL__register_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
 {
     H5VL_connector_t *connector = NULL; /* Connector for class */
-    H5PL_vol_key_t key;                 /* Info for connector search */
+    H5PL_vol_key_t    key;              /* Info for connector search */
     H5VL_connector_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1457,7 +1468,7 @@ H5VL__register_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
 
     /* If not found, create a new connector */
     if (NULL == connector) {
-        H5PL_key_t plugin_key;
+        H5PL_key_t          plugin_key;
         const H5VL_class_t *cls;
 
         /* Try loading the connector */
@@ -1495,9 +1506,9 @@ done:
 htri_t
 H5VL__is_connector_registered_by_name(const char *name)
 {
-    H5VL_connector_t *connector = NULL; /* Connector for class */
-    H5PL_vol_key_t key;                 /* Info for connector search */
-    htri_t                  ret_value = false; /* Return value */
+    H5VL_connector_t *connector = NULL;  /* Connector for class */
+    H5PL_vol_key_t    key;               /* Info for connector search */
+    htri_t            ret_value = false; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1532,9 +1543,9 @@ done:
 htri_t
 H5VL__is_connector_registered_by_value(H5VL_class_value_t value)
 {
-    H5VL_connector_t *connector = NULL; /* Connector for class */
-    H5PL_vol_key_t key;                 /* Info for connector search */
-    htri_t                  ret_value = false; /* Return value */
+    H5VL_connector_t *connector = NULL;  /* Connector for class */
+    H5PL_vol_key_t    key;               /* Info for connector search */
+    htri_t            ret_value = false; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1568,7 +1579,7 @@ H5VL_connector_t *
 H5VL__get_connector_by_name(const char *name)
 {
     H5VL_connector_t *connector = NULL; /* Connector for class */
-    H5PL_vol_key_t key;                 /* Info for connector search */
+    H5PL_vol_key_t    key;              /* Info for connector search */
     H5VL_connector_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1606,7 +1617,7 @@ H5VL_connector_t *
 H5VL__get_connector_by_value(H5VL_class_value_t value)
 {
     H5VL_connector_t *connector = NULL; /* Connector for class */
-    H5PL_vol_key_t key;                 /* Info for connector search */
+    H5PL_vol_key_t    key;              /* Info for connector search */
     H5VL_connector_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2163,7 +2174,8 @@ H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx)
     if (vol_wrap_ctx->obj_wrap_ctx)
         /* Release the VOL connector's object wrapping context */
         if ((*vol_wrap_ctx->connector->cls->wrap_cls.free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release connector's object wrapping context");
+            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL,
+                        "unable to release connector's object wrapping context");
 
     /* Decrement refcount on connector */
     if (H5VL_conn_dec_rc(vol_wrap_ctx->connector) < 0)
@@ -2384,7 +2396,8 @@ H5VL_wrap_register(H5I_type_t type, void *obj, bool app_ref)
     if (H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context");
     if (NULL == vol_wrap_ctx || NULL == vol_wrap_ctx->connector)
-        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, H5I_INVALID_HID, "VOL object wrap context or its connector is NULL???");
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, H5I_INVALID_HID,
+                    "VOL object wrap context or its connector is NULL???");
 
     /* If the datatype is already VOL-managed, the datatype's vol_obj
      * field will get clobbered later, so disallow this.
@@ -2779,7 +2792,8 @@ H5VL_conn_prop_get_cap_flags(const H5VL_connector_prop_t *connector_prop, uint64
     /* Copy the connector ID & info, if there is one */
     if (connector_prop->connector) {
         /* Query the connector's capability flags */
-        if (H5VL_introspect_get_cap_flags(connector_prop->connector_info, connector_prop->connector->cls, cap_flags) < 0)
+        if (H5VL_introspect_get_cap_flags(connector_prop->connector_info, connector_prop->connector->cls,
+                                          cap_flags) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't query connector's capability flags");
     } /* end if */
     else

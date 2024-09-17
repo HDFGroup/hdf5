@@ -35,7 +35,7 @@
 #include "H5VLpkg.h"    /* Virtual Object Layer                 */
 
 /* VOL connectors */
-#include "H5VLnative_private.h"   /* Native VOL connector                 */
+#include "H5VLnative_private.h" /* Native VOL connector                 */
 
 /****************/
 /* Local Macros */
@@ -107,8 +107,8 @@ htri_t
 H5VL__is_native_connector_test(hid_t vol_id)
 {
     H5VL_connector_t *native, *connector;
-    int    cmp_value;           /* Comparison result */
-    htri_t ret_value = SUCCEED; /* Return value */
+    int               cmp_value;           /* Comparison result */
+    htri_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -140,7 +140,7 @@ hid_t
 H5VL__register_using_vol_id_test(H5I_type_t type, void *object, hid_t vol_id)
 {
     H5VL_connector_t *connector;
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

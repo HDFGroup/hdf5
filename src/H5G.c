@@ -893,11 +893,11 @@ done:
 herr_t
 H5Gclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t group_id, hid_t es_id)
 {
-    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    H5VL_connector_t        *connector = NULL;            /* VOL connector */
-    void          *token     = NULL;            /* Request token for async operation        */
-    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    herr_t         ret_value = SUCCEED;         /* Return value                     */
+    H5VL_object_t    *vol_obj   = NULL;            /* Object for loc_id */
+    H5VL_connector_t *connector = NULL;            /* VOL connector */
+    void             *token     = NULL;            /* Request token for async operation        */
+    void            **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t            ret_value = SUCCEED;         /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
 

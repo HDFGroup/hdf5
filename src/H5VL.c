@@ -35,7 +35,7 @@
 #include "H5VLpkg.h"    /* Virtual Object Layer                 */
 
 /* VOL connectors */
-#include "H5VLnative_private.h"   /* Native VOL connector                 */
+#include "H5VLnative_private.h" /* Native VOL connector                 */
 
 /****************/
 /* Local Macros */
@@ -82,7 +82,7 @@ hid_t
 H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
 {
     H5VL_connector_t *connector = NULL;
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
 
@@ -104,7 +104,8 @@ done:
     if (ret_value < 0)
         /* Decrement refcount on connector */
         if (connector && H5VL_conn_dec_rc(connector) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement ref count on VOL connector");
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
+                        "unable to decrement ref count on VOL connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLregister_connector() */
@@ -130,7 +131,7 @@ hid_t
 H5VLregister_connector_by_name(const char *name, hid_t vipl_id)
 {
     H5VL_connector_t *connector = NULL;
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
 
@@ -138,7 +139,8 @@ H5VLregister_connector_by_name(const char *name, hid_t vipl_id)
     if (!name)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "null VOL connector name is disallowed");
     if (0 == strlen(name))
-        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "zero-length VOL connector name is disallowed");
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
+                    "zero-length VOL connector name is disallowed");
 
     /* Check VOL initialization property list */
     if (H5P_DEFAULT == vipl_id)
@@ -158,7 +160,8 @@ done:
     if (ret_value < 0)
         /* Decrement refcount on connector */
         if (connector && H5VL_conn_dec_rc(connector) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement ref count on VOL connector");
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
+                        "unable to decrement ref count on VOL connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLregister_connector_by_name() */
@@ -184,13 +187,14 @@ hid_t
 H5VLregister_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
 {
     H5VL_connector_t *connector = NULL;
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check arguments */
     if (value < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "negative VOL connector value is disallowed");
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
+                    "negative VOL connector value is disallowed");
 
     /* Check VOL initialization property list */
     if (H5P_DEFAULT == vipl_id)
@@ -210,7 +214,8 @@ done:
     if (ret_value < 0)
         /* Decrement refcount on connector */
         if (connector && H5VL_conn_dec_rc(connector) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement ref count on VOL connector");
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
+                        "unable to decrement ref count on VOL connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLregister_connector_by_value() */
@@ -285,7 +290,7 @@ hid_t
 H5VLget_connector_id(hid_t obj_id)
 {
     H5VL_object_t *vol_obj   = NULL;
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
 
@@ -319,7 +324,7 @@ hid_t
 H5VLget_connector_id_by_name(const char *name)
 {
     H5VL_connector_t *connector = NULL;
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
 
@@ -335,7 +340,8 @@ done:
     if (ret_value < 0)
         /* Decrement refcount on connector */
         if (connector && H5VL_conn_dec_rc(connector) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement ref count on VOL connector");
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
+                        "unable to decrement ref count on VOL connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLget_connector_id_by_name() */
@@ -358,7 +364,7 @@ hid_t
 H5VLget_connector_id_by_value(H5VL_class_value_t connector_value)
 {
     H5VL_connector_t *connector = NULL;
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
 
@@ -374,7 +380,8 @@ done:
     if (ret_value < 0)
         /* Decrement refcount on connector */
         if (connector && H5VL_conn_dec_rc(connector) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement ref count on VOL connector");
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
+                        "unable to decrement ref count on VOL connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLget_connector_id_by_value() */
@@ -399,8 +406,8 @@ done:
 ssize_t
 H5VLget_connector_name(hid_t obj_id, char *name /*out*/, size_t size)
 {
-    H5VL_object_t      *vol_obj;
-    ssize_t ret_value = -1;
+    H5VL_object_t *vol_obj;
+    ssize_t        ret_value = -1;
 
     FUNC_ENTER_API(FAIL)
 
@@ -467,8 +474,8 @@ herr_t
 H5VLunregister_connector(hid_t vol_id)
 {
     H5VL_connector_t *native, *connector;
-    int    cmp_value;           /* Comparison result */
-    herr_t ret_value = SUCCEED; /* Return value */
+    int               cmp_value;           /* Comparison result */
+    herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -508,8 +515,8 @@ done:
 herr_t
 H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2)
 {
-    H5VL_connector_t *conn1, *conn2;   /* Connectors for IDs */
-    herr_t        ret_value = SUCCEED; /* Return value */
+    H5VL_connector_t *conn1, *conn2;       /* Connectors for IDs */
+    herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -668,12 +675,12 @@ done:
 hid_t
 H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
 {
-    H5T_t         *dtype;               /* unregistered type       */
-    H5T_t         *file_type    = NULL; /* copied file type        */
-    hid_t          file_type_id = -1;   /* copied file type id     */
-    H5VL_connector_t *connector;        /* VOL connector */
-    H5VL_object_t *file_vol_obj = NULL; /* VOL object for file     */
-    hid_t          ret_value    = -1;   /* Return value            */
+    H5T_t            *dtype;               /* unregistered type       */
+    H5T_t            *file_type    = NULL; /* copied file type        */
+    hid_t             file_type_id = -1;   /* copied file type id     */
+    H5VL_connector_t *connector;           /* VOL connector */
+    H5VL_object_t    *file_vol_obj = NULL; /* VOL object for file     */
+    hid_t             ret_value    = -1;   /* Return value            */
 
     FUNC_ENTER_API(FAIL)
 

@@ -257,7 +257,7 @@ test_getters(void)
     htri_t is_registered = FAIL;
     hid_t  vol_id        = H5I_INVALID_HID;
     hid_t  vol_id_out    = H5I_INVALID_HID;
-    int cmp_value;           /* Comparison value */
+    int    cmp_value; /* Comparison value */
 
     TESTING("VOL getters");
 

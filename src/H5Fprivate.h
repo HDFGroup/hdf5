@@ -525,9 +525,9 @@ H5_DLL bool    H5F_get_point_of_no_return(const H5F_t *f);
 H5_DLL bool    H5F_get_null_fsm_addr(const H5F_t *f);
 H5_DLL bool    H5F_get_min_dset_ohdr(const H5F_t *f);
 H5_DLL herr_t  H5F_set_min_dset_ohdr(H5F_t *f, bool minimize);
-H5_DLL H5VL_object_t      *H5F_get_vol_obj(const H5F_t *f);
-H5_DLL bool                H5F_get_use_file_locking(const H5F_t *f);
-H5_DLL uint64_t            H5F_get_rfic_flags(const H5F_t *f);
+H5_DLL H5VL_object_t *H5F_get_vol_obj(const H5F_t *f);
+H5_DLL bool           H5F_get_use_file_locking(const H5F_t *f);
+H5_DLL uint64_t       H5F_get_rfic_flags(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t            H5F_get_base_addr(const H5F_t *f);

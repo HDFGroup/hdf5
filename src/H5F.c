@@ -88,7 +88,6 @@ static herr_t H5F__flush_api_common(hid_t object_id, H5F_scope_t scope, void **t
 /* Local Variables */
 /*******************/
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_create_plist
  *
@@ -598,7 +597,8 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Create a new file or truncate an existing file through the VOL */
-    if (NULL == (new_file = H5VL_file_create(connector_prop.connector, filename, flags, fcpl_id, fapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
+    if (NULL == (new_file = H5VL_file_create(connector_prop.connector, filename, flags, fcpl_id, fapl_id,
+                                             H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file");
 
     /* Get an ID for the file */
@@ -777,7 +777,8 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, void *
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL connector info in API context");
 
     /* Open the file through the VOL layer */
-    if (NULL == (new_file = H5VL_file_open(connector_prop.connector, filename, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
+    if (NULL == (new_file = H5VL_file_open(connector_prop.connector, filename, flags, fapl_id,
+                                           H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file");
 
     /* Get an ID for the file */
@@ -1055,11 +1056,11 @@ done:
 herr_t
 H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t file_id, hid_t es_id)
 {
-    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    H5VL_connector_t        *connector = NULL;            /* VOL connector */
-    void          *token     = NULL;            /* Request token for async operation        */
-    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    herr_t         ret_value = SUCCEED;         /* Return value */
+    H5VL_object_t    *vol_obj   = NULL;            /* Object for loc_id */
+    H5VL_connector_t *connector = NULL;            /* VOL connector */
+    void             *token     = NULL;            /* Request token for async operation        */
+    void            **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t            ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -1187,7 +1188,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
     void                      *grp = NULL;           /* Root group opened */
     H5I_type_t                 loc_type;             /* ID type of location  */
     htri_t                     same_connector; /* Whether parent and child files use the same connector */
-    herr_t                     ret_value      = SUCCEED; /* Return value         */
+    herr_t                     ret_value = SUCCEED; /* Return value         */
 
     FUNC_ENTER_API(FAIL)
 
@@ -1246,15 +1247,18 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get child object");
 
     /* Check if both objects are associated with the same VOL connector */
-    if ((same_connector = H5VL_conn_same_class(H5VL_OBJ_CONNECTOR(loc_vol_obj), H5VL_OBJ_CONNECTOR(child_vol_obj))) < 0)
+    if ((same_connector =
+             H5VL_conn_same_class(H5VL_OBJ_CONNECTOR(loc_vol_obj), H5VL_OBJ_CONNECTOR(child_vol_obj))) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCOMPARE, FAIL, "can't compare connector classes");
     if (!same_connector)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't mount file onto object from different VOL connector");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "can't mount file onto object from different VOL connector");
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type         = H5VL_GROUP_MOUNT;
     vol_cb_args.args.mount.name = name;
-    vol_cb_args.args.mount.child_file = H5VL_OBJ_DATA(child_vol_obj); /* Don't unwrap fully, so each connector can see its object */
+    vol_cb_args.args.mount.child_file =
+        H5VL_OBJ_DATA(child_vol_obj); /* Don't unwrap fully, so each connector can see its object */
     vol_cb_args.args.mount.fmpl_id = plist_id;
 
     /* Perform the mount operation */

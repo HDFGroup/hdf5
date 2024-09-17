@@ -189,7 +189,7 @@ H5_DLL herr_t      H5P_set_driver_by_name(H5P_genplist_t *plist, const char *dri
                                           const char *driver_config, bool app_ref);
 H5_DLL herr_t      H5P_set_driver_by_value(H5P_genplist_t *plist, H5FD_class_value_t driver_value,
                                            const char *driver_config, bool app_ref);
-H5_DLL herr_t      H5P_set_vol(H5P_genplist_t *plist, struct H5VL_connector_t *connector, const void *vol_info);
+H5_DLL herr_t H5P_set_vol(H5P_genplist_t *plist, struct H5VL_connector_t *connector, const void *vol_info);
 H5_DLL herr_t H5P_reset_vol_class(const H5P_genclass_t *pclass, const struct H5VL_connector_prop_t *vol_prop);
 H5_DLL herr_t H5P_set_vlen_mem_manager(H5P_genplist_t *plist, H5MM_allocate_t alloc_func, void *alloc_info,
                                        H5MM_free_t free_func, void *free_info);

@@ -815,7 +815,8 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid
 
     /* Check arguments */
     if (new_loc_id == H5L_SAME_LOC)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot use H5L_SAME_LOC when only one location is specified");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+                    "cannot use H5L_SAME_LOC when only one location is specified");
     if (!new_name || !*new_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
 /* Avoid compiler warning on 32-bit machines */
@@ -856,10 +857,12 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid
         htri_t same_connector;
 
         /* Check if both objects are associated with the same VOL connector */
-        if ((same_connector = H5VL_conn_same_class(H5VL_OBJ_CONNECTOR(vol_obj1), H5VL_OBJ_CONNECTOR(vol_obj2))) < 0)
+        if ((same_connector =
+                 H5VL_conn_same_class(H5VL_OBJ_CONNECTOR(vol_obj1), H5VL_OBJ_CONNECTOR(vol_obj2))) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOMPARE, FAIL, "can't compare connector classes");
         if (!same_connector)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL connectors and can't be linked");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+                        "Objects are accessed through different VOL connectors and can't be linked");
     } /* end if */
 
     /* Set up VOL callback arguments */
@@ -869,7 +872,8 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid
     vol_cb_args.args.hard.curr_loc_params.obj_type = H5I_get_type(obj_id);
 
     /* Create a link to the object */
-    if (H5VL_link_create(&vol_cb_args, vol_obj2, &new_loc_params, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (H5VL_link_create(&vol_cb_args, vol_obj2, &new_loc_params, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT,
+                         H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "unable to create link");
 
 done:
@@ -1917,11 +1921,11 @@ done:
 herr_t
 H5Oclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t object_id, hid_t es_id)
 {
-    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    H5VL_connector_t        *connector = NULL;            /* VOL connector */
-    void          *token     = NULL;            /* Request token for async operation        */
-    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    herr_t         ret_value = SUCCEED;
+    H5VL_object_t    *vol_obj   = NULL;            /* Object for loc_id */
+    H5VL_connector_t *connector = NULL;            /* VOL connector */
+    void             *token     = NULL;            /* Request token for async operation        */
+    void            **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
