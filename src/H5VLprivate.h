@@ -81,7 +81,7 @@ H5_DLL int64_t H5VL_conn_inc_rc(H5VL_connector_t *connector);
 H5_DLL int64_t H5VL_conn_dec_rc(H5VL_connector_t *connector);
 H5_DLL htri_t  H5VL_conn_same_class(const H5VL_connector_t *connector1, const H5VL_connector_t *conn2);
 
-/* Connector property rountines */
+/* Connector property routines */
 H5_DLL herr_t H5VL_conn_prop_copy(H5VL_connector_prop_t *value);
 H5_DLL herr_t H5VL_conn_prop_cmp(int *cmp_value, const H5VL_connector_prop_t *prop1,
                                  const H5VL_connector_prop_t *prop2);
