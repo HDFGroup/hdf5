@@ -115,9 +115,15 @@ typedef struct iter_t {
     int                   local;                       /* Flag to indicate iteration over the object*/
 } iter_t;
 
-static const char *drivername = NULL;
-
 size_t page_cache = 0;
+
+static bool use_custom_vol_g = false;
+static bool use_custom_vfd_g = false;
+
+static h5tools_vol_info_t vol_info_g = {0};
+static h5tools_vfd_info_t vfd_info_g = {0};
+
+static bool get_onion_revision_count = false;
 
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
@@ -144,6 +150,17 @@ static H5FD_hdfs_fapl_t hdfs_fa = {
     2048,        /* Stream buffer size    */
 };
 #endif /* H5_HAVE_LIBHDFS */
+
+static H5FD_onion_fapl_info_t onion_fa_g = {
+    H5FD_ONION_FAPL_INFO_VERSION_CURR,
+    H5P_DEFAULT,                   /* backing_fapl_id                */
+    32,                            /* page_size                      */
+    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
+    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+    0,            /* force_write_open               */
+    0,            /* creation_flags                 */
+    "input file", /* comment                        */
+};
 
 static int display_all = true;
 
@@ -192,6 +209,12 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"page-buffer-size", require_arg, 'K'},
                                           {"s3-cred", require_arg, 'w'},
                                           {"hdfs-attrs", require_arg, 'H'},
+                                          {"vol-value", require_arg, '1'},
+                                          {"vol-name", require_arg, '2'},
+                                          {"vol-info", require_arg, '3'},
+                                          {"vfd-value", require_arg, '4'},
+                                          {"vfd-name", require_arg, '5'},
+                                          {"vfd-info", require_arg, '6'},
                                           {NULL, 0, '\0'}};
 
 static void
@@ -213,46 +236,65 @@ leave(int ret)
 static void
 usage(const char *prog)
 {
-    fflush(stdout);
-    fprintf(stdout, "usage: %s [OPTIONS] file\n", prog);
-    fprintf(stdout, "\n");
-    fprintf(stdout, "      ERROR\n");
-    fprintf(stdout, "     --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
-    fprintf(stdout, "                           Optional value 2 also prints file open errors\n");
-    fprintf(stdout, "      OPTIONS\n");
-    fprintf(stdout, "     -h, --help            Print a usage message and exit\n");
-    fprintf(stdout, "     -V, --version         Print version number and exit\n");
-    fprintf(stdout, "     -f, --file            Print file information\n");
-    fprintf(stdout, "     -F, --filemetadata    Print file space information for file's metadata\n");
-    fprintf(stdout, "     -g, --group           Print group information\n");
-    fprintf(stdout, "     -l N, --links=N       Set the threshold for the # of links when printing\n");
-    fprintf(stdout, "                           information for small groups.  N is an integer greater\n");
-    fprintf(stdout, "                           than 0.  The default threshold is 10.\n");
-    fprintf(stdout, "     -G, --groupmetadata   Print file space information for groups' metadata\n");
-    fprintf(stdout, "     -d, --dset            Print dataset information\n");
-    fprintf(stdout, "     -m N, --dims=N        Set the threshold for the dimension sizes when printing\n");
-    fprintf(stdout, "                           information for small datasets.  N is an integer greater\n");
-    fprintf(stdout, "                           than 0.  The default threshold is 10.\n");
-    fprintf(stdout, "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
-    fprintf(stdout, "     -T, --dtypemetadata   Print datasets' datatype information\n");
-    fprintf(stdout, "     -A, --attribute       Print attribute information\n");
-    fprintf(stdout, "     -a N, --numattrs=N    Set the threshold for the # of attributes when printing\n");
-    fprintf(stdout,
-            "                           information for small # of attributes.  N is an integer greater\n");
-    fprintf(stdout, "                           than 0.  The default threshold is 10.\n");
-    fprintf(stdout, "     -s, --freespace       Print free space information\n");
-    fprintf(stdout, "     -S, --summary         Print summary of file space information\n");
-    fprintf(stdout, "     --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers\n");
-    fprintf(stdout, "     --s3-cred=<cred>      Access file on S3, using provided credential\n");
-    fprintf(stdout, "                           <cred> :: (region,id,key)\n");
-    fprintf(stdout, "                           If <cred> == \"(,,)\", no authentication is used.\n");
-    fprintf(stdout, "     --hdfs-attrs=<attrs>  Access a file on HDFS with given configuration\n");
-    fprintf(stdout, "                           attributes.\n");
-    fprintf(stdout, "                           <attrs> :: (<namenode name>,<namenode port>,\n");
-    fprintf(stdout, "                                       <kerberos cache path>,<username>,\n");
-    fprintf(stdout, "                                       <buffer size>)\n");
-    fprintf(stdout, "                           If an attribute is empty, a default value will be\n");
-    fprintf(stdout, "                           used.\n");
+    FLUSHSTREAM(rawoutstream);
+    PRINTSTREAM(rawoutstream, "usage: %s [OPTIONS] file\n", prog);
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "  ERROR\n");
+    PRINTVALSTREAM(rawoutstream, "   --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
+    PRINTVALSTREAM(rawoutstream, "                         Optional value 2 also prints file open errors\n");
+    PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
+    PRINTVALSTREAM(rawoutstream, "   -h, --help            Print a usage message and exit\n");
+    PRINTVALSTREAM(rawoutstream, "   -V, --version         Print version number and exit\n");
+    PRINTVALSTREAM(rawoutstream, "   -f, --file            Print file information\n");
+    PRINTVALSTREAM(rawoutstream, "   -F, --filemetadata    Print file space information for file's metadata\n");
+    PRINTVALSTREAM(rawoutstream, "   -g, --group           Print group information\n");
+    PRINTVALSTREAM(rawoutstream, "   -l N, --links=N       Set the threshold for the # of links when printing\n");
+    PRINTVALSTREAM(rawoutstream, "                         information for small groups.  N is an integer greater\n");
+    PRINTVALSTREAM(rawoutstream, "                         than 0.  The default threshold is 10.\n");
+    PRINTVALSTREAM(rawoutstream, "   -G, --groupmetadata   Print file space information for groups' metadata\n");
+    PRINTVALSTREAM(rawoutstream, "   -d, --dset            Print dataset information\n");
+    PRINTVALSTREAM(rawoutstream, "   -m N, --dims=N        Set the threshold for the dimension sizes when printing\n");
+    PRINTVALSTREAM(rawoutstream, "                         information for small datasets.  N is an integer greater\n");
+    PRINTVALSTREAM(rawoutstream, "                         than 0.  The default threshold is 10.\n");
+    PRINTVALSTREAM(rawoutstream, "   -D, --dsetmetadata    Print file space information for datasets' metadata\n");
+    PRINTVALSTREAM(rawoutstream, "   -T, --dtypemetadata   Print datasets' datatype information\n");
+    PRINTVALSTREAM(rawoutstream, "   -A, --attribute       Print attribute information\n");
+    PRINTVALSTREAM(rawoutstream, "   -a N, --numattrs=N    Set the threshold for the # of attributes when printing\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                         information for small # of attributes.  N is an integer greater\n");
+    PRINTVALSTREAM(rawoutstream, "                         than 0.  The default threshold is 10.\n");
+    PRINTVALSTREAM(rawoutstream, "   -s, --freespace       Print free space information\n");
+    PRINTVALSTREAM(rawoutstream, "   -S, --summary         Print summary of file space information\n");
+    PRINTVALSTREAM(rawoutstream, "   --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers\n");
+    PRINTVALSTREAM(rawoutstream, "   --s3-cred=<cred>      Access file on S3, using provided credential\n");
+    PRINTVALSTREAM(rawoutstream, "                         <cred> :: (region,id,key)\n");
+    PRINTVALSTREAM(rawoutstream, "                         If <cred> == \"(,,)\", no authentication is used.\n");
+    PRINTVALSTREAM(rawoutstream, "   --hdfs-attrs=<attrs>  Access a file on HDFS with given configuration\n");
+    PRINTVALSTREAM(rawoutstream, "                         attributes.\n");
+    PRINTVALSTREAM(rawoutstream, "                         <attrs> :: (<namenode name>,<namenode port>,\n");
+    PRINTVALSTREAM(rawoutstream, "                                     <kerberos cache path>,<username>,\n");
+    PRINTVALSTREAM(rawoutstream, "                                     <buffer size>)\n");
+    PRINTVALSTREAM(rawoutstream, "                         If an attribute is empty, a default value will be\n");
+    PRINTVALSTREAM(rawoutstream, "                         used.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vol-value           Value (ID) of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                         HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vol-name            Name of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                         HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vol-info            VOL-specific info to pass to the VOL connector used for\n");
+    PRINTVALSTREAM(rawoutstream, "                         opening the HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                         If none of the above options are used to specify a VOL, then\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                         the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,\n");
+    PRINTVALSTREAM(rawoutstream, "                         if that environment variable is unset) will be used\n");
+    PRINTVALSTREAM(rawoutstream, "   --vfd-value           Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                         HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vfd-name            Name of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                         HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vfd-info            VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                         opening the HDF5 file specified\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -944,12 +986,13 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
             case 'w':
 #ifdef H5_HAVE_ROS3_VFD
-                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &ros3_fa) < 0) {
+                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &ros3_fa_g) < 0) {
                     error_msg("failed to parse S3 VFD credential info\n");
+                    usage(h5tools_getprogname());
                     goto error;
                 }
 
-                drivername = drivernames[ROS3_VFD_IDX];
+                vfd_info_g.info = &ros3_fa_g;
 #else
                 error_msg(
                     "Read-Only S3 VFD is not available unless enabled when HDF5 is configured and built.\n");
@@ -961,10 +1004,11 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 #ifdef H5_HAVE_LIBHDFS
                 if (h5tools_parse_hdfs_fapl_tuple(H5_optarg, ',', &hdfs_fa) < 0) {
                     error_msg("failed to parse HDFS VFD configuration info\n");
+                    usage(h5tools_getprogname());
                     goto error;
                 }
 
-                drivername = drivernames[HDFS_VFD_IDX];
+                vfd_info_g.info = &hdfs_fa_g;
 #else
                 error_msg("HDFS VFD is not available unless enabled when HDF5 is configured and built.\n");
                 goto error;
@@ -975,11 +1019,66 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
                 page_cache = strtoul(H5_optarg, NULL, 0);
                 break;
 
+            case '1':
+                vol_info_g.type    = VOL_BY_VALUE;
+                vol_info_g.u.value = (H5VL_class_value_t)atoi(H5_optarg);
+                use_custom_vol_g   = true;
+                break;
+
+            case '2':
+                vol_info_g.type   = VOL_BY_NAME;
+                vol_info_g.u.name = H5_optarg;
+                use_custom_vol_g  = true;
+                break;
+
+            case '3':
+                vol_info_g.info_string = H5_optarg;
+                break;
+
+            case '4':
+                vfd_info_g.type    = VFD_BY_VALUE;
+                vfd_info_g.u.value = (H5FD_class_value_t)atoi(H5_optarg);
+                use_custom_vfd_g   = true;
+                break;
+
+            case '5':
+                vfd_info_g.type   = VFD_BY_NAME;
+                vfd_info_g.u.name = H5_optarg;
+                use_custom_vfd_g  = true;
+                break;
+
+            case '6':
+                vfd_info_g.info = (const void *)H5_optarg;
+                break;
+
             default:
                 usage(h5tools_getprogname());
                 goto error;
         } /* end switch */
     }     /* end while */
+
+    /* If the file uses the onion VFD, get the revision number */
+    if (vfd_info_g.type == VFD_BY_NAME && vfd_info_g.u.name && !strcmp(vfd_info_g.u.name, "onion")) {
+
+        if (vfd_info_g.info) {
+            if (!strcmp(vfd_info_g.info, "revision_count"))
+                get_onion_revision_count = true;
+            else {
+                errno                   = 0;
+                onion_fa_g.revision_num = strtoull(vfd_info_g.info, NULL, 10);
+                if (errno == ERANGE) {
+                    printf("Invalid onion revision specified\n");
+                    goto error;
+                }
+
+                printf("Using revision %" PRIu64 "\n", onion_fa_g.revision_num);
+            }
+        }
+        else
+            onion_fa_g.revision_num = 0;
+
+        vfd_info_g.info = &onion_fa_g;
+    }
 
     /* check for file name to be processed */
     if (argc <= H5_optind) {
@@ -1631,24 +1730,17 @@ main(int argc, char *argv[])
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
-    if (drivername) {
-        h5tools_vfd_info_t vfd_info;
-
-        vfd_info.type   = VFD_BY_NAME;
-        vfd_info.info   = NULL;
-        vfd_info.u.name = drivername;
-
-#ifdef H5_HAVE_ROS3_VFD
-        if (!strcmp(drivername, drivernames[ROS3_VFD_IDX]))
-            vfd_info.info = &ros3_fa;
-#endif
-#ifdef H5_HAVE_LIBHDFS
-        if (!strcmp(drivername, drivernames[HDFS_VFD_IDX]))
-            vfd_info.info = &hdfs_fa;
-#endif
-
-        /* Set non-default virtual file driver, if requested */
-        if (h5tools_set_fapl_vfd(fapl_id, &vfd_info) < 0) {
+    /* Set non-default VOL connector, if requested */
+    if (use_custom_vol_g) {
+        if (h5tools_set_fapl_vol(fapl_id, &vol_info_g) < 0) {
+            error_msg("unable to set VOL on fapl for file\n");
+            h5tools_setstatus(EXIT_FAILURE);
+            goto done;
+        }
+    }
+    /* Set non-default virtual file driver, if requested */
+    if (use_custom_vfd_g) {
+        if (h5tools_set_fapl_vfd(fapl_id, &vfd_info_g) < 0) {
             error_msg("unable to set VFD on fapl for file\n");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
@@ -1671,7 +1763,22 @@ main(int argc, char *argv[])
 
         printf("Filename: %s\n", fname);
 
-        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (drivername != NULL), NULL, 0);
+        /* A short cut to get the revision count of an onion file without opening the file */
+        if (get_onion_revision_count && H5FD_ONION == H5Pget_driver(fapl_id)) {
+            uint64_t revision_count = 0;
+
+            if (H5FDonion_get_revision_count(fname, fapl_id, &revision_count) < 0) {
+                error_msg("unable to create FAPL for file access\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                goto done;
+            }
+
+            printf("The number of revisions for the onion file is %" PRIu64 "\n", revision_count);
+            goto done;
+        }
+        else
+            fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (use_custom_vol_g || use_custom_vfd_g), NULL,
+                                0);
 
         if (fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);

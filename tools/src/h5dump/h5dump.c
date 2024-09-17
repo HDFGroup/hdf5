@@ -1161,9 +1161,10 @@ end_collect:
                 break;
             case 'h':
                 usage(h5tools_getprogname());
-                free_handler(hand, argc);
-                hand = NULL;
-                h5tools_setstatus(EXIT_SUCCESS);
+                if (hand) {
+                    free_handler(hand, argc);
+                    hand = NULL;
+                }
                 goto done;
 
             case '$':
@@ -1171,18 +1172,14 @@ end_collect:
                 if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &ros3_fa_g) < 0) {
                     error_msg("failed to parse S3 VFD credential info\n");
                     usage(h5tools_getprogname());
-                    free_handler(hand, argc);
-                    hand = NULL;
-                    h5tools_setstatus(EXIT_FAILURE);
-                    goto done;
+                    goto error;
                 }
 
                 vfd_info_g.info = &ros3_fa_g;
 #else
                 error_msg(
                     "Read-Only S3 VFD is not available unless enabled when HDF5 is configured and built.\n");
-                h5tools_setstatus(EXIT_FAILURE);
-                goto done;
+                goto error;
 #endif
                 break;
 
@@ -1191,17 +1188,13 @@ end_collect:
                 if (h5tools_parse_hdfs_fapl_tuple(H5_optarg, ',', &hdfs_fa_g) < 0) {
                     error_msg("failed to parse HDFS VFD configuration info\n");
                     usage(h5tools_getprogname());
-                    free_handler(hand, argc);
-                    hand = NULL;
-                    h5tools_setstatus(EXIT_FAILURE);
-                    goto done;
+                    goto error;
                 }
 
                 vfd_info_g.info = &hdfs_fa_g;
 #else
                 error_msg("HDFS VFD is not available unless enabled when HDF5 is configured and built.\n");
-                h5tools_setstatus(EXIT_FAILURE);
-                goto done;
+                goto error;
 #endif
                 break;
 
@@ -1240,7 +1233,11 @@ end_collect:
             case '?':
             default:
                 usage(h5tools_getprogname());
-                goto error;
+                if (hand) {
+                    free_handler(hand, argc);
+                    hand = NULL;
+                }
+                goto done;
         }
     }
 
