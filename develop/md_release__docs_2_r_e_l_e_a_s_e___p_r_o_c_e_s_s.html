@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.901a8db</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.405d1b9</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -138,7 +138,7 @@ Description (HDF5):</h1>
 <p>Maintenance releases are always forward compatible with regards to the HDF5 file format, meaning that:</p><ul>
 <li>HDF5 libraries and command line utilities can access files created by future maintenance versions of the library. Note that maintenance releases are NOT guaranteed to be interface-compatible, meaning that, on occasion, application source code will need updated and re-compiled against a new maintenance release when the interface changes. Interface changes are only made when absolutely necessary as deemed by the HDF5 product manager(s), and interface compatibility reports are published with each release to inform customers and users of any incompatibilities in the interface.</li>
 </ul>
-<p>For more information on the HDF5 versioning and backward and forward compatibility issues, see the <a href="https://support.hdfgroup.org/documentation/hdf5/v1_14/v1_14_4/api-compat-macros.html">API Compatibility Macros</a> on the public website.</p>
+<p>For more information on the HDF5 versioning and backward and forward compatibility issues, see the <a href="https://hdfgroup.github.io/hdf5/develop/api-compat-macros.html">API Compatibility Macros</a> on the public website.</p>
 <h1><a class="anchor" id="autotoc_md226"></a>
 Participants:</h1>
 <ul>
@@ -188,12 +188,15 @@ Tasks:</h1>
 <ol type="1">
 <li>Transition from performing maintenance on software to preparing for its delivery.</li>
 <li>A few days before the code freeze, announce (via a product's developer mailing list and during team meetings) the pending freeze of the code for the release. On the day of the code freeze, send a "no more commits" message for the software being released and any third party software we develop that it depends on, as well as a "no more upgrades" message for other third party software the release depends on.<ul>
-<li>Recently we haven’t announced a code freeze since it doesn’t take long to create the release branch and the support branch doesn’t need to remain frozen once the release branch is created. There are a few things that can be done on the support branch before the release branch is created, in particular updating the .so numbers.</li>
+<li>Recently we haven’t announced a code freeze since it doesn’t take long to create the release branch and the support branch doesn’t need to remain frozen once the release branch is created. There are a few things that can be done on the support branch before the release branch is created, in particular updating the .so numbers. <br  />
+</li>
 </ul>
+</li>
+<li>Be sure to complete all four steps to update so numbers for each deployed lib file in the process described in config/lt_vers.am and check that the .so numbers for lib files in binaries correctly indicate compatibility status with the previous release. <br  />
 </li>
 <li>Move all unresolved Milestone issues to the next release version in GitHub.</li>
 <li>Verify that frozen code branch satisfies all existing regression test cases, and give the 'OK' to the release coordinator once all daily test configurations are passing as expected after the date of the code freeze. If there are failing tests after the code freeze date, coordinate with maintainers responsible for the failures to ensure that either the changes causing the failures are corrected or reverted.</li>
-<li>Verify release branches for third-party software used: SZIP, ZLIB, and Plugins; and announce release versions to <a href="#" onclick="location.href='mai'+'lto:'+'hdf'+'5l'+'ib@'+'li'+'sts'+'.h'+'dfg'+'ro'+'up.'+'or'+'g'; return false;">hdf5l<span class="obfuscator">.nosp@m.</span>ib@l<span class="obfuscator">.nosp@m.</span>ists.<span class="obfuscator">.nosp@m.</span>hdfg<span class="obfuscator">.nosp@m.</span>roup.<span class="obfuscator">.nosp@m.</span>org</a>.</li>
+<li>Verify release branches for third-party software used: SZIP, ZLIB, and Plugins; and announce release versions to <a href="#" onclick="location.href='mai'+'lto:'+'hdf'+'5l'+'ib@'+'hd'+'fgr'+'ou'+'p.o'+'rg'; return false;">hdf5l<span class="obfuscator">.nosp@m.</span>ib@h<span class="obfuscator">.nosp@m.</span>dfgro<span class="obfuscator">.nosp@m.</span>up.o<span class="obfuscator">.nosp@m.</span>rg</a>.</li>
 </ol>
 <h2><a class="anchor" id="autotoc_md232"></a>
 5. Update Interface Version (Release Manager | Product Manager)</h2>
@@ -254,7 +257,7 @@ Tasks:</h1>
 </li>
 <li>Update default configuration mode<ul>
 <li><code>$ git checkout hdf5_X_Y_Z;</code> and <code>$ bin/switch_maint_mode -disable ./configure.ac</code> to disable <code>AM_MAINTAINER_MODE</code>.</li>
-<li>Need to set option <code>HDF5_GENERATE_HEADERS</code> to <code>OFF</code>, currently in line 996 of [src/CMakeLists.txt][11].</li>
+<li>Need to set option <code>HDF5_GENERATE_HEADERS</code> to <code>OFF</code>, currently in line 996 of <a href="https://github.com/HDFGroup/hdf5/blob/develop/src/CMakeLists.txt">src/CMakeLists.txt</a>.</li>
 <li>Change the <b>release preparation branch</b>'s (i.e. hdf5_X_Y_Z) default configuration mode from development to production in <a href="https://github.com/HDFGroup/hdf5/blob/develop/configure.ac">configure.ac</a>.</li>
 <li>Find “Determine build mode” in <a href="https://github.com/HDFGroup/hdf5/blob/develop/configure.ac">configure.ac</a>.</li>
 <li>Change <code>default=debug</code> to <code>default=production</code> at the bottom of the <code>AS_HELP_STRING</code> for <code>--enable-build-mode</code>.</li>
