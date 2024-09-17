@@ -49,9 +49,10 @@ New Features
     -------------
     - Added signed Windows msi binary and signed Apple dmg binary files.
 
-      The release process now provides signed Windows and Apple installation
-      binaries in addition to the debian and rpm installation binaries. Also
-      these installer files are no longer compressed into packaged archives.
+      The release process now provides signed Windows and Mac installation
+      binaries in addition to the Debian and rpm installation binaries. The Mac 
+      binaries are built as universal binaries on an ARM-based Mac. Installer
+      files are no longer compressed into packaged archives.
 
     - Moved examples to the HDF5Examples folder in the source tree.
 
@@ -89,17 +90,17 @@ New Features
       language features
 
     - Added the CMake variable HDF5_ENABLE_ROS3_VFD to the HDF5 CMake config
-      file hdf5-config.cmake. This allows to easily detect if the library
+      file hdf5-config.cmake. This allows it to easily detect if the library
       has been built with or without read-only S3 functionality.
 
 
     Library:
     --------
     - Added new routines for interacting with error stacks: H5Epause_stack,
-      H5Eresume_stack, and H5Eis_paused.  These routines can be used to
+      H5Eresume_stack, and H5Eis_paused. These routines can be used to
       indicate that errors from a call to an HDF5 routine should not be
-      pushed on to an error stack.  Primarily targeted toward 3rd-party
-      developers of Virtual File Drivirs (VFDs) and Virtual Object Layer (VOL)
+      pushed on to an error stack. Primarily targeted toward third-party
+      developers of Virtual File Drivers (VFDs) and Virtual Object Layer (VOL)
       connectors, these routines allow developers to perform "speculative"
       operations (such as trying to open a file or object) without requiring
       that the error stack be cleared after a speculative operation fails.
@@ -132,11 +133,11 @@ New Features
 
     Tools:
     ------
-    - Add doxygen files for the tools
+    - Added doxygen files for the tools
 
       Implement the tools usage text as pages in doxygen.
 
-    - Add option to adjust the page buffer size in tools
+    - Added option to adjust the page buffer size in tools
 
       The page buffer cache size for a file can now be adjusted using the
         --page-buffer-size=N
@@ -144,10 +145,10 @@ New Features
       will call the H5Pset_page_buffer_size() API function with the specified
       size in bytes.
 
-    - Allow h5repack to reserve space for a user block without a file
+    - Allowed h5repack to reserve space for a user block without a file
 
-      This is useful for users who want to reserve space
-      in the file for future use without requiring a file to copy.
+      This is useful for users who want to reserve space in the file for 
+      future use without requiring a file to copy.
 
 
     High-Level APIs:
@@ -201,22 +202,22 @@ Bug Fixes since HDF5-1.14.4 release
       without the null terminator
 
       H5Rget_file_name and H5Rget_obj_name both return the name's length
-      without the null terminator.  H5Rget_attr_name now behaves consistently
-      with the other two APIs.  Going forward, all the get character string
+      without the null terminator. H5Rget_attr_name now behaves consistently
+      with the other two APIs. Going forward, all the get character string
       APIs in HDF5 will be modified/written in this manner, regarding the
       length of a character string.
 
     - Fixed library to allow usage of page buffering feature for serial file
       access with parallel builds of HDF5
 
-      When HDF5 is built with parallel support enabled, the library would previously
+      When HDF5 is built with parallel support enabled, previously the library would 
       disallow any usage of page buffering, even if a file was not opened with
       parallel access. The library now allows usage of page buffering for serial
       file access with parallel builds of HDF5. Usage of page buffering is still
       disabled for any form of parallel file access, even if only 1 MPI process
       is used.
 
-    - Fixed function H5Requal actually to compare the reference pointers
+    - Fixed function H5Requal to actually compare the reference pointers
 
       Fixed an issue with H5Requal always returning true because the
       function was only comparing the ref2_ptr to itself.
@@ -224,10 +225,10 @@ Bug Fixes since HDF5-1.14.4 release
     - Fixed infinite loop closing library issue when h5dump with a user provided test file
 
       The library's metadata cache calls the "get_final_load_size" client callback
-      to find out the actual size of the object header.  As the size obtained
+      to find out the actual size of the object header. As the size obtained
       exceeds the file's EOA, it throws an error but the object header structure
-      allocated through the client callback is not freed hence causing the 
-      issue described.
+      allocated through the client callback is not freed, causing the issue
+      described.
 
       (1) Free the structure allocated in the object header client callback after 
       saving the needed information in udata. (2) Deserialize the object header
@@ -283,7 +284,7 @@ Bug Fixes since HDF5-1.14.4 release
 
       Fixed an issue in config/cmake/runTest.cmake where the CMake logic
       would try to access an invalid list index if the number of lines in
-      a test's output and reference files don't match
+      a test's output and reference files don't match.
 
     - Fix Autotools -Werror cleanup
 
@@ -316,12 +317,12 @@ Bug Fixes since HDF5-1.14.4 release
       fixed:
 
         - several concurrency issues in ph5diff that can result in interleaved
-          output
+          output,
         - an issue where output can sometimes be dropped when it ends up in
-          ph5diff's output overflow file
+          ph5diff's output overflow file, and 
         - an issue where MPI_Init was called after HDF5 had been initialized,
           preventing the library from setting up an MPI communicator attribute
-          to perform library cleanup on MPI_Finalize
+          to perform library cleanup on MPI_Finalize.
 
 
     Performance
@@ -369,7 +370,7 @@ Platforms Tested
 
     - HDF5 supports the latest macOS versions, including the current and two
       preceding releases. As new major macOS versions become available, HDF5
-      will discontinue  support for the  oldest  version and add  the latest
+      will discontinue support for the oldest version and add the latest
       version to its list of compatible systems, along with the previous two
       releases.
 
@@ -546,7 +547,7 @@ Known Problems
     results in very complex and fragile build files.
 
  -  At present, metadata cache images may not be generated by parallel
-    applications.  Parallel applications can read files with metadata cache
+    applications. Parallel applications can read files with metadata cache
     images, but since this is a collective operation, a deadlock is possible
     if one or more processes do not participate.
 
