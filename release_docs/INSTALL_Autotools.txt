@@ -359,7 +359,7 @@ III. Full installation instructions for source distributions
         source code.  For additional configuration options and other details,
         see "API Compatibility Macros":
 
-            https://hdfgroup.github.io/hdf5/v1_14/api-compat-macros.html
+            https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/api-compat-macros.html
 
    4. Building
         The library, confidence tests, and programs can be built by
