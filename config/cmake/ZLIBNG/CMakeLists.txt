@@ -98,7 +98,7 @@ endif()
 # Options parsing
 #
 option(WITH_GZFILEOP "Compile with support for gzFile related functions" ON)
-option(ZLIB_COMPAT "Compile with zlib compatible API" ON)
+option(ZLIB_COMPAT "Compile with zlib compatible API" OFF)
 option(ZLIB_ENABLE_TESTS "Build test binaries" OFF)
 option(ZLIBNG_ENABLE_TESTS "Test zlib-ng specific API" OFF)
 option(WITH_GTEST "Build gtest_zlib" OFF)
