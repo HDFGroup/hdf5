@@ -175,6 +175,6 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u10]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/bin/h5vers
 [u11]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/src/CMakeLists.txt
 [u12]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/configure.ac
-[u13]: https://hdfgroup.github.io/hdf5/v1_14/api-compat-macros.html
+[u13]: https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/api-compat-macros.html
 [u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14
 [u15]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot
