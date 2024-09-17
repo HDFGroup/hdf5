@@ -783,6 +783,11 @@ New Features
 
     Tools:
     ------
+    - Add h5stat command line options to specify vfd or vol connector settings
+
+      Other tools can specify info for vfd and vol connector on the command line,
+      these options were added to the h5stat tool.
+
     - Add doxygen files for the tools
 
       Implement the tools usage text as pages in doxygen.
