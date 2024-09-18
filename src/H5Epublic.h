@@ -210,7 +210,7 @@ typedef herr_t (*H5E_auto2_t)(hid_t estack, void *client_data);
  * \param[in] lib_name Name of the client library or application to which the error class belongs
  * \param[in] version Version of the client library or application to which the
               error class belongs. It can be \c NULL.
- * \return Returns a class identifier on success; otherwise returns H5I_INVALID_ID.
+ * \return Returns a class identifier on success; otherwise returns H5I_INVALID_HID.
  *
  * \details H5Eregister_class() registers a client library or application
  *          program to the HDF5 error API so that the client library or

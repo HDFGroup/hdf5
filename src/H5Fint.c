@@ -1152,7 +1152,8 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
          */
         if (NULL == (plist = (H5P_genplist_t *)H5I_object(fcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list");
-        f->shared->fcpl_id = H5P_copy_plist(plist, false);
+        if ((f->shared->fcpl_id = H5P_copy_plist(plist, false)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, NULL, "can't copy property list");
 
         /* Get the FCPL values to cache */
         if (H5P_get(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &f->shared->sizeof_addr) < 0)
@@ -1559,7 +1560,7 @@ H5F__dest(H5F_t *f, bool flush, bool free_on_failure)
         } /* end if */
 
         /* Destroy other components of the file */
-        if (H5F__accum_reset(f->shared, true) < 0)
+        if (H5F__accum_reset(f->shared, true, true) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file");
         if (H5FO_dest(f) < 0)
@@ -3893,7 +3894,7 @@ H5F__start_swmr_write(H5F_t *f)
     }     /* end if */
 
     /* Flush and reset the accumulator */
-    if (H5F__accum_reset(f->shared, true) < 0)
+    if (H5F__accum_reset(f->shared, true, false) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator");
 
     /* Turn on SWMR write in shared file open flags */

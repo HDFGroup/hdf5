@@ -594,8 +594,11 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
                 else
                     mem_type = entry_ptr->type->mem_type;
 
-                if (H5F_block_write(f, mem_type, entry_ptr->addr, entry_ptr->size, entry_ptr->image_ptr) < 0)
+                if (H5F_block_write(f, mem_type, entry_ptr->addr, entry_ptr->size, entry_ptr->image_ptr) < 0) {
+                    H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush, FAIL);
+
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't write image to file");
+                }
 #ifdef H5_HAVE_PARALLEL
             }
 #endif    /* H5_HAVE_PARALLEL */
