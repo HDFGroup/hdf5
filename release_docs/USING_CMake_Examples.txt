@@ -56,6 +56,11 @@ Default installation process:
        The default ctest configuration is defined as "Release". It can be changed
            with the CTEST_CONFIGURATION_TYPE script option. Note that this must
            be the same as the value used with the -C command line option.
+           On Windows, you can set the CTEST_VSVERS script option to either
+               64_VS2022 or 64_VS2019. Alternately, you can set the script
+               CTEST_CMAKE_GENERATOR option to "Visual Studio 16 2019" or "Visual Studio 17 2022",
+               and the CMAKE_GENERATOR_ARCHITECTURE script option to "x64".
+
        The default build configuration is defined to build and use static libraries.
 
        Shared libraries and other options can be changed by editing the
@@ -69,15 +74,15 @@ Default installation process:
     When executed, the ctest script will save the results to the log file, test.log, as
     indicated by the ctest command. If you wish to see more build and test information,
     add "-VV" to the ctest command. The output should show;
-          100% tests passed, 0 tests failed out of 156.
+          100% tests passed, 0 tests failed out of 206.
 
 
 ========================================================================
 III. Defaults in the HDF5_Examples_options.cmake file
 ========================================================================
 
-####  DEFAULT:                                                                            ###
-####         BUILD_SHARED_LIBS:BOOL=OFF                                                   ###
+####  DEFAULT:                                                                           ###
+####         BUILD_SHARED_LIBS:BOOL=OFF                                                  ###
 ####         H5EX_BUILD_C:BOOL=ON                                                        ###
 ####         H5EX_BUILD_CXX:BOOL=OFF                                                     ###
 ####         H5EX_BUILD_FORTRAN:BOOL=OFF                                                 ###
