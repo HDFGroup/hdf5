@@ -157,8 +157,8 @@ For more information on the HDF5 versioning and backward and forward compatibili
             100% tests passed, 0 tests failed out of 206 (all options).
     - For more information see USING_CMake_Examples.txt in the install folder.
 16. Manual Testing (i.e. verifying correct test outcomes via visual inspection): 
-    - Use this if UNIX test script is not reporting correct results, yet binaries look OK. 
-    - UNIX: [Manual Binary Testing of HDF5 on Unix systems (this is missing)]() 
+    - Inspect text documents for correct versions and names. 
+    - Inspect the doxygen files in the share/html directory open index.html .
 17. Update the test results Confluence page with status/outcome of all test assignments.
 18. If any test source (hdf-forum, clients, internal testers, automated regression suite) identifies any issues: 
     - a) Enter the issue in JIRA summarizing the failure if it is not already there. 
