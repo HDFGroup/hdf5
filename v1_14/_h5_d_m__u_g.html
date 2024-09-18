@@ -134,7 +134,7 @@ Introduction</h2>
 HDF5 models and implementations</div></div>
    </td></tr>
 </table>
-<p>The <em>Abstract Data Model</em> is a conceptual model of data, data types, and data organization. The abstract data model is independent of storage medium or programming environment. The <em>Storage Model</em> is a standard representation for the objects of the abstract data model. The <a href="https://hdfgroup.github.io/hdf5/v1_14/_s_p_e_c.html">HDF5 File Format Specification</a> defines the storage model.</p>
+<p>The <em>Abstract Data Model</em> is a conceptual model of data, data types, and data organization. The abstract data model is independent of storage medium or programming environment. The <em>Storage Model</em> is a standard representation for the objects of the abstract data model. The <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_s_p_e_c.html">HDF5 File Format Specification</a> defines the storage model.</p>
 <p>The <em>Programming Model</em> is a model of the computing environment and includes platforms from small single systems to large multiprocessors and clusters. The programming model manipulates (instantiates, populates, and retrieves) objects from the abstract data model.</p>
 <p>The <em>Library</em> is the concrete implementation of the programming model. The library exports the HDF5 APIs as its interface. In addition to implementing the objects of the abstract data model, the library manages data transfers from one stored form to another. Data transfer examples include reading from disk to memory and writing from memory to disk.</p>
 <p><em>Stored Data</em> is the concrete implementation of the storage model. The <em>Storage Model</em> is mapped to several storage mechanisms including single disk files, multiple files (family of files), and memory representations.</p>
@@ -151,7 +151,7 @@ The library, the application program, and other modules</div></div>
 <p>The <em>Application Program</em> uses data structures that represent the problem and algorithms including variables, tables, arrays, and meshes among other data structures. Depending on its design and function, an application may have quite a few different kinds of data structures and different numbers and sizes of objects.</p>
 <p>The <em>HDF5 Library</em> implements the objects of the HDF5 abstract data model. Some of these objects include groups, datasets, and attributes. The application program maps the application data structures to a hierarchy of HDF5 objects. Each application will create a mapping best suited to its purposes.</p>
 <p>The objects of the HDF5 abstract data model are mapped to the objects of the HDF5 storage model, and stored in a storage medium. The stored objects include header blocks, free lists, data blocks, B-trees, and other objects. Each group or dataset is stored as one or more header and data blocks.</p>
-<p>For more information on how these objects are organized; see <a href="https://hdfgroup.github.io/hdf5/v1_14/_s_p_e_c.html">HDF5 File Format Specification</a></p>
+<p>For more information on how these objects are organized; see <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_s_p_e_c.html">HDF5 File Format Specification</a></p>
 <p>The HDF5 library can also use other libraries and modules such as compression.</p>
 <table class="doxtable">
 <caption>Data structures in different layers</caption>
@@ -167,7 +167,7 @@ The library, the application program, and other modules</div></div>
 </div>
    </td></tr>
 </table>
-<p>The important point to note is that there is not necessarily any simple correspondence between the objects of the application program, the abstract data model, and those of the Format Specification. The organization of the data of application program, and how it is mapped to the HDF5 abstract data model is up to the application developer. The application program only needs to deal with the library and the abstract data model. Most applications need not consider any details of the <a href="https://hdfgroup.github.io/hdf5/v1_14/_s_p_e_c.html">HDF5 File Format Specification</a> or the details of how objects of abstract data model are translated to and from storage.</p>
+<p>The important point to note is that there is not necessarily any simple correspondence between the objects of the application program, the abstract data model, and those of the Format Specification. The organization of the data of application program, and how it is mapped to the HDF5 abstract data model is up to the application developer. The application program only needs to deal with the library and the abstract data model. Most applications need not consider any details of the <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_s_p_e_c.html">HDF5 File Format Specification</a> or the details of how objects of abstract data model are translated to and from storage.</p>
 <h2><a class="anchor" id="subsec_data_model_abstract"></a>
 The Abstract Data Model</h2>
 <p>The abstract data model (ADM) defines concepts for defining and describing complex data stored in files. The ADM is a very general model which is designed to conceptually cover many specific models. Many different kinds of data can be mapped to objects of the ADM, and therefore stored and retrieved using HDF5. The ADM is not, however, a model of any particular problem or application domain. Users need to map their data to the concepts of the ADM.</p>
@@ -339,7 +339,7 @@ Link</h3>
 The HDF5 Storage Model</h2>
 <h3><a class="anchor" id="subsubsec_data_model_storage_spec"></a>
 The Abstract Storage Model: the HDF5 Format Specification</h3>
-<p>The <a href="https://hdfgroup.github.io/hdf5/v1_14/_s_p_e_c.html">HDF5 File Format Specification</a> defines how HDF5 objects and data are mapped to a linear address space. The address space is assumed to be a contiguous array of bytes stored on some random access medium. The format defines the standard for how the objects of the abstract data model are mapped to linear addresses. The stored representation is self-describing in the sense that the format defines all the information necessary to read and reconstruct the original objects of the abstract data model.</p>
+<p>The <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_s_p_e_c.html">HDF5 File Format Specification</a> defines how HDF5 objects and data are mapped to a linear address space. The address space is assumed to be a contiguous array of bytes stored on some random access medium. The format defines the standard for how the objects of the abstract data model are mapped to linear addresses. The stored representation is self-describing in the sense that the format defines all the information necessary to read and reconstruct the original objects of the abstract data model.</p>
 <p>The HDF5 File Format Specification is organized in three parts: </p><ul>
 <li>
 Level 0: File signature and super block </li>
