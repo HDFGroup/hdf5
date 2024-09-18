@@ -70,7 +70,7 @@ jobs:
         AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
         AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
         AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-      if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-abi:
     needs: [get-old-names, call-workflow-tarball, call-workflow-ctest]
