@@ -122,12 +122,43 @@ For more information on the HDF5 versioning and backward and forward compatibili
 12. Once binaries are ready to be tested, send an e-mail notification or update the Confluence test dashboard page indicating source and binary test assignments and when results should be made available. 
 13. Use the pre-release source packages to build and test HDF5 on assigned platforms by hand. Build both shared and static libraries, Fortran, C++, and szip, and any additional configurations required on specific remote platforms based on customer support needs.
 14. Use the pre-release binary packages found in /mnt/scr1/pre-release/hdf5/vXYZ/pre-\<n\>/binaries/{UNIX, Windows} to test according to the binary testing procedures for your assigned platforms. 
-15. Scripted Testing: 
-    - UNIX: [Scripted Binary Testing of HDF5 on UNIX systems (this is missing)]() 
-    - Windows: [Testing HDF5 Binaries(this is missing)]() 
+15. Initial Testing: 
+    - Installation Using Installer Binary
+        - Execute the install package
+        - Follow prompts
+    - Uncompress Directory Image Binary
+        - Extract the package
+    - After Installation
+        - The examples folder, HDF5Examples, located in the HDF5 install folder, can be built and tested with CMake and the supplied
+            HDF5_Examples.cmake file. The HDF5_Examples.cmake expects HDF5 to have been installed in the default location with same compilers (see the
+            libhdf5.settings file in the lib install folder). Also, the CMake utility should be installed.
+
+    - To test the installation with the examples;
+        - Create a directory to run the examples.
+        - Copy HDF5Examples folder to this directory.
+        - Copy CTestScript.cmake to this directory.
+        - Copy HDF5_Examples.cmake to this directory.
+        - Copy HDF5_Examples_options.cmake to this directory.
+        - The default source folder is defined as "HDF5Examples". It can be changed with the CTEST_SOURCE_NAME script option.
+        - The default installation folder should be visible in the script. It can be changed with the INSTALLDIR script option.
+        - The default ctest configuration is defined as "Release". It can be changed
+            with the CTEST_CONFIGURATION_TYPE script option. Note that this must
+            be the same as the value used with the -C command line option.
+        - The default build configuration is defined to build and use static libraries.
+            Shared libraries can be used with the STATICONLYLIBRARIES script option set to "NO".
+        - Other options can be changed by editing the HDF5_Examples_options.cmake file.
+    - If the defaults are okay, execute from this directory:
+        - ctest -S HDF5_Examples.cmake -C Release -V -O test.log
+    - If the defaults need change, execute from this directory:
+        - ctest -S HDF5_Examples.cmake,CTEST_SOURCE_NAME=MyExamples,INSTALLDIR=MyLocation -C Release -V -O test.log
+        - When executed, the ctest script will save the results to the log file, test.log, as
+            indicated by the ctest command. If you wish to see more build and test information,
+            add "-VV" to the ctest command. The output should show;
+            100% tests passed, 0 tests failed out of 206 (all options).
+    - For more information see USING_CMake_Examples.txt in the install folder.
 16. Manual Testing (i.e. verifying correct test outcomes via visual inspection): 
-    - Use this if UNIX test script is not reporting correct results, yet binaries look OK. 
-    - UNIX: [Manual Binary Testing of HDF5 on Unix systems (this is missing)]() 
+    - Inspect text documents for correct versions and names. 
+    - Inspect the doxygen files in the share/html directory open index.html .
 17. Update the test results Confluence page with status/outcome of all test assignments.
 18. If any test source (hdf-forum, clients, internal testers, automated regression suite) identifies any issues: 
     - a) Enter the issue in JIRA summarizing the failure if it is not already there. 
