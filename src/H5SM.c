@@ -48,7 +48,7 @@ typedef struct H5SM_read_udata_t {
 /* Typedef to increment a reference count in the B-tree */
 typedef struct {
     H5SM_mesg_key_t *key;      /* IN: key for message being incremented */
-    bool found;                /* OUT: if message was found */
+    bool             found;    /* OUT: if message was found */
     H5O_fheap_id_t   fheap_id; /* OUT: fheap ID of record */
 } H5SM_incr_ref_opdata_t;
 
@@ -1148,9 +1148,9 @@ done:
 static herr_t
 H5SM__incr_ref(void *record, void *_op_data, bool *changed)
 {
-    H5SM_sohm_t          *message   = (H5SM_sohm_t *)record;
+    H5SM_sohm_t            *message   = (H5SM_sohm_t *)record;
     H5SM_incr_ref_opdata_t *op_data   = (H5SM_incr_ref_opdata_t *)_op_data;
-    herr_t                ret_value = SUCCEED;
+    herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1183,7 +1183,7 @@ H5SM__incr_ref(void *record, void *_op_data, bool *changed)
 
     /* Set the heap ID and indicate it was found */
     op_data->fheap_id = message->u.heap_loc.fheap_id;
-    op_data->found = true;
+    op_data->found    = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1336,7 +1336,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, bool def
             H5SM_incr_ref_opdata_t op_data;
 
             /* Set up callback info */
-            op_data.key = &key;
+            op_data.key   = &key;
             op_data.found = false;
 
             /* Set the heap_id in the shared struct, if the message was found.
@@ -1349,8 +1349,8 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, bool def
                 shared.u.heap_id = op_data.fheap_id;
                 found            = true;
             } /* end if */
-        } /* end else */
-    } /* end else */
+        }     /* end else */
+    }         /* end else */
 
     if (found) {
         /* If the message was found, it's shared in the heap (now).  Set up a
