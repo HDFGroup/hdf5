@@ -1601,7 +1601,7 @@ H5VL__get_connector_by_name(const char *name)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__get_connector_id_by_name() */
+} /* end H5VL__get_connector_by_name() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__get_connector_by_value
