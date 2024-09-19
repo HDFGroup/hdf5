@@ -22,11 +22,11 @@ if (NOT SITE_OS_NAME)
   ## -- set hostname
   ## --------------------------
   find_program (HOSTNAME_CMD NAMES hostname)
-  exec_program (${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)
+  execute_process (COMMAND ${HOSTNAME_CMD} OUTPUT_VARIABLE HOSTNAME)
   set (CTEST_SITE  "${HOSTNAME}${CTEST_SITE_EXT}")
   find_program (UNAME NAMES uname)
   macro (getuname name flag)
-    exec_program ("${UNAME}" ARGS "${flag}" OUTPUT_VARIABLE "${name}")
+    execute_process (COMMAND "${UNAME}" "${flag}" OUTPUT_VARIABLE "${name}")
   endmacro ()
 
   getuname (osname -s)

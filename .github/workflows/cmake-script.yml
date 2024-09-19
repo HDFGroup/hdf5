@@ -92,7 +92,7 @@ jobs:
           cd "${{ runner.workspace }}/hdf5"
           cat <<EOF > HDF5options.cmake
           set (CTEST_DROP_SITE_INIT "my.cdash.org")
-          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5114")
+          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
           #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
@@ -103,6 +103,7 @@ jobs:
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_HDFS:BOOL=ON")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON")
           EOF
+        shell: bash
 
       - name: Run ctest script (Windows)
         run: |
@@ -177,7 +178,7 @@ jobs:
           cd "${{ runner.workspace }}/hdf5"
           cat <<EOF > HDF5options.cmake
           set (CTEST_DROP_SITE_INIT "my.cdash.org")
-          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5114")
+          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
@@ -274,7 +275,7 @@ jobs:
           cd "${{ runner.workspace }}/hdf5"
           cat <<EOF > HDF5options.cmake
           set (CTEST_DROP_SITE_INIT "my.cdash.org")
-          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5114")
+          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
@@ -356,7 +357,7 @@ jobs:
           cd "${{ runner.workspace }}/hdf5"
           cat <<EOF > HDF5options.cmake
           set (CTEST_DROP_SITE_INIT "my.cdash.org")
-          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5114")
+          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
@@ -452,7 +453,7 @@ jobs:
           cd "${{ runner.workspace }}/hdf5"
           cat <<EOF > HDF5options.cmake
           set (CTEST_DROP_SITE_INIT "my.cdash.org")
-          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5114")
+          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
@@ -463,6 +464,7 @@ jobs:
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_HDFS:BOOL=ON")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON")
           EOF
+        shell: bash
 
       - name: Run ctest (Windows_intel) with oneapi
         env:
@@ -545,7 +547,7 @@ jobs:
           cd "${{ runner.workspace }}/hdf5"
           cat <<EOF > HDF5options.cmake
           set (CTEST_DROP_SITE_INIT "my.cdash.org")
-          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5114")
+          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
           set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
