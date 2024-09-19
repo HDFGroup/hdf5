@@ -78,13 +78,31 @@ jobs:
 
       - name: Copy script files for the space (Windows)
         run: |
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/*.cmake -Destination ${{ runner.workspace }}/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake -Destination ${{ runner.workspace }}/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake -Destination ${{ runner.workspace }}/hdf5/
         shell: pwsh
 
       - name: List files for the hdf5 (Windows)
         run: |
           Get-ChildItem -Path ${{ runner.workspace }}/hdf5
         shell: pwsh
+
+      - name: Create options file (Windows)
+        run: |
+          cd "${{ runner.workspace }}/hdf5"
+          cat <<EOF > HDF5options.cmake
+          set (CTEST_DROP_SITE_INIT "my.cdash.org")
+          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5114")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
+          #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_ROS3_VFD:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_HDFS:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON")
+          EOF
 
       - name: Run ctest script (Windows)
         run: |
@@ -139,19 +157,37 @@ jobs:
 
       - name: List files for the space (Linux)
         run: |
-              ls -l ${{ github.workspace }}
-              ls ${{ runner.workspace }}
+            ls -l ${{ github.workspace }}
+            ls ${{ runner.workspace }}
 
       - name: Uncompress source (Linux)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
       - name: Copy script files for the space (Linux)
         run: |
-            cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/*.cmake ${{ runner.workspace }}/hdf5
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
 
       - name: List files for the hdf5 (Linux)
         run: |
             ls ${{ runner.workspace }}/hdf5
+
+      - name: Create options file (Linux)
+        run: |
+          cd "${{ runner.workspace }}/hdf5"
+          cat <<EOF > HDF5options.cmake
+          set (CTEST_DROP_SITE_INIT "my.cdash.org")
+          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5114")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_ROS3_VFD:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_HDFS:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON")
+          EOF
 
       - name: Run ctest (Linux)
         run: |
@@ -218,7 +254,8 @@ jobs:
 
       - name: Copy script files for the space (MacOS_latest)
         run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/*.cmake ${{ runner.workspace }}/hdf5
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
 
       # symlinks the compiler executables to a common location 
       - name: Setup GNU Fortran
@@ -231,6 +268,23 @@ jobs:
       - name: List files for the hdf5 (MacOS_latest)
         run: |
               ls ${{ runner.workspace }}/hdf5
+
+      - name: Create options file (MacOS_latest)
+        run: |
+          cd "${{ runner.workspace }}/hdf5"
+          cat <<EOF > HDF5options.cmake
+          set (CTEST_DROP_SITE_INIT "my.cdash.org")
+          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5114")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_ROS3_VFD:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_HDFS:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON")
+          EOF
 
       - name: Run ctest (MacOS_latest)
         id: run-ctest
@@ -290,11 +344,29 @@ jobs:
 
       - name: Copy script files for the space (Linux S3)
         run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/*.cmake ${{ runner.workspace }}/hdf5
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
 
       - name: List files for the hdf5 (Linux S3)
         run: |
               ls ${{ runner.workspace }}/hdf5
+
+      - name: Create options file (Linux S3)
+        run: |
+          cd "${{ runner.workspace }}/hdf5"
+          cat <<EOF > HDF5options.cmake
+          set (CTEST_DROP_SITE_INIT "my.cdash.org")
+          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5114")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_ROS3_VFD:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_HDFS:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON")
+          EOF
 
       - name: Run ctest (Linux S3)
         run: |
@@ -366,13 +438,31 @@ jobs:
 
       - name: Copy script files for the space (Windows_intel)
         run: |
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/*.cmake -Destination ${{ runner.workspace }}/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake -Destination ${{ runner.workspace }}/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake -Destination ${{ runner.workspace }}/hdf5/
         shell: pwsh
 
       - name: List files for the hdf5 (Windows_intel)
         run: |
               Get-ChildItem -Path ${{ runner.workspace }}/hdf5
         shell: pwsh
+
+      - name: Create options file (Windows_intel)
+        run: |
+          cd "${{ runner.workspace }}/hdf5"
+          cat <<EOF > HDF5options.cmake
+          set (CTEST_DROP_SITE_INIT "my.cdash.org")
+          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5114")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_ROS3_VFD:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_HDFS:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON")
+          EOF
 
       - name: Run ctest (Windows_intel) with oneapi
         env:
@@ -443,11 +533,29 @@ jobs:
 
       - name: Copy script files for the space (Linux_intel)
         run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/*.cmake ${{ runner.workspace }}/hdf5
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
 
       - name: List files for the hdf5 (Linux_intel)
         run: |
-              ls ${{ runner.workspace }}/hdf5
+          ls ${{ runner.workspace }}/hdf5
+
+      - name: Create options file (Linux_intel)
+        run: |
+          cd "${{ runner.workspace }}/hdf5"
+          cat <<EOF > HDF5options.cmake
+          set (CTEST_DROP_SITE_INIT "my.cdash.org")
+          set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5114")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_ROS3_VFD:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_HDFS:BOOL=ON")
+          set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON")
+          EOF
 
       - name: Run ctest (Linux_intel)
         env:
