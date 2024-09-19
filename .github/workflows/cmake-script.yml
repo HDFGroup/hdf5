@@ -130,7 +130,7 @@ jobs:
       - name: Install CMake Dependencies (Linux)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build graphviz
+          sudo apt-get install ninja-build graphviz curl
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
@@ -215,7 +215,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Install Dependencies (MacOS_latest)
-        run: brew install ninja
+        run: brew install ninja curl
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
@@ -317,7 +317,7 @@ jobs:
       - name: Install CMake Dependencies (Linux S3)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build doxygen graphviz curl
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
 
       - name: Set file base name (Linux S3)
@@ -464,6 +464,7 @@ jobs:
             set (CTEST_SITE_EXT "GH-Windows.Intel")
             set (CTEST_DROP_SITE_INIT "my.cdash.org")
             set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+            set (CMAKE_GENERATOR_TOOLSET "Intel C++ Compiler 2024,fortran=ifx")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
             #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
@@ -504,7 +505,7 @@ jobs:
       - name: Install CMake Dependencies (Linux_intel)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add oneAPI to env
         uses: fortran-lang/setup-fortran@v1
@@ -559,6 +560,7 @@ jobs:
             set (CTEST_SITE_EXT "GH-Linux.Intel")
             set (CTEST_DROP_SITE_INIT "my.cdash.org")
             set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+            set (CMAKE_GENERATOR_TOOLSET "Intel C++ Compiler 2024,fortran=ifx")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
             #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
