@@ -42,6 +42,14 @@ if(DEFINED CTEST_SCRIPT_ARG)
   endforeach()
 endif()
 
+if(${CTEST_VSVERS} STREQUAL "64_VS2022") # 64-bit Visual Studio 2022
+  set(CTEST_CMAKE_GENERATOR "Visual Studio 17 2022")
+  set(CMAKE_GENERATOR_ARCHITECTURE "x64")
+elseif(${VS_VERS} STREQUAL "64_VS2019") # 64-bit Visual Studio 2019
+  set(CTEST_CMAKE_GENERATOR "Visual Studio 16 2019")
+  set(CMAKE_GENERATOR_ARCHITECTURE "x64")
+endif()
+
 ###################################################################
 ### Following Line is one of [Release, RelWithDebInfo, Debug] #####
 set(CTEST_CONFIGURATION_TYPE "$ENV{CMAKE_CONFIG_TYPE}")
