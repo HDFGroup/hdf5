@@ -81,11 +81,15 @@ jobs:
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/* -Destination ${{ runner.workspace }}/hdf5/
         shell: pwsh
 
+      - name: List files for the hdf5 (Windows)
+        run: |
+          Get-ChildItem -Path ${{ runner.workspace }}/hdf5
+        shell: pwsh
+
       - name: Run ctest script (Windows)
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,BUILD_GENERATOR=VS202264 -C Release -VV -O hdf5.log
-          cmake --workflow --preset=${{ inputs.preset_name }}-MSVC --fresh
+          ctest -S HDF5config.cmake,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
 
       # Save log files created by ctest script
@@ -144,10 +148,14 @@ jobs:
         run: |
             cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/* ${{ runner.workspace }}/hdf5
 
+      - name: List files for the hdf5 (Linux)
+        run: |
+            ls ${{ runner.workspace }}/hdf5
+
       - name: Run ctest (Linux)
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
 
       # Save log files created by ctest script
@@ -218,11 +226,15 @@ jobs:
           compiler: gcc
           version: 14
 
+      - name: List files for the hdf5 (MacOS_latest)
+        run: |
+              ls ${{ runner.workspace }}/hdf5
+
       - name: Run ctest (MacOS_latest)
         id: run-ctest
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
 
       # Save log files created by ctest script
@@ -277,10 +289,14 @@ jobs:
         run: |
           cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/* ${{ runner.workspace }}/hdf5
 
+      - name: List files for the hdf5 (Linux S3)
+        run: |
+              ls ${{ runner.workspace }}/hdf5
+
       - name: Run ctest (Linux S3)
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
 
       # Save log files created by ctest script
@@ -349,6 +365,11 @@ jobs:
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/* -Destination ${{ runner.workspace }}/hdf5/
         shell: pwsh
 
+      - name: List files for the hdf5 (Windows_intel)
+        run: |
+              Get-ChildItem -Path ${{ runner.workspace }}/hdf5
+        shell: pwsh
+
       - name: Run ctest (Windows_intel) with oneapi
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
@@ -358,7 +379,7 @@ jobs:
           SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,BUILD_GENERATOR=VS202264 -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: pwsh
 
       # Save log files created by ctest script
@@ -419,6 +440,10 @@ jobs:
         run: |
           cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/* ${{ runner.workspace }}/hdf5
 
+      - name: List files for the hdf5 (Linux_intel)
+        run: |
+              ls ${{ runner.workspace }}/hdf5
+
       - name: Run ctest (Linux_intel)
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
@@ -426,7 +451,7 @@ jobs:
           CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
 
       # Save log files created by ctest script
