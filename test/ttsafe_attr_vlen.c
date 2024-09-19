@@ -123,6 +123,7 @@ tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
     hid_t       fid  = H5I_INVALID_HID; /* File ID */
     hid_t       gid  = H5I_INVALID_HID; /* Group ID */
     hid_t       aid  = H5I_INVALID_HID; /* Attribute ID */
+    hid_t       asid = H5I_INVALID_HID; /* Dataspace ID for the attribute */
     hid_t       atid = H5I_INVALID_HID; /* Datatype ID for the attribute */
     char       *string_attr_check;      /* The attribute data being read */
     const char *string_attr = "2.0";    /* The expected attribute data */
@@ -144,6 +145,10 @@ tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
     atid = H5Aget_type(aid);
     CHECK(atid, H5I_INVALID_HID, "H5Aget_type");
 
+    /* Get the dataspace for the attribute */
+    asid = H5Aget_space(aid);
+    CHECK(asid, H5I_INVALID_HID, "H5Aget_space");
+
     /* Read the attribute */
     ret = H5Aread(aid, atid, &string_attr_check);
     CHECK(ret, FAIL, "H5Aclose");
@@ -151,8 +156,15 @@ tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
     /* Verify the attribute data is as expected */
     VERIFY_STR(string_attr_check, string_attr, "H5Aread");
 
+    /* Free the attribute data */
+    ret = H5Dvlen_reclaim(atid, asid, H5P_DEFAULT, &string_attr_check);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
     /* Close IDs */
     ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Sclose(asid);
     CHECK(ret, FAIL, "H5Aclose");
 
     ret = H5Gclose(gid);
