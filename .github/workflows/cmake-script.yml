@@ -93,8 +93,7 @@ jobs:
             path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
             write-mode: overwrite
             contents: |
-              #set (CTEST_SITE_EXT "GH-Windows.VScl")
-              #set (CTEST_DROP_SITE_INIT "my.cdash.org")
+              set (CTEST_DROP_SITE_INIT "my.cdash.org")
               #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
@@ -178,8 +177,7 @@ jobs:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
           contents: |
-            #set (CTEST_SITE_EXT "GH-Linux.Gcc")
-            #set (CTEST_DROP_SITE_INIT "my.cdash.org")
+            set (CTEST_DROP_SITE_INIT "my.cdash.org")
             #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
@@ -275,8 +273,7 @@ jobs:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
           contents: |
-            #set (CTEST_SITE_EXT "GH-Mac.Clang")
-            #set (CTEST_DROP_SITE_INIT "my.cdash.org")
+            set (CTEST_DROP_SITE_INIT "my.cdash.org")
             #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
@@ -357,8 +354,7 @@ jobs:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
           contents: |
-            #set (CTEST_SITE_EXT "GH-Linux.S3")
-            #set (CTEST_DROP_SITE_INIT "my.cdash.org")
+            set (CTEST_DROP_SITE_INIT "my.cdash.org")
             #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
@@ -453,8 +449,7 @@ jobs:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
           contents: |
-            #set (CTEST_SITE_EXT "GH-Windows.Intel")
-            #set (CTEST_DROP_SITE_INIT "my.cdash.org")
+            set (CTEST_DROP_SITE_INIT "my.cdash.org")
             #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             #set (CMAKE_GENERATOR_TOOLSET "Intel C++ Compiler 2024,fortran=ifx")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
@@ -547,8 +542,7 @@ jobs:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
           contents: |
-            #set (CTEST_SITE_EXT "GH-Linux.Intel")
-            #set (CTEST_DROP_SITE_INIT "my.cdash.org")
+            set (CTEST_DROP_SITE_INIT "my.cdash.org")
             #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
