@@ -93,9 +93,9 @@ jobs:
             path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
             write-mode: overwrite
             contents: |
-              set (CTEST_SITE_EXT "GH-Windows.VScl")
-              set (CTEST_DROP_SITE_INIT "my.cdash.org")
-              set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+              #set (CTEST_SITE_EXT "GH-Windows.VScl")
+              #set (CTEST_DROP_SITE_INIT "my.cdash.org")
+              #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
@@ -107,7 +107,7 @@ jobs:
       - name: Run ctest script (Windows)
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,LOCAL_SUBMIT=ON,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH,LOCAL_SUBMIT=ON,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
@@ -178,9 +178,9 @@ jobs:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
           contents: |
-            set (CTEST_SITE_EXT "GH-Linux.Gcc")
-            set (CTEST_DROP_SITE_INIT "my.cdash.org")
-            set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+            #set (CTEST_SITE_EXT "GH-Linux.Gcc")
+            #set (CTEST_DROP_SITE_INIT "my.cdash.org")
+            #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
@@ -192,7 +192,7 @@ jobs:
       - name: Run ctest (Linux)
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,LOCAL_SUBMIT=ON,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-GCC,LOCAL_SUBMIT=ON,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
@@ -275,9 +275,9 @@ jobs:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
           contents: |
-            set (CTEST_SITE_EXT "GH-Mac.Clang")
-            set (CTEST_DROP_SITE_INIT "my.cdash.org")
-            set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+            #set (CTEST_SITE_EXT "GH-Mac.Clang")
+            #set (CTEST_DROP_SITE_INIT "my.cdash.org")
+            #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
@@ -290,7 +290,7 @@ jobs:
         id: run-ctest
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,LOCAL_SUBMIT=ON,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-Clang,LOCAL_SUBMIT=ON,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
@@ -357,9 +357,9 @@ jobs:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
           contents: |
-            set (CTEST_SITE_EXT "GH-Linux.S3")
-            set (CTEST_DROP_SITE_INIT "my.cdash.org")
-            set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+            #set (CTEST_SITE_EXT "GH-Linux.S3")
+            #set (CTEST_DROP_SITE_INIT "my.cdash.org")
+            #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
@@ -371,7 +371,7 @@ jobs:
       - name: Run ctest (Linux S3)
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,LOCAL_SUBMIT=ON,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-S3,LOCAL_SUBMIT=ON,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
@@ -453,9 +453,9 @@ jobs:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
           contents: |
-            set (CTEST_SITE_EXT "GH-Windows.Intel")
-            set (CTEST_DROP_SITE_INIT "my.cdash.org")
-            set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+            #set (CTEST_SITE_EXT "GH-Windows.Intel")
+            #set (CTEST_DROP_SITE_INIT "my.cdash.org")
+            #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             #set (CMAKE_GENERATOR_TOOLSET "Intel C++ Compiler 2024,fortran=ifx")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
@@ -474,7 +474,7 @@ jobs:
           SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,LOCAL_SUBMIT=ON,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-Intel,LOCAL_SUBMIT=ON,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: pwsh
         continue-on-error: true
 
@@ -547,9 +547,9 @@ jobs:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
           contents: |
-            set (CTEST_SITE_EXT "GH-Linux.Intel")
-            set (CTEST_DROP_SITE_INIT "my.cdash.org")
-            set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+            #set (CTEST_SITE_EXT "GH-Linux.Intel")
+            #set (CTEST_DROP_SITE_INIT "my.cdash.org")
+            #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
@@ -565,7 +565,7 @@ jobs:
           CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,LOCAL_SUBMIT=ON,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-Intel,LOCAL_SUBMIT=ON,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
