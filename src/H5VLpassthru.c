@@ -2686,7 +2686,7 @@ H5VL_pass_through_request_wait(void *obj, uint64_t timeout, H5VL_request_status_
 
     ret_value = H5VLrequest_wait(o->under_object, o->under_vol_id, timeout, status);
 
-    if (ret_value >= 0 && *status != H5ES_STATUS_IN_PROGRESS)
+    if (ret_value >= 0 && *status != H5VL_REQUEST_STATUS_IN_PROGRESS)
         H5VL_pass_through_free_obj(o);
 
     return ret_value;

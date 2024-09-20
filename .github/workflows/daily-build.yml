@@ -45,6 +45,9 @@ jobs:
 #      use_tag: snapshot
       use_environ: snapshots
     secrets:
+        APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
+        APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
+        KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
         AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -64,7 +67,7 @@ jobs:
     if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
 
   call-workflow-release:
-    needs: [call-workflow-tarball, call-workflow-ctest, call-workflow-abi]
+    needs: [get-old-names, call-workflow-tarball, call-workflow-ctest, call-workflow-abi]
     permissions:
       contents: write # In order to allow tag creation
     uses: ./.github/workflows/release-files.yml
@@ -85,5 +88,5 @@ jobs:
       file_base: ${{ needs.get-old-names.outputs.hdf5-name }}
       use_tag: snapshot
       use_environ: snapshots
-    if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
+    if: ${{ (needs.call-workflow-tarball.outputs.has_changes == 'true') && (needs.get-old-names.outputs.hdf5-name != needs.call-workflow-tarball.outputs.file_base) }}
 

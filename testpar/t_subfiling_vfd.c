@@ -105,6 +105,7 @@ static void test_read_different_stripe_size(void);
 static void test_subfiling_precreate_rank_0(void);
 static void test_subfiling_write_many_read_one(void);
 static void test_subfiling_write_many_read_few(void);
+static void test_subfiling_vector_io_extension(void);
 static void test_subfiling_h5fuse(void);
 
 static test_func tests[] = {
@@ -118,6 +119,7 @@ static test_func tests[] = {
     test_subfiling_precreate_rank_0,
     test_subfiling_write_many_read_one,
     test_subfiling_write_many_read_few,
+    test_subfiling_vector_io_extension,
     test_subfiling_h5fuse,
 };
 
@@ -2566,6 +2568,120 @@ test_subfiling_write_many_read_few(void)
 }
 #undef SUBF_FILENAME
 #undef SUBF_HDF5_TYPE
+#undef SUBF_C_TYPE
+
+/*
+ * Test to check for a bug where the vector I/O sizes
+ * array wasn't being extended when an entry in the
+ * array was 0.
+ */
+#define SUBF_FILENAME "test_subfiling_vector_io_extension.h5"
+#define SUBF_C_TYPE   int
+static void
+test_subfiling_vector_io_extension(void)
+{
+    H5FD_subfiling_params_t cfg;
+    h5_stat_size_t          file_size;
+    SUBF_C_TYPE            *read_buf = NULL;
+    H5FD_mem_t             *types    = NULL;
+    h5_stat_t               file_info;
+    uint32_t                count = 64;
+    haddr_t                *addrs = NULL;
+    haddr_t                 file_end_addr;
+    herr_t                  read_status;
+    size_t                 *sizes    = NULL;
+    H5FD_t                 *file_ptr = NULL;
+    hid_t                   file_id  = H5I_INVALID_HID;
+    hid_t                   fapl_id  = H5I_INVALID_HID;
+    hid_t                   dxpl_id  = H5I_INVALID_HID;
+    void                  **bufs     = NULL;
+
+    curr_nerrors = nerrors;
+
+    if (MAINPROCESS)
+        TESTING_2("I/O vector size extension functionality");
+
+    /* Must use at least 2 subfiles to cause generation of
+     * I/O vectors within the VFD.
+     */
+    cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
+    cfg.stripe_size   = (stripe_size_g > 0) ? stripe_size_g : 1048576;
+    cfg.stripe_count  = num_iocs_g > 1 ? num_iocs_g : 2;
+
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, true, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
+    VRFY((fapl_id >= 0), "FAPL creation succeeded");
+
+    file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((file_id >= 0), "H5Fcreate succeeded");
+
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    /* Re-open file through H5FDopen for direct reads */
+    file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+    VRFY(file_ptr, "H5FDopen succeeded");
+
+    /*
+     * Get the current file size to see where we can safely
+     * write to in the file without overwriting the superblock
+     */
+    memset(&file_info, 0, sizeof(h5_stat_t));
+    VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
+    file_size = (h5_stat_size_t)file_info.st_size;
+
+    H5_CHECK_OVERFLOW(file_size, h5_stat_size_t, haddr_t);
+    file_end_addr = (haddr_t)file_size;
+
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id >= 0), "DXPL creation succeeded");
+
+    /* Set independent I/O on DXPL */
+    VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) >= 0), "H5Pset_dxpl_mpio succeeded");
+
+    /* Set EOA for following read call */
+    VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + (count * sizeof(int))) >= 0),
+         "H5FDset_eoa succeeded");
+
+    read_buf = malloc(count * sizeof(*read_buf));
+    types    = malloc(count * sizeof(*types));
+    addrs    = malloc(count * sizeof(*addrs));
+    sizes    = malloc(2 * sizeof(size_t));
+    bufs     = malloc(count * sizeof(*bufs));
+
+    sizes[0] = sizeof(SUBF_C_TYPE);
+    sizes[1] = 0;
+
+    for (size_t i = 0; i < count; i++) {
+        types[i] = H5FD_MEM_DRAW;
+        addrs[i] = file_end_addr + (i * sizeof(SUBF_C_TYPE));
+        bufs[i]  = (void *)&(read_buf[i]);
+    }
+
+    read_status = H5FDread_vector(file_ptr, dxpl_id, count, types, addrs, sizes, bufs);
+    VRFY((read_status >= 0), "H5FDread_vector succeeded");
+
+    VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+
+    mpi_code_g = MPI_Barrier(comm_g);
+    VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
+
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(SUBF_FILENAME, fapl_id);
+    }
+    H5E_END_TRY
+
+    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+    VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
+
+    free(bufs);
+    free(sizes);
+    free(addrs);
+    free(types);
+    free(read_buf);
+
+    CHECK_PASSED();
+}
+#undef SUBF_FILENAME
 #undef SUBF_C_TYPE
 
 /*

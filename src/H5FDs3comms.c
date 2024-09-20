@@ -50,7 +50,7 @@
 /* manipulate verbosity of CURL output
  *
  * 0 -> no explicit curl output
- * 1 -> on error, print failure info to stderr
+ * 1 -> print: (1) failure info to stderr on error, (2) basic HTTP range GET info
  * 2 -> in addition to above, print information for all performs; sets all
  *      curl handles with CURLOPT_VERBOSE
  */
@@ -810,6 +810,11 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
 
     handle->filesize = (size_t)content_length;
 
+#if S3COMMS_CURL_VERBOSITY > 0
+    fprintf(stdout, " -- size: %ju\n", content_length);
+    fflush(stdout);
+#endif
+
     /**********************
      * UNDO HEAD SETTINGS *
      **********************/
@@ -1118,6 +1123,12 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (ret <= 0 || ret >= S3COMMS_MAX_RANGE_STRING_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format HTTP Range value");
     }
+
+#if S3COMMS_CURL_VERBOSITY > 0
+    fprintf(stdout, "%s: Bytes %" PRIuHADDR " - %" PRIuHADDR ", Request Size: %zu\n", handle->httpverb,
+            offset, offset + len - 1, len);
+    fflush(stdout);
+#endif
 
     /*******************
      * COMPILE REQUEST *
@@ -1671,6 +1682,9 @@ H5FD_s3comms_HMAC_SHA256(const unsigned char *key, size_t key_len, const char *m
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    if (!key)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "signing key not provided");
+
     if (dest == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "destination cannot be null.");
 
@@ -1751,6 +1765,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     unsigned setting_i     = 0;
     int      found_setting = 0;
     char    *line_buffer   = &(buffer[0]);
+    size_t   end           = 0;
 
     FUNC_ENTER_PACKAGE
 
@@ -1761,8 +1776,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     /* look for start of profile */
     do {
         /* clear buffer */
-        for (buffer_i = 0; buffer_i < 128; buffer_i++)
-            buffer[buffer_i] = 0;
+        memset(buffer, 0, 128);
 
         line_buffer = fgets(line_buffer, 128, file);
         if (line_buffer == NULL) /* reached end of file */
@@ -1771,9 +1785,9 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
 
     /* extract credentials from lines */
     do {
-        /* clear buffer */
-        for (buffer_i = 0; buffer_i < 128; buffer_i++)
-            buffer[buffer_i] = 0;
+        /* clear buffer and flag */
+        memset(buffer, 0, 128);
+        found_setting = 0;
 
         /* collect a line from file */
         line_buffer = fgets(line_buffer, 128, file);
@@ -1812,10 +1826,11 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
                 strncpy(setting_pointers[setting_i], (const char *)line_buffer, strlen(line_buffer));
 
                 /* "trim" tailing whitespace by replacing with null terminator*/
-                buffer_i = 0;
-                while (!isspace(setting_pointers[setting_i][buffer_i]))
-                    buffer_i++;
-                setting_pointers[setting_i][buffer_i] = '\0';
+                end = strlen(line_buffer) - 1;
+                while (end > 0 && isspace((int)setting_pointers[setting_i][end])) {
+                    setting_pointers[setting_i][end] = '\0';
+                    end--;
+                }
 
                 break; /* have read setting; don't compare with others */
             }          /* end if possible name match */
@@ -2173,7 +2188,7 @@ H5FD_s3comms_signing_key(unsigned char *md, const char *secret, const char *regi
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "`iso8601now` cannot be NULL.");
 
     AWS4_secret_len = 4 + strlen(secret) + 1;
-    AWS4_secret     = (char *)H5MM_malloc(sizeof(char *) * AWS4_secret_len);
+    AWS4_secret     = (char *)H5MM_malloc(AWS4_secret_len);
     if (AWS4_secret == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Could not allocate space.");
 
@@ -2188,10 +2203,13 @@ H5FD_s3comms_signing_key(unsigned char *md, const char *secret, const char *regi
     HMAC(EVP_sha256(), (const unsigned char *)AWS4_secret, (int)strlen(AWS4_secret),
          (const unsigned char *)iso8601now, 8, /* 8 --> length of 8 --> "yyyyMMDD"  */
          datekey, NULL);
+
     HMAC(EVP_sha256(), (const unsigned char *)datekey, SHA256_DIGEST_LENGTH, (const unsigned char *)region,
          strlen(region), dateregionkey, NULL);
+
     HMAC(EVP_sha256(), (const unsigned char *)dateregionkey, SHA256_DIGEST_LENGTH,
          (const unsigned char *)"s3", 2, dateregionservicekey, NULL);
+
     HMAC(EVP_sha256(), (const unsigned char *)dateregionservicekey, SHA256_DIGEST_LENGTH,
          (const unsigned char *)"aws4_request", 12, md, NULL);
 

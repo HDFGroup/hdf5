@@ -359,8 +359,7 @@ done:
  *              the in-file datatype for values is defined by VAL_TYPE_ID.
  *              LOC_ID specifies the file to create the map object, but no
  *              link to the object is created.  Other options can be
- *              specified through the property lists LCPL_ID, MCPL_ID, and
- *              MAPL_ID.
+ *              specified through the property lists MCPL_ID and MAPL_ID.
  *
  *              The resulting ID should be linked into the file with
  *              H5Olink or it will be deleted when closed.
@@ -397,7 +396,7 @@ H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id, hid_t mcpl_id
         HGOTO_ERROR(H5E_MAP, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info");
 
     /* get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Set location parameters */
@@ -693,7 +692,7 @@ H5Mget_key_type(hid_t map_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid map identifier");
 
     /* Set up VOL callback arguments */
@@ -737,7 +736,7 @@ H5Mget_val_type(hid_t map_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid map identifier");
 
     /* Set up VOL callback arguments */
@@ -781,7 +780,7 @@ H5Mget_create_plist(hid_t map_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid map identifier");
 
     /* Set up VOL callback arguments */
@@ -828,7 +827,7 @@ H5Mget_access_plist(hid_t map_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid map identifier");
 
     /* Set up VOL callback arguments */
@@ -871,7 +870,7 @@ H5Mget_count(hid_t map_id, hsize_t *count /*out*/, hid_t dxpl_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid map identifier");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
@@ -927,7 +926,7 @@ H5M__put_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid value memory datatype ID");
 
     /* Get map pointer */
-    if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
+    if (NULL == (*vol_obj_ptr = H5VL_vol_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "map_id is not a map ID");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
@@ -1056,7 +1055,7 @@ H5M__get_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid value memory datatype ID");
 
     /* Get map pointer */
-    if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
+    if (NULL == (*vol_obj_ptr = H5VL_vol_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "map_id is not a map ID");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
@@ -1187,7 +1186,7 @@ H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, hbool_t *exists,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid key memory datatype ID");
 
     /* Get map pointer */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "map_id is not a map ID");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
@@ -1263,7 +1262,7 @@ H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified");
 
     /* Get map pointer */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "map_id is not a map ID");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
@@ -1348,7 +1347,7 @@ H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *idx, hid_t key_m
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified");
 
     /* Get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
@@ -1412,7 +1411,7 @@ H5Mdelete(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid key memory datatype ID");
 
     /* Get map pointer */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "map_id is not a map ID");
 
     /* Get the default dataset transfer property list if the user didn't provide one */

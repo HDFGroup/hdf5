@@ -268,6 +268,11 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
   endif ()
   set (CPACK_PACKAGE_ICON "${HDF_RESOURCES_DIR}/hdf.bmp")
 
+  set (CPACK_ORIG_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+  if ("$ENV{BINSIGN}" STREQUAL "exists")
+    set (CPACK_PRE_BUILD_SCRIPTS ${CMAKE_SOURCE_DIR}/config/cmake/SignPackageFiles.cmake)
+  endif ()
+
   set (CPACK_GENERATOR "TGZ")
   if (WIN32)
     set (CPACK_GENERATOR "ZIP")

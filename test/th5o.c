@@ -545,6 +545,7 @@ test_h5o_refcount(void)
     hid_t       grp, dset, dtype, dspace; /* Object identifiers */
     char        filename[1024];
     H5O_info2_t oinfo; /* Object info struct */
+    H5L_info2_t linfo; /* Buffer for H5Lget_info */
     hsize_t     dims[RANK];
     herr_t      ret; /* Value returned from API calls */
 
@@ -567,6 +568,10 @@ test_h5o_refcount(void)
     CHECK(dtype, FAIL, "H5Tcopy");
     ret = H5Tcommit2(fid, "datatype", dtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tcommit2");
+
+    /* Test passing a datatype ID to H5Lget_info2, it should not fail */
+    ret = H5Lget_info2(dtype, "/datatype", &linfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lget_info2");
 
     /* Create the data space for the dataset. */
     dims[0] = DIM0;
@@ -747,6 +752,7 @@ test_h5o_plist(void)
     hid_t    grp, dset, dtype, dspace; /* Object identifiers */
     hid_t    fapl;                     /* File access property list */
     hid_t    gcpl, dcpl, tcpl;         /* Object creation properties */
+    hid_t    bad_pl = H5I_INVALID_HID; /* Invalid property list dues to invalid arg */
     char     filename[1024];
     unsigned def_max_compact, def_min_dense; /* Default phase change parameters */
     unsigned max_compact, min_dense;         /* Actual phase change parameters */
@@ -848,6 +854,14 @@ test_h5o_plist(void)
     CHECK(tcpl, FAIL, "H5Tget_create_plist");
     dcpl = H5Dget_create_plist(dset);
     CHECK(dcpl, FAIL, "H5Dget_create_plist");
+
+    /* Test passing in a non-group identifier to the H5G API */
+    H5E_BEGIN_TRY
+    {
+        bad_pl = H5Gget_create_plist(dtype);
+    }
+    H5E_END_TRY
+    VERIFY(bad_pl, H5I_INVALID_HID, "H5Gget_create_plist");
 
     /* Retrieve attribute phase change values on each creation property list and verify */
     ret = H5Pget_attr_phase_change(gcpl, &max_compact, &min_dense);
@@ -1215,6 +1229,7 @@ test_h5o_comment(void)
     /* Getting the comment on the file and verify it */
     comment_len = H5Oget_comment(fid, NULL, (size_t)0);
     CHECK(comment_len, FAIL, "H5Oget_comment");
+    VERIFY(comment_len, strlen(file_comment), "H5Oget_comment");
 
     len = H5Oget_comment(fid, check_comment, (size_t)comment_len + 1);
     CHECK(len, FAIL, "H5Oget_comment");
@@ -1232,6 +1247,7 @@ test_h5o_comment(void)
 
     len = H5Oget_comment(grp, check_comment, (size_t)comment_len + 1);
     CHECK(len, FAIL, "H5Oget_comment");
+    VERIFY(len, strlen(grp_comment), "H5Oget_comment");
 
     ret_value = strcmp(grp_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment");
@@ -1243,6 +1259,7 @@ test_h5o_comment(void)
     /* Getting the comment on the datatype and verify it */
     comment_len = H5Oget_comment(dtype, NULL, (size_t)0);
     CHECK(comment_len, FAIL, "H5Oget_comment");
+    VERIFY(comment_len, strlen(dtype_comment), "H5Oget_comment");
 
     len = H5Oget_comment(dtype, check_comment, (size_t)comment_len + 1);
     CHECK(len, FAIL, "H5Oget_comment");
@@ -1260,6 +1277,7 @@ test_h5o_comment(void)
 
     len = H5Oget_comment(dset, check_comment, (size_t)comment_len + 1);
     CHECK(ret, len, "H5Oget_comment");
+    VERIFY(len, strlen(dset_comment), "H5Oget_comment");
 
     ret_value = strcmp(dset_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment");
@@ -1401,6 +1419,7 @@ test_h5o_comment_by_name(void)
 
     len = H5Oget_comment_by_name(fid, ".", check_comment, (size_t)comment_len + 1, H5P_DEFAULT);
     CHECK(len, FAIL, "H5Oget_comment_by_name");
+    VERIFY(len, strlen(file_comment), "H5Oget_comment");
 
     ret_value = strcmp(file_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment_by_name");

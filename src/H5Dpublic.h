@@ -1842,7 +1842,7 @@ H5_DLL hid_t H5Dopen1(hid_t loc_id, const char *name);
  *          used if the dataset dimension sizes are to be reduced.
  *
  * \version 1.8.0 Function deprecated in this release. Parameter size
- *                syntax changed to \Code{const hsize_t size[]} in this release.
+ *                syntax changed to \TText{const hsize_t size[]} in this release.
  * \since 1.0.0
  *
  */

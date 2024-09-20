@@ -700,15 +700,16 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             int    myerrno = errno;
             time_t mytime  = time(NULL);
 
+#ifndef H5_HAVE_PREADWRITE
             offset = HDlseek(file->fd, 0, SEEK_CUR);
+#endif
 
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
                         "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
-                        "error message = '%s', buf = %p, total read size = %llu, bytes this sub-read = %llu, "
-                        "bytes actually read = %llu, offset = %llu",
-                        ctime(&mytime), file->filename, file->fd, myerrno, strerror(myerrno), buf,
-                        (unsigned long long)size, (unsigned long long)bytes_in,
-                        (unsigned long long)bytes_read, (unsigned long long)offset);
+                        "error message = '%s', buf = %p, total read size = %zu, bytes this sub-read = %llu, "
+                        "offset = %llu",
+                        ctime(&mytime), file->filename, file->fd, myerrno, strerror(myerrno), buf, size,
+                        (unsigned long long)bytes_in, (unsigned long long)offset);
         } /* end if */
 
         if (0 == bytes_read) {
@@ -810,15 +811,16 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
             int    myerrno = errno;
             time_t mytime  = time(NULL);
 
+#ifndef H5_HAVE_PREADWRITE
             offset = HDlseek(file->fd, 0, SEEK_CUR);
+#endif
 
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                         "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
-                        "error message = '%s', buf = %p, total write size = %llu, bytes this sub-write = "
-                        "%llu, bytes actually written = %llu, offset = %llu",
-                        ctime(&mytime), file->filename, file->fd, myerrno, strerror(myerrno), buf,
-                        (unsigned long long)size, (unsigned long long)bytes_in,
-                        (unsigned long long)bytes_wrote, (unsigned long long)offset);
+                        "error message = '%s', buf = %p, total write size = %zu, bytes this sub-write = "
+                        "%llu, offset = %llu",
+                        ctime(&mytime), file->filename, file->fd, myerrno, strerror(myerrno), buf, size,
+                        (unsigned long long)bytes_in, (unsigned long long)offset);
         } /* end if */
 
         assert(bytes_wrote > 0);

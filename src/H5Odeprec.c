@@ -347,7 +347,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Get object type */
