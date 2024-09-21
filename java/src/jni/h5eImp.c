@@ -21,9 +21,6 @@ extern "C" {
  *  Each routine wraps a single HDF entry point, generally with the
  *  analogous arguments and return codes.
  *
- *  For details of the HDF libraries, see the HDF Documentation at:
- *    https://portal.hdfgroup.org/documentation/index.html
- *
  */
 
 #include <jni.h>

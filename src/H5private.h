@@ -1129,34 +1129,34 @@ H5_DLL herr_t H5_trace_args(struct H5RS_str_t *rs, const char *type, va_list ap)
  *        Handles H5XY_.
  */
 #define H5_IS_API(S)                                                                                         \
-    ('_' != ((const char *)S)[2]              /* underscore at position 2     */                             \
-     && '_' != ((const char *)S)[3]           /* underscore at position 3     */                             \
-     && !(                                    /* NOT              */                                         \
-          ((const char *)S)[4]                /* pos 4 exists     */                                         \
-          && (isupper(S[3]) || isdigit(S[3])) /* pos 3 dig | uc   */                                         \
-          && '_' == ((const char *)S)[4]      /* pos 4 underscore */                                         \
+    ('_' != ((const char *)S)[2]                        /* underscore at position 2     */                   \
+     && '_' != ((const char *)S)[3]                     /* underscore at position 3     */                   \
+     && !(                                              /* NOT              */                               \
+          ((const char *)S)[4]                          /* pos 4 exists     */                               \
+          && (isupper((int)S[3]) || isdigit((int)S[3])) /* pos 3 dig | uc   */                               \
+          && '_' == ((const char *)S)[4]                /* pos 4 underscore */                               \
           ))
 
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a public API function */
 #define H5_IS_PUB(S)                                                                                         \
-    (((isdigit(S[1]) || isupper(S[1])) && islower(S[2])) ||                                                  \
-     ((isdigit(S[2]) || isupper(S[2])) && islower(S[3])) ||                                                  \
-     (!S[4] || ((isdigit(S[3]) || isupper(S[3])) && islower(S[4]))))
+    (((isdigit((int)S[1]) || isupper((int)S[1])) && islower((int)S[2])) ||                                   \
+     ((isdigit((int)S[2]) || isupper((int)S[2])) && islower((int)S[3])) ||                                   \
+     (!S[4] || ((isdigit((int)S[3]) || isupper((int)S[3])) && islower((int)S[4]))))
 
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a private library function */
 #define H5_IS_PRIV(S)                                                                                        \
-    (((isdigit(S[1]) || isupper(S[1])) && '_' == S[2] && islower(S[3])) ||                                   \
-     ((isdigit(S[2]) || isupper(S[2])) && '_' == S[3] && islower(S[4])) ||                                   \
-     ((isdigit(S[3]) || isupper(S[3])) && '_' == S[4] && islower(S[5])))
+    (((isdigit((int)S[1]) || isupper((int)S[1])) && '_' == S[2] && islower((int)S[3])) ||                    \
+     ((isdigit((int)S[2]) || isupper((int)S[2])) && '_' == S[3] && islower((int)S[4])) ||                    \
+     ((isdigit((int)S[3]) || isupper((int)S[3])) && '_' == S[4] && islower((int)S[5])))
 
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a package private function */
 #define H5_IS_PKG(S)                                                                                         \
-    (((isdigit(S[1]) || isupper(S[1])) && '_' == S[2] && '_' == S[3] && islower(S[4])) ||                    \
-     ((isdigit(S[2]) || isupper(S[2])) && '_' == S[3] && '_' == S[4] && islower(S[5])) ||                    \
-     ((isdigit(S[3]) || isupper(S[3])) && '_' == S[4] && '_' == S[5] && islower(S[6])))
+    (((isdigit((int)S[1]) || isupper((int)S[1])) && '_' == S[2] && '_' == S[3] && islower((int)S[4])) ||     \
+     ((isdigit((int)S[2]) || isupper((int)S[2])) && '_' == S[3] && '_' == S[4] && islower((int)S[5])) ||     \
+     ((isdigit((int)S[3]) || isupper((int)S[3])) && '_' == S[4] && '_' == S[5] && islower((int)S[6])))
 
 /* global library version information string */
 extern char H5_lib_vers_info_g[];

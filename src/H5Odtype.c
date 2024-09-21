@@ -135,7 +135,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
      * that case is impossible.
      *
      * Instead of using our normal H5_IS_BUFFER_OVERFLOW macro, use
-     * H5_IS_KNOWN_BUFFER_OVERFLOW, which will skip the check when the
+     * H5_IS_KNOWN_BUFFER_OVERFLOW, which will skip the check when
      * we're decoding a buffer from H5Tconvert().
      *
      * Even if this is fixed at some point in the future, as long as we

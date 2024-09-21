@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,16 +18,17 @@
 
 #include "ttsafe.h"
 
-#if defined(H5_HAVE_THREADS) && defined(H5_HAVE_STDATOMIC_H)
+#if defined(H5_HAVE_THREADS)
 
-#define NUM_PINGPONG     (1000 * 1000)
+#define NUM_PINGPONG     (250 * 1000)
 #define NUM_CLIENTSERVER (50 * 1000)
 
 #define NUM_THREADS 16
 
 typedef struct {
     H5TS_semaphore_t ping_sem, pong_sem;
-    unsigned         counter;
+    unsigned         ping_counter;
+    unsigned         pong_counter;
 } pingpong_t;
 
 typedef struct {
@@ -47,11 +48,11 @@ ping(void *_test_info)
         result = H5TS_semaphore_wait(&test_info->ping_sem);
         CHECK_I(result, "H5TS_semaphore_wait");
 
-        test_info->counter++;
+        test_info->ping_counter++;
 
         result = H5TS_semaphore_signal(&test_info->pong_sem);
         CHECK_I(result, "H5TS_semaphore_signal");
-    } while (test_info->counter < NUM_PINGPONG);
+    } while (test_info->ping_counter < NUM_PINGPONG);
 
     return ret_value;
 }
@@ -67,11 +68,11 @@ pong(void *_test_info)
         result = H5TS_semaphore_wait(&test_info->pong_sem);
         CHECK_I(result, "H5TS_semaphore_wait");
 
-        test_info->counter++;
+        test_info->pong_counter++;
 
         result = H5TS_semaphore_signal(&test_info->ping_sem);
         CHECK_I(result, "H5TS_semaphore_signal");
-    } while (test_info->counter < NUM_PINGPONG);
+    } while (test_info->pong_counter < NUM_PINGPONG);
 
     return ret_value;
 }
@@ -93,7 +94,8 @@ tts_semaphore_pingpong(void)
     CHECK_I(result, "H5TS_semaphore_init");
     result = H5TS_semaphore_init(&test_info.pong_sem, 0);
     CHECK_I(result, "H5TS_semaphore_init");
-    test_info.counter = 0;
+    test_info.ping_counter = 0;
+    test_info.pong_counter = 0;
 
     /* Start ping & pong threads */
     result = H5TS_thread_create(&ping_thread, ping, &test_info);
@@ -111,7 +113,8 @@ tts_semaphore_pingpong(void)
     result = H5TS_thread_join(pong_thread, NULL);
     CHECK_I(result, "H5TS_thread_join");
 
-    VERIFY(test_info.counter, (NUM_PINGPONG + 1), "ping pong");
+    VERIFY(test_info.ping_counter, NUM_PINGPONG, "ping counter");
+    VERIFY(test_info.pong_counter, NUM_PINGPONG, "pong counter");
 
     /* Destroy semaphores */
     result = H5TS_semaphore_destroy(&test_info.ping_sem);
@@ -268,4 +271,4 @@ tts_semaphore(void)
     tts_semaphore_clientserver();
 } /* end tts_semaphore() */
 
-#endif /* defined(H5_HAVE_THREADS) && defined(H5_HAVE_STDATOMIC_H) */
+#endif /* defined(H5_HAVE_THREADS) */

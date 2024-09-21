@@ -722,7 +722,7 @@
  *
  * <h4>Mounting a File</h4>
  * An external link is a permanent connection between two files. A temporary connection can be set
- * up with the #H5Fmount function. For more information, @see sec_file.
+ * up with the #H5Fmount function. For more information, @see \ref sec_file.
  * For more information, see the #H5Fmount function in the \ref RM.
  *
  * \subsubsection subsubsec_group_program_info Discovering Information about Objects
