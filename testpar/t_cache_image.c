@@ -15,7 +15,7 @@
  *      feature implemented in H5C.c
  */
 
-#include "testphdf5.h"
+#include "testpar.h"
 
 #include "cache_common.h"
 #include "genall5.h"

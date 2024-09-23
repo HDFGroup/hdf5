@@ -15960,6 +15960,7 @@ main(void)
     const char *driver_name;   /* Environment variable */
     bool        contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
     bool        api_ctx_pushed = false; /* Whether API context pushed */
+    int         test_express;
 
     /* Don't run this test using certain file drivers */
     driver_name = h5_get_test_driver_name();
@@ -15982,9 +15983,10 @@ main(void)
      *      Activate full testing when this feature is re-enabled
      *      in the future for parallel build.
      */
-    if (TestExpress > 0)
-        printf("***Express test mode %d.  Some tests may be skipped\n", TestExpress);
-    else if (TestExpress == 0) {
+    test_express = h5_get_testexpress();
+    if (test_express > 0)
+        printf("***Express test mode %d.  Some tests may be skipped\n", test_express);
+    else if (test_express == 0) {
 #ifdef H5_HAVE_PARALLEL
         num_pb_fs = NUM_PB_FS - 2;
 #else
@@ -16200,7 +16202,7 @@ main(void)
                     /* If this test fails, uncomment the tests above, which build up to this
                      * level of complexity gradually. -QAK
                      */
-                    if (TestExpress > 1)
+                    if (test_express > 1)
                         printf(
                             "***Express test mode on.  test_man_start_5th_recursive_indirect is skipped\n");
                     else
@@ -16248,7 +16250,7 @@ main(void)
                                 nerrors += test_man_remove_first_row(fapl, &small_cparam, &tparam);
                                 nerrors += test_man_remove_first_two_rows(fapl, &small_cparam, &tparam);
                                 nerrors += test_man_remove_first_four_rows(fapl, &small_cparam, &tparam);
-                                if (TestExpress > 1)
+                                if (test_express > 1)
                                     printf("***Express test mode on.  Some tests skipped\n");
                                 else {
                                     nerrors += test_man_remove_all_root_direct(fapl, &small_cparam, &tparam);
@@ -16298,7 +16300,7 @@ main(void)
                                 nerrors +=
                                     test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(
                                         fapl, &small_cparam, &tparam);
-                                if (TestExpress > 1)
+                                if (test_express > 1)
                                     printf("***Express test mode on.  Some tests skipped\n");
                                 else {
                                     nerrors +=
@@ -16428,7 +16430,7 @@ main(void)
             }     /* end block */
 
             /* Random object insertion & deletion */
-            if (TestExpress > 1)
+            if (test_express > 1)
                 printf("***Express test mode on.  Some tests skipped\n");
             else {
                 /* Random tests using "small" heap creation parameters */

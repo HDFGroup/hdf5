@@ -678,7 +678,7 @@ test_multiple_ends(hid_t file, bool is_chunked)
 **
 ****************************************************************/
 void
-test_coords(void)
+test_coords(const void H5_ATTR_UNUSED *params)
 {
     hid_t  fid;
     bool   is_chunk[2] = {true, false};
@@ -713,11 +713,13 @@ test_coords(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_coords(void)
+cleanup_coords(void H5_ATTR_UNUSED *params)
 {
-    H5E_BEGIN_TRY
-    {
-        H5Fdelete(FILENAME, H5P_DEFAULT);
+    if (GetTestCleanup()) {
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(FILENAME, H5P_DEFAULT);
+        }
+        H5E_END_TRY
     }
-    H5E_END_TRY
 }

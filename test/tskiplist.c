@@ -1555,7 +1555,7 @@ test_skiplist_term(void)
 **
 ****************************************************************/
 void
-test_skiplist(void)
+test_skiplist(const void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Skip Lists\n"));

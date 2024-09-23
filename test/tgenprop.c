@@ -2145,7 +2145,7 @@ test_genprop_deprec_list(void)
 **
 ****************************************************************/
 void
-test_genprop(void)
+test_genprop(const void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Generic Properties\n"));
@@ -2188,11 +2188,13 @@ test_genprop(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_genprop(void)
+cleanup_genprop(void H5_ATTR_UNUSED *params)
 {
-    H5E_BEGIN_TRY
-    {
-        H5Fdelete(FILENAME, H5P_DEFAULT);
+    if (GetTestCleanup()) {
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(FILENAME, H5P_DEFAULT);
+        }
+        H5E_END_TRY
     }
-    H5E_END_TRY
 }

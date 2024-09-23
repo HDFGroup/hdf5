@@ -56,7 +56,7 @@ static herr_t                  walk_error_callback(unsigned, const H5E_error2_t 
 static H5TS_THREAD_RETURN_TYPE tts_error_thread(void *);
 
 void
-tts_error(void)
+tts_error(const void H5_ATTR_UNUSED *params)
 {
     hid_t         def_fapl = H5I_INVALID_HID;
     hid_t         vol_id   = H5I_INVALID_HID;
@@ -251,9 +251,11 @@ walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void H5_ATTR_UNUSE
 }
 
 void
-cleanup_error(void)
+cleanup_error(void H5_ATTR_UNUSED *params)
 {
-    HDunlink(FILENAME);
+    if (GetTestCleanup()) {
+        HDunlink(FILENAME);
+    }
 }
 
 #endif /*H5_HAVE_THREADSAFE*/

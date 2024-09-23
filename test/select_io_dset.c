@@ -14,7 +14,7 @@
  * Purpose:    Tests selection IO for the dataset interface (H5D)
  */
 
-#include "testhdf5.h"
+#include "h5test.h"
 #include "H5srcdir.h"
 
 const char *FILENAME[] = {"select_io", /* 0 */
