@@ -1464,12 +1464,13 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
 
             /* Walk through the list of datatype suggestions */
             while (suggestion) {
+                bool exists = false;
+
                 /* Find the object */
-                if (H5G_loc_find(&dst_root_loc, suggestion->path, &obj_loc /*out*/) < 0)
-                    /* Ignore errors - i.e. suggestions not present in
-                     * destination file */
-                    H5E_clear_stack();
-                else
+                if (H5G_loc_exists(&dst_root_loc, suggestion->path, &exists /*out*/) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTFIND, FAIL, "can't check object's existance");
+
+                if (exists)
                     /* Check object and add to skip list if appropriate */
                     if (H5O__copy_search_comm_dt_check(&obj_oloc, &udata) < 0) {
                         if (H5G_loc_free(&obj_loc) < 0)
