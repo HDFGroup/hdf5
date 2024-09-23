@@ -179,6 +179,12 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, bool H5_ATT
     if (bt->nchildren > shared->two_k)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "number of children is greater than maximum");
 
+    /* Check in case of level is corrupted, it is unreasonable for level to be
+       larger than the number of entries */
+    if (bt->level > bt->nchildren)
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL,
+                    "level cannot be greater than the number of children, possibly corrupted");
+
     /* Sibling pointers */
     if (H5_IS_BUFFER_OVERFLOW(image, H5F_sizeof_addr(udata->f), p_end))
         HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
