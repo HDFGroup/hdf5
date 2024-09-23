@@ -30,7 +30,7 @@
 #define DSET7_NAME "dataset string"
 
 /* Name of a non-existing dataset, do not create a dataset with this name */
-#define NODS_NAME  "dataset"
+#define NODS_NAME "dataset"
 
 #define DIM 6
 
@@ -63,7 +63,7 @@ test_dsets(void)
     hsize_t     dims[2] = {2, 3};
     hid_t       file_id;
     hid_t       dataset_id;
-    herr_t      ds_existed = 0; /* whether searched ds exists */
+    herr_t      ds_existed        = 0; /* whether searched ds exists */
     char        data_char_in[DIM] = {1, 2, 3, 4, 5, 6};
     char        data_char_out[DIM];
     short       data_short_in[DIM] = {1, 2, 3, 4, 5, 6};
