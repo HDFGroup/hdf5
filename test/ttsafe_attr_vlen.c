@@ -157,7 +157,7 @@ tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
     VERIFY_STR(string_attr_check, string_attr, "H5Aread");
 
     /* Free the attribute data */
-    ret = H5Dvlen_reclaim(atid, asid, H5P_DEFAULT, &string_attr_check);
+    ret = H5Treclaim(atid, asid, H5P_DEFAULT, &string_attr_check);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Close IDs */

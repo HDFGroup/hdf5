@@ -12,7 +12,7 @@
 cmake_minimum_required (VERSION 3.18)
 ########################################################
 # This dashboard is maintained by The HDF Group
-# For any comments please contact cdashhelp@hdfgroup.org
+# For any comments please contact help@hdfgroup.org
 #
 ########################################################
 # -----------------------------------------------------------
