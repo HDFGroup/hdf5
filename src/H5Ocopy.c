@@ -1470,7 +1470,11 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
                 if (H5G_loc_exists(&dst_root_loc, suggestion->path, &exists /*out*/) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTFIND, FAIL, "can't check object's existance");
 
-                if (exists)
+                if (exists) {
+                    /* Retrieve the object location info */
+                    if (H5G_loc_find(&dst_root_loc, suggestion->path, &obj_loc /*out*/) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve object location");
+
                     /* Check object and add to skip list if appropriate */
                     if (H5O__copy_search_comm_dt_check(&obj_oloc, &udata) < 0) {
                         if (H5G_loc_free(&obj_loc) < 0)
@@ -1478,9 +1482,10 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't check object");
                     } /* end if */
 
-                /* Free location */
-                if (H5G_loc_free(&obj_loc) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location");
+                    /* Free location */
+                    if (H5G_loc_free(&obj_loc) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location");
+                } /* end if */
 
                 /* Advance the suggestion pointer */
                 suggestion = suggestion->next;
