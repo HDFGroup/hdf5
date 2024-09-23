@@ -1468,7 +1468,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
 
                 /* Find the object */
                 if (H5G_loc_exists(&dst_root_loc, suggestion->path, &exists /*out*/) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTFIND, FAIL, "can't check object's existance");
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTFIND, FAIL, "can't check object's existence");
 
                 if (exists) {
                     /* Retrieve the object location info */
