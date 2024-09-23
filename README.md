@@ -28,17 +28,17 @@ tools, and services at [The HDF Group's website](https://www.hdfgroup.org/).
 
 DOCUMENTATION
 -------------
-This release is fully functional for the API described in the documentation.
+Documentation for all HDF software is available at:
 
-   https://hdfgroup.github.io/hdf5/develop/_l_b_a_p_i.html
+   https://support.hdfgroup.org/documentation/index.html
 
-Full Documentation and Programming Resources for this release can be found at
+Documentation for the current HDF5 library release is available at:
 
-   https://hdfgroup.github.io/hdf5/develop/index.html
+   https://support.hdfgroup.org/releases/hdf5/latest-docs.html
 
-The latest doxygen documentation generated on changes to develop is available at:
+The latest Doxygen documentation generated on changes to `develop`, which does **not** correspond to any particular library release, is available at:
 
-   https://hdfgroup.github.io/hdf5/develop
+   https://hdfgroup.github.io/hdf5/develop 
 
 See the [RELEASE.txt](release_docs/RELEASE.txt) file in the [release_docs/](release_docs/) directory for information specific
 to the features and updates included in this release of the library.
