@@ -29,6 +29,9 @@
 #define DSET6_NAME "dataset double"
 #define DSET7_NAME "dataset string"
 
+/* Name of a non-existing dataset, do not create a dataset with this name */
+#define NODS_NAME "dataset"
+
 #define DIM 6
 
 #define ATTR_NAME_SUB "att"
@@ -60,6 +63,7 @@ test_dsets(void)
     hsize_t     dims[2] = {2, 3};
     hid_t       file_id;
     hid_t       dataset_id;
+    herr_t      ds_existed        = 0; /* whether searched ds exists */
     char        data_char_in[DIM] = {1, 2, 3, 4, 5, 6};
     char        data_char_out[DIM];
     short       data_short_in[DIM] = {1, 2, 3, 4, 5, 6};
@@ -347,6 +351,23 @@ test_dsets(void)
 
     if (strcmp(data_string_in, data_string_out) != 0)
         goto out;
+
+    PASSED();
+
+    /*-------------------------------------------------------------------------
+     * H5LTfind_dataset test
+     *-------------------------------------------------------------------------
+     */
+
+    HL_TESTING2("H5LTfind_dataset");
+
+    /* Try to find a non-existing ds whose name matches existing datasets partially */
+    if ((ds_existed = H5LTfind_dataset(file_id, NODS_NAME)) < 0)
+        goto out;
+    if (ds_existed > 0) {
+        printf("Dataset \"%s\" does not exist.\n", NODS_NAME);
+        goto out;
+    }
 
     /*-------------------------------------------------------------------------
      * end tests
@@ -1075,7 +1096,7 @@ test_integers(void)
     char  *dt_str;
     size_t str_len;
 
-    HL_TESTING3("\n        text for integer types");
+    HL_TESTING3("        text for integer types");
 
     if ((dtype = H5LTtext_to_dtype("H5T_NATIVE_INT\n", H5LT_DDL)) < 0)
         goto out;
@@ -1881,6 +1902,7 @@ test_text_dtype(void)
 {
     HL_TESTING2("H5LTtext_to_dtype");
 
+    printf("\n");
     if (test_integers() < 0)
         goto out;
 
