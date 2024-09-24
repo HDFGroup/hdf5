@@ -62,10 +62,22 @@
       }
     },
     {
-      "name": "ci-macos",
+      "name": "ci-macos-arm64",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_OSX_ARCHITECTURES": "arm64;x86_64"
+        "CMAKE_OSX_ARCHITECTURES": "arm64"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "ci-macos-x86_64",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_OSX_ARCHITECTURES": "x86_64"
       },
       "condition": {
         "type": "equals",
@@ -197,45 +209,45 @@
       ]
     },
     {
-      "name": "ci-macos-Debug-Clang",
+      "name": "ci-macos-arm64-Debug-Clang",
       "description": "Clang/LLVM for x64 (Debug)",
       "hidden": true,
       "inherits": [
         "ci-base",
-        "ci-macos",
+        "ci-macos-arm64",
         "ci-Debug",
         "ci-Clang"
       ]
     },
     {
-      "name": "ci-macos-Release-Clang",
+      "name": "ci-macos-arm64-Release-Clang",
       "description": "Clang/LLVM for x64 (Release)",
       "hidden": true,
       "inherits": [
         "ci-base",
-        "ci-macos",
+        "ci-macos-arm64",
         "ci-Release",
         "ci-Clang"
       ]
     },
     {
-      "name": "ci-macos-Debug-GNUC",
+      "name": "ci-macos-arm64-Debug-GNUC",
       "description": "GNUC for x64 (Debug)",
       "hidden": true,
       "inherits": [
         "ci-base",
-        "ci-macos",
+        "ci-macos-arm64",
         "ci-Debug",
         "ci-GNUC"
       ]
     },
     {
-      "name": "ci-macos-Release-GNUC",
+      "name": "ci-macos-arm64-Release-GNUC",
       "description": "GNUC for x64 (Release)",
       "hidden": true,
       "inherits": [
         "ci-base",
-        "ci-macos",
+        "ci-macos-arm64",
         "ci-Release",
         "ci-GNUC"
       ]
@@ -322,32 +334,32 @@
       ]
     },
     {
-      "name": "ci-macos-Debug-Clang",
-      "configurePreset": "ci-macos-Debug-Clang",
+      "name": "ci-macos-arm64-Debug-Clang",
+      "configurePreset": "ci-macos-arm64-Debug-Clang",
       "hidden": true,
       "inherits": [
         "ci-base"
       ]
     },
     {
-      "name": "ci-macos-Release-Clang",
-      "configurePreset": "ci-macos-Release-Clang",
+      "name": "ci-macos-arm64-Release-Clang",
+      "configurePreset": "ci-macos-arm64-Release-Clang",
       "hidden": true,
       "inherits": [
         "ci-base"
       ]
     },
     {
-      "name": "ci-macos-Debug-GNUC",
-      "configurePreset": "ci-macos-Debug-GNUC",
+      "name": "ci-macos-arm64-Debug-GNUC",
+      "configurePreset": "ci-macos-arm64-Debug-GNUC",
       "hidden": true,
       "inherits": [
         "ci-base"
       ]
     },
     {
-      "name": "ci-macos-Release-GNUC",
-      "configurePreset": "ci-macos-Release-GNUC",
+      "name": "ci-macos-arm64-Release-GNUC",
+      "configurePreset": "ci-macos-arm64-Release-GNUC",
       "hidden": true,
       "inherits": [
         "ci-base"
@@ -447,24 +459,24 @@
       ]
     },
     {
-      "name": "ci-macos-Release-Clang",
-      "configurePreset": "ci-macos-Release-Clang",
+      "name": "ci-macos-arm64-Release-Clang",
+      "configurePreset": "ci-macos-arm64-Release-Clang",
       "hidden": true,
       "inherits": [
         "ci-base"
       ]
     },
     {
-      "name": "ci-macos-Debug-GNUC",
-      "configurePreset": "ci-macos-Debug-GNUC",
+      "name": "ci-macos-arm64-Debug-GNUC",
+      "configurePreset": "ci-macos-arm64-Debug-GNUC",
       "hidden": true,
       "inherits": [
         "ci-base"
       ]
     },
     {
-      "name": "ci-macos-Release-GNUC",
-      "configurePreset": "ci-macos-Release-GNUC",
+      "name": "ci-macos-arm64-Release-GNUC",
+      "configurePreset": "ci-macos-arm64-Release-GNUC",
       "hidden": true,
       "inherits": [
         "ci-base"
@@ -515,14 +527,14 @@
       "inherits": "ci-base"
     },
     {
-      "name": "ci-macos-Release-Clang",
-      "configurePreset": "ci-macos-Release-Clang",
+      "name": "ci-macos-arm64-Release-Clang",
+      "configurePreset": "ci-macos-arm64-Release-Clang",
       "hidden": true,
       "inherits": "ci-base"
     },
     {
-      "name": "ci-macos-Release-GNUC",
-      "configurePreset": "ci-macos-Release-GNUC",
+      "name": "ci-macos-arm64-Release-GNUC",
+      "configurePreset": "ci-macos-arm64-Release-GNUC",
       "hidden": true,
       "inherits": "ci-base"
     },
