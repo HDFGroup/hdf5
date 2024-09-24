@@ -181,11 +181,6 @@
         "noTestsAction": "error",
         "timeout": 180,
         "jobs": 2
-      },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Darwin"
       }
     },
     {
@@ -251,6 +246,14 @@
         {"type": "configure", "name": "ci-StdShar-GNUC"},
         {"type": "build", "name": "ci-StdShar-GNUC"},
         {"type": "test", "name": "ci-StdShar-GNUC"}
+      ]
+    },
+    {
+      "name": "ci-StdShar-macos-GNUC",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-macos-GNUC"},
+        {"type": "build", "name": "ci-StdShar-macos-GNUC"},
+        {"type": "test", "name": "ci-StdShar-macos-GNUC"},
       ]
     },
     {
