@@ -75,8 +75,8 @@ static herr_t H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type);
 static herr_t H5O__get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr);
 static herr_t H5O__free_visit_visited(void *item, void *key, void *operator_data /*in,out*/);
 static herr_t H5O__visit_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void *_udata);
-static const H5O_obj_class_t *H5O__obj_class_real(const H5O_t *oh);
-static herr_t                 H5O__reset_info2(H5O_info2_t *oinfo);
+static herr_t H5O__obj_class_real(const H5O_t *oh, const H5O_obj_class_t **cls);
+static herr_t H5O__reset_info2(H5O_info2_t *oinfo);
 
 /*********************/
 /* Package Variables */
@@ -1594,37 +1594,39 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O__obj_type_real
  *
- * Purpose:    Returns the type of object pointed to by `oh'.
+ * Purpose:     On success, returns the type of object pointed to by `oh' or
+ *              NULL in *obj_type.  *obj_type not defined on failure.
  *
- * Return:    Success:    Non-negative
- *        Failure:    Negative
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type)
 {
-    const H5O_obj_class_t *obj_class; /* Class of object for header */
+    const H5O_obj_class_t *obj_class = NULL; /* Class of object for header */
+    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     assert(oh);
     assert(obj_type);
 
     /* Look up class for object header */
-    if (NULL == (obj_class = H5O__obj_class_real(oh))) {
-        /* Clear error stack from "failed" class lookup */
-        H5E_clear_stack();
+    if (H5O__obj_class_real(oh, &obj_class) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine object class");
 
-        /* Set type to "unknown" */
-        *obj_type = H5O_TYPE_UNKNOWN;
-    }
-    else
+    if (obj_class)
         /* Set object type */
         *obj_type = obj_class->type;
+    else
+        /* Set type to "unknown" */
+        *obj_type = H5O_TYPE_UNKNOWN;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__obj_type_real() */
 
 /*-------------------------------------------------------------------------
@@ -1650,7 +1652,7 @@ H5O__obj_class(const H5O_loc_t *loc)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header");
 
     /* Test whether entry qualifies as a particular type of object */
-    if (NULL == (ret_value = H5O__obj_class_real(oh)))
+    if (H5O__obj_class_real(oh, &ret_value) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to determine object type");
 
 done:
@@ -1663,23 +1665,25 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O__obj_class_real
  *
- * Purpose:    Returns the class of object pointed to by `oh'.
+ * Purpose:     On success returns the class of object pointed to by `oh' or
+ *              NULL in *cls.  *cls not defined on failure.
  *
- * Return:    Success:    An object class
- *        Failure:    NULL
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
-static const H5O_obj_class_t *
-H5O__obj_class_real(const H5O_t *oh)
+static herr_t
+H5O__obj_class_real(const H5O_t *oh, const H5O_obj_class_t **cls)
 {
     size_t                 i;                /* Local index variable */
-    const H5O_obj_class_t *ret_value = NULL; /* Return value */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     assert(oh);
+    assert(cls);
 
     /* Test whether entry qualifies as a particular type of object */
     /* (Note: loop is in reverse order, to test specific objects first) */
@@ -1687,13 +1691,15 @@ H5O__obj_class_real(const H5O_t *oh)
         htri_t isa; /* Is entry a particular type? */
 
         if ((isa = (H5O_obj_class_g[i - 1]->isa)(oh)) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to determine object type");
-        else if (isa)
-            HGOTO_DONE(H5O_obj_class_g[i - 1]);
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine object type");
+        else if (isa) {
+            *cls = H5O_obj_class_g[i - 1];
+            break;
+        }
     }
 
     if (0 == i)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to determine object type");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine object type");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2071,7 +2077,7 @@ H5O__get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
 herr_t
 H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
 {
-    const H5O_obj_class_t *obj_class;           /* Class of object for header */
+    const H5O_obj_class_t *obj_class = NULL;           /* Class of object for header */
     H5O_t                 *oh        = NULL;    /* Object header */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -2086,7 +2092,7 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header");
 
     /* Get class for object */
-    if (NULL == (obj_class = H5O__obj_class_real(oh)))
+    if (H5O__obj_class_real(oh, &obj_class) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine object class");
 
     /* Reset the object info structure */
@@ -2177,7 +2183,7 @@ done:
 herr_t
 H5O_get_native_info(const H5O_loc_t *loc, H5O_native_info_t *oinfo, unsigned fields)
 {
-    const H5O_obj_class_t *obj_class;           /* Class of object for header */
+    const H5O_obj_class_t *obj_class = NULL;           /* Class of object for header */
     H5O_t                 *oh        = NULL;    /* Object header */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -2192,7 +2198,7 @@ H5O_get_native_info(const H5O_loc_t *loc, H5O_native_info_t *oinfo, unsigned fie
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header");
 
     /* Get class for object */
-    if (NULL == (obj_class = H5O__obj_class_real(oh)))
+    if (H5O__obj_class_real(oh, &obj_class) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine object class");
 
     /* Reset the object info structure */
