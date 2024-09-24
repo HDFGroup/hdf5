@@ -285,6 +285,18 @@ Bug Fixes since HDF5-1.14.4 release
       APIs in HDF5 will be modified/written in this manner, regarding the
       length of a character string.
 
+      Fixes GitHub #4447
+
+    - Fixed heap-buffer-overflow in h5dump
+
+      h5dump aborted when provided with a malformed input file.  The was because
+      the buffer size for checksum was smaller than H5_SIZEOF_CHKSUM, causing
+      an overflow while calculating the offset to the checksum in the buffer.
+      A check was added so H5F_get_checksums would fail appropriately in all
+      of its occurrences.
+
+      Fixes GitHub #4434
+
     - Fixed library to allow usage of page buffering feature for serial file
       access with parallel builds of HDF5
 
