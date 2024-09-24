@@ -1606,7 +1606,7 @@ static herr_t
 H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type)
 {
     const H5O_obj_class_t *obj_class = NULL; /* Class of object for header */
-    herr_t ret_value = SUCCEED;
+    herr_t                 ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1676,7 +1676,7 @@ done:
 static herr_t
 H5O__obj_class_real(const H5O_t *oh, const H5O_obj_class_t **cls)
 {
-    size_t                 i;                /* Local index variable */
+    size_t i; /* Local index variable */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -2077,7 +2077,7 @@ H5O__get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
 herr_t
 H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
 {
-    const H5O_obj_class_t *obj_class = NULL;           /* Class of object for header */
+    const H5O_obj_class_t *obj_class = NULL;    /* Class of object for header */
     H5O_t                 *oh        = NULL;    /* Object header */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -2183,7 +2183,7 @@ done:
 herr_t
 H5O_get_native_info(const H5O_loc_t *loc, H5O_native_info_t *oinfo, unsigned fields)
 {
-    const H5O_obj_class_t *obj_class = NULL;           /* Class of object for header */
+    const H5O_obj_class_t *obj_class = NULL;    /* Class of object for header */
     H5O_t                 *oh        = NULL;    /* Object header */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
