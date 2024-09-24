@@ -184,6 +184,13 @@
       }
     },
     {
+      "name": "ci-StdShar-macos-GNUC",
+      "configurePreset": "ci-StdShar-macos-GNUC",
+      "inherits": [
+        "ci-macos-Release-GNUC"
+      ]
+    },
+    {
       "name": "ci-StdShar-GNUC",
       "configurePreset": "ci-StdShar-GNUC",
       "inherits": [
