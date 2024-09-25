@@ -133,10 +133,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5TS_term_package
  *
- * Purpose:  Terminate this interface.
+ * Purpose:  Terminate this interface. Clean up global resources shared by
+ *              all threads.
  *
  * Note:     This function is currently registered via atexit() and is called
- *              AFTER H5_term_library().
+ *              AFTER H5_term_library(). H5TS_top_term_package() is called at library
+ *              termination to clean up per-thread resources.
  *
  * Return:    void
  *
@@ -151,8 +153,8 @@ H5TS_term_package(void)
     H5TS_mutex_destroy(&H5TS_api_info_p.api_mutex);
     H5TS_atomic_destroy_uint(&H5TS_api_info_p.attempt_lock_count);
 
-    /* Clean up per-thread library info */
-    H5TS__tinfo_term();
+    /* Release critical section / mutex for modifying the thread info globals */
+    H5TS_mutex_destroy(&H5TS_tinfo_mtx_s);
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5TS_term_package() */
@@ -536,6 +538,30 @@ H5TS__tinfo_destroy(void *_tinfo_node)
 }
 
 /*--------------------------------------------------------------------------
+ * Function:    H5TS_top_term_package
+ *
+ * Purpose:     Terminate the threadlocal parts of the H5TS interface during library terminaton.
+ *
+ * Note:        See H5TS_term_package for termination of the thread-global resources
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+int
+H5TS_top_term_package(void)
+{
+    int n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Clean up per-thread library info */
+    H5TS__tinfo_term();
+
+    FUNC_LEAVE_NOAPI(n)
+}
+
+/*--------------------------------------------------------------------------
  * Function:    H5TS__tinfo_term
  *
  * Purpose:     Terminate per-thread info at library shutdown
@@ -560,10 +586,6 @@ H5TS__tinfo_term(void)
         H5TS_tinfo_next_free_s = next;
     }
     if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_tinfo_mtx_s) < 0))
-        HGOTO_DONE(FAIL);
-
-    /* Release critical section / mutex for modifying the thread info globals */
-    if (H5_UNLIKELY(H5TS_mutex_destroy(&H5TS_tinfo_mtx_s) < 0))
         HGOTO_DONE(FAIL);
 
     /* Release key for thread-specific API contexts */
