@@ -23,6 +23,8 @@
 H5TS_THREAD_RETURN_TYPE generate_hdf5_error(void *arg);
 H5TS_THREAD_RETURN_TYPE generate_user_error(void *arg);
 
+hid_t err_cls_id = H5I_INVALID_HID;
+
 /* Helper routine to generate an HDF5 library error */
 H5TS_THREAD_RETURN_TYPE
 generate_hdf5_error(void H5_ATTR_UNUSED *arg)
@@ -47,24 +49,21 @@ H5TS_THREAD_RETURN_TYPE
 generate_user_error(void H5_ATTR_UNUSED *arg)
 {
     H5TS_thread_ret_t ret_value = 0;
-    hid_t             cls       = H5I_INVALID_HID;
     hid_t             major     = H5I_INVALID_HID;
     hid_t             minor     = H5I_INVALID_HID;
     herr_t            status    = FAIL;
 
-    cls = H5Eregister_class(ERR_CLS_NAME, ERR_CLS_LIB_NAME, ERR_CLS_LIB_VERSION);
-    CHECK(cls, H5I_INVALID_HID, "H5Eregister_class");
+    err_cls_id = H5Eregister_class(ERR_CLS_NAME, ERR_CLS_LIB_NAME, ERR_CLS_LIB_VERSION);
+    CHECK(err_cls_id, H5I_INVALID_HID, "H5Eregister_class");
 
-    major = H5Ecreate_msg(cls, H5E_MAJOR, ERR_MAJOR_MSG);
+    major = H5Ecreate_msg(err_cls_id, H5E_MAJOR, ERR_MAJOR_MSG);
     CHECK(major, H5I_INVALID_HID, "H5Ecreate_msg");
 
-    minor = H5Ecreate_msg(cls, H5E_MINOR, ERR_MINOR_MSG);
+    minor = H5Ecreate_msg(err_cls_id, H5E_MINOR, ERR_MINOR_MSG);
     CHECK(minor, H5I_INVALID_HID, "H5Ecreate_msg");
 
-    status = H5Epush2(H5E_DEFAULT, __FILE__, __func__, __LINE__, cls, major, minor, "Hello, error\n");
+    status = H5Epush2(H5E_DEFAULT, __FILE__, __func__, __LINE__, err_cls_id, major, minor, "Hello, error\n");
     CHECK(status, FAIL, "H5Epush2");
-
-    ret_value = (H5TS_thread_ret_t)cls;
 
     return ret_value;
 }
@@ -81,8 +80,7 @@ void
 tts_error_stacks(void)
 {
     H5TS_thread_t threads[2];
-    herr_t        status     = FAIL;
-    hid_t         err_cls_id = H5I_INVALID_HID;
+    herr_t        status = FAIL;
 
     /* Open library */
     H5open();
@@ -96,7 +94,7 @@ tts_error_stacks(void)
     status = H5TS_thread_create(&threads[1], generate_user_error, NULL);
     CHECK(status, FAIL, "H5TS_thread_create");
 
-    status = H5TS_thread_join(threads[1], (void *)&err_cls_id);
+    status = H5TS_thread_join(threads[1], NULL);
     CHECK(status, FAIL, "H5TS_thread_join");
 
     if (err_cls_id <= 0) {
