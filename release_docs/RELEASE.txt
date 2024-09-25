@@ -888,7 +888,6 @@ Bug Fixes since HDF5-1.14.0 release
 
       Fixes GitHub #4656 and GitHub #4662
 
->>>>>>> origin/develop
     - Fixed a bug with large external datasets
 
       When performing a large I/O on an external dataset, the library would only
