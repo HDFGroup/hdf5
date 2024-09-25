@@ -11,8 +11,7 @@
 #
 cmake_minimum_required (VERSION 3.18)
 ########################################################
-# This dashboard is maintained by The HDF Group
-# For any comments please contact cdashhelp@hdfgroup.org
+# For any comments please contact help@hdfgroup.org
 #
 ########################################################
 # -----------------------------------------------------------
@@ -65,7 +64,7 @@ else ()
 endif ()
 
 #-----------------------------------------------------------------------------
-# MAC machines need special option
+# MacOS machines need special options
 #-----------------------------------------------------------------------------
 if (APPLE)
   # Compiler choice
@@ -81,7 +80,6 @@ endif ()
 set (NEED_REPOSITORY_CHECKOUT 0)
 set (CTEST_CMAKE_COMMAND "\"${CMAKE_COMMAND}\"")
 if (CTEST_USE_TAR_SOURCE)
-  ## Uncompress source if tar file provided
   ## --------------------------
   if (WIN32 AND NOT MINGW)
     message (STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_DASHBOARD_ROOT}\\${CTEST_USE_TAR_SOURCE}.zip]")
