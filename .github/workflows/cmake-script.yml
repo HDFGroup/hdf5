@@ -284,7 +284,6 @@ jobs:
             set (CTEST_DROP_SITE_INIT "my.cdash.org")
             # Change following line to submit to your CDash dashboard to a different CDash project
             #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
-            set (NO_MAC_FORTRAN "ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
