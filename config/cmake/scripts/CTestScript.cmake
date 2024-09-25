@@ -22,12 +22,12 @@ if (NOT SITE_OS_NAME)
   ## machine name not provided - attempt to discover with uname
   ## -- set hostname
   ## --------------------------
-  #find_program (HOSTNAME_CMD NAMES hostname)
-  #execute_process (COMMAND ${HOSTNAME_CMD} OUTPUT_VARIABLE HOSTNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
-  #set (CTEST_SITE  "${HOSTNAME}${CTEST_SITE_EXT}")
+  find_program (HOSTNAME_CMD NAMES hostname)
+  execute_process (COMMAND ${HOSTNAME_CMD} OUTPUT_VARIABLE HOSTNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
+  set (CTEST_SITE  "${HOSTNAME}${CTEST_SITE_EXT}")
   find_program (UNAME NAMES uname)
   macro (getuname name flag)
-    execute_process (COMMAND "${UNAME}" "${flag}" OUTPUT_VARIABLE "${name}")
+    execute_process (COMMAND "${UNAME}" "${flag}" OUTPUT_VARIABLE "${name}" OUTPUT_STRIP_TRAILING_WHITESPACE)
   endmacro ()
 
   getuname (osname -s)
