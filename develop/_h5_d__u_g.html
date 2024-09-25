@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.e014493</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.013b1cd</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -231,7 +231,7 @@ Dataset Function Summaries</h2>
 <tr>
 <td><a class="el" href="group___d_c_p_l.html#gaf507a3efa5d1f37448baea089fc053d8" title="Retrieves the timing for storage space allocation.">H5Pget_alloc_time</a> </td><td>Retrieves the timing for storage space allocation.  </td></tr>
 <tr>
-<td><a class="el" href="group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5" title="Adds a filter to the filter pipeline.">H5Pset_filter</a> </td><td>Adds a filter to the filter pipeline.  </td></tr>
+<td><a class="el" href="group___o_c_p_l.html#gae7ac4c110e9ec3fcf38966928b96cda3" title="Adds a filter to the filter pipeline.">H5Pset_filter</a> </td><td>Adds a filter to the filter pipeline.  </td></tr>
 <tr>
 <td><a class="el" href="group___d_c_p_l.html#ga70f5346250698afc950532e9593c3988" title="Verifies that all required filters are available.">H5Pall_filters_avail</a> </td><td>Verifies that all required filters are available.  </td></tr>
 <tr>
@@ -722,7 +722,7 @@ Data Pipeline Dynamically Loaded Filters</h3>
 <p>If a user of such data does not have a modified HDF5 Library installed on his system, command-line tools such as h5dump or h5ls will not be able to display the compressed data. Furthermore, it would be practically impossible to determine the compression method used, making the data stored in HDF5 useless.</p>
 <p>It is clear that the internal HDF5 filter mechanism, while extensible, does not work well with third-party filters. It would be a maintenance nightmare to keep adding and supporting new compression methods in HDF5. For any set of HDF5 “internal” filters, there always will be data with which the “internal” filters will not achieve the optimal performance needed to address data I/O and storage problems. Thus the internal HDF5 filter mechanism is enhanced to address the issues discussed above.</p>
 <p>We have a feature of HDF5 called “dynamically loaded filters in HDF5.” This feature makes the HDF5 third-party filters available to an application at runtime. The third-party HDF5 filter function has to be a part of the HDF5 filter plugin installed on the system as a shared library or DLL.</p>
-<p>To use a third-party filter an HDF5 application should call the <a class="el" href="group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5" title="Adds a filter to the filter pipeline.">H5Pset_filter</a> function when setting the filter pipeline for a dataset creation property. The HDF5 Library will register the filter with the library and the filter will be applied when data is written to the file.</p>
+<p>To use a third-party filter an HDF5 application should call the <a class="el" href="group___o_c_p_l.html#gae7ac4c110e9ec3fcf38966928b96cda3" title="Adds a filter to the filter pipeline.">H5Pset_filter</a> function when setting the filter pipeline for a dataset creation property. The HDF5 Library will register the filter with the library and the filter will be applied when data is written to the file.</p>
 <p>When an application reads data compressed with a third-party HDF5 filter, the HDF5 Library will search for the required filter plugin, register the filter with the library (if the filter function is not registered) and apply it to the data on the read operation.</p>
 <p>For more information, </p><ul>
 <li><dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_p_l__u_g.html#sec_filter_plugins">HDF5 Filter Plugins</a></dd></dl>
