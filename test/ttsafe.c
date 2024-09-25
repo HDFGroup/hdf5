@@ -144,6 +144,8 @@ main(int argc, char *argv[])
 #ifdef H5_HAVE_THREADSAFE
     AddTest("thread_id", tts_thread_id, NULL, "thread IDs", NULL);
 
+    /* Error stack test must be done after thread_id test to not mess up expected IDs */
+    AddTest("error_stacks", tts_error_stacks, NULL, "error stack tests", NULL);
     AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
     AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
 #ifdef H5_HAVE_PTHREAD_H

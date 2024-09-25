@@ -40,6 +40,7 @@ void tts_thread_pool(void);
 void tts_atomics(void);
 void tts_rwlock(void);
 void tts_semaphore(void);
+void tts_error_stacks(void);
 #ifndef H5_HAVE_WIN_THREADS
 void tts_rec_rwlock_smoke_check_1(void);
 void tts_rec_rwlock_smoke_check_2(void);
