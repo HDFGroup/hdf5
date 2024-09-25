@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       use_ignore:
-        description: 'Ignore has changes check'
+        description: 'Ignore has_changes check'
         type: string
         required: false
         default: check
@@ -48,7 +48,7 @@ jobs:
     needs: [get-old-names]
     uses: ./.github/workflows/tarball.yml
     with:
-      use_ignore: ${{ needs.get-base-names.outputs.run-ignore }}
+      use_ignore: ${{ needs.get-old-names.outputs.run-ignore }}
       use_tag: snapshot
       use_environ: snapshots
 
@@ -58,7 +58,7 @@ jobs:
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_environ: snapshots
-    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-ctest:
     needs: [get-old-names, call-workflow-tarball]
@@ -78,7 +78,7 @@ jobs:
         AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
         AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
         AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-abi:
     needs: [get-old-names, call-workflow-tarball, call-workflow-ctest]
@@ -88,7 +88,7 @@ jobs:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_tag: snapshot
       use_environ: snapshots
-    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-release:
     needs: [get-old-names, call-workflow-tarball, call-workflow-ctest, call-workflow-abi]
@@ -101,7 +101,7 @@ jobs:
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
       use_tag: snapshot
       use_environ: snapshots
-    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-remove:
     needs: [get-old-names, call-workflow-tarball, call-workflow-ctest, call-workflow-abi, call-workflow-release]
@@ -112,5 +112,5 @@ jobs:
       file_base: ${{ needs.get-old-names.outputs.hdf5-name }}
       use_tag: snapshot
       use_environ: snapshots
-    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) && (needs.get-old-names.outputs.hdf5-name != needs.call-workflow-tarball.outputs.file_base) }}
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) && (needs.get-old-names.outputs.hdf5-name != needs.call-workflow-tarball.outputs.file_base) }}
 

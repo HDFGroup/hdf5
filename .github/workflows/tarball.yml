@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       use_ignore:
-        description: 'Ignore has changes check'
+        description: 'Ignore has_changes check'
         type: string
         required: false
         default: check
