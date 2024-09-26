@@ -61,7 +61,7 @@ void accum_printf(const H5F_t *f);
 #define accum_read(a, s, b)  H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), (b))
 #define accum_free(f, a, s)  H5F__accum_free(f->shared, H5FD_MEM_DEFAULT, (haddr_t)(a), (hsize_t)(s))
 #define accum_flush(f)       H5F__accum_flush(f->shared)
-#define accum_reset(f)       H5F__accum_reset(f->shared, true)
+#define accum_reset(f)       H5F__accum_reset(f->shared, true, false)
 
 /* ================= */
 /* Main Test Routine */
