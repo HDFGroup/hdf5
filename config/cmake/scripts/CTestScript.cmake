@@ -11,7 +11,6 @@
 #
 cmake_minimum_required (VERSION 3.18)
 ########################################################
-# This dashboard is maintained by The HDF Group
 # For any comments please contact help@hdfgroup.org
 #
 ########################################################
@@ -23,16 +22,19 @@ if (NOT SITE_OS_NAME)
   ## -- set hostname
   ## --------------------------
   find_program (HOSTNAME_CMD NAMES hostname)
-  exec_program (${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)
+  execute_process (COMMAND ${HOSTNAME_CMD} OUTPUT_VARIABLE HOSTNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
   set (CTEST_SITE  "${HOSTNAME}${CTEST_SITE_EXT}")
   find_program (UNAME NAMES uname)
   macro (getuname name flag)
-    exec_program ("${UNAME}" ARGS "${flag}" OUTPUT_VARIABLE "${name}")
+    execute_process (COMMAND "${UNAME}" "${flag}" OUTPUT_VARIABLE "${name}" OUTPUT_STRIP_TRAILING_WHITESPACE)
   endmacro ()
 
   getuname (osname -s)
+  string(STRIP ${osname} osname)
   getuname (osrel  -r)
+  string(STRIP ${osrel} osrel)
   getuname (cpu    -m)
+  string(STRIP ${cpu} cpu)
   message (STATUS "Dashboard script uname output: ${osname}-${osrel}-${cpu}\n")
 
   set (CTEST_BUILD_NAME  "${osname}-${osrel}-${cpu}")
@@ -62,7 +64,7 @@ else ()
 endif ()
 
 #-----------------------------------------------------------------------------
-# MAC machines need special option
+# MacOS machines need special options
 #-----------------------------------------------------------------------------
 if (APPLE)
   # Compiler choice
@@ -78,7 +80,6 @@ endif ()
 set (NEED_REPOSITORY_CHECKOUT 0)
 set (CTEST_CMAKE_COMMAND "\"${CMAKE_COMMAND}\"")
 if (CTEST_USE_TAR_SOURCE)
-  ## Uncompress source if tar file provided
   ## --------------------------
   if (WIN32 AND NOT MINGW)
     message (STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_DASHBOARD_ROOT}\\${CTEST_USE_TAR_SOURCE}.zip]")
