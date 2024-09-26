@@ -725,7 +725,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
             /* Make certain that data in accumulator is visible before new write */
             if ((H5F_SHARED_INTENT(f_sh) & H5F_ACC_SWMR_WRITE) > 0)
                 /* Flush if dirty and reset accumulator */
-                if (H5F__accum_reset(f_sh, true) < 0)
+                if (H5F__accum_reset(f_sh, true, false) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator");
 
             /* Write the data */
@@ -776,7 +776,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                     }      /* end if */
                     else { /* Access covers whole accumulator */
                         /* Reset accumulator, but don't flush */
-                        if (H5F__accum_reset(f_sh, false) < 0)
+                        if (H5F__accum_reset(f_sh, false, false) < 0)
                             HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator");
                     }                    /* end else */
                 }                        /* end if */
@@ -1039,7 +1039,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__accum_reset(H5F_shared_t *f_sh, bool flush)
+H5F__accum_reset(H5F_shared_t *f_sh, bool flush, bool force)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1050,8 +1050,11 @@ H5F__accum_reset(H5F_shared_t *f_sh, bool flush)
 
     /* Flush any dirty data in accumulator, if requested */
     if (flush)
-        if (H5F__accum_flush(f_sh) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "can't flush metadata accumulator");
+        if (H5F__accum_flush(f_sh) < 0) {
+            HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "can't flush metadata accumulator");
+            if (!force)
+                HGOTO_DONE(FAIL);
+        }
 
     /* Check if we need to reset the metadata accumulator information */
     if (f_sh->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) {
