@@ -829,6 +829,67 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed an incorrect returned value by H5LTfind_dataset()
+
+      H5LTfind_dataset() returned true for non-existing datasets because it only
+      compared up to the length of the searched string, such as "Day" vs "DayNight".
+      Applied the user's patch to correct this behavior.
+
+      Fixes GitHub #4780
+
+    - Fixed a segfault by H5Gmove2, extending to H5Lcopy and H5Lmove
+
+      A user's application segfaulted when it passed in an invalid location ID
+      to H5Gmove2.  The src and dst location IDs must be either a file or a group
+      ID.  The fix was also applied to H5Lcopy and H5Lmove.  Now, all these
+      three functions will fail if either the src or dst location ID is not a file
+      or a group ID.
+
+      Fixes GitHub #4737
+
+    - Fixed a segfault by H5Lget_info()
+
+      A user's program generated a segfault when the ID passed into H5Lget_info()
+      was a datatype ID.  This was caused by non-VOL functions being used internally
+      where VOL functions should have been.  This correction was extended to many
+      other functions to prevent potential issue in the future.
+
+      Fixes GitHub #4730
+
+    - Fixed a segfault by H5Fget_intent(), extending to several other functions
+
+      A user's program generated a segfault when the ID passed into H5Fget_intent()
+      was not a file ID.  In addition to H5Fget_intent(), a number of APIs also failed
+      to detect an incorrect ID being passed in, which can potentially cause various
+      failures, including segfault.  The affected functions are listed below and now
+      properly detect incorrect ID parameters:
+
+        H5Fget_intent()
+        H5Fget_fileno()
+        H5Fget_freespace()
+        H5Fget_create_plist()
+        H5Fget_access_plist()
+        H5Fget_vfd_handle()
+        H5Dvlen_get_buf_size()
+        H5Fget_mdc_config()
+        H5Fset_mdc_config()
+        H5Freset_mdc_hit_rate_stats()
+
+      Fixes GitHub #4656 and GitHub #4662
+
+    - Fixed a bug with large external datasets
+
+      When performing a large I/O on an external dataset, the library would only
+      issue a single read or write system call. This could cause errors or cause
+      the data to be incorrect. These calls do not guarantee that they will
+      process the entire I/O request, and may need to be called multiple times
+      to complete the I/O, advancing the buffer and reducing the size by the
+      amount actually processed by read or write each time. Implemented this
+      algorithm for external datasets in both the read and write cases.
+
+      Fixes GitHub #4216
+      Fixes h5py GitHub #2394
+
     - Fixed a bug in the Subfiling VFD that could cause a buffer over-read
       and memory allocation failures
 
@@ -853,8 +914,20 @@ Bug Fixes since HDF5-1.14.0 release
       H5Rget_file_name and H5Rget_obj_name both return the name's length
       without the null terminator.  H5Rget_attr_name now behaves consistently
       with the other two APIs.  Going forward, all the get character string
-      APIs in HDF5 will be modified/written in this manner, regarding the
+      APIs in HDF5 will be modified/written in this manner regarding the
       length of a character string.
+
+      Fixes GitHub #4447
+
+    - Fixed heap-buffer-overflow in h5dump
+
+      h5dump aborted when provided with a malformed input file.  The was because
+      the buffer size for checksum was smaller than H5_SIZEOF_CHKSUM, causing
+      an overflow while calculating the offset to the checksum in the buffer.
+      A check was added so H5F_get_checksums would fail appropriately in all
+      of its occurrences.
+
+      Fixes GitHub #4434
 
     - Fixed library to allow usage of page buffering feature for serial file
       access with parallel builds of HDF5

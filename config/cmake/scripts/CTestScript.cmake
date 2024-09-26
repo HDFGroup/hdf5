@@ -11,6 +11,10 @@
 #
 cmake_minimum_required (VERSION 3.18)
 ########################################################
+<<<<<<< HEAD
+=======
+# This dashboard is maintained by The HDF Group
+>>>>>>> branch 'develop' of https://github.com/HDFGroup/hdf5.git
 # For any comments please contact help@hdfgroup.org
 #
 ########################################################
