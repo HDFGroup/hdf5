@@ -205,7 +205,7 @@ ${HDF5_FLEX} --nounistd -PH5LTyy -o ${path_to_hl_src}/H5LTanalyze.c ${path_to_hl
 # with a return value of type int, which is a mapping to the
 # flex yyparse function.  The return value in the HL library should be
 # an hid_t.
-# A Perl command will be added to find and replace this function declaration
+# Use Perl command to find and replace this function declaration
 # in H5LTparse.c. This is a temporary solution until a method that does not
 # use flex is implemented.
 perl -0777 -pi -e 's/int yyparse/hid_t yyparse/igs' ${path_to_hl_src}/H5LTparse.c
