@@ -2074,8 +2074,8 @@ H5O__get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
 herr_t
 H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
 {
-    H5O_t                 *oh        = NULL;    /* Object header */
-    herr_t                 ret_value = SUCCEED; /* Return value */
+    H5O_t *oh        = NULL;    /* Object header */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(loc->addr, FAIL)
 
@@ -2093,7 +2093,7 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
 
     /* Get basic information, if requested */
     if (fields & H5O_INFO_BASIC) {
-        H5O_type_t obj_type = H5O_TYPE_UNKNOWN;    /* Type of object */
+        H5O_type_t obj_type = H5O_TYPE_UNKNOWN; /* Type of object */
 
         /* Retrieve the file's fileno */
         H5F_GET_FILENO(loc->file, oinfo->fileno);
@@ -2181,8 +2181,8 @@ done:
 herr_t
 H5O_get_native_info(const H5O_loc_t *loc, H5O_native_info_t *oinfo, unsigned fields)
 {
-    H5O_t                 *oh        = NULL;    /* Object header */
-    herr_t                 ret_value = SUCCEED; /* Return value */
+    H5O_t *oh        = NULL;    /* Object header */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(loc->addr, FAIL)
 
@@ -2204,7 +2204,7 @@ H5O_get_native_info(const H5O_loc_t *loc, H5O_native_info_t *oinfo, unsigned fie
 
     /* Get B-tree & heap metadata storage size, if requested */
     if (fields & H5O_NATIVE_INFO_META_SIZE) {
-        const H5O_obj_class_t *obj_class = NULL;    /* Class of object for header */
+        const H5O_obj_class_t *obj_class = NULL; /* Class of object for header */
 
         /* Get class for object */
         if (H5O__obj_class_real(oh, &obj_class) < 0)
