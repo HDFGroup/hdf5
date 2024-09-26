@@ -818,7 +818,15 @@ New Features
 
     Documentation:
     --------------
-    -
+    - Documented that leaving HDF5 threads running at termination is unsafe
+
+      Added doc/threadsafety-warning.md as a warning that threads which use HDF5 
+      resources must be closed before either process exit or library close. 
+      If HDF5 threads are alive during either of  these operations, their resources 
+      will not be cleaned up properly and undefined behavior is possible. 
+      
+      This document also includes a discussion on potential ways to mitigate this issue.
+
 
 
 Support for new platforms, languages and compilers
