@@ -22,6 +22,8 @@
  *      reporting macros.
  */
 #define H5_MY_PKG     H5FD
-#define H5_MY_PKG_ERR H5E_FILE
+#define H5_MY_PKG_ERR H5E_VFL
+#define H5_MY_PKG_INIT YES
+#define H5_PKG_SINGLE_SOURCE
 
 #endif /* H5FDdrvr_module_H */

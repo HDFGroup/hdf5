@@ -153,6 +153,9 @@ static H5B_t *H5B__copy(const H5B_t *old_bt);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /* Declare a free list to manage the haddr_t sequence information */
 H5FL_SEQ_DEFINE(haddr_t);
 

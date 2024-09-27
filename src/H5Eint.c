@@ -228,6 +228,30 @@ H5E_init(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E_init() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5E__init_package
+ *
+ * Purpose:     Initialize interface-specific information
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, July 11, 2003
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5E__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
 
     /* Initialize the ID group for the error class IDs */
     if (H5I_register_type(H5I_ERRCLS_CLS) < 0)
@@ -254,7 +278,7 @@ H5E_init(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5E__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5E_term_package
@@ -275,6 +299,7 @@ H5E_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    if (H5_PKG_INIT_VAR) {
     int64_t ncls, nmsg, nstk;
 
     /* Check if there are any open error stacks, classes or messages */
@@ -329,7 +354,11 @@ H5E_term_package(void)
         n += (H5I_dec_type_ref(H5I_ERROR_CLASS) > 0);
         n += (H5I_dec_type_ref(H5I_ERROR_MSG) > 0);
 
+            /* Mark closed */
+            if (0 == n)
+                H5_PKG_INIT_VAR = false;
     } /* end else */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5E_term_package() */
@@ -1774,7 +1803,7 @@ H5E_dump_api_stack(void)
     H5E_stack_t *estack    = H5E__get_my_stack();
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(estack);
 
@@ -1792,6 +1821,7 @@ H5E_dump_api_stack(void)
     } /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_dump_api_stack() */
 
@@ -1823,7 +1853,7 @@ H5E_pause_stack(void)
 {
     H5E_stack_t *estack = H5E__get_my_stack();
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(estack);
 
@@ -1861,7 +1891,7 @@ H5E_resume_stack(void)
 {
     H5E_stack_t *estack = H5E__get_my_stack();
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(estack);
     assert(estack->paused);

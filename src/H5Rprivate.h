@@ -38,6 +38,4 @@
 /* Library Private Prototypes */
 /******************************/
 
-H5_DLL herr_t H5R_init(void);
-
 #endif /* H5Rprivate_H */

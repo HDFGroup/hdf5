@@ -16,8 +16,8 @@
  * Purpose:     Provide in-file provenance and revision/version control.
  */
 
-/* This source code file is part of the H5FD driver module */
-#include "H5FDdrvr_module.h"
+/* This source code file is part of the H5FD onion module */
+#include "H5FDonion_module.h"
 
 #include "H5private.h"      /* Generic Functions           */
 #include "H5Eprivate.h"     /* Error handling              */
@@ -31,7 +31,10 @@
 #include "H5MMprivate.h"    /* Memory management           */
 
 /* The driver identification number, initialized at runtime */
-static hid_t H5FD_ONION_g = 0;
+static hid_t H5FD_ONION_g = H5I_INVALID_HID;
+
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
 
 /******************************************************************************
  *
@@ -217,6 +220,29 @@ static const H5FD_class_t H5FD_onion_g = {
     H5FD_FLMAP_DICHOTOMY            /* fl_map               */
 };
 
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__onion__init_package
+ *
+ * Purpose:     Initializes any interface-specific data or routines.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD__onion__init_package(void)
+{
+    herr_t ret_value    = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    if (H5FD_onion_init() < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize onion VFD");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__onion__init_package() */
+
 /*-----------------------------------------------------------------------------
  * Function:    H5FD_onion_init
  *
@@ -232,7 +258,7 @@ H5FD_onion_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     if (H5I_VFL != H5I_get_type(H5FD_ONION_g))
         H5FD_ONION_g = H5FD_register(&H5FD_onion_g, sizeof(H5FD_class_t), false);
@@ -240,6 +266,7 @@ H5FD_onion_init(void)
     /* Set return value */
     ret_value = H5FD_ONION_g;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_onion_init() */
 
@@ -257,10 +284,9 @@ H5FD__onion_term(void)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset VFL ID */
-    H5FD_ONION_g = 0;
+    H5FD_ONION_g = H5I_INVALID_HID;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-
 } /* end H5FD__onion_term() */
 
 /*-----------------------------------------------------------------------------

@@ -197,7 +197,6 @@ H5_DLL herr_t H5FD_sort_selection_io_req(bool *selection_was_sorted, size_t coun
                                          H5_flexible_const_ptr_t bufs[], hid_t **s_mem_space_ids,
                                          hid_t **s_file_space_ids, haddr_t **s_offsets_ptr,
                                          size_t **s_element_sizes_ptr, H5_flexible_const_ptr_t **s_bufs_ptr);
-H5_DLL herr_t H5FD_init(void);
 
 /* Function prototypes for MPI based VFDs*/
 #ifdef H5_HAVE_PARALLEL

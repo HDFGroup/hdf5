@@ -18,7 +18,7 @@
 
 #ifdef H5_HAVE_ROS3_VFD
 /** Initializer for the ros3 VFD */
-#define H5FD_ROS3 (H5FDperform_init(H5FD_ros3_init))
+#define H5FD_ROS3       (H5FD_ros3_init())
 
 /** Identifier for the ros3 VFD */
 #define H5FD_ROS3_VALUE H5_VFD_ROS3

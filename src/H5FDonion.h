@@ -17,7 +17,7 @@
 #define H5FDonion_H
 
 /** Initializer for the onion VFD */
-#define H5FD_ONION (H5FDperform_init(H5FD_onion_init))
+#define H5FD_ONION (H5FD_onion_init())
 
 /** Identifier for the onion VFD */
 #define H5FD_ONION_VALUE H5_VFD_ONION

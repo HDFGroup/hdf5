@@ -19,7 +19,7 @@
 #ifdef H5_HAVE_DIRECT
 
 /** Initializer for the direct VFD */
-#define H5FD_DIRECT (H5FDperform_init(H5FD_direct_init))
+#define H5FD_DIRECT       (H5FD_direct_init())
 
 /** Identifier for the direct VFD */
 #define H5FD_DIRECT_VALUE H5_VFD_DIRECT

@@ -102,6 +102,9 @@ static int    H5ES__close_failed_cb(H5ES_event_t *ev, void *_ctx);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -122,20 +125,22 @@ static const H5I_class_t H5I_EVENTSET_CLS[1] = {{
 H5FL_DEFINE_STATIC(H5ES_t);
 
 /*-------------------------------------------------------------------------
- * Function:    H5ES_init
+ * Function:    H5ES__init_package
+ *
+ * Purpose:     Initializes any interface-specific data or routines.
+ *
+ * Return:      Non-negative on success / Negative on failure
  *
  * Purpose:     Initialize the interface from some other layer.
  *
- * Return:      Success:        non-negative
- *              Failure:        negative
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_init(void)
+H5ES__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Initialize the ID group for the event set IDs */
     if (H5I_register_type(H5I_EVENTSET_CLS) < 0)
@@ -143,7 +148,7 @@ H5ES_init(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5ES__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ES_term_package
@@ -163,8 +168,14 @@ H5ES_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    if (H5_PKG_INIT_VAR) {
     /* Destroy the event set ID group */
     n += (H5I_dec_type_ref(H5I_EVENTSET) > 0);
+
+        /* Mark closed */
+        if (0 == n)
+            H5_PKG_INIT_VAR = false;
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5ES_term_package() */

@@ -20,7 +20,7 @@
 #ifdef H5_HAVE_MIRROR_VFD
 
 /** Initializer for the mirror VFD */
-#define H5FD_MIRROR (H5FDperform_init(H5FD_mirror_init))
+#define H5FD_MIRROR       (H5FD_mirror_init())
 
 /** Identifier for the mirror VFD */
 #define H5FD_MIRROR_VALUE H5_VFD_MIRROR

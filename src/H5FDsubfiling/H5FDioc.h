@@ -27,7 +27,7 @@
  * \def H5FD_IOC
  * Macro that returns the identifier for the #H5FD_IOC driver. \hid_t{file driver}
  */
-#define H5FD_IOC (H5FDperform_init(H5FD_ioc_init))
+#define H5FD_IOC (H5FD_ioc_init())
 #else
 #define H5FD_IOC (H5I_INVALID_HID)
 #endif

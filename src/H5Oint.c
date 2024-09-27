@@ -82,6 +82,9 @@ static herr_t                 H5O__reset_info2(H5O_info2_t *oinfo);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /* Header message ID to class mapping
  *
  * Remember to increment H5O_MSG_TYPES in H5Opkg.h when adding a new
@@ -177,20 +180,19 @@ static const H5O_obj_class_t *const H5O_obj_class_g[] = {
 };
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_init
+ * Function:    H5O__init_package
  *
- * Purpose:     Initialize the interface from some other layer.
+ * Purpose:     Initialize information specific to H5O interface.
  *
  * Return:      Success:        non-negative
  *              Failure:        negative
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_init(void)
+H5O__init_package(void)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* H5O interface sanity checks */
     HDcompile_assert(H5O_MSG_TYPES == NELMTS(H5O_msg_class_g));
@@ -198,8 +200,8 @@ H5O_init(void)
 
     HDcompile_assert(H5O_UNKNOWN_ID < H5O_MSG_TYPES);
 
-    FUNC_LEAVE_NOAPI(ret_value)
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__set_version
@@ -545,7 +547,7 @@ H5O_open(H5O_loc_t *loc)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     assert(loc);
@@ -557,6 +559,7 @@ H5O_open(H5O_loc_t *loc)
     else
         H5F_INCR_NOPEN_OBJS(loc->file);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_open() */
 

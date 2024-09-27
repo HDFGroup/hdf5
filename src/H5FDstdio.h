@@ -19,7 +19,7 @@
 #include "H5Ipublic.h"
 
 /** Initializer for the stdio VFD */
-#define H5FD_STDIO (H5FDperform_init(H5FD_stdio_init))
+#define H5FD_STDIO (H5FD_stdio_init())
 
 #ifdef __cplusplus
 extern "C" {

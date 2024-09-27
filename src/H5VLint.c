@@ -103,6 +103,9 @@ static herr_t         H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -155,9 +158,7 @@ H5VL_init_phase1(void)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Initialize the ID group for the VL IDs */
-    if (H5I_register_type(H5I_VOL_CLS) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize H5VL interface");
+    /* FUNC_ENTER() does all the work */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -179,38 +180,23 @@ done:
 herr_t
 H5VL_init_phase2(void)
 {
-    size_t i;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* clang-format off */
-    struct {
-        herr_t (*func)(void);
-        const char *descr;
-    } initializer[] = {
-        {H5T_init, "datatype"}
-    ,   {H5O_init, "object header"}
-    ,   {H5D_init, "dataset"}
-    ,   {H5F_init, "file"}
-    ,   {H5G_init, "group"}
-    ,   {H5A_init, "attribute"}
-    ,   {H5M_init, "map"}
-    ,   {H5CX_init, "context"}
-    ,   {H5ES_init, "event set"}
-    ,   {H5Z_init, "transform"}
-    ,   {H5R_init, "reference"}
-    };
-
     /* Initialize all packages for VOL-managed objects */
-    for (i = 0; i < NELMTS(initializer); i++) {
-        if (initializer[i].func() < 0) {
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL,
-                "unable to initialize %s interface", initializer[i].descr);
-        }
-    }
-
-    /* clang-format on */
+    if (H5T_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize datatype interface");
+    if (H5D_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize dataset interface");
+    if (H5F_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize file interface");
+    if (H5G_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize group interface");
+    if (H5A_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize attribute interface");
+    if (H5M_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize map interface");
 
     /* Sanity check default VOL connector */
     assert(H5VL_def_conn_s.connector_id == (-1));
@@ -223,6 +209,32 @@ H5VL_init_phase2(void)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_init_phase2() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__init_package
+ *
+ * Purpose:     Initialize interface-specific information
+ *
+ * Return:      Success:    Non-negative
+ *
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Initialize the ID group for the VL IDs */
+    if (H5I_register_type(H5I_VOL_CLS) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize H5VL interface");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_term_package
@@ -242,6 +254,7 @@ H5VL_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    if (H5_PKG_INIT_VAR) {
     if (H5VL_def_conn_s.connector_id > 0) {
         /* Release the default VOL connector */
         (void)H5VL_conn_free(&H5VL_def_conn_s);
@@ -264,9 +277,14 @@ H5VL_term_package(void)
             else {
                 /* Destroy the VOL connector ID group */
                 n += (H5I_dec_type_ref(H5I_VOL) > 0);
+
+                    /* Mark interface as closed */
+                    if (0 == n)
+                        H5_PKG_INIT_VAR = FALSE;
             } /* end else */
         }     /* end else */
     }         /* end else */
+    }             /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5VL_term_package() */
@@ -957,7 +975,7 @@ H5VL_conn_inc_rc(H5VL_t *connector)
 {
     int64_t ret_value = -1;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(-1)
 
     /* Check arguments */
     assert(connector);
@@ -967,6 +985,7 @@ H5VL_conn_inc_rc(H5VL_t *connector)
 
     ret_value = connector->nrefs;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_conn_inc_rc() */
 
@@ -1021,7 +1040,7 @@ done:
 hsize_t
 H5VL_object_inc_rc(H5VL_object_t *vol_obj)
 {
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     assert(vol_obj);
@@ -1077,7 +1096,7 @@ H5VL_object_is_native(const H5VL_object_t *obj, bool *is_native)
 {
     const H5VL_class_t *cls;                 /* VOL connector class structs for object */
     const H5VL_class_t *native_cls;          /* Native VOL connector class structs */
-    int                 cmp_value;           /* Comparison result */
+    int                 cmp_value = 0;       /* Comparison result */
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1990,7 +2009,7 @@ H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_clas
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     assert(cls1);
@@ -2497,7 +2516,7 @@ H5VL_check_plugin_load(const H5VL_class_t *cls, const H5PL_key_t *key, bool *suc
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     assert(cls);
@@ -2523,6 +2542,7 @@ H5VL_check_plugin_load(const H5VL_class_t *cls, const H5PL_key_t *key, bool *suc
     if (*success && cls->version != H5VL_VERSION)
         *success = false;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_check_plugin_load() */
 

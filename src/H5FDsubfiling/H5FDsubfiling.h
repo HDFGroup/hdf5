@@ -19,7 +19,7 @@
  * \def H5FD_SUBFILING
  * Macro that returns the identifier for the #H5FD_SUBFILING driver. \hid_t{file driver}
  */
-#define H5FD_SUBFILING (H5FDperform_init(H5FD_subfiling_init))
+#define H5FD_SUBFILING (H5FD_subfiling_init())
 #else
 #define H5FD_SUBFILING (H5I_INVALID_HID)
 #endif

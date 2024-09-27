@@ -24,6 +24,7 @@
 #define H5_MODULE
 #define H5_MY_PKG     H5
 #define H5_MY_PKG_ERR H5E_LIB
+#define H5_MY_PKG_INIT YES
 
 /** \page H5DM_UG HDF5 Data Model and File Structure
  *

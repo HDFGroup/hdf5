@@ -17,7 +17,7 @@
 #define H5FDlog_H
 
 /** Initializer for the log VFD */
-#define H5FD_LOG (H5FDperform_init(H5FD_log_init))
+#define H5FD_LOG       (H5FD_log_init())
 
 /** Identifier for the log VFD */
 #define H5FD_LOG_VALUE H5_VFD_LOG

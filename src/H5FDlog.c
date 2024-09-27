@@ -227,6 +227,39 @@ static const H5FD_log_fapl_t H5FD_log_default_config_g = {NULL, H5FD_LOG_LOC_IO 
 H5FL_DEFINE_STATIC(H5FD_log_t);
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__init_package
+ *
+ * Purpose:     Initializes any interface-specific data or routines.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__init_package(void)
+{
+    char * lock_env_var = NULL; /* Environment variable pointer */
+    herr_t ret_value    = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check the use disabled file locks environment variable */
+    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
+    if (lock_env_var && !strcmp(lock_env_var, "BEST_EFFORT"))
+        ignore_disabled_file_locks_s = true; /* Override: Ignore disabled locks */
+    else if (lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "1")))
+        ignore_disabled_file_locks_s = false; /* Override: Don't ignore disabled locks */
+    else
+        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
+
+    if (H5FD_log_init() < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize log VFD");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__init_package() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5FD_log_init
  *
  * Purpose:     Initialize this driver by registering the driver with the
@@ -240,19 +273,9 @@ H5FL_DEFINE_STATIC(H5FD_log_t);
 hid_t
 H5FD_log_init(void)
 {
-    char *lock_env_var = NULL;            /* Environment variable pointer */
     hid_t ret_value    = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
-
-    /* Check the use disabled file locks environment variable */
-    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
-    if (lock_env_var && !strcmp(lock_env_var, "BEST_EFFORT"))
-        ignore_disabled_file_locks_s = true; /* Override: Ignore disabled locks */
-    else if (lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "1")))
-        ignore_disabled_file_locks_s = false; /* Override: Don't ignore disabled locks */
-    else
-        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     if (H5I_VFL != H5I_get_type(H5FD_LOG_g))
         H5FD_LOG_g = H5FD_register(&H5FD_log_g, sizeof(H5FD_class_t), false);
@@ -260,6 +283,7 @@ H5FD_log_init(void)
     /* Set return value */
     ret_value = H5FD_LOG_g;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_log_init() */
 

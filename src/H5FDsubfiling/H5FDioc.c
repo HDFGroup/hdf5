@@ -179,6 +179,29 @@ H5FL_DEFINE_STATIC(H5FD_ioc_t);
 H5FL_DEFINE_STATIC(H5FD_ioc_config_t);
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__init_package
+ *
+ * Purpose:     Initializes any interface-specific data or routines.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__init_package(void)
+{
+    herr_t ret_value    = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    if (H5FD_ioc_init() < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize ioc VFD");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__init_package() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5FD_ioc_init
  *
  * Purpose:     Initialize the IOC driver by registering it with the

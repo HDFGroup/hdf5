@@ -12,18 +12,17 @@
 
 /*
  * Purpose: This file contains declarations which define macros for the
- *          H5FL package.  Including this header means that the source file
- *          is part of the H5FL package.
+ *          H5FD onion package.  Including this header means that the source file
+ *          is part of the H5FD onion package.
  */
-#ifndef H5FLmodule_H
-#define H5FLmodule_H
+#ifndef H5FDonion_module_H
+#define H5FDonion_module_H
 
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
  */
-#define H5FL_MODULE
-#define H5_MY_PKG     H5FL
-#define H5_MY_PKG_ERR H5E_RESOURCE
-#define H5_MY_PKG_INIT NO
+#define H5_MY_PKG     H5FD__onion
+#define H5_MY_PKG_ERR H5E_VFL
+#define H5_MY_PKG_INIT YES
 
-#endif /* H5FLmodule_H */
+#endif /* H5FDonion_module_H */

@@ -240,7 +240,6 @@ set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FDonion_header.c
     ${HDF5_SRC_DIR}/H5FDonion_history.c
     ${HDF5_SRC_DIR}/H5FDonion_index.c
-    ${HDF5_SRC_DIR}/H5FDperform.c
     ${HDF5_SRC_DIR}/H5FDros3.c
     ${HDF5_SRC_DIR}/H5FDs3comms.c
     ${HDF5_SRC_DIR}/H5FDsec2.c

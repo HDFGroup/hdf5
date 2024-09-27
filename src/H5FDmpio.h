@@ -19,7 +19,7 @@
 #ifdef H5_HAVE_PARALLEL
 
 /** Initializer for the mpio VFD */
-#define H5FD_MPIO (H5FDperform_init(H5FD_mpio_init))
+#define H5FD_MPIO (H5FD_mpio_init())
 
 #else
 

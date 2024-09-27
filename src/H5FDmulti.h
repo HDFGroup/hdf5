@@ -17,7 +17,7 @@
 #define H5FDmulti_H
 
 /** Initializer for the multi VFD */
-#define H5FD_MULTI (H5FDperform_init(H5FD_multi_init))
+#define H5FD_MULTI (H5FD_multi_init())
 
 #ifdef __cplusplus
 extern "C" {

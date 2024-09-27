@@ -111,6 +111,9 @@ static herr_t H5MF__sects_cb(H5FS_section_info_t *_sect, void *_udata);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/

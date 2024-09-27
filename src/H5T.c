@@ -416,8 +416,11 @@ H5T_order_t H5T_native_order_g = H5T_ORDER_ERROR;
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /*
- * Predefined data types. These are initialized at runtime by H5T_init().
+ * Predefined data types. These are initialized at runtime by H5T__init_package().
  *
  * If more of these are added, the new ones must be added to the list of
  * types to reset in H5T_term_package().
@@ -641,6 +644,34 @@ static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
     (H5I_free_t)H5T__close_cb /* Callback routine for closing objects of this class */
 }};
 
+/* Flag indicating "top" of interface has been initialized */
+static bool H5T_top_package_initialize_s = false;
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_init
+ *
+ * Purpose:    Initialize the interface from some other package.
+ *
+ * Return:    Success:    non-negative
+ *            Failure:    negative
+ *
+ * Programmer:    Robb Matzke
+ *              Wednesday, December 16, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_init(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_init() */
+
 /*-------------------------------------------------------------------------
  * Function:    H5T__init_inf
  *
@@ -793,17 +824,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__init_inf() */
 
-/*-------------------------------------------------------------------------
- * Function:    H5T_init
- *
- * Purpose:     Initialize the interface from some other layer.
- *
- * Return:      Success:        non-negative
- *              Failure:        negative
- *-------------------------------------------------------------------------
- */
+/*--------------------------------------------------------------------------
+NAME
+   H5T__init_package -- Initialize interface-specific information
+USAGE
+    herr__t H5T_init_package()
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+--------------------------------------------------------------------------*/
 herr_t
-H5T_init(void)
+H5T__init_package(void)
 {
     H5T_t  *native_schar   = NULL; /* Datatype structure for native signed char */
     H5T_t  *native_uchar   = NULL; /* Datatype structure for native unsigned char */
@@ -847,7 +879,7 @@ H5T_init(void)
 #endif
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the ID group for the file IDs */
     if (H5I_register_type(H5I_DATATYPE_CLS) < 0)
@@ -1594,7 +1626,7 @@ H5T_init(void)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to register conversion function(s)");
 
     /* Register datatype creation property class properties here.  See similar
-     * code in H5D_init(), etc. for example.
+     * code in H5D__init_package(), etc. for example.
      */
 
     /* Only register the default property list if it hasn't been created yet */
@@ -1606,6 +1638,9 @@ H5T_init(void)
         if ((H5P_LST_DATATYPE_CREATE_ID_g = H5P_create_id(H5P_CLS_DATATYPE_CREATE_g, false)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class");
     } /* end if */
+
+    /* Mark "top" of interface as initialized, too */
+    H5T_top_package_initialize_s = true;
 
 done:
     /* General cleanup */
@@ -1634,7 +1669,7 @@ done:
     }         /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_init() */
+} /* end H5T__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:   H5T__unlock_cb
@@ -1683,6 +1718,7 @@ H5T_top_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    if (H5T_top_package_initialize_s) {
     /* Unregister all conversion functions */
     if (H5T_g.path) {
         H5T_conv_ctx_t conv_ctx = {0};
@@ -1822,6 +1858,11 @@ H5T_top_term_package(void)
         n++;
     } /* end if */
 
+        /* Mark "top" of interface as closed */
+        if (0 == n)
+            H5T_top_package_initialize_s = false;
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(n)
 } /* end H5T_top_term_package() */
 
@@ -1847,11 +1888,18 @@ H5T_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    if (H5_PKG_INIT_VAR) {
     /* Sanity check */
     assert(0 == H5I_nmembers(H5I_DATATYPE));
+        assert(false == H5T_top_package_initialize_s);
 
     /* Destroy the datatype object id group */
     n += (H5I_dec_type_ref(H5I_DATATYPE) > 0);
+
+        /* Mark interface as closed */
+        if (0 == n)
+            H5_PKG_INIT_VAR = false;
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5T_term_package() */
@@ -2247,7 +2295,7 @@ H5T_get_class(const H5T_t *dt, htri_t internal)
 {
     H5T_class_t ret_value = H5T_NO_CLASS; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(H5T_NO_CLASS)
 
     assert(dt);
 
@@ -2262,6 +2310,7 @@ H5T_get_class(const H5T_t *dt, htri_t internal)
             ret_value = dt->shared->type;
     }
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_get_class() */
 
@@ -2313,7 +2362,7 @@ H5T_detect_class(const H5T_t *dt, H5T_class_t cls, bool from_api)
     unsigned i;
     htri_t   ret_value = false; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(dt);
     assert(cls > H5T_NO_CLASS && cls < H5T_NCLASSES);
@@ -6022,13 +6071,14 @@ H5T_is_immutable(const H5T_t *dt)
 {
     htri_t ret_value = false;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(dt);
 
     if (dt->shared->state == H5T_STATE_IMMUTABLE)
         ret_value = true;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -6046,7 +6096,7 @@ H5T_is_named(const H5T_t *dt)
 {
     htri_t ret_value = false;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(dt);
 
@@ -6055,6 +6105,7 @@ H5T_is_named(const H5T_t *dt)
     else
         ret_value = (H5T_STATE_OPEN == dt->shared->state || H5T_STATE_NAMED == dt->shared->state);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -6130,13 +6181,14 @@ H5T_get_ref_type(const H5T_t *dt)
 {
     H5R_type_t ret_value = H5R_BADTYPE;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(H5R_BADTYPE)
 
     assert(dt);
 
     if (dt->shared->type == H5T_REFERENCE)
         ret_value = dt->shared->u.atomic.u.r.rtype;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_get_ref_type() */
 
@@ -6157,7 +6209,7 @@ H5T_is_sensible(const H5T_t *dt)
 {
     htri_t ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(dt);
 
@@ -6195,6 +6247,7 @@ H5T_is_sensible(const H5T_t *dt)
             break;
     } /* end switch */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -6384,7 +6437,7 @@ H5T_is_relocatable(const H5T_t *dt)
 {
     htri_t ret_value = false;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     assert(dt);
@@ -6393,6 +6446,7 @@ H5T_is_relocatable(const H5T_t *dt)
     if (H5T_detect_class(dt, H5T_VLEN, false) || H5T_detect_class(dt, H5T_REFERENCE, false))
         ret_value = true;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_relocatable() */
 
@@ -6477,7 +6531,7 @@ H5T_is_vl_storage(const H5T_t *dt)
 {
     htri_t ret_value = false;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     assert(dt);
@@ -6490,6 +6544,7 @@ H5T_is_vl_storage(const H5T_t *dt)
     else
         ret_value = false;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_vl_storage() */
 
@@ -6632,7 +6687,7 @@ H5T_patch_file(H5T_t *dt, H5F_t *f)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     assert(dt);
@@ -6643,6 +6698,7 @@ H5T_patch_file(H5T_t *dt, H5F_t *f)
         dt->sh_loc.file = f;
     } /* end if */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_patch_file() */
 

@@ -16,8 +16,8 @@
  * Purpose:     Code for the onion file's history
  */
 
-/* This source code file is part of the H5FD driver module */
-#include "H5FDdrvr_module.h"
+/* This source code file is part of the H5FD onion module */
+#include "H5FDonion_module.h"
 
 #include "H5private.h"      /* Generic Functions                        */
 #include "H5Eprivate.h"     /* Error handling                           */
