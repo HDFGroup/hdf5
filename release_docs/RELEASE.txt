@@ -818,7 +818,15 @@ New Features
 
     Documentation:
     --------------
-    -
+    - Documented that leaving HDF5 threads running at termination is unsafe
+
+      Added doc/threadsafety-warning.md as a warning that threads which use HDF5 
+      resources must be closed before either process exit or library close. 
+      If HDF5 threads are alive during either of  these operations, their resources 
+      will not be cleaned up properly and undefined behavior is possible. 
+      
+      This document also includes a discussion on potential ways to mitigate this issue.
+
 
 
 Support for new platforms, languages and compilers
@@ -829,6 +837,16 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+
+    - Fixed a memory leak in H5F__accum_write()
+
+      The memory was allocated in H5F__accum_write() and was to be freed in
+      H5F__accum_reset() during the closing process but a failure occurred just
+      before the deallocation, leaving the memory un-freed.  The problem is
+      now fixed.
+
+      Fixes GitHub #4585
+
     - Fixed an incorrect returned value by H5LTfind_dataset()
 
       H5LTfind_dataset() returned true for non-existing datasets because it only

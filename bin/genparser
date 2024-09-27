@@ -200,14 +200,14 @@ if [ "$verbose" = true ] ; then
 fi
 ${HDF5_FLEX} --nounistd -PH5LTyy -o ${path_to_hl_src}/H5LTanalyze.c ${path_to_hl_src}/H5LTanalyze.l
 
-# fix H5LTparse.c and H5LTlparse.h to declare H5LTyyparse return type as an
-# hid_t instead of int.  Currently the generated function H5LTyyparse is
-# generated with a return value of type int, which is a mapping to the
+# Fix H5LTparse.c and H5LTparse.h to declare H5LTyyparse return type as an
+# hid_t instead of int.  Currently, the H5LTyyparse function is generated
+# with a return value of type int, which is a mapping to the
 # flex yyparse function.  The return value in the HL library should be
 # an hid_t.
-# I propose to not use flex to generate this function, but for now I am
-# adding a perl command to find and replace this function declaration in
-# H5LTparse.c.
+# Use Perl command to find and replace this function declaration
+# in H5LTparse.c. This is a temporary solution until a method that does not
+# use flex is implemented.
 perl -0777 -pi -e 's/int yyparse/hid_t yyparse/igs' ${path_to_hl_src}/H5LTparse.c
 perl -0777 -pi -e 's/int\nyyparse/hid_t\nyyparse/igs' ${path_to_hl_src}/H5LTparse.c
 perl -0777 -pi -e 's/int H5LTyyparse/hid_t H5LTyyparse/igs' ${path_to_hl_src}/H5LTparse.c
