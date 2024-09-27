@@ -744,13 +744,17 @@ bool
 H5CX_pushed(void)
 {
     H5CX_node_t **head = NULL; /* Pointer to head of API context list */
+    bool          is_pushed = false; /* Flag to indicate context is pushed */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
     assert(head);
 
-    FUNC_LEAVE_NOAPI(*head != NULL);
+    /* Set return value */
+    is_pushed = (*head != NULL);
+
+    FUNC_LEAVE_NOAPI(is_pushed)
 }
 
 /*-------------------------------------------------------------------------
