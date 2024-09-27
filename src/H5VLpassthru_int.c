@@ -37,7 +37,7 @@
 #include "H5VLpassthru_private.h" /* Passthru  VOL connector        */
 
 /* The native passthru VOL connector */
-hid_t H5VL_PASSTHRU_g = H5I_INVALID_HID;
+hid_t             H5VL_PASSTHRU_g      = H5I_INVALID_HID;
 H5VL_connector_t *H5VL_PASSTHRU_conn_g = NULL;
 
 /*-------------------------------------------------------------------------
@@ -52,13 +52,14 @@ H5VL_connector_t *H5VL_PASSTHRU_conn_g = NULL;
 herr_t
 H5VL__passthru_register(void)
 {
-    herr_t ret_value    = SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Register the passthru VOL connector, if it isn't already */
     if (NULL == H5VL_PASSTHRU_conn_g)
-        if (NULL == (H5VL_PASSTHRU_conn_g = H5VL__register_connector(&H5VL_pass_through_g, H5P_VOL_INITIALIZE_DEFAULT)))
+        if (NULL == (H5VL_PASSTHRU_conn_g =
+                         H5VL__register_connector(&H5VL_pass_through_g, H5P_VOL_INITIALIZE_DEFAULT)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "can't register passthru VOL connector");
 
     /* Get ID for connector */
@@ -89,9 +90,8 @@ H5VL__passthru_unregister(void)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset VOL connector info */
-    H5VL_PASSTHRU_g = H5I_INVALID_HID;
+    H5VL_PASSTHRU_g      = H5I_INVALID_HID;
     H5VL_PASSTHRU_conn_g = NULL;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__passthru_unregister() */
-

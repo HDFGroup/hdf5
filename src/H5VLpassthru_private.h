@@ -45,6 +45,4 @@ H5_DLLVAR H5VL_connector_t *H5VL_PASSTHRU_conn_g;
 /* Library Private Prototypes */
 /******************************/
 
-
 #endif /* H5VLpassthru_private_H */
-

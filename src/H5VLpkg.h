@@ -82,7 +82,6 @@ H5_DLL herr_t H5VL__native_unregister(void);
 H5_DLL herr_t H5VL__passthru_register(void);
 H5_DLL herr_t H5VL__passthru_unregister(void);
 
-
 /* Testing functions */
 #ifdef H5VL_TESTING
 H5_DLL herr_t H5VL__reparse_def_vol_conn_variable_test(void);
