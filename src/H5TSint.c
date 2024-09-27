@@ -153,9 +153,6 @@ H5TS_term_package(void)
     H5TS_mutex_destroy(&H5TS_api_info_p.api_mutex);
     H5TS_atomic_destroy_uint(&H5TS_api_info_p.attempt_lock_count);
 
-    /* Release critical section / mutex for modifying the thread info globals */
-    H5TS_mutex_destroy(&H5TS_tinfo_mtx_s);
-
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5TS_term_package() */
 
@@ -592,6 +589,9 @@ H5TS__tinfo_term(void)
     if (H5_UNLIKELY(H5TS_key_delete(H5TS_thrd_info_key_g) < 0))
         HGOTO_DONE(FAIL);
 
+    /* Release critical section / mutex for modifying the thread info globals */
+    if (H5_UNLIKELY(H5TS_mutex_destroy(&H5TS_tinfo_mtx_s) < 0))
+        HGOTO_DONE(FAIL);
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__tinfo_term() */
