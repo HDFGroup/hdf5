@@ -829,6 +829,15 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed a memory leak in H5F__accum_write()
+ 
+      The memory was allocated in H5F__accum_write() and was to be freed in
+      H5F__accum_reset() during the closing process but a failure occurred just
+      before the deallocation, leaving the memory un-freed.  The problem is
+      now fixed.
+ 
+      Fixes GitHub #4585
+
     - Fixed an incorrect returned value by H5LTfind_dataset()
 
       H5LTfind_dataset() returned true for non-existing datasets because it only
