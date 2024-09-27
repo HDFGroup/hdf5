@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include "ttsafe.h"
 
-#ifdef H5_HAVE_THREADS
+#ifdef H5_HAVE_THREADSAFE
 
 #define ERR_CLS_NAME        "Custom error class"
 #define ERR_CLS_LIB_NAME    "example_lib"
