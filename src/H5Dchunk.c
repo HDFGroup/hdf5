@@ -43,7 +43,7 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions                        */
+#include "H5private.h" /* Generic Functions                        */
 #ifdef H5_HAVE_PARALLEL
 #include "H5ACprivate.h" /* Metadata cache                           */
 #endif                   /* H5_HAVE_PARALLEL */
@@ -5728,7 +5728,7 @@ H5D__chunk_cmp_coll_fill_info(const void *_entry1, const void *_entry2)
 {
     const struct chunk_coll_fill_info *entry1;
     const struct chunk_coll_fill_info *entry2;
-    int     ret_value = 0;
+    int                                ret_value = 0;
 
     FUNC_ENTER_PACKAGE_NOERR
 
