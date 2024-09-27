@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.7d40520</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.6a5514b</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -121,20 +121,20 @@ $(document).ready(function(){initNavTree('md_release__docs_2_r_e_a_d_m_e.html','
   <div class="headertitle"><div class="title">The &lt;tt&gt;release_docs&lt;/tt&gt; directory</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md210"></a> </p>
-<h1><a class="anchor" id="autotoc_md211"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md212"></a> </p>
+<h1><a class="anchor" id="autotoc_md213"></a>
 Intro</h1>
 <p>This directory contains instructions for building and using the library as well as the HDF5 history files.</p>
-<h1><a class="anchor" id="autotoc_md212"></a>
+<h1><a class="anchor" id="autotoc_md214"></a>
 HISTORY files</h1>
 <p>The <code>HISTORY</code> files contain the history of this branch of HDF5. They fall into three categories.</p>
-<h2><a class="anchor" id="autotoc_md213"></a>
+<h2><a class="anchor" id="autotoc_md215"></a>
 HISTORY-[VERSION 1]-[VERSION 2].txt</h2>
 <p>These files are created when we release a new major version and include all the changes that were made to the <code>develop</code> branch while creating a major release.</p>
-<h2><a class="anchor" id="autotoc_md214"></a>
+<h2><a class="anchor" id="autotoc_md216"></a>
 HISTORY-[VERSION].txt</h2>
 <p>This file contains the changes that were made to a maintenance branch since it split off from <code>develop</code>. It will also be found in the <code>develop</code> branch when experimental releases have been created.</p>
-<h2><a class="anchor" id="autotoc_md215"></a>
+<h2><a class="anchor" id="autotoc_md217"></a>
 RELEASE.txt</h2>
 <p>This is the changelog for the current version of the library.</p>
 <p>For a MAJOR release (or in <code>develop</code>) this files lists all the changes since the last major version. For a MINOR release (or in a maintenance branch), this file lists all the changes since the last release in the maintenance branch.</p>
@@ -146,9 +146,9 @@ RELEASE.txt</h2>
 <li>The file in <code>hdf5_1_14</code> includes all the changes since the last minor HDF5 1.14 release</li>
 </ul>
 <p>Note that we make no effort to bring maintenance branch <code>HISTORY</code> files back to develop. If you want to compare, say, 1.10.4 with 1.12.3, you'd have to get the history files from those releases and compare them by hand.</p>
-<h1><a class="anchor" id="autotoc_md216"></a>
+<h1><a class="anchor" id="autotoc_md218"></a>
 Creating new releases</h1>
-<h2><a class="anchor" id="autotoc_md217"></a>
+<h2><a class="anchor" id="autotoc_md219"></a>
 MAJOR release</h2>
 <ul>
 <li>If there were experimental releases, merge the experimental <code>HISTORY</code> file and the current <code>RELEASE.txt</code> by category to create a separate, unified file that ignores the experimental releases. Don't check this in yet or clobber any existing <code>HISTORY</code>/<code>RELEASE</code> files, but put it someplace handy for use in later steps.</li>
@@ -180,7 +180,7 @@ MAJOR release</h2>
 <li>If there were experimental releases, use the combined file you created earlier as <code>RELEASE.txt</code></li>
 <li>Otherwise the <code>RELEASE.txt</code> will be used as-is</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md218"></a>
+<h2><a class="anchor" id="autotoc_md220"></a>
 MINOR release</h2>
 <ul>
 <li>Create the release branch</li>
@@ -189,16 +189,16 @@ MINOR release</h2>
 <li>Add the contents of <code>RELEASE.txt</code> to the beginnnig of <code>HISTORY-\[VERSION\].txt</code></li>
 <li>Clear out <code>RELEASE.txt</code></li>
 </ul>
-<h2><a class="anchor" id="autotoc_md219"></a>
+<h2><a class="anchor" id="autotoc_md221"></a>
 EXPERIMENTAL release</h2>
 <ul>
 <li>Add the contents of <code>RELEASE.txt</code> to the beginnnig of <code>HISTORY-\[VERSION\].txt</code></li>
 <li>Clear out <code>RELEASE.txt</code></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md220"></a>
+<h1><a class="anchor" id="autotoc_md222"></a>
 INSTALL files</h1>
 <p>These files include instructions for building and installing HDF5 on various platforms.</p>
-<h1><a class="anchor" id="autotoc_md221"></a>
+<h1><a class="anchor" id="autotoc_md223"></a>
 USING files</h1>
 <p>These files document how to build HDF5 applications with an installed HDF5 library. </p>
 </div></div><!-- contents -->
