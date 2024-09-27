@@ -20,8 +20,16 @@
 /* Public headers needed by this file */
 #include "H5VLpublic.h" /* Virtual Object Layer                 */
 
+/* When this header is included from a private header, don't make calls to H5open() */
+#undef H5OPEN
+#ifndef H5private_H
+#define H5OPEN H5open(),
+#else /* H5private_H */
+#define H5OPEN
+#endif /* H5private_H */
+
 /* Identifier for the pass-through VOL connector */
-#define H5VL_PASSTHRU (H5VL_pass_through_register())
+#define H5VL_PASSTHRU (H5OPEN H5VL_PASSTHRU_g)
 
 /* Characteristics of the pass-through VOL connector */
 #define H5VL_PASSTHRU_NAME    "pass_through"
@@ -38,7 +46,8 @@ typedef struct H5VL_pass_through_info_t {
 extern "C" {
 #endif
 
-H5_DLL hid_t H5VL_pass_through_register(void);
+/* Global variable to hold the VOL connector ID */
+H5_DLLVAR hid_t H5VL_PASSTHRU_g;
 
 #ifdef __cplusplus
 }

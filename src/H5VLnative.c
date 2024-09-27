@@ -40,10 +40,8 @@
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
 /* The native VOL connector */
-static H5VL_connector_t *H5VL_NATIVE_conn_g = NULL;
-
-/* Prototypes */
-static herr_t H5VL__native_term(void);
+hid_t H5VL_NATIVE_g = H5I_INVALID_HID;
+H5VL_connector_t *H5VL_NATIVE_conn_g = NULL;
 
 #define H5VL_NATIVE_CAP_FLAGS                                                                                \
     (H5VL_CAP_FLAG_NATIVE_FILES | H5VL_CAP_FLAG_ATTR_BASIC | H5VL_CAP_FLAG_ATTR_MORE |                       \
@@ -66,7 +64,7 @@ static const H5VL_class_t H5VL_native_cls_g = {
     H5VL_NATIVE_VERSION,   /* connector version */
     H5VL_NATIVE_CAP_FLAGS, /* capability flags */
     NULL,                  /* initialize   */
-    H5VL__native_term,     /* terminate    */
+    NULL,                  /* terminate    */
     {
         /* info_cls */
         (size_t)0, /* info size    */
@@ -182,37 +180,41 @@ static const H5VL_class_t H5VL_native_cls_g = {
 };
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_native_register
+ * Function:    H5VL__native_register
  *
- * Purpose:     Register the native VOL connector and retrieve an ID for it.
+ * Purpose:     Register the native VOL connector and set up an ID for it.
  *
- * Return:      Success:    A pointer to the native connector
- *              Failure:    NULL
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-H5VL_connector_t *
-H5VL_native_register(void)
+herr_t
+H5VL__native_register(void)
 {
-    H5VL_connector_t *ret_value = NULL;
+    herr_t ret_value    = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_PACKAGE
 
     /* Register the native VOL connector, if it isn't already */
     if (NULL == H5VL_NATIVE_conn_g)
-        if (NULL ==
-            (H5VL_NATIVE_conn_g = H5VL__register_connector(&H5VL_native_cls_g, H5P_VOL_INITIALIZE_DEFAULT)))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, NULL, "can't create ID for native VOL connector");
+        if (NULL == (H5VL_NATIVE_conn_g = H5VL__register_connector(&H5VL_native_cls_g, H5P_VOL_INITIALIZE_DEFAULT)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "can't register native VOL connector");
 
-    /* Set return value */
-    ret_value = H5VL_NATIVE_conn_g;
+    /* Get ID for connector */
+    if (H5I_VOL != H5I_get_type(H5VL_NATIVE_g)) {
+        if ((H5VL_NATIVE_g = H5I_register(H5I_VOL, H5VL_NATIVE_conn_g, false)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "can't create ID for native VOL connector");
+
+        /* ID is holding a reference to the connector */
+        H5VL_conn_inc_rc(H5VL_NATIVE_conn_g);
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_native_register() */
+} /* end H5VL__native_register() */
 
 /*---------------------------------------------------------------------------
- * Function:    H5VL__native_term
+ * Function:    H5VL__native_unregister
  *
  * Purpose:     Shut down the native VOL
  *
@@ -220,16 +222,17 @@ done:
  *
  *---------------------------------------------------------------------------
  */
-static herr_t
-H5VL__native_term(void)
+herr_t
+H5VL__native_unregister(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Reset VOL */
+    /* Reset VOL conector info */
+    H5VL_NATIVE_g = H5I_INVALID_HID;
     H5VL_NATIVE_conn_g = NULL;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5VL__native_term() */
+} /* end H5VL__native_unregister() */
 
 /*---------------------------------------------------------------------------
  * Function:    H5VL__native_introspect_get_conn_cls

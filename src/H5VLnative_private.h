@@ -28,9 +28,6 @@
 /* Library Private Macros */
 /**************************/
 
-/* Identifier for the native VOL connector */
-#define H5VL_NATIVE (H5VL_native_register())
-
 /****************************/
 /* Library Private Typedefs */
 /****************************/
@@ -38,6 +35,9 @@
 /*****************************/
 /* Library Private Variables */
 /*****************************/
+
+/* The native VOL connector */
+H5_DLLVAR H5VL_connector_t *H5VL_NATIVE_conn_g;
 
 /******************************/
 /* Library Private Prototypes */
@@ -156,11 +156,6 @@ H5_DLL herr_t H5VL__native_token_to_str(void *obj, H5I_type_t obj_type, const H5
                                         char **token_str);
 H5_DLL herr_t H5VL__native_str_to_token(void *obj, H5I_type_t obj_type, const char *token_str,
                                         H5O_token_t *token);
-
-/*
- * Register the native VOL connector and retrieve a pointer to it
- */
-H5_DLL H5VL_connector_t *H5VL_native_register(void);
 
 /* Helper functions */
 H5_DLL herr_t H5VL_native_get_file_addr_len(hid_t loc_id, size_t *addr_len);

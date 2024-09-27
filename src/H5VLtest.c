@@ -117,7 +117,7 @@ H5VL__is_native_connector_test(hid_t vol_id)
         HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a VOL connector ID");
 
     /* For the time being, we disallow unregistering the native VOL connector */
-    native = H5VL_NATIVE;
+    native = H5VL_NATIVE_conn_g;
     if (H5VL_cmp_connector_cls(&cmp_value, connector->cls, native->cls) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare connector classes");
     ret_value = (0 == cmp_value);

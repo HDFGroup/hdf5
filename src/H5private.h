@@ -126,8 +126,8 @@
 #define H5_DEFAULT_VFD      H5FD_SEC2
 #define H5_DEFAULT_VFD_NAME "sec2"
 
-/* Define the default VOL driver */
-#define H5_DEFAULT_VOL H5VL_NATIVE
+/* Define the default VOL connector */
+#define H5_DEFAULT_VOL H5VL_NATIVE_conn_g
 
 #ifdef H5_HAVE_WIN32_API
 

@@ -76,6 +76,13 @@ H5_DLL herr_t H5VL__find_opt_operation(H5VL_subclass_t subcls, const char *op_na
 H5_DLL herr_t H5VL__unregister_opt_operation(H5VL_subclass_t subcls, const char *op_name);
 H5_DLL herr_t H5VL__term_opt_operation(void);
 
+/* Register the internal VOL connectors */
+H5_DLL herr_t H5VL__native_register(void);
+H5_DLL herr_t H5VL__native_unregister(void);
+H5_DLL herr_t H5VL__passthru_register(void);
+H5_DLL herr_t H5VL__passthru_unregister(void);
+
+
 /* Testing functions */
 #ifdef H5VL_TESTING
 H5_DLL herr_t H5VL__reparse_def_vol_conn_variable_test(void);

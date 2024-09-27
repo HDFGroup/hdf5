@@ -3500,7 +3500,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5VL_1CAP_1FLAG_1THREADSAFE(JNIEnv *env, jclass c
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5VL_1NATIVE(JNIEnv *env, jclass cls)
 {
-    return H5VLget_connector_id_by_value(H5VL_NATIVE_VALUE);
+    return H5VL_NATIVE;
 }
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5VL_1NATIVE_1NAME(JNIEnv *env, jclass cls)

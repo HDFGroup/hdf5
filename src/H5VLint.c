@@ -44,8 +44,8 @@
 #include "H5VLpkg.h"     /* Virtual Object Layer                 */
 
 /* VOL connectors */
-#include "H5VLnative_private.h" /* Native VOL connector                 */
-#include "H5VLpassthru.h"       /* Pass-through VOL connector           */
+#include "H5VLnative_private.h"   /* Native VOL connector                 */
+#include "H5VLpassthru_private.h" /* Pass-through VOL connector           */
 
 /****************/
 /* Local Macros */
@@ -217,6 +217,12 @@ H5VL_init_phase2(void)
 
     /* clang-format on */
 
+    /* Register internal VOL connectors */
+    if (H5VL__native_register() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to register native VOL connector");
+    if (H5VL__passthru_register() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to register passthru VOL connector");
+
     /* Sanity check default VOL connector */
     assert(H5VL_def_conn_s.connector == NULL);
     assert(H5VL_def_conn_s.connector_info == NULL);
@@ -258,6 +264,11 @@ H5VL_term_package(void)
         if (H5I_nmembers(H5I_VOL) > 0) {
             /* Unregister all VOL connectors */
             (void)H5I_clear_type(H5I_VOL, true, false);
+
+            /* Reset internal VOL connectors' global vars */
+            (void)H5VL__native_unregister();
+            (void)H5VL__passthru_unregister();
+
             n++;
         } /* end if */
         else {
@@ -377,15 +388,13 @@ H5VL__set_def_conn(void)
         else {
             /* Check for VOL connectors that ship with the library */
             if (!strcmp(tok, "native")) {
-                connector = H5VL_NATIVE;
+                connector = H5VL_NATIVE_conn_g;
 
                 /* Inc. refcount on connector object, so it can be uniformly released */
                 H5VL_conn_inc_rc(connector);
             } /* end if */
             else if (!strcmp(tok, "pass_through")) {
-                if (NULL == (connector = H5I_object(H5VL_PASSTHRU)))
-                    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL,
-                                "can't get connector for internal pass-through VOL connector");
+                connector = H5VL_PASSTHRU_conn_g;
 
                 /* Inc. refcount on connector object, so it can be uniformly released */
                 H5VL_conn_inc_rc(connector);
@@ -1186,7 +1195,7 @@ H5VL_object_is_native(const H5VL_object_t *obj, bool *is_native)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get VOL connector class");
 
     /* Retrieve the native connector class */
-    native = H5VL_NATIVE;
+    native = H5VL_NATIVE_conn_g;
 
     /* Compare connector classes */
     if (H5VL_cmp_connector_cls(&cmp_value, cls, native->cls) < 0)
@@ -2403,7 +2412,7 @@ H5VL_wrap_register(H5I_type_t type, void *obj, bool app_ref)
      * field will get clobbered later, so disallow this.
      */
     if (type == H5I_DATATYPE)
-        if (vol_wrap_ctx->connector == H5VL_NATIVE)
+        if (vol_wrap_ctx->connector == H5VL_NATIVE_conn_g)
             if (true == H5T_already_vol_managed((const H5T_t *)obj))
                 HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5I_INVALID_HID, "can't wrap an uncommitted datatype");
 
