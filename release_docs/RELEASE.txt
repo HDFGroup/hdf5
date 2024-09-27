@@ -168,7 +168,15 @@ New Features
 
     Documentation:
     --------------
-    -
+    - Documented that leaving HDF5 threads running at termination is unsafe
+
+      Added doc/threadsafety-warning.md as a warning that threads which use HDF5 
+      resources must be closed before either process exit or library close. 
+      If HDF5 threads are alive during either of  these operations, their resources 
+      will not be cleaned up properly and undefined behavior is possible. 
+      
+      This document also includes a discussion on potential ways to mitigate this issue.
+
 
 
 Support for new platforms, languages and compilers
@@ -180,6 +188,19 @@ Bug Fixes since HDF5-1.14.4 release
 ===================================
     Library
     -------
+    - Fixed a bug with large external datasets
+
+      When performing a large I/O on an external dataset, the library would only
+      issue a single read or write system call. This could cause errors or cause
+      the data to be incorrect. These calls do not guarantee that they will
+      process the entire I/O request, and may need to be called multiple times
+      to complete the I/O, advancing the buffer and reducing the size by the
+      amount actually processed by read or write each time. Implemented this
+      algorithm for external datasets in both the read and write cases.
+
+      Fixes GitHub #4216
+      Fixes h5py GitHub #2394
+
     - Fixed a bug in the Subfiling VFD that could cause a buffer over-read
       and memory allocation failures
 
