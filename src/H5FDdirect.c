@@ -201,7 +201,7 @@ H5FD__init_package(void)
     char  *lock_env_var = NULL; /* Environment variable pointer */
     herr_t ret_value    = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check the use disabled file locks environment variable */
     lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
