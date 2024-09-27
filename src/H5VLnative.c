@@ -228,7 +228,7 @@ H5VL__native_unregister(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Reset VOL conector info */
+    /* Reset VOL connector info */
     H5VL_NATIVE_g      = H5I_INVALID_HID;
     H5VL_NATIVE_conn_g = NULL;
 
