@@ -433,14 +433,11 @@ H5_term_library(void)
             /* Shut down the following packages in strictly the order given
              * by the table.
              */
-        ,   TERMINATOR(CX, true)
-#ifdef H5_HAVE_THREADSAFE
-        ,   TERMINATOR(TS_top, true)
-#endif
         ,   TERMINATOR(E, true)
         ,   TERMINATOR(I, true)
         ,   TERMINATOR(SL, true)
         ,   TERMINATOR(FL, true)
+        ,   TERMINATOR(CX, true)
         };
 
         do {
