@@ -743,7 +743,7 @@ H5CX_term_package(void)
 bool
 H5CX_pushed(void)
 {
-    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
+    H5CX_node_t **head      = NULL;  /* Pointer to head of API context list */
     bool          is_pushed = false; /* Flag to indicate context is pushed */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
