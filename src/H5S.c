@@ -180,14 +180,14 @@ H5S_top_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5S_top_package_initialize_s) {
-    if (H5I_nmembers(H5I_DATASPACE) > 0) {
-        (void)H5I_clear_type(H5I_DATASPACE, false, false);
-        n++;
-    }
-    if (H5I_nmembers(H5I_SPACE_SEL_ITER) > 0) {
-        (void)H5I_clear_type(H5I_SPACE_SEL_ITER, false, false);
-        n++;
-    }
+        if (H5I_nmembers(H5I_DATASPACE) > 0) {
+            (void)H5I_clear_type(H5I_DATASPACE, false, false);
+            n++;
+        }
+        if (H5I_nmembers(H5I_SPACE_SEL_ITER) > 0) {
+            (void)H5I_clear_type(H5I_SPACE_SEL_ITER, false, false);
+            n++;
+        }
 
         /* Mark "top" of interface as closed */
         if (0 == n)
@@ -225,16 +225,16 @@ H5S_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5_PKG_INIT_VAR) {
-    /* Sanity checks */
-    assert(0 == H5I_nmembers(H5I_DATASPACE));
-    assert(0 == H5I_nmembers(H5I_SPACE_SEL_ITER));
+        /* Sanity checks */
+        assert(0 == H5I_nmembers(H5I_DATASPACE));
+        assert(0 == H5I_nmembers(H5I_SPACE_SEL_ITER));
         assert(false == H5S_top_package_initialize_s);
 
-    /* Destroy the dataspace object id group */
-    n += (H5I_dec_type_ref(H5I_DATASPACE) > 0);
+        /* Destroy the dataspace object id group */
+        n += (H5I_dec_type_ref(H5I_DATASPACE) > 0);
 
-    /* Destroy the dataspace selection iterator object id group */
-    n += (H5I_dec_type_ref(H5I_SPACE_SEL_ITER) > 0);
+        /* Destroy the dataspace selection iterator object id group */
+        n += (H5I_dec_type_ref(H5I_SPACE_SEL_ITER) > 0);
 
         /* Mark interface as closed */
         if (0 == n)

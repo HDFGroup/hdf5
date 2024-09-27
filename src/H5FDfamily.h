@@ -17,7 +17,7 @@
 #define H5FDfamily_H
 
 /** Initializer for the family VFD */
-#define H5FD_FAMILY       (H5FD_family_init())
+#define H5FD_FAMILY (H5FD_family_init())
 
 /** Identifier for the family VFD */
 #define H5FD_FAMILY_VALUE H5_VFD_FAMILY

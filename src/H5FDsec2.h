@@ -18,7 +18,7 @@
 #define H5FDsec2_H
 
 /** Initializer for the sec2 VFD */
-#define H5FD_SEC2       (H5FD_sec2_init())
+#define H5FD_SEC2 (H5FD_sec2_init())
 
 /** Identifier for the sec2 VFD */
 #define H5FD_SEC2_VALUE H5_VFD_SEC2

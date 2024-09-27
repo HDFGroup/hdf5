@@ -197,7 +197,7 @@ H5FL_DEFINE_STATIC(H5FD_sec2_t);
 static herr_t
 H5FD__init_package(void)
 {
-    char * lock_env_var = NULL; /* Environment variable pointer */
+    char  *lock_env_var = NULL; /* Environment variable pointer */
     herr_t ret_value    = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -232,7 +232,7 @@ done:
 hid_t
 H5FD_sec2_init(void)
 {
-    hid_t ret_value    = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 

@@ -175,11 +175,11 @@ H5FL_term_package(void)
         /* Garbage collect any nodes on the free lists */
         (void)H5FL_garbage_coll();
 
-    /* Shut down the various kinds of free lists */
-    n += H5FL__reg_term();
-    n += H5FL__fac_term_all();
-    n += H5FL__arr_term();
-    n += H5FL__blk_term();
+        /* Shut down the various kinds of free lists */
+        n += H5FL__reg_term();
+        n += H5FL__fac_term_all();
+        n += H5FL__arr_term();
+        n += H5FL__blk_term();
 
         /* Mark interface closed */
         if (0 == n)

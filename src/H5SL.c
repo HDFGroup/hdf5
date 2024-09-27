@@ -584,27 +584,27 @@ H5SL_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5_PKG_INIT_VAR) {
-    /* Terminate all the factories */
-    if (H5SL_fac_nused_g > 0) {
-        size_t                       i;
-        herr_t H5_ATTR_NDEBUG_UNUSED ret;
+        /* Terminate all the factories */
+        if (H5SL_fac_nused_g > 0) {
+            size_t                       i;
+            herr_t H5_ATTR_NDEBUG_UNUSED ret;
 
-        for (i = 0; i < H5SL_fac_nused_g; i++) {
-            ret = H5FL_fac_term(H5SL_fac_g[i]);
-            assert(ret >= 0);
+            for (i = 0; i < H5SL_fac_nused_g; i++) {
+                ret = H5FL_fac_term(H5SL_fac_g[i]);
+                assert(ret >= 0);
+            }
+            H5SL_fac_nused_g = 0;
+
+            n++;
         }
-        H5SL_fac_nused_g = 0;
 
-        n++;
-    }
+        /* Free the list of factories */
+        if (H5SL_fac_g) {
+            H5SL_fac_g        = (H5FL_fac_head_t **)H5MM_xfree((void *)H5SL_fac_g);
+            H5SL_fac_nalloc_g = 0;
 
-    /* Free the list of factories */
-    if (H5SL_fac_g) {
-        H5SL_fac_g        = (H5FL_fac_head_t **)H5MM_xfree((void *)H5SL_fac_g);
-        H5SL_fac_nalloc_g = 0;
-
-        n++;
-    }
+            n++;
+        }
 
         /* Mark the interface as uninitialized */
         if (0 == n)

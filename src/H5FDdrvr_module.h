@@ -21,8 +21,8 @@
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
  */
-#define H5_MY_PKG     H5FD
-#define H5_MY_PKG_ERR H5E_VFL
+#define H5_MY_PKG      H5FD
+#define H5_MY_PKG_ERR  H5E_VFL
 #define H5_MY_PKG_INIT YES
 #define H5_PKG_SINGLE_SOURCE
 

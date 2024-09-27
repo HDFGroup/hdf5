@@ -319,7 +319,7 @@ H5FD__subfiling_mpi_finalize(void)
 static herr_t
 H5FD__init_package(void)
 {
-    herr_t ret_value    = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -365,7 +365,8 @@ H5FD_subfiling_init(void)
             if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
                 HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Query_thread failed", mpi_code);
             if (provided != MPI_THREAD_MULTIPLE)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                            "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
         }
         else {
             int required = MPI_THREAD_MULTIPLE;
@@ -376,10 +377,12 @@ H5FD_subfiling_init(void)
             H5FD_mpi_self_initialized = true;
 
             if (provided != required)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                            "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
 
             if (atexit(H5FD__subfiling_mpi_finalize) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "can't register atexit handler for MPI_Finalize");
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                            "can't register atexit handler for MPI_Finalize");
         }
 
         /*
@@ -438,7 +441,8 @@ H5FD__subfiling_term(void)
             }
 #ifdef H5_SUBFILING_DEBUG
             else
-                printf("** WARNING **: HDF5 is terminating the Subfiling VFD after MPI_Finalize() was called " "- an HDF5 ID was probably left unclosed\n");
+                printf("** WARNING **: HDF5 is terminating the Subfiling VFD after MPI_Finalize() was called "
+                       "- an HDF5 ID was probably left unclosed\n");
 #endif
         }
 

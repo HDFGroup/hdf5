@@ -148,10 +148,10 @@ H5M_top_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5M_top_package_initialize_s) {
-    if (H5I_nmembers(H5I_MAP) > 0) {
-        (void)H5I_clear_type(H5I_MAP, false, false);
-        n++;
-    }
+        if (H5I_nmembers(H5I_MAP) > 0) {
+            (void)H5I_clear_type(H5I_MAP, false, false);
+            n++;
+        }
 
         /* Mark closed */
         if (0 == n)
@@ -182,12 +182,12 @@ H5M_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5_PKG_INIT_VAR) {
-    /* Sanity checks */
-    assert(0 == H5I_nmembers(H5I_MAP));
+        /* Sanity checks */
+        assert(0 == H5I_nmembers(H5I_MAP));
         assert(false == H5M_top_package_initialize_s);
 
-    /* Destroy the dataset object id group */
-    n += (H5I_dec_type_ref(H5I_MAP) > 0);
+        /* Destroy the dataset object id group */
+        n += (H5I_dec_type_ref(H5I_MAP) > 0);
 
         /* Mark closed */
         if (0 == n)

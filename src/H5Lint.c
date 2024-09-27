@@ -254,12 +254,12 @@ H5L_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5_PKG_INIT_VAR) {
-    /* Free the table of link types */
-    if (H5L_table_g) {
-        H5L_table_g      = (H5L_class_t *)H5MM_xfree(H5L_table_g);
-        H5L_table_used_g = H5L_table_alloc_g = 0;
-        n++;
-    } /* end if */
+        /* Free the table of link types */
+        if (H5L_table_g) {
+            H5L_table_g      = (H5L_class_t *)H5MM_xfree(H5L_table_g);
+            H5L_table_used_g = H5L_table_alloc_g = 0;
+            n++;
+        } /* end if */
 
         /* Mark the interface as uninitialized */
         if (0 == n)

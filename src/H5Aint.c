@@ -212,10 +212,10 @@ H5A_top_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5A_top_package_initialize_s) {
-    if (H5I_nmembers(H5I_ATTR) > 0) {
-        (void)H5I_clear_type(H5I_ATTR, false, false);
-        n++; /*H5I*/
-    }        /* end if */
+        if (H5I_nmembers(H5I_ATTR) > 0) {
+            (void)H5I_clear_type(H5I_ATTR, false, false);
+            n++; /*H5I*/
+        }        /* end if */
 
         /* Mark closed */
         if (0 == n)

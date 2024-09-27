@@ -689,7 +689,7 @@ H5CX__init_package(void)
 
     if (H5P_get(fa_plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &H5CX_def_fapl_cache.high_bound) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve dataset minimize flag");
-        
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX__init_package() */
@@ -711,18 +711,18 @@ H5CX_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5_PKG_INIT_VAR) {
-    H5CX_node_t *cnode; /* Context node */
+        H5CX_node_t *cnode; /* Context node */
 
-    /* Pop the top context node from the stack */
-    /* (Can't check for errors, as rest of library is shut down) */
-    cnode = H5CX__pop_common(false);
+        /* Pop the top context node from the stack */
+        /* (Can't check for errors, as rest of library is shut down) */
+        cnode = H5CX__pop_common(false);
 
-    /* Free the context node */
-    /* (Allocated with malloc() in H5CX_push_special() ) */
-    free(cnode);
+        /* Free the context node */
+        /* (Allocated with malloc() in H5CX_push_special() ) */
+        free(cnode);
 
 #ifndef H5_HAVE_THREADSAFE
-    H5CX_head_g = NULL;
+        H5CX_head_g = NULL;
 #endif /* H5_HAVE_THREADSAFE */
 
         H5_PKG_INIT_VAR = false;
@@ -2967,8 +2967,8 @@ H5CX_set_coll_metadata_read(bool cmdr)
 herr_t
 H5CX_set_mpi_coll_datatypes(MPI_Datatype btype, MPI_Datatype ftype)
 {
-    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

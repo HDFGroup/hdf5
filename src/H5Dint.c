@@ -161,7 +161,7 @@ static const char *H5D_prefix_vds_env = NULL;
 herr_t
 H5D_init(void)
 {
-    herr_t          ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
     /* FUNC_ENTER() does all the work */
@@ -250,31 +250,31 @@ H5D_top_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5D_top_package_initialize_s) {
-    if (H5I_nmembers(H5I_DATASET) > 0) {
-        /* The dataset API uses the "force" flag set to true because it
-         * is using the "file objects" (H5FO) API functions to track open
-         * objects in the file.  Using the H5FO code means that dataset
-         * IDs can have reference counts >1, when an existing dataset is
-         * opened more than once.  However, the H5I code does not attempt
-         * to close objects with reference counts>1 unless the "force" flag
-         * is set to true.
-         *
-         * At some point (probably after the group and datatypes use the
-         * the H5FO code), the H5FO code might need to be switched around
-         * to storing pointers to the objects being tracked (H5D_t, H5G_t,
-         * etc) and reference count those itself instead of relying on the
-         * reference counting in the H5I layer.  Then, the "force" flag can
-         * be put back to false.
-         *
-         * Setting the "force" flag to true for all the interfaces won't
-         * work because the "file driver" (H5FD) APIs use the H5I reference
-         * counting to avoid closing a file driver out from underneath an
-         * open file...
-         *
-         * QAK - 5/13/03
-         */
-        (void)H5I_clear_type(H5I_DATASET, true, false);
-        n++; /*H5I*/
+        if (H5I_nmembers(H5I_DATASET) > 0) {
+            /* The dataset API uses the "force" flag set to true because it
+             * is using the "file objects" (H5FO) API functions to track open
+             * objects in the file.  Using the H5FO code means that dataset
+             * IDs can have reference counts >1, when an existing dataset is
+             * opened more than once.  However, the H5I code does not attempt
+             * to close objects with reference counts>1 unless the "force" flag
+             * is set to true.
+             *
+             * At some point (probably after the group and datatypes use the
+             * the H5FO code), the H5FO code might need to be switched around
+             * to storing pointers to the objects being tracked (H5D_t, H5G_t,
+             * etc) and reference count those itself instead of relying on the
+             * reference counting in the H5I layer.  Then, the "force" flag can
+             * be put back to false.
+             *
+             * Setting the "force" flag to true for all the interfaces won't
+             * work because the "file driver" (H5FD) APIs use the H5I reference
+             * counting to avoid closing a file driver out from underneath an
+             * open file...
+             *
+             * QAK - 5/13/03
+             */
+            (void)H5I_clear_type(H5I_DATASET, true, false);
+            n++; /*H5I*/
         }        /* end if */
 
         /* Mark closed */
@@ -306,12 +306,12 @@ H5D_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5_PKG_INIT_VAR) {
-    /* Sanity checks */
-    assert(0 == H5I_nmembers(H5I_DATASET));
-    assert(FALSE == H5D_top_package_initialize_s);
+        /* Sanity checks */
+        assert(0 == H5I_nmembers(H5I_DATASET));
+        assert(FALSE == H5D_top_package_initialize_s);
 
-    /* Destroy the dataset object id group */
-    n += (H5I_dec_type_ref(H5I_DATASET) > 0);
+        /* Destroy the dataset object id group */
+        n += (H5I_dec_type_ref(H5I_DATASET) > 0);
 
         /* Mark closed */
         if (0 == n)

@@ -335,18 +335,19 @@ H5_term_library(void)
 #define DOWN(F)                                                                                              \
     (((n = H5##F##_term_package()) && (at + 8) < sizeof loop)                                                \
          ? (sprintf(loop + at, "%s%s", (at ? "," : ""), #F), at += strlen(loop + at), n)                     \
-         : ((n > 0 && (at + 5) < sizeof loop) ? (sprintf(loop + at, "..."), at += strlen(loop + at), n)  : n))
+         : ((n > 0 && (at + 5) < sizeof loop) ? (sprintf(loop + at, "..."), at += strlen(loop + at), n)      \
+                                              : n))
 
     do {
         pending = 0;
 
         /* Try to organize these so the "higher" level components get shut
          * down before "lower" level components that they might rely on. -QAK
-                                      */
+         */
 
-            /* Close the event sets first, so that all asynchronous operations
-             * complete before anything else attempts to shut down.
-             */
+        /* Close the event sets first, so that all asynchronous operations
+         * complete before anything else attempts to shut down.
+         */
         pending += DOWN(ES);
 
         /* Close down the user-facing interfaces, after the event sets */
@@ -368,18 +369,18 @@ H5_term_library(void)
             pending += DOWN(T_top);
         } /* end if */
 
-            /* Don't shut down the file code until objects in files are shut down */
+        /* Don't shut down the file code until objects in files are shut down */
         if (pending == 0)
             pending += DOWN(F);
 
-            /* Don't shut down the property list code until all objects that might
+        /* Don't shut down the property list code until all objects that might
          * use property lists are shut down */
         if (pending == 0)
             pending += DOWN(P);
 
-            /* Wait to shut down the "bottom" of various interfaces until the
-             * files are closed, so pieces of the file can be serialized
-             * correctly.
+        /* Wait to shut down the "bottom" of various interfaces until the
+         * files are closed, so pieces of the file can be serialized
+         * correctly.
          */
         if (pending == 0) {
             /* Shut down the "bottom" of the attribute, dataset, group,
@@ -399,7 +400,7 @@ H5_term_library(void)
          * have successfully shut down.  This prevents property lists and IDs
          * from being closed "out from underneath" of the high-level objects
          * that depend on them. -QAK
-             */
+         */
         if (pending == 0) {
             pending += DOWN(AC);
             /* Shut down the "pluggable" interfaces, before the plugin framework */

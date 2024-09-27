@@ -18,7 +18,7 @@
 #define H5FDsplitter_H
 
 /** Initializer for the splitter VFD */
-#define H5FD_SPLITTER       (H5FD_splitter_init())
+#define H5FD_SPLITTER (H5FD_splitter_init())
 
 /** Identifier for the splitter VFD */
 #define H5FD_SPLITTER_VALUE H5_VFD_SPLITTER

@@ -596,111 +596,111 @@ H5P_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5_PKG_INIT_VAR) {
-    int64_t nlist, nclass;
+        int64_t nlist, nclass;
 
-    /* Destroy HDF5 library property classes & lists */
+        /* Destroy HDF5 library property classes & lists */
 
-    /* Check if there are any open property list classes or lists */
-    nclass = H5I_nmembers(H5I_GENPROP_CLS);
-    nlist  = H5I_nmembers(H5I_GENPROP_LST);
+        /* Check if there are any open property list classes or lists */
+        nclass = H5I_nmembers(H5I_GENPROP_CLS);
+        nlist  = H5I_nmembers(H5I_GENPROP_LST);
 
-    /* If there are any open classes or groups, attempt to get rid of them. */
-    if ((nclass + nlist) > 0) {
-        /* Clear the lists */
-        if (nlist > 0) {
-            (void)H5I_clear_type(H5I_GENPROP_LST, false, false);
+        /* If there are any open classes or groups, attempt to get rid of them. */
+        if ((nclass + nlist) > 0) {
+            /* Clear the lists */
+            if (nlist > 0) {
+                (void)H5I_clear_type(H5I_GENPROP_LST, false, false);
 
-            /* Reset the default property lists, if they've been closed */
-            if (H5I_nmembers(H5I_GENPROP_LST) == 0) {
-                H5P_LST_ATTRIBUTE_ACCESS_ID_g = H5I_INVALID_HID;
-                H5P_LST_ATTRIBUTE_CREATE_ID_g = H5I_INVALID_HID;
-                H5P_LST_DATASET_ACCESS_ID_g   = H5I_INVALID_HID;
-                H5P_LST_DATASET_CREATE_ID_g   = H5I_INVALID_HID;
-                H5P_LST_DATASET_XFER_ID_g     = H5I_INVALID_HID;
-                H5P_LST_DATATYPE_ACCESS_ID_g  = H5I_INVALID_HID;
-                H5P_LST_DATATYPE_CREATE_ID_g  = H5I_INVALID_HID;
-                H5P_LST_FILE_ACCESS_ID_g      = H5I_INVALID_HID;
-                H5P_LST_FILE_CREATE_ID_g      = H5I_INVALID_HID;
-                H5P_LST_FILE_MOUNT_ID_g       = H5I_INVALID_HID;
-                H5P_LST_GROUP_ACCESS_ID_g     = H5I_INVALID_HID;
-                H5P_LST_GROUP_CREATE_ID_g     = H5I_INVALID_HID;
-                H5P_LST_LINK_ACCESS_ID_g      = H5I_INVALID_HID;
-                H5P_LST_LINK_CREATE_ID_g      = H5I_INVALID_HID;
-                H5P_LST_MAP_ACCESS_ID_g       = H5I_INVALID_HID;
-                H5P_LST_MAP_CREATE_ID_g       = H5I_INVALID_HID;
-                H5P_LST_OBJECT_COPY_ID_g      = H5I_INVALID_HID;
-                H5P_LST_REFERENCE_ACCESS_ID_g = H5I_INVALID_HID;
-                H5P_LST_VOL_INITIALIZE_ID_g   = H5I_INVALID_HID;
+                /* Reset the default property lists, if they've been closed */
+                if (H5I_nmembers(H5I_GENPROP_LST) == 0) {
+                    H5P_LST_ATTRIBUTE_ACCESS_ID_g = H5I_INVALID_HID;
+                    H5P_LST_ATTRIBUTE_CREATE_ID_g = H5I_INVALID_HID;
+                    H5P_LST_DATASET_ACCESS_ID_g   = H5I_INVALID_HID;
+                    H5P_LST_DATASET_CREATE_ID_g   = H5I_INVALID_HID;
+                    H5P_LST_DATASET_XFER_ID_g     = H5I_INVALID_HID;
+                    H5P_LST_DATATYPE_ACCESS_ID_g  = H5I_INVALID_HID;
+                    H5P_LST_DATATYPE_CREATE_ID_g  = H5I_INVALID_HID;
+                    H5P_LST_FILE_ACCESS_ID_g      = H5I_INVALID_HID;
+                    H5P_LST_FILE_CREATE_ID_g      = H5I_INVALID_HID;
+                    H5P_LST_FILE_MOUNT_ID_g       = H5I_INVALID_HID;
+                    H5P_LST_GROUP_ACCESS_ID_g     = H5I_INVALID_HID;
+                    H5P_LST_GROUP_CREATE_ID_g     = H5I_INVALID_HID;
+                    H5P_LST_LINK_ACCESS_ID_g      = H5I_INVALID_HID;
+                    H5P_LST_LINK_CREATE_ID_g      = H5I_INVALID_HID;
+                    H5P_LST_MAP_ACCESS_ID_g       = H5I_INVALID_HID;
+                    H5P_LST_MAP_CREATE_ID_g       = H5I_INVALID_HID;
+                    H5P_LST_OBJECT_COPY_ID_g      = H5I_INVALID_HID;
+                    H5P_LST_REFERENCE_ACCESS_ID_g = H5I_INVALID_HID;
+                    H5P_LST_VOL_INITIALIZE_ID_g   = H5I_INVALID_HID;
+                }
             }
-        }
 
-        /* Only attempt to close the classes after all the lists are closed */
-        if (nlist == 0 && nclass > 0) {
-            (void)H5I_clear_type(H5I_GENPROP_CLS, false, false);
+            /* Only attempt to close the classes after all the lists are closed */
+            if (nlist == 0 && nclass > 0) {
+                (void)H5I_clear_type(H5I_GENPROP_CLS, false, false);
 
-            /* Reset the default property classes and IDs if they've been closed */
-            if (H5I_nmembers(H5I_GENPROP_CLS) == 0) {
-                H5P_CLS_ROOT_g = NULL;
+                /* Reset the default property classes and IDs if they've been closed */
+                if (H5I_nmembers(H5I_GENPROP_CLS) == 0) {
+                    H5P_CLS_ROOT_g = NULL;
 
-                H5P_CLS_ATTRIBUTE_ACCESS_g = NULL;
-                H5P_CLS_ATTRIBUTE_CREATE_g = NULL;
-                H5P_CLS_DATASET_ACCESS_g   = NULL;
-                H5P_CLS_DATASET_CREATE_g   = NULL;
-                H5P_CLS_DATASET_XFER_g     = NULL;
-                H5P_CLS_DATATYPE_ACCESS_g  = NULL;
-                H5P_CLS_DATATYPE_CREATE_g  = NULL;
-                H5P_CLS_FILE_ACCESS_g      = NULL;
-                H5P_CLS_FILE_CREATE_g      = NULL;
-                H5P_CLS_FILE_MOUNT_g       = NULL;
-                H5P_CLS_GROUP_ACCESS_g     = NULL;
-                H5P_CLS_GROUP_CREATE_g     = NULL;
-                H5P_CLS_LINK_ACCESS_g      = NULL;
-                H5P_CLS_LINK_CREATE_g      = NULL;
-                H5P_CLS_MAP_ACCESS_g       = NULL;
-                H5P_CLS_MAP_CREATE_g       = NULL;
-                H5P_CLS_OBJECT_COPY_g      = NULL;
-                H5P_CLS_OBJECT_CREATE_g    = NULL;
-                H5P_CLS_REFERENCE_ACCESS_g = NULL;
-                H5P_CLS_STRING_CREATE_g    = NULL;
-                H5P_CLS_VOL_INITIALIZE_g   = NULL;
+                    H5P_CLS_ATTRIBUTE_ACCESS_g = NULL;
+                    H5P_CLS_ATTRIBUTE_CREATE_g = NULL;
+                    H5P_CLS_DATASET_ACCESS_g   = NULL;
+                    H5P_CLS_DATASET_CREATE_g   = NULL;
+                    H5P_CLS_DATASET_XFER_g     = NULL;
+                    H5P_CLS_DATATYPE_ACCESS_g  = NULL;
+                    H5P_CLS_DATATYPE_CREATE_g  = NULL;
+                    H5P_CLS_FILE_ACCESS_g      = NULL;
+                    H5P_CLS_FILE_CREATE_g      = NULL;
+                    H5P_CLS_FILE_MOUNT_g       = NULL;
+                    H5P_CLS_GROUP_ACCESS_g     = NULL;
+                    H5P_CLS_GROUP_CREATE_g     = NULL;
+                    H5P_CLS_LINK_ACCESS_g      = NULL;
+                    H5P_CLS_LINK_CREATE_g      = NULL;
+                    H5P_CLS_MAP_ACCESS_g       = NULL;
+                    H5P_CLS_MAP_CREATE_g       = NULL;
+                    H5P_CLS_OBJECT_COPY_g      = NULL;
+                    H5P_CLS_OBJECT_CREATE_g    = NULL;
+                    H5P_CLS_REFERENCE_ACCESS_g = NULL;
+                    H5P_CLS_STRING_CREATE_g    = NULL;
+                    H5P_CLS_VOL_INITIALIZE_g   = NULL;
 
-                H5P_CLS_ROOT_ID_g = H5I_INVALID_HID;
+                    H5P_CLS_ROOT_ID_g = H5I_INVALID_HID;
 
-                H5P_CLS_ATTRIBUTE_ACCESS_ID_g = H5I_INVALID_HID;
-                H5P_CLS_ATTRIBUTE_CREATE_ID_g = H5I_INVALID_HID;
-                H5P_CLS_DATASET_ACCESS_ID_g   = H5I_INVALID_HID;
-                H5P_CLS_DATASET_CREATE_ID_g   = H5I_INVALID_HID;
-                H5P_CLS_DATASET_XFER_ID_g     = H5I_INVALID_HID;
-                H5P_CLS_DATATYPE_ACCESS_ID_g  = H5I_INVALID_HID;
-                H5P_CLS_DATATYPE_CREATE_ID_g  = H5I_INVALID_HID;
-                H5P_CLS_FILE_ACCESS_ID_g      = H5I_INVALID_HID;
-                H5P_CLS_FILE_CREATE_ID_g      = H5I_INVALID_HID;
-                H5P_CLS_FILE_MOUNT_ID_g       = H5I_INVALID_HID;
-                H5P_CLS_GROUP_ACCESS_ID_g     = H5I_INVALID_HID;
-                H5P_CLS_GROUP_CREATE_ID_g     = H5I_INVALID_HID;
-                H5P_CLS_LINK_ACCESS_ID_g      = H5I_INVALID_HID;
-                H5P_CLS_LINK_CREATE_ID_g      = H5I_INVALID_HID;
-                H5P_CLS_MAP_ACCESS_ID_g       = H5I_INVALID_HID;
-                H5P_CLS_MAP_CREATE_ID_g       = H5I_INVALID_HID;
-                H5P_CLS_OBJECT_COPY_ID_g      = H5I_INVALID_HID;
-                H5P_CLS_OBJECT_CREATE_ID_g    = H5I_INVALID_HID;
-                H5P_CLS_REFERENCE_ACCESS_ID_g = H5I_INVALID_HID;
-                H5P_CLS_STRING_CREATE_ID_g    = H5I_INVALID_HID;
-                H5P_CLS_VOL_INITIALIZE_ID_g   = H5I_INVALID_HID;
+                    H5P_CLS_ATTRIBUTE_ACCESS_ID_g = H5I_INVALID_HID;
+                    H5P_CLS_ATTRIBUTE_CREATE_ID_g = H5I_INVALID_HID;
+                    H5P_CLS_DATASET_ACCESS_ID_g   = H5I_INVALID_HID;
+                    H5P_CLS_DATASET_CREATE_ID_g   = H5I_INVALID_HID;
+                    H5P_CLS_DATASET_XFER_ID_g     = H5I_INVALID_HID;
+                    H5P_CLS_DATATYPE_ACCESS_ID_g  = H5I_INVALID_HID;
+                    H5P_CLS_DATATYPE_CREATE_ID_g  = H5I_INVALID_HID;
+                    H5P_CLS_FILE_ACCESS_ID_g      = H5I_INVALID_HID;
+                    H5P_CLS_FILE_CREATE_ID_g      = H5I_INVALID_HID;
+                    H5P_CLS_FILE_MOUNT_ID_g       = H5I_INVALID_HID;
+                    H5P_CLS_GROUP_ACCESS_ID_g     = H5I_INVALID_HID;
+                    H5P_CLS_GROUP_CREATE_ID_g     = H5I_INVALID_HID;
+                    H5P_CLS_LINK_ACCESS_ID_g      = H5I_INVALID_HID;
+                    H5P_CLS_LINK_CREATE_ID_g      = H5I_INVALID_HID;
+                    H5P_CLS_MAP_ACCESS_ID_g       = H5I_INVALID_HID;
+                    H5P_CLS_MAP_CREATE_ID_g       = H5I_INVALID_HID;
+                    H5P_CLS_OBJECT_COPY_ID_g      = H5I_INVALID_HID;
+                    H5P_CLS_OBJECT_CREATE_ID_g    = H5I_INVALID_HID;
+                    H5P_CLS_REFERENCE_ACCESS_ID_g = H5I_INVALID_HID;
+                    H5P_CLS_STRING_CREATE_ID_g    = H5I_INVALID_HID;
+                    H5P_CLS_VOL_INITIALIZE_ID_g   = H5I_INVALID_HID;
+                }
             }
-        }
 
-        n++; /*H5I*/
-    }
-    else {
-        /* Destroy the property list and class id groups */
-        n += (H5I_dec_type_ref(H5I_GENPROP_LST) > 0);
-        n += (H5I_dec_type_ref(H5I_GENPROP_CLS) > 0);
+            n++; /*H5I*/
+        }
+        else {
+            /* Destroy the property list and class id groups */
+            n += (H5I_dec_type_ref(H5I_GENPROP_LST) > 0);
+            n += (H5I_dec_type_ref(H5I_GENPROP_CLS) > 0);
 
             /* Mark closed */
             if (0 == n)
                 H5_PKG_INIT_VAR = FALSE;
-    } /* end else */
+        } /* end else */
     }     /* end if */
 
     FUNC_LEAVE_NOAPI(n)

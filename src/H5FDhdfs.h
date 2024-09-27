@@ -21,7 +21,7 @@
 #ifdef H5_HAVE_LIBHDFS
 
 /** Initializer for the hdfs VFD */
-#define H5FD_HDFS       (H5FD_hdfs_init())
+#define H5FD_HDFS (H5FD_hdfs_init())
 
 /** Identifier for the hdfs VFD */
 #define H5FD_HDFS_VALUE H5_VFD_HDFS

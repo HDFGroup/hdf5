@@ -169,8 +169,8 @@ H5ES_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5_PKG_INIT_VAR) {
-    /* Destroy the event set ID group */
-    n += (H5I_dec_type_ref(H5I_EVENTSET) > 0);
+        /* Destroy the event set ID group */
+        n += (H5I_dec_type_ref(H5I_EVENTSET) > 0);
 
         /* Mark closed */
         if (0 == n)

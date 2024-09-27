@@ -255,35 +255,35 @@ H5VL_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5_PKG_INIT_VAR) {
-    if (H5VL_def_conn_s.connector_id > 0) {
-        /* Release the default VOL connector */
-        (void)H5VL_conn_free(&H5VL_def_conn_s);
-        H5VL_def_conn_s.connector_id   = -1;
-        H5VL_def_conn_s.connector_info = NULL;
-        n++;
-    } /* end if */
-    else {
-        if (H5I_nmembers(H5I_VOL) > 0) {
-            /* Unregister all VOL connectors */
-            (void)H5I_clear_type(H5I_VOL, true, false);
+        if (H5VL_def_conn_s.connector_id > 0) {
+            /* Release the default VOL connector */
+            (void)H5VL_conn_free(&H5VL_def_conn_s);
+            H5VL_def_conn_s.connector_id   = -1;
+            H5VL_def_conn_s.connector_info = NULL;
             n++;
         } /* end if */
         else {
-            if (H5VL__num_opt_operation() > 0) {
-                /* Unregister all dynamically registered optional operations */
-                (void)H5VL__term_opt_operation();
+            if (H5I_nmembers(H5I_VOL) > 0) {
+                /* Unregister all VOL connectors */
+                (void)H5I_clear_type(H5I_VOL, true, false);
                 n++;
             } /* end if */
             else {
-                /* Destroy the VOL connector ID group */
-                n += (H5I_dec_type_ref(H5I_VOL) > 0);
+                if (H5VL__num_opt_operation() > 0) {
+                    /* Unregister all dynamically registered optional operations */
+                    (void)H5VL__term_opt_operation();
+                    n++;
+                } /* end if */
+                else {
+                    /* Destroy the VOL connector ID group */
+                    n += (H5I_dec_type_ref(H5I_VOL) > 0);
 
                     /* Mark interface as closed */
                     if (0 == n)
                         H5_PKG_INIT_VAR = FALSE;
-            } /* end else */
-        }     /* end else */
-    }         /* end else */
+                } /* end else */
+            }     /* end else */
+        }         /* end else */
     }             /* end if */
 
     FUNC_LEAVE_NOAPI(n)

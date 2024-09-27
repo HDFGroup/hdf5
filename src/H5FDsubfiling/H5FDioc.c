@@ -190,7 +190,7 @@ H5FL_DEFINE_STATIC(H5FD_ioc_config_t);
 static herr_t
 H5FD__init_package(void)
 {
-    herr_t ret_value    = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 

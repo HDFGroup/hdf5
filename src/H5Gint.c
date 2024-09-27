@@ -196,10 +196,10 @@ H5G_top_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5G_top_package_initialize_s) {
-    if (H5I_nmembers(H5I_GROUP) > 0) {
-        (void)H5I_clear_type(H5I_GROUP, false, false);
-        n++;
-    }
+        if (H5I_nmembers(H5I_GROUP) > 0) {
+            (void)H5I_clear_type(H5I_GROUP, false, false);
+            n++;
+        }
 
         /* Mark closed */
         if (0 == n)
@@ -231,12 +231,12 @@ H5G_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5_PKG_INIT_VAR) {
-    /* Sanity checks */
-    assert(0 == H5I_nmembers(H5I_GROUP));
+        /* Sanity checks */
+        assert(0 == H5I_nmembers(H5I_GROUP));
         assert(false == H5G_top_package_initialize_s);
 
-    /* Destroy the group object id group */
-    n += (H5I_dec_type_ref(H5I_GROUP) > 0);
+        /* Destroy the group object id group */
+        n += (H5I_dec_type_ref(H5I_GROUP) > 0);
 
         /* Mark closed */
         if (0 == n)

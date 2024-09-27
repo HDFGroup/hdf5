@@ -195,7 +195,7 @@ H5R_term_package(void)
     if (H5_PKG_INIT_VAR) {
         /* Mark closed */
         H5_PKG_INIT_VAR = false;
-}
+    }
 
     FUNC_LEAVE_NOAPI(0)
 } /* end H5R_term_package() */

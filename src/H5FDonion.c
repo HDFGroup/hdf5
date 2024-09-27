@@ -232,7 +232,7 @@ static const H5FD_class_t H5FD_onion_g = {
 herr_t
 H5FD__onion__init_package(void)
 {
-    herr_t ret_value    = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 

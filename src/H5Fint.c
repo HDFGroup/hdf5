@@ -198,21 +198,21 @@ H5F_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5_PKG_INIT_VAR) {
-    if (H5I_nmembers(H5I_FILE) > 0) {
-        (void)H5I_clear_type(H5I_FILE, false, false);
-        n++; /*H5I*/
-    }        /* end if */
-    else {
-        /* Make certain we've cleaned up all the shared file objects */
-        H5F_sfile_assert_num(0);
+        if (H5I_nmembers(H5I_FILE) > 0) {
+            (void)H5I_clear_type(H5I_FILE, false, false);
+            n++; /*H5I*/
+        }        /* end if */
+        else {
+            /* Make certain we've cleaned up all the shared file objects */
+            H5F_sfile_assert_num(0);
 
-        /* Destroy the file object id group */
-        n += (H5I_dec_type_ref(H5I_FILE) > 0);
+            /* Destroy the file object id group */
+            n += (H5I_dec_type_ref(H5I_FILE) > 0);
 
             /* Mark closed */
             if (0 == n)
                 H5_PKG_INIT_VAR = FALSE;
-    } /* end else */
+        } /* end else */
     }     /* end if */
 
     FUNC_LEAVE_NOAPI(n)

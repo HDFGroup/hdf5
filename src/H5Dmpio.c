@@ -2716,7 +2716,7 @@ H5D__cmp_piece_addr(const void *piece_info1, const void *piece_info2)
 {
     haddr_t addr1;
     haddr_t addr2;
-    int ret_value = 0;
+    int     ret_value = 0;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2747,8 +2747,8 @@ H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_in
 {
     const H5D_filtered_collective_chunk_info_t *entry1;
     const H5D_filtered_collective_chunk_info_t *entry2;
-    haddr_t                                     addr1 = HADDR_UNDEF;
-    haddr_t                                     addr2 = HADDR_UNDEF;
+    haddr_t                                     addr1     = HADDR_UNDEF;
+    haddr_t                                     addr2     = HADDR_UNDEF;
     int                                         ret_value = 0;
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -2866,8 +2866,8 @@ H5D__cmp_chunk_redistribute_info_orig_owner(const void *_entry1, const void *_en
 {
     const H5D_chunk_redistribute_info_t *entry1;
     const H5D_chunk_redistribute_info_t *entry2;
-    int                                  owner1 = -1;
-    int                                  owner2 = -1;
+    int                                  owner1    = -1;
+    int                                  owner2    = -1;
     int                                  ret_value = 0;
 
     FUNC_ENTER_PACKAGE_NOERR
