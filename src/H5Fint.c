@@ -1559,7 +1559,7 @@ H5F__dest(H5F_t *f, bool flush, bool free_on_failure)
         } /* end if */
 
         /* Destroy other components of the file */
-        if (H5F__accum_reset(f->shared, true, true) < 0)
+        if (H5F__accum_reset(f->shared, true) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file");
         if (H5FO_dest(f) < 0)
@@ -3893,7 +3893,7 @@ H5F__start_swmr_write(H5F_t *f)
     }     /* end if */
 
     /* Flush and reset the accumulator */
-    if (H5F__accum_reset(f->shared, true, false) < 0)
+    if (H5F__accum_reset(f->shared, true) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator");
 
     /* Turn on SWMR write in shared file open flags */
