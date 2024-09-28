@@ -1228,7 +1228,7 @@ find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const
      * cause the iterator to immediately return that positive value,
      * indicating short-circuit success
      */
-    if (strncmp(name, (char *)op_data, strlen((char *)op_data)) == 0)
+    if (strcmp(name, (char *)op_data) == 0)
         ret = 1;
 
     return ret;
