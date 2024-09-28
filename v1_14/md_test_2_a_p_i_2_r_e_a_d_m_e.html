@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.f64e10a</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.5.d8420e3</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -121,11 +121,11 @@ $(document).ready(function(){initNavTree('md_test_2_a_p_i_2_r_e_a_d_m_e.html',''
   <div class="headertitle"><div class="title">HDF5 API Tests</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md442"></a> This directory contains several test applications that exercise HDF5's public API and serve as regression tests for HDF5 <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_v_l__u_g.html">VOL Connectors</a>.</p>
-<h1><a class="anchor" id="autotoc_md443"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md444"></a> This directory contains several test applications that exercise HDF5's public API and serve as regression tests for HDF5 <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_v_l__u_g.html">VOL Connectors</a>.</p>
+<h1><a class="anchor" id="autotoc_md445"></a>
 Build Process and options</h1>
 <p>These HDF5 API tests are disabled by default, but can be enabled by passing the <code>-DHDF5_TEST_API=ON</code> option to CMake. The following build options are available to influence how the API tests get built:</p>
-<h2><a class="anchor" id="autotoc_md444"></a>
+<h2><a class="anchor" id="autotoc_md446"></a>
 CMake</h2>
 <p>To set an option, it should be prepended with <code>-D</code> when passed to the <code>cmake</code> command. For example, </p><pre class="fragment">cmake -DHDF5_TEST_API=OFF ..
 </pre><p> <code>HDF5_TEST_API</code> (Default: <code>ON</code>) - Determines whether the API tests will be built.</p>
@@ -133,10 +133,10 @@ CMake</h2>
 <p><code>HDF5_TEST_API_ENABLE_ASYNC</code> (Default: <code>OFF</code>) - Determines whether tests for HDF5's asynchronous I/O capabilities should be enabled. Note that the "native" HDF5 VOL connector doesn't support this functionality, so these tests are directed towards VOL connectors that do.</p>
 <p><code>HDF5_TEST_ENABLE_DRIVER</code> (Default: <code>OFF</code>) - Determines whether the API test driver program should be built. This driver program is useful when a VOL connector relies upon a server executable (as well as possible additional executables) in order to function. The driver program can be supplied with a server executable and</p>
 <p><code>HDF5_TEST_API_SERVER</code> (Default: empty string) - If <code>HDF5_TEST_ENABLE_DRIVER</code> is set to <code>ON</code>, this option should be edited to point to the server executable that the driver program should attempt to launch before running the API tests.</p>
-<h2><a class="anchor" id="autotoc_md445"></a>
+<h2><a class="anchor" id="autotoc_md447"></a>
 Autotools</h2>
 <p>Currently unsupported</p>
-<h2><a class="anchor" id="autotoc_md446"></a>
+<h2><a class="anchor" id="autotoc_md448"></a>
 Usage</h2>
 <p>These API tests currently only support usage with the native HDF5 VOL connector and HDF5 VOL connectors that can be loaded dynamically as a plugin. For information on how to build a VOL connector in this manner, refer to section 2.3 of the <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_v_o_l__connector.html">HDF5 VOL Connector Author Guide</a>.</p>
 <p>TODO: section on building VOL connectors alongside HDF5 for use with tests</p>
@@ -160,7 +160,7 @@ Usage</h2>
   #004: /home/user/git/hdf5/src/H5VLint.c line 1321 in H5VL__register_connector_by_name(): unable to load VOL connector
     major: Virtual Object Layer
     minor: Unable to initialize object
-</pre> <h2><a class="anchor" id="autotoc_md447"></a>
+</pre> <h2><a class="anchor" id="autotoc_md449"></a>
 Help and Support</h2>
 <p>For help with building or using the HDF5 API tests, please contact the <a href="https://help.hdfgroup.org/">HDF Help Desk</a>. </p>
 </div></div><!-- contents -->
