@@ -116,7 +116,7 @@ if (TEST_ERRREF)
               RESULT_VARIABLE TEST_ERRREF_RESULT
           )
         endif ()
-        message (FATAL_ERROR "Failed: The error output of ${TEST_PROGRAM} did not contain ${TEST_ERRREF}")
+        message (FATAL_ERROR "Failed: The error output of ${TEST_PROGRAM} did not contain '${TEST_ERRREF}'. Error output was: '${TEST_ERR_STREAM}'")
       endif ()
     endif ()
   endif ()
