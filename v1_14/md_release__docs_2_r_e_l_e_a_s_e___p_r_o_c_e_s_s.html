@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.5.d8420e3</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.f64e10a</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -121,15 +121,15 @@ $(document).ready(function(){initNavTree('md_release__docs_2_r_e_l_e_a_s_e___p_r
   <div class="headertitle"><div class="title">Release Process</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md224"></a> </p>
-<h1><a class="anchor" id="autotoc_md225"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md222"></a> </p>
+<h1><a class="anchor" id="autotoc_md223"></a>
 Objective:</h1>
 <p>Release a new version of HDF software, which corrects defects, adds functionality, improves maintainability, and/or ports it to new operational environments.</p>
-<h1><a class="anchor" id="autotoc_md226"></a>
+<h1><a class="anchor" id="autotoc_md224"></a>
 Description (General):</h1>
 <p>At regularly scheduled intervals throughout each year, The HDF Group releases a new version of each of its maintained/core software products and corresponding documentation set. This is referred to as a maintenance release. The main purpose of a maintenance release is to address defects reported against previous releases of the software, to port the software to new operating environments, and to improve maintainability by way of refactoring code and improving documentation. A maintenance release may also include new functionality in any of the product's components.</p>
 <p>Depending on the software being released, there may be specific guidelines that are followed or steps that are performed in addition to the 'standard' maintenance release procedure - in such a case, product-specific tabs are provided within the page to view information specific to only that product.</p>
-<h1><a class="anchor" id="autotoc_md227"></a>
+<h1><a class="anchor" id="autotoc_md225"></a>
 Description (HDF5):</h1>
 <p>Twice each year, The HDF Group releases a new version of the HDF5 C, C++, and Fortran libraries and command line utilities and associated documentation set. This is referred to as a maintenance release of HDF5. The main purpose of a maintenance release is to address defects reported against previous releases of the software, to port HDF5 to new operating environments, and to improve maintainability by way of refactoring code and improving documentation. A maintenance release may also include new functionality in the C, C++, and Fortran libraries and/or command line utilities if requested and/or funded by the user community and/or The HDF Group's customers. The new features included in a maintenance release expand the feature set only and do not change the HDF5 file format, with the exception of addressing critical defects that corrupt data.</p>
 <p>Maintenance releases are always backward compatible with regards to the HDF5 file format, meaning that:</p><ul>
@@ -139,7 +139,7 @@ Description (HDF5):</h1>
 <li>HDF5 libraries and command line utilities can access files created by future maintenance versions of the library. Note that maintenance releases are NOT guaranteed to be interface-compatible, meaning that, on occasion, application source code will need updated and re-compiled against a new maintenance release when the interface changes. Interface changes are only made when absolutely necessary as deemed by the HDF5 product manager(s), and interface compatibility reports are published with each release to inform customers and users of any incompatibilities in the interface.</li>
 </ul>
 <p>For more information on the HDF5 versioning and backward and forward compatibility issues, see the <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/api-compat-macros.html">API Compatibility Macros</a> on the public website.</p>
-<h1><a class="anchor" id="autotoc_md228"></a>
+<h1><a class="anchor" id="autotoc_md226"></a>
 Participants:</h1>
 <ul>
 <li>Product Manager — The individual responsible for the overall direction and development of a software product at The HDF Group.</li>
@@ -148,13 +148,13 @@ Participants:</h1>
 <li>Software Tester — An individual responsible for identifying, implementing, and conducting tests of software code, modules, packages, executables, and/or release binaries.</li>
 <li>Test Automation Team — A team at The HDF Group responsible for overseeing the daily automated regression tests of software maintained by the company's Sustaining Engineering program.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md229"></a>
+<h1><a class="anchor" id="autotoc_md227"></a>
 Tasks:</h1>
-<h2><a class="anchor" id="autotoc_md230"></a>
+<h2><a class="anchor" id="autotoc_md228"></a>
 1. Plan Maintenance Release (Product Manager | Release Manager)</h2>
-<h2><a class="anchor" id="autotoc_md231"></a>
+<h2><a class="anchor" id="autotoc_md229"></a>
 2. Perform Software Maintenance (Software Developers | Product Manager | Release Manager)</h2>
-<h2><a class="anchor" id="autotoc_md232"></a>
+<h2><a class="anchor" id="autotoc_md230"></a>
 3. Prepare Release Notes (Release Manager)</h2>
 <ol type="1">
 <li>Confirm that all non-trivial changes made to the source are reflected in the release notes. Verify the following:<ul>
@@ -183,7 +183,7 @@ Tasks:</h1>
 </ul>
 </li>
 </ol>
-<h2><a class="anchor" id="autotoc_md233"></a>
+<h2><a class="anchor" id="autotoc_md231"></a>
 4. Freeze Code (Release Manager | Test Automation Team)</h2>
 <ol type="1">
 <li>Transition from performing maintenance on software to preparing for its delivery.</li>
@@ -198,7 +198,7 @@ Tasks:</h1>
 <li>Verify that frozen code branch satisfies all existing regression test cases, and give the 'OK' to the release coordinator once all daily test configurations are passing as expected after the date of the code freeze. If there are failing tests after the code freeze date, coordinate with maintainers responsible for the failures to ensure that either the changes causing the failures are corrected or reverted.</li>
 <li>Verify release branches for third-party software used: SZIP, ZLIB, and Plugins; and announce release versions to <a href="#" onclick="location.href='mai'+'lto:'+'hdf'+'5l'+'ib@'+'hd'+'fgr'+'ou'+'p.o'+'rg'; return false;">hdf5l<span class="obfuscator">.nosp@m.</span>ib@h<span class="obfuscator">.nosp@m.</span>dfgro<span class="obfuscator">.nosp@m.</span>up.o<span class="obfuscator">.nosp@m.</span>rg</a>.</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md234"></a>
+<h2><a class="anchor" id="autotoc_md232"></a>
 5. Update Interface Version (Release Manager | Product Manager)</h2>
 <ol type="1">
 <li>Verify interface additions, changes, and removals, and update the shared library interface version number.</li>
@@ -223,7 +223,7 @@ Tasks:</h1>
 <li>After the release branch has been created, run <code>./autogen.sh</code> to regenerate build system files on the release branch and commit the changes. <br  />
 </li>
 </ol>
-<h2><a class="anchor" id="autotoc_md235"></a>
+<h2><a class="anchor" id="autotoc_md233"></a>
 6. Prepare Release Branch (Release Manager)</h2>
 <ol type="1">
 <li>Get the release branch ready for pre-release testing and packaging.</li>
@@ -268,7 +268,7 @@ Tasks:</h1>
 </li>
 <li>E-mail <a href="#" onclick="location.href='mai'+'lto:'+'hdf'+'5l'+'ib@'+'hd'+'fgr'+'ou'+'p.o'+'rg'; return false;">hdf5l<span class="obfuscator">.nosp@m.</span>ib@h<span class="obfuscator">.nosp@m.</span>dfgro<span class="obfuscator">.nosp@m.</span>up.o<span class="obfuscator">.nosp@m.</span>rg</a> to indicate that the code freeze on the release support branch (i.e. hdf5_X_Y) has been lifted and development on the next maintenance release can resume. The code freeze will remain in place on the release preparation branch (i.e. hdf5_X_Y_Z) indefinitely.</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md236"></a>
+<h2><a class="anchor" id="autotoc_md234"></a>
 7. Perform Release Testing (Test Automation Team | Release Manager | Project Leads)</h2>
 <ol type="1">
 <li>Verify that source and binary distributions of HDF5 are acceptable on all target operating environments.</li>
@@ -344,7 +344,7 @@ Tasks:</h1>
 </li>
 <li>Decide if another cycle of pre-release testing should occur based on the issue reports received and the actions taken during this cycle. If another round of testing is required (i.e. there were significant issues in pre-release testing which resulted in code changes), increment the subrelease version number and go back to step 7.2. If no further testing is required (i.e. no code changes were made and issues were documented as known issues, or code changes were trivial, unit tested, and exhaustive testing is unneeded), then proceed.</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md237"></a>
+<h2><a class="anchor" id="autotoc_md235"></a>
 8. Finalize Release Notes (Release Manager)</h2>
 <ol type="1">
 <li>Perform a final review of release notes and ensure that any new changes made to the source, any new known issues discovered, and any additional tests run since the code freeze have been reflected in RELEASE.txt and other appropriate in-source documentation files (INSTALL_*, etc.). (Refer to the sub-steps of step 3 for what to check).</li>
@@ -357,7 +357,7 @@ Tasks:</h1>
 </li>
 <li>Update Release Notes in <b>release</b> branch (Release Manager)</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md238"></a>
+<h2><a class="anchor" id="autotoc_md236"></a>
 9. Package and Distribute Release (Release Manager)</h2>
 <ol type="1">
 <li>h5vers will run autogen.sh, which can change the generated files if certain code files have been changed since the files generated by autogen.sh were committed on the release branch. This should be checked by running <code>git status --ignored;</code>, then running autogen.sh, then repeating <code>git status --ignored;</code>. If there are modified files from either git status command, they should be committed (or deleted if there are backup files or an autom4te.cache directory), and at least minimal testing should be done to see that the software is still good with the changes.</li>
@@ -375,9 +375,9 @@ Tasks:</h1>
 </ul>
 </li>
 </ol>
-<h2><a class="anchor" id="autotoc_md239"></a>
+<h2><a class="anchor" id="autotoc_md237"></a>
 10. Add the contents of the RELEASE.txt file in the release code to the HISTORY file in the &lt;strong&gt;support&lt;/strong&gt; branch, just below the introductory lines at the top of the HISTORY file.</h2>
-<h2><a class="anchor" id="autotoc_md240"></a>
+<h2><a class="anchor" id="autotoc_md238"></a>
 11. Conduct Release Retrospective (Release Manager)</h2>
 <ol type="1">
 <li>Schedule time and solicit comments from retrospective</li>
