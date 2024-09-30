@@ -31,15 +31,17 @@
 #define H5F_ACC_EXCL   (0x0004u) /**< Fail if file already exists*/
 /* NOTE: 0x0008u was H5F_ACC_DEBUG, now deprecated */
 #define H5F_ACC_CREAT (0x0010u) /**< Create non-existing files  */
-#define H5F_ACC_SWMR_WRITE (0x0020u) /**< Indicate that this file is open for writing in a                   \
-                       *   single-writer/multi-reader (SWMR)  scenario.                                      \
-                       *   Note that the process(es) opening the file for reading                            \
-                       *   must open the file with #H5F_ACC_RDONLY and use the                               \
-                       *   #H5F_ACC_SWMR_READ access flag. */
-#define H5F_ACC_SWMR_READ (0x0040u) /**< Indicate that this file is open for reading in a                    \
-                       * single-writer/multi-reader (SWMR) scenario. Note that                               \
-                       * the process(es) opening the file for SWMR reading must                              \
-                       * also open the file with the #H5F_ACC_RDONLY flag.  */
+#define H5F_ACC_SWMR_WRITE                                                                                   \
+    (0x0020u) /**< Indicate that this file is open for writing in a                                          \
+               *   single-writer/multi-reader (SWMR)  scenario.                                              \
+               *   Note that the process(es) opening the file for reading                                    \
+               *   must open the file with #H5F_ACC_RDONLY and use the                                       \
+               *   #H5F_ACC_SWMR_READ access flag. */
+#define H5F_ACC_SWMR_READ                                                                                    \
+    (0x0040u) /**< Indicate that this file is open for reading in a                                          \
+               * single-writer/multi-reader (SWMR) scenario. Note that                                       \
+               * the process(es) opening the file for SWMR reading must                                      \
+               * also open the file with the #H5F_ACC_RDONLY flag.  */
 
 /**
  * Default property list identifier
@@ -56,8 +58,9 @@
 #define H5F_OBJ_DATATYPE (0x0008u) /**< Datatype objects */
 #define H5F_OBJ_ATTR     (0x0010u) /**< Attribute objects */
 #define H5F_OBJ_ALL      (H5F_OBJ_FILE | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_DATATYPE | H5F_OBJ_ATTR)
-#define H5F_OBJ_LOCAL    (0x0020u) /**< Restrict search to objects opened through current file ID                                 \
-                                        (as opposed to objects opened through any file ID accessing this file) */
+#define H5F_OBJ_LOCAL                                                                                        \
+    (0x0020u) /**< Restrict search to objects opened through current file ID                                 \
+                   (as opposed to objects opened through any file ID accessing this file) */
 
 #define H5F_FAMILY_DEFAULT 0 /* (hsize_t) */
 

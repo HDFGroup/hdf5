@@ -827,7 +827,7 @@ H5_check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     char                lib_str[256];
     char                substr[]                 = H5_VERS_SUBRELEASE;
     static bool         checked                  = false; /* If we've already checked the version info */
-    static unsigned int disable_version_check    = 0; /* Set if the version check should be disabled */
+    static unsigned int disable_version_check    = 0;     /* Set if the version check should be disabled */
     static const char  *version_mismatch_warning = VERSION_MISMATCH_WARNING;
     static const char  *release_mismatch_warning = RELEASE_MISMATCH_WARNING;
     herr_t              ret_value                = SUCCEED; /* Return value */
@@ -963,7 +963,7 @@ done:
 herr_t
 H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 {
-    herr_t              ret_value                = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT_NOERR
 

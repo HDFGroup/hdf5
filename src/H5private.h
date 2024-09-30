@@ -1531,7 +1531,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     } /*end scope from beginning of FUNC_ENTER*/
 
 /* Use this macro to match the FUNC_ENTER_API_NOINIT_NOERR macro */
-#define FUNC_LEAVE_API_NOERR(ret_value)                                                                       \
+#define FUNC_LEAVE_API_NOERR(ret_value)                                                                      \
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
     H5_API_UNLOCK                                                                                            \
