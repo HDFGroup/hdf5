@@ -1358,6 +1358,14 @@ test_char_attachscales(const char *fileext)
     if (create_char_dataset(fid, "ac", 0) < 0)
         goto out;
 
+    /* test finding dataset dsname */
+    if ((ds_existed = H5LTfind_dataset(fid, dsname)) < 0)
+        goto out;
+    if (ds_existed == 0) {
+        printf("Unexpected result: Dataset \"%s\" does exist\n", dsname);
+        goto out;
+    }
+
     if ((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
         snprintf(scalename, sizeof(scalename), "%s%s", DS_1_NAME, "ac");
         if (test_attach_scale(fid, did, scalename, DIM0) < 0)
