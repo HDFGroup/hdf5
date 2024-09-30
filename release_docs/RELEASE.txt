@@ -1,4 +1,4 @@
-HDF5 version 1.14.5-3 currently under development
+HDF5 version 1.14.5 released on 2024-09-30
 ================================================================================
 
 
@@ -205,7 +205,6 @@ Bug Fixes since HDF5-1.14.4 release
 
       Fixes GitHub #4780
 
-
     - Fixed a segfault by H5Gmove2, extended to fix H5Lcopy and H5Lmove
 
       A user's application segfaulted when it passed in an invalid location ID
@@ -224,7 +223,6 @@ Bug Fixes since HDF5-1.14.4 release
       other functions to prevent potential issue in the future.
 
       Fixes GitHub #4730
-
 
     - Fixed a segfault by H5Fget_intent(), extended to fix several other functions
 
