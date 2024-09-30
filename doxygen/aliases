@@ -20,8 +20,8 @@ ALIASES += DOXURL="\HDFURL/doxygen"
 ALIASES += SRCURL="github.com/HDFGroup/hdf5/blob/hdf5_1_14"
 #Other projects that contribute to HDF5
 ALIASES += PRJURL="\HDFURL/projects"
-ALIASES += HVURL="github.com/HDFGroup/hdfview/blob/master"
-ALIASES += PLURL="github.com/HDFGroup/hdf5_plugins/blob/master"
+ALIASES += HVURL="github.com/HDFGroup/hdfview/blob/hdfview-3-1_14"
+ALIASES += PLURL="github.com/HDFGroup/hdf5_plugins/blob/1_14"
 ################################################################################
 # Styling
 ################################################################################

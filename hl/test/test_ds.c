@@ -1341,10 +1341,11 @@ out:
 static int
 test_char_attachscales(const char *fileext)
 {
-    hid_t fid = -1;
-    hid_t did = -1;
-    char  dsname[32];
-    char  scalename[32];
+    hid_t  fid = -1;
+    hid_t  did = -1;
+    char   dsname[32];
+    char   scalename[32];
+    herr_t ds_existed = 0;
 
     snprintf(dsname, sizeof(dsname), "%s%s", DATASET_NAME, "ac");
 
