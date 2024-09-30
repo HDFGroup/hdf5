@@ -180,6 +180,28 @@ static const H5O_obj_class_t *const H5O_obj_class_g[] = {
 };
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_init
+ *
+ * Purpose:     Initialize the interface from some other package.
+ *
+ * Return:      Success:	non-negative
+ *              Failure:	negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_init(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_init() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5O__init_package
  *
  * Purpose:     Initialize information specific to H5O interface.

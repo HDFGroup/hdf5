@@ -58,6 +58,7 @@ static void H5__debug_mask(const char *);
 #ifdef H5_HAVE_PARALLEL
 static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *flag);
 #endif /*H5_HAVE_PARALLEL*/
+static herr_t H5_check_version(unsigned majnum, unsigned minnum, unsigned relnum);
 
 /*********************/
 /* Package Variables */
@@ -143,6 +144,10 @@ H5_init_library(void)
     if (H5_INIT_GLOBAL || H5_TERM_GLOBAL)
         HGOTO_DONE(SUCCEED);
 
+    /* Check library version */
+    /* (Will abort() on failure) */
+    H5_check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+
     /* Set the 'library initialized' flag as early as possible, to avoid
      * possible re-entrancy.
      */
@@ -225,20 +230,27 @@ H5_init_library(void)
     } /* end if */
 
     /*
-     * Initialize interfaces that might not be able to initialize themselves
-     * soon enough.  The file & dataset interfaces must be initialized because
-     * calling H5P_create() might require the file/dataset property classes to be
-     * initialized.  The property interface must be initialized before the file
-     * & dataset interfaces though, in order to provide them with the proper
-     * property classes.
-     * The link interface needs to be initialized so that link property lists
-     * have their properties registered.
+     * Initialize interfaces that use macros of the form "(H5OPEN <var>)", so
+     * that the variable returned through the macros nas been initialized.
+     * Also initialize some interfaces that might not be able to initialize
+     * themselves soon enough.
+     *
+     * Interfaces returning variables through a macro: H5E, H5O, H5P, H5T
+     *
+     * The link interface needs to be initialized so that the external link
+     *   class is registered.
+     *
      * The FS module needs to be initialized as a result of the fix for HDFFV-10160:
      *   It might not be initialized during normal file open.
      *   When the application does not close the file, routines in the module might
      *   be called via H5_term_library() when shutting down the file.
+     *
      * The dataspace interface needs to be initialized so that future IDs for
      *   dataspaces work.
+     *
+     * The VOL interface needs to be initialized so that the default VOL
+     *   connector and the VOL-managed interfaces are set up.
+     *
      */
     if (H5E_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize error interface");
@@ -246,14 +258,16 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface");
     if (H5P_init_phase1() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize property list interface");
-    if (H5AC_init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize metadata caching interface");
     if (H5L_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize link interface");
+    if (H5O_init() < 0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize object interface");
     if (H5FS_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize FS interface");
     if (H5S_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize dataspace interface");
+    if (H5T_init() < 0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize datatype interface");
 
     /* Finish initializing interfaces that depend on the interfaces above */
     if (H5P_init_phase2() < 0)
@@ -489,14 +503,14 @@ H5dont_atexit(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API_NOINIT_NOERR_NOFS
+    FUNC_ENTER_API_NOINIT_NOERR
 
     if (H5_dont_atexit_g)
         ret_value = FAIL;
     else
         H5_dont_atexit_g = true;
 
-    FUNC_LEAVE_API_NOFS(ret_value)
+    FUNC_LEAVE_API_NOERR(ret_value)
 } /* end H5dont_atexit() */
 
 /*-------------------------------------------------------------------------
@@ -774,13 +788,10 @@ done:
 } /* end H5get_libversion() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5check_version
+ * Function:    H5__check_version
  *
- * Purpose:     Verifies that the arguments match the version numbers
- *              compiled into the library.  This function is intended to be
- *              called from user to verify that the versions of header files
- *              compiled into the application match the version of the hdf5
- *              library.
+ * Purpose:     Internal routine which Verifies that the arguments match the
+ *              version numbers compiled into the library.
  *
  *              Within major.minor.release version, the expectation
  *              is that all release versions are compatible, exceptions to
@@ -810,18 +821,18 @@ done:
     "You should recompile the application or check your shared library related\n"                            \
     "settings such as 'LD_LIBRARY_PATH'.\n"
 
-herr_t
-H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
+static herr_t
+H5_check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 {
     char                lib_str[256];
     char                substr[]                 = H5_VERS_SUBRELEASE;
-    static int          checked                  = 0; /* If we've already checked the version info */
+    static bool         checked                  = false; /* If we've already checked the version info */
     static unsigned int disable_version_check    = 0; /* Set if the version check should be disabled */
     static const char  *version_mismatch_warning = VERSION_MISMATCH_WARNING;
     static const char  *release_mismatch_warning = RELEASE_MISMATCH_WARNING;
     herr_t              ret_value                = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API_NOINIT_NOERR_NOFS
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Don't check again, if we already have */
     if (checked)
@@ -918,7 +929,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     } /* end if (H5_VERS_RELEASE != relnum) */
 
     /* Indicate that the version check has been performed */
-    checked = 1;
+    checked = true;
 
     if (!disable_version_check) {
         /*
@@ -946,7 +957,21 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     }
 
 done:
-    FUNC_LEAVE_API_NOFS(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5__check_version() */
+
+herr_t
+H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
+{
+    herr_t              ret_value                = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API_NOINIT_NOERR
+
+    /* Call internal routine */
+    /* (Will abort() on failure) */
+    H5_check_version(majnum, minnum, relnum);
+
+    FUNC_LEAVE_API_NOERR(ret_value)
 } /* end H5check_version() */
 
 /*-------------------------------------------------------------------------
@@ -1029,11 +1054,11 @@ H5close(void)
      * whole library just to release it all right away.  It is safe to call
      * this function for an uninitialized library.
      */
-    FUNC_ENTER_API_NOINIT_NOERR_NOFS
+    FUNC_ENTER_API_NOINIT_NOERR
 
     H5_term_library();
 
-    FUNC_LEAVE_API_NOFS(SUCCEED)
+    FUNC_LEAVE_API_NOERR(SUCCEED)
 } /* end H5close() */
 
 /*-------------------------------------------------------------------------

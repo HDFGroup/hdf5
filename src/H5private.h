@@ -1339,12 +1339,11 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 
 /*
  * Use this macro for API functions that shouldn't perform _any_ initialization
- *      of the library or an interface or push themselves on the function
- *      stack, just perform tracing, etc.  Examples
+ *      of the library or an interface and also don't return errors.  Examples
  *      are: H5close, H5check_version, etc.
  *
  */
-#define FUNC_ENTER_API_NOINIT_NOERR_NOFS                                                                     \
+#define FUNC_ENTER_API_NOINIT_NOERR                                                                          \
     {                                                                                                        \
         {                                                                                                    \
             {                                                                                                \
@@ -1531,8 +1530,8 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     }                                                                                                        \
     } /*end scope from beginning of FUNC_ENTER*/
 
-/* Use this macro to match the FUNC_ENTER_API_NOINIT_NOERR_NOFS macro */
-#define FUNC_LEAVE_API_NOFS(ret_value)                                                                       \
+/* Use this macro to match the FUNC_ENTER_API_NOINIT_NOERR macro */
+#define FUNC_LEAVE_API_NOERR(ret_value)                                                                       \
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
     H5_API_UNLOCK                                                                                            \
