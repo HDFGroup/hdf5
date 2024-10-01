@@ -524,10 +524,12 @@ H5TS__tinfo_destroy(void *_tinfo_node)
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     if (tinfo_node) {
-        /* Add thread info node to the free list */
         H5TS_mutex_lock(&H5TS_tinfo_mtx_s);
+        /* Add thread info node to the free list */
         tinfo_node->next       = H5TS_tinfo_next_free_s;
         H5TS_tinfo_next_free_s = tinfo_node;
+        /* Release resources held by error records in thread-local error stack */
+        H5E__destroy_stack(&tinfo_node->info.err_stack);
         H5TS_mutex_unlock(&H5TS_tinfo_mtx_s);
     }
 

@@ -54,6 +54,7 @@ void tts_acreate(void);
 void tts_attr_vlen(void);
 void tts_thread_id(void);
 void tts_develop_api(void);
+void tts_error_stacks(void);
 
 /* Prototypes for the cleanup routines */
 void cleanup_dcreate(void);
