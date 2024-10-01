@@ -156,7 +156,7 @@ endif
 
 libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c external_common.c
 
-# Use libhd5test.la to compile all of the tests
+# Use libh5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)
 
 # List the source files for tests that have more than one

@@ -709,7 +709,7 @@ test_visit(hid_t fapl_id, hbool_t new_format)
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_links()
+test_links(const void *params)
 {
     hid_t    fapl_id, fapl2_id; /* File access property lists */
     unsigned new_format;        /* Whether to use the new format or not */
@@ -769,8 +769,10 @@ test_links()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_links()
+cleanup_links(void *params)
 {
-    HDremove(FILENAME[0]);
-    HDremove(FILENAME[1]);
+    if (GetTestCleanup()) {
+        HDremove(FILENAME[0]);
+        HDremove(FILENAME[1]);
+    }
 }

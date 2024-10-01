@@ -18,7 +18,7 @@
 #define H5F_TESTING
 #include "H5Fpkg.h"
 
-#include "testhdf5.h"
+#include "h5test.h"
 #include "cache_common.h"
 
 #include "H5CXprivate.h" /* API Contexts                         */

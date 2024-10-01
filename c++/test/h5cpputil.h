@@ -22,6 +22,7 @@
 #define H5cpputil_H
 
 #include "h5test.h"
+#include "testframe.h"
 
 using namespace H5;
 using std::cerr;
@@ -29,8 +30,8 @@ using std::endl;
 
 #define MESSAGE(V, A)                                                                                        \
     do {                                                                                                     \
-        if (HDGetTestVerbosity() > (V))                                                                      \
-            print_func A;                                                                                    \
+        if (GetTestVerbosity() > (V))                                                                        \
+            printf A;                                                                                        \
     } while (0)
 #define SUBTEST(TEST)                                                                                        \
     do {                                                                                                     \
@@ -142,36 +143,36 @@ verify_val(Type1 x, Type2 value, float epsilon, const char *msg, int line, const
 #ifdef __cplusplus
 extern "C" {
 #endif
-void test_array();
-void test_attr();
-void test_compound();
-void test_dsproplist();
-void test_file();
-void test_filters();
-void test_links();
-void test_h5s();
-void test_iterate();
-void test_object();
-void test_reference();
-void test_types();
-void test_vlstrings();
-void test_dset();
+void test_array(const void *params);
+void test_attr(const void *params);
+void test_compound(const void *params);
+void test_dsproplist(const void *params);
+void test_file(const void *params);
+void test_filters(const void *params);
+void test_links(const void *params);
+void test_h5s(const void *params);
+void test_iterate(const void *params);
+void test_object(const void *params);
+void test_reference(const void *params);
+void test_types(const void *params);
+void test_vlstrings(const void *params);
+void test_dset(const void *params);
 
 /* Prototypes for the cleanup routines */
-void cleanup_array();
-void cleanup_attr();
-void cleanup_compound();
-void cleanup_dsproplist();
-void cleanup_dsets();
-void cleanup_file();
-void cleanup_filters();
-void cleanup_h5s();
-void cleanup_iterate();
-void cleanup_links();
-void cleanup_object();
-void cleanup_reference();
-void cleanup_types();
-void cleanup_vlstrings();
+void cleanup_array(void *params);
+void cleanup_attr(void *params);
+void cleanup_compound(void *params);
+void cleanup_dsproplist(void *params);
+void cleanup_dsets(void *params);
+void cleanup_file(void *params);
+void cleanup_filters(void *params);
+void cleanup_h5s(void *params);
+void cleanup_iterate(void *params);
+void cleanup_links(void *params);
+void cleanup_object(void *params);
+void cleanup_reference(void *params);
+void cleanup_types(void *params);
+void cleanup_vlstrings(void *params);
 
 #ifdef __cplusplus
 }

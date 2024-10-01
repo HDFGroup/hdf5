@@ -45,7 +45,7 @@ typedef struct acreate_data_struct {
 } ttsafe_name_data_t;
 
 void
-tts_acreate(void)
+tts_acreate(const void H5_ATTR_UNUSED *params)
 {
     /* Thread declarations */
     H5TS_thread_t threads[NUM_THREADS];
@@ -182,9 +182,11 @@ tts_acreate_thread(void *client_data)
 } /* end tts_acreate_thread() */
 
 void
-cleanup_acreate(void)
+cleanup_acreate(void H5_ATTR_UNUSED *params)
 {
-    HDunlink(FILENAME);
+    if (GetTestCleanup()) {
+        HDunlink(FILENAME);
+    }
 }
 
 #endif /*H5_HAVE_THREADSAFE*/

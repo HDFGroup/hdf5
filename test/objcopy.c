@@ -14,7 +14,7 @@
  * Purpose:    Test H5Ocopy().
  */
 
-#include "testhdf5.h"
+#include "h5test.h"
 #include "H5srcdir.h"
 
 #include "H5Iprivate.h"
@@ -10063,14 +10063,14 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].p = malloc((i + 1) * sizeof(hvl_t));
         if (buf[i].p == NULL) {
-            TestErrPrintf("Cannot allocate memory for VL data! i=%u\n", i);
+            fprintf(stderr, "Cannot allocate memory for VL data! i=%u\n", i);
             return 1;
         } /* end if */
         buf[i].len = i + 1;
         for (tvl = (hvl_t *)buf[i].p, j = 0; j < (i + 1); j++, tvl++) {
             tvl->p = malloc((j + 1) * sizeof(unsigned int));
             if (tvl->p == NULL) {
-                TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
+                fprintf(stderr, "Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 return 1;
             } /* end if */
             tvl->len = j + 1;
@@ -10260,14 +10260,14 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].p = malloc((i + 1) * sizeof(hvl_t));
         if (buf[i].p == NULL) {
-            TestErrPrintf("Cannot allocate memory for VL data! i=%u\n", i);
+            fprintf(stderr, "Cannot allocate memory for VL data! i=%u\n", i);
             TEST_ERROR;
         } /* end if */
         buf[i].len = i + 1;
         for (tvl = (hvl_t *)buf[i].p, j = 0; j < (i + 1); j++, tvl++) {
             tvl->p = malloc((j + 1) * sizeof(unsigned int));
             if (tvl->p == NULL) {
-                TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
+                fprintf(stderr, "Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 TEST_ERROR;
             } /* end if */
             tvl->len = j + 1;
@@ -10452,14 +10452,14 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].p = malloc((i + 1) * sizeof(hvl_t));
         if (buf[i].p == NULL) {
-            TestErrPrintf("Cannot allocate memory for VL data! i=%u\n", i);
+            fprintf(stderr, "Cannot allocate memory for VL data! i=%u\n", i);
             TEST_ERROR;
         } /* end if */
         buf[i].len = i + 1;
         for (tvl = (hvl_t *)buf[i].p, j = 0; j < (i + 1); j++, tvl++) {
             tvl->p = malloc((j + 1) * sizeof(unsigned int));
             if (tvl->p == NULL) {
-                TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
+                fprintf(stderr, "Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 TEST_ERROR;
             } /* end if */
             tvl->len = j + 1;
@@ -10693,14 +10693,14 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].p = malloc((i + 1) * sizeof(hvl_t));
         if (buf[i].p == NULL) {
-            TestErrPrintf("Cannot allocate memory for VL data! i=%u\n", i);
+            fprintf(stderr, "Cannot allocate memory for VL data! i=%u\n", i);
             TEST_ERROR;
         } /* end if */
         buf[i].len = i + 1;
         for (tvl = (hvl_t *)buf[i].p, j = 0; j < (i + 1); j++, tvl++) {
             tvl->p = malloc((j + 1) * sizeof(unsigned int));
             if (tvl->p == NULL) {
-                TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
+                fprintf(stderr, "Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 TEST_ERROR;
             } /* end if */
             tvl->len = j + 1;
@@ -17135,9 +17135,6 @@ main(void)
 
     if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)
         TEST_ERROR;
-
-    if (TestExpress > 0)
-        printf("***Express test mode %d.  Some tests may be skipped\n", TestExpress);
 
     /* Copy the file access property list */
     if ((fapl2 = H5Pcopy(fapl)) < 0)

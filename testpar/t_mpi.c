@@ -26,6 +26,9 @@
 
 #include "testpar.h"
 
+/* Include testing framework functionality */
+#include "testframe.h"
+
 /* FILENAME and filenames must have the same number of names */
 const char *FILENAME[2] = {"MPItest", NULL};
 char        filenames[2][200];
@@ -1011,8 +1014,10 @@ parse_options(int argc, char **argv)
         else {
             switch (*(*argv + 1)) {
                 case 'v':
-                    if (*((*argv + 1) + 1))
-                        ParseTestVerbosity((*argv + 1) + 1);
+                    if (*((*argv + 1) + 1)) {
+                        if (ParseTestVerbosity((*argv + 1) + 1) < 0)
+                            return 1;
+                    }
                     else
                         SetTestVerbosity(VERBO_MED);
                     break;
@@ -1123,7 +1128,12 @@ main(int argc, char **argv)
     H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
     /* set alarm. */
-    TestAlarmOn();
+    if (TestAlarmOn() < 0) {
+        if (MAINPROCESS)
+            fprintf(stderr, "couldn't enable test timer\n");
+        fflush(stderr);
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
 
     /*=======================================
      * MPIO 1 write Many read test

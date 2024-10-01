@@ -92,7 +92,7 @@ decr_task(void *_counter)
  **********************************************************************
  */
 void
-tts_thread_pool(void)
+tts_thread_pool(const void H5_ATTR_UNUSED *params)
 {
     H5TS_pool_t *pool = NULL;
     herr_t       result;
