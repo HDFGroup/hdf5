@@ -1673,6 +1673,15 @@ done:
  *
  * Purpose:     Clear the default error stack
  *
+ * Note:        This routine should _not_ be used inside general library
+ *              code in general.  It creates complex locking issues for
+ *              threadsafe code.  Generally, using a 'try' parameter or
+ *              an 'exists' parameter should be used if an operation is
+ *              being used to probe for information.  Remember: failing
+ *              to locate a record is not an error for a data structure,
+ *              although it could be an error for the user of the data
+ *              structure.
+ *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
