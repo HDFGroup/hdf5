@@ -646,7 +646,7 @@ H5E__get_current_stack(void)
     estack_copy->auto_data = current_stack->auto_data;
 
     /* Empty current error stack */
-    H5E__clear_stack(current_stack);
+    H5E__destroy_stack(current_stack);
 
     /* Set the return value */
     ret_value = estack_copy;
@@ -685,7 +685,7 @@ H5E__set_current_stack(H5E_stack_t *estack)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Empty current error stack */
-    H5E__clear_stack(current_stack);
+    H5E__destroy_stack(current_stack);
 
     /* Copy new stack to current error stack */
     current_stack->nused = estack->nused;
@@ -715,7 +715,7 @@ H5E__close_stack(H5E_stack_t *estack, void H5_ATTR_UNUSED **request)
     assert(estack);
 
     /* Release the stack's error information */
-    H5E__clear_stack(estack);
+    H5E__destroy_stack(estack);
 
     /* Free the stack structure */
     estack = H5FL_FREE(H5E_stack_t, estack);
@@ -1673,6 +1673,15 @@ done:
  *
  * Purpose:     Clear the default error stack
  *
+ * Note:        This routine should _not_ be used inside general library
+ *              code in general.  It creates complex locking issues for
+ *              threadsafe code.  Generally, using a 'try' parameter or
+ *              an 'exists' parameter should be used if an operation is
+ *              being used to probe for information.  Remember: failing
+ *              to locate a record is not an error for a data structure,
+ *              although it could be an error for the user of the data
+ *              structure.
+ *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
@@ -1699,16 +1708,20 @@ done:
 } /* end H5E_clear_stack() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5E__clear_stack
+ * Function:    H5E__destroy_stack
  *
- * Purpose:     Clear the specified error stack
+ * Purpose:     Clear all internal state within an error stack, as a precursor to freeing it.
+ *
+ *              At present, this is nearly identical to H5E_clear_stack(),
+ *              but if additional resources are added to the error stack in the future,
+ *              they will only be released by this routine and not by H5E_clear_stack().
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E__clear_stack(H5E_stack_t *estack)
+H5E__destroy_stack(H5E_stack_t *estack)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1726,7 +1739,7 @@ H5E__clear_stack(H5E_stack_t *estack)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5E__clear_stack() */
+} /* end H5E__destroy_stack() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5E__pop
