@@ -779,7 +779,7 @@ init_data(void)
  * Function:    do_express_test()
  *
  * Purpose:    Do an MPI_Allreduce to obtain the maximum value returned
- *         by GetTestExpress() across all processes.  Return this
+ *         by h5_get_testexpress() across all processes.  Return this
  *         value.
  *
  *         Envirmoment variables can be different across different
@@ -787,7 +787,7 @@ init_data(void)
  *         on whether to do an express test.
  *
  * Return:    Success:    Maximum of the values returned by
- *                 GetTestExpress() across    all processes.
+ *                 h5_get_testexpress() across    all processes.
  *
  *        Failure:    -1
  *
@@ -799,7 +799,7 @@ do_express_test(void)
     int max_express_test;
     int result;
 
-    express_test = GetTestExpress();
+    express_test = h5_get_testexpress();
 
     result =
         MPI_Allreduce((void *)&express_test, (void *)&max_express_test, 1, MPI_INT, MPI_MAX, world_mpi_comm);

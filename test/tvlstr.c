@@ -968,7 +968,7 @@ test_write_same_element(void)
 **
 ****************************************************************/
 void
-test_vlstrings(void)
+test_vlstrings(const void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Variable-Length Strings\n"));
@@ -1000,13 +1000,15 @@ test_vlstrings(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_vlstrings(void)
+cleanup_vlstrings(void H5_ATTR_UNUSED *params)
 {
-    H5E_BEGIN_TRY
-    {
-        H5Fdelete(DATAFILE, H5P_DEFAULT);
-        H5Fdelete(DATAFILE2, H5P_DEFAULT);
-        H5Fdelete(DATAFILE3, H5P_DEFAULT);
+    if (GetTestCleanup()) {
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(DATAFILE, H5P_DEFAULT);
+            H5Fdelete(DATAFILE2, H5P_DEFAULT);
+            H5Fdelete(DATAFILE3, H5P_DEFAULT);
+        }
+        H5E_END_TRY
     }
-    H5E_END_TRY
 }

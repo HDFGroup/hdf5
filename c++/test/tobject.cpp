@@ -718,7 +718,7 @@ test_intermediate_groups()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_object()
+test_object(const void *params)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Object Functions\n"));
@@ -742,10 +742,12 @@ test_object()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_object()
+cleanup_object(void *params)
 {
-    HDremove(FILE_OBJECTS.c_str());
-    HDremove(FILE_OBJHDR.c_str());
-    HDremove(FILE_OBJINFO.c_str());
-    HDremove(FILE_INTERGRPS.c_str());
+    if (GetTestCleanup()) {
+        HDremove(FILE_OBJECTS.c_str());
+        HDremove(FILE_OBJHDR.c_str());
+        HDremove(FILE_OBJINFO.c_str());
+        HDremove(FILE_INTERGRPS.c_str());
+    }
 } // cleanup_objects

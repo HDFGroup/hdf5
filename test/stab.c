@@ -1466,10 +1466,9 @@ main(void)
     puts("All symbol table tests passed.");
 
     /* Cleanup */
-    if (GetTestCleanup()) {
-        HDremove(FILE_OLD_GROUPS_COPY);
-        HDremove(CORRUPT_STAB_TMP_FILE);
-    }
+    HDremove(FILE_OLD_GROUPS_COPY);
+    HDremove(CORRUPT_STAB_TMP_FILE);
+
     h5_cleanup(FILENAME, fapl);
 
     return 0;

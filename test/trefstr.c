@@ -512,7 +512,7 @@ test_refstr_finalize(void)
 **
 ****************************************************************/
 void
-test_refstr(void)
+test_refstr(const void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Reference Counted Strings\n"));

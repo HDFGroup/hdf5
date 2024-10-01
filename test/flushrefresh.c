@@ -26,7 +26,7 @@
 /* Includes */
 /* ======== */
 
-#include "testhdf5.h"
+#include "h5test.h"
 #include "H5FDpkg.h" /* File Drivers				*/
 
 /* ======= */

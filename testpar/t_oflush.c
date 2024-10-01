@@ -25,7 +25,7 @@
 #define RANK        2
 
 void
-test_oflush(void)
+test_oflush(const void *params)
 {
     int         mpi_size, mpi_rank;
     hid_t       file, dataset;
@@ -50,7 +50,7 @@ test_oflush(void)
         for (i = 0; i < NY; i++)
             data[j][i] = i + j;
 
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
 
     file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((file >= 0), "file creation succeeded");
