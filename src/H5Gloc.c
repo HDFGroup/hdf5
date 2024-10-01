@@ -608,8 +608,7 @@ done:
  *
  * Purpose:	Check if an object actually exists at a location
  *
- * Return:	Success:	true/false
- * 		Failure:	Negative
+ * Return:	Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
