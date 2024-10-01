@@ -276,6 +276,7 @@ typedef atomic_flag H5TS_spinlock_t;
 #ifdef H5_HAVE_THREADSAFE
 /* Library/thread init/term operations */
 H5_DLL void H5TS_term_package(void);
+H5_DLL int  H5TS_top_term_package(void);
 
 /* API locking */
 H5_DLL herr_t H5TS_api_lock(void);

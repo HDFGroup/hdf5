@@ -611,7 +611,7 @@ H5Eclear2(hid_t err_stack)
     } /* end else */
 
     /* Clear the error stack */
-    if (H5E__clear_stack(estack) < 0)
+    if (H5E__destroy_stack(estack) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack");
 
 done:

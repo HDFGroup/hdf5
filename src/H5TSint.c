@@ -133,10 +133,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5TS_term_package
  *
- * Purpose:  Terminate this interface.
+ * Purpose:  Terminate this interface. Clean up global resources shared by
+ *              all threads.
  *
  * Note:     This function is currently registered via atexit() and is called
- *              AFTER H5_term_library().
+ *              AFTER H5_term_library(). H5TS_top_term_package() is called at library
+ *              termination to clean up per-thread resources.
  *
  * Return:    void
  *
@@ -150,9 +152,6 @@ H5TS_term_package(void)
     /* Reset global API lock info */
     H5TS_mutex_destroy(&H5TS_api_info_p.api_mutex);
     H5TS_atomic_destroy_uint(&H5TS_api_info_p.attempt_lock_count);
-
-    /* Clean up per-thread library info */
-    H5TS__tinfo_term();
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5TS_term_package() */
@@ -525,14 +524,40 @@ H5TS__tinfo_destroy(void *_tinfo_node)
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     if (tinfo_node) {
-        /* Add thread info node to the free list */
         H5TS_mutex_lock(&H5TS_tinfo_mtx_s);
+        /* Add thread info node to the free list */
         tinfo_node->next       = H5TS_tinfo_next_free_s;
         H5TS_tinfo_next_free_s = tinfo_node;
+        /* Release resources held by error records in thread-local error stack */
+        H5E__destroy_stack(&tinfo_node->info.err_stack);
         H5TS_mutex_unlock(&H5TS_tinfo_mtx_s);
     }
 
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
+}
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_top_term_package
+ *
+ * Purpose:     Terminate the threadlocal parts of the H5TS interface during library terminaton.
+ *
+ * Note:        See H5TS_term_package for termination of the thread-global resources
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+int
+H5TS_top_term_package(void)
+{
+    int n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Clean up per-thread library info */
+    H5TS__tinfo_term();
+
+    FUNC_LEAVE_NOAPI(n)
 }
 
 /*--------------------------------------------------------------------------
@@ -562,14 +587,13 @@ H5TS__tinfo_term(void)
     if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_tinfo_mtx_s) < 0))
         HGOTO_DONE(FAIL);
 
-    /* Release critical section / mutex for modifying the thread info globals */
-    if (H5_UNLIKELY(H5TS_mutex_destroy(&H5TS_tinfo_mtx_s) < 0))
-        HGOTO_DONE(FAIL);
-
     /* Release key for thread-specific API contexts */
     if (H5_UNLIKELY(H5TS_key_delete(H5TS_thrd_info_key_g) < 0))
         HGOTO_DONE(FAIL);
 
+    /* Release critical section / mutex for modifying the thread info globals */
+    if (H5_UNLIKELY(H5TS_mutex_destroy(&H5TS_tinfo_mtx_s) < 0))
+        HGOTO_DONE(FAIL);
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__tinfo_term() */

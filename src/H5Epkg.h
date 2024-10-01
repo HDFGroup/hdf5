@@ -153,6 +153,6 @@ H5_DLL herr_t       H5E__get_auto(const H5E_stack_t *estack, H5E_auto_op_t *op, 
 H5_DLL herr_t       H5E__set_auto(H5E_stack_t *estack, const H5E_auto_op_t *op, void *client_data);
 H5_DLL herr_t       H5E__pop(H5E_stack_t *err_stack, size_t count);
 H5_DLL herr_t       H5E__append_stack(H5E_stack_t *dst_estack, const H5E_stack_t *src_stack);
-H5_DLL herr_t       H5E__clear_stack(H5E_stack_t *estack);
+H5_DLL herr_t       H5E__destroy_stack(H5E_stack_t *estack);
 
 #endif /* H5Epkg_H */
