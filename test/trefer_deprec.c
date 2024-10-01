@@ -166,53 +166,134 @@ test_reference_params(void)
     CHECK(ret, FAIL, "H5Dcreate2");
 
     /* Test parameters to H5Rcreate */
-    ret = H5Rcreate(NULL, fid1, "/Group1/Dataset1", H5R_OBJECT, (hid_t)H5I_INVALID_HID);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate(NULL, fid1, "/Group1/Dataset1", H5R_OBJECT, (hid_t)H5I_INVALID_HID);
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate ref");
-    ret = H5Rcreate(&wbuf[0], (hid_t)H5I_INVALID_HID, "/Group1/Dataset1", H5R_OBJECT, (hid_t)H5I_INVALID_HID);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate(&wbuf[0], (hid_t)H5I_INVALID_HID, "/Group1/Dataset1", H5R_OBJECT,
+                        (hid_t)H5I_INVALID_HID);
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate loc_id");
-    ret = H5Rcreate(&wbuf[0], fid1, NULL, H5R_OBJECT, (hid_t)H5I_INVALID_HID);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate(&wbuf[0], fid1, NULL, H5R_OBJECT, (hid_t)H5I_INVALID_HID);
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate name");
-    ret = H5Rcreate(&wbuf[0], fid1, "", H5R_OBJECT, (hid_t)H5I_INVALID_HID);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate(&wbuf[0], fid1, "", H5R_OBJECT, (hid_t)H5I_INVALID_HID);
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate null name");
-    ret = H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_MAXTYPE, (hid_t)H5I_INVALID_HID);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_MAXTYPE, (hid_t)H5I_INVALID_HID);
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate type");
-    ret = H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_DATASET_REGION, (hid_t)H5I_INVALID_HID);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_DATASET_REGION, (hid_t)H5I_INVALID_HID);
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate region space");
-    ret = H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_MAXTYPE, (hid_t)0);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_MAXTYPE, (hid_t)0);
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate space");
 
     /* Test parameters to H5Rdereference */
-    dset2 = H5Rdereference2((hid_t)H5I_INVALID_HID, H5P_DEFAULT, H5R_OBJECT, &rbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        dset2 = H5Rdereference2((hid_t)H5I_INVALID_HID, H5P_DEFAULT, H5R_OBJECT, &rbuf[0]);
+    }
+    H5E_END_TRY
     VERIFY(dset2, FAIL, "H5Rdereference2 loc_id");
-    dset2 = H5Rdereference2(dataset, (hid_t)H5I_INVALID_HID, H5R_OBJECT, &rbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        dset2 = H5Rdereference2(dataset, (hid_t)H5I_INVALID_HID, H5R_OBJECT, &rbuf[0]);
+    }
+    H5E_END_TRY
     VERIFY(dset2, FAIL, "H5Rdereference2 oapl_id");
-    dset2 = H5Rdereference2(dataset, dapl_id, H5R_OBJECT, NULL);
+    H5E_BEGIN_TRY
+    {
+        dset2 = H5Rdereference2(dataset, dapl_id, H5R_OBJECT, NULL);
+    }
+    H5E_END_TRY
     VERIFY(dset2, FAIL, "H5Rdereference2 ref");
-    dset2 = H5Rdereference2(dataset, dapl_id, H5R_MAXTYPE, &rbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        dset2 = H5Rdereference2(dataset, dapl_id, H5R_MAXTYPE, &rbuf[0]);
+    }
+    H5E_END_TRY
     VERIFY(dset2, FAIL, "H5Rdereference2 type");
 
     /* Test parameters to H5Rget_obj_type2 */
-    ret = H5Rget_obj_type2((hid_t)H5I_INVALID_HID, H5R_OBJECT, &rbuf[0], NULL);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rget_obj_type2((hid_t)H5I_INVALID_HID, H5R_OBJECT, &rbuf[0], NULL);
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rget_obj_type2 loc_id");
-    ret = H5Rget_obj_type2(fid1, H5R_OBJECT, NULL, NULL);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rget_obj_type2(fid1, H5R_OBJECT, NULL, NULL);
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rget_obj_type2 ref");
-    ret = H5Rget_obj_type2(fid1, H5R_MAXTYPE, &rbuf[0], NULL);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rget_obj_type2(fid1, H5R_MAXTYPE, &rbuf[0], NULL);
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rget_obj_type2 type");
 
     /* Test parameters to H5Rget_name */
-    name_size = H5Rget_name((hid_t)H5I_INVALID_HID, H5R_DATASET_REGION, &rbuf[0], NULL, 0);
+    H5E_BEGIN_TRY
+    {
+        name_size = H5Rget_name((hid_t)H5I_INVALID_HID, H5R_DATASET_REGION, &rbuf[0], NULL, 0);
+    }
+    H5E_END_TRY
     VERIFY(name_size, FAIL, "H5Rget_name loc_id");
-    name_size = H5Rget_name(fid1, H5R_DATASET_REGION, NULL, NULL, 0);
+    H5E_BEGIN_TRY
+    {
+        name_size = H5Rget_name(fid1, H5R_DATASET_REGION, NULL, NULL, 0);
+    }
+    H5E_END_TRY
     VERIFY(name_size, FAIL, "H5Rget_name ref");
-    name_size = H5Rget_name(fid1, H5R_MAXTYPE, &rbuf[0], NULL, 0);
+    H5E_BEGIN_TRY
+    {
+        name_size = H5Rget_name(fid1, H5R_MAXTYPE, &rbuf[0], NULL, 0);
+    }
+    H5E_END_TRY
     VERIFY(name_size, FAIL, "H5Rget_name type");
 
     /* Test parameters to H5Rget_region */
-    ret_id = H5Rget_region((hid_t)H5I_INVALID_HID, H5R_OBJECT, &rbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        ret_id = H5Rget_region((hid_t)H5I_INVALID_HID, H5R_OBJECT, &rbuf[0]);
+    }
+    H5E_END_TRY
     VERIFY(ret_id, FAIL, "H5Rget_region loc_id");
-    ret_id = H5Rget_region(fid1, H5R_OBJECT, NULL);
+    H5E_BEGIN_TRY
+    {
+        ret_id = H5Rget_region(fid1, H5R_OBJECT, NULL);
+    }
+    H5E_END_TRY
     VERIFY(ret_id, FAIL, "H5Rget_region ref");
-    ret_id = H5Rget_region(fid1, H5R_OBJECT, &rbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        ret_id = H5Rget_region(fid1, H5R_OBJECT, &rbuf[0]);
+    }
+    H5E_END_TRY
     VERIFY(ret_id, FAIL, "H5Rget_region type");
 
     /* Close disk dataspace */
@@ -773,7 +854,11 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
 
     /* Try to read an unaddressed dataset */
     memset(&undef_reg, 0, sizeof(undef_reg));
-    dset2 = H5Rdereference2(dset1, dapl_id, H5R_DATASET_REGION, undef_reg);
+    H5E_BEGIN_TRY
+    {
+        dset2 = H5Rdereference2(dset1, dapl_id, H5R_DATASET_REGION, undef_reg);
+    }
+    H5E_END_TRY
     VERIFY(dset2, FAIL, "H5Rdereference2 haddr_undef");
 
     /* Try to open objects */
@@ -1314,7 +1399,11 @@ test_reference_obj_deleted(void)
     CHECK(ret, FAIL, "H5Dopen2");
 
     /* Open undefined reference */
-    dset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &addr);
+    H5E_BEGIN_TRY
+    {
+        dset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &addr);
+    }
+    H5E_END_TRY
     VERIFY(dset2, FAIL, "H5Rdereference2");
 
     /* Read selection from disk */
@@ -1323,12 +1412,20 @@ test_reference_obj_deleted(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Open deleted dataset object */
-    dset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &oref);
+    H5E_BEGIN_TRY
+    {
+        dset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &oref);
+    }
+    H5E_END_TRY
     VERIFY(dset2, FAIL, "H5Rdereference2");
 
     /* Open nonsense reference */
     memset(&oref, 0, sizeof(hobj_ref_t));
-    dset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &oref);
+    H5E_BEGIN_TRY
+    {
+        dset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &oref);
+    }
+    H5E_END_TRY
     VERIFY(dset2, FAIL, "H5Rdereference2");
 
     /* Close Dataset */
@@ -1771,10 +1868,18 @@ test_reference_compat(void)
     CHECK(obj_type, H5G_UNKNOWN, "H5Rget_obj_type1");
     VERIFY(obj_type, H5G_DATASET, "H5Rget_obj_type1");
 
-    obj_type = H5Rget_obj_type1(dataset, H5R_DATASET_REGION, &rbuf_reg[2]);
+    H5E_BEGIN_TRY
+    {
+        obj_type = H5Rget_obj_type1(dataset, H5R_DATASET_REGION, &rbuf_reg[2]);
+    }
+    H5E_END_TRY
     VERIFY(obj_type, H5G_UNKNOWN, "H5Rget_obj_type1");
 
-    obj_type = H5Rget_obj_type1(dataset, H5R_DATASET_REGION, &rbuf_reg[3]);
+    H5E_BEGIN_TRY
+    {
+        obj_type = H5Rget_obj_type1(dataset, H5R_DATASET_REGION, &rbuf_reg[3]);
+    }
+    H5E_END_TRY
     VERIFY(obj_type, H5G_UNKNOWN, "H5Rget_obj_type1");
 
     /* Make sure the referenced objects can be opened */
@@ -1812,7 +1917,7 @@ test_reference_compat(void)
 **
 ****************************************************************/
 void
-test_reference_deprec(void)
+test_reference_deprec(const void H5_ATTR_UNUSED *params)
 {
     H5F_libver_t low, high; /* Low and high bounds */
     bool         vol_is_native;
@@ -1862,9 +1967,11 @@ test_reference_deprec(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_reference_deprec(void)
+cleanup_reference_deprec(void H5_ATTR_UNUSED *params)
 {
-    HDremove(FILE1);
-    HDremove(FILE2);
-    HDremove(FILE3);
+    if (GetTestCleanup()) {
+        HDremove(FILE1);
+        HDremove(FILE2);
+        HDremove(FILE3);
+    }
 }

@@ -51,7 +51,7 @@ num_digits(int num)
 
 /* Test the H5is_library_threadsafe() function */
 void
-tts_is_threadsafe(void)
+tts_is_threadsafe(const void H5_ATTR_UNUSED *params)
 {
     bool is_ts;
     bool should_be;
@@ -97,19 +97,22 @@ main(int argc, char *argv[])
 {
 
     /* Initialize testing framework */
-    TestInit(argv[0], NULL, NULL);
+    if (TestInit(argv[0], NULL, NULL, 0) < 0) {
+        fprintf(stderr, "couldn't initialize testing framework\n");
+        return -1;
+    }
 
     /* Tests are generally arranged from least to most complexity... */
-    AddTest("is_threadsafe", tts_is_threadsafe, NULL, "library threadsafe status", NULL);
-#ifdef H5_HAVE_THREADSAFE
-    AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
-    AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
+    AddTest("is_threadsafe", tts_is_threadsafe, NULL, NULL, NULL, 0, "library threadsafe status");
+#ifdef H5_HAVE_THREADS
+    AddTest("dcreate", tts_dcreate, NULL, cleanup_dcreate, NULL, 0, "multi-dataset creation");
+    AddTest("error", tts_error, NULL, cleanup_error, NULL, 0, "per-thread error stacks");
 #ifdef H5_HAVE_PTHREAD_H
     /* Thread cancellability only supported with pthreads ... */
-    AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test", NULL);
+    AddTest("cancel", tts_cancel, NULL, cleanup_cancel, NULL, 0, "thread cancellation safety test");
 #endif /* H5_HAVE_PTHREAD_H */
-    AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation", NULL);
-    AddTest("attr_vlen", tts_attr_vlen, cleanup_attr_vlen, "multi-file-attribute-vlen read", NULL);
+    AddTest("acreate", tts_acreate, NULL, cleanup_acreate, NULL, 0, "multi-attribute creation");
+    AddTest("attr_vlen", tts_attr_vlen, NULL, cleanup_attr_vlen, NULL, 0, "multi-file-attribute-vlen read");
 
 #else /* H5_HAVE_THREADSAFE */
 
@@ -118,17 +121,21 @@ main(int argc, char *argv[])
 #endif /* H5_HAVE_THREADSAFE */
 
     /* Display testing information */
-    TestInfo(argv[0]);
+    TestInfo(stdout);
 
     /* Parse command line arguments */
-    TestParseCmdLine(argc, argv);
+    if (TestParseCmdLine(argc, argv) < 0) {
+        fprintf(stderr, "couldn't parse command-line arguments\n");
+        TestShutdown();
+        return -1;
+    }
 
     /* Perform requested testing */
     PerformTests();
 
     /* Display test summary, if requested */
     if (GetTestSummary())
-        TestSummary();
+        TestSummary(stdout);
 
     /* Clean up test files, if allowed */
     if (GetTestCleanup() && !getenv(HDF5_NOCLEANUP))

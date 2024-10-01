@@ -9924,7 +9924,7 @@ main(void)
     /* Reset library */
     h5_test_init();
     fapl             = h5_fileaccess();
-    localTestExpress = TestExpress;
+    localTestExpress = h5_get_testexpress();
 
     /* For the Direct I/O driver, skip intensive tests due to poor performance */
     if (localTestExpress < 2 && !strcmp(driver_name, "direct"))

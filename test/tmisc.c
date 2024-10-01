@@ -1196,11 +1196,19 @@ test_misc7(void)
     CHECK(tid, FAIL, "H5Tcreate");
 
     /* Attempt to commit an empty compound datatype */
-    ret = H5Tcommit2(fid, MISC7_TYPENAME1, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Tcommit2(fid, MISC7_TYPENAME1, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Tcommit2");
 
     /* Attempt to use empty compound datatype to create dataset */
-    did = H5Dcreate2(fid, MISC7_DSETNAME1, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        did = H5Dcreate2(fid, MISC7_DSETNAME1, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dcreate2");
 
     /* Add a field to the compound datatype */
@@ -1228,11 +1236,19 @@ test_misc7(void)
     CHECK(tid, FAIL, "H5Tenum_create");
 
     /* Attempt to commit an empty enum datatype */
-    ret = H5Tcommit2(fid, MISC7_TYPENAME2, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Tcommit2(fid, MISC7_TYPENAME2, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Tcommit2");
 
     /* Attempt to use empty enum datatype to create dataset */
-    did = H5Dcreate2(fid, MISC7_DSETNAME2, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        did = H5Dcreate2(fid, MISC7_DSETNAME2, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY
     VERIFY(did, FAIL, "H5Dcreate2");
 
     /* Add a member to the enum datatype */
@@ -3821,7 +3837,11 @@ test_misc20(void)
     CHECK(dcpl, FAIL, "H5Pcreate");
 
     /* Try to use chunked storage for this dataset */
-    ret = H5Pset_chunk(dcpl, rank, big_dims);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_chunk(dcpl, rank, big_dims);
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Pset_chunk");
 
     /* Verify that the storage for the dataset is the correct size and hasn't
@@ -7105,7 +7125,7 @@ test_misc41(void)
 **
 ****************************************************************/
 void
-test_misc(void)
+test_misc(const void H5_ATTR_UNUSED *params)
 {
     bool default_driver = h5_using_default_driver(NULL);
 
@@ -7188,52 +7208,54 @@ test_misc(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_misc(void)
+cleanup_misc(void H5_ATTR_UNUSED *params)
 {
-    H5E_BEGIN_TRY
-    {
-        H5Fdelete(MISC1_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC2_FILE_1, H5P_DEFAULT);
-        H5Fdelete(MISC2_FILE_2, H5P_DEFAULT);
-        H5Fdelete(MISC3_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC4_FILE_1, H5P_DEFAULT);
-        H5Fdelete(MISC4_FILE_2, H5P_DEFAULT);
-        H5Fdelete(MISC5_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC6_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC7_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC8_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC9_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC10_FILE_NEW, H5P_DEFAULT);
-        H5Fdelete(MISC11_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC12_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC13_FILE_1, H5P_DEFAULT);
-        H5Fdelete(MISC13_FILE_2, H5P_DEFAULT);
-        H5Fdelete(MISC14_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC15_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC16_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC17_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC18_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC19_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC20_FILE, H5P_DEFAULT);
+    if (GetTestCleanup()) {
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(MISC1_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC2_FILE_1, H5P_DEFAULT);
+            H5Fdelete(MISC2_FILE_2, H5P_DEFAULT);
+            H5Fdelete(MISC3_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC4_FILE_1, H5P_DEFAULT);
+            H5Fdelete(MISC4_FILE_2, H5P_DEFAULT);
+            H5Fdelete(MISC5_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC6_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC7_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC8_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC9_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC10_FILE_NEW, H5P_DEFAULT);
+            H5Fdelete(MISC11_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC12_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC13_FILE_1, H5P_DEFAULT);
+            H5Fdelete(MISC13_FILE_2, H5P_DEFAULT);
+            H5Fdelete(MISC14_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC15_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC16_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC17_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC18_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC19_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC20_FILE, H5P_DEFAULT);
 #ifdef H5_HAVE_FILTER_SZIP
-        H5Fdelete(MISC21_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC22_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC21_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC22_FILE, H5P_DEFAULT);
 #endif /* H5_HAVE_FILTER_SZIP */
-        H5Fdelete(MISC23_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC24_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC25A_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC25C_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC26_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC28_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC29_COPY_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC30_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC23_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC24_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC25A_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC25C_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC26_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC28_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC29_COPY_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC30_FILE, H5P_DEFAULT);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-        H5Fdelete(MISC31_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC31_FILE, H5P_DEFAULT);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-        H5Fdelete(MISC38C_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC39_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC40_FILE, H5P_DEFAULT);
-        H5Fdelete(MISC41_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC38C_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC39_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC40_FILE, H5P_DEFAULT);
+            H5Fdelete(MISC41_FILE, H5P_DEFAULT);
+        }
+        H5E_END_TRY
     }
-    H5E_END_TRY
 } /* end cleanup_misc() */

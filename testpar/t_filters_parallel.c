@@ -9989,12 +9989,17 @@ main(int argc, char **argv)
     if (VERBOSE_MED)
         h5_show_hostname();
 
-    TestAlarmOn();
+    if (TestAlarmOn() < 0) {
+        if (MAINPROCESS)
+            fprintf(stderr, "couldn't enable test timer\n");
+        fflush(stderr);
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
 
     /*
      * Get the TestExpress level setting
      */
-    test_express_level_g = GetTestExpress();
+    test_express_level_g = h5_get_testexpress();
     if ((test_express_level_g >= 1) && MAINPROCESS) {
         printf("** Some tests will be skipped due to TestExpress setting.\n");
         printf("** Exhaustive tests will only be performed for the first available filter.\n");

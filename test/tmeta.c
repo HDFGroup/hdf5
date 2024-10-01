@@ -53,7 +53,7 @@ static uint8_t encode_buffer[sizeof(compar_buffer)];
 **
 ****************************************************************/
 void
-test_metadata(void)
+test_metadata(const void H5_ATTR_UNUSED *params)
 {
     int16_t  ei16 = TEST_INT16_VALUE; /* variables to hold the values to encode */
     uint16_t eu16 = TEST_UINT16_VALUE;
@@ -121,7 +121,7 @@ test_metadata(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_metadata(void)
+cleanup_metadata(void H5_ATTR_UNUSED *params)
 {
     /* no file to clean */
 }

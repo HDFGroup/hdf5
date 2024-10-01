@@ -52,7 +52,7 @@ pthread_mutex_t mutex;
 pthread_cond_t  cond;
 
 void
-tts_cancel(void)
+tts_cancel(const void H5_ATTR_UNUSED *params)
 {
     pthread_attr_t            attribute;
     hid_t                     dataset;
@@ -241,9 +241,11 @@ tts_cancel_barrier(void)
 } /* end tts_cancel_barrier() */
 
 void
-cleanup_cancel(void)
+cleanup_cancel(void H5_ATTR_UNUSED *params)
 {
-    HDunlink(FILENAME);
+    if (GetTestCleanup()) {
+        HDunlink(FILENAME);
+    }
 }
 
 #endif /*H5_HAVE_WIN_THREADS*/

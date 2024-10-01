@@ -58,7 +58,7 @@
  *                                               JRM -- 11/28/11
  */
 void
-file_image_daisy_chain_test(void)
+file_image_daisy_chain_test(const void H5_ATTR_UNUSED *params)
 {
     char       file_name[1024] = "\0";
     int        mpi_size, mpi_rank;

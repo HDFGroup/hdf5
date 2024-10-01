@@ -3233,7 +3233,7 @@ test_vltypes_fill_value(void)
 **
 ****************************************************************/
 void
-test_vltypes(void)
+test_vltypes(const void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Variable-Length Datatypes\n"));
@@ -3266,11 +3266,13 @@ test_vltypes(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_vltypes(void)
+cleanup_vltypes(void H5_ATTR_UNUSED *params)
 {
-    H5E_BEGIN_TRY
-    {
-        H5Fdelete(FILENAME, H5P_DEFAULT);
+    if (GetTestCleanup()) {
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(FILENAME, H5P_DEFAULT);
+        }
+        H5E_END_TRY
     }
-    H5E_END_TRY
 }

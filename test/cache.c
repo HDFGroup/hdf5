@@ -32368,7 +32368,7 @@ main(void)
 
     H5open();
 
-    express_test = GetTestExpress();
+    express_test = h5_get_testexpress();
 
     printf("=========================================\n");
     printf("Internal cache tests\n");
