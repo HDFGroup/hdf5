@@ -6770,7 +6770,6 @@ test_complex_type(void)
     const char *driver_name;
     char        filename[256];
     hsize_t     dims[1];
-    herr_t      status;
     hid_t       fid       = H5I_INVALID_HID;
     hid_t       space_id  = H5I_INVALID_HID;
     hid_t       dset_id   = H5I_INVALID_HID;
@@ -6996,52 +6995,22 @@ test_complex_type(void)
     }
 
     /*
-     * Check that H5Tset_size and H5Tset_offset work correctly on a complex
-     * number type (H5Tset_size sets the size for the whole datatype with
-     * each of the two parts of the type sharing half the size, while
-     * H5Tset_offset sets the offset for the base datatype)
+     * Check that H5Tset_offset works correctly on a complex number type
+     * (H5Tset_offset sets the offset for the base datatype)
      */
     if ((complex_type = H5Tcopy(H5T_NATIVE_FLOAT_COMPLEX)) < 0) {
         H5_FAILED();
         printf("Can't copy H5T_NATIVE_FLOAT_COMPLEX datatype\n");
         goto error;
     }
-
-    H5E_BEGIN_TRY
-    {
-        /* Size must be a multiple of 2 since the real and
-         * imaginary parts will each share half the datatype size
-         */
-        status = H5Tset_size(complex_type, 13);
-    }
-    H5E_END_TRY
-    if (status >= 0) {
-        H5_FAILED();
-        printf("Changed the size of complex number type to a size that isn't a multiple of 2\n");
-        goto error;
-    }
-
     if (H5Tset_offset(complex_type, 3) < 0) {
         H5_FAILED();
         printf("Can't set offset for complex number type's base datatype\n");
         goto error;
     }
-    if (H5Tset_size(complex_type, 128) < 0) {
-        H5_FAILED();
-        printf("Can't change size of complex number type\n");
-        goto error;
-    }
-
     if ((base_type = H5Tget_super(complex_type)) < 0) {
         H5_FAILED();
         printf("Can't get base datatype of complex number datatype\n");
-        goto error;
-    }
-
-    type_size = H5Tget_size(base_type);
-    if (0 == type_size || 64 != type_size) {
-        H5_FAILED();
-        printf("Invalid size for complex number type's base datatype\n");
         goto error;
     }
     if (3 != H5Tget_offset(base_type)) {
@@ -7049,7 +7018,6 @@ test_complex_type(void)
         printf("Invalid offset value for complex number type's base datatype\n");
         goto error;
     }
-
     if (H5Tclose(base_type) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
@@ -8820,6 +8788,131 @@ test_array_cmpd_vl(void)
 error:
     return 1;
 } /* end test_array_cmpd_vl() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_set_size_invalid
+ *
+ * Purpose:     Tests that H5Tset_size fails when called on an array,
+ *              variable-length, reference or complex number datatype.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_set_size_invalid(void)
+{
+    hsize_t array_dims[] = {10};
+    hid_t   array_tid    = H5I_INVALID_HID;
+    hid_t   vlen_tid     = H5I_INVALID_HID;
+    hid_t   ref_tid      = H5I_INVALID_HID;
+    hid_t   complex_tid  = H5I_INVALID_HID;
+    hid_t   string_tid   = H5I_INVALID_HID;
+    herr_t  status;
+
+    TESTING("H5Tset_size on ineligible datatypes");
+
+    if ((array_tid = H5Tarray_create2(H5T_NATIVE_INT, 1, array_dims)) < 0)
+        TEST_ERROR;
+    if ((vlen_tid = H5Tvlen_create(array_tid)) < 0)
+        TEST_ERROR;
+    if ((ref_tid = H5Tcopy(H5T_STD_REF)) < 0)
+        TEST_ERROR;
+    if ((complex_tid = H5Tcomplex_create(H5T_NATIVE_FLOAT)) < 0)
+        TEST_ERROR;
+    if ((string_tid = H5Tcopy(H5T_C_S1)) < 0)
+        TEST_ERROR;
+
+    H5E_BEGIN_TRY
+    {
+        status = H5Tset_size(array_tid, 100);
+    }
+    H5E_END_TRY;
+    if (status >= 0) {
+        H5_FAILED();
+        AT();
+        printf("Set size on array datatype\n");
+        goto error;
+    }
+
+    H5E_BEGIN_TRY
+    {
+        status = H5Tset_size(vlen_tid, 100);
+    }
+    H5E_END_TRY;
+    if (status >= 0) {
+        H5_FAILED();
+        AT();
+        printf("Set size on variable-length datatype\n");
+        goto error;
+    }
+
+    H5E_BEGIN_TRY
+    {
+        status = H5Tset_size(ref_tid, 100);
+    }
+    H5E_END_TRY;
+    if (status >= 0) {
+        H5_FAILED();
+        AT();
+        printf("Set size on reference datatype\n");
+        goto error;
+    }
+
+    H5E_BEGIN_TRY
+    {
+        status = H5Tset_size(complex_tid, 100);
+    }
+    H5E_END_TRY;
+    if (status >= 0) {
+        H5_FAILED();
+        AT();
+        printf("Set size on complex number datatype\n");
+        goto error;
+    }
+
+    /* Should still be able to convert a variable-length string datatype
+     * back into a fixed-length string datatype even though variable-length
+     * string datatypes are tested as H5T_VLEN
+     */
+    if (H5Tset_size(string_tid, H5T_VARIABLE) < 0)
+        TEST_ERROR;
+    if (H5Tset_size(string_tid, 100) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Unable to set size on variable-length string datatype\n");
+        goto error;
+    }
+
+    if (H5Tclose(array_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(vlen_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(ref_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(complex_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(string_tid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(array_tid);
+        H5Tclose(vlen_tid);
+        H5Tclose(ref_tid);
+        H5Tclose(complex_tid);
+        H5Tclose(string_tid);
+    }
+    H5E_END_TRY
+
+    return 1;
+} /* end test_set_size_invalid() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_encode
@@ -12785,6 +12878,7 @@ main(void)
     nerrors += test_opaque();
     nerrors += test_set_order();
     nerrors += test_array_cmpd_vl();
+    nerrors += test_set_size_invalid();
 
     nerrors += test__Float16();
     nerrors += test_complex_type();

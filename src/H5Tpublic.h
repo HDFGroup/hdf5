@@ -846,7 +846,7 @@ H5_DLLVAR hid_t H5T_VAX_F64_g;
 #define H5T_NATIVE_ULLONG (H5OPEN H5T_NATIVE_ULLONG_g)
 /**
  * \ingroup PDTNAT
- * C-style \TText{_Float16} (May be \Code{H5I_INVALID_HID} if platform doesn't support \Code{_Float16} type)
+ * C-style \TText{_Float16} (May be \TText{H5I_INVALID_HID} if platform doesn't support \TText{_Float16} type)
  */
 #define H5T_NATIVE_FLOAT16 (H5OPEN H5T_NATIVE_FLOAT16_g)
 /**
@@ -866,20 +866,20 @@ H5_DLLVAR hid_t H5T_VAX_F64_g;
 #define H5T_NATIVE_LDOUBLE (H5OPEN H5T_NATIVE_LDOUBLE_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{float _Complex} / (MSVC) \Code{_Fcomplex} (May be \Code{H5I_INVALID_HID} if platform doesn't
- * support \Code{float _Complex}/\Code{_Fcomplex} type)
+ * C-style \TText{float _Complex} / (MSVC) \TText{_Fcomplex} (May be \TText{H5I_INVALID_HID} if platform
+ * doesn't support \TText{float _Complex}/\TText{_Fcomplex} type)
  */
 #define H5T_NATIVE_FLOAT_COMPLEX (H5OPEN H5T_NATIVE_FLOAT_COMPLEX_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{double _Complex} / (MSVC) \Code{_Dcomplex} (May be \Code{H5I_INVALID_HID} if platform doesn't
- * support \Code{double _Complex}/\Code{_Dcomplex} type)
+ * C-style \TText{double _Complex} / (MSVC) \TText{_Dcomplex} (May be \TText{H5I_INVALID_HID} if platform
+ * doesn't support \TText{double _Complex}/\TText{_Dcomplex} type)
  */
 #define H5T_NATIVE_DOUBLE_COMPLEX (H5OPEN H5T_NATIVE_DOUBLE_COMPLEX_g)
 /**
  * \ingroup PDTNAT
- * C-style \Code{long double _Complex} / (MSVC) \Code{_Lcomplex} (May be \Code{H5I_INVALID_HID} if platform
- * doesn't support \Code{long double _Complex}/\Code{_Lcomplex} type)
+ * C-style \TText{long double _Complex} / (MSVC) \TText{_Lcomplex} (May be \TText{H5I_INVALID_HID} if platform
+ * doesn't support \TText{long double _Complex}/\TText{_Lcomplex} type)
  */
 #define H5T_NATIVE_LDOUBLE_COMPLEX (H5OPEN H5T_NATIVE_LDOUBLE_COMPLEX_g)
 /**
@@ -2508,22 +2508,10 @@ H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction);
  *          decrease the size of a compound datatype, but the function will
  *          fail if the new size is too small to accommodate all member fields.
  *
- *          \li Variable-length datatypes: This function sets the size of
- *          the base datatype for the variable-length datatype.
- *
- *          \li Array datatypes: This function sets the size of the base
- *          datatype for the array datatype. The array datatype's size is
- *          then adjusted to be the size of the base datatype multiplied
- *          by the number of elements in the array datatype's dimensions.
- *
- *          \li Complex number datatypes: The size set for a complex number
- *          datatype is the size for the entire datatype, which is shared
- *          evenly among the datatype's real and imaginary parts. Thus,
- *          the specified size must be a multiple of 2.
- *
  *          \li Ineligible datatypes: This function cannot be used with
- *          enumerated datatypes (#H5T_ENUM) or reference datatypes
- *          (#H5T_REFERENCE).
+ *          enumerated datatypes (#H5T_ENUM), array datatypes (#H5T_ARRAY),
+ *          variable-length array datatypes (#H5T_VLEN), reference datatypes
+ *          (#H5T_REFERENCE), or complex number datatypes (#H5T_COMPLEX).
  *
  * \see H5Tget_size()
  *

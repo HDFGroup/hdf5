@@ -2919,7 +2919,9 @@ H5Tset_size(hid_t type_id, size_t size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "only strings may be variable length");
     if (H5T_ENUM == dt->shared->type && dt->shared->u.enumer.nmembs > 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
-    if (H5T_REFERENCE == dt->shared->type)
+    if (H5T_ARRAY == dt->shared->type || H5T_REFERENCE == dt->shared->type || H5T_COMPLEX == dt->shared->type)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for this datatype");
+    if (H5T_VLEN == dt->shared->type && H5T_VLEN_STRING != dt->shared->u.vlen.type)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for this datatype");
 
     /* Modify the datatype */
@@ -4726,30 +4728,15 @@ H5T__set_size(H5T_t *dt, size_t size)
     assert(dt);
     assert(dt->shared);
     assert(size != 0);
+    assert(H5T_ARRAY != dt->shared->type);
     assert(H5T_REFERENCE != dt->shared->type);
+    assert(H5T_COMPLEX != dt->shared->type);
+    assert(H5T_VLEN != dt->shared->type || H5T_VLEN_STRING == dt->shared->u.vlen.type);
     assert(!(H5T_ENUM == dt->shared->type && 0 == dt->shared->u.enumer.nmembs));
 
     if (dt->shared->parent) {
-        size_t new_size = size;
-
-        if (dt->shared->type == H5T_COMPLEX) {
-            if ((new_size % 2) != 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL,
-                            "new datatype size is not evenly divisible by 2");
-
-            new_size /= 2;
-        }
-
-        if (H5T__set_size(dt->shared->parent, new_size) < 0)
+        if (H5T__set_size(dt->shared->parent, size) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set size for parent data type");
-
-        /* Adjust size of datatype appropriately */
-        if (dt->shared->type == H5T_ARRAY)
-            dt->shared->size = dt->shared->parent->shared->size * dt->shared->u.array.nelem;
-        else if (dt->shared->type == H5T_COMPLEX)
-            dt->shared->size = 2 * dt->shared->parent->shared->size;
-        else if (dt->shared->type != H5T_VLEN)
-            dt->shared->size = dt->shared->parent->shared->size;
     }
     else {
         if (H5T_IS_ATOMIC(dt->shared)) {
