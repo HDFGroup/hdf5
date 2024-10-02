@@ -380,6 +380,7 @@ CONTAINS
     H5F_LIBVER_V112_F              = H5F_flags(29)
     H5F_LIBVER_V114_F              = H5F_flags(30)
     H5F_LIBVER_V116_F              = H5F_flags(31)
+    H5F_LIBVER_V118_F              = H5F_flags(32)
     !
     ! H5generic flags
     !

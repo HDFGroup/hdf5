@@ -888,7 +888,7 @@ HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"   
 HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"          ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
 
-DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112, v114, v116)"           "v116"
+DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112, v114, v116, v118)"           "v118"
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                     ON
 HDF5_MSVC_NAMING_CONVENTION    "Use MSVC Naming conventions for Shared Libraries"                OFF
 HDF5_MINGW_STATIC_GCC_LIBS     "Statically link libgcc/libstdc++"                                OFF
