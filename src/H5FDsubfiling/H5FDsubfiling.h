@@ -14,12 +14,24 @@
 #ifndef H5FDsubfiling_H
 #define H5FDsubfiling_H
 
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
+
 #ifdef H5_HAVE_SUBFILING_VFD
+
+/* When this header is included from a private header, don't make calls to H5open() */
+#undef H5OPEN
+#ifndef H5private_H
+#define H5OPEN H5open(),
+#else /* H5private_H */
+#define H5OPEN
+#endif /* H5private_H */
+
 /**
  * \def H5FD_SUBFILING
  * Macro that returns the identifier for the #H5FD_SUBFILING driver. \hid_t{file driver}
  */
-#define H5FD_SUBFILING (H5FD_subfiling_init())
+#define H5FD_SUBFILING (H5OPEN H5FD_SUBFILING_id_g)
 #else
 #define H5FD_SUBFILING (H5I_INVALID_HID)
 #endif
@@ -319,11 +331,12 @@ typedef struct H5FD_subfiling_config_t {
 extern "C" {
 #endif
 
-/**
- * \brief Internal routine to initialize #H5FD_SUBFILING driver. Not meant to be
- *        called directly by an HDF5 application
+/** @private
+ *
+ * \brief ID for the SUBFILING VFD
  */
-H5_DLL hid_t H5FD_subfiling_init(void);
+H5_DLLVAR hid_t H5FD_SUBFILING_id_g;
+
 /**
  * \ingroup FAPL
  *

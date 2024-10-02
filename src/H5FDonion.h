@@ -16,8 +16,19 @@
 #ifndef H5FDonion_H
 #define H5FDonion_H
 
-/** Initializer for the onion VFD */
-#define H5FD_ONION (H5FD_onion_init())
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
+
+/* When this header is included from a private header, don't make calls to H5open() */
+#undef H5OPEN
+#ifndef H5private_H
+#define H5OPEN H5open(),
+#else /* H5private_H */
+#define H5OPEN
+#endif /* H5private_H */
+
+/** ID for the onion VFD */
+#define H5FD_ONION (H5OPEN H5FD_ONION_id_g)
 
 /** Identifier for the onion VFD */
 #define H5FD_ONION_VALUE H5_VFD_ONION
@@ -115,9 +126,9 @@ extern "C" {
 
 /** @private
  *
- * \brief Private initializer for the onion VFD
+ * \brief ID for the onion VFD
  */
-H5_DLL hid_t H5FD_onion_init(void);
+H5_DLLVAR hid_t H5FD_ONION_id_g;
 
 /**
  * --------------------------------------------------------------------------

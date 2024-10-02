@@ -235,7 +235,7 @@ H5_init_library(void)
      * Also initialize some interfaces that might not be able to initialize
      * themselves soon enough.
      *
-     * Interfaces returning variables through a macro: H5E, H5O, H5P, H5T
+     * Interfaces returning variables through a macro: H5E, H5FD, H5O, H5P, H5T
      *
      * The link interface needs to be initialized so that the external link
      *   class is registered.
@@ -248,12 +248,15 @@ H5_init_library(void)
      * The dataspace interface needs to be initialized so that future IDs for
      *   dataspaces work.
      *
-     * The VOL interface needs to be initialized so that the default VOL
-     *   connector and the VOL-managed interfaces are set up.
+     * The VFD & VOL interfaces need to be initialized before the H5P interface
+     *   so that the default VFD and default VOL connector are ready for the
+     *   default FAPL.
      *
      */
     if (H5E_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize error interface");
+    if (H5FD_init() < 0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize VFL interface");
     if (H5VL_init_phase1() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface");
     if (H5P_init_phase1() < 0)

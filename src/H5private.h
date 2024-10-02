@@ -1596,19 +1596,11 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     } /*end scope from beginning of FUNC_ENTER*/
 
 /* Macros to declare package initialization function, if a package initialization routine is defined */
-#ifdef H5_PKG_SINGLE_SOURCE
-#define H5_PKG_DECLARE_YES_FUNC(pkg) static herr_t H5_PACKAGE_INIT_FUNC(pkg)(void);
-#else
 #define H5_PKG_DECLARE_YES_FUNC(pkg) extern herr_t H5_PACKAGE_INIT_FUNC(pkg)(void);
-#endif
 #define H5_PKG_DECLARE_NO_FUNC(pkg)
 
 /* Declare package initialization symbols (if in a package) */
-#ifdef H5_PKG_SINGLE_SOURCE
-#define H5_PKG_DECLARE_VAR(pkg) static bool H5_PACKAGE_INIT_VAR(pkg);
-#else
 #define H5_PKG_DECLARE_VAR(pkg) extern bool H5_PACKAGE_INIT_VAR(pkg);
-#endif
 #define H5_PKG_DECLARE_FUNC(pkg_init, pkg) H5_GLUE3(H5_PKG_DECLARE_, pkg_init, _FUNC)(pkg)
 
 #ifdef H5_MY_PKG

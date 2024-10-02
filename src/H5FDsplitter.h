@@ -17,8 +17,19 @@
 #ifndef H5FDsplitter_H
 #define H5FDsplitter_H
 
-/** Initializer for the splitter VFD */
-#define H5FD_SPLITTER (H5FD_splitter_init())
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
+
+/* When this header is included from a private header, don't make calls to H5open() */
+#undef H5OPEN
+#ifndef H5private_H
+#define H5OPEN H5open(),
+#else /* H5private_H */
+#define H5OPEN
+#endif /* H5private_H */
+
+/** ID for the splitter VFD */
+#define H5FD_SPLITTER (H5OPEN H5FD_SPLITTER_id_g)
 
 /** Identifier for the splitter VFD */
 #define H5FD_SPLITTER_VALUE H5_VFD_SPLITTER
@@ -61,9 +72,9 @@ extern "C" {
 
 /** @private
  *
- * \brief Private initializer for the splitter VFD
+ * \brief ID for the splitter VFD
  */
-H5_DLL hid_t H5FD_splitter_init(void);
+H5_DLLVAR hid_t H5FD_SPLITTER_id_g;
 
 /**
  * \ingroup FAPL

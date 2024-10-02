@@ -109,6 +109,7 @@ struct H5S_t;
 struct H5F_t;
 union H5PL_key_t;
 
+H5_DLL herr_t        H5FD_init(void);
 H5_DLL int           H5FD_term_interface(void);
 H5_DLL herr_t        H5FD_locate_signature(H5FD_t *file, haddr_t *sig_addr);
 H5_DLL H5FD_class_t *H5FD_get_class(hid_t id);

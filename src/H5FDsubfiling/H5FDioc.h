@@ -20,14 +20,24 @@
 #ifndef H5FDioc_H
 #define H5FDioc_H
 
-#include "H5FDsubfiling.h"
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
 
 #ifdef H5_HAVE_IOC_VFD
+
+/* When this header is included from a private header, don't make calls to H5open() */
+#undef H5OPEN
+#ifndef H5private_H
+#define H5OPEN H5open(),
+#else /* H5private_H */
+#define H5OPEN
+#endif /* H5private_H */
+
 /**
  * \def H5FD_IOC
  * Macro that returns the identifier for the #H5FD_IOC driver. \hid_t{file driver}
  */
-#define H5FD_IOC (H5FD_ioc_init())
+#define H5FD_IOC (H5OPEN H5FD_IOC_id_g)
 #else
 #define H5FD_IOC (H5I_INVALID_HID)
 #endif
@@ -114,11 +124,12 @@ typedef struct H5FD_ioc_config_t {
 extern "C" {
 #endif
 
-/**
- * \brief Internal routine to initialize #H5FD_IOC driver. Not meant to be
- *        called directly by an HDF5 application
+/** @private
+ *
+ * \brief ID for the IOC VFD
  */
-H5_DLL hid_t H5FD_ioc_init(void);
+H5_DLLVAR hid_t H5FD_IOC_id_g;
+
 /**
  * \ingroup FAPL
  *

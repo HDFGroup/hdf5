@@ -16,8 +16,19 @@
 #ifndef H5FDfamily_H
 #define H5FDfamily_H
 
-/** Initializer for the family VFD */
-#define H5FD_FAMILY (H5FD_family_init())
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
+
+/* When this header is included from a private header, don't make calls to H5open() */
+#undef H5OPEN
+#ifndef H5private_H
+#define H5OPEN H5open(),
+#else /* H5private_H */
+#define H5OPEN
+#endif /* H5private_H */
+
+/** ID for the family VFD */
+#define H5FD_FAMILY (H5OPEN H5FD_FAMILY_id_g)
 
 /** Identifier for the family VFD */
 #define H5FD_FAMILY_VALUE H5_VFD_FAMILY
@@ -28,9 +39,9 @@ extern "C" {
 
 /** @private
  *
- * \brief Private initializer for the family VFD
+ * \brief ID for the family VFD
  */
-H5_DLL hid_t H5FD_family_init(void);
+H5_DLLVAR hid_t H5FD_FAMILY_id_g;
 
 /**
  * \ingroup FAPL

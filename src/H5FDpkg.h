@@ -39,12 +39,61 @@
 /* Package Private Variables */
 /*****************************/
 
+/* Whether to ignore file locks when disabled (env var value) */
+H5_DLLVAR htri_t H5FD_ignore_disabled_file_locks_p;
+
 /******************************/
 /* Package Private Prototypes */
 /******************************/
 H5_DLL haddr_t H5FD__alloc_real(H5FD_t *file, H5FD_mem_t type, hsize_t size, haddr_t *align_addr,
                                 hsize_t *align_size);
 H5_DLL herr_t  H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size);
+
+/* Internal VFD init/term routines */
+H5_DLL herr_t H5FD__core_register(void);
+H5_DLL herr_t H5FD__core_unregister(void);
+#ifdef H5_HAVE_DIRECT
+H5_DLL herr_t H5FD__direct_register(void);
+H5_DLL herr_t H5FD__direct_unregister(void);
+#endif
+H5_DLL herr_t H5FD__family_register(void);
+H5_DLL herr_t H5FD__family_unregister(void);
+#ifdef H5_HAVE_LIBHDFS
+H5_DLL herr_t H5FD__hdfs_register(void);
+H5_DLL herr_t H5FD__hdfs_unregister(void);
+#endif
+#ifdef H5_HAVE_IOC_VFD
+H5_DLL herr_t H5FD__ioc_register(void);
+H5_DLL herr_t H5FD__ioc_unregister(void);
+#endif
+H5_DLL herr_t H5FD__log_register(void);
+H5_DLL herr_t H5FD__log_unregister(void);
+#ifdef H5_HAVE_MIRROR_VFD
+H5_DLL herr_t H5FD__mirror_register(void);
+H5_DLL herr_t H5FD__mirror_unregister(void);
+#endif
+#ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t H5FD__mpio_register(void);
+H5_DLL herr_t H5FD__mpio_unregister(void);
+#endif
+H5_DLL herr_t H5FD__multi_register(void);
+H5_DLL herr_t H5FD__multi_unregister(void);
+H5_DLL herr_t H5FD__onion_register(void);
+H5_DLL herr_t H5FD__onion_unregister(void);
+#ifdef H5_HAVE_ROS3_VFD
+H5_DLL herr_t H5FD__ros3_register(void);
+H5_DLL herr_t H5FD__ros3_unregister(void);
+#endif
+H5_DLL herr_t H5FD__sec2_register(void);
+H5_DLL herr_t H5FD__sec2_unregister(void);
+H5_DLL herr_t H5FD__splitter_register(void);
+H5_DLL herr_t H5FD__splitter_unregister(void);
+H5_DLL herr_t H5FD__stdio_register(void);
+H5_DLL herr_t H5FD__stdio_unregister(void);
+#ifdef H5_HAVE_SUBFILING_VFD
+H5_DLL herr_t H5FD__subfiling_register(void);
+H5_DLL herr_t H5FD__subfiling_unregister(void);
+#endif
 
 /* Testing functions */
 #ifdef H5FD_TESTING
