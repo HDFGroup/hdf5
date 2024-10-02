@@ -11,14 +11,16 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "hdf5.h"
-#include "testphdf5.h"
+#include "testpar.h"
 #include "H5Dprivate.h" /* For Chunk tests */
+
+/* Include testing framework functionality */
+#include "testframe.h"
 
 /* FILENAME and filenames must have the same number of names */
 const char *FILENAME[3] = {"bigio_test.h5", "single_rank_independent_io.h5", NULL};
 
 /* Constants definitions */
-#define MAX_ERR_REPORT 10 /* Maximum number of errors reported */
 
 /* Define some handy debugging shorthands, routines, ... */
 /* debugging tools */
@@ -28,22 +30,27 @@ const char *FILENAME[3] = {"bigio_test.h5", "single_rank_independent_io.h5", NUL
 /* Constants definitions */
 #define RANK 2
 
-#define IN_ORDER     1
-#define OUT_OF_ORDER 2
+#define DATASET1       "DSET1"
+#define DATASET2       "DSET2"
+#define DATASET3       "DSET3"
+#define DATASET4       "DSET4"
+#define DXFER_BIGCOUNT (1 << 29)
 
-#define DATASET1             "DSET1"
-#define DATASET2             "DSET2"
-#define DATASET3             "DSET3"
-#define DATASET4             "DSET4"
-#define DXFER_COLLECTIVE_IO  0x1 /* Collective IO*/
-#define DXFER_INDEPENDENT_IO 0x2 /* Independent IO collectively */
-#define DXFER_BIGCOUNT       (1 << 29)
+#define SPACE_DIM1            24
+#define SPACE_DIM2            4
+#define BYROW_CONT            1
+#define BYROW_DISCONT         2
+#define BYROW_SELECTNONE      3
+#define BYROW_SELECTUNBALANCE 4
+#define BYROW_SELECTINCHUNK   5
+
+#define DSET_COLLECTIVE_CHUNK_NAME "coll_chunk_name"
 
 #define HYPER 1
 #define POINT 2
 #define ALL   3
 
-/* Dataset data type.  Int's can be easily octo dumped. */
+typedef int     DATATYPE;
 typedef hsize_t B_DATATYPE;
 
 int        facc_type       = FACC_MPIO; /*Test file access type */
@@ -104,54 +111,6 @@ fill_datasets(hsize_t start[], hsize_t block[], B_DATATYPE *dataset)
         for (j = 0; j < block[1]; j++) {
             *dataptr = (B_DATATYPE)((i + start[0]) * 100 + (j + start[1] + 1));
             dataptr++;
-        }
-    }
-}
-
-/*
- * Setup the coordinates for point selection.
- */
-void
-point_set(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], size_t num_points,
-          hsize_t coords[], int order)
-{
-    hsize_t i, j, k = 0, m, n, s1, s2;
-
-    HDcompile_assert(RANK == 2);
-
-    if (OUT_OF_ORDER == order)
-        k = (num_points * RANK) - 1;
-    else if (IN_ORDER == order)
-        k = 0;
-
-    s1 = start[0];
-    s2 = start[1];
-
-    for (i = 0; i < count[0]; i++)
-        for (j = 0; j < count[1]; j++)
-            for (m = 0; m < block[0]; m++)
-                for (n = 0; n < block[1]; n++)
-                    if (OUT_OF_ORDER == order) {
-                        coords[k--] = s2 + (stride[1] * j) + n;
-                        coords[k--] = s1 + (stride[0] * i) + m;
-                    }
-                    else if (IN_ORDER == order) {
-                        coords[k++] = s1 + stride[0] * i + m;
-                        coords[k++] = s2 + stride[1] * j + n;
-                    }
-
-    if (VERBOSE_MED) {
-        printf("start[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-               "count[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-               "stride[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-               "block[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-               "total datapoints=%" PRIuHSIZE "\n",
-               start[0], start[1], count[0], count[1], stride[0], stride[1], block[0], block[1],
-               block[0] * block[1] * count[0] * count[1]);
-        k = 0;
-        for (i = 0; i < num_points; i++) {
-            printf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
-            k += 2;
         }
     }
 }
@@ -1186,59 +1145,6 @@ single_rank_independent_io(void)
     MPI_Barrier(MPI_COMM_WORLD);
 }
 
-/*
- * Create the appropriate File access property list
- */
-hid_t
-create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
-{
-    hid_t  ret_pl = H5I_INVALID_HID;
-    herr_t ret;      /* generic return value */
-    int    mpi_rank; /* mpi variables */
-
-    /* need the rank for error checking macros */
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-
-    ret_pl = H5Pcreate(H5P_FILE_ACCESS);
-    VRFY_G((ret_pl >= 0), "H5P_FILE_ACCESS");
-
-    if (l_facc_type == FACC_DEFAULT)
-        return (ret_pl);
-
-    if (l_facc_type == FACC_MPIO) {
-        /* set Parallel access with communicator */
-        ret = H5Pset_fapl_mpio(ret_pl, comm, info);
-        VRFY_G((ret >= 0), "");
-        ret = H5Pset_all_coll_metadata_ops(ret_pl, true);
-        VRFY_G((ret >= 0), "");
-        ret = H5Pset_coll_metadata_write(ret_pl, true);
-        VRFY_G((ret >= 0), "");
-        return (ret_pl);
-    }
-
-    if (l_facc_type == (FACC_MPIO | FACC_SPLIT)) {
-        hid_t mpio_pl;
-
-        mpio_pl = H5Pcreate(H5P_FILE_ACCESS);
-        VRFY_G((mpio_pl >= 0), "");
-        /* set Parallel access with communicator */
-        ret = H5Pset_fapl_mpio(mpio_pl, comm, info);
-        VRFY_G((ret >= 0), "");
-
-        /* setup file access template */
-        ret_pl = H5Pcreate(H5P_FILE_ACCESS);
-        VRFY_G((ret_pl >= 0), "");
-        /* set Parallel access with communicator */
-        ret = H5Pset_fapl_split(ret_pl, ".meta", mpio_pl, ".raw", mpio_pl);
-        VRFY_G((ret >= 0), "H5Pset_fapl_split succeeded");
-        H5Pclose(mpio_pl);
-        return (ret_pl);
-    }
-
-    /* unknown file access types */
-    return (ret_pl);
-}
-
 /*-------------------------------------------------------------------------
  * Function:    coll_chunk1
  *
@@ -1269,7 +1175,7 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
  * ------------------------------------------------------------------------
  */
 
-void
+static void
 coll_chunk1(void)
 {
     const char *filename = FILENAME[0];
@@ -1317,7 +1223,7 @@ coll_chunk1(void)
  *
  * ------------------------------------------------------------------------
  */
-void
+static void
 coll_chunk2(void)
 {
     const char *filename = FILENAME[0];
@@ -1366,7 +1272,7 @@ coll_chunk2(void)
  * ------------------------------------------------------------------------
  */
 
-void
+static void
 coll_chunk3(void)
 {
     const char *filename = FILENAME[0];
@@ -1922,7 +1828,12 @@ main(int argc, char **argv)
         printf("Failed to turn off atexit processing. Continue.\n");
 
     /* set alarm. */
-    TestAlarmOn();
+    if (TestAlarmOn() < 0) {
+        if (MAIN_PROCESS)
+            fprintf(stderr, "couldn't enable test timer\n");
+        MPI_Finalize();
+        return -1;
+    }
 
     acc_plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
 

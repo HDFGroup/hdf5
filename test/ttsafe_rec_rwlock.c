@@ -263,7 +263,7 @@ tts_rec_rwlock_smoke_check_test_thread(void *_udata)
  **********************************************************************
  */
 void
-tts_rec_rwlock_smoke_check_1(void)
+tts_rec_rwlock_smoke_check_1(const void H5_ATTR_UNUSED *params)
 {
     herr_t result;
 #if H5TS_ENABLE_REC_RWLOCK_STATS
@@ -546,7 +546,7 @@ tts_rec_rwlock_smoke_check_1(void)
  **********************************************************************
  */
 void
-tts_rec_rwlock_smoke_check_2(void)
+tts_rec_rwlock_smoke_check_2(const void H5_ATTR_UNUSED *params)
 {
     herr_t                   result;
     int                      express_test;
@@ -752,7 +752,7 @@ tts_rec_rwlock_smoke_check_2(void)
  **********************************************************************
  */
 void
-tts_rec_rwlock_smoke_check_3(void)
+tts_rec_rwlock_smoke_check_3(const void H5_ATTR_UNUSED *params)
 {
     herr_t                   result;
     int                      i;
@@ -958,7 +958,7 @@ tts_rec_rwlock_smoke_check_3(void)
  **********************************************************************
  */
 void
-tts_rec_rwlock_smoke_check_4(void)
+tts_rec_rwlock_smoke_check_4(const void H5_ATTR_UNUSED *params)
 {
     herr_t                   result;
     int                      i;

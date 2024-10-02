@@ -25,77 +25,6 @@
 #include "H5Eprivate.h"
 
 /*
- * Predefined test verbosity levels.
- *
- * Convention:
- *
- * The higher the verbosity value, the more information printed.
- * So, output for higher verbosity also include output of all lower
- * verbosity.
- *
- *  Value     Description
- *  0         None:   No informational message.
- *  1                 "All tests passed"
- *  2                 Header of overall test
- *  3         Default: header and results of individual test
- *  4
- *  5         Low:    Major category of tests.
- *  6
- *  7         Medium: Minor category of tests such as functions called.
- *  8
- *  9         High:   Highest level.  All information.
- */
-#define VERBO_NONE 0 /* None    */
-#define VERBO_DEF  3 /* Default */
-#define VERBO_LO   5 /* Low     */
-#define VERBO_MED  7 /* Medium  */
-#define VERBO_HI   9 /* High    */
-
-/*
- * Verbose queries
- * Only None needs an exact match.  The rest are at least as much.
- */
-
-/* A macro version of HDGetTestVerbosity(). */
-/* Should be used internally by the libtest.a only. */
-#define HDGetTestVerbosity() (TestVerbosity)
-
-#define VERBOSE_NONE (HDGetTestVerbosity() == VERBO_NONE)
-#define VERBOSE_DEF  (HDGetTestVerbosity() >= VERBO_DEF)
-#define VERBOSE_LO   (HDGetTestVerbosity() >= VERBO_LO)
-#define VERBOSE_MED  (HDGetTestVerbosity() >= VERBO_MED)
-#define VERBOSE_HI   (HDGetTestVerbosity() >= VERBO_HI)
-
-/*
- * The TestExpress mode for the testing framework
- *
- Values:
- 0: Exhaustive run
-    Tests should take as long as necessary
- 1: Full run.  Default if H5_TEST_EXPRESS_LEVEL_DEFAULT
-    and HDF5TestExpress are not defined
-    Tests should take no more than 30 minutes
- 2: Quick run
-    Tests should take no more than 10 minutes
- 3: Smoke test.
-    Default if HDF5TestExpress is set to a value other than 0-3
-    Tests should take less than 1 minute
-
- Design:
- If the environment variable $HDF5TestExpress is defined,
- or if a default testing level > 1 has been set via
- H5_TEST_EXPRESS_LEVEL_DEFAULT, then test programs should
- skip some tests so that they complete sooner.
-*/
-
-/*
- * Test controls definitions.
- */
-#define SKIPTEST  1 /* Skip this test */
-#define ONLYTEST  2 /* Do only this test */
-#define BEGINTEST 3 /* Skip all tests before this test */
-
-/*
  * This contains the filename prefix specified as command line option for
  * the parallel test files.
  */
@@ -248,9 +177,6 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
         goto part_##part_name##_end;                                                                         \
     } while (0)
 
-/* Number of seconds to wait before killing a test (requires alarm(2)) */
-#define H5_ALARM_SEC 1200 /* default is 20 minutes */
-
 /* Flags for h5_fileaccess_flags() */
 #define H5_FILEACCESS_VFD    0x01
 #define H5_FILEACCESS_LIBVER 0x02
@@ -302,7 +228,6 @@ H5TEST_DLL const char *h5_rmprefix(const char *filename);
 H5TEST_DLL void        h5_restore_err(void);
 H5TEST_DLL void        h5_show_hostname(void);
 H5TEST_DLL h5_stat_size_t h5_get_file_size(const char *filename, hid_t fapl);
-H5TEST_DLL int            print_func(const char *format, ...) H5_ATTR_FORMAT(printf, 1, 2);
 H5TEST_DLL int            h5_make_local_copy(const char *origfilename, const char *local_copy_name);
 H5TEST_DLL herr_t         h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
 H5TEST_DLL H5FD_class_t  *h5_get_dummy_vfd_class(void);
@@ -339,33 +264,9 @@ H5TEST_DLL void h5_delete_all_test_files(const char *base_name[], hid_t fapl);
  * including resetting the library by closing it */
 H5TEST_DLL void h5_test_init(void);
 
-/* Routines for operating on the list of tests (for the "all in one" tests) */
-H5TEST_DLL void        TestUsage(void);
-H5TEST_DLL void        AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void),
-                               const char *TheDescr, const void *Parameters);
-H5TEST_DLL void        TestInfo(const char *ProgName);
-H5TEST_DLL void        TestParseCmdLine(int argc, char *argv[]);
-H5TEST_DLL void        PerformTests(void);
-H5TEST_DLL void        TestSummary(void);
-H5TEST_DLL void        TestCleanup(void);
-H5TEST_DLL void        TestShutdown(void);
-H5TEST_DLL void        TestInit(const char *ProgName, void (*private_usage)(void),
-                                int (*private_parser)(int ac, char *av[]));
-H5TEST_DLL int         GetTestVerbosity(void);
-H5TEST_DLL int         SetTestVerbosity(int newval);
-H5TEST_DLL int         GetTestSummary(void);
-H5TEST_DLL int         GetTestCleanup(void);
-H5TEST_DLL int         SetTestNoCleanup(void);
-H5TEST_DLL int         GetTestExpress(void);
-H5TEST_DLL int         SetTestExpress(int newval);
-H5TEST_DLL void        ParseTestVerbosity(char *argv);
-H5TEST_DLL int         GetTestNumErrs(void);
-H5TEST_DLL void        IncTestNumErrs(void);
-H5TEST_DLL const void *GetTestParameters(void);
-H5TEST_DLL int         TestErrPrintf(const char *format, ...) H5_ATTR_FORMAT(printf, 1, 2);
-H5TEST_DLL void        SetTest(const char *testname, int action);
-H5TEST_DLL void        TestAlarmOn(void);
-H5TEST_DLL void        TestAlarmOff(void);
+/* Functions that deal with expediting testing */
+H5TEST_DLL int  h5_get_testexpress(void);
+H5TEST_DLL void h5_set_testexpress(int new_val);
 
 #ifdef H5_HAVE_FILTER_SZIP
 H5TEST_DLL int h5_szip_can_encode(void);
@@ -378,14 +279,11 @@ H5TEST_DLL char *getenv_all(MPI_Comm comm, int root, const char *name);
 #endif
 
 /* Extern global variables */
-H5TEST_DLLVAR int      TestExpress;
-H5TEST_DLLVAR int      TestVerbosity;
 H5TEST_DLLVAR size_t   n_tests_run_g;
 H5TEST_DLLVAR size_t   n_tests_passed_g;
 H5TEST_DLLVAR size_t   n_tests_failed_g;
 H5TEST_DLLVAR size_t   n_tests_skipped_g;
 H5TEST_DLLVAR uint64_t vol_cap_flags_g;
-H5TEST_DLLVAR int      mpi_rank_framework_g;
 
 H5TEST_DLL void   h5_send_message(const char *file, const char *arg1, const char *arg2);
 H5TEST_DLL herr_t h5_wait_message(const char *file);

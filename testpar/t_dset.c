@@ -123,53 +123,6 @@ slab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[], hsize_t s
 }
 
 /*
- * Setup the coordinates for point selection.
- */
-void
-point_set(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], size_t num_points,
-          hsize_t coords[], int order)
-{
-    hsize_t i, j, k = 0, m, n, s1, s2;
-
-    HDcompile_assert(RANK == 2);
-
-    if (OUT_OF_ORDER == order)
-        k = (num_points * RANK) - 1;
-    else if (IN_ORDER == order)
-        k = 0;
-
-    s1 = start[0];
-    s2 = start[1];
-
-    for (i = 0; i < count[0]; i++)
-        for (j = 0; j < count[1]; j++)
-            for (m = 0; m < block[0]; m++)
-                for (n = 0; n < block[1]; n++)
-                    if (OUT_OF_ORDER == order) {
-                        coords[k--] = s2 + (stride[1] * j) + n;
-                        coords[k--] = s1 + (stride[0] * i) + m;
-                    }
-                    else if (IN_ORDER == order) {
-                        coords[k++] = s1 + stride[0] * i + m;
-                        coords[k++] = s2 + stride[1] * j + n;
-                    }
-
-    if (VERBOSE_MED) {
-        printf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total "
-               "datapoints=%lu\n",
-               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-               (unsigned long)block[0], (unsigned long)block[1],
-               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
-        k = 0;
-        for (i = 0; i < num_points; i++) {
-            printf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
-            k += 2;
-        }
-    }
-}
-
-/*
  * Fill the dataset with trivial data for testing.
  * Assume dimension rank is 2 and data is stored contiguous.
  */
@@ -271,7 +224,7 @@ dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[]
  */
 
 void
-dataset_writeInd(void)
+dataset_writeInd(const void *params)
 {
     hid_t       fid;                /* HDF5 file ID */
     hid_t       acc_tpl;            /* File access templates */
@@ -293,7 +246,7 @@ dataset_writeInd(void)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     if (VERBOSE_MED)
         printf("Independent write test on file %s\n", filename);
 
@@ -423,7 +376,7 @@ dataset_writeInd(void)
 
 /* Example of using the parallel HDF5 library to read a dataset */
 void
-dataset_readInd(void)
+dataset_readInd(const void *params)
 {
     hid_t       fid;                 /* HDF5 file ID */
     hid_t       acc_tpl;             /* File access templates */
@@ -444,7 +397,7 @@ dataset_readInd(void)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     if (VERBOSE_MED)
         printf("Independent read test on file %s\n", filename);
 
@@ -558,7 +511,7 @@ dataset_readInd(void)
  */
 
 void
-dataset_writeAll(void)
+dataset_writeAll(const void *params)
 {
     hid_t       fid;                                    /* HDF5 file ID */
     hid_t       acc_tpl;                                /* File access templates */
@@ -587,7 +540,7 @@ dataset_writeAll(void)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     if (VERBOSE_MED)
         printf("Collective write test on file %s\n", filename);
 
@@ -948,6 +901,22 @@ dataset_writeAll(void)
     /* Dataset5: point selection in File - Hyperslab selection in Memory*/
     /* create a file dataspace independently */
     point_set(start, count, stride, block, num_points, coords, OUT_OF_ORDER);
+    if (VERBOSE_MED) {
+        hsize_t k = 0;
+
+        printf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total "
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+
+        for (size_t i = 0; i < num_points; i++) {
+            printf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
+            k += RANK;
+        }
+    }
+
     file_dataspace = H5Dget_space(dataset5);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
     ret = H5Sselect_elements(file_dataspace, H5S_SELECT_SET, num_points, coords);
@@ -984,6 +953,22 @@ dataset_writeAll(void)
     start[0] = (hsize_t)(dim0 / mpi_size * mpi_rank);
     start[1] = 0;
     point_set(start, count, stride, block, num_points, coords, OUT_OF_ORDER);
+    if (VERBOSE_MED) {
+        hsize_t k = 0;
+
+        printf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total "
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+
+        for (size_t i = 0; i < num_points; i++) {
+            printf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
+            k += RANK;
+        }
+    }
+
     file_dataspace = H5Dget_space(dataset6);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
     ret = H5Sselect_elements(file_dataspace, H5S_SELECT_SET, num_points, coords);
@@ -992,6 +977,22 @@ dataset_writeAll(void)
     start[0] = 0;
     start[1] = 0;
     point_set(start, count, stride, block, num_points, coords, IN_ORDER);
+    if (VERBOSE_MED) {
+        hsize_t k = 0;
+
+        printf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total "
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+
+        for (size_t i = 0; i < num_points; i++) {
+            printf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
+            k += RANK;
+        }
+    }
+
     mem_dataspace = H5Dget_space(dataset6);
     VRFY((mem_dataspace >= 0), "H5Dget_space succeeded");
     ret = H5Sselect_elements(mem_dataspace, H5S_SELECT_SET, num_points, coords);
@@ -1021,6 +1022,22 @@ dataset_writeAll(void)
     start[0] = (hsize_t)(dim0 / mpi_size * mpi_rank);
     start[1] = 0;
     point_set(start, count, stride, block, num_points, coords, IN_ORDER);
+    if (VERBOSE_MED) {
+        hsize_t k = 0;
+
+        printf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total "
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+
+        for (size_t i = 0; i < num_points; i++) {
+            printf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
+            k += RANK;
+        }
+    }
+
     file_dataspace = H5Dget_space(dataset7);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
     ret = H5Sselect_elements(file_dataspace, H5S_SELECT_SET, num_points, coords);
@@ -1090,7 +1107,7 @@ dataset_writeAll(void)
  */
 
 void
-dataset_readAll(void)
+dataset_readAll(const void *params)
 {
     hid_t       fid;                                              /* HDF5 file ID */
     hid_t       acc_tpl;                                          /* File access templates */
@@ -1116,7 +1133,7 @@ dataset_readAll(void)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     if (VERBOSE_MED)
         printf("Collective read test on file %s\n", filename);
 
@@ -1353,6 +1370,22 @@ dataset_readAll(void)
     start[0] = 0;
     start[1] = 0;
     point_set(start, count, stride, block, num_points, coords, OUT_OF_ORDER);
+    if (VERBOSE_MED) {
+        hsize_t idx = 0;
+
+        printf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total "
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+
+        for (size_t point = 0; point < num_points; point++) {
+            printf("(%d, %d)\n", (int)coords[idx], (int)coords[idx + 1]);
+            idx += RANK;
+        }
+    }
+
     mem_dataspace = H5Dget_space(dataset5);
     VRFY((mem_dataspace >= 0), "H5Dget_space succeeded");
     ret = H5Sselect_elements(mem_dataspace, H5S_SELECT_SET, num_points, coords);
@@ -1391,6 +1424,22 @@ dataset_readAll(void)
     start[0] = (hsize_t)(dim0 / mpi_size * mpi_rank);
     start[1] = 0;
     point_set(start, count, stride, block, num_points, coords, IN_ORDER);
+    if (VERBOSE_MED) {
+        hsize_t idx = 0;
+
+        printf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total "
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+
+        for (size_t point = 0; point < num_points; point++) {
+            printf("(%d, %d)\n", (int)coords[idx], (int)coords[idx + 1]);
+            idx += RANK;
+        }
+    }
+
     file_dataspace = H5Dget_space(dataset6);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
     ret = H5Sselect_elements(file_dataspace, H5S_SELECT_SET, num_points, coords);
@@ -1399,6 +1448,22 @@ dataset_readAll(void)
     start[0] = 0;
     start[1] = 0;
     point_set(start, count, stride, block, num_points, coords, OUT_OF_ORDER);
+    if (VERBOSE_MED) {
+        hsize_t idx = 0;
+
+        printf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total "
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+
+        for (size_t point = 0; point < num_points; point++) {
+            printf("(%d, %d)\n", (int)coords[idx], (int)coords[idx + 1]);
+            idx += RANK;
+        }
+    }
+
     mem_dataspace = H5Dget_space(dataset6);
     VRFY((mem_dataspace >= 0), "H5Dget_space succeeded");
     ret = H5Sselect_elements(mem_dataspace, H5S_SELECT_SET, num_points, coords);
@@ -1517,7 +1582,7 @@ dataset_readAll(void)
  */
 
 void
-extend_writeInd(void)
+extend_writeInd(const void *params)
 {
     hid_t       fid;                /* HDF5 file ID */
     hid_t       acc_tpl;            /* File access templates */
@@ -1543,7 +1608,7 @@ extend_writeInd(void)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     if (VERBOSE_MED)
         printf("Extend independent write test on file %s\n", filename);
 
@@ -1751,7 +1816,7 @@ extend_writeInd(void)
  */
 
 void
-extend_writeInd2(void)
+extend_writeInd2(const void *params)
 {
     const char *filename;
     hid_t       fid;             /* HDF5 file ID */
@@ -1771,7 +1836,7 @@ extend_writeInd2(void)
     int    i;                               /* Local index variable */
     herr_t ret;                             /* Generic return value */
 
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     if (VERBOSE_MED)
         printf("Extend independent write test #2 on file %s\n", filename);
 
@@ -1924,7 +1989,7 @@ extend_writeInd2(void)
 
 /* Example of using the parallel HDF5 library to read an extendible dataset */
 void
-extend_readInd(void)
+extend_readInd(const void *params)
 {
     hid_t       fid;                 /* HDF5 file ID */
     hid_t       acc_tpl;             /* File access templates */
@@ -1947,7 +2012,7 @@ extend_readInd(void)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     if (VERBOSE_MED)
         printf("Extend independent read test on file %s\n", filename);
 
@@ -2114,7 +2179,7 @@ extend_readInd(void)
  */
 
 void
-extend_writeAll(void)
+extend_writeAll(const void *params)
 {
     hid_t       fid;                /* HDF5 file ID */
     hid_t       acc_tpl;            /* File access templates */
@@ -2141,7 +2206,7 @@ extend_writeAll(void)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     if (VERBOSE_MED)
         printf("Extend independent write test on file %s\n", filename);
 
@@ -2367,7 +2432,7 @@ extend_writeAll(void)
 
 /* Example of using the parallel HDF5 library to read an extendible dataset */
 void
-extend_readAll(void)
+extend_readAll(const void *params)
 {
     hid_t       fid;                /* HDF5 file ID */
     hid_t       acc_tpl;            /* File access templates */
@@ -2391,7 +2456,7 @@ extend_readAll(void)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     if (VERBOSE_MED)
         printf("Extend independent read test on file %s\n", filename);
 
@@ -2573,7 +2638,7 @@ extend_readAll(void)
  */
 #ifdef H5_HAVE_FILTER_DEFLATE
 void
-compress_readAll(void)
+compress_readAll(const void *params)
 {
     hid_t       fid;                           /* HDF5 file ID */
     hid_t       acc_tpl;                       /* File access templates */
@@ -2594,7 +2659,7 @@ compress_readAll(void)
     int         mpi_size, mpi_rank;
     herr_t      ret; /* Generic return value */
 
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     if (VERBOSE_MED)
         printf("Collective chunked dataset read test on file %s\n", filename);
 
@@ -2769,7 +2834,7 @@ compress_readAll(void)
  */
 
 void
-none_selection_chunk(void)
+none_selection_chunk(const void *params)
 {
     hid_t       fid;                /* HDF5 file ID */
     hid_t       acc_tpl;            /* File access templates */
@@ -2797,7 +2862,7 @@ none_selection_chunk(void)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     if (VERBOSE_MED)
         printf("Extend independent write test on file %s\n", filename);
 
@@ -3031,7 +3096,7 @@ none_selection_chunk(void)
  *          path way to multi-chunk-io by H5FD_MPIO_CHUNK_MULTI_IO instead of num-threshold.
  */
 static void
-test_actual_io_mode(int selection_mode)
+test_actual_io_mode(const void *params, int selection_mode)
 {
     H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode_write    = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
     H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode_read     = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
@@ -3111,7 +3176,7 @@ test_actual_io_mode(int selection_mode)
     mpi_comm = MPI_COMM_WORLD;
     mpi_info = MPI_INFO_NULL;
 
-    filename = (const char *)GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     assert(filename != NULL);
 
     /* Setup the file access template */
@@ -3484,7 +3549,7 @@ test_actual_io_mode(int selection_mode)
  *
  */
 void
-actual_io_mode_tests(void)
+actual_io_mode_tests(const void *params)
 {
     H5D_selection_io_mode_t selection_io_mode;
     hid_t                   dxpl_id = H5I_INVALID_HID;
@@ -3507,32 +3572,32 @@ actual_io_mode_tests(void)
     VRFY((ret >= 0), "H5Pclose succeeded");
 
     if (selection_io_mode == H5D_SELECTION_IO_MODE_OFF) {
-        test_actual_io_mode(TEST_ACTUAL_IO_NO_COLLECTIVE);
+        test_actual_io_mode(params, TEST_ACTUAL_IO_NO_COLLECTIVE);
 
         /*
          * Test multi-chunk-io via proc_num threshold
          */
-        test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_IND);
-        test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_COL);
+        test_actual_io_mode(params, TEST_ACTUAL_IO_MULTI_CHUNK_IND);
+        test_actual_io_mode(params, TEST_ACTUAL_IO_MULTI_CHUNK_COL);
 
         /* The Multi Chunk Mixed test requires at least three processes. */
         if (mpi_size > 2)
-            test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX);
+            test_actual_io_mode(params, TEST_ACTUAL_IO_MULTI_CHUNK_MIX);
         else
             fprintf(stdout, "Multi Chunk Mixed test requires 3 processes minimum\n");
 
-        test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE);
+        test_actual_io_mode(params, TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE);
 
         /*
          * Test multi-chunk-io via setting direct property
          */
-        test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND);
-        test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL);
+        test_actual_io_mode(params, TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND);
+        test_actual_io_mode(params, TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL);
 
-        test_actual_io_mode(TEST_ACTUAL_IO_LINK_CHUNK);
-        test_actual_io_mode(TEST_ACTUAL_IO_CONTIGUOUS);
+        test_actual_io_mode(params, TEST_ACTUAL_IO_LINK_CHUNK);
+        test_actual_io_mode(params, TEST_ACTUAL_IO_CONTIGUOUS);
 
-        test_actual_io_mode(TEST_ACTUAL_IO_RESET);
+        test_actual_io_mode(params, TEST_ACTUAL_IO_RESET);
     }
 
     return;
@@ -3579,7 +3644,7 @@ actual_io_mode_tests(void)
  */
 #define FILE_EXTERNAL "nocolcause_extern.data"
 static void
-test_no_collective_cause_mode(int selection_mode)
+test_no_collective_cause_mode(const void *params, int selection_mode)
 {
     uint32_t no_collective_cause_local_write     = 0;
     uint32_t no_collective_cause_local_read      = 0;
@@ -3682,7 +3747,7 @@ test_no_collective_cause_mode(int selection_mode)
         VRFY((sid >= 0), "H5Screate_simple succeeded");
     }
 
-    filename = (const char *)GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     assert(filename != NULL);
 
     /* Setup the file access template */
@@ -3920,7 +3985,7 @@ test_no_collective_cause_mode(int selection_mode)
 
     /* clean up external file */
     if (selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL)
-        H5Fdelete(FILE_EXTERNAL, fapl);
+        HDremove(FILE_EXTERNAL);
 
     if (fapl)
         H5Pclose(fapl);
@@ -3934,26 +3999,27 @@ test_no_collective_cause_mode(int selection_mode)
  *
  */
 void
-no_collective_cause_tests(void)
+no_collective_cause_tests(const void *params)
 {
     /*
      * Test individual cause
      */
-    test_no_collective_cause_mode(TEST_COLLECTIVE);
-    test_no_collective_cause_mode(TEST_SET_INDEPENDENT);
-    test_no_collective_cause_mode(TEST_DATATYPE_CONVERSION);
-    test_no_collective_cause_mode(TEST_DATA_TRANSFORMS);
-    test_no_collective_cause_mode(TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES);
-    test_no_collective_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT);
-    test_no_collective_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL);
+    test_no_collective_cause_mode(params, TEST_COLLECTIVE);
+    test_no_collective_cause_mode(params, TEST_SET_INDEPENDENT);
+    test_no_collective_cause_mode(params, TEST_DATATYPE_CONVERSION);
+    test_no_collective_cause_mode(params, TEST_DATA_TRANSFORMS);
+    test_no_collective_cause_mode(params, TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES);
+    test_no_collective_cause_mode(params, TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT);
+    test_no_collective_cause_mode(params, TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL);
 
     /*
      * Test combined causes
      */
-    test_no_collective_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL | TEST_DATATYPE_CONVERSION);
-    test_no_collective_cause_mode(TEST_DATATYPE_CONVERSION | TEST_DATA_TRANSFORMS);
-    test_no_collective_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL | TEST_DATATYPE_CONVERSION |
-                                  TEST_DATA_TRANSFORMS);
+    test_no_collective_cause_mode(params,
+                                  TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL | TEST_DATATYPE_CONVERSION);
+    test_no_collective_cause_mode(params, TEST_DATATYPE_CONVERSION | TEST_DATA_TRANSFORMS);
+    test_no_collective_cause_mode(params, TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL |
+                                              TEST_DATATYPE_CONVERSION | TEST_DATA_TRANSFORMS);
 
     return;
 }
@@ -3970,7 +4036,7 @@ no_collective_cause_tests(void)
  */
 
 void
-dataset_atomicity(void)
+dataset_atomicity(const void *params)
 {
     hid_t       fid;              /* HDF5 file ID */
     hid_t       acc_tpl;          /* File access templates */
@@ -3997,7 +4063,7 @@ dataset_atomicity(void)
 
     dim0     = 64;
     dim1     = 32;
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     if (facc_type != FACC_MPIO) {
         printf("Atomicity tests will not work without the MPIO VFD\n");
         return;
@@ -4318,7 +4384,7 @@ dataset_atomicity(void)
  *
  */
 void
-test_dense_attr(void)
+test_dense_attr(const void *params)
 {
     int         mpi_size, mpi_rank;
     hid_t       fpid, fid;
@@ -4346,7 +4412,7 @@ test_dense_attr(void)
     }
 
     /* get filename */
-    filename = (const char *)GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     assert(filename != NULL);
 
     fpid = H5Pcreate(H5P_FILE_ACCESS);
