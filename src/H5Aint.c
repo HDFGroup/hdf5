@@ -96,6 +96,7 @@ const unsigned H5O_attr_ver_bounds[] = {
     H5O_ATTR_VERSION_3,     /* H5F_LIBVER_V112 */
     H5O_ATTR_VERSION_3,     /* H5F_LIBVER_V114 */
     H5O_ATTR_VERSION_3,     /* H5F_LIBVER_V116 */
+    H5O_ATTR_VERSION_3,     /* H5F_LIBVER_V118 */
     H5O_ATTR_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
