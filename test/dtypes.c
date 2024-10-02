@@ -11886,15 +11886,12 @@ error:
 static herr_t
 verify_version(hid_t dtype, H5F_libver_t low, H5F_libver_t high, unsigned *highest_version)
 {
-    hid_t       base_dtype   = H5I_INVALID_HID;
-    hid_t       mem_dtype    = H5I_INVALID_HID;
-    H5T_t      *dtypep       = NULL;         /* Internal structure of a datatype */
-    H5T_class_t type_cls     = H5T_NO_CLASS; /* Temporary var for datatype class */
-    int         nmembers     = 0;
-    int         cur_num_errs = 0;
-    herr_t      ret          = SUCCEED; /* Generic return value */
-
-    cur_num_errs = GetTestNumErrs();
+    hid_t       base_dtype = H5I_INVALID_HID;
+    hid_t       mem_dtype  = H5I_INVALID_HID;
+    H5T_t      *dtypep     = NULL;         /* Internal structure of a datatype */
+    H5T_class_t type_cls   = H5T_NO_CLASS; /* Temporary var for datatype class */
+    int         nmembers   = 0;
+    herr_t      ret        = SUCCEED; /* Generic return value */
 
     dtypep = (H5T_t *)H5I_object(dtype);
     if (dtypep == NULL)
@@ -12029,11 +12026,13 @@ verify_version(hid_t dtype, H5F_libver_t low, H5F_libver_t high, unsigned *highe
                 PUTS_ERROR("invalid datatype encoding version for complex number datatype");
 
             /* Complex number datatypes do not currently upgrade */
-            VERIFY(dtypep->shared->version, H5O_DTYPE_VERSION_5, "H5O_dtype_ver_bounds");
+            if (dtypep->shared->version != H5O_DTYPE_VERSION_5)
+                TEST_ERROR;
 
             /* Get the base datatype of this array type */
             base_dtype = H5Tget_super(dtype);
-            CHECK(base_dtype, FAIL, "H5Tget_super");
+            if (base_dtype == H5I_INVALID_HID)
+                TEST_ERROR;
 
             /* Get the base type's internal structure for version */
             base_dtypep = H5I_object(base_dtype);
@@ -12075,9 +12074,6 @@ verify_version(hid_t dtype, H5F_libver_t low, H5F_libver_t high, unsigned *highe
             PUTS_ERROR("invalid datatype class for test");
             TEST_ERROR;
     } /* end switch */
-
-    if (GetTestNumErrs() != cur_num_errs)
-        ret = FAIL;
 
     return ret;
 
