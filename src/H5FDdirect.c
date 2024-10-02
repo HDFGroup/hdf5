@@ -492,7 +492,7 @@ H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     /* Check the file locking flags in the fapl */
     if (H5FD_ignore_disabled_file_locks_p != FAIL)
         /* The environment variable was set, so use that preferentially */
-        file->ignore_disabled_file_locks = H5FD_pgnore_disabled_file_locks_p;
+        file->ignore_disabled_file_locks = H5FD_ignore_disabled_file_locks_p;
     else {
         /* Use the value in the property list */
         if (H5P_get(plist, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME, &file->ignore_disabled_file_locks) < 0)
