@@ -4265,7 +4265,7 @@ elif test "X$withval" = "Xv114"; then
     DEFAULT_API_VERSION=v114
     AC_DEFINE([USE_114_API_DEFAULT], [1],
               [Define using v1.14 public API symbols by default])
-elif test "X$withval" = "Xv116" -o "X$withval" = "Xdefault"; then
+elif test "X$withval" = "Xv116"; then
     AC_MSG_RESULT([v116])
     DEFAULT_API_VERSION=v116
     AC_DEFINE([USE_116_API_DEFAULT], [1],
