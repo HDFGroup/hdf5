@@ -20,7 +20,7 @@
 
 #define H5Z_FRIEND /*suppress error about including H5Zpkg      */
 
-#include "testhdf5.h"
+#include "h5test.h"
 #include "H5srcdir.h"
 
 #include "H5CXprivate.h" /* API Contexts                         */
@@ -990,14 +990,16 @@ test_compact_io(hid_t fapl)
 
             /* Verify the dataset's layout and fill message versions */
             if (fp->shared->low_bound == H5F_LIBVER_EARLIEST) {
-                VERIFY(dsetp->shared->layout.version, H5O_LAYOUT_VERSION_DEFAULT, "layout_ver_bounds");
-                VERIFY(dsetp->shared->dcpl_cache.fill.version, H5O_FILL_VERSION_2, "fill_ver_bounds");
+                if (dsetp->shared->layout.version != H5O_LAYOUT_VERSION_DEFAULT)
+                    TEST_ERROR;
+                if (dsetp->shared->dcpl_cache.fill.version != H5O_FILL_VERSION_2)
+                    TEST_ERROR;
             }
             else {
-                VERIFY(dsetp->shared->layout.version, H5O_layout_ver_bounds[fp->shared->low_bound],
-                       "layout_ver_bounds");
-                VERIFY(dsetp->shared->dcpl_cache.fill.version, H5O_fill_ver_bounds[fp->shared->low_bound],
-                       "fill_ver_bounds");
+                if (dsetp->shared->layout.version != H5O_layout_ver_bounds[fp->shared->low_bound])
+                    TEST_ERROR;
+                if (dsetp->shared->dcpl_cache.fill.version != H5O_fill_ver_bounds[fp->shared->low_bound])
+                    TEST_ERROR;
             }
 
             /* Close the dataset and delete from the file */
@@ -14983,7 +14985,8 @@ test_versionbounds(void)
             if (vdset > 0) /* dataset created successfully */
             {
                 /* Virtual dataset is only available starting in V110 */
-                VERIFY(high >= H5F_LIBVER_V110, true, "virtual dataset");
+                if (high < H5F_LIBVER_V110)
+                    TEST_ERROR;
 
                 if (H5Dclose(vdset) < 0)
                     TEST_ERROR;
@@ -16165,8 +16168,7 @@ main(void)
         goto error;
     printf("All dataset tests passed.\n");
 #ifdef H5_HAVE_FILTER_SZIP
-    if (GetTestCleanup())
-        HDremove(NOENCODER_COPY_FILENAME);
+    HDremove(NOENCODER_COPY_FILENAME);
 #endif /* H5_HAVE_FILTER_SZIP */
     h5_cleanup(FILENAME, fapl);
 

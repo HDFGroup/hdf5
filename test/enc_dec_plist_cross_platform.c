@@ -26,9 +26,6 @@ static int test_plists(const char *filename_prefix);
 int
 main(void)
 {
-    if (VERBOSE_MED)
-        printf("Encode/Decode property list endianness\n");
-
     /******* ENCODE/DECODE DCPLS *****/
     TESTING("Default DCPL Encoding/Decoding");
     if (test_plists("plist_files/def_dcpl_") < 0)

@@ -229,7 +229,7 @@ tts_semaphore_clientserver(void)
  **********************************************************************
  */
 void
-tts_semaphore(void)
+tts_semaphore(const void H5_ATTR_UNUSED *params)
 {
     H5TS_semaphore_t sem;
     herr_t           result;

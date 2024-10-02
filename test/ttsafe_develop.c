@@ -97,7 +97,7 @@ tts_develop_api_thr_2(void *_udata)
  **********************************************************************
  */
 void
-tts_develop_api(void)
+tts_develop_api(const void H5_ATTR_UNUSED *params)
 {
     H5TS_thread_t           thread_1, thread_2;
     H5TS_barrier_t          barrier;

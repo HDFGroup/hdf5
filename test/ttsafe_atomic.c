@@ -64,7 +64,7 @@ decr_task(void *_counter)
  **********************************************************************
  */
 void
-tts_atomics(void)
+tts_atomics(const void H5_ATTR_UNUSED *params)
 {
     H5TS_pool_t *pool = NULL;
     herr_t       result;

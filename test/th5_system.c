@@ -551,7 +551,7 @@ test_h5_strndup(void)
 }
 
 void
-test_h5_system(void)
+test_h5_system(const void H5_ATTR_UNUSED *params)
 {
     MESSAGE(5, ("Testing H5system routines\n"));
 
@@ -563,7 +563,7 @@ test_h5_system(void)
 }
 
 void
-cleanup_h5_system(void)
+cleanup_h5_system(void H5_ATTR_UNUSED *params)
 {
     /* Nothing to cleanup yet */
 }

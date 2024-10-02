@@ -54,7 +54,7 @@ thr_info thread_out[NUM_THREAD];
  **********************************************************************
  */
 void
-tts_dcreate(void)
+tts_dcreate(const void H5_ATTR_UNUSED *params)
 {
     /* thread definitions */
     H5TS_thread_t threads[NUM_THREAD];
@@ -152,8 +152,10 @@ tts_dcreate_creator(void *_thread_data)
 } /* end tts_dcreate_creator() */
 
 void
-cleanup_dcreate(void)
+cleanup_dcreate(void H5_ATTR_UNUSED *params)
 {
-    HDunlink(FILENAME);
+    if (GetTestCleanup()) {
+        HDunlink(FILENAME);
+    }
 }
 #endif /*H5_HAVE_THREADSAFE*/

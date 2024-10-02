@@ -861,9 +861,11 @@ verify_attribute(hid_t fid, const char *table_name, const char *attr_name)
 
     /* Verify values read in */
     for (ii = 0; ii < ATTR_DIM; ii++)
-        if (attr_data[ii] != read_data[ii])
-            TestErrPrintf("%d: attribute data different: attr_data[%d]=%d, read_data[%d]=%d\n", __LINE__, ii,
-                          attr_data[ii], ii, read_data[ii]);
+        if (attr_data[ii] != read_data[ii]) {
+            fprintf(stderr, "%d: attribute data different: attr_data[%d]=%d, read_data[%d]=%d\n", __LINE__,
+                    ii, attr_data[ii], ii, read_data[ii]);
+            goto error;
+        }
 
     /* Close the attribute */
     if (H5Aclose(attr_id) < 0)

@@ -15,7 +15,7 @@
  * termination of the HDF5 library with MPI init and finalize.
  */
 
-#include "testphdf5.h"
+#include "testpar.h"
 
 int nerrors = 0; /* errors count */
 
