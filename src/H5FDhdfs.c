@@ -17,7 +17,7 @@
 
 #include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
-#include "H5private.h"   /* Generic Functions        */
+#include "H5private.h" /* Generic Functions        */
 
 #ifdef H5_HAVE_LIBHDFS
 

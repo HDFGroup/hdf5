@@ -16,7 +16,7 @@
 
 #include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
-#include "H5private.h"   /* Generic Functions                    */
+#include "H5private.h" /* Generic Functions                    */
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -329,7 +329,7 @@ H5FD__mpio_unregister(void)
 static herr_t
 H5FD__mpio_init(void)
 {
-    char      *env                    = NULL;
+    char  *env       = NULL;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE

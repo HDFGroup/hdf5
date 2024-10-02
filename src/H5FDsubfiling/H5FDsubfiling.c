@@ -344,9 +344,9 @@ H5FD__subfiling_unregister(void)
 static herr_t
 H5FD__subfiling_init(void)
 {
-    int mpi_initialized = 0;
-    int provided        = 0;
-    int mpi_code;
+    int    mpi_initialized = 0;
+    int    provided        = 0;
+    int    mpi_code;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -359,7 +359,8 @@ H5FD__subfiling_init(void)
         if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Query_thread failed", mpi_code);
         if (provided != MPI_THREAD_MULTIPLE)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+                        "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
     }
     else {
         if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(NULL, NULL, MPI_THREAD_MULTIPLE, &provided)))
@@ -368,7 +369,8 @@ H5FD__subfiling_init(void)
         H5FD_mpi_self_initialized_s = true;
 
         if (provided != MPI_THREAD_MULTIPLE)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+                        "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
     }
 
     /*
@@ -402,8 +404,8 @@ done:
 static herr_t
 H5FD__subfiling_term(void)
 {
-    int mpi_finalized;
-    int mpi_code;
+    int    mpi_finalized;
+    int    mpi_code;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE

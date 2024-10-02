@@ -81,5 +81,3 @@ H5FD__multi_unregister(void)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_multi_unregister() */
-
-

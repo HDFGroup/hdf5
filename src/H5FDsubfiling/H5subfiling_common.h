@@ -17,11 +17,11 @@
 #ifndef H5_SUBFILING_COMMON_H
 #define H5_SUBFILING_COMMON_H
 
-#include "H5private.h"   /* Generic Functions                        */
+#include "H5private.h"     /* Generic Functions                        */
 #include "H5FDsubfiling.h" /* Subfiling file driver */
-#include "H5FDioc.h"     /* I/O concentrator file driver */
-#include "H5Pprivate.h"  /* Property lists                           */
-#include "H5TSprivate.h" /* Threads                                  */
+#include "H5FDioc.h"       /* I/O concentrator file driver */
+#include "H5Pprivate.h"    /* Property lists                           */
+#include "H5TSprivate.h"   /* Threads                                  */
 
 #ifndef PATH_MAX
 #define PATH_MAX 4096

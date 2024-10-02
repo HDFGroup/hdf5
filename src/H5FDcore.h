@@ -28,7 +28,7 @@
 #endif /* H5private_H */
 
 /** ID for the core VFD */
-#define H5FD_CORE       (H5OPEN H5FD_CORE_id_g)
+#define H5FD_CORE (H5OPEN H5FD_CORE_id_g)
 
 /** Identifier for the core VFD */
 #define H5FD_CORE_VALUE H5_VFD_CORE

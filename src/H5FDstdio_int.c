@@ -81,4 +81,3 @@ H5FD__stdio_unregister(void)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_stdio_unregister() */
-

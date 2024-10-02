@@ -16,13 +16,13 @@
 
 #include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
-#include "H5private.h"   /* Generic Functions			*/
+#include "H5private.h" /* Generic Functions			*/
 
 #ifdef H5_HAVE_PARALLEL
 
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FDmpi.h"     /* Common MPI file driver		*/
-#include "H5FDpkg.h"     /* File drivers                        */
+#include "H5Eprivate.h" /* Error handling		  	*/
+#include "H5FDmpi.h"    /* Common MPI file driver		*/
+#include "H5FDpkg.h"    /* File drivers                        */
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_mpi_get_rank

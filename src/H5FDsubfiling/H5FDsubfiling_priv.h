@@ -25,7 +25,7 @@
 #include "H5FDsubfiling.h" /* Subfiling VFD                            */
 
 /* Private headers */
-#include "H5private.h"     /* Generic Functions                        */
+#include "H5private.h" /* Generic Functions                        */
 #include "H5subfiling_common.h"
 
 #define DRIVER_INFO_MESSAGE_MAX_INFO   65536

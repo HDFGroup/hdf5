@@ -43,4 +43,3 @@ H5_DLLVAR const H5FD_class_t H5FD_stdio_g;
 /******************************/
 
 #endif /* H5FDstdio_private_H */
-

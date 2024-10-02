@@ -22,7 +22,7 @@
 /**************/
 
 /* Public header */
-#include "H5FDioc.h"     /* IOC VFD                                  */
+#include "H5FDioc.h" /* IOC VFD                                  */
 
 /* Private headers */
 #include "H5private.h"   /* Generic Functions                        */

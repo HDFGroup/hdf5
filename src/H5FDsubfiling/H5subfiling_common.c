@@ -16,12 +16,12 @@
 
 #include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
-#include "H5private.h"          /* Generic Functions        */
-#include "H5Eprivate.h"         /* Error handling           */
-#include "H5FDpkg.h"            /* File drivers             */
-#include "H5Iprivate.h"         /* IDs                      */
-#include "H5MMprivate.h"        /* Memory management        */
-#include "H5TSprivate.h"        /* Threadsafety             */
+#include "H5private.h"   /* Generic Functions        */
+#include "H5Eprivate.h"  /* Error handling           */
+#include "H5FDpkg.h"     /* File drivers             */
+#include "H5Iprivate.h"  /* IDs                      */
+#include "H5MMprivate.h" /* Memory management        */
+#include "H5TSprivate.h" /* Threadsafety             */
 #include "H5subfiling_common.h"
 
 typedef struct {            /* Format of a context map entry  */

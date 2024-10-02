@@ -237,9 +237,9 @@ H5FD__ioc_unregister(void)
 static herr_t
 H5FD__ioc_init(void)
 {
-    char *env_var;
-    int   key_val_retrieved = 0;
-    int   mpi_code;
+    char  *env_var;
+    int    key_val_retrieved = 0;
+    int    mpi_code;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -258,7 +258,8 @@ H5FD__ioc_init(void)
             if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Query_thread failed", mpi_code);
             if (provided != MPI_THREAD_MULTIPLE)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "IOC VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+                            "IOC VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
         }
         else {
             /* Otherwise, initialize MPI */
@@ -268,12 +269,14 @@ H5FD__ioc_init(void)
             H5FD_mpi_self_initialized_s = true;
 
             if (provided != MPI_THREAD_MULTIPLE)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+                            "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
         }
     }
 
     /* Retrieve upper bound for MPI message tag value */
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB, &H5FD_IOC_tag_ub_val_ptr, &key_val_retrieved)))
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB, &H5FD_IOC_tag_ub_val_ptr,
+                                                     &key_val_retrieved)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Comm_get_attr failed", mpi_code);
     if (!key_val_retrieved)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't retrieve value for MPI_TAG_UB");

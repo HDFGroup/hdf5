@@ -301,9 +301,9 @@ H5Pset_fapl_stdio(hid_t fapl_id)
 static H5FD_t *
 H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    FILE              *f            = NULL;
-    unsigned           write_access = 0; /* File opened with write access? */
-    H5FD_stdio_t      *file         = NULL;
+    FILE         *f            = NULL;
+    unsigned      write_access = 0; /* File opened with write access? */
+    H5FD_stdio_t *file         = NULL;
 #ifdef H5_HAVE_WIN32_API
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #else  /* H5_HAVE_WIN32_API */
@@ -418,7 +418,8 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     if (INVALID_HANDLE_VALUE == file->hFile) {
         free(file);
         fclose(f);
-        H5Epush_ret(__func__, H5E_ERR_CLS, H5E_FILE, H5E_CANTOPENFILE, "unable to get Windows file handle", NULL);
+        H5Epush_ret(__func__, H5E_ERR_CLS, H5E_FILE, H5E_CANTOPENFILE, "unable to get Windows file handle",
+                    NULL);
     } /* end if */
 
     if (!GetFileInformationByHandle((HANDLE)file->hFile, &fileinfo)) {
@@ -459,7 +460,7 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 static herr_t
 H5FD_stdio_close(H5FD_t *_file)
 {
-    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file;
+    H5FD_stdio_t *file = (H5FD_stdio_t *)_file;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -706,7 +707,7 @@ H5FD_stdio_get_eof(const H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type)
 static herr_t
 H5FD_stdio_get_handle(H5FD_t *_file, hid_t /*UNUSED*/ fapl, void **file_handle)
 {
-    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file;
+    H5FD_stdio_t *file = (H5FD_stdio_t *)_file;
 
     /* Quiet the compiler */
     (void)fapl;
@@ -740,7 +741,7 @@ static herr_t
 H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl_id, haddr_t addr,
                 size_t size, void /*OUT*/ *buf)
 {
-    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file;
+    H5FD_stdio_t *file = (H5FD_stdio_t *)_file;
 
     /* Quiet the compiler */
     (void)type;
@@ -839,7 +840,7 @@ static herr_t
 H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl_id, haddr_t addr,
                  size_t size, const void *buf)
 {
-    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file;
+    H5FD_stdio_t *file = (H5FD_stdio_t *)_file;
 
     /* Quiet the compiler */
     (void)dxpl_id;
@@ -922,7 +923,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
 static herr_t
 H5FD_stdio_flush(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, bool closing)
 {
-    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file;
+    H5FD_stdio_t *file = (H5FD_stdio_t *)_file;
 
     /* Quiet the compiler */
     (void)dxpl_id;
@@ -962,7 +963,7 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, bool closing)
 static herr_t
 H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, bool /*UNUSED*/ closing)
 {
-    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file;
+    H5FD_stdio_t *file = (H5FD_stdio_t *)_file;
 
     /* Quiet the compiler */
     (void)dxpl_id;
@@ -999,7 +1000,8 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, bool /*UNUSED*/ clo
             if (INVALID_SET_FILE_POINTER == dwPtrLow) {
                 dwError = GetLastError();
                 if (dwError != NO_ERROR)
-                    H5Epush_ret(__func__, H5E_ERR_CLS, H5E_FILE, H5E_FILEOPEN, "unable to set file pointer", -1);
+                    H5Epush_ret(__func__, H5E_ERR_CLS, H5E_FILE, H5E_FILEOPEN, "unable to set file pointer",
+                                -1);
             }
 
             bError = SetEndOfFile(file->hFile);
@@ -1050,8 +1052,8 @@ static herr_t
 H5FD_stdio_lock(H5FD_t *_file, bool rw)
 {
 #ifdef H5_HAVE_FLOCK
-    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file; /* VFD file struct                      */
-    int                lock_flags;                   /* file locking flags                   */
+    H5FD_stdio_t *file = (H5FD_stdio_t *)_file; /* VFD file struct                      */
+    int           lock_flags;                   /* file locking flags                   */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -1098,7 +1100,7 @@ static herr_t
 H5FD_stdio_unlock(H5FD_t *_file)
 {
 #ifdef H5_HAVE_FLOCK
-    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file; /* VFD file struct                      */
+    H5FD_stdio_t *file = (H5FD_stdio_t *)_file; /* VFD file struct                      */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);

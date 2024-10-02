@@ -83,7 +83,6 @@ extern "C" {
  */
 H5_DLLVAR hid_t H5FD_LOG_id_g;
 
-
 /**
  * \ingroup FAPL
  *
