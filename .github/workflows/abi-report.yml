@@ -1,4 +1,4 @@
-name: hdf5 Check Application Binary Interface (ABI)
+name: hdf5 1.16 Check Application Binary Interface (ABI)
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -8,7 +8,7 @@ on:
         description: 'Release version tag'
         type: string
         required: false
-        default: snapshot
+        default: snapshot-1.16
       use_environ:
         description: 'Environment to locate files'
         type: string

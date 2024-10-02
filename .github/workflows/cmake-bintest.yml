@@ -1,4 +1,4 @@
-name: hdf5 examples bintest runs
+name: hdf5 1.16 examples bintest runs
 
 # Triggers the workflow on a call from another workflow
 on:

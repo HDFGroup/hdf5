@@ -1,4 +1,4 @@
-name: hdf5 dev CMake special CI
+name: hdf5 1.16 CMake special CI
 
 # Controls when the action will run. Triggers the workflow on a call
 on:

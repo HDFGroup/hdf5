@@ -1,4 +1,4 @@
-name: hdf5 dev release build
+name: hdf5 1.16 release build
 
 # Triggers the workflow on demand
 on:
@@ -8,7 +8,7 @@ on:
         description: 'Release version tag'
         type: string
         required: false
-        default: snapshot
+        default: snapshot-1.16
 
 permissions:
   contents: read

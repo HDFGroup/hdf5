@@ -1,4 +1,4 @@
-name: hdf5 dev CMake nvhpc
+name: hdf5 1.16 CMake nvhpc
 
 # Triggers the workflow on a call from another workflow
 on:

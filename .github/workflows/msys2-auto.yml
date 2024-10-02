@@ -1,4 +1,4 @@
-name: hdf5 dev Autotools MSys2
+name: hdf5 1.16 Autotools MSys2
 
 # Triggers the workflow on a call from another workflow
 on:

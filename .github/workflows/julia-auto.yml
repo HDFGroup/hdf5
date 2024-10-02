@@ -1,4 +1,4 @@
-name: hdf5 dev autotools julia
+name: hdf5 1.16 autotools julia
 
 on:
   workflow_call:
