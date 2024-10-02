@@ -50,6 +50,7 @@ static const char *FILENAME[] = {"tchunk_info_earliest",
                                  "tchunk_info_v112",
                                  "tchunk_info_v114",
                                  "tchunk_info_v116",
+                                 "tchunk_info_v118",
                                  NULL};
 
 /* File to be used in test_failed_attempts */
