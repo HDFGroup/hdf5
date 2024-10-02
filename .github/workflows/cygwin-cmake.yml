@@ -1,4 +1,4 @@
-name: hdf5 dev CMake cygwin
+name: hdf5 1.16 CMake cygwin
 
 # Triggers the workflow on a call from another workflow
 on:

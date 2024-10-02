@@ -1,4 +1,4 @@
-name: hdf5 dev ctest runs
+name: hdf5 1.16 ctest runs
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -157,7 +157,7 @@ jobs:
           endpoint: ${{ secrets.AZURE_ENDPOINT }}
           trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-          files-folder: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC
+          files-folder: ${{ runner.workspace }}/hdf5116/build/${{ inputs.preset_name }}-MSVC
           files-folder-filter: msi
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
@@ -167,7 +167,7 @@ jobs:
       - name: Publish binary (Windows)
         id: publish-ctest-binary
         run: |
-          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build116"
           mkdir "${{ runner.workspace }}/build/hdf5"
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
@@ -181,7 +181,7 @@ jobs:
         id: publish-ctest-msi-binary
         run: |
           mkdir "${{ runner.workspace }}/buildmsi"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi -Include *.msi
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi -Include *.msi
         shell: pwsh
 
       - name: List files in the space (Windows)
@@ -195,7 +195,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: zip-vs2022_cl-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
+              path: ${{ runner.workspace }}/build116/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published msi binary (Windows)
@@ -259,13 +259,13 @@ jobs:
       - name: Publish binary (Linux)
         id: publish-ctest-binary
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.tar.gz ${{ runner.workspace }}/build/hdf5
-          cd "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build116"
+          mkdir "${{ runner.workspace }}/build116/hdf5"
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build116/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build116/hdf5
+          cp ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/build116/hdf5
+          cp ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-GNUC/*.tar.gz ${{ runner.workspace }}/build116/hdf5
+          cd "${{ runner.workspace }}/build116"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz hdf5
         shell: bash
 
@@ -273,14 +273,14 @@ jobs:
         id: publish-ctest-deb-binary
         run: |
           mkdir "${{ runner.workspace }}/builddeb"
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.deb ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
+          cp ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-GNUC/*.deb ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
         shell: bash
 
       - name: Publish rpm binary (Linux)
         id: publish-ctest-rpm-binary
         run: |
           mkdir "${{ runner.workspace }}/buildrpm"
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.rpm ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm
+          cp ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-GNUC/*.rpm ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm
         shell: bash
 
       - name: List files in the space (Linux)
@@ -293,7 +293,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: tgz-ubuntu-2204_gcc-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
+              path: ${{ runner.workspace }}/build116/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published binary deb (Linux)
@@ -315,7 +315,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: docs-doxygen
-              path: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/hdf5lib_docs/html
+              path: ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-GNUC/hdf5lib_docs/html
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_mac_latest:
@@ -416,19 +416,19 @@ jobs:
           NOTARY_USER: ${{ vars.NOTARY_USER }}
           NOTARY_KEY: ${{ vars.NOTARY_KEY }}
         run: |
-          /usr/bin/codesign --force --timestamp --options runtime --entitlements ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/distribution.entitlements --verbose=4 --strict --sign ${{ env.SIGNER }} --deep ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+          /usr/bin/codesign --force --timestamp --options runtime --entitlements ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/distribution.entitlements --verbose=4 --strict --sign ${{ env.SIGNER }} --deep ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
 
       - name: Check dmg timestamp (MacOS_latest)
         run: |
-          /usr/bin/codesign -dvv ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+          /usr/bin/codesign -dvv ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
 
       - name: Verify dmg (MacOS_latest)
         run: |
-          /usr/bin/hdiutil verify ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+          /usr/bin/hdiutil verify ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
 
@@ -441,7 +441,7 @@ jobs:
           NOTARY_USER: ${{ vars.NOTARY_USER }}
           NOTARY_KEY: ${{ vars.NOTARY_KEY }}
         run: |
-          jsonout=$(/usr/bin/xcrun notarytool submit --wait --output-format json --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg)
+          jsonout=$(/usr/bin/xcrun notarytool submit --wait --output-format json --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-macos-Clang/*.dmg)
           echo "JSONOUT=$jsonout" >> $GITHUB_OUTPUT
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
@@ -496,13 +496,13 @@ jobs:
       - name: Publish binary (MacOS_latest)
         id: publish-ctest-binary
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
-          cd "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build116"
+          mkdir "${{ runner.workspace }}/build116/hdf5"
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build116/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build116/hdf5
+          cp ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-macos-Clang/README.md ${{ runner.workspace }}/build116/hdf5
+          cp ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-macos-Clang/*.tar.gz ${{ runner.workspace }}/build116/hdf5
+          cd "${{ runner.workspace }}/build116"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz hdf5
         shell: bash
 
@@ -510,7 +510,7 @@ jobs:
         id: publish-ctest-dmg-binary
         run: |
           mkdir "${{ runner.workspace }}/builddmg"
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
+          cp ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-macos-Clang/*.dmg ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
         shell: bash
 
       - name: List files in the space (MacOS_latest)
@@ -523,7 +523,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: tgz-macos14_clang-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz
+              path: ${{ runner.workspace }}/build116/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published dmg binary (MacOS_latest)
@@ -582,13 +582,13 @@ jobs:
       - name: Publish binary (Linux S3)
         id: publish-ctest-binary
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC-S3/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC-S3/*.tar.gz ${{ runner.workspace }}/build/hdf5
-          cd "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build116"
+          mkdir "${{ runner.workspace }}/build116/hdf5"
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build116/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build116/hdf5
+          cp ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-GNUC-S3/README.md ${{ runner.workspace }}/build116/hdf5
+          cp ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-GNUC-S3/*.tar.gz ${{ runner.workspace }}/build116/hdf5
+          cd "${{ runner.workspace }}/build116"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz hdf5
         shell: bash
 
@@ -602,7 +602,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: tgz-ubuntu-2204_gcc_s3-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz
+              path: ${{ runner.workspace }}/build116/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
 ####### intel builds
@@ -697,7 +697,7 @@ jobs:
           endpoint: ${{ secrets.AZURE_ENDPOINT }}
           trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-          files-folder: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel
+          files-folder: ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-Intel
           files-folder-filter: msi
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
@@ -707,13 +707,13 @@ jobs:
       - name: Publish binary (Windows_intel)
         id: publish-ctest-binary
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
-          cd "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build116"
+          mkdir "${{ runner.workspace }}/build116/hdf5"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build116/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build116/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/build116/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/build116/hdf5/ -Include *.zip
+          cd "${{ runner.workspace }}/build116"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip hdf5
         shell: pwsh
 
@@ -721,7 +721,7 @@ jobs:
         id: publish-ctest-msi-binary
         run: |
           mkdir "${{ runner.workspace }}/buildmsi"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi -Include *.msi
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi -Include *.msi
         shell: pwsh
 
       - name: List files in the space (Windows_intel)
@@ -735,7 +735,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: zip-vs2022_intel-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
+              path: ${{ runner.workspace }}/build116/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published msi binary (Windows_intel)
@@ -805,13 +805,13 @@ jobs:
       - name: Publish binary (Linux_intel)
         id: publish-ctest-binary
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/*.tar.gz ${{ runner.workspace }}/build/hdf5
-          cd "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build116"
+          mkdir "${{ runner.workspace }}/build116/hdf5"
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build116/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build116/hdf5
+          cp ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-Intel/README.md ${{ runner.workspace }}/build116/hdf5
+          cp ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-Intel/*.tar.gz ${{ runner.workspace }}/build116/hdf5
+          cd "${{ runner.workspace }}/build116"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz hdf5
         shell: bash
 
@@ -825,5 +825,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: tgz-ubuntu-2204_intel-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
+              path: ${{ runner.workspace }}/build116/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

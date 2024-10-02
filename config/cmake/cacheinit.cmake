@@ -80,11 +80,14 @@ set (KWSYS_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for KWSYS FetchConten
 ########################
 
 set (PLUGIN_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshots" CACHE STRING "Use PLUGINS from original location" FORCE)
-set (PLUGIN_TGZ_NAME "hdf5_plugins-master.tar.gz" CACHE STRING "Use PLUGINS from compressed file" FORCE)
+set (PLUGIN_TGZ_NAME "hdf5_plugins-1.16.tar.gz" CACHE STRING "Use PLUGINS from compressed file" FORCE)
 set (PLUGIN_USE_LOCALCONTENT ON CACHE BOOL "Use local file for PLUGIN FetchContent" FORCE)
 set (PLUGIN_PACKAGE_NAME "pl" CACHE STRING "Name of PLUGIN package" FORCE)
 set (PLUGIN_GIT_URL "https://github.com/HDFGroup/hdf5_plugins.git" CACHE STRING "Use plugins from HDF Group repository" FORCE)
 set (PLUGIN_GIT_BRANCH "master" CACHE STRING "" FORCE)
+set (H5PL_VERS_MAJOR "1" CACHE STRING "Major version of hdf5 package for PLUGIN package" FORCE)
+set (H5PL_VERS_MINOR "16" CACHE STRING "Minor version of hdf5 package for PLUGIN package" FORCE)
+set (H5PL_VERS_RELEASE "0" CACHE STRING "Release version of hdf5 package for PLUGIN package" FORCE)
 
 #############
 # bitshuffle

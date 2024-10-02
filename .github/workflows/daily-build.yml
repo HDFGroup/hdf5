@@ -1,4 +1,4 @@
-name: hdf5 dev daily build
+name: hdf5 1.16 daily build
 
 # Triggers the workflow on a schedule or on demand
 on:
@@ -28,7 +28,7 @@ jobs:
     - name: Get hdf5 release base name
       uses: dsaltares/fetch-gh-release-asset@master
       with:
-        version: 'tags/snapshot'
+        version: 'tags/snapshot-1.16'
         file: 'last-file.txt'
 
     - name: Read base-name file
@@ -49,7 +49,7 @@ jobs:
     uses: ./.github/workflows/tarball.yml
     with:
       use_ignore: ${{ needs.get-old-names.outputs.run-ignore }}
-      use_tag: snapshot
+      use_tag: snapshot-1.16
       use_environ: snapshots
 
   call-workflow-c-script:
@@ -66,7 +66,7 @@ jobs:
     with:
       preset_name: ci-StdShar
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
-#      use_tag: snapshot
+#      use_tag: snapshot-1.16
       use_environ: snapshots
     secrets:
         APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
@@ -99,7 +99,7 @@ jobs:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
-      use_tag: snapshot
+      use_tag: snapshot-1.16
       use_environ: snapshots
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
 
@@ -110,7 +110,7 @@ jobs:
     uses: ./.github/workflows/remove-files.yml
     with:
       file_base: ${{ needs.get-old-names.outputs.hdf5-name }}
-      use_tag: snapshot
+      use_tag: snapshot-1.16
       use_environ: snapshots
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) && (needs.get-old-names.outputs.hdf5-name != needs.call-workflow-tarball.outputs.file_base) }}
 

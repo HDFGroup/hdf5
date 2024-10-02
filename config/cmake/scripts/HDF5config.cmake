@@ -37,15 +37,15 @@ cmake_minimum_required (VERSION 3.18)
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.15.0")
+set (CTEST_SOURCE_VERSION "1.16.0")
 set (CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
-#INSTALLDIR - HDF5-1.15.x root folder
+#INSTALLDIR - HDF5-1.16.x root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
-#CTEST_SOURCE_NAME - name of source folder; HDF5-1.15.x
+#CTEST_SOURCE_NAME - name of source folder; HDF5-1.16.x
 #MODEL - CDash group name
 #HPC - run alternate configurations for HPC machines; sbatch, bsub, raybsub, qsub
 #MPI - enable MPI
@@ -223,7 +223,7 @@ endif ()
 #####       Following controls source update                  #####
 #set (LOCAL_UPDATE "TRUE")
 set (REPOSITORY_URL "https://github.com/HDFGroup/hdf5.git")
-set (REPOSITORY_BRANCH "develop")
+set (REPOSITORY_BRANCH "hdf5_1_16")
 
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")

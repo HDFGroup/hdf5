@@ -1,4 +1,4 @@
-name: hdf5 dev autotools cygwin
+name: hdf5 1.16 autotools cygwin
 
 # Triggers the workflow on a call from another workflow
 on:
