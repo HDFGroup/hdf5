@@ -19,7 +19,14 @@
  * all created objects are there.
  */
 
-#include "testphdf5.h"
+#include "testpar.h"
+
+#define RANK       2
+#define ROW_FACTOR 8  /* Nominal row factor for dataset size */
+#define COL_FACTOR 16 /* Nominal column factor for dataset size */
+
+/* Dataset data type.  Int's can be easily octo dumped. */
+typedef int DATATYPE;
 
 int nerrors = 0; /* errors count */
 
@@ -155,8 +162,6 @@ main(int argc, char **argv)
         free(data_array);
 
     MPI_Finalize();
-
-    nerrors += GetTestNumErrs();
 
     if (MAINPROCESS) {
         if (0 == nerrors)

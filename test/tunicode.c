@@ -802,7 +802,7 @@ dump_string(const char *string)
  * that string.
  */
 void
-test_unicode(void)
+test_unicode(const void H5_ATTR_UNUSED *params)
 {
     char         test_string[MAX_STRING_LENGTH];
     unsigned int cur_pos = 0;   /* Current position in test_string */
@@ -864,11 +864,13 @@ test_unicode(void)
  * Delete the file this test created.
  */
 void
-cleanup_unicode(void)
+cleanup_unicode(void H5_ATTR_UNUSED *params)
 {
-    H5E_BEGIN_TRY
-    {
-        H5Fdelete(FILENAME, H5P_DEFAULT);
+    if (GetTestCleanup()) {
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(FILENAME, H5P_DEFAULT);
+        }
+        H5E_END_TRY
     }
-    H5E_END_TRY
 }

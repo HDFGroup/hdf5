@@ -216,7 +216,7 @@ test_chksum_large(void)
 **
 ****************************************************************/
 void
-test_checksum(void)
+test_checksum(const void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing checksum algorithms\n"));
@@ -240,7 +240,7 @@ test_checksum(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_checksum(void)
+cleanup_checksum(void H5_ATTR_UNUSED *params)
 {
     /* no file to clean */
 }

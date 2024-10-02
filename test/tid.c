@@ -1495,7 +1495,7 @@ test_appropriate_ids(void)
 }
 
 void
-test_ids(void)
+test_ids(const void H5_ATTR_UNUSED *params)
 {
     /* Set the random # seed */
     srand((unsigned)time(NULL));

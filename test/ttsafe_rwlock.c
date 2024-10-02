@@ -182,7 +182,7 @@ verify_counting(void *_counter)
  **********************************************************************
  */
 void
-tts_rwlock(void)
+tts_rwlock(const void H5_ATTR_UNUSED *params)
 {
     H5TS_thread_t    threads[NUM_THREADS];
     H5TS_pool_t     *pool = NULL;

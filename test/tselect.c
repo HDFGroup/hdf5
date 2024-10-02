@@ -16063,7 +16063,7 @@ test_h5s_set_extent_none(void)
 **
 ****************************************************************/
 void
-test_select(void)
+test_select(const void H5_ATTR_UNUSED *params)
 {
     hid_t       plist_id;                     /* Property list for reading random hyperslabs */
     hid_t       fapl;                         /* Property list accessing the file */
@@ -16275,11 +16275,13 @@ test_select(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_select(void)
+cleanup_select(void H5_ATTR_UNUSED *params)
 {
-    H5E_BEGIN_TRY
-    {
-        H5Fdelete(FILENAME, H5P_DEFAULT);
+    if (GetTestCleanup()) {
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(FILENAME, H5P_DEFAULT);
+        }
+        H5E_END_TRY
     }
-    H5E_END_TRY
 }

@@ -1451,7 +1451,7 @@ test_read_string(H5File &file)
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_dset()
+test_dset(const void *params)
 {
     hid_t fapl_id;
     fapl_id     = h5_fileaccess(); // in h5test.c, returns a file access template
@@ -1492,9 +1492,6 @@ test_dset()
     catch (Exception &E) {
         test_report(nerrors, H5std_string(" Dataset"));
     }
-
-    // Clean up data file
-    cleanup_dsets();
 } // test_dset
 
 /*-------------------------------------------------------------------------
@@ -1506,8 +1503,10 @@ test_dset()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_dsets()
+cleanup_dsets(void *params)
 {
-    HDremove(FILE1.c_str());
-    HDremove(FILE_ACCPLIST.c_str());
+    if (GetTestCleanup()) {
+        HDremove(FILE1.c_str());
+        HDremove(FILE_ACCPLIST.c_str());
+    }
 } // cleanup_dsets
