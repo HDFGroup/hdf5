@@ -3726,7 +3726,7 @@ static hssize_t
 H5S__hyper_serial_size(H5S_t *space)
 {
     hsize_t  block_count = 0; /* block counter for regular hyperslabs */
-    uint32_t version;         /* Version number */
+    uint32_t version = UINT_MAX;     /* Version number */
     uint8_t  enc_size;        /* Encoded size of hyperslab selection info */
     hssize_t ret_value = -1;  /* return value */
 

@@ -1236,7 +1236,7 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size, hsi
     H5AC_ring_t    fsm_ring;                  /* Ring of FSM */
     haddr_t        end;                       /* End of block to extend */
     H5FD_mem_t     map_type;                  /* Mapped type */
-    H5F_mem_page_t fs_type;                   /* free space type */
+    H5F_mem_page_t fs_type = H5F_MEM_PAGE_NTYPES;                   /* free space type */
     htri_t         allow_extend = true;       /* Possible to extend the block */
     hsize_t        frag_size    = 0;          /* Size of mis-aligned fragment */
     htri_t         ret_value    = false;      /* Return value */
@@ -2556,7 +2556,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, bool *fsm_settled)
     int            pass_count;
     hsize_t        alloc_size;
     H5F_mem_t      mem_type;                    /* Memory type for iteration */
-    H5F_mem_page_t fsm_type;                    /* FSM type for iteration */
+    H5F_mem_page_t fsm_type = H5F_MEM_PAGE_NTYPES;                    /* FSM type for iteration */
     H5O_fsinfo_t   fsinfo;                      /* Free space manager info message */
     H5FS_stat_t    fs_stat;                     /* Information for free-space manager */
     H5AC_ring_t    orig_ring   = H5AC_RING_INV; /* Original ring value */
@@ -3021,8 +3021,8 @@ done:
 herr_t
 H5MF_settle_meta_data_fsm(H5F_t *f, bool *fsm_settled)
 {
-    H5F_mem_page_t sm_fshdr_fs_type;                          /* small fs hdr fsm */
-    H5F_mem_page_t sm_fssinfo_fs_type;                        /* small fs sinfo fsm */
+    H5F_mem_page_t sm_fshdr_fs_type = H5F_MEM_PAGE_NTYPES;                          /* small fs hdr fsm */
+    H5F_mem_page_t sm_fssinfo_fs_type = H5F_MEM_PAGE_NTYPES;                        /* small fs sinfo fsm */
     H5F_mem_page_t lg_fshdr_fs_type   = H5F_MEM_PAGE_DEFAULT; /* large fs hdr fsm */
     H5F_mem_page_t lg_fssinfo_fs_type = H5F_MEM_PAGE_DEFAULT; /* large fs sinfo fsm */
     H5FS_t        *sm_hdr_fspace      = NULL;                 /* ptr to sm FSM hdr alloc FSM */
@@ -3312,10 +3312,10 @@ H5MF__continue_alloc_fsm(H5F_shared_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_s
 static bool
 H5MF__fsm_type_is_self_referential(H5F_shared_t *f_sh, H5F_mem_page_t fsm_type)
 {
-    H5F_mem_page_t sm_fshdr_fsm;
-    H5F_mem_page_t sm_fssinfo_fsm;
-    H5F_mem_page_t lg_fshdr_fsm;
-    H5F_mem_page_t lg_fssinfo_fsm;
+    H5F_mem_page_t sm_fshdr_fsm = H5F_MEM_PAGE_NTYPES;
+    H5F_mem_page_t sm_fssinfo_fsm = H5F_MEM_PAGE_NTYPES;
+    H5F_mem_page_t lg_fshdr_fsm = H5F_MEM_PAGE_NTYPES;
+    H5F_mem_page_t lg_fssinfo_fsm = H5F_MEM_PAGE_NTYPES;
     bool           result = false;
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -3364,8 +3364,8 @@ H5MF__fsm_type_is_self_referential(H5F_shared_t *f_sh, H5F_mem_page_t fsm_type)
 static bool
 H5MF__fsm_is_self_referential(H5F_shared_t *f_sh, H5FS_t *fspace)
 {
-    H5F_mem_page_t sm_fshdr_fsm;
-    H5F_mem_page_t sm_fssinfo_fsm;
+    H5F_mem_page_t sm_fshdr_fsm = H5F_MEM_PAGE_NTYPES;
+    H5F_mem_page_t sm_fssinfo_fsm = H5F_MEM_PAGE_NTYPES;
     bool           result = false;
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -3378,8 +3378,8 @@ H5MF__fsm_is_self_referential(H5F_shared_t *f_sh, H5FS_t *fspace)
     H5MF__alloc_to_fs_type(f_sh, H5FD_MEM_FSPACE_SINFO, (size_t)1, &sm_fssinfo_fsm);
 
     if (H5F_SHARED_PAGED_AGGR(f_sh)) {
-        H5F_mem_page_t lg_fshdr_fsm;
-        H5F_mem_page_t lg_fssinfo_fsm;
+        H5F_mem_page_t lg_fshdr_fsm = H5F_MEM_PAGE_NTYPES;
+        H5F_mem_page_t lg_fssinfo_fsm = H5F_MEM_PAGE_NTYPES;
 
         H5MF__alloc_to_fs_type(f_sh, H5FD_MEM_FSPACE_HDR, f_sh->fs_page_size + 1, &lg_fshdr_fsm);
         H5MF__alloc_to_fs_type(f_sh, H5FD_MEM_FSPACE_SINFO, f_sh->fs_page_size + 1, &lg_fssinfo_fsm);
