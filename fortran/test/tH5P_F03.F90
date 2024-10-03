@@ -235,6 +235,13 @@ SUBROUTINE test_create(total_error)
   CALL VERIFY("***ERROR: Returned wrong low libver_bounds", low, H5F_LIBVER_V116_F, total_error)
   CALL VERIFY("***ERROR: Returned wrong high libver_bounds", high, H5F_LIBVER_V116_F, total_error)
 
+  CALL h5pset_libver_bounds_f(fapl, H5F_LIBVER_V118_F, H5F_LIBVER_V118_F, error)
+  CALL check("h5pset_libver_bounds_f",error, total_error)
+  CALL h5pget_libver_bounds_f(fapl, low, high, error)
+  CALL check("h5pget_libver_bounds_f",error, total_error)
+  CALL VERIFY("***ERROR: Returned wrong low libver_bounds", low, H5F_LIBVER_V118_F, total_error)
+  CALL VERIFY("***ERROR: Returned wrong high libver_bounds", high, H5F_LIBVER_V118_F, total_error)
+
   CALL H5Pset_libver_bounds_f(fapl, H5F_LIBVER_LATEST_F, H5F_LIBVER_LATEST_F, error)
   CALL check("H5Pset_libver_bounds_f",error, total_error)
   CALL h5pget_libver_bounds_f(fapl, low, high, error)

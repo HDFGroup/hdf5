@@ -242,6 +242,7 @@ static const unsigned H5O_sds_hyper_ver_bounds[] = {
     H5S_HYPER_VERSION_3, /* H5F_LIBVER_V112 */
     H5S_HYPER_VERSION_3, /* H5F_LIBVER_V114 */
     H5S_HYPER_VERSION_3, /* H5F_LIBVER_V116 */
+    H5S_HYPER_VERSION_3, /* H5F_LIBVER_V118 */
     H5S_HYPER_VERSION_3  /* H5F_LIBVER_LATEST */
 };
 

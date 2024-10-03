@@ -856,9 +856,8 @@ if (HDF5_ENABLE_SUBFILING_VFD)
 endif()
 
 
-#option (DEFAULT_API_VERSION "Enable v1.16 API (v16, v18, v110, v112, v114, v116)" "v116")
-set (DEFAULT_API_VERSION "v116" CACHE STRING "Enable v1.16 API (v16, v18, v110, v112, v114, v116)")
-set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v116)
+set (DEFAULT_API_VERSION "v118" CACHE STRING "Enable v1.16 API (v16, v18, v110, v112, v114, v116, v118)")
+set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v116 v118)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------
@@ -902,12 +901,20 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to use 1.16.x API
 #-----------------------------------------------------------------------------
-if (NOT DEFAULT_API_VERSION)
-  set (DEFAULT_API_VERSION "v116")
-endif ()
 set (H5_USE_116_API_DEFAULT 0)
 if (DEFAULT_API_VERSION MATCHES "v116")
   set (H5_USE_116_API_DEFAULT 1)
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to use 1.18.x API
+#-----------------------------------------------------------------------------
+if (NOT DEFAULT_API_VERSION)
+  set (DEFAULT_API_VERSION "v118")
+endif ()
+set (H5_USE_118_API_DEFAULT 0)
+if (DEFAULT_API_VERSION MATCHES "v118")
+  set (H5_USE_118_API_DEFAULT 1)
 endif ()
 
 #-----------------------------------------------------------------------------
