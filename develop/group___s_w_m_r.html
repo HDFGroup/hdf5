@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.15.0.d507b7c</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.626f639</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -182,10 +182,10 @@ Functions</h2></td></tr>
 <div class="line">    <span class="keywordtype">unsigned</span>  <a class="code hl_variable" href="struct_h5_f__retry__info__t.html#aa86f48adcf8ee5bbe9d05ae595130544">nbins</a>;</div>
 <div class="line">    uint32_t *<a class="code hl_variable" href="struct_h5_f__retry__info__t.html#a9ed64b2becff4cade9713b0cd9f3827e">retries</a>[<a class="code hl_define" href="_h5_fpublic_8h.html#a3a67d0d121762e7c44c4ef3f40a49611">H5F_NUM_METADATA_READ_RETRY_TYPES</a>];</div>
 <div class="line">} <a class="code hl_struct" href="struct_h5_f__retry__info__t.html">H5F_retry_info_t</a>;</div>
-<div class="ttc" id="a_h5_fpublic_8h_html_a3a67d0d121762e7c44c4ef3f40a49611"><div class="ttname"><a href="_h5_fpublic_8h.html#a3a67d0d121762e7c44c4ef3f40a49611">H5F_NUM_METADATA_READ_RETRY_TYPES</a></div><div class="ttdeci">#define H5F_NUM_METADATA_READ_RETRY_TYPES</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:228</div></div>
-<div class="ttc" id="astruct_h5_f__retry__info__t_html"><div class="ttname"><a href="struct_h5_f__retry__info__t.html">H5F_retry_info_t</a></div><div class="ttdef"><b>Definition</b> H5Fpublic.h:234</div></div>
-<div class="ttc" id="astruct_h5_f__retry__info__t_html_a9ed64b2becff4cade9713b0cd9f3827e"><div class="ttname"><a href="struct_h5_f__retry__info__t.html#a9ed64b2becff4cade9713b0cd9f3827e">H5F_retry_info_t::retries</a></div><div class="ttdeci">uint32_t * retries[21]</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:236</div></div>
-<div class="ttc" id="astruct_h5_f__retry__info__t_html_aa86f48adcf8ee5bbe9d05ae595130544"><div class="ttname"><a href="struct_h5_f__retry__info__t.html#aa86f48adcf8ee5bbe9d05ae595130544">H5F_retry_info_t::nbins</a></div><div class="ttdeci">unsigned nbins</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:235</div></div>
+<div class="ttc" id="a_h5_fpublic_8h_html_a3a67d0d121762e7c44c4ef3f40a49611"><div class="ttname"><a href="_h5_fpublic_8h.html#a3a67d0d121762e7c44c4ef3f40a49611">H5F_NUM_METADATA_READ_RETRY_TYPES</a></div><div class="ttdeci">#define H5F_NUM_METADATA_READ_RETRY_TYPES</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:229</div></div>
+<div class="ttc" id="astruct_h5_f__retry__info__t_html"><div class="ttname"><a href="struct_h5_f__retry__info__t.html">H5F_retry_info_t</a></div><div class="ttdef"><b>Definition</b> H5Fpublic.h:235</div></div>
+<div class="ttc" id="astruct_h5_f__retry__info__t_html_a9ed64b2becff4cade9713b0cd9f3827e"><div class="ttname"><a href="struct_h5_f__retry__info__t.html#a9ed64b2becff4cade9713b0cd9f3827e">H5F_retry_info_t::retries</a></div><div class="ttdeci">uint32_t * retries[21]</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:237</div></div>
+<div class="ttc" id="astruct_h5_f__retry__info__t_html_aa86f48adcf8ee5bbe9d05ae595130544"><div class="ttname"><a href="struct_h5_f__retry__info__t.html#aa86f48adcf8ee5bbe9d05ae595130544">H5F_retry_info_t::nbins</a></div><div class="ttdeci">unsigned nbins</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:236</div></div>
 </div><!-- fragment --><p> <code>nbins</code> is the number of bins for each <code>retries</code>[i] of metadata entry <code>i</code>. It is calculated based on the current number of read attempts used in the library and logarithmic base 10.</p>
 <p>If read retries are incurred for a metadata entry <code>i</code>, the library will allocate memory for <code>retries[i] (nbins * sizeof(uint32_t)</code> and store the collection of retries there. If there are no retries for a metadata entry <code>i</code>, <code>retries[i]</code> will be NULL. After a call to this routine, users should free each <code>retries[i]</code> that is non-NULL, otherwise resource leak will occur.</p>
 <p>For the library default read attempts of 100 for SWMR access, nbins will be 2 as depicted below: </p><ul>
