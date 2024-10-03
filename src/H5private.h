@@ -1207,10 +1207,6 @@ extern char H5_lib_vers_info_g[];
 
 #endif /* H5_HAVE_THREADSAFE */
 
-/* Library init / term status (global) */
-extern bool H5_libinit_g; /* Has the library been initialized? */
-extern bool H5_libterm_g; /* Is the library being shutdown? */
-
 /* Macros for accessing the global variables */
 #define H5_INIT_GLOBAL (H5_libinit_g)
 #define H5_TERM_GLOBAL (H5_libterm_g)

@@ -434,6 +434,13 @@ typedef void (*H5_atclose_func_t)(void *ctx);
 extern "C" {
 #endif
 
+/** @private
+ *
+ * \brief Library init / term status (global)
+ */
+H5_DLLVAR bool H5_libinit_g; /* Has the library been initialized? */
+H5_DLLVAR bool H5_libterm_g; /* Is the library being shutdown? */
+
 /* Functions in H5.c */
 /**
  * \ingroup H5

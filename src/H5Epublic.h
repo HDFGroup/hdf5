@@ -52,7 +52,7 @@ typedef struct H5E_error2_t {
 /* When this header is included from a private header, don't make calls to H5open() */
 #undef H5OPEN
 #ifndef H5private_H
-#define H5OPEN H5open(),
+#define H5OPEN ((!H5_libinit_g && !H5_libterm_g) ? H5open() : 0),
 #else /* H5private_H */
 #define H5OPEN
 #endif /* H5private_H */
