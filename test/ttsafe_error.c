@@ -26,6 +26,9 @@
  *
  ********************************************************************/
 #include "ttsafe.h"
+#define H5VL_FRIEND /* Suppress error about including H5VLpkg    */
+#define H5VL_TESTING
+#include "H5VLpkg.h" /* Virtual Object Layer                 */
 
 #ifdef H5_HAVE_THREADSAFE
 
@@ -63,6 +66,7 @@ tts_error(const void H5_ATTR_UNUSED *params)
     hid_t         dataset  = H5I_INVALID_HID;
     H5TS_thread_t threads[NUM_THREAD];
     int           value, i;
+    int           is_native;
     herr_t        status;
 
     /* Must initialize these at runtime */
@@ -108,7 +112,10 @@ tts_error(const void H5_ATTR_UNUSED *params)
     status = H5Pget_vol_id(def_fapl, &vol_id);
     CHECK(status, FAIL, "H5Pget_vol_id");
 
-    if (vol_id == H5VL_NATIVE) {
+    is_native = H5VL__is_native_connector_test(vol_id);
+    CHECK(is_native, FAIL, "H5VL__is_native_connector_test");
+
+    if (is_native) {
         /* Create a hdf5 file using H5F_ACC_TRUNC access, default file
          * creation plist and default file access plist
          */

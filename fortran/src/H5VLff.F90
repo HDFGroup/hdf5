@@ -404,6 +404,41 @@ CONTAINS
 !>
 !! \ingroup FH5VL
 !!
+!! \brief Determines whether two connector identifiers refer to the same connector.
+!!
+!! \param conn_id1 A valid identifier of the first connector to check
+!! \param conn_id2 A valid identifier of the second connector to check
+!! \param are_same Whether connector IDs refer to the same connector
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5VLcmp_connector_cls()
+!!
+  SUBROUTINE H5VLcmp_connector_cls_f(are_same, conn_id1, conn_id2, hdferr)
+    IMPLICIT NONE
+    LOGICAL, INTENT(OUT) :: are_same
+    INTEGER(HID_T), INTENT(IN) :: conn_id1
+    INTEGER(HID_T), INTENT(IN) :: conn_id2
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER :: are_same_c
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5VLcmp_connector_cls(cmp_value, conn_id1, conn_id2) BIND(C, NAME='H5VLcmp_connector_cls')
+         IMPORT :: HID_T, C_INT
+         INTEGER(C_INT), INTENT(OUT) :: cmp_value
+         INTEGER(HID_T), VALUE :: conn_id1
+         INTEGER(HID_T), VALUE :: conn_id2
+       END FUNCTION H5VLcmp_connector_cls
+    END INTERFACE
+
+    are_same = .FALSE.
+    hdferr = INT(H5VLcmp_connector_cls(are_same_c, conn_id1, conn_id2))
+    IF(are_same_c .EQ. 0) are_same = .TRUE.
+
+  END SUBROUTINE H5VLcmp_connector_cls_f
+
+!>
+!! \ingroup FH5VL
+!!
 !! \brief Retrieves the token representation from an address for a location identifier.
 !!
 !! \param loc_id Specifies a location identifier

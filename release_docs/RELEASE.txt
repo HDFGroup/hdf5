@@ -708,6 +708,7 @@ New Features
 
     Fortran Library:
     ----------------
+    - Add Fortran H5VLcmp_connector_cls_f API routine.
 
     - Add Fortran H5R APIs:
       h5rcreate_attr_f, h5rcreate_object_f, h5rcreate_region_f,
@@ -778,7 +779,7 @@ New Features
 
     Java Library:
     -------------
-    -
+    - Add H5VLcmp_connector_cls API routine.
 
 
     Tools:
@@ -820,13 +821,14 @@ New Features
     --------------
     - Documented that leaving HDF5 threads running at termination is unsafe
 
-      Added doc/threadsafety-warning.md as a warning that threads which use HDF5 
-      resources must be closed before either process exit or library close. 
-      If HDF5 threads are alive during either of  these operations, their resources 
-      will not be cleaned up properly and undefined behavior is possible. 
-      
-      This document also includes a discussion on potential ways to mitigate this issue.
+      Added doc/threadsafety-warning.md as a warning that threads which use
+      HDF5 resources must be closed before either process exit or library
+      close.  If HDF5 threads are alive during either of these operations,
+      their resources will not be cleaned up properly and undefined behavior
+      is possible.
 
+      This document also includes a discussion on potential ways to mitigate
+      this issue.
 
 
 Support for new platforms, languages and compilers
@@ -837,6 +839,15 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Removed the H5VLpeek_connector_id_by_name and
+      H5VLpeek_connector_id_by_value routines from the VOL connector public
+      API.  VOL connector authors should use the H5VLget_connector_id_by_name
+      and H5VLget_connector_id_by_value routines instead.  Note that the
+      H5VLpeek_connector_id_by_name and H5VLpeek_connector_id_by_value routines
+      required that connector authors _not_ close the IDs returned and that
+      the IDs returned from H5VLget_connector_id_by_name and
+      and H5VLget_connector_id_by_value should be closed to avoid resource
+      leaks.
 
     - Fixed a memory leak in H5F__accum_write()
 
@@ -984,10 +995,10 @@ Bug Fixes since HDF5-1.14.0 release
       The library's metadata cache calls the "get_final_load_size" client callback
       to find out the actual size of the object header.  As the size obtained
       exceeds the file's EOA, it throws an error but the object header structure
-      allocated through the client callback is not freed hence causing the 
+      allocated through the client callback is not freed hence causing the
       issue described.
 
-      (1) Free the structure allocated in the object header client callback after 
+      (1) Free the structure allocated in the object header client callback after
       saving the needed information in udata. (2) Deserialize the object header
       prefix in the object header's "deserialize" callback regardless.
 
@@ -1490,7 +1501,7 @@ Bug Fixes since HDF5-1.14.0 release
       This behavior is not generally observed when creating a dataset
       and then performing I/O on it, as the relevant metadata will
       usually be in the metadata cache as a side effect of creating
-      the chunk index structures during dataset creation. 
+      the chunk index structures during dataset creation.
 
       This issue has been fixed by adding callbacks to the different
       chunk indexing structure classes that allow more explicit control
@@ -1737,8 +1748,8 @@ Bug Fixes since HDF5-1.14.0 release
 
       When attempting to read layout, pline, and efl information for a
       dataset, memory leaks could occur if attempting to read pline/efl
-      information threw an error, which is due to the memory that was 
-      allocated for pline and efl not being properly cleaned up on error.  
+      information threw an error, which is due to the memory that was
+      allocated for pline and efl not being properly cleaned up on error.
 
       Fixes GitHub issue #2602
 
@@ -1746,11 +1757,11 @@ Bug Fixes since HDF5-1.14.0 release
 
       H5O__ginfo_decode could sometimes read past allocated memory when parsing a
       group info message from the header of a malformed file.
-  
+
       It now checks buffer size before each read to properly throw an error in these cases.
-  
+
       Fixes GitHub issue #2601
-      
+
     - Fixed potential buffer overrun issues in some object header decode routines
 
       Several checks were added to H5O__layout_decode and H5O__sdspace_decode to
@@ -1804,7 +1815,7 @@ Bug Fixes since HDF5-1.14.0 release
           lead to issues if only 1 I/O concentrator was requested
 
       Also added a regression test for these two I/O concentrator selection
-      strategies to prevent future issues. 
+      strategies to prevent future issues.
 
     - Fix CVE-2021-37501 / GHSA-rfgw-5vq3-wrjf
 
@@ -1830,7 +1841,7 @@ Bug Fixes since HDF5-1.14.0 release
 
       The assertion failure was fixed by updating collective metadata writes
       to treat global heap metadata as raw data, as done elsewhere in the
-      library. 
+      library.
 
       Fixes GitHub issue #2433
 
@@ -1840,7 +1851,7 @@ Bug Fixes since HDF5-1.14.0 release
       buffer, which is called many times from the function responsible for image
       decoding. The length of the buffer is known in the image decoding function,
       but no checks are produced, so the buffer overflow can occur in many places,
-      including callee functions for address decoding. 
+      including callee functions for address decoding.
 
       The error was fixed by inserting corresponding checks for buffer overflow.
 
@@ -1861,8 +1872,8 @@ Bug Fixes since HDF5-1.14.0 release
     - Fixed a segfault when using a user-defined conversion function between compound datatypes
 
       During type info initialization for compound datatype conversion, the library checked if the
-      datatypes are subsets of one another in order to perform special conversion handling. 
-      This check uses information that is only defined if a library conversion function is in use. 
+      datatypes are subsets of one another in order to perform special conversion handling.
+      This check uses information that is only defined if a library conversion function is in use.
       The library now skips this check for user-defined conversion functions.
 
       Fixes Github issue #3840
@@ -1882,9 +1893,9 @@ Bug Fixes since HDF5-1.14.0 release
 
     Configuration
     -------------
-    - Changed name of libhdf5hl_fortran installed by autotools to libhdf5_hl_fortran.  The 
-      new name is consistent with the name of the lib when installed by CMake and with the 
-      other hl libs.  
+    - Changed name of libhdf5hl_fortran installed by autotools to libhdf5_hl_fortran.  The
+      new name is consistent with the name of the lib when installed by CMake and with the
+      other hl libs.
 
       Fixes GitHub issue #4811
 
@@ -1902,7 +1913,7 @@ Bug Fixes since HDF5-1.14.0 release
       library in a find_package call.
 
     - Corrected usage of FetchContent in the HDFLibMacros.cmake file.
-    
+
       CMake version 3.30 changed the behavior of the FetchContent module to deprecate
       the use of FetchContent_Populate() in favor of FetchContent_MakeAvailable(). Therefore,
       the copying of HDF specialized CMakeLists.txt files to the dependent project's source
@@ -2092,13 +2103,13 @@ Bug Fixes since HDF5-1.14.0 release
       variable-length datatypes, but this can be problematic if the global heap
       addresses involved do not match exactly between the old and new files. These
       addresses could change for a variety of reasons, such as the command-line options
-      provided to h5repack, how h5repack allocate space in the repacked file, etc.      
+      provided to h5repack, how h5repack allocate space in the repacked file, etc.
       Since H5Ocopy does not currently perform any translation when these addresses
       change, datasets that were repacked with H5Ocopy could become unreadable in the
       new file. H5repack has been fixed to repack variable-length typed datasets without
       using H5Ocopy to ensure that the new datasets always have the correct global heap
       addresses.
-    
+
     - Names of objects with square brackets will have trouble without the
       special argument, --no-compact-subset, on the h5dump command line.
 
@@ -2159,7 +2170,7 @@ Bug Fixes since HDF5-1.14.0 release
 
     C++ APIs
     --------
-    - 
+    -
 
 
     Testing
