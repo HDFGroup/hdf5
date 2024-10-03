@@ -475,6 +475,11 @@ H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config)
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_subfiling_init_s)
+        if (H5FD__subfiling_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
+
     if (vfd_config == NULL) {
         if (NULL == (subfiling_conf = H5MM_calloc(sizeof(*subfiling_conf))))
             HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate subfiling VFD configuration");
@@ -550,6 +555,11 @@ H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_out is NULL");
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_subfiling_init_s)
+        if (H5FD__subfiling_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
 
     if (H5FD_SUBFILING != H5P_peek_driver(plist))
         use_default_config = true;
