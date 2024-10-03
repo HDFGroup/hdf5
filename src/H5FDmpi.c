@@ -42,7 +42,7 @@ H5FD_mpi_get_rank(H5FD_t *file)
     uint64_t            flags    = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
     int                 rank     = -1;
     void               *rank_ptr = (void *)(&rank);
-    int                 ret_value;
+    int                 ret_value = -1;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -120,7 +120,7 @@ H5FD_mpi_get_comm(H5FD_t *file)
     uint64_t            flags    = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
     MPI_Comm            comm     = MPI_COMM_NULL;
     void               *comm_ptr = (void *)(&comm);
-    MPI_Comm            ret_value;
+    MPI_Comm            ret_value = MPI_COMM_NULL;
 
     FUNC_ENTER_NOAPI(MPI_COMM_NULL)
 
@@ -159,7 +159,7 @@ H5FD_mpi_get_info(H5FD_t *file)
     uint64_t            flags    = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
     MPI_Info            info     = MPI_INFO_NULL;
     void               *info_ptr = (void *)(&info);
-    MPI_Info            ret_value;
+    MPI_Info            ret_value = MPI_INFO_NULL;
 
     FUNC_ENTER_NOAPI(MPI_INFO_NULL)
 
