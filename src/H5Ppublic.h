@@ -5061,6 +5061,36 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *                  objects created with this setting.</td>
  *           </tr>
  *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V116<br />
+ *                \p high=<any version higher than \p low but not #H5F_LIBVER_LATEST></td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.16.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release specified
+ *                  in the \p high value.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than version specified in
+ *                  \p high will fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V118<br />
+ *                \p high=<any version higher than \p low but not #H5F_LIBVER_LATEST></td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.18.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release specified
+ *                  in the \p high value.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than version specified in
+ *                  \p high will fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
  *            <td>\p low=high </td>
  *            <td>
  *             \li The library will create objects with the latest format

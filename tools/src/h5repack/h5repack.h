@@ -119,7 +119,8 @@
  * \li <strong>3</strong> This is #H5F_LIBVER_V112 in #H5F_libver_t struct
  * \li <strong>4</strong> This is #H5F_LIBVER_V114 in #H5F_libver_t struct
  * \li <strong>5</strong> This is #H5F_LIBVER_V116 in #H5F_libver_t struct
- * \li #H5F_LIBVER_LATEST is aliased to #H5F_LIBVER_V116 for this release
+ * \li <strong>6</strong> This is #H5F_LIBVER_V118 in #H5F_libver_t struct
+ * \li #H5F_LIBVER_LATEST is aliased to #H5F_LIBVER_V118 for this release
  *
  * \subsubsection subsubsec_cltools_h5repack_options_fs File Strategy Settings
  * <strong>FS_STRATEGY</strong> is a string indicating the file space strategy used:
