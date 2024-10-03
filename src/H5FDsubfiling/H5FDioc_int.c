@@ -88,9 +88,9 @@ H5FD__ioc_write_independent_async(int64_t context_id, int64_t offset, int64_t el
     subfiling_context_t *sf_context    = NULL;
     MPI_Request          ack_request   = MPI_REQUEST_NULL;
     io_req_t            *sf_io_request = NULL;
-    int64_t              ioc_start;
-    int64_t              ioc_offset;
-    int64_t              ioc_subfile_idx;
+    int64_t              ioc_start = -1;
+    int64_t              ioc_offset = -1;
+    int64_t              ioc_subfile_idx = -1;
     int64_t              msg[3]           = {0};
     int                 *io_concentrators = NULL;
     int                  num_io_concentrators;
@@ -245,9 +245,9 @@ H5FD__ioc_read_independent_async(int64_t context_id, int64_t offset, int64_t ele
     MPI_Request          ack_request   = MPI_REQUEST_NULL;
     io_req_t            *sf_io_request = NULL;
     bool                 need_data_tag = false;
-    int64_t              ioc_start;
-    int64_t              ioc_offset;
-    int64_t              ioc_subfile_idx;
+    int64_t              ioc_start = -1;
+    int64_t              ioc_offset = -1;
+    int64_t              ioc_subfile_idx = -1;
     int64_t              msg[3]           = {0};
     int                 *io_concentrators = NULL;
     int                  num_io_concentrators;
