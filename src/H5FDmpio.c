@@ -300,17 +300,6 @@ H5FD__mpio_unregister(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Terminate MPI if the driver initialized it */
-    if (H5FD_mpi_self_initialized_s) {
-        int mpi_finalized = 0;
-
-        MPI_Finalized(&mpi_finalized);
-        if (!mpi_finalized)
-            MPI_Finalize();
-
-        H5FD_mpi_self_initialized_s = false;
-    }
-
     /* Reset VFL ID */
     H5FD_MPIO_id_g = H5I_INVALID_HID;
 
