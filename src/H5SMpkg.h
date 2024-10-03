@@ -201,24 +201,6 @@ typedef struct {
                                 * heap ID, the heap ID will be 0. */
 } H5SM_mesg_key_t;
 
-/*
- * Data exchange structure to pass through the fractal heap layer for the
- * H5HF_op function when computing a hash value for a message.
- */
-typedef struct {
-    /* downward (internal) */
-    unsigned type_id; /* Message type */
-
-    /* upward */
-    uint32_t hash; /* Hash value */
-} H5SM_fh_ud_gh_t;
-
-/* Typedef to increment a reference count in the B-tree */
-typedef struct {
-    H5SM_mesg_key_t *key;      /* IN: key for message being incremented */
-    H5O_fheap_id_t   fheap_id; /* OUT: fheap ID of record */
-} H5SM_incr_ref_opdata;
-
 /* v2 B-tree client callback context */
 typedef struct H5SM_bt2_ctx_t {
     uint8_t sizeof_addr; /* Size of file addresses */
