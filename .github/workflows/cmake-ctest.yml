@@ -157,7 +157,7 @@ jobs:
           endpoint: ${{ secrets.AZURE_ENDPOINT }}
           trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-          files-folder: ${{ runner.workspace }}/hdf5116/build/${{ inputs.preset_name }}-MSVC
+          files-folder: ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-MSVC
           files-folder-filter: msi
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
@@ -168,12 +168,12 @@ jobs:
         id: publish-ctest-binary
         run: |
           mkdir "${{ runner.workspace }}/build116"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/README.md -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
-          cd "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build116/hdf5"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build116/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build116/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-MSVC/README.md -Destination ${{ runner.workspace }}/build116/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace }}/build116/hdf5/ -Include *.zip
+          cd "${{ runner.workspace }}/build116"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip hdf5
         shell: pwsh
 
@@ -488,7 +488,7 @@ jobs:
           NOTARY_USER: ${{ vars.NOTARY_USER }}
           NOTARY_KEY: ${{ vars.NOTARY_KEY }}
         run: |
-          /usr/bin/xcrun stapler staple ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+          /usr/bin/xcrun stapler staple ${{ runner.workspace }}/hdf5/build116/${{ inputs.preset_name }}-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
         continue-on-error: true
