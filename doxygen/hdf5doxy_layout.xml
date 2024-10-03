@@ -5,12 +5,8 @@
     <tab type="user" url="@ref GettingStarted" title="Getting started" />
     <tab type="user" url="@ref UG" title="User Guide" />
     <tab type="user" url="@ref RM" title="Reference Manual" />
-    <!-- <tab type="user" url="https://support.hdfgroup.org/releases/hdf5/documentation/HDF5+Application+Developer%27s+Guide" title="Application Developer's Guide" />
-    <tab type="user" url="https://support.hdfgroup.org/releases/hdf5/documentation/An_Overview_of_the_HDF5_Library_Architecture.v2.pdf" title="HDF5 Library Architecture Overview" /> -->
     <tab type="user" url="@ref Cookbook" title="Cookbook" />
     <tab type="user" url="@ref TN" title="Technical Notes" />
-    <!-- <tab type="user" url="@ref VOL_Connector" title="HDF5 VOL Connector Author Guide" />
-    <tab type="user" url="https://support.hdfgroup.org/releases/hdf5/documentation/HDF5+VOL+User%27s+Guide" title="HDF5 VOL User's Guide" /> -->
     <tab type="user" url="@ref RFC" title="RFCs" />
     <tab type="user" url="@ref SPEC" title="Specifications" />
     <tab type="user" url="@ref GLS" title="Glossary" />

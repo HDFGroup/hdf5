@@ -81,7 +81,7 @@
         "HDF5_ENABLE_PLUGIN_SUPPORT": "ON",
         "H5PL_ALLOW_EXTERNAL_SUPPORT": {"type": "STRING", "value": "TGZ"},
         "PLUGIN_PACKAGE_NAME": {"type": "STRING", "value": "pl"},
-        "PLUGIN_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot"},
+        "PLUGIN_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot-1.16"},
         "PLUGIN_TGZ_NAME": {"type": "STRING", "value": "hdf5_plugins-1.16.tar.gz"}
       }
     },

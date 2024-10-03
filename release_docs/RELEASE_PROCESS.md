@@ -194,18 +194,18 @@ For more information on the HDF5 versioning and backward and forward compatibili
 1. Schedule time and solicit comments from retrospective
 2. Identify issues and document them
 
-[u1]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt
-[u2]: https://github.com/HDFGroup/hdf5/blob/develop/README.md
-[u3]: https://github.com/HDFGroup/hdf5/blob/develop/COPYING
-[u4]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs
-[u5]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL
-[u6]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_Autotools.txt
-[u7]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_CMake.txt
-[u8]: https://github.com/HDFGroup/hdf5/blob/develop/.github/workflows/release.yml
-[u9]: https://github.com/HDFGroup/hdf5/blob/develop/config/lt_vers.am
-[u10]: https://github.com/HDFGroup/hdf5/blob/develop/bin/h5vers
-[u11]: https://github.com/HDFGroup/hdf5/blob/develop/src/CMakeLists.txt
-[u12]: https://github.com/HDFGroup/hdf5/blob/develop/configure.ac
-[u13]: https://hdfgroup.github.io/hdf5/develop/api-compat-macros.html
-[u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14
+[u1]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_16/release_docs/RELEASE.txt
+[u2]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_16/README.md
+[u3]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_16/COPYING
+[u4]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_16/release_docs
+[u5]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_16/release_docs/INSTALL
+[u6]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_16/release_docs/INSTALL_Autotools.txt
+[u7]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_16/release_docs/INSTALL_CMake.txt
+[u8]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_16/.github/workflows/release.yml
+[u9]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_16/config/lt_vers.am
+[u10]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_16/bin/h5vers
+[u11]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_16/src/CMakeLists.txt
+[u12]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_16/configure.ac
+[u13]: https://support.hdfgroup.org/releases/hdf5/v1_16/v1_16_0/documentation/doxygen/api-compat-macros.html
+[u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.16
 [u15]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot

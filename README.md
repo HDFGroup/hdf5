@@ -2,17 +2,9 @@ HDF5 version 1.16.0-1 currently under development
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
-[![develop cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cmake.yml?branch=develop&label=HDF5%20develop%20CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/cmake.yml?query=branch%3Adevelop)
-[![develop autotools build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/autotools.yml?branch=develop&label=HDF5%20develop%20Autotools%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/autotools.yml?query=branch%3Adevelop)
-[![HDF-EOS5 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/hdfeos5.yml?branch=develop&label=HDF-EOS5)](https://github.com/HDFGroup/hdf5/actions/workflows/hdfeos5.yml?query=branch%3Adevelop)
-[![netCDF build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/netcdf.yml?branch=develop&label=netCDF)](https://github.com/HDFGroup/hdf5/actions/workflows/netcdf.yml?query=branch%3Adevelop)
-[![h5py build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/h5py.yml?branch=develop&label=h5py)](https://github.com/HDFGroup/hdf5/actions/workflows/h5py.yml?query=branch%3Adevelop)
-[![CVE regression](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cve.yml?branch=develop&label=CVE)](https://github.com/HDFGroup/hdf5/actions/workflows/cve.yml?query=branch%3Adevelop)
-[![HDF5 VOL connectors build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vol.yml?branch=develop&label=HDF5-VOL)](https://github.com/HDFGroup/hdf5/actions/workflows/vol.yml?query=branch%3Adevelop)
-[![HDF5 VFD build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vfd.yml?branch=develop&label=HDF5-VFD)](https://github.com/HDFGroup/hdf5/actions/workflows/vfd.yml?query=branch%3Adevelop)
-[![1.14 cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cmake.yml?branch=hdf5_1_14&label=HDF5%201.14%20CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/cmake.yml?query=branch%3Ahdf5_1_14)
-[![1.14 autotools build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/autotools.yml?branch=hdf5_1_14&label=HDF5%201.14%20Autotools%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/autotools.yml?query=branch%3Ahdf5_1_14)
-[![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
+[![1.14 cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cmake.yml?branch=hdf5_1_16&label=HDF5%201.16%20CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/cmake.yml?query=branch%3Ahdf5_1_16)
+[![1.14 autotools build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/autotools.yml?branch=hdf5_1_16&label=HDF5%201.16%20Autotools%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/autotools.yml?query=branch%3Ahdf5_1_16)
+[![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/hdf5_1_16/COPYING)
 
 [HPC configure/build/test results](https://my.cdash.org/index.php?project=HDF5)
 
@@ -29,17 +21,17 @@ tools, and services at [The HDF Group's website](https://www.hdfgroup.org/).
 
 DOCUMENTATION
 -------------
-Documentation for all HDF software is available at:
+This release is fully functional for the API described in the documentation.
 
-   https://support.hdfgroup.org/documentation/index.html
+   https://support.hdfgroup.org/releases/hdf5/v1_16/v1_16_0/documentation/doxygen/_l_b_a_p_i.html
 
-Documentation for the current HDF5 library release is available at:
+Full Documentation and Programming Resources for this release can be found at
 
-   https://support.hdfgroup.org/releases/hdf5/latest-docs.html
+   https://support.hdfgroup.org/releases/hdf5/v1_16/v1_16_0/documentation/doxygen/index.html
 
-The latest Doxygen documentation generated on changes to `develop`, which does **not** correspond to any particular library release, is available at:
+The latest doxygen documentation generated on changes to HDF5 1.16.x is available at:
 
-   https://hdfgroup.github.io/hdf5/develop 
+   https://support.hdfgroup.org/releases/hdf5/v1_16/v1_16_0/documentation/doxygen
 
 See the [RELEASE.txt](release_docs/RELEASE.txt) file in the [release_docs/](release_docs/) directory for information specific
 to the features and updates included in this release of the library.
@@ -78,34 +70,12 @@ Posting requires completing a simple registration and allows one to join in the
 conversation.  Please read the [instructions](https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum
 ) pertaining to the Forum's use and configuration.
 
-RELEASE SCHEDULE
-----------------
-
-![HDF5 release schedule](doc/img/release-schedule.png) 
-
-HDF5 does not release on a regular schedule. Instead, releases are driven by
-new features and bug fixes, though we try to have at least one release of each
-maintenance branch per year. Future HDF5 releases indicated on this schedule
-are tentative.
-
-| Release | New Features |
-| ------- | ------------ |
-| 1.14.5 | oss-fuzz fixes, ros3 VFD improvements |
-| 1.14.6 | Last maintenance release of 1.14 |
-| 1.16.0 | Complex number support, updated library defaults (cache sizes, etc.) |
-| 2.0.0 | Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, sparse datasets, improved storage for variable-length datatypes, better Unicode support (especially on Windows), semantic versioning |
-
-Some HDF5 2.0.0 features listed here may be released in a 1.16.x release.
-
-This list of feature release versions is also tentative, and the specific release
-in which a feature is introduced may change.
-
 
 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
 Periodically development code snapshots are provided at the following URL:
 
-   https://github.com/HDFGroup/hdf5/releases/tag/snapshot
+   https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.16
 
 Source packages for current and previous releases are located at:
 
