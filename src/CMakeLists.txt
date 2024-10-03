@@ -751,7 +751,6 @@ set (H5_MODULE_HEADERS
     ${HDF5_SRC_DIR}/H5ESmodule.h
     ${HDF5_SRC_DIR}/H5Fmodule.h
     ${HDF5_SRC_DIR}/H5FAmodule.h
-    ${HDF5_SRC_DIR}/H5FDdrvr_module.h
     ${HDF5_SRC_DIR}/H5FDmodule.h
     ${HDF5_SRC_DIR}/H5FLmodule.h
     ${HDF5_SRC_DIR}/H5FSmodule.h
