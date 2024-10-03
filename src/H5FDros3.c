@@ -234,7 +234,7 @@ H5FD__ros3_register(void)
 
     FUNC_ENTER_PACKAGE
 
-    if (H5I_VFL != H5I_get_type(H5FD_ROS3_g))
+    if (H5I_VFL != H5I_get_type(H5FD_ROS3_id_g))
         if ((H5FD_ROS3_id_g = H5FD_register(&H5FD_ros3_g, sizeof(H5FD_class_t), false)) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register ros3 driver");
 
