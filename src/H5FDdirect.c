@@ -416,7 +416,7 @@ H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     int                       fd   = (-1);
     H5FD_direct_t            *file = NULL;
     const H5FD_direct_fapl_t *fa;
-    H5FD_direct_fapl_t        default_fa;
+    H5FD_direct_fapl_t        default_fa = {0};
 #ifdef H5_HAVE_WIN32_API
     HFILE                              filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
