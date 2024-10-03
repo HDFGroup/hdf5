@@ -24,8 +24,8 @@ jobs:
         sed -i 's/hdf5@1.10.4:1.14/hdf5@1.10.4:/g' \
         ./spack/var/spack/repos/builtin/packages/py-h5py/package.py
         . ./spack/share/spack/setup-env.sh
-        ./spack/bin/spack spec py-h5py@master+mpi ^hdf5@develop-1.15
-        ./spack/bin/spack install py-h5py@master+mpi ^hdf5@develop-1.15
+        ./spack/bin/spack spec py-h5py@master+mpi ^hdf5@develop-1.17
+        ./spack/bin/spack install py-h5py@master+mpi ^hdf5@develop-1.17
         ./spack/bin/spack install py-pytest
         ./spack/bin/spack install py-ipython
         spack load py-h5py
