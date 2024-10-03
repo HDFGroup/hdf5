@@ -269,7 +269,7 @@ H5VL_term_package(void)
         if (H5VL_def_conn_s.connector) {
             /* Release the default VOL connector */
             (void)H5VL_conn_prop_free(&H5VL_def_conn_s);
-            H5VL_def_conn_s.connector = NULL;
+            H5VL_def_conn_s.connector      = NULL;
             H5VL_def_conn_s.connector_info = NULL;
             n++;
         } /* end if */
