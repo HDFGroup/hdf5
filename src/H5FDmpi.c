@@ -78,9 +78,9 @@ int
 H5FD_mpi_get_size(H5FD_t *file)
 {
     const H5FD_class_t *cls;
-    uint64_t            flags    = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
-    int                 size     = 0;
-    void               *size_ptr = (void *)(&size);
+    uint64_t            flags     = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
+    int                 size      = 0;
+    void               *size_ptr  = (void *)(&size);
     int                 ret_value = 0;
 
     FUNC_ENTER_NOAPI(FAIL)
