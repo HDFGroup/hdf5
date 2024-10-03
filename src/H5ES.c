@@ -111,9 +111,9 @@ done:
 herr_t
 H5ESinsert_request(hid_t es_id, hid_t connector_id, void *request)
 {
-    H5ES_t *es;                  /* Event set */
-    H5VL_t *connector = NULL;    /* VOL connector */
-    herr_t  ret_value = SUCCEED; /* Return value */
+    H5ES_t           *es;                  /* Event set */
+    H5VL_connector_t *connector = NULL;    /* VOL connector */
+    herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -122,22 +122,14 @@ H5ESinsert_request(hid_t es_id, hid_t connector_id, void *request)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier");
     if (NULL == request)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL request pointer");
-
-    /* Create new VOL connector object, using the connector ID */
-    if (NULL == (connector = H5VL_new_connector(connector_id)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCREATE, FAIL, "can't create VOL connector object");
+    if (NULL == (connector = H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID");
 
     /* Insert request into event set */
     if (H5ES__insert_request(es, connector, request) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "can't insert request into event set");
 
 done:
-    /* Clean up on error */
-    if (ret_value < 0)
-        /* Release newly created connector */
-        if (connector && H5VL_conn_dec_rc(connector) < 0)
-            HDONE_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector");
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5ESinsert_request() */
 

@@ -10,21 +10,15 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*-------------------------------------------------------------------------
- *
- * Created:     H5ESprivate.h
- *
- * Purpose:     Private header for library accessible event set routines.
- *
- *-------------------------------------------------------------------------
+/*
+ * Purpose:	The private header file for the passthru VOL connector.
  */
 
-#ifndef H5ESprivate_H
-#define H5ESprivate_H
+#ifndef H5VLpassthru_private_H
+#define H5VLpassthru_private_H
 
-/* Include package's public headers */
-#include "H5ESpublic.h"
-#include "H5ESdevelop.h"
+/* Include connector's public header */
+#include "H5VLpassthru.h" /* Passthru VOL connector     */
 
 /* Private headers needed by this file */
 #include "H5VLprivate.h" /* Virtual Object Layer        */
@@ -37,18 +31,18 @@
 /* Library Private Typedefs */
 /****************************/
 
-/* Typedef for event set objects */
-typedef struct H5ES_t H5ES_t;
-
 /*****************************/
-/* Library-private Variables */
+/* Library Private Variables */
 /*****************************/
 
-/***************************************/
-/* Library-private Function Prototypes */
-/***************************************/
-herr_t        H5ES_insert(hid_t es_id, H5VL_connector_t *connector, void *token, const char *caller,
-                          const char *caller_args, ...);
-H5_DLL herr_t H5ES_init(void);
+/* Passthru VOL connector's class struct */
+H5_DLLVAR const H5VL_class_t H5VL_pass_through_g;
 
-#endif /* H5ESprivate_H */
+/* The native VOL connector */
+H5_DLLVAR H5VL_connector_t *H5VL_PASSTHRU_conn_g;
+
+/******************************/
+/* Library Private Prototypes */
+/******************************/
+
+#endif /* H5VLpassthru_private_H */

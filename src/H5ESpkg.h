@@ -76,7 +76,7 @@ typedef int (*H5ES_list_iter_func_t)(H5ES_event_t *ev, void *ctx);
 /* Package Private Prototypes */
 /******************************/
 H5_DLL H5ES_t *H5ES__create(void) H5_ATTR_MALLOC;
-H5_DLL herr_t  H5ES__insert_request(H5ES_t *es, H5VL_t *connector, void *token);
+H5_DLL herr_t  H5ES__insert_request(H5ES_t *es, H5VL_connector_t *connector, void *token);
 H5_DLL herr_t  H5ES__wait(H5ES_t *es, uint64_t timeout, size_t *num_in_progress, bool *op_failed);
 H5_DLL herr_t  H5ES__get_requests(H5ES_t *es, H5_iter_order_t order, hid_t *connector_ids, void **requests,
                                   size_t array_len);
@@ -92,7 +92,7 @@ H5_DLL int    H5ES__list_iterate(H5ES_event_list_t *el, H5_iter_order_t order, H
 H5_DLL void   H5ES__list_remove(H5ES_event_list_t *el, const H5ES_event_t *ev);
 
 /* Event operations */
-H5_DLL H5ES_event_t *H5ES__event_new(H5VL_t *connector, void *token);
+H5_DLL H5ES_event_t *H5ES__event_new(H5VL_connector_t *connector, void *token);
 H5_DLL herr_t        H5ES__event_free(H5ES_event_t *ev);
 H5_DLL herr_t        H5ES__event_completed(H5ES_event_t *ev, H5ES_event_list_t *el);
 

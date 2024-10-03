@@ -6589,7 +6589,7 @@ test_misc39(void)
      * the object should have a reference count of 1 since the file
      * was just created.
      */
-    VERIFY(file_vol_obj->rc, 1, "checking reference count");
+    VERIFY(H5VL_OBJ_RC(file_vol_obj), 1, "checking reference count");
 
     /* Create a variable-length string type */
     str_type = H5Tcopy(H5T_C_S1);
@@ -6650,7 +6650,7 @@ test_misc39(void)
      * associate each attribute's datatype with the file's VOL object
      * and will have incremented the reference count by 5.
      */
-    VERIFY(file_vol_obj->rc, 6, "checking reference count");
+    VERIFY(H5VL_OBJ_RC(file_vol_obj), 6, "checking reference count");
 
     /* Increments file's VOL object reference count by 1 */
     ret = H5Awrite(attr_id1, str_type, buf);
@@ -6682,7 +6682,7 @@ test_misc39(void)
      * incrementing the reference count of the associated file's VOL
      * object.
      */
-    VERIFY(file_vol_obj->rc, 12, "checking reference count");
+    VERIFY(H5VL_OBJ_RC(file_vol_obj), 12, "checking reference count");
 
     ret = H5Aclose(attr_id1);
     CHECK(ret, FAIL, "H5Aclose");
@@ -6716,7 +6716,7 @@ test_misc39(void)
          * the object should have a reference count of 1 since the file
          * was just opened.
          */
-        VERIFY(file_vol_obj->rc, 1, "checking reference count");
+        VERIFY(H5VL_OBJ_RC(file_vol_obj), 1, "checking reference count");
 
         /* Increments file's VOL object reference count by 1 */
         attr_id1 = H5Aopen(file_id, "varstr_attribute", H5P_DEFAULT);
@@ -6737,7 +6737,7 @@ test_misc39(void)
          * the attributes will also have associated their datatypes with
          * the file's VOL object.
          */
-        VERIFY(file_vol_obj->rc, 6, "checking reference count");
+        VERIFY(H5VL_OBJ_RC(file_vol_obj), 6, "checking reference count");
 
         /* Increments file's VOL object reference count by 1 */
         ret = H5Aread(attr_id1, str_type, rbuf);
@@ -6769,7 +6769,7 @@ test_misc39(void)
          * incrementing the reference count of the associated file's VOL
          * object.
          */
-        VERIFY(file_vol_obj->rc, 12, "checking reference count");
+        VERIFY(H5VL_OBJ_RC(file_vol_obj), 12, "checking reference count");
 
         ret = H5Treclaim(str_type, space_id, H5P_DEFAULT, rbuf);
         ret = H5Treclaim(array_type, space_id, H5P_DEFAULT, arr_rbuf);

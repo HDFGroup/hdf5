@@ -104,7 +104,8 @@ libhdf5_la_SOURCES= H5.c H5build_settings.c H5checksum.c H5dbg.c H5system.c \
         H5VLnative_attr.c H5VLnative_blob.c H5VLnative_dataset.c \
         H5VLnative_datatype.c H5VLnative_file.c H5VLnative_group.c \
         H5VLnative_link.c H5VLnative_introspect.c H5VLnative_object.c \
-        H5VLnative_token.c H5VLpassthru.c H5VLtest.c \
+        H5VLnative_token.c H5VLpassthru.c H5VLpassthru_int.c H5VLquery.c \
+        H5VLtest.c \
         H5VM.c H5WB.c H5Z.c  \
         H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zscaleoffset.c \
         H5Zszip.c H5Ztrans.c

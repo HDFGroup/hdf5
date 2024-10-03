@@ -2791,6 +2791,7 @@ H5D__vlen_get_buf_size_gen_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned
 {
     H5D_vlen_bufsize_generic_t *vlen_bufsize = (H5D_vlen_bufsize_generic_t *)op_data;
     H5T_t                      *dt;                  /* Datatype for operation */
+    void                       *vol_obj_data;        /* VOL object's data pointer */
     herr_t                      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2813,8 +2814,9 @@ H5D__vlen_get_buf_size_gen_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't select point");
 
     /* Read in the point (with the custom VL memory allocator) */
-    if (H5VL_dataset_read(1, &vlen_bufsize->dset_vol_obj->data, vlen_bufsize->dset_vol_obj->connector,
-                          &type_id, &vlen_bufsize->mspace_id, &vlen_bufsize->fspace_id, vlen_bufsize->dxpl_id,
+    vol_obj_data = H5VL_OBJ_DATA(vlen_bufsize->dset_vol_obj);
+    if (H5VL_dataset_read(1, &vol_obj_data, H5VL_OBJ_CONNECTOR(vlen_bufsize->dset_vol_obj), &type_id,
+                          &vlen_bufsize->mspace_id, &vlen_bufsize->fspace_id, vlen_bufsize->dxpl_id,
                           &vlen_bufsize->common.fl_tbuf, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point");
 

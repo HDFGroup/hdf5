@@ -39,6 +39,7 @@
 #include "H5Iprivate.h"  /* IDs                                  */
 #include "H5MMprivate.h" /* Memory management                    */
 #include "H5RSprivate.h" /* Reference-counted strings            */
+#include "H5VLprivate.h" /* Virtual Object Layer                 */
 
 /****************/
 /* Local Macros */
@@ -88,7 +89,7 @@ typedef struct H5ES_gei_ctx_t {
 /********************/
 static herr_t H5ES__close(H5ES_t *es);
 static herr_t H5ES__close_cb(void *es, void **request_token);
-static herr_t H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app_file,
+static herr_t H5ES__insert(H5ES_t *es, H5VL_connector_t *connector, void *request_token, const char *app_file,
                            const char *app_func, unsigned app_line, const char *caller, const char *api_args);
 static int    H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx);
 static herr_t H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev);
@@ -240,8 +241,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app_file, const char *app_func,
-             unsigned app_line, const char *caller, const char *api_args)
+H5ES__insert(H5ES_t *es, H5VL_connector_t *connector, void *request_token, const char *app_file,
+             const char *app_func, unsigned app_line, const char *caller, const char *api_args)
 {
     H5ES_event_t *ev          = NULL;    /* Event for request */
     bool          ev_inserted = false;   /* Flag to indicate that event is in active list */
@@ -313,7 +314,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, const char *caller_args, ...)
+H5ES_insert(hid_t es_id, H5VL_connector_t *connector, void *token, const char *caller,
+            const char *caller_args, ...)
 {
     H5ES_t     *es = NULL;             /* Event set for the operation */
     const char *app_file;              /* Application source file name */
@@ -389,7 +391,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES__insert_request(H5ES_t *es, H5VL_t *connector, void *token)
+H5ES__insert_request(H5ES_t *es, H5VL_connector_t *connector, void *token)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -424,7 +426,7 @@ H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
     H5ES_get_requests_ctx_t *ctx       = (H5ES_get_requests_ctx_t *)_ctx; /* Callback context */
     int                      ret_value = H5_ITER_CONT;                    /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     assert(ev);
@@ -433,16 +435,18 @@ H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
 
     /* Get the connector ID for the event */
     if (ctx->connector_ids)
-        ctx->connector_ids[ctx->i] = ev->request->connector->id;
+        if ((ctx->connector_ids[ctx->i] = H5VL_conn_register(H5VL_OBJ_CONNECTOR(ev->request))) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTREGISTER, H5_ITER_ERROR, "unable to register VOL connector ID");
 
     /* Get the request for the event */
     if (ctx->requests)
-        ctx->requests[ctx->i] = ev->request->data;
+        ctx->requests[ctx->i] = H5VL_OBJ_DATA(ev->request);
 
     /* Check if we've run out of room in the arrays */
     if (++ctx->i == ctx->array_len)
         ret_value = H5_ITER_STOP;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__get_requests_cb() */
 
