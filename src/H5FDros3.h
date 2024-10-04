@@ -21,14 +21,6 @@
 
 #ifdef H5_HAVE_ROS3_VFD
 
-/* When this header is included from a private header, don't make calls to H5open() */
-#undef H5OPEN
-#ifndef H5private_H
-#define H5OPEN ((!H5_libinit_g && !H5_libterm_g) ? H5open() : 0),
-#else /* H5private_H */
-#define H5OPEN
-#endif /* H5private_H */
-
 /** ID for the ros3 VFD */
 #define H5FD_ROS3 (H5OPEN H5FD_ROS3_id_g)
 

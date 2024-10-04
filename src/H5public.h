@@ -430,6 +430,20 @@ typedef void (*H5_atclose_func_t)(void *ctx);
 /* API adapter header (defines H5_DLL, etc.) */
 #include "H5api_adpt.h"
 
+/* Definition of H5OPEN macro used for returning library defined IDs to
+ * applications with macros, e.g. H5FD_SEC2.  Will only call H5open() for
+ * the application  once per library init/term epoch, and will not call
+ * H5open() when a macro that uses it is used within the library.
+ * Note: for library source, this coding pattern requires that H5private.h
+ * is the first library private header file included in the source file.
+ */
+#undef H5OPEN
+#ifndef H5private_H
+#define H5OPEN ((!H5_libinit_g && !H5_libterm_g) ? H5open() : 0),
+#else /* H5private_H */
+#define H5OPEN
+#endif /* H5private_H */
+
 #ifdef __cplusplus
 extern "C" {
 #endif

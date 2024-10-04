@@ -239,14 +239,6 @@ typedef H5T_conv_ret_t (*H5T_conv_except_func_t)(H5T_conv_except_t except_type, 
                                                  void *src_buf, void *dst_buf, void *user_data);
 //! <!-- [H5T_conv_except_func_t_snip] -->
 
-/* When this header is included from a private header, don't make calls to H5open() */
-#undef H5OPEN
-#ifndef H5private_H
-#define H5OPEN ((!H5_libinit_g && !H5_libterm_g) ? H5open() : 0),
-#else /* H5private_H */
-#define H5OPEN
-#endif /* H5private_H */
-
 /*
  * The IEEE floating point types in various byte orders.
  */

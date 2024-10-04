@@ -1681,14 +1681,6 @@ H5_DLL herr_t H5Otoken_from_str(hid_t loc_id, const char *token_str, H5O_token_t
 #endif
 /// \endcond
 
-/* When this header is included from a private header, don't make calls to H5open() */
-#undef H5OPEN
-#ifndef H5private_H
-#define H5OPEN ((!H5_libinit_g && !H5_libterm_g) ? H5open() : 0),
-#else /* H5private_H */
-#define H5OPEN
-#endif /* H5private_H */
-
 /* The canonical 'undefined' token value */
 #define H5O_TOKEN_UNDEF (H5OPEN H5O_TOKEN_UNDEF_g)
 H5_DLLVAR const H5O_token_t H5O_TOKEN_UNDEF_g;
