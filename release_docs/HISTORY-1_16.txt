@@ -1,0 +1,9 @@
+HDF5 History
+============
+
+This file contains development history of the HDF5 1.16 branch
+
+01.      Release Information for hdf5-1.16.0
+
+[Search on the string '%%%%' for section breaks of each release.]
+
