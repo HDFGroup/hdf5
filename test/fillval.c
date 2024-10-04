@@ -1565,17 +1565,17 @@ static int
 test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t *ch_size, hsize_t *start_size,
                   hsize_t *max_size, hid_t dtype, void *fillval)
 {
-    hid_t       fspace = H5I_INVALID_HID, mspace = H5I_INVALID_HID; /* File & memory dataspaces */
-    hid_t       dset = H5I_INVALID_HID;                             /* Dataset ID */
-    hid_t       dcpl = H5I_INVALID_HID;                             /* Dataset creation property list */
-    hsize_t     extend_size[5];                                     /* Dimensions to extend to */
-    hsize_t     one[5] = {1, 1, 1, 1, 1}; /* Dimensions of single element dataspace */
-    hsize_t     hs_size[5], hs_stride[5], hs_offset[5];
-    size_t      nelmts;
-    H5T_class_t dtype_class; /* Class of datatype */
-    int (*init_rtn)(void *, size_t, const void *);
-    int (*verify_rtn)(unsigned, const hsize_t *, const void *, const void *);
-    int (*release_rtn)(void *);
+    hid_t            fspace = H5I_INVALID_HID, mspace = H5I_INVALID_HID; /* File & memory dataspaces */
+    hid_t            dset = H5I_INVALID_HID;                             /* Dataset ID */
+    hid_t            dcpl = H5I_INVALID_HID;                             /* Dataset creation property list */
+    hsize_t          extend_size[5];                                     /* Dimensions to extend to */
+    hsize_t          one[5] = {1, 1, 1, 1, 1}; /* Dimensions of single element dataspace */
+    hsize_t          hs_size[5], hs_stride[5], hs_offset[5];
+    size_t           nelmts;
+    H5T_class_t      dtype_class; /* Class of datatype */
+    int              (*init_rtn)(void *, size_t, const void *);
+    int              (*verify_rtn)(unsigned, const hsize_t *, const void *, const void *);
+    int              (*release_rtn)(void *);
     size_t           val_size; /* Size of element */
     void            *val_rd, *odd_val;
     const void      *init_val, *should_be, *even_val;

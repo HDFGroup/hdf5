@@ -90,13 +90,13 @@ typedef struct H5B_shared_t {
  * array is initialized with the HDF5_BTREE_K_DEFAULT macro.
  */
 typedef struct H5B_class_t {
-    H5B_subid_t id;                                     /*id as found in file*/
-    size_t      sizeof_nkey;                            /*size of native (memory) key*/
-    H5UC_t *(*get_shared)(const H5F_t *, const void *); /*shared info for node */
-    herr_t (*new_node)(H5F_t *, H5B_ins_t, void *, void *, void *, haddr_t *);
-    int (*cmp2)(void *, void *, void *); /*compare 2 keys */
-    int (*cmp3)(void *, void *, void *); /*compare 3 keys */
-    htri_t (*found)(H5F_t *, haddr_t, const void *, bool *, void *);
+    H5B_subid_t id;                                         /*id as found in file*/
+    size_t      sizeof_nkey;                                /*size of native (memory) key*/
+    H5UC_t     *(*get_shared)(const H5F_t *, const void *); /*shared info for node */
+    herr_t      (*new_node)(H5F_t *, H5B_ins_t, void *, void *, void *, haddr_t *);
+    int         (*cmp2)(void *, void *, void *); /*compare 2 keys */
+    int         (*cmp3)(void *, void *, void *); /*compare 3 keys */
+    htri_t      (*found)(H5F_t *, haddr_t, const void *, bool *, void *);
 
     /* insert new data */
     H5B_ins_t (*insert)(H5F_t *, haddr_t, void *, bool *, void *, void *, void *, bool *, haddr_t *);

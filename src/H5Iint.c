@@ -36,7 +36,7 @@
 /****************/
 
 /* Combine a Type number and an ID index into an ID */
-#define H5I_MAKE(g, i) ((((hid_t)(g)&TYPE_MASK) << ID_BITS) | ((hid_t)(i)&ID_MASK))
+#define H5I_MAKE(g, i) ((((hid_t)(g) & TYPE_MASK) << ID_BITS) | ((hid_t)(i) & ID_MASK))
 
 /******************/
 /* Local Typedefs */

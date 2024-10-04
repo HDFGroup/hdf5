@@ -212,25 +212,25 @@ struct H5O_msg_class_t {
     const char *name;        /*for debugging             */
     size_t      native_size; /*size of native message    */
     unsigned    share_flags; /* Message sharing settings */
-    void *(*decode)(H5F_t *, H5O_t *, unsigned, unsigned *, size_t, const uint8_t *);
-    herr_t (*encode)(H5F_t *, bool, size_t, uint8_t *, const void *);
-    void *(*copy)(const void *, void *);                   /*copy native value         */
-    size_t (*raw_size)(const H5F_t *, bool, const void *); /*sizeof encoded message	*/
-    herr_t (*reset)(void *);                               /*free nested data structs  */
-    herr_t (*free)(void *);                                /*free main data struct  */
-    herr_t (*del)(H5F_t *, H5O_t *, void *);  /* Delete space in file referenced by this message */
-    herr_t (*link)(H5F_t *, H5O_t *, void *); /* Increment any links in file reference by this message */
-    herr_t (*set_share)(void *, const H5O_shared_t *); /* Set shared information */
-    htri_t (*can_share)(const void *);                 /* Is message allowed to be shared? */
-    herr_t (*pre_copy_file)(H5F_t *, const void *, bool *, const H5O_copy_t *,
+    void       *(*decode)(H5F_t *, H5O_t *, unsigned, unsigned *, size_t, const uint8_t *);
+    herr_t      (*encode)(H5F_t *, bool, size_t, uint8_t *, const void *);
+    void       *(*copy)(const void *, void *);                  /*copy native value         */
+    size_t      (*raw_size)(const H5F_t *, bool, const void *); /*sizeof encoded message	*/
+    herr_t      (*reset)(void *);                               /*free nested data structs  */
+    herr_t      (*free)(void *);                                /*free main data struct  */
+    herr_t      (*del)(H5F_t *, H5O_t *, void *);  /* Delete space in file referenced by this message */
+    herr_t      (*link)(H5F_t *, H5O_t *, void *); /* Increment any links in file reference by this message */
+    herr_t      (*set_share)(void *, const H5O_shared_t *); /* Set shared information */
+    htri_t      (*can_share)(const void *);                 /* Is message allowed to be shared? */
+    herr_t      (*pre_copy_file)(H5F_t *, const void *, bool *, const H5O_copy_t *,
                             void *); /*"pre copy" action when copying native value to file */
-    void *(*copy_file)(H5F_t *, void *, H5F_t *, bool *, unsigned *, H5O_copy_t *,
+    void       *(*copy_file)(H5F_t *, void *, H5F_t *, bool *, unsigned *, H5O_copy_t *,
                        void *); /*copy native value to file */
-    herr_t (*post_copy_file)(const H5O_loc_t *, const void *, H5O_loc_t *, void *, unsigned *,
+    herr_t      (*post_copy_file)(const H5O_loc_t *, const void *, H5O_loc_t *, void *, unsigned *,
                              H5O_copy_t *); /*"post copy" action when copying native value to file */
-    herr_t (*get_crt_index)(const void *, H5O_msg_crt_idx_t *); /* Get message's creation index */
-    herr_t (*set_crt_index)(void *, H5O_msg_crt_idx_t);         /* Set message's creation index */
-    herr_t (*debug)(H5F_t *, const void *, FILE *, int, int);
+    herr_t      (*get_crt_index)(const void *, H5O_msg_crt_idx_t *); /* Get message's creation index */
+    herr_t      (*set_crt_index)(void *, H5O_msg_crt_idx_t);         /* Set message's creation index */
+    herr_t      (*debug)(H5F_t *, const void *, FILE *, int, int);
 };
 
 struct H5O_mesg_t {
@@ -321,17 +321,17 @@ struct H5O_t {
 
 /* Class for types of objects in file */
 typedef struct H5O_obj_class_t {
-    H5O_type_t  type;                               /*object type on disk	     */
-    const char *name;                               /*for debugging		     */
-    void *(*get_copy_file_udata)(void);             /*retrieve user data for 'copy file' operation */
-    void (*free_copy_file_udata)(void *);           /*free user data for 'copy file' operation */
-    htri_t (*isa)(const H5O_t *);                   /*if a header matches an object class */
-    void *(*open)(const H5G_loc_t *, H5I_type_t *); /*open an object of this class */
-    void *(*create)(H5F_t *, void *, H5G_loc_t *);  /*create an object of this class */
-    H5O_loc_t *(*get_oloc)(hid_t);                  /*get the object header location for an object */
-    herr_t (*bh_info)(const H5O_loc_t *loc, H5O_t *oh,
+    H5O_type_t  type;                                     /*object type on disk	     */
+    const char *name;                                     /*for debugging		     */
+    void       *(*get_copy_file_udata)(void);             /*retrieve user data for 'copy file' operation */
+    void        (*free_copy_file_udata)(void *);          /*free user data for 'copy file' operation */
+    htri_t      (*isa)(const H5O_t *);                    /*if a header matches an object class */
+    void       *(*open)(const H5G_loc_t *, H5I_type_t *); /*open an object of this class */
+    void       *(*create)(H5F_t *, void *, H5G_loc_t *);  /*create an object of this class */
+    H5O_loc_t  *(*get_oloc)(hid_t);                       /*get the object header location for an object */
+    herr_t      (*bh_info)(const H5O_loc_t *loc, H5O_t *oh,
                       H5_ih_info_t *bh_info); /*get the index & heap info for an object */
-    herr_t (*flush)(void *obj_ptr);           /*flush an opened object of this class */
+    herr_t      (*flush)(void *obj_ptr);           /*flush an opened object of this class */
 } H5O_obj_class_t;
 
 /* Node in skip list to map addresses from one file to another during object header copy */

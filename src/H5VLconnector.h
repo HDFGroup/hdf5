@@ -843,8 +843,8 @@ typedef int H5VL_blob_optional_t;
 
 /* VOL connector info fields & callbacks */
 typedef struct H5VL_info_class_t {
-    size_t size;                     /* Size of the VOL info                         */
-    void *(*copy)(const void *info); /* Callback to create a copy of the VOL info    */
+    size_t size;                      /* Size of the VOL info                         */
+    void  *(*copy)(const void *info); /* Callback to create a copy of the VOL info    */
     herr_t (*cmp)(int *cmp_value, const void *info1, const void *info2); /* Callback to compare VOL info */
     herr_t (*free)(void *info);                     /* Callback to release a VOL info               */
     herr_t (*to_str)(const void *info, char **str); /* Callback to serialize connector's info into a string */
@@ -856,22 +856,22 @@ typedef struct H5VL_info_class_t {
 /* (These must be implemented by "pass through" VOL connectors, and should not be implemented by terminal VOL
  * connectors) */
 typedef struct H5VL_wrap_class_t {
-    void *(*get_object)(const void *obj); /* Callback to retrieve underlying object       */
+    void  *(*get_object)(const void *obj); /* Callback to retrieve underlying object       */
     herr_t (*get_wrap_ctx)(
         const void *obj,
         void      **wrap_ctx); /* Callback to retrieve the object wrapping context for the connector */
-    void *(*wrap_object)(void *obj, H5I_type_t obj_type,
+    void  *(*wrap_object)(void *obj, H5I_type_t obj_type,
                          void *wrap_ctx); /* Callback to wrap a library object */
-    void *(*unwrap_object)(void *obj);    /* Callback to unwrap a library object */
+    void  *(*unwrap_object)(void *obj);    /* Callback to unwrap a library object */
     herr_t (*free_wrap_ctx)(
         void *wrap_ctx); /* Callback to release the object wrapping context for the connector */
 } H5VL_wrap_class_t;
 
 /* H5A routines */
 typedef struct H5VL_attr_class_t {
-    void *(*create)(void *obj, const H5VL_loc_params_t *loc_params, const char *attr_name, hid_t type_id,
+    void  *(*create)(void *obj, const H5VL_loc_params_t *loc_params, const char *attr_name, hid_t type_id,
                     hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
-    void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *attr_name, hid_t aapl_id,
+    void  *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *attr_name, hid_t aapl_id,
                   hid_t dxpl_id, void **req);
     herr_t (*read)(void *attr, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req);
     herr_t (*write)(void *attr, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req);
@@ -884,9 +884,9 @@ typedef struct H5VL_attr_class_t {
 
 /* H5D routines */
 typedef struct H5VL_dataset_class_t {
-    void *(*create)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t lcpl_id,
+    void  *(*create)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t lcpl_id,
                     hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
-    void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t dapl_id,
+    void  *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t dapl_id,
                   hid_t dxpl_id, void **req);
     herr_t (*read)(size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[],
                    hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req);
@@ -900,9 +900,9 @@ typedef struct H5VL_dataset_class_t {
 
 /* H5T routines*/
 typedef struct H5VL_datatype_class_t {
-    void *(*commit)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t type_id,
+    void  *(*commit)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t type_id,
                     hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
-    void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t tapl_id,
+    void  *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t tapl_id,
                   hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*specific)(void *obj, H5VL_datatype_specific_args_t *args, hid_t dxpl_id, void **req);
@@ -912,9 +912,9 @@ typedef struct H5VL_datatype_class_t {
 
 /* H5F routines */
 typedef struct H5VL_file_class_t {
-    void *(*create)(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id,
+    void  *(*create)(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id,
                     void **req);
-    void *(*open)(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
+    void  *(*open)(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*specific)(void *obj, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
@@ -923,9 +923,9 @@ typedef struct H5VL_file_class_t {
 
 /* H5G routines */
 typedef struct H5VL_group_class_t {
-    void *(*create)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t lcpl_id,
+    void  *(*create)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t lcpl_id,
                     hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
-    void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t gapl_id,
+    void  *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t gapl_id,
                   hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*specific)(void *obj, H5VL_group_specific_args_t *args, hid_t dxpl_id, void **req);
@@ -953,7 +953,7 @@ typedef struct H5VL_link_class_t {
 
 /* H5O routines */
 typedef struct H5VL_object_class_t {
-    void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, H5I_type_t *opened_type, hid_t dxpl_id,
+    void  *(*open)(void *obj, const H5VL_loc_params_t *loc_params, H5I_type_t *opened_type, hid_t dxpl_id,
                   void **req);
     herr_t (*copy)(void *src_obj, const H5VL_loc_params_t *loc_params1, const char *src_name, void *dst_obj,
                    const H5VL_loc_params_t *loc_params2, const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id,
@@ -1019,13 +1019,13 @@ typedef struct H5VL_token_class_t {
 //! <!-- [H5VL_class_t_snip] -->
 typedef struct H5VL_class_t {
     /* Overall connector fields & callbacks */
-    unsigned           version;          /**< VOL connector class struct version number */
-    H5VL_class_value_t value;            /**< Value to identify connector               */
-    const char        *name;             /**< Connector name (MUST be unique!)          */
-    unsigned           conn_version;     /**< Version number of connector               */
-    uint64_t           cap_flags;        /**< Capability flags for connector            */
-    herr_t (*initialize)(hid_t vipl_id); /**< Connector initialization callback         */
-    herr_t (*terminate)(void);           /**< Connector termination callback            */
+    unsigned           version;                      /**< VOL connector class struct version number */
+    H5VL_class_value_t value;                        /**< Value to identify connector               */
+    const char        *name;                         /**< Connector name (MUST be unique!)          */
+    unsigned           conn_version;                 /**< Version number of connector               */
+    uint64_t           cap_flags;                    /**< Capability flags for connector            */
+    herr_t             (*initialize)(hid_t vipl_id); /**< Connector initialization callback         */
+    herr_t             (*terminate)(void);           /**< Connector termination callback            */
 
     /* VOL framework */
     H5VL_info_class_t info_cls; /**< VOL info fields & callbacks  */

@@ -158,14 +158,14 @@ typedef struct H5TS_rwlock_t {
     unsigned readers, writers, read_waiters, write_waiters;
 } H5TS_rwlock_t;
 
-typedef thrd_t H5TS_thread_t;
-typedef int (*H5TS_thread_start_func_t)(void *);
+typedef thrd_t    H5TS_thread_t;
+typedef int       (*H5TS_thread_start_func_t)(void *);
 typedef int       H5TS_thread_ret_t;
 typedef tss_t     H5TS_key_t;
 typedef mtx_t     H5TS_CAPABILITY("mutex") H5TS_mutex_t;
 typedef cnd_t     H5TS_cond_t;
 typedef once_flag H5TS_once_t;
-typedef void (*H5TS_once_init_func_t)(void);
+typedef void      (*H5TS_once_init_func_t)(void);
 #else
 #ifdef H5_HAVE_WIN_THREADS
 typedef HANDLE                 H5TS_thread_t;
@@ -178,15 +178,15 @@ typedef CONDITION_VARIABLE     H5TS_cond_t;
 typedef INIT_ONCE              H5TS_once_t;
 typedef PINIT_ONCE_FN          H5TS_once_init_func_t;
 #else
-typedef pthread_t H5TS_thread_t;
-typedef void *(*H5TS_thread_start_func_t)(void *);
+typedef pthread_t        H5TS_thread_t;
+typedef void            *(*H5TS_thread_start_func_t)(void *);
 typedef void            *H5TS_thread_ret_t;
 typedef pthread_key_t    H5TS_key_t;
 typedef pthread_mutex_t  H5TS_CAPABILITY("mutex") H5TS_mutex_t;
 typedef pthread_rwlock_t H5TS_rwlock_t;
 typedef pthread_cond_t   H5TS_cond_t;
 typedef pthread_once_t   H5TS_once_t;
-typedef void (*H5TS_once_init_func_t)(void);
+typedef void             (*H5TS_once_init_func_t)(void);
 #endif
 #endif
 

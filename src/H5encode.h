@@ -33,7 +33,7 @@
 
 #define INT16ENCODE(p, i)                                                                                    \
     do {                                                                                                     \
-        *(p) = (uint8_t)((unsigned)(i)&0xff);                                                                \
+        *(p) = (uint8_t)((unsigned)(i) & 0xff);                                                              \
         (p)++;                                                                                               \
         *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff);                                                       \
         (p)++;                                                                                               \
@@ -41,7 +41,7 @@
 
 #define UINT16ENCODE(p, i)                                                                                   \
     do {                                                                                                     \
-        *(p) = (uint8_t)((unsigned)(i)&0xff);                                                                \
+        *(p) = (uint8_t)((unsigned)(i) & 0xff);                                                              \
         (p)++;                                                                                               \
         *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff);                                                       \
         (p)++;                                                                                               \
@@ -49,7 +49,7 @@
 
 #define INT32ENCODE(p, i)                                                                                    \
     do {                                                                                                     \
-        *(p) = (uint8_t)((uint32_t)(i)&0xff);                                                                \
+        *(p) = (uint8_t)((uint32_t)(i) & 0xff);                                                              \
         (p)++;                                                                                               \
         *(p) = (uint8_t)(((uint32_t)(i) >> 8) & 0xff);                                                       \
         (p)++;                                                                                               \
@@ -61,7 +61,7 @@
 
 #define UINT32ENCODE(p, i)                                                                                   \
     do {                                                                                                     \
-        *(p) = (uint8_t)((i)&0xff);                                                                          \
+        *(p) = (uint8_t)((i) & 0xff);                                                                        \
         (p)++;                                                                                               \
         *(p) = (uint8_t)(((i) >> 8) & 0xff);                                                                 \
         (p)++;                                                                                               \
@@ -149,41 +149,41 @@
 
 #define INT16DECODE(p, i)                                                                                    \
     do {                                                                                                     \
-        (i) = (int16_t)((*(p)&0xff));                                                                        \
+        (i) = (int16_t)((*(p) & 0xff));                                                                      \
         (p)++;                                                                                               \
-        (i) |= (int16_t)(((*(p)&0xff) << 8) | ((*(p)&0x80) ? ~0xffff : 0x0));                                \
+        (i) |= (int16_t)(((*(p) & 0xff) << 8) | ((*(p) & 0x80) ? ~0xffff : 0x0));                            \
         (p)++;                                                                                               \
     } while (0)
 
 #define UINT16DECODE(p, i)                                                                                   \
     do {                                                                                                     \
-        (i) = (uint16_t)(*(p)&0xff);                                                                         \
+        (i) = (uint16_t)(*(p) & 0xff);                                                                       \
         (p)++;                                                                                               \
-        (i) |= (uint16_t)((*(p)&0xff) << 8);                                                                 \
+        (i) |= (uint16_t)((*(p) & 0xff) << 8);                                                               \
         (p)++;                                                                                               \
     } while (0)
 
 #define INT32DECODE(p, i)                                                                                    \
     do {                                                                                                     \
-        (i) = ((int32_t)(*(p)&0xff));                                                                        \
+        (i) = ((int32_t)(*(p) & 0xff));                                                                      \
         (p)++;                                                                                               \
-        (i) |= ((int32_t)(*(p)&0xff) << 8);                                                                  \
+        (i) |= ((int32_t)(*(p) & 0xff) << 8);                                                                \
         (p)++;                                                                                               \
-        (i) |= ((int32_t)(*(p)&0xff) << 16);                                                                 \
+        (i) |= ((int32_t)(*(p) & 0xff) << 16);                                                               \
         (p)++;                                                                                               \
-        (i) |= ((int32_t)(((*(p) & (unsigned)0xff) << 24) | ((*(p)&0x80) ? ~0xffffffffULL : 0x0ULL)));       \
+        (i) |= ((int32_t)(((*(p) & (unsigned)0xff) << 24) | ((*(p) & 0x80) ? ~0xffffffffULL : 0x0ULL)));     \
         (p)++;                                                                                               \
     } while (0)
 
 #define UINT32DECODE(p, i)                                                                                   \
     do {                                                                                                     \
-        (i) = (uint32_t)(*(p)&0xff);                                                                         \
+        (i) = (uint32_t)(*(p) & 0xff);                                                                       \
         (p)++;                                                                                               \
-        (i) |= ((uint32_t)(*(p)&0xff) << 8);                                                                 \
+        (i) |= ((uint32_t)(*(p) & 0xff) << 8);                                                               \
         (p)++;                                                                                               \
-        (i) |= ((uint32_t)(*(p)&0xff) << 16);                                                                \
+        (i) |= ((uint32_t)(*(p) & 0xff) << 16);                                                              \
         (p)++;                                                                                               \
-        (i) |= ((uint32_t)(*(p)&0xff) << 24);                                                                \
+        (i) |= ((uint32_t)(*(p) & 0xff) << 24);                                                              \
         (p)++;                                                                                               \
     } while (0)
 

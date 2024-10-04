@@ -86,7 +86,7 @@ static void init_prefix(char **prfx, size_t prfx_len);
 
 /* a structure for handling the order command-line parameters come in */
 struct handler_t {
-    void (*func)(hid_t, const char *, void *, int, const char *);
+    void             (*func)(hid_t, const char *, void *, int, const char *);
     char            *obj;
     struct subset_t *subset_info;
 };

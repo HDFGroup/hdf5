@@ -105,9 +105,9 @@ typedef struct H5FS_section_class_t {
     herr_t (*term_cls)(struct H5FS_section_class_t *); /* Routine to terminate class-specific settings */
 
     /* Object methods */
-    herr_t (*add)(H5FS_section_info_t **, unsigned *,
+    herr_t               (*add)(H5FS_section_info_t **, unsigned *,
                   void *); /* Routine called when section is about to be added to manager */
-    herr_t (*serialize)(const struct H5FS_section_class_t *, const H5FS_section_info_t *,
+    herr_t               (*serialize)(const struct H5FS_section_class_t *, const H5FS_section_info_t *,
                         uint8_t *); /* Routine to serialize a "live" section into a buffer */
     H5FS_section_info_t *(*deserialize)(
         const struct H5FS_section_class_t *, const uint8_t *, haddr_t, hsize_t,
@@ -122,7 +122,7 @@ typedef struct H5FS_section_class_t {
     herr_t (*valid)(const struct H5FS_section_class_t *,
                     const H5FS_section_info_t *); /* Routine to check if a section is valid */
     H5FS_section_info_t *(*split)(H5FS_section_info_t *, hsize_t); /* Routine to create the split section */
-    herr_t (*debug)(const H5FS_section_info_t *, FILE *, int,
+    herr_t               (*debug)(const H5FS_section_info_t *, FILE *, int,
                     int); /* Routine to dump debugging information about a section */
 } H5FS_section_class_t;
 

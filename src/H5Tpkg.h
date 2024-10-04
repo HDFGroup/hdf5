@@ -249,7 +249,7 @@ typedef enum {
 
 /* VL function pointers */
 typedef herr_t (*H5T_vlen_getlen_func_t)(H5VL_object_t *file, const void *vl_addr, size_t *len);
-typedef void *(*H5T_vlen_getptr_func_t)(void *vl_addr);
+typedef void  *(*H5T_vlen_getptr_func_t)(void *vl_addr);
 typedef herr_t (*H5T_vlen_isnull_func_t)(const H5VL_object_t *file, void *vl_addr, bool *isnull);
 typedef herr_t (*H5T_vlen_setnull_func_t)(H5VL_object_t *file, void *_vl, void *_bg);
 typedef herr_t (*H5T_vlen_read_func_t)(H5VL_object_t *file, void *_vl, void *buf, size_t len);

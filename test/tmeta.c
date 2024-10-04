@@ -28,18 +28,18 @@
 
 static uint8_t compar_buffer[] = {
     /* Little-endian encoded version of the 16-bit signed integer */
-    (uint8_t)((TEST_INT16_VALUE)&0xff),
+    (uint8_t)((TEST_INT16_VALUE) & 0xff),
     (uint8_t)((TEST_INT16_VALUE >> 8) & 0xff),
     /* Little-endian encoded version of the 16-bit unsigned integer */
-    (uint8_t)((TEST_UINT16_VALUE)&0xff),
+    (uint8_t)((TEST_UINT16_VALUE) & 0xff),
     (uint8_t)((TEST_UINT16_VALUE >> 8) & 0xff),
     /* Little-endian encoded version of the 32-bit signed integer */
-    (uint8_t)((TEST_INT32_VALUE)&0xff),
+    (uint8_t)((TEST_INT32_VALUE) & 0xff),
     (uint8_t)((TEST_INT32_VALUE >> 8) & 0xff),
     (uint8_t)((TEST_INT32_VALUE >> 16) & 0xff),
     (uint8_t)((TEST_INT32_VALUE >> 24) & 0xff),
     /* Little-endian encoded version of the 32-bit unsigned integer */
-    (uint8_t)((TEST_UINT32_VALUE)&0xff),
+    (uint8_t)((TEST_UINT32_VALUE) & 0xff),
     (uint8_t)((TEST_UINT32_VALUE >> 8) & 0xff),
     (uint8_t)((TEST_UINT32_VALUE >> 16) & 0xff),
     (uint8_t)((TEST_UINT32_VALUE >> 24) & 0xff),
