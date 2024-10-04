@@ -56,8 +56,8 @@ typedef struct H5FA_class_t {
     size_t        nat_elmt_size; /* Size of native (memory) element              */
 
     /* Fixed array client callback methods */
-    void  *(*crt_context)(void *udata); /* Create context for other callbacks */
-    herr_t (*dst_context)(void *ctx);   /* Destroy context */
+    void *(*crt_context)(void *udata); /* Create context for other callbacks */
+    herr_t (*dst_context)(void *ctx);  /* Destroy context */
     herr_t (*fill)(void  *nat_blk,
                    size_t nelmts); /* Fill array of elements with encoded form of "missing element" value */
     herr_t (*encode)(void *raw, const void *elmt, size_t nelmts,
@@ -65,9 +65,9 @@ typedef struct H5FA_class_t {
     herr_t (*decode)(const void *raw, void *elmt, size_t nelmts,
                      void *ctx); /* Decode elements from disk storage form to native form */
     herr_t (*debug)(FILE *stream, int indent, int fwidth, hsize_t idx,
-                    const void *elmt);                 /* Print an element for debugging */
-    void  *(*crt_dbg_ctx)(H5F_t *f, haddr_t obj_addr); /* Create debugging context */
-    herr_t (*dst_dbg_ctx)(void *dbg_ctx);              /* Destroy debugging context */
+                    const void *elmt);                /* Print an element for debugging */
+    void *(*crt_dbg_ctx)(H5F_t *f, haddr_t obj_addr); /* Create debugging context */
+    herr_t (*dst_dbg_ctx)(void *dbg_ctx);             /* Destroy debugging context */
 } H5FA_class_t;
 
 /* Fixed array creation parameters */

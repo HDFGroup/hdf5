@@ -364,7 +364,7 @@ typedef struct H5EA_dblk_page_cache_ud_t {
 #ifdef H5EA_TESTING
 typedef struct H5EA__ctx_cb_t {
     herr_t (*encode)(const void *elmt, size_t nelmts, void *udata); /* Perform action during encode step */
-    void  *udata;                                                   /* User data for encode action */
+    void *udata;                                                    /* User data for encode action */
 } H5EA__ctx_cb_t;
 #endif /* H5EA_TESTING */
 

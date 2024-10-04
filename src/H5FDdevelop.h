@@ -217,7 +217,7 @@ typedef struct H5FD_class_t {
     /**< Decodes the superblock information for this driver */
 
     size_t fapl_size; /**< Size of driver-specific file access properties */
-    void  *(*fapl_get)(H5FD_t *file);
+    void *(*fapl_get)(H5FD_t *file);
     /**< Returns the file access property list */
 
     void *(*fapl_copy)(const void *fapl);

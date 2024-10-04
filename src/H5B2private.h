@@ -86,7 +86,7 @@ struct H5B2_class_t {
     size_t       nrec_size; /* Size of native (memory) record */
 
     /* Extensible array client callback methods */
-    void  *(*crt_context)(void *udata);                /* Create context for other client callbacks */
+    void *(*crt_context)(void *udata);                 /* Create context for other client callbacks */
     herr_t (*dst_context)(void *ctx);                  /* Destroy client callback context */
     herr_t (*store)(void *nrecord, const void *udata); /* Store application record in native record table */
     herr_t (*compare)(const void *rec1, const void *rec2, int *result); /* Compare two native records */

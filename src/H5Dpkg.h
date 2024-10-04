@@ -140,17 +140,17 @@ struct H5D_dset_io_info_t;
 typedef struct H5D_shared_t H5D_shared_t;
 
 /* Function pointers for I/O on particular types of dataset layouts */
-typedef herr_t  (*H5D_layout_construct_func_t)(H5F_t *f, H5D_t *dset);
-typedef herr_t  (*H5D_layout_init_func_t)(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
-typedef bool    (*H5D_layout_is_space_alloc_func_t)(const H5O_storage_t *storage);
-typedef bool    (*H5D_layout_is_data_cached_func_t)(const H5D_shared_t *shared_dset);
-typedef herr_t  (*H5D_layout_io_init_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_io_info_t *dinfo);
-typedef herr_t  (*H5D_layout_mdio_init_func_t)(struct H5D_io_info_t      *io_info,
+typedef herr_t (*H5D_layout_construct_func_t)(H5F_t *f, H5D_t *dset);
+typedef herr_t (*H5D_layout_init_func_t)(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
+typedef bool (*H5D_layout_is_space_alloc_func_t)(const H5O_storage_t *storage);
+typedef bool (*H5D_layout_is_data_cached_func_t)(const H5D_shared_t *shared_dset);
+typedef herr_t (*H5D_layout_io_init_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_io_info_t *dinfo);
+typedef herr_t (*H5D_layout_mdio_init_func_t)(struct H5D_io_info_t      *io_info,
                                               struct H5D_dset_io_info_t *dinfo);
-typedef herr_t  (*H5D_layout_read_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_io_info_t *dinfo);
-typedef herr_t  (*H5D_layout_write_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_io_info_t *dinfo);
-typedef herr_t  (*H5D_layout_read_md_func_t)(struct H5D_io_info_t *io_info);
-typedef herr_t  (*H5D_layout_write_md_func_t)(struct H5D_io_info_t *io_info);
+typedef herr_t (*H5D_layout_read_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_io_info_t *dinfo);
+typedef herr_t (*H5D_layout_write_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_io_info_t *dinfo);
+typedef herr_t (*H5D_layout_read_md_func_t)(struct H5D_io_info_t *io_info);
+typedef herr_t (*H5D_layout_write_md_func_t)(struct H5D_io_info_t *io_info);
 typedef ssize_t (*H5D_layout_readvv_func_t)(const struct H5D_io_info_t      *io_info,
                                             const struct H5D_dset_io_info_t *dset_info, size_t dset_max_nseq,
                                             size_t *dset_curr_seq, size_t dset_len_arr[],
@@ -163,9 +163,9 @@ typedef ssize_t (*H5D_layout_writevv_func_t)(const struct H5D_io_info_t      *io
                                              hsize_t dset_offset_arr[], size_t mem_max_nseq,
                                              size_t *mem_curr_seq, size_t mem_len_arr[],
                                              hsize_t mem_offset_arr[]);
-typedef herr_t  (*H5D_layout_flush_func_t)(H5D_t *dataset);
-typedef herr_t  (*H5D_layout_io_term_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_io_info_t *di);
-typedef herr_t  (*H5D_layout_dest_func_t)(H5D_t *dataset);
+typedef herr_t (*H5D_layout_flush_func_t)(H5D_t *dataset);
+typedef herr_t (*H5D_layout_io_term_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_io_info_t *di);
+typedef herr_t (*H5D_layout_dest_func_t)(H5D_t *dataset);
 
 /* Typedef for grouping layout I/O routines */
 typedef struct H5D_layout_ops_t {
@@ -396,13 +396,13 @@ typedef herr_t (*H5D_chunk_create_func_t)(const H5D_chk_idx_info_t *idx_info);
 typedef herr_t (*H5D_chunk_open_func_t)(const H5D_chk_idx_info_t *idx_info);
 typedef herr_t (*H5D_chunk_close_func_t)(const H5D_chk_idx_info_t *idx_info);
 typedef herr_t (*H5D_chunk_is_open_func_t)(const H5D_chk_idx_info_t *idx_info, bool *is_open);
-typedef bool   (*H5D_chunk_is_space_alloc_func_t)(const H5O_storage_chunk_t *storage);
+typedef bool (*H5D_chunk_is_space_alloc_func_t)(const H5O_storage_chunk_t *storage);
 typedef herr_t (*H5D_chunk_insert_func_t)(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
                                           const H5D_t *dset);
 typedef herr_t (*H5D_chunk_get_addr_func_t)(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata);
 typedef herr_t (*H5D_chunk_load_metadata_func_t)(const H5D_chk_idx_info_t *idx_info);
 typedef herr_t (*H5D_chunk_resize_func_t)(H5O_layout_chunk_t *layout);
-typedef int    (*H5D_chunk_iterate_func_t)(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
+typedef int (*H5D_chunk_iterate_func_t)(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
                                         void *chunk_udata);
 typedef herr_t (*H5D_chunk_remove_func_t)(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata);
 typedef herr_t (*H5D_chunk_delete_func_t)(const H5D_chk_idx_info_t *idx_info);

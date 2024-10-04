@@ -114,13 +114,13 @@ typedef struct earray_test_param_t earray_test_param_t;
 
 /* Extensible array iterator class */
 typedef struct earray_iter_t {
-    void    *(*init)(const H5EA_create_t *cparam, const earray_test_param_t *tparam,
-                  hsize_t cnt);          /* Initialize/allocate iterator private info */
+    void *(*init)(const H5EA_create_t *cparam, const earray_test_param_t *tparam,
+                  hsize_t cnt);             /* Initialize/allocate iterator private info */
     hssize_t (*next)(void *info);           /* Get the next element to test */
     hssize_t (*max_elem)(const void *info); /* Get the max. element set */
-    int      (*state)(void *in_eiter, const H5EA_create_t *cparam, const earray_test_param_t *tparam,
+    int (*state)(void *in_eiter, const H5EA_create_t *cparam, const earray_test_param_t *tparam,
                  earray_state_t *state, hsize_t idx); /* Get the state of the extensible array */
-    herr_t   (*term)(void *info);                          /* Shutdown/free iterator private info */
+    herr_t (*term)(void *info);                       /* Shutdown/free iterator private info */
 } earray_iter_t;
 
 /* Testing parameters */

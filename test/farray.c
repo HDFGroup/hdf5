@@ -81,10 +81,10 @@ typedef struct farray_test_param_t farray_test_param_t;
 
 /* Fixed array iterator class */
 typedef struct farray_iter_t {
-    void    *(*init)(const H5FA_create_t *cparam, const farray_test_param_t *tparam,
-                  hsize_t cnt); /* Initialize/allocate iterator private info */
-    hssize_t (*next)(void *info);  /* Get the next element to test */
-    herr_t   (*term)(void *info);  /* Shutdown/free iterator private info */
+    void *(*init)(const H5FA_create_t *cparam, const farray_test_param_t *tparam,
+                  hsize_t cnt);   /* Initialize/allocate iterator private info */
+    hssize_t (*next)(void *info); /* Get the next element to test */
+    herr_t (*term)(void *info);   /* Shutdown/free iterator private info */
 } farray_iter_t;
 
 /* Testing parameters */

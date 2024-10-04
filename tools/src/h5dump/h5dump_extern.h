@@ -25,13 +25,13 @@
  **/
 /* the table of dump functions */
 typedef struct dump_functions_t {
-    void   (*dump_group_function)(hid_t, const char *);
-    void   (*dump_named_datatype_function)(hid_t, const char *);
-    void   (*dump_dataset_function)(hid_t, const char *, struct subset_t *);
-    void   (*dump_dataspace_function)(hid_t);
-    void   (*dump_datatype_function)(hid_t);
+    void (*dump_group_function)(hid_t, const char *);
+    void (*dump_named_datatype_function)(hid_t, const char *);
+    void (*dump_dataset_function)(hid_t, const char *, struct subset_t *);
+    void (*dump_dataspace_function)(hid_t);
+    void (*dump_datatype_function)(hid_t);
     herr_t (*dump_attribute_function)(hid_t, const char *, const H5A_info_t *, void *);
-    void   (*dump_data_function)(hid_t, int, struct subset_t *, int);
+    void (*dump_data_function)(hid_t, int, struct subset_t *, int);
 } dump_functions;
 
 /* List of table structures.  There is one table structure for each file */

@@ -22,11 +22,11 @@
  */
 
 typedef struct TestStruct {
-    char  Name[MAXTESTNAME];
-    char  Description[MAXTESTDESC];
-    void  (*TestFunc)(const void *);
-    void  (*TestSetupFunc)(void *);
-    void  (*TestCleanupFunc)(void *);
+    char Name[MAXTESTNAME];
+    char Description[MAXTESTDESC];
+    void (*TestFunc)(const void *);
+    void (*TestSetupFunc)(void *);
+    void (*TestCleanupFunc)(void *);
     void *TestParameters;
     int   TestNumErrors;
     int   TestSkipFlag;
@@ -40,9 +40,9 @@ static TestStruct *TestArray = NULL; /* Array of tests */
 static unsigned    TestAlloc = 0;    /* Size of the Test array */
 static unsigned    TestCount = 0;    /* Number of tests currently added to test array */
 
-static const char *TestProgName                                   = NULL;
-static void        (*TestPrivateUsage_g)(FILE *stream)            = NULL;
-static herr_t      (*TestPrivateParser_g)(int argc, char *argv[]) = NULL;
+static const char *TestProgName                              = NULL;
+static void (*TestPrivateUsage_g)(FILE *stream)              = NULL;
+static herr_t (*TestPrivateParser_g)(int argc, char *argv[]) = NULL;
 
 static int  TestNumErrs_g        = 0;    /* Total number of errors that occurred for whole test program */
 static bool TestEnableErrorStack = true; /* Whether to show error stacks from the library */

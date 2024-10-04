@@ -135,10 +135,10 @@ static bool display_root_g     = false; /* show root group in output? */
 /* Information about how to display each type of object */
 static struct dispatch_t {
     const char *name;
-    hid_t       (*open)(hid_t loc, const char *name, hid_t apl_id);
-    herr_t      (*close)(hid_t obj);
-    herr_t      (*list1)(hid_t obj);
-    herr_t      (*list2)(hid_t obj, const char *name);
+    hid_t (*open)(hid_t loc, const char *name, hid_t apl_id);
+    herr_t (*close)(hid_t obj);
+    herr_t (*list1)(hid_t obj);
+    herr_t (*list2)(hid_t obj, const char *name);
 } dispatch_g[H5O_TYPE_NTYPES];
 
 #define DISPATCH(TYPE, NAME, LIST1, LIST2)                                                                   \
