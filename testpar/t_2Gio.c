@@ -2536,7 +2536,7 @@ main(int argc, char **argv)
 
     /* Initialize testing framework */
     if (mpi_rank < 2) {
-        if (TestInit(argv[0], usage, parse_options, mpi_rank) < 0) {
+        if (TestInit(argv[0], usage, parse_options, NULL, NULL, mpi_rank) < 0) {
             fprintf(stderr, "couldn't initialize testing framework\n");
             MPI_Abort(MPI_COMM_WORLD, -1);
         }
@@ -2581,7 +2581,11 @@ main(int argc, char **argv)
         H5Pset_fapl_mpio(fapl, test_comm, MPI_INFO_NULL);
 
         /* Perform requested testing */
-        PerformTests();
+        if (PerformTests() < 0) {
+            fprintf(stderr, "couldn't run tests\n");
+            TestShutdown();
+            MPI_Abort(MPI_COMM_WORLD, -1);
+        }
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -2602,6 +2606,12 @@ main(int argc, char **argv)
     for (int i = 0; i < NFILENAME; i++) {
         free(filenames[i]);
         filenames[i] = NULL;
+    }
+
+    if (TestShutdown() < 0) {
+        if (MAINPROCESS)
+            fprintf(stderr, "couldn't shut down testing framework\n");
+        MPI_Abort(MPI_COMM_WORLD, -1);
     }
 
     H5close();
