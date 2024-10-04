@@ -36,7 +36,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.16.0
+- Bug Fixes since HDF5-1.14.5
 - Platforms Tested
 - Known Problems
 - CMake vs. Autotools installations
