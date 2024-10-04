@@ -430,6 +430,18 @@ typedef void (*H5_atclose_func_t)(void *ctx);
 /* API adapter header (defines H5_DLL, etc.) */
 #include "H5api_adpt.h"
 
+/*
+ * Does the compiler support the __builtin_expect() syntax?
+ * It's not a problem if not.
+ */
+#if H5_HAVE_BUILTIN_EXPECT
+#define H5_LIKELY(expression)   __builtin_expect(!!(expression), 1)
+#define H5_UNLIKELY(expression) __builtin_expect(!!(expression), 0)
+#else
+#define H5_LIKELY(expression)   (expression)
+#define H5_UNLIKELY(expression) (expression)
+#endif
+
 /* Definition of H5OPEN macro used for returning library defined IDs to
  * applications with macros, e.g. H5FD_SEC2.  Will only call H5open() for
  * the application  once per library init/term epoch, and will not call
@@ -439,7 +451,7 @@ typedef void (*H5_atclose_func_t)(void *ctx);
  */
 #undef H5OPEN
 #ifndef H5private_H
-#define H5OPEN ((!H5_libinit_g && !H5_libterm_g) ? H5open() : 0),
+#define H5OPEN (H5_UNLIKELY(!H5_libinit_g && !H5_libterm_g) ? H5open() : 0),
 #else /* H5private_H */
 #define H5OPEN
 #endif /* H5private_H */

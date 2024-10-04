@@ -163,18 +163,6 @@
 #include "uthash.h"
 
 /*
- * Does the compiler support the __builtin_expect() syntax?
- * It's not a problem if not.
- */
-#if H5_HAVE_BUILTIN_EXPECT
-#define H5_LIKELY(expression)   __builtin_expect(!!(expression), 1)
-#define H5_UNLIKELY(expression) __builtin_expect(!!(expression), 0)
-#else
-#define H5_LIKELY(expression)   (expression)
-#define H5_UNLIKELY(expression) (expression)
-#endif
-
-/*
  * Does the compiler support the __attribute__(()) syntax?  It's no
  * big deal if we don't.
  *
