@@ -854,6 +854,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   if test "$MY_FLT128_DIG" -gt "$MY_LDBL_DIG" ; then
     AC_MSG_RESULT([yes])
     AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 will be used in the Fortran wrappers])
+    AC_CHECK_SIZEOF([__float128])
   else
     ## Can't use __float128, but write an undef line anyway
     AC_MSG_RESULT([no])
