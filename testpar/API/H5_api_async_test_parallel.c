@@ -434,7 +434,7 @@ test_multi_dataset_io(void)
     hid_t    file_id                               = H5I_INVALID_HID;
     hid_t    fapl_id                               = H5I_INVALID_HID;
     hid_t    dset_id[MULTI_DATASET_IO_TEST_NDSETS] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
-                                                   H5I_INVALID_HID, H5I_INVALID_HID};
+                                                      H5I_INVALID_HID, H5I_INVALID_HID};
     hid_t    space_id                              = H5I_INVALID_HID;
     hid_t    mspace_id                             = H5I_INVALID_HID;
     hid_t    es_id                                 = H5I_INVALID_HID;
@@ -758,9 +758,9 @@ test_multi_file_dataset_io(void)
     size_t   i, j, data_size, num_in_progress;
     hid_t    fapl_id                                    = H5I_INVALID_HID;
     hid_t    file_id[MULTI_FILE_DATASET_IO_TEST_NFILES] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
-                                                        H5I_INVALID_HID, H5I_INVALID_HID};
+                                                           H5I_INVALID_HID, H5I_INVALID_HID};
     hid_t    dset_id[MULTI_FILE_DATASET_IO_TEST_NFILES] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
-                                                        H5I_INVALID_HID, H5I_INVALID_HID};
+                                                           H5I_INVALID_HID, H5I_INVALID_HID};
     hid_t    space_id                                   = H5I_INVALID_HID;
     hid_t    mspace_id                                  = H5I_INVALID_HID;
     hid_t    es_id                                      = H5I_INVALID_HID;
