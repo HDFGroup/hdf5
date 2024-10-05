@@ -1050,7 +1050,7 @@ H5VL_conn_same_class(const H5VL_connector_t *conn1, const H5VL_connector_t *conn
     if (conn1 == conn2)
         HGOTO_DONE(TRUE);
     else {
-        int cmp_value; /* Comparison result */
+        int cmp_value = 0; /* Comparison result */
 
         /* Compare connector classes */
         if (H5VL_cmp_connector_cls(&cmp_value, conn1->cls, conn2->cls) < 0)
@@ -1531,7 +1531,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-htri_t
+H5_ATTR_PURE htri_t
 H5VL__is_connector_registered_by_name(const char *name)
 {
     H5VL_connector_t *connector = NULL;  /* Connector for class */
@@ -1568,7 +1568,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-htri_t
+H5_ATTR_PURE htri_t
 H5VL__is_connector_registered_by_value(H5VL_class_value_t value)
 {
     H5VL_connector_t *connector = NULL;  /* Connector for class */
