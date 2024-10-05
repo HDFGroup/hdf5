@@ -236,13 +236,13 @@ test_table(hid_t fid, int do_write)
                                      0.0,
                                      0,
                                  },
-                                 {"one", 10, 1.0F, 10.0, 10},
-                                 {"two", 20, 2.0F, 20.0, 20},
-                                 {"three", 30, 3.0F, 30.0, 30},
-                                 {"four", 40, 4.0F, 40.0, 40},
-                                 {"five", 50, 5.0F, 50.0, 50},
-                                 {"six", 60, 6.0F, 60.0, 60},
-                                 {"seven", 70, 7.0F, 70.0, 70}};
+                                  {"one", 10, 1.0F, 10.0, 10},
+                                  {"two", 20, 2.0F, 20.0, 20},
+                                  {"three", 30, 3.0F, 30.0, 30},
+                                  {"four", 40, 4.0F, 40.0, 40},
+                                  {"five", 50, 5.0F, 50.0, 50},
+                                  {"six", 60, 6.0F, 60.0, 60},
+                                  {"seven", 70, 7.0F, 70.0, 70}};
     /* buffers for the field "Pressure" and "New_field" */
     float pressure_in[NRECORDS] = {0.0F, 1.0F, 2.0F, 3.0F, 4.0F, 5.0F, 6.0F, 7.0F};
     float pressure_out[NRECORDS];
@@ -302,8 +302,8 @@ test_table(hid_t fid, int do_write)
                                        HOFFSET(particle2_t, pressure), HOFFSET(particle2_t, temperature),
                                        HOFFSET(particle2_t, lati),     HOFFSET(particle2_t, new_field)};
     size_t dst_sizes2[NFIELDS + 1]  = {sizeof(rbuf2[0].name),     sizeof(rbuf2[0].longi),
-                                      sizeof(rbuf2[0].pressure), sizeof(rbuf2[0].temperature),
-                                      sizeof(rbuf2[0].lati),     sizeof(rbuf2[0].new_field)};
+                                       sizeof(rbuf2[0].pressure), sizeof(rbuf2[0].temperature),
+                                       sizeof(rbuf2[0].lati),     sizeof(rbuf2[0].new_field)};
     /*-------------------------------------------------------------------------
      * initialize table parameters
      * size and the offsets of struct members in memory
@@ -353,7 +353,7 @@ test_table(hid_t fid, int do_write)
                                     HOFFSET(particle_t, pressure), HOFFSET(particle_t, temperature),
                                     HOFFSET(particle_t, lati)};
     size_t field_size[NFIELDS]   = {sizeof(rbuf[0].name), sizeof(rbuf[0].longi), sizeof(rbuf[0].pressure),
-                                  sizeof(rbuf[0].temperature), sizeof(rbuf[0].lati)};
+                                    sizeof(rbuf[0].temperature), sizeof(rbuf[0].lati)};
 
     const char *field_names4[NFIELDS + 1] = {"F1", "F2", "F3", "F4", "F5", "F6"};
     hid_t       field_type4[NFIELDS + 1];

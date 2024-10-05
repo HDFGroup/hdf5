@@ -939,8 +939,8 @@ public class TestH5D {
     public void testH5Dvlen_get_buf_size()
     {
         String[] str_data   = {"Parting", "is such", "sweet", "sorrow.", "Testing",  "one", "two",   "three.",
-                             "Dog,",    "man's",   "best",  "friend.", "Diamonds", "are", "a",     "girls!",
-                             "S A",     "T U R",   "D A Y", "night",   "That's",   "all", "folks", "!!!"};
+                               "Dog,",    "man's",   "best",  "friend.", "Diamonds", "are", "a",     "girls!",
+                               "S A",     "T U R",   "D A Y", "night",   "That's",   "all", "folks", "!!!"};
         long vl_size        = -1; /* Number of bytes used */
         long str_data_bytes = 0;
         for (int idx = 0; idx < str_data.length; idx++)
