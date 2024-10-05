@@ -44,7 +44,7 @@ typedef struct h5dump_table_list_t {
         table_t      *group_table; /* Table of groups */
         table_t      *dset_table;  /* Table of datasets */
         table_t      *type_table;  /* Table of datatypes */
-    } * tables;
+    } *tables;
 } h5dump_table_list_t;
 
 extern h5dump_table_list_t table_list;

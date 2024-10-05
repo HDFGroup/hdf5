@@ -45,7 +45,7 @@ main(void)
     size_t dst_offset[NFIELDS] = {HOFFSET(Particle, name), HOFFSET(Particle, lati), HOFFSET(Particle, longi),
                                   HOFFSET(Particle, pressure), HOFFSET(Particle, temperature)};
     size_t dst_sizes[NFIELDS]  = {sizeof(dst_buf[0].name), sizeof(dst_buf[0].lati), sizeof(dst_buf[0].longi),
-                                 sizeof(dst_buf[0].pressure), sizeof(dst_buf[0].temperature)};
+                                  sizeof(dst_buf[0].pressure), sizeof(dst_buf[0].temperature)};
 
     /* Define an array of Particles */
     Particle p_data[NRECORDS] = {{"zero", 0, 0, 0.0F, 0.0},    {"one", 10, 10, 1.0F, 10.0},

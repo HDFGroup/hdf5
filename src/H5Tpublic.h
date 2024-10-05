@@ -1259,7 +1259,7 @@ H5_DLL hid_t H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id);
 H5_DLL hid_t H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t tapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Topen_async(hid_t loc_id, const char *name, hid_t tapl_id, hid_t es_id);
+H5_DLL hid_t H5Topen_async(hid_t loc_id, const char *name, hid_t tapl_id, hid_t es_id);
 #endif
 /**
  * \ingroup H5T

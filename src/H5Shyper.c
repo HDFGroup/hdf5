@@ -269,7 +269,7 @@ static const H5S_sel_iter_class_t H5S_sel_iter_hyper[1] = {{
 static const hsize_t H5S_hyper_zeros_g[H5S_MAX_RANK] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 static const hsize_t H5S_hyper_ones_g[H5S_MAX_RANK]  = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                                                       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+                                                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
 /* Declare a free list to manage the H5S_hyper_sel_t struct */
 H5FL_DEFINE_STATIC(H5S_hyper_sel_t);
