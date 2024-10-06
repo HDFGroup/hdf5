@@ -30,6 +30,7 @@ jobs:
       with:
         version: 'tags/snapshot'
         file: 'last-file.txt'
+      continue-on-error: true
 
     - name: Read base-name file
       id: gethdf5base
@@ -84,7 +85,7 @@ jobs:
     needs: [get-old-names, call-workflow-tarball, call-workflow-ctest]
     uses: ./.github/workflows/abi-report.yml
     with:
-      file_ref: '1.14.4.3'
+      file_ref: '1.14.5'
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_tag: snapshot
       use_environ: snapshots

@@ -276,7 +276,7 @@ H5_DLL hid_t H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL hid_t H5Oopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Oopen_async(hid_t loc_id, const char *name, hid_t lapl_id, hid_t es_id);
+H5_DLL hid_t H5Oopen_async(hid_t loc_id, const char *name, hid_t lapl_id, hid_t es_id);
 #endif
 
 /**
@@ -365,8 +365,8 @@ H5_DLL hid_t H5Oopen_by_idx_async(const char *app_file, const char *app_func, un
                                   const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                                   hsize_t n, hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Oopen_by_idx_async(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                                   H5_iter_order_t order, hsize_t n, hid_t lapl_id, hid_t es_id);
+H5_DLL hid_t H5Oopen_by_idx_async(hid_t loc_id, const char *group_name, H5_index_t idx_type,
+                                  H5_iter_order_t order, hsize_t n, hid_t lapl_id, hid_t es_id);
 #endif
 
 /**

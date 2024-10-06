@@ -1,4 +1,4 @@
-name: hdf5 dev CMake icx
+name: hdf5 dev CMake icx CI
 
 # Triggers the workflow on a call from another workflow
 on:

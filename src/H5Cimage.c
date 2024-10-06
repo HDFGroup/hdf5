@@ -82,25 +82,23 @@
  *
  ***********************************************************************/
 #if H5C_COLLECT_CACHE_STATS
-/* clang-format off */
-#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr) \
-do {                                                        \
-    (cache_ptr)->images_created++;                          \
-} while (0)
-#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)  \
-do {                                                       \
-    /* make sure image len is still good */                \
-    assert((cache_ptr)->image_len > 0);                  \
-    (cache_ptr)->images_read++;                            \
-} while (0)
-#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_LOAD(cache_ptr)  \
-do {                                                       \
-    /* make sure image len is still good */                \
-    assert((cache_ptr)->image_len > 0);                  \
-    (cache_ptr)->images_loaded++;                          \
-    (cache_ptr)->last_image_size = (cache_ptr)->image_len; \
-} while (0)
-/* clang-format on */
+#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr)                                                  \
+    do {                                                                                                     \
+        (cache_ptr)->images_created++;                                                                       \
+    } while (0)
+#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)                                                    \
+    do {                                                                                                     \
+        /* make sure image len is still good */                                                              \
+        assert((cache_ptr)->image_len > 0);                                                                  \
+        (cache_ptr)->images_read++;                                                                          \
+    } while (0)
+#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_LOAD(cache_ptr)                                                    \
+    do {                                                                                                     \
+        /* make sure image len is still good */                                                              \
+        assert((cache_ptr)->image_len > 0);                                                                  \
+        (cache_ptr)->images_loaded++;                                                                        \
+        (cache_ptr)->last_image_size = (cache_ptr)->image_len;                                               \
+    } while (0)
 #else /* H5C_COLLECT_CACHE_STATS */
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)

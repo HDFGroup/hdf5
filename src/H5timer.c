@@ -200,7 +200,7 @@ H5_now_usec(void)
 #else  /* H5_HAVE_GETTIMEOFDAY */
     /* Cast all values in this expression to uint64_t to ensure that all intermediate calculations
      * are done in 64 bit, to prevent overflow */
-    now       = ((uint64_t)time(NULL) * ((uint64_t)1000 * (uint64_t)1000));
+    now = ((uint64_t)time(NULL) * ((uint64_t)1000 * (uint64_t)1000));
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
     return (now);
