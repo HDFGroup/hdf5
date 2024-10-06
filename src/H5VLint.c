@@ -1241,7 +1241,7 @@ H5VL_file_is_same(const H5VL_object_t *vol_obj1, const H5VL_object_t *vol_obj2, 
 {
     const H5VL_class_t *cls1;                /* VOL connector class struct for first object */
     const H5VL_class_t *cls2;                /* VOL connector class struct for second object */
-    int                 cmp_value;           /* Comparison result */
+    int                 cmp_value = 0;       /* Comparison result */
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
