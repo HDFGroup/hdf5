@@ -137,6 +137,11 @@ extern "C" {
  * \param[in]  TestPrivateParser Pointer to a function which parses
  *                               command-line arguments which are specific to
  *                               the test program
+ * \param[in]  TestSetupFunc     Pointer to a function which will be called
+ *                               as part of TestInit()
+ * \param[in]  TestCleanupFunc   Pointer to a function which will be called
+ *                               when the testing framework is being shut
+ *                               down
  * \param[in]  TestProcessID     ID for the process calling TestInit(). Used
  *                               to control printing of output in parallel
  *                               test programs.
@@ -167,6 +172,18 @@ extern "C" {
  *          standard list of arguments it recognizes. \p TestPrivateParser
  *          may be NULL.
  *
+ *          \p TestSetupFunc is a pointer to a function that can be used to
+ *          setup any state needed before tests begin executing. If provided,
+ *          this callback function will be called as part of TestInit() once
+ *          the testing framework has been fully initialized. \p TestSetupFunc
+ *          may be NULL.
+ *
+ *          \p TestCleanupFunc is a pointer to a function that can be used
+ *          to clean up any state after tests have finished executing. If
+ *          provided, this callback function will be called by TestShutdown()
+ *          before the testing framework starts being shut down.
+ *          \p TestCleanupFunc may be NULL.
+ *
  *          \p TestProcessID is an integer value that is used to distinguish
  *          between processes when multiple are involved in running a test
  *          program. This is primarily useful for controlling testing
@@ -180,7 +197,8 @@ extern "C" {
  *
  */
 H5TEST_DLL herr_t TestInit(const char *ProgName, void (*TestPrivateUsage)(FILE *stream),
-                           int (*TestPrivateParser)(int argc, char *argv[]), int TestProcessID);
+                           int (*TestPrivateParser)(int argc, char *argv[]), herr_t (*TestSetupFunc)(void),
+                           herr_t (*TestCleanupFunc)(void), int TestProcessID);
 
 /**
  * --------------------------------------------------------------------------
@@ -188,7 +206,7 @@ H5TEST_DLL herr_t TestInit(const char *ProgName, void (*TestPrivateUsage)(FILE *
  *
  * \brief Shuts down the testing framework
  *
- * \return void
+ * \return \herr_t
  *
  * \details TestShutdown() shuts down the testing framework by tearing down
  *          the internal state needed for running tests and freeing any
@@ -199,7 +217,7 @@ H5TEST_DLL herr_t TestInit(const char *ProgName, void (*TestPrivateUsage)(FILE *
  * \see TestInit()
  *
  */
-H5TEST_DLL void TestShutdown(void);
+H5TEST_DLL herr_t TestShutdown(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -366,7 +384,7 @@ H5TEST_DLL herr_t TestParseCmdLine(int argc, char *argv[]);
  * \brief Executes all tests added by AddTest() that aren't flagged to be
  *        skipped
  *
- * \return void
+ * \return \herr_t
  *
  * \details PerformTests() runs all tests that aren't flagged to be skipped
  *          in the order added by calls to AddTest(). For each test, the
@@ -380,7 +398,7 @@ H5TEST_DLL herr_t TestParseCmdLine(int argc, char *argv[]);
  * \see AddTest(), TestAlarmOn()
  *
  */
-H5TEST_DLL void PerformTests(void);
+H5TEST_DLL herr_t PerformTests(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -403,24 +421,6 @@ H5TEST_DLL void PerformTests(void);
  *
  */
 H5TEST_DLL void TestSummary(FILE *stream);
-
-/**
- * --------------------------------------------------------------------------
- * \ingroup H5TEST
- *
- * \brief Calls the 'cleanup' callback for each test added to the list of
- *        tests
- *
- * \return void
- *
- * \details TestCleanup() performs cleanup by calling the 'cleanup' callback
- *          for each test added to the lists of tests, as long as the test
- *          isn't flagged to be skipped.
- *
- * \see SetTestCleanup()
- *
- */
-H5TEST_DLL void TestCleanup(void);
 
 /**
  * --------------------------------------------------------------------------

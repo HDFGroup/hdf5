@@ -335,7 +335,7 @@ main(int argc, char **argv)
     VRFY((H5Pget_vol_cap_flags(fapl, &vol_cap_flags_g) >= 0), "H5Pget_vol_cap_flags succeeded");
 
     /* Initialize testing framework */
-    if (TestInit(argv[0], usage, parse_options, mpi_rank) < 0) {
+    if (TestInit(argv[0], usage, parse_options, NULL, NULL, mpi_rank) < 0) {
         if (MAINPROCESS)
             fprintf(stderr, "couldn't initialize testing framework\n");
         MPI_Finalize();
@@ -569,7 +569,12 @@ main(int argc, char **argv)
     }
 
     /* Perform requested testing */
-    PerformTests();
+    if (PerformTests() < 0) {
+        if (MAINPROCESS)
+            fprintf(stderr, "couldn't run tests\n");
+        TestShutdown();
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
 
     /* make sure all processes are finished before final report, cleanup
      * and exit.
@@ -611,7 +616,11 @@ main(int argc, char **argv)
     H5close();
 
     /* Release test infrastructure */
-    TestShutdown();
+    if (TestShutdown() < 0) {
+        if (MAINPROCESS)
+            fprintf(stderr, "couldn't shut down testing framework\n");
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
 
     /* MPI_Finalize must be called AFTER H5close which may use MPI calls */
     MPI_Finalize();

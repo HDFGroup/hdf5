@@ -43,6 +43,7 @@ static unsigned    TestCount = 0;    /* Number of tests currently added to test 
 static const char *TestProgName                              = NULL;
 static void (*TestPrivateUsage_g)(FILE *stream)              = NULL;
 static herr_t (*TestPrivateParser_g)(int argc, char *argv[]) = NULL;
+static herr_t (*TestCleanupFunc_g)(void)                     = NULL;
 
 static int  TestNumErrs_g        = 0;    /* Total number of errors that occurred for whole test program */
 static bool TestEnableErrorStack = true; /* Whether to show error stacks from the library */
@@ -65,21 +66,25 @@ AddTest(const char *TestName, void (*TestFunc)(const void *), void (*TestSetupFu
     void *new_test_data = NULL;
 
     if (*TestName == '\0') {
-        fprintf(stderr, "%s: empty string given for test name\n", __func__);
+        if (TestFrameworkProcessID_g == 0)
+            fprintf(stderr, "%s: empty string given for test name\n", __func__);
         return FAIL;
     }
     if (strlen(TestName) >= MAXTESTNAME) {
-        fprintf(stderr, "%s: test name ('%s') too long, increase MAXTESTNAME(%d).\n", __func__, TestName,
-                MAXTESTNAME);
+        if (TestFrameworkProcessID_g == 0)
+            fprintf(stderr, "%s: test name ('%s') too long, increase MAXTESTNAME(%d).\n", __func__, TestName,
+                    MAXTESTNAME);
         return FAIL;
     }
     if (strlen(TestDescr) >= MAXTESTDESC) {
-        fprintf(stderr, "%s: test description ('%s') too long, increase MAXTESTDESC(%d).\n", __func__,
-                TestDescr, MAXTESTDESC);
+        if (TestFrameworkProcessID_g == 0)
+            fprintf(stderr, "%s: test description ('%s') too long, increase MAXTESTDESC(%d).\n", __func__,
+                    TestDescr, MAXTESTDESC);
         return FAIL;
     }
     if ((TestData && (0 == TestDataSize)) || (!TestData && (0 != TestDataSize))) {
-        fprintf(stderr, "%s: invalid test data size (%zu)\n", __func__, TestDataSize);
+        if (TestFrameworkProcessID_g == 0)
+            fprintf(stderr, "%s: invalid test data size (%zu)\n", __func__, TestDataSize);
         return FAIL;
     }
 
@@ -89,9 +94,10 @@ AddTest(const char *TestName, void (*TestFunc)(const void *), void (*TestSetupFu
         unsigned    newAlloc = MAX(1, TestAlloc * 2);
 
         if (NULL == (newTest = realloc(TestArray, newAlloc * sizeof(TestStruct)))) {
-            fprintf(stderr,
-                    "%s: couldn't reallocate test array, TestCount = %u, TestAlloc = %u, newAlloc = %u\n",
-                    __func__, TestCount, TestAlloc, newAlloc);
+            if (TestFrameworkProcessID_g == 0)
+                fprintf(stderr,
+                        "%s: couldn't reallocate test array, TestCount = %u, TestAlloc = %u, newAlloc = %u\n",
+                        __func__, TestCount, TestAlloc, newAlloc);
             return FAIL;
         }
 
@@ -113,7 +119,8 @@ AddTest(const char *TestName, void (*TestFunc)(const void *), void (*TestSetupFu
     /* Make a copy of the additional test data given */
     if (TestData) {
         if (NULL == (new_test_data = malloc(TestDataSize))) {
-            fprintf(stderr, "%s: couldn't allocate space for additional test data\n", __func__);
+            if (TestFrameworkProcessID_g == 0)
+                fprintf(stderr, "%s: couldn't allocate space for additional test data\n", __func__);
             return FAIL;
         }
 
@@ -136,12 +143,14 @@ AddTest(const char *TestName, void (*TestFunc)(const void *), void (*TestSetupFu
  */
 herr_t
 TestInit(const char *ProgName, void (*TestPrivateUsage)(FILE *stream),
-         herr_t (*TestPrivateParser)(int argc, char *argv[]), int TestProcessID)
+         herr_t (*TestPrivateParser)(int argc, char *argv[]), herr_t (*TestSetupFunc)(void),
+         herr_t (*TestCleanupFunc)(void), int TestProcessID)
 {
     /* Turn off automatic error reporting if requested */
     if (!TestEnableErrorStack) {
         if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0) {
-            fprintf(stderr, "%s: can't disable error stack\n", __func__);
+            if (TestFrameworkProcessID_g == 0)
+                fprintf(stderr, "%s: can't disable error stack\n", __func__);
             return FAIL;
         }
     }
@@ -155,7 +164,9 @@ TestInit(const char *ProgName, void (*TestPrivateUsage)(FILE *stream),
         TestPrivateUsage_g = TestPrivateUsage;
     if (NULL != TestPrivateParser)
         TestPrivateParser_g = TestPrivateParser;
+    TestCleanupFunc_g = TestCleanupFunc;
 
+    /* Set process ID for later use */
     TestFrameworkProcessID_g = TestProcessID;
 
     /* Set/reset global variables from h5test that may be used by
@@ -165,6 +176,13 @@ TestInit(const char *ProgName, void (*TestPrivateUsage)(FILE *stream),
     n_tests_passed_g  = 0;
     n_tests_failed_g  = 0;
     n_tests_skipped_g = 0;
+
+    /* Call test framework setup callback if provided */
+    if (TestSetupFunc && TestSetupFunc() < 0) {
+        if (TestFrameworkProcessID_g == 0)
+            fprintf(stderr, "%s: error occurred in test framework initialization callback\n", __func__);
+        return FAIL;
+    }
 
     return SUCCEED;
 }
@@ -337,21 +355,24 @@ TestParseCmdLine(int argc, char *argv[])
                 errno       = 0;
                 max_threads = strtol(*argv, NULL, 10);
                 if (errno != 0) {
-                    fprintf(stderr,
-                            "error while parsing value (%s) specified for maximum number of threads\n",
-                            *argv);
+                    if (TestFrameworkProcessID_g == 0)
+                        fprintf(stderr,
+                                "error while parsing value (%s) specified for maximum number of threads\n",
+                                *argv);
                     ret_value = FAIL;
                     goto done;
                 }
                 if (max_threads <= 0) {
-                    fprintf(stderr, "invalid value (%ld) specified for maximum number of threads\n",
-                            max_threads);
+                    if (TestFrameworkProcessID_g == 0)
+                        fprintf(stderr, "invalid value (%ld) specified for maximum number of threads\n",
+                                max_threads);
                     ret_value = FAIL;
                     goto done;
                 }
                 else if (max_threads > (long)INT_MAX) {
-                    fprintf(stderr, "value (%ld) specified for maximum number of threads too large\n",
-                            max_threads);
+                    if (TestFrameworkProcessID_g == 0)
+                        fprintf(stderr, "value (%ld) specified for maximum number of threads too large\n",
+                                max_threads);
                     ret_value = FAIL;
                     goto done;
                 }
@@ -387,24 +408,23 @@ done:
 /*
  * Execute all tests that aren't being skipped
  */
-void
+herr_t
 PerformTests(void)
 {
     for (unsigned Loop = 0; Loop < TestCount; Loop++) {
         int old_num_errs = TestNumErrs_g;
 
         if (TestArray[Loop].TestSkipFlag) {
-            if (TestFrameworkProcessID_g == 0)
-                MESSAGE(2, ("Skipping -- %s (%s) \n", TestArray[Loop].Description, TestArray[Loop].Name));
+            MESSAGE(2, ("Skipping -- %s (%s) \n", TestArray[Loop].Description, TestArray[Loop].Name));
             continue;
         }
 
-        if (TestFrameworkProcessID_g == 0) {
-            MESSAGE(2, ("Testing  -- %s (%s) \n", TestArray[Loop].Description, TestArray[Loop].Name));
-            MESSAGE(5, ("===============================================\n"));
-        }
+        MESSAGE(2, ("Testing  -- %s (%s) \n", TestArray[Loop].Description, TestArray[Loop].Name));
+        MESSAGE(5, ("===============================================\n"));
 
-        TestAlarmOn();
+        if (TestAlarmOn() < 0)
+            MESSAGE(5, ("Couldn't enable test alarm timer for test -- %s (%s) \n",
+                        TestArray[Loop].Description, TestArray[Loop].Name));
 
         if (TestArray[Loop].TestSetupFunc)
             TestArray[Loop].TestSetupFunc(TestArray[Loop].TestParameters);
@@ -418,19 +438,17 @@ PerformTests(void)
 
         TestArray[Loop].TestNumErrors = TestNumErrs_g - old_num_errs;
 
-        if (TestFrameworkProcessID_g == 0) {
-            MESSAGE(5, ("===============================================\n"));
-            MESSAGE(5, ("There were %d errors detected.\n\n", TestArray[Loop].TestNumErrors));
-        }
+        MESSAGE(5, ("===============================================\n"));
+        MESSAGE(5, ("There were %d errors detected.\n\n", TestArray[Loop].TestNumErrors));
     }
 
-    if (TestFrameworkProcessID_g == 0) {
-        MESSAGE(2, ("\n\n"));
-        if (TestNumErrs_g)
-            MESSAGE(VERBO_NONE, ("!!! %d Error(s) were detected !!!\n\n", TestNumErrs_g));
-        else
-            MESSAGE(VERBO_NONE, ("All tests were successful. \n\n"));
-    }
+    MESSAGE(2, ("\n\n"));
+    if (TestNumErrs_g)
+        MESSAGE(VERBO_NONE, ("!!! %d Error(s) were detected !!!\n\n", TestNumErrs_g));
+    else
+        MESSAGE(VERBO_NONE, ("All tests were successful. \n\n"));
+
+    return SUCCEED;
 }
 
 /*
@@ -498,30 +516,25 @@ TestSummary(FILE *stream)
 }
 
 /*
- * Perform test cleanup
- */
-void
-TestCleanup(void)
-{
-    if (TestFrameworkProcessID_g == 0)
-        MESSAGE(2, ("\nCleaning Up temp files...\n\n"));
-
-    for (unsigned Loop = 0; Loop < TestCount; Loop++)
-        if (!TestArray[Loop].TestSkipFlag && TestArray[Loop].TestCleanupFunc != NULL)
-            TestArray[Loop].TestCleanupFunc(TestArray[Loop].TestParameters);
-}
-
-/*
  * Shutdown the test infrastructure
  */
-void
+herr_t
 TestShutdown(void)
 {
+    /* Clean up test state first before tearing down testing framework */
+    if (TestCleanupFunc_g && TestCleanupFunc_g() < 0) {
+        if (TestFrameworkProcessID_g == 0)
+            fprintf(stderr, "%s: error occurred in test framework initialization callback\n", __func__);
+        return FAIL;
+    }
+
     if (TestArray)
         for (unsigned Loop = 0; Loop < TestCount; Loop++)
             free(TestArray[Loop].TestParameters);
 
     free(TestArray);
+
+    return SUCCEED;
 }
 
 /*
@@ -585,6 +598,12 @@ GetTestSummary(void)
 H5_ATTR_PURE bool
 GetTestCleanup(void)
 {
+    /* Don't cleanup files if the HDF5_NOCLEANUP environment
+     * variable is defined to anything
+     */
+    if (getenv(HDF5_NOCLEANUP))
+        SetTestNoCleanup();
+
     return TestDoCleanUp_g;
 }
 
@@ -615,8 +634,9 @@ ParseTestVerbosity(char *argv)
         errno      = 0;
         verb_level = strtol(argv, NULL, 10);
         if (errno != 0) {
-            fprintf(stderr, "%s: error while parsing value (%s) specified for test verbosity\n", __func__,
-                    argv);
+            if (TestFrameworkProcessID_g == 0)
+                fprintf(stderr, "%s: error while parsing value (%s) specified for test verbosity\n", __func__,
+                        argv);
             return FAIL;
         }
 
@@ -770,12 +790,15 @@ TestAlarmOn(void)
         errno     = 0;
         alarm_sec = strtoul(env_val, NULL, 10);
         if (errno != 0) {
-            fprintf(stderr, "%s: error while parsing value (%s) specified for alarm timeout\n", __func__,
-                    env_val);
+            if (TestFrameworkProcessID_g == 0)
+                fprintf(stderr, "%s: error while parsing value (%s) specified for alarm timeout\n", __func__,
+                        env_val);
             return FAIL;
         }
         else if (alarm_sec > (unsigned long)UINT_MAX) {
-            fprintf(stderr, "%s: value (%lu) specified for alarm timeout too large\n", __func__, alarm_sec);
+            if (TestFrameworkProcessID_g == 0)
+                fprintf(stderr, "%s: value (%lu) specified for alarm timeout too large\n", __func__,
+                        alarm_sec);
             return FAIL;
         }
     }
