@@ -32,8 +32,6 @@
         PerformTests() -- Perform requested testing
         GetTestSummary() -- Retrieve Summary request value
         TestSummary() -- Display test summary
-        GetTestCleanup() -- Retrieve Cleanup request value
-        TestCleanup() -- Clean up files from testing
         GetTestNumErrs() -- Retrieve the number of testing errors
 
  ***************************************************************************/
@@ -57,7 +55,7 @@ main(int argc, char *argv[])
         // caused deliberately and expected.
         Exception::dontPrint();
         /* Initialize testing framework */
-        TestInit(argv[0], NULL, NULL, 0);
+        TestInit(argv[0], NULL, NULL, NULL, NULL, 0);
 
         // testing file creation and opening in tfile.cpp
         AddTest("tfile", test_file, NULL, cleanup_file, NULL, 0, "File I/O Operations");
@@ -111,10 +109,6 @@ main(int argc, char *argv[])
     /* Display test summary, if requested */
     if (GetTestSummary())
         TestSummary(stdout);
-
-    /* Clean up test files, if allowed */
-    if (GetTestCleanup() && !getenv(HDF5_NOCLEANUP))
-        TestCleanup();
 
     /* Release test infrastructure */
     TestShutdown();
