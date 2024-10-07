@@ -40,7 +40,12 @@
 
 #include "h5test.h"
 #ifdef H5_HAVE_FILTER_DEFLATE
-#include "zlib.h"
+#if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER)
+#define H5_ZLIB_HEADER "zlib.h"
+#endif
+#if defined(H5_ZLIB_HEADER)
+#include H5_ZLIB_HEADER /* "zlib.h" */
+#endif
 #endif
 
 /* Test file names, using H5F_libver_t as indices */
@@ -530,7 +535,11 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     z_dst = (Bytef *)inbuf;
 
     /* Perform compression from the source to the destination buffer */
+#if defined(H5_HAVE_ZLIBNG_H)
+    ret = zng_compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+#else
     ret = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+#endif
 
     /* Set the chunk size to the compressed chunk size */
     chunk_size = (hsize_t)z_dst_nbytes;
