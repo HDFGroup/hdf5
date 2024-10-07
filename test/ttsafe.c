@@ -97,7 +97,7 @@ main(int argc, char *argv[])
 {
 
     /* Initialize testing framework */
-    if (TestInit(argv[0], NULL, NULL, 0) < 0) {
+    if (TestInit(argv[0], NULL, NULL, NULL, NULL, 0) < 0) {
         fprintf(stderr, "couldn't initialize testing framework\n");
         return -1;
     }
@@ -131,18 +131,21 @@ main(int argc, char *argv[])
     }
 
     /* Perform requested testing */
-    PerformTests();
+    if (PerformTests() < 0) {
+        fprintf(stderr, "couldn't run tests\n");
+        TestShutdown();
+        return -1;
+    }
 
     /* Display test summary, if requested */
     if (GetTestSummary())
         TestSummary(stdout);
 
-    /* Clean up test files, if allowed */
-    if (GetTestCleanup() && !getenv(HDF5_NOCLEANUP))
-        TestCleanup();
-
     /* Release test infrastructure */
-    TestShutdown();
+    if (TestShutdown() < 0) {
+        fprintf(stderr, "couldn't shut down testing framework\n");
+        return -1;
+    }
 
     return GetTestNumErrs();
 
