@@ -47,7 +47,7 @@ main(int argc, char *argv[])
     H5Pclose(fapl_id);
 
     /* Initialize testing framework */
-    if (TestInit(argv[0], NULL, NULL, 0) < 0) {
+    if (TestInit(argv[0], NULL, NULL, NULL, NULL, 0) < 0) {
         fprintf(stderr, "couldn't initialize testing framework\n");
         exit(EXIT_FAILURE);
     }
@@ -90,18 +90,21 @@ main(int argc, char *argv[])
     }
 
     /* Perform requested testing */
-    PerformTests();
+    if (PerformTests() < 0) {
+        fprintf(stderr, "couldn't run tests\n");
+        TestShutdown();
+        exit(EXIT_FAILURE);
+    }
 
     /* Display test summary, if requested */
     if (GetTestSummary())
         TestSummary(stdout);
 
-    /* Clean up test files, if allowed */
-    if (GetTestCleanup() && !getenv(HDF5_NOCLEANUP))
-        TestCleanup();
-
     /* Release test infrastructure */
-    TestShutdown();
+    if (TestShutdown() < 0) {
+        fprintf(stderr, "couldn't shut down testing framework\n");
+        exit(EXIT_FAILURE);
+    }
 
     /* Exit failure if errors encountered; else exit success. */
     /* No need to print anything since PerformTests() already does. */
