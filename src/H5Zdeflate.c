@@ -192,7 +192,7 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
 #if defined(H5_HAVE_ZLIBNG_H)
         status = zng_compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
 #else
-        status              = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+        status = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
 #endif
 
         /* Check for various zlib errors */
