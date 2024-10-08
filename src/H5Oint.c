@@ -2960,7 +2960,6 @@ H5O_has_chksum(const H5O_t *oh)
     FUNC_LEAVE_NOAPI(H5O_SIZEOF_CHKSUM_OH(oh) > 0)
 } /* end H5O_has_chksum() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_version_bound
  *

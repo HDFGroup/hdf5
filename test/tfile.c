@@ -5649,18 +5649,18 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create, H5F
  *
  *-------------------------------------------------------------------------
  */
-#define VFNAME   "verbounds.h5"
+#define VFNAME      "verbounds.h5"
 #define VERBDSNAME  "dataset 1"
 #define SPACE1_DIM1 3
 static void
 test_libver_bounds_open(void)
 {
-    hid_t        file     = H5I_INVALID_HID;   /* File ID */
-    hid_t        space    = H5I_INVALID_HID;   /* Dataspace ID */
-    hid_t        dset     = H5I_INVALID_HID;   /* Dataset ID */
-    hid_t        fapl     = H5I_INVALID_HID;   /* File access property list ID */
-    hid_t        dcpl     = H5I_INVALID_HID;   /* Dataset creation property list ID */
-    hsize_t      dim[1]   = {SPACE1_DIM1};     /* Dataset dimensions */
+    hid_t        file   = H5I_INVALID_HID;     /* File ID */
+    hid_t        space  = H5I_INVALID_HID;     /* Dataspace ID */
+    hid_t        dset   = H5I_INVALID_HID;     /* Dataset ID */
+    hid_t        fapl   = H5I_INVALID_HID;     /* File access property list ID */
+    hid_t        dcpl   = H5I_INVALID_HID;     /* Dataset creation property list ID */
+    hsize_t      dim[1] = {SPACE1_DIM1};       /* Dataset dimensions */
     H5F_libver_t low, high;                    /* File format bounds */
     hsize_t      chunk_dim[1] = {SPACE1_DIM1}; /* Chunk dimensions */
     bool         vol_is_native;
@@ -5724,7 +5724,7 @@ test_libver_bounds_open(void)
     CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     if ((file = H5Fopen(VFNAME, H5F_ACC_RDONLY, fapl)) < 0)
-    VERIFY((file >= 0), true, "Attempt to open latest file with earliest version should succeed");
+        VERIFY((file >= 0), true, "Attempt to open latest file with earliest version should succeed");
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
 
@@ -5747,7 +5747,7 @@ test_libver_bounds_open(void)
 
         /* Open the file */
         file = H5Fopen(VFNAME, H5F_ACC_RDONLY, fapl);
-        VERIFY(file >=0, true, "H5Fopen should succeed");
+        VERIFY(file >= 0, true, "H5Fopen should succeed");
 
         ret = H5Fclose(file);
         CHECK(ret, FAIL, "H5Fclose");
@@ -6334,16 +6334,16 @@ test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non
 
                 /* Get the internal file pointer if the open succeeds */
                 if (fid >= 0) {
-                     ret = H5Fclose(fid);
-                     CHECK(ret, FAIL, "H5Fclose");
-
-                } else {
+                    ret = H5Fclose(fid);
+                    CHECK(ret, FAIL, "H5Fclose");
+                }
+                else {
 
                     VERIFY((is_swmr || (non_def_fsm && (high < H5F_LIBVER_V110))), true, "H5Fopen");
                 }
 
-            }     /* end for */
-        }         /* end for */
+            } /* end for */
+        }     /* end for */
 
         /* Close the file access property list */
         ret = H5Pclose(new_fapl);
@@ -7601,8 +7601,8 @@ test_libver_bounds_attributes(hid_t fapl)
                 CHECK_PTR(attr, "H5VL_object");
 
                 /* Verify the attribute message version */
-                VERIFY(attr->shared->version >= H5O_attr_ver_bounds[f->shared->low_bound],
-                       true, "H5O_attr_ver_bounds");
+                VERIFY(attr->shared->version >= H5O_attr_ver_bounds[f->shared->low_bound], true,
+                       "H5O_attr_ver_bounds");
 
                 /* Close the attribute */
                 ret = H5Aclose(aid);
