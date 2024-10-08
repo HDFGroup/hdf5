@@ -31,10 +31,9 @@ jobs:
     steps:
     - name: Install CMake Dependencies (Linux_coverage)
       run: |
-        sudo apt-get update
-        sudo apt-get install ninja-build doxygen graphviz curl libncurses5
+        sudo apt update
+        sudo apt-get install ninja-build doxygen graphviz curl libncurses5 build-essential
         sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-        sudo apt-get install gcov -q -y
         sudo apt-get install lcov -q -y
 
     - name: Set file base name (Linux_coverage)
@@ -85,6 +84,7 @@ jobs:
             set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
             #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             set (LOCAL_COVERAGE_TEST "TRUE")
+            set (LOCAL_USE_GCOV "TRUE")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_STATIC_LIBS:BOOL=ON")
@@ -126,7 +126,7 @@ jobs:
     steps:
       - name: Install CMake Dependencies (Linux_Leak)
         run: |
-          sudo apt-get update
+          sudo apt update
           sudo apt-get install ninja-build doxygen graphviz curl libncurses5
 
       - name: add clang to env
@@ -224,7 +224,7 @@ jobs:
     steps:
       - name: Install CMake Dependencies (Linux_Address)
         run: |
-          sudo apt-get update
+          sudo apt update
           sudo apt-get install ninja-build doxygen graphviz curl libncurses5
 
       - name: add clang to env
