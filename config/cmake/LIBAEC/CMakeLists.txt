@@ -122,21 +122,6 @@ if (WIN32)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Compiler specific flags : Shouldn't there be compiler tests for these
-#-----------------------------------------------------------------------------
-if (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM" OR CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
-   set (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
-endif ()
-
-#-----------------------------------------------------------------------------
-# This is in here to help some of the GCC based IDES like Eclipse
-# and code blocks parse the compiler errors and warnings better.
-#-----------------------------------------------------------------------------
-if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
-endif ()
-
-#-----------------------------------------------------------------------------
 # Generate the aec_config.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
 configure_file (${LIBAEC_RESOURCES_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
@@ -166,6 +151,12 @@ target_include_directories (${LIBAEC_LIB_TARGET} PUBLIC
   "$<BUILD_INTERFACE:${LIBAEC_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>"
   "$<INSTALL_INTERFACE:include>")
+if (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM" OR CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
+  target_compile_options(${LIBAEC_LIB_TARGET} PRIVATE -Wno-deprecated-non-prototype)
+endif ()
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  target_compile_options(${LIBAEC_LIB_TARGET} PRIVATE -fmessage-length=0)
+endif ()
 TARGET_C_PROPERTIES (${LIBAEC_LIB_TARGET} STATIC)
 H5_SET_LIB_OPTIONS (${LIBAEC_LIB_TARGET} ${LIBAEC_LIB_NAME} STATIC 0)
 set_target_properties (${LIBAEC_LIB_TARGET} PROPERTIES
