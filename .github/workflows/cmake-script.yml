@@ -610,14 +610,9 @@ jobs:
       - name: Install Dependencies (Windows_clang)
         run: choco install ninja
 
-      - uses: ilammy/msvc-dev-cmd@v1
-
-      - name: add clang to env
-        uses: KyleMayes/install-llvm-action@v2.0.5
-        id: setup-clang
-        with:
-          env: true
-          version: '18'
+      - name: Workaround C++ clang
+        run: |
+          choco upgrade llvm
 
       - name: Set file base name (Windows_clang)
         id: set-file-base
