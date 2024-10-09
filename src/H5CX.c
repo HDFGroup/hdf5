@@ -60,42 +60,43 @@
     /* Check if the property list is already available */                                                    \
     if (NULL == (*head)->ctx.PL)                                                                             \
         /* Get the property list pointer */                                                                  \
-        if (H5_UNLIKELY(NULL == ((*head)->ctx.PL = (H5P_genplist_t *)H5I_object((*head)->ctx.H5_GLUE(PL, _id)))))         \
+        if (H5_UNLIKELY(NULL ==                                                                              \
+                        ((*head)->ctx.PL = (H5P_genplist_t *)H5I_object((*head)->ctx.H5_GLUE(PL, _id)))))    \
             HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, (FAILVAL), "can't get property list");
 
 /* Common macro for the duplicated code to retrieve properties from a property list */
 #define H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)                                         \
     {                                                                                                        \
                                                                                                              \
-        /* Check for default property list */                                                                    \
-        if ((*head)->ctx.H5_GLUE(PL, _id) == (DEF_PL))                                                           \
-            H5MM_memcpy(&(*head)->ctx.PROP_FIELD, &H5_GLUE3(H5CX_def_, PL, _cache).PROP_FIELD,                   \
-                        sizeof(H5_GLUE3(H5CX_def_, PL, _cache).PROP_FIELD));                                     \
-        else {                                                                                                   \
-            /* Retrieve the property list */                                                                     \
-            H5CX_RETRIEVE_PLIST(PL, FAIL)                                                                        \
-                                                                                                                 \
-            /* Get the property */                                                                               \
-            if (H5_UNLIKELY(H5P_get((*head)->ctx.PL, (PROP_NAME), &(*head)->ctx.PROP_FIELD) < 0))                             \
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "can't retrieve value from API context");            \
-        } /* end else */                                                                                         \
-                                                                                                                 \
-        /* Mark the field as valid */                                                                            \
-        (*head)->ctx.H5_GLUE(PROP_FIELD, _valid) = true;                                                         \
+        /* Check for default property list */                                                                \
+        if ((*head)->ctx.H5_GLUE(PL, _id) == (DEF_PL))                                                       \
+            H5MM_memcpy(&(*head)->ctx.PROP_FIELD, &H5_GLUE3(H5CX_def_, PL, _cache).PROP_FIELD,               \
+                        sizeof(H5_GLUE3(H5CX_def_, PL, _cache).PROP_FIELD));                                 \
+        else {                                                                                               \
+            /* Retrieve the property list */                                                                 \
+            H5CX_RETRIEVE_PLIST(PL, FAIL)                                                                    \
+                                                                                                             \
+            /* Get the property */                                                                           \
+            if (H5_UNLIKELY(H5P_get((*head)->ctx.PL, (PROP_NAME), &(*head)->ctx.PROP_FIELD) < 0))            \
+                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "can't retrieve value from API context");        \
+        } /* end else */                                                                                     \
+                                                                                                             \
+        /* Mark the field as valid */                                                                        \
+        (*head)->ctx.H5_GLUE(PROP_FIELD, _valid) = true;                                                     \
     }
 
 /* Macro for the duplicated code to retrieve a value from a plist if the context value is invalid */
 #define H5CX_RETRIEVE_PROP_VALID(PL, DEF_PL, PROP_NAME, PROP_FIELD)                                          \
     /* Check if the value has been retrieved already */                                                      \
     if (!(*head)->ctx.H5_GLUE(PROP_FIELD, _valid))                                                           \
-        H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)
+    H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)
 
 /* Macro for the duplicated code to retrieve a value from a plist if the context value is invalid, or the
  * library has previously modified the context value for return */
 #define H5CX_RETRIEVE_PROP_VALID_SET(PL, DEF_PL, PROP_NAME, PROP_FIELD)                                      \
     /* Check if the value has been retrieved already */                                                      \
     if (!((*head)->ctx.H5_GLUE(PROP_FIELD, _valid) || (*head)->ctx.H5_GLUE(PROP_FIELD, _set)))               \
-        H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)
+    H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)
 
 #if defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_INSTRUMENTED_LIBRARY)
 /* Macro for the duplicated code to set a context field that may not exist as a property */
@@ -108,7 +109,7 @@
             /* Retrieve the dataset transfer property list */                                                \
             H5CX_RETRIEVE_PLIST(dxpl, FAIL)                                                                  \
                                                                                                              \
-            if (H5_UNLIKELY((check_prop = H5P_exist_plist((*head)->ctx.dxpl, PROP_NAME)) < 0))                            \
+            if (H5_UNLIKELY((check_prop = H5P_exist_plist((*head)->ctx.dxpl, PROP_NAME)) < 0))               \
                 HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "error checking for property");                  \
         } /* end if */                                                                                       \
                                                                                                              \
@@ -128,7 +129,7 @@
         H5CX_RETRIEVE_PLIST(dxpl, FAIL)                                                                      \
                                                                                                              \
         /* Set the property */                                                                               \
-        if (H5_UNLIKELY(H5P_set((*head)->ctx.dxpl, PROP_NAME, &(*head)->ctx.PROP_FIELD) < 0))                             \
+        if (H5_UNLIKELY(H5P_set((*head)->ctx.dxpl, PROP_NAME, &(*head)->ctx.PROP_FIELD) < 0))                \
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, FAIL, "error setting data xfer property");                 \
     } /* end if */
 
@@ -469,7 +470,7 @@ done:
 int
 H5CX_term_package(void)
 {
-    H5CX_node_t **head = NULL;        /* Pointer to head of API context list */
+    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -517,7 +518,7 @@ H5CX_pushed(void)
 herr_t
 H5CX_push(H5CX_node_t *cnode)
 {
-    H5CX_node_t **head = NULL;        /* Pointer to head of API context list */
+    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
 
     FUNC_ENTER_NOAPI_NOERR
 
@@ -543,7 +544,7 @@ H5CX_push(H5CX_node_t *cnode)
 
     /* Push context node onto stack */
     cnode->next = *head;
-    *head = cnode;
+    *head       = cnode;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5CX_push() */
@@ -3290,8 +3291,8 @@ done:
 herr_t
 H5CX_pop(bool update_dxpl_props)
 {
-    H5CX_node_t **head      = NULL; /* Pointer to head of API context list */
-    herr_t       ret_value = SUCCEED; /* Return value */
+    H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -3330,7 +3331,7 @@ H5CX_pop(bool update_dxpl_props)
     }  /* end if */
 
     /* Pop the top context node from the stack */
-    (*head)   = (*head)->next;
+    (*head) = (*head)->next;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

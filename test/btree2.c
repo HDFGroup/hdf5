@@ -9916,9 +9916,9 @@ main(void)
     unsigned         nerrors = 0;               /* Cumulative error count */
     unsigned         reopen;                    /* Whether to reopen B-tree during tests */
     const char      *driver_name;
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
-    bool             api_ctx_pushed = false; /* Whether API context pushed */
-    int              localTestExpress;       /* localized TestExpress */
+    H5CX_node_t      api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool             api_ctx_pushed = false;       /* Whether API context pushed */
+    int              localTestExpress;             /* localized TestExpress */
 
     driver_name = h5_get_test_driver_name();
 

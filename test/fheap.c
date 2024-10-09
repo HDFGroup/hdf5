@@ -15958,9 +15958,9 @@ main(void)
     unsigned          nerrors = 0;                            /* Cumulative error count */
     unsigned    num_pb_fs = 1; /* The number of settings to test for page buffering and file space handling */
     const char *driver_name;   /* Environment variable */
-    bool        contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
-    bool        api_ctx_pushed = false; /* Whether API context pushed */
+    bool        contig_addr_vfd;              /* Whether VFD used has a contiguous address space */
+    H5CX_node_t api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool        api_ctx_pushed = false;       /* Whether API context pushed */
     int         test_express;
 
     /* Don't run this test using certain file drivers */

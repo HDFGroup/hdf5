@@ -2845,7 +2845,7 @@ test_missing_filter(hid_t file)
     size_t        i, j;                                   /* Local index variables */
     herr_t        ret;                                    /* Generic return value */
     const char   *testfile       = H5_get_srcdir_filename(FILE_DEFLATE_NAME); /* Corrected test file name */
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
+    H5CX_node_t   api_ctx        = {{0}, NULL};                               /* API context node to push */
     bool          api_ctx_pushed = false;                                     /* Whether API context pushed */
 
     TESTING("dataset access with missing filter");

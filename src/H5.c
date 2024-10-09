@@ -297,7 +297,7 @@ H5_term_library(void)
     size_t      nleft = sizeof(loop);
     int         nprinted;
     H5E_auto2_t func;
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
+    H5CX_node_t api_ctx = {{0}, NULL}; /* API context node to push */
 
     /* Acquire the API lock */
     FUNC_ENTER_API_VARS

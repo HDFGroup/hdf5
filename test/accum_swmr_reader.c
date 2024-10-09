@@ -45,11 +45,11 @@ main(void)
     hid_t       fapl        = H5I_INVALID_HID; /* file access property list ID */
     H5F_t      *f           = NULL;            /* File pointer */
     char        filename[1024];
-    unsigned    u;                      /* Local index variable */
-    uint8_t     rbuf[1024];             /* Buffer for reading */
-    uint8_t     buf[1024];              /* Buffer for holding the expected data */
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
-    bool        api_ctx_pushed = false; /* Whether API context pushed */
+    unsigned    u;                            /* Local index variable */
+    uint8_t     rbuf[1024];                   /* Buffer for reading */
+    uint8_t     buf[1024];                    /* Buffer for holding the expected data */
+    H5CX_node_t api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool        api_ctx_pushed = false;       /* Whether API context pushed */
 
     /* Testing setup */
     h5_test_init();

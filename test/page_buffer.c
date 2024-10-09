@@ -2051,7 +2051,7 @@ main(void)
     hid_t       fapl           = H5I_INVALID_HID; /* File access property list for data files */
     unsigned    nerrors        = 0;               /* Cumulative error count */
     const char *driver_name    = NULL;            /* File Driver value from environment */
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
+    H5CX_node_t api_ctx        = {{0}, NULL};     /* API context node to push */
     bool        api_ctx_pushed = false;           /* Whether API context pushed */
 
     h5_test_init();

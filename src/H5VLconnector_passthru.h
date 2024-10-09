@@ -80,7 +80,7 @@ H5_DLL herr_t H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connect
  *       can't be retrieved.
  *
  */
-H5_DLL hid_t  H5VLwrap_register(void *obj, H5I_type_t type);
+H5_DLL hid_t H5VLwrap_register(void *obj, H5I_type_t type);
 
 /* Library context and state routines */
 H5_DLL herr_t H5VLretrieve_lib_state(void **state);

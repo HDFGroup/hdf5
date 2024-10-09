@@ -80,13 +80,13 @@ void accum_printf(const H5F_t *f);
 int
 main(void)
 {
-    unsigned nerrors        = 0;     /* track errors */
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
-    bool     api_ctx_pushed = false; /* Whether API context pushed */
-    hid_t    fid            = H5I_INVALID_HID;
-    hid_t    fapl           = H5I_INVALID_HID; /* File access property list */
-    char     filename[1024];
-    H5F_t   *f = NULL; /* File for all tests */
+    unsigned    nerrors        = 0;           /* track errors */
+    H5CX_node_t api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool        api_ctx_pushed = false;       /* Whether API context pushed */
+    hid_t       fid            = H5I_INVALID_HID;
+    hid_t       fapl           = H5I_INVALID_HID; /* File access property list */
+    char        filename[1024];
+    H5F_t      *f = NULL; /* File for all tests */
 
     /* Test Setup */
     puts("Testing the metadata accumulator");
@@ -2059,8 +2059,8 @@ test_swmr_write_big(bool newest_format)
     uint8_t     wbuf[1024];                 /* Buffer for reading & writing */
     unsigned    u;                          /* Local index variable */
     bool        process_success = false;
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
-    bool        api_ctx_pushed  = false; /* Whether API context pushed */
+    H5CX_node_t api_ctx         = {{0}, NULL}; /* API context node to push */
+    bool        api_ctx_pushed  = false;       /* Whether API context pushed */
 
     if (newest_format)
         TESTING("SWMR write of large metadata: with latest format");

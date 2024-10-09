@@ -1262,8 +1262,7 @@ extern bool H5_libterm_g; /* Is the library being shutdown? */
 #define FUNC_ENTER_COMMON_NOERR(asrt) FUNC_ENTER_CHECK_NAME(asrt);
 
 /* Local variables for API routines */
-#define FUNC_ENTER_API_VARS             \
-    H5CANCEL_DECL
+#define FUNC_ENTER_API_VARS H5CANCEL_DECL
 
 #define FUNC_ENTER_API_COMMON                                                                                \
     FUNC_ENTER_API_VARS                                                                                      \
@@ -1279,7 +1278,7 @@ extern bool H5_libterm_g; /* Is the library being shutdown? */
 
 #define FUNC_ENTER_API_PUSH(err)                                                                             \
     /* Push the API context */                                                                               \
-    if (H5_UNLIKELY(H5CX_push(&api_ctx) < 0))                                                                    \
+    if (H5_UNLIKELY(H5CX_push(&api_ctx) < 0))                                                                \
         HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context");                                    \
     else                                                                                                     \
         api_ctx_pushed = true;
@@ -1288,8 +1287,8 @@ extern bool H5_libterm_g; /* Is the library being shutdown? */
 #define FUNC_ENTER_API(err)                                                                                  \
     {                                                                                                        \
         {                                                                                                    \
-            H5CX_node_t api_ctx = {{0}, NULL};     \
-            bool api_ctx_pushed = false;                                                                     \
+            H5CX_node_t api_ctx        = {{0}, NULL};                                                        \
+            bool        api_ctx_pushed = false;                                                              \
                                                                                                              \
             FUNC_ENTER_API_COMMON                                                                            \
             FUNC_ENTER_API_INIT(err);                                                                        \
@@ -1305,8 +1304,8 @@ extern bool H5_libterm_g; /* Is the library being shutdown? */
 #define FUNC_ENTER_API_NOCLEAR(err)                                                                          \
     {                                                                                                        \
         {                                                                                                    \
-            H5CX_node_t api_ctx = {{0}, NULL};     \
-            bool api_ctx_pushed = false;                                                                     \
+            H5CX_node_t api_ctx        = {{0}, NULL};                                                        \
+            bool        api_ctx_pushed = false;                                                              \
                                                                                                              \
             FUNC_ENTER_API_COMMON                                                                            \
             FUNC_ENTER_API_INIT(err);                                                                        \
@@ -1355,7 +1354,7 @@ extern bool H5_libterm_g; /* Is the library being shutdown? */
             {                                                                                                \
                 {                                                                                            \
                     {                                                                                        \
-                        FUNC_ENTER_API_COMMON                                                                            \
+                        FUNC_ENTER_API_COMMON                                                                \
                         FUNC_ENTER_API_INIT(err);                                                            \
                         {
 

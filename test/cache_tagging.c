@@ -4353,14 +4353,14 @@ check_invalid_tag_application(void)
 {
 #ifdef H5C_DO_TAGGING_SANITY_CHECKS
     /* Variables */
-    H5F_t  *f   = NULL;
-    hid_t   fid = H5I_INVALID_HID;
-    haddr_t addr;
-    H5HL_t *lheap          = NULL;
-    hid_t   fapl           = H5I_INVALID_HID; /* File access prop list */
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
-    bool    api_ctx_pushed = false;           /* Whether API context pushed */
-#endif                                        /* H5C_DO_TAGGING_SANITY_CHECKS */
+    H5F_t      *f   = NULL;
+    hid_t       fid = H5I_INVALID_HID;
+    haddr_t     addr;
+    H5HL_t     *lheap          = NULL;
+    hid_t       fapl           = H5I_INVALID_HID; /* File access prop list */
+    H5CX_node_t api_ctx        = {{0}, NULL};     /* API context node to push */
+    bool        api_ctx_pushed = false;           /* Whether API context pushed */
+#endif                                            /* H5C_DO_TAGGING_SANITY_CHECKS */
 
     /* Testing Macro */
     TESTING("failure on invalid tag application");

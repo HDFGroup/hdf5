@@ -275,10 +275,10 @@ error:
 int
 main(void)
 {
-    hid_t fapl_id        = H5I_INVALID_HID;
-    int   nerrors        = 0;
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
-    bool  api_ctx_pushed = false; /* Whether API context pushed */
+    hid_t       fapl_id        = H5I_INVALID_HID;
+    int         nerrors        = 0;
+    H5CX_node_t api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool        api_ctx_pushed = false;       /* Whether API context pushed */
 
     /* Testing setup */
     h5_test_init();

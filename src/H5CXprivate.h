@@ -291,8 +291,8 @@ typedef struct H5CX_node_t {
 /* Library private routines */
 H5_DLL herr_t H5CX_push(H5CX_node_t *cnode);
 H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
-H5_DLL bool H5CX_pushed(void);
-H5_DLL bool H5CX_is_def_dxpl(void);
+H5_DLL bool   H5CX_pushed(void);
+H5_DLL bool   H5CX_is_def_dxpl(void);
 
 /* API context state routines */
 H5_DLL herr_t H5CX_retrieve_state(H5CX_state_t **api_state);

@@ -9126,13 +9126,13 @@ error:
 int
 main(void)
 {
-    hid_t       fapl     = H5I_INVALID_HID; /* File access property list for data files */
-    hid_t       new_fapl = H5I_INVALID_HID; /* File access property list for alignment & aggr setting */
-    unsigned    nerrors  = 0;               /* Cumulative error count */
-    test_type_t curr_test;                  /* Current test being worked on */
-    const char *driver_name;                /* File Driver value from environment */
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
-    bool        api_ctx_pushed = false;     /* Whether API context pushed */
+    hid_t       fapl     = H5I_INVALID_HID;   /* File access property list for data files */
+    hid_t       new_fapl = H5I_INVALID_HID;   /* File access property list for alignment & aggr setting */
+    unsigned    nerrors  = 0;                 /* Cumulative error count */
+    test_type_t curr_test;                    /* Current test being worked on */
+    const char *driver_name;                  /* File Driver value from environment */
+    H5CX_node_t api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool        api_ctx_pushed = false;       /* Whether API context pushed */
 
     /* Get the VFD to use */
     driver_name = h5_get_test_driver_name();

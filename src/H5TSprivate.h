@@ -306,7 +306,7 @@ static inline herr_t H5TS_rwlock_rdunlock(H5TS_rwlock_t *lock);
 static inline herr_t H5TS_rwlock_wrlock(H5TS_rwlock_t *lock);
 static inline herr_t H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock);
 #endif
-H5_DLL herr_t        H5TS_rwlock_destroy(H5TS_rwlock_t *lock);
+H5_DLL herr_t H5TS_rwlock_destroy(H5TS_rwlock_t *lock);
 
 /* Condition variable operations */
 H5_DLL herr_t H5TS_cond_init(H5TS_cond_t *cond);
@@ -330,7 +330,7 @@ H5_DLL herr_t H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads);
 #if !defined(__cplusplus)
 static inline herr_t H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx);
 #endif
-H5_DLL herr_t        H5TS_pool_destroy(H5TS_pool_t *pool);
+H5_DLL herr_t H5TS_pool_destroy(H5TS_pool_t *pool);
 
 /* Emulated C11 atomics */
 #if !defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
@@ -367,7 +367,7 @@ H5_DLL herr_t H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count);
 #if !defined(H5_HAVE_PTHREAD_BARRIER) && !defined(__cplusplus)
 static inline herr_t H5TS_barrier_wait(H5TS_barrier_t *barrier);
 #endif /* H5_HAVE_PTHREAD_BARRIER */
-H5_DLL herr_t        H5TS_barrier_destroy(H5TS_barrier_t *barrier);
+H5_DLL herr_t H5TS_barrier_destroy(H5TS_barrier_t *barrier);
 
 H5_DLL herr_t H5TS_semaphore_init(H5TS_semaphore_t *sem, unsigned initial_count);
 /* Semaphore signal & wait calls are defined in H5TSsemaphore.h */
@@ -375,7 +375,7 @@ H5_DLL herr_t H5TS_semaphore_init(H5TS_semaphore_t *sem, unsigned initial_count)
 static inline herr_t H5TS_semaphore_signal(H5TS_semaphore_t *sem);
 static inline herr_t H5TS_semaphore_wait(H5TS_semaphore_t *sem);
 #endif
-H5_DLL herr_t        H5TS_semaphore_destroy(H5TS_semaphore_t *sem);
+H5_DLL herr_t H5TS_semaphore_destroy(H5TS_semaphore_t *sem);
 
 /* Headers with inlined routines */
 #include "H5TScond.h"

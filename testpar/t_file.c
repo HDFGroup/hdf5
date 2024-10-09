@@ -141,13 +141,13 @@ test_page_buffer_access(const void *params)
     hid_t       fcpl, fapl;
     herr_t      ret; /* generic return value */
 #ifdef PB_OUT
-    size_t  page_count = 0;
-    int     i, num_elements = 200;
-    haddr_t raw_addr, meta_addr;
-    int    *data;
-    H5F_t  *f              = NULL;
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
-    bool    api_ctx_pushed = false; /* Whether API context pushed */
+    size_t      page_count = 0;
+    int         i, num_elements = 200;
+    haddr_t     raw_addr, meta_addr;
+    int        *data;
+    H5F_t      *f              = NULL;
+    H5CX_node_t api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool        api_ctx_pushed = false;       /* Whether API context pushed */
 #endif
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -484,8 +484,8 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     H5F_t              *f         = NULL;
     H5C_t              *cache_ptr = NULL;
     H5AC_cache_config_t config;
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
-    bool                api_ctx_pushed = false; /* Whether API context pushed */
+    H5CX_node_t         api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool                api_ctx_pushed = false;       /* Whether API context pushed */
     herr_t              ret;
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
@@ -641,8 +641,8 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
     H5F_t              *f         = NULL;
     H5C_t              *cache_ptr = NULL;
     H5AC_cache_config_t config;
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
-    bool                api_ctx_pushed = false; /* Whether API context pushed */
+    H5CX_node_t         api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool                api_ctx_pushed = false;       /* Whether API context pushed */
     herr_t              ret;
 
     config.version = H5AC__CURR_CACHE_CONFIG_VERSION;

@@ -1681,8 +1681,8 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
     int                  fake_obj, fake_arg;
     int                  op_val = -1, op_val2 = -1;
     int                  find_op_val;
-    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
-    herr_t               ret = SUCCEED;
+    H5CX_node_t          api_ctx = {{0}, NULL}; /* API context node to push */
+    herr_t               ret     = SUCCEED;
 
     /* Test registering optional operation */
     snprintf(op_name, sizeof(op_name), "%s-op1", subcls_name);

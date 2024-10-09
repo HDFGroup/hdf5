@@ -1587,7 +1587,8 @@ test_select_hyper_contig2(hid_t dset_type, hid_t xfer_plist)
     /* Allocate write & read buffers */
     wbuf = (uint16_t *)malloc(sizeof(uint16_t) * SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4);
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint16_t *)calloc((size_t)(SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4), sizeof(uint16_t));
+    rbuf =
+        (uint16_t *)calloc((size_t)(SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4), sizeof(uint16_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -1732,7 +1733,8 @@ test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
     /* Allocate write & read buffers */
     wbuf = (uint16_t *)malloc(sizeof(uint16_t) * SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4);
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint16_t *)calloc((size_t)(SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4), sizeof(uint16_t));
+    rbuf =
+        (uint16_t *)calloc((size_t)(SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4), sizeof(uint16_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -6324,7 +6326,8 @@ test_select_hyper_union_random_5d(hid_t read_plist)
     /* Allocate write & read buffers */
     wbuf = (int *)malloc(sizeof(int) * SPACE5_DIM1 * SPACE5_DIM2 * SPACE5_DIM3 * SPACE5_DIM4 * SPACE5_DIM5);
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (int *)calloc((size_t)(SPACE5_DIM1 * SPACE5_DIM2 * SPACE5_DIM3 * SPACE5_DIM4 * SPACE5_DIM5), sizeof(int));
+    rbuf = (int *)calloc((size_t)(SPACE5_DIM1 * SPACE5_DIM2 * SPACE5_DIM3 * SPACE5_DIM4 * SPACE5_DIM5),
+                         sizeof(int));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */

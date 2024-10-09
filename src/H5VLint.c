@@ -2054,8 +2054,8 @@ done:
 herr_t
 H5VL_start_lib_state(void **context)
 {
-    H5CX_node_t *cnode = NULL;  /* API context */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5CX_node_t *cnode     = NULL;    /* API context */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
