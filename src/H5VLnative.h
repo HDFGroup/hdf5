@@ -25,8 +25,16 @@
 /* Public Macros */
 /*****************/
 
+/* When this header is included from a private header, don't make calls to H5open() */
+#undef H5OPEN
+#ifndef H5private_H
+#define H5OPEN H5open(),
+#else /* H5private_H */
+#define H5OPEN
+#endif /* H5private_H */
+
 /* Identifier for the native VOL connector */
-#define H5VL_NATIVE (H5VL_native_register())
+#define H5VL_NATIVE (H5OPEN H5VL_NATIVE_g)
 
 /* Characteristics of the native VOL connector */
 #define H5VL_NATIVE_NAME    "native"
@@ -514,6 +522,9 @@ typedef union H5VL_native_object_optional_args_t {
 extern "C" {
 #endif
 
+/* Global variable to hold the VOL connector ID */
+H5_DLLVAR hid_t H5VL_NATIVE_g;
+
 /* Token <--> address converters */
 
 /**
@@ -550,12 +561,6 @@ H5_DLL herr_t H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *
  * \since 1.12.0
  */
 H5_DLL herr_t H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr);
-
-/** @private
- *
- * \brief Register the native VOL connector and retrieve an ID for it
- */
-H5_DLL hid_t H5VL_native_register(void);
 
 #ifdef __cplusplus
 }

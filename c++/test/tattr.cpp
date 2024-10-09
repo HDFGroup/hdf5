@@ -1956,7 +1956,7 @@ test_attr_corder_create_basic(FileCreatPropList &fcpl, FileAccPropList &fapl)
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_attr()
+test_attr(const void *params)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Attributes\n"));
@@ -2041,12 +2041,14 @@ test_attr()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_attr()
+cleanup_attr(void *params)
 {
-    HDremove(FILE_BASIC.c_str());
-    HDremove(FILE_COMPOUND.c_str());
-    HDremove(FILE_SCALAR.c_str());
-    HDremove(FILE_MULTI.c_str());
-    HDremove(FILE_DTYPE.c_str());
-    HDremove(FILE_CRTPROPS.c_str());
+    if (GetTestCleanup()) {
+        HDremove(FILE_BASIC.c_str());
+        HDremove(FILE_COMPOUND.c_str());
+        HDremove(FILE_SCALAR.c_str());
+        HDremove(FILE_MULTI.c_str());
+        HDremove(FILE_DTYPE.c_str());
+        HDremove(FILE_CRTPROPS.c_str());
+    }
 }

@@ -3,6 +3,12 @@ name: hdf5 dev daily build
 # Triggers the workflow on a schedule or on demand
 on:
   workflow_dispatch:
+    inputs:
+      use_ignore:
+        description: 'Ignore has_changes check'
+        type: string
+        required: false
+        default: check
   schedule:
     - cron: "6 0 * * *"
 
@@ -14,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       hdf5-name: ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}
+      run-ignore: ${{ steps.getinputs.outputs.INPUTS_IGNORE }}
 
     steps:
     - uses: actions/checkout@v4.1.7
@@ -23,6 +30,7 @@ jobs:
       with:
         version: 'tags/snapshot'
         file: 'last-file.txt'
+      continue-on-error: true
 
     - name: Read base-name file
       id: gethdf5base
@@ -30,14 +38,31 @@ jobs:
 
     - run: echo "hdf5 base name is ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}."
 
+    - name: Read inputs
+      id: getinputs
+      run: |
+        echo "INPUTS_IGNORE=${{ inputs.use_ignore }}" >> $GITHUB_OUTPUT
+
+    - run: echo "use_ignore is ${{ steps.getinputs.outputs.INPUTS_IGNORE }}."
+
   call-workflow-tarball:
+    needs: [get-old-names]
     uses: ./.github/workflows/tarball.yml
     with:
+      use_ignore: ${{ needs.get-old-names.outputs.run-ignore }}
       use_tag: snapshot
       use_environ: snapshots
 
+  call-workflow-c-script:
+    needs: [get-old-names, call-workflow-tarball]
+    uses: ./.github/workflows/cmake-script.yml
+    with:
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      use_environ: snapshots
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
+
   call-workflow-ctest:
-    needs: call-workflow-tarball
+    needs: [get-old-names, call-workflow-tarball]
     uses: ./.github/workflows/cmake-ctest.yml
     with:
       preset_name: ci-StdShar
@@ -54,17 +79,17 @@ jobs:
         AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
         AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
         AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-    if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-abi:
-    needs: [call-workflow-tarball, call-workflow-ctest]
+    needs: [get-old-names, call-workflow-tarball, call-workflow-ctest]
     uses: ./.github/workflows/abi-report.yml
     with:
-      file_ref: '1.14.4.3'
+      file_ref: '1.14.5'
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_tag: snapshot
       use_environ: snapshots
-    if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-release:
     needs: [get-old-names, call-workflow-tarball, call-workflow-ctest, call-workflow-abi]
@@ -77,7 +102,7 @@ jobs:
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
       use_tag: snapshot
       use_environ: snapshots
-    if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-remove:
     needs: [get-old-names, call-workflow-tarball, call-workflow-ctest, call-workflow-abi, call-workflow-release]
@@ -88,5 +113,5 @@ jobs:
       file_base: ${{ needs.get-old-names.outputs.hdf5-name }}
       use_tag: snapshot
       use_environ: snapshots
-    if: ${{ (needs.call-workflow-tarball.outputs.has_changes == 'true') && (needs.get-old-names.outputs.hdf5-name != needs.call-workflow-tarball.outputs.file_base) }}
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) && (needs.get-old-names.outputs.hdf5-name != needs.call-workflow-tarball.outputs.file_base) }}
 

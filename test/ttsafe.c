@@ -51,7 +51,7 @@ num_digits(int num)
 
 /* Test the H5is_library_threadsafe() function */
 void
-tts_is_threadsafe(void)
+tts_is_threadsafe(const void H5_ATTR_UNUSED *params)
 {
     bool is_ts;
     bool should_be;
@@ -97,7 +97,10 @@ main(int argc, char *argv[])
 {
 
     /* Initialize testing framework */
-    TestInit(argv[0], NULL, NULL);
+    if (TestInit(argv[0], NULL, NULL, NULL, NULL, 0) < 0) {
+        fprintf(stderr, "couldn't initialize testing framework\n");
+        return -1;
+    }
 
 #ifdef H5_HAVE_THREADS
     MESSAGE(2, ("\nConcurrency Configuration:\n"));
@@ -120,41 +123,43 @@ main(int argc, char *argv[])
 #endif
 
     /* Tests are generally arranged from least to most complexity... */
-    AddTest("is_threadsafe", tts_is_threadsafe, NULL, "library threadsafe status", NULL);
+    AddTest("is_threadsafe", tts_is_threadsafe, NULL, NULL, NULL, 0, "library threadsafe status");
 #ifdef H5_HAVE_THREADS
-    AddTest("thread_pool", tts_thread_pool, NULL, "thread pools", NULL);
+    AddTest("thread_pool", tts_thread_pool, NULL, NULL, NULL, 0, "thread pools");
 #ifndef H5_HAVE_STDATOMIC_H
     /* C11 atomics only tested when emulated */
-    AddTest("atomics", tts_atomics, NULL, "emulation of C11 atomics", NULL);
+    AddTest("atomics", tts_atomics, NULL, NULL, NULL, 0, "emulation of C11 atomics");
 #endif /* H5_HAVE_STDATOMIC_H */
-    AddTest("rwlock", tts_rwlock, NULL, "simple R/W locks", NULL);
+    AddTest("rwlock", tts_rwlock, NULL, NULL, NULL, 0, "simple R/W locks");
 #ifndef H5_HAVE_WIN_THREADS
     /* Recursive R/W locks */
-    AddTest("rec_rwlock_1", tts_rec_rwlock_smoke_check_1, NULL, "recursive R/W lock smoke check 1 -- basic",
-            NULL);
-    AddTest("rec_rwlock_2", tts_rec_rwlock_smoke_check_2, NULL,
-            "recursive R/W lock smoke check 2 -- mob of readers", NULL);
-    AddTest("rec_rwlock_3", tts_rec_rwlock_smoke_check_3, NULL,
-            "recursive R/W lock smoke check 3 -- mob of writers", NULL);
-    AddTest("rec_rwlock_4", tts_rec_rwlock_smoke_check_4, NULL,
-            "recursive R/W lock smoke check 4 -- mixed mob", NULL);
+    AddTest("rec_rwlock_1", tts_rec_rwlock_smoke_check_1, NULL, NULL, NULL, 0,
+            "recursive R/W lock smoke check 1 -- basic");
+    AddTest("rec_rwlock_2", tts_rec_rwlock_smoke_check_2, NULL, NULL, NULL, 0,
+            "recursive R/W lock smoke check 2 -- mob of readers");
+    AddTest("rec_rwlock_3", tts_rec_rwlock_smoke_check_3, NULL, NULL, NULL, 0,
+            "recursive R/W lock smoke check 3 -- mob of writers");
+    AddTest("rec_rwlock_4", tts_rec_rwlock_smoke_check_4, NULL, NULL, NULL, 0,
+            "recursive R/W lock smoke check 4 -- mixed mob");
 #endif /* !H5_HAVE_WIN_THREADS */
-    AddTest("semaphore", tts_semaphore, NULL, "lightweight system semaphores", NULL);
+    AddTest("semaphore", tts_semaphore, NULL, NULL, NULL, 0, "lightweight system semaphores");
 
 #ifdef H5_HAVE_THREADSAFE
-    AddTest("thread_id", tts_thread_id, NULL, "thread IDs", NULL);
+    AddTest("thread_id", tts_thread_id, NULL, NULL, NULL, 0, "thread IDs");
 
-    AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
-    AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
+    /* Error stack test must be done after thread_id test to not mess up expected IDs */
+    AddTest("error_stacks", tts_error_stacks, NULL, NULL, NULL, 0, "error stack tests");
+    AddTest("dcreate", tts_dcreate, NULL, cleanup_dcreate, NULL, 0, "multi-dataset creation");
+    AddTest("error", tts_error, NULL, cleanup_error, NULL, 0, "per-thread error stacks");
 #ifdef H5_HAVE_PTHREAD_H
     /* Thread cancellability only supported with pthreads ... */
-    AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test", NULL);
+    AddTest("cancel", tts_cancel, NULL, cleanup_cancel, NULL, 0, "thread cancellation safety test");
 #endif /* H5_HAVE_PTHREAD_H */
-    AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation", NULL);
-    AddTest("attr_vlen", tts_attr_vlen, cleanup_attr_vlen, "multi-file-attribute-vlen read", NULL);
+    AddTest("acreate", tts_acreate, NULL, cleanup_acreate, NULL, 0, "multi-attribute creation");
+    AddTest("attr_vlen", tts_attr_vlen, NULL, cleanup_attr_vlen, NULL, 0, "multi-file-attribute-vlen read");
 
     /* Developer API routine tests */
-    AddTest("developer", tts_develop_api, NULL, "developer API routines", NULL);
+    AddTest("developer", tts_develop_api, NULL, NULL, NULL, 0, "developer API routines");
 
 #else /* H5_HAVE_THREADSAFE */
 
@@ -169,24 +174,31 @@ main(int argc, char *argv[])
 #endif /* H5_HAVE_THREADS */
 
     /* Display testing information */
-    TestInfo(argv[0]);
+    TestInfo(stdout);
 
     /* Parse command line arguments */
-    TestParseCmdLine(argc, argv);
+    if (TestParseCmdLine(argc, argv) < 0) {
+        fprintf(stderr, "couldn't parse command-line arguments\n");
+        TestShutdown();
+        return -1;
+    }
 
     /* Perform requested testing */
-    PerformTests();
+    if (PerformTests() < 0) {
+        fprintf(stderr, "couldn't run tests\n");
+        TestShutdown();
+        return -1;
+    }
 
     /* Display test summary, if requested */
     if (GetTestSummary())
-        TestSummary();
-
-    /* Clean up test files, if allowed */
-    if (GetTestCleanup() && !getenv(HDF5_NOCLEANUP))
-        TestCleanup();
+        TestSummary(stdout);
 
     /* Release test infrastructure */
-    TestShutdown();
+    if (TestShutdown() < 0) {
+        fprintf(stderr, "couldn't shut down testing framework\n");
+        return -1;
+    }
 
     return GetTestNumErrs();
 

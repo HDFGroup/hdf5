@@ -51,7 +51,7 @@
 H5TS_THREAD_RETURN_TYPE tts_attr_vlen_thread(void *);
 
 void
-tts_attr_vlen(void)
+tts_attr_vlen(const void H5_ATTR_UNUSED *params)
 {
     H5TS_thread_t threads[NUM_THREADS] = {0};             /* Thread declaration */
     hid_t         fid                  = H5I_INVALID_HID; /* File ID */
@@ -157,7 +157,7 @@ tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
     VERIFY_STR(string_attr_check, string_attr, "H5Aread");
 
     /* Free the attribute data */
-    ret = H5Dvlen_reclaim(atid, asid, H5P_DEFAULT, &string_attr_check);
+    ret = H5Treclaim(atid, asid, H5P_DEFAULT, &string_attr_check);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Close IDs */
@@ -180,9 +180,11 @@ tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
 } /* end tts_attr_vlen_thread() */
 
 void
-cleanup_attr_vlen(void)
+cleanup_attr_vlen(void H5_ATTR_UNUSED *params)
 {
-    HDunlink(FILENAME);
+    if (GetTestCleanup()) {
+        HDunlink(FILENAME);
+    }
 }
 
 #endif /*H5_HAVE_THREADSAFE*/

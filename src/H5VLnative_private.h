@@ -17,9 +17,12 @@
 #ifndef H5VLnative_private_H
 #define H5VLnative_private_H
 
+/* Include connector's public header */
+#include "H5VLnative.h" /* Native VOL connector         */
+
 /* Private headers needed by this file */
-#include "H5Fprivate.h" /* Files                                    */
-#include "H5VLnative.h" /* Native VOL connector                     */
+#include "H5Fprivate.h"  /* Files                       */
+#include "H5VLprivate.h" /* Virtual Object Layer        */
 
 /**************************/
 /* Library Private Macros */
@@ -33,13 +36,12 @@
 /* Library Private Variables */
 /*****************************/
 
+/* The native VOL connector */
+H5_DLLVAR H5VL_connector_t *H5VL_NATIVE_conn_g;
+
 /******************************/
 /* Library Private Prototypes */
 /******************************/
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /* Attribute callbacks */
 H5_DLL void  *H5VL__native_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const char *attr_name,
@@ -161,9 +163,5 @@ H5_DLL herr_t H5VL__native_get_file_addr_len(void *obj, H5I_type_t obj_type, siz
 H5_DLL herr_t H5VL_native_addr_to_token(void *obj, H5I_type_t obj_type, haddr_t addr, H5O_token_t *token);
 H5_DLL herr_t H5VL_native_token_to_addr(void *obj, H5I_type_t obj_type, H5O_token_t token, haddr_t *addr);
 H5_DLL herr_t H5VL_native_get_file_struct(void *obj, H5I_type_t type, H5F_t **file);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* H5VLnative_private_H */

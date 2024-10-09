@@ -14,7 +14,7 @@
  * Purpose:     Tests the datatype interface (H5T)
  */
 
-#include "testhdf5.h"
+#include "h5test.h"
 #include "H5srcdir.h"
 #include "H5Iprivate.h" /* For checking that datatype id's don't leak */
 
@@ -774,10 +774,10 @@ test_compound_2(void)
 {
     struct st {
         int a, b, c[4], d, e;
-    } * s_ptr;
+    } *s_ptr;
     struct dt {
         int e, d, c[4], b, a;
-    } * d_ptr;
+    } *d_ptr;
 
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
@@ -899,10 +899,10 @@ test_compound_3(void)
 {
     struct st {
         int a, b, c[4], d, e;
-    } * s_ptr;
+    } *s_ptr;
     struct dt {
         int a, c[4], e;
-    } * d_ptr;
+    } *d_ptr;
 
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
@@ -1021,13 +1021,13 @@ test_compound_4(void)
 
     struct st {
         int a, b, c[4], d, e;
-    } * s_ptr;
+    } *s_ptr;
     struct dt {
         short b;
         int   a, c[4];
         short d;
         int   e;
-    } * d_ptr;
+    } *d_ptr;
 
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
@@ -1249,11 +1249,11 @@ test_compound_6(void)
     struct st {
         short b;
         short d;
-    } * s_ptr;
+    } *s_ptr;
     struct dt {
         long b;
         long d;
-    } * d_ptr;
+    } *d_ptr;
 
     const size_t   nelmts = NTESTELEM;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
@@ -7693,7 +7693,7 @@ test_int_float_except(void)
 {
 #if H5_SIZEOF_INT == 4 && H5_SIZEOF_FLOAT == 4
     float  buf[CONVERT_SIZE]       = {(float)INT_MIN - 172.0F, (float)INT_MAX - 32.0F, (float)INT_MAX - 68.0F,
-                               (float)4.5F};
+                                      (float)4.5F};
     int    buf_int[CONVERT_SIZE]   = {INT_MIN, INT_MAX, INT_MAX - 127, 4};
     float  buf_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX + 1.0F, (float)INT_MAX - 127.0F, 4};
     int   *intp; /* Pointer to buffer, as integers */
@@ -9528,8 +9528,8 @@ test_deprec(hid_t fapl)
     dim_mismatch = false;
     for (u = 0; u < rank; u++)
         if (rdims[u] != dims[u]) {
-            TestErrPrintf("Array dimension information doesn't match!, rdims1[%u]=%d, tdims1[%u]=%d\n", u,
-                          (int)rdims[u], u, (int)dims[u]);
+            fprintf(stderr, "Array dimension information doesn't match!, rdims1[%u]=%d, tdims1[%u]=%d\n", u,
+                    (int)rdims[u], u, (int)dims[u]);
             dim_mismatch = true;
         } /* end if */
     if (dim_mismatch)
@@ -9539,9 +9539,9 @@ test_deprec(hid_t fapl)
     dim_mismatch = false;
     for (u = 0; u < rank; u++)
         if (rperm[u] != -2) {
-            TestErrPrintf(
-                "Array dimension permutation information was modified!, rdims1[%u]=%d, tdims1[%u]=%d\n", u,
-                rperm[u], u, perm[u]);
+            fprintf(stderr,
+                    "Array dimension permutation information was modified!, rdims1[%u]=%d, tdims1[%u]=%d\n",
+                    u, rperm[u], u, perm[u]);
             dim_mismatch = true;
         } /* end if */
     if (dim_mismatch)
@@ -9946,14 +9946,19 @@ verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
         case H5T_ARRAY: {
             H5T_t *base_dtypep = NULL; /* Internal structure of a datatype */
 
-            if (low == H5F_LIBVER_EARLIEST)
-                VERIFY(dtypep->shared->version, H5O_DTYPE_VERSION_2, "H5O_dtype_ver_bounds");
-            else
-                VERIFY(dtypep->shared->version, H5O_dtype_ver_bounds[low], "H5O_dtype_ver_bounds");
+            if (low == H5F_LIBVER_EARLIEST) {
+                if (dtypep->shared->version != H5O_DTYPE_VERSION_2)
+                    TEST_ERROR;
+            }
+            else {
+                if (dtypep->shared->version != H5O_dtype_ver_bounds[low])
+                    TEST_ERROR;
+            }
 
             /* Get the base datatype of this array type */
             base_dtype = H5Tget_super(dtype);
-            CHECK(base_dtype, FAIL, "H5Tget_super");
+            if (base_dtype == H5I_INVALID_HID)
+                TEST_ERROR;
 
             /* Get the base type's internal structure for version */
             base_dtypep = (H5T_t *)H5I_object(base_dtype);
@@ -10014,19 +10019,25 @@ verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
             }
             /* If this compound datatype contains a datatype of higher version, it
                will be promoted to that version, thus, verify with highest version */
-            if (*highest_version > H5O_dtype_ver_bounds[low])
-                VERIFY(dtypep->shared->version, *highest_version, "verify_version");
-            else
-                VERIFY(dtypep->shared->version, H5O_dtype_ver_bounds[low], "verify_version");
+            if (*highest_version > H5O_dtype_ver_bounds[low]) {
+                if (dtypep->shared->version != *highest_version)
+                    TEST_ERROR;
+            }
+            else {
+                if (dtypep->shared->version != H5O_dtype_ver_bounds[low])
+                    TEST_ERROR;
+            }
             break;
         }
         case H5T_ENUM:
-            VERIFY(dtypep->shared->version, H5O_dtype_ver_bounds[low], "verify_version");
+            if (dtypep->shared->version != H5O_dtype_ver_bounds[low])
+                TEST_ERROR;
             break;
         case H5T_VLEN:
         case H5T_FLOAT:
         case H5T_INTEGER:
-            VERIFY(dtypep->shared->version, H5O_dtype_ver_bounds[H5F_LIBVER_EARLIEST], "verify_version");
+            if (dtypep->shared->version != H5O_dtype_ver_bounds[H5F_LIBVER_EARLIEST])
+                TEST_ERROR;
             break;
         case H5T_NCLASSES:
         case H5T_NO_CLASS:
@@ -10115,7 +10126,7 @@ test_versionbounds(void)
     hsize_t      arr_dim[]       = {ARRAY_LEN};     /* Length of the array */
     int          low, high;                         /* Indices for iterating over versions */
     H5F_libver_t versions[]     = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18,  H5F_LIBVER_V110,
-                               H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V116};
+                                   H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V116};
     int          versions_count = 6; /* Number of version bounds in the array */
     unsigned     highest_version;    /* Highest version in nested datatypes */
     color_t      enum_val;           /* Enum type index */

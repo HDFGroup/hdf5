@@ -1,4 +1,4 @@
-name: hdf5 dev autotools icx
+name: hdf5 dev autotools icx CI
 
 # Triggers the workflow on a call from another workflow
 on:

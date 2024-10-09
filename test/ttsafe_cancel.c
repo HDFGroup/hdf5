@@ -55,7 +55,7 @@ pthread_t             childthread;
 static H5TS_barrier_t barrier;
 
 void
-tts_cancel(void)
+tts_cancel(const void H5_ATTR_UNUSED *params)
 {
     hid_t dataset;
     int   buffer;
@@ -203,9 +203,11 @@ cancellation_cleanup(void *arg)
 } /* end cancellation_cleanup() */
 
 void
-cleanup_cancel(void)
+cleanup_cancel(void H5_ATTR_UNUSED *params)
 {
-    HDunlink(FILENAME);
+    if (GetTestCleanup()) {
+        HDunlink(FILENAME);
+    }
 }
 
 #endif /*H5_HAVE_PTHREAD_H*/

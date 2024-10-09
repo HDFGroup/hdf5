@@ -242,7 +242,7 @@ static herr_t H5VL_pass_through_optional(void *obj, H5VL_optional_args_t *args, 
 /*******************/
 
 /* Pass through VOL connector class struct */
-static const H5VL_class_t H5VL_pass_through_g = {
+const H5VL_class_t H5VL_pass_through_g = {
     H5VL_VERSION,                            /* VOL class struct version */
     (H5VL_class_value_t)H5VL_PASSTHRU_VALUE, /* value        */
     H5VL_PASSTHRU_NAME,                      /* name         */
@@ -364,9 +364,6 @@ static const H5VL_class_t H5VL_pass_through_g = {
     H5VL_pass_through_optional /* optional */
 };
 
-/* The connector identification number, initialized at runtime */
-static hid_t H5VL_PASSTHRU_g = H5I_INVALID_HID;
-
 /*-------------------------------------------------------------------------
  * Function:    H5VL__pass_through_new_obj
  *
@@ -421,27 +418,6 @@ H5VL_pass_through_free_obj(H5VL_pass_through_t *obj)
 } /* end H5VL__pass_through_free_obj() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_pass_through_register
- *
- * Purpose:     Register the pass-through VOL connector and retrieve an ID
- *              for it.
- *
- * Return:      Success:    The ID for the pass-through VOL connector
- *              Failure:    -1
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5VL_pass_through_register(void)
-{
-    /* Singleton register the pass-through VOL connector ID */
-    if (H5VL_PASSTHRU_g < 0)
-        H5VL_PASSTHRU_g = H5VLregister_connector(&H5VL_pass_through_g, H5P_DEFAULT);
-
-    return H5VL_PASSTHRU_g;
-} /* end H5VL_pass_through_register() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5VL_pass_through_init
  *
  * Purpose:     Initialize this VOL connector, performing any necessary
@@ -485,9 +461,6 @@ H5VL_pass_through_term(void)
 #ifdef ENABLE_PASSTHRU_LOGGING
     printf("------- PASS THROUGH VOL TERM\n");
 #endif
-
-    /* Reset VOL ID */
-    H5VL_PASSTHRU_g = H5I_INVALID_HID;
 
     return 0;
 } /* end H5VL_pass_through_term() */

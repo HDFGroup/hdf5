@@ -30,17 +30,17 @@ using namespace H5;
 #define NDATASETS 50
 
 /* Number of attributes for attribute iteration test */
-//#define NATTR 50
+// #define NATTR 50
 
 /* Number of groups for second group iteration test */
-//#define ITER_NGROUPS 150
+// #define ITER_NGROUPS 150
 
 /* General maximum length of names used */
 #define NAMELEN 80
 
 /* 1-D dataset with fixed dimensions */
-//#define SPACE1_RANK     1
-//#define SPACE1_DIM1     4
+// #define SPACE1_RANK     1
+// #define SPACE1_DIM1     4
 
 const H5std_string FILE_ITERATE("titerate.h5");
 const H5std_string GROUP1("Top Group");
@@ -440,7 +440,7 @@ test_HDFFV_9920()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_iterate()
+test_iterate(const void *params)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Iterate Feature\n"));
@@ -464,8 +464,10 @@ test_iterate()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_iterate()
+cleanup_iterate(void *params)
 {
-    HDremove(FILE_ITERATE.c_str());
-    HDremove(FILE_NAME.c_str());
+    if (GetTestCleanup()) {
+        HDremove(FILE_ITERATE.c_str());
+        HDremove(FILE_NAME.c_str());
+    }
 } // cleanup_iterate

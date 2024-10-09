@@ -24,6 +24,9 @@
 #include "stdlib.h"
 #include "testpar.h"
 
+/* Include testing framework functionality */
+#include "testframe.h"
+
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(a[0])
 
 /* Used to load other filters than GZIP */

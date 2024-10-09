@@ -311,9 +311,8 @@ struct H5F_shared_t {
     uint64_t             rfic_flags;            /* Relaxed file integrity check (RFIC) flags */
 
     /* Cached VOL connector ID & info */
-    hid_t               vol_id;   /* ID of VOL connector for the container */
-    const H5VL_class_t *vol_cls;  /* Pointer to VOL connector class for the container */
-    void               *vol_info; /* Copy of VOL connector info for container */
+    H5VL_connector_t *vol_conn; /* VOL connector for the container */
+    void             *vol_info; /* Copy of VOL connector info for container */
 
     /* File space allocation information */
     H5F_fspace_strategy_t fs_strategy;  /* File space handling strategy	*/
@@ -445,7 +444,7 @@ H5_DLL herr_t H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr
                                const void *buf);
 H5_DLL herr_t H5F__accum_free(H5F_shared_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size);
 H5_DLL herr_t H5F__accum_flush(H5F_shared_t *f_sh);
-H5_DLL herr_t H5F__accum_reset(H5F_shared_t *f_sh, bool flush);
+H5_DLL herr_t H5F__accum_reset(H5F_shared_t *f_sh, bool flush, bool force);
 
 /* Shared file list related routines */
 H5_DLL herr_t        H5F__sfile_add(H5F_shared_t *shared);

@@ -931,33 +931,27 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
     } /* end if */
 
     /* Keep a copy of the VOL connector property, if there is one */
-    if ((*head)->ctx.vol_connector_prop_valid && (*head)->ctx.vol_connector_prop.connector_id > 0) {
+    if ((*head)->ctx.vol_connector_prop_valid && (*head)->ctx.vol_connector_prop.connector) {
         /* Get the connector property */
         H5MM_memcpy(&(*api_state)->vol_connector_prop, &(*head)->ctx.vol_connector_prop,
                     sizeof(H5VL_connector_prop_t));
 
         /* Check for actual VOL connector property */
-        if ((*api_state)->vol_connector_prop.connector_id) {
+        if ((*api_state)->vol_connector_prop.connector) {
             /* Copy connector info, if it exists */
             if ((*api_state)->vol_connector_prop.connector_info) {
-                H5VL_class_t *connector;                 /* Pointer to connector */
-                void         *new_connector_info = NULL; /* Copy of connector info */
-
-                /* Retrieve the connector for the ID */
-                if (NULL ==
-                    (connector = (H5VL_class_t *)H5I_object((*api_state)->vol_connector_prop.connector_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a VOL connector ID");
+                void *new_connector_info = NULL; /* Copy of connector info */
 
                 /* Allocate and copy connector info */
-                if (H5VL_copy_connector_info(connector, &new_connector_info,
+                if (H5VL_copy_connector_info((*api_state)->vol_connector_prop.connector, &new_connector_info,
                                              (*api_state)->vol_connector_prop.connector_info) < 0)
                     HGOTO_ERROR(H5E_CONTEXT, H5E_CANTCOPY, FAIL, "connector info copy failed");
                 (*api_state)->vol_connector_prop.connector_info = new_connector_info;
             } /* end if */
 
-            /* Increment the refcount on the connector ID */
-            if (H5I_inc_ref((*api_state)->vol_connector_prop.connector_id, false) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTINC, FAIL, "incrementing VOL connector ID failed");
+            /* Increment the refcount on the connector */
+            if (H5VL_conn_inc_rc((*api_state)->vol_connector_prop.connector) < 0)
+                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTINC, FAIL, "incrementing VOL connector refcount failed");
         } /* end if */
     }     /* end if */
 
@@ -1028,7 +1022,7 @@ H5CX_restore_state(const H5CX_state_t *api_state)
         (*head)->ctx.vol_wrap_ctx_valid = true;
 
     /* Restore the VOL connector info */
-    if (api_state->vol_connector_prop.connector_id) {
+    if (api_state->vol_connector_prop.connector) {
         H5MM_memcpy(&(*head)->ctx.vol_connector_prop, &api_state->vol_connector_prop,
                     sizeof(H5VL_connector_prop_t));
         (*head)->ctx.vol_connector_prop_valid = true;
@@ -1087,16 +1081,17 @@ H5CX_free_state(H5CX_state_t *api_state)
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on VOL wrapping context");
 
     /* Release the VOL connector property, if it was set */
-    if (api_state->vol_connector_prop.connector_id) {
+    if (api_state->vol_connector_prop.connector) {
         /* Clean up any VOL connector info */
         if (api_state->vol_connector_prop.connector_info)
-            if (H5VL_free_connector_info(api_state->vol_connector_prop.connector_id,
+            if (H5VL_free_connector_info(api_state->vol_connector_prop.connector,
                                          api_state->vol_connector_prop.connector_info) < 0)
                 HGOTO_ERROR(H5E_CONTEXT, H5E_CANTRELEASE, FAIL,
                             "unable to release VOL connector info object");
-        /* Decrement connector ID */
-        if (H5I_dec_ref(api_state->vol_connector_prop.connector_id) < 0)
-            HDONE_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't close VOL connector ID");
+
+        /* Decrement connector refcount */
+        if (H5VL_conn_dec_rc(api_state->vol_connector_prop.connector) < 0)
+            HDONE_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't close VOL connector");
     } /* end if */
 
     /* Free the state */

@@ -71,8 +71,8 @@ typedef struct dtype1_struct {
 
 #define DTYPE2_SIZE 1024
 static const char *DSETNAME[]       = {"dataset0",  "dataset1",  "dataset2", "dataset3", "dataset4",
-                                 "dataset5",  "dataset6",  "dataset7", "dataset8", "dataset9",
-                                 "dataset10", "dataset11", NULL};
+                                       "dataset5",  "dataset6",  "dataset7", "dataset8", "dataset9",
+                                       "dataset10", "dataset11", NULL};
 static const char *EXTRA_DSETNAME[] = {"ex_dataset0",  "ex_dataset1",  "ex_dataset2",
                                        "ex_dataset3",  "ex_dataset4",  "ex_dataset5",
                                        "ex_dataset6",  "ex_dataset7",  "ex_dataset8",
@@ -94,7 +94,7 @@ static const char *ENUM_NAME[] = {"enum_member0",  "enum_member1",  "enum_member
                                   "enum_member15", "enum_member16", "enum_member17",
                                   "enum_member18", "enum_member19", NULL};
 static const int   ENUM_VAL[]  = {0, 13,  -500,  63,  64,  -64,  65,  2048,  1,  2,     -1,
-                               7, 130, -5000, 630, 640, -640, 650, 20480, 10, -1001, -10};
+                                  7, 130, -5000, 630, 640, -640, 650, 20480, 10, -1001, -10};
 #define SIZE2_RANK1 6
 #define SIZE2_RANK2 10
 #define SIZE2_DIMS                                                                                           \
@@ -615,7 +615,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, bool test_file_clo
     /* Closing and re-opening the file takes a long time on systems without
      * local disks.  Don't close and reopen if express testing is enabled.
      */
-    if (TestExpress > 1)
+    if (h5_get_testexpress() > 1)
         test_file_closing = false;
 
     /* Initialize wdata */
@@ -1553,7 +1553,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     /* Closing and re-opening the file takes a long time on systems without
      * local disks.  Don't close and reopen if express testing is enabled.
      */
-    if (TestExpress > 1)
+    if (h5_get_testexpress() > 1)
         test_file_closing = 0;
 
     /* Create a file and get its size */
@@ -3708,7 +3708,7 @@ test_sohm_external_dtype(void)
 **
 ****************************************************************/
 void
-test_sohm(void)
+test_sohm(const void H5_ATTR_UNUSED *params)
 {
     const char *driver_name;
     bool        vol_is_native;
@@ -3767,9 +3767,11 @@ test_sohm(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_sohm(void)
+cleanup_sohm(void H5_ATTR_UNUSED *params)
 {
-    HDremove(FILENAME);
-    HDremove(FILENAME_SRC);
-    HDremove(FILENAME_DST);
+    if (GetTestCleanup()) {
+        HDremove(FILENAME);
+        HDremove(FILENAME_SRC);
+        HDremove(FILENAME_DST);
+    }
 } /* cleanup_sohm */

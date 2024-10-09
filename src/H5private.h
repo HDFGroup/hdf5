@@ -126,8 +126,8 @@
 #define H5_DEFAULT_VFD      H5FD_SEC2
 #define H5_DEFAULT_VFD_NAME "sec2"
 
-/* Define the default VOL driver */
-#define H5_DEFAULT_VOL H5VL_NATIVE
+/* Define the default VOL connector */
+#define H5_DEFAULT_VOL H5VL_NATIVE_conn_g
 
 #ifdef H5_HAVE_WIN32_API
 
@@ -857,7 +857,7 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifdef H5_HAVE_VASPRINTF
 #define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
 #else
-H5_DLL int       HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #endif
 

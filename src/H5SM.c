@@ -45,6 +45,13 @@ typedef struct H5SM_read_udata_t {
     void             *encoding_buf; /* The encoded message (out) */
 } H5SM_read_udata_t;
 
+/* Typedef to increment a reference count in the B-tree */
+typedef struct {
+    H5SM_mesg_key_t *key;      /* IN: key for message being incremented */
+    bool             found;    /* OUT: if message was found */
+    H5O_fheap_id_t   fheap_id; /* OUT: fheap ID of record */
+} H5SM_incr_ref_opdata_t;
+
 /********************/
 /* Local Prototypes */
 /********************/
@@ -1141,9 +1148,9 @@ done:
 static herr_t
 H5SM__incr_ref(void *record, void *_op_data, bool *changed)
 {
-    H5SM_sohm_t          *message   = (H5SM_sohm_t *)record;
-    H5SM_incr_ref_opdata *op_data   = (H5SM_incr_ref_opdata *)_op_data;
-    herr_t                ret_value = SUCCEED;
+    H5SM_sohm_t            *message   = (H5SM_sohm_t *)record;
+    H5SM_incr_ref_opdata_t *op_data   = (H5SM_incr_ref_opdata_t *)_op_data;
+    herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1174,9 +1181,9 @@ H5SM__incr_ref(void *record, void *_op_data, bool *changed)
     /* If we got here, the message has changed */
     *changed = true;
 
-    /* Check for retrieving the heap ID */
-    if (op_data)
-        op_data->fheap_id = message->u.heap_loc.fheap_id;
+    /* Set the heap ID and indicate it was found */
+    op_data->fheap_id = message->u.heap_loc.fheap_id;
+    op_data->found    = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1326,24 +1333,24 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, bool def
                 HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "can't search for message in index");
         } /* end if */
         else {
-            H5SM_incr_ref_opdata op_data;
+            H5SM_incr_ref_opdata_t op_data;
 
             /* Set up callback info */
-            op_data.key = &key;
+            op_data.key   = &key;
+            op_data.found = false;
 
-            /* If this returns failure, it means that the message wasn't found. */
-            /* If it succeeds, set the heap_id in the shared struct.  It will
-             * return a heap ID, since a message with a reference count greater
-             * than 1 is always shared in the heap.
+            /* Set the heap_id in the shared struct, if the message was found.
+             * It will return a heap ID, since a message with a reference count
+             * greater than 1 is always shared in the heap.
              */
-            if (H5B2_modify(bt2, &key, H5SM__incr_ref, &op_data) >= 0) {
+            if (H5B2_modify(bt2, &key, true, H5SM__incr_ref, &op_data) < 0)
+                HGOTO_ERROR(H5E_SOHM, H5E_CANTMODIFY, FAIL, "B-tree modification failed");
+            if (op_data.found) {
                 shared.u.heap_id = op_data.fheap_id;
                 found            = true;
             } /* end if */
-            else
-                H5E_clear_stack(); /*ignore error*/
-        }                          /* end else */
-    }                              /* end else */
+        }     /* end else */
+    }         /* end else */
 
     if (found) {
         /* If the message was found, it's shared in the heap (now).  Set up a
@@ -1807,7 +1814,7 @@ H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, c
         /* If this returns failure, it means that the message wasn't found.
          * If it succeeds, a copy of the modified message will be returned.
          */
-        if (H5B2_modify(bt2, &key, H5SM__decr_ref, &message) < 0)
+        if (H5B2_modify(bt2, &key, false, H5SM__decr_ref, &message) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index");
 
         /* Point to the message */

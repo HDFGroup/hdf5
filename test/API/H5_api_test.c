@@ -214,6 +214,8 @@ main(int argc, char **argv)
             goto done;
         }
         else {
+            int cmp = 0;
+
             /*
              * If the connector was successfully registered, check that
              * the connector ID set on the default FAPL matches the ID
@@ -231,7 +233,13 @@ main(int argc, char **argv)
                 goto done;
             }
 
-            if (default_con_id != registered_con_id) {
+            if (H5VLcmp_connector_cls(&cmp, default_con_id, registered_con_id) < 0) {
+                fprintf(stderr, "Couldn't compare VOL connector classes\n");
+                err_occurred = true;
+                goto done;
+            }
+
+            if (0 != cmp) {
                 fprintf(stderr, "VOL connector set on default FAPL didn't match specified VOL connector\n");
                 err_occurred = true;
                 goto done;

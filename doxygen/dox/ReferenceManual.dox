@@ -31,7 +31,7 @@ The functions provided by the HDF5 API are grouped into the following
 </td>
 </tr>
 <tr>
-<th>Event Set (H5ES)</th><td>@ref H5ES "C"</td><td>"C++"</td><td>"Fortran"</td><td>"Java"</td><td>HDF5 event set life cycle used with HDF5 VOL connectors that enable the asynchronous feature in HDF5.
+<th>Event Set (H5ES)</th><td>@ref H5ES "C"</td><td>"C++"</td><td>@ref FH5ES "Fortran"</td><td>"Java"</td><td>HDF5 event set life cycle used with HDF5 VOL connectors that enable the asynchronous feature in HDF5.
 </td>
 </tr>
 <tr>
@@ -103,7 +103,7 @@ The functions provided by the HDF5 API are grouped into the following
 </td>
 </tr>
 <tr>
-<th>HDF5 Optimizations APIs (H5DO)</th><td>@ref H5DO "C"</td><td>"C++"</td><td>"Fortran"</td><td>"Java"</td><td>Bypassing default HDF5 behavior in order to optimize for specific use cases.
+<th>HDF5 Optimizations APIs (H5DO)</th><td>@ref H5DO "C"</td><td>"C++"</td><td>@ref FH5DO "Fortran"</td><td>"Java"</td><td>Bypassing default HDF5 behavior in order to optimize for specific use cases.
 </td>
 </tr>
 <tr>

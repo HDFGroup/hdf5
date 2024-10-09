@@ -27,6 +27,9 @@
 
 #ifdef H5_HAVE_SUBFILING_VFD
 
+/* Include testing framework functionality -- currently just for test alarm timer */
+#include "testframe.h"
+
 #include "H5FDsubfiling.h"
 #include "H5FDioc.h"
 
@@ -3132,7 +3135,12 @@ main(int argc, char **argv)
         printf("Testing Subfiling VFD functionality\n");
     }
 
-    TestAlarmOn();
+    if (TestAlarmOn() < 0) {
+        if (MAINPROCESS)
+            fprintf(stderr, "couldn't enable test timer\n");
+        nerrors++;
+        goto exit;
+    }
 
     /*
      * Obtain and broadcast seed value since ranks

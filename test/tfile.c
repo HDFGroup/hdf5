@@ -4885,7 +4885,11 @@ test_sects_freespace(const char *driver_name, bool new_format)
     CHECK(nall, FAIL, "H5Fget_free_sections");
 
     /* Should return failure when nsects is 0 with a nonnull sect_info */
-    nsects = H5Fget_free_sections(file, H5FD_MEM_DEFAULT, (size_t)0, all_sect_info);
+    H5E_BEGIN_TRY
+    {
+        nsects = H5Fget_free_sections(file, H5FD_MEM_DEFAULT, (size_t)0, all_sect_info);
+    }
+    H5E_END_TRY
     VERIFY(nsects, FAIL, "H5Fget_free_sections");
 
     /* Retrieve and verify free space info for all the sections */
@@ -5108,7 +5112,11 @@ test_filespace_compatible(void)
         CHECK(fid, FAIL, "H5Fopen");
 
         /* The dataset should not be there */
-        did = H5Dopen2(fid, DSETNAME, H5P_DEFAULT);
+        H5E_BEGIN_TRY
+        {
+            did = H5Dopen2(fid, DSETNAME, H5P_DEFAULT);
+        }
+        H5E_END_TRY
         VERIFY(did, FAIL, "H5Dopen");
 
         /* There should not be any free space in the file */
@@ -6195,6 +6203,7 @@ test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t n
             case H5F_LIBVER_V112:
             case H5F_LIBVER_V114:
             case H5F_LIBVER_V116:
+            case H5F_LIBVER_V118:
                 ok = (f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_3);
                 VERIFY(ok, true, "HDF5_superblock_ver_bounds");
                 break;
@@ -8389,7 +8398,7 @@ test_deprec(const char *driver_name)
 **
 ****************************************************************/
 void
-test_file(void)
+test_file(const void H5_ATTR_UNUSED *params)
 {
     const char *driver_name;               /* File Driver value from environment */
     hid_t       fapl_id = H5I_INVALID_HID; /* VFD-dependent fapl ID */
@@ -8489,20 +8498,22 @@ test_file(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_file(void)
+cleanup_file(void H5_ATTR_UNUSED *params)
 {
-    H5E_BEGIN_TRY
-    {
-        H5Fdelete(SFILE1, H5P_DEFAULT);
-        H5Fdelete(FILE1, H5P_DEFAULT);
-        H5Fdelete(FILE2, H5P_DEFAULT);
-        H5Fdelete(FILE3, H5P_DEFAULT);
-        H5Fdelete(FILE4, H5P_DEFAULT);
-        H5Fdelete(FILE5, H5P_DEFAULT);
-        H5Fdelete(FILE6, H5P_DEFAULT);
-        H5Fdelete(FILE7, H5P_DEFAULT);
-        H5Fdelete(FILE8, H5P_DEFAULT);
-        H5Fdelete(DST_FILE, H5P_DEFAULT);
+    if (GetTestCleanup()) {
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(SFILE1, H5P_DEFAULT);
+            H5Fdelete(FILE1, H5P_DEFAULT);
+            H5Fdelete(FILE2, H5P_DEFAULT);
+            H5Fdelete(FILE3, H5P_DEFAULT);
+            H5Fdelete(FILE4, H5P_DEFAULT);
+            H5Fdelete(FILE5, H5P_DEFAULT);
+            H5Fdelete(FILE6, H5P_DEFAULT);
+            H5Fdelete(FILE7, H5P_DEFAULT);
+            H5Fdelete(FILE8, H5P_DEFAULT);
+            H5Fdelete(DST_FILE, H5P_DEFAULT);
+        }
+        H5E_END_TRY
     }
-    H5E_END_TRY
 }

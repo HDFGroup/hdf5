@@ -2542,7 +2542,7 @@ test_vltypes_fill_value(void)
     hsize_t large_dims[]         = {SPACE4_DIM_LARGE};
     size_t  dset_elmts           = 0; /* Number of elements in a particular dataset */
     const dtype1_struct fill1    = {1, 2,   "foobar", "",  NULL,     "\0",   "dead",
-                                 3, 4.0, 100.0,    1.0, "liquid", "meter"};
+                                    3, 4.0, 100.0,    1.0, "liquid", "meter"};
     const dtype1_struct wdata    = {3, 4, "", NULL, "\0", "foo", "two", 6, 8.0, 200.0, 2.0, "solid", "yard"};
     dtype1_struct      *rbuf     = NULL;                /* Buffer for reading data */
     size_t              mem_used = 0;                   /* Memory used during allocation */
@@ -3233,7 +3233,7 @@ test_vltypes_fill_value(void)
 **
 ****************************************************************/
 void
-test_vltypes(void)
+test_vltypes(const void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Variable-Length Datatypes\n"));
@@ -3266,11 +3266,13 @@ test_vltypes(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_vltypes(void)
+cleanup_vltypes(void H5_ATTR_UNUSED *params)
 {
-    H5E_BEGIN_TRY
-    {
-        H5Fdelete(FILENAME, H5P_DEFAULT);
+    if (GetTestCleanup()) {
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(FILENAME, H5P_DEFAULT);
+        }
+        H5E_END_TRY
     }
-    H5E_END_TRY
 }

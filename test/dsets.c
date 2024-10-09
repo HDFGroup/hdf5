@@ -20,7 +20,7 @@
 
 #define H5Z_FRIEND /*suppress error about including H5Zpkg      */
 
-#include "testhdf5.h"
+#include "h5test.h"
 #include "H5srcdir.h"
 
 #include "H5CXprivate.h" /* API Contexts                         */
@@ -990,14 +990,16 @@ test_compact_io(hid_t fapl)
 
             /* Verify the dataset's layout and fill message versions */
             if (fp->shared->low_bound == H5F_LIBVER_EARLIEST) {
-                VERIFY(dsetp->shared->layout.version, H5O_LAYOUT_VERSION_DEFAULT, "layout_ver_bounds");
-                VERIFY(dsetp->shared->dcpl_cache.fill.version, H5O_FILL_VERSION_2, "fill_ver_bounds");
+                if (dsetp->shared->layout.version != H5O_LAYOUT_VERSION_DEFAULT)
+                    TEST_ERROR;
+                if (dsetp->shared->dcpl_cache.fill.version != H5O_FILL_VERSION_2)
+                    TEST_ERROR;
             }
             else {
-                VERIFY(dsetp->shared->layout.version, H5O_layout_ver_bounds[fp->shared->low_bound],
-                       "layout_ver_bounds");
-                VERIFY(dsetp->shared->dcpl_cache.fill.version, H5O_fill_ver_bounds[fp->shared->low_bound],
-                       "fill_ver_bounds");
+                if (dsetp->shared->layout.version != H5O_layout_ver_bounds[fp->shared->low_bound])
+                    TEST_ERROR;
+                if (dsetp->shared->dcpl_cache.fill.version != H5O_fill_ver_bounds[fp->shared->low_bound])
+                    TEST_ERROR;
             }
 
             /* Close the dataset and delete from the file */
@@ -3319,7 +3321,7 @@ test_nbit_float(hid_t file)
      * dataset datatype (no precision loss during datatype conversion)
      */
     float  orig_data[2][5] = {{188384.0F, 19.103516F, -1.0831790e9F, -84.242188F, 5.2045898F},
-                             {-49140.0F, 2350.25F, -3.2110596e-1F, 6.4998865e-5F, -0.0F}};
+                              {-49140.0F, 2350.25F, -3.2110596e-1F, 6.4998865e-5F, -0.0F}};
     float  new_data[2][5];
     size_t precision, offset;
     size_t i, j;
@@ -3706,7 +3708,7 @@ test_nbit_compound(hid_t file)
     const hsize_t size[2]         = {2, 5};
     const hsize_t chunk_size[2]   = {2, 5};
     const float   float_val[2][5] = {{188384.0F, 19.103516F, -1.0831790e9F, -84.242188F, 5.2045898F},
-                                   {-49140.0F, 2350.25F, -3.2110596e-1F, 6.4998865e-5F, -0.0F}};
+                                     {-49140.0F, 2350.25F, -3.2110596e-1F, 6.4998865e-5F, -0.0F}};
     atomic        orig_data[2][5];
     atomic        new_data[2][5];
     unsigned int  i_mask, s_mask, c_mask;
@@ -3933,7 +3935,7 @@ test_nbit_compound_2(hid_t file)
     const hsize_t size[2]         = {2, 5};
     const hsize_t chunk_size[2]   = {2, 5};
     const float   float_val[2][5] = {{188384.0F, 19.103516F, -1.0831790e9F, -84.242188F, 5.2045898F},
-                                   {-49140.0F, 2350.25F, -3.2110596e-1F, 6.4998865e-5F, -0.0F}};
+                                     {-49140.0F, 2350.25F, -3.2110596e-1F, 6.4998865e-5F, -0.0F}};
     complex       orig_data[2][5];
     complex       new_data[2][5];
     unsigned int  i_mask, s_mask, c_mask, b_mask;
@@ -12722,9 +12724,9 @@ test_bt2_hdr_fd(const char *driver_name, hid_t fapl)
     const hsize_t     maxshape[2]  = {H5S_UNLIMITED, H5S_UNLIMITED};
     const hsize_t     chunk[2]     = {8, 8};
     const int         buffer[8][8] = {{0, 1, 2, 3, 4, 5, 6, 7},         {8, 9, 10, 11, 12, 13, 14, 15},
-                              {16, 17, 18, 19, 20, 21, 22, 23}, {24, 25, 26, 27, 28, 29, 30, 31},
-                              {32, 33, 34, 35, 36, 37, 38, 39}, {40, 41, 42, 43, 44, 45, 46, 47},
-                              {48, 49, 50, 51, 52, 53, 54, 55}, {56, 57, 58, 59, 60, 61, 62, 63}};
+                                      {16, 17, 18, 19, 20, 21, 22, 23}, {24, 25, 26, 27, 28, 29, 30, 31},
+                                      {32, 33, 34, 35, 36, 37, 38, 39}, {40, 41, 42, 43, 44, 45, 46, 47},
+                                      {48, 49, 50, 51, 52, 53, 54, 55}, {56, 57, 58, 59, 60, 61, 62, 63}};
     H5O_info2_t       info;
 
     TESTING("Version 2 B-tree chunk index header flush dependencies handled correctly");
@@ -14983,7 +14985,8 @@ test_versionbounds(void)
             if (vdset > 0) /* dataset created successfully */
             {
                 /* Virtual dataset is only available starting in V110 */
-                VERIFY(high >= H5F_LIBVER_V110, true, "virtual dataset");
+                if (high < H5F_LIBVER_V110)
+                    TEST_ERROR;
 
                 if (H5Dclose(vdset) < 0)
                     TEST_ERROR;
@@ -16165,8 +16168,7 @@ main(void)
         goto error;
     printf("All dataset tests passed.\n");
 #ifdef H5_HAVE_FILTER_SZIP
-    if (GetTestCleanup())
-        HDremove(NOENCODER_COPY_FILENAME);
+    HDremove(NOENCODER_COPY_FILENAME);
 #endif /* H5_HAVE_FILTER_SZIP */
     h5_cleanup(FILENAME, fapl);
 

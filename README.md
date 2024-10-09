@@ -1,9 +1,10 @@
-HDF5 version 1.15.0 currently under development
+HDF5 version 1.17.0 currently under development
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
 [![develop cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cmake.yml?branch=develop&label=HDF5%20develop%20CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/cmake.yml?query=branch%3Adevelop)
 [![develop autotools build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/autotools.yml?branch=develop&label=HDF5%20develop%20Autotools%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/autotools.yml?query=branch%3Adevelop)
+[![HDF-EOS5 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/hdfeos5.yml?branch=develop&label=HDF-EOS5)](https://github.com/HDFGroup/hdf5/actions/workflows/hdfeos5.yml?query=branch%3Adevelop)
 [![netCDF build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/netcdf.yml?branch=develop&label=netCDF)](https://github.com/HDFGroup/hdf5/actions/workflows/netcdf.yml?query=branch%3Adevelop)
 [![h5py build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/h5py.yml?branch=develop&label=h5py)](https://github.com/HDFGroup/hdf5/actions/workflows/h5py.yml?query=branch%3Adevelop)
 [![CVE regression](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cve.yml?branch=develop&label=CVE)](https://github.com/HDFGroup/hdf5/actions/workflows/cve.yml?query=branch%3Adevelop)
@@ -28,17 +29,17 @@ tools, and services at [The HDF Group's website](https://www.hdfgroup.org/).
 
 DOCUMENTATION
 -------------
-This release is fully functional for the API described in the documentation.
+Documentation for all HDF software is available at:
 
-   https://hdfgroup.github.io/hdf5/develop/_l_b_a_p_i.html
+   https://support.hdfgroup.org/documentation/index.html
 
-Full Documentation and Programming Resources for this release can be found at
+Documentation for the current HDF5 library release is available at:
 
-   https://hdfgroup.github.io/hdf5/develop/index.html
+   https://support.hdfgroup.org/releases/hdf5/latest-docs.html
 
-The latest doxygen documentation generated on changes to develop is available at:
+The latest Doxygen documentation generated on changes to `develop`, which does **not** correspond to any particular library release, is available at:
 
-   https://hdfgroup.github.io/hdf5/develop
+   https://hdfgroup.github.io/hdf5/develop 
 
 See the [RELEASE.txt](release_docs/RELEASE.txt) file in the [release_docs/](release_docs/) directory for information specific
 to the features and updates included in this release of the library.

@@ -156,14 +156,14 @@ endif
 
 libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c external_common.c
 
-# Use libhd5test.la to compile all of the tests
+# Use libh5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)
 
 # List the source files for tests that have more than one
 ttsafe_SOURCES=ttsafe.c ttsafe_acreate.c ttsafe_atomic.c ttsafe_attr_vlen.c \
     ttsafe_cancel.c ttsafe_dcreate.c ttsafe_develop.c ttsafe_error.c \
     ttsafe_rwlock.c ttsafe_rec_rwlock.c ttsafe_semaphore.c \
-    ttsafe_thread_id.c ttsafe_thread_pool.c
+    ttsafe_thread_id.c ttsafe_thread_pool.c ttsafe_error_stacks.c
 cache_image_SOURCES=cache_image.c genall5.c
 mirror_vfd_SOURCES=mirror_vfd.c genall5.c
 

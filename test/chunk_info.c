@@ -38,19 +38,15 @@
 #define H5D_TESTING /* to use H5D__ functions */
 #include "H5Dpkg.h"
 
-#include "testhdf5.h"
+#include "h5test.h"
 #ifdef H5_HAVE_FILTER_DEFLATE
 #include "zlib.h"
 #endif
 
 /* Test file names, using H5F_libver_t as indices */
-static const char *FILENAME[] = {"tchunk_info_earliest",
-                                 "tchunk_info_v18",
-                                 "tchunk_info_v110",
-                                 "tchunk_info_v112",
-                                 "tchunk_info_v114",
-                                 "tchunk_info_v116",
-                                 NULL};
+static const char *FILENAME[] = {
+    "tchunk_info_earliest", "tchunk_info_v18",  "tchunk_info_v110", "tchunk_info_v112",
+    "tchunk_info_v114",     "tchunk_info_v116", "tchunk_info_v118", NULL};
 
 /* File to be used in test_failed_attempts */
 #define FILTERMASK_FILE "tflt_msk"

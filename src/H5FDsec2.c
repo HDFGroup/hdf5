@@ -692,7 +692,7 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             if (bytes_read > 0)
                 offset += bytes_read;
 #else
-            bytes_read  = HDread(file->fd, buf, bytes_in);
+            bytes_read = HDread(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
         } while (-1 == bytes_read && EINTR == errno);
 

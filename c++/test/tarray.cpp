@@ -477,7 +477,7 @@ test_array_info()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_array()
+test_array(const void *params)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Array Datatypes\n"));
@@ -502,7 +502,9 @@ test_array()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_array()
+cleanup_array(void *params)
 {
-    HDremove(FILENAME.c_str());
+    if (GetTestCleanup()) {
+        HDremove(FILENAME.c_str());
+    }
 } // cleanup_array

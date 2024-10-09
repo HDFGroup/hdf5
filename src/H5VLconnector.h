@@ -1105,14 +1105,6 @@ H5_DLL void *H5VLobject(hid_t obj_id);
  * \ingroup H5VLDEV
  */
 H5_DLL hid_t H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id);
-/**
- * \ingroup H5VLDEV
- */
-H5_DLL hid_t H5VLpeek_connector_id_by_name(const char *name);
-/**
- * \ingroup H5VLDEV
- */
-H5_DLL hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
 
 /* User-defined optional operations */
 H5_DLL herr_t H5VLregister_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val);

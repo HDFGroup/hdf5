@@ -182,13 +182,19 @@ For more information on the HDF5 versioning and backward and forward compatibili
 3. Run `bin/release` (similar to 8.2) and commit all the changed files.
 4. Select release build from workflow.
     - Choose the release branch
-    - Change ‘Release version tag’ name to 'hdf5_X.Y.Z' 
+    - Change ‘Release version tag’ name to 'hdf5_X.Y.Z'
     - Press "Run Workflow"
 5. Review the release files in Github
 6. Edit the Github Release and change status to Release
     - Change status from Pre-release to Release
+7. Select publish-release build from workflow.
+    - Choose the release branch
+    - Change ‘HDF5 Release version tag’ name to 'hdf5_X.Y.Z'
+    - Change 'HDF5 Release file name base' to 'hdf5-X.Y.Z'
+    - Change 'HDF5 target bucket directory' to 'vX_Y/vX_Y_Z'
+    - Press "Run Workflow"
 
-### 10. Add the contents of the RELEASE.txt file in the release code to the HISTORY file in the **support** branch, just below the introductory lines at the top of the HISTORY file.
+### 10. Add the contents of the RELEASE.txt file in the release code to the HISTORY-<branch> file in the **support** branch, just below the introductory lines at the top of the HISTORY file.
 
 ### 11. Conduct Release Retrospective (Release Manager)
 1. Schedule time and solicit comments from retrospective
@@ -207,5 +213,5 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u11]: https://github.com/HDFGroup/hdf5/blob/develop/src/CMakeLists.txt
 [u12]: https://github.com/HDFGroup/hdf5/blob/develop/configure.ac
 [u13]: https://hdfgroup.github.io/hdf5/develop/api-compat-macros.html
-[u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14
+[u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.16
 [u15]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot

@@ -2499,8 +2499,8 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *                      pipeline
  * \param[in] flags     Bit vector specifying certain general properties of
  *                      the filter
- * \param[in] cd_nelmts Number of elements in \p c_values
- * \param[in] c_values  Auxiliary data for the filter
+ * \param[in] cd_nelmts Number of elements in \p cd_values
+ * \param[in] cd_values  Auxiliary data for the filter
  *
  * \return \herr_t
  *
@@ -2756,7 +2756,7 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *
  */
 H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts,
-                            const unsigned int c_values[]);
+                            const unsigned int cd_values[]);
 /**
  * \ingroup OCPL
  *
@@ -5051,6 +5051,36 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *             <td>
  *              \li The library will create objects with the latest format
  *                  versions available to library release 1.14.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release specified
+ *                  in the \p high value.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than version specified in
+ *                  \p high will fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V116<br />
+ *                \p high=<any version higher than \p low but not #H5F_LIBVER_LATEST></td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.16.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release specified
+ *                  in the \p high value.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than version specified in
+ *                  \p high will fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V118<br />
+ *                \p high=<any version higher than \p low but not #H5F_LIBVER_LATEST></td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.18.x.
  *              \li The library will allow objects to be created with the latest
  *                  format versions available to library release specified
  *                  in the \p high value.

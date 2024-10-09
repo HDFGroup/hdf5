@@ -14,7 +14,7 @@
  * Serial tests for encoding/decoding plists
  */
 
-#include "testhdf5.h"
+#include "h5test.h"
 #include "H5ACprivate.h"
 #include "H5Pprivate.h"
 
@@ -190,9 +190,6 @@ main(void)
             snprintf(msg, sizeof(msg),
                      "Testing ENCODE/DECODE with file version bounds: (%s, %s):", low_string, high_string);
             puts(msg);
-
-            if (VERBOSE_MED)
-                printf("Encode/Decode DCPLs\n");
 
             /******* ENCODE/DECODE DCPLS *****/
             TESTING("Default DCPL Encoding/Decoding");

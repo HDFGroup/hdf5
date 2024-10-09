@@ -231,7 +231,7 @@ import org.slf4j.LoggerFactory;
  * which prints out the HDF5 error stack, as described in the HDF5 C API <i><b>@ref H5Eprint()</b>.</i> This
  * may be used by Java exception handlers to print out the HDF5 error stack. <hr>
  *
- * @version HDF5 1.15.0 <BR>
+ * @version HDF5 1.17.0 <BR>
  *          <b>See also: </b>
  *          @ref HDFARRAY hdf.hdf5lib.HDFArray<br />
  *          @ref HDF5CONST hdf.hdf5lib.HDF5Constants<br />
@@ -273,7 +273,7 @@ public class H5 implements java.io.Serializable {
      * </ul>
      * Make sure to update the versions number when a different library is used.
      */
-    public final static int LIB_VERSION[] = {1, 15, 0};
+    public final static int LIB_VERSION[] = {1, 17, 0};
 
     /**
      * @ingroup JH5
@@ -15495,6 +15495,24 @@ public class H5 implements java.io.Serializable {
      *            Error from the HDF5 Library.
      **/
     public synchronized static native void H5VLunregister_connector(long connector_id)
+        throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5VL
+     *
+     * H5VLcmp_connector_cls Determines whether two connector identifiers refer to the same connector.
+     *
+     * @param conn_id1
+     *            IN: Identifier of connector to compare.
+     * @param conn_id2
+     *            IN: Identifier of connector to compare.
+     *
+     * @return true if the connector identifiers refer to the same connector, else false.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static native boolean H5VLcmp_connector_cls(long conn_id1, long conn_id2)
         throws HDF5LibraryException;
 
     // /////// unimplemented ////////

@@ -233,7 +233,7 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
         case H5I_BADID:
         case H5I_NTYPES:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid location ID");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid location type");
     } /* end switch */
 
 done:
@@ -608,8 +608,7 @@ done:
  *
  * Purpose:	Check if an object actually exists at a location
  *
- * Return:	Success:	true/false
- * 		Failure:	Negative
+ * Return:	Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */

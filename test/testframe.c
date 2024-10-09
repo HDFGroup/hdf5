@@ -11,276 +11,379 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:    Provides support functions for the testing framework.
- *
+ * Purpose: Implements a basic testing framework for HDF5 tests to use.
  */
 
-#include "testhdf5.h"
+#include "testframe.h"
+#include "h5test.h"
 
 /*
  * Definitions for the testing structure.
  */
-#define MAXTESTNAME 16
-#define MAXTESTDESC 64
 
 typedef struct TestStruct {
-    int  NumErrors;
-    char Description[MAXTESTDESC];
-    int  SkipFlag;
     char Name[MAXTESTNAME];
-    void (*Call)(void);
-    void (*Cleanup)(void);
-    const void *Parameters;
+    char Description[MAXTESTDESC];
+    void (*TestFunc)(const void *);
+    void (*TestSetupFunc)(void *);
+    void (*TestCleanupFunc)(void *);
+    void *TestParameters;
+    int   TestNumErrors;
+    int   TestSkipFlag;
 } TestStruct;
 
 /*
- * Variables used by testing framework.
+ * Global variables used by testing framework.
  */
-static int         enable_error_stack               = 0;         /* enable error stack; disable=0 enable=1 */
-static int         num_errs                         = 0;         /* Total number of errors during testing */
-int                TestVerbosity                    = VERBO_DEF; /* Default Verbosity is Low */
-static int         Summary                          = 0;         /* Show test summary. Default is no. */
-static int         CleanUp                          = 1;         /* Do cleanup or not. Default is yes. */
-int                TestExpress                      = -1;   /* Do TestExpress or not. -1 means not set yet. */
-static TestStruct *Test                             = NULL; /* Array of tests */
-static unsigned    TestAlloc                        = 0;    /* Size of the Test array */
-static unsigned    Index                            = 0;
-static const void *Test_parameters                  = NULL;
-static const char *TestProgName                     = NULL;
-static void (*TestPrivateUsage)(void)               = NULL;
-static int (*TestPrivateParser)(int ac, char *av[]) = NULL;
-int mpi_rank_framework_g                            = 0;
+
+static TestStruct *TestArray = NULL; /* Array of tests */
+static unsigned    TestAlloc = 0;    /* Size of the Test array */
+static unsigned    TestCount = 0;    /* Number of tests currently added to test array */
+
+static const char *TestProgName                              = NULL;
+static void (*TestPrivateUsage_g)(FILE *stream)              = NULL;
+static herr_t (*TestPrivateParser_g)(int argc, char *argv[]) = NULL;
+static herr_t (*TestCleanupFunc_g)(void)                     = NULL;
+
+static int  TestNumErrs_g        = 0;    /* Total number of errors that occurred for whole test program */
+static bool TestEnableErrorStack = true; /* Whether to show error stacks from the library */
+
+static int TestMaxNumThreads_g = -1; /* Max number of threads that can be spawned */
+
+static bool TestDoSummary_g = false; /* Show test summary. Default is no. */
+static bool TestDoCleanUp_g = true;  /* Do cleanup or not. Default is yes. */
+
+int TestFrameworkProcessID_g = 0;         /* MPI process rank value for parallel tests */
+int TestVerbosity_g          = VERBO_DEF; /* Default Verbosity is Low */
 
 /*
- * Setup a test function and add it to the list of tests.
- *      It must have no parameters and returns void.
- * TheName--short test name.
- *    If the name starts with '-', do not run it by default.
- * TheCall--the test routine.
- * Cleanup--the cleanup routine for the test.
- * TheDescr--Long description of the test.
- * Parameters--pointer to extra parameters. Use NULL if none used.
- *    Since only the pointer is copied, the contents should not change.
- * Return: Void
- *    exit EXIT_FAILURE if error is encountered.
+ * Add a new test to the list of tests to be executed
  */
-void
-AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const char *TheDescr,
-        const void *Parameters)
+herr_t
+AddTest(const char *TestName, void (*TestFunc)(const void *), void (*TestSetupFunc)(void *),
+        void (*TestCleanupFunc)(void *), const void *TestData, size_t TestDataSize, const char *TestDescr)
 {
-    /* Sanity checking */
-    if (strlen(TheDescr) >= MAXTESTDESC) {
-        printf("Test description ('%s') too long, increase MAXTESTDESC(%d).\n", TheDescr, MAXTESTDESC);
-        exit(EXIT_FAILURE);
+    void *new_test_data = NULL;
+
+    if (*TestName == '\0') {
+        if (TestFrameworkProcessID_g == 0)
+            fprintf(stderr, "%s: empty string given for test name\n", __func__);
+        return FAIL;
     }
-    if (strlen(TheName) >= MAXTESTNAME) {
-        printf("Test name too long, increase MAXTESTNAME(%d).\n", MAXTESTNAME);
-        exit(EXIT_FAILURE);
+    if (strlen(TestName) >= MAXTESTNAME) {
+        if (TestFrameworkProcessID_g == 0)
+            fprintf(stderr, "%s: test name ('%s') too long, increase MAXTESTNAME(%d).\n", __func__, TestName,
+                    MAXTESTNAME);
+        return FAIL;
+    }
+    if (strlen(TestDescr) >= MAXTESTDESC) {
+        if (TestFrameworkProcessID_g == 0)
+            fprintf(stderr, "%s: test description ('%s') too long, increase MAXTESTDESC(%d).\n", __func__,
+                    TestDescr, MAXTESTDESC);
+        return FAIL;
+    }
+    if ((TestData && (0 == TestDataSize)) || (!TestData && (0 != TestDataSize))) {
+        if (TestFrameworkProcessID_g == 0)
+            fprintf(stderr, "%s: invalid test data size (%zu)\n", __func__, TestDataSize);
+        return FAIL;
     }
 
-    /* Check for increasing the Test array size */
-    if (Index >= TestAlloc) {
-        TestStruct *newTest  = Test;                  /* New array of tests */
-        unsigned    newAlloc = MAX(1, TestAlloc * 2); /* New array size */
+    /* Re-allocate test array if necessary */
+    if (TestCount >= TestAlloc) {
+        TestStruct *newTest  = TestArray;
+        unsigned    newAlloc = MAX(1, TestAlloc * 2);
 
-        /* Reallocate array */
-        if (NULL == (newTest = (TestStruct *)realloc(Test, newAlloc * sizeof(TestStruct)))) {
-            printf("Out of memory for tests, Index = %u, TestAlloc = %u, newAlloc = %u\n", Index, TestAlloc,
-                   newAlloc);
-            exit(EXIT_FAILURE);
+        if (NULL == (newTest = realloc(TestArray, newAlloc * sizeof(TestStruct)))) {
+            if (TestFrameworkProcessID_g == 0)
+                fprintf(stderr,
+                        "%s: couldn't reallocate test array, TestCount = %u, TestAlloc = %u, newAlloc = %u\n",
+                        __func__, TestCount, TestAlloc, newAlloc);
+            return FAIL;
         }
 
-        /* Update info */
-        Test      = newTest;
+        TestArray = newTest;
         TestAlloc = newAlloc;
     }
 
-    /* Set up test function */
-    strcpy(Test[Index].Description, TheDescr);
-    if (*TheName != '-') {
-        strcpy(Test[Index].Name, TheName);
-        Test[Index].SkipFlag = 0;
+    /* If the test name begins with '-', skip the test by default */
+    if (*TestName == '-') {
+        TestArray[TestCount].TestSkipFlag = 1;
+        TestName++;
     }
-    else { /* skip test by default */
-        strcpy(Test[Index].Name, TheName + 1);
-        Test[Index].SkipFlag = 1;
-    }
-    Test[Index].Call       = TheCall;
-    Test[Index].Cleanup    = Cleanup;
-    Test[Index].NumErrors  = -1;
-    Test[Index].Parameters = Parameters;
+    else
+        TestArray[TestCount].TestSkipFlag = 0;
 
-    /* Increment test count */
-    Index++;
-}
+    strcpy(TestArray[TestCount].Name, TestName);
+    strcpy(TestArray[TestCount].Description, TestDescr);
 
-/*
- * Initialize testing framework
- *
- * ProgName: Name of test program.
- * private_usage: Optional routine provided by test program to print the
- *      private portion of usage page.  Default to NULL which means none is
- *      provided.
- * private_parser: Optional routine provided by test program to parse the
- *      private options.  Default to NULL which means none is provided.
- *
- */
-void
-TestInit(const char *ProgName, void (*private_usage)(void), int (*private_parser)(int ac, char *av[]))
-{
-    /*
-     * Turn off automatic error reporting since we do it ourselves.  Besides,
-     * half the functions this test calls are private, so automatic error
-     * reporting wouldn't do much good since it's triggered at the API layer.
-     */
-    if (enable_error_stack == 0)
-        H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
-    /*
-     * Record the program name and private routines if provided.
-     */
-    TestProgName = ProgName;
-    if (NULL != private_usage)
-        TestPrivateUsage = private_usage;
-    if (NULL != private_parser)
-        TestPrivateParser = private_parser;
-}
-
-/*
- * Print test usage.
- *    First print the common test options, then the extra options if provided.
- */
-void
-TestUsage(void)
-{
-    unsigned i;
-
-    if (mpi_rank_framework_g == 0) {
-        print_func("Usage: %s [-v[erbose] (l[ow]|m[edium]|h[igh]|0-9)] %s\n", TestProgName,
-                   (TestPrivateUsage ? "<extra options>" : ""));
-        print_func("              [-[e]x[clude] name]+ \n");
-        print_func("              [-o[nly] name]+ \n");
-        print_func("              [-b[egin] name] \n");
-        print_func("              [-s[ummary]]  \n");
-        print_func("              [-c[leanoff]]  \n");
-        print_func("              [-h[elp]]  \n");
-        print_func("\n\n");
-        print_func("verbose   controls the amount of information displayed\n");
-        print_func("exclude   to exclude tests by name\n");
-        print_func("only      to name tests which should be run\n");
-        print_func("begin     start at the name of the test given\n");
-        print_func("summary   prints a summary of test results at the end\n");
-        print_func("cleanoff  does not delete *.hdf files after execution of tests\n");
-        print_func("help      print out this information\n");
-        if (TestPrivateUsage) {
-            print_func("\nExtra options\n");
-            TestPrivateUsage();
+    /* Make a copy of the additional test data given */
+    if (TestData) {
+        if (NULL == (new_test_data = malloc(TestDataSize))) {
+            if (TestFrameworkProcessID_g == 0)
+                fprintf(stderr, "%s: couldn't allocate space for additional test data\n", __func__);
+            return FAIL;
         }
-        print_func("\n\n");
-        print_func("This program currently tests the following: \n\n");
-        print_func("%16s %s\n", "Name", "Description");
-        print_func("%16s %s\n", "----", "-----------");
 
-        for (i = 0; i < Index; i++)
-            print_func("%16s %s\n", Test[i].Name, Test[i].Description);
-
-        print_func("\n\n");
+        memcpy(new_test_data, TestData, TestDataSize);
     }
+    TestArray[TestCount].TestParameters = new_test_data;
+
+    TestArray[TestCount].TestFunc        = TestFunc;
+    TestArray[TestCount].TestSetupFunc   = TestSetupFunc;
+    TestArray[TestCount].TestCleanupFunc = TestCleanupFunc;
+    TestArray[TestCount].TestNumErrors   = -1;
+
+    TestCount++;
+
+    return SUCCEED;
 }
 
 /*
- * Print test info.
+ * Initialize the testing framework
  */
-void
-TestInfo(const char *ProgName)
+herr_t
+TestInit(const char *ProgName, void (*TestPrivateUsage)(FILE *stream),
+         herr_t (*TestPrivateParser)(int argc, char *argv[]), herr_t (*TestSetupFunc)(void),
+         herr_t (*TestCleanupFunc)(void), int TestProcessID)
 {
-    if (mpi_rank_framework_g == 0) {
-        unsigned major, minor, release;
-
-        H5get_libversion(&major, &minor, &release);
-
-        print_func("\nFor help use: %s -help\n", ProgName);
-        print_func("Linked with hdf5 version %u.%u release %u\n", major, minor, release);
+    /* Turn off automatic error reporting if requested */
+    if (!TestEnableErrorStack) {
+        if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0) {
+            if (TestFrameworkProcessID_g == 0)
+                fprintf(stderr, "%s: can't disable error stack\n", __func__);
+            return FAIL;
+        }
     }
+
+    /* Initialize value for TestExpress functionality */
+    h5_get_testexpress();
+
+    /* Record the program name and private routines if provided. */
+    TestProgName = ProgName;
+    if (NULL != TestPrivateUsage)
+        TestPrivateUsage_g = TestPrivateUsage;
+    if (NULL != TestPrivateParser)
+        TestPrivateParser_g = TestPrivateParser;
+    TestCleanupFunc_g = TestCleanupFunc;
+
+    /* Set process ID for later use */
+    TestFrameworkProcessID_g = TestProcessID;
+
+    /* Set/reset global variables from h5test that may be used by
+     * tests integrated with the testing framework
+     */
+    n_tests_run_g     = 0;
+    n_tests_passed_g  = 0;
+    n_tests_failed_g  = 0;
+    n_tests_skipped_g = 0;
+
+    /* Call test framework setup callback if provided */
+    if (TestSetupFunc && TestSetupFunc() < 0) {
+        if (TestFrameworkProcessID_g == 0)
+            fprintf(stderr, "%s: error occurred in test framework initialization callback\n", __func__);
+        return FAIL;
+    }
+
+    return SUCCEED;
 }
 
 /*
- * Parse command line information.
- *      argc, argv: the usual command line argument count and strings
- *
- * Return: Void
- *    exit EXIT_FAILURE if error is encountered.
+ * Print out test program usage help text
  */
 void
+TestUsage(FILE *stream)
+{
+    size_t max_test_name_len = 0;
+
+    /* If running in parallel, only print output from a single MPI process */
+    if (TestFrameworkProcessID_g != 0)
+        return;
+
+    if (!stream)
+        stream = stdout;
+
+    fprintf(stream, "Usage: %s [-v[erbose] (l[ow]|m[edium]|h[igh]|0-9)] %s\n", TestProgName,
+            (TestPrivateUsage_g ? "<extra options>" : ""));
+    fprintf(stream, "              [-[e]x[clude] name]+ \n");
+    fprintf(stream, "              [-o[nly] name]+ \n");
+    fprintf(stream, "              [-b[egin] name] \n");
+    fprintf(stream, "              [-[max]t[hreads]]  \n");
+    fprintf(stream, "              [-s[ummary]]  \n");
+    fprintf(stream, "              [-c[leanoff]]  \n");
+    fprintf(stream, "              [-h[elp]]  \n");
+    fprintf(stream, "\n\n");
+    fprintf(stream, "verbose     controls the amount of information displayed\n");
+    fprintf(stream, "exclude     to exclude tests by name\n");
+    fprintf(stream, "only        to name tests which should be run\n");
+    fprintf(stream, "begin       start at the name of the test given\n");
+    fprintf(stream, "maxthreads  maximum number of threads to be used by multi-thread tests\n");
+    fprintf(stream, "summary     prints a summary of test results at the end\n");
+    fprintf(stream, "cleanoff    does not delete *.hdf files after execution of tests\n");
+    fprintf(stream, "help        print out this information\n");
+    if (TestPrivateUsage_g) {
+        fprintf(stream, "\nExtra options\n");
+        TestPrivateUsage_g(stream);
+    }
+    fprintf(stream, "\n\n");
+
+    /* Collect some information for cleaner printing */
+    for (unsigned Loop = 0; Loop < TestCount; Loop++) {
+        size_t test_name_len = strlen(TestArray[Loop].Name);
+
+        if (test_name_len > max_test_name_len)
+            max_test_name_len = test_name_len;
+    }
+
+    fprintf(stream, "This program currently tests the following: \n\n");
+    fprintf(stream, "%*s %s\n", (int)max_test_name_len, "Name", " Description");
+    fprintf(stream, "%*s %s\n", (int)max_test_name_len, "----", " -----------");
+
+    for (unsigned i = 0; i < TestCount; i++)
+        fprintf(stream, "%*s  %s\n", (int)max_test_name_len, TestArray[i].Name, TestArray[i].Description);
+
+    fprintf(stream, "\n\n");
+}
+
+/*
+ * Print out miscellaneous test program information
+ */
+void
+TestInfo(FILE *stream)
+{
+    unsigned major, minor, release;
+
+    /* If running in parallel, only print output from a single MPI process */
+    if (TestFrameworkProcessID_g != 0)
+        return;
+
+    if (!stream)
+        stream = stdout;
+
+    H5get_libversion(&major, &minor, &release);
+
+    fprintf(stream, "\nFor help use: %s -help\n", TestProgName);
+    fprintf(stream, "Linked with hdf5 version %u.%u release %u\n", major, minor, release);
+}
+
+/*
+ * Parse command line information
+ */
+herr_t
 TestParseCmdLine(int argc, char *argv[])
 {
-    bool skipped_all = false;
-    int  ret_code;
+    herr_t ret_value = SUCCEED;
 
     while ((void)argv++, --argc > 0) {
         if ((strcmp(*argv, "-verbose") == 0) || (strcmp(*argv, "-v") == 0)) {
             if (argc > 0) {
                 --argc;
                 ++argv;
-                ParseTestVerbosity(*argv);
+
+                if (ParseTestVerbosity(*argv) < 0) {
+                    ret_value = FAIL;
+                    goto done;
+                }
             }
             else {
-                TestUsage();
-                exit(EXIT_FAILURE);
+                ret_value = FAIL;
+                goto done;
             }
         }
         else if (((strcmp(*argv, "-exclude") == 0) || (strcmp(*argv, "-x") == 0))) {
             if (argc > 0) {
                 --argc;
                 ++argv;
-                SetTest(*argv, SKIPTEST);
+
+                if (SetTest(*argv, SKIPTEST) < 0) {
+                    ret_value = FAIL;
+                    goto done;
+                }
             }
             else {
-                TestUsage();
-                exit(EXIT_FAILURE);
+                ret_value = FAIL;
+                goto done;
             }
         }
         else if (((strcmp(*argv, "-begin") == 0) || (strcmp(*argv, "-b") == 0))) {
             if (argc > 0) {
                 --argc;
                 ++argv;
-                SetTest(*argv, BEGINTEST);
+
+                if (SetTest(*argv, BEGINTEST) < 0) {
+                    ret_value = FAIL;
+                    goto done;
+                }
             }
             else {
-                TestUsage();
-                exit(EXIT_FAILURE);
+                ret_value = FAIL;
+                goto done;
             }
         }
         else if (((strcmp(*argv, "-only") == 0) || (strcmp(*argv, "-o") == 0))) {
             if (argc > 0) {
-                unsigned Loop;
-
                 --argc;
                 ++argv;
 
-                /* Skip all tests, then activate only one. */
-                if (!skipped_all) {
-                    for (Loop = 0; Loop < Index; Loop++)
-                        Test[Loop].SkipFlag = 1;
-                    skipped_all = true;
-                } /* end if */
-                SetTest(*argv, ONLYTEST);
+                if (SetTest(*argv, ONLYTEST) < 0) {
+                    ret_value = FAIL;
+                    goto done;
+                }
             }
             else {
-                TestUsage();
-                exit(EXIT_FAILURE);
+                ret_value = FAIL;
+                goto done;
             }
         }
         else if ((strcmp(*argv, "-summary") == 0) || (strcmp(*argv, "-s") == 0))
-            Summary = 1;
-        else if (strcmp(*argv, "-enable-error-stack") == 0)
-            enable_error_stack = 1;
+            TestDoSummary_g = true;
+        else if (strcmp(*argv, "-disable-error-stack") == 0) {
+            TestEnableErrorStack = false;
+        }
         else if ((strcmp(*argv, "-help") == 0) || (strcmp(*argv, "-h") == 0)) {
-            TestUsage();
+            TestUsage(stdout);
             exit(EXIT_SUCCESS);
         }
         else if ((strcmp(*argv, "-cleanoff") == 0) || (strcmp(*argv, "-c") == 0))
             SetTestNoCleanup();
+        else if ((strcmp(*argv, "-maxthreads") == 0) || (strcmp(*argv, "-t") == 0)) {
+            if (argc > 0) {
+                long max_threads;
+
+                --argc;
+                ++argv;
+
+                errno       = 0;
+                max_threads = strtol(*argv, NULL, 10);
+                if (errno != 0) {
+                    if (TestFrameworkProcessID_g == 0)
+                        fprintf(stderr,
+                                "error while parsing value (%s) specified for maximum number of threads\n",
+                                *argv);
+                    ret_value = FAIL;
+                    goto done;
+                }
+                if (max_threads <= 0) {
+                    if (TestFrameworkProcessID_g == 0)
+                        fprintf(stderr, "invalid value (%ld) specified for maximum number of threads\n",
+                                max_threads);
+                    ret_value = FAIL;
+                    goto done;
+                }
+                else if (max_threads > (long)INT_MAX) {
+                    if (TestFrameworkProcessID_g == 0)
+                        fprintf(stderr, "value (%ld) specified for maximum number of threads too large\n",
+                                max_threads);
+                    ret_value = FAIL;
+                    goto done;
+                }
+
+                SetTestMaxNumThreads((int)max_threads);
+            }
+            else {
+                ret_value = FAIL;
+                goto done;
+            }
+        }
         else {
             /* non-standard option.  Break out. */
             break;
@@ -288,101 +391,150 @@ TestParseCmdLine(int argc, char *argv[])
     }
 
     /* Call extra parsing function if provided. */
-    if (NULL != TestPrivateParser) {
-        ret_code = TestPrivateParser(argc + 1, argv - 1);
-        if (ret_code != 0)
-            exit(EXIT_FAILURE);
+    if (NULL != TestPrivateParser_g) {
+        if (TestPrivateParser_g(argc + 1, argv - 1) < 0) {
+            ret_value = FAIL;
+            goto done;
+        }
     }
+
+done:
+    if (ret_value < 0)
+        TestUsage(stderr);
+
+    return ret_value;
 }
 
 /*
- * Perform Tests.
+ * Execute all tests that aren't being skipped
  */
-void
+herr_t
 PerformTests(void)
 {
-    unsigned Loop;
+    for (unsigned Loop = 0; Loop < TestCount; Loop++) {
+        int old_num_errs = TestNumErrs_g;
 
-    for (Loop = 0; Loop < Index; Loop++)
-        if (Test[Loop].SkipFlag) {
-            if (mpi_rank_framework_g == 0)
-                MESSAGE(2, ("Skipping -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
-        }
-        else {
-            if (mpi_rank_framework_g == 0)
-                MESSAGE(2, ("Testing  -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
-            if (mpi_rank_framework_g == 0)
-                MESSAGE(5, ("===============================================\n"));
-            Test[Loop].NumErrors = num_errs;
-            Test_parameters      = Test[Loop].Parameters;
-            TestAlarmOn();
-            Test[Loop].Call();
-            TestAlarmOff();
-            Test[Loop].NumErrors = num_errs - Test[Loop].NumErrors;
-            if (mpi_rank_framework_g == 0) {
-                MESSAGE(5, ("===============================================\n"));
-                MESSAGE(5, ("There were %d errors detected.\n\n", (int)Test[Loop].NumErrors));
-            }
+        if (TestArray[Loop].TestSkipFlag) {
+            MESSAGE(2, ("Skipping -- %s (%s) \n", TestArray[Loop].Description, TestArray[Loop].Name));
+            continue;
         }
 
-    Test_parameters = NULL; /* clear it. */
+        MESSAGE(2, ("Testing  -- %s (%s) \n", TestArray[Loop].Description, TestArray[Loop].Name));
+        MESSAGE(5, ("===============================================\n"));
 
-    if (mpi_rank_framework_g == 0) {
-        MESSAGE(2, ("\n\n"));
-        if (num_errs)
-            print_func("!!! %d Error(s) were detected !!!\n\n", (int)num_errs);
-        else
-            print_func("All tests were successful. \n\n");
+        if (TestAlarmOn() < 0)
+            MESSAGE(5, ("Couldn't enable test alarm timer for test -- %s (%s) \n",
+                        TestArray[Loop].Description, TestArray[Loop].Name));
+
+        if (TestArray[Loop].TestSetupFunc)
+            TestArray[Loop].TestSetupFunc(TestArray[Loop].TestParameters);
+
+        TestArray[Loop].TestFunc(TestArray[Loop].TestParameters);
+
+        if (TestArray[Loop].TestCleanupFunc)
+            TestArray[Loop].TestCleanupFunc(TestArray[Loop].TestParameters);
+
+        TestAlarmOff();
+
+        TestArray[Loop].TestNumErrors = TestNumErrs_g - old_num_errs;
+
+        MESSAGE(5, ("===============================================\n"));
+        MESSAGE(5, ("There were %d errors detected.\n\n", TestArray[Loop].TestNumErrors));
     }
+
+    MESSAGE(2, ("\n\n"));
+    if (TestNumErrs_g)
+        MESSAGE(VERBO_NONE, ("!!! %d Error(s) were detected !!!\n\n", TestNumErrs_g));
+    else
+        MESSAGE(VERBO_NONE, ("All tests were successful. \n\n"));
+
+    return SUCCEED;
 }
 
 /*
- * Display test summary.
+ * Display a summary of running tests
  */
 void
-TestSummary(void)
+TestSummary(FILE *stream)
 {
-    unsigned Loop;
+    size_t max_test_name_len    = 0;
+    size_t max_test_desc_len    = 0;
+    size_t test_name_header_len = 0;
+    size_t test_desc_header_len = 0;
 
-    print_func("Summary of Test Results:\n");
-    print_func("Name of Test     Errors Description of Test\n");
-    print_func("---------------- ------ --------------------------------------\n");
+    /* If running in parallel, only print output from a single MPI process */
+    if (TestFrameworkProcessID_g != 0)
+        return;
 
-    for (Loop = 0; Loop < Index; Loop++) {
-        if (Test[Loop].NumErrors == -1)
-            print_func("%16s %6s %s\n", Test[Loop].Name, "N/A", Test[Loop].Description);
-        else
-            print_func("%16s %6d %s\n", Test[Loop].Name, (int)Test[Loop].NumErrors, Test[Loop].Description);
+    if (!stream)
+        stream = stdout;
+
+    /* Collect some information for cleaner printing */
+    for (unsigned Loop = 0; Loop < TestCount; Loop++) {
+        size_t test_name_len = strlen(TestArray[Loop].Name);
+        size_t test_desc_len = strlen(TestArray[Loop].Description);
+
+        if (test_name_len > max_test_name_len)
+            max_test_name_len = test_name_len;
+        if (test_desc_len > max_test_desc_len)
+            max_test_desc_len = test_desc_len;
     }
 
-    print_func("\n\n");
-}
+    test_name_header_len = MAX(max_test_name_len, strlen("Name of Test"));
+    test_desc_header_len = MAX(max_test_desc_len, strlen("Description of Test"));
 
-/*
- * Cleanup files from testing
- */
-void
-TestCleanup(void)
-{
-    unsigned Loop;
+    /* Print header, adjusted to maximum test name and description lengths */
+    fprintf(stream, "Summary of Test Results:\n");
+    fprintf(stream, "%-*s  Errors  %-*s\n", (int)test_name_header_len, "Name of Test",
+            (int)test_desc_header_len, "Description of Test");
 
-    if (mpi_rank_framework_g == 0)
-        MESSAGE(2, ("\nCleaning Up temp files...\n\n"));
+    /* Print a separating line row for each column header, adjusted to maximum
+     * test name and description lengths
+     */
+    for (size_t i = 0; i < test_name_header_len; i++) /* 'Name of Test' */
+        putc('-', stream);
+    putc(' ', stream);
+    putc(' ', stream);
+    for (size_t i = 0; i < 6; i++) /* 'Errors' */
+        putc('-', stream);
+    putc(' ', stream);
+    putc(' ', stream);
+    for (size_t i = 0; i < test_desc_header_len; i++) /* 'Description of Test' */
+        putc('-', stream);
+    putc('\n', stream);
 
-    /* call individual cleanup routines in each source module */
-    for (Loop = 0; Loop < Index; Loop++)
-        if (!Test[Loop].SkipFlag && Test[Loop].Cleanup != NULL)
-            Test[Loop].Cleanup();
+    for (unsigned Loop = 0; Loop < TestCount; Loop++) {
+        if (TestArray[Loop].TestNumErrors == -1)
+            fprintf(stream, "%-*s  %-6s  %-*s\n", (int)test_name_header_len, TestArray[Loop].Name, "N/A",
+                    (int)test_desc_header_len, TestArray[Loop].Description);
+        else
+            fprintf(stream, "%-*s  %-6d  %-*s\n", (int)test_name_header_len, TestArray[Loop].Name,
+                    TestArray[Loop].TestNumErrors, (int)test_desc_header_len, TestArray[Loop].Description);
+    }
+
+    fprintf(stream, "\n\n");
 }
 
 /*
  * Shutdown the test infrastructure
  */
-void
+herr_t
 TestShutdown(void)
 {
-    if (Test)
-        free(Test);
+    /* Clean up test state first before tearing down testing framework */
+    if (TestCleanupFunc_g && TestCleanupFunc_g() < 0) {
+        if (TestFrameworkProcessID_g == 0)
+            fprintf(stderr, "%s: error occurred in test framework initialization callback\n", __func__);
+        return FAIL;
+    }
+
+    if (TestArray)
+        for (unsigned Loop = 0; Loop < TestCount; Loop++)
+            free(TestArray[Loop].TestParameters);
+
+    free(TestArray);
+
+    return SUCCEED;
 }
 
 /*
@@ -391,140 +543,83 @@ TestShutdown(void)
 H5_ATTR_PURE int
 GetTestVerbosity(void)
 {
-    return (TestVerbosity);
+    return TestVerbosity_g;
 }
 
 /*
- * Set the verbosity level for the testing framework.
- * Return previous verbosity level.
+ * Set the verbosity level for the testing framework
  */
 int
 SetTestVerbosity(int newval)
 {
     int oldval;
 
-    oldval        = TestVerbosity;
-    TestVerbosity = newval;
-    return (oldval);
+    if (newval < 0)
+        newval = VERBO_NONE;
+    else if (newval > VERBO_HI)
+        newval = VERBO_HI;
+
+    oldval          = TestVerbosity_g;
+    TestVerbosity_g = newval;
+
+    return oldval;
 }
 
 /*
  * Retrieve the TestExpress mode for the testing framework
- Values:
- 0: Exhaustive run
-    Tests should take as long as necessary
- 1: Full run.  Default if H5_TEST_EXPRESS_LEVEL_DEFAULT
-    and HDF5TestExpress are not defined
-    Tests should take no more than 30 minutes
- 2: Quick run
-    Tests should take no more than 10 minutes
- 3: Smoke test.
-    Default if HDF5TestExpress is set to a value other than 0-3
-    Tests should take less than 1 minute
-
- Design:
- If the environment variable $HDF5TestExpress is defined,
- or if a default testing level > 1 has been set via
- H5_TEST_EXPRESS_LEVEL_DEFAULT, then test programs should
- skip some tests so that they
- complete sooner.
-
- Terms:
- A "test" is a single executable, even if it contains multiple
- sub-tests.
- The standard system for test times is a Linux machine running in
- NFS space (to catch tests that involve a great deal of disk I/O).
-
- Implementation:
- I think this can be easily implemented in the test library (libh5test.a)
- so that all tests can just call it to check the status of $HDF5TestExpress.
  */
 int
 GetTestExpress(void)
 {
-    char *env_val;
-
-    /* set it here for now.  Should be done in something like h5test_init(). */
-    if (TestExpress == -1) {
-        int express_val = 1;
-
-        /* Check if a default test express level is defined (e.g., by build system) */
-#ifdef H5_TEST_EXPRESS_LEVEL_DEFAULT
-        express_val = H5_TEST_EXPRESS_LEVEL_DEFAULT;
-#endif
-
-        /* Check if HDF5TestExpress is set to override the default level */
-        env_val = getenv("HDF5TestExpress");
-        if (env_val) {
-            if (strcmp(env_val, "0") == 0)
-                express_val = 0;
-            else if (strcmp(env_val, "1") == 0)
-                express_val = 1;
-            else if (strcmp(env_val, "2") == 0)
-                express_val = 2;
-            else
-                express_val = 3;
-        }
-
-        SetTestExpress(express_val);
-    }
-
-    return (TestExpress);
+    return h5_get_testexpress();
 }
 
 /*
  * Set the TestExpress mode for the testing framework.
- * Return previous TestExpress mode.
- * Values: non-zero means TestExpress mode is on, 0 means off.
  */
-int
+void
 SetTestExpress(int newval)
 {
-    int oldval;
-
-    oldval      = TestExpress;
-    TestExpress = newval;
-    return (oldval);
+    h5_set_testexpress(newval);
 }
 
 /*
- * Retrieve Summary request value.
- *     0 means no summary, 1 means yes.
+ * Retrieve test summary request value.
  */
-H5_ATTR_PURE int
+H5_ATTR_PURE bool
 GetTestSummary(void)
 {
-    return (Summary);
+    return TestDoSummary_g;
 }
 
 /*
- * Retrieve Cleanup request value.
- *     0 means no Cleanup, 1 means yes.
+ * Retrieve test file cleanup status value
  */
-H5_ATTR_PURE int
+H5_ATTR_PURE bool
 GetTestCleanup(void)
 {
-    return (CleanUp);
+    /* Don't cleanup files if the HDF5_NOCLEANUP environment
+     * variable is defined to anything
+     */
+    if (getenv(HDF5_NOCLEANUP))
+        SetTestNoCleanup();
+
+    return TestDoCleanUp_g;
 }
 
 /*
- * Set cleanup to no.
- * Return previous cleanup value.
+ * Set test file cleanup status to "don't clean up temporary files"
  */
-int
+void
 SetTestNoCleanup(void)
 {
-    int oldval;
-
-    oldval  = CleanUp;
-    CleanUp = 0;
-    return (oldval);
+    TestDoCleanUp_g = false;
 }
 
 /*
  * Parse an argument string for verbosity level and set it.
  */
-void
+herr_t
 ParseTestVerbosity(char *argv)
 {
     if (*argv == 'l')
@@ -533,8 +628,27 @@ ParseTestVerbosity(char *argv)
         SetTestVerbosity(VERBO_MED);
     else if (*argv == 'h')
         SetTestVerbosity(VERBO_HI);
-    else
-        SetTestVerbosity(atoi(argv));
+    else {
+        long verb_level;
+
+        errno      = 0;
+        verb_level = strtol(argv, NULL, 10);
+        if (errno != 0) {
+            if (TestFrameworkProcessID_g == 0)
+                fprintf(stderr, "%s: error while parsing value (%s) specified for test verbosity\n", __func__,
+                        argv);
+            return FAIL;
+        }
+
+        if (verb_level < 0)
+            verb_level = VERBO_DEF;
+        else if (verb_level > VERBO_HI)
+            verb_level = VERBO_HI;
+
+        SetTestVerbosity((int)verb_level);
+    }
+
+    return SUCCEED;
 }
 
 /*
@@ -543,7 +657,7 @@ ParseTestVerbosity(char *argv)
 H5_ATTR_PURE int
 GetTestNumErrs(void)
 {
-    return (num_errs);
+    return TestNumErrs_g;
 }
 
 /*
@@ -552,16 +666,7 @@ GetTestNumErrs(void)
 void
 IncTestNumErrs(void)
 {
-    num_errs++;
-}
-
-/*
- * Retrieve the current Test Parameters pointer.
- */
-H5_ATTR_PURE const void *
-GetTestParameters(void)
-{
-    return (Test_parameters);
+    TestNumErrs_g++;
 }
 
 /*
@@ -575,11 +680,11 @@ TestErrPrintf(const char *format, ...)
     int     ret_value;
 
     /* Increment the error count */
-    num_errs++;
+    IncTestNumErrs();
 
     /* Print the requested information */
     va_start(arglist, format);
-    ret_value = vprintf(format, arglist);
+    ret_value = vfprintf(stderr, format, arglist);
     va_end(arglist);
 
     /* Return the length of the string produced (like printf() does) */
@@ -587,51 +692,84 @@ TestErrPrintf(const char *format, ...)
 }
 
 /*
- * Set (control) which test will be tested.
- * SKIPTEST: skip this test
- * ONLYTEST: do only this test
- * BEGINTEST: skip all tests before this test
- *
+ * Change testing behavior in relation to a specific test
  */
-void
+herr_t
 SetTest(const char *testname, int action)
 {
-    unsigned Loop;
+    static bool skipped_all = false;
 
     switch (action) {
         case SKIPTEST:
-            for (Loop = 0; Loop < Index; Loop++)
-                if (strcmp(testname, Test[Loop].Name) == 0) {
-                    Test[Loop].SkipFlag = 1;
+            for (unsigned Loop = 0; Loop < TestCount; Loop++)
+                if (strcmp(testname, TestArray[Loop].Name) == 0) {
+                    TestArray[Loop].TestSkipFlag = 1;
                     break;
                 }
             break;
         case BEGINTEST:
-            for (Loop = 0; Loop < Index; Loop++) {
-                if (strcmp(testname, Test[Loop].Name) != 0)
-                    Test[Loop].SkipFlag = 1;
+            for (unsigned Loop = 0; Loop < TestCount; Loop++) {
+                if (strcmp(testname, TestArray[Loop].Name) != 0)
+                    TestArray[Loop].TestSkipFlag = 1;
                 else {
                     /* Found it. Set it to run.  Done. */
-                    Test[Loop].SkipFlag = 0;
+                    TestArray[Loop].TestSkipFlag = 0;
                     break;
                 }
             }
             break;
         case ONLYTEST:
-            for (Loop = 0; Loop < Index; Loop++) {
-                if (strcmp(testname, Test[Loop].Name) == 0) {
+            /* Skip all tests, then keep track that we did that.
+             * Some testing prefers the convenience of being
+             * able to specify multiple tests to "only" run
+             * rather than specifying (possibly many more) tests
+             * to exclude, but we only want to skip all the
+             * tests a single time to facilitate this.
+             */
+            if (!skipped_all) {
+                for (unsigned Loop = 0; Loop < TestCount; Loop++)
+                    TestArray[Loop].TestSkipFlag = 1;
+                skipped_all = true;
+            }
+
+            for (unsigned Loop = 0; Loop < TestCount; Loop++) {
+                if (strcmp(testname, TestArray[Loop].Name) == 0) {
                     /* Found it. Set it to run. Break to skip the rest. */
-                    Test[Loop].SkipFlag = 0;
+                    TestArray[Loop].TestSkipFlag = 0;
                     break;
                 }
             }
             break;
         default:
             /* error */
-            if (mpi_rank_framework_g == 0)
-                printf("*** ERROR: Unknown action (%d) for SetTest\n", action);
-            break;
+            if (TestFrameworkProcessID_g == 0)
+                fprintf(stderr, "%s: invalid action %d specified\n", __func__, action);
+            return FAIL;
     }
+
+    return SUCCEED;
+}
+
+/*
+ * Returns the value set for the maximum number of threads that a test
+ * program can spawn in addition to the main thread.
+ */
+H5_ATTR_PURE int
+GetTestMaxNumThreads(void)
+{
+    return TestMaxNumThreads_g;
+}
+
+/*
+ * Set the value for the maximum number of threads that a test program
+ * can spawn in addition to the main thread.
+ */
+herr_t
+SetTestMaxNumThreads(int max_num_threads)
+{
+    TestMaxNumThreads_g = max_num_threads;
+
+    return SUCCEED;
 }
 
 /* Enable a test timer that will kill long-running tests, the time is configurable
@@ -640,7 +778,7 @@ SetTest(const char *testname, int action)
  * Only useful on POSIX systems where alarm(2) is present. This does not include
  * MinGW builds, which will often incorrectly decide that alarm(2) exists.
  */
-void
+herr_t
 TestAlarmOn(void)
 {
 #ifdef H5_HAVE_ALARM
@@ -648,12 +786,28 @@ TestAlarmOn(void)
     unsigned long alarm_sec = H5_ALARM_SEC;                 /* Number of seconds before alarm goes off */
 
     /* Get the alarm value from the environment variable, if set */
-    if (env_val != NULL)
-        alarm_sec = (unsigned)strtoul(env_val, (char **)NULL, 10);
+    if (env_val != NULL) {
+        errno     = 0;
+        alarm_sec = strtoul(env_val, NULL, 10);
+        if (errno != 0) {
+            if (TestFrameworkProcessID_g == 0)
+                fprintf(stderr, "%s: error while parsing value (%s) specified for alarm timeout\n", __func__,
+                        env_val);
+            return FAIL;
+        }
+        else if (alarm_sec > (unsigned long)UINT_MAX) {
+            if (TestFrameworkProcessID_g == 0)
+                fprintf(stderr, "%s: value (%lu) specified for alarm timeout too large\n", __func__,
+                        alarm_sec);
+            return FAIL;
+        }
+    }
 
     /* Set the number of seconds before alarm goes off */
     alarm((unsigned)alarm_sec);
 #endif
+
+    return SUCCEED;
 }
 
 /* Disable the test timer */

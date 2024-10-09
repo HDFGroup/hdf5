@@ -610,6 +610,7 @@ const unsigned H5O_dtype_ver_bounds[] = {
     H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V112 */
     H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V114 */
     H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V116 */
+    H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V118 */
     H5O_DTYPE_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -2086,12 +2087,12 @@ done:
 herr_t
 H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t type_id, hid_t es_id)
 {
-    H5T_t         *dt;                          /* Pointer to datatype to close */
-    void          *token     = NULL;            /* Request token for async operation        */
-    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    H5VL_object_t *vol_obj   = NULL;            /* VOL object of dset_id */
-    H5VL_t        *connector = NULL;            /* VOL connector */
-    herr_t         ret_value = SUCCEED;         /* Return value */
+    H5T_t            *dt;                          /* Pointer to datatype to close */
+    void             *token     = NULL;            /* Request token for async operation        */
+    void            **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    H5VL_object_t    *vol_obj   = NULL;            /* VOL object of dset_id */
+    H5VL_connector_t *connector = NULL;            /* VOL connector */
+    herr_t            ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -2109,7 +2110,7 @@ H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
     if (H5ES_NONE != es_id) {
         /* Increase connector's refcount, so it doesn't get closed if closing
          * the dataset closes the file */
-        connector = vol_obj->connector;
+        connector = H5VL_OBJ_CONNECTOR(vol_obj);
         H5VL_conn_inc_rc(connector);
 
         /* Point at token for operation to set up */
@@ -2122,7 +2123,7 @@ H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE5(__func__, "*s*sIuii", app_file, app_func, app_line, type_id, es_id)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 

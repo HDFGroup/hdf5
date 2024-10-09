@@ -28,18 +28,18 @@
 
 static uint8_t compar_buffer[] = {
     /* Little-endian encoded version of the 16-bit signed integer */
-    (uint8_t)((TEST_INT16_VALUE)&0xff),
+    (uint8_t)((TEST_INT16_VALUE) & 0xff),
     (uint8_t)((TEST_INT16_VALUE >> 8) & 0xff),
     /* Little-endian encoded version of the 16-bit unsigned integer */
-    (uint8_t)((TEST_UINT16_VALUE)&0xff),
+    (uint8_t)((TEST_UINT16_VALUE) & 0xff),
     (uint8_t)((TEST_UINT16_VALUE >> 8) & 0xff),
     /* Little-endian encoded version of the 32-bit signed integer */
-    (uint8_t)((TEST_INT32_VALUE)&0xff),
+    (uint8_t)((TEST_INT32_VALUE) & 0xff),
     (uint8_t)((TEST_INT32_VALUE >> 8) & 0xff),
     (uint8_t)((TEST_INT32_VALUE >> 16) & 0xff),
     (uint8_t)((TEST_INT32_VALUE >> 24) & 0xff),
     /* Little-endian encoded version of the 32-bit unsigned integer */
-    (uint8_t)((TEST_UINT32_VALUE)&0xff),
+    (uint8_t)((TEST_UINT32_VALUE) & 0xff),
     (uint8_t)((TEST_UINT32_VALUE >> 8) & 0xff),
     (uint8_t)((TEST_UINT32_VALUE >> 16) & 0xff),
     (uint8_t)((TEST_UINT32_VALUE >> 24) & 0xff),
@@ -53,7 +53,7 @@ static uint8_t encode_buffer[sizeof(compar_buffer)];
 **
 ****************************************************************/
 void
-test_metadata(void)
+test_metadata(const void H5_ATTR_UNUSED *params)
 {
     int16_t  ei16 = TEST_INT16_VALUE; /* variables to hold the values to encode */
     uint16_t eu16 = TEST_UINT16_VALUE;
@@ -121,7 +121,7 @@ test_metadata(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_metadata(void)
+cleanup_metadata(void H5_ATTR_UNUSED *params)
 {
     /* no file to clean */
 }

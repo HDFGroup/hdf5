@@ -1727,7 +1727,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
         H5CX_push();
 
     /* Create fake object on fake VOL connector */
-    if (H5I_INVALID_HID == (obj_id = H5VL_register_using_vol_id(id_type, &fake_obj, fake_vol_id, true)))
+    if (H5I_INVALID_HID == (obj_id = H5VL__register_using_vol_id_test(id_type, &fake_obj, fake_vol_id)))
         TEST_ERROR;
 
     /* Pop the API context off the stack */
@@ -1783,7 +1783,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
         H5CX_push();
 
     /* Create fake object on reg_opt VOL connector */
-    if (H5I_INVALID_HID == (obj_id = H5VL_register_using_vol_id(id_type, &fake_obj, reg_opt_vol_id, true)))
+    if (H5I_INVALID_HID == (obj_id = H5VL__register_using_vol_id_test(id_type, &fake_obj, reg_opt_vol_id)))
         TEST_ERROR;
 
     /* Pop the API context off the stack */
@@ -2209,12 +2209,12 @@ test_vol_cap_flags(void)
     /* If using the native VOL by default, check flags again with H5P_DEFAULT */
     vol_env = getenv(HDF5_VOL_CONNECTOR);
     if (!vol_env || (0 == strcmp(vol_env, "native"))) {
-        H5VL_class_t *cls;
-        hid_t         connector_id;
+        H5VL_connector_t *connector;
+        hid_t             connector_id;
 
         if (H5Pget_vol_id(H5P_DEFAULT, &connector_id) < 0)
             TEST_ERROR;
-        if (NULL == (cls = H5I_object(connector_id)))
+        if (NULL == (connector = H5I_object(connector_id)))
             TEST_ERROR;
 
         vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
@@ -2222,7 +2222,7 @@ test_vol_cap_flags(void)
         if (H5Pget_vol_cap_flags(H5P_DEFAULT, &vol_cap_flags_g) < 0)
             TEST_ERROR;
 
-        if (vol_cap_flags_g != cls->cap_flags)
+        if (vol_cap_flags_g != connector->cls->cap_flags)
             TEST_ERROR;
 
         if (H5VLclose(connector_id) < 0)

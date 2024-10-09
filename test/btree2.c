@@ -9575,7 +9575,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     modify = 4;
     H5E_BEGIN_TRY
     {
-        ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+        ret = H5B2_modify(bt2, &record, false, modify_cb, &modify);
     }
     H5E_END_TRY
     /* Should fail */
@@ -9600,7 +9600,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     /* Attempt to modify a record in a leaf node */
     record = 4330;
     modify = 4331;
-    if (H5B2_modify(bt2, &record, modify_cb, &modify) < 0)
+    if (H5B2_modify(bt2, &record, false, modify_cb, &modify) < 0)
         FAIL_STACK_ERROR;
 
     /* Check status of B-tree */
@@ -9626,7 +9626,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     found  = HSIZET_MAX;
     H5E_BEGIN_TRY
     {
-        ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+        ret = H5B2_modify(bt2, &record, false, modify_cb, &modify);
     }
     H5E_END_TRY
     /* Should fail */
@@ -9651,7 +9651,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     /* Attempt to modify a record in an internal node */
     record = 5350;
     modify = 5352;
-    if (H5B2_modify(bt2, &record, modify_cb, &modify) < 0)
+    if (H5B2_modify(bt2, &record, false, modify_cb, &modify) < 0)
         FAIL_STACK_ERROR;
 
     /* Check status of B-tree */
@@ -9677,7 +9677,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     found  = 5350;
     H5E_BEGIN_TRY
     {
-        ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+        ret = H5B2_modify(bt2, &record, false, modify_cb, &modify);
     }
     H5E_END_TRY
     /* Should fail */
@@ -9702,7 +9702,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     /* Attempt to modify a record in a root node */
     record = 9445;
     modify = 9448;
-    if (H5B2_modify(bt2, &record, modify_cb, &modify) < 0)
+    if (H5B2_modify(bt2, &record, false, modify_cb, &modify) < 0)
         FAIL_STACK_ERROR;
 
     /* Check status of B-tree */
@@ -9728,7 +9728,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     found  = 9445;
     H5E_BEGIN_TRY
     {
-        ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+        ret = H5B2_modify(bt2, &record, false, modify_cb, &modify);
     }
     H5E_END_TRY
     /* Should fail */
@@ -9924,7 +9924,7 @@ main(void)
     /* Reset library */
     h5_test_init();
     fapl             = h5_fileaccess();
-    localTestExpress = TestExpress;
+    localTestExpress = h5_get_testexpress();
 
     /* For the Direct I/O driver, skip intensive tests due to poor performance */
     if (localTestExpress < 2 && !strcmp(driver_name, "direct"))

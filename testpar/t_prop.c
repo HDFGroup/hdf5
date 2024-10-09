@@ -88,7 +88,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
 }
 
 void
-test_plist_ed(void)
+test_plist_ed(const void H5_ATTR_UNUSED *params)
 {
     hid_t dcpl;   /* dataset create prop. list */
     hid_t dapl;   /* dataset access prop. list */
@@ -451,7 +451,7 @@ test_plist_ed(void)
 }
 
 void
-external_links(void)
+external_links(const void H5_ATTR_UNUSED *params)
 {
     hid_t lcpl  = H5I_INVALID_HID; /* link create prop. list */
     hid_t lapl  = H5I_INVALID_HID; /* link access prop. list */

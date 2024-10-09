@@ -540,6 +540,7 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5f_flags[28] = (int_f)H5F_LIBVER_V112;
     h5f_flags[29] = (int_f)H5F_LIBVER_V114;
     h5f_flags[30] = (int_f)H5F_LIBVER_V116;
+    h5f_flags[31] = (int_f)H5F_LIBVER_V118;
 
     /*
      *  H5FD flags
@@ -568,17 +569,17 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5fd_flags[20] = (int_f)SELECT_IOC_TOTAL;
     h5fd_flags[21] = (int_f)ioc_selection_options;
 #else
-    h5fd_flags[11]    = 0;
-    h5fd_flags[12]    = 0;
-    h5fd_flags[13]    = 0;
-    h5fd_flags[14]    = 0;
-    h5fd_flags[15]    = 0;
-    h5fd_flags[16]    = 0;
-    h5fd_flags[17]    = 0;
-    h5fd_flags[18]    = 0;
-    h5fd_flags[19]    = 0;
-    h5fd_flags[20]    = 0;
-    h5fd_flags[21]    = 0;
+    h5fd_flags[11] = 0;
+    h5fd_flags[12] = 0;
+    h5fd_flags[13] = 0;
+    h5fd_flags[14] = 0;
+    h5fd_flags[15] = 0;
+    h5fd_flags[16] = 0;
+    h5fd_flags[17] = 0;
+    h5fd_flags[18] = 0;
+    h5fd_flags[19] = 0;
+    h5fd_flags[20] = 0;
+    h5fd_flags[21] = 0;
 #endif
 
     /*

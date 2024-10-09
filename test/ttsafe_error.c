@@ -26,6 +26,9 @@
  *
  ********************************************************************/
 #include "ttsafe.h"
+#define H5VL_FRIEND /* Suppress error about including H5VLpkg    */
+#define H5VL_TESTING
+#include "H5VLpkg.h" /* Virtual Object Layer                 */
 
 #ifdef H5_HAVE_THREADSAFE
 
@@ -56,13 +59,14 @@ static herr_t                  walk_error_callback(unsigned, const H5E_error2_t 
 static H5TS_THREAD_RETURN_TYPE tts_error_thread(void *);
 
 void
-tts_error(void)
+tts_error(const void H5_ATTR_UNUSED *params)
 {
     hid_t         def_fapl = H5I_INVALID_HID;
     hid_t         vol_id   = H5I_INVALID_HID;
     hid_t         dataset  = H5I_INVALID_HID;
     H5TS_thread_t threads[NUM_THREAD];
     int           value, i;
+    int           is_native;
     herr_t        status;
 
     /* Must initialize these at runtime */
@@ -108,7 +112,10 @@ tts_error(void)
     status = H5Pget_vol_id(def_fapl, &vol_id);
     CHECK(status, FAIL, "H5Pget_vol_id");
 
-    if (vol_id == H5VL_NATIVE) {
+    is_native = H5VL__is_native_connector_test(vol_id);
+    CHECK(is_native, FAIL, "H5VL__is_native_connector_test");
+
+    if (is_native) {
         /* Create a hdf5 file using H5F_ACC_TRUNC access, default file
          * creation plist and default file access plist
          */
@@ -251,9 +258,11 @@ walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void H5_ATTR_UNUSE
 }
 
 void
-cleanup_error(void)
+cleanup_error(void H5_ATTR_UNUSED *params)
 {
-    HDunlink(FILENAME);
+    if (GetTestCleanup()) {
+        HDunlink(FILENAME);
+    }
 }
 
 #endif /*H5_HAVE_THREADSAFE*/

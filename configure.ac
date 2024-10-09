@@ -22,7 +22,7 @@ AC_PREREQ([2.71])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.15.0], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.17.0], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -854,6 +854,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   if test "$MY_FLT128_DIG" -gt "$MY_LDBL_DIG" ; then
     AC_MSG_RESULT([yes])
     AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 will be used in the Fortran wrappers])
+    AC_CHECK_SIZEOF([__float128])
   else
     ## Can't use __float128, but write an undef line anyway
     AC_MSG_RESULT([no])
@@ -4233,10 +4234,10 @@ esac
 AC_SUBST([DEFAULT_API_VERSION])
 AC_MSG_CHECKING([which version of public symbols to use by default])
 AC_ARG_WITH([default-api-version],
-            [AS_HELP_STRING([--with-default-api-version=(default|v16|v18|v110|v112|v114|v116)],
+            [AS_HELP_STRING([--with-default-api-version=(default|v16|v18|v110|v112|v114|v116|v118)],
                             [Specify default release version of public symbols
-                             [default=v116]])],,
-            [withval=v116])
+                             [default=v118]])],,
+            [withval=v118])
 
 ## Allowing "default" allows the GitHub CI to check that we didn't forget
 ## to change the defaults when creating a new major version
@@ -4265,11 +4266,16 @@ elif test "X$withval" = "Xv114"; then
     DEFAULT_API_VERSION=v114
     AC_DEFINE([USE_114_API_DEFAULT], [1],
               [Define using v1.14 public API symbols by default])
-elif test "X$withval" = "Xv116" -o "X$withval" = "Xdefault"; then
+elif test "X$withval" = "Xv116"; then
     AC_MSG_RESULT([v116])
     DEFAULT_API_VERSION=v116
     AC_DEFINE([USE_116_API_DEFAULT], [1],
               [Define using v1.16 public API symbols by default])
+elif test "X$withval" = "Xv118" -o "X$withval" = "Xdefault"; then
+    AC_MSG_RESULT([v118])
+    DEFAULT_API_VERSION=v118
+    AC_DEFINE([USE_118_API_DEFAULT], [1],
+              [Define using v1.18 public API symbols by default])
 else
     AC_MSG_ERROR([invalid version of public symbols given])
 fi
@@ -4279,7 +4285,7 @@ fi
 ## if the user insists on doing this via the --enable-unsupported configure
 ## flag, we'll let them.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${DEFAULT_API_VERSION}" != "Xv116" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
+  if test "X${DEFAULT_API_VERSION}" != "Xv118" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
     AC_MSG_ERROR([Removing old public API symbols not allowed when using them as default public API symbols. Use --enable-unsupported to override this error.])
   fi
 fi

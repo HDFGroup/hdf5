@@ -22,11 +22,18 @@
 #define H5S_TESTING
 
 #include "H5Spkg.h" /* Dataspaces                           */
-#include "testphdf5.h"
+
+#include "testpar.h"
+
+/* Include testing framework functionality */
+#include "testframe.h"
 
 #ifndef PATH_MAX
 #define PATH_MAX 512
 #endif
+
+#define ROW_FACTOR 8  /* Nominal row factor for dataset size */
+#define COL_FACTOR 16 /* Nominal column factor for dataset size */
 
 /* FILENAME and filenames must have the same number of names.
  * Use PARATESTFILE in general and use a separated filename only if the file
@@ -38,6 +45,21 @@
 const char *FILENAME[NFILENAME] = {"ShapeSameTest", NULL};
 char       *filenames[NFILENAME];
 hid_t       fapl; /* file access property list */
+
+/* global variables */
+int dim0;
+int dim1;
+int chunkdim0;
+int chunkdim1;
+int nerrors   = 0;               /* errors count */
+int ndatasets = 300;             /* number of datasets to create*/
+int ngroups   = 512;             /* number of groups to create in root
+                                  * group. */
+int facc_type       = FACC_MPIO; /*Test file access type */
+int dxfer_coll_type = DXFER_COLLECTIVE_IO;
+
+H5E_auto2_t old_func;        /* previous error handler */
+void       *old_client_data; /* previous error handler arg.*/
 
 /* On Lustre (and perhaps other parallel file systems?), we have severe
  * slow downs if two or more processes attempt to access the same file system
@@ -111,6 +133,11 @@ struct hs_dr_pio_test_vars_t {
     int64_t   tests_skipped;
 };
 
+/* Structure for passing test parameters around */
+typedef struct test_params_t {
+    char *filename;
+} test_params_t;
+
 /*-------------------------------------------------------------------------
  * Function:    hs_dr_pio_test__setup()
  *
@@ -125,10 +152,10 @@ struct hs_dr_pio_test_vars_t {
 #define CONTIG_HS_DR_PIO_TEST__SETUP__DEBUG 0
 
 static void
-hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker_edge_size,
-                      const int chunk_edge_size, const int small_rank, const int large_rank,
-                      const bool use_collective_io, const hid_t dset_type, const int express_test,
-                      struct hs_dr_pio_test_vars_t *tv_ptr)
+hs_dr_pio_test__setup(const void *params, const int test_num, const int edge_size,
+                      const int checker_edge_size, const int chunk_edge_size, const int small_rank,
+                      const int large_rank, const bool use_collective_io, const hid_t dset_type,
+                      const int express_test, struct hs_dr_pio_test_vars_t *tv_ptr)
 {
 #if CONTIG_HS_DR_PIO_TEST__SETUP__DEBUG
     const char *fcnName = "hs_dr_pio_test__setup()";
@@ -246,7 +273,7 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
 
     memset(tv_ptr->large_ds_slice_buf, 0, sizeof(uint32_t) * tv_ptr->large_ds_slice_size);
 
-    filename = (const char *)GetTestParameters();
+    filename = ((const test_params_t *)params)->filename;
     assert(filename != NULL);
 #if CONTIG_HS_DR_PIO_TEST__SETUP__DEBUG
     if (MAINPROCESS) {
@@ -1697,11 +1724,11 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 #define CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG 0
 
 static void
-contig_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const int chunk_edge_size,
-                                const int small_rank, const int large_rank, const bool use_collective_io,
-                                const hid_t dset_type, int express_test, int *skips_ptr, int max_skips,
-                                int64_t *total_tests_ptr, int64_t *tests_run_ptr, int64_t *tests_skipped_ptr,
-                                int mpi_rank)
+contig_hs_dr_pio_test__run_test(const void *params, const int test_num, const int edge_size,
+                                const int chunk_edge_size, const int small_rank, const int large_rank,
+                                const bool use_collective_io, const hid_t dset_type, int express_test,
+                                int *skips_ptr, int max_skips, int64_t *total_tests_ptr,
+                                int64_t *tests_run_ptr, int64_t *tests_skipped_ptr, int mpi_rank)
 {
 #if CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG
     const char *fcnName = "contig_hs_dr_pio_test__run_test()";
@@ -1771,8 +1798,8 @@ contig_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
         printf("\r - running test #%lld: small rank = %d, large rank = %d", (long long)(test_num + 1),
                small_rank, large_rank);
 
-    hs_dr_pio_test__setup(test_num, edge_size, -1, chunk_edge_size, small_rank, large_rank, use_collective_io,
-                          dset_type, express_test, tv_ptr);
+    hs_dr_pio_test__setup(params, test_num, edge_size, -1, chunk_edge_size, small_rank, large_rank,
+                          use_collective_io, dset_type, express_test, tv_ptr);
 
     /* initialize skips & max_skips */
     tv_ptr->skips     = *skips_ptr;
@@ -1885,7 +1912,7 @@ contig_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
 #define CONTIG_HS_DR_PIO_TEST__DEBUG 0
 
 static void
-contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
+contig_hs_dr_pio_test(const void *params, ShapeSameTestMethods sstest_type)
 {
     int express_test;
     int local_express_test;
@@ -1943,9 +1970,10 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* contiguous data set, independent I/O */
                     chunk_edge_size = 0;
 
-                    contig_hs_dr_pio_test__run_test(
-                        test_num, edge_size, chunk_edge_size, small_rank, large_rank, false, dset_type,
-                        express_test, &skips, max_skips, &total_tests, &tests_run, &tests_skipped, mpi_rank);
+                    contig_hs_dr_pio_test__run_test(params, test_num, edge_size, chunk_edge_size, small_rank,
+                                                    large_rank, false, dset_type, express_test, &skips,
+                                                    max_skips, &total_tests, &tests_run, &tests_skipped,
+                                                    mpi_rank);
                     test_num++;
                     break;
                     /* end of case IND_CONTIG */
@@ -1955,7 +1983,7 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     chunk_edge_size = 0;
 
                     contig_hs_dr_pio_test__run_test(
-                        test_num, edge_size, chunk_edge_size, small_rank, large_rank, true, dset_type,
+                        params, test_num, edge_size, chunk_edge_size, small_rank, large_rank, true, dset_type,
                         express_test, &skips, max_skips, &total_tests, &tests_run, &tests_skipped, mpi_rank);
                     test_num++;
                     break;
@@ -1965,9 +1993,10 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* chunked data set, independent I/O */
                     chunk_edge_size = 5;
 
-                    contig_hs_dr_pio_test__run_test(
-                        test_num, edge_size, chunk_edge_size, small_rank, large_rank, false, dset_type,
-                        express_test, &skips, max_skips, &total_tests, &tests_run, &tests_skipped, mpi_rank);
+                    contig_hs_dr_pio_test__run_test(params, test_num, edge_size, chunk_edge_size, small_rank,
+                                                    large_rank, false, dset_type, express_test, &skips,
+                                                    max_skips, &total_tests, &tests_run, &tests_skipped,
+                                                    mpi_rank);
                     test_num++;
                     break;
                     /* end of case IND_CHUNKED */
@@ -1977,7 +2006,7 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     chunk_edge_size = 5;
 
                     contig_hs_dr_pio_test__run_test(
-                        test_num, edge_size, chunk_edge_size, small_rank, large_rank, true, dset_type,
+                        params, test_num, edge_size, chunk_edge_size, small_rank, large_rank, true, dset_type,
                         express_test, &skips, max_skips, &total_tests, &tests_run, &tests_skipped, mpi_rank);
                     test_num++;
                     break;
@@ -3629,11 +3658,12 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 #define CKRBRD_HS_DR_PIO_TEST__RUN_TEST__DEBUG 0
 
 static void
-ckrbrd_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const int checker_edge_size,
-                                const int chunk_edge_size, const int small_rank, const int large_rank,
-                                const bool use_collective_io, const hid_t dset_type, const int express_test,
-                                int *skips_ptr, int max_skips, int64_t *total_tests_ptr,
-                                int64_t *tests_run_ptr, int64_t *tests_skipped_ptr, int mpi_rank)
+ckrbrd_hs_dr_pio_test__run_test(const void *params, const int test_num, const int edge_size,
+                                const int checker_edge_size, const int chunk_edge_size, const int small_rank,
+                                const int large_rank, const bool use_collective_io, const hid_t dset_type,
+                                const int express_test, int *skips_ptr, int max_skips,
+                                int64_t *total_tests_ptr, int64_t *tests_run_ptr, int64_t *tests_skipped_ptr,
+                                int mpi_rank)
 
 {
 #if CKRBRD_HS_DR_PIO_TEST__RUN_TEST__DEBUG
@@ -3704,8 +3734,8 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
         printf("\r - running test #%lld: small rank = %d, large rank = %d", (long long)(test_num + 1),
                small_rank, large_rank);
 
-    hs_dr_pio_test__setup(test_num, edge_size, checker_edge_size, chunk_edge_size, small_rank, large_rank,
-                          use_collective_io, dset_type, express_test, tv_ptr);
+    hs_dr_pio_test__setup(params, test_num, edge_size, checker_edge_size, chunk_edge_size, small_rank,
+                          large_rank, use_collective_io, dset_type, express_test, tv_ptr);
 
     /* initialize skips & max_skips */
     tv_ptr->skips     = *skips_ptr;
@@ -3800,7 +3830,7 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
  */
 
 static void
-ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
+ckrbrd_hs_dr_pio_test(const void *params, ShapeSameTestMethods sstest_type)
 {
     int   express_test;
     int   local_express_test;
@@ -3865,9 +3895,9 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                 case IND_CONTIG:
                     /* contiguous data set, independent I/O */
                     chunk_edge_size = 0;
-                    ckrbrd_hs_dr_pio_test__run_test(test_num, edge_size, checker_edge_size, chunk_edge_size,
-                                                    small_rank, large_rank, false, dset_type, express_test,
-                                                    &skips, max_skips, &total_tests, &tests_run,
+                    ckrbrd_hs_dr_pio_test__run_test(params, test_num, edge_size, checker_edge_size,
+                                                    chunk_edge_size, small_rank, large_rank, false, dset_type,
+                                                    express_test, &skips, max_skips, &total_tests, &tests_run,
                                                     &tests_skipped, mpi_rank);
                     test_num++;
                     break;
@@ -3876,9 +3906,9 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                 case COL_CONTIG:
                     /* contiguous data set, collective I/O */
                     chunk_edge_size = 0;
-                    ckrbrd_hs_dr_pio_test__run_test(test_num, edge_size, checker_edge_size, chunk_edge_size,
-                                                    small_rank, large_rank, true, dset_type, express_test,
-                                                    &skips, max_skips, &total_tests, &tests_run,
+                    ckrbrd_hs_dr_pio_test__run_test(params, test_num, edge_size, checker_edge_size,
+                                                    chunk_edge_size, small_rank, large_rank, true, dset_type,
+                                                    express_test, &skips, max_skips, &total_tests, &tests_run,
                                                     &tests_skipped, mpi_rank);
                     test_num++;
                     break;
@@ -3887,9 +3917,9 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                 case IND_CHUNKED:
                     /* chunked data set, independent I/O */
                     chunk_edge_size = 5;
-                    ckrbrd_hs_dr_pio_test__run_test(test_num, edge_size, checker_edge_size, chunk_edge_size,
-                                                    small_rank, large_rank, false, dset_type, express_test,
-                                                    &skips, max_skips, &total_tests, &tests_run,
+                    ckrbrd_hs_dr_pio_test__run_test(params, test_num, edge_size, checker_edge_size,
+                                                    chunk_edge_size, small_rank, large_rank, false, dset_type,
+                                                    express_test, &skips, max_skips, &total_tests, &tests_run,
                                                     &tests_skipped, mpi_rank);
                     test_num++;
                     break;
@@ -3898,9 +3928,9 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                 case COL_CHUNKED:
                     /* chunked data set, collective I/O */
                     chunk_edge_size = 5;
-                    ckrbrd_hs_dr_pio_test__run_test(test_num, edge_size, checker_edge_size, chunk_edge_size,
-                                                    small_rank, large_rank, true, dset_type, express_test,
-                                                    &skips, max_skips, &total_tests, &tests_run,
+                    ckrbrd_hs_dr_pio_test__run_test(params, test_num, edge_size, checker_edge_size,
+                                                    chunk_edge_size, small_rank, large_rank, true, dset_type,
+                                                    express_test, &skips, max_skips, &total_tests, &tests_run,
                                                     &tests_skipped, mpi_rank);
                     test_num++;
                     break;
@@ -3938,21 +3968,6 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
 /*
  * Main driver of the Parallel HDF5 tests
  */
-
-/* global variables */
-int dim0;
-int dim1;
-int chunkdim0;
-int chunkdim1;
-int nerrors   = 0;               /* errors count */
-int ndatasets = 300;             /* number of datasets to create*/
-int ngroups   = 512;             /* number of groups to create in root
-                                  * group. */
-int facc_type       = FACC_MPIO; /*Test file access type */
-int dxfer_coll_type = DXFER_COLLECTIVE_IO;
-
-H5E_auto2_t old_func;        /* previous error handler */
-void       *old_client_data; /* previous error handler arg.*/
 
 /* other option flags */
 
@@ -4015,20 +4030,20 @@ MPI_Init(int *argc, char ***argv)
  * Show command usage
  */
 static void
-usage(void)
+usage(FILE *stream)
 {
-    printf("    [-r] [-w] [-m<n_datasets>] [-n<n_groups>] "
-           "[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
-    printf("\t-m<n_datasets>"
-           "\tset number of datasets for the multiple dataset test\n");
-    printf("\t-n<n_groups>"
-           "\tset number of groups for the multiple group test\n");
-    printf("\t-f <prefix>\tfilename prefix\n");
-    printf("\t-2\t\tuse Split-file together with MPIO\n");
-    printf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n", ROW_FACTOR,
-           COL_FACTOR);
-    printf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
-    printf("\n");
+    fprintf(stream, "    [-r] [-w] [-m<n_datasets>] [-n<n_groups>] "
+                    "[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
+    fprintf(stream, "\t-m<n_datasets>"
+                    "\tset number of datasets for the multiple dataset test\n");
+    fprintf(stream, "\t-n<n_groups>"
+                    "\tset number of groups for the multiple group test\n");
+    fprintf(stream, "\t-f <prefix>\tfilename prefix\n");
+    fprintf(stream, "\t-2\t\tuse Split-file together with MPIO\n");
+    fprintf(stream, "\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n", ROW_FACTOR,
+            COL_FACTOR);
+    fprintf(stream, "\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
+    fprintf(stream, "\n");
 }
 
 /*
@@ -4162,120 +4177,68 @@ parse_options(int argc, char **argv)
     return (0);
 }
 
-/*
- * Create the appropriate File access property list
- */
-hid_t
-create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
-{
-    hid_t  ret_pl = H5I_INVALID_HID;
-    herr_t ret;      /* generic return value */
-    int    mpi_rank; /* mpi variables */
-
-    /* need the rank for error checking macros */
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-
-    ret_pl = H5Pcreate(H5P_FILE_ACCESS);
-    VRFY((ret_pl >= 0), "H5P_FILE_ACCESS");
-
-    if (l_facc_type == FACC_DEFAULT)
-        return (ret_pl);
-
-    if (l_facc_type == FACC_MPIO) {
-        /* set Parallel access with communicator */
-        ret = H5Pset_fapl_mpio(ret_pl, comm, info);
-        VRFY((ret >= 0), "");
-        ret = H5Pset_all_coll_metadata_ops(ret_pl, true);
-        VRFY((ret >= 0), "");
-        ret = H5Pset_coll_metadata_write(ret_pl, true);
-        VRFY((ret >= 0), "");
-        return (ret_pl);
-    }
-
-    if (l_facc_type == (FACC_MPIO | FACC_SPLIT)) {
-        hid_t mpio_pl;
-
-        mpio_pl = H5Pcreate(H5P_FILE_ACCESS);
-        VRFY((mpio_pl >= 0), "");
-        /* set Parallel access with communicator */
-        ret = H5Pset_fapl_mpio(mpio_pl, comm, info);
-        VRFY((ret >= 0), "");
-
-        /* setup file access template */
-        ret_pl = H5Pcreate(H5P_FILE_ACCESS);
-        VRFY((ret_pl >= 0), "");
-        /* set Parallel access with communicator */
-        ret = H5Pset_fapl_split(ret_pl, ".meta", mpio_pl, ".raw", mpio_pl);
-        VRFY((ret >= 0), "H5Pset_fapl_split succeeded");
-        H5Pclose(mpio_pl);
-        return (ret_pl);
-    }
-
-    /* unknown file access types */
-    return (ret_pl);
-}
-
 /* Shape Same test using contiguous hyperslab using independent IO on contiguous datasets */
 static void
-sscontig1(void)
+sscontig1(const void *params)
 {
-    contig_hs_dr_pio_test(IND_CONTIG);
+    contig_hs_dr_pio_test(params, IND_CONTIG);
 }
 
 /* Shape Same test using contiguous hyperslab using collective IO on contiguous datasets */
 static void
-sscontig2(void)
+sscontig2(const void *params)
 {
-    contig_hs_dr_pio_test(COL_CONTIG);
+    contig_hs_dr_pio_test(params, COL_CONTIG);
 }
 
 /* Shape Same test using contiguous hyperslab using independent IO on chunked datasets */
 static void
-sscontig3(void)
+sscontig3(const void *params)
 {
-    contig_hs_dr_pio_test(IND_CHUNKED);
+    contig_hs_dr_pio_test(params, IND_CHUNKED);
 }
 
 /* Shape Same test using contiguous hyperslab using collective IO on chunked datasets */
 static void
-sscontig4(void)
+sscontig4(const void *params)
 {
-    contig_hs_dr_pio_test(COL_CHUNKED);
+    contig_hs_dr_pio_test(params, COL_CHUNKED);
 }
 
 /* Shape Same test using checker hyperslab using independent IO on contiguous datasets */
 static void
-sschecker1(void)
+sschecker1(const void *params)
 {
-    ckrbrd_hs_dr_pio_test(IND_CONTIG);
+    ckrbrd_hs_dr_pio_test(params, IND_CONTIG);
 }
 
 /* Shape Same test using checker hyperslab using collective IO on contiguous datasets */
 static void
-sschecker2(void)
+sschecker2(const void *params)
 {
-    ckrbrd_hs_dr_pio_test(COL_CONTIG);
+    ckrbrd_hs_dr_pio_test(params, COL_CONTIG);
 }
 
 /* Shape Same test using checker hyperslab using independent IO on chunked datasets */
 static void
-sschecker3(void)
+sschecker3(const void *params)
 {
-    ckrbrd_hs_dr_pio_test(IND_CHUNKED);
+    ckrbrd_hs_dr_pio_test(params, IND_CHUNKED);
 }
 
 /* Shape Same test using checker hyperslab using collective IO on chunked datasets */
 static void
-sschecker4(void)
+sschecker4(const void *params)
 {
-    ckrbrd_hs_dr_pio_test(COL_CHUNKED);
+    ckrbrd_hs_dr_pio_test(params, COL_CHUNKED);
 }
 
 int
 main(int argc, char **argv)
 {
-    int mpi_size, mpi_rank; /* mpi variables */
-    int mpi_code;
+    test_params_t test_params;
+    int           mpi_size, mpi_rank; /* mpi variables */
+    int           mpi_code;
 #ifdef H5_HAVE_TEST_API
     int required = MPI_THREAD_MULTIPLE;
     int provided;
@@ -4318,8 +4281,6 @@ main(int argc, char **argv)
         MPI_Finalize();
         return -1;
     }
-
-    mpi_rank_framework_g = mpi_rank;
 
     dim0 = ROW_FACTOR * mpi_size;
     dim1 = COL_FACTOR * mpi_size;
@@ -4374,28 +4335,51 @@ main(int argc, char **argv)
     }
 
     /* Initialize testing framework */
-    TestInit(argv[0], usage, parse_options);
+    if (TestInit(argv[0], usage, parse_options, NULL, NULL, mpi_rank) < 0) {
+        if (MAINPROCESS) {
+            fprintf(stderr, "couldn't initialize testing framework\n");
+            fflush(stderr);
+        }
+
+        MPI_Finalize();
+        return -1;
+    }
+
+    test_params.filename = PARATESTFILE;
 
     /* Shape Same tests using contiguous hyperslab */
-    AddTest("sscontig1", sscontig1, NULL, "Cntg hslab, ind IO, cntg dsets", PARATESTFILE);
-    AddTest("sscontig2", sscontig2, NULL, "Cntg hslab, col IO, cntg dsets", PARATESTFILE);
-    AddTest("sscontig3", sscontig3, NULL, "Cntg hslab, ind IO, chnk dsets", PARATESTFILE);
-    AddTest("sscontig4", sscontig4, NULL, "Cntg hslab, col IO, chnk dsets", PARATESTFILE);
+    AddTest("sscontig1", sscontig1, NULL, NULL, &test_params, sizeof(test_params),
+            "Cntg hslab, ind IO, cntg dsets");
+    AddTest("sscontig2", sscontig2, NULL, NULL, &test_params, sizeof(test_params),
+            "Cntg hslab, col IO, cntg dsets");
+    AddTest("sscontig3", sscontig3, NULL, NULL, &test_params, sizeof(test_params),
+            "Cntg hslab, ind IO, chnk dsets");
+    AddTest("sscontig4", sscontig4, NULL, NULL, &test_params, sizeof(test_params),
+            "Cntg hslab, col IO, chnk dsets");
 
     /* Shape Same tests using checker board hyperslab */
-    AddTest("sschecker1", sschecker1, NULL, "Check hslab, ind IO, cntg dsets", PARATESTFILE);
-    AddTest("sschecker2", sschecker2, NULL, "Check hslab, col IO, cntg dsets", PARATESTFILE);
-    AddTest("sschecker3", sschecker3, NULL, "Check hslab, ind IO, chnk dsets", PARATESTFILE);
-    AddTest("sschecker4", sschecker4, NULL, "Check hslab, col IO, chnk dsets", PARATESTFILE);
+    AddTest("sschecker1", sschecker1, NULL, NULL, &test_params, sizeof(test_params),
+            "Check hslab, ind IO, cntg dsets");
+    AddTest("sschecker2", sschecker2, NULL, NULL, &test_params, sizeof(test_params),
+            "Check hslab, col IO, cntg dsets");
+    AddTest("sschecker3", sschecker3, NULL, NULL, &test_params, sizeof(test_params),
+            "Check hslab, ind IO, chnk dsets");
+    AddTest("sschecker4", sschecker4, NULL, NULL, &test_params, sizeof(test_params),
+            "Check hslab, col IO, chnk dsets");
 
     /* Display testing information */
-    TestInfo(argv[0]);
+    TestInfo(stdout);
 
     /* setup file access property list */
     H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
     /* Parse command line arguments */
-    TestParseCmdLine(argc, argv);
+    if (TestParseCmdLine(argc, argv) < 0) {
+        if (MAINPROCESS)
+            fprintf(stderr, "couldn't parse command-line arguments\n");
+        TestShutdown();
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
 
     if (dxfer_coll_type == DXFER_INDEPENDENT_IO && MAINPROCESS) {
         printf("===================================\n"
@@ -4404,7 +4388,12 @@ main(int argc, char **argv)
     }
 
     /* Perform requested testing */
-    PerformTests();
+    if (PerformTests() < 0) {
+        if (MAINPROCESS)
+            fprintf(stderr, "couldn't run tests\n");
+        TestShutdown();
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
 
     /* make sure all processes are finished before final report, cleanup
      * and exit.
@@ -4413,7 +4402,7 @@ main(int argc, char **argv)
 
     /* Display test summary, if requested */
     if (MAINPROCESS && GetTestSummary())
-        TestSummary();
+        TestSummary(stdout);
 
     /* Clean up test files */
     h5_delete_all_test_files(FILENAME, fapl);
@@ -4446,7 +4435,11 @@ main(int argc, char **argv)
     H5close();
 
     /* Release test infrastructure */
-    TestShutdown();
+    if (TestShutdown() < 0) {
+        if (MAINPROCESS)
+            fprintf(stderr, "couldn't shut down testing framework\n");
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
 
     MPI_Finalize();
 

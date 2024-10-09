@@ -22,52 +22,64 @@ HDF5-DIAG: Error detected in HDF5 (version (number)):
   #002: (file name) line (number) in H5VL_setup_acc_args(): invalid location identifier
     major: Invalid arguments to routine
     minor: Inappropriate type
-  #003: (file name) line (number) in H5VL_vol_object(): invalid identifier type to function
+  #003: (file name) line (number) in H5VL_vol_object(): can't retrieve object for ID
+    major: Virtual Object Layer
+    minor: Can't get value
+  #004: (file name) line (number) in H5VL_vol_object_verify(): invalid identifier type to function
     major: Invalid arguments to routine
     minor: Inappropriate type
 
 ********* Print error stack in customized way *********
-    error #000: (file name) in H5VL_vol_object(): line (number)
+    error #000: (file name) in H5VL_vol_object_verify(): line (number)
         major: Invalid arguments to routine
         minor: Inappropriate type
-    error #001: (file name) in H5VL_setup_acc_args(): line (number)
+    error #001: (file name) in H5VL_vol_object(): line (number)
+        major: Virtual Object Layer
+        minor: Can't get value
+    error #002: (file name) in H5VL_setup_acc_args(): line (number)
         major: Invalid arguments to routine
         minor: Inappropriate type
-    error #002: (file name) in H5D__create_api_common(): line (number)
+    error #003: (file name) in H5D__create_api_common(): line (number)
         major: Dataset
         minor: Can't set value
-    error #003: (file name) in H5Dcreate2(): line (number)
+    error #004: (file name) in H5Dcreate2(): line (number)
         major: Dataset
         minor: Unable to create file
 
 ********* Print error stack in customized way *********
-    error #000: (file name) in H5VL_vol_object(): line (number)
+    error #000: (file name) in H5VL_vol_object_verify(): line (number)
         major: Invalid arguments to routine
         minor: Inappropriate type
-    error #001: (file name) in H5VL_setup_acc_args(): line (number)
+    error #001: (file name) in H5VL_vol_object(): line (number)
+        major: Virtual Object Layer
+        minor: Can't get value
+    error #002: (file name) in H5VL_setup_acc_args(): line (number)
         major: Invalid arguments to routine
         minor: Inappropriate type
-    error #002: (file name) in H5D__create_api_common(): line (number)
+    error #003: (file name) in H5D__create_api_common(): line (number)
         major: Dataset
         minor: Can't set value
-    error #003: (file name) in H5Dcreate2(): line (number)
+    error #004: (file name) in H5Dcreate2(): line (number)
         major: Dataset
         minor: Unable to create file
-    error #004: (file name) in H5Eget_auto(1 or 2)(): line (number)
+    error #005: (file name) in H5Eget_auto(1 or 2)(): line (number)
         major: Error API
         minor: Can't get value
 
 ********* Print error stack in customized way *********
-    error #000: (file name) in H5VL_vol_object(): line (number)
+    error #000: (file name) in H5VL_vol_object_verify(): line (number)
         major: Invalid arguments to routine
         minor: Inappropriate type
-    error #001: (file name) in H5VL_setup_acc_args(): line (number)
+    error #001: (file name) in H5VL_vol_object(): line (number)
+        major: Virtual Object Layer
+        minor: Can't get value
+    error #002: (file name) in H5VL_setup_acc_args(): line (number)
         major: Invalid arguments to routine
         minor: Inappropriate type
-    error #002: (file name) in H5D__create_api_common(): line (number)
+    error #003: (file name) in H5D__create_api_common(): line (number)
         major: Dataset
         minor: Can't set value
-    error #003: (file name) in H5Dcreate2(): line (number)
+    error #004: (file name) in H5Dcreate2(): line (number)
         major: Dataset
         minor: Unable to create file
 HDF5-DIAG: Error detected in HDF5 (version (number)):
@@ -80,7 +92,10 @@ HDF5-DIAG: Error detected in HDF5 (version (number)):
   #002: (file name) line (number) in H5VL_setup_acc_args(): invalid location identifier
     major: Invalid arguments to routine
     minor: Inappropriate type
-  #003: (file name) line (number) in H5VL_vol_object(): invalid identifier type to function
+  #003: (file name) line (number) in H5VL_vol_object(): can't retrieve object for ID
+    major: Virtual Object Layer
+    minor: Can't get value
+  #004: (file name) line (number) in H5VL_vol_object_verify(): invalid identifier type to function
     major: Invalid arguments to routine
     minor: Inappropriate type
 HDF5-DIAG: Error detected in HDF5 (version (number)):
