@@ -3793,9 +3793,9 @@ H5F__start_swmr_write(H5F_t *f)
 
         /* Ensure that there's no old-style opened objects */
         for (u = 0; u < grp_dset_count; u++) {
-            H5O_native_info_t  ninfo;
-            H5O_loc_t *oloc;
-            uint8_t version;
+            H5O_native_info_t ninfo;
+            H5O_loc_t        *oloc;
+            uint8_t           version;
 
             if (NULL == (oloc = H5O_get_loc(obj_ids[u])))
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
@@ -3945,7 +3945,6 @@ H5F__start_swmr_write(H5F_t *f)
             HGOTO_ERROR(H5E_FILE, H5E_CANTLOCKFILE, FAIL, "unable to lock the file");
         }
     }
-
 
     /* Mark superblock as dirty */
     if (H5F_super_dirty(f) < 0)

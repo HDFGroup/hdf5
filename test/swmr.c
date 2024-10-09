@@ -1555,7 +1555,7 @@ error:
  *      Close the file
  *
  *  (B) Open the file with write + non-latest-format (earliest, latest)
- *      --file has v3 superblock 
+ *      --file has v3 superblock
  *      Create a group in the file
  *      Create a chunked dataset "dataset2" in the group--keep it open
  *      Verify "dataset2" is using v1 btree indexing
@@ -1736,7 +1736,7 @@ test_start_swmr_write(hid_t in_fapl, bool new_format)
     if (H5Pclose(file_fapl) < 0)
         FAIL_STACK_ERROR;
 
-     /* Create a group */
+    /* Create a group */
     if ((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
@@ -1807,7 +1807,6 @@ test_start_swmr_write(hid_t in_fapl, bool new_format)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-
     /*
      * Case D: when opening a file with (V110, latest)
      */
@@ -1839,7 +1838,6 @@ test_start_swmr_write(hid_t in_fapl, bool new_format)
         TEST_ERROR;
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
-
 
     /*
      * Case E: when opening a file with (V110, latest)
@@ -2218,7 +2216,8 @@ test_err_start_swmr_write(hid_t in_fapl, bool new_format)
     if (new_format) {
         if (ret < 0)
             TEST_ERROR;
-    } else if (ret >= 0)
+    }
+    else if (ret >= 0)
         TEST_ERROR;
 
     /* Should fail for a second call to enable SWMR writing mode */
@@ -2250,9 +2249,10 @@ test_err_start_swmr_write(hid_t in_fapl, bool new_format)
     if (new_format) {
         if (ret < 0)
             TEST_ERROR;
-    } else if (ret >= 0)
+    }
+    else if (ret >= 0)
         TEST_ERROR;
-        
+
     /* Re-open the same file */
     if ((fid2 = H5Freopen(fid)) < 0)
         FAIL_STACK_ERROR;
@@ -2292,7 +2292,8 @@ test_err_start_swmr_write(hid_t in_fapl, bool new_format)
     if (new_format) {
         if (ret < 0)
             TEST_ERROR;
-    } else if (ret >= 0)
+    }
+    else if (ret >= 0)
         TEST_ERROR;
 
     /* Should fail to enable SWMR writing for fid2 */
@@ -2383,7 +2384,6 @@ test_err_start_swmr_write(hid_t in_fapl, bool new_format)
             FAIL_STACK_ERROR;
 
     } /* not new */
-
 
     /* Close the file access property list */
     if (H5Pclose(fapl) < 0)
