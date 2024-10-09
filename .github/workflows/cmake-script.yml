@@ -675,7 +675,7 @@ jobs:
               #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
               set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
               #set (CMAKE_GENERATOR_TOOLSET "ClangCL")
-              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=TRACE")
               #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/clang.cmake")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
