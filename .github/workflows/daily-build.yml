@@ -3,6 +3,7 @@ name: hdf5 dev daily build
 # Triggers the workflow on demand
 on:
   workflow_dispatch:
+  workflow_call:
     inputs:
       use_ignore:
         description: 'Ignore has_changes check'
