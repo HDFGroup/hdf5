@@ -610,6 +610,8 @@ jobs:
       - name: Install Dependencies (Windows_clang)
         run: choco install ninja
 
+      - uses: ilammy/msvc-dev-cmd@v1
+
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@v2.0.5
         id: setup-clang
