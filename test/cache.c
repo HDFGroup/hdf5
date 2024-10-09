@@ -7651,7 +7651,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
 {
     struct expected_entry_status *expected  = NULL;
     H5C_t                        *cache_ptr = file_ptr->shared->cache;
-    long                           i;
+    long                          i;
     const int                     num_variable_entries = 10;
     const int                     num_monster_entries  = 31;
     int                           num_large_entries    = 14;
@@ -8566,7 +8566,8 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
 
         num_large_entries = 12;
 
-        for (i = num_variable_entries; i < num_variable_entries + num_monster_entries + num_large_entries - 1; i++) {
+        for (i = num_variable_entries; i < num_variable_entries + num_monster_entries + num_large_entries - 1;
+             i++) {
             expected[i].is_dirty   = false;
             expected[i].serialized = true;
         }
@@ -8644,7 +8645,8 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
         }
 
         /* update the expected array to mark all these entries dirty again. */
-        for (i = num_variable_entries; i < num_variable_entries + num_monster_entries + num_large_entries - 1; i++) {
+        for (i = num_variable_entries; i < num_variable_entries + num_monster_entries + num_large_entries - 1;
+             i++) {
             expected[i].is_dirty = true;
         }
 
