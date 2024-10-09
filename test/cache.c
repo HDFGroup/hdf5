@@ -13339,6 +13339,7 @@ check_move_entry_errs(unsigned paged)
 
     if (pass)
         takedown_cache(file_ptr, false, false);
+    H5CX_pop(false);
 
     /* Allocate a cache, protect an entry R/O, and then call
      * H5C_move_entry() to move it -- this should fail.
@@ -13352,7 +13353,10 @@ check_move_entry_errs(unsigned paged)
 
         file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
         cache_ptr = file_ptr->shared->cache;
+    }
+    H5CX_push(&api_ctx);
 
+    if (pass) {
         insert_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
         protect_entry_ro(file_ptr, 0, 0);
 
@@ -13553,6 +13557,7 @@ check_unprotect_ro_dirty_err(unsigned paged)
 
         takedown_cache(file_ptr, false, false);
     }
+    H5CX_pop(false);
 
     /* allocate a another cache, protect an entry read only twice, and
      * then unprotect it with the dirtied flag set.  This should fail.
@@ -13565,7 +13570,10 @@ check_unprotect_ro_dirty_err(unsigned paged)
         reset_entries();
 
         file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+    }
+    H5CX_push(&api_ctx);
 
+    if (pass) {
         protect_entry_ro(file_ptr, 0, 0);
         protect_entry_ro(file_ptr, 0, 0);
 
