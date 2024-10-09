@@ -364,7 +364,7 @@ H5_DLL void         H5TS_atomic_destroy_voidp(H5TS_atomic_voidp_t *obj);
 /* Barrier related function declarations */
 H5_DLL herr_t H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count);
 /* Barrier wait call is defined in H5TSbarrier.h */
-#if !defined(H5_HAVE_PTHREAD_BARRIER) && !defined(__cplusplus)
+#if !defined(__cplusplus)
 static inline herr_t H5TS_barrier_wait(H5TS_barrier_t *barrier);
 #endif /* H5_HAVE_PTHREAD_BARRIER */
 H5_DLL herr_t H5TS_barrier_destroy(H5TS_barrier_t *barrier);
@@ -385,9 +385,7 @@ H5_DLL herr_t H5TS_semaphore_destroy(H5TS_semaphore_t *sem);
 #if !defined(H5_HAVE_STDATOMIC_H)
 #include "H5TSatomic.h"
 #endif /* H5_HAVE_STDATOMIC_H */
-#if !defined(H5_HAVE_PTHREAD_BARRIER)
 #include "H5TSbarrier.h"
-#endif /* H5_HAVE_PTHREAD_BARRIER */
 #include "H5TSrwlock.h"
 #include "H5TSsemaphore.h"
 #include "H5TSpool.h"
