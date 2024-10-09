@@ -1,6 +1,7 @@
 name: hdf5 dev daily build
 
-# Triggers the workflow on demand
+# Triggers the workflow on demand or on a call from another workflow
+# NOTE: inputs must be duplicated between triggers
 on:
   workflow_dispatch:
     inputs:
