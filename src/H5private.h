@@ -594,6 +594,18 @@
 #define H5_GCC_CLANG_DIAG_ON(x)
 #endif
 
+/* Private typedefs */
+
+/* Union for const/non-const pointer for use by functions that manipulate
+ * pointers but do not write to their targets or return pointers to const
+ * specified locations.  Also used for I/O functions that work for read and
+ * write - these functions are expected to never write to these locations in the
+ * write case.  This helps us avoid compiler warnings. */
+typedef union {
+    void       *vp;
+    const void *cvp;
+} H5_flexible_const_ptr_t;
+
 /* If necessary, create a typedef for library usage of the
  * _Float16 type to avoid issues when compiling the library
  * with the -pedantic flag or similar where we get warnings
@@ -1221,10 +1233,7 @@ extern bool H5_libterm_g; /* Is the library being shutdown? */
 #define H5_INIT_GLOBAL (H5_libinit_g)
 #define H5_TERM_GLOBAL (H5_libterm_g)
 
-/* Forward declaration of H5CXpush() / H5CXpop() */
-/* (Including H5CXprivate.h creates bad circular dependencies - QAK, 3/18/2018) */
-H5_DLL herr_t H5CX_push(void);
-H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
+#include "H5CXprivate.h" /* API Contexts */
 
 #ifndef NDEBUG
 #define FUNC_ENTER_CHECK_NAME(asrt)                                                                          \
@@ -1253,7 +1262,8 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 #define FUNC_ENTER_COMMON_NOERR(asrt) FUNC_ENTER_CHECK_NAME(asrt);
 
 /* Local variables for API routines */
-#define FUNC_ENTER_API_VARS H5CANCEL_DECL
+#define FUNC_ENTER_API_VARS             \
+    H5CANCEL_DECL
 
 #define FUNC_ENTER_API_COMMON                                                                                \
     FUNC_ENTER_API_VARS                                                                                      \
@@ -1269,7 +1279,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 
 #define FUNC_ENTER_API_PUSH(err)                                                                             \
     /* Push the API context */                                                                               \
-    if (H5_UNLIKELY(H5CX_push() < 0))                                                                        \
+    if (H5_UNLIKELY(H5CX_push(&api_ctx) < 0))                                                                    \
         HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context");                                    \
     else                                                                                                     \
         api_ctx_pushed = true;
@@ -1278,6 +1288,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 #define FUNC_ENTER_API(err)                                                                                  \
     {                                                                                                        \
         {                                                                                                    \
+            H5CX_node_t api_ctx = {{0}, NULL};     \
             bool api_ctx_pushed = false;                                                                     \
                                                                                                              \
             FUNC_ENTER_API_COMMON                                                                            \
@@ -1294,6 +1305,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 #define FUNC_ENTER_API_NOCLEAR(err)                                                                          \
     {                                                                                                        \
         {                                                                                                    \
+            H5CX_node_t api_ctx = {{0}, NULL};     \
             bool api_ctx_pushed = false;                                                                     \
                                                                                                              \
             FUNC_ENTER_API_COMMON                                                                            \
@@ -1343,9 +1355,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
             {                                                                                                \
                 {                                                                                            \
                     {                                                                                        \
-                        FUNC_ENTER_API_VARS                                                                  \
-                        FUNC_ENTER_COMMON(H5_IS_API(__func__));                                              \
-                        H5_API_LOCK                                                                          \
+                        FUNC_ENTER_API_COMMON                                                                            \
                         FUNC_ENTER_API_INIT(err);                                                            \
                         {
 
@@ -1589,18 +1599,6 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
   #define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)
   #define HDcompile_assert(e)     do { typedef struct { unsigned int b: (e); } x; } while(0)
 */
-
-/* Private typedefs */
-
-/* Union for const/non-const pointer for use by functions that manipulate
- * pointers but do not write to their targets or return pointers to const
- * specified locations.  Also used for I/O functions that work for read and
- * write - these functions are expected to never write to these locations in the
- * write case.  This helps us avoid compiler warnings. */
-typedef union {
-    void       *vp;
-    const void *cvp;
-} H5_flexible_const_ptr_t;
 
 /* File-independent encode/decode routines */
 #include "H5encode.h"

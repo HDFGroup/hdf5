@@ -2043,25 +2043,41 @@ done:
  *
  * Purpose:     Opens a new internal state for the HDF5 library.
  *
- * Note:        Currently just pushes a new API context state, but could be
+ * Note:        Currently just pushes a new API context, but could be
  *		expanded in the future.
  *
- * Return:      SUCCEED / FAIL
+ * Return:      Success:    Non-negative, *context set
+ *              Failure:    Negative, *context unset
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_start_lib_state(void)
+H5VL_start_lib_state(void **context)
 {
+    H5CX_node_t *cnode = NULL;  /* API context */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity check */
+    assert(context);
+
+    /* Allocate & clear a new API context */
+    if (NULL == (cnode = H5MM_calloc(sizeof(H5CX_node_t))))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate library context");
+
     /* Push a new API context on the stack */
-    if (H5CX_push() < 0)
+    if (H5CX_push(cnode) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't push API context");
 
+    /* Set output parameter */
+    *context = cnode;
+
 done:
+    if (ret_value < 0)
+        if (cnode)
+            H5MM_xfree(cnode);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_start_lib_state() */
 
@@ -2113,15 +2129,21 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_finish_lib_state(void)
+H5VL_finish_lib_state(void *context)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity check */
+    assert(context);
+
     /* Pop the API context off the stack */
     if (H5CX_pop(false) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't pop API context");
+
+    /* Release library context */
+    H5MM_xfree(context);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

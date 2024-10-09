@@ -48,6 +48,7 @@ main(void)
     unsigned    u;                      /* Local index variable */
     uint8_t     rbuf[1024];             /* Buffer for reading */
     uint8_t     buf[1024];              /* Buffer for holding the expected data */
+    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
     bool        api_ctx_pushed = false; /* Whether API context pushed */
 
     /* Testing setup */
@@ -75,7 +76,7 @@ main(void)
         FAIL_STACK_ERROR;
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 

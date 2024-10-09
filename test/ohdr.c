@@ -1835,6 +1835,7 @@ main(void)
     H5F_libver_t   low, high; /* File format bounds */
     time_t         time_new, ro;
     int            i;                      /* Local index variable */
+    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
     bool           api_ctx_pushed = false; /* Whether API context pushed */
     herr_t         ret;                    /* Generic return value */
 
@@ -1850,7 +1851,7 @@ main(void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 

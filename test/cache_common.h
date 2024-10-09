@@ -21,6 +21,7 @@
 #define H5F_FRIEND /*suppress error about including H5Fpkg      */
 
 /* Include library header files */
+#include "H5private.h"
 #include "H5ACprivate.h"
 #include "H5MFprivate.h"
 #include "H5Cpkg.h"

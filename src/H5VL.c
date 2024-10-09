@@ -771,26 +771,33 @@ done:
 /*---------------------------------------------------------------------------
  * Function:    H5VLstart_lib_state
  *
- * Purpose:     Opens a new internal state for the HDF5 library.
+ * Purpose:     Opens a new internal context for the HDF5 library.
  *
  * Note:        This routine is _only_ for HDF5 VOL connector authors!  It is
  *              _not_ part of the public API for HDF5 application developers.
  *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
+ * Note:        Should probably rename this to 'H5VLopen_lib_context' or
+ *              similar.
+ *
+ * Return:      Success:    Non-negative, *context set
+ *              Failure:    Negative, *context unset
  *
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VLstart_lib_state(void)
+H5VLstart_lib_state(void **context)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
     FUNC_ENTER_API_NOINIT
 
+    /* Check args */
+    if (NULL == context)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid context pointer");
+
     /* Start a new library state */
-    if (H5VL_start_lib_state() < 0)
+    if (H5VL_start_lib_state(context) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't start new library state");
 
 done:
@@ -843,21 +850,28 @@ done:
  *              H5VLstart_lib_state.  It can be called before / after /
  *              independently of H5VLfree_lib_state.
  *
+ * Note:        Should probably rename this to 'H5VLclose_lib_context' or
+ *              similar.
+ *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VLfinish_lib_state(void)
+H5VLfinish_lib_state(void *context)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
     FUNC_ENTER_API_NOINIT
 
+    /* Check args */
+    if (NULL == context)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid context pointer");
+
     /* Reset the library state */
-    if (H5VL_finish_lib_state() < 0)
+    if (H5VL_finish_lib_state(context) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset library state");
 
 done:

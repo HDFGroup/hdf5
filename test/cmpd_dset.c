@@ -14,11 +14,12 @@
 #undef NDEBUG
 
 #define H5T_FRIEND  /*suppress error about including H5Tpkg      */
-#include "H5Tpkg.h" /*to turn off hardware conversions*/
-#include "H5Tconv_compound.h"
-#include "H5Iprivate.h"
 
 #include "h5test.h"
+#include "H5Iprivate.h"
+#include "H5Tpkg.h" /*to turn off hardware conversions*/
+#include "H5Tconv_compound.h"
+
 
 static const char *FILENAME[] = {"cmpd_dset", "src_subset", "dst_subset", "select_cmpd_dset", NULL};
 

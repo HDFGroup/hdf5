@@ -277,6 +277,7 @@ main(void)
 {
     hid_t fapl_id        = H5I_INVALID_HID;
     int   nerrors        = 0;
+    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
     bool  api_ctx_pushed = false; /* Whether API context pushed */
 
     /* Testing setup */
@@ -284,7 +285,7 @@ main(void)
     fapl_id = h5_fileaccess();
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 

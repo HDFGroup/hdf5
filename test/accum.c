@@ -81,6 +81,7 @@ int
 main(void)
 {
     unsigned nerrors        = 0;     /* track errors */
+    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
     bool     api_ctx_pushed = false; /* Whether API context pushed */
     hid_t    fid            = H5I_INVALID_HID;
     hid_t    fapl           = H5I_INVALID_HID; /* File access property list */
@@ -101,7 +102,7 @@ main(void)
         FAIL_STACK_ERROR;
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 
@@ -2058,6 +2059,7 @@ test_swmr_write_big(bool newest_format)
     uint8_t     wbuf[1024];                 /* Buffer for reading & writing */
     unsigned    u;                          /* Local index variable */
     bool        process_success = false;
+    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
     bool        api_ctx_pushed  = false; /* Whether API context pushed */
 
     if (newest_format)
@@ -2110,7 +2112,7 @@ test_swmr_write_big(bool newest_format)
         FAIL_STACK_ERROR;
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 

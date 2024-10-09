@@ -146,6 +146,7 @@ test_page_buffer_access(const void *params)
     haddr_t raw_addr, meta_addr;
     int    *data;
     H5F_t  *f              = NULL;
+    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
     bool    api_ctx_pushed = false; /* Whether API context pushed */
 #endif
 
@@ -229,7 +230,7 @@ test_page_buffer_access(const void *params)
         VRFY((file_id >= 0), "");
 
         /* Push API context */
-        ret = H5CX_push();
+        ret = H5CX_push(&api_ctx);
         VRFY((ret == 0), "H5CX_push()");
         api_ctx_pushed = true;
 
@@ -339,7 +340,7 @@ test_page_buffer_access(const void *params)
         VRFY((file_id >= 0), "");
 
         /* Push API context */
-        ret = H5CX_push();
+        ret = H5CX_push(&api_ctx);
         VRFY((ret == 0), "H5CX_push()");
         api_ctx_pushed = true;
 
@@ -483,6 +484,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     H5F_t              *f         = NULL;
     H5C_t              *cache_ptr = NULL;
     H5AC_cache_config_t config;
+    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
     bool                api_ctx_pushed = false; /* Whether API context pushed */
     herr_t              ret;
 
@@ -493,7 +495,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     VRFY((ret == 0), "");
 
     /* Push API context */
-    ret = H5CX_push();
+    ret = H5CX_push(&api_ctx);
     VRFY((ret == 0), "H5CX_push()");
     api_ctx_pushed = true;
 
@@ -639,6 +641,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
     H5F_t              *f         = NULL;
     H5C_t              *cache_ptr = NULL;
     H5AC_cache_config_t config;
+    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
     bool                api_ctx_pushed = false; /* Whether API context pushed */
     herr_t              ret;
 
@@ -656,7 +659,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
     VRFY((file_id >= 0), "");
 
     /* Push API context */
-    ret = H5CX_push();
+    ret = H5CX_push(&api_ctx);
     VRFY((ret == 0), "H5CX_push()");
     api_ctx_pushed = true;
 

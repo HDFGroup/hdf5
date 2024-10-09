@@ -559,6 +559,7 @@ main(void)
 {
     int   nerrors        = 0;
     hid_t fapl_id        = H5I_INVALID_HID;
+    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
     bool  api_ctx_pushed = false; /* Whether API context pushed */
 
     h5_test_init();
@@ -566,7 +567,7 @@ main(void)
         goto error;
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 

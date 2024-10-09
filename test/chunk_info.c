@@ -36,9 +36,9 @@
  */
 #define H5D_FRIEND
 #define H5D_TESTING /* to use H5D__ functions */
-#include "H5Dpkg.h"
 
 #include "h5test.h"
+#include "H5Dpkg.h"
 #ifdef H5_HAVE_FILTER_DEFLATE
 #include "zlib.h"
 #endif

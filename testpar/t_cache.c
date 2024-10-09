@@ -3591,6 +3591,7 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
     H5F_t              *file_ptr  = NULL;
     H5C_t              *cache_ptr = NULL;
     haddr_t             actual_base_addr;
+    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
 
     assert(fid_ptr != NULL);
     assert(file_ptr_ptr != NULL);
@@ -3599,7 +3600,7 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
     fid = H5Fcreate(filenames[0], H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 
     /* Push API context */
-    H5CX_push();
+    H5CX_push(&api_ctx);
 
     if (fid < 0) {
         nerrors++;
@@ -4945,6 +4946,7 @@ smoke_check_1(int metadata_write_strategy)
     }
     else /* run the clients */
     {
+H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
         if (!setup_cache_for_test(&fid, &file_ptr, &cache_ptr, metadata_write_strategy)) {
 
             nerrors++;
@@ -4954,6 +4956,7 @@ smoke_check_1(int metadata_write_strategy)
                 fprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, __func__);
             }
         }
+H5CX_push(&api_ctx);
 
         for (i = 0; i < (virt_num_data_entries / 2); i++) {
             insert_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
@@ -5021,6 +5024,7 @@ smoke_check_1(int metadata_write_strategy)
                 }
             }
         }
+H5CX_pop(false);
     }
 
     max_nerrors = get_max_nerrors();
@@ -5107,6 +5111,7 @@ smoke_check_2(int metadata_write_strategy)
     }
     else /* run the clients */
     {
+H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
         if (!setup_cache_for_test(&fid, &file_ptr, &cache_ptr, metadata_write_strategy)) {
 
             nerrors++;
@@ -5116,6 +5121,7 @@ smoke_check_2(int metadata_write_strategy)
                 fprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, __func__);
             }
         }
+H5CX_push(&api_ctx);
 
         for (i = 0; i < (virt_num_data_entries / 2); i++) {
             insert_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
@@ -5217,6 +5223,7 @@ smoke_check_2(int metadata_write_strategy)
                 }
             }
         }
+H5CX_pop(false);
     }
 
     max_nerrors = get_max_nerrors();
@@ -5310,6 +5317,7 @@ smoke_check_3(int metadata_write_strategy)
     }
     else /* run the clients */
     {
+H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
         if (!setup_cache_for_test(&fid, &file_ptr, &cache_ptr, metadata_write_strategy)) {
 
             nerrors++;
@@ -5319,6 +5327,7 @@ smoke_check_3(int metadata_write_strategy)
                 fprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, __func__);
             }
         }
+H5CX_push(&api_ctx);
 
         min_count = 100 / ((file_mpi_rank + 1) * (file_mpi_rank + 1));
         max_count = min_count + 50;
@@ -5500,6 +5509,7 @@ smoke_check_3(int metadata_write_strategy)
                 }
             }
         }
+H5CX_pop(false);
     }
 
     max_nerrors = get_max_nerrors();
@@ -5593,6 +5603,7 @@ smoke_check_4(int metadata_write_strategy)
     }
     else /* run the clients */
     {
+H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
         if (!setup_cache_for_test(&fid, &file_ptr, &cache_ptr, metadata_write_strategy)) {
 
             nerrors++;
@@ -5602,6 +5613,7 @@ smoke_check_4(int metadata_write_strategy)
                 fprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, __func__);
             }
         }
+H5CX_push(&api_ctx);
 
         min_count = 100 * (file_mpi_rank % 4);
         max_count = min_count + 50;
@@ -5782,6 +5794,7 @@ smoke_check_4(int metadata_write_strategy)
                 }
             }
         }
+H5CX_pop(false);
     }
 
     max_nerrors = get_max_nerrors();
@@ -5866,6 +5879,7 @@ smoke_check_5(int metadata_write_strategy)
     }
     else /* run the clients */
     {
+H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
 
         if (!setup_cache_for_test(&fid, &file_ptr, &cache_ptr, metadata_write_strategy)) {
 
@@ -5876,6 +5890,7 @@ smoke_check_5(int metadata_write_strategy)
                 fprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, __func__);
             }
         }
+H5CX_push(&api_ctx);
 
         for (i = 0; i < (virt_num_data_entries / 2); i++) {
             insert_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
@@ -5972,6 +5987,7 @@ smoke_check_5(int metadata_write_strategy)
                 }
             }
         }
+H5CX_pop(false);
     }
 
     max_nerrors = get_max_nerrors();
@@ -6148,6 +6164,7 @@ trace_file_check(int metadata_write_strategy)
     }
     else {
         /* run the clients */
+H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
 
         if (!setup_cache_for_test(&fid, &file_ptr, &cache_ptr, metadata_write_strategy)) {
 
@@ -6157,6 +6174,7 @@ trace_file_check(int metadata_write_strategy)
             if (verbose)
                 fprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, __func__);
         }
+H5CX_push(&api_ctx);
 
         if (nerrors == 0) {
 
@@ -6370,6 +6388,7 @@ trace_file_check(int metadata_write_strategy)
             trace_file_ptr = NULL;
             HDremove(trace_file_name);
         }
+H5CX_pop(false);
     } /* end giant else that runs clients */
 
     max_nerrors = get_max_nerrors();
@@ -6453,6 +6472,7 @@ smoke_check_6(int metadata_write_strategy)
     }
     else /* run the clients */
     {
+H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
         int temp;
 
         if (!setup_cache_for_test(&fid, &file_ptr, &cache_ptr, metadata_write_strategy)) {
@@ -6464,6 +6484,7 @@ smoke_check_6(int metadata_write_strategy)
                 fprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, __func__);
             }
         }
+H5CX_push(&api_ctx);
 
         temp                  = virt_num_data_entries;
         virt_num_data_entries = NUM_DATA_ENTRIES;
@@ -6621,6 +6642,7 @@ smoke_check_6(int metadata_write_strategy)
             }
         }
         virt_num_data_entries = temp;
+H5CX_pop(false);
     }
 
     max_nerrors = get_max_nerrors();

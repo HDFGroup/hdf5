@@ -9131,6 +9131,7 @@ main(void)
     unsigned    nerrors  = 0;               /* Cumulative error count */
     test_type_t curr_test;                  /* Current test being worked on */
     const char *driver_name;                /* File Driver value from environment */
+    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
     bool        api_ctx_pushed = false;     /* Whether API context pushed */
 
     /* Get the VFD to use */
@@ -9141,7 +9142,7 @@ main(void)
     fapl = h5_fileaccess();
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 

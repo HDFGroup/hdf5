@@ -15959,6 +15959,7 @@ main(void)
     unsigned    num_pb_fs = 1; /* The number of settings to test for page buffering and file space handling */
     const char *driver_name;   /* Environment variable */
     bool        contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
+    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
     bool        api_ctx_pushed = false; /* Whether API context pushed */
     int         test_express;
 
@@ -15999,7 +16000,7 @@ main(void)
     init_large_cparam(&large_cparam);
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 

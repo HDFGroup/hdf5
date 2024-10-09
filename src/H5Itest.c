@@ -65,6 +65,7 @@ H5I__get_name_test(hid_t id, char *name /*out*/, size_t size, bool *cached)
 {
     H5VL_object_t *vol_obj;                 /* Object of id */
     H5G_loc_t      loc;                     /* Object location */
+    H5CX_node_t api_ctx = {{0}, NULL};   /* API context node to push */
     bool           api_ctx_pushed  = false; /* Whether API context pushed */
     bool           vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
     size_t         name_len        = 0;     /* Length of name */
@@ -73,7 +74,7 @@ H5I__get_name_test(hid_t id, char *name /*out*/, size_t size, bool *cached)
     FUNC_ENTER_PACKAGE
 
     /* Set API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, (-1), "can't set API context");
     api_ctx_pushed = true;
 
