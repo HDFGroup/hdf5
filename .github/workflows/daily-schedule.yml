@@ -1,7 +1,8 @@
 name: hdf5 dev daily build on schedule
 
-# Triggers the workflow on a schedule
+# Triggers the workflow on a schedule or on demand
 on:
+  workflow_dispatch:
   schedule:
     - cron: "6 0 * * *"
 
