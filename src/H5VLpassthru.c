@@ -49,13 +49,6 @@
 /* (Uncomment to enable) */
 /* #define ENABLE_PASSTHRU_LOGGING */
 
-/* Hack for missing va_copy() in old Visual Studio editions
- * (from H5win2_defs.h - used on VS2012 and earlier)
- */
-#if defined(_WIN32) && defined(_MSC_VER) && (_MSC_VER < 1800)
-#define va_copy(D, S) ((D) = (S))
-#endif
-
 /************/
 /* Typedefs */
 /************/
