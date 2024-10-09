@@ -4044,7 +4044,6 @@ take_down_cache(hid_t fid, H5C_t *cache_ptr)
     }
 
     return (success);
-
 } /* take_down_cache() */
 
 /*****************************************************************************
@@ -4956,6 +4955,8 @@ smoke_check_1(int metadata_write_strategy)
                 fprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, __func__);
             }
         }
+
+        /* Push API context */
         H5CX_push(&api_ctx);
 
         for (i = 0; i < (virt_num_data_entries / 2); i++) {
@@ -5024,6 +5025,8 @@ smoke_check_1(int metadata_write_strategy)
                 }
             }
         }
+
+        /* Pop API context */
         H5CX_pop(false);
     }
 
@@ -5045,7 +5048,6 @@ smoke_check_1(int metadata_write_strategy)
     success = ((success) && (max_nerrors == 0));
 
     return (success);
-
 } /* smoke_check_1() */
 
 /*****************************************************************************
@@ -5121,6 +5123,8 @@ smoke_check_2(int metadata_write_strategy)
                 fprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, __func__);
             }
         }
+
+        /* Push API context */
         H5CX_push(&api_ctx);
 
         for (i = 0; i < (virt_num_data_entries / 2); i++) {
@@ -5223,6 +5227,8 @@ smoke_check_2(int metadata_write_strategy)
                 }
             }
         }
+
+        /* Pop API context */
         H5CX_pop(false);
     }
 
@@ -5244,7 +5250,6 @@ smoke_check_2(int metadata_write_strategy)
     success = ((success) && (max_nerrors == 0));
 
     return (success);
-
 } /* smoke_check_2() */
 
 /*****************************************************************************
@@ -5327,6 +5332,8 @@ smoke_check_3(int metadata_write_strategy)
                 fprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, __func__);
             }
         }
+
+        /* Push API context */
         H5CX_push(&api_ctx);
 
         min_count = 100 / ((file_mpi_rank + 1) * (file_mpi_rank + 1));
@@ -5509,6 +5516,8 @@ smoke_check_3(int metadata_write_strategy)
                 }
             }
         }
+
+        /* Pop API context */
         H5CX_pop(false);
     }
 
@@ -5530,7 +5539,6 @@ smoke_check_3(int metadata_write_strategy)
     success = ((success) && (max_nerrors == 0));
 
     return (success);
-
 } /* smoke_check_3() */
 
 /*****************************************************************************
@@ -5613,6 +5621,8 @@ smoke_check_4(int metadata_write_strategy)
                 fprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, __func__);
             }
         }
+
+        /* Push API context */
         H5CX_push(&api_ctx);
 
         min_count = 100 * (file_mpi_rank % 4);
@@ -5794,6 +5804,8 @@ smoke_check_4(int metadata_write_strategy)
                 }
             }
         }
+
+        /* Pop API context */
         H5CX_pop(false);
     }
 
@@ -5815,7 +5827,6 @@ smoke_check_4(int metadata_write_strategy)
     success = ((success) && (max_nerrors == 0));
 
     return (success);
-
 } /* smoke_check_4() */
 
 /*****************************************************************************
@@ -5890,6 +5901,8 @@ smoke_check_5(int metadata_write_strategy)
                 fprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, __func__);
             }
         }
+
+        /* Push API context */
         H5CX_push(&api_ctx);
 
         for (i = 0; i < (virt_num_data_entries / 2); i++) {
@@ -5987,6 +6000,8 @@ smoke_check_5(int metadata_write_strategy)
                 }
             }
         }
+
+        /* Pop API context */
         H5CX_pop(false);
     }
 
@@ -6008,7 +6023,6 @@ smoke_check_5(int metadata_write_strategy)
     success = ((success) && (max_nerrors == 0));
 
     return (success);
-
 } /* smoke_check_5() */
 
 /*****************************************************************************
@@ -6174,6 +6188,8 @@ trace_file_check(int metadata_write_strategy)
             if (verbose)
                 fprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, __func__);
         }
+
+        /* Push API context */
         H5CX_push(&api_ctx);
 
         if (nerrors == 0) {
@@ -6388,6 +6404,8 @@ trace_file_check(int metadata_write_strategy)
             trace_file_ptr = NULL;
             HDremove(trace_file_name);
         }
+
+        /* Pop API context */
         H5CX_pop(false);
     } /* end giant else that runs clients */
 
@@ -6407,7 +6425,6 @@ trace_file_check(int metadata_write_strategy)
     success = ((success) && (max_nerrors == 0));
 
     return (success);
-
 } /* trace_file_check() */
 
 /*****************************************************************************
@@ -6484,6 +6501,8 @@ smoke_check_6(int metadata_write_strategy)
                 fprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, __func__);
             }
         }
+
+        /* Push API context */
         H5CX_push(&api_ctx);
 
         temp                  = virt_num_data_entries;
@@ -6642,6 +6661,8 @@ smoke_check_6(int metadata_write_strategy)
             }
         }
         virt_num_data_entries = temp;
+
+        /* Pop API context */
         H5CX_pop(false);
     }
 
@@ -6663,7 +6684,6 @@ smoke_check_6(int metadata_write_strategy)
     success = ((success) && (max_nerrors == 0));
 
     return (success);
-
 } /* smoke_check_6() */
 
 /*****************************************************************************
