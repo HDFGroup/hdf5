@@ -3798,13 +3798,13 @@ H5F__start_swmr_write(H5F_t *f)
             uint8_t           version;
 
             if (NULL == (oloc = H5O_get_loc(obj_ids[u])))
-                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5O_get_loc() failed");
 
             if (H5O_get_native_info(oloc, &ninfo, H5O_NATIVE_INFO_HDR) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5O_get_native__info failed");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5O_get_native_info() failed");
 
             if (H5O_get_version_bound(f->shared->low_bound, &version) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5O_get_version_bound failed");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5O_get_version_bound() failed");
 
             if (ninfo.hdr.version < version)
                 HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "disallow opened objects below 1.10");
