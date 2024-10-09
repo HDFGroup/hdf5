@@ -173,7 +173,7 @@ Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation)
 time_t
 H5_make_time(struct tm *tm)
 {
-    time_t the_time;                                     /* The converted time */
+    time_t the_time; /* The converted time */
 #if defined(H5_HAVE_VISUAL_STUDIO)
     long timezone = 0;
 #endif
