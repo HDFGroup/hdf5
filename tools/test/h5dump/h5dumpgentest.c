@@ -12271,19 +12271,19 @@ gent_complex(void)
 
     struct {
         H5_float_complex arr[F95_XDIM][F95_YDIM];
-    } * dset_fc;
+    } *dset_fc;
 
     struct {
         H5_double_complex arr[F95_XDIM][F95_YDIM];
-    } * dset_dc;
+    } *dset_dc;
 
     struct {
         H5_ldouble_complex arr[F95_XDIM][F95_YDIM];
-    } * dset_ldc;
+    } *dset_ldc;
 
     struct {
         hvl_t arr[F95_XDIM];
-    } * dset_var_fc;
+    } *dset_var_fc;
 
     fid = H5Fcreate(FILE95, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -12522,19 +12522,19 @@ gent_complex_be(void)
 
     struct {
         H5_float_complex arr[F96_XDIM][F96_YDIM];
-    } * dset_fc;
+    } *dset_fc;
 
     struct {
         H5_double_complex arr[F96_XDIM][F96_YDIM];
-    } * dset_dc;
+    } *dset_dc;
 
     struct {
         H5_ldouble_complex arr[F96_XDIM][F96_YDIM];
-    } * dset_ldc;
+    } *dset_ldc;
 
     struct {
         hvl_t arr[F96_XDIM];
-    } * dset_var_fc;
+    } *dset_var_fc;
 
     fid = H5Fcreate(FILE96, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 

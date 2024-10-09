@@ -3649,7 +3649,7 @@ test_conv_flt_1_hw_conv_from_double(void *hw_dst, unsigned char *src_buf, size_t
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((H5_float_complex *)hw_dst) = (H5_float_complex)aligned;
 #else
-            *((H5_float_complex *)hw_dst)   = H5_CMPLXF(aligned, 0.0F);
+            *((H5_float_complex *)hw_dst) = H5_CMPLXF(aligned, 0.0F);
 #endif
 
             /* Check for overflow and underflow */
@@ -3663,7 +3663,7 @@ test_conv_flt_1_hw_conv_from_double(void *hw_dst, unsigned char *src_buf, size_t
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((H5_double_complex *)hw_dst) = (H5_double_complex)aligned;
 #else
-            *((H5_double_complex *)hw_dst)  = H5_CMPLX(aligned, 0.0);
+            *((H5_double_complex *)hw_dst) = H5_CMPLX(aligned, 0.0);
 #endif
             break;
         case LDBL_COMPLEX:
@@ -3775,7 +3775,7 @@ test_conv_flt_1_hw_conv_from_ldouble(void *hw_dst, unsigned char *src_buf, size_
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((H5_float_complex *)hw_dst) = (H5_float_complex)aligned;
 #else
-            *((H5_float_complex *)hw_dst)   = H5_CMPLXF(aligned, 0.0F);
+            *((H5_float_complex *)hw_dst) = H5_CMPLXF(aligned, 0.0F);
 #endif
 
             /* Check for overflow and underflow */
@@ -3789,7 +3789,7 @@ test_conv_flt_1_hw_conv_from_ldouble(void *hw_dst, unsigned char *src_buf, size_
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((H5_double_complex *)hw_dst) = (H5_double_complex)aligned;
 #else
-            *((H5_double_complex *)hw_dst)  = H5_CMPLX(aligned, 0.0);
+            *((H5_double_complex *)hw_dst) = H5_CMPLX(aligned, 0.0);
 #endif
 
             /* Check for overflow and underflow */
@@ -3864,14 +3864,14 @@ test_conv_flt_1_hw_conv_from_fcomplex(void *hw_dst, unsigned char *src_buf, size
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((float *)hw_dst) = (float)aligned;
 #else
-            *((float *)hw_dst)       = crealf(aligned);
+            *((float *)hw_dst) = crealf(aligned);
 #endif
             break;
         case FLT_DOUBLE:
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((double *)hw_dst) = (double)aligned;
 #else
-            *((double *)hw_dst)      = (double)crealf(aligned);
+            *((double *)hw_dst) = (double)crealf(aligned);
 #endif
             break;
         case FLT_LDOUBLE:
@@ -3892,7 +3892,7 @@ test_conv_flt_1_hw_conv_from_fcomplex(void *hw_dst, unsigned char *src_buf, size
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
 #else
-            *((H5__Float16 *)hw_dst)        = (H5__Float16)real_val;
+            *((H5__Float16 *)hw_dst) = (H5__Float16)real_val;
 #endif
 
             /* Check for overflow and underflow */
@@ -3979,7 +3979,7 @@ test_conv_flt_1_hw_conv_from_dcomplex(void *hw_dst, unsigned char *src_buf, size
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((float *)hw_dst) = (float)aligned;
 #else
-            *((float *)hw_dst)       = (float)real_val;
+            *((float *)hw_dst) = (float)real_val;
 #endif
 
             /* Check for overflow and underflow */
@@ -3993,7 +3993,7 @@ test_conv_flt_1_hw_conv_from_dcomplex(void *hw_dst, unsigned char *src_buf, size
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((double *)hw_dst) = (double)aligned;
 #else
-            *((double *)hw_dst)      = (double)creal(aligned);
+            *((double *)hw_dst) = (double)creal(aligned);
 #endif
             break;
         case FLT_LDOUBLE:
@@ -4011,7 +4011,7 @@ test_conv_flt_1_hw_conv_from_dcomplex(void *hw_dst, unsigned char *src_buf, size
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
 #else
-            *((H5__Float16 *)hw_dst)        = (H5__Float16)creal(aligned);
+            *((H5__Float16 *)hw_dst) = (H5__Float16)creal(aligned);
 #endif
 
             /* Check for overflow and underflow */
@@ -4137,7 +4137,7 @@ test_conv_flt_1_hw_conv_from_lcomplex(void *hw_dst, unsigned char *src_buf, size
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((float *)hw_dst) = (float)aligned;
 #else
-            *((float *)hw_dst)       = (float)real_val;
+            *((float *)hw_dst) = (float)real_val;
 #endif
 
             /* Check for overflow and underflow */
@@ -4153,7 +4153,7 @@ test_conv_flt_1_hw_conv_from_lcomplex(void *hw_dst, unsigned char *src_buf, size
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((double *)hw_dst) = (double)aligned;
 #else
-            *((double *)hw_dst)      = (double)real_val;
+            *((double *)hw_dst) = (double)real_val;
 #endif
 
             /* Check for overflow and underflow */
@@ -4178,7 +4178,7 @@ test_conv_flt_1_hw_conv_from_lcomplex(void *hw_dst, unsigned char *src_buf, size
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
 #else
-            *((H5__Float16 *)hw_dst)        = (H5__Float16)creall(aligned);
+            *((H5__Float16 *)hw_dst) = (H5__Float16)creall(aligned);
 #endif
 
             /* Check for overflow and underflow */
@@ -4206,7 +4206,7 @@ test_conv_flt_1_hw_conv_from_lcomplex(void *hw_dst, unsigned char *src_buf, size
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((H5_float_complex *)hw_dst) = (H5_float_complex)aligned;
 #else
-            *((H5_float_complex *)hw_dst)  = H5_CMPLXF((float)real_val, (float)imag_val);
+            *((H5_float_complex *)hw_dst) = H5_CMPLXF((float)real_val, (float)imag_val);
 #endif
 
             /* Check for overflow and underflow */

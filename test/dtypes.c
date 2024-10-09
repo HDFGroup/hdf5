@@ -12546,7 +12546,7 @@ static int
 test_complex_type_versionbounds(void)
 {
     H5F_libver_t versions[]     = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18,  H5F_LIBVER_V110,
-                               H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V116};
+                                   H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V116};
     hsize_t      arr_dim[]      = {5};             /* Length of the array */
     hid_t        file           = H5I_INVALID_HID; /* File ID */
     hid_t        space          = H5I_INVALID_HID; /* Dataspace ID */

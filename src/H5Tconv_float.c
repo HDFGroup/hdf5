@@ -200,17 +200,16 @@ H5T__conv_f_f_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
     /* The conversion loop */
     for (size_t elmtno = 0; elmtno < nelmts; elmtno++) {
         H5T_conv_float_specval_t specval_type; /* floating-point value type (regular, +/-Inf, +/-0, NaN) */
-        H5T_conv_ret_t           except_ret =
-            H5T_CONV_UNHANDLED;       /* return of conversion exception callback function       */
-        ssize_t bitno = 0;            /* bit number                                       */
-        int64_t expo;                 /* exponent                                         */
-        size_t  implied;              /* destination implied bits                         */
-        size_t  mpos;                 /* offset to useful mant in src                     */
-        size_t  msize = 0;            /* useful size of mantissa in src                   */
-        size_t  mrsh;                 /* amount to right shift mantissa                   */
-        bool    reverse      = true;  /* if reversed the order of destination             */
-        bool    denormalized = false; /* is either source or destination denormalized?    */
-        bool    carry        = false; /* carry after rounding mantissa                    */
+        H5T_conv_ret_t except_ret = H5T_CONV_UNHANDLED; /* return of conversion exception callback function */
+        ssize_t bitno = 0;                              /* bit number                                       */
+        int64_t expo;                                   /* exponent                                         */
+        size_t  implied;                                /* destination implied bits                         */
+        size_t  mpos;                                   /* offset to useful mant in src                     */
+        size_t  msize = 0;                              /* useful size of mantissa in src                   */
+        size_t  mrsh;                                   /* amount to right shift mantissa                   */
+        bool    reverse      = true;                    /* if reversed the order of destination             */
+        bool    denormalized = false;                   /* is either source or destination denormalized?    */
+        bool    carry        = false;                   /* carry after rounding mantissa                    */
 
         /*
          * If the source and destination buffers overlap then use a
@@ -870,8 +869,7 @@ H5T__conv_f_i_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
     /* The conversion loop */
     for (size_t elmtno = 0; elmtno < nelmts; elmtno++) {
         H5T_conv_float_specval_t specval_type; /* floating-point value type (regular, +/-Inf, +/-0, NaN) */
-        H5T_conv_ret_t           except_ret =
-            H5T_CONV_UNHANDLED;     /* return of conversion exception callback function       */
+        H5T_conv_ret_t except_ret = H5T_CONV_UNHANDLED; /* return of conversion exception callback function */
         uint64_t sign;              /* source sign bit value                                  */
         hssize_t expo;              /* source exponent                                        */
         hssize_t shift_val;         /* shift value when shifting mantissa by exponent         */
