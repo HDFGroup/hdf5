@@ -167,39 +167,6 @@ H5R__init_package(void)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5R__init_package() */
 
-/*--------------------------------------------------------------------------
- NAME
-    H5R_term_package
- PURPOSE
-    Terminate various H5R objects
- USAGE
-    void H5R_term_package()
- RETURNS
-    void
- DESCRIPTION
-    Release the ID group and any other resources allocated.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-     Can't report errors...
-
-     Finishes shutting down the interface, after H5R_top_term_package()
-     is called
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-int
-H5R_term_package(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if (H5_PKG_INIT_VAR) {
-        /* Mark closed */
-        H5_PKG_INIT_VAR = false;
-    }
-
-    FUNC_LEAVE_NOAPI(0)
-} /* end H5R_term_package() */
-
 /*-------------------------------------------------------------------------
  * Function:    H5R__create_object
  *

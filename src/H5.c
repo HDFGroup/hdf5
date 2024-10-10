@@ -401,14 +401,13 @@ H5_term_library(void)
          */
         if (pending == 0) {
             /* Shut down the "bottom" of the attribute, dataset, group,
-             * reference, dataspace, and datatype interfaces, fully closing
+             * dataspace, and datatype interfaces, fully closing
              * out the interfaces now.
              */
             pending += DOWN(A);
             pending += DOWN(D);
             pending += DOWN(G);
             pending += DOWN(M);
-            pending += DOWN(R);
             pending += DOWN(S);
             pending += DOWN(T);
         } /* end if */
