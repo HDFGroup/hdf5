@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.626f639</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.68bffcd</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -121,7 +121,8 @@ $(document).ready(function(){initNavTree('_h5_v_lnative_8h.html',''); initResiza
   <div class="summary">
 <a href="#nested-classes">Data Structures</a> &#124;
 <a href="#define-members">Macros</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">H5VLnative.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -187,7 +188,9 @@ Data Structures</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a3198509e19c60950ab0045b089816118"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_v_lnative_8h.html#a3198509e19c60950ab0045b089816118">H5VL_NATIVE</a>&#160;&#160;&#160;(H5VL_native_register())</td></tr>
+<tr class="memitem:abb549ba9fa5c4f3107d8ff19602705da"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_v_lnative_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a>&#160;&#160;&#160;<a class="el" href="group___h5.html#ga27fa33dc262dda95c5aa8df533837480">H5open</a>(),</td></tr>
+<tr class="separator:abb549ba9fa5c4f3107d8ff19602705da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3198509e19c60950ab0045b089816118"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_v_lnative_8h.html#a3198509e19c60950ab0045b089816118">H5VL_NATIVE</a>&#160;&#160;&#160;(<a class="el" href="_h5_epublic_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> <a class="el" href="_h5_v_lnative_8h.html#a8629734811e8e3a8f49748421a8840ff">H5VL_NATIVE_g</a>)</td></tr>
 <tr class="separator:a3198509e19c60950ab0045b089816118"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa2277d8c3f14300431598ea86dbd987c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_v_lnative_8h.html#aa2277d8c3f14300431598ea86dbd987c">H5VL_NATIVE_NAME</a>&#160;&#160;&#160;&quot;native&quot;</td></tr>
 <tr class="separator:aa2277d8c3f14300431598ea86dbd987c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -302,8 +305,27 @@ Functions</h2></td></tr>
 <tr class="memitem:ga7136f48f79f4b88d87002d5c218ceb40"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_v_l_n_a_t.html#ga7136f48f79f4b88d87002d5c218ceb40">H5VLnative_token_to_addr</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, <a class="el" href="struct_h5_o__token__t.html">H5O_token_t</a> token, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> *addr)</td></tr>
 <tr class="memdesc:ga7136f48f79f4b88d87002d5c218ceb40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a native VOL connector token to a haddr_t address.  <br /></td></tr>
 <tr class="separator:ga7136f48f79f4b88d87002d5c218ceb40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a8629734811e8e3a8f49748421a8840ff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_v_lnative_8h.html#a8629734811e8e3a8f49748421a8840ff">H5VL_NATIVE_g</a></td></tr>
+<tr class="separator:a8629734811e8e3a8f49748421a8840ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="abb549ba9fa5c4f3107d8ff19602705da" name="abb549ba9fa5c4f3107d8ff19602705da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb549ba9fa5c4f3107d8ff19602705da">&#9670;&#160;</a></span>H5OPEN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define H5OPEN&#160;&#160;&#160;<a class="el" href="group___h5.html#ga27fa33dc262dda95c5aa8df533837480">H5open</a>(),</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a3198509e19c60950ab0045b089816118" name="a3198509e19c60950ab0045b089816118"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3198509e19c60950ab0045b089816118">&#9670;&#160;</a></span>H5VL_NATIVE</h2>
 
@@ -311,7 +333,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5VL_NATIVE&#160;&#160;&#160;(H5VL_native_register())</td>
+          <td class="memname">#define H5VL_NATIVE&#160;&#160;&#160;(<a class="el" href="_h5_epublic_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> <a class="el" href="_h5_v_lnative_8h.html#a8629734811e8e3a8f49748421a8840ff">H5VL_NATIVE_g</a>)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -1042,6 +1064,29 @@ Functions</h2></td></tr>
           <td class="memname">#define H5VL_NATIVE_VERSION&#160;&#160;&#160;0</td>
         </tr>
       </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Variable Documentation</h2>
+<a id="a8629734811e8e3a8f49748421a8840ff" name="a8629734811e8e3a8f49748421a8840ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8629734811e8e3a8f49748421a8840ff">&#9670;&#160;</a></span>H5VL_NATIVE_g</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> H5VL_NATIVE_g</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">extern</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 </div>

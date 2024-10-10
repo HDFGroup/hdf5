@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.626f639</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.68bffcd</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -211,7 +211,7 @@ Tasks:</h1>
 <li>The compatibility reports are produced by the CI and are viewable in the Github <a href="https://github.com/HDFGroup/hdf5/releases/tag/snapshot">Releases/snapshot</a> section.</li>
 </ul>
 </li>
-<li>Verify the interface compatibility reports between the current source and the previous release on the Github <a href="https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14">Snapshots</a> page.<ul>
+<li>Verify the interface compatibility reports between the current source and the previous release on the Github <a href="https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.16">Snapshots</a> page.<ul>
 <li>The compatibility reports are produced by the CI and are viewable in the Github <a href="https://github.com/HDFGroup/hdf5/releases/tag/snapshot">Releases/snapshot</a> section.</li>
 </ul>
 </li>
@@ -374,9 +374,17 @@ Tasks:</h1>
 <li>Change status from Pre-release to Release</li>
 </ul>
 </li>
+<li>Select publish-release build from workflow.<ul>
+<li>Choose the release branch</li>
+<li>Change ‘HDF5 Release version tag’ name to 'hdf5_X.Y.Z'</li>
+<li>Change 'HDF5 Release file name base' to 'hdf5-X.Y.Z'</li>
+<li>Change 'HDF5 target bucket directory' to 'vX_Y/vX_Y_Z'</li>
+<li>Press "Run Workflow"</li>
+</ul>
+</li>
 </ol>
 <h2><a class="anchor" id="autotoc_md239"></a>
-10. Add the contents of the RELEASE.txt file in the release code to the HISTORY file in the &lt;strong&gt;support&lt;/strong&gt; branch, just below the introductory lines at the top of the HISTORY file.</h2>
+10. Add the contents of the RELEASE.txt file in the release code to the HISTORY-&lt;branch&gt; file in the &lt;strong&gt;support&lt;/strong&gt; branch, just below the introductory lines at the top of the HISTORY file.</h2>
 <h2><a class="anchor" id="autotoc_md240"></a>
 11. Conduct Release Retrospective (Release Manager)</h2>
 <ol type="1">

@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.626f639</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.68bffcd</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -150,6 +150,8 @@ Functions</h2></td></tr>
 <tr class="separator:ga7eb33aa9608a32287769a5d797c62b54"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaec02be3715f1a4d71ba1a5d78524cbb3"><td class="memItemLeft" align="right" valign="top">static synchronized native void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___j_h5_v_l.html#gaec02be3715f1a4d71ba1a5d78524cbb3">H5VLunregister_connector</a> (long connector_id)  throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a></td></tr>
 <tr class="separator:gaec02be3715f1a4d71ba1a5d78524cbb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6aeaace8a5926058662fbe1b6579ad6f"><td class="memItemLeft" align="right" valign="top">static synchronized native boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___j_h5_v_l.html#ga6aeaace8a5926058662fbe1b6579ad6f">H5VLcmp_connector_cls</a> (long conn_id1, long conn_id2)  throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a></td></tr>
+<tr class="separator:ga6aeaace8a5926058662fbe1b6579ad6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="ga7eb33aa9608a32287769a5d797c62b54" name="ga7eb33aa9608a32287769a5d797c62b54"></a>
@@ -182,6 +184,57 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">HDF5LibraryException</td><td>Error from the HDF5 Library. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga6aeaace8a5926058662fbe1b6579ad6f" name="ga6aeaace8a5926058662fbe1b6579ad6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6aeaace8a5926058662fbe1b6579ad6f">&#9670;&#160;</a></span>H5VLcmp_connector_cls()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static synchronized native boolean H5VLcmp_connector_cls </td>
+          <td>(</td>
+          <td class="paramtype">long&#160;</td>
+          <td class="paramname"><em>conn_id1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">long&#160;</td>
+          <td class="paramname"><em>conn_id2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>H5VLcmp_connector_cls Determines whether two connector identifiers refer to the same connector.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">conn_id1</td><td>IN: Identifier of connector to compare. </td></tr>
+    <tr><td class="paramname">conn_id2</td><td>IN: Identifier of connector to compare.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if the connector identifiers refer to the same connector, else false.</dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
     <tr><td class="paramname">HDF5LibraryException</td><td>Error from the HDF5 Library. </td></tr>

@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.626f639</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.68bffcd</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -168,6 +168,9 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:gae8b51f85b767e562299e590032b4f07b"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_v_l.html#gae8b51f85b767e562299e590032b4f07b">h5vlunregister_connector_f</a> (plugin_id, hdferr)</td></tr>
 <tr class="memdesc:gae8b51f85b767e562299e590032b4f07b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes a VOL connector ID from the library.  <br /></td></tr>
 <tr class="separator:gae8b51f85b767e562299e590032b4f07b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0d2310224f83ee0dbc1669943edf51d7"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_v_l.html#ga0d2310224f83ee0dbc1669943edf51d7">h5vlcmp_connector_cls_f</a> (are_same, conn_id1, conn_id2, hdferr)</td></tr>
+<tr class="memdesc:ga0d2310224f83ee0dbc1669943edf51d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether two connector identifiers refer to the same connector.  <br /></td></tr>
+<tr class="separator:ga0d2310224f83ee0dbc1669943edf51d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2db86442b96e3aecad0030bf5fdf568d"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_v_l.html#ga2db86442b96e3aecad0030bf5fdf568d">h5vlnative_addr_to_token_f</a> (loc_id, addr, token, hdferr)</td></tr>
 <tr class="memdesc:ga2db86442b96e3aecad0030bf5fdf568d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the token representation from an address for a location identifier.  <br /></td></tr>
 <tr class="separator:ga2db86442b96e3aecad0030bf5fdf568d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -361,6 +364,58 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <p>See C API: <a class="el" href="group___h5_v_l.html#gaa3324ac7aedf9362b498226903288094">H5VLclose()</a> </p>
+
+</div>
+</div>
+<a id="ga0d2310224f83ee0dbc1669943edf51d7" name="ga0d2310224f83ee0dbc1669943edf51d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0d2310224f83ee0dbc1669943edf51d7">&#9670;&#160;</a></span>h5vlcmp_connector_cls_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5vlcmp_connector_cls_f </td>
+          <td>(</td>
+          <td class="paramtype">logical, intent(out)&#160;</td>
+          <td class="paramname"><em>are_same</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>conn_id1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>conn_id2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Determines whether two connector identifiers refer to the same connector. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">conn_id1</td><td>A valid identifier of the first connector to check </td></tr>
+    <tr><td class="paramname">conn_id2</td><td>A valid identifier of the second connector to check </td></tr>
+    <tr><td class="paramname">are_same</td><td>Whether connector IDs refer to the same connector </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="_h5_v_lconnector__passthru_8h.html#a814ba230b852c6b7e27811fe2b8d4fb2">H5VLcmp_connector_cls()</a> </p>
 
 </div>
 </div>

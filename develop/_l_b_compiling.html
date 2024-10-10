@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.626f639</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.68bffcd</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -188,7 +188,7 @@ I. Preconditions
 ========================================================================
 
    1. We suggest you obtain the latest CMake for your platform from the Kitware
-      web site. The HDF5 1.15.x product requires a minimum CMake version
+      web site. The HDF5 1.17.x product requires a minimum CMake version
       of 3.18. If you are using VS2022, the minimum CMake version is 3.21.
 
    2. You have installed the HDF5 library built with CMake, by executing
@@ -200,24 +200,24 @@ I. Preconditions
       or environment variable, set(ENV{HDF5_ROOT} "&lt;install_path&gt;")
       to the installed location of HDF5.
          On Windows:
-            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.15.x/
+            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.17.x/
          On unix:
-            HDF5_ROOT=&lt;install root folder&gt;/HDF_Group/HDF5/1.15.x/
+            HDF5_ROOT=&lt;install root folder&gt;/HDF_Group/HDF5/1.17.x/
 
       If you are using shared libraries, you may need to add to the path
       environment variable. Set the path environment variable to the
       installed location of the library files for HDF5.
          On Windows (*.dll):
-            PATH=%PATH%;C:/Program Files/HDF_Group/HDF5/1.15.x/bin
+            PATH=%PATH%;C:/Program Files/HDF_Group/HDF5/1.17.x/bin
          On unix (*.so):
-            LD_LIBRARY_PATH=$LD_LIBRARY_PATH:&lt;install root folder&gt;/HDF_Group/HDF5/1.15.x/lib
+            LD_LIBRARY_PATH=$LD_LIBRARY_PATH:&lt;install root folder&gt;/HDF_Group/HDF5/1.17.x/lib
 
       If you are using filter plugin libraries, you will need to set the
       HDF5_PLUGIN_PATH environment variable.
          On Windows:
-            HDF5_PLUGIN_PATH=C:/Program Files/HDF_Group/HDF5/1.15.x/lib/plugin
+            HDF5_PLUGIN_PATH=C:/Program Files/HDF_Group/HDF5/1.17.x/lib/plugin
          On unix:
-            HDF5_PLUGIN_PATH=&lt;install root folder&gt;/HDF_Group/HDF5/1.15.x/lib/plugin
+            HDF5_PLUGIN_PATH=&lt;install root folder&gt;/HDF_Group/HDF5/1.17.x/lib/plugin
 
       (Note there are no quote characters used on Windows and all platforms
       use forward slashes)
