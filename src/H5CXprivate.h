@@ -272,8 +272,7 @@ typedef struct H5CX_t {
 /* Typedef for nodes on the API context stack */
 /* Each entry into the library through an API routine invokes H5CX_push()
  * in a FUNC_ENTER_API* macro, which pushes an H5CX_node_t on the API
- * context [thread-local] stack, after initializing it with default values
- * in H5CX__push_common().
+ * context [thread-local] stack, after initializing it with default values.
  */
 typedef struct H5CX_node_t {
     H5CX_t              ctx;  /* Context for current API call */

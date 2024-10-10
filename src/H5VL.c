@@ -771,7 +771,10 @@ done:
 /*---------------------------------------------------------------------------
  * Function:    H5VLstart_lib_state
  *
- * Purpose:     Opens a new internal context for the HDF5 library.
+ * Purpose:     Opens a new internal context for the HDF5 library.  The context
+ *              returned (via the OUT parameter) must be passed to
+ *              H5VLfinish_lib_state to conclude the library's context and
+ *              release resources.
  *
  * Note:        This routine is _only_ for HDF5 VOL connector authors!  It is
  *              _not_ part of the public API for HDF5 application developers.
