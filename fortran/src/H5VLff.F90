@@ -419,7 +419,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: conn_id1
     INTEGER(HID_T), INTENT(IN) :: conn_id2
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER :: are_same_c
+
+    INTEGER(C_INT) :: are_same_c
 
     INTERFACE
        INTEGER(C_INT) FUNCTION H5VLcmp_connector_cls(cmp_value, conn_id1, conn_id2) BIND(C, NAME='H5VLcmp_connector_cls')
@@ -432,7 +433,7 @@ CONTAINS
 
     are_same = .FALSE.
     hdferr = INT(H5VLcmp_connector_cls(are_same_c, conn_id1, conn_id2))
-    IF(are_same_c .EQ. 0) are_same = .TRUE.
+    IF(are_same_c .EQ. 0_C_INT) are_same = .TRUE.
 
   END SUBROUTINE H5VLcmp_connector_cls_f
 
