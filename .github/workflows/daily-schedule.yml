@@ -1,0 +1,16 @@
+name: hdf5 dev daily build on schedule
+
+# Triggers the workflow on a schedule or on demand
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "6 0 * * *"
+
+permissions:
+    contents: write # In order to allow tag creation and file deletion
+
+jobs:
+  daily-build:
+    uses: ./.github/workflows/daily-build.yml
+    with:
+      use_ignore: check

@@ -490,9 +490,7 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
-          CXX: ${{ steps.setup-fortran.outputs.cxx }}
-          BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
-          SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
+          CXX: ${{ steps.setup-fortran.outputs.cc }}
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-Intel,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
@@ -603,110 +601,6 @@ jobs:
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
 ####### clang builds
-  build_and_test_win_clang:
-  # Windows w/ clang + CMake
-  #
-    name: "Windows ClangCL CTest"
-    runs-on: windows-latest
-    steps:
-      - name: Install Dependencies (Windows_clang)
-        run: choco install ninja
-
-      - name: add clang to env
-        uses: KyleMayes/install-llvm-action@v2.0.5
-        id: setup-clang
-        with:
-          env: true
-          version: '18'
-
-      - name: Set file base name (Windows_clang)
-        id: set-file-base
-        run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
-          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'release' ]]
-          then
-            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
-          else
-            SOURCE_NAME_BASE=$(echo "hdfsrc")
-          fi
-          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
-        shell: bash
-
-      # Get files created by release script
-      - name: Get zip-tarball (Windows_clang)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
-        with:
-          name: zip-tarball
-          path: ${{ github.workspace }}
-
-      - name: using powershell
-        shell: pwsh
-        run: Get-Location
-
-      - name: List files for the space (Windows_clang)
-        run: |
-          Get-ChildItem -Path ${{ github.workspace }}
-          Get-ChildItem -Path ${{ runner.workspace }}
-        shell: pwsh
-
-      - name: Uncompress source (Windows_clang)
-        working-directory: ${{ github.workspace }}
-        run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
-        shell: bash
-
-      - name: Copy script files for the space (Windows_clang)
-        run: |
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake -Destination ${{ runner.workspace }}/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake -Destination ${{ runner.workspace }}/hdf5/
-        shell: pwsh
-
-      - name: List files for the hdf5 (Windows_clang)
-        run: |
-          Get-ChildItem -Path ${{ runner.workspace }}/hdf5
-        shell: pwsh
-
-      - name: Create options file (Windows_clang)
-        uses: "DamianReeves/write-file-action@master"
-        with:
-          path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
-          write-mode: overwrite
-          contents: |
-              set (CTEST_DROP_SITE_INIT "my.cdash.org")
-              # Change following line to submit to your CDash dashboard to a different CDash project
-              #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
-              set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
-              #set (CMAKE_GENERATOR_TOOLSET "ClangCL")
-              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
-              #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/clang.cmake")
-              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
-              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
-              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
-              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON")
-              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON")
-              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=ON")
-              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON")
-              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF")
-              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
-
-      - name: Run ctest (Windows_clang) with clang
-        env:
-          BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
-          SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
-        run: |
-          cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-Clang,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
-        shell: pwsh
-        continue-on-error: true
-
-      # Save log files created by ctest script
-      - name: Save log (Windows_clang)
-        uses: actions/upload-artifact@v4
-        with:
-          name: clang-win-log
-          path: ${{ runner.workspace }}/hdf5/hdf5.log
-          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-
   build_and_test_linux_clang:
   # Linux (Ubuntu) w/ clang + CMake
   #
