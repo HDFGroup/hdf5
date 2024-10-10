@@ -427,6 +427,9 @@ typedef struct H5O_efl_t {
  */
 #define H5O_LAYOUT_VERSION_4 4
 
+/* This version adds support for structured chunk */
+#define H5O_LAYOUT_VERSION_5 5
+
 /* The default version of the format.  (Earlier versions had bugs) */
 #define H5O_LAYOUT_VERSION_DEFAULT H5O_LAYOUT_VERSION_3
 
@@ -650,12 +653,36 @@ typedef struct H5O_layout_chunk_t {
     } u;
 } H5O_layout_chunk_t;
 
+typedef struct H5O_layout_struct_chunk_t {
+    /* TBD: may add more fields or modify fields for structured chunk */
+    unsigned struct_type;                            /* Structured chunk storage type */
+                                                     /* NOW: H5D_SPARSE_CHUNK, H5D_VL_CHUK */
+    H5D_chunk_index_t idx_type;                      /* Type of chunk index               */
+    uint8_t           flags;                         /* Chunk layout flags                */
+    unsigned          ndims;                         /* Num dimensions in chunk           */
+    uint32_t          dim[H5O_LAYOUT_NDIMS];         /* Size of chunk in elements         */
+    unsigned          enc_bytes_per_dim;             /* Encoded # of bytes for storing each chunk dimension */
+    uint32_t          size;                          /* Size of chunk in bytes            */
+    hsize_t           nchunks;                       /* Number of chunks in dataset	     */
+    hsize_t           max_nchunks;                   /* Max. number of chunks in dataset	     */
+    hsize_t           chunks[H5O_LAYOUT_NDIMS];      /* # of chunks in each dataset dimension  */
+    hsize_t           max_chunks[H5O_LAYOUT_NDIMS];  /* # of chunks in each dataset's max. dimension */
+    hsize_t           down_chunks[H5O_LAYOUT_NDIMS]; /* "down" size of number of chunks in each dimension */
+    hsize_t           max_down_chunks[H5O_LAYOUT_NDIMS]; /* "down" size of number of chunks in each max dim */
+    union {
+        H5O_layout_chunk_farray_t farray; /* Information for fixed array index */
+        H5O_layout_chunk_earray_t earray; /* Information for extensible array index */
+        H5O_layout_chunk_bt2_t    btree2; /* Information for v2 B-tree index */
+    } u;
+} H5O_layout_struct_chunk_t;
+
 typedef struct H5O_layout_t {
     H5D_layout_t                   type;    /* Type of layout                    */
     unsigned                       version; /* Version of message                */
     const struct H5D_layout_ops_t *ops;     /* Pointer to data layout I/O operations */
     union {
-        H5O_layout_chunk_t chunk; /* Information for chunked layout    */
+        H5O_layout_chunk_t        chunk;        /* Information for chunked layout    */
+        H5O_layout_struct_chunk_t struct_chunk; /* Information for structured chunk layout    */
     } u;
     H5O_storage_t storage; /* Information for storing dataset elements */
 } H5O_layout_t;

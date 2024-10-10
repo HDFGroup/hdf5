@@ -85,6 +85,29 @@
             }                                                                                                \
         }                                                                                                    \
     }
+
+#define H5D_DEF_LAYOUT_STRUCT_CHUNK_INIT                                                                     \
+    {                                                                                                        \
+        H5D_SPARSE_CHUNK, H5D_CHUNK_IDX_BTREE, (uint8_t)0, (unsigned)0,                                      \
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                                              \
+             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                                \
+            (unsigned)0, (uint32_t)0, (hsize_t)0, (hsize_t)0,                                                \
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                                              \
+             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                                \
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                                              \
+             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                                \
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                                              \
+             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                                \
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                                              \
+             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                                \
+        {                                                                                                    \
+            {                                                                                                \
+                {                                                                                            \
+                    (uint8_t)0                                                                               \
+                }                                                                                            \
+            }                                                                                                \
+        }                                                                                                    \
+    }
 #define H5D_DEF_STORAGE_VIRTUAL_INIT                                                                         \
     {                                                                                                        \
         {HADDR_UNDEF, 0}, 0, NULL, 0, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                       \
@@ -130,6 +153,20 @@
             H5D_DEF_STORAGE_CONTIG                                                                           \
     }
 #define H5D_DEF_LAYOUT_CHUNK                                                                                 \
+    {                                                                                                        \
+        H5D_CHUNKED, H5O_LAYOUT_VERSION_DEFAULT, H5D_LOPS_CHUNK, {H5D_DEF_LAYOUT_CHUNK_INIT},                \
+            H5D_DEF_STORAGE_CHUNK                                                                            \
+    }
+/* TBD: FOR NOW set to CHUNKED */
+#ifdef TBD
+#define H5D_DEF_LAYOUT_STRUCT_CHUNK                                                                          \
+    {                                                                                                        \
+        H5D_STRUCT_CHUNK, H5O_LAYOUT_VERSION_5, H5D_LOPS_CHUNK,                                              \
+            {.struct_chunk = H5D_DEF_LAYOUT_STRUCT_CHUNK_INIT}, H5D_DEF_STORAGE_CHUNK                        \
+    }
+#endif
+/* TBD: same as H5D_CHUNKED */
+#define H5D_DEF_LAYOUT_STRUCT_CHUNK                                                                          \
     {                                                                                                        \
         H5D_CHUNKED, H5O_LAYOUT_VERSION_DEFAULT, H5D_LOPS_CHUNK, {H5D_DEF_LAYOUT_CHUNK_INIT},                \
             H5D_DEF_STORAGE_CHUNK                                                                            \
@@ -279,10 +316,11 @@ static const H5O_efl_t H5D_def_efl_g = H5D_CRT_EXT_FILE_LIST_DEF;     /* Default
 static const unsigned H5O_ohdr_min_g = H5D_CRT_MIN_DSET_HDR_SIZE_DEF; /* Default object header minimization */
 
 /* Defaults for each type of layout */
-static const H5O_layout_t H5D_def_layout_compact_g = H5D_DEF_LAYOUT_COMPACT;
-static const H5O_layout_t H5D_def_layout_contig_g  = H5D_DEF_LAYOUT_CONTIG;
-static const H5O_layout_t H5D_def_layout_chunk_g   = H5D_DEF_LAYOUT_CHUNK;
-static const H5O_layout_t H5D_def_layout_virtual_g = H5D_DEF_LAYOUT_VIRTUAL;
+static const H5O_layout_t H5D_def_layout_compact_g      = H5D_DEF_LAYOUT_COMPACT;
+static const H5O_layout_t H5D_def_layout_contig_g       = H5D_DEF_LAYOUT_CONTIG;
+static const H5O_layout_t H5D_def_layout_chunk_g        = H5D_DEF_LAYOUT_CHUNK;
+static const H5O_layout_t H5D_def_layout_struct_chunk_g = H5D_DEF_LAYOUT_STRUCT_CHUNK;
+static const H5O_layout_t H5D_def_layout_virtual_g      = H5D_DEF_LAYOUT_VIRTUAL;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dcrt_reg_prop
@@ -1778,6 +1816,7 @@ H5P__set_layout(H5P_genplist_t *plist, const H5O_layout_t *layout)
 
             case H5D_CHUNKED:
             case H5D_VIRTUAL:
+            case H5D_STRUCT_CHUNK:
                 fill.alloc_time = H5D_ALLOC_TIME_INCR;
                 break;
 
@@ -1838,6 +1877,10 @@ H5Pset_layout(hid_t plist_id, H5D_layout_t layout_type)
 
         case H5D_CHUNKED:
             layout = &H5D_def_layout_chunk_g;
+            break;
+
+        case H5D_STRUCT_CHUNK:
+            layout = &H5D_def_layout_struct_chunk_g;
             break;
 
         case H5D_VIRTUAL:
@@ -3547,3 +3590,117 @@ H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_dset_no_attrs_hint() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_struct_chunk
+ *
+ * Purpose:	Sets the number of dimensions and the size of each chunk to
+ *		the values specified.  The dimensionality of the chunk should
+ *		match the dimensionality of the dataspace.
+ *		It also sets the structured chunk storage type to FLAG.
+ *
+ *		As a side effect, the layout method is changed to
+ *		H5D_STRUCT_CHUNK.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_struct_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/], unsigned H5_ATTR_UNUSED flag)
+{
+    H5P_genplist_t *plist;               /* Property list pointer */
+    H5O_layout_t    chunk_layout;        /* Layout information for setting chunk info */
+    unsigned        u;                   /* Local index variable */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (ndims <= 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk dimensionality must be positive");
+    if (ndims > H5S_MAX_RANK)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk dimensionality is too large");
+    if (!dim)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no chunk dimensions specified");
+
+    /* Verify & initialize property's chunk dims */
+    /* TBD: for now, just set to H5D_CHUNKED */
+    H5MM_memcpy(&chunk_layout, &H5D_def_layout_chunk_g, sizeof(H5D_def_layout_chunk_g));
+
+    memset(&chunk_layout.u.chunk.dim, 0, sizeof(chunk_layout.u.chunk.dim));
+    for (u = 0; u < (unsigned)ndims; u++) {
+        if (dim[u] == 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all chunk dimensions must be positive");
+        /* Didn't check for chunk dimensions < 2^32 */
+        /* Didn't check for number of elements in chunk < 4 GB */
+        chunk_layout.u.chunk.dim[u] = (uint32_t)dim[u]; /* Store user's chunk dimensions */
+    }                                                   /* end for */
+
+    /* TBD: should set fields u.struct_chunk e.g. struct_type to parameter flag */
+
+    /* Get the plist structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+
+    /* Set chunk information in property list */
+    chunk_layout.u.chunk.ndims = (unsigned)ndims;
+    if (H5P__set_layout(plist, &chunk_layout) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_struct_chunk() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_struct_chunk
+ *
+ * Purpose:	Retrieves the chunk size of chunked layout.  The chunk
+ *		dimensionality is returned and the chunk size in each
+ *		dimension is returned through the DIM argument.	 At most
+ *		MAX_NDIMS elements of DIM will be initialized.
+ *		It also retrieves the structured chunk storage type in the
+ *		FLAG argument.
+ *
+ * Return:	Success:	Positive Chunk dimensionality.
+ *
+ *		Failure:	Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5Pget_struct_chunk(hid_t plist_id, int max_ndims, hsize_t dim[] /*out*/, unsigned *flag)
+{
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5O_layout_t    layout;    /* Layout information */
+    int             ret_value; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Get the plist structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+
+    /* Peek at the layout property */
+    if (H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout");
+    if (H5D_STRUCT_CHUNK != layout.type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a chunked storage layout");
+
+    if (dim) {
+        unsigned u; /* Local index variable */
+
+        /* Get the dimension sizes */
+        for (u = 0; u < layout.u.struct_chunk.ndims && u < (unsigned)max_ndims; u++)
+            dim[u] = layout.u.struct_chunk.dim[u];
+    } /* end if */
+
+    if (flag)
+        *flag = layout.u.struct_chunk.struct_type;
+
+    /* Set the return value */
+    ret_value = (int)layout.u.struct_chunk.ndims;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_struct_chunk() */

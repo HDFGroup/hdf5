@@ -117,16 +117,20 @@ H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subc
                 case H5VL_NATIVE_DATASET_GET_NUM_CHUNKS:
                 case H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX:
                 case H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD:
+                case H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_IDX:
+                case H5VL_NATIVE_DATASET_GET_STRUCT_CHUNK_INFO_BY_COORD:
                 case H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE:
                 case H5VL_NATIVE_DATASET_GET_OFFSET:
                     *flags |= H5VL_OPT_QUERY_QUERY_METADATA;
                     break;
 
                 case H5VL_NATIVE_DATASET_CHUNK_READ:
+                case H5VL_NATIVE_DATASET_READ_STRUCT_CHUNK:
                     *flags |= H5VL_OPT_QUERY_READ_DATA;
                     break;
 
                 case H5VL_NATIVE_DATASET_CHUNK_WRITE:
+                case H5VL_NATIVE_DATASET_WRITE_STRUCT_CHUNK:
                     *flags |= H5VL_OPT_QUERY_WRITE_DATA;
                     break;
 

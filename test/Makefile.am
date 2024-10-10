@@ -69,7 +69,8 @@ TEST_PROG= testhdf5 \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
            enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
            dangle dtransform reserved cross_read freespace mf vds file_image \
-           unregister cache_logging cork swmr vol timer event_set onion
+           unregister cache_logging cork swmr vol timer event_set \
+		   onion struct_chunk_storage
 
 # List programs to be built when testing here
 #

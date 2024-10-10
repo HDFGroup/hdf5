@@ -574,6 +574,16 @@ encoding for object names.</td>
 <td>#H5Pset_dset_no_attrs_hint/#H5Pget_dset_no_attrs_hint</td>
 <td>Sets/gets the flag to create minimized dataset object headers.</td>
 </tr>
+<tr>
+<td>#H5Pset_struct_chunk</td>
+<td>Sets the size of chunks and the structured chunk storage type
+    used to store a dataset with structured chunked layout.</td>
+</tr>
+<tr>
+<td>#H5Pget_struct_chunk</td>
+<td>Retrieves the size of chunks and the structured chunk storage type
+    for the raw data of a dataset with structured chunk layout.</td>
+</tr>
 </table>
 //! [dcpl_table]
  *
@@ -904,6 +914,26 @@ encoding for object names.</td>
 <tr>
 <td>#H5Pset_fletcher32</td>
 <td>Sets up use of the Fletcher32 checksum filter.</td>
+</tr>
+<tr>
+<td>#H5Pset_filter2/#H5Pget_filter3</td>
+<td>Adds/gets a filter to/from the filter pipeline for a specified section of structured chunk.</td>
+</tr>
+<tr>
+<td>#H5Pget_filter_by_id3</td>
+<td>Returns information about a filter in the pipeline for a specified section of structured chunk.</td>
+</tr>
+<tr>
+<td>#H5Pget_nfilters2</td>
+<td>Returns the number of filters in the pipeline for a specified section of structured chunk.</td>
+</tr>
+<tr>
+<td>#H5Premove_filter2</td>
+<td>Remove a filter in the filter pipeline for a specified section of structured chunk.</td>
+</tr>
+<tr>
+<td>#H5Pmodify_filter2</td>
+<td>Modifies a filter in the filter pipeline for a specified section of structured chunk.</td>
 </tr>
 </table>
 //! [ocpl_table]

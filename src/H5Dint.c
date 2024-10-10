@@ -4012,3 +4012,75 @@ H5D_get_dcpl_id(const H5D_obj_create_t *d)
 
     FUNC_LEAVE_NOAPI(d->dcpl_id);
 } /* end H5D_get_dcpl_id() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5D__get_defined
+ *
+ * Purpose:  Returns the dataspace ID with selection of defined elements
+ *
+ * Return:   Success:    ID for dataspace
+ *           Failure:    FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5D__get_defined(const H5D_t H5_ATTR_UNUSED *dset, const H5S_t *fspace)
+{
+    H5S_t *space     = NULL;
+    hid_t  ret_value = H5I_INVALID_HID;
+
+    FUNC_ENTER_PACKAGE
+
+    /* TBD:
+        if (dset->shared->layout.type == H5D_SPARSE_CHUNK)
+            call routine to get defined elements
+        else
+            if (NULL == (space = H5S_copy(fspace, false, true)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
+     */
+
+    /* FOR NOW: return copy of fspace */
+    if (NULL == (space = H5S_copy(fspace, false, true)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
+
+    /* Create an ID */
+    if ((ret_value = H5I_register(H5I_DATASPACE, space, true)) < 0)
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
+
+done:
+    if (ret_value < 0)
+        if (space != NULL)
+            if (H5S_close(space) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5D__get_defined() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function: H5D__erase
+ *
+ * Purpose:  Deletes elements from a dataset
+ *
+ * Return:   SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__erase(const H5D_t H5_ATTR_UNUSED *dset, const H5S_t H5_ATTR_UNUSED *fspace)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* TBD:
+        if (dset->shared->layout.type == H5D_SPARSE_CHUNK)
+            call routine to delete elements
+        else
+            return error
+     */
+    /* FOR NOW: just return success */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__erase() */

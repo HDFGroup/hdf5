@@ -57,6 +57,7 @@ Dataset layout information:
 	Dataset layout counts[CONTIG]: 0
 	Dataset layout counts[CHUNKED]: 2
 	Dataset layout counts[VIRTUAL]: 0
+	Dataset layout counts[STRUCT_CHUNK]: 0
 	Number of external files : 0
 Dataset filters information:
 	Number of datasets with:
