@@ -3379,7 +3379,7 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  */
 H5_DLL herr_t H5Pset_filter2(hid_t plist_id, uint64_t section_number, H5Z_filter_t filter, uint64_t flags,
                              size_t buf_size, const void *buf);
-  
+
 /**
  * \ingroup OCPL
  *
