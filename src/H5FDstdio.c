@@ -113,7 +113,7 @@ typedef struct H5FD_stdio_t {
     DWORD nFileIndexHigh;
     DWORD dwVolumeSerialNumber;
 
-    HANDLE      hFile; /* Native windows file handle */
+    HANDLE hFile; /* Native windows file handle */
 #endif /* H5_HAVE_WIN32_API */
 } H5FD_stdio_t;
 

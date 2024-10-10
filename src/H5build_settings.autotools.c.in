@@ -15,7 +15,6 @@
 H5_GCC_DIAG_OFF("larger-than=")
 H5_CLANG_DIAG_OFF("overlength-strings")
 
-/* clang-format off */
 const char H5build_settings[]=
     "        SUMMARY OF THE HDF5 CONFIGURATION\n"
     "        =================================\n"
@@ -114,7 +113,6 @@ const char H5build_settings[]=
     "         Strict file format checks: @STRICT_FORMAT_CHECKS@\n"
     "      Optimization instrumentation: @INSTRUMENT_LIBRARY@\n"
 ;
-/* clang-format on */
 
 H5_GCC_DIAG_ON("larger-than=")
 H5_CLANG_DIAG_OFF("overlength-strings")

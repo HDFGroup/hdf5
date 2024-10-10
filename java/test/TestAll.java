@@ -28,5 +28,4 @@ import org.junit.runners.Suite;
                      TestH5Obasic.class,    TestH5Ocopy.class,    TestH5Ocreate.class,   TestH5PL.class,
                      TestH5Z.class})
 
-public class TestAll {
-}
+public class TestAll {}

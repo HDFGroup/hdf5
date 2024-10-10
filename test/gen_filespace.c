@@ -26,8 +26,8 @@ const char *FILENAMES[] = {
 
 #define DATASET   "dset"
 #define NUM_ELMTS 100
-#define false 0
-#define true 1
+#define false     0
+#define true      1
 
 /*
  * Compile and run this program in the trunk to generate

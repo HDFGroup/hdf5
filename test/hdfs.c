@@ -588,10 +588,10 @@ test_hdfs_fapl(void)
      * test-local variables *
      ************************/
 
-    hid_t fapl_id = H5I_INVALID_HID;   /* file access property list ID */
-    hid_t driver_id = H5I_INVALID_HID; /* ID for this VFD              */
-    unsigned long driver_flags = 0;    /* VFD feature flags            */
-    H5FD_hdfs_fapl_t hdfs_fa_0 = {
+    hid_t            fapl_id      = H5I_INVALID_HID; /* file access property list ID */
+    hid_t            driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long    driver_flags = 0;               /* VFD feature flags            */
+    H5FD_hdfs_fapl_t hdfs_fa_0    = {
         1,    /* version*/
         "",   /* node name */
         9000, /* node port */
@@ -672,7 +672,7 @@ test_vfd_open(void)
      * test-local macros *
      *********************/
 
-/* selectors for which fapl to use in testcase */
+    /* selectors for which fapl to use in testcase */
 #define FAPL_H5P_DEFAULT  -2
 #define FAPL_UNCONFIGURED -3 /* H5P_FILE_ACCESS */
 #define FAPL_HDFS         -4
@@ -684,10 +684,10 @@ test_vfd_open(void)
     struct test_condition {
         const char *message;
         const char *url;
-        unsigned flags;
-        int which_fapl;
-        haddr_t maxaddr;
-        bool might_use_other_driver;
+        unsigned    flags;
+        int         which_fapl;
+        haddr_t     maxaddr;
+        bool        might_use_other_driver;
     };
 
     /************************
@@ -776,11 +776,11 @@ test_vfd_open(void)
             false,
         },
     };
-    unsigned i = 0;
+    unsigned i                        = 0;
     unsigned failing_conditions_count = 10;
-    H5FD_t *fd = NULL;
-    hid_t fapl_hdfs = H5I_INVALID_HID;
-    hid_t fapl_unconfigured = H5I_INVALID_HID;
+    H5FD_t  *fd                       = NULL;
+    hid_t    fapl_hdfs                = H5I_INVALID_HID;
+    hid_t    fapl_unconfigured        = H5I_INVALID_HID;
 
     TESTING("HDFS VFD-level open");
 
@@ -798,8 +798,8 @@ test_vfd_open(void)
     /* all the test cases that will _not_ open
      */
     for (i = 0; i < failing_conditions_count; i++) {
-        struct test_condition T = failing_conditions[i];
-        hid_t fapl_id = H5P_DEFAULT;
+        struct test_condition T       = failing_conditions[i];
+        hid_t                 fapl_id = H5P_DEFAULT;
 
         fd = NULL;
 
@@ -934,7 +934,7 @@ test_eof_eoa(void)
      ************************/
 
     H5FD_t *fd_shakespeare = NULL;
-    hid_t fapl_id = H5I_INVALID_HID;
+    hid_t   fapl_id        = H5I_INVALID_HID;
 
     TESTING("HDFS eof/eoa gets and sets");
 
@@ -1031,10 +1031,10 @@ test_H5FDread_without_eoa_set_fails(void)
 
 #else
 
-    char buffer[HDFS_TEST_MAX_BUF_SIZE];
-    unsigned int i = 0;
-    H5FD_t *file_shakespeare = NULL;
-    hid_t fapl_id = H5I_INVALID_HID;
+    char         buffer[HDFS_TEST_MAX_BUF_SIZE];
+    unsigned int i                = 0;
+    H5FD_t      *file_shakespeare = NULL;
+    hid_t        fapl_id          = H5I_INVALID_HID;
 
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
 
@@ -1139,10 +1139,10 @@ test_read(void)
      *************************/
     struct testcase {
         const char *message;  /* purpose of test case */
-        haddr_t eoa_set;      /* set file EOA to this prior to read */
-        size_t addr;          /* offset of read in file */
-        size_t len;           /* length of read in file */
-        herr_t success;       /* expected return value of read function */
+        haddr_t     eoa_set;  /* set file EOA to this prior to read */
+        size_t      addr;     /* offset of read in file */
+        size_t      len;      /* length of read in file */
+        herr_t      success;  /* expected return value of read function */
         const char *expected; /* expected contents of buffer; failure ignores */
     };
 
@@ -1199,14 +1199,14 @@ test_read(void)
             NULL,
         },
     };
-    unsigned testcase_count = 6;
-    unsigned test_i = 0;
+    unsigned        testcase_count = 6;
+    unsigned        test_i         = 0;
     struct testcase test;
-    herr_t open_return = FAIL;
-    char buffer[HDFS_TEST_MAX_BUF_SIZE];
-    unsigned int i = 0;
-    H5FD_t *file_raven = NULL;
-    hid_t fapl_id = H5I_INVALID_HID;
+    herr_t          open_return = FAIL;
+    char            buffer[HDFS_TEST_MAX_BUF_SIZE];
+    unsigned int    i          = 0;
+    H5FD_t         *file_raven = NULL;
+    hid_t           fapl_id    = H5I_INVALID_HID;
 
     TESTING("HDFS VFD read/range-gets");
 
@@ -1243,7 +1243,7 @@ test_read(void)
          * per-test setup *
          * -------------- */
 
-        test = cases[test_i];
+        test        = cases[test_i];
         open_return = FAIL;
 
         FAIL_IF(HDFS_TEST_MAX_BUF_SIZE < test.len) /* buffer too small! */
@@ -1349,8 +1349,8 @@ test_noops_and_autofails(void)
      * test-local variables *
      ************************/
 
-    hid_t fapl_id = H5I_INVALID_HID;
-    H5FD_t *file = NULL;
+    hid_t      fapl_id  = H5I_INVALID_HID;
+    H5FD_t    *file     = NULL;
     const char data[36] = "The Force shall be with you, always";
 
     TESTING("HDFS VFD always-fail and no-op routines");
@@ -1485,7 +1485,7 @@ test_H5F_integration(void)
      * test-local variables *
      ************************/
 
-    hid_t file = H5I_INVALID_HID;
+    hid_t file    = H5I_INVALID_HID;
     hid_t fapl_id = H5I_INVALID_HID;
 
     TESTING("HDFS file access through HD5F library (H5F API)");

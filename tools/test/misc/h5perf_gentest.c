@@ -151,16 +151,16 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
     size_t          offset, len;
     herr_t          status;
     char           *names[NTYPES] = {"int",
-                           "ulong",
-                           "float",
-                           "double",
-                           "fixed string",
-                           "enum",
-                           "fixed float array",
-                           "vlen int array",
-                           "vlen strings"};
+                                     "ulong",
+                                     "float",
+                                     "double",
+                                     "fixed string",
+                                     "enum",
+                                     "fixed float array",
+                                     "vlen int array",
+                                     "vlen strings"};
     hid_t   types[NTYPES] = {H5T_NATIVE_INT, H5T_NATIVE_UINT64, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE, tid_str,
-                           tid_enum,       tid_array_f,       tid_vlen_i,       tid_vlen_s};
+                             tid_enum,       tid_array_f,       tid_vlen_i,       tid_vlen_s};
     hsize_t coords[4][2] = {{0, 1}, {3, 5}, {1, 0}, {2, 4}}, start = 0, stride = 1, count = 1;
 
     if (nrows < NROWS)
