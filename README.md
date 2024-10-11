@@ -90,7 +90,7 @@ are tentative.
 
 | Release | New Features |
 | ------- | ------------ |
-| 2.0.0 | Complex number support, updated library defaults (cache sizes, etc.), semantic versioning |
+| 2.0.0 | Drop Autotools support, complex number support, updated library defaults (cache sizes, etc.), semantic versioning |
 | FUTURE | Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, sparse datasets, improved storage for variable-length datatypes, better Unicode support (especially on Windows) |
 
 NOTE: In the March 2025 release we will begin using semantic versioning (https://semver.org/) and the previously announced 1.16.0 version will instead be numbered 2.0.0.
