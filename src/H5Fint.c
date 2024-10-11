@@ -3181,7 +3181,8 @@ H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high)
     assert(f->shared);
 
     /* Set the bounds only if the existing setting is different from the inputs */
-    if (f->shared->low_bound != low || f->shared->high_bound != high) {
+    if ((f->shared->low_bound != low || f->shared->high_bound != high) &&
+        !(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)) {
         /* Call the flush routine, for this file */
         /* Note: This is done in case the binary format for representing a
          *      metadata entry class changes when the file format low / high
@@ -3704,6 +3705,7 @@ done:
  *                  --only allow datasets and groups without attributes
  *                  --disallow named datatype with/without attributes
  *                  --disallow opened attributes attached to objects
+ *                  --disallow opened objects below 1.10
  *
  * NOTE:        Currently, only opened groups and datasets are allowed
  *              when enabling SWMR via H5Fstart_swmr_write().
@@ -3746,7 +3748,7 @@ H5F__start_swmr_write(H5F_t *f)
     if (f->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_3)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file superblock version - should be at least 3");
 
-    /* Check for correct file format version */
+    /* Check for correct file format version to start SWMR writing */
     if ((f->shared->low_bound < H5F_LIBVER_V110) || (f->shared->high_bound < H5F_LIBVER_V110))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
                     "file format version does not support SWMR - needs to be 1.10 or greater");
@@ -3783,6 +3785,31 @@ H5F__start_swmr_write(H5F_t *f)
         /* Allocate space for group and object locations */
         if ((obj_ids = (hid_t *)H5MM_malloc(grp_dset_count * sizeof(hid_t))) == NULL)
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for hid_t");
+
+        /* Get the list of opened object ids (groups & datasets) */
+        if (H5F_get_obj_ids(f, H5F_OBJ_GROUP | H5F_OBJ_DATASET, grp_dset_count, obj_ids, false,
+                            &grp_dset_count) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5F_get_obj_ids failed");
+
+        /* Ensure that there's no old-style opened objects */
+        for (u = 0; u < grp_dset_count; u++) {
+            H5O_native_info_t ninfo;
+            H5O_loc_t        *oloc;
+            uint8_t           version;
+
+            if (NULL == (oloc = H5O_get_loc(obj_ids[u])))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5O_get_loc() failed");
+
+            if (H5O_get_native_info(oloc, &ninfo, H5O_NATIVE_INFO_HDR) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5O_get_native_info() failed");
+
+            if (H5O_get_version_bound(f->shared->low_bound, &version) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5O_get_version_bound() failed");
+
+            if (ninfo.hdr.version < version)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "disallow opened objects below 1.10");
+        }
+
         if ((obj_glocs = (H5G_loc_t *)H5MM_malloc(grp_dset_count * sizeof(H5G_loc_t))) == NULL)
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for object group locations");
         if ((obj_olocs = (H5O_loc_t *)H5MM_malloc(grp_dset_count * sizeof(H5O_loc_t))) == NULL)
@@ -3796,11 +3823,6 @@ H5F__start_swmr_write(H5F_t *f)
         if ((obj_apl_ids = (hid_t *)H5MM_calloc(grp_dset_count * sizeof(hid_t))) == NULL)
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for hid_t");
         assert(obj_apl_ids[0] == H5P_DEFAULT);
-
-        /* Get the list of opened object ids (groups & datasets) */
-        if (H5F_get_obj_ids(f, H5F_OBJ_GROUP | H5F_OBJ_DATASET, grp_dset_count, obj_ids, false,
-                            &grp_dset_count) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5F_get_obj_ids failed");
 
         /* Save the VOL connector and the object wrapping context for the refresh step */
         if (grp_dset_count > 0) {
