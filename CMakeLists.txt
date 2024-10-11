@@ -190,6 +190,8 @@ set (HDF5_HL_F90_C_LIB_CORENAME     "${HDF5_LIB_BASE}${HDF5_HL_F90_C_LIB_CORE}")
 set (HDF5_JAVA_JNI_LIB_CORENAME     "${HDF5_LIB_BASE}${HDF5_JAVA_JNI_LIB_CORE}")
 set (HDF5_JAVA_HDF5_LIB_CORENAME    "jarhdf5")
 set (HDF5_JAVA_TEST_LIB_CORENAME    "jartest5")
+set (HDF5_JAVA_JSRC_LIB_CORENAME    "javahdf5")
+set (HDF5_JAVA_JTEST_LIB_CORENAME   "javatest5")
 
 #-----------------------------------------------------------------------------
 # Set the true names of all the libraries if customized by external project
@@ -213,6 +215,8 @@ set (HDF5_HL_F90_C_LIB_NAME     "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_LIB_BASE}${HD
 set (HDF5_JAVA_JNI_LIB_NAME     "${HDF5_LIB_BASE}${HDF5_JAVA_JNI_LIB_CORE}")
 set (HDF5_JAVA_HDF5_LIB_NAME    "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_JAVA_HDF5_LIB_CORENAME}${HDF5_LIB_INFIX}${HDF5_EXTERNAL_LIB_SUFFIX}")
 set (HDF5_JAVA_TEST_LIB_NAME    "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_JAVA_TEST_LIB_CORENAME}${HDF5_LIB_INFIX}${HDF5_EXTERNAL_LIB_SUFFIX}")
+set (HDF5_JAVA_JSRC_LIB_NAME    "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_JAVA_JSRC_LIB_CORENAME}${HDF5_LIB_INFIX}${HDF5_EXTERNAL_LIB_SUFFIX}")
+set (HDF5_JAVA_JTEST_LIB_NAME   "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_JAVA_JTEST_LIB_CORENAME}${HDF5_LIB_INFIX}${HDF5_EXTERNAL_LIB_SUFFIX}")
 
 #-----------------------------------------------------------------------------
 # Set the target names of all the libraries
@@ -248,6 +252,8 @@ set (HDF5_F90_TEST_LIBSH_TARGET   "${HDF5_F90_TEST_LIB_CORENAME}-shared")
 set (HDF5_F90_C_TEST_LIBSH_TARGET "${HDF5_F90_C_TEST_LIB_CORENAME}-shared")
 set (HDF5_HL_F90_LIBSH_TARGET     "${HDF5_HL_F90_LIB_CORENAME}-shared")
 set (HDF5_HL_F90_C_LIBSH_TARGET   "${HDF5_HL_F90_C_LIB_CORENAME}-shared")
+set (HDF5_JAVA_JSRC_LIB_TARGET    "${HDF5_JAVA_JSRC_LIB_CORENAME}")
+set (HDF5_JAVA_JTEST_LIB_TARGET   "${HDF5_JAVA_JTEST_LIB_CORENAME}")
 
 #-----------------------------------------------------------------------------
 # Define some CMake variables for use later in the project
