@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -25,24 +25,23 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5VL_wrap_class_t {
 
-    H5VL_wrap_class_t() {
+    H5VL_wrap_class_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_POINTER.withName("get_object"),
-        hdf5_h.C_POINTER.withName("get_wrap_ctx"),
-        hdf5_h.C_POINTER.withName("wrap_object"),
-        hdf5_h.C_POINTER.withName("unwrap_object"),
-        hdf5_h.C_POINTER.withName("free_wrap_ctx")
-    ).withName("H5VL_wrap_class_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_POINTER.withName("get_object"), hdf5_h.C_POINTER.withName("get_wrap_ctx"),
+                          hdf5_h.C_POINTER.withName("wrap_object"),
+                          hdf5_h.C_POINTER.withName("unwrap_object"),
+                          hdf5_h.C_POINTER.withName("free_wrap_ctx"))
+            .withName("H5VL_wrap_class_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     /**
      * {@snippet lang=c :
@@ -51,7 +50,8 @@ public class H5VL_wrap_class_t {
      */
     public static class get_object {
 
-        get_object() {
+        get_object()
+        {
             // Should not be called directly
         }
 
@@ -62,25 +62,23 @@ public class H5VL_wrap_class_t {
             MemorySegment apply(MemorySegment _x0);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(get_object.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(get_object.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(get_object.Function fi, Arena arena) {
+        public static MemorySegment allocate(get_object.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -89,16 +87,19 @@ public class H5VL_wrap_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static MemorySegment invoke(MemorySegment funcPtr,MemorySegment _x0) {
+        public static MemorySegment invoke(MemorySegment funcPtr, MemorySegment _x0)
+        {
             try {
-                return (MemorySegment) DOWN$MH.invokeExact(funcPtr, _x0);
-            } catch (Throwable ex$) {
+                return (MemorySegment)DOWN$MH.invokeExact(funcPtr, _x0);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout get_object$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("get_object"));
+    private static final AddressLayout get_object$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("get_object"));
 
     /**
      * Layout for field:
@@ -106,9 +107,7 @@ public class H5VL_wrap_class_t {
      * void *(*get_object)(const void *)
      * }
      */
-    public static final AddressLayout get_object$layout() {
-        return get_object$LAYOUT;
-    }
+    public static final AddressLayout get_object$layout() { return get_object$LAYOUT; }
 
     private static final long get_object$OFFSET = 0;
 
@@ -118,9 +117,7 @@ public class H5VL_wrap_class_t {
      * void *(*get_object)(const void *)
      * }
      */
-    public static final long get_object$offset() {
-        return get_object$OFFSET;
-    }
+    public static final long get_object$offset() { return get_object$OFFSET; }
 
     /**
      * Getter for field:
@@ -128,7 +125,8 @@ public class H5VL_wrap_class_t {
      * void *(*get_object)(const void *)
      * }
      */
-    public static MemorySegment get_object(MemorySegment struct) {
+    public static MemorySegment get_object(MemorySegment struct)
+    {
         return struct.get(get_object$LAYOUT, get_object$OFFSET);
     }
 
@@ -138,7 +136,8 @@ public class H5VL_wrap_class_t {
      * void *(*get_object)(const void *)
      * }
      */
-    public static void get_object(MemorySegment struct, MemorySegment fieldValue) {
+    public static void get_object(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(get_object$LAYOUT, get_object$OFFSET, fieldValue);
     }
 
@@ -149,7 +148,8 @@ public class H5VL_wrap_class_t {
      */
     public static class get_wrap_ctx {
 
-        get_wrap_ctx() {
+        get_wrap_ctx()
+        {
             // Should not be called directly
         }
 
@@ -160,26 +160,23 @@ public class H5VL_wrap_class_t {
             int apply(MemorySegment _x0, MemorySegment _x1);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(get_wrap_ctx.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(get_wrap_ctx.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(get_wrap_ctx.Function fi, Arena arena) {
+        public static MemorySegment allocate(get_wrap_ctx.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -188,16 +185,19 @@ public class H5VL_wrap_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr,MemorySegment _x0, MemorySegment _x1) {
+        public static int invoke(MemorySegment funcPtr, MemorySegment _x0, MemorySegment _x1)
+        {
             try {
-                return (int) DOWN$MH.invokeExact(funcPtr, _x0, _x1);
-            } catch (Throwable ex$) {
+                return (int)DOWN$MH.invokeExact(funcPtr, _x0, _x1);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout get_wrap_ctx$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("get_wrap_ctx"));
+    private static final AddressLayout get_wrap_ctx$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("get_wrap_ctx"));
 
     /**
      * Layout for field:
@@ -205,9 +205,7 @@ public class H5VL_wrap_class_t {
      * herr_t (*get_wrap_ctx)(const void *, void **)
      * }
      */
-    public static final AddressLayout get_wrap_ctx$layout() {
-        return get_wrap_ctx$LAYOUT;
-    }
+    public static final AddressLayout get_wrap_ctx$layout() { return get_wrap_ctx$LAYOUT; }
 
     private static final long get_wrap_ctx$OFFSET = 8;
 
@@ -217,9 +215,7 @@ public class H5VL_wrap_class_t {
      * herr_t (*get_wrap_ctx)(const void *, void **)
      * }
      */
-    public static final long get_wrap_ctx$offset() {
-        return get_wrap_ctx$OFFSET;
-    }
+    public static final long get_wrap_ctx$offset() { return get_wrap_ctx$OFFSET; }
 
     /**
      * Getter for field:
@@ -227,7 +223,8 @@ public class H5VL_wrap_class_t {
      * herr_t (*get_wrap_ctx)(const void *, void **)
      * }
      */
-    public static MemorySegment get_wrap_ctx(MemorySegment struct) {
+    public static MemorySegment get_wrap_ctx(MemorySegment struct)
+    {
         return struct.get(get_wrap_ctx$LAYOUT, get_wrap_ctx$OFFSET);
     }
 
@@ -237,7 +234,8 @@ public class H5VL_wrap_class_t {
      * herr_t (*get_wrap_ctx)(const void *, void **)
      * }
      */
-    public static void get_wrap_ctx(MemorySegment struct, MemorySegment fieldValue) {
+    public static void get_wrap_ctx(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(get_wrap_ctx$LAYOUT, get_wrap_ctx$OFFSET, fieldValue);
     }
 
@@ -248,7 +246,8 @@ public class H5VL_wrap_class_t {
      */
     public static class wrap_object {
 
-        wrap_object() {
+        wrap_object()
+        {
             // Should not be called directly
         }
 
@@ -259,27 +258,23 @@ public class H5VL_wrap_class_t {
             MemorySegment apply(MemorySegment _x0, int _x1, MemorySegment _x2);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(wrap_object.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(wrap_object.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(wrap_object.Function fi, Arena arena) {
+        public static MemorySegment allocate(wrap_object.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -288,16 +283,20 @@ public class H5VL_wrap_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static MemorySegment invoke(MemorySegment funcPtr,MemorySegment _x0, int _x1, MemorySegment _x2) {
+        public static MemorySegment invoke(MemorySegment funcPtr, MemorySegment _x0, int _x1,
+                                           MemorySegment _x2)
+        {
             try {
-                return (MemorySegment) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
-            } catch (Throwable ex$) {
+                return (MemorySegment)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout wrap_object$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("wrap_object"));
+    private static final AddressLayout wrap_object$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("wrap_object"));
 
     /**
      * Layout for field:
@@ -305,9 +304,7 @@ public class H5VL_wrap_class_t {
      * void *(*wrap_object)(void *, H5I_type_t, void *)
      * }
      */
-    public static final AddressLayout wrap_object$layout() {
-        return wrap_object$LAYOUT;
-    }
+    public static final AddressLayout wrap_object$layout() { return wrap_object$LAYOUT; }
 
     private static final long wrap_object$OFFSET = 16;
 
@@ -317,9 +314,7 @@ public class H5VL_wrap_class_t {
      * void *(*wrap_object)(void *, H5I_type_t, void *)
      * }
      */
-    public static final long wrap_object$offset() {
-        return wrap_object$OFFSET;
-    }
+    public static final long wrap_object$offset() { return wrap_object$OFFSET; }
 
     /**
      * Getter for field:
@@ -327,7 +322,8 @@ public class H5VL_wrap_class_t {
      * void *(*wrap_object)(void *, H5I_type_t, void *)
      * }
      */
-    public static MemorySegment wrap_object(MemorySegment struct) {
+    public static MemorySegment wrap_object(MemorySegment struct)
+    {
         return struct.get(wrap_object$LAYOUT, wrap_object$OFFSET);
     }
 
@@ -337,7 +333,8 @@ public class H5VL_wrap_class_t {
      * void *(*wrap_object)(void *, H5I_type_t, void *)
      * }
      */
-    public static void wrap_object(MemorySegment struct, MemorySegment fieldValue) {
+    public static void wrap_object(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(wrap_object$LAYOUT, wrap_object$OFFSET, fieldValue);
     }
 
@@ -348,7 +345,8 @@ public class H5VL_wrap_class_t {
      */
     public static class unwrap_object {
 
-        unwrap_object() {
+        unwrap_object()
+        {
             // Should not be called directly
         }
 
@@ -359,25 +357,23 @@ public class H5VL_wrap_class_t {
             MemorySegment apply(MemorySegment _x0);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(unwrap_object.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(unwrap_object.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(unwrap_object.Function fi, Arena arena) {
+        public static MemorySegment allocate(unwrap_object.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -386,16 +382,19 @@ public class H5VL_wrap_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static MemorySegment invoke(MemorySegment funcPtr,MemorySegment _x0) {
+        public static MemorySegment invoke(MemorySegment funcPtr, MemorySegment _x0)
+        {
             try {
-                return (MemorySegment) DOWN$MH.invokeExact(funcPtr, _x0);
-            } catch (Throwable ex$) {
+                return (MemorySegment)DOWN$MH.invokeExact(funcPtr, _x0);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout unwrap_object$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("unwrap_object"));
+    private static final AddressLayout unwrap_object$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("unwrap_object"));
 
     /**
      * Layout for field:
@@ -403,9 +402,7 @@ public class H5VL_wrap_class_t {
      * void *(*unwrap_object)(void *)
      * }
      */
-    public static final AddressLayout unwrap_object$layout() {
-        return unwrap_object$LAYOUT;
-    }
+    public static final AddressLayout unwrap_object$layout() { return unwrap_object$LAYOUT; }
 
     private static final long unwrap_object$OFFSET = 24;
 
@@ -415,9 +412,7 @@ public class H5VL_wrap_class_t {
      * void *(*unwrap_object)(void *)
      * }
      */
-    public static final long unwrap_object$offset() {
-        return unwrap_object$OFFSET;
-    }
+    public static final long unwrap_object$offset() { return unwrap_object$OFFSET; }
 
     /**
      * Getter for field:
@@ -425,7 +420,8 @@ public class H5VL_wrap_class_t {
      * void *(*unwrap_object)(void *)
      * }
      */
-    public static MemorySegment unwrap_object(MemorySegment struct) {
+    public static MemorySegment unwrap_object(MemorySegment struct)
+    {
         return struct.get(unwrap_object$LAYOUT, unwrap_object$OFFSET);
     }
 
@@ -435,7 +431,8 @@ public class H5VL_wrap_class_t {
      * void *(*unwrap_object)(void *)
      * }
      */
-    public static void unwrap_object(MemorySegment struct, MemorySegment fieldValue) {
+    public static void unwrap_object(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(unwrap_object$LAYOUT, unwrap_object$OFFSET, fieldValue);
     }
 
@@ -446,7 +443,8 @@ public class H5VL_wrap_class_t {
      */
     public static class free_wrap_ctx {
 
-        free_wrap_ctx() {
+        free_wrap_ctx()
+        {
             // Should not be called directly
         }
 
@@ -457,25 +455,22 @@ public class H5VL_wrap_class_t {
             int apply(MemorySegment _x0);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(free_wrap_ctx.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(free_wrap_ctx.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(free_wrap_ctx.Function fi, Arena arena) {
+        public static MemorySegment allocate(free_wrap_ctx.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -484,16 +479,19 @@ public class H5VL_wrap_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr,MemorySegment _x0) {
+        public static int invoke(MemorySegment funcPtr, MemorySegment _x0)
+        {
             try {
-                return (int) DOWN$MH.invokeExact(funcPtr, _x0);
-            } catch (Throwable ex$) {
+                return (int)DOWN$MH.invokeExact(funcPtr, _x0);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout free_wrap_ctx$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("free_wrap_ctx"));
+    private static final AddressLayout free_wrap_ctx$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("free_wrap_ctx"));
 
     /**
      * Layout for field:
@@ -501,9 +499,7 @@ public class H5VL_wrap_class_t {
      * herr_t (*free_wrap_ctx)(void *)
      * }
      */
-    public static final AddressLayout free_wrap_ctx$layout() {
-        return free_wrap_ctx$LAYOUT;
-    }
+    public static final AddressLayout free_wrap_ctx$layout() { return free_wrap_ctx$LAYOUT; }
 
     private static final long free_wrap_ctx$OFFSET = 32;
 
@@ -513,9 +509,7 @@ public class H5VL_wrap_class_t {
      * herr_t (*free_wrap_ctx)(void *)
      * }
      */
-    public static final long free_wrap_ctx$offset() {
-        return free_wrap_ctx$OFFSET;
-    }
+    public static final long free_wrap_ctx$offset() { return free_wrap_ctx$OFFSET; }
 
     /**
      * Getter for field:
@@ -523,7 +517,8 @@ public class H5VL_wrap_class_t {
      * herr_t (*free_wrap_ctx)(void *)
      * }
      */
-    public static MemorySegment free_wrap_ctx(MemorySegment struct) {
+    public static MemorySegment free_wrap_ctx(MemorySegment struct)
+    {
         return struct.get(free_wrap_ctx$LAYOUT, free_wrap_ctx$OFFSET);
     }
 
@@ -533,7 +528,8 @@ public class H5VL_wrap_class_t {
      * herr_t (*free_wrap_ctx)(void *)
      * }
      */
-    public static void free_wrap_ctx(MemorySegment struct, MemorySegment fieldValue) {
+    public static void free_wrap_ctx(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(free_wrap_ctx$LAYOUT, free_wrap_ctx$OFFSET, fieldValue);
     }
 
@@ -541,7 +537,8 @@ public class H5VL_wrap_class_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -553,15 +550,14 @@ public class H5VL_wrap_class_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -569,7 +565,8 @@ public class H5VL_wrap_class_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -577,8 +574,9 @@ public class H5VL_wrap_class_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -23,22 +23,21 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5VL_introspect_class_t {
 
-    H5VL_introspect_class_t() {
+    H5VL_introspect_class_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_POINTER.withName("get_conn_cls"),
-        hdf5_h.C_POINTER.withName("get_cap_flags"),
-        hdf5_h.C_POINTER.withName("opt_query")
-    ).withName("H5VL_introspect_class_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_POINTER.withName("get_conn_cls"),
+                          hdf5_h.C_POINTER.withName("get_cap_flags"), hdf5_h.C_POINTER.withName("opt_query"))
+            .withName("H5VL_introspect_class_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     /**
      * {@snippet lang=c :
@@ -47,7 +46,8 @@ public class H5VL_introspect_class_t {
      */
     public static class get_conn_cls {
 
-        get_conn_cls() {
+        get_conn_cls()
+        {
             // Should not be called directly
         }
 
@@ -58,27 +58,23 @@ public class H5VL_introspect_class_t {
             int apply(MemorySegment _x0, int _x1, MemorySegment _x2);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(get_conn_cls.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(get_conn_cls.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(get_conn_cls.Function fi, Arena arena) {
+        public static MemorySegment allocate(get_conn_cls.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -87,16 +83,19 @@ public class H5VL_introspect_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr,MemorySegment _x0, int _x1, MemorySegment _x2) {
+        public static int invoke(MemorySegment funcPtr, MemorySegment _x0, int _x1, MemorySegment _x2)
+        {
             try {
-                return (int) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
-            } catch (Throwable ex$) {
+                return (int)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout get_conn_cls$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("get_conn_cls"));
+    private static final AddressLayout get_conn_cls$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("get_conn_cls"));
 
     /**
      * Layout for field:
@@ -104,9 +103,7 @@ public class H5VL_introspect_class_t {
      * herr_t (*get_conn_cls)(void *, H5VL_get_conn_lvl_t, const struct H5VL_class_t **)
      * }
      */
-    public static final AddressLayout get_conn_cls$layout() {
-        return get_conn_cls$LAYOUT;
-    }
+    public static final AddressLayout get_conn_cls$layout() { return get_conn_cls$LAYOUT; }
 
     private static final long get_conn_cls$OFFSET = 0;
 
@@ -116,9 +113,7 @@ public class H5VL_introspect_class_t {
      * herr_t (*get_conn_cls)(void *, H5VL_get_conn_lvl_t, const struct H5VL_class_t **)
      * }
      */
-    public static final long get_conn_cls$offset() {
-        return get_conn_cls$OFFSET;
-    }
+    public static final long get_conn_cls$offset() { return get_conn_cls$OFFSET; }
 
     /**
      * Getter for field:
@@ -126,7 +121,8 @@ public class H5VL_introspect_class_t {
      * herr_t (*get_conn_cls)(void *, H5VL_get_conn_lvl_t, const struct H5VL_class_t **)
      * }
      */
-    public static MemorySegment get_conn_cls(MemorySegment struct) {
+    public static MemorySegment get_conn_cls(MemorySegment struct)
+    {
         return struct.get(get_conn_cls$LAYOUT, get_conn_cls$OFFSET);
     }
 
@@ -136,7 +132,8 @@ public class H5VL_introspect_class_t {
      * herr_t (*get_conn_cls)(void *, H5VL_get_conn_lvl_t, const struct H5VL_class_t **)
      * }
      */
-    public static void get_conn_cls(MemorySegment struct, MemorySegment fieldValue) {
+    public static void get_conn_cls(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(get_conn_cls$LAYOUT, get_conn_cls$OFFSET, fieldValue);
     }
 
@@ -147,7 +144,8 @@ public class H5VL_introspect_class_t {
      */
     public static class get_cap_flags {
 
-        get_cap_flags() {
+        get_cap_flags()
+        {
             // Should not be called directly
         }
 
@@ -158,26 +156,23 @@ public class H5VL_introspect_class_t {
             int apply(MemorySegment _x0, MemorySegment _x1);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(get_cap_flags.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(get_cap_flags.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(get_cap_flags.Function fi, Arena arena) {
+        public static MemorySegment allocate(get_cap_flags.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -186,16 +181,19 @@ public class H5VL_introspect_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr,MemorySegment _x0, MemorySegment _x1) {
+        public static int invoke(MemorySegment funcPtr, MemorySegment _x0, MemorySegment _x1)
+        {
             try {
-                return (int) DOWN$MH.invokeExact(funcPtr, _x0, _x1);
-            } catch (Throwable ex$) {
+                return (int)DOWN$MH.invokeExact(funcPtr, _x0, _x1);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout get_cap_flags$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("get_cap_flags"));
+    private static final AddressLayout get_cap_flags$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("get_cap_flags"));
 
     /**
      * Layout for field:
@@ -203,9 +201,7 @@ public class H5VL_introspect_class_t {
      * herr_t (*get_cap_flags)(const void *, uint64_t *)
      * }
      */
-    public static final AddressLayout get_cap_flags$layout() {
-        return get_cap_flags$LAYOUT;
-    }
+    public static final AddressLayout get_cap_flags$layout() { return get_cap_flags$LAYOUT; }
 
     private static final long get_cap_flags$OFFSET = 8;
 
@@ -215,9 +211,7 @@ public class H5VL_introspect_class_t {
      * herr_t (*get_cap_flags)(const void *, uint64_t *)
      * }
      */
-    public static final long get_cap_flags$offset() {
-        return get_cap_flags$OFFSET;
-    }
+    public static final long get_cap_flags$offset() { return get_cap_flags$OFFSET; }
 
     /**
      * Getter for field:
@@ -225,7 +219,8 @@ public class H5VL_introspect_class_t {
      * herr_t (*get_cap_flags)(const void *, uint64_t *)
      * }
      */
-    public static MemorySegment get_cap_flags(MemorySegment struct) {
+    public static MemorySegment get_cap_flags(MemorySegment struct)
+    {
         return struct.get(get_cap_flags$LAYOUT, get_cap_flags$OFFSET);
     }
 
@@ -235,7 +230,8 @@ public class H5VL_introspect_class_t {
      * herr_t (*get_cap_flags)(const void *, uint64_t *)
      * }
      */
-    public static void get_cap_flags(MemorySegment struct, MemorySegment fieldValue) {
+    public static void get_cap_flags(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(get_cap_flags$LAYOUT, get_cap_flags$OFFSET, fieldValue);
     }
 
@@ -246,7 +242,8 @@ public class H5VL_introspect_class_t {
      */
     public static class opt_query {
 
-        opt_query() {
+        opt_query()
+        {
             // Should not be called directly
         }
 
@@ -258,27 +255,22 @@ public class H5VL_introspect_class_t {
         }
 
         private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(opt_query.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(opt_query.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(opt_query.Function fi, Arena arena) {
+        public static MemorySegment allocate(opt_query.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -287,16 +279,20 @@ public class H5VL_introspect_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr,MemorySegment _x0, int _x1, int _x2, MemorySegment _x3) {
+        public static int invoke(MemorySegment funcPtr, MemorySegment _x0, int _x1, int _x2,
+                                 MemorySegment _x3)
+        {
             try {
-                return (int) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3);
-            } catch (Throwable ex$) {
+                return (int)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout opt_query$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("opt_query"));
+    private static final AddressLayout opt_query$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("opt_query"));
 
     /**
      * Layout for field:
@@ -304,9 +300,7 @@ public class H5VL_introspect_class_t {
      * herr_t (*opt_query)(void *, H5VL_subclass_t, int, uint64_t *)
      * }
      */
-    public static final AddressLayout opt_query$layout() {
-        return opt_query$LAYOUT;
-    }
+    public static final AddressLayout opt_query$layout() { return opt_query$LAYOUT; }
 
     private static final long opt_query$OFFSET = 16;
 
@@ -316,9 +310,7 @@ public class H5VL_introspect_class_t {
      * herr_t (*opt_query)(void *, H5VL_subclass_t, int, uint64_t *)
      * }
      */
-    public static final long opt_query$offset() {
-        return opt_query$OFFSET;
-    }
+    public static final long opt_query$offset() { return opt_query$OFFSET; }
 
     /**
      * Getter for field:
@@ -326,7 +318,8 @@ public class H5VL_introspect_class_t {
      * herr_t (*opt_query)(void *, H5VL_subclass_t, int, uint64_t *)
      * }
      */
-    public static MemorySegment opt_query(MemorySegment struct) {
+    public static MemorySegment opt_query(MemorySegment struct)
+    {
         return struct.get(opt_query$LAYOUT, opt_query$OFFSET);
     }
 
@@ -336,7 +329,8 @@ public class H5VL_introspect_class_t {
      * herr_t (*opt_query)(void *, H5VL_subclass_t, int, uint64_t *)
      * }
      */
-    public static void opt_query(MemorySegment struct, MemorySegment fieldValue) {
+    public static void opt_query(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(opt_query$LAYOUT, opt_query$OFFSET, fieldValue);
     }
 
@@ -344,7 +338,8 @@ public class H5VL_introspect_class_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -356,15 +351,14 @@ public class H5VL_introspect_class_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -372,7 +366,8 @@ public class H5VL_introspect_class_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -380,8 +375,9 @@ public class H5VL_introspect_class_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

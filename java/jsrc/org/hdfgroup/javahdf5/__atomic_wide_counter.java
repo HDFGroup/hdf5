@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -25,21 +25,21 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class __atomic_wide_counter {
 
-    __atomic_wide_counter() {
+    __atomic_wide_counter()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.unionLayout(
-        hdf5_h.C_LONG_LONG.withName("__value64"),
-        __atomic_wide_counter.__value32.layout().withName("__value32")
-    ).withName("$anon$25:9");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .unionLayout(hdf5_h.C_LONG_LONG.withName("__value64"),
+                         __atomic_wide_counter.__value32.layout().withName("__value32"))
+            .withName("$anon$25:9");
 
     /**
      * The layout of this union
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final OfLong __value64$LAYOUT = (OfLong)$LAYOUT.select(groupElement("__value64"));
 
@@ -49,9 +49,7 @@ public class __atomic_wide_counter {
      * unsigned long long __value64
      * }
      */
-    public static final OfLong __value64$layout() {
-        return __value64$LAYOUT;
-    }
+    public static final OfLong __value64$layout() { return __value64$LAYOUT; }
 
     private static final long __value64$OFFSET = 0;
 
@@ -61,9 +59,7 @@ public class __atomic_wide_counter {
      * unsigned long long __value64
      * }
      */
-    public static final long __value64$offset() {
-        return __value64$OFFSET;
-    }
+    public static final long __value64$offset() { return __value64$OFFSET; }
 
     /**
      * Getter for field:
@@ -71,7 +67,8 @@ public class __atomic_wide_counter {
      * unsigned long long __value64
      * }
      */
-    public static long __value64(MemorySegment union) {
+    public static long __value64(MemorySegment union)
+    {
         return union.get(__value64$LAYOUT, __value64$OFFSET);
     }
 
@@ -81,7 +78,8 @@ public class __atomic_wide_counter {
      * unsigned long long __value64
      * }
      */
-    public static void __value64(MemorySegment union, long fieldValue) {
+    public static void __value64(MemorySegment union, long fieldValue)
+    {
         union.set(__value64$LAYOUT, __value64$OFFSET, fieldValue);
     }
 
@@ -95,21 +93,19 @@ public class __atomic_wide_counter {
      */
     public static class __value32 {
 
-        __value32() {
+        __value32()
+        {
             // Should not be called directly
         }
 
-        private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-            hdf5_h.C_INT.withName("__low"),
-            hdf5_h.C_INT.withName("__high")
-        ).withName("$anon$28:3");
+        private static final GroupLayout $LAYOUT =
+            MemoryLayout.structLayout(hdf5_h.C_INT.withName("__low"), hdf5_h.C_INT.withName("__high"))
+                .withName("$anon$28:3");
 
         /**
          * The layout of this struct
          */
-        public static final GroupLayout layout() {
-            return $LAYOUT;
-        }
+        public static final GroupLayout layout() { return $LAYOUT; }
 
         private static final OfInt __low$LAYOUT = (OfInt)$LAYOUT.select(groupElement("__low"));
 
@@ -119,9 +115,7 @@ public class __atomic_wide_counter {
          * unsigned int __low
          * }
          */
-        public static final OfInt __low$layout() {
-            return __low$LAYOUT;
-        }
+        public static final OfInt __low$layout() { return __low$LAYOUT; }
 
         private static final long __low$OFFSET = 0;
 
@@ -131,9 +125,7 @@ public class __atomic_wide_counter {
          * unsigned int __low
          * }
          */
-        public static final long __low$offset() {
-            return __low$OFFSET;
-        }
+        public static final long __low$offset() { return __low$OFFSET; }
 
         /**
          * Getter for field:
@@ -141,9 +133,7 @@ public class __atomic_wide_counter {
          * unsigned int __low
          * }
          */
-        public static int __low(MemorySegment struct) {
-            return struct.get(__low$LAYOUT, __low$OFFSET);
-        }
+        public static int __low(MemorySegment struct) { return struct.get(__low$LAYOUT, __low$OFFSET); }
 
         /**
          * Setter for field:
@@ -151,7 +141,8 @@ public class __atomic_wide_counter {
          * unsigned int __low
          * }
          */
-        public static void __low(MemorySegment struct, int fieldValue) {
+        public static void __low(MemorySegment struct, int fieldValue)
+        {
             struct.set(__low$LAYOUT, __low$OFFSET, fieldValue);
         }
 
@@ -163,9 +154,7 @@ public class __atomic_wide_counter {
          * unsigned int __high
          * }
          */
-        public static final OfInt __high$layout() {
-            return __high$LAYOUT;
-        }
+        public static final OfInt __high$layout() { return __high$LAYOUT; }
 
         private static final long __high$OFFSET = 4;
 
@@ -175,9 +164,7 @@ public class __atomic_wide_counter {
          * unsigned int __high
          * }
          */
-        public static final long __high$offset() {
-            return __high$OFFSET;
-        }
+        public static final long __high$offset() { return __high$OFFSET; }
 
         /**
          * Getter for field:
@@ -185,9 +172,7 @@ public class __atomic_wide_counter {
          * unsigned int __high
          * }
          */
-        public static int __high(MemorySegment struct) {
-            return struct.get(__high$LAYOUT, __high$OFFSET);
-        }
+        public static int __high(MemorySegment struct) { return struct.get(__high$LAYOUT, __high$OFFSET); }
 
         /**
          * Setter for field:
@@ -195,7 +180,8 @@ public class __atomic_wide_counter {
          * unsigned int __high
          * }
          */
-        public static void __high(MemorySegment struct, int fieldValue) {
+        public static void __high(MemorySegment struct, int fieldValue)
+        {
             struct.set(__high$LAYOUT, __high$OFFSET, fieldValue);
         }
 
@@ -203,7 +189,8 @@ public class __atomic_wide_counter {
          * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
          * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
          */
-        public static MemorySegment asSlice(MemorySegment array, long index) {
+        public static MemorySegment asSlice(MemorySegment array, long index)
+        {
             return array.asSlice(layout().byteSize() * index);
         }
 
@@ -215,7 +202,8 @@ public class __atomic_wide_counter {
         /**
          * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
          */
-        public static MemorySegment allocate(SegmentAllocator allocator) {
+        public static MemorySegment allocate(SegmentAllocator allocator)
+        {
             return allocator.allocate(layout());
         }
 
@@ -223,7 +211,8 @@ public class __atomic_wide_counter {
          * Allocate an array of size {@code elementCount} using {@code allocator}.
          * The returned segment has size {@code elementCount * layout().byteSize()}.
          */
-        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+        {
             return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
         }
 
@@ -231,7 +220,9 @@ public class __atomic_wide_counter {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+        public static MemorySegment reinterpret(MemorySegment addr, Arena arena,
+                                                Consumer<MemorySegment> cleanup)
+        {
             return reinterpret(addr, 1, arena, cleanup);
         }
 
@@ -239,12 +230,15 @@ public class __atomic_wide_counter {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code elementCount * layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                                Consumer<MemorySegment> cleanup)
+        {
             return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
         }
     }
 
-    private static final GroupLayout __value32$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("__value32"));
+    private static final GroupLayout __value32$LAYOUT =
+        (GroupLayout)$LAYOUT.select(groupElement("__value32"));
 
     /**
      * Layout for field:
@@ -255,9 +249,7 @@ public class __atomic_wide_counter {
      * } __value32
      * }
      */
-    public static final GroupLayout __value32$layout() {
-        return __value32$LAYOUT;
-    }
+    public static final GroupLayout __value32$layout() { return __value32$LAYOUT; }
 
     private static final long __value32$OFFSET = 0;
 
@@ -270,9 +262,7 @@ public class __atomic_wide_counter {
      * } __value32
      * }
      */
-    public static final long __value32$offset() {
-        return __value32$OFFSET;
-    }
+    public static final long __value32$offset() { return __value32$OFFSET; }
 
     /**
      * Getter for field:
@@ -283,7 +273,8 @@ public class __atomic_wide_counter {
      * } __value32
      * }
      */
-    public static MemorySegment __value32(MemorySegment union) {
+    public static MemorySegment __value32(MemorySegment union)
+    {
         return union.asSlice(__value32$OFFSET, __value32$LAYOUT.byteSize());
     }
 
@@ -296,7 +287,8 @@ public class __atomic_wide_counter {
      * } __value32
      * }
      */
-    public static void __value32(MemorySegment union, MemorySegment fieldValue) {
+    public static void __value32(MemorySegment union, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, union, __value32$OFFSET, __value32$LAYOUT.byteSize());
     }
 
@@ -304,7 +296,8 @@ public class __atomic_wide_counter {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -316,15 +309,14 @@ public class __atomic_wide_counter {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -332,7 +324,8 @@ public class __atomic_wide_counter {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -340,8 +333,9 @@ public class __atomic_wide_counter {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

@@ -45,7 +45,7 @@ public class TestH5F {
     private static final int[] OBJ_COUNTS = {COUNT_OBJ_FILE,     COUNT_OBJ_DATASET, COUNT_OBJ_GROUP,
                                              COUNT_OBJ_DATATYPE, COUNT_OBJ_ATTR,    COUNT_OBJ_ALL};
     private static final int[] OBJ_TYPES  = {H5F_OBJ_FILE(),     H5F_OBJ_DATASET(), H5F_OBJ_GROUP(),
-                                            H5F_OBJ_DATATYPE(), H5F_OBJ_ATTR(),    H5F_OBJ_ALL()};
+                                             H5F_OBJ_DATATYPE(), H5F_OBJ_ATTR(),    H5F_OBJ_ALL()};
     long H5fid                            = H5I_INVALID_HID();
 
     private final void _deleteFile(String filename)

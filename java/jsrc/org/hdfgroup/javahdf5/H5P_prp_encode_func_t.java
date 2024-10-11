@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -19,7 +19,8 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5P_prp_encode_func_t {
 
-    H5P_prp_encode_func_t() {
+    H5P_prp_encode_func_t()
+    {
         // Should not be called directly
     }
 
@@ -30,27 +31,23 @@ public class H5P_prp_encode_func_t {
         int apply(MemorySegment value, MemorySegment buf, MemorySegment size);
     }
 
-    private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-        hdf5_h.C_INT,
-        hdf5_h.C_POINTER,
-        hdf5_h.C_POINTER,
-        hdf5_h.C_POINTER
-    );
+    private static final FunctionDescriptor $DESC =
+        FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
     /**
      * The descriptor of this function pointer
      */
-    public static FunctionDescriptor descriptor() {
-        return $DESC;
-    }
+    public static FunctionDescriptor descriptor() { return $DESC; }
 
-    private static final MethodHandle UP$MH = hdf5_h.upcallHandle(H5P_prp_encode_func_t.Function.class, "apply", $DESC);
+    private static final MethodHandle UP$MH =
+        hdf5_h.upcallHandle(H5P_prp_encode_func_t.Function.class, "apply", $DESC);
 
     /**
      * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
      * The lifetime of the returned segment is managed by {@code arena}
      */
-    public static MemorySegment allocate(H5P_prp_encode_func_t.Function fi, Arena arena) {
+    public static MemorySegment allocate(H5P_prp_encode_func_t.Function fi, Arena arena)
+    {
         return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
     }
 
@@ -59,12 +56,14 @@ public class H5P_prp_encode_func_t {
     /**
      * Invoke the upcall stub {@code funcPtr}, with given parameters
      */
-    public static int invoke(MemorySegment funcPtr,MemorySegment value, MemorySegment buf, MemorySegment size) {
+    public static int invoke(MemorySegment funcPtr, MemorySegment value, MemorySegment buf,
+                             MemorySegment size)
+    {
         try {
-            return (int) DOWN$MH.invokeExact(funcPtr, value, buf, size);
-        } catch (Throwable ex$) {
+            return (int)DOWN$MH.invokeExact(funcPtr, value, buf, size);
+        }
+        catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
     }
 }
-

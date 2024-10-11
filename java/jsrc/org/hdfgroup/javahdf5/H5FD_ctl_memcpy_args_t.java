@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -25,24 +25,22 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5FD_ctl_memcpy_args_t {
 
-    H5FD_ctl_memcpy_args_t() {
+    H5FD_ctl_memcpy_args_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_POINTER.withName("dstbuf"),
-        hdf5_h.C_LONG.withName("dst_off"),
-        hdf5_h.C_POINTER.withName("srcbuf"),
-        hdf5_h.C_LONG.withName("src_off"),
-        hdf5_h.C_LONG.withName("len")
-    ).withName("H5FD_ctl_memcpy_args_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_POINTER.withName("dstbuf"), hdf5_h.C_LONG.withName("dst_off"),
+                          hdf5_h.C_POINTER.withName("srcbuf"), hdf5_h.C_LONG.withName("src_off"),
+                          hdf5_h.C_LONG.withName("len"))
+            .withName("H5FD_ctl_memcpy_args_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final AddressLayout dstbuf$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("dstbuf"));
 
@@ -52,9 +50,7 @@ public class H5FD_ctl_memcpy_args_t {
      * void *dstbuf
      * }
      */
-    public static final AddressLayout dstbuf$layout() {
-        return dstbuf$LAYOUT;
-    }
+    public static final AddressLayout dstbuf$layout() { return dstbuf$LAYOUT; }
 
     private static final long dstbuf$OFFSET = 0;
 
@@ -64,9 +60,7 @@ public class H5FD_ctl_memcpy_args_t {
      * void *dstbuf
      * }
      */
-    public static final long dstbuf$offset() {
-        return dstbuf$OFFSET;
-    }
+    public static final long dstbuf$offset() { return dstbuf$OFFSET; }
 
     /**
      * Getter for field:
@@ -74,7 +68,8 @@ public class H5FD_ctl_memcpy_args_t {
      * void *dstbuf
      * }
      */
-    public static MemorySegment dstbuf(MemorySegment struct) {
+    public static MemorySegment dstbuf(MemorySegment struct)
+    {
         return struct.get(dstbuf$LAYOUT, dstbuf$OFFSET);
     }
 
@@ -84,7 +79,8 @@ public class H5FD_ctl_memcpy_args_t {
      * void *dstbuf
      * }
      */
-    public static void dstbuf(MemorySegment struct, MemorySegment fieldValue) {
+    public static void dstbuf(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(dstbuf$LAYOUT, dstbuf$OFFSET, fieldValue);
     }
 
@@ -96,9 +92,7 @@ public class H5FD_ctl_memcpy_args_t {
      * hsize_t dst_off
      * }
      */
-    public static final OfLong dst_off$layout() {
-        return dst_off$LAYOUT;
-    }
+    public static final OfLong dst_off$layout() { return dst_off$LAYOUT; }
 
     private static final long dst_off$OFFSET = 8;
 
@@ -108,9 +102,7 @@ public class H5FD_ctl_memcpy_args_t {
      * hsize_t dst_off
      * }
      */
-    public static final long dst_off$offset() {
-        return dst_off$OFFSET;
-    }
+    public static final long dst_off$offset() { return dst_off$OFFSET; }
 
     /**
      * Getter for field:
@@ -118,9 +110,7 @@ public class H5FD_ctl_memcpy_args_t {
      * hsize_t dst_off
      * }
      */
-    public static long dst_off(MemorySegment struct) {
-        return struct.get(dst_off$LAYOUT, dst_off$OFFSET);
-    }
+    public static long dst_off(MemorySegment struct) { return struct.get(dst_off$LAYOUT, dst_off$OFFSET); }
 
     /**
      * Setter for field:
@@ -128,7 +118,8 @@ public class H5FD_ctl_memcpy_args_t {
      * hsize_t dst_off
      * }
      */
-    public static void dst_off(MemorySegment struct, long fieldValue) {
+    public static void dst_off(MemorySegment struct, long fieldValue)
+    {
         struct.set(dst_off$LAYOUT, dst_off$OFFSET, fieldValue);
     }
 
@@ -140,9 +131,7 @@ public class H5FD_ctl_memcpy_args_t {
      * const void *srcbuf
      * }
      */
-    public static final AddressLayout srcbuf$layout() {
-        return srcbuf$LAYOUT;
-    }
+    public static final AddressLayout srcbuf$layout() { return srcbuf$LAYOUT; }
 
     private static final long srcbuf$OFFSET = 16;
 
@@ -152,9 +141,7 @@ public class H5FD_ctl_memcpy_args_t {
      * const void *srcbuf
      * }
      */
-    public static final long srcbuf$offset() {
-        return srcbuf$OFFSET;
-    }
+    public static final long srcbuf$offset() { return srcbuf$OFFSET; }
 
     /**
      * Getter for field:
@@ -162,7 +149,8 @@ public class H5FD_ctl_memcpy_args_t {
      * const void *srcbuf
      * }
      */
-    public static MemorySegment srcbuf(MemorySegment struct) {
+    public static MemorySegment srcbuf(MemorySegment struct)
+    {
         return struct.get(srcbuf$LAYOUT, srcbuf$OFFSET);
     }
 
@@ -172,7 +160,8 @@ public class H5FD_ctl_memcpy_args_t {
      * const void *srcbuf
      * }
      */
-    public static void srcbuf(MemorySegment struct, MemorySegment fieldValue) {
+    public static void srcbuf(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(srcbuf$LAYOUT, srcbuf$OFFSET, fieldValue);
     }
 
@@ -184,9 +173,7 @@ public class H5FD_ctl_memcpy_args_t {
      * hsize_t src_off
      * }
      */
-    public static final OfLong src_off$layout() {
-        return src_off$LAYOUT;
-    }
+    public static final OfLong src_off$layout() { return src_off$LAYOUT; }
 
     private static final long src_off$OFFSET = 24;
 
@@ -196,9 +183,7 @@ public class H5FD_ctl_memcpy_args_t {
      * hsize_t src_off
      * }
      */
-    public static final long src_off$offset() {
-        return src_off$OFFSET;
-    }
+    public static final long src_off$offset() { return src_off$OFFSET; }
 
     /**
      * Getter for field:
@@ -206,9 +191,7 @@ public class H5FD_ctl_memcpy_args_t {
      * hsize_t src_off
      * }
      */
-    public static long src_off(MemorySegment struct) {
-        return struct.get(src_off$LAYOUT, src_off$OFFSET);
-    }
+    public static long src_off(MemorySegment struct) { return struct.get(src_off$LAYOUT, src_off$OFFSET); }
 
     /**
      * Setter for field:
@@ -216,7 +199,8 @@ public class H5FD_ctl_memcpy_args_t {
      * hsize_t src_off
      * }
      */
-    public static void src_off(MemorySegment struct, long fieldValue) {
+    public static void src_off(MemorySegment struct, long fieldValue)
+    {
         struct.set(src_off$LAYOUT, src_off$OFFSET, fieldValue);
     }
 
@@ -228,9 +212,7 @@ public class H5FD_ctl_memcpy_args_t {
      * size_t len
      * }
      */
-    public static final OfLong len$layout() {
-        return len$LAYOUT;
-    }
+    public static final OfLong len$layout() { return len$LAYOUT; }
 
     private static final long len$OFFSET = 32;
 
@@ -240,9 +222,7 @@ public class H5FD_ctl_memcpy_args_t {
      * size_t len
      * }
      */
-    public static final long len$offset() {
-        return len$OFFSET;
-    }
+    public static final long len$offset() { return len$OFFSET; }
 
     /**
      * Getter for field:
@@ -250,9 +230,7 @@ public class H5FD_ctl_memcpy_args_t {
      * size_t len
      * }
      */
-    public static long len(MemorySegment struct) {
-        return struct.get(len$LAYOUT, len$OFFSET);
-    }
+    public static long len(MemorySegment struct) { return struct.get(len$LAYOUT, len$OFFSET); }
 
     /**
      * Setter for field:
@@ -260,7 +238,8 @@ public class H5FD_ctl_memcpy_args_t {
      * size_t len
      * }
      */
-    public static void len(MemorySegment struct, long fieldValue) {
+    public static void len(MemorySegment struct, long fieldValue)
+    {
         struct.set(len$LAYOUT, len$OFFSET, fieldValue);
     }
 
@@ -268,7 +247,8 @@ public class H5FD_ctl_memcpy_args_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -280,15 +260,14 @@ public class H5FD_ctl_memcpy_args_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -296,7 +275,8 @@ public class H5FD_ctl_memcpy_args_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -304,8 +284,9 @@ public class H5FD_ctl_memcpy_args_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

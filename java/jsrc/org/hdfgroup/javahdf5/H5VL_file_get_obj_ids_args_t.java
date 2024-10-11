@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -24,24 +24,22 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5VL_file_get_obj_ids_args_t {
 
-    H5VL_file_get_obj_ids_args_t() {
+    H5VL_file_get_obj_ids_args_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_INT.withName("types"),
-        MemoryLayout.paddingLayout(4),
-        hdf5_h.C_LONG.withName("max_objs"),
-        hdf5_h.C_POINTER.withName("oid_list"),
-        hdf5_h.C_POINTER.withName("count")
-    ).withName("H5VL_file_get_obj_ids_args_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_INT.withName("types"), MemoryLayout.paddingLayout(4),
+                          hdf5_h.C_LONG.withName("max_objs"), hdf5_h.C_POINTER.withName("oid_list"),
+                          hdf5_h.C_POINTER.withName("count"))
+            .withName("H5VL_file_get_obj_ids_args_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final OfInt types$LAYOUT = (OfInt)$LAYOUT.select(groupElement("types"));
 
@@ -51,9 +49,7 @@ public class H5VL_file_get_obj_ids_args_t {
      * unsigned int types
      * }
      */
-    public static final OfInt types$layout() {
-        return types$LAYOUT;
-    }
+    public static final OfInt types$layout() { return types$LAYOUT; }
 
     private static final long types$OFFSET = 0;
 
@@ -63,9 +59,7 @@ public class H5VL_file_get_obj_ids_args_t {
      * unsigned int types
      * }
      */
-    public static final long types$offset() {
-        return types$OFFSET;
-    }
+    public static final long types$offset() { return types$OFFSET; }
 
     /**
      * Getter for field:
@@ -73,9 +67,7 @@ public class H5VL_file_get_obj_ids_args_t {
      * unsigned int types
      * }
      */
-    public static int types(MemorySegment struct) {
-        return struct.get(types$LAYOUT, types$OFFSET);
-    }
+    public static int types(MemorySegment struct) { return struct.get(types$LAYOUT, types$OFFSET); }
 
     /**
      * Setter for field:
@@ -83,7 +75,8 @@ public class H5VL_file_get_obj_ids_args_t {
      * unsigned int types
      * }
      */
-    public static void types(MemorySegment struct, int fieldValue) {
+    public static void types(MemorySegment struct, int fieldValue)
+    {
         struct.set(types$LAYOUT, types$OFFSET, fieldValue);
     }
 
@@ -95,9 +88,7 @@ public class H5VL_file_get_obj_ids_args_t {
      * size_t max_objs
      * }
      */
-    public static final OfLong max_objs$layout() {
-        return max_objs$LAYOUT;
-    }
+    public static final OfLong max_objs$layout() { return max_objs$LAYOUT; }
 
     private static final long max_objs$OFFSET = 8;
 
@@ -107,9 +98,7 @@ public class H5VL_file_get_obj_ids_args_t {
      * size_t max_objs
      * }
      */
-    public static final long max_objs$offset() {
-        return max_objs$OFFSET;
-    }
+    public static final long max_objs$offset() { return max_objs$OFFSET; }
 
     /**
      * Getter for field:
@@ -117,9 +106,7 @@ public class H5VL_file_get_obj_ids_args_t {
      * size_t max_objs
      * }
      */
-    public static long max_objs(MemorySegment struct) {
-        return struct.get(max_objs$LAYOUT, max_objs$OFFSET);
-    }
+    public static long max_objs(MemorySegment struct) { return struct.get(max_objs$LAYOUT, max_objs$OFFSET); }
 
     /**
      * Setter for field:
@@ -127,11 +114,13 @@ public class H5VL_file_get_obj_ids_args_t {
      * size_t max_objs
      * }
      */
-    public static void max_objs(MemorySegment struct, long fieldValue) {
+    public static void max_objs(MemorySegment struct, long fieldValue)
+    {
         struct.set(max_objs$LAYOUT, max_objs$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout oid_list$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("oid_list"));
+    private static final AddressLayout oid_list$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("oid_list"));
 
     /**
      * Layout for field:
@@ -139,9 +128,7 @@ public class H5VL_file_get_obj_ids_args_t {
      * hid_t *oid_list
      * }
      */
-    public static final AddressLayout oid_list$layout() {
-        return oid_list$LAYOUT;
-    }
+    public static final AddressLayout oid_list$layout() { return oid_list$LAYOUT; }
 
     private static final long oid_list$OFFSET = 16;
 
@@ -151,9 +138,7 @@ public class H5VL_file_get_obj_ids_args_t {
      * hid_t *oid_list
      * }
      */
-    public static final long oid_list$offset() {
-        return oid_list$OFFSET;
-    }
+    public static final long oid_list$offset() { return oid_list$OFFSET; }
 
     /**
      * Getter for field:
@@ -161,7 +146,8 @@ public class H5VL_file_get_obj_ids_args_t {
      * hid_t *oid_list
      * }
      */
-    public static MemorySegment oid_list(MemorySegment struct) {
+    public static MemorySegment oid_list(MemorySegment struct)
+    {
         return struct.get(oid_list$LAYOUT, oid_list$OFFSET);
     }
 
@@ -171,7 +157,8 @@ public class H5VL_file_get_obj_ids_args_t {
      * hid_t *oid_list
      * }
      */
-    public static void oid_list(MemorySegment struct, MemorySegment fieldValue) {
+    public static void oid_list(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(oid_list$LAYOUT, oid_list$OFFSET, fieldValue);
     }
 
@@ -183,9 +170,7 @@ public class H5VL_file_get_obj_ids_args_t {
      * size_t *count
      * }
      */
-    public static final AddressLayout count$layout() {
-        return count$LAYOUT;
-    }
+    public static final AddressLayout count$layout() { return count$LAYOUT; }
 
     private static final long count$OFFSET = 24;
 
@@ -195,9 +180,7 @@ public class H5VL_file_get_obj_ids_args_t {
      * size_t *count
      * }
      */
-    public static final long count$offset() {
-        return count$OFFSET;
-    }
+    public static final long count$offset() { return count$OFFSET; }
 
     /**
      * Getter for field:
@@ -205,9 +188,7 @@ public class H5VL_file_get_obj_ids_args_t {
      * size_t *count
      * }
      */
-    public static MemorySegment count(MemorySegment struct) {
-        return struct.get(count$LAYOUT, count$OFFSET);
-    }
+    public static MemorySegment count(MemorySegment struct) { return struct.get(count$LAYOUT, count$OFFSET); }
 
     /**
      * Setter for field:
@@ -215,7 +196,8 @@ public class H5VL_file_get_obj_ids_args_t {
      * size_t *count
      * }
      */
-    public static void count(MemorySegment struct, MemorySegment fieldValue) {
+    public static void count(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(count$LAYOUT, count$OFFSET, fieldValue);
     }
 
@@ -223,7 +205,8 @@ public class H5VL_file_get_obj_ids_args_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -235,15 +218,14 @@ public class H5VL_file_get_obj_ids_args_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -251,7 +233,8 @@ public class H5VL_file_get_obj_ids_args_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -259,8 +242,9 @@ public class H5VL_file_get_obj_ids_args_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

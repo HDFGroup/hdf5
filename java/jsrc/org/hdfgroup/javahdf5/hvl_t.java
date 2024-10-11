@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -22,21 +22,19 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class hvl_t {
 
-    hvl_t() {
+    hvl_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_LONG.withName("len"),
-        hdf5_h.C_POINTER.withName("p")
-    ).withName("$anon$197:9");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout.structLayout(hdf5_h.C_LONG.withName("len"), hdf5_h.C_POINTER.withName("p"))
+            .withName("$anon$197:9");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final OfLong len$LAYOUT = (OfLong)$LAYOUT.select(groupElement("len"));
 
@@ -46,9 +44,7 @@ public class hvl_t {
      * size_t len
      * }
      */
-    public static final OfLong len$layout() {
-        return len$LAYOUT;
-    }
+    public static final OfLong len$layout() { return len$LAYOUT; }
 
     private static final long len$OFFSET = 0;
 
@@ -58,9 +54,7 @@ public class hvl_t {
      * size_t len
      * }
      */
-    public static final long len$offset() {
-        return len$OFFSET;
-    }
+    public static final long len$offset() { return len$OFFSET; }
 
     /**
      * Getter for field:
@@ -68,9 +62,7 @@ public class hvl_t {
      * size_t len
      * }
      */
-    public static long len(MemorySegment struct) {
-        return struct.get(len$LAYOUT, len$OFFSET);
-    }
+    public static long len(MemorySegment struct) { return struct.get(len$LAYOUT, len$OFFSET); }
 
     /**
      * Setter for field:
@@ -78,7 +70,8 @@ public class hvl_t {
      * size_t len
      * }
      */
-    public static void len(MemorySegment struct, long fieldValue) {
+    public static void len(MemorySegment struct, long fieldValue)
+    {
         struct.set(len$LAYOUT, len$OFFSET, fieldValue);
     }
 
@@ -90,9 +83,7 @@ public class hvl_t {
      * void *p
      * }
      */
-    public static final AddressLayout p$layout() {
-        return p$LAYOUT;
-    }
+    public static final AddressLayout p$layout() { return p$LAYOUT; }
 
     private static final long p$OFFSET = 8;
 
@@ -102,9 +93,7 @@ public class hvl_t {
      * void *p
      * }
      */
-    public static final long p$offset() {
-        return p$OFFSET;
-    }
+    public static final long p$offset() { return p$OFFSET; }
 
     /**
      * Getter for field:
@@ -112,9 +101,7 @@ public class hvl_t {
      * void *p
      * }
      */
-    public static MemorySegment p(MemorySegment struct) {
-        return struct.get(p$LAYOUT, p$OFFSET);
-    }
+    public static MemorySegment p(MemorySegment struct) { return struct.get(p$LAYOUT, p$OFFSET); }
 
     /**
      * Setter for field:
@@ -122,7 +109,8 @@ public class hvl_t {
      * void *p
      * }
      */
-    public static void p(MemorySegment struct, MemorySegment fieldValue) {
+    public static void p(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(p$LAYOUT, p$OFFSET, fieldValue);
     }
 
@@ -130,7 +118,8 @@ public class hvl_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -142,15 +131,14 @@ public class hvl_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -158,7 +146,8 @@ public class hvl_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -166,8 +155,9 @@ public class hvl_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

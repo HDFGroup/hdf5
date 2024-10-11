@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -27,28 +27,27 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5G_stat_t {
 
-    H5G_stat_t() {
+    H5G_stat_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        MemoryLayout.sequenceLayout(2, hdf5_h.C_LONG).withName("fileno"),
-        MemoryLayout.sequenceLayout(2, hdf5_h.C_LONG).withName("objno"),
-        hdf5_h.C_INT.withName("nlink"),
-        hdf5_h.C_INT.withName("type"),
-        hdf5_h.C_LONG.withName("mtime"),
-        hdf5_h.C_LONG.withName("linklen"),
-        H5O_stat_t.layout().withName("ohdr")
-    ).withName("H5G_stat_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(MemoryLayout.sequenceLayout(2, hdf5_h.C_LONG).withName("fileno"),
+                          MemoryLayout.sequenceLayout(2, hdf5_h.C_LONG).withName("objno"),
+                          hdf5_h.C_INT.withName("nlink"), hdf5_h.C_INT.withName("type"),
+                          hdf5_h.C_LONG.withName("mtime"), hdf5_h.C_LONG.withName("linklen"),
+                          H5O_stat_t.layout().withName("ohdr"))
+            .withName("H5G_stat_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
-    private static final SequenceLayout fileno$LAYOUT = (SequenceLayout)$LAYOUT.select(groupElement("fileno"));
+    private static final SequenceLayout fileno$LAYOUT =
+        (SequenceLayout)$LAYOUT.select(groupElement("fileno"));
 
     /**
      * Layout for field:
@@ -56,9 +55,7 @@ public class H5G_stat_t {
      * unsigned long fileno[2]
      * }
      */
-    public static final SequenceLayout fileno$layout() {
-        return fileno$LAYOUT;
-    }
+    public static final SequenceLayout fileno$layout() { return fileno$LAYOUT; }
 
     private static final long fileno$OFFSET = 0;
 
@@ -68,9 +65,7 @@ public class H5G_stat_t {
      * unsigned long fileno[2]
      * }
      */
-    public static final long fileno$offset() {
-        return fileno$OFFSET;
-    }
+    public static final long fileno$offset() { return fileno$OFFSET; }
 
     /**
      * Getter for field:
@@ -78,7 +73,8 @@ public class H5G_stat_t {
      * unsigned long fileno[2]
      * }
      */
-    public static MemorySegment fileno(MemorySegment struct) {
+    public static MemorySegment fileno(MemorySegment struct)
+    {
         return struct.asSlice(fileno$OFFSET, fileno$LAYOUT.byteSize());
     }
 
@@ -88,11 +84,12 @@ public class H5G_stat_t {
      * unsigned long fileno[2]
      * }
      */
-    public static void fileno(MemorySegment struct, MemorySegment fieldValue) {
+    public static void fileno(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, fileno$OFFSET, fileno$LAYOUT.byteSize());
     }
 
-    private static long[] fileno$DIMS = { 2 };
+    private static long[] fileno$DIMS = {2};
 
     /**
      * Dimensions for array field:
@@ -100,9 +97,7 @@ public class H5G_stat_t {
      * unsigned long fileno[2]
      * }
      */
-    public static long[] fileno$dimensions() {
-        return fileno$DIMS;
-    }
+    public static long[] fileno$dimensions() { return fileno$DIMS; }
     private static final VarHandle fileno$ELEM_HANDLE = fileno$LAYOUT.varHandle(sequenceElement());
 
     /**
@@ -111,7 +106,8 @@ public class H5G_stat_t {
      * unsigned long fileno[2]
      * }
      */
-    public static long fileno(MemorySegment struct, long index0) {
+    public static long fileno(MemorySegment struct, long index0)
+    {
         return (long)fileno$ELEM_HANDLE.get(struct, 0L, index0);
     }
 
@@ -121,7 +117,8 @@ public class H5G_stat_t {
      * unsigned long fileno[2]
      * }
      */
-    public static void fileno(MemorySegment struct, long index0, long fieldValue) {
+    public static void fileno(MemorySegment struct, long index0, long fieldValue)
+    {
         fileno$ELEM_HANDLE.set(struct, 0L, index0, fieldValue);
     }
 
@@ -133,9 +130,7 @@ public class H5G_stat_t {
      * unsigned long objno[2]
      * }
      */
-    public static final SequenceLayout objno$layout() {
-        return objno$LAYOUT;
-    }
+    public static final SequenceLayout objno$layout() { return objno$LAYOUT; }
 
     private static final long objno$OFFSET = 16;
 
@@ -145,9 +140,7 @@ public class H5G_stat_t {
      * unsigned long objno[2]
      * }
      */
-    public static final long objno$offset() {
-        return objno$OFFSET;
-    }
+    public static final long objno$offset() { return objno$OFFSET; }
 
     /**
      * Getter for field:
@@ -155,7 +148,8 @@ public class H5G_stat_t {
      * unsigned long objno[2]
      * }
      */
-    public static MemorySegment objno(MemorySegment struct) {
+    public static MemorySegment objno(MemorySegment struct)
+    {
         return struct.asSlice(objno$OFFSET, objno$LAYOUT.byteSize());
     }
 
@@ -165,11 +159,12 @@ public class H5G_stat_t {
      * unsigned long objno[2]
      * }
      */
-    public static void objno(MemorySegment struct, MemorySegment fieldValue) {
+    public static void objno(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, objno$OFFSET, objno$LAYOUT.byteSize());
     }
 
-    private static long[] objno$DIMS = { 2 };
+    private static long[] objno$DIMS = {2};
 
     /**
      * Dimensions for array field:
@@ -177,9 +172,7 @@ public class H5G_stat_t {
      * unsigned long objno[2]
      * }
      */
-    public static long[] objno$dimensions() {
-        return objno$DIMS;
-    }
+    public static long[] objno$dimensions() { return objno$DIMS; }
     private static final VarHandle objno$ELEM_HANDLE = objno$LAYOUT.varHandle(sequenceElement());
 
     /**
@@ -188,7 +181,8 @@ public class H5G_stat_t {
      * unsigned long objno[2]
      * }
      */
-    public static long objno(MemorySegment struct, long index0) {
+    public static long objno(MemorySegment struct, long index0)
+    {
         return (long)objno$ELEM_HANDLE.get(struct, 0L, index0);
     }
 
@@ -198,7 +192,8 @@ public class H5G_stat_t {
      * unsigned long objno[2]
      * }
      */
-    public static void objno(MemorySegment struct, long index0, long fieldValue) {
+    public static void objno(MemorySegment struct, long index0, long fieldValue)
+    {
         objno$ELEM_HANDLE.set(struct, 0L, index0, fieldValue);
     }
 
@@ -210,9 +205,7 @@ public class H5G_stat_t {
      * unsigned int nlink
      * }
      */
-    public static final OfInt nlink$layout() {
-        return nlink$LAYOUT;
-    }
+    public static final OfInt nlink$layout() { return nlink$LAYOUT; }
 
     private static final long nlink$OFFSET = 32;
 
@@ -222,9 +215,7 @@ public class H5G_stat_t {
      * unsigned int nlink
      * }
      */
-    public static final long nlink$offset() {
-        return nlink$OFFSET;
-    }
+    public static final long nlink$offset() { return nlink$OFFSET; }
 
     /**
      * Getter for field:
@@ -232,9 +223,7 @@ public class H5G_stat_t {
      * unsigned int nlink
      * }
      */
-    public static int nlink(MemorySegment struct) {
-        return struct.get(nlink$LAYOUT, nlink$OFFSET);
-    }
+    public static int nlink(MemorySegment struct) { return struct.get(nlink$LAYOUT, nlink$OFFSET); }
 
     /**
      * Setter for field:
@@ -242,7 +231,8 @@ public class H5G_stat_t {
      * unsigned int nlink
      * }
      */
-    public static void nlink(MemorySegment struct, int fieldValue) {
+    public static void nlink(MemorySegment struct, int fieldValue)
+    {
         struct.set(nlink$LAYOUT, nlink$OFFSET, fieldValue);
     }
 
@@ -254,9 +244,7 @@ public class H5G_stat_t {
      * H5G_obj_t type
      * }
      */
-    public static final OfInt type$layout() {
-        return type$LAYOUT;
-    }
+    public static final OfInt type$layout() { return type$LAYOUT; }
 
     private static final long type$OFFSET = 36;
 
@@ -266,9 +254,7 @@ public class H5G_stat_t {
      * H5G_obj_t type
      * }
      */
-    public static final long type$offset() {
-        return type$OFFSET;
-    }
+    public static final long type$offset() { return type$OFFSET; }
 
     /**
      * Getter for field:
@@ -276,9 +262,7 @@ public class H5G_stat_t {
      * H5G_obj_t type
      * }
      */
-    public static int type(MemorySegment struct) {
-        return struct.get(type$LAYOUT, type$OFFSET);
-    }
+    public static int type(MemorySegment struct) { return struct.get(type$LAYOUT, type$OFFSET); }
 
     /**
      * Setter for field:
@@ -286,7 +270,8 @@ public class H5G_stat_t {
      * H5G_obj_t type
      * }
      */
-    public static void type(MemorySegment struct, int fieldValue) {
+    public static void type(MemorySegment struct, int fieldValue)
+    {
         struct.set(type$LAYOUT, type$OFFSET, fieldValue);
     }
 
@@ -298,9 +283,7 @@ public class H5G_stat_t {
      * time_t mtime
      * }
      */
-    public static final OfLong mtime$layout() {
-        return mtime$LAYOUT;
-    }
+    public static final OfLong mtime$layout() { return mtime$LAYOUT; }
 
     private static final long mtime$OFFSET = 40;
 
@@ -310,9 +293,7 @@ public class H5G_stat_t {
      * time_t mtime
      * }
      */
-    public static final long mtime$offset() {
-        return mtime$OFFSET;
-    }
+    public static final long mtime$offset() { return mtime$OFFSET; }
 
     /**
      * Getter for field:
@@ -320,9 +301,7 @@ public class H5G_stat_t {
      * time_t mtime
      * }
      */
-    public static long mtime(MemorySegment struct) {
-        return struct.get(mtime$LAYOUT, mtime$OFFSET);
-    }
+    public static long mtime(MemorySegment struct) { return struct.get(mtime$LAYOUT, mtime$OFFSET); }
 
     /**
      * Setter for field:
@@ -330,7 +309,8 @@ public class H5G_stat_t {
      * time_t mtime
      * }
      */
-    public static void mtime(MemorySegment struct, long fieldValue) {
+    public static void mtime(MemorySegment struct, long fieldValue)
+    {
         struct.set(mtime$LAYOUT, mtime$OFFSET, fieldValue);
     }
 
@@ -342,9 +322,7 @@ public class H5G_stat_t {
      * size_t linklen
      * }
      */
-    public static final OfLong linklen$layout() {
-        return linklen$LAYOUT;
-    }
+    public static final OfLong linklen$layout() { return linklen$LAYOUT; }
 
     private static final long linklen$OFFSET = 48;
 
@@ -354,9 +332,7 @@ public class H5G_stat_t {
      * size_t linklen
      * }
      */
-    public static final long linklen$offset() {
-        return linklen$OFFSET;
-    }
+    public static final long linklen$offset() { return linklen$OFFSET; }
 
     /**
      * Getter for field:
@@ -364,9 +340,7 @@ public class H5G_stat_t {
      * size_t linklen
      * }
      */
-    public static long linklen(MemorySegment struct) {
-        return struct.get(linklen$LAYOUT, linklen$OFFSET);
-    }
+    public static long linklen(MemorySegment struct) { return struct.get(linklen$LAYOUT, linklen$OFFSET); }
 
     /**
      * Setter for field:
@@ -374,7 +348,8 @@ public class H5G_stat_t {
      * size_t linklen
      * }
      */
-    public static void linklen(MemorySegment struct, long fieldValue) {
+    public static void linklen(MemorySegment struct, long fieldValue)
+    {
         struct.set(linklen$LAYOUT, linklen$OFFSET, fieldValue);
     }
 
@@ -386,9 +361,7 @@ public class H5G_stat_t {
      * H5O_stat_t ohdr
      * }
      */
-    public static final GroupLayout ohdr$layout() {
-        return ohdr$LAYOUT;
-    }
+    public static final GroupLayout ohdr$layout() { return ohdr$LAYOUT; }
 
     private static final long ohdr$OFFSET = 56;
 
@@ -398,9 +371,7 @@ public class H5G_stat_t {
      * H5O_stat_t ohdr
      * }
      */
-    public static final long ohdr$offset() {
-        return ohdr$OFFSET;
-    }
+    public static final long ohdr$offset() { return ohdr$OFFSET; }
 
     /**
      * Getter for field:
@@ -408,7 +379,8 @@ public class H5G_stat_t {
      * H5O_stat_t ohdr
      * }
      */
-    public static MemorySegment ohdr(MemorySegment struct) {
+    public static MemorySegment ohdr(MemorySegment struct)
+    {
         return struct.asSlice(ohdr$OFFSET, ohdr$LAYOUT.byteSize());
     }
 
@@ -418,7 +390,8 @@ public class H5G_stat_t {
      * H5O_stat_t ohdr
      * }
      */
-    public static void ohdr(MemorySegment struct, MemorySegment fieldValue) {
+    public static void ohdr(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, ohdr$OFFSET, ohdr$LAYOUT.byteSize());
     }
 
@@ -426,7 +399,8 @@ public class H5G_stat_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -438,15 +412,14 @@ public class H5G_stat_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -454,7 +427,8 @@ public class H5G_stat_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -462,8 +436,9 @@ public class H5G_stat_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

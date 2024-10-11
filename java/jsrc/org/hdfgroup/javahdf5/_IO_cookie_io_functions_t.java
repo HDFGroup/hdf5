@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -24,23 +24,21 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class _IO_cookie_io_functions_t {
 
-    _IO_cookie_io_functions_t() {
+    _IO_cookie_io_functions_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_POINTER.withName("read"),
-        hdf5_h.C_POINTER.withName("write"),
-        hdf5_h.C_POINTER.withName("seek"),
-        hdf5_h.C_POINTER.withName("close")
-    ).withName("_IO_cookie_io_functions_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_POINTER.withName("read"), hdf5_h.C_POINTER.withName("write"),
+                          hdf5_h.C_POINTER.withName("seek"), hdf5_h.C_POINTER.withName("close"))
+            .withName("_IO_cookie_io_functions_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final AddressLayout read$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("read"));
 
@@ -50,9 +48,7 @@ public class _IO_cookie_io_functions_t {
      * cookie_read_function_t *read
      * }
      */
-    public static final AddressLayout read$layout() {
-        return read$LAYOUT;
-    }
+    public static final AddressLayout read$layout() { return read$LAYOUT; }
 
     private static final long read$OFFSET = 0;
 
@@ -62,9 +58,7 @@ public class _IO_cookie_io_functions_t {
      * cookie_read_function_t *read
      * }
      */
-    public static final long read$offset() {
-        return read$OFFSET;
-    }
+    public static final long read$offset() { return read$OFFSET; }
 
     /**
      * Getter for field:
@@ -72,9 +66,7 @@ public class _IO_cookie_io_functions_t {
      * cookie_read_function_t *read
      * }
      */
-    public static MemorySegment read(MemorySegment struct) {
-        return struct.get(read$LAYOUT, read$OFFSET);
-    }
+    public static MemorySegment read(MemorySegment struct) { return struct.get(read$LAYOUT, read$OFFSET); }
 
     /**
      * Setter for field:
@@ -82,7 +74,8 @@ public class _IO_cookie_io_functions_t {
      * cookie_read_function_t *read
      * }
      */
-    public static void read(MemorySegment struct, MemorySegment fieldValue) {
+    public static void read(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(read$LAYOUT, read$OFFSET, fieldValue);
     }
 
@@ -94,9 +87,7 @@ public class _IO_cookie_io_functions_t {
      * cookie_write_function_t *write
      * }
      */
-    public static final AddressLayout write$layout() {
-        return write$LAYOUT;
-    }
+    public static final AddressLayout write$layout() { return write$LAYOUT; }
 
     private static final long write$OFFSET = 8;
 
@@ -106,9 +97,7 @@ public class _IO_cookie_io_functions_t {
      * cookie_write_function_t *write
      * }
      */
-    public static final long write$offset() {
-        return write$OFFSET;
-    }
+    public static final long write$offset() { return write$OFFSET; }
 
     /**
      * Getter for field:
@@ -116,9 +105,7 @@ public class _IO_cookie_io_functions_t {
      * cookie_write_function_t *write
      * }
      */
-    public static MemorySegment write(MemorySegment struct) {
-        return struct.get(write$LAYOUT, write$OFFSET);
-    }
+    public static MemorySegment write(MemorySegment struct) { return struct.get(write$LAYOUT, write$OFFSET); }
 
     /**
      * Setter for field:
@@ -126,7 +113,8 @@ public class _IO_cookie_io_functions_t {
      * cookie_write_function_t *write
      * }
      */
-    public static void write(MemorySegment struct, MemorySegment fieldValue) {
+    public static void write(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(write$LAYOUT, write$OFFSET, fieldValue);
     }
 
@@ -138,9 +126,7 @@ public class _IO_cookie_io_functions_t {
      * cookie_seek_function_t *seek
      * }
      */
-    public static final AddressLayout seek$layout() {
-        return seek$LAYOUT;
-    }
+    public static final AddressLayout seek$layout() { return seek$LAYOUT; }
 
     private static final long seek$OFFSET = 16;
 
@@ -150,9 +136,7 @@ public class _IO_cookie_io_functions_t {
      * cookie_seek_function_t *seek
      * }
      */
-    public static final long seek$offset() {
-        return seek$OFFSET;
-    }
+    public static final long seek$offset() { return seek$OFFSET; }
 
     /**
      * Getter for field:
@@ -160,9 +144,7 @@ public class _IO_cookie_io_functions_t {
      * cookie_seek_function_t *seek
      * }
      */
-    public static MemorySegment seek(MemorySegment struct) {
-        return struct.get(seek$LAYOUT, seek$OFFSET);
-    }
+    public static MemorySegment seek(MemorySegment struct) { return struct.get(seek$LAYOUT, seek$OFFSET); }
 
     /**
      * Setter for field:
@@ -170,7 +152,8 @@ public class _IO_cookie_io_functions_t {
      * cookie_seek_function_t *seek
      * }
      */
-    public static void seek(MemorySegment struct, MemorySegment fieldValue) {
+    public static void seek(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(seek$LAYOUT, seek$OFFSET, fieldValue);
     }
 
@@ -182,9 +165,7 @@ public class _IO_cookie_io_functions_t {
      * cookie_close_function_t *close
      * }
      */
-    public static final AddressLayout close$layout() {
-        return close$LAYOUT;
-    }
+    public static final AddressLayout close$layout() { return close$LAYOUT; }
 
     private static final long close$OFFSET = 24;
 
@@ -194,9 +175,7 @@ public class _IO_cookie_io_functions_t {
      * cookie_close_function_t *close
      * }
      */
-    public static final long close$offset() {
-        return close$OFFSET;
-    }
+    public static final long close$offset() { return close$OFFSET; }
 
     /**
      * Getter for field:
@@ -204,9 +183,7 @@ public class _IO_cookie_io_functions_t {
      * cookie_close_function_t *close
      * }
      */
-    public static MemorySegment close(MemorySegment struct) {
-        return struct.get(close$LAYOUT, close$OFFSET);
-    }
+    public static MemorySegment close(MemorySegment struct) { return struct.get(close$LAYOUT, close$OFFSET); }
 
     /**
      * Setter for field:
@@ -214,7 +191,8 @@ public class _IO_cookie_io_functions_t {
      * cookie_close_function_t *close
      * }
      */
-    public static void close(MemorySegment struct, MemorySegment fieldValue) {
+    public static void close(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(close$LAYOUT, close$OFFSET, fieldValue);
     }
 
@@ -222,7 +200,8 @@ public class _IO_cookie_io_functions_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -234,15 +213,14 @@ public class _IO_cookie_io_functions_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -250,7 +228,8 @@ public class _IO_cookie_io_functions_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -258,8 +237,9 @@ public class _IO_cookie_io_functions_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

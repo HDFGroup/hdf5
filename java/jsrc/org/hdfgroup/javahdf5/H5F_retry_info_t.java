@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -22,22 +22,21 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5F_retry_info_t {
 
-    H5F_retry_info_t() {
+    H5F_retry_info_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_INT.withName("nbins"),
-        MemoryLayout.paddingLayout(4),
-        MemoryLayout.sequenceLayout(21, hdf5_h.C_POINTER).withName("retries")
-    ).withName("H5F_retry_info_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_INT.withName("nbins"), MemoryLayout.paddingLayout(4),
+                          MemoryLayout.sequenceLayout(21, hdf5_h.C_POINTER).withName("retries"))
+            .withName("H5F_retry_info_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final OfInt nbins$LAYOUT = (OfInt)$LAYOUT.select(groupElement("nbins"));
 
@@ -47,9 +46,7 @@ public class H5F_retry_info_t {
      * unsigned int nbins
      * }
      */
-    public static final OfInt nbins$layout() {
-        return nbins$LAYOUT;
-    }
+    public static final OfInt nbins$layout() { return nbins$LAYOUT; }
 
     private static final long nbins$OFFSET = 0;
 
@@ -59,9 +56,7 @@ public class H5F_retry_info_t {
      * unsigned int nbins
      * }
      */
-    public static final long nbins$offset() {
-        return nbins$OFFSET;
-    }
+    public static final long nbins$offset() { return nbins$OFFSET; }
 
     /**
      * Getter for field:
@@ -69,9 +64,7 @@ public class H5F_retry_info_t {
      * unsigned int nbins
      * }
      */
-    public static int nbins(MemorySegment struct) {
-        return struct.get(nbins$LAYOUT, nbins$OFFSET);
-    }
+    public static int nbins(MemorySegment struct) { return struct.get(nbins$LAYOUT, nbins$OFFSET); }
 
     /**
      * Setter for field:
@@ -79,11 +72,13 @@ public class H5F_retry_info_t {
      * unsigned int nbins
      * }
      */
-    public static void nbins(MemorySegment struct, int fieldValue) {
+    public static void nbins(MemorySegment struct, int fieldValue)
+    {
         struct.set(nbins$LAYOUT, nbins$OFFSET, fieldValue);
     }
 
-    private static final SequenceLayout retries$LAYOUT = (SequenceLayout)$LAYOUT.select(groupElement("retries"));
+    private static final SequenceLayout retries$LAYOUT =
+        (SequenceLayout)$LAYOUT.select(groupElement("retries"));
 
     /**
      * Layout for field:
@@ -91,9 +86,7 @@ public class H5F_retry_info_t {
      * uint32_t *retries[21]
      * }
      */
-    public static final SequenceLayout retries$layout() {
-        return retries$LAYOUT;
-    }
+    public static final SequenceLayout retries$layout() { return retries$LAYOUT; }
 
     private static final long retries$OFFSET = 8;
 
@@ -103,9 +96,7 @@ public class H5F_retry_info_t {
      * uint32_t *retries[21]
      * }
      */
-    public static final long retries$offset() {
-        return retries$OFFSET;
-    }
+    public static final long retries$offset() { return retries$OFFSET; }
 
     /**
      * Getter for field:
@@ -113,7 +104,8 @@ public class H5F_retry_info_t {
      * uint32_t *retries[21]
      * }
      */
-    public static MemorySegment retries(MemorySegment struct) {
+    public static MemorySegment retries(MemorySegment struct)
+    {
         return struct.asSlice(retries$OFFSET, retries$LAYOUT.byteSize());
     }
 
@@ -123,11 +115,12 @@ public class H5F_retry_info_t {
      * uint32_t *retries[21]
      * }
      */
-    public static void retries(MemorySegment struct, MemorySegment fieldValue) {
+    public static void retries(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, retries$OFFSET, retries$LAYOUT.byteSize());
     }
 
-    private static long[] retries$DIMS = { 21 };
+    private static long[] retries$DIMS = {21};
 
     /**
      * Dimensions for array field:
@@ -135,9 +128,7 @@ public class H5F_retry_info_t {
      * uint32_t *retries[21]
      * }
      */
-    public static long[] retries$dimensions() {
-        return retries$DIMS;
-    }
+    public static long[] retries$dimensions() { return retries$DIMS; }
     private static final VarHandle retries$ELEM_HANDLE = retries$LAYOUT.varHandle(sequenceElement());
 
     /**
@@ -146,7 +137,8 @@ public class H5F_retry_info_t {
      * uint32_t *retries[21]
      * }
      */
-    public static MemorySegment retries(MemorySegment struct, long index0) {
+    public static MemorySegment retries(MemorySegment struct, long index0)
+    {
         return (MemorySegment)retries$ELEM_HANDLE.get(struct, 0L, index0);
     }
 
@@ -156,7 +148,8 @@ public class H5F_retry_info_t {
      * uint32_t *retries[21]
      * }
      */
-    public static void retries(MemorySegment struct, long index0, MemorySegment fieldValue) {
+    public static void retries(MemorySegment struct, long index0, MemorySegment fieldValue)
+    {
         retries$ELEM_HANDLE.set(struct, 0L, index0, fieldValue);
     }
 
@@ -164,7 +157,8 @@ public class H5F_retry_info_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -176,15 +170,14 @@ public class H5F_retry_info_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -192,7 +185,8 @@ public class H5F_retry_info_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -200,8 +194,9 @@ public class H5F_retry_info_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -24,24 +24,22 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5T_cdata_t {
 
-    H5T_cdata_t() {
+    H5T_cdata_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_INT.withName("command"),
-        hdf5_h.C_INT.withName("need_bkg"),
-        hdf5_h.C_BOOL.withName("recalc"),
-        MemoryLayout.paddingLayout(7),
-        hdf5_h.C_POINTER.withName("priv")
-    ).withName("H5T_cdata_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_INT.withName("command"), hdf5_h.C_INT.withName("need_bkg"),
+                          hdf5_h.C_BOOL.withName("recalc"), MemoryLayout.paddingLayout(7),
+                          hdf5_h.C_POINTER.withName("priv"))
+            .withName("H5T_cdata_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final OfInt command$LAYOUT = (OfInt)$LAYOUT.select(groupElement("command"));
 
@@ -51,9 +49,7 @@ public class H5T_cdata_t {
      * H5T_cmd_t command
      * }
      */
-    public static final OfInt command$layout() {
-        return command$LAYOUT;
-    }
+    public static final OfInt command$layout() { return command$LAYOUT; }
 
     private static final long command$OFFSET = 0;
 
@@ -63,9 +59,7 @@ public class H5T_cdata_t {
      * H5T_cmd_t command
      * }
      */
-    public static final long command$offset() {
-        return command$OFFSET;
-    }
+    public static final long command$offset() { return command$OFFSET; }
 
     /**
      * Getter for field:
@@ -73,9 +67,7 @@ public class H5T_cdata_t {
      * H5T_cmd_t command
      * }
      */
-    public static int command(MemorySegment struct) {
-        return struct.get(command$LAYOUT, command$OFFSET);
-    }
+    public static int command(MemorySegment struct) { return struct.get(command$LAYOUT, command$OFFSET); }
 
     /**
      * Setter for field:
@@ -83,7 +75,8 @@ public class H5T_cdata_t {
      * H5T_cmd_t command
      * }
      */
-    public static void command(MemorySegment struct, int fieldValue) {
+    public static void command(MemorySegment struct, int fieldValue)
+    {
         struct.set(command$LAYOUT, command$OFFSET, fieldValue);
     }
 
@@ -95,9 +88,7 @@ public class H5T_cdata_t {
      * H5T_bkg_t need_bkg
      * }
      */
-    public static final OfInt need_bkg$layout() {
-        return need_bkg$LAYOUT;
-    }
+    public static final OfInt need_bkg$layout() { return need_bkg$LAYOUT; }
 
     private static final long need_bkg$OFFSET = 4;
 
@@ -107,9 +98,7 @@ public class H5T_cdata_t {
      * H5T_bkg_t need_bkg
      * }
      */
-    public static final long need_bkg$offset() {
-        return need_bkg$OFFSET;
-    }
+    public static final long need_bkg$offset() { return need_bkg$OFFSET; }
 
     /**
      * Getter for field:
@@ -117,9 +106,7 @@ public class H5T_cdata_t {
      * H5T_bkg_t need_bkg
      * }
      */
-    public static int need_bkg(MemorySegment struct) {
-        return struct.get(need_bkg$LAYOUT, need_bkg$OFFSET);
-    }
+    public static int need_bkg(MemorySegment struct) { return struct.get(need_bkg$LAYOUT, need_bkg$OFFSET); }
 
     /**
      * Setter for field:
@@ -127,7 +114,8 @@ public class H5T_cdata_t {
      * H5T_bkg_t need_bkg
      * }
      */
-    public static void need_bkg(MemorySegment struct, int fieldValue) {
+    public static void need_bkg(MemorySegment struct, int fieldValue)
+    {
         struct.set(need_bkg$LAYOUT, need_bkg$OFFSET, fieldValue);
     }
 
@@ -139,9 +127,7 @@ public class H5T_cdata_t {
      * hbool_t recalc
      * }
      */
-    public static final OfBoolean recalc$layout() {
-        return recalc$LAYOUT;
-    }
+    public static final OfBoolean recalc$layout() { return recalc$LAYOUT; }
 
     private static final long recalc$OFFSET = 8;
 
@@ -151,9 +137,7 @@ public class H5T_cdata_t {
      * hbool_t recalc
      * }
      */
-    public static final long recalc$offset() {
-        return recalc$OFFSET;
-    }
+    public static final long recalc$offset() { return recalc$OFFSET; }
 
     /**
      * Getter for field:
@@ -161,9 +145,7 @@ public class H5T_cdata_t {
      * hbool_t recalc
      * }
      */
-    public static boolean recalc(MemorySegment struct) {
-        return struct.get(recalc$LAYOUT, recalc$OFFSET);
-    }
+    public static boolean recalc(MemorySegment struct) { return struct.get(recalc$LAYOUT, recalc$OFFSET); }
 
     /**
      * Setter for field:
@@ -171,7 +153,8 @@ public class H5T_cdata_t {
      * hbool_t recalc
      * }
      */
-    public static void recalc(MemorySegment struct, boolean fieldValue) {
+    public static void recalc(MemorySegment struct, boolean fieldValue)
+    {
         struct.set(recalc$LAYOUT, recalc$OFFSET, fieldValue);
     }
 
@@ -183,9 +166,7 @@ public class H5T_cdata_t {
      * void *priv
      * }
      */
-    public static final AddressLayout priv$layout() {
-        return priv$LAYOUT;
-    }
+    public static final AddressLayout priv$layout() { return priv$LAYOUT; }
 
     private static final long priv$OFFSET = 16;
 
@@ -195,9 +176,7 @@ public class H5T_cdata_t {
      * void *priv
      * }
      */
-    public static final long priv$offset() {
-        return priv$OFFSET;
-    }
+    public static final long priv$offset() { return priv$OFFSET; }
 
     /**
      * Getter for field:
@@ -205,9 +184,7 @@ public class H5T_cdata_t {
      * void *priv
      * }
      */
-    public static MemorySegment priv(MemorySegment struct) {
-        return struct.get(priv$LAYOUT, priv$OFFSET);
-    }
+    public static MemorySegment priv(MemorySegment struct) { return struct.get(priv$LAYOUT, priv$OFFSET); }
 
     /**
      * Setter for field:
@@ -215,7 +192,8 @@ public class H5T_cdata_t {
      * void *priv
      * }
      */
-    public static void priv(MemorySegment struct, MemorySegment fieldValue) {
+    public static void priv(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(priv$LAYOUT, priv$OFFSET, fieldValue);
     }
 
@@ -223,7 +201,8 @@ public class H5T_cdata_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -235,15 +214,14 @@ public class H5T_cdata_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -251,7 +229,8 @@ public class H5T_cdata_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -259,8 +238,9 @@ public class H5T_cdata_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

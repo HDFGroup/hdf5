@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -26,26 +26,23 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5E_error1_t {
 
-    H5E_error1_t() {
+    H5E_error1_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_LONG.withName("maj_num"),
-        hdf5_h.C_LONG.withName("min_num"),
-        hdf5_h.C_POINTER.withName("func_name"),
-        hdf5_h.C_POINTER.withName("file_name"),
-        hdf5_h.C_INT.withName("line"),
-        MemoryLayout.paddingLayout(4),
-        hdf5_h.C_POINTER.withName("desc")
-    ).withName("H5E_error1_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_LONG.withName("maj_num"), hdf5_h.C_LONG.withName("min_num"),
+                          hdf5_h.C_POINTER.withName("func_name"), hdf5_h.C_POINTER.withName("file_name"),
+                          hdf5_h.C_INT.withName("line"), MemoryLayout.paddingLayout(4),
+                          hdf5_h.C_POINTER.withName("desc"))
+            .withName("H5E_error1_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final OfLong maj_num$LAYOUT = (OfLong)$LAYOUT.select(groupElement("maj_num"));
 
@@ -55,9 +52,7 @@ public class H5E_error1_t {
      * H5E_major_t maj_num
      * }
      */
-    public static final OfLong maj_num$layout() {
-        return maj_num$LAYOUT;
-    }
+    public static final OfLong maj_num$layout() { return maj_num$LAYOUT; }
 
     private static final long maj_num$OFFSET = 0;
 
@@ -67,9 +62,7 @@ public class H5E_error1_t {
      * H5E_major_t maj_num
      * }
      */
-    public static final long maj_num$offset() {
-        return maj_num$OFFSET;
-    }
+    public static final long maj_num$offset() { return maj_num$OFFSET; }
 
     /**
      * Getter for field:
@@ -77,9 +70,7 @@ public class H5E_error1_t {
      * H5E_major_t maj_num
      * }
      */
-    public static long maj_num(MemorySegment struct) {
-        return struct.get(maj_num$LAYOUT, maj_num$OFFSET);
-    }
+    public static long maj_num(MemorySegment struct) { return struct.get(maj_num$LAYOUT, maj_num$OFFSET); }
 
     /**
      * Setter for field:
@@ -87,7 +78,8 @@ public class H5E_error1_t {
      * H5E_major_t maj_num
      * }
      */
-    public static void maj_num(MemorySegment struct, long fieldValue) {
+    public static void maj_num(MemorySegment struct, long fieldValue)
+    {
         struct.set(maj_num$LAYOUT, maj_num$OFFSET, fieldValue);
     }
 
@@ -99,9 +91,7 @@ public class H5E_error1_t {
      * H5E_minor_t min_num
      * }
      */
-    public static final OfLong min_num$layout() {
-        return min_num$LAYOUT;
-    }
+    public static final OfLong min_num$layout() { return min_num$LAYOUT; }
 
     private static final long min_num$OFFSET = 8;
 
@@ -111,9 +101,7 @@ public class H5E_error1_t {
      * H5E_minor_t min_num
      * }
      */
-    public static final long min_num$offset() {
-        return min_num$OFFSET;
-    }
+    public static final long min_num$offset() { return min_num$OFFSET; }
 
     /**
      * Getter for field:
@@ -121,9 +109,7 @@ public class H5E_error1_t {
      * H5E_minor_t min_num
      * }
      */
-    public static long min_num(MemorySegment struct) {
-        return struct.get(min_num$LAYOUT, min_num$OFFSET);
-    }
+    public static long min_num(MemorySegment struct) { return struct.get(min_num$LAYOUT, min_num$OFFSET); }
 
     /**
      * Setter for field:
@@ -131,11 +117,13 @@ public class H5E_error1_t {
      * H5E_minor_t min_num
      * }
      */
-    public static void min_num(MemorySegment struct, long fieldValue) {
+    public static void min_num(MemorySegment struct, long fieldValue)
+    {
         struct.set(min_num$LAYOUT, min_num$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout func_name$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("func_name"));
+    private static final AddressLayout func_name$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("func_name"));
 
     /**
      * Layout for field:
@@ -143,9 +131,7 @@ public class H5E_error1_t {
      * const char *func_name
      * }
      */
-    public static final AddressLayout func_name$layout() {
-        return func_name$LAYOUT;
-    }
+    public static final AddressLayout func_name$layout() { return func_name$LAYOUT; }
 
     private static final long func_name$OFFSET = 16;
 
@@ -155,9 +141,7 @@ public class H5E_error1_t {
      * const char *func_name
      * }
      */
-    public static final long func_name$offset() {
-        return func_name$OFFSET;
-    }
+    public static final long func_name$offset() { return func_name$OFFSET; }
 
     /**
      * Getter for field:
@@ -165,7 +149,8 @@ public class H5E_error1_t {
      * const char *func_name
      * }
      */
-    public static MemorySegment func_name(MemorySegment struct) {
+    public static MemorySegment func_name(MemorySegment struct)
+    {
         return struct.get(func_name$LAYOUT, func_name$OFFSET);
     }
 
@@ -175,11 +160,13 @@ public class H5E_error1_t {
      * const char *func_name
      * }
      */
-    public static void func_name(MemorySegment struct, MemorySegment fieldValue) {
+    public static void func_name(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(func_name$LAYOUT, func_name$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout file_name$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("file_name"));
+    private static final AddressLayout file_name$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("file_name"));
 
     /**
      * Layout for field:
@@ -187,9 +174,7 @@ public class H5E_error1_t {
      * const char *file_name
      * }
      */
-    public static final AddressLayout file_name$layout() {
-        return file_name$LAYOUT;
-    }
+    public static final AddressLayout file_name$layout() { return file_name$LAYOUT; }
 
     private static final long file_name$OFFSET = 24;
 
@@ -199,9 +184,7 @@ public class H5E_error1_t {
      * const char *file_name
      * }
      */
-    public static final long file_name$offset() {
-        return file_name$OFFSET;
-    }
+    public static final long file_name$offset() { return file_name$OFFSET; }
 
     /**
      * Getter for field:
@@ -209,7 +192,8 @@ public class H5E_error1_t {
      * const char *file_name
      * }
      */
-    public static MemorySegment file_name(MemorySegment struct) {
+    public static MemorySegment file_name(MemorySegment struct)
+    {
         return struct.get(file_name$LAYOUT, file_name$OFFSET);
     }
 
@@ -219,7 +203,8 @@ public class H5E_error1_t {
      * const char *file_name
      * }
      */
-    public static void file_name(MemorySegment struct, MemorySegment fieldValue) {
+    public static void file_name(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(file_name$LAYOUT, file_name$OFFSET, fieldValue);
     }
 
@@ -231,9 +216,7 @@ public class H5E_error1_t {
      * unsigned int line
      * }
      */
-    public static final OfInt line$layout() {
-        return line$LAYOUT;
-    }
+    public static final OfInt line$layout() { return line$LAYOUT; }
 
     private static final long line$OFFSET = 32;
 
@@ -243,9 +226,7 @@ public class H5E_error1_t {
      * unsigned int line
      * }
      */
-    public static final long line$offset() {
-        return line$OFFSET;
-    }
+    public static final long line$offset() { return line$OFFSET; }
 
     /**
      * Getter for field:
@@ -253,9 +234,7 @@ public class H5E_error1_t {
      * unsigned int line
      * }
      */
-    public static int line(MemorySegment struct) {
-        return struct.get(line$LAYOUT, line$OFFSET);
-    }
+    public static int line(MemorySegment struct) { return struct.get(line$LAYOUT, line$OFFSET); }
 
     /**
      * Setter for field:
@@ -263,7 +242,8 @@ public class H5E_error1_t {
      * unsigned int line
      * }
      */
-    public static void line(MemorySegment struct, int fieldValue) {
+    public static void line(MemorySegment struct, int fieldValue)
+    {
         struct.set(line$LAYOUT, line$OFFSET, fieldValue);
     }
 
@@ -275,9 +255,7 @@ public class H5E_error1_t {
      * const char *desc
      * }
      */
-    public static final AddressLayout desc$layout() {
-        return desc$LAYOUT;
-    }
+    public static final AddressLayout desc$layout() { return desc$LAYOUT; }
 
     private static final long desc$OFFSET = 40;
 
@@ -287,9 +265,7 @@ public class H5E_error1_t {
      * const char *desc
      * }
      */
-    public static final long desc$offset() {
-        return desc$OFFSET;
-    }
+    public static final long desc$offset() { return desc$OFFSET; }
 
     /**
      * Getter for field:
@@ -297,9 +273,7 @@ public class H5E_error1_t {
      * const char *desc
      * }
      */
-    public static MemorySegment desc(MemorySegment struct) {
-        return struct.get(desc$LAYOUT, desc$OFFSET);
-    }
+    public static MemorySegment desc(MemorySegment struct) { return struct.get(desc$LAYOUT, desc$OFFSET); }
 
     /**
      * Setter for field:
@@ -307,7 +281,8 @@ public class H5E_error1_t {
      * const char *desc
      * }
      */
-    public static void desc(MemorySegment struct, MemorySegment fieldValue) {
+    public static void desc(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(desc$LAYOUT, desc$OFFSET, fieldValue);
     }
 
@@ -315,7 +290,8 @@ public class H5E_error1_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -327,15 +303,14 @@ public class H5E_error1_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -343,7 +318,8 @@ public class H5E_error1_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -351,8 +327,9 @@ public class H5E_error1_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -27,26 +27,24 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5FD_file_image_callbacks_t {
 
-    H5FD_file_image_callbacks_t() {
+    H5FD_file_image_callbacks_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_POINTER.withName("image_malloc"),
-        hdf5_h.C_POINTER.withName("image_memcpy"),
-        hdf5_h.C_POINTER.withName("image_realloc"),
-        hdf5_h.C_POINTER.withName("image_free"),
-        hdf5_h.C_POINTER.withName("udata_copy"),
-        hdf5_h.C_POINTER.withName("udata_free"),
-        hdf5_h.C_POINTER.withName("udata")
-    ).withName("$anon$303:9");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_POINTER.withName("image_malloc"),
+                          hdf5_h.C_POINTER.withName("image_memcpy"),
+                          hdf5_h.C_POINTER.withName("image_realloc"), hdf5_h.C_POINTER.withName("image_free"),
+                          hdf5_h.C_POINTER.withName("udata_copy"), hdf5_h.C_POINTER.withName("udata_free"),
+                          hdf5_h.C_POINTER.withName("udata"))
+            .withName("$anon$303:9");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     /**
      * {@snippet lang=c :
@@ -55,7 +53,8 @@ public class H5FD_file_image_callbacks_t {
      */
     public static class image_malloc {
 
-        image_malloc() {
+        image_malloc()
+        {
             // Should not be called directly
         }
 
@@ -66,27 +65,23 @@ public class H5FD_file_image_callbacks_t {
             MemorySegment apply(long _x0, int _x1, MemorySegment _x2);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(image_malloc.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(image_malloc.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(image_malloc.Function fi, Arena arena) {
+        public static MemorySegment allocate(image_malloc.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -95,16 +90,19 @@ public class H5FD_file_image_callbacks_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static MemorySegment invoke(MemorySegment funcPtr,long _x0, int _x1, MemorySegment _x2) {
+        public static MemorySegment invoke(MemorySegment funcPtr, long _x0, int _x1, MemorySegment _x2)
+        {
             try {
-                return (MemorySegment) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
-            } catch (Throwable ex$) {
+                return (MemorySegment)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout image_malloc$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("image_malloc"));
+    private static final AddressLayout image_malloc$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("image_malloc"));
 
     /**
      * Layout for field:
@@ -112,9 +110,7 @@ public class H5FD_file_image_callbacks_t {
      * void *(*image_malloc)(size_t, H5FD_file_image_op_t, void *)
      * }
      */
-    public static final AddressLayout image_malloc$layout() {
-        return image_malloc$LAYOUT;
-    }
+    public static final AddressLayout image_malloc$layout() { return image_malloc$LAYOUT; }
 
     private static final long image_malloc$OFFSET = 0;
 
@@ -124,9 +120,7 @@ public class H5FD_file_image_callbacks_t {
      * void *(*image_malloc)(size_t, H5FD_file_image_op_t, void *)
      * }
      */
-    public static final long image_malloc$offset() {
-        return image_malloc$OFFSET;
-    }
+    public static final long image_malloc$offset() { return image_malloc$OFFSET; }
 
     /**
      * Getter for field:
@@ -134,7 +128,8 @@ public class H5FD_file_image_callbacks_t {
      * void *(*image_malloc)(size_t, H5FD_file_image_op_t, void *)
      * }
      */
-    public static MemorySegment image_malloc(MemorySegment struct) {
+    public static MemorySegment image_malloc(MemorySegment struct)
+    {
         return struct.get(image_malloc$LAYOUT, image_malloc$OFFSET);
     }
 
@@ -144,7 +139,8 @@ public class H5FD_file_image_callbacks_t {
      * void *(*image_malloc)(size_t, H5FD_file_image_op_t, void *)
      * }
      */
-    public static void image_malloc(MemorySegment struct, MemorySegment fieldValue) {
+    public static void image_malloc(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(image_malloc$LAYOUT, image_malloc$OFFSET, fieldValue);
     }
 
@@ -155,7 +151,8 @@ public class H5FD_file_image_callbacks_t {
      */
     public static class image_memcpy {
 
-        image_memcpy() {
+        image_memcpy()
+        {
             // Should not be called directly
         }
 
@@ -166,29 +163,24 @@ public class H5FD_file_image_callbacks_t {
             MemorySegment apply(MemorySegment _x0, MemorySegment _x1, long _x2, int _x3, MemorySegment _x4);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG,
+                                  hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(image_memcpy.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(image_memcpy.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(image_memcpy.Function fi, Arena arena) {
+        public static MemorySegment allocate(image_memcpy.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -197,16 +189,20 @@ public class H5FD_file_image_callbacks_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static MemorySegment invoke(MemorySegment funcPtr,MemorySegment _x0, MemorySegment _x1, long _x2, int _x3, MemorySegment _x4) {
+        public static MemorySegment invoke(MemorySegment funcPtr, MemorySegment _x0, MemorySegment _x1,
+                                           long _x2, int _x3, MemorySegment _x4)
+        {
             try {
-                return (MemorySegment) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3, _x4);
-            } catch (Throwable ex$) {
+                return (MemorySegment)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3, _x4);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout image_memcpy$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("image_memcpy"));
+    private static final AddressLayout image_memcpy$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("image_memcpy"));
 
     /**
      * Layout for field:
@@ -214,9 +210,7 @@ public class H5FD_file_image_callbacks_t {
      * void *(*image_memcpy)(void *, const void *, size_t, H5FD_file_image_op_t, void *)
      * }
      */
-    public static final AddressLayout image_memcpy$layout() {
-        return image_memcpy$LAYOUT;
-    }
+    public static final AddressLayout image_memcpy$layout() { return image_memcpy$LAYOUT; }
 
     private static final long image_memcpy$OFFSET = 8;
 
@@ -226,9 +220,7 @@ public class H5FD_file_image_callbacks_t {
      * void *(*image_memcpy)(void *, const void *, size_t, H5FD_file_image_op_t, void *)
      * }
      */
-    public static final long image_memcpy$offset() {
-        return image_memcpy$OFFSET;
-    }
+    public static final long image_memcpy$offset() { return image_memcpy$OFFSET; }
 
     /**
      * Getter for field:
@@ -236,7 +228,8 @@ public class H5FD_file_image_callbacks_t {
      * void *(*image_memcpy)(void *, const void *, size_t, H5FD_file_image_op_t, void *)
      * }
      */
-    public static MemorySegment image_memcpy(MemorySegment struct) {
+    public static MemorySegment image_memcpy(MemorySegment struct)
+    {
         return struct.get(image_memcpy$LAYOUT, image_memcpy$OFFSET);
     }
 
@@ -246,7 +239,8 @@ public class H5FD_file_image_callbacks_t {
      * void *(*image_memcpy)(void *, const void *, size_t, H5FD_file_image_op_t, void *)
      * }
      */
-    public static void image_memcpy(MemorySegment struct, MemorySegment fieldValue) {
+    public static void image_memcpy(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(image_memcpy$LAYOUT, image_memcpy$OFFSET, fieldValue);
     }
 
@@ -257,7 +251,8 @@ public class H5FD_file_image_callbacks_t {
      */
     public static class image_realloc {
 
-        image_realloc() {
+        image_realloc()
+        {
             // Should not be called directly
         }
 
@@ -269,27 +264,22 @@ public class H5FD_file_image_callbacks_t {
         }
 
         private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(image_realloc.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(image_realloc.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(image_realloc.Function fi, Arena arena) {
+        public static MemorySegment allocate(image_realloc.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -298,16 +288,20 @@ public class H5FD_file_image_callbacks_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static MemorySegment invoke(MemorySegment funcPtr,MemorySegment _x0, long _x1, int _x2, MemorySegment _x3) {
+        public static MemorySegment invoke(MemorySegment funcPtr, MemorySegment _x0, long _x1, int _x2,
+                                           MemorySegment _x3)
+        {
             try {
-                return (MemorySegment) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3);
-            } catch (Throwable ex$) {
+                return (MemorySegment)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout image_realloc$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("image_realloc"));
+    private static final AddressLayout image_realloc$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("image_realloc"));
 
     /**
      * Layout for field:
@@ -315,9 +309,7 @@ public class H5FD_file_image_callbacks_t {
      * void *(*image_realloc)(void *, size_t, H5FD_file_image_op_t, void *)
      * }
      */
-    public static final AddressLayout image_realloc$layout() {
-        return image_realloc$LAYOUT;
-    }
+    public static final AddressLayout image_realloc$layout() { return image_realloc$LAYOUT; }
 
     private static final long image_realloc$OFFSET = 16;
 
@@ -327,9 +319,7 @@ public class H5FD_file_image_callbacks_t {
      * void *(*image_realloc)(void *, size_t, H5FD_file_image_op_t, void *)
      * }
      */
-    public static final long image_realloc$offset() {
-        return image_realloc$OFFSET;
-    }
+    public static final long image_realloc$offset() { return image_realloc$OFFSET; }
 
     /**
      * Getter for field:
@@ -337,7 +327,8 @@ public class H5FD_file_image_callbacks_t {
      * void *(*image_realloc)(void *, size_t, H5FD_file_image_op_t, void *)
      * }
      */
-    public static MemorySegment image_realloc(MemorySegment struct) {
+    public static MemorySegment image_realloc(MemorySegment struct)
+    {
         return struct.get(image_realloc$LAYOUT, image_realloc$OFFSET);
     }
 
@@ -347,7 +338,8 @@ public class H5FD_file_image_callbacks_t {
      * void *(*image_realloc)(void *, size_t, H5FD_file_image_op_t, void *)
      * }
      */
-    public static void image_realloc(MemorySegment struct, MemorySegment fieldValue) {
+    public static void image_realloc(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(image_realloc$LAYOUT, image_realloc$OFFSET, fieldValue);
     }
 
@@ -358,7 +350,8 @@ public class H5FD_file_image_callbacks_t {
      */
     public static class image_free {
 
-        image_free() {
+        image_free()
+        {
             // Should not be called directly
         }
 
@@ -369,27 +362,23 @@ public class H5FD_file_image_callbacks_t {
             int apply(MemorySegment _x0, int _x1, MemorySegment _x2);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(image_free.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(image_free.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(image_free.Function fi, Arena arena) {
+        public static MemorySegment allocate(image_free.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -398,16 +387,19 @@ public class H5FD_file_image_callbacks_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr,MemorySegment _x0, int _x1, MemorySegment _x2) {
+        public static int invoke(MemorySegment funcPtr, MemorySegment _x0, int _x1, MemorySegment _x2)
+        {
             try {
-                return (int) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
-            } catch (Throwable ex$) {
+                return (int)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout image_free$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("image_free"));
+    private static final AddressLayout image_free$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("image_free"));
 
     /**
      * Layout for field:
@@ -415,9 +407,7 @@ public class H5FD_file_image_callbacks_t {
      * herr_t (*image_free)(void *, H5FD_file_image_op_t, void *)
      * }
      */
-    public static final AddressLayout image_free$layout() {
-        return image_free$LAYOUT;
-    }
+    public static final AddressLayout image_free$layout() { return image_free$LAYOUT; }
 
     private static final long image_free$OFFSET = 24;
 
@@ -427,9 +417,7 @@ public class H5FD_file_image_callbacks_t {
      * herr_t (*image_free)(void *, H5FD_file_image_op_t, void *)
      * }
      */
-    public static final long image_free$offset() {
-        return image_free$OFFSET;
-    }
+    public static final long image_free$offset() { return image_free$OFFSET; }
 
     /**
      * Getter for field:
@@ -437,7 +425,8 @@ public class H5FD_file_image_callbacks_t {
      * herr_t (*image_free)(void *, H5FD_file_image_op_t, void *)
      * }
      */
-    public static MemorySegment image_free(MemorySegment struct) {
+    public static MemorySegment image_free(MemorySegment struct)
+    {
         return struct.get(image_free$LAYOUT, image_free$OFFSET);
     }
 
@@ -447,7 +436,8 @@ public class H5FD_file_image_callbacks_t {
      * herr_t (*image_free)(void *, H5FD_file_image_op_t, void *)
      * }
      */
-    public static void image_free(MemorySegment struct, MemorySegment fieldValue) {
+    public static void image_free(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(image_free$LAYOUT, image_free$OFFSET, fieldValue);
     }
 
@@ -458,7 +448,8 @@ public class H5FD_file_image_callbacks_t {
      */
     public static class udata_copy {
 
-        udata_copy() {
+        udata_copy()
+        {
             // Should not be called directly
         }
 
@@ -469,25 +460,23 @@ public class H5FD_file_image_callbacks_t {
             MemorySegment apply(MemorySegment _x0);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(udata_copy.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(udata_copy.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(udata_copy.Function fi, Arena arena) {
+        public static MemorySegment allocate(udata_copy.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -496,16 +485,19 @@ public class H5FD_file_image_callbacks_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static MemorySegment invoke(MemorySegment funcPtr,MemorySegment _x0) {
+        public static MemorySegment invoke(MemorySegment funcPtr, MemorySegment _x0)
+        {
             try {
-                return (MemorySegment) DOWN$MH.invokeExact(funcPtr, _x0);
-            } catch (Throwable ex$) {
+                return (MemorySegment)DOWN$MH.invokeExact(funcPtr, _x0);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout udata_copy$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("udata_copy"));
+    private static final AddressLayout udata_copy$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("udata_copy"));
 
     /**
      * Layout for field:
@@ -513,9 +505,7 @@ public class H5FD_file_image_callbacks_t {
      * void *(*udata_copy)(void *)
      * }
      */
-    public static final AddressLayout udata_copy$layout() {
-        return udata_copy$LAYOUT;
-    }
+    public static final AddressLayout udata_copy$layout() { return udata_copy$LAYOUT; }
 
     private static final long udata_copy$OFFSET = 32;
 
@@ -525,9 +515,7 @@ public class H5FD_file_image_callbacks_t {
      * void *(*udata_copy)(void *)
      * }
      */
-    public static final long udata_copy$offset() {
-        return udata_copy$OFFSET;
-    }
+    public static final long udata_copy$offset() { return udata_copy$OFFSET; }
 
     /**
      * Getter for field:
@@ -535,7 +523,8 @@ public class H5FD_file_image_callbacks_t {
      * void *(*udata_copy)(void *)
      * }
      */
-    public static MemorySegment udata_copy(MemorySegment struct) {
+    public static MemorySegment udata_copy(MemorySegment struct)
+    {
         return struct.get(udata_copy$LAYOUT, udata_copy$OFFSET);
     }
 
@@ -545,7 +534,8 @@ public class H5FD_file_image_callbacks_t {
      * void *(*udata_copy)(void *)
      * }
      */
-    public static void udata_copy(MemorySegment struct, MemorySegment fieldValue) {
+    public static void udata_copy(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(udata_copy$LAYOUT, udata_copy$OFFSET, fieldValue);
     }
 
@@ -556,7 +546,8 @@ public class H5FD_file_image_callbacks_t {
      */
     public static class udata_free {
 
-        udata_free() {
+        udata_free()
+        {
             // Should not be called directly
         }
 
@@ -567,25 +558,22 @@ public class H5FD_file_image_callbacks_t {
             int apply(MemorySegment _x0);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(udata_free.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(udata_free.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(udata_free.Function fi, Arena arena) {
+        public static MemorySegment allocate(udata_free.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -594,16 +582,19 @@ public class H5FD_file_image_callbacks_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr,MemorySegment _x0) {
+        public static int invoke(MemorySegment funcPtr, MemorySegment _x0)
+        {
             try {
-                return (int) DOWN$MH.invokeExact(funcPtr, _x0);
-            } catch (Throwable ex$) {
+                return (int)DOWN$MH.invokeExact(funcPtr, _x0);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout udata_free$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("udata_free"));
+    private static final AddressLayout udata_free$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("udata_free"));
 
     /**
      * Layout for field:
@@ -611,9 +602,7 @@ public class H5FD_file_image_callbacks_t {
      * herr_t (*udata_free)(void *)
      * }
      */
-    public static final AddressLayout udata_free$layout() {
-        return udata_free$LAYOUT;
-    }
+    public static final AddressLayout udata_free$layout() { return udata_free$LAYOUT; }
 
     private static final long udata_free$OFFSET = 40;
 
@@ -623,9 +612,7 @@ public class H5FD_file_image_callbacks_t {
      * herr_t (*udata_free)(void *)
      * }
      */
-    public static final long udata_free$offset() {
-        return udata_free$OFFSET;
-    }
+    public static final long udata_free$offset() { return udata_free$OFFSET; }
 
     /**
      * Getter for field:
@@ -633,7 +620,8 @@ public class H5FD_file_image_callbacks_t {
      * herr_t (*udata_free)(void *)
      * }
      */
-    public static MemorySegment udata_free(MemorySegment struct) {
+    public static MemorySegment udata_free(MemorySegment struct)
+    {
         return struct.get(udata_free$LAYOUT, udata_free$OFFSET);
     }
 
@@ -643,7 +631,8 @@ public class H5FD_file_image_callbacks_t {
      * herr_t (*udata_free)(void *)
      * }
      */
-    public static void udata_free(MemorySegment struct, MemorySegment fieldValue) {
+    public static void udata_free(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(udata_free$LAYOUT, udata_free$OFFSET, fieldValue);
     }
 
@@ -655,9 +644,7 @@ public class H5FD_file_image_callbacks_t {
      * void *udata
      * }
      */
-    public static final AddressLayout udata$layout() {
-        return udata$LAYOUT;
-    }
+    public static final AddressLayout udata$layout() { return udata$LAYOUT; }
 
     private static final long udata$OFFSET = 48;
 
@@ -667,9 +654,7 @@ public class H5FD_file_image_callbacks_t {
      * void *udata
      * }
      */
-    public static final long udata$offset() {
-        return udata$OFFSET;
-    }
+    public static final long udata$offset() { return udata$OFFSET; }
 
     /**
      * Getter for field:
@@ -677,9 +662,7 @@ public class H5FD_file_image_callbacks_t {
      * void *udata
      * }
      */
-    public static MemorySegment udata(MemorySegment struct) {
-        return struct.get(udata$LAYOUT, udata$OFFSET);
-    }
+    public static MemorySegment udata(MemorySegment struct) { return struct.get(udata$LAYOUT, udata$OFFSET); }
 
     /**
      * Setter for field:
@@ -687,7 +670,8 @@ public class H5FD_file_image_callbacks_t {
      * void *udata
      * }
      */
-    public static void udata(MemorySegment struct, MemorySegment fieldValue) {
+    public static void udata(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(udata$LAYOUT, udata$OFFSET, fieldValue);
     }
 
@@ -695,7 +679,8 @@ public class H5FD_file_image_callbacks_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -707,15 +692,14 @@ public class H5FD_file_image_callbacks_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -723,7 +707,8 @@ public class H5FD_file_image_callbacks_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -731,8 +716,9 @@ public class H5FD_file_image_callbacks_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

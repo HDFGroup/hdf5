@@ -2,24 +2,26 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
 
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-
 /**
  * {@snippet lang=c :
- * typedef herr_t (*H5L_elink_traverse_t)(const char *, const char *, const char *, const char *, unsigned int *, hid_t, void *)
+ * typedef herr_t (*H5L_elink_traverse_t)(const char *, const char *, const char *, const char *, unsigned int
+ * *, hid_t, void *)
  * }
  */
 public class H5L_elink_traverse_t {
 
-    H5L_elink_traverse_t() {
+    H5L_elink_traverse_t()
+    {
         // Should not be called directly
     }
 
@@ -27,34 +29,29 @@ public class H5L_elink_traverse_t {
      * The function pointer signature, expressed as a functional interface
      */
     public interface Function {
-        int apply(MemorySegment parent_file_name, MemorySegment parent_group_name, MemorySegment child_file_name, MemorySegment child_object_name, MemorySegment acc_flags, long fapl_id, MemorySegment op_data);
+        int apply(MemorySegment parent_file_name, MemorySegment parent_group_name,
+                  MemorySegment child_file_name, MemorySegment child_object_name, MemorySegment acc_flags,
+                  long fapl_id, MemorySegment op_data);
     }
 
-    private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-        hdf5_h.C_INT,
-        hdf5_h.C_POINTER,
-        hdf5_h.C_POINTER,
-        hdf5_h.C_POINTER,
-        hdf5_h.C_POINTER,
-        hdf5_h.C_POINTER,
-        hdf5_h.C_LONG,
-        hdf5_h.C_POINTER
-    );
+    private static final FunctionDescriptor $DESC =
+        FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER,
+                              hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG, hdf5_h.C_POINTER);
 
     /**
      * The descriptor of this function pointer
      */
-    public static FunctionDescriptor descriptor() {
-        return $DESC;
-    }
+    public static FunctionDescriptor descriptor() { return $DESC; }
 
-    private static final MethodHandle UP$MH = hdf5_h.upcallHandle(H5L_elink_traverse_t.Function.class, "apply", $DESC);
+    private static final MethodHandle UP$MH =
+        hdf5_h.upcallHandle(H5L_elink_traverse_t.Function.class, "apply", $DESC);
 
     /**
      * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
      * The lifetime of the returned segment is managed by {@code arena}
      */
-    public static MemorySegment allocate(H5L_elink_traverse_t.Function fi, Arena arena) {
+    public static MemorySegment allocate(H5L_elink_traverse_t.Function fi, Arena arena)
+    {
         return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
     }
 
@@ -63,12 +60,17 @@ public class H5L_elink_traverse_t {
     /**
      * Invoke the upcall stub {@code funcPtr}, with given parameters
      */
-    public static int invoke(MemorySegment funcPtr,MemorySegment parent_file_name, MemorySegment parent_group_name, MemorySegment child_file_name, MemorySegment child_object_name, MemorySegment acc_flags, long fapl_id, MemorySegment op_data) {
+    public static int invoke(MemorySegment funcPtr, MemorySegment parent_file_name,
+                             MemorySegment parent_group_name, MemorySegment child_file_name,
+                             MemorySegment child_object_name, MemorySegment acc_flags, long fapl_id,
+                             MemorySegment op_data)
+    {
         try {
-            return (int) DOWN$MH.invokeExact(funcPtr, parent_file_name, parent_group_name, child_file_name, child_object_name, acc_flags, fapl_id, op_data);
-        } catch (Throwable ex$) {
+            return (int)DOWN$MH.invokeExact(funcPtr, parent_file_name, parent_group_name, child_file_name,
+                                            child_object_name, acc_flags, fapl_id, op_data);
+        }
+        catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
     }
 }
-

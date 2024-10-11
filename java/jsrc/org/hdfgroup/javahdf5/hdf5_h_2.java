@@ -2,55 +2,59 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
 
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-
 public class hdf5_h_2 {
 
-    hdf5_h_2() {
+    hdf5_h_2()
+    {
         // Should not be called directly
     }
 
-    static final Arena LIBRARY_ARENA = Arena.ofAuto();
+    static final Arena LIBRARY_ARENA     = Arena.ofAuto();
     static final boolean TRACE_DOWNCALLS = Boolean.getBoolean("jextract.trace.downcalls");
 
-    static void traceDowncall(String name, Object... args) {
-         String traceArgs = Arrays.stream(args)
-                       .map(Object::toString)
-                       .collect(Collectors.joining(", "));
-         System.out.printf("%s(%s)\n", name, traceArgs);
+    static void traceDowncall(String name, Object... args)
+    {
+        String traceArgs = Arrays.stream(args).map(Object::toString).collect(Collectors.joining(", "));
+        System.out.printf("%s(%s)\n", name, traceArgs);
     }
 
-    static MemorySegment findOrThrow(String symbol) {
-        return SYMBOL_LOOKUP.find(symbol)
-            .orElseThrow(() -> new UnsatisfiedLinkError("unresolved symbol: " + symbol));
+    static MemorySegment findOrThrow(String symbol)
+    {
+        return SYMBOL_LOOKUP.find(symbol).orElseThrow(
+            () -> new UnsatisfiedLinkError("unresolved symbol: " + symbol));
     }
 
-    static MethodHandle upcallHandle(Class<?> fi, String name, FunctionDescriptor fdesc) {
+    static MethodHandle upcallHandle(Class<?> fi, String name, FunctionDescriptor fdesc)
+    {
         try {
             return MethodHandles.lookup().findVirtual(fi, name, fdesc.toMethodType());
-        } catch (ReflectiveOperationException ex) {
+        }
+        catch (ReflectiveOperationException ex) {
             throw new AssertionError(ex);
         }
     }
 
-    static MemoryLayout align(MemoryLayout layout, long align) {
-        return switch (layout) {
-            case PaddingLayout p -> p;
-            case ValueLayout v -> v.withByteAlignment(align);
-            case GroupLayout g -> {
-                MemoryLayout[] alignedMembers = g.memberLayouts().stream()
-                        .map(m -> align(m, align)).toArray(MemoryLayout[]::new);
-                yield g instanceof StructLayout ?
-                        MemoryLayout.structLayout(alignedMembers) : MemoryLayout.unionLayout(alignedMembers);
-            }
+    static MemoryLayout align(MemoryLayout layout, long align)
+    {
+        return switch (layout)
+        {
+        case PaddingLayout p -> p; case ValueLayout v -> v.withByteAlignment(align);
+            case GroupLayout g
+            -> { MemoryLayout[] alignedMembers =
+                     g.memberLayouts().stream().map(m -> align(m, align)).toArray(MemoryLayout[] ::new);
+                 yield g instanceof StructLayout ? MemoryLayout.structLayout(alignedMembers):
+            MemoryLayout.unionLayout(alignedMembers);
+        }
             case SequenceLayout s -> MemoryLayout.sequenceLayout(s.elementCount(), align(s.elementLayout(), align));
         };
     }
@@ -14800,4 +14804,3 @@ public class hdf5_h_2 {
         H5T_NATIVE_SHORT_g$constants.SEGMENT.set(H5T_NATIVE_SHORT_g$constants.LAYOUT, 0L, varValue);
     }
 }
-

@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -22,21 +22,19 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class _G_fpos64_t {
 
-    _G_fpos64_t() {
+    _G_fpos64_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_LONG.withName("__pos"),
-        __mbstate_t.layout().withName("__state")
-    ).withName("_G_fpos64_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout.structLayout(hdf5_h.C_LONG.withName("__pos"), __mbstate_t.layout().withName("__state"))
+            .withName("_G_fpos64_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final OfLong __pos$LAYOUT = (OfLong)$LAYOUT.select(groupElement("__pos"));
 
@@ -46,9 +44,7 @@ public class _G_fpos64_t {
      * __off64_t __pos
      * }
      */
-    public static final OfLong __pos$layout() {
-        return __pos$LAYOUT;
-    }
+    public static final OfLong __pos$layout() { return __pos$LAYOUT; }
 
     private static final long __pos$OFFSET = 0;
 
@@ -58,9 +54,7 @@ public class _G_fpos64_t {
      * __off64_t __pos
      * }
      */
-    public static final long __pos$offset() {
-        return __pos$OFFSET;
-    }
+    public static final long __pos$offset() { return __pos$OFFSET; }
 
     /**
      * Getter for field:
@@ -68,9 +62,7 @@ public class _G_fpos64_t {
      * __off64_t __pos
      * }
      */
-    public static long __pos(MemorySegment struct) {
-        return struct.get(__pos$LAYOUT, __pos$OFFSET);
-    }
+    public static long __pos(MemorySegment struct) { return struct.get(__pos$LAYOUT, __pos$OFFSET); }
 
     /**
      * Setter for field:
@@ -78,7 +70,8 @@ public class _G_fpos64_t {
      * __off64_t __pos
      * }
      */
-    public static void __pos(MemorySegment struct, long fieldValue) {
+    public static void __pos(MemorySegment struct, long fieldValue)
+    {
         struct.set(__pos$LAYOUT, __pos$OFFSET, fieldValue);
     }
 
@@ -90,9 +83,7 @@ public class _G_fpos64_t {
      * __mbstate_t __state
      * }
      */
-    public static final GroupLayout __state$layout() {
-        return __state$LAYOUT;
-    }
+    public static final GroupLayout __state$layout() { return __state$LAYOUT; }
 
     private static final long __state$OFFSET = 8;
 
@@ -102,9 +93,7 @@ public class _G_fpos64_t {
      * __mbstate_t __state
      * }
      */
-    public static final long __state$offset() {
-        return __state$OFFSET;
-    }
+    public static final long __state$offset() { return __state$OFFSET; }
 
     /**
      * Getter for field:
@@ -112,7 +101,8 @@ public class _G_fpos64_t {
      * __mbstate_t __state
      * }
      */
-    public static MemorySegment __state(MemorySegment struct) {
+    public static MemorySegment __state(MemorySegment struct)
+    {
         return struct.asSlice(__state$OFFSET, __state$LAYOUT.byteSize());
     }
 
@@ -122,7 +112,8 @@ public class _G_fpos64_t {
      * __mbstate_t __state
      * }
      */
-    public static void __state(MemorySegment struct, MemorySegment fieldValue) {
+    public static void __state(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, __state$OFFSET, __state$LAYOUT.byteSize());
     }
 
@@ -130,7 +121,8 @@ public class _G_fpos64_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -142,15 +134,14 @@ public class _G_fpos64_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -158,7 +149,8 @@ public class _G_fpos64_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -166,8 +158,9 @@ public class _G_fpos64_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

@@ -48,18 +48,18 @@ import org.junit.rules.TestName;
  */
 public class TestH5 {
     @Rule
-    public TestName testname                       = new TestName();
-    private static final String H5_FILE            = "testData.h5";
-    private static final int DIM_X                 = 4;
-    private static final int DIM_Y                 = 6;
-    private static final int DIM_BLKS              = 36;
-    private static final int DIM_PNTS              = 10;
-    private static final int DIM_ATTR              = 12;
-    private static final int RANK                  = 2;
-    long H5fid                                     = H5I_INVALID_HID();
-    long H5dsid                                    = H5I_INVALID_HID();
-    long H5did                                     = H5I_INVALID_HID();
-    long[] H5dims                                  = {DIM_X, DIM_Y};
+    public TestName testname            = new TestName();
+    private static final String H5_FILE = "testData.h5";
+    private static final int DIM_X      = 4;
+    private static final int DIM_Y      = 6;
+    private static final int DIM_BLKS   = 36;
+    private static final int DIM_PNTS   = 10;
+    private static final int DIM_ATTR   = 12;
+    private static final int RANK       = 2;
+    long H5fid                          = H5I_INVALID_HID();
+    long H5dsid                         = H5I_INVALID_HID();
+    long H5did                          = H5I_INVALID_HID();
+    long[] H5dims                       = {DIM_X, DIM_Y};
 
     private final void _deleteFile(String filename)
     {
@@ -275,16 +275,16 @@ public class TestH5 {
     {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the array bytes
-//            MemorySegment efunc = arena.allocateFrom(ValueLayout.ADDRESS);
-//            MemorySegment edata = arena.allocateFrom(ValueLayout.ADDRESS);
-//            try {
-//                H5Eget_auto2(H5E_DEFAULT(), efunc, edata);
-//                H5Eset_auto2(H5E_DEFAULT(), null, null);
-//                H5Eset_auto2(H5E_DEFAULT(), efunc, edata);
-//            }
-//            catch (Throwable err) {
-//                fail("H5Eget_auto2 failed: " + err);
-//            }
+            //            MemorySegment efunc = arena.allocateFrom(ValueLayout.ADDRESS);
+            //            MemorySegment edata = arena.allocateFrom(ValueLayout.ADDRESS);
+            //            try {
+            //                H5Eget_auto2(H5E_DEFAULT(), efunc, edata);
+            //                H5Eset_auto2(H5E_DEFAULT(), null, null);
+            //                H5Eset_auto2(H5E_DEFAULT(), efunc, edata);
+            //            }
+            //            catch (Throwable err) {
+            //                fail("H5Eget_auto2 failed: " + err);
+            //            }
         }
         catch (Throwable err) {
             err.printStackTrace();

@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -28,29 +28,26 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5FD_onion_fapl_info_t {
 
-    H5FD_onion_fapl_info_t() {
+    H5FD_onion_fapl_info_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_CHAR.withName("version"),
-        MemoryLayout.paddingLayout(7),
-        hdf5_h.C_LONG.withName("backing_fapl_id"),
-        hdf5_h.C_INT.withName("page_size"),
-        hdf5_h.C_INT.withName("store_target"),
-        hdf5_h.C_LONG.withName("revision_num"),
-        hdf5_h.C_CHAR.withName("force_write_open"),
-        hdf5_h.C_CHAR.withName("creation_flags"),
-        MemoryLayout.sequenceLayout(256, hdf5_h.C_CHAR).withName("comment"),
-        MemoryLayout.paddingLayout(6)
-    ).withName("H5FD_onion_fapl_info_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_CHAR.withName("version"), MemoryLayout.paddingLayout(7),
+                          hdf5_h.C_LONG.withName("backing_fapl_id"), hdf5_h.C_INT.withName("page_size"),
+                          hdf5_h.C_INT.withName("store_target"), hdf5_h.C_LONG.withName("revision_num"),
+                          hdf5_h.C_CHAR.withName("force_write_open"),
+                          hdf5_h.C_CHAR.withName("creation_flags"),
+                          MemoryLayout.sequenceLayout(256, hdf5_h.C_CHAR).withName("comment"),
+                          MemoryLayout.paddingLayout(6))
+            .withName("H5FD_onion_fapl_info_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final OfByte version$LAYOUT = (OfByte)$LAYOUT.select(groupElement("version"));
 
@@ -60,9 +57,7 @@ public class H5FD_onion_fapl_info_t {
      * uint8_t version
      * }
      */
-    public static final OfByte version$layout() {
-        return version$LAYOUT;
-    }
+    public static final OfByte version$layout() { return version$LAYOUT; }
 
     private static final long version$OFFSET = 0;
 
@@ -72,9 +67,7 @@ public class H5FD_onion_fapl_info_t {
      * uint8_t version
      * }
      */
-    public static final long version$offset() {
-        return version$OFFSET;
-    }
+    public static final long version$offset() { return version$OFFSET; }
 
     /**
      * Getter for field:
@@ -82,9 +75,7 @@ public class H5FD_onion_fapl_info_t {
      * uint8_t version
      * }
      */
-    public static byte version(MemorySegment struct) {
-        return struct.get(version$LAYOUT, version$OFFSET);
-    }
+    public static byte version(MemorySegment struct) { return struct.get(version$LAYOUT, version$OFFSET); }
 
     /**
      * Setter for field:
@@ -92,11 +83,13 @@ public class H5FD_onion_fapl_info_t {
      * uint8_t version
      * }
      */
-    public static void version(MemorySegment struct, byte fieldValue) {
+    public static void version(MemorySegment struct, byte fieldValue)
+    {
         struct.set(version$LAYOUT, version$OFFSET, fieldValue);
     }
 
-    private static final OfLong backing_fapl_id$LAYOUT = (OfLong)$LAYOUT.select(groupElement("backing_fapl_id"));
+    private static final OfLong backing_fapl_id$LAYOUT =
+        (OfLong)$LAYOUT.select(groupElement("backing_fapl_id"));
 
     /**
      * Layout for field:
@@ -104,9 +97,7 @@ public class H5FD_onion_fapl_info_t {
      * hid_t backing_fapl_id
      * }
      */
-    public static final OfLong backing_fapl_id$layout() {
-        return backing_fapl_id$LAYOUT;
-    }
+    public static final OfLong backing_fapl_id$layout() { return backing_fapl_id$LAYOUT; }
 
     private static final long backing_fapl_id$OFFSET = 8;
 
@@ -116,9 +107,7 @@ public class H5FD_onion_fapl_info_t {
      * hid_t backing_fapl_id
      * }
      */
-    public static final long backing_fapl_id$offset() {
-        return backing_fapl_id$OFFSET;
-    }
+    public static final long backing_fapl_id$offset() { return backing_fapl_id$OFFSET; }
 
     /**
      * Getter for field:
@@ -126,7 +115,8 @@ public class H5FD_onion_fapl_info_t {
      * hid_t backing_fapl_id
      * }
      */
-    public static long backing_fapl_id(MemorySegment struct) {
+    public static long backing_fapl_id(MemorySegment struct)
+    {
         return struct.get(backing_fapl_id$LAYOUT, backing_fapl_id$OFFSET);
     }
 
@@ -136,7 +126,8 @@ public class H5FD_onion_fapl_info_t {
      * hid_t backing_fapl_id
      * }
      */
-    public static void backing_fapl_id(MemorySegment struct, long fieldValue) {
+    public static void backing_fapl_id(MemorySegment struct, long fieldValue)
+    {
         struct.set(backing_fapl_id$LAYOUT, backing_fapl_id$OFFSET, fieldValue);
     }
 
@@ -148,9 +139,7 @@ public class H5FD_onion_fapl_info_t {
      * uint32_t page_size
      * }
      */
-    public static final OfInt page_size$layout() {
-        return page_size$LAYOUT;
-    }
+    public static final OfInt page_size$layout() { return page_size$LAYOUT; }
 
     private static final long page_size$OFFSET = 16;
 
@@ -160,9 +149,7 @@ public class H5FD_onion_fapl_info_t {
      * uint32_t page_size
      * }
      */
-    public static final long page_size$offset() {
-        return page_size$OFFSET;
-    }
+    public static final long page_size$offset() { return page_size$OFFSET; }
 
     /**
      * Getter for field:
@@ -170,7 +157,8 @@ public class H5FD_onion_fapl_info_t {
      * uint32_t page_size
      * }
      */
-    public static int page_size(MemorySegment struct) {
+    public static int page_size(MemorySegment struct)
+    {
         return struct.get(page_size$LAYOUT, page_size$OFFSET);
     }
 
@@ -180,7 +168,8 @@ public class H5FD_onion_fapl_info_t {
      * uint32_t page_size
      * }
      */
-    public static void page_size(MemorySegment struct, int fieldValue) {
+    public static void page_size(MemorySegment struct, int fieldValue)
+    {
         struct.set(page_size$LAYOUT, page_size$OFFSET, fieldValue);
     }
 
@@ -192,9 +181,7 @@ public class H5FD_onion_fapl_info_t {
      * H5FD_onion_target_file_constant_t store_target
      * }
      */
-    public static final OfInt store_target$layout() {
-        return store_target$LAYOUT;
-    }
+    public static final OfInt store_target$layout() { return store_target$LAYOUT; }
 
     private static final long store_target$OFFSET = 20;
 
@@ -204,9 +191,7 @@ public class H5FD_onion_fapl_info_t {
      * H5FD_onion_target_file_constant_t store_target
      * }
      */
-    public static final long store_target$offset() {
-        return store_target$OFFSET;
-    }
+    public static final long store_target$offset() { return store_target$OFFSET; }
 
     /**
      * Getter for field:
@@ -214,7 +199,8 @@ public class H5FD_onion_fapl_info_t {
      * H5FD_onion_target_file_constant_t store_target
      * }
      */
-    public static int store_target(MemorySegment struct) {
+    public static int store_target(MemorySegment struct)
+    {
         return struct.get(store_target$LAYOUT, store_target$OFFSET);
     }
 
@@ -224,7 +210,8 @@ public class H5FD_onion_fapl_info_t {
      * H5FD_onion_target_file_constant_t store_target
      * }
      */
-    public static void store_target(MemorySegment struct, int fieldValue) {
+    public static void store_target(MemorySegment struct, int fieldValue)
+    {
         struct.set(store_target$LAYOUT, store_target$OFFSET, fieldValue);
     }
 
@@ -236,9 +223,7 @@ public class H5FD_onion_fapl_info_t {
      * uint64_t revision_num
      * }
      */
-    public static final OfLong revision_num$layout() {
-        return revision_num$LAYOUT;
-    }
+    public static final OfLong revision_num$layout() { return revision_num$LAYOUT; }
 
     private static final long revision_num$OFFSET = 24;
 
@@ -248,9 +233,7 @@ public class H5FD_onion_fapl_info_t {
      * uint64_t revision_num
      * }
      */
-    public static final long revision_num$offset() {
-        return revision_num$OFFSET;
-    }
+    public static final long revision_num$offset() { return revision_num$OFFSET; }
 
     /**
      * Getter for field:
@@ -258,7 +241,8 @@ public class H5FD_onion_fapl_info_t {
      * uint64_t revision_num
      * }
      */
-    public static long revision_num(MemorySegment struct) {
+    public static long revision_num(MemorySegment struct)
+    {
         return struct.get(revision_num$LAYOUT, revision_num$OFFSET);
     }
 
@@ -268,11 +252,13 @@ public class H5FD_onion_fapl_info_t {
      * uint64_t revision_num
      * }
      */
-    public static void revision_num(MemorySegment struct, long fieldValue) {
+    public static void revision_num(MemorySegment struct, long fieldValue)
+    {
         struct.set(revision_num$LAYOUT, revision_num$OFFSET, fieldValue);
     }
 
-    private static final OfByte force_write_open$LAYOUT = (OfByte)$LAYOUT.select(groupElement("force_write_open"));
+    private static final OfByte force_write_open$LAYOUT =
+        (OfByte)$LAYOUT.select(groupElement("force_write_open"));
 
     /**
      * Layout for field:
@@ -280,9 +266,7 @@ public class H5FD_onion_fapl_info_t {
      * uint8_t force_write_open
      * }
      */
-    public static final OfByte force_write_open$layout() {
-        return force_write_open$LAYOUT;
-    }
+    public static final OfByte force_write_open$layout() { return force_write_open$LAYOUT; }
 
     private static final long force_write_open$OFFSET = 32;
 
@@ -292,9 +276,7 @@ public class H5FD_onion_fapl_info_t {
      * uint8_t force_write_open
      * }
      */
-    public static final long force_write_open$offset() {
-        return force_write_open$OFFSET;
-    }
+    public static final long force_write_open$offset() { return force_write_open$OFFSET; }
 
     /**
      * Getter for field:
@@ -302,7 +284,8 @@ public class H5FD_onion_fapl_info_t {
      * uint8_t force_write_open
      * }
      */
-    public static byte force_write_open(MemorySegment struct) {
+    public static byte force_write_open(MemorySegment struct)
+    {
         return struct.get(force_write_open$LAYOUT, force_write_open$OFFSET);
     }
 
@@ -312,11 +295,13 @@ public class H5FD_onion_fapl_info_t {
      * uint8_t force_write_open
      * }
      */
-    public static void force_write_open(MemorySegment struct, byte fieldValue) {
+    public static void force_write_open(MemorySegment struct, byte fieldValue)
+    {
         struct.set(force_write_open$LAYOUT, force_write_open$OFFSET, fieldValue);
     }
 
-    private static final OfByte creation_flags$LAYOUT = (OfByte)$LAYOUT.select(groupElement("creation_flags"));
+    private static final OfByte creation_flags$LAYOUT =
+        (OfByte)$LAYOUT.select(groupElement("creation_flags"));
 
     /**
      * Layout for field:
@@ -324,9 +309,7 @@ public class H5FD_onion_fapl_info_t {
      * uint8_t creation_flags
      * }
      */
-    public static final OfByte creation_flags$layout() {
-        return creation_flags$LAYOUT;
-    }
+    public static final OfByte creation_flags$layout() { return creation_flags$LAYOUT; }
 
     private static final long creation_flags$OFFSET = 33;
 
@@ -336,9 +319,7 @@ public class H5FD_onion_fapl_info_t {
      * uint8_t creation_flags
      * }
      */
-    public static final long creation_flags$offset() {
-        return creation_flags$OFFSET;
-    }
+    public static final long creation_flags$offset() { return creation_flags$OFFSET; }
 
     /**
      * Getter for field:
@@ -346,7 +327,8 @@ public class H5FD_onion_fapl_info_t {
      * uint8_t creation_flags
      * }
      */
-    public static byte creation_flags(MemorySegment struct) {
+    public static byte creation_flags(MemorySegment struct)
+    {
         return struct.get(creation_flags$LAYOUT, creation_flags$OFFSET);
     }
 
@@ -356,11 +338,13 @@ public class H5FD_onion_fapl_info_t {
      * uint8_t creation_flags
      * }
      */
-    public static void creation_flags(MemorySegment struct, byte fieldValue) {
+    public static void creation_flags(MemorySegment struct, byte fieldValue)
+    {
         struct.set(creation_flags$LAYOUT, creation_flags$OFFSET, fieldValue);
     }
 
-    private static final SequenceLayout comment$LAYOUT = (SequenceLayout)$LAYOUT.select(groupElement("comment"));
+    private static final SequenceLayout comment$LAYOUT =
+        (SequenceLayout)$LAYOUT.select(groupElement("comment"));
 
     /**
      * Layout for field:
@@ -368,9 +352,7 @@ public class H5FD_onion_fapl_info_t {
      * char comment[256]
      * }
      */
-    public static final SequenceLayout comment$layout() {
-        return comment$LAYOUT;
-    }
+    public static final SequenceLayout comment$layout() { return comment$LAYOUT; }
 
     private static final long comment$OFFSET = 34;
 
@@ -380,9 +362,7 @@ public class H5FD_onion_fapl_info_t {
      * char comment[256]
      * }
      */
-    public static final long comment$offset() {
-        return comment$OFFSET;
-    }
+    public static final long comment$offset() { return comment$OFFSET; }
 
     /**
      * Getter for field:
@@ -390,7 +370,8 @@ public class H5FD_onion_fapl_info_t {
      * char comment[256]
      * }
      */
-    public static MemorySegment comment(MemorySegment struct) {
+    public static MemorySegment comment(MemorySegment struct)
+    {
         return struct.asSlice(comment$OFFSET, comment$LAYOUT.byteSize());
     }
 
@@ -400,11 +381,12 @@ public class H5FD_onion_fapl_info_t {
      * char comment[256]
      * }
      */
-    public static void comment(MemorySegment struct, MemorySegment fieldValue) {
+    public static void comment(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, comment$OFFSET, comment$LAYOUT.byteSize());
     }
 
-    private static long[] comment$DIMS = { 256 };
+    private static long[] comment$DIMS = {256};
 
     /**
      * Dimensions for array field:
@@ -412,9 +394,7 @@ public class H5FD_onion_fapl_info_t {
      * char comment[256]
      * }
      */
-    public static long[] comment$dimensions() {
-        return comment$DIMS;
-    }
+    public static long[] comment$dimensions() { return comment$DIMS; }
     private static final VarHandle comment$ELEM_HANDLE = comment$LAYOUT.varHandle(sequenceElement());
 
     /**
@@ -423,7 +403,8 @@ public class H5FD_onion_fapl_info_t {
      * char comment[256]
      * }
      */
-    public static byte comment(MemorySegment struct, long index0) {
+    public static byte comment(MemorySegment struct, long index0)
+    {
         return (byte)comment$ELEM_HANDLE.get(struct, 0L, index0);
     }
 
@@ -433,7 +414,8 @@ public class H5FD_onion_fapl_info_t {
      * char comment[256]
      * }
      */
-    public static void comment(MemorySegment struct, long index0, byte fieldValue) {
+    public static void comment(MemorySegment struct, long index0, byte fieldValue)
+    {
         comment$ELEM_HANDLE.set(struct, 0L, index0, fieldValue);
     }
 
@@ -441,7 +423,8 @@ public class H5FD_onion_fapl_info_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -453,15 +436,14 @@ public class H5FD_onion_fapl_info_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -469,7 +451,8 @@ public class H5FD_onion_fapl_info_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -477,8 +460,9 @@ public class H5FD_onion_fapl_info_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-
