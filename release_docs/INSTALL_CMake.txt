@@ -69,8 +69,8 @@ External compression plugin libraries from https://github.com/HDFGroup/hdf5_plug
     hdf5_plugins.tar.gz
 
 External compression szip and zlib libraries:
-    ZLIB          "https://github.com/madler/zlib/releases/download/v1.3/zlib-1.3.tar.gz"
-    ZLIBNG        "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.1.6.tar.gz"
+    ZLIB          "https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz"
+    ZLIBNG        "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.2.2.tar.gz"
     LIBAEC        "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3/libaec-1.1.3.tar.gz"
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
@@ -531,13 +531,13 @@ These five steps are described in detail below.
             ########################
             set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
             set (ZLIB_TGZ_NAME "zlib-1.3.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
-            set (ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.3" CACHE STRING "Use ZLIB from original location" FORCE)
+            set (ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.3.1" CACHE STRING "Use ZLIB from original location" FORCE)
             set (ZLIB_USE_LOCALCONTENT ON CACHE BOOL "Use local file for ZLIB FetchContent" FORCE)
             set (ZLIB_GIT_URL "https://github.com/madler/zlib.git" CACHE STRING "Use ZLIB from  GitHub repository" FORCE)
             set (ZLIB_GIT_BRANCH "develop" CACHE STRING "" FORCE)
             set (HDF5_USE_ZLIB_NG OFF CACHE BOOL "Use zlib-ng library as zlib library" FORCE)
             set (ZLIBNG_PACKAGE_NAME "zlib-ng" CACHE STRING "Name of ZLIBNG package" FORCE)
-            set (ZLIBNG_TGZ_NAME "2.1.6.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
+            set (ZLIBNG_TGZ_NAME "2.2.2.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
             set (ZLIBNG_TGZ_ORIGPATH "https://github.com/zlib-ng/zlib-ng/archive/refs/tags" CACHE STRING "Use ZLIBNG from original location" FORCE)
             set (ZLIBNG_GIT_URL "https://github.com/zlib-ng/zlib-ng.git" CACHE STRING "Use ZLIBNG from  GitHub repository" FORCE)
             set (ZLIBNG_GIT_BRANCH "develop" CACHE STRING "" FORCE)
@@ -580,7 +580,7 @@ These five steps are described in detail below.
             set (BLOSC_PACKAGE_NAME "blosc" CACHE STRING "Name of BLOSC package" FORCE)
             set (BLOSC_ZLIB_GIT_URL "https://github.com/madler/zlib.git" CACHE STRING "Use ZLIB from  GitHub repository" FORCE)
             set (BLOSC_ZLIB_GIT_BRANCH "develop" CACHE STRING "" FORCE)
-            set (BLOSC_ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.3" CACHE STRING "Use PLUGINS from original location" FORCE)
+            set (BLOSC_ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.3.1" CACHE STRING "Use PLUGINS from original location" FORCE)
             set (BLOSC_ZLIB_TGZ_NAME "zlib-1.3.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
             set (BLOSC_ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of BLOSC_ZLIB package" FORCE)
             ########
@@ -593,7 +593,7 @@ These five steps are described in detail below.
             set (BLOSC2_PACKAGE_NAME "blosc2" CACHE STRING "Name of BLOSC2 package" FORCE)
             set (BLOSC2_ZLIB_GIT_URL "https://github.com/madler/zlib.git" CACHE STRING "Use ZLIB from  GitHub repository" FORCE)
             set (BLOSC2_ZLIB_GIT_BRANCH "develop" CACHE STRING "" FORCE)
-            set (BLOSC2_ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.3" CACHE STRING "Use PLUGINS from original location" FORCE)
+            set (BLOSC2_ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.3.1" CACHE STRING "Use PLUGINS from original location" FORCE)
             set (BLOSC2_ZLIB_TGZ_NAME "zlib-1.3.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
             set (BLOSC2_ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of BLOSC2_ZLIB package" FORCE)
             ########
@@ -944,12 +944,12 @@ HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                           ON
 
 if (HDF5_USE_ZLIB_NG)
     ZLIBNG_USE_EXTERNAL     "Use External Library Building for ZLIBNG"      OFF
-    ZLIBNG_TGZ_ORIGPATH     "Use ZLIBNG from original location"             "https://github.com/zlib-ng/zlib-ng/releases/tag/2.1.6"
-    ZLIBNG_TGZ_NAME         "Use ZLIBNG from original compressed file"      "2.1.6.tar.gz"
+    ZLIBNG_TGZ_ORIGPATH     "Use ZLIBNG from original location"             "https://github.com/zlib-ng/zlib-ng/releases/tag/2.2.2"
+    ZLIBNG_TGZ_NAME         "Use ZLIBNG from original compressed file"      "2.2.2.tar.gz"
 else
     ZLIB_USE_EXTERNAL       "Use External Library Building for ZLIB"        OFF
-    ZLIB_TGZ_ORIGPATH       "Use ZLIB from original location"               "https://github.com/madler/zlib/releases/download/v1.2.13"
-    ZLIB_TGZ_NAME           "Use ZLIB from original compressed file"        "zlib-1.2.13.tar.gz"
+    ZLIB_TGZ_ORIGPATH       "Use ZLIB from original location"               "https://github.com/madler/zlib/releases/download/v1.3.1"
+    ZLIB_TGZ_NAME           "Use ZLIB from original compressed file"        "zlib-1.3.1.tar.gz"
 ZLIB_USE_LOCALCONTENT       "Use local file for ZLIB FetchContent"          ON
 HDF5_USE_ZLIB_STATIC        "Find static zlib library"                      OFF
 
