@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.18)
 set (CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 project (ZLIB C)
 
-set (VERSION "1.3")
+set(VERSION "1.3.1")
 
 #-----------------------------------------------------------------------------
 # Basic ZLIB stuff here
@@ -131,6 +131,7 @@ set_directory_properties (PROPERTIES INCLUDE_DIRECTORIES
 if (MSVC)
   set(CMAKE_DEBUG_POSTFIX "d")
   add_definitions (-D_BIND_TO_CURRENT_VCLIBS_VERSION=1)
+  add_definitions (-D_CRT_SECURE_NO_DEPRECATE)
   add_definitions (-D_CRT_SECURE_NO_WARNINGS)
   add_definitions (-D_CONSOLE)
   add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
@@ -191,7 +192,10 @@ set(ZLIB_SRCS
 )
 
 add_library(${ZLIB_LIB_TARGET} STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
-target_include_directories(${ZLIB_LIB_TARGET} PRIVATE "${CMAKE_BINARY_DIR}")
+target_include_directories(${ZLIB_LIB_TARGET}
+    PRIVATE "${CMAKE_BINARY_DIR}"
+    PUBLIC "${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}"
+)
 if (MSVC AND CMAKE_CL_64)
   set_target_properties (${ZLIB_LIB_TARGET} PROPERTIES STATIC_LIBRARY_FLAGS "/machine:x64")
 endif ()
