@@ -405,20 +405,6 @@ jobs:
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-macos-Clang --fresh
-        # This needs to be true to proceed to the next step of failure
-        continue-on-error: true
-        shell: bash
-
-      - name: Run ctest 2nd attempt (MacOS_latest)
-        id: run-ctest2
-        env:
-          BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
-          SIGNER: ${{ vars.SIGNER }}
-        run: |
-          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
-          cmake --workflow --preset=${{ inputs.preset_name }}-macos-Clang --fresh
-        # Only run this step if run-ctest fails.
-        if: steps.run-ctest.outcome == 'failure'
         shell: bash
 
       - name: Sign dmg (MacOS_latest)
