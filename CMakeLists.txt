@@ -858,8 +858,8 @@ if (HDF5_ENABLE_SUBFILING_VFD)
 endif()
 
 
-set (DEFAULT_API_VERSION "v118" CACHE STRING "Enable v1.16 API (v16, v18, v110, v112, v114, v116, v118)")
-set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v116 v118)
+set (DEFAULT_API_VERSION "v210" CACHE STRING "Enable v2.0.0 API (v16, v18, v110, v112, v114, v200, v210)")
+set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v200 v210)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------
@@ -901,22 +901,22 @@ if (DEFAULT_API_VERSION MATCHES "v114")
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to use 1.16.x API
+# Option to use 2.0.0.x API
 #-----------------------------------------------------------------------------
-set (H5_USE_116_API_DEFAULT 0)
-if (DEFAULT_API_VERSION MATCHES "v116")
-  set (H5_USE_116_API_DEFAULT 1)
+set (H5_USE_200_API_DEFAULT 0)
+if (DEFAULT_API_VERSION MATCHES "v200")
+  set (H5_USE_200_API_DEFAULT 1)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to use 1.18.x API
+# Option to use 2.1.0.x API
 #-----------------------------------------------------------------------------
 if (NOT DEFAULT_API_VERSION)
-  set (DEFAULT_API_VERSION "v118")
+  set (DEFAULT_API_VERSION "v210")
 endif ()
-set (H5_USE_118_API_DEFAULT 0)
-if (DEFAULT_API_VERSION MATCHES "v118")
-  set (H5_USE_118_API_DEFAULT 1)
+set (H5_USE_210_API_DEFAULT 0)
+if (DEFAULT_API_VERSION MATCHES "v210")
+  set (H5_USE_210_API_DEFAULT 1)
 endif ()
 
 #-----------------------------------------------------------------------------

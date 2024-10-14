@@ -5061,11 +5061,11 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *                  objects created with this setting.</td>
  *           </tr>
  *           <tr>
- *            <td>\p low=#H5F_LIBVER_V116<br />
+ *            <td>\p low=#H5F_LIBVER_V200<br />
  *                \p high=<any version higher than \p low but not #H5F_LIBVER_LATEST></td>
  *             <td>
  *              \li The library will create objects with the latest format
- *                  versions available to library release 1.16.x.
+ *                  versions available to library release 2.0.0.x.
  *              \li The library will allow objects to be created with the latest
  *                  format versions available to library release specified
  *                  in the \p high value.
@@ -5076,11 +5076,11 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *                  objects created with this setting.</td>
  *           </tr>
  *           <tr>
- *            <td>\p low=#H5F_LIBVER_V118<br />
+ *            <td>\p low=#H5F_LIBVER_V210<br />
  *                \p high=<any version higher than \p low but not #H5F_LIBVER_LATEST></td>
  *             <td>
  *              \li The library will create objects with the latest format
- *                  versions available to library release 1.18.x.
+ *                  versions available to library release 2.1.0.x.
  *              \li The library will allow objects to be created with the latest
  *                  format versions available to library release specified
  *                  in the \p high value.
@@ -5150,10 +5150,10 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *          </table>
  *
  * \note *H5F_LIBVER_LATEST*:<br />
- *                 Since 1.16.x is also #H5F_LIBVER_LATEST, there is no upper
+ *                 Since 2.0.0.x is also #H5F_LIBVER_LATEST, there is no upper
  *                 limit on the format versions to use.  That is, if a
  *                 newer format version is required to support a feature
- *                 in 1.16.x series, this setting will allow the object to be
+ *                 in 2.0.0.x series, this setting will allow the object to be
  *                 created.
  *
  * \version 1.10.2 #H5F_LIBVER_V18 added to the enumerated defines in
@@ -6067,7 +6067,7 @@ H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize);
  *          which is a 32-bit signed long value on Windows, which limited
  *          the valid offset that can be returned to 2 GiB.
  *
- * \version 1.16.0 \p offset parameter type changed to HDoff_t from off_t.
+ * \version 2.0.0.0 \p offset parameter type changed to HDoff_t from off_t.
  * \version 1.6.4 \p idx parameter type changed to unsigned.
  * \since 1.0.0
  *
@@ -6564,7 +6564,7 @@ H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
  *          which is a 32-bit signed long value on Windows, which limited
  *          the valid offset that can be set to 2 GiB.
  *
- * \version 1.16.0 \p offset parameter type changed to HDoff_t from off_t.
+ * \version 2.0.0.0 \p offset parameter type changed to HDoff_t from off_t.
  * \since 1.0.0
  *
  */

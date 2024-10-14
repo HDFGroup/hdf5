@@ -46,7 +46,7 @@
 /* Test file names, using H5F_libver_t as indices */
 static const char *FILENAME[] = {
     "tchunk_info_earliest", "tchunk_info_v18",  "tchunk_info_v110", "tchunk_info_v112",
-    "tchunk_info_v114",     "tchunk_info_v116", "tchunk_info_v118", NULL};
+    "tchunk_info_v114",     "tchunk_info_v200", "tchunk_info_v210", NULL};
 
 /* File to be used in test_failed_attempts */
 #define FILTERMASK_FILE "tflt_msk"
