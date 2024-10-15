@@ -162,6 +162,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
     /* Check for invalid datatype size */
     if (dt->shared->size == 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "invalid datatype size");
+    if (H5T_IS_ATOMIC(dt->shared) && (dt->shared->size > SIZE_MAX / 8))
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "number of bits in atomic datatype would overflow size_t");
 
     switch (dt->shared->type) {
         case H5T_INTEGER:
