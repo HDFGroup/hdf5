@@ -2075,9 +2075,9 @@ H5O__get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
 herr_t
 H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
 {
-    H5O_t     *oh        = NULL;    /* Object header */
+    H5O_t     *oh        = NULL;             /* Object header */
     H5O_type_t obj_type  = H5O_TYPE_UNKNOWN; /* Type of object */
-    herr_t     ret_value = SUCCEED; /* Return value */
+    herr_t     ret_value = SUCCEED;          /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(loc->addr, FAIL)
 
