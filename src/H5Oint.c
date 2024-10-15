@@ -2075,8 +2075,9 @@ H5O__get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
 herr_t
 H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
 {
-    H5O_t *oh        = NULL;    /* Object header */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5O_t     *oh        = NULL;    /* Object header */
+    H5O_type_t obj_type  = H5O_TYPE_UNKNOWN; /* Type of object */
+    herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(loc->addr, FAIL)
 
@@ -2092,9 +2093,13 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
     if (H5O__reset_info2(oinfo) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't reset object data struct");
 
+    /* Get type of object */
+    if (H5O__obj_type_real(oh, &obj_type) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine object type");
+    oinfo->type = obj_type;
+
     /* Get basic information, if requested */
     if (fields & H5O_INFO_BASIC) {
-        H5O_type_t obj_type = H5O_TYPE_UNKNOWN; /* Type of object */
 
         /* Retrieve the file's fileno */
         H5F_GET_FILENO(loc->file, oinfo->fileno);
@@ -2102,13 +2107,6 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
         /* Set the object's address into the token */
         if (H5VL_native_addr_to_token(loc->file, H5I_FILE, loc->addr, &oinfo->token) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL, "can't serialize address into object token");
-
-        /* Get type of object */
-        if (H5O__obj_type_real(oh, &obj_type) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine object type");
-
-        /* Set the type of the object */
-        oinfo->type = obj_type;
 
         /* Set the object's reference count */
         oinfo->rc = oh->nlink;
