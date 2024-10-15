@@ -113,7 +113,7 @@ endif ()
 #  endforeach ()
 #endif ()
 #if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "2.0")
-#  foreach (example_name ${1_16_examples})
+#  foreach (example_name ${2_0_examples})
 #    if (H5EX_BUILD_TESTING)
 #      add_custom_command (
 #          TARGET     ${EXAMPLE_VARNAME}_${example_name}
@@ -209,7 +209,7 @@ if (HDF5_BUILD_TOOLS)
 #  endforeach ()
 #  foreach (example_name ${1_14_examples})
 #  endforeach ()
-#  foreach (example_name ${1_16_examples})
+#  foreach (example_name ${2_0_examples})
 #  endforeach ()
 endif ()
 

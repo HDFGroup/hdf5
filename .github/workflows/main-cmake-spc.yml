@@ -319,7 +319,7 @@ jobs:
         run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
 
-  build_v1_16:
+  build_v2_0:
     name: "gcc DBG v2.0.0 default API"
     runs-on: ubuntu-latest
     steps:
