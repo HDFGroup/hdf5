@@ -858,7 +858,7 @@ if (HDF5_ENABLE_SUBFILING_VFD)
 endif()
 
 
-set (DEFAULT_API_VERSION "v210" CACHE STRING "Enable v2.0.0 API (v16, v18, v110, v112, v114, v200, v210)")
+set (DEFAULT_API_VERSION "v210" CACHE STRING "Enable v2.1.0 API (v16, v18, v110, v112, v114, v200, v210)")
 set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v200 v210)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API

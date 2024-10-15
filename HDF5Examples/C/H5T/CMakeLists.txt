@@ -97,7 +97,7 @@ endforeach ()
 #    endif ()
 #  endforeach ()
 #endif ()
-#if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "2.0.0")
+#if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "2.0")
 #  foreach (example_name ${1_16_examples})
 #    if (H5EX_BUILD_TESTING)
 #      add_custom_command (
@@ -321,7 +321,7 @@ if (HDF5_BUILD_TOOLS)
       #      ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/114/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
       #  )
       #endif ()
-      #if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "2.0.0")
+      #if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "2.0")
       #  add_custom_command (
       #      TARGET     ${EXAMPLE_VARNAME}_${example_name}
       #      POST_BUILD

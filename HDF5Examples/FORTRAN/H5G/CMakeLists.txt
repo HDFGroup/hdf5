@@ -110,7 +110,7 @@ endforeach ()
 #    endif ()
 #  endforeach ()
 #endif ()
-#if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "2.0.0")
+#if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "2.0")
 #  foreach (example_name ${1_16_examples})
 #    if (H5EX_BUILD_TESTING)
 #      add_custom_command (
