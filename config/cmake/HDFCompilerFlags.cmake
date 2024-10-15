@@ -427,3 +427,33 @@ if (HDF5_ENABLE_OPTIMIZATION)
   list (APPEND HDF5_CMAKE_C_FLAGS "${OPTIMIZE_CFLAGS}")
 endif ()
 MARK_AS_ADVANCED (HDF5_ENABLE_OPTIMIZATION)
+
+#-----------------------------------------------------------------------------
+# The build mode flags are not added to CMAKE_C_FLAGS, so create a separate
+# variable for them so they can be written out to libhdf5.settings and
+# H5build_settings.c
+#-----------------------------------------------------------------------------
+set (HDF5_BUILD_MODE_C_FLAGS "")
+set (HDF5_BUILD_MODE_Fortran_FLAGS "")
+set (HDF5_BUILD_MODE_CXX_FLAGS "")
+if ("${HDF_CFG_NAME}" STREQUAL "Debug")
+    set (HDF5_BUILD_MODE_C_FLAGS       "${CMAKE_C_FLAGS_DEBUG}")
+    set (HDF5_BUILD_MODE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS_DEBUG}")
+    set (HDF5_BUILD_MODE_CXX_FLAGS     "${CMAKE_CXX_FLAGS_DEBUG}")
+elseif ("${HDF_CFG_NAME}" STREQUAL "Developer")
+    set (HDF5_BUILD_MODE_C_FLAGS       "${CMAKE_C_FLAGS_DEVELOPER}")
+    set (HDF5_BUILD_MODE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS_DEBUG}")
+    set (HDF5_BUILD_MODE_CXX_FLAGS     "${CMAKE_CXX_FLAGS_DEBUG}")
+elseif ("${HDF_CFG_NAME}" STREQUAL "Release")
+    set (HDF5_BUILD_MODE_C_FLAGS       "${CMAKE_C_FLAGS_RELEASE}")
+    set (HDF5_BUILD_MODE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS_RELEASE}")
+    set (HDF5_BUILD_MODE_CXX_FLAGS     "${CMAKE_CXX_FLAGS_RELEASE}")
+elseif ("${HDF_CFG_NAME}" STREQUAL "MinSizeRel")
+    set (HDF5_BUILD_MODE_C_FLAGS       "${CMAKE_C_FLAGS_MINSIZEREL}")
+    set (HDF5_BUILD_MODE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS_MINSIZEREL}")
+    set (HDF5_BUILD_MODE_CXX_FLAGS     "${CMAKE_CXX_FLAGS_MINSIZEREL}")
+elseif ("${HDF_CFG_NAME}" STREQUAL "RelWithDebInfo")
+    set (HDF5_BUILD_MODE_C_FLAGS       "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+    set (HDF5_BUILD_MODE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS_RELWITHDEBINFO}")
+    set (HDF5_BUILD_MODE_CXX_FLAGS     "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+endif ()
