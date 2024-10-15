@@ -901,7 +901,7 @@ if (DEFAULT_API_VERSION MATCHES "v114")
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to use 2.0.0.x API
+# Option to use 2.0.x API
 #-----------------------------------------------------------------------------
 set (H5_USE_200_API_DEFAULT 0)
 if (DEFAULT_API_VERSION MATCHES "v200")
