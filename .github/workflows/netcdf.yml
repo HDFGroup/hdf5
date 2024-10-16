@@ -67,7 +67,7 @@ jobs:
 
     - name: Install HDF5
       run: |
-        sudo make install -j
+        sudo cmake --install -j
       working-directory: ${{ runner.workspace }}/build
 
     - name: Checkout netCDF
