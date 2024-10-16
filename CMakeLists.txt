@@ -909,7 +909,7 @@ if (DEFAULT_API_VERSION MATCHES "v200")
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to use 2.1.0.x API
+# Option to use 2.1.x API
 #-----------------------------------------------------------------------------
 if (NOT DEFAULT_API_VERSION)
   set (DEFAULT_API_VERSION "v210")
