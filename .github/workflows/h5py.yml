@@ -28,6 +28,7 @@ jobs:
         ./spack/bin/spack install py-h5py@master+mpi ^hdf5@develop-1.17
         ./spack/bin/spack install py-pytest
         ./spack/bin/spack install py-ipython
+        ./spack/bin/spack install py-pytest-mpi        
         spack load py-h5py
         spack load py-pytest
         spack load py-ipython
