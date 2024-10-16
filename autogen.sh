@@ -11,26 +11,9 @@
 # help@hdfgroup.org.
 #
 
-# A script to reconfigure the Autotools for HDF5, and to recreate other
+# A script to recreate other
 # generated files specific to HDF5.
 #
-# IMPORTANT OS X NOTE
-#
-# If you are using OS X, you will probably not have the Autotools
-# installed, even if you have the Xcode command-line tools.
-#
-# The easiest way to fix this is to install everything via Homebrew:
-#
-#   http://brew.sh/
-#
-# After you install the base packages, install autoconf, automake,
-# and libtool.
-#
-#   brew install autoconf
-#   brew install automake
-#   brew install libtool
-#
-# END IMPORTANT OS X NOTE
 
 echo
 echo "**************************"
@@ -39,9 +22,6 @@ echo "**************************"
 echo
 
 # Run scripts that process source.
-#
-# These should be run before the Autotools so that failures here block
-# compilation.
 
 # Run trace script
 # The trace script updates H5ARG_TRACE macros in library source files.
@@ -68,19 +48,6 @@ echo
 # conversion.
 echo "Running overflow macro generation script:"
 bin/make_overflow src/H5overflow.txt || exit 1
-echo
-
-# Run Autotools
-
-# The "obsolete" warnings category flags our Java macros as obsolete.
-# Since there is no clear way to upgrade them (Java support in the Autotools
-# is not great) and they work well enough for now, we suppress those warnings.
-echo "Running Autotools"
-echo
-echo "NOTE: You can ignore the warning about adding -I m4."
-echo "      We already do this in an included file."
-echo
-autoreconf -vif --warnings=no-obsolete || exit 1
 echo
 
 echo "*** SUCCESS ***"
