@@ -1,0 +1,190 @@
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://www.hdfgroup.org/licenses.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+# Tests for the swmr feature using virtual datasets.
+
+$srcdir  = '@srcdir@'
+$utils_testdir=@H5_UTILS_TEST_BUILDDIR@
+$testdir=@H5_TEST_BUILDDIR@
+
+###############################################################################
+## test parameters
+###############################################################################
+
+$Nwriters     = 6          # number of writers (1 per source dataset)
+$Nreaders     = 5          # number of readers to launch
+$nerrors      = 0
+
+###############################################################################
+## definitions for message file to coordinate test runs
+###############################################################################
+$WRITER_MESSAGE = 'SWMR_WRITER_MESSAGE'    # The message file created by writer that the open is complete
+                                           # This should be the same as the define in "test/swmr_common.h"
+$MESSAGE_TIMEOUT = 300                     # Message timeout length in secs
+                                           # This should be the same as the define in "test/h5test.h"
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+function Test-WithSpaces {
+   $SPACES='                                                               '
+   #Write-Output  "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# To wait for the writer message file or till the maximum # of seconds is reached
+# $Message is the message file to wait for
+# This performs similar function as the routine h5_wait_message() in test/h5test.c
+function Wait-Message {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [string]$TestPath,                             # Get the path of the message file to wait for
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [string]$Message                              # Get the name of the message file to wait for
+    )
+
+    PROCESS {
+        $message = Join-Path -Path $TestPath -ChildPath $Message
+        $t0 = Get-Date                                # Get current time
+        $t1 = $t0
+        $difft = New-Timespan -Start $t0 -End $t1     # Initialize the time difference
+        $mexist = 0                                   # Indicate whether the message file is found
+        while ($difft.TotalSeconds -lt $MESSAGE_TIMEOUT) {    # Loop till message times out
+            $t1 = Get-Date                                    # Get current time in seconds
+            $difft = New-Timespan -Start $t0 -End $t1         # Calculate the time difference
+            #Write-Output "Check for $message : time=$difft"
+            if ([System.IO.File]::Exists($message)) {         # If message file is found:
+                $mexist = 1                                   #       indicate the message file is found
+                Remove-Item $message                          #       remove the message file
+                break                                         #       get out of the while loop
+            }
+        }
+        if ($mexist -eq 0) {
+            # Issue warning that the writer message file is not found, continue with launching the reader(s)
+            Write-Warning -Message "$WRITER_MESSAGE is not found after waiting $MESSAGE_TIMEOUT seconds"
+        }
+        else {
+            Write-Output "$WRITER_MESSAGE is found"
+        }
+    }
+}
+
+###############################################################################
+## Main
+###############################################################################
+
+# Check to see if the VFD specified by the HDF5_DRIVER or HDF5_TEST_DRIVER
+# environment variable supports SWMR.
+$testprog = Join-Path -Path $utils_testdir -ChildPath swmr_check_compat_vfd.exe
+$rp = Start-Process -FilePath $testprog -PassThru -Wait -NoNewWindow
+if ($rp.ExitCode -ne 0) {
+    Write-Output ""
+    Write-Output "The VFD specified by the HDF5_DRIVER or HDF5_TEST_DRIVER"
+    Write-Output "environment variable does not support SWMR."
+    Write-Output ""
+    Write-Output "SWMR acceptance tests skipped"
+    Write-Output ""
+    exit 0
+}
+
+Set-Location -Path vds_swmr_test
+$testdir = Join-Path -Path $testdir -ChildPath vds_swmr_test
+
+Write-Output ""
+Write-Output "###############################################################################"
+Write-Output "## Basic VDS SWMR test - writing to a tiled plane"
+Write-Output "###############################################################################"
+
+# Launch the file generator
+Write-Output "launch the swmr_generator"
+$rp = Start-Process -FilePath $testdir/vds_swmr_gen.exe -NoNewWindow -PassThru -Wait
+if ($rp.ExitCode -ne 0) {
+    Write-Warning "generator had error"
+    $nerrors += 1
+}
+
+# Check for error and exit if one occurred
+#Write-Output "nerrors=$nerrors"
+if ($nerrors -ne 0) {
+    Write-Warning "VDS SWMR tests failed with $nerrors errors."
+    exit 1
+}
+
+# Launch the writers
+Write-Output "launch the $Nwriters SWMR VDS writers (1 per source)"
+$pid_writers = @()
+$n = 0
+while ($n -lt $Nwriters) {
+    $rp = Start-Process -FilePath $testdir/vds_swmr_writer.exe -NoNewWindow -PassThru -ArgumentList "$n" 2>&1 | tee swmr_writer.out.$n
+    $pid_writers +=  $rp.id
+    $n += 1
+}
+#Write-Output "pid_writers=$pid_writers"
+
+# Sleep to ensure that the writers have started
+Start-Sleep -Seconds 3
+
+# Launch the readers
+Write-Output "launch $Nreaders SWMR readers"
+$pid_readers = @()
+$n = 0
+while ($n -lt $Nreaders) {
+    $rp = Start-Process -FilePath $testdir/vds_swmr_reader.exe -NoNewWindow -PassThru 2>&1 | tee swmr_reader.out.$n
+    $pid_readers +=  $rp.id
+    $n += 1
+}
+#Write-Output "pid_readers=$pid_readers"
+
+# Collect exit code of the writers
+foreach ($xpid in $pid_writers) {
+    #Write-Output "checked writer $xpid"
+    $result = Wait-Process -Id  $xpid
+    if ($result.ExitCode -ne 0) {
+        Write-Warning "writer had error"
+        $nerrors += 1
+    }
+}
+
+# Collect exit code of the readers
+# (they usually finish after the writers)
+foreach ($xpid in $pid_readers) {
+    #Write-Output "checked reader $xpid"
+    $result = Wait-Process -Id  $xpid
+    if ($result.ExitCode -ne 0) {
+        Write-Warning "reader had error"
+        $nerrors += 1
+    }
+}
+
+# Check for error and exit if one occurred
+#Write-Output "nerrors=$nerrors"
+if ($nerrors -ne 0) {
+    Write-Warning "VDS SWMR tests failed with $nerrors errors."
+    exit 1
+}
+
+###############################################################################
+## Report and exit
+###############################################################################
+cd ..
+#Write-Output "nerrors=$nerrors"
+if ($nerrors -eq 0) {
+    Write-Output "VDS SWMR tests passed."
+#    if test -z "$HDF5_NOCLEANUP"; then
+#        # delete the test directory
+#        Remove-Item vds_swmr_test -Recurse
+#    fi
+    exit 0
+}
+else {
+    Write-Warning "VDS SWMR tests failed with $nerrors errors."
+    exit 1
+}
+
