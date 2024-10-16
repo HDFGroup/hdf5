@@ -608,9 +608,13 @@ H5T__init_native_float_types(void)
 #endif
 
 done:
-    /* Clear any FE_INVALID exceptions from NaN handling */
+    /* Clear any FE_INVALID exceptions from NaN handling. FE_INVALID is C99/C11,
+     * but may not be present on all systems.
+     */
+#ifdef FE_INVALID
     if (feclearexcept(FE_INVALID) != 0)
         HSYS_GOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't clear floating-point exceptions");
+#endif
 
     /* Restore the original environment */
     if (feupdateenv(&saved_fenv) != 0)

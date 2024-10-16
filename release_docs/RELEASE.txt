@@ -132,7 +132,19 @@ Bug Fixes since HDF5-1.16.0 release
 ===================================
     Library
     -------
-    -
+    - Only clear FE_INVALID when that symbol is present on the system
+
+      When we initialize the floating-point types at library startup, it's
+      possible to raise floating-point exceptions when we check which things
+      are supported. Normally, we clear these floating-point exceptions via
+      feclearexcept(FE_INVALID), but FE_INVALID may not be present on all
+      systems. Specifically, this was reported as being a problem when using
+      Emscripten 3.1.68 to compile HDF5 1.14.5 to WebAssembly.
+
+      We've added an #ifdef FE_INVALID block around the exception clearing
+      code to correct this.
+
+      Fixes GitHub issue #4952
 
 
     Java Library
@@ -191,14 +203,6 @@ Bug Fixes since HDF5-1.16.0 release
 
     Testing
     -------
-    - Disabled running of MPI Atomicity tests for OpenMPI major versions < 5
-
-      Support for MPI atomicity operations is not implemented for major
-      versions of OpenMPI less than version 5. This would cause the MPI
-      atomicity tests for parallel HDF5 to sporadically fail when run
-      with OpenMPI. Testphdf5 now checks if OpenMPI is being used and will
-      skip running the atomicity tests if the major version of OpenMPI is
-      < 5.
 
 
 Platforms Tested
