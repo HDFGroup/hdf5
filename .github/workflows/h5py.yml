@@ -3,8 +3,8 @@ name: h5py
 # Triggers the workflow on a schedule or on demand
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "6 0 * * *"
+#  schedule:
+#    - cron: "6 0 * * *"
 
 permissions:
   contents: read
@@ -31,5 +31,5 @@ jobs:
         spack load py-h5py
         spack load py-pytest
         spack load py-ipython
-        pip install pytest-mpi
+        spack load py-pytest-mpi
         python -c "import h5py; h5py.run_tests(); print(h5py.version.info);"
