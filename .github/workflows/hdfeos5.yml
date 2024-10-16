@@ -3,17 +3,17 @@ name: hdfeos5 dev
 # Triggers the workflow on push or pull request or on demand
 on:
   workflow_dispatch:
-  push:
-  pull_request:
-    branches: [ develop ]
-    paths-ignore:
-      - '.github/CODEOWNERS'
-      - '.github/FUNDING.yml'
-      - 'doc/**'
-      - 'release_docs/**'
-      - 'ACKNOWLEDGEMENTS'
-      - 'COPYING**'
-      - '**.md'
+#  push:
+#  pull_request:
+#    branches: [ develop ]
+#    paths-ignore:
+#      - '.github/CODEOWNERS'
+#      - '.github/FUNDING.yml'
+#      - 'doc/**'
+#      - 'release_docs/**'
+#      - 'ACKNOWLEDGEMENTS'
+#      - 'COPYING**'
+#      - '**.md'
 
 # Using concurrency to cancel any in-progress job or run
 concurrency:
