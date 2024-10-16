@@ -241,6 +241,7 @@ jobs:
       - name: CMake Run Package
         run: cpack -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
+        if: ${{ inputs.build_mode != 'Debug' }}
 
       - name: List files in the space
         run: |
