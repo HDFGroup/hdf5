@@ -856,13 +856,13 @@ CONTAINS
        END FUNCTION H5Requal
     END INTERFACE
 
-    c_equal = INT(H5Requal(ref1_ptr, ref2_ptr))
+    c_equal = INT(H5Requal(ref1_ptr, ref2_ptr), C_INT)
 
     hdferr = 0
     equal = .FALSE.
-    IF(c_equal .EQ. 1)THEN
+    IF(c_equal .EQ. 1_C_INT)THEN
        equal = .TRUE.
-    ELSE IF(c_equal .LT. 0)THEN
+    ELSE IF(c_equal .LT. 0_C_INT)THEN
        hdferr = -1
     ENDIF
 

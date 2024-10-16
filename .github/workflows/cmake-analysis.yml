@@ -1,0 +1,419 @@
+name: hdf5 dev ctest analysis runs
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      snap_name:
+        description: 'The name in the source tarballs'
+        type: string
+        required: false
+        default: hdfsrc
+      file_base:
+        description: "The common base name of the source tarballs"
+        required: true
+        type: string
+      use_environ:
+        description: 'Environment to locate files'
+        type: string
+        required: true
+        default: snapshots
+
+permissions:
+  contents: read
+
+jobs:
+  coverage_test_linux_GCC:
+  # Linux (Ubuntu) w/ gcc + coverage
+  #
+    name: "Ubuntu GCC Coverage"
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install CMake Dependencies (Linux_coverage)
+      run: |
+        sudo apt update
+        sudo apt-get install ninja-build doxygen graphviz curl libncurses5 build-essential
+        sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+        sudo apt-get install lcov -q -y
+
+    - name: Set file base name (Linux_coverage)
+      id: set-file-base
+      run: |
+        FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+        echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+        if [[ '${{ inputs.use_environ }}' == 'release' ]]
+        then
+          SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+        else
+          SOURCE_NAME_BASE=$(echo "hdfsrc")
+        fi
+        echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+    # Get files created by release script
+    - name: Get tgz-tarball (Linux_coverage)
+      uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+      with:
+        name: tgz-tarball
+        path: ${{ github.workspace }}
+
+    - name: List files for the space (Linux_coverage)
+      run: |
+        ls -l ${{ github.workspace }}
+        ls ${{ runner.workspace }}
+
+    - name: Uncompress source (Linux_coverage)
+      run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+    - name: Copy script files for the space (Linux_coverage)
+      run: |
+        cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
+        cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+
+    - name: List files for the hdf5 (Linux_coverage)
+      run: |
+        ls ${{ runner.workspace }}/hdf5
+
+    - name: Create options file (Linux_coverage)
+      uses: "DamianReeves/write-file-action@master"
+      with:
+        path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
+        write-mode: overwrite
+        contents: |
+            set (CTEST_DROP_SITE_INIT "my.cdash.org")
+            # Change following line to submit to your CDash dashboard to a different CDash project
+            set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
+            #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+            set (LOCAL_COVERAGE_TEST "TRUE")
+            set (LOCAL_USE_GCOV "TRUE")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_STATIC_LIBS:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_COVERAGE:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCODE_COVERAGE:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACK_EXAMPLES:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_NO_PACKAGES:BOOL=ON")
+
+    - name: Run ctest (Linux_coverage)
+      run: |
+        cd "${{ runner.workspace }}/hdf5"
+        ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH_COV,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
+      shell: bash
+      continue-on-error: true
+
+    # Save log files created by ctest script
+    - name: Save log (Linux_coverage)
+      uses: actions/upload-artifact@v4
+      with:
+        name: clang-coverage-log
+        path: ${{ runner.workspace }}/hdf5/hdf5.log
+        if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_linux_LeakSanitizer:
+  # Linux (Ubuntu) w/ clang + LeakSanitizer
+  #
+    name: "Ubuntu Clang LeakSanitizer"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install CMake Dependencies (Linux_Leak)
+        run: |
+          sudo apt update
+          sudo apt-get install ninja-build doxygen graphviz curl libncurses5
+
+      - name: add clang to env
+        uses: KyleMayes/install-llvm-action@v2.0.5
+        id: setup-clang
+        with:
+          env: true
+          version: '18'
+
+      - name: Set file base name (Linux_Leak)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (Linux_Leak)
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: tgz-tarball
+          path: ${{ github.workspace }}
+
+      - name: List files for the space (Linux_Leak)
+        run: |
+          ls -l ${{ github.workspace }}
+          ls ${{ runner.workspace }}
+
+      - name: Uncompress source (Linux_Leak)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: Copy script files for the space (Linux_Leak)
+        run: |
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+
+      - name: List files for the hdf5 (Linux_Leak)
+        run: |
+          ls ${{ runner.workspace }}/hdf5
+
+      - name: Create options file (Linux_Leak)
+        uses: "DamianReeves/write-file-action@master"
+        with:
+          path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
+          write-mode: overwrite
+          contents: |
+              set (CTEST_DROP_SITE_INIT "my.cdash.org")
+              # Change following line to submit to your CDash dashboard to a different CDash project
+              set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
+              #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
+              set (MODEL "Sanitize")
+              set (GROUP "Sanitize")
+              set (LOCAL_MEMCHECK_TEST "TRUE")
+              set (CTEST_MEMORYCHECK_TYPE "LeakSanitizer")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=ON")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_STATIC_LIBS:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SANITIZERS:BOOL=ON")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DUSE_SANITIZER:STRING=Leak")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
+
+      - name: Run ctest (Linux_Leak)
+        run: |
+          cd "${{ runner.workspace }}/hdf5"
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-LEAK,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
+        shell: bash
+        continue-on-error: true
+
+      # Save log files created by ctest script
+      - name: Save log (Linux_Leak)
+        uses: actions/upload-artifact@v4
+        with:
+          name: leak-ubuntu-log
+          path: ${{ runner.workspace }}/hdf5/hdf5.log
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_linux_AddressSanitizer:
+  # Linux (Ubuntu) w/ clang + AddressSanitizer
+  #
+    name: "Ubuntu Clang AddressSanitizer"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install CMake Dependencies (Linux_Address)
+        run: |
+          sudo apt update
+          sudo apt-get install ninja-build doxygen graphviz curl libncurses5
+
+      - name: add clang to env
+        uses: KyleMayes/install-llvm-action@v2.0.5
+        id: setup-clang
+        with:
+          env: true
+          version: '18'
+
+      - name: Set file base name (Linux_Address)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (Linux_Address)
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: tgz-tarball
+          path: ${{ github.workspace }}
+
+      - name: List files for the space (Linux_Address)
+        run: |
+          ls -l ${{ github.workspace }}
+          ls ${{ runner.workspace }}
+
+      - name: Uncompress source (Linux_Address)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: Copy script files for the space (Linux_Address)
+        run: |
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+
+      - name: List files for the hdf5 (Linux_Address)
+        run: |
+          ls ${{ runner.workspace }}/hdf5
+
+      - name: Create options file (Linux_Address)
+        uses: "DamianReeves/write-file-action@master"
+        with:
+          path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
+          write-mode: overwrite
+          contents: |
+              set (CTEST_DROP_SITE_INIT "my.cdash.org")
+              # Change following line to submit to your CDash dashboard to a different CDash project
+              set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
+              #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
+              set (MODEL "Sanitize")
+              set (GROUP "Sanitize")
+              set (LOCAL_MEMCHECK_TEST "TRUE")
+              set (CTEST_MEMORYCHECK_TYPE "AddressSanitizer")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=ON")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_STATIC_LIBS:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SANITIZERS:BOOL=ON")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DUSE_SANITIZER:STRING=Address")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
+
+      - name: Run ctest (Linux_Address)
+        run: |
+          cd "${{ runner.workspace }}/hdf5"
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-ADDR,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
+        shell: bash
+        continue-on-error: true
+
+      # Save log files created by ctest script
+      - name: Save log (Linux_Address)
+        uses: actions/upload-artifact@v4
+        with:
+          name: address-ubuntu-log
+          path: ${{ runner.workspace }}/hdf5/hdf5.log
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_linux_UndefinedBehaviorSanitizer:
+  # Linux (Ubuntu) w/ clang + UndefinedBehaviorSanitizer
+  #
+    name: "Ubuntu Clang UndefinedBehaviorSanitizer"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install CMake Dependencies (Linux_UndefinedBehavior)
+        run: |
+          sudo apt update
+          sudo apt-get install ninja-build doxygen graphviz curl libncurses5
+
+      - name: add clang to env
+        uses: KyleMayes/install-llvm-action@v2.0.5
+        id: setup-clang
+        with:
+          env: true
+          version: '18'
+
+      - name: Set file base name (Linux_UndefinedBehavior)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (Linux_UndefinedBehavior)
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: tgz-tarball
+          path: ${{ github.workspace }}
+
+      - name: List files for the space (Linux_UndefinedBehavior)
+        run: |
+          ls -l ${{ github.workspace }}
+          ls ${{ runner.workspace }}
+
+      - name: Uncompress source (Linux_UndefinedBehavior)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: Copy script files for the space (Linux_UndefinedBehavior)
+        run: |
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+
+      - name: List files for the hdf5 (Linux_UndefinedBehavior)
+        run: |
+          ls ${{ runner.workspace }}/hdf5
+
+      - name: Create options file (Linux_UndefinedBehavior)
+        uses: "DamianReeves/write-file-action@master"
+        with:
+          path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
+          write-mode: overwrite
+          contents: |
+              set (CTEST_DROP_SITE_INIT "my.cdash.org")
+              # Change following line to submit to your CDash dashboard to a different CDash project
+              set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
+              #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
+              set (MODEL "Sanitize")
+              set (GROUP "Sanitize")
+              set (LOCAL_MEMCHECK_TEST "TRUE")
+              set (CTEST_MEMORYCHECK_TYPE "UndefinedBehaviorSanitizer")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=ON")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_STATIC_LIBS:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SANITIZERS:BOOL=ON")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DUSE_SANITIZER:STRING=Undefined")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
+
+      - name: Run ctest (Linux_UndefinedBehavior)
+        run: |
+          cd "${{ runner.workspace }}/hdf5"
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-UNDEF,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
+        shell: bash
+        continue-on-error: true
+
+      # Save log files created by ctest script
+      - name: Save log (Linux_UndefinedBehavior)
+        uses: actions/upload-artifact@v4
+        with:
+          name: undefined-ubuntu-log
+          path: ${{ runner.workspace }}/hdf5/hdf5.log
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

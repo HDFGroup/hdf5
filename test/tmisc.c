@@ -6868,7 +6868,7 @@ test_misc40(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Re-open the file */
-    fid = H5Fopen(MISC25C_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid = H5Fopen(MISC25C_FILE, H5F_ACC_RDWR, fapl);
     CHECK(fid, H5I_INVALID_HID, "H5Fopen");
 
     /* Set the compact/dense value high, to see if we can trick the
