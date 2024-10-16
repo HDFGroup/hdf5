@@ -30,7 +30,7 @@ jobs:
     - name: Install System dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install ninja-build doxygen graphviz
+        sudo apt-get install ninja-build
         sudo apt install libssl3 libssl-dev libcurl4
         sudo apt install -y libaec-dev zlib1g-dev automake autoconf libcurl4-openssl-dev libjpeg-dev wget curl bzip2 m4 flex bison cmake libzip-dev doxygen openssl libtool libtool-bin
 
@@ -58,9 +58,6 @@ jobs:
             $GITHUB_WORKSPACE
       shell: bash
 
-      #
-      # BUILD
-      #
     - name: CMake Build
       run: cmake --build . --parallel 3 --config Release
       working-directory: ${{ runner.workspace }}/build
