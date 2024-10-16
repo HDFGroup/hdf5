@@ -75,5 +75,6 @@ jobs:
           cd hdf-eos5-2.0
           ./configure CC=/usr/local/bin/h5cc --prefix=/usr/local/ --enable-install-include
           make
-          make check
+          LD_LIBRARY_PATH="/usr/local/lib:${LD_LIBRARY_PATH}"
+          LD_LIBRARY_PATH=${LD_LIBRARY_PATH} make check
           sudo make install
