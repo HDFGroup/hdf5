@@ -181,7 +181,7 @@
  * the checksum. /code size_t md5_filter(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
  * size_t nbytes, size_t *buf_size, void **buf)
  *     {
- *     #ifdef HAVE_MD5
+ *     \c \#ifdef HAVE_MD5
  *         unsigned char       cksum[16];
  *
  *         if (flags & H5Z_REVERSE) {
@@ -207,9 +207,9 @@
  *             memcpy((char*)(*buf)+nbytes, cksum, 16);
  *             return nbytes+16;
  *         }
- *     #else
+ *     \c \#else
  *         return 0; // fail
- *     #endif
+ *     \c \#endif
  *     }
  * /endcode
  *
@@ -219,7 +219,7 @@
  * from the reserved range. We'll randomly choose 305.
  *
  * /code
- *    #define FILTER_MD5 305
+ *    \c \#define FILTER_MD5 305
  *    herr_t status = H5Zregister(FILTER_MD5, "md5 checksum", md5_filter);
  * /endcode
  *
