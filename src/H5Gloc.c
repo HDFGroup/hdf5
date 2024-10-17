@@ -582,9 +582,8 @@ H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_
                    H5G_own_loc_t *own_loc /*out*/)
 {
     bool  *exists    = (bool *)_udata; /* User data passed in */
-    herr_t ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check if the name in this group resolved to a valid object */
     if (obj_loc == NULL)
@@ -596,8 +595,7 @@ H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_
      * location for the object */
     *own_loc = H5G_OWN_NONE;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G__loc_exists_cb() */
 
 /*-------------------------------------------------------------------------
