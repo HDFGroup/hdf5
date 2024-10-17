@@ -172,14 +172,14 @@
  * This example shows how to define and register a simple filter
  * that adds a checksum capability to the data stream.
  *
- * The function that acts as the filter always returns zero (failure) if the <code>md5()</code> function was not detected at
- * configuration time (left as an exercise for the reader). Otherwise the function is broken down to an input and output
- * half. The output half calculates a checksum, increases the size of the output buffer if necessary, and appends the checksum to
- * the end of the buffer. The input half calculates the checksum on the first part of the buffer and compares it to the checksum
- * already stored at the end of the buffer. If the two differ then zero (failure) is returned, otherwise the buffer size is reduced
- * to exclude the checksum.
- * /code
- *     size_t md5_filter(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nbytes, size_t *buf_size, void **buf)
+ * The function that acts as the filter always returns zero (failure) if the <code>md5()</code> function was
+ * not detected at configuration time (left as an exercise for the reader). Otherwise the function is broken
+ * down to an input and output half. The output half calculates a checksum, increases the size of the output
+ * buffer if necessary, and appends the checksum to the end of the buffer. The input half calculates the
+ * checksum on the first part of the buffer and compares it to the checksum already stored at the end of the
+ * buffer. If the two differ then zero (failure) is returned, otherwise the buffer size is reduced to exclude
+ * the checksum. /code size_t md5_filter(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
+ * size_t nbytes, size_t *buf_size, void **buf)
  *     {
  *     #ifdef HAVE_MD5
  *         unsigned char       cksum[16];
