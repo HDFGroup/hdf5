@@ -588,10 +588,7 @@ H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_
 
     /* Check if the name in this group resolved to a valid object */
     if (obj_loc == NULL)
-        if (lnk)
-            *exists = false;
-        else
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "no object or link info?");
+        *exists = false;
     else
         *exists = true;
 
