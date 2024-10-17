@@ -190,6 +190,8 @@ H5_DLL herr_t H5Sclose(hid_t space_id);
  *          composing the entire current extent). If either \p stride or
  *          \p block is NULL, then it will be set to \p 1.
  *
+ *          See H5Sselect_hyperslab() for valid operators (\p op).
+ *
  * \since 1.10.6
  *
  */
@@ -212,6 +214,8 @@ H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_
  *          new dataspace with the resulting selection. The dataspace extent
  *          from \p space1_id is copied for the dataspace extent of the
  *          newly created dataspace.
+ *
+ *          See H5Sselect_hyperslab() for valid operators (\p op).
  *
  * \since 1.10.6
  *
@@ -815,6 +819,8 @@ H5_DLL htri_t H5Sis_simple(hid_t space_id);
  *          \p space1_id with an operation \p op, using a second hyperslab
  *          \p space2_id. The first selection is modified to contain the
  *          result of \p space1_id operated on by \p space2_id.
+ *
+ *          See H5Sselect_hyperslab() for valid operators (\p op).
  *
  * \since 1.10.6
  *

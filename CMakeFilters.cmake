@@ -108,7 +108,7 @@ if (HDF5_ENABLE_Z_LIB_SUPPORT)
         # on the target. The target returned is: ZLIB::ZLIB
         get_filename_component (libname ${ZLIB_LIBRARIES} NAME_WLE)
         string (REGEX REPLACE "^lib" "" libname ${libname})
-        set_target_properties (ZLIB::ZLIB PROPERTIES OUTPUT_NAME zlib-static)
+        set_target_properties (ZLIB::ZLIB PROPERTIES OUTPUT_NAME ${libname})
         set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ZLIB::ZLIB)
       endif ()
     else ()
