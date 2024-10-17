@@ -581,7 +581,7 @@ H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_
                    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata /*in,out*/,
                    H5G_own_loc_t *own_loc /*out*/)
 {
-    bool  *exists    = (bool *)_udata; /* User data passed in */
+    bool *exists = (bool *)_udata; /* User data passed in */
 
     FUNC_ENTER_PACKAGE_NOERR
 
