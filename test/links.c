@@ -495,7 +495,7 @@ new_links(hid_t fapl, bool new_format)
     hid_t   dset1 = (H5I_INVALID_HID), dset2 = (H5I_INVALID_HID);
     char    filename[NAME_BUF_SIZE];
     hsize_t size[1] = {1};
-    herr_t status;                  /* Generic return value */
+    herr_t  status; /* Generic return value */
 
     if (new_format)
         TESTING("H5Lcreate functions (w/new group format)");
@@ -1364,8 +1364,8 @@ test_move(hid_t fapl, bool new_format)
     hid_t file_a = H5I_INVALID_HID, file_b = H5I_INVALID_HID;
     hid_t grp_1 = H5I_INVALID_HID, grp_2 = H5I_INVALID_HID, grp_move = H5I_INVALID_HID,
           moved_grp = H5I_INVALID_HID;
-    char filename[1024];
-    herr_t status;                  /* Generic return value */
+    char   filename[1024];
+    herr_t status; /* Generic return value */
 
     if (new_format)
         TESTING("H5Lmove (w/new group format)");
@@ -1400,7 +1400,8 @@ test_move(hid_t fapl, bool new_format)
      * H5L_SAME_LOC.  Should fail. */
     H5E_BEGIN_TRY
     {
-        status = H5Lmove(H5L_SAME_LOC, "group_move", H5L_SAME_LOC, "group_new_name", H5P_DEFAULT, H5P_DEFAULT);
+        status =
+            H5Lmove(H5L_SAME_LOC, "group_move", H5L_SAME_LOC, "group_new_name", H5P_DEFAULT, H5P_DEFAULT);
     }
     H5E_END_TRY
     if (status >= 0)
@@ -1562,8 +1563,8 @@ test_copy(hid_t fapl, bool new_format)
     hid_t file_a = H5I_INVALID_HID, file_b = H5I_INVALID_HID;
     hid_t grp_1 = H5I_INVALID_HID, grp_2 = H5I_INVALID_HID, grp_move = H5I_INVALID_HID,
           moved_grp = H5I_INVALID_HID;
-    char filename[1024];
-    herr_t status;                  /* Generic return value */
+    char   filename[1024];
+    herr_t status; /* Generic return value */
 
     if (new_format)
         TESTING("H5Lcopy (w/new group format)");
@@ -1598,7 +1599,8 @@ test_copy(hid_t fapl, bool new_format)
      * H5L_SAME_LOC.  Should fail. */
     H5E_BEGIN_TRY
     {
-        status = H5Lcopy(H5L_SAME_LOC, "group_copy", H5L_SAME_LOC, "group_new_name", H5P_DEFAULT, H5P_DEFAULT);
+        status =
+            H5Lcopy(H5L_SAME_LOC, "group_copy", H5L_SAME_LOC, "group_new_name", H5P_DEFAULT, H5P_DEFAULT);
     }
     H5E_END_TRY
     if (status >= 0)
@@ -1607,7 +1609,7 @@ test_copy(hid_t fapl, bool new_format)
     /* Copy a group across files.  Should fail. */
     H5E_BEGIN_TRY
     {
-       status = H5Lcopy(grp_1, "group_copy", file_b, "group_new_name", H5P_DEFAULT, H5P_DEFAULT);
+        status = H5Lcopy(grp_1, "group_copy", file_b, "group_new_name", H5P_DEFAULT, H5P_DEFAULT);
     }
     H5E_END_TRY
     if (status >= 0)
@@ -1989,7 +1991,7 @@ test_deprec(hid_t fapl, bool new_format)
     char       filename[1024];
     char       tmpstr[1024];
     int        len = 0; /* Length of comment */
-    herr_t status;                  /* Generic return value */
+    herr_t     status;  /* Generic return value */
 
     if (new_format)
         TESTING("backwards compatibility (w/new group format)");
@@ -3115,7 +3117,7 @@ external_link_query_deprec(hid_t fapl, bool new_format)
     H5L_info1_t li;                    /* Link information */
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], /* Names of files to externally link across */
         query_buf[NAME_BUF_SIZE];                            /* Buffer to hold query result */
-    herr_t status;                  /* Generic return value */
+    herr_t status;                                           /* Generic return value */
 
     if (new_format)
         TESTING("query aspects of external link using deprecated routines (w/new group format)");
@@ -3278,7 +3280,7 @@ external_link_closing_deprec(hid_t fapl, bool new_format)
     H5L_info1_t li;
     H5O_info1_t oi;
     hobj_ref_t  obj_ref;
-    herr_t status;                  /* Generic return value */
+    herr_t      status; /* Generic return value */
 
     if (new_format)
         TESTING("that external files are closed during traversal (w/new group format)");
@@ -3910,7 +3912,7 @@ ud_link_reregister_deprec(hid_t fapl)
     char           objname[NAME_BUF_SIZE];                        /* Object name */
     char           filename[NAME_BUF_SIZE];
     h5_stat_size_t empty_size; /* Size of an empty file */
-    herr_t status;                  /* Generic return value */
+    herr_t         status;     /* Generic return value */
 
     TESTING("registering a new class for existing UD links using deprecated routines (w/new group format)");
 
@@ -3979,7 +3981,8 @@ ud_link_reregister_deprec(hid_t fapl)
     /* Verify that we can't create any new links of this type */
     H5E_BEGIN_TRY
     {
-        status = H5Lcreate_ud(fid, "ud_link2", (H5L_type_t)UD_HARD_TYPE, &(li.u.address), sizeof(li.u.address), H5P_DEFAULT, H5P_DEFAULT);
+        status = H5Lcreate_ud(fid, "ud_link2", (H5L_type_t)UD_HARD_TYPE, &(li.u.address),
+                              sizeof(li.u.address), H5P_DEFAULT, H5P_DEFAULT);
     }
     H5E_END_TRY
     if (status >= 0)
@@ -4097,7 +4100,7 @@ ud_callbacks_deprec(hid_t fapl, bool new_format)
     char        ud_target_name[] = UD_CB_TARGET; /* Link target name */
     char        filename[NAME_BUF_SIZE];
     char        query_buf[NAME_BUF_SIZE];
-    herr_t status;                  /* Generic return value */
+    herr_t      status; /* Generic return value */
 
     if (new_format)
         TESTING("user-defined link callbacks using deprecated routines (w/new group format)");
@@ -4211,7 +4214,8 @@ ud_callbacks_deprec(hid_t fapl, bool new_format)
     /* Now test that each of the callbacks fails */
     H5E_BEGIN_TRY
     {
-        status = H5Lcreate_ud(fid, NEW_UD_CB_LINK_NAME, (H5L_type_t)UD_CB_TYPE, ud_target_name, (size_t)UD_CB_TARGET_LEN, H5P_DEFAULT, H5P_DEFAULT);
+        status = H5Lcreate_ud(fid, NEW_UD_CB_LINK_NAME, (H5L_type_t)UD_CB_TYPE, ud_target_name,
+                              (size_t)UD_CB_TARGET_LEN, H5P_DEFAULT, H5P_DEFAULT);
     }
     H5E_END_TRY
     if (status >= 0)
@@ -5293,14 +5297,16 @@ link_info_by_idx_deprec(hid_t fapl)
             /* Check for query on empty group */
             H5E_BEGIN_TRY
             {
-                ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &linfo, H5P_DEFAULT);
+                ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &linfo,
+                                          H5P_DEFAULT);
             }
             H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
             {
-                name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0,
+                                              tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             }
             H5E_END_TRY
             if (name_len >= 0)
@@ -5343,21 +5349,24 @@ link_info_by_idx_deprec(hid_t fapl)
             /* Check for out of bound offset queries */
             H5E_BEGIN_TRY
             {
-                ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT);
+                ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo,
+                                          H5P_DEFAULT);
             }
             H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
             {
-                ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo, H5P_DEFAULT);
+                ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo,
+                                          H5P_DEFAULT);
             }
             H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
             {
-                name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u,
+                                              tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             }
             H5E_END_TRY
             if (name_len >= 0)
@@ -5400,7 +5409,8 @@ link_info_by_idx_deprec(hid_t fapl)
             /* Check for out of bound offset queries */
             H5E_BEGIN_TRY
             {
-                ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT);
+                ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo,
+                                          H5P_DEFAULT);
             }
             H5E_END_TRY
             if (ret >= 0)
@@ -5615,14 +5625,16 @@ link_info_by_idx_old_deprec(hid_t fapl)
         /* Check for creation order index queries */
         H5E_BEGIN_TRY
         {
-            ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT);
+            ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo,
+                                      H5P_DEFAULT);
         }
         H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
         H5E_BEGIN_TRY
         {
-            name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+            name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname,
+                                          (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
         }
         H5E_END_TRY
         if (name_len >= 0)
@@ -7077,7 +7089,8 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
     skip = 0;
     H5E_BEGIN_TRY
     {
-        ret = H5Literate1((hid_t)(H5I_INVALID_HID), H5_INDEX_NAME, order, &skip, link_iterate_fail_deprec_cb, NULL);
+        ret = H5Literate1((hid_t)(H5I_INVALID_HID), H5_INDEX_NAME, order, &skip, link_iterate_fail_deprec_cb,
+                          NULL);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -11379,7 +11392,7 @@ external_link_query(hid_t fapl, bool new_format)
     H5L_info2_t li;                    /* Link information */
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], /* Names of files to externally link across */
         query_buf[NAME_BUF_SIZE];                            /* Buffer to hold query result */
-    herr_t status;                  /* Generic return value */
+    herr_t status;                                           /* Generic return value */
 
     if (new_format)
         TESTING("query aspects of external link (w/new group format)");
@@ -12278,7 +12291,7 @@ external_link_closing(hid_t fapl, bool new_format)
     H5L_info2_t li;
     H5O_info2_t oi;
     hobj_ref_t  obj_ref;
-    herr_t status;                  /* Generic return value */
+    herr_t      status; /* Generic return value */
 
     if (new_format)
         TESTING("that external files are closed during traversal (w/new group format)");
@@ -14534,7 +14547,7 @@ ud_link_reregister(hid_t fapl)
     char           objname[NAME_BUF_SIZE];                        /* Object name */
     char           filename[NAME_BUF_SIZE];
     h5_stat_size_t empty_size; /* Size of an empty file */
-    herr_t status;                  /* Generic return value */
+    herr_t         status;     /* Generic return value */
 
     TESTING("registering a new class for existing UD links (w/new group format)");
 
@@ -14603,7 +14616,8 @@ ud_link_reregister(hid_t fapl)
     /* Verify that we can't create any new links of this type */
     H5E_BEGIN_TRY
     {
-        status = H5Lcreate_ud(fid, "ud_link2", (H5L_type_t)UD_HARD_TYPE, &(li.u.token), sizeof(H5O_token_t), H5P_DEFAULT, H5P_DEFAULT);
+        status = H5Lcreate_ud(fid, "ud_link2", (H5L_type_t)UD_HARD_TYPE, &(li.u.token), sizeof(H5O_token_t),
+                              H5P_DEFAULT, H5P_DEFAULT);
     }
     H5E_END_TRY
     if (status >= 0)
@@ -14865,7 +14879,7 @@ ud_callbacks(hid_t fapl, bool new_format)
     char        ud_target_name[] = UD_CB_TARGET; /* Link target name */
     char        filename[NAME_BUF_SIZE];
     char        query_buf[NAME_BUF_SIZE];
-    herr_t status;                  /* Generic return value */
+    herr_t      status; /* Generic return value */
 
     if (new_format)
         TESTING("user-defined link callbacks (w/new group format)");
@@ -14979,7 +14993,8 @@ ud_callbacks(hid_t fapl, bool new_format)
     /* Now test that each of the callbacks fails */
     H5E_BEGIN_TRY
     {
-        status = H5Lcreate_ud(fid, NEW_UD_CB_LINK_NAME, (H5L_type_t)UD_CB_TYPE, ud_target_name, (size_t)UD_CB_TARGET_LEN, H5P_DEFAULT, H5P_DEFAULT);
+        status = H5Lcreate_ud(fid, NEW_UD_CB_LINK_NAME, (H5L_type_t)UD_CB_TYPE, ud_target_name,
+                              (size_t)UD_CB_TARGET_LEN, H5P_DEFAULT, H5P_DEFAULT);
     }
     H5E_END_TRY
     if (status >= 0)
@@ -15409,8 +15424,8 @@ ud_link_errors(hid_t fapl, bool new_format)
     char        group_name[NAME_BUF_SIZE];
     char        filename[NAME_BUF_SIZE];
     char        query_buf[NAME_BUF_SIZE];
-    H5L_info2_t li; /* Link information */
-    herr_t status;                  /* Generic return value */
+    H5L_info2_t li;     /* Link information */
+    herr_t      status; /* Generic return value */
 
     if (new_format)
         TESTING("user-defined link error conditions (w/new group format)");
@@ -15508,7 +15523,8 @@ ud_link_errors(hid_t fapl, bool new_format)
     H5E_BEGIN_TRY
     {
         /* The create callback will fail if we pass in no udata */
-        status = H5Lcreate_ud(fid, "fail", (H5L_type_t)UD_CBFAIL_TYPE, NULL, (size_t)0, H5P_DEFAULT, H5P_DEFAULT);
+        status =
+            H5Lcreate_ud(fid, "fail", (H5L_type_t)UD_CBFAIL_TYPE, NULL, (size_t)0, H5P_DEFAULT, H5P_DEFAULT);
     }
     H5E_END_TRY
     if (status >= 0)
@@ -18678,14 +18694,16 @@ link_info_by_idx(hid_t fapl)
             /* Check for query on empty group */
             H5E_BEGIN_TRY
             {
-                ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &linfo, H5P_DEFAULT);
+                ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &linfo,
+                                          H5P_DEFAULT);
             }
             H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
             {
-                name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0,
+                                              tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             }
             H5E_END_TRY
             if (name_len >= 0)
@@ -18728,21 +18746,24 @@ link_info_by_idx(hid_t fapl)
             /* Check for out of bound offset queries */
             H5E_BEGIN_TRY
             {
-                ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT);
+                ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo,
+                                          H5P_DEFAULT);
             }
             H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
             {
-                ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo, H5P_DEFAULT);
+                ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo,
+                                          H5P_DEFAULT);
             }
             H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
             {
-                name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u,
+                                              tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             }
             H5E_END_TRY
             if (name_len >= 0)
@@ -18785,21 +18806,24 @@ link_info_by_idx(hid_t fapl)
             /* Check for out of bound offset queries */
             H5E_BEGIN_TRY
             {
-                ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT);
+                ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo,
+                                          H5P_DEFAULT);
             }
             H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
             {
-                ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo, H5P_DEFAULT);
+                ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo,
+                                          H5P_DEFAULT);
             }
             H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
             {
-                name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u,
+                                              tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             }
             H5E_END_TRY
             if (name_len >= 0)
@@ -19006,14 +19030,16 @@ link_info_by_idx_old(hid_t fapl)
         /* Check for creation order index queries */
         H5E_BEGIN_TRY
         {
-            ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT);
+            ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo,
+                                      H5P_DEFAULT);
         }
         H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
         H5E_BEGIN_TRY
         {
-            name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+            name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname,
+                                          (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
         }
         H5E_END_TRY
         if (name_len >= 0)
@@ -21509,11 +21535,14 @@ object_info(hid_t fapl)
                     TEST_ERROR;
 
                 /* Set creation order tracking & indexing on group */
-                if (H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0))) < 0)
+                if (H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED |
+                                                         (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0))) <
+                    0)
                     TEST_ERROR;
 
                 /* Create group with creation order tracking on */
-                if ((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
+                if ((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) <
+                    0)
                     TEST_ERROR;
 
                 /* Create group with creation order tracking on for soft links */
@@ -21524,7 +21553,8 @@ object_info(hid_t fapl)
                 /* Check for out of bound query by index on empty group */
                 H5E_BEGIN_TRY
                 {
-                    ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+                    ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &oinfo,
+                                              H5O_INFO_BASIC, H5P_DEFAULT);
                 }
                 H5E_END_TRY
                 if (ret >= 0)
@@ -21539,7 +21569,8 @@ object_info(hid_t fapl)
                     snprintf(objname, sizeof(objname), "filler %02u", u);
 
                     /* Create hard link, with group object */
-                    if ((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                    if ((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+                        0)
                         TEST_ERROR;
 
                     /* Retrieve group's address on disk */
@@ -21553,7 +21584,8 @@ object_info(hid_t fapl)
                         snprintf(attrname, sizeof(attrname), "attr %02u", v);
 
                         /* Create attribute */
-                        if ((attr_id = H5Acreate2(group_id2, attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                        if ((attr_id = H5Acreate2(group_id2, attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT,
+                                                  H5P_DEFAULT)) < 0)
                             TEST_ERROR;
 
                         /* Close attribute */
@@ -21578,7 +21610,8 @@ object_info(hid_t fapl)
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY
                 {
-                    ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+                    ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &oinfo,
+                                              H5O_INFO_BASIC, H5P_DEFAULT);
                 }
                 H5E_END_TRY
                 if (ret >= 0)
@@ -21597,7 +21630,8 @@ object_info(hid_t fapl)
                     snprintf(objname, sizeof(objname), "filler %02u", u);
 
                     /* Create hard link, with group object */
-                    if ((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                    if ((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+                        0)
                         TEST_ERROR;
 
                     /* Retrieve group's address on disk */
@@ -21611,7 +21645,8 @@ object_info(hid_t fapl)
                         snprintf(attrname, sizeof(attrname), "attr %02u", v);
 
                         /* Create attribute */
-                        if ((attr_id = H5Acreate2(group_id2, attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                        if ((attr_id = H5Acreate2(group_id2, attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT,
+                                                  H5P_DEFAULT)) < 0)
                             TEST_ERROR;
 
                         /* Close attribute */
@@ -21636,7 +21671,8 @@ object_info(hid_t fapl)
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY
                 {
-                    ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+                    ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &oinfo,
+                                              H5O_INFO_BASIC, H5P_DEFAULT);
                 }
                 H5E_END_TRY
                 if (ret >= 0)
@@ -21835,7 +21871,8 @@ object_info_old(hid_t fapl)
         /* Check for out of bound query by index on empty group */
         H5E_BEGIN_TRY
         {
-            ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+            ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &oinfo, H5O_INFO_BASIC,
+                                      H5P_DEFAULT);
         }
         H5E_END_TRY
         if (ret >= 0)
@@ -21890,7 +21927,8 @@ object_info_old(hid_t fapl)
         /* Check for out of bound query by index */
         H5E_BEGIN_TRY
         {
-            ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+            ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &oinfo, H5O_INFO_BASIC,
+                                      H5P_DEFAULT);
         }
         H5E_END_TRY
         if (ret >= 0)
@@ -21899,7 +21937,8 @@ object_info_old(hid_t fapl)
         /* Check for creation order index query */
         H5E_BEGIN_TRY
         {
-            ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_CRT_ORDER, order, (hsize_t)(u - 1), &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+            ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_CRT_ORDER, order, (hsize_t)(u - 1), &oinfo,
+                                      H5O_INFO_BASIC, H5P_DEFAULT);
         }
         H5E_END_TRY
         if (ret >= 0)
@@ -22065,7 +22104,8 @@ group_info(hid_t fapl)
                 /* Check for out of bound query by index on empty group */
                 H5E_BEGIN_TRY
                 {
-                    ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &grp_info, H5P_DEFAULT);
+                    ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &grp_info,
+                                             H5P_DEFAULT);
                 }
                 H5E_END_TRY
                 if (ret >= 0)
@@ -22256,7 +22296,8 @@ group_info(hid_t fapl)
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY
                 {
-                    ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &grp_info, H5P_DEFAULT);
+                    ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &grp_info,
+                                             H5P_DEFAULT);
                 }
                 H5E_END_TRY
                 if (ret >= 0)
@@ -22447,7 +22488,8 @@ group_info(hid_t fapl)
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY
                 {
-                    ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &grp_info, H5P_DEFAULT);
+                    ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &grp_info,
+                                             H5P_DEFAULT);
                 }
                 H5E_END_TRY
                 if (ret >= 0)
@@ -22742,7 +22784,8 @@ group_info_old(hid_t fapl)
         /* Check for bad index query by index group */
         H5E_BEGIN_TRY
         {
-            ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, order, (hsize_t)0, &grp_info, H5P_DEFAULT);
+            ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, order, (hsize_t)0, &grp_info,
+                                     H5P_DEFAULT);
         }
         H5E_END_TRY
         if (ret >= 0)
