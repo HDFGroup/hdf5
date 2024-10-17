@@ -72,6 +72,9 @@ static H5EA_t *H5EA__new(H5F_t *f, haddr_t ea_addr, bool from_open, void *ctx_ud
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /* Extensible array client ID to class mapping */
 
 /* Remember to add client ID to H5EA_cls_id_t in H5EAprivate.h when adding a new

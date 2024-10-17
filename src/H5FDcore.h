@@ -16,8 +16,11 @@
 #ifndef H5FDcore_H
 #define H5FDcore_H
 
-/** Initializer for the core VFD */
-#define H5FD_CORE (H5FDperform_init(H5FD_core_init))
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
+
+/** ID for the core VFD */
+#define H5FD_CORE (H5OPEN H5FD_CORE_id_g)
 
 /** Identifier for the core VFD */
 #define H5FD_CORE_VALUE H5_VFD_CORE
@@ -28,9 +31,9 @@ extern "C" {
 
 /** @private
  *
- * \brief Private initializer for the core VFD
+ * \brief ID for the core VFD
  */
-H5_DLL hid_t H5FD_core_init(void);
+H5_DLLVAR hid_t H5FD_CORE_id_g;
 
 /**
  * \ingroup FAPL

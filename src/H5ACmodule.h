@@ -22,7 +22,8 @@
  *      reporting macros.
  */
 #define H5AC_MODULE
-#define H5_MY_PKG     H5AC
-#define H5_MY_PKG_ERR H5E_CACHE
+#define H5_MY_PKG      H5AC
+#define H5_MY_PKG_ERR  H5E_CACHE
+#define H5_MY_PKG_INIT YES
 
 #endif /* H5ACmodule_H */
