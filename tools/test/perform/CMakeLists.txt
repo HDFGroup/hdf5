@@ -112,6 +112,12 @@ endif ()
 set (zip_perf_SOURCES
     ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/zip_perf.c
 )
+if (H5_ZLIB_HEADER)
+  message(STATUS "H5_ZLIB_HEADER=${H5_ZLIB_HEADER}")
+  set_source_files_properties(${HDF5_TEST_SOURCE_DIR}/zip_perf.c
+               PROPERTIES COMPILE_DEFINITIONS H5_ZLIB_HEADER="${H5_ZLIB_HEADER}"
+  )
+endif ()
 add_executable (zip_perf ${zip_perf_SOURCES})
 target_include_directories (zip_perf PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
