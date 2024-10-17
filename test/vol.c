@@ -1780,6 +1780,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 
     /* Push a new API context on the stack */
     /* (Necessary for the named datatype construction routines) */
+    memset(&api_ctx, 0, sizeof(api_ctx));
     if (H5VL_SUBCLS_DATATYPE == subcls)
         H5CX_push(&api_ctx);
 
