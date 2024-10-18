@@ -22,7 +22,8 @@
  *      reporting macros.
  */
 #define H5HG_MODULE
-#define H5_MY_PKG     H5HG
-#define H5_MY_PKG_ERR H5E_HEAP
+#define H5_MY_PKG      H5HG
+#define H5_MY_PKG_ERR  H5E_HEAP
+#define H5_MY_PKG_INIT NO
 
 #endif /* H5HGmodule_H */

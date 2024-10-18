@@ -19,22 +19,19 @@
  *          application to the same file).
  */
 
-#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
 #include "H5private.h"   /* Generic Functions        */
 #include "H5Eprivate.h"  /* Error handling           */
 #include "H5Fprivate.h"  /* File access              */
-#include "H5FDprivate.h" /* File drivers             */
+#include "H5FDpkg.h"     /* File drivers             */
 #include "H5FDsec2.h"    /* Sec2 file driver         */
 #include "H5FLprivate.h" /* Free Lists               */
 #include "H5Iprivate.h"  /* IDs                      */
 #include "H5Pprivate.h"  /* Property lists           */
 
 /* The driver identification number, initialized at runtime */
-static hid_t H5FD_SEC2_g = 0;
-
-/* Whether to ignore file locks when disabled (env var value) */
-static htri_t ignore_disabled_file_locks_s = FAIL;
+hid_t H5FD_SEC2_id_g = H5I_INVALID_HID;
 
 /* The description of a file belonging to this driver. The 'eoa' and 'eof'
  * determine the amount of hdf5 address space in use and the high-water mark
@@ -119,7 +116,6 @@ typedef struct H5FD_sec2_t {
     (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
 
 /* Prototypes */
-static herr_t  H5FD__sec2_term(void);
 static H5FD_t *H5FD__sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t  H5FD__sec2_close(H5FD_t *_file);
 static int     H5FD__sec2_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
@@ -145,7 +141,7 @@ static const H5FD_class_t H5FD_sec2_g = {
     "sec2",                /* name                 */
     MAXADDR,               /* maxaddr              */
     H5F_CLOSE_WEAK,        /* fc_degree            */
-    H5FD__sec2_term,       /* terminate            */
+    NULL,                  /* terminate            */
     NULL,                  /* sb_size              */
     NULL,                  /* sb_encode            */
     NULL,                  /* sb_decode            */
@@ -186,61 +182,48 @@ static const H5FD_class_t H5FD_sec2_g = {
 H5FL_DEFINE_STATIC(H5FD_sec2_t);
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_sec2_init
+ * Function:    H5FD__sec2_register
  *
- * Purpose:     Initialize this driver by registering the driver with the
- *              library.
+ * Purpose:     Register the driver with the library.
  *
- * Return:      Success:    The driver ID for the sec2 driver
- *              Failure:    H5I_INVALID_HID
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5FD_sec2_init(void)
+herr_t
+H5FD__sec2_register(void)
 {
-    char *lock_env_var = NULL;            /* Environment variable pointer */
-    hid_t ret_value    = H5I_INVALID_HID; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_PACKAGE
 
-    /* Check the use disabled file locks environment variable */
-    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
-    if (lock_env_var && !strcmp(lock_env_var, "BEST_EFFORT"))
-        ignore_disabled_file_locks_s = true; /* Override: Ignore disabled locks */
-    else if (lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "1")))
-        ignore_disabled_file_locks_s = false; /* Override: Don't ignore disabled locks */
-    else
-        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
+    if (H5I_VFL != H5I_get_type(H5FD_SEC2_id_g))
+        if ((H5FD_SEC2_id_g = H5FD_register(&H5FD_sec2_g, sizeof(H5FD_class_t), false)) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register sec2 driver");
 
-    if (H5I_VFL != H5I_get_type(H5FD_SEC2_g))
-        H5FD_SEC2_g = H5FD_register(&H5FD_sec2_g, sizeof(H5FD_class_t), false);
-
-    /* Set return value */
-    ret_value = H5FD_SEC2_g;
-
+done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_sec2_init() */
+} /* end H5FD__sec2_register() */
 
 /*---------------------------------------------------------------------------
- * Function:    H5FD__sec2_term
+ * Function:    H5FD__sec2_unregister
  *
- * Purpose:     Shut down the VFD
+ * Purpose:     Reset library driver info.
  *
  * Returns:     SUCCEED (Can't fail)
  *
  *---------------------------------------------------------------------------
  */
-static herr_t
-H5FD__sec2_term(void)
+herr_t
+H5FD__sec2_unregister(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset VFL ID */
-    H5FD_SEC2_g = 0;
+    H5FD_SEC2_id_g = H5I_INVALID_HID;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FD__sec2_term() */
+} /* end H5FD__sec2_unregister() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_sec2
@@ -361,9 +344,9 @@ H5FD__sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, NULL, "not a file access property list");
 
     /* Check the file locking flags in the fapl */
-    if (ignore_disabled_file_locks_s != FAIL)
+    if (H5FD_ignore_disabled_file_locks_p != FAIL)
         /* The environment variable was set, so use that preferentially */
-        file->ignore_disabled_file_locks = ignore_disabled_file_locks_s;
+        file->ignore_disabled_file_locks = H5FD_ignore_disabled_file_locks_p;
     else {
         /* Use the value in the property list */
         if (H5P_get(plist, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME, &file->ignore_disabled_file_locks) < 0)

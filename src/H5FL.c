@@ -110,6 +110,9 @@ struct H5FL_fac_node_t {
     struct H5FL_fac_node_t *next; /* Pointer to next block in free list */
 };
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /* The head of the list of factory things to garbage collect */
 static H5FL_fac_gc_list_t H5FL_fac_gc_head = {0, NULL};
 
@@ -168,15 +171,20 @@ H5FL_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    if (H5_PKG_INIT_VAR) {
         /* Garbage collect any nodes on the free lists */
-        (void)
-    H5FL_garbage_coll();
+        (void)H5FL_garbage_coll();
 
-    /* Shut down the various kinds of free lists */
-    n += H5FL__reg_term();
-    n += H5FL__fac_term_all();
-    n += H5FL__arr_term();
-    n += H5FL__blk_term();
+        /* Shut down the various kinds of free lists */
+        n += H5FL__reg_term();
+        n += H5FL__fac_term_all();
+        n += H5FL__arr_term();
+        n += H5FL__blk_term();
+
+        /* Mark interface closed */
+        if (0 == n)
+            H5_PKG_INIT_VAR = false;
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5FL_term_package() */

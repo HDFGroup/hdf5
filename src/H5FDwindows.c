@@ -10,14 +10,17 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5private.h"   /* Generic Functions        */
-#include "H5Eprivate.h"  /* Error handling           */
-#include "H5FDprivate.h" /* File drivers             */
-#include "H5FDwindows.h" /* Windows file driver      */
-#include "H5FDsec2.h"    /* Windows file driver      */
-#include "H5Pprivate.h"  /* Property lists           */
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
+
+#include "H5private.h" /* Generic Functions        */
 
 #ifdef H5_HAVE_WINDOWS
+
+#include "H5Eprivate.h"  /* Error handling           */
+#include "H5FDsec2.h"    /* Windows file driver      */
+#include "H5FDpkg.h"     /* File drivers             */
+#include "H5FDwindows.h" /* Windows file driver      */
+#include "H5Pprivate.h"  /* Property lists           */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_windows

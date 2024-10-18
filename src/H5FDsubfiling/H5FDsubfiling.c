@@ -16,27 +16,30 @@
  *          mirror, and family VFDs.
  */
 
-#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
 #include "H5private.h"          /* Generic Functions        */
 #include "H5CXprivate.h"        /* API contexts, etc.       */
-#include "H5Dprivate.h"         /* Dataset stuff            */
 #include "H5Eprivate.h"         /* Error handling           */
-#include "H5FDprivate.h"        /* File drivers             */
-#include "H5FDsubfiling.h"      /* Subfiling file driver    */
-#include "H5FDsubfiling_priv.h" /* Subfiling file driver    */
-#include "H5FDsec2.h"           /* Sec2 VFD                 */
-#include "H5FLprivate.h"        /* Free Lists               */
 #include "H5Fprivate.h"         /* File access              */
+#include "H5FDpkg.h"            /* File drivers             */
+#include "H5FDsec2.h"           /* Sec2 VFD                 */
+#include "H5FDsubfiling_priv.h" /* Subfiling file driver    */
+#include "H5FLprivate.h"        /* Free Lists               */
 #include "H5Iprivate.h"         /* IDs                      */
 #include "H5MMprivate.h"        /* Memory management        */
 #include "H5Pprivate.h"         /* Property lists           */
 
 /* The driver identification number, initialized at runtime */
-static hid_t H5FD_SUBFILING_g = H5I_INVALID_HID;
+hid_t H5FD_SUBFILING_id_g = H5I_INVALID_HID;
+
+/* Flag to indicate whether global driver resources & settings have been
+ *      initialized.
+ */
+static bool H5FD_subfiling_init_s = false;
 
 /* Whether the driver initialized MPI on its own */
-static bool H5FD_mpi_self_initialized = false;
+static bool H5FD_mpi_self_initialized_s = false;
 
 /* The description of a file belonging to this driver. The 'eoa' and 'eof'
  * determine the amount of hdf5 address space in use and the high-water mark
@@ -178,7 +181,7 @@ static herr_t  H5FD__subfiling_read_vector(H5FD_t *file, hid_t dxpl_id, uint32_t
 static herr_t  H5FD__subfiling_write_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
                                             haddr_t addrs[], size_t sizes[], const void *bufs[] /* in */);
 static herr_t  H5FD__subfiling_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
-static herr_t  H5FD__subfiling_del(const char *name, hid_t fapl);
+static herr_t  H5FD__subfiling_delete(const char *name, hid_t fapl);
 static herr_t  H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
                                    void **output);
 
@@ -238,8 +241,6 @@ static void H5_subfiling_dump_iovecs(subfiling_context_t *sf_context, size_t ior
                                      haddr_t *io_addrs, size_t *io_sizes, H5_flexible_const_ptr_t *io_bufs);
 #endif
 
-void H5FD__subfiling_mpi_finalize(void);
-
 static const H5FD_class_t H5FD_subfiling_g = {
     H5FD_CLASS_VERSION,              /* VFD interface version */
     H5_VFD_SUBFILING,                /* value                 */
@@ -278,7 +279,7 @@ static const H5FD_class_t H5FD_subfiling_g = {
     H5FD__subfiling_truncate,        /* truncate              */
     NULL,                            /* lock                  */
     NULL,                            /* unlock                */
-    H5FD__subfiling_del,             /* del                   */
+    H5FD__subfiling_delete,          /* del                   */
     H5FD__subfiling_ctl,             /* ctl                   */
     H5FD_FLMAP_DICHOTOMY             /* fl_map                */
 };
@@ -286,101 +287,110 @@ static const H5FD_class_t H5FD_subfiling_g = {
 /* Declare a free list to manage the H5FD_subfiling_t struct */
 H5FL_DEFINE_STATIC(H5FD_subfiling_t);
 
-/*
- * If this VFD initialized MPI, this routine will be registered
- * as an atexit handler in order to finalize MPI before the
- * application exits.
- */
-void
-H5FD__subfiling_mpi_finalize(void)
-{
-    /*
-     * Don't call normal FUNC_ENTER() since we don't want to initialize the
-     * whole library just to release it all right away.  It is safe to call
-     * this function for an uninitialized library.
-     */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    H5_term_library();
-    MPI_Finalize();
-
-    FUNC_LEAVE_NOAPI_VOID
-}
-
 /*-------------------------------------------------------------------------
- * Function:    H5FD_subfiling_init
+ * Function:    H5FD__subfiling_register
  *
- * Purpose:     Initialize this driver by registering the driver with the
- *              library.
+ * Purpose:     Register the driver with the library.
  *
- * Return:      Success:    The driver ID for the subfiling driver
- *              Failure:    H5I_INVALID_HID
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5FD_subfiling_init(void)
+herr_t
+H5FD__subfiling_register(void)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_PACKAGE
 
     /* Register the Subfiling VFD, if it isn't already registered */
-    if (H5I_VFL != H5I_get_type(H5FD_SUBFILING_g)) {
-        int mpi_initialized = 0;
-        int provided        = 0;
-        int mpi_code;
-
-        if ((H5FD_SUBFILING_g = H5FD_register(&H5FD_subfiling_g, sizeof(H5FD_class_t), false)) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register subfiling VFD");
-
-        /* Initialize MPI if not already initialized */
-        if (MPI_SUCCESS != (mpi_code = MPI_Initialized(&mpi_initialized)))
-            HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Initialized failed", mpi_code);
-        if (mpi_initialized) {
-            /* If MPI is initialized, validate that it was initialized with MPI_THREAD_MULTIPLE */
-            if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
-                HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Query_thread failed", mpi_code);
-            if (provided != MPI_THREAD_MULTIPLE)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                            "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
-        }
-        else {
-            int required = MPI_THREAD_MULTIPLE;
-
-            if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(NULL, NULL, required, &provided)))
-                HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Init_thread failed", mpi_code);
-
-            H5FD_mpi_self_initialized = true;
-
-            if (provided != required)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                            "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
-
-            if (atexit(H5FD__subfiling_mpi_finalize) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                            "can't register atexit handler for MPI_Finalize");
-        }
-
-        /*
-         * Create the MPI Datatype that will be used
-         * for sending/receiving RPC messages
-         */
-        HDcompile_assert(sizeof(((sf_work_request_t *)NULL)->header) == 3 * sizeof(int64_t));
-        if (H5_subfiling_rpc_msg_type == MPI_DATATYPE_NULL) {
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous(3, MPI_INT64_T, &H5_subfiling_rpc_msg_type)))
-                HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Type_contiguous failed", mpi_code);
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&H5_subfiling_rpc_msg_type)))
-                HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Type_commit failed", mpi_code);
-        }
-    }
-
-    /* Set return value */
-    ret_value = H5FD_SUBFILING_g;
+    if (H5I_VFL != H5I_get_type(H5FD_SUBFILING_id_g))
+        if ((H5FD_SUBFILING_id_g = H5FD_register(&H5FD_subfiling_g, sizeof(H5FD_class_t), false)) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "can't register subfiling VFD");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_subfiling_init() */
+} /* end H5FD__subfiling_register() */
+
+/*---------------------------------------------------------------------------
+ * Function:    H5FD__subfiling_unregister
+ *
+ * Purpose:     Reset library driver info.
+ *
+ * Returns:     SUCCEED (Can't fail)
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5FD__subfiling_unregister(void)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Reset VFL ID */
+    H5FD_SUBFILING_id_g = H5I_INVALID_HID;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FD__subfiling_unregister() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__subfiling_init
+ *
+ * Purpose:     Singleton to initialize global driver settings & resources.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__subfiling_init(void)
+{
+    int    mpi_initialized = 0;
+    int    provided        = 0;
+    int    mpi_code;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Initialize MPI if not already initialized */
+    if (MPI_SUCCESS != (mpi_code = MPI_Initialized(&mpi_initialized)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Initialized failed", mpi_code);
+    if (mpi_initialized) {
+        /* If MPI is initialized, validate that it was initialized with MPI_THREAD_MULTIPLE */
+        if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Query_thread failed", mpi_code);
+        if (provided != MPI_THREAD_MULTIPLE)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+                        "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
+    }
+    else {
+        if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(NULL, NULL, MPI_THREAD_MULTIPLE, &provided)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Init_thread failed", mpi_code);
+
+        H5FD_mpi_self_initialized_s = true;
+
+        if (provided != MPI_THREAD_MULTIPLE)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+                        "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
+    }
+
+    /*
+     * Create the MPI Datatype that will be used
+     * for sending/receiving RPC messages
+     */
+    HDcompile_assert(sizeof(((sf_work_request_t *)NULL)->header) == 3 * sizeof(int64_t));
+    if (H5_subfiling_rpc_msg_type == MPI_DATATYPE_NULL) {
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous(3, MPI_INT64_T, &H5_subfiling_rpc_msg_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code);
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&H5_subfiling_rpc_msg_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
+    }
+
+    /* Indicate that driver is set up */
+    H5FD_subfiling_init_s = true;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__subfiling_init() */
 
 /*---------------------------------------------------------------------------
  * Function:    H5FD__subfiling_term
@@ -394,44 +404,45 @@ done:
 static herr_t
 H5FD__subfiling_term(void)
 {
+    int    mpi_finalized;
+    int    mpi_code;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
-    if (H5FD_SUBFILING_g >= 0) {
-        int mpi_finalized;
-        int mpi_code;
+    /*
+     * Retrieve status of whether MPI has already been terminated.
+     * This can happen if an HDF5 ID is left unclosed and HDF5
+     * shuts down after MPI_Finalize() is called in an application.
+     */
+    if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
 
-        /*
-         * Retrieve status of whether MPI has already been terminated.
-         * This can happen if an HDF5 ID is left unclosed and HDF5
-         * shuts down after MPI_Finalize() is called in an application.
-         */
-        if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
-
+    if (!mpi_finalized) {
         /* Free RPC message MPI Datatype */
-        if (H5_subfiling_rpc_msg_type != MPI_DATATYPE_NULL) {
-            if (!mpi_finalized) {
-                if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&H5_subfiling_rpc_msg_type)))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
-            }
-#ifdef H5_SUBFILING_DEBUG
-            else
-                printf("** WARNING **: HDF5 is terminating the Subfiling VFD after MPI_Finalize() was called "
-                       "- an HDF5 ID was probably left unclosed\n");
-#endif
-        }
+        if (H5_subfiling_rpc_msg_type != MPI_DATATYPE_NULL)
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&H5_subfiling_rpc_msg_type)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
 
-        /* Clean up resources */
-        if (H5FD__subfiling_terminate() < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't cleanup internal subfiling resources");
+        /* Terminate MPI if the driver initialized it */
+        if (H5FD_mpi_self_initialized_s) {
+            if (MPI_SUCCESS != (mpi_code = MPI_Finalize()))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Finalize failed", mpi_code);
+
+            H5FD_mpi_self_initialized_s = false;
+        }
     }
+#ifdef H5_SUBFILING_DEBUG
+    else
+        printf("** WARNING **: HDF5 is terminating the Subfiling VFD after MPI_Finalize() was called "
+               "- an HDF5 ID was probably left unclosed\n");
+#endif
+
+    /* Clean up resources */
+    if (H5FD__subfiling_terminate() < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't cleanup internal subfiling resources");
 
 done:
-    /* Reset VFL ID */
-    H5FD_SUBFILING_g = H5I_INVALID_HID;
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__subfiling_term() */
 
@@ -461,12 +472,13 @@ H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config)
 
     FUNC_ENTER_API(FAIL)
 
-    /* Ensure Subfiling (and therefore MPI) is initialized before doing anything */
-    if (H5FD_subfiling_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize subfiling VFD");
-
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_subfiling_init_s)
+        if (H5FD__subfiling_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
 
     if (vfd_config == NULL) {
         if (NULL == (subfiling_conf = H5MM_calloc(sizeof(*subfiling_conf))))
@@ -543,6 +555,11 @@ H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_out is NULL");
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_subfiling_init_s)
+        if (H5FD__subfiling_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
 
     if (H5FD_SUBFILING != H5P_peek_driver(plist))
         use_default_config = true;
@@ -1113,6 +1130,11 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     if (ADDR_OVERFLOW(maxaddr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr");
 
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_subfiling_init_s)
+        if (H5FD__subfiling_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "can't initialize driver");
+
     if (NULL == (file = (H5FD_subfiling_t *)H5FL_CALLOC(H5FD_subfiling_t)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct");
     file->comm           = MPI_COMM_NULL;
@@ -1127,7 +1149,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
 
-    if (H5FD_mpi_self_initialized) {
+    if (H5FD_mpi_self_initialized_s) {
         file->comm = MPI_COMM_WORLD;
         file->info = MPI_INFO_NULL;
     }
@@ -1759,8 +1781,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__subfiling_truncate() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__subfiling_delete
+ *
+ * Purpose:     Delete a file
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t
-H5FD__subfiling_del(const char *name, hid_t fapl)
+H5FD__subfiling_delete(const char *name, hid_t fapl)
 {
     const H5FD_subfiling_config_t *subfiling_config = NULL;
     H5FD_subfiling_config_t        default_config;
@@ -1768,6 +1799,11 @@ H5FD__subfiling_del(const char *name, hid_t fapl)
     herr_t                         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
+
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_subfiling_init_s)
+        if (H5FD__subfiling_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
 
     if (NULL == (plist = H5P_object_verify(fapl, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");

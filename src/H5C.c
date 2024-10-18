@@ -84,6 +84,9 @@
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /* Declare a free list to manage the tag info struct */
 H5FL_DEFINE(H5C_tag_info_t);
 

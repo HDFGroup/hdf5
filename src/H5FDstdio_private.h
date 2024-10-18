@@ -11,20 +11,21 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * This file contains private information about the H5R module
+ * Purpose:	The private header file for the stdio VFD
  */
-#ifndef H5Rprivate_H
-#define H5Rprivate_H
 
-#include "H5Rpublic.h"
+#ifndef H5FDstdio_private_H
+#define H5FDstdio_private_H
+
+/* Include VFD's public header */
+#include "H5FDstdio.h" /* stdio VFD */
 
 /* Private headers needed by this file */
+#include "H5FDprivate.h" /* File drivers */
 
 /**************************/
 /* Library Private Macros */
 /**************************/
-
-#define H5R_ENCODE_VERSION 0x1 /* Version for encoding references */
 
 /****************************/
 /* Library Private Typedefs */
@@ -34,8 +35,11 @@
 /* Library Private Variables */
 /*****************************/
 
+/* stdio VFD's class struct */
+H5_DLLVAR const H5FD_class_t H5FD_stdio_g;
+
 /******************************/
 /* Library Private Prototypes */
 /******************************/
 
-#endif /* H5Rprivate_H */
+#endif /* H5FDstdio_private_H */
