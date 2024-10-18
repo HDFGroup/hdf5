@@ -1031,7 +1031,7 @@ done:
  *
  * Purpose:     Determine if two connectors point to the same VOL class
  *
- * Return:      TRUE/FALSE/FAIL
+ * Return:      true/false/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -1048,7 +1048,7 @@ H5VL_conn_same_class(const H5VL_connector_t *conn1, const H5VL_connector_t *conn
 
     /* Fast check */
     if (conn1 == conn2)
-        HGOTO_DONE(TRUE);
+        HGOTO_DONE(true);
     else {
         int cmp_value = 0; /* Comparison result */
 
