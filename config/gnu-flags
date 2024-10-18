@@ -117,18 +117,15 @@ if test "X-gcc" = "X-$cc_vendor"; then
     esac
 
     case "$host_os-$host_cpu" in
-        # Cygwin needs the "-std=c99" flag removed.
-        cygwin-*)
-            ;;
-        # On Solaris, gcc needs the gnu99 standard to pick up certain POSIX
+        # On Solaris, gcc needs the gnu11 standard to pick up certain POSIX
         # things. Do NOT use this as the gcc norm as this encourages the use
         # of non-standard gcc extensions.
         *solaris*)
-            H5_CFLAGS="$H5_CFLAGS -std=gnu99"
+            H5_CFLAGS="$H5_CFLAGS -std=gnu11"
             ;;
-        # Everybody else gets c99 as the standard.
+        # Everybody else gets C11 as the standard.
         *)
-            H5_CFLAGS="$H5_CFLAGS -std=c99"
+            H5_CFLAGS="$H5_CFLAGS -std=c11"
             ;;
     esac
 

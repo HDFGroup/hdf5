@@ -47,6 +47,21 @@ New Features
 
     Configuration:
     -------------
+    - Dropped support for the traditional MSVC preprocessor
+
+      Visual Studio has recently started using a standards-compliant
+      preprocessor (In VS2019+) and this is the default in C11.
+
+      https://learn.microsoft.com/en-us/cpp/preprocessor/preprocessor-experimental-overview?view=msvc-170
+
+      Because of this, we've dropped support for the traditional
+      MSVC preprocessor.
+
+    - The standard for building the library is now C11
+
+      We have updated the build files to set the C standard to C11, though
+      some platforms use gnu11 to get some GNU things to work.
+
     - Added configuration option for internal threading/concurrency support:
 
           CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)

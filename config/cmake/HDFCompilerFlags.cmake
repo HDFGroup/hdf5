@@ -9,10 +9,10 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-set (CMAKE_C_STANDARD 99)
+set (CMAKE_C_STANDARD 11)
 set (CMAKE_C_STANDARD_REQUIRED TRUE)
 
-set (CMAKE_C_FLAGS "${CMAKE_C99_STANDARD_COMPILE_OPTION} ${CMAKE_C_FLAGS}")
+set (CMAKE_C_FLAGS "${CMAKE_C11_STANDARD_COMPILE_OPTION} ${CMAKE_C_FLAGS}")
 set (CMAKE_C_FLAGS "${CMAKE_C_SANITIZER_FLAGS} ${CMAKE_C_FLAGS}")
 message (VERBOSE "Warnings Configuration: C default: ${CMAKE_C_FLAGS}")
 #-----------------------------------------------------------------------------
