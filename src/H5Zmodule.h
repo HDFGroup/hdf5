@@ -71,6 +71,7 @@
  * shuffling algorithm) and error checking (Fletcher32 checksum). For further
  * flexibility, the library allows a user application to extend the pipeline
  * through the creation and registration of customized filters.
+ * See \ref sec_filter_plugins
  *
  * The flexibility of the filter pipeline implementation enables the definition
  * of additional filters by a user application. A filter
@@ -82,6 +83,43 @@
  * The HDF5 library does not support filters for contiguous datasets because of
  * the difficulty of implementing random access for partial I/O. Compact dataset
  * filters are not supported because they would not produce significant results.
+ *
+ * HDF5 allows chunked data to pass through user-defined filters
+ * on the way to or from disk.  The filters operate on chunks of an
+ * #H5D_CHUNKED dataset can be arranged in a pipeline
+ * so output of one filter becomes the input of the next filter.
+ *
+ * Each filter has a two-byte identification number (type
+ * #H5Z_filter_t) allocated by The HDF Group and can also be
+ * passed application-defined integer resources to control its
+ * behavior.  Each filter also has an optional ASCII comment
+ * string.
+ *
+ *     <table>
+ *     <tr>
+ *       <th>Values for <code>#H5Z_filter_t</code></th><th>Description</th>
+ *     </tr>
+ *     <tr>
+ *       <td><code>0-255</code></td>
+ *       <td>These values are reserved for filters predefined and
+ *            registered by the HDF5 library and of use to the general
+ *            public.</td>
+ *     </tr>
+ *     <tr>
+ *       <td><code>256-511</code></td>
+ *       <td>Filter numbers in this range are used for testing only
+ *            and can be used temporarily by any organization.  No
+ *            attempt is made to resolve numbering conflicts since all
+ *            definitions are by nature temporary.</td>
+ *     </tr>
+ *     <tr>
+ *       <td><code>512-65535</code></td>
+ *       <td>Reserved for future assignment. Please contact the
+ *            <a href="mailto:help@hdfgroup.org">HDF5 development team</a>
+ *            to reserve a value or range of values for
+ *            use by your filters.</td>
+ *    </tr>
+ *    </table>
  *
  * Filter identifiers for the filters distributed with the HDF5
  * Library are as follows:
