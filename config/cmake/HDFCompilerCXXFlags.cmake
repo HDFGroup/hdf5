@@ -141,3 +141,22 @@ if (CMAKE_CXX_COMPILER_LOADED)
     list (APPEND HDF5_CMAKE_CXX_FLAGS "${OPTIMIZE_CXXFLAGS}")
   endif ()
 endif ()
+
+#-----------------------------------------------------------------------------
+# The build mode flags are not added to CMAKE_CXX_FLAGS, so create a separate
+# variable for them so they can be written out to libhdf5.settings and
+# H5build_settings.c
+#-----------------------------------------------------------------------------
+if ("${HDF_CFG_NAME}" STREQUAL     "Debug")
+  set (HDF5_BUILD_MODE_CXX_FLAGS   "${CMAKE_CXX_FLAGS_DEBUG}")
+elseif ("${HDF_CFG_NAME}" STREQUAL "Developer")
+  set (HDF5_BUILD_MODE_CXX_FLAGS   "${CMAKE_CXX_FLAGS_DEVELOPER}")
+elseif ("${HDF_CFG_NAME}" STREQUAL "Release")
+  set (HDF5_BUILD_MODE_CXX_FLAGS   "${CMAKE_CXX_FLAGS_RELEASE}")
+elseif ("${HDF_CFG_NAME}" STREQUAL "MinSizeRel")
+  set (HDF5_BUILD_MODE_CXX_FLAGS   "${CMAKE_CXX_FLAGS_MINSIZEREL}")
+elseif ("${HDF_CFG_NAME}" STREQUAL "RelWithDebInfo")
+  set (HDF5_BUILD_MODE_CXX_FLAGS   "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+else ()
+  set (HDF5_BUILD_MODE_CXX_FLAGS   "")
+endif ()
