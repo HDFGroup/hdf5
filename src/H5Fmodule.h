@@ -239,7 +239,7 @@
  * Tools</a>
  * page under
  * <a href="https://\DOXURL/_view_tools_command.html">Command-line Tools</a>.
- * The HDF5 DDL grammar is described in the document \ref DDLBNF114.
+ * The HDF5 DDL grammar is described in the document \ref DDLBNF116.
  *
  * \subsection subsec_file_summary File Function Summaries
  * General library (\ref H5 functions and macros), (\ref H5F functions), file related

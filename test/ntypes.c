@@ -43,6 +43,9 @@ static const char *FILENAME[] = {"ntypes", NULL};
 #ifdef H5_HAVE__FLOAT16
 #define DSET_FLOAT16_NAME "_Float16_type"
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+#define DSET_COMPLEX_NAME "float_complex_type"
+#endif
 
 #define SPACE1_DIM1    4
 #define SPACE1_RANK    1
@@ -3168,6 +3171,130 @@ error:
 }
 #endif
 
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+static herr_t
+test_complex(hid_t file)
+{
+    hsize_t dims[2];
+    hid_t   dataset     = H5I_INVALID_HID;
+    hid_t   space       = H5I_INVALID_HID;
+    hid_t   dtype       = H5I_INVALID_HID;
+    hid_t   native_type = H5I_INVALID_HID;
+    struct {
+        H5_float_complex arr[DIM0][DIM1];
+    } *ipoints = NULL;
+    struct {
+        H5_float_complex arr[DIM0][DIM1];
+    } *icheck = NULL;
+
+    TESTING("float complex datatype");
+
+    if (NULL == (ipoints = calloc(1, sizeof(*ipoints))))
+        TEST_ERROR;
+    if (NULL == (icheck = calloc(1, sizeof(*icheck))))
+        TEST_ERROR;
+
+    /* Initialize the data */
+    for (size_t i = 0; i < DIM0; i++)
+        for (size_t j = 0; j < DIM1; j++) {
+            float real         = (float)(rand() / (double)RAND_MAX);
+            float imag         = (float)(rand() / (double)RAND_MAX);
+            ipoints->arr[i][j] = H5_CMPLXF(real, imag);
+        }
+
+    /* Create the data space */
+    dims[0] = DIM0;
+    dims[1] = DIM1;
+    if ((space = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    if ((dataset = H5Dcreate2(file, DSET_COMPLEX_NAME, H5T_COMPLEX_IEEE_F32BE, space, H5P_DEFAULT,
+                              H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write the data to the dataset */
+    if (H5Dwrite(dataset, H5T_NATIVE_FLOAT_COMPLEX, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+
+    /* Open dataset again to check H5Tget_native_type */
+    if ((dataset = H5Dopen2(file, DSET_COMPLEX_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dtype = H5Dget_type(dataset)) < 0)
+        TEST_ERROR;
+
+    if ((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Verify the datatype retrieved and converted */
+    if (H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_FLOAT_COMPLEX))
+        TEST_ERROR;
+    if (H5Tget_size(native_type) != H5Tget_size(H5T_COMPLEX_IEEE_F32BE))
+        TEST_ERROR;
+    if (H5T_COMPLEX != H5Tget_class(native_type))
+        TEST_ERROR;
+
+    /* Read the dataset back */
+    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, icheck) < 0)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    for (size_t i = 0; i < DIM0; i++)
+        for (size_t j = 0; j < DIM1; j++) {
+            float real_points = crealf(ipoints->arr[i][j]);
+            float imag_points = cimagf(ipoints->arr[i][j]);
+            float real_check  = crealf(icheck->arr[i][j]);
+            float imag_check  = cimagf(icheck->arr[i][j]);
+
+            if (!H5_FLT_ABS_EQUAL(real_points, real_check) || !H5_FLT_ABS_EQUAL(imag_points, imag_check)) {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %zu,%zu\n", i, j);
+                printf("    Written: %f%+fi, Read: %f%+fi\n", (double)real_points, (double)imag_points,
+                       (double)real_check, (double)imag_check);
+                goto error;
+            }
+        }
+
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    if (H5Tclose(native_type) < 0)
+        TEST_ERROR;
+    if (H5Tclose(dtype) < 0)
+        TEST_ERROR;
+
+    free(ipoints);
+    ipoints = NULL;
+    free(icheck);
+    icheck = NULL;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dataset);
+        H5Tclose(native_type);
+        H5Tclose(dtype);
+        H5Sclose(space);
+    }
+    H5E_END_TRY
+
+    free(ipoints);
+    free(icheck);
+
+    return -1;
+}
+#endif
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -3220,6 +3347,10 @@ main(void)
 
 #ifdef H5_HAVE__FLOAT16
     nerrors += test__Float16(file) < 0 ? 1 : 0;
+#endif
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_complex(file) < 0 ? 1 : 0;
 #endif
 
     if (H5Fclose(file) < 0)

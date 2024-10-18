@@ -47,7 +47,8 @@ public class H5Ex_T_Commit {
         H5T_ENUM(HDF5Constants.H5T_ENUM),           // enumeration types
         H5T_VLEN(HDF5Constants.H5T_VLEN),           // Variable-Length types
         H5T_ARRAY(HDF5Constants.H5T_ARRAY),         // Array types
-        H5T_NCLASSES(11);                           // this must be last
+        H5T_COMPLEX(HDF5Constants.H5T_COMPLEX),     // Complex number types
+        H5T_NCLASSES(12);                           // this must be last
 
         private static final Map<Long, H5T_class> lookup = new HashMap<Long, H5T_class>();
 

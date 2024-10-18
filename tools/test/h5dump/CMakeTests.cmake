@@ -77,6 +77,10 @@
       tcmpdintarray.ddl
       tcmpdints.ddl
       tcmpdintsize.ddl
+      tcomplex.ddl
+      tcomplex_be.ddl
+      tcomplex_be_info.ddl
+      tcomplex_info.ddl
       tcompound_complex2.ddl
       tcomp-1.ddl
       tcomp-2.ddl
@@ -269,6 +273,8 @@
       tcmpdintarray.h5
       tcmpdints.h5
       tcmpdintsize.h5
+      tcomplex.h5
+      tcomplex_be.h5
       tcompound.h5
       tcompound_complex.h5
       tcompound_complex2.h5
@@ -1317,6 +1323,27 @@
   # Add tests for _Float16 type
   ADD_H5_TEST (tfloat16 0 --enable-error-stack tfloat16.h5)
   ADD_H5_TEST (tfloat16_be 0 --enable-error-stack tfloat16_be.h5)
+
+  # Add tests for complex numbers. For portability, use a fixed floating-point
+  # precision and skip dumping of the "long double _Complex" dataset. The "long
+  # double _Complex" dataset may display differently across platforms, e.g.
+  # between Linux and Windows, due to the size of "long double" and is only
+  # affected by the fixed floating-point precision option when
+  # sizeof(long double) != sizeof(double). Use -w80 after the floating-point
+  # format option since specifying a fixed floating-point precision resets h5dump's
+  # default number of columns value.
+  ADD_H5_TEST (tcomplex 0 --enable-error-stack -m %.6f -w80 -d ArrayDatasetFloatComplex
+               -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
+               -d VariableLengthDatasetFloatComplex tcomplex.h5)
+  ADD_H5_TEST (tcomplex_info 0 --enable-error-stack -p -H -m %.6f -w80 -d ArrayDatasetFloatComplex
+               -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
+               -d VariableLengthDatasetFloatComplex tcomplex.h5)
+  ADD_H5_TEST (tcomplex_be 0 --enable-error-stack -m %.6f -w80 -d ArrayDatasetFloatComplex
+               -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
+               -d VariableLengthDatasetFloatComplex tcomplex_be.h5)
+  ADD_H5_TEST (tcomplex_be_info 0 --enable-error-stack -p -H -m %.6f -w80 -d ArrayDatasetFloatComplex
+               -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
+               -d VariableLengthDatasetFloatComplex tcomplex_be.h5)
 
   # test for vms
   ADD_H5_TEST (tvms 0 --enable-error-stack tvms.h5)

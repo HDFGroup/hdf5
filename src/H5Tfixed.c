@@ -23,13 +23,12 @@
 #include "H5Tpkg.h"     /*data-type functions			  */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tget_sign
+ * Function:    H5Tget_sign
  *
- * Purpose:	Retrieves the sign type for an integer type.
+ * Purpose:     Retrieves the sign type for an integer type.
  *
- * Return:	Success:	The sign type.
- *
- *		Failure:	H5T_SGN_ERROR (Negative)
+ * Return:      Success:    The sign type.
+ *              Failure:    H5T_SGN_ERROR (Negative)
  *
  *-------------------------------------------------------------------------
  */
@@ -52,14 +51,13 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_get_sign
+ * Function:    H5T_get_sign
  *
- * Purpose:	Private function for H5Tget_sign.  Retrieves the sign type
+ * Purpose:     Private function for H5Tget_sign.  Retrieves the sign type
  *              for an integer type.
  *
- * Return:	Success:	The sign type.
- *
- *		Failure:	H5T_SGN_ERROR (Negative)
+ * Return:      Success:    The sign type.
+ *              Failure:    H5T_SGN_ERROR (Negative)
  *
  *-------------------------------------------------------------------------
  */
@@ -88,11 +86,11 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tset_sign
+ * Function:    H5Tset_sign
  *
- * Purpose:	Sets the sign property for an integer.
+ * Purpose:     Sets the sign property for an integer.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */

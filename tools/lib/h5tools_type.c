@@ -74,6 +74,15 @@ h5tools_get_little_endian_type(hid_t tid)
                 p_type = H5Tcopy(H5T_STD_B64LE);
             break;
 
+        case H5T_COMPLEX:
+            if (size == 4)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F16LE);
+            else if (size == 8)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F32LE);
+            else if (size == 16)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F64LE);
+            break;
+
         case H5T_TIME:
         case H5T_OPAQUE:
         case H5T_STRING:
@@ -153,6 +162,15 @@ h5tools_get_big_endian_type(hid_t tid)
                 p_type = H5Tcopy(H5T_STD_B32BE);
             else if (size == 8)
                 p_type = H5Tcopy(H5T_STD_B64BE);
+            break;
+
+        case H5T_COMPLEX:
+            if (size == 4)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F16BE);
+            else if (size == 8)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F32BE);
+            else if (size == 16)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F64BE);
             break;
 
         case H5T_TIME:

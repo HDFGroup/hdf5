@@ -1150,9 +1150,9 @@ test_array_vlen_atomic(void)
     sid1 = H5Screate_simple(SPACE1_RANK, sdims1, NULL);
     CHECK(sid1, FAIL, "H5Screate_simple");
 
-    /* Create a compound datatype to refer to */
+    /* Create a variable-length datatype to refer to */
     tid2 = H5Tvlen_create(H5T_NATIVE_UINT);
-    CHECK(tid2, FAIL, "H5Tcreate");
+    CHECK(tid2, FAIL, "H5Tvlen_create");
 
     /* Create an array datatype to refer to */
     tid1 = H5Tarray_create2(tid2, ARRAY1_RANK, tdims1);
@@ -1582,6 +1582,164 @@ test_array_vlen_array(void)
     CHECK(ret, FAIL, "H5Fclose");
 
 } /* end test_array_vlen_array() */
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+static void
+test_array_complex(void)
+{
+    H5_float_complex wdata[SPACE1_DIM1][ARRAY1_DIM1]; /* Information to write         */
+    H5_float_complex rdata[SPACE1_DIM1][ARRAY1_DIM1]; /* Information read in          */
+    H5T_class_t      mclass;                          /* Datatype class for VL        */
+    hsize_t          sdims1[] = {SPACE1_DIM1};        /* Dataset dimensions           */
+    hsize_t          tdims1[] = {ARRAY1_DIM1};        /* Array type dimensions        */
+    hid_t            fid1;                            /* HDF5 File IDs                */
+    hid_t            dataset;                         /* Dataset ID                   */
+    hid_t            sid1;                            /* Dataspace ID                 */
+    hid_t            tid1;                            /* Array Datatype ID            */
+    hid_t            tid2;                            /* Complex Number Datatype ID   */
+    hid_t            tid3;                            /* Atomic Datatype ID           */
+    int              ndims;                           /* Array rank for reading       */
+    hsize_t          rdims1[H5S_MAX_RANK];            /* Array dimensions for reading */
+    herr_t           ret;                             /* Generic return value         */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing 1-D Array of Complex Number Datatypes Functionality\n"));
+
+    memset(wdata, 0, sizeof(wdata));
+    memset(rdata, 0, sizeof(rdata));
+
+    /* Initialize array data to write */
+    for (size_t i = 0; i < SPACE1_DIM1; i++)
+        for (size_t j = 0; j < ARRAY1_DIM1; j++)
+            wdata[i][j] = H5_CMPLXF((float)(i * 100), (float)(j * 10));
+
+    /* Create file */
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create dataspace for datasets */
+    sid1 = H5Screate_simple(SPACE1_RANK, sdims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create a complex number datatype to refer to */
+    tid2 = H5Tcomplex_create(H5T_IEEE_F32LE);
+    CHECK(tid2, FAIL, "H5Tcomplex_create");
+
+    /* Create an array datatype to refer to */
+    tid1 = H5Tarray_create2(tid2, ARRAY1_RANK, tdims1);
+    CHECK(tid1, FAIL, "H5Tarray_create2");
+
+    /* Close complex number datatype */
+    ret = H5Tclose(tid2);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Create a dataset */
+    dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
+
+    /* Write dataset to disk */
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open file */
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* Open the dataset */
+    dataset = H5Dopen2(fid1, "Dataset1", H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
+
+    /* Get the dataspace */
+    sid1 = H5Dget_space(dataset);
+    CHECK(sid1, FAIL, "H5Dget_space");
+
+    /* Get the datatype */
+    tid1 = H5Dget_type(dataset);
+    CHECK(tid1, FAIL, "H5Dget_type");
+
+    /* Check the array rank */
+    ndims = H5Tget_array_ndims(tid1);
+    VERIFY(ndims, ARRAY1_RANK, "H5Tget_array_ndims");
+
+    /* Get the array dimensions */
+    ret = H5Tget_array_dims2(tid1, rdims1);
+    CHECK(ret, FAIL, "H5Tget_array_dims2");
+
+    /* Check the array dimensions */
+    for (size_t i = 0; i < (size_t)ndims; i++)
+        if (rdims1[i] != tdims1[i]) {
+            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%" PRIuHSIZE
+                          ", tdims1[%d]=%" PRIuHSIZE "\n",
+                          (int)i, rdims1[i], (int)i, tdims1[i]);
+        }
+
+    /* Get the complex number datatype */
+    tid2 = H5Tget_super(tid1);
+    CHECK(tid2, FAIL, "H5Tget_super");
+
+    /* Get the 2nd field's class */
+    mclass = H5Tget_class(tid2);
+    VERIFY(mclass, H5T_COMPLEX, "H5Tget_class");
+
+    /* Check the complex number datatype's base type */
+    tid3 = H5Tget_super(tid2);
+    CHECK(tid3, FAIL, "H5Tget_super");
+
+    if ((ret = H5Tequal(tid3, H5T_IEEE_F32LE)) <= 0)
+        TestErrPrintf("VL base datatype is incorrect!, ret=%d\n", (int)ret);
+
+    /* Close the array's base type datatype */
+    ret = H5Tclose(tid3);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close complex number datatype */
+    ret = H5Tclose(tid2);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Read dataset from disk */
+    ret = H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Compare data read in */
+    for (size_t i = 0; i < SPACE1_DIM1; i++) {
+        for (size_t j = 0; j < ARRAY1_DIM1; j++) {
+            if (0 != memcmp(&wdata[i][j], &rdata[i][j], sizeof(H5_float_complex)))
+                TestErrPrintf(
+                    "Complex number data doesn't match!, wdata[%d][%d]=%f%+fi, rdata[%d][%d]=%f%+fi\n",
+                    (int)i, (int)j, (double)crealf(wdata[i][j]), (double)cimagf(wdata[i][j]), (int)i, (int)j,
+                    (double)crealf(wdata[i][j]), (double)cimagf(wdata[i][j]));
+        }
+    }
+
+    /* Close Datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+}
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:    test_array_bkg
@@ -2231,6 +2389,10 @@ test_array(const void H5_ATTR_UNUSED *params)
     test_array_vlen_atomic();     /* Test 1-D array of atomic VL datatypes                                */
     test_array_vlen_array();      /* Test 1-D array of 1-D array VL datatypes                             */
     test_array_funcs();           /* Test type functions with array types                                 */
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    test_array_complex();
+#endif
 
     test_array_bkg(); /* Read compound datatype with array fields and background fields read  */
 

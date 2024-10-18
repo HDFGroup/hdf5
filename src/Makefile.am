@@ -90,9 +90,10 @@ libhdf5_la_SOURCES= H5.c H5build_settings.c H5checksum.c H5dbg.c H5system.c \
         H5Sselect.c H5Stest.c \
         H5SL.c \
         H5SM.c H5SMbtree2.c H5SMcache.c H5SMmessage.c H5SMtest.c \
-        H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c H5Tcompound.c H5Tconv.c \
-        H5Tconv_integer.c H5Tconv_float.c H5Tconv_string.c H5Tconv_bitfield.c \
-        H5Tconv_compound.c H5Tconv_reference.c H5Tconv_enum.c H5Tconv_vlen.c H5Tconv_array.c \
+        H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c H5Tcomplex.c H5Tcompound.c \
+        H5Tconv.c H5Tconv_array.c H5Tconv_bitfield.c H5Tconv_complex.c H5Tconv_compound.c \
+        H5Tconv_enum.c H5Tconv_float.c H5Tconv_integer.c H5Tconv_reference.c \
+        H5Tconv_string.c H5Tconv_vlen.c \
         H5Tcset.c H5Tdbg.c H5Tdeprec.c H5Tenum.c H5Tfields.c H5Tfixed.c \
         H5Tfloat.c H5Tinit_float.c H5Tnative.c H5Toffset.c H5Toh.c H5Topaque.c \
         H5Torder.c H5Tref.c H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c \

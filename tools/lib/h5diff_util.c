@@ -175,6 +175,7 @@ print_type(hid_t type)
         case H5T_ENUM:
         case H5T_VLEN:
         case H5T_ARRAY:
+        case H5T_COMPLEX:
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
         default:
@@ -309,6 +310,9 @@ get_class(H5T_class_t tclass)
 
         case H5T_ARRAY:
             return ("H5T_ARRAY");
+
+        case H5T_COMPLEX:
+            return ("H5T_COMPLEX");
 
         case H5T_NO_CLASS:
         case H5T_NCLASSES:

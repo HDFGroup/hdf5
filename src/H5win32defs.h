@@ -74,6 +74,24 @@ struct timezone {
 #define HDfseek(F, O, W)  _fseeki64(F, O, W)
 #endif
 
+#if defined(H5_HAVE_COMPLEX_NUMBERS) && !defined(H5_HAVE_C99_COMPLEX_NUMBERS)
+/*
+ * MSVC uses its own types for complex numbers that are separate from the
+ * C99 standard types, so we must use a typedef. These types are structure
+ * types, so we also need some wrapper functions for interacting with them,
+ * as the arithmetic operators can't be used on them. These types also may
+ * not be used for casts (other than pointer casts) anywhere in the library
+ * that will be compiled by MSVC, as casts can't be made between structure
+ * types and other types and MSVC will fail to compile.
+ */
+typedef _Fcomplex H5_float_complex;
+typedef _Dcomplex H5_double_complex;
+typedef _Lcomplex H5_ldouble_complex;
+#define H5_CMPLXF _FCbuild
+#define H5_CMPLX  _Cbuild
+#define H5_CMPLXL _LCbuild
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

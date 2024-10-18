@@ -56,6 +56,7 @@ extern bool        hit_elink;   /* whether we have traversed an external link */
 extern size_t      prefix_len;
 extern char       *prefix;
 extern const char *fp_format;
+extern const char *complex_format; /* format for complex number */
 
 /* things to display or which are set via command line parameters */
 typedef struct {

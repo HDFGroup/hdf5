@@ -83,6 +83,11 @@ static char*       enum_memb_symbol;       /*enum member symbol string*/
 %token <hid> H5T_IEEE_F32BE_TOKEN H5T_IEEE_F32LE_TOKEN H5T_IEEE_F64BE_TOKEN H5T_IEEE_F64LE_TOKEN
 %token <hid> H5T_NATIVE_FLOAT16_TOKEN H5T_NATIVE_FLOAT_TOKEN H5T_NATIVE_DOUBLE_TOKEN H5T_NATIVE_LDOUBLE_TOKEN
 
+%token <hid> H5T_COMPLEX_IEEE_F16BE_TOKEN H5T_COMPLEX_IEEE_F16LE_TOKEN
+%token <hid> H5T_COMPLEX_IEEE_F32BE_TOKEN H5T_COMPLEX_IEEE_F32LE_TOKEN
+%token <hid> H5T_COMPLEX_IEEE_F64BE_TOKEN H5T_COMPLEX_IEEE_F64LE_TOKEN
+%token <hid> H5T_NATIVE_FLOAT_COMPLEX_TOKEN H5T_NATIVE_DOUBLE_COMPLEX_TOKEN H5T_NATIVE_LDOUBLE_COMPLEX_TOKEN
+
 %token <ival> H5T_STRING_TOKEN STRSIZE_TOKEN STRPAD_TOKEN CSET_TOKEN CTYPE_TOKEN H5T_VARIABLE_TOKEN
 %token <ival> H5T_STR_NULLTERM_TOKEN H5T_STR_NULLPAD_TOKEN H5T_STR_SPACEPAD_TOKEN 
 %token <ival> H5T_CSET_ASCII_TOKEN H5T_CSET_UTF8_TOKEN H5T_C_S1_TOKEN H5T_FORTRAN_S1_TOKEN
@@ -93,6 +98,7 @@ static char*       enum_memb_symbol;       /*enum member symbol string*/
 %token <ival> H5T_ENUM_TOKEN
 %token <ival> H5T_ARRAY_TOKEN
 %token <ival> H5T_VLEN_TOKEN
+%token <ival> H5T_COMPLEX_TOKEN
 
 %token <sval> STRING
 %token <ival> NUMBER
@@ -106,6 +112,7 @@ ddl_type        :       atomic_type
                 |       compound_type
                 |       array_type
                 |       vlen_type
+                |       complex_type
                 ;
 atomic_type     :       integer_type
                 |       fp_type
@@ -243,6 +250,19 @@ dimsize         :       NUMBER
 
 vlen_type       :       H5T_VLEN_TOKEN '{' ddl_type '}'
                             { $<hid>$ = H5Tvlen_create($<hid>3); H5Tclose($<hid>3); }
+                ;
+
+complex_type    :       H5T_NATIVE_FLOAT_COMPLEX_TOKEN  { $<hid>$ = H5Tcopy(H5T_NATIVE_FLOAT_COMPLEX); }
+                |       H5T_NATIVE_DOUBLE_COMPLEX_TOKEN  { $<hid>$ = H5Tcopy(H5T_NATIVE_DOUBLE_COMPLEX); }
+                |       H5T_NATIVE_LDOUBLE_COMPLEX_TOKEN  { $<hid>$ = H5Tcopy(H5T_NATIVE_LDOUBLE_COMPLEX); }
+                |       H5T_COMPLEX_IEEE_F16LE_TOKEN  { $<hid>$ = H5Tcopy(H5T_COMPLEX_IEEE_F16LE); }
+                |       H5T_COMPLEX_IEEE_F16BE_TOKEN  { $<hid>$ = H5Tcopy(H5T_COMPLEX_IEEE_F16BE); }
+                |       H5T_COMPLEX_IEEE_F32LE_TOKEN  { $<hid>$ = H5Tcopy(H5T_COMPLEX_IEEE_F32LE); }
+                |       H5T_COMPLEX_IEEE_F32BE_TOKEN  { $<hid>$ = H5Tcopy(H5T_COMPLEX_IEEE_F32BE); }
+                |       H5T_COMPLEX_IEEE_F64LE_TOKEN  { $<hid>$ = H5Tcopy(H5T_COMPLEX_IEEE_F64LE); }
+                |       H5T_COMPLEX_IEEE_F64BE_TOKEN  { $<hid>$ = H5Tcopy(H5T_COMPLEX_IEEE_F64BE); }
+                |       H5T_COMPLEX_TOKEN '{' ddl_type '}'
+                            { $<hid>$ = H5Tcomplex_create($<hid>3); H5Tclose($<hid>3); }
                 ;
 
 opaque_type     :       H5T_OPAQUE_TOKEN
