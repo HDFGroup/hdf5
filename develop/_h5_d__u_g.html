@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.e64e1ea</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.29c84e0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -1093,7 +1093,7 @@ Partitioning a 2-D dataset for external storage</div></div>
 <p>All referenced external data files must exist before performing raw data I/O on the dataset. This is normally not a problem since those files are being managed directly by the application or indirectly through some other library. However, if the file is transferred from its original context, care must be taken to assure that all the external files are accessible in the new location.</p>
 <h2><a class="anchor" id="subsec_dataset_filters"></a>
 Using HDF5 Filters</h2>
-<p>This section describes in detail how to use the n-bit, scale-offset filters and szip filters.</p>
+<p>This section describes in detail how to use the n-bit, scale-offset filters and szip filters. For details on the how filters are used in the read / write of data, see /def subsubsec_dataset_transfer_pipe.</p>
 <h3><a class="anchor" id="subsubsec_dataset_filters_nbit"></a>
 Using the N‐bit Filter</h3>
 <p>N-bit data has n significant bits, where n may not correspond to a precise number of bytes. On the other hand, computing systems and applications universally, or nearly so, run most efficiently when manipulating data as whole bytes or multiple bytes.</p>

@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.e64e1ea</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.29c84e0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -227,14 +227,38 @@ $(document).ready(function(){initNavTree('group___h5_z.html',''); initResizable(
 <div class="ttc" id="agroup___h5_z_html_ga6b8bcdde70c9256c50c7c62ba66380f8"><div class="ttname"><a href="group___h5_z.html#ga6b8bcdde70c9256c50c7c62ba66380f8">H5Zunregister</a></div><div class="ttdeci">herr_t H5Zunregister(H5Z_filter_t id)</div><div class="ttdoc">Unregisters a filter.</div></div>
 </div><!-- fragment -->  </td></tr>
 </table>
-<p>HDF5 supports a filter pipeline that provides the capability for standard and customized raw data processing during I/O operations. HDF5 is distributed with a small set of standard filters such as compression (gzip, SZIP, and a shuffling algorithm) and error checking (Fletcher32 checksum). For further flexibility, the library allows a user application to extend the pipeline through the creation and registration of customized filters.</p>
+<p>HDF5 supports a filter pipeline that provides the capability for standard and customized raw data processing during I/O operations. HDF5 is distributed with a small set of standard filters such as compression (gzip, SZIP, and a shuffling algorithm) and error checking (Fletcher32 checksum). For further flexibility, the library allows a user application to extend the pipeline through the creation and registration of customized filters. See <a class="el" href="_h5_p_l__u_g.html#sec_filter_plugins">HDF5 Filter Plugins</a></p>
 <p>The flexibility of the filter pipeline implementation enables the definition of additional filters by a user application. A filter </p><ul>
 <li>is associated with a dataset when the dataset is created, </li>
 <li>can be used only with chunked data (i.e., datasets stored in the <a class="el" href="_h5_dpublic_8h.html#a57e163d4c263b585ca2d904996f5e06eadc846667d1f23d573964d22549e5f262">H5D_CHUNKED</a> storage layout), and </li>
 <li>is applied independently to each chunk of the dataset.</li>
 </ul>
 <p>The HDF5 library does not support filters for contiguous datasets because of the difficulty of implementing random access for partial I/O. Compact dataset filters are not supported because they would not produce significant results.</p>
-<p>Filter identifiers for the filters distributed with the HDF5 Library are as follows: </p><table class="doxtable">
+<p>HDF5 allows chunked data to pass through user-defined filters on the way to or from disk. The filters operate on chunks of an <a class="el" href="_h5_dpublic_8h.html#a57e163d4c263b585ca2d904996f5e06eadc846667d1f23d573964d22549e5f262">H5D_CHUNKED</a> dataset can be arranged in a pipeline so output of one filter becomes the input of the next filter.</p>
+<p>Each filter has a two-byte identification number (type <a class="el" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237" title="Filter identifiers.">H5Z_filter_t</a>) allocated by The HDF Group and can also be passed application-defined integer resources to control its behavior. Each filter also has an optional ASCII comment string. </p><pre class="fragment">&lt;table&gt;
+&lt;tr&gt;
+  &lt;th&gt;Values for &lt;code&gt;#H5Z_filter_t&lt;/code&gt;&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+  &lt;td&gt;&lt;code&gt;0-255&lt;/code&gt;&lt;/td&gt;
+  &lt;td&gt;These values are reserved for filters predefined and
+       registered by the HDF5 library and of use to the general
+       public.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+  &lt;td&gt;&lt;code&gt;256-511&lt;/code&gt;&lt;/td&gt;
+  &lt;td&gt;Filter numbers in this range are used for testing only
+       and can be used temporarily by any organization.  No
+       attempt is made to resolve numbering conflicts since all
+       definitions are by nature temporary.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+  &lt;td&gt;&lt;code&gt;512-65535&lt;/code&gt;&lt;/td&gt;
+  &lt;td&gt;Reserved for future assignment. Please contact the
+       &lt;a href="mailto:help@hdfgroup.org"&gt;HDF5 development team&lt;/a&gt;
+       to reserve a value or range of values for
+       use by your filters.&lt;/td&gt;
+</pre>  <p>Filter identifiers for the filters distributed with the HDF5 Library are as follows: </p><table class="doxtable">
 <tr>
 <td><a class="el" href="_h5_zpublic_8h.html#a9e802e9612b3647e7d3ffe4ce3b8dcce">H5Z_FILTER_DEFLATE</a></td><td>The gzip compression, or deflation, filter </td></tr>
 <tr>
