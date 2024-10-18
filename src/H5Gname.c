@@ -199,17 +199,23 @@ H5G__common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
     size_t      nchars1, nchars2;  /* Number of characters in components */
     htri_t      ret_value = false; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Get component of each name */
-    fullpath = H5RS_get_str(fullpath_r);
-    assert(fullpath);
-    fullpath = H5G__component(fullpath, &nchars1);
-    assert(fullpath);
-    prefix = H5RS_get_str(prefix_r);
-    assert(prefix);
-    prefix = H5G__component(prefix, &nchars2);
-    assert(prefix);
+    if (NULL == (fullpath = H5RS_get_str(fullpath_r)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve full path");
+    nchars1 = SIZE_MAX;
+    if (NULL == (fullpath = H5G__component(fullpath, &nchars1)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve pointer to path component");
+    if (SIZE_MAX == nchars1)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve component length");
+    if (NULL == (prefix = H5RS_get_str(prefix_r)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve path prefix");
+    nchars2 = SIZE_MAX;
+    if (NULL == (prefix = H5G__component(prefix, &nchars2)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve pointer to path component");
+    if (SIZE_MAX == nchars2)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve component length");
 
     /* Check if we have a real string for each component */
     while (*fullpath && *prefix) {
@@ -226,6 +232,15 @@ H5G__common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
                 assert(fullpath);
                 prefix = H5G__component(prefix, &nchars2);
                 assert(prefix);
+                if (NULL == (fullpath = H5G__component(fullpath, &nchars1)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve pointer to path component");
+                if (SIZE_MAX == nchars1)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve component length");
+                nchars2 = SIZE_MAX;
+                if (NULL == (prefix = H5G__component(prefix, &nchars2)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve pointer to path component");
+                if (SIZE_MAX == nchars2)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve component length");
             } /* end if */
             else
                 HGOTO_DONE(false);

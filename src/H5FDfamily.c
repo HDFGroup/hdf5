@@ -28,13 +28,13 @@
  *
  */
 
-#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
 #include "H5private.h"   /* Generic Functions                       */
 #include "H5Eprivate.h"  /* Error handling                          */
 #include "H5Fprivate.h"  /* File access                             */
-#include "H5FDprivate.h" /* File drivers                            */
 #include "H5FDfamily.h"  /* Family file driver                      */
+#include "H5FDpkg.h"     /* File drivers                            */
 #include "H5Iprivate.h"  /* IDs                                     */
 #include "H5MMprivate.h" /* Memory management                       */
 #include "H5Pprivate.h"  /* Property lists                          */
@@ -46,7 +46,7 @@
 #define H5FD_FAM_DEF_MEM_SIZE ((hsize_t)(100 * H5_MB))
 
 /* The driver identification number, initialized at runtime */
-static hid_t H5FD_FAMILY_g = 0;
+hid_t H5FD_FAMILY_id_g = H5I_INVALID_HID;
 
 /* The description of a file belonging to this driver. */
 typedef struct H5FD_family_t {
@@ -80,7 +80,6 @@ static herr_t H5FD__family_get_default_config(H5FD_family_fapl_t *fa_out);
 static char  *H5FD__family_get_default_printf_filename(const char *old_filename);
 
 /* Callback prototypes */
-static herr_t  H5FD__family_term(void);
 static void   *H5FD__family_fapl_get(H5FD_t *_file);
 static void   *H5FD__family_fapl_copy(const void *_old_fa);
 static herr_t  H5FD__family_fapl_free(void *_fa);
@@ -112,7 +111,7 @@ static const H5FD_class_t H5FD_family_g = {
     "family",                   /* name                 */
     HADDR_MAX,                  /* maxaddr              */
     H5F_CLOSE_WEAK,             /* fc_degree            */
-    H5FD__family_term,          /* terminate            */
+    NULL,                       /* terminate            */
     H5FD__family_sb_size,       /* sb_size              */
     H5FD__family_sb_encode,     /* sb_encode            */
     H5FD__family_sb_decode,     /* sb_decode            */
@@ -267,51 +266,48 @@ done:
 } /* end H5FD__family_get_default_printf_filename() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_family_init
+ * Function:    H5FD__family_register
  *
- * Purpose:     Initialize this driver by registering the driver with the
- *              library.
+ * Purpose:     Register the driver with the library.
  *
- * Return:      Success:    The driver ID for the family driver
- *              Failure:    H5I_INVALID_HID
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5FD_family_init(void)
+herr_t
+H5FD__family_register(void)
 {
-    hid_t ret_value = H5I_INVALID_HID;
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_PACKAGE
 
-    if (H5I_VFL != H5I_get_type(H5FD_FAMILY_g))
-        H5FD_FAMILY_g = H5FD_register(&H5FD_family_g, sizeof(H5FD_class_t), false);
+    if (H5I_VFL != H5I_get_type(H5FD_FAMILY_id_g))
+        if ((H5FD_FAMILY_id_g = H5FD_register(&H5FD_family_g, sizeof(H5FD_class_t), false)) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register family driver");
 
-    /* Set return value */
-    ret_value = H5FD_FAMILY_g;
-
+done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_family_init() */
+} /* H5FD__family_register() */
 
 /*---------------------------------------------------------------------------
- * Function:    H5FD__family_term
+ * Function:    H5FD__family_unregister
  *
- * Purpose:    Shut down the VFD
+ * Purpose:     Reset library driver info.
  *
  * Returns:     Non-negative on success or negative on failure
  *
  *---------------------------------------------------------------------------
  */
-static herr_t
-H5FD__family_term(void)
+herr_t
+H5FD__family_unregister(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset VFL ID */
-    H5FD_FAMILY_g = 0;
+    H5FD_FAMILY_id_g = H5I_INVALID_HID;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FD__family_term() */
+} /* end H5FD__family_unregister() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_family

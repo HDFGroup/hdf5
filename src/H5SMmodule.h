@@ -22,7 +22,8 @@
  *      reporting macros.
  */
 #define H5SM_MODULE
-#define H5_MY_PKG     H5SM
-#define H5_MY_PKG_ERR H5E_SOHM
+#define H5_MY_PKG      H5SM
+#define H5_MY_PKG_ERR  H5E_SOHM
+#define H5_MY_PKG_INIT NO
 
 #endif /* H5SMmodule_H */

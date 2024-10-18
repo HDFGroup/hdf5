@@ -16,10 +16,11 @@
 #ifndef H5FDstdio_H
 #define H5FDstdio_H
 
-#include "H5Ipublic.h"
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
 
-/** Initializer for the stdio VFD */
-#define H5FD_STDIO (H5FDperform_init(H5FD_stdio_init))
+/** ID for the stdio VFD */
+#define H5FD_STDIO (H5OPEN H5FD_STDIO_id_g)
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,9 +28,9 @@ extern "C" {
 
 /** @private
  *
- * \brief Private initializer for the stdio VFD
+ * \brief ID for the stdio VFD
  */
-H5_DLL hid_t H5FD_stdio_init(void);
+H5_DLLVAR hid_t H5FD_STDIO_id_g;
 
 /**
  * \ingroup FAPL
