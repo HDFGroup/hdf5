@@ -282,7 +282,7 @@
         {
 
 /*
- * Use this macro for non-API functions that propagate, but do not isssue
+ * Use this macro for non-API functions that propagate, but do not issue
  * errors, which are called during library shutdown, since we don't want to
  * re-initialize the library.
  */
