@@ -69,7 +69,7 @@ New Features
       POSIX large-file support (LFS). On Windows, however, off_t is defined
       as a 32-bit type, even on 64-bit Windows.
 
-      HDoff_t has been added to H5public.h and is defined to be __int64 on
+      HDoff_t has been added to H5public.h and is defined to be int64_t on
       Windows and the library has been updated to use HDoff_t in place of
       off_t throughout. The H5Pset_external() offset parameter has also been
       updated to be HDoff_t.
