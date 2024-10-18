@@ -152,6 +152,9 @@
 
 #endif /*H5_HAVE_WIN32_API*/
 
+/* Macros for suppressing warnings */
+#include "H5warnings.h"
+
 #ifndef F_OK
 #define F_OK 00
 #define W_OK 02
@@ -377,16 +380,6 @@
     (skip ? false : H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end))
 
 /*
- * HDF Boolean type.
- */
-#ifndef FALSE
-#define FALSE false
-#endif
-#ifndef TRUE
-#define TRUE true
-#endif
-
-/*
  * The max value for ssize_t.
  *
  * Only needed where ssize_t isn't a thing (e.g., Windows)
@@ -517,14 +510,6 @@
 #endif
 #endif
 
-/* KiB, MiB, GiB, TiB, PiB, EiB - Used in profiling and timing code */
-#define H5_KB (1024.0F)
-#define H5_MB (1024.0F * 1024.0F)
-#define H5_GB (1024.0F * 1024.0F * 1024.0F)
-#define H5_TB (1024.0F * 1024.0F * 1024.0F * 1024.0F)
-#define H5_PB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
-#define H5_EB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
-
 #ifndef H5_HAVE_FLOCK
 /* flock() operations. Used in the source so we have to define them when
  * the call is not available (e.g.: Windows). These should NOT be used
@@ -536,63 +521,6 @@
 #define LOCK_NB 0x04
 #define LOCK_UN 0x08
 #endif /* H5_HAVE_FLOCK */
-
-/* Macros for enabling/disabling particular GCC / clang warnings
- *
- * These are duplicated in H5FDmulti.c (we don't want to put them in the
- * public header and the multi VFD can't use private headers). If you make
- * changes here, be sure to update those as well.
- *
- * (see the following web-sites for more info:
- *      http://www.dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
- *      http://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
- */
-#define H5_DIAG_JOINSTR(x, y) x y
-#define H5_DIAG_DO_PRAGMA(x)  _Pragma(#x)
-#define H5_DIAG_PRAGMA(x)     H5_DIAG_DO_PRAGMA(GCC diagnostic x)
-
-/* Allow suppression of compiler diagnostics unless H5_SHOW_ALL_WARNINGS is
- *      defined (enabled with '--enable-show-all-warnings' configure option).
- */
-#ifndef H5_SHOW_ALL_WARNINGS
-#define H5_DIAG_OFF(x) H5_DIAG_PRAGMA(push) H5_DIAG_PRAGMA(ignored H5_DIAG_JOINSTR("-W", x))
-#define H5_DIAG_ON(x)  H5_DIAG_PRAGMA(pop)
-#else
-#define H5_DIAG_OFF(x)
-#define H5_DIAG_ON(x)
-#endif
-
-/* Macros for enabling/disabling particular GCC-only warnings.
- * These pragmas are only implemented usefully in gcc 4.6+
- */
-#if (((__GNUC__ * 100) + __GNUC_MINOR__) >= 406)
-#define H5_GCC_DIAG_OFF(x) H5_DIAG_OFF(x)
-#define H5_GCC_DIAG_ON(x)  H5_DIAG_ON(x)
-#else
-#define H5_GCC_DIAG_OFF(x)
-#define H5_GCC_DIAG_ON(x)
-#endif
-
-/* Macros for enabling/disabling particular clang-only warnings.
- */
-#if defined(__clang__)
-#define H5_CLANG_DIAG_OFF(x) H5_DIAG_OFF(x)
-#define H5_CLANG_DIAG_ON(x)  H5_DIAG_ON(x)
-#else
-#define H5_CLANG_DIAG_OFF(x)
-#define H5_CLANG_DIAG_ON(x)
-#endif
-
-/* Macros for enabling/disabling particular GCC / clang warnings.
- * These macros should be used for warnings supported by both gcc and clang.
- */
-#if (((__GNUC__ * 100) + __GNUC_MINOR__) >= 406) || defined(__clang__)
-#define H5_GCC_CLANG_DIAG_OFF(x) H5_DIAG_OFF(x)
-#define H5_GCC_CLANG_DIAG_ON(x)  H5_DIAG_ON(x)
-#else
-#define H5_GCC_CLANG_DIAG_OFF(x)
-#define H5_GCC_CLANG_DIAG_ON(x)
-#endif
 
 /* If necessary, create a typedef for library usage of the
  * _Float16 type to avoid issues when compiling the library
@@ -617,37 +545,10 @@ typedef _Float16 H5__Float16;
 typedef int (*H5_sort_func_cb_t)(const void *, const void *);
 
 /* Typedefs and functions for timing certain parts of the library. */
+#include "H5timer.h"
 
-/* A set of elapsed/user/system times emitted as a time point by the
- * platform-independent timers.
- */
-typedef struct {
-    double user;    /* User time in seconds */
-    double system;  /* System time in seconds */
-    double elapsed; /* Elapsed (wall clock) time in seconds */
-} H5_timevals_t;
-
-/* Timer structure for platform-independent timers */
-typedef struct {
-    H5_timevals_t initial;        /* Current interval start time */
-    H5_timevals_t final_interval; /* Last interval elapsed time */
-    H5_timevals_t total;          /* Total elapsed time for all intervals */
-    bool          is_running;     /* Whether timer is running */
-} H5_timer_t;
-
-/* Returns library bandwidth as a pretty string */
-H5_DLL void H5_bandwidth(char *buf /*out*/, size_t bufsize, double nbytes, double nseconds);
-
-/* Timer functionality */
-H5_DLL time_t   H5_now(void);
-H5_DLL uint64_t H5_now_usec(void);
-H5_DLL herr_t   H5_timer_init(H5_timer_t *timer /*in,out*/);
-H5_DLL herr_t   H5_timer_start(H5_timer_t *timer /*in,out*/);
-H5_DLL herr_t   H5_timer_stop(H5_timer_t *timer /*in,out*/);
-H5_DLL herr_t   H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
-H5_DLL herr_t   H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
-H5_DLL char    *H5_timer_get_time_string(double seconds);
-H5_DLL char    *H5_strcasestr(const char *haystack, const char *needle);
+/* Substitute for strcasestr() when that doesn't exist on the platform */
+H5_DLL char *H5_strcasestr(const char *haystack, const char *needle);
 
 /* Depth of object copy */
 typedef enum {

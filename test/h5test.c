@@ -770,14 +770,14 @@ h5_get_vfd_fapl(hid_t fapl)
     }
     else if (!strcmp(tok, "core")) {
         /* In-memory driver settings (backing store on, 1 MB increment) */
-        if (H5Pset_fapl_core(fapl, (size_t)H5_MB, TRUE) < 0)
+        if (H5Pset_fapl_core(fapl, (size_t)H5_MB, true) < 0)
             goto error;
     }
     else if (!strcmp(tok, "core_paged")) {
         /* In-memory driver with write tracking and paging on */
-        if (H5Pset_fapl_core(fapl, (size_t)H5_MB, TRUE) < 0)
+        if (H5Pset_fapl_core(fapl, (size_t)H5_MB, true) < 0)
             goto error;
-        if (H5Pset_core_write_tracking(fapl, TRUE, 4096) < 0)
+        if (H5Pset_core_write_tracking(fapl, true, 4096) < 0)
             goto error;
     }
     else if (!strcmp(tok, "split")) {
@@ -810,7 +810,7 @@ h5_get_vfd_fapl(hid_t fapl)
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
         } /* end for */
 
-        if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
+        if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, false) < 0)
             goto error;
 
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
@@ -2394,10 +2394,10 @@ h5_check_file_locking_env_var(htri_t *use_locks, htri_t *ignore_disabled_locks)
 herr_t
 h5_using_native_vol(hid_t fapl_id, hid_t obj_id, bool *is_native_vol)
 {
-    hbool_t is_native = false;
-    hid_t   native_id = H5I_INVALID_HID;
-    hid_t   vol_id    = H5I_INVALID_HID;
-    herr_t  ret_value = SUCCEED;
+    bool   is_native = false;
+    hid_t  native_id = H5I_INVALID_HID;
+    hid_t  vol_id    = H5I_INVALID_HID;
+    herr_t ret_value = SUCCEED;
 
     assert((fapl_id >= 0) || (obj_id >= 0));
     assert(is_native_vol);
