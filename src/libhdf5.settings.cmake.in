@@ -38,7 +38,7 @@ Languages:
                        CPPFLAGS: @CPPFLAGS@
                     H5_CPPFLAGS: @H5_CPPFLAGS@
                     AM_CPPFLAGS: @AM_CPPFLAGS@
-                         CFLAGS: @CMAKE_C_FLAGS@
+                         CFLAGS: @CMAKE_C_FLAGS@ @HDF5_BUILD_MODE_C_FLAGS@
                       H5_CFLAGS: @HDF5_CMAKE_C_FLAGS@
                       AM_CFLAGS: @AM_CFLAGS@
                Shared C Library: @H5_ENABLE_SHARED_LIB@
@@ -46,7 +46,7 @@ Languages:
 
                         Fortran: @HDF5_BUILD_FORTRAN@
                Fortran Compiler: @CMAKE_Fortran_COMPILER@ @CMAKE_Fortran_COMPILER_VERSION@
-                  Fortran Flags: @CMAKE_Fortran_FLAGS@
+                  Fortran Flags: @CMAKE_Fortran_FLAGS@ @HDF5_BUILD_MODE_Fortran_FLAGS@
                H5 Fortran Flags: @HDF5_CMAKE_Fortran_FLAGS@
                AM Fortran Flags: @AM_FCFLAGS@
          Shared Fortran Library: @H5_ENABLE_SHARED_LIB@
@@ -55,7 +55,7 @@ Languages:
 
                             C++: @HDF5_BUILD_CPP_LIB@
                    C++ Compiler: @CMAKE_CXX_COMPILER@ @CMAKE_CXX_COMPILER_VERSION@
-                      C++ Flags: @CMAKE_CXX_FLAGS@
+                      C++ Flags: @CMAKE_CXX_FLAGS@ @HDF5_BUILD_MODE_CXX_FLAGS@
                    H5 C++ Flags: @HDF5_CMAKE_CXX_FLAGS@
                    AM C++ Flags: @AM_CXXFLAGS@
              Shared C++ Library: @H5_ENABLE_SHARED_LIB@
