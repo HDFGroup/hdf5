@@ -23,10 +23,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5Eprivate.h"
-#include "H5FLprivate.h"
-#include "H5Rpkg.h"
-#include "H5Tconv.h"
+#include "H5private.h"   /* Generic Functions                    */
+#include "H5Eprivate.h"  /* Error handling                       */
+#include "H5FLprivate.h" /* Free Lists                           */
+#include "H5Rpkg.h"      /* References                           */
+#include "H5Tconv.h"     /* Datatype conversions                 */
 #include "H5Tconv_reference.h"
 
 /*******************/
