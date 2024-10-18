@@ -48,16 +48,23 @@
  * available to the application. For example, if the application intends to apply the HDF5 bzip2 compression
  * filter that was registered with The HDF Group and has an identification number 307
  * (<a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">Registered
- * Filters</a>) then the application would follow the steps as outlined below: \code dcpl = H5Pcreate
- * (H5P_DATASET_CREATE); status = H5Pset_filter (dcpl, (H5Z_filter_t)307, H5Z_FLAG_MANDATORY, (size_t)6,
- * cd_values); dset = H5Dcreate (file, DATASET, H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, status = H5Dwrite
- * (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata[0]); \endcode
+ * Filters</a>) then the application would follow the steps as outlined below:
+ * \code
+ *     dcpl = H5Pcreate (H5P_DATASET_CREATE);
+ *     status = H5Pset_filter (dcpl, (H5Z_filter_t)307, H5Z_FLAG_MANDATORY, (size_t)6, cd_values);
+ *     dset = H5Dcreate (file, DATASET, H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+ *     status = H5Dwrite (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata[0]);
+ * \endcode
  *
  * \subsubsection subsubsec_filter_plugins_model_read Reading Data with an Applied Third-party Filter
  * An application does not need to do anything special to read the data with a third-party filter applied. For
  * example, if one wants to read data written in the previous example, the following regular steps should be
- * taken: \code file = H5Fopen (FILE, H5F_ACC_RDONLY, H5P_DEFAULT); dset = H5Dopen (file, DATASET,
- * H5P_DEFAULT); H5Dread (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]); \endcode
+ * taken:
+ * \code
+ *     file = H5Fopen (FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+ *     dset = H5Dopen (file, DATASET, H5P_DEFAULT);
+ *     H5Dread (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]);
+ * \endcode
  *
  * The command-line utility h5dump, for example, will read and display the data as shown:
  * \code
@@ -161,10 +168,78 @@
  * plugin on the system.
  *
  * \subsubsection subsubsec_filter_plugins_prog_write Writing a Filter Function
- * The HDF5 filter function for the dynamically loaded filter feature should be written as any custom filter
- * described in <a href="https://\DOXURL/_f_i_l_t_e_r.html">Custom Filters</a>. See the
- * “Example” section, section 5, of that document to get an idea of the simple filter function, and see the
- * example of the more sophisticated HDF5 bzip2 filter function in the “Building an HDF5 bzip2 Plugin Example”
+ * The HDF5 filter function for the dynamically loaded filter feature should be written as a custom filter.
+ * This example shows how to define and register a simple filter
+ * that adds a checksum capability to the data stream.
+ *
+ * The function that acts as the filter always returns zero (failure) if the <code>md5()</code> function was
+ * not detected at configuration time (left as an exercise for the reader). Otherwise the function is broken
+ * down to an input and output half. The output half calculates a checksum, increases the size of the output
+ * buffer if necessary, and appends the checksum to the end of the buffer. The input half calculates the
+ * checksum on the first part of the buffer and compares it to the checksum already stored at the end of the
+ * buffer. If the two differ then zero (failure) is returned, otherwise the buffer size is reduced to exclude
+ * the checksum. /code size_t md5_filter(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
+ * size_t nbytes, size_t *buf_size, void **buf)
+ *     {
+ *     \c \#ifdef HAVE_MD5
+ *         unsigned char       cksum[16];
+ *
+ *         if (flags & H5Z_REVERSE) {
+ *             // Input
+ *             assert(nbytes >= 16);
+ *             md5(nbytes-16, *buf, cksum);
+ *             // Compare
+ *             if (memcmp(cksum, (char*)(*buf)+ nbytes- 16, 16)) {
+ *                  return 0; // fail
+ *             }
+ *             // Strip off checksum
+ *             return nbytes - 16;
+ *         }
+ *         else {
+ *             // Output
+ *             md5(nbytes, *buf, cksum);
+ *             // Increase buffer size if necessary
+ *             if (nbytes + 16 > *buf_size) {
+ *                  *buf_size = nbytes + 16;
+ *                  *buf = realloc(*buf, *buf_size);
+ *             }
+ *             // Append checksum
+ *             memcpy((char*)(*buf)+nbytes, cksum, 16);
+ *             return nbytes+16;
+ *         }
+ *     \c \#else
+ *         return 0; // fail
+ *     \c \#endif
+ *     }
+ * /endcode
+ *
+ * Once the filter function is defined it must be registered so
+ * the HDF5 library knows about it.  Since we're testing this
+ * filter we choose one of the #H5Z_filter_t numbers
+ * from the reserved range. We'll randomly choose 305.
+ *
+ * /code
+ *    \c \#define FILTER_MD5 305
+ *    herr_t status = H5Zregister(FILTER_MD5, "md5 checksum", md5_filter);
+ * /endcode
+ *
+ * Now we can use the filter in a pipeline. We could have added
+ * the filter to the pipeline before defining or registering the
+ * filter as long as the filter was defined and registered by time
+ * we tried to use it (if the filter is marked as optional then we
+ * could have used it without defining it and the library would
+ * have automatically removed it from the pipeline for each chunk
+ * written before the filter was defined and registered).
+ *
+ * /code
+ *    hid_t dcpl = H5Pcreate(H5P_DATASET_CREATE);
+ *    hsize_t chunk_size[3] = {10,10,10};
+ *    H5Pset_chunk(dcpl, 3, chunk_size);
+ *    H5Pset_filter(dcpl, FILTER_MD5, 0, 0, NULL);
+ *    hid_t dset = H5Dcreate(file, "dset", H5T_NATIVE_DOUBLE, space, dcpl);
+ * /endcode
+ *
+ * See the example of a more sophisticated HDF5 bzip2 filter function in the /ref subsec_filter_plugins_build
  * section. The HDF5 bzip2 filter function is also available for download from <a
  * href="https://github.com/HDFGroup/hdf5_plugins">Filter Plugin Repository</a>.
  *

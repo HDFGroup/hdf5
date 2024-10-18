@@ -1612,7 +1612,8 @@ allocated if necessary.
  * care must be taken to assure that all the external files are accessible in the new location.
  *
  * \subsection subsec_dataset_filters Using HDF5 Filters
- * This section describes in detail how to use the n-bit, scale-offset filters and szip filters.
+ * This section describes in detail how to use the n-bit, scale-offset filters and szip filters. For
+ * details on the how filters are used in the read / write of data, see /def subsubsec_dataset_transfer_pipe.
  *
  * \subsubsection subsubsec_dataset_filters_nbit Using the N‐bit Filter
  * N-bit data has n significant bits, where n may not correspond to a precise number of bytes. On
