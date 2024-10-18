@@ -131,7 +131,7 @@
             if (H5_UNLIKELY(H5_init_library() < 0))                                                          \
                 HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "library initialization failed");                   \
         }                                                                                                    \
-    } while(0)
+    } while (0)
 
 /* Macro to push the API context */
 #define H5_API_SETUP_PUSH_CONTEXT(err)                                                                       \
@@ -143,7 +143,7 @@
             HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context");                                \
         else                                                                                                 \
             api_ctx_pushed = true;                                                                           \
-    } while(0)
+    } while (0)
 
 /* ----------------------------------------------------------------------------
  * HDF5 API call entry macros
@@ -296,8 +296,7 @@
  * function stack, or perform tracing, etc.  This macro _only_ sanity checks
  * the API name itself. Examples are private routines in the H5TS package.
  */
-#define FUNC_ENTER_NOAPI_NAMECHECK_ONLY                                                                      \
-    {
+#define FUNC_ENTER_NOAPI_NAMECHECK_ONLY {
 
 /* Use the following two macros as replacements for the FUNC_ENTER_NOAPI
  * and FUNC_ENTER_NOAPI_NOINIT macros when the function needs to set
