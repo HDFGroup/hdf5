@@ -45,7 +45,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - **See: Testing/Testing Systems(this is a page in confluence)**
 4. Update current compiler information for each platform in the PLATFORMS TESTED section of [RELEASE.txt][u1].
 5. Review the [RELEASE.txt][u1] for formatting and language to verify that it corresponds to guidelines found in **[Writing Notes in a RELEASE.txt(this is missing)]()** File.
-6. Review and update, if needed, the [README][u2] and [COPYING][u3] files.
+6. Review and update, if needed, the [README][u2] and [LICENSE][u3] files.
 7. Review and update all INSTALL_* files in [release_docs][u4], if needed.
     - [INSTALL][u5] should be general info and not require extensive changes
     - [INSTALL_Autotools.txt][u6] are the instructions for building under autotools.
@@ -202,7 +202,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 
 [u1]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt
 [u2]: https://github.com/HDFGroup/hdf5/blob/develop/README.md
-[u3]: https://github.com/HDFGroup/hdf5/blob/develop/COPYING
+[u3]: https://github.com/HDFGroup/hdf5/blob/develop/LICENSE
 [u4]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs
 [u5]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL
 [u6]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_Autotools.txt

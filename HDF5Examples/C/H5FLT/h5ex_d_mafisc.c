@@ -5,7 +5,7 @@
  * This file is part of the HDF5 MAFISC filter plugin source.  The full         *
  * copyright notice, including terms governing use, modification, and        *
  * terms governing use, modification, and redistribution, is contained in    *
- * the file COPYING, which can be found at the root of the MAFISC source code   *
+ * the file LICENSE, which can be found at the root of the MAFISC source code   *
  * distribution tree.  If you do not have access to this file, you may       *
  * request a copy from help@hdfgroup.org.                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

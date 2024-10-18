@@ -7,7 +7,7 @@ process enjoyable and straightforward.
 This document describes guiding principles for the HDF5 code contributors and does not pretend to address any possible
 contribution. If in doubt, please do not hesitate to ask us for guidance.
 ***Note that no contribution may be accepted unless the donor agrees with the HDF Group software license terms
-found in the COPYING file in every branch's top source directory.***
+found in the LICENSE file in every branch's top source directory.***
 
 
 > We will assume that you are familiar with `git` and `GitHub`.  If not, you may go through the GitHub tutorial found at
