@@ -608,7 +608,7 @@ H5SL_term_package(void)
 
         /* Mark the interface as uninitialized */
         if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
+            H5_PKG_INIT_VAR = false;
     }
 
     FUNC_LEAVE_NOAPI(n)

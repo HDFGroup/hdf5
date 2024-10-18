@@ -208,7 +208,7 @@ next:
 
         /* Mark interface as closed */
         if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
+            H5_PKG_INIT_VAR = false;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)

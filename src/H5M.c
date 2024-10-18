@@ -124,7 +124,7 @@ H5M__init_package(void)
         HGOTO_ERROR(H5E_MAP, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
     /* Mark "top" of interface as initialized, too */
-    H5M_top_package_initialize_s = TRUE;
+    H5M_top_package_initialize_s = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -191,7 +191,7 @@ H5M_term_package(void)
 
         /* Mark closed */
         if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
+            H5_PKG_INIT_VAR = false;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)

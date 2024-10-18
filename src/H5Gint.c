@@ -203,7 +203,7 @@ H5G_top_term_package(void)
 
         /* Mark closed */
         if (0 == n)
-            H5G_top_package_initialize_s = FALSE;
+            H5G_top_package_initialize_s = false;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)

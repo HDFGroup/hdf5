@@ -197,7 +197,7 @@ H5PL_term_package(void)
 
         /* Mark the interface as uninitialized */
         if (0 == ret_value)
-            H5_PKG_INIT_VAR = FALSE;
+            H5_PKG_INIT_VAR = false;
     } /* end if */
 
 done:

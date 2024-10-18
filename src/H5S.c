@@ -149,7 +149,7 @@ H5S__init_package(void)
                     "unable to initialize dataspace selection iterator ID class");
 
     /* Mark "top" of interface as initialized, too */
-    H5S_top_package_initialize_s = TRUE;
+    H5S_top_package_initialize_s = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -192,7 +192,7 @@ H5S_top_term_package(void)
 
         /* Mark "top" of interface as closed */
         if (0 == n)
-            H5S_top_package_initialize_s = FALSE;
+            H5S_top_package_initialize_s = false;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)

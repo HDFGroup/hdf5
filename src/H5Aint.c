@@ -132,7 +132,7 @@ static const H5I_class_t H5I_ATTR_CLS[1] = {{
 }};
 
 /* Flag indicating "top" of interface has been initialized */
-static hbool_t H5A_top_package_initialize_s = FALSE;
+static hbool_t H5A_top_package_initialize_s = false;
 
 /*-------------------------------------------------------------------------
  * Function: H5A_init
@@ -182,7 +182,7 @@ H5A__init_package(void)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
     /* Mark "top" of interface as initialized, too */
-    H5A_top_package_initialize_s = TRUE;
+    H5A_top_package_initialize_s = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -220,7 +220,7 @@ H5A_top_term_package(void)
 
         /* Mark closed */
         if (0 == n)
-            H5A_top_package_initialize_s = FALSE;
+            H5A_top_package_initialize_s = false;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
@@ -255,14 +255,14 @@ H5A_term_package(void)
     if (H5_PKG_INIT_VAR) {
         /* Sanity checks */
         assert(0 == H5I_nmembers(H5I_ATTR));
-        assert(FALSE == H5A_top_package_initialize_s);
+        assert(false == H5A_top_package_initialize_s);
 
         /* Destroy the attribute object id group */
         n += (H5I_dec_type_ref(H5I_ATTR) > 0);
 
         /* Mark closed */
         if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
+            H5_PKG_INIT_VAR = false;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)

@@ -308,7 +308,7 @@ H5D_term_package(void)
     if (H5_PKG_INIT_VAR) {
         /* Sanity checks */
         assert(0 == H5I_nmembers(H5I_DATASET));
-        assert(FALSE == H5D_top_package_initialize_s);
+        assert(false == H5D_top_package_initialize_s);
 
         /* Destroy the dataset object id group */
         n += (H5I_dec_type_ref(H5I_DATASET) > 0);

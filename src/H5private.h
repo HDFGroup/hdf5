@@ -1111,19 +1111,19 @@ extern char H5_lib_vers_info_g[];
 #define H5_PACKAGE_YES_INIT(err)                                                                             \
     /* Initialize this interface or bust */                                                                  \
     if (H5_UNLIKELY(!H5_PKG_INIT_VAR && !H5_TERM_GLOBAL)) {                                                  \
-        H5_PKG_INIT_VAR = TRUE;                                                                              \
+        H5_PKG_INIT_VAR = true;                                                                              \
         if (H5_PKG_INIT_FUNC() < 0) {                                                                        \
-            H5_PKG_INIT_VAR = FALSE;                                                                         \
+            H5_PKG_INIT_VAR = false;                                                                         \
             HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "interface initialization failed");                     \
         }                                                                                                    \
     }
 #define H5_PACKAGE_NO_INIT(err)                                                                              \
     /* Initialize this interface or bust */                                                                  \
     if (H5_UNLIKELY(!H5_PKG_INIT_VAR && !H5_TERM_GLOBAL))                                                    \
-        H5_PKG_INIT_VAR = TRUE;
+        H5_PKG_INIT_VAR = true;
 #define H5_PACKAGE_INIT(pkg_init, err) H5_GLUE3(H5_PACKAGE_, pkg_init, _INIT)(err)
 #else /* H5_MY_PKG */
-#define H5_PKG_INIT_VAR (TRUE)
+#define H5_PKG_INIT_VAR (true)
 #define H5_PACKAGE_INIT(pkg_init, err)
 #endif /* H5_MY_PKG */
 

@@ -194,7 +194,7 @@ H5AC_term_package(void)
 
     if (H5_PKG_INIT_VAR)
         /* Reset interface initialization flag */
-        H5_PKG_INIT_VAR = FALSE;
+        H5_PKG_INIT_VAR = false;
 
     FUNC_LEAVE_NOAPI(0)
 } /* end H5AC_term_package() */

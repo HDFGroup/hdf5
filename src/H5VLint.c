@@ -296,7 +296,7 @@ H5VL_term_package(void)
 
                     /* Mark interface as closed */
                     if (0 == n)
-                        H5_PKG_INIT_VAR = FALSE;
+                        H5_PKG_INIT_VAR = false;
                 } /* end else */
             }     /* end else */
         }         /* end else */
