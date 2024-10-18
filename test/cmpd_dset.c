@@ -1211,11 +1211,11 @@ test_compounds_selection_io(void)
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[3], fapl, fname, sizeof(fname));
 
-    for (set_cache = FALSE; set_cache <= TRUE; set_cache++) {
-        for (set_fillvalue = FALSE; set_fillvalue <= TRUE; set_fillvalue++) {
-            for (select_io = FALSE; select_io <= TRUE; select_io++) {
-                for (mwbuf = FALSE; mwbuf <= TRUE; mwbuf++) {
-                    for (set_buf = FALSE; set_buf <= TRUE; set_buf++) {
+    for (set_cache = false; set_cache <= true; set_cache++) {
+        for (set_fillvalue = false; set_fillvalue <= true; set_fillvalue++) {
+            for (select_io = false; select_io <= true; select_io++) {
+                for (mwbuf = false; mwbuf <= true; mwbuf++) {
+                    for (set_buf = false; set_buf <= true; set_buf++) {
 
                         if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
                             goto error;
@@ -1243,7 +1243,7 @@ test_compounds_selection_io(void)
 
                         if (mwbuf) {
                             printf("with modify write buf, ");
-                            if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+                            if (H5Pset_modify_write_buf(dxpl, true) < 0)
                                 goto error;
                         }
                         else
