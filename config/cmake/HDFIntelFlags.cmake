@@ -92,16 +92,15 @@ if (HDF5_ENABLE_DEV_WARNINGS)
   endif ()
 endif ()
 
-  # Turn on -Winline warnings now only for non-Debug and
-  # non-Developer builds. For at least GNU compilers this
-  # flag appears to conflict specifically with the -Og
-  # optimization flag and will produce warnings about functions
-  # not being considered for inlining
-  if (NOT ${HDF_CFG_NAME} MATCHES "Debug" AND NOT ${HDF_CFG_NAME} MATCHES "Developer")
-    if (CMAKE_C_COMPILER_ID STREQUAL "Intel" AND NOT _INTEL_WINDOWS)
-      list (APPEND H5_CFLAGS "-Winline")
-    elseif (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM" AND NOT _INTEL_WINDOWS)
-      list (APPEND H5_CFLAGS "-Winline")
-    endif ()
+# Turn on -Winline warnings now only for non-Debug and
+# non-Developer builds. For at least GNU compilers this
+# flag appears to conflict specifically with the -Og
+# optimization flag and will produce warnings about functions
+# not being considered for inlining
+if (NOT ${HDF_CFG_NAME} MATCHES "Debug" AND NOT ${HDF_CFG_NAME} MATCHES "Developer")
+  if (CMAKE_C_COMPILER_ID STREQUAL "Intel" AND NOT _INTEL_WINDOWS)
+    list (APPEND H5_CFLAGS "-Winline")
+  elseif (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM" AND NOT _INTEL_WINDOWS)
+    list (APPEND H5_CFLAGS "-Winline")
   endif ()
 endif ()
