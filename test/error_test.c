@@ -659,7 +659,7 @@ test_append(void)
         TEST_ERROR;
 
     /* Append error stack #2 to error stack #1, and close stack #2 */
-    if (H5Eappend_stack(estack_id1, estack_id2, TRUE) < 0)
+    if (H5Eappend_stack(estack_id1, estack_id2, true) < 0)
         TEST_ERROR;
 
     /* Try to close error stack #2.  Should fail because H5Eappend_stack
@@ -700,7 +700,7 @@ test_pause(void)
     const char *err_msg1 = "Error message #1"; /* Error message #1 for pushing error */
     ssize_t     err_num;                       /* Number of errors on stack */
     hid_t       estack_id1 = H5I_INVALID_HID;  /* Error stack ID */
-    hbool_t     is_paused;                     /* Whether error stack is paused */
+    bool        is_paused;                     /* Whether error stack is paused */
     herr_t      ret;                           /* Generic return value */
 
     /* Push an error */
@@ -718,7 +718,7 @@ test_pause(void)
         TEST_ERROR;
 
     /* Check for bad arguments */
-    is_paused = TRUE;
+    is_paused = true;
     H5E_BEGIN_TRY
     {
         ret = H5Eis_paused(H5I_INVALID_HID, &is_paused);
@@ -728,17 +728,17 @@ test_pause(void)
         TEST_ERROR;
 
     /* Verify that default stack is not paused */
-    is_paused = TRUE;
+    is_paused = true;
     if (H5Eis_paused(H5E_DEFAULT, &is_paused) < 0)
         TEST_ERROR;
-    if (FALSE != is_paused)
+    if (false != is_paused)
         TEST_ERROR;
 
     /* Verify that application stack is not paused */
-    is_paused = TRUE;
+    is_paused = true;
     if (H5Eis_paused(estack_id1, &is_paused) < 0)
         TEST_ERROR;
-    if (FALSE != is_paused)
+    if (false != is_paused)
         TEST_ERROR;
 
     /* Check for bad arguments */
@@ -763,10 +763,10 @@ test_pause(void)
         TEST_ERROR;
 
     /* Check if stack is paused */
-    is_paused = FALSE;
+    is_paused = false;
     if (H5Eis_paused(estack_id1, &is_paused) < 0)
         TEST_ERROR;
-    if (TRUE != is_paused)
+    if (true != is_paused)
         TEST_ERROR;
 
     /* Resume error stack */
@@ -774,10 +774,10 @@ test_pause(void)
         TEST_ERROR;
 
     /* Check if stack is paused */
-    is_paused = TRUE;
+    is_paused = true;
     if (H5Eis_paused(estack_id1, &is_paused) < 0)
         TEST_ERROR;
-    if (FALSE != is_paused)
+    if (false != is_paused)
         TEST_ERROR;
 
     /* Check for resuming too many times */
@@ -790,10 +790,10 @@ test_pause(void)
         TEST_ERROR;
 
     /* Check if stack is paused, after trying to resume too many times */
-    is_paused = TRUE;
+    is_paused = true;
     if (H5Eis_paused(estack_id1, &is_paused) < 0)
         TEST_ERROR;
-    if (FALSE != is_paused)
+    if (false != is_paused)
         TEST_ERROR;
 
     /* Close error stack */
@@ -805,10 +805,10 @@ test_pause(void)
         TEST_ERROR;
 
     /* Check if stack is paused */
-    is_paused = FALSE;
+    is_paused = false;
     if (H5Eis_paused(H5E_DEFAULT, &is_paused) < 0)
         TEST_ERROR;
-    if (TRUE != is_paused)
+    if (true != is_paused)
         TEST_ERROR;
 
     /* Resume error stack */
@@ -816,10 +816,10 @@ test_pause(void)
         TEST_ERROR;
 
     /* Check if stack is paused */
-    is_paused = TRUE;
+    is_paused = true;
     if (H5Eis_paused(H5E_DEFAULT, &is_paused) < 0)
         TEST_ERROR;
-    if (FALSE != is_paused)
+    if (false != is_paused)
         TEST_ERROR;
 
     /* Check for resuming too many times */
@@ -832,10 +832,10 @@ test_pause(void)
         TEST_ERROR;
 
     /* Check if stack is paused, after trying to resume too many times */
-    is_paused = TRUE;
+    is_paused = true;
     if (H5Eis_paused(H5E_DEFAULT, &is_paused) < 0)
         TEST_ERROR;
-    if (FALSE != is_paused)
+    if (false != is_paused)
         TEST_ERROR;
 
     return 0;

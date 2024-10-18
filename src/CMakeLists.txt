@@ -865,6 +865,7 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5private.h
     ${HDF5_SRC_DIR}/H5func_enter.h
     ${HDF5_SRC_DIR}/H5func_enter_threadsafe.h
+    ${HDF5_SRC_DIR}/H5timer.h
 
     ${HDF5_SRC_DIR}/H5Apkg.h
     ${HDF5_SRC_DIR}/H5Aprivate.h
