@@ -237,6 +237,10 @@ for arg in $@ ; do
       qarg='"'"$arg"'"'
       qargs="$qargs $qarg"
       ;;
+    *\ *)
+      qarg=$arg
+      qargs="$qargs $qarg"
+      ;;
     *)
       if [ -s "$arg" ] ; then
         ext=`expr "$arg" : '.*\(\..*\)'`
