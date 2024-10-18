@@ -18,13 +18,7 @@
 
 include $(top_srcdir)/config/commence.am
 
-if BUILD_TOOLS_HL_GIF_CONDITIONAL
-  TOOLS_GIF_DIR = gif2h5
-else
-  TOOLS_GIF_DIR =
-endif
-
 # All subdirectories
-SUBDIRS=h5watch $(TOOLS_GIF_DIR)
+SUBDIRS=h5watch
 
 include $(top_srcdir)/config/conclude.am

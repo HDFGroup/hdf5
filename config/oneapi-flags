@@ -80,8 +80,8 @@ if test "X-icx" = "X-$cc_vendor"; then
     # General #
     ###########
 
-    # Default to C99 standard.
-    H5_CFLAGS="$H5_CFLAGS $arch -std=c99"
+    # Default to C11 standard.
+    H5_CFLAGS="$H5_CFLAGS $arch -std=c11"
 
     ##############
     # Production #

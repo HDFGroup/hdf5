@@ -374,7 +374,7 @@ test_create_hard_link_many(void)
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID;
     hid_t  group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID;
-    bool   valid_name_matched = FALSE;
+    bool   valid_name_matched = false;
     char   objname[HARD_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE]; /* Object name */
 
     TESTING("hard link creation of many links");
@@ -1573,7 +1573,7 @@ static int
 test_create_soft_link_many(void)
 {
     htri_t link_exists        = FAIL;
-    bool   valid_name_matched = FALSE;
+    bool   valid_name_matched = false;
     hid_t  file_id            = H5I_INVALID_HID;
     hid_t  container_group    = H5I_INVALID_HID;
     hid_t  group_id           = H5I_INVALID_HID;

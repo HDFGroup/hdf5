@@ -43,20 +43,8 @@ struct timezone {
 #define HDlstat(S, B)        _lstati64(S, B)
 #define HDmkdir(S, M)        _mkdir(S)
 
-/* Note that with the traditional MSVC preprocessor, the variadic
- * HDopen macro uses an MSVC-specific extension where the comma
- * is dropped if nothing is passed to the ellipsis.
- *
- * MinGW and the newer, conforming MSVC preprocessor do not exhibit this
- * behavior.
- */
-#if (defined(_MSC_VER) && !defined(_MSVC_TRADITIONAL)) || defined(_MSVC_TRADITIONAL)
-/* Using the MSVC traditional preprocessor */
-#define HDopen(S, F, ...) Wopen(S, F, __VA_ARGS__)
-#else
-/* Using a standards conformant preprocessor */
+/* We only support the standards conformant preprocessor */
 #define HDopen(S, F, ...) Wopen(S, F, ##__VA_ARGS__)
-#endif
 
 #define HDremove(S)           Wremove(S)
 #define HDsetenv(N, V, O)     Wsetenv(N, V, O)

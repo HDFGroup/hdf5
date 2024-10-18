@@ -484,8 +484,6 @@ III. Full installation instructions for source distributions
             ./tools/misc/h5debug            (low-level file debugging)
             ./tools/h5import/h5import       (imports data to HDF5 file)
             ./tools/h5diff/h5diff           (compares two HDF5 files)
-            ./tools/gifconv/h52gif          (HDF5 to GIF converter)
-            ./tools/gifconv/gif2h5          (GIF to HDF5 converter)
 
 
 ========================================================================
