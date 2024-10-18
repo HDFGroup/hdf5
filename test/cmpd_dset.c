@@ -128,7 +128,7 @@ static hid_t create_stype1(void);
 static hid_t create_stype2(void);
 static hid_t create_stype3(void);
 static hid_t create_stype4(void);
-static int   compare_data(void *src_data, void *dst_data, hbool_t src_subset);
+static int   compare_data(void *src_data, void *dst_data, bool src_subset);
 static int   compare_stype4_data(void *expect_buf, void *rbuf);
 static int   compare_s1_data(void *expect_buf, void *rbuf);
 static int   compare_s1_s3_data(void *expect_buf, void *rbuf);

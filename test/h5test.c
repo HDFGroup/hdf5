@@ -2394,10 +2394,10 @@ h5_check_file_locking_env_var(htri_t *use_locks, htri_t *ignore_disabled_locks)
 herr_t
 h5_using_native_vol(hid_t fapl_id, hid_t obj_id, bool *is_native_vol)
 {
-    hbool_t is_native = false;
-    hid_t   native_id = H5I_INVALID_HID;
-    hid_t   vol_id    = H5I_INVALID_HID;
-    herr_t  ret_value = SUCCEED;
+    bool   is_native = false;
+    hid_t  native_id = H5I_INVALID_HID;
+    hid_t  vol_id    = H5I_INVALID_HID;
+    herr_t ret_value = SUCCEED;
 
     assert((fapl_id >= 0) || (obj_id >= 0));
     assert(is_native_vol);

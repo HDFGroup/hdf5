@@ -700,7 +700,7 @@ test_pause(void)
     const char *err_msg1 = "Error message #1"; /* Error message #1 for pushing error */
     ssize_t     err_num;                       /* Number of errors on stack */
     hid_t       estack_id1 = H5I_INVALID_HID;  /* Error stack ID */
-    hbool_t     is_paused;                     /* Whether error stack is paused */
+    bool        is_paused;                     /* Whether error stack is paused */
     herr_t      ret;                           /* Generic return value */
 
     /* Push an error */
