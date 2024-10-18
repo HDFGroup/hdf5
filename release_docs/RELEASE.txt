@@ -116,8 +116,19 @@ New Features
 
     Tools:
     ------
-    -
+    - Remove the high-level GIF tools
 
+      The high-level GIF tools, h52gif and gif2h5, have unfixed CVE issues
+      (with no proof-of-concept files). They are not critical tools, are not
+      well maintained, and are an odd fit for building with the library.
+      Because of this, they have been removed. We may move them to a separate
+      repository in the future.
+
+      This also removes the following configure options:
+
+        Autotools:  --(dis|en)able-hlgiftools
+
+        CMake:      HDF5_BUILD_HL_GIF_TOOLS
 
     High-Level APIs:
     ----------------

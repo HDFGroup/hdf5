@@ -93,7 +93,6 @@ const char H5build_settings[]=
     "Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@\n"
     "                  Build HDF5 Tests: @HDF5_TESTS@\n"
     "                  Build HDF5 Tools: @HDF5_TOOLS@\n"
-    "                   Build GIF Tools: @HDF5_HL_GIF_TOOLS@\n"
     "                           Threads: @THREADS@\n"
     "                      Threadsafety: @THREADSAFE@\n"
     "               Default API mapping: @DEFAULT_API_VERSION@\n"
