@@ -11,22 +11,25 @@
 #
 
 ###############################################################################
-# This file included from HDFCompilerFlags.cmake
+# This file included from HDFCompilerFlags.cmake with
+#  if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
 ###############################################################################
+#-----------------------------------------------------------------------------
+# Compiler specific flags
+#-----------------------------------------------------------------------------
 
-if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   set (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
   if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
     if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og -ftrapv -fno-common")
     endif ()
   else ()
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND
+    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND
         NOT CMAKE_C_CLANG_TIDY)
       # `clang-tidy` does not understand -fstdarg-opt
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstdarg-opt")
     endif ()
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 10.0)
+    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 10.0)
       #-----------------------------------------------------------------------------
       # Option to allow the user to enable build extended diagnostics
       #
@@ -42,15 +45,12 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
       endif ()
     endif ()
   endif ()
-endif ()
 
 #-----------------------------------------------------------------------------
 # HDF5 library compile options - to be made available to all targets
 #-----------------------------------------------------------------------------
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
-  list (APPEND HDF5_CMAKE_C_FLAGS "-erroff=%none -DBSD_COMP")
-else ()
+if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
   # General flags
   #
   # Note that some of the flags listed here really should be developer
@@ -60,7 +60,6 @@ else ()
   #
   # NOTE: Don't add -Wpadded here since we can't/won't fix the (many)
   # warnings that are emitted. If you need it, add it at configure time.
-  if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     # Add general CFlags for GCC versions 4.8 and above
     if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
       ADD_H5_FLAGS (HDF5_CMAKE_C_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/general")
@@ -69,7 +68,6 @@ else ()
     # gcc automatically inlines based on the optimization level
     # this is just a failsafe
     list (APPEND H5_CFLAGS "-finline-functions")
-  endif ()
   message (VERBOSE "CMAKE_C_FLAGS_GENERAL=${HDF5_CMAKE_C_FLAGS}")
 endif ()
 
@@ -79,7 +77,7 @@ endif ()
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_DEV_WARNINGS)
   message (STATUS "....HDF5 developer group warnings are enabled")
-  if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
+  if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
     ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-general")
   endif ()
 
@@ -89,17 +87,14 @@ if (HDF5_ENABLE_DEV_WARNINGS)
   # optimization flag and will produce warnings about functions
   # not being considered for inlining
   if (NOT ${HDF_CFG_NAME} MATCHES "Debug" AND NOT ${HDF_CFG_NAME} MATCHES "Developer")
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
       list (APPEND H5_CFLAGS "-Winline")
-    endif ()
   endif ()
 else ()
-  if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
+  if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
     ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-general")
   endif ()
 endif ()
 
-if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   # Technically, variable-length arrays are part of the C99 standard, but
   #   we should approach them a bit cautiously... Only needed for gcc 4.X
   if (CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
@@ -182,27 +177,19 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     #  ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-12")
     endif ()
   endif ()
-endif ()
 
 #-----------------------------------------------------------------------------
 # This is in here to help some of the GCC based IDES like Eclipse
 # and code blocks parse the compiler errors and warnings better.
 #-----------------------------------------------------------------------------
-if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
-endif ()
 
 #-----------------------------------------------------------------------------
 # Option for --enable-symbols
 # This option will force/override the default setting for all configurations
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_SYMBOLS MATCHES "YES")
-  if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -fno-omit-frame-pointer")
-  endif ()
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -fno-omit-frame-pointer")
 elseif (HDF5_ENABLE_SYMBOLS MATCHES "NO")
-  if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s")
-  endif ()
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s")
 endif ()
-

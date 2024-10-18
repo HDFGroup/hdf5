@@ -12,17 +12,15 @@
 
 ###############################################################################
 # This file included from HDFCompilerFlags.cmake with
-#  if (CMAKE_C_COMPILER_ID MATCHES "NVHPC" )
+#  if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 ###############################################################################
 
 #-----------------------------------------------------------------------------
 # Compiler specific flags
 #-----------------------------------------------------------------------------
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Minform=warn")
-if (NOT ${HDF_CFG_NAME} MATCHES "Debug" AND NOT ${HDF_CFG_NAME} MATCHES "Developer")
-  if (NOT ${HDF_CFG_NAME} MATCHES "RelWithDebInfo")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s")
+
+# MSVC 14.28 enables C5105, but the Windows SDK 10.0.18362.0 triggers it.
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.28)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd5105")
   endif ()
-else ()
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Mbounds -gopt")
-endif ()

@@ -12,17 +12,22 @@
 
 ###############################################################################
 # This file included from HDFCompilerFlags.cmake with
-#  if (CMAKE_C_COMPILER_ID MATCHES "NVHPC" )
+#  if (CMAKE_CXX_COMPILER_ID MATCHES "NVHPC" )
 ###############################################################################
 
 #-----------------------------------------------------------------------------
 # Compiler specific flags
 #-----------------------------------------------------------------------------
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Minform=warn")
+if (NOT DEFINED CMAKE_CXX${CMAKE_CXX_STANDARD}_STANDARD_COMPILE_OPTION)
+  if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD EQUAL 11)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C11_STANDARD_COMPILE_OPTION}")
+  endif ()
+endif ()
 if (NOT ${HDF_CFG_NAME} MATCHES "Debug" AND NOT ${HDF_CFG_NAME} MATCHES "Developer")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Minform=warn")
   if (NOT ${HDF_CFG_NAME} MATCHES "RelWithDebInfo")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s")
   endif ()
 else ()
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Mbounds -gopt")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Mbounds -gopt -g")
 endif ()

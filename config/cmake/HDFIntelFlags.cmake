@@ -11,12 +11,29 @@
 #
 
 ###############################################################################
-# This file included from HDFCompilerFlags.cmake
+# This file included from HDFCompilerFlags.cmake with
+#  if (CMAKE_C_COMPILER_ID MATCHES "Intel")
 ###############################################################################
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
-  list (APPEND HDF5_CMAKE_C_FLAGS "-erroff=%none -DBSD_COMP")
-else ()
+#-----------------------------------------------------------------------------
+# Compiler specific flags
+#-----------------------------------------------------------------------------
+if (WIN32)
+  set (_INTEL_WINDOWS 1)
+endif ()
+
+# Disable deprecation warnings for standard C functions.
+# really only needed for newer versions of VS, but should
+# not hurt other versions, and this will work into the
+# future
+if (MSVC OR _INTEL_WINDOWS)
+  add_definitions (-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
+endif ()
+
+#-----------------------------------------------------------------------------
+# HDF5 library compile options - to be made available to all targets
+#-----------------------------------------------------------------------------
+if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
   # General flags
   #
   # Note that some of the flags listed here really should be developer
@@ -50,6 +67,7 @@ else ()
       list (APPEND H5_CFLAGS "-finline-functions")
       ADD_H5_FLAGS (HDF5_CMAKE_C_FLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/oneapi/general")
     endif ()
+  endif ()
   message (VERBOSE "CMAKE_C_FLAGS_GENERAL=${HDF5_CMAKE_C_FLAGS}")
 endif ()
 
@@ -72,6 +90,7 @@ if (HDF5_ENABLE_DEV_WARNINGS)
       ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/oneapi/developer-general")
     endif ()
   endif ()
+endif ()
 
   # Turn on -Winline warnings now only for non-Debug and
   # non-Developer builds. For at least GNU compilers this

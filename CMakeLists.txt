@@ -1133,7 +1133,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
   option (HDF5_BUILD_FORTRAN "Build FORTRAN support" OFF)
   if (HDF5_BUILD_FORTRAN)
     message (VERBOSE "Fortran compiler ID is ${CMAKE_Fortran_COMPILER_ID}")
-    include (${HDF_RESOURCES_DIR}/HDFFortranCompilerFlags.cmake)
+    include (${HDF_RESOURCES_DIR}/HDFCompilerFortranFlags.cmake)
     include (${HDF_RESOURCES_DIR}/HDF5UseFortran.cmake)
     set (LINK_Fortran_LIBS ${LINK_LIBS})
 
@@ -1193,7 +1193,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
       endif ()
     endif ()
 
-    include (${HDF_RESOURCES_DIR}/HDFCXXCompilerFlags.cmake)
+    include (${HDF_RESOURCES_DIR}/HDFCompilerCXXFlags.cmake)
 
     add_subdirectory (c++)
     if (HDF5_BUILD_HL_LIB)

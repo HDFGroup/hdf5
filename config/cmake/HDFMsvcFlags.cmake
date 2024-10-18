@@ -11,14 +11,15 @@
 #
 
 ###############################################################################
-# This file included from HDFCompilerFlags.cmake
+# This file included from HDFCompilerFlags.cmake with
+#  if (CMAKE_C_COMPILER_ID MATCHES "MSVC")
 ###############################################################################
+
+#-----------------------------------------------------------------------------
+# Compiler specific flags
+#-----------------------------------------------------------------------------
 
 # MSVC 14.28 enables C5105, but the Windows SDK 10.0.18362.0 triggers it.
 if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 19.28)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -wd5105")
 endif ()
-
-if(_CLANG_MSVC_WINDOWS AND "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Xlinker -stack:20000000")
-endif()
