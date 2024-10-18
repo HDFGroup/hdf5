@@ -86,7 +86,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5TS_mutex_trylock
  *
- * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to TRUE if so
+ * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to true if so
  *
  * Return:   Non-negative on success / Negative on failure
  *
@@ -157,7 +157,7 @@ H5TS_mutex_init(H5TS_mutex_t *mutex, int H5_ATTR_UNUSED type)
 /*-------------------------------------------------------------------------
  * Function: H5TS_mutex_trylock
  *
- * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to TRUE if so
+ * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to true if so
  *
  * Return:   Non-negative on success / Negative on failure
  *
@@ -242,7 +242,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5TS_mutex_trylock
  *
- * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to TRUE if so
+ * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to true if so
  *
  * Return:   Non-negative on success / Negative on failure
  *

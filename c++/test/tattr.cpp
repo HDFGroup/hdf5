@@ -1983,7 +1983,7 @@ test_attr(const void *params)
 
         // Loop over using new group format
         unsigned new_format;
-        for (new_format = FALSE; new_format <= TRUE; new_format++) {
+        for (new_format = false; new_format <= true; new_format++) {
             FileAccPropList curr_fapl;
 
             // Set the file access proplist for the type of format

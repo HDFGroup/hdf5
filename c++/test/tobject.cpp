@@ -169,54 +169,54 @@ test_existance()
 
         // Check if GROUP1 exists in the file
         bool exists = file.nameExists(GROUP1);
-        verify_val(exists, TRUE, "Group::nameExists GROUP1_1", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::nameExists GROUP1_1", __LINE__, __FILE__);
         // Deprecated
         exists = file.exists(GROUP1);
-        verify_val(exists, TRUE, "Group::exists GROUP1_1", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::exists GROUP1_1", __LINE__, __FILE__);
 
         // Open GROUP1
         Group grp1 = file.openGroup(GROUP1);
 
         // Check if GROUP1_1 and GROUP1_2 exist in GROUP1
         exists = grp1.nameExists(GROUP1_1);
-        verify_val(exists, TRUE, "Group::nameExists GROUP1_1", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::nameExists GROUP1_1", __LINE__, __FILE__);
         exists = grp1.nameExists(GROUP1_2);
-        verify_val(exists, TRUE, "Group::nameExists GROUP1_2", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::nameExists GROUP1_2", __LINE__, __FILE__);
         // Deprecated
         exists = grp1.exists(GROUP1_1);
-        verify_val(exists, TRUE, "Group::exists GROUP1_1", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::exists GROUP1_1", __LINE__, __FILE__);
         exists = grp1.exists(GROUP1_2);
-        verify_val(exists, TRUE, "Group::exists GROUP1_2", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::exists GROUP1_2", __LINE__, __FILE__);
 
         // Check if DSET_IN_GRP1 exists in GROUP1
         exists = grp1.nameExists(DSET_IN_GRP1);
-        verify_val(exists, TRUE, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__);
         // Deprecated
         exists = grp1.exists(DSET_IN_GRP1);
-        verify_val(exists, TRUE, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__);
 
         // Open GROUP1_2
         Group grp1_2 = grp1.openGroup(GROUP1_2);
 
         // Check if DSET_IN_GRP1_2 exists in GROUP1_2
         exists = grp1_2.nameExists(DSET_IN_GRP1_2);
-        verify_val(exists, TRUE, "Group::nameExists DSET_IN_GRP1_2", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::nameExists DSET_IN_GRP1_2", __LINE__, __FILE__);
         // Deprecated
         exists = grp1_2.exists(DSET_IN_GRP1_2);
-        verify_val(exists, TRUE, "Group::exists DSET_IN_GRP1_2", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::exists DSET_IN_GRP1_2", __LINE__, __FILE__);
 
         // Check if a dataset exists given dataset as location with full path name
         DataSet dset1 = file.openDataSet(DSET_IN_FILE);
         exists        = dset1.nameExists("/Top Group/Dataset_in_Group_1");
-        verify_val(exists, TRUE, "Group::nameExists given dataset with full path name", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::nameExists given dataset with full path name", __LINE__, __FILE__);
 
         exists = grp1_2.nameExists(DSET_IN_GRP1);
-        verify_val(exists, FALSE, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__);
+        verify_val(exists, false, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__);
         // Deprecated
         exists = dset1.exists("/Top Group/Dataset_in_Group_1");
-        verify_val(exists, TRUE, "Group::exists given dataset with full path name", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::exists given dataset with full path name", __LINE__, __FILE__);
         exists = grp1_2.exists(DSET_IN_GRP1);
-        verify_val(exists, FALSE, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__);
+        verify_val(exists, false, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__);
 
         // Everything will be closed as they go out of scope
 
@@ -647,7 +647,7 @@ test_intermediate_groups()
         } // Failure is ignored
 
         // Create GROUP14NAME with the flag to create missing groups set
-        // to FALSE, should fail because group GROUP13NAME is missing
+        // to false, should fail because group GROUP13NAME is missing
 
         // Reset flag to not create missing groups
         lcpl.setCreateIntermediateGroup(false);
@@ -662,7 +662,7 @@ test_intermediate_groups()
         catch (FileIException &expected2) {
         } // Failure is ignored
 
-        // Set the flag to create missing groups set to TRUE
+        // Set the flag to create missing groups set to true
         lcpl.setCreateIntermediateGroup(true);
         crt_int_grps = lcpl.getCreateIntermediateGroup();
         verify_val(crt_int_grps, true, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__);

@@ -902,8 +902,8 @@ test_basic_file_operation(const char *driver_name)
      */
     h5_check_file_locking_env_var(&use_locking_env, &ignore_disabled_env);
     if (use_locking_env != FAIL) {
-        hbool_t default_use_locking           = true;
-        hbool_t default_ignore_disabled_locks = true;
+        bool default_use_locking           = true;
+        bool default_ignore_disabled_locks = true;
 
         if (H5Pget_file_locking(H5P_DEFAULT, &default_use_locking, &default_ignore_disabled_locks) < 0)
             TEST_ERROR;

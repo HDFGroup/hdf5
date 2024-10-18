@@ -129,14 +129,14 @@ test_basic_links(hid_t fapl_id, hbool_t new_format)
         H5File file(filename, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
 
         // Verify link existence
-        if (file.nameExists("dset1", LinkAccPropList::DEFAULT) != TRUE)
+        if (file.nameExists("dset1", LinkAccPropList::DEFAULT) != true)
             throw InvalidActionException("H5File::nameExists", "dset1 doesn't exist");
-        if (file.nameExists("grp1/soft", LinkAccPropList::DEFAULT) != TRUE)
+        if (file.nameExists("grp1/soft", LinkAccPropList::DEFAULT) != true)
             throw InvalidActionException("H5File::nameExists", "grp1/soft doesn't exist");
         // Deprecated
-        if (file.exists("dset1", LinkAccPropList::DEFAULT) != TRUE)
+        if (file.exists("dset1", LinkAccPropList::DEFAULT) != true)
             throw InvalidActionException("H5File::exists", "dset1 doesn't exist");
-        if (file.exists("grp1/soft", LinkAccPropList::DEFAULT) != TRUE)
+        if (file.exists("grp1/soft", LinkAccPropList::DEFAULT) != true)
             throw InvalidActionException("H5File::exists", "grp1/soft doesn't exist");
 
         // Verify link values
@@ -290,7 +290,7 @@ test_move(hid_t fapl_id, hbool_t new_format)
 
         // Move a soft link across files, should succeed
         grp_2.moveLink("soft", file_b, "soft_new_name");
-        if (file_b.exists("soft_new_name") != TRUE)
+        if (file_b.exists("soft_new_name") != true)
             throw InvalidActionException("H5File::exists", "grp1/soft doesn't exist");
 
         // Move a group across groups in the same file while renaming it
@@ -429,7 +429,7 @@ test_copy(hid_t fapl_id, hbool_t new_format)
 
         // Copy a soft link across files, should succeed
         grp_2.copyLink("soft", file_b, "soft_new_name");
-        if (file_b.exists("soft_new_name") != TRUE)
+        if (file_b.exists("soft_new_name") != true)
             throw InvalidActionException("H5File::exists", "soft_new_name doesn't exist");
 
         // Move a group across groups in the same file while renaming it
@@ -730,7 +730,7 @@ test_links(const void *params)
             throw Exception("test_links", "H5Pset_libver_bounds failed");
 
         /* Loop over using new group format */
-        for (new_format = FALSE; new_format <= TRUE; new_format++) {
+        for (new_format = false; new_format <= true; new_format++) {
             hid_t my_fapl_id;
 
             /* Check for FAPL to use */

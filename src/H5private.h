@@ -377,16 +377,6 @@
     (skip ? false : H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end))
 
 /*
- * HDF Boolean type.
- */
-#ifndef FALSE
-#define FALSE false
-#endif
-#ifndef TRUE
-#define TRUE true
-#endif
-
-/*
  * The max value for ssize_t.
  *
  * Only needed where ssize_t isn't a thing (e.g., Windows)

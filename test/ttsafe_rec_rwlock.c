@@ -115,7 +115,7 @@ typedef struct rec_rwlock_test_udata_t {
 static H5TS_THREAD_RETURN_TYPE
 tts_rec_rwlock_smoke_check_test_thread(void *_udata)
 {
-    hbool_t                  read;
+    bool                     read;
     int32_t                  rec_lock_depth = 0;
     int32_t                  max_rec_lock_depth;
     int32_t                  rd_locks_remaining;
@@ -132,14 +132,14 @@ tts_rec_rwlock_smoke_check_test_thread(void *_udata)
 
     while (rd_locks_remaining > 0 || wr_locks_remaining > 0) {
         if (wr_locks_remaining == 0)
-            read = TRUE;
+            read = true;
         else if (rd_locks_remaining == 0)
-            read = FALSE;
+            read = false;
         else {
             if ((rand() % 2) == 0)
-                read = TRUE;
+                read = true;
             else
-                read = FALSE;
+                read = false;
         }
 
         if (read) {
@@ -556,7 +556,7 @@ tts_rec_rwlock_smoke_check_2(const void H5_ATTR_UNUSED *params)
     H5TS_thread_t            threads[MAX_NUM_THREADS];
     rec_rwlock_test_udata_t *udata = NULL;
 #if H5TS_ENABLE_REC_RWLOCK_STATS
-    hbool_t                 verbose                     = FALSE;
+    bool                    verbose                     = false;
     int32_t                 total_target_rd_lock_cycles = 0;
     int32_t                 total_target_wr_lock_cycles = 0;
     H5TS_rec_rwlock_stats_t stats;
@@ -762,7 +762,7 @@ tts_rec_rwlock_smoke_check_3(const void H5_ATTR_UNUSED *params)
     H5TS_thread_t            threads[MAX_NUM_THREADS];
     rec_rwlock_test_udata_t *udata = NULL;
 #if H5TS_ENABLE_REC_RWLOCK_STATS
-    hbool_t                 verbose                     = FALSE;
+    bool                    verbose                     = false;
     int32_t                 total_target_rd_lock_cycles = 0;
     int32_t                 total_target_wr_lock_cycles = 0;
     H5TS_rec_rwlock_stats_t stats;
@@ -968,7 +968,7 @@ tts_rec_rwlock_smoke_check_4(const void H5_ATTR_UNUSED *params)
     H5TS_thread_t            threads[MAX_NUM_THREADS];
     rec_rwlock_test_udata_t *udata = NULL;
 #if H5TS_ENABLE_REC_RWLOCK_STATS
-    hbool_t                 verbose                     = FALSE;
+    bool                    verbose                     = false;
     int32_t                 total_target_rd_lock_cycles = 0;
     int32_t                 total_target_wr_lock_cycles = 0;
     H5TS_rec_rwlock_stats_t stats;

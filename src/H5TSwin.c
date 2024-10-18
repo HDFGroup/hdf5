@@ -70,7 +70,7 @@ static herr_t H5TS__win32_thread_exit(void);
  *
  * Purpose:     Per-process setup on Windows when using Win32 threads.
  *
- * Returns:     TRUE on success, FALSE on failure
+ * Returns:     true on success, FALSE on failure
  *
  *--------------------------------------------------------------------------
  */
