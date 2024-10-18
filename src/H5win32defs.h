@@ -48,9 +48,10 @@ struct timezone {
  * is dropped if nothing is passed to the ellipsis.
  *
  * MinGW and the newer, conforming MSVC preprocessor do not exhibit this
- * behavior.
+ * behavior. The conforming preprocessor is also used by default with
+ * C11.
  */
-#if (defined(_MSC_VER) && !defined(_MSVC_TRADITIONAL)) || defined(_MSVC_TRADITIONAL)
+#if defined(_MSVC_TRADITIONAL)
 /* Using the MSVC traditional preprocessor */
 #define HDopen(S, F, ...) Wopen(S, F, __VA_ARGS__)
 #else
