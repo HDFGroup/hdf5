@@ -68,8 +68,8 @@ if test "X-nvc" = "X-$cc_vendor" -o "X-nvcc" = "X-$cc_vendor"; then
     # General #
     ###########
 
-    # Default to C99 standard.
-    H5_CFLAGS="$H5_CFLAGS $arch -c99 -Minform=warn"
+    # Default to C11 standard.
+    H5_CFLAGS="$H5_CFLAGS $arch -std=c11 -Minform=warn"
 
     ##############
     # Production #
