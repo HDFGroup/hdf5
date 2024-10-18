@@ -3214,7 +3214,7 @@ main(void)
     if ((fapl2 = H5Pcopy(fapl)) < 0)
         TEST_ERROR;
 
-    for (set_cache = FALSE; set_cache <= TRUE; set_cache++) {
+    for (set_cache = false; set_cache <= true; set_cache++) {
 
         /* Disable chunk caching on fapl2 */
         if (set_cache) {

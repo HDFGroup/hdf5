@@ -578,11 +578,11 @@ test_reference_obj(void)
     /* Check if references are equal */
     htri_t is_equal = H5Requal(&wbuf[0], &wbuf_cp[0]);
     CHECK(is_equal, FAIL, "H5Requal");
-    VERIFY(is_equal, TRUE, "H5Requal");
+    VERIFY(is_equal, true, "H5Requal");
 
     is_equal = H5Requal(&wbuf[0], &wbuf[2]);
     CHECK(is_equal, FAIL, "H5Requal");
-    VERIFY(is_equal, FALSE, "H5Requal");
+    VERIFY(is_equal, false, "H5Requal");
 
     ret = H5Rdestroy(&wbuf_cp[0]);
     CHECK(ret, FAIL, "H5Rdestroy");

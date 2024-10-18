@@ -99,7 +99,7 @@ done:
  *
  * Purpose:     Check if connector is the native connector
  *
- * Return:      TRUE/FALSE/FAIL
+ * Return:      true/false/FAIL
  *
  *-------------------------------------------------------------------------
  */
