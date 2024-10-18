@@ -13,7 +13,8 @@
 /*-------------------------------------------------------------------------
  * H5func_enter_threadsafe.h
  *
- * Macros used to handle the global lock in HDF5 library API calls
+ * Macros used to handle treading and thread-safety concerns (like the
+ * global API lock) in HDF5 library API calls
  *-------------------------------------------------------------------------
  */
 
