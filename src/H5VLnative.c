@@ -344,7 +344,7 @@ H5VL__native_get_file_addr_len(void *obj, H5I_type_t obj_type, size_t *addr_len)
     H5F_t *file      = NULL; /* File struct pointer */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     assert(obj);

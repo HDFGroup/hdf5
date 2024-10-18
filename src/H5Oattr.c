@@ -564,7 +564,7 @@ H5O__attr_delete(H5F_t *f, H5O_t *oh, void *_mesg)
     H5A_t *attr      = (H5A_t *)_mesg;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     assert(f);
