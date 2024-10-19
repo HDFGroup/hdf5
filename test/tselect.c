@@ -2537,7 +2537,7 @@ test_select_hyper_contig_dr(hid_t dset_type, hid_t xfer_plist)
         *cube_ptr++ = (uint16_t)s;
 
     /* Allocate cube buffer for zeroing values on disk */
-    zero_buf = (uint16_t *)calloc(sizeof(uint16_t), max_cube_size);
+    zero_buf = (uint16_t *)calloc(max_cube_size, sizeof(uint16_t));
     CHECK_PTR(zero_buf, "calloc");
 
     for (large_rank = 1; large_rank <= max_rank; large_rank++) {
@@ -2986,9 +2986,9 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
     assert(large_cube_size < (size_t)(64 * 1024));
 
     /* Allocate & initialize buffers */
-    small_cube_buf_1 = (uint16_t *)calloc(sizeof(uint16_t), small_cube_size);
+    small_cube_buf_1 = (uint16_t *)calloc(small_cube_size, sizeof(uint16_t));
     CHECK_PTR(small_cube_buf_1, "calloc");
-    large_cube_buf_1 = (uint16_t *)calloc(sizeof(uint16_t), large_cube_size);
+    large_cube_buf_1 = (uint16_t *)calloc(large_cube_size, sizeof(uint16_t));
     CHECK_PTR(large_cube_buf_1, "calloc");
 
     /* Create a dataset transfer property list */
@@ -3613,7 +3613,7 @@ test_select_hyper_checker_board_dr(hid_t dset_type, hid_t xfer_plist)
         *cube_ptr++ = (uint16_t)s;
 
     /* Allocate cube buffer for zeroing values on disk */
-    zero_buf = (uint16_t *)calloc(sizeof(uint16_t), max_cube_size);
+    zero_buf = (uint16_t *)calloc(max_cube_size, sizeof(uint16_t));
     CHECK_PTR(zero_buf, "calloc");
 
     for (large_rank = 1; large_rank <= max_rank; large_rank++) {
@@ -3677,11 +3677,11 @@ test_select_hyper_copy(void)
     MESSAGE(5, ("Testing Hyperslabs with Strides Functionality\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint16_t *)malloc(sizeof(uint16_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint16_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint16_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint16_t *)calloc(sizeof(uint16_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf = (uint16_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint16_t));
     CHECK_PTR(rbuf, "calloc");
-    rbuf2 = (uint16_t *)calloc(sizeof(uint16_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf2 = (uint16_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint16_t));
     CHECK_PTR(rbuf2, "calloc");
 
     /* Initialize write buffer */
@@ -3848,11 +3848,11 @@ test_select_point_copy(void)
     MESSAGE(5, ("Testing Hyperslabs with Strides Functionality\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint16_t *)malloc(sizeof(uint16_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint16_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint16_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint16_t *)calloc(sizeof(uint16_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf = (uint16_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint16_t));
     CHECK_PTR(rbuf, "calloc");
-    rbuf2 = (uint16_t *)calloc(sizeof(uint16_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf2 = (uint16_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint16_t));
     CHECK_PTR(rbuf2, "calloc");
 
     /* Initialize write buffer */
@@ -4066,9 +4066,9 @@ test_select_hyper_offset(void)
     MESSAGE(5, ("Testing Hyperslab Selection Functions with Offsets\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf = (uint8_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
