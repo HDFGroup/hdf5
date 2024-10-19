@@ -685,7 +685,7 @@ H5G__stab_get_name_by_idx(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t 
     /* Portably clear udata struct (before FUNC_ENTER) */
     memset(&udata, 0, sizeof(udata));
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     assert(oloc);
