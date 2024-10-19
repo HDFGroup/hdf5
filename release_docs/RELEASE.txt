@@ -147,7 +147,11 @@ New Features
 
     Documentation:
     --------------
-    -
+    - The COPYING file has been renamed to LICENSE
+
+      This is where most people will expect to find license information. The
+      COPYING_LBNL_HDF5 file has also been renamed to LICENSE_LBNL_HDF5.
+      The licenses are unchanged.
 
 
 Support for new platforms, languages and compilers
@@ -435,7 +439,7 @@ CMake vs. Autotools installations
 While both build systems produce similar results, there are differences.
 Each system produces the same set of folders on Linux (only CMake works
 on standard Windows); bin, include, lib and share. Autotools places the
-COPYING and RELEASE.txt file in the root folder, CMake places them in
+LICENSE and RELEASE.txt file in the root folder, CMake places them in
 the share folder.
 
 The bin folder contains the tools and the build scripts. Additionally, CMake
