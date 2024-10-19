@@ -28,10 +28,10 @@ jobs:
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install libaec0 libaec-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           echo "CC=gcc-12" >> $GITHUB_ENV
-           echo "CXX=g++-12" >> $GITHUB_ENV
-           echo "FC=gfortran-12" >> $GITHUB_ENV
+           sudo apt install gcc-13 g++-13 gfortran-13
+           echo "CC=gcc-13" >> $GITHUB_ENV
+           echo "CXX=g++-13" >> $GITHUB_ENV
+           echo "FC=gfortran-13" >> $GITHUB_ENV
 
       - name: Get Sources
         uses: actions/checkout@v4.1.7

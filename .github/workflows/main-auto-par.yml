@@ -39,7 +39,7 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
+           sudo apt install gcc-13 g++-13 gfortran-13
            sudo apt install automake autoconf libtool libtool-bin
            sudo apt install libaec0 libaec-dev
            sudo apt install openmpi-bin openmpi-common mpi-default-dev
