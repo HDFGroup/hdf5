@@ -47,6 +47,21 @@ New Features
 
     Configuration:
     -------------
+    - Generated files in src are now checked into version control
+
+      These files are infrequently updated and generating them adds a
+      dependency on Perl. The listed files are now checked in and do
+      not need to be recreated when checking out development branches.
+
+        * H5Edefin.h
+        * H5Einit.h
+        * H5Emajdef.h
+        * H5Emindef.h
+        * H5Epubgen.h
+        * H5Eterm.h
+        * H5overflow.h
+        * H5version.h
+
     - Dropped support for the traditional MSVC preprocessor
 
       Visual Studio has recently started using a standards-compliant
