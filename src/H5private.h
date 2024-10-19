@@ -187,9 +187,6 @@
  * Does the compiler support the __attribute__(()) syntax?  It's no
  * big deal if we don't.
  *
- * Note that Solaris Studio supports attribute, but does not support the
- * attributes we use.
- *
  * When using H5_ATTR_FALLTHROUGH, you should also include a comment that
  * says FALLTHROUGH to reduce warnings on compilers that don't use
  * attributes but do respect fall-through comments.
@@ -199,7 +196,7 @@
  * file). Be sure to update that file if the #ifdefs change here.
  */
 /* clang-format off */
-#if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
+#if defined(H5_HAVE_ATTRIBUTE)
 #   define H5_ATTR_FORMAT(X, Y, Z) __attribute__((format(X, Y, Z)))
 #   define H5_ATTR_UNUSED          __attribute__((unused))
 

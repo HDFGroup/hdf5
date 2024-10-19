@@ -29,11 +29,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set (${HDF_PREFIX}_HAVE_DARWIN 1)
 endif ()
 
-# Check for Solaris
-if (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
-    set (${HDF_PREFIX}_HAVE_SOLARIS 1)
-endif ()
-
 #-----------------------------------------------------------------------------
 # This MACRO checks IF the symbol exists in the library and IF it
 # does, it appends library to the list.

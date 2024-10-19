@@ -250,8 +250,6 @@ do
     echo '#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 600                    ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wnull-dereference"               ' >> tmp.out
     echo '#endif                                                            ' >> tmp.out
-    echo '#elif defined __SUNPRO_CC                                         ' >> tmp.out
-    echo '#pragma disable_warn                                              ' >> tmp.out
     echo '#elif defined _MSC_VER                                            ' >> tmp.out
     echo '#pragma warning(push, 1)                                          ' >> tmp.out
     echo '#endif                                                            ' >> tmp.out
