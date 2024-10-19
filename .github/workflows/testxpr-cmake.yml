@@ -20,7 +20,7 @@ jobs:
     # Don't run the action if the commit message says to skip CI
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Install Linux Dependencies
         run: |
@@ -28,10 +28,10 @@ jobs:
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install libaec0 libaec-dev
-           sudo apt install gcc-13 g++-13 gfortran-13
-           echo "CC=gcc-13" >> $GITHUB_ENV
-           echo "CXX=g++-13" >> $GITHUB_ENV
-           echo "FC=gfortran-13" >> $GITHUB_ENV
+           sudo apt install gcc-14 g++-14 gfortran-14
+           echo "CC=gcc-14" >> $GITHUB_ENV
+           echo "CXX=g++-14" >> $GITHUB_ENV
+           echo "FC=gfortran-14" >> $GITHUB_ENV
 
       - name: Get Sources
         uses: actions/checkout@v4.1.7

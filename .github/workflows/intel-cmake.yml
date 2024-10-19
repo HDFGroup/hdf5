@@ -15,7 +15,7 @@ permissions:
 jobs:
   intel_oneapi_linux:
     name: "linux-oneapi ${{ inputs.build_mode }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Get Sources (Linux)
         uses: actions/checkout@v4.1.7

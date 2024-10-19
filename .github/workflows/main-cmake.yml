@@ -66,7 +66,7 @@ jobs:
           # We might think about adding Clang, but MacOS already tests that
           # so it's not critical
           - name: "Ubuntu gcc"
-            os: ubuntu-latest
+            os: ubuntu-24.04
             cpp: ON
             fortran: ON
             java: ON
@@ -123,11 +123,11 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-13 g++-13 gfortran-13
-           echo "CC=gcc-13" >> $GITHUB_ENV
-           echo "CXX=g++-13" >> $GITHUB_ENV
-           echo "FC=gfortran-13" >> $GITHUB_ENV
-        if: matrix.os == 'ubuntu-latest'
+           sudo apt install gcc-14 g++-14 gfortran-14
+           echo "CC=gcc-14" >> $GITHUB_ENV
+           echo "CXX=g++-14" >> $GITHUB_ENV
+           echo "FC=gfortran-14" >> $GITHUB_ENV
+        if: matrix.os == 'ubuntu-24.04'
 
       # CMake gets libaec from fetchcontent
 
@@ -262,7 +262,7 @@ jobs:
               name: tgz-ubuntu-2204_gcc-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if:  ${{ (matrix.os == 'ubuntu-latest') && (inputs.thread_safety != 'TS') && ( inputs.build_mode != 'Debug') }}
+        if:  ${{ (matrix.os == 'ubuntu-24.04') && (inputs.thread_safety != 'TS') && ( inputs.build_mode != 'Debug') }}
 
       - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@v4

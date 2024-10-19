@@ -48,7 +48,7 @@ permissions:
 jobs:
   check-secret:
     name: Check Secrets exists
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       sign-state: ${{ steps.set-signing-state.outputs.BINSIGN }}
     steps:
@@ -209,7 +209,7 @@ jobs:
   # Linux (Ubuntu) w/ gcc + CMake
   #
     name: "Ubuntu gcc CMake"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [check-secret]
     steps:
       - name: Install CMake Dependencies (Linux)
@@ -537,7 +537,7 @@ jobs:
   # Linux S3 (Ubuntu) w/ gcc + CMake
   #
     name: "Ubuntu gcc CMake S3"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Install CMake Dependencies (Linux S3)
         run: |
@@ -749,7 +749,7 @@ jobs:
   # Linux (Ubuntu) w/ OneAPI + CMake
   #
     name: "Ubuntu Intel CMake"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [check-secret]
     steps:
       - name: Install CMake Dependencies (Linux_intel)
