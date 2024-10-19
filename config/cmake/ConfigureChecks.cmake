@@ -437,16 +437,14 @@ endif ()
 #-----------------------------------------------------------------------------
 # Check a bunch of other functions
 #-----------------------------------------------------------------------------
-if (MINGW OR NOT WINDOWS)
-  foreach (other_test
-      HAVE_ATTRIBUTE
-      HAVE_BUILTIN_EXPECT
-      PTHREAD_BARRIER
-      HAVE_SOCKLEN_T
+foreach (other_test
+    HAVE_ATTRIBUTE
+    HAVE_BUILTIN_EXPECT
+    PTHREAD_BARRIER
+    HAVE_SOCKLEN_T
   )
-    HDF_FUNCTION_TEST (${other_test})
-  endforeach ()
-endif ()
+  HDF_FUNCTION_TEST (${other_test})
+endforeach ()
 
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can handle converting
