@@ -29,7 +29,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -39,7 +39,7 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-13 g++-13 gfortran-13
+           sudo apt install gcc-14 g++-14 gfortran-14
            sudo apt install automake autoconf libtool libtool-bin
            sudo apt install libaec0 libaec-dev
            sudo apt install openmpi-bin openmpi-common mpi-default-dev
