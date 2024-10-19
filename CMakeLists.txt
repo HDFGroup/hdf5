@@ -857,9 +857,16 @@ if (HDF5_ENABLE_SUBFILING_VFD)
   endif()
 endif()
 
+# Select the default API version
+set (HDF5_DEFAULT_API_VERSION "v118" CACHE STRING "Enable v1.16 API (v16, v18, v110, v112, v114, v116, v118)")
+set_property (CACHE HDF5_DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v116 v118)
 
-set (DEFAULT_API_VERSION "v118" CACHE STRING "Enable v1.16 API (v16, v18, v110, v112, v114, v116, v118)")
-set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v116 v118)
+# Most of the configure code uses DEFAULT_API_VERSION, so just set that
+# to be the same value as the HDF5_ option. We can use HDF5_DEFAULT_API_VERSION
+# when the Autotools go away.
+if (HDF5_DEFAULT_API_VERSION)
+  set (DEFAULT_API_VERSION ${HDF5_DEFAULT_API_VERSION})
+endif ()
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------

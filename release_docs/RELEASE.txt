@@ -47,6 +47,10 @@ New Features
 
     Configuration:
     -------------
+    - Renamed DEFAULT_API_VERSION to HDF5_DEFAULT_API_VERSION in CMake
+
+      All other HDF5 library CMake options are prefixed with HDF5_
+
     - Dropped support for the traditional MSVC preprocessor
 
       Visual Studio has recently started using a standards-compliant
