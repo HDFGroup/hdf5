@@ -63,6 +63,11 @@
 /* Pthreads */
 #if defined(H5_HAVE_PTHREAD_H)
 #include <pthread.h>
+
+#if defined(__ANDROID__)
+#include <bthread.h>
+#endif
+
 #endif
 #endif
 
