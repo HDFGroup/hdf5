@@ -47,6 +47,12 @@ New Features
 
     Configuration:
     -------------
+    - Dropped some old Solaris Studio work-arounds
+
+      Solaris Studio no longer seems to be maintained and the last version
+      (12.4, circa 2015) doesn't seem to fully support C11. We've removed
+      some hacks that work around things like __attribute__() support.
+
     - Dropped support for the traditional MSVC preprocessor
 
       Visual Studio has recently started using a standards-compliant
