@@ -29,11 +29,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set (${HDF_PREFIX}_HAVE_DARWIN 1)
 endif ()
 
-# Check for Solaris
-if (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
-    set (${HDF_PREFIX}_HAVE_SOLARIS 1)
-endif ()
-
 #-----------------------------------------------------------------------------
 # This MACRO checks IF the symbol exists in the library and IF it
 # does, it appends library to the list.
@@ -437,16 +432,14 @@ endif ()
 #-----------------------------------------------------------------------------
 # Check a bunch of other functions
 #-----------------------------------------------------------------------------
-if (MINGW OR NOT WINDOWS)
-  foreach (other_test
-      HAVE_ATTRIBUTE
-      HAVE_BUILTIN_EXPECT
-      PTHREAD_BARRIER
-      HAVE_SOCKLEN_T
+foreach (other_test
+    HAVE_ATTRIBUTE
+    HAVE_BUILTIN_EXPECT
+    PTHREAD_BARRIER
+    HAVE_SOCKLEN_T
   )
-    HDF_FUNCTION_TEST (${other_test})
-  endforeach ()
-endif ()
+  HDF_FUNCTION_TEST (${other_test})
+endforeach ()
 
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can handle converting
