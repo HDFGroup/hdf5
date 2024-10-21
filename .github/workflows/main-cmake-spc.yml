@@ -61,7 +61,7 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
-            -DDEFAULT_API_VERSION:STRING=v16 \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v16 \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -121,7 +121,7 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
-            -DDEFAULT_API_VERSION:STRING=v18 \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v18 \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -181,7 +181,7 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
-            -DDEFAULT_API_VERSION:STRING=v110 \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v110 \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -241,7 +241,7 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
-            -DDEFAULT_API_VERSION:STRING=v112 \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v112 \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -301,7 +301,7 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
-            -DDEFAULT_API_VERSION:STRING=v114 \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v114 \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -361,7 +361,7 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
-            -DDEFAULT_API_VERSION:STRING=v116 \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v116 \
             $GITHUB_WORKSPACE
         shell: bash
 
