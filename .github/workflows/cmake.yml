@@ -108,3 +108,9 @@ jobs:
         uses: ./.github/workflows/julia-cmake.yml
         with:
           build_mode: "Release"      
+
+    call-release-cmake-msys2:
+        name: "CMake Msys2 Workflows"
+        uses: ./.github/workflows/msys2-cmake.yml
+        with:
+          build_mode: "Release"      
