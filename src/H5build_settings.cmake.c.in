@@ -95,7 +95,7 @@ const char H5build_settings[]=
     "                  Build HDF5 Tools: @HDF5_BUILD_TOOLS@\n"
     "                   Build GIF Tools: @HDF5_BUILD_HL_GIF_TOOLS@\n"
     "                      Threadsafety: @HDF5_ENABLE_THREADSAFE@\n"
-    "               Default API mapping: @DEFAULT_API_VERSION@\n"
+    "               Default API mapping: @HDF5_DEFAULT_API_VERSION@\n"
     "    With deprecated public symbols: @HDF5_ENABLE_DEPRECATED_SYMBOLS@\n"
     "            I/O filters (external): @EXTERNAL_FILTERS@\n"
     "                  _Float16 support: @HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16@\n"

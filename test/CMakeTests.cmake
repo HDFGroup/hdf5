@@ -784,7 +784,7 @@ if ("H5TEST-err_compat" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
 endif ()
 
 #-- Adding test for error_test
-if (DEFAULT_API_VERSION MATCHES "v16" OR MINGW)
+if (HDF5_DEFAULT_API_VERSION MATCHES "v16" OR MINGW)
   add_test (NAME H5TEST-error_test COMMAND "${CMAKE_COMMAND}"
       -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
@@ -914,8 +914,8 @@ if (BUILD_SHARED_LIBS)
   endif ()
 endif ()
 
-option (TEST_SHELL_SCRIPTS "Enable shell script tests" ON)
-if (TEST_SHELL_SCRIPTS)
+option (HDF5_TEST_SHELL_SCRIPTS "Enable shell script tests" ON)
+if (HDF5_TEST_SHELL_SCRIPTS)
   include (ShellTests.cmake)
 endif()
 
