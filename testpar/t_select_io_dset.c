@@ -4086,12 +4086,12 @@ main(int argc, char *argv[])
     unsigned select;
     unsigned mwbuf;
 
-    h5_test_init();
-
     /* Initialize MPI */
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    h5_test_init();
 
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         P_TEST_ERROR;
