@@ -21,7 +21,7 @@ jobs:
 
   build_v1_6:
     name: "gcc DBG v1.6 default API (build only)"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # SETUP
       # Only CMake need ninja-build, but we just install it unilaterally
@@ -31,10 +31,10 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           echo "CC=gcc-12" >> $GITHUB_ENV
-           echo "CXX=g++-12" >> $GITHUB_ENV
-           echo "FC=gfortran-12" >> $GITHUB_ENV
+           sudo apt install gcc-14 g++-14 gfortran-14
+           echo "CC=gcc-14" >> $GITHUB_ENV
+           echo "CXX=g++-14" >> $GITHUB_ENV
+           echo "FC=gfortran-14" >> $GITHUB_ENV
 
       - name: Install Autotools Dependencies (Linux)
         run: |
@@ -82,7 +82,7 @@ jobs:
 
   build_v1_8:
     name: "gcc DBG v1.8 default API (build only)"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # SETUP
       # Only CMake need ninja-build, but we just install it unilaterally
@@ -92,10 +92,10 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           echo "CC=gcc-12" >> $GITHUB_ENV
-           echo "CXX=g++-12" >> $GITHUB_ENV
-           echo "FC=gfortran-12" >> $GITHUB_ENV
+           sudo apt install gcc-14 g++-14 gfortran-14
+           echo "CC=gcc-14" >> $GITHUB_ENV
+           echo "CXX=g++-14" >> $GITHUB_ENV
+           echo "FC=gfortran-14" >> $GITHUB_ENV
 
       - name: Install Autotools Dependencies (Linux)
         run: |
@@ -143,7 +143,7 @@ jobs:
 
   build_v1_10:
     name: "gcc DBG v1.10 default API (build only)"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # SETUP
       # Only CMake need ninja-build, but we just install it unilaterally
@@ -153,10 +153,10 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           echo "CC=gcc-12" >> $GITHUB_ENV
-           echo "CXX=g++-12" >> $GITHUB_ENV
-           echo "FC=gfortran-12" >> $GITHUB_ENV
+           sudo apt install gcc-14 g++-14 gfortran-14
+           echo "CC=gcc-14" >> $GITHUB_ENV
+           echo "CXX=g++-14" >> $GITHUB_ENV
+           echo "FC=gfortran-14" >> $GITHUB_ENV
 
       - name: Install Autotools Dependencies (Linux)
         run: |
@@ -204,7 +204,7 @@ jobs:
 
   build_v1_12:
     name: "gcc DBG v1.12 default API (build only)"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # SETUP
       # Only CMake need ninja-build, but we just install it unilaterally
@@ -214,10 +214,10 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           echo "CC=gcc-12" >> $GITHUB_ENV
-           echo "CXX=g++-12" >> $GITHUB_ENV
-           echo "FC=gfortran-12" >> $GITHUB_ENV
+           sudo apt install gcc-14 g++-14 gfortran-14
+           echo "CC=gcc-14" >> $GITHUB_ENV
+           echo "CXX=g++-14" >> $GITHUB_ENV
+           echo "FC=gfortran-14" >> $GITHUB_ENV
 
       - name: Install Autotools Dependencies (Linux)
         run: |
@@ -265,7 +265,7 @@ jobs:
 
   build_v1_14:
     name: "gcc DBG v1.14 default API (build only)"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # SETUP
       # Only CMake need ninja-build, but we just install it unilaterally
@@ -275,10 +275,10 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           echo "CC=gcc-12" >> $GITHUB_ENV
-           echo "CXX=g++-12" >> $GITHUB_ENV
-           echo "FC=gfortran-12" >> $GITHUB_ENV
+           sudo apt install gcc-14 g++-14 gfortran-14
+           echo "CC=gcc-14" >> $GITHUB_ENV
+           echo "CXX=g++-14" >> $GITHUB_ENV
+           echo "FC=gfortran-14" >> $GITHUB_ENV
 
       - name: Install Autotools Dependencies (Linux)
         run: |
@@ -326,7 +326,7 @@ jobs:
 
   build_no_deprecated:
     name: "gcc no deprecated symbols (build only)"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # SETUP
       # Only CMake need ninja-build, but we just install it unilaterally
@@ -336,10 +336,10 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           echo "CC=gcc-12" >> $GITHUB_ENV
-           echo "CXX=g++-12" >> $GITHUB_ENV
-           echo "FC=gfortran-12" >> $GITHUB_ENV
+           sudo apt install gcc-14 g++-14 gfortran-14
+           echo "CC=gcc-14" >> $GITHUB_ENV
+           echo "CXX=g++-14" >> $GITHUB_ENV
+           echo "FC=gfortran-14" >> $GITHUB_ENV
 
       - name: Install Autotools Dependencies (Linux)
         run: |
@@ -387,7 +387,7 @@ jobs:
 
   build_debug_werror:
     name: "gcc DBG -Werror (build only)"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # SETUP
       # Only CMake need ninja-build, but we just install it unilaterally
@@ -397,10 +397,10 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           echo "CC=gcc-12" >> $GITHUB_ENV
-           echo "CXX=g++-12" >> $GITHUB_ENV
-           echo "FC=gfortran-12" >> $GITHUB_ENV
+           sudo apt install gcc-14 g++-14 gfortran-14
+           echo "CC=gcc-14" >> $GITHUB_ENV
+           echo "CXX=g++-14" >> $GITHUB_ENV
+           echo "FC=gfortran-14" >> $GITHUB_ENV
 
       - name: Install Autotools Dependencies (Linux)
         run: |
@@ -450,7 +450,7 @@ jobs:
 
   build_release_werror:
     name: "gcc REL -Werror (build only)"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # SETUP
       # Only CMake need ninja-build, but we just install it unilaterally
@@ -460,10 +460,10 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           echo "CC=gcc-12" >> $GITHUB_ENV
-           echo "CXX=g++-12" >> $GITHUB_ENV
-           echo "FC=gfortran-12" >> $GITHUB_ENV
+           sudo apt install gcc-14 g++-14 gfortran-14
+           echo "CC=gcc-14" >> $GITHUB_ENV
+           echo "CXX=g++-14" >> $GITHUB_ENV
+           echo "FC=gfortran-14" >> $GITHUB_ENV
 
       - name: Install Autotools Dependencies (Linux)
         run: |

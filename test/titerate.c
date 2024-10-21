@@ -698,7 +698,7 @@ test_iter_group_large(hid_t fapl)
     } s1_t;
 
     /* Allocate & initialize array */
-    names = (iter_info *)calloc(sizeof(iter_info), (ITER_NGROUPS + 2));
+    names = (iter_info *)calloc((ITER_NGROUPS + 2), sizeof(iter_info));
     CHECK_PTR(names, "calloc");
 
     /* Output message about test being performed */

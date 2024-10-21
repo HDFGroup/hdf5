@@ -42,7 +42,7 @@ permissions:
 jobs:
   check_commits:
     name: Check for recent commits
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       has_changes: ${{ steps.check-new-commits.outputs.has-new-commits }}
       branch_ref: ${{ steps.get-branch-name.outputs.BRANCH_REF }}
@@ -83,7 +83,7 @@ jobs:
 
   create_tarball:
     name: Create a source tarball
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: check_commits
     if: ${{ ((inputs.use_environ == 'snapshots') && ((needs.check_commits.outputs.has_changes == 'true') || (inputs.use_ignore == 'ignore'))) || (inputs.use_environ  == 'release') }}
     outputs:

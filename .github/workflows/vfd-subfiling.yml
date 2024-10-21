@@ -27,10 +27,10 @@ jobs:
 #        mpi_lib: ["OpenMPI", "MPICH"]
         include:
           - os_name: "Ubuntu"
-            os: ubuntu-latest
+            os: ubuntu-24.04
             mpi_lib: "OpenMPI"
 #          - os_name: "Ubuntu"
-#            os: ubuntu-latest
+#            os: ubuntu-24.04
 #            mpi_lib: "MPICH"
 #          - os_name: "MacOS"
 #            os: macos-latest
@@ -49,7 +49,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install automake autoconf libtool libtool-bin
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.os == 'ubuntu-24.04' }}
 
       # For now, just install OpenMPI or MPICH with the package
       # manager. Eventually, we should pick one or 2 release
@@ -59,14 +59,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install libopenmpi-dev
           echo "CC=mpicc" >> $GITHUB_ENV
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.mpi_lib == 'OpenMPI' }}
+        if: ${{ matrix.os == 'ubuntu-24.04' && matrix.mpi_lib == 'OpenMPI' }}
 
       - name: Install MPICH
         run: |
           sudo apt-get update
           sudo apt-get install libmpich-dev
           echo "CC=mpicc" >> $GITHUB_ENV
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.mpi_lib == 'MPICH' }}
+        if: ${{ matrix.os == 'ubuntu-24.04' && matrix.mpi_lib == 'MPICH' }}
 
       - name: Checkout HDF5
         uses: actions/checkout@v4.1.7

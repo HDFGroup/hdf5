@@ -127,7 +127,7 @@ jobs:
   # Linux (Ubuntu) w/ gcc + CMake
   #
     name: "Ubuntu gcc CMake"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Install CMake Dependencies (Linux)
         run: |
@@ -318,7 +318,7 @@ jobs:
   # Linux S3 (Ubuntu) w/ gcc + CMake
   #
     name: "Ubuntu gcc CMake S3"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Install CMake Dependencies (Linux S3)
         run: |
@@ -509,7 +509,7 @@ jobs:
   # Linux (Ubuntu) w/ OneAPI + CMake
   #
     name: "Ubuntu Intel CMake"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Install CMake Dependencies (Linux_intel)
         run: |
@@ -605,7 +605,7 @@ jobs:
   # Linux (Ubuntu) w/ clang + CMake
   #
     name: "Ubuntu Clang CMake"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Install CMake Dependencies (Linux_clang)
         run: |

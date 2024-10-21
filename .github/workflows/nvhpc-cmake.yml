@@ -15,7 +15,7 @@ permissions:
 jobs:
   nvhpc_build_and_test:
     name: "nvhpc ${{ inputs.build_mode }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Get Sources
         uses: actions/checkout@v4.1.7

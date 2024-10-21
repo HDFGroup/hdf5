@@ -26,7 +26,7 @@ permissions:
 # Previous workflows must pass to get here so tag the commit that created the files
 jobs:
   PreRelease-delfiles:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: ${{ inputs.use_environ }}
     permissions:
         contents: write

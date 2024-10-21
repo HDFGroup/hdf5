@@ -2254,10 +2254,10 @@ gent_datareg(void)
     int      i;                                           /* counting variables */
 
     /* Allocate write & read buffers */
-    wbuf  = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    rbuf  = (hdset_reg_ref_t *)malloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
-    dwbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    drbuf = (uint8_t *)calloc(sizeof(uint8_t), SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf  = (hdset_reg_ref_t *)calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t));
+    rbuf  = (hdset_reg_ref_t *)malloc(SPACE1_DIM1 * sizeof(hdset_reg_ref_t));
+    dwbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
+    drbuf = (uint8_t *)calloc((SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint8_t));
 
     /* Create file */
     fid1 = H5Fcreate(FILE17, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2378,10 +2378,10 @@ gent_attrreg(void)
     int              i;                                   /* counting variables */
 
     /* Allocate write & read buffers */
-    wbuf  = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    rbuf  = (hdset_reg_ref_t *)malloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
-    dwbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    drbuf = (uint8_t *)calloc(sizeof(uint8_t), SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf  = (hdset_reg_ref_t *)calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t));
+    rbuf  = (hdset_reg_ref_t *)malloc(SPACE1_DIM1 * sizeof(hdset_reg_ref_t));
+    dwbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
+    drbuf = (uint8_t *)calloc((SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint8_t));
 
     /* Create file */
     fid1 = H5Fcreate(FILE64, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -3093,8 +3093,8 @@ gent_array1_big(void)
     block[0]  = 1;
 
     /* Allocate write & read buffers */
-    wbuf  = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    wdata = (int *)malloc(sizeof(int) * (size_t)(SPACE_ARRAY1BIG_DIM * ARRAY1BIG_DIM));
+    wbuf  = (hdset_reg_ref_t *)calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t));
+    wdata = (int *)malloc((SPACE_ARRAY1BIG_DIM * ARRAY1BIG_DIM) * sizeof(int));
 
     /* Allocate and initialize array data to write */
     for (i = 0; i < SPACE_ARRAY1BIG_DIM; i++)
