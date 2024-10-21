@@ -22,7 +22,8 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5Tconv.h"
+#include "H5private.h" /* Generic Functions                    */
+#include "H5Tconv.h"   /* Datatype conversions                 */
 #include "H5Tconv_macros.h"
 #include "H5Tconv_integer.h"
 
