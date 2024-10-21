@@ -168,10 +168,10 @@ New Features
 
     Documentation:
     --------------
-    - The COPYING file has been renamed to LICENSE
+    - The LICENSE file has been renamed to LICENSE
 
       This is where most people will expect to find license information. The
-      COPYING_LBNL_HDF5 file has also been renamed to LICENSE_LBNL_HDF5.
+      LICENSE_LBNL_HDF5 file has also been renamed to LICENSE_LBNL_HDF5.
       The licenses are unchanged.
 
 
