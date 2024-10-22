@@ -145,7 +145,7 @@ would typically be passed when building HDF5, such as `CMAKE_INSTALL_PREFIX`,
     cmake [hdf5 options]
       -DHDF5_ENABLE_THREADSAFE=ON
       -DHDF5_ENABLE_PARALLEL=ON
-      -DALLOW_UNSUPPORTED=ON
+      -DHDF5_ALLOW_UNSUPPORTED=ON
       -DHDF5_TEST_API=ON
       -DHDF5_VOL_ALLOW_EXTERNAL="GIT"
       -DHDF5_VOL_URL01=https://github.com/hpc-io/vol-async.git
