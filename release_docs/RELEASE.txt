@@ -47,6 +47,39 @@ New Features
 
     Configuration:
     -------------
+    - Added configuration option for internal threading/concurrency support:
+
+          CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)
+          Autotools:  --enable-threads    (yes/no) (Default: yes)
+
+      This option enables support for threading and concurrency algorithms
+      within the HDF5 library.  It is required for, but separate from, the
+      'threadsafe' configure option, which makes the HDF5 API safe to call from
+      multiple threads.  It is possible to enable the 'threads' option and
+      disable the 'threadsafe' option, but not vice versa.  The 'threads' option
+      must be on to enable the subfiling VFD.
+
+    - Generated files in src are now checked into version control
+
+      These files are infrequently updated and generating them adds a
+      dependency on Perl. The listed files are now checked in and do
+      not need to be recreated when checking out development branches.
+
+        * H5Edefin.h
+        * H5Einit.h
+        * H5Emajdef.h
+        * H5Emindef.h
+        * H5Epubgen.h
+        * H5Eterm.h
+        * H5overflow.h
+        * H5version.h
+
+    - Dropped some old Solaris Studio work-arounds
+
+      Solaris Studio no longer seems to be maintained and the last version
+      (12.4, circa 2015) doesn't seem to fully support C11. We've removed
+      some hacks that work around things like __attribute__() support.
+
     - Dropped support for the traditional MSVC preprocessor
 
       Visual Studio has recently started using a standards-compliant
@@ -62,21 +95,14 @@ New Features
       We have updated the build files to set the C standard to C11, though
       some platforms use gnu11 to get some GNU things to work.
 
-    - Added configuration option for internal threading/concurrency support:
-
-          CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)
-          Autotools:  --enable-threads    (yes/no) (Default: yes)
-
-      This option enables support for threading and concurrency algorithms
-      within the HDF5 library.  It is required for, but separate from, the
-      'threadsafe' configure option, which makes the HDF5 API safe to call from
-      multiple threads.  It is possible to enable the 'threads' option and
-      disable the 'threadsafe' option, but not vice versa.  The 'threads' option
-      must be on to enable the subfiling VFD.
 
 
     Library:
     --------
+    - Removed H5FDperform_init API routine.  Virtual File Driver (VFD)
+      developers who wish to provide an ID for their driver should create
+      a routine specific to their individual implementation.
+
     - H5Pset_external() now uses HDoff_t, which is always a 64-bit type
 
       The H5Pset_external() call took an off_t parameter in HDF5 1.14.x and
@@ -147,7 +173,11 @@ New Features
 
     Documentation:
     --------------
-    -
+    - The COPYING file has been renamed to LICENSE
+
+      This is where most people will expect to find license information. The
+      COPYING_LBNL_HDF5 file has also been renamed to LICENSE_LBNL_HDF5.
+      The licenses are unchanged.
 
 
 Support for new platforms, languages and compilers
@@ -435,7 +465,7 @@ CMake vs. Autotools installations
 While both build systems produce similar results, there are differences.
 Each system produces the same set of folders on Linux (only CMake works
 on standard Windows); bin, include, lib and share. Autotools places the
-COPYING and RELEASE.txt file in the root folder, CMake places them in
+LICENSE and RELEASE.txt file in the root folder, CMake places them in
 the share folder.
 
 The bin folder contains the tools and the build scripts. Additionally, CMake
