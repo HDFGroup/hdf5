@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -24,8 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Solaris Studio defines attribute, but for the attributes we need */
-#if !defined(H5_HAVE_ATTRIBUTE) || defined __cplusplus || defined(__SUNPRO_C)
+#if !defined(H5_HAVE_ATTRIBUTE) || defined __cplusplus
 #undef __attribute__
 #define __attribute__(X) /*void*/
 #define H5_ATTR_UNUSED   /*void*/

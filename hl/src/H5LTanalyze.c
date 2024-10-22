@@ -24,8 +24,6 @@
 #if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 600                    
 #pragma GCC diagnostic ignored "-Wnull-dereference"               
 #endif                                                            
-#elif defined __SUNPRO_CC                                         
-#pragma disable_warn                                              
 #elif defined _MSC_VER                                            
 #pragma warning(push, 1)                                          
 #endif                                                            
@@ -906,7 +904,7 @@ char *yytext;
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
