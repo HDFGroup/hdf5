@@ -98,6 +98,10 @@ New Features
 
     Library:
     --------
+    - The H5VLstart_lib_state / H5VLfinish_lib_state API routines for pass-
+      through connector authors now require a parameter that can be used to
+      store the library's context.
+
     - H5Pset_external() now uses HDoff_t, which is always a 64-bit type
 
       The H5Pset_external() call took an off_t parameter in HDF5 1.14.x and
