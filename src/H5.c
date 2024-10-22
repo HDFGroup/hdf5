@@ -231,7 +231,7 @@ H5_init_library(void)
 
     /*
      * Initialize interfaces that use macros of the form "(H5OPEN <var>)", so
-     * that the variable returned through the macros nas been initialized.
+     * that the variable returned through the macros has been initialized.
      * Also initialize some interfaces that might not be able to initialize
      * themselves soon enough.
      *
