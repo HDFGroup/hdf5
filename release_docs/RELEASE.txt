@@ -56,6 +56,11 @@ New Features
       TEST_SHELL_SCRIPTS to HDF5_TEST_SHELL_SCRIPTS
 
       All other HDF5 library CMake options are prefixed with HDF5_
+    - bin/cmakehdf5 has been removed
+
+      This was an unsupported build script that made building HDF5 via CMake
+      work like building HDF5 via the Autotools. It has been unmaintained
+      for a long time, has been marked deprecated, and is being removed.
 
     - Generated files in src are now checked into version control
 
