@@ -96,7 +96,7 @@ const char H5build_settings[]=
     "                           Threads: @THREADS@\n"
     "                      Threadsafety: @THREADSAFE@\n"
     "               Default API mapping: @DEFAULT_API_VERSION@\n"
-    "    With deprecated public symbols:HDF5_DEFAULT_API_VERSIONS@\n"
+    "    With deprecated public symbols: @DEPRECATED_SYMBOLS@\n"
     "            I/O filters (external): @EXTERNAL_FILTERS@\n"
     "                  _Float16 support: @HAVE__FLOAT16@\n"
     "                     Map (H5M) API: @MAP_API@\n"
