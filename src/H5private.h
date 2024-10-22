@@ -1114,9 +1114,10 @@ extern char H5_lib_vers_info_g[];
             HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "interface initialization failed");                     \
         }                                                                                                    \
     }
-#define H5_PACKAGE_NO_INIT(err) /* Mark a package without an init interface call as initialized */
-if (H5_UNLIKELY(!H5_PKG_INIT_VAR && !H5_TERM_GLOBAL))
-    H5_PKG_INIT_VAR = true;
+#define H5_PACKAGE_NO_INIT(err)                                                                              \
+    /* Mark a package without an init interface call as initialized */                                       \
+    if (H5_UNLIKELY(!H5_PKG_INIT_VAR && !H5_TERM_GLOBAL))                                                    \
+        H5_PKG_INIT_VAR = true;
 #define H5_PACKAGE_INIT(pkg_init, err) H5_GLUE3(H5_PACKAGE_, pkg_init, _INIT)(err)
 #else /* H5_MY_PKG */
 #define H5_PKG_INIT_VAR (true)
