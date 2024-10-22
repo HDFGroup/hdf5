@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get Sources
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
 
       - name: Install Dependencies
         shell: bash
@@ -29,12 +29,12 @@ jobs:
           sudo apt install -y zlib1g-dev libcurl4-openssl-dev libjpeg-dev wget curl bzip2
           sudo apt install -y m4 flex bison cmake libzip-dev openssl build-essential
 
-      - name: Install AOCC 4.2.0
+      - name: Install AOCC 5.0.0
         shell: bash
         run: |
-          wget https://download.amd.com/developer/eula/aocc/aocc-4-2/aocc-compiler-4.2.0.tar
-          tar -xvf aocc-compiler-4.2.0.tar
-          cd aocc-compiler-4.2.0
+          wget https://download.amd.com/developer/eula/aocc/aocc-5-0/aocc-compiler-5.0.0.tar
+          tar -xvf aocc-compiler-5.0.0.tar
+          cd aocc-compiler-5.0.0
           bash install.sh
           source /home/runner/work/hdf5/hdf5/setenv_AOCC.sh
           which clang
@@ -51,19 +51,19 @@ jobs:
       - name: Install OpenMPI 4.1.6
         if: ${{ steps.cache-openmpi-4_1_6.outputs.cache-hit != 'true' }}
         run: |
-          export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-4.2.0/lib:/usr/local/lib
+          export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/lib:/usr/local/lib
           wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.6.tar.gz
           tar zxvf openmpi-4.1.6.tar.gz
           cd openmpi-4.1.6
-          ./configure CC=/home/runner/work/hdf5/hdf5/aocc-compiler-4.2.0/bin/clang FC=/home/runner/work/hdf5/hdf5/aocc-compiler-4.2.0/bin/flang --prefix=/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install
+          ./configure CC=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/bin/clang FC=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/bin/flang --prefix=/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install
           make
           make install
 
       - name: CMake Configure
         shell: bash
         run: |
-          export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-4.2.0/lib:/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/lib:/usr/local/lib
-          export LD_RUN_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-4.2.0/lib:/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/lib:/usr/local/lib
+          export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/lib:/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/lib:/usr/local/lib
+          export LD_RUN_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/lib:/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/lib:/usr/local/lib
           export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/bin:/usr/local/bin:$PATH
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
