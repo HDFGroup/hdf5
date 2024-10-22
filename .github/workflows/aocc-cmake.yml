@@ -41,30 +41,30 @@ jobs:
           which flang
           clang -v
 
-      - name: Cache OpenMPI 4.1.6 installation
-        id: cache-openmpi-4_1_6
+      - name: Cache OpenMPI 5.0.5 installation
+        id: cache-openmpi-5_0_5
         uses: actions/cache@v4
         with:
-          path: /home/runner/work/hdf5/hdf5/openmpi-4.1.6-install
+          path: /home/runner/work/hdf5/hdf5/openmpi-5.0.5-install
           key: ${{ runner.os }}-${{ runner.arch }}-openmpi-4_1_6-cache
 
-      - name: Install OpenMPI 4.1.6
+      - name: Install OpenMPI 5.0.5
         if: ${{ steps.cache-openmpi-4_1_6.outputs.cache-hit != 'true' }}
         run: |
           export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/lib:/usr/local/lib
-          wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.6.tar.gz
-          tar zxvf openmpi-4.1.6.tar.gz
-          cd openmpi-4.1.6
-          ./configure CC=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/bin/clang FC=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/bin/flang --prefix=/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install
+          wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-5.0.5.tar.gz
+          tar zxvf openmpi-5.0.5.tar.gz
+          cd openmpi-5.0.5
+          ./configure CC=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/bin/clang FC=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/bin/flang --prefix=/home/runner/work/hdf5/hdf5/openmpi-5.0.5-install
           make
           make install
 
       - name: CMake Configure
         shell: bash
         run: |
-          export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/lib:/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/lib:/usr/local/lib
-          export LD_RUN_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/lib:/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/lib:/usr/local/lib
-          export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.6-install/bin:/usr/local/bin:$PATH
+          export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/lib:/home/runner/work/hdf5/hdf5/openmpi-5.0.5-install/lib:/usr/local/lib
+          export LD_RUN_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/lib:/home/runner/work/hdf5/hdf5/openmpi-5.0.5-install/lib:/usr/local/lib
+          export PATH=/home/runner/work/hdf5/hdf5/openmpi-5.0.5-install/bin:/usr/local/bin:$PATH
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           CC=mpicc cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
