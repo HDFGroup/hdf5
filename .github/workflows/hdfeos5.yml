@@ -12,7 +12,7 @@ on:
       - 'doc/**'
       - 'release_docs/**'
       - 'ACKNOWLEDGEMENTS'
-      - 'COPYING**'
+      - 'LICENSE**'
       - '**.md'
 
 # Using concurrency to cancel any in-progress job or run
