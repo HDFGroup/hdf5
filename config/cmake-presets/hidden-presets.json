@@ -269,7 +269,7 @@
       "hidden": true,
       "inherits": "ci-x64-Debug-MSVC",
       "cacheVariables": {
-        "USE_SANITIZER": "Address",
+        "HDF5_USE_SANITIZER": "Address",
         "HDF5_ENABLE_SANITIZERS": "ON"
       }
     },
@@ -278,7 +278,7 @@
       "hidden": true,
       "inherits": "ci-x64-Debug-GNUC",
       "cacheVariables": {
-        "USE_SANITIZER": "Address",
+        "HDF5_USE_SANITIZER": "Address",
         "HDF5_ENABLE_SANITIZERS": "ON"
       }
     },
@@ -287,7 +287,7 @@
       "hidden": true,
       "inherits": "ci-x64-Debug-GNUC",
       "cacheVariables": {
-        "USE_SANITIZER": "Thread",
+        "HDF5_USE_SANITIZER": "Thread",
         "HDF5_ENABLE_SANITIZERS": "ON"
       }
     },
@@ -296,7 +296,7 @@
       "hidden": true,
       "inherits": "ci-x64-Debug-GNUC",
       "cacheVariables": {
-        "USE_SANITIZER": "Leak",
+        "HDF5_USE_SANITIZER": "Leak",
         "HDF5_ENABLE_SANITIZERS": "ON"
       }
     },
@@ -305,7 +305,7 @@
       "hidden": true,
       "inherits": "ci-x64-Debug-GNUC",
       "cacheVariables": {
-        "USE_SANITIZER": "Undefined",
+        "HDF5_USE_SANITIZER": "Undefined",
         "HDF5_ENABLE_SANITIZERS": "ON"
       }
     }
