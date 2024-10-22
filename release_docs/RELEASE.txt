@@ -47,6 +47,21 @@ New Features
 
     Configuration:
     -------------
+    - Renamed remaining HDF5 library CMake options except for CMake BUILD* variables
+    
+      DEFAULT_API_VERSION to HDF5_DEFAULT_API_VERSION
+      DISABLE_PDB_FILES to HDF5_DISABLE_PDB_FILES
+      ONLY_SHARED_LIBS to HDF5_ONLY_SHARED_LIBS
+      ALLOW_UNSUPPORTED to HDF5_ALLOW_UNSUPPORTED
+      TEST_SHELL_SCRIPTS to HDF5_TEST_SHELL_SCRIPTS
+
+      All other HDF5 library CMake options are prefixed with HDF5_
+    - bin/cmakehdf5 has been removed
+
+      This was an unsupported build script that made building HDF5 via CMake
+      work like building HDF5 via the Autotools. It has been unmaintained
+      for a long time, has been marked deprecated, and is being removed.
+
     - Generated files in src are now checked into version control
 
       These files are infrequently updated and generating them adds a
