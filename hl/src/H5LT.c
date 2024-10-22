@@ -2753,6 +2753,49 @@ next:
 
             break;
         }
+        case H5T_COMPLEX: {
+            hid_t  super;
+            size_t super_len;
+            char  *stmp = NULL;
+
+            /* Print lead-in */
+            snprintf(dt_str, *slen, "H5T_COMPLEX {\n");
+            indent += COL;
+            if (!(dt_str = indentation(indent + COL, dt_str, no_user_buf, slen)))
+                goto out;
+
+            if ((super = H5Tget_super(dtype)) < 0)
+                goto out;
+            if (H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
+                goto out;
+            stmp = (char *)calloc(super_len, sizeof(char));
+            if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0) {
+                free(stmp);
+                goto out;
+            }
+            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp))) {
+                free(stmp);
+                goto out;
+            }
+
+            if (stmp)
+                free(stmp);
+            stmp = NULL;
+            snprintf(tmp_str, TMP_LEN, "\n");
+            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
+                goto out;
+            H5Tclose(super);
+
+            /* Print closing */
+            indent -= COL;
+            if (!(dt_str = indentation(indent + COL, dt_str, no_user_buf, slen)))
+                goto out;
+            snprintf(tmp_str, TMP_LEN, "}");
+            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
+                goto out;
+
+            break;
+        }
         case H5T_TIME:
             snprintf(dt_str, *slen, "H5T_TIME: not yet implemented");
             break;

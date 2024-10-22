@@ -193,6 +193,8 @@ H5T__set_precision(const H5T_t *dt, size_t prec)
         /* Adjust size of datatype appropriately */
         if (dt->shared->type == H5T_ARRAY)
             dt->shared->size = dt->shared->parent->shared->size * dt->shared->u.array.nelem;
+        else if (dt->shared->type == H5T_COMPLEX)
+            dt->shared->size = 2 * dt->shared->parent->shared->size;
         else if (dt->shared->type != H5T_VLEN)
             dt->shared->size = dt->shared->parent->shared->size;
     }
@@ -237,6 +239,7 @@ H5T__set_precision(const H5T_t *dt, size_t prec)
                 case H5T_ENUM:
                 case H5T_VLEN:
                 case H5T_ARRAY:
+                case H5T_COMPLEX:
                 case H5T_NCLASSES:
                 default:
                     HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class");

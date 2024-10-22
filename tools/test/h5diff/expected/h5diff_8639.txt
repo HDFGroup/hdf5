@@ -23,6 +23,12 @@ attribute: <bitfield2D of </g1>> and <bitfield2D of </g1>>
 0 differences found
 attribute: <bitfield3D of </g1>> and <bitfield3D of </g1>>
 0 differences found
+attribute: <complex of </g1>> and <complex of </g1>>
+0 differences found
+attribute: <complex2D of </g1>> and <complex2D of </g1>>
+0 differences found
+attribute: <complex3D of </g1>> and <complex3D of </g1>>
+0 differences found
 attribute: <compound of </g1>> and <compound of </g1>>
 0 differences found
 attribute: <compound2D of </g1>> and <compound2D of </g1>>

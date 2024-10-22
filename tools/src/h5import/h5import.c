@@ -3485,6 +3485,10 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!strcmp(buffer, "H5T_ARRAY")) {
         kindex = -1;
     }
+    /*    case H5T_COMPLEX: */
+    else if (!strcmp(buffer, "H5T_COMPLEX")) {
+        kindex = -1;
+    }
 
     if (kindex == -1) {
         (void)fprintf(stderr, "%s", err1);

@@ -11,9 +11,10 @@ JUnit version 4.13.2
 .testH5Tcompound_functions
 .testH5Tget_size
 .testH5Tarray_create
+.testH5Tcomplex_create
 .testH5Topaque_functions
 
 Time:  XXXX
 
-OK (13 tests)
+OK (14 tests)
 

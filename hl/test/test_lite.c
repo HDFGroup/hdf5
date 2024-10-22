@@ -1894,6 +1894,226 @@ out:
 }
 
 /*-------------------------------------------------------------------------
+ * subroutine for test_text_dtype(): test complex number datatypes
+ *-------------------------------------------------------------------------
+ */
+static int
+test_complex(void)
+{
+    hid_t       dtype;
+    H5T_class_t type_class;
+
+    HL_TESTING3("        text for complex number types");
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    if ((dtype = H5LTtext_to_dtype("H5T_NATIVE_FLOAT_COMPLEX\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_FLOAT_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_NATIVE_DOUBLE_COMPLEX\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_DOUBLE_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_NATIVE_LDOUBLE_COMPLEX\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_LDOUBLE_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_NATIVE_FLOAT }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_FLOAT_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_NATIVE_DOUBLE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_DOUBLE_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_NATIVE_LDOUBLE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_LDOUBLE_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+#endif
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F16LE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F16LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F16BE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F16BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F32LE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F32LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F32BE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F32BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F64LE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F64LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F64BE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F64BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F16LE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F16LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F16BE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F16BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F32LE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F32LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F32BE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F32BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F64LE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F64LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F64BE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F64BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * test H5LTtext_to_dtype function
  *-------------------------------------------------------------------------
  */
@@ -1931,6 +2151,9 @@ test_text_dtype(void)
         goto out;
 
     if (test_complicated_compound() < 0)
+        goto out;
+
+    if (test_complex() < 0)
         goto out;
 
     return 0;

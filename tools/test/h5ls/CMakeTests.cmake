@@ -28,6 +28,8 @@
       tarray1.h5
       tattr2.h5
       tattrreg.h5
+      tcomplex.h5
+      tcomplex_be.h5
       tcompound.h5
       tdatareg.h5
       tdset.h5
@@ -63,6 +65,10 @@
       tattrreg_le.ls
       tattrreg_be.ls
       tcomp-1.ls
+      tcomplex.ls
+      tcomplex_be.ls
+      tcomplex_be_nosupport.ls
+      tcomplex_nosupport.ls
       tdataregbe.ls
       tdataregle.ls
       tdset-1.ls
@@ -338,6 +344,44 @@
     set_tests_properties (H5LS-tfloat16_be PROPERTIES WILL_FAIL "true")
     ADD_H5_TEST (tfloat16_nosupport 0 -w80 -v tfloat16.h5)
     ADD_H5_TEST (tfloat16_be_nosupport 0 -w80 -v tfloat16_be.h5)
+  endif ()
+
+  # tests for complex numbers
+  if (${${HDF_PREFIX}_HAVE_COMPLEX_NUMBERS})
+    # If support is available for complex numbers, the second test
+    # will fail as the type will be printed out as "native float _Complex",
+    # for example, rather than "complex number of native float".
+    if (H5_WORDS_BIGENDIAN)
+      ADD_H5_TEST (tcomplex_be 0 -w80 -v tcomplex_be.h5)
+      ADD_H5_TEST (tcomplex_be_nosupport 0 -w80 -v tcomplex_be.h5)
+      set_tests_properties (H5LS-tcomplex_be_nosupport PROPERTIES WILL_FAIL "true")
+    else ()
+      ADD_H5_TEST (tcomplex 0 -w80 -v tcomplex.h5)
+      ADD_H5_TEST (tcomplex_nosupport 0 -w80 -v tcomplex.h5)
+      set_tests_properties (H5LS-tcomplex_nosupport PROPERTIES WILL_FAIL "true")
+    endif ()
+  else ()
+    # If support is NOT available for complex numbers, the first two tests
+    # will fail as the types will be printed out as "complex number of native float"
+    # or "complex number of IEEE 32-bit little-endian float", for example, rather
+    # than "native float _Complex". One of the second two tests will also fail,
+    # depending on the endian-ness of the machine, as the types will be printed
+    # out as "complex number of IEEE 32-bit little-endian float", for example,
+    # rather than "complex number of native float".
+    ADD_H5_TEST (tcomplex 0 -w80 -v tcomplex.h5)
+    set_tests_properties (H5LS-tcomplex PROPERTIES WILL_FAIL "true")
+    ADD_H5_TEST (tcomplex_be 0 -w80 -v tcomplex_be.h5)
+    set_tests_properties (H5LS-tcomplex_be PROPERTIES WILL_FAIL "true")
+
+    if (H5_WORDS_BIGENDIAN)
+      ADD_H5_TEST (tcomplex_nosupport 0 -w80 -v tcomplex.h5)
+      set_tests_properties (H5LS-tcomplex_nosupport PROPERTIES WILL_FAIL "true")
+      ADD_H5_TEST (tcomplex_be_nosupport 0 -w80 -v tcomplex_be.h5)
+    else ()
+      ADD_H5_TEST (tcomplex_nosupport 0 -w80 -v tcomplex.h5)
+      ADD_H5_TEST (tcomplex_be_nosupport 0 -w80 -v tcomplex_be.h5)
+      set_tests_properties (H5LS-tcomplex_be_nosupport PROPERTIES WILL_FAIL "true")
+    endif ()
   endif ()
 
 # test for wildcards in filename (does not work with cmake)

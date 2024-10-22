@@ -1461,14 +1461,14 @@ H5Pget_driver(hid_t plist_id)
     H5P_genplist_t *plist;     /* Property list pointer */
     hid_t           ret_value; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
 
     if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a property list");
 
     /* Get the driver */
     if ((ret_value = H5P_peek_driver(plist)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get driver");
 
 done:
     FUNC_LEAVE_API(ret_value)

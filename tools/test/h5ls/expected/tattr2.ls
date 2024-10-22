@@ -12,21 +12,30 @@ dset                     Dataset {2/2}
         Type:      8-bit bitfield
     Attribute: bitfield3D {4, 3, 2}
         Type:      8-bit bitfield
+    Attribute: complex {2}
+        Type:      complex number of
+                   IEEE 32-bit little-endian float
+    Attribute: complex2D {3, 2}
+        Type:      complex number of
+                   IEEE 32-bit little-endian float
+    Attribute: complex3D {4, 3, 2}
+        Type:      complex number of
+                   IEEE 32-bit little-endian float
     Attribute: compound {2}
         Type:      struct {
                    "a"                +0    8-bit integer
-                   "b"                +4    IEEE 64-bit little-endian float
-               } 12 bytes
+                   "b"                +8    IEEE 64-bit little-endian float
+               } 16 bytes
     Attribute: compound2D {3, 2}
         Type:      struct {
                    "a"                +0    8-bit integer
-                   "b"                +4    IEEE 64-bit little-endian float
-               } 12 bytes
+                   "b"                +8    IEEE 64-bit little-endian float
+               } 16 bytes
     Attribute: compound3D {4, 3, 2}
         Type:      struct {
                    "a"                +0    8-bit integer
-                   "b"                +4    IEEE 64-bit little-endian float
-               } 12 bytes
+                   "b"                +8    IEEE 64-bit little-endian float
+               } 16 bytes
     Attribute: enum {2}
         Type:      enum 32-bit little-endian integer {
                    RED              = 0
@@ -84,7 +93,7 @@ dset                     Dataset {2/2}
     Attribute: vlen3D {4, 3, 2}
         Type:      variable length of
                    32-bit little-endian integer
-    Location:  1:976
+    Location:  1:800
     Links:     1
     Storage:   8 logical bytes, 0 allocated bytes
     Type:      32-bit little-endian integer
@@ -101,21 +110,30 @@ g1                       Group
         Type:      8-bit bitfield
     Attribute: bitfield3D {4, 3, 2}
         Type:      8-bit bitfield
+    Attribute: complex {2}
+        Type:      complex number of
+                   IEEE 32-bit little-endian float
+    Attribute: complex2D {3, 2}
+        Type:      complex number of
+                   IEEE 32-bit little-endian float
+    Attribute: complex3D {4, 3, 2}
+        Type:      complex number of
+                   IEEE 32-bit little-endian float
     Attribute: compound {2}
         Type:      struct {
                    "a"                +0    8-bit integer
-                   "b"                +4    IEEE 64-bit little-endian float
-               } 12 bytes
+                   "b"                +8    IEEE 64-bit little-endian float
+               } 16 bytes
     Attribute: compound2D {3, 2}
         Type:      struct {
                    "a"                +0    8-bit integer
-                   "b"                +4    IEEE 64-bit little-endian float
-               } 12 bytes
+                   "b"                +8    IEEE 64-bit little-endian float
+               } 16 bytes
     Attribute: compound3D {4, 3, 2}
         Type:      struct {
                    "a"                +0    8-bit integer
-                   "b"                +4    IEEE 64-bit little-endian float
-               } 12 bytes
+                   "b"                +8    IEEE 64-bit little-endian float
+               } 16 bytes
     Attribute: enum {2}
         Type:      enum 32-bit little-endian integer {
                    RED              = 0
@@ -167,8 +185,8 @@ g1                       Group
     Attribute: vlen3D {4, 3, 2}
         Type:      variable length of
                    32-bit little-endian integer
-    Location:  1:2176
+    Location:  1:1400
     Links:     1
 g2                       Group
-    Location:  1:2824
+    Location:  1:2104
     Links:     1

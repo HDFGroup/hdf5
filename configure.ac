@@ -574,6 +574,58 @@ AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
 
+## ----------------------------------------------------------------------
+## Check if complex number support is available
+##
+HAVE_COMPLEX_NUMBERS="no"
+AC_CHECK_SIZEOF([float complex], [], [#include <complex.h>])
+AC_CHECK_SIZEOF([double complex], [], [#include <complex.h>])
+AC_CHECK_SIZEOF([long double complex], [], [#include <complex.h>])
+
+if test "$ac_cv_sizeof_float_complex" != 0 &&
+   test "$ac_cv_sizeof_double_complex" != 0 &&
+   test "$ac_cv_sizeof_long_double_complex" != 0; then
+  # Check if __STDC_NO_COMPLEX__ macro is defined, in which case complex number
+  # support is not available
+  AC_MSG_CHECKING([if __STDC_NO_COMPLEX__ is defined])
+  TEST_SRC="`(echo \"#define HAVE_STDC_NO_COMPLEX 1\"; cat $srcdir/config/cmake/HDFTests.c)`"
+  AC_CACHE_VAL([hdf5_cv_have_stdc_no_complex],
+  [AC_RUN_IFELSE(
+      [AC_LANG_SOURCE([$TEST_SRC])],
+      [hdf5_cv_have_stdc_no_complex=yes],
+      [hdf5_cv_have_stdc_no_complex=no],
+      [hdf5_cv_have_stdc_no_complex=maybe])])
+  AC_MSG_RESULT(${hdf5_cv_have_stdc_no_complex})
+
+  if test "X$hdf5_cv_have_stdc_no_complex" == "Xno"; then
+    # Compile simple test program with complex numbers
+    AC_MSG_CHECKING([if complex number test program can be compiled and linked])
+    TEST_SRC="`(echo \"#define HAVE_COMPLEX_NUMBERS 1\"; cat $srcdir/config/cmake/HDFTests.c)`"
+    AC_CACHE_VAL([hdf5_cv_have_complex_numbers],
+    [AC_RUN_IFELSE(
+        [AC_LANG_SOURCE([$TEST_SRC])],
+        [hdf5_cv_have_complex_numbers=yes],
+        [hdf5_cv_have_complex_numbers=no],
+        [hdf5_cv_have_complex_numbers=maybe])])
+    AC_MSG_RESULT(${hdf5_cv_have_complex_numbers})
+
+    if test "X$hdf5_cv_have_complex_numbers" == "Xyes"; then
+      HAVE_COMPLEX_NUMBERS="yes"
+
+      # Define HAVE_COMPLEX_NUMBERS macro for H5pubconf.h.
+      AC_DEFINE([HAVE_COMPLEX_NUMBERS], [1], [Determine if complex number support is available])
+      AC_DEFINE([HAVE_C99_COMPLEX_NUMBERS], [1], [Determine if C99 complex number types are present])
+    fi
+  fi
+fi
+
+# Define HAVE_COMPLEX_NUMBERS value to substitute into other files for conditional testing
+AC_SUBST([HAVE_COMPLEX_NUMBERS])
+AC_SUBST([HAVE_C99_COMPLEX_NUMBERS])
+
+AC_MSG_CHECKING([if complex number support is available])
+AC_MSG_RESULT([$HAVE_COMPLEX_NUMBERS])
+
 #-----------------------------------------------------------------------------
 # Option for enabling/disabling support for non-standard features, datatypes,
 # etc. These features should still be checked for at configure time, but these

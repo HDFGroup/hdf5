@@ -2273,7 +2273,7 @@ make_all_objects(hid_t loc_id)
         goto out;
 
     /*-------------------------------------------------------------------------
-     * write a series of datasetes at root
+     * write a series of datasets at root
      *-------------------------------------------------------------------------
      */
 
@@ -3960,6 +3960,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     int        buf6[2][3]  = {{1, 2, 3}, {4, 5, 6}}; /* array */
     int        buf7[2]     = {1, 2};                 /* integer */
     float      buf8[2]     = {1, 2};                 /* float */
+    float      buf9[4]     = {1, 2, 3, 4};           /* complex */
 
     /* create 2D attributes with dimension [3][2], 6 elements */
     hsize_t    dims2[2]    = {3, 2};
@@ -3970,8 +3971,9 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     hobj_ref_t buf42[1][1];                                                       /* reference */
     hvl_t      buf52[3][2];                                                       /* vlen */
     int buf62[6][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}, {13, 14, 15}, {16, 17, 18}}; /* array */
-    int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};   /* integer */
-    float buf82[3][2] = {{1, 2}, {3, 4}, {5, 6}}; /* float */
+    int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};                              /* integer */
+    float buf82[3][2] = {{1, 2}, {3, 4}, {5, 6}};                            /* float */
+    float buf92[6][2] = {{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 10}, {11, 12}}; /* complex */
 
     /* create 3D attributes with dimension [4][3][2], 24 elements */
     hsize_t dims3[3]     = {4, 3, 2};
@@ -3986,6 +3988,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     int        buf63[24][3];                                                  /* array */
     int        buf73[4][3][2];                                                /* integer */
     float      buf83[4][3][2];                                                /* float */
+    float      buf93[24][2];                                                  /* complex */
 
     /*-------------------------------------------------------------------------
      * 1D
@@ -4235,6 +4238,21 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
         goto out;
 
     /*-------------------------------------------------------------------------
+     * H5T_COMPLEX
+     *-------------------------------------------------------------------------
+     */
+
+    if (make_diffs)
+        memset(buf9, 0, sizeof(buf9));
+
+    if ((tid = H5Tcomplex_create(H5T_NATIVE_FLOAT)) < 0)
+        goto out;
+    if (write_dset(loc_id, 1, dims, "complex", tid, buf9) < 0)
+        goto out;
+    if (H5Tclose(tid) < 0)
+        goto out;
+
+    /*-------------------------------------------------------------------------
      * 2D
      *-------------------------------------------------------------------------
      */
@@ -4422,6 +4440,21 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (write_dset(loc_id, 2, dims2, "float2D", H5T_NATIVE_FLOAT, buf82) < 0)
+        goto out;
+
+    /*-------------------------------------------------------------------------
+     * H5T_COMPLEX
+     *-------------------------------------------------------------------------
+     */
+
+    if (make_diffs)
+        memset(buf92, 0, sizeof(buf92));
+
+    if ((tid = H5Tcomplex_create(H5T_NATIVE_FLOAT)) < 0)
+        goto out;
+    if (write_dset(loc_id, 2, dims2, "complex2D", tid, buf92) < 0)
+        goto out;
+    if (H5Tclose(tid) < 0)
         goto out;
 
     /*-------------------------------------------------------------------------
@@ -4634,6 +4667,27 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     if (write_dset(loc_id, 3, dims3, "integer3D", H5T_NATIVE_INT, buf73) < 0)
         goto out;
     if (write_dset(loc_id, 3, dims3, "float3D", H5T_NATIVE_FLOAT, buf83) < 0)
+        goto out;
+
+    /*-------------------------------------------------------------------------
+     * H5T_COMPLEX
+     *-------------------------------------------------------------------------
+     */
+
+    f = 1;
+    for (i = 0; i < 24; i++)
+        for (j = 0; j < 2; j++) {
+            if (make_diffs)
+                buf93[i][j] = 0;
+            else
+                buf93[i][j] = f++;
+        }
+
+    if ((tid = H5Tcomplex_create(H5T_NATIVE_FLOAT)) < 0)
+        goto out;
+    if (write_dset(loc_id, 3, dims3, "complex3D", tid, buf93) < 0)
+        goto out;
+    if (H5Tclose(tid) < 0)
         goto out;
 
     return 0;
