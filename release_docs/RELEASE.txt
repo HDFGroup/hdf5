@@ -47,6 +47,12 @@ New Features
 
     Configuration:
     -------------
+    - bin/cmakehdf5 has been removed
+
+      This was an unsupported build script that made building HDF5 via CMake
+      work like building HDF5 via the Autotools. It has been unmaintained
+      for a long time, has been marked deprecated, and is being removed.
+
     - Generated files in src are now checked into version control
 
       These files are infrequently updated and generating them adds a
