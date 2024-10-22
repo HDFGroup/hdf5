@@ -66,7 +66,7 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DCMAKE_TOOLCHAIN_FILE="" \
-            -DHDF5_BUILD_GENERATORS=OFF \
+            -DHDF5_GENERATE_HEADERS=OFF \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
