@@ -2781,7 +2781,7 @@ available in the subdirectory HDF5Examples.
  *     unsigned szip_options_mask;
  *     unsigned szip_pixels_per_block;
  *
- *     // Initiliaze data buffer with some bogus data.
+ *     // Initialize data buffer with some bogus data.
  *     for (i=0; i < NX; i++) {
  *         for (j=0; j < NY; j++)
  *             buf[i][j] = i + j;
