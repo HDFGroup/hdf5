@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -187,9 +187,6 @@
  * Does the compiler support the __attribute__(()) syntax?  It's no
  * big deal if we don't.
  *
- * Note that Solaris Studio supports attribute, but does not support the
- * attributes we use.
- *
  * When using H5_ATTR_FALLTHROUGH, you should also include a comment that
  * says FALLTHROUGH to reduce warnings on compilers that don't use
  * attributes but do respect fall-through comments.
@@ -199,7 +196,7 @@
  * file). Be sure to update that file if the #ifdefs change here.
  */
 /* clang-format off */
-#if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
+#if defined(H5_HAVE_ATTRIBUTE)
 #   define H5_ATTR_FORMAT(X, Y, Z) __attribute__((format(X, Y, Z)))
 #   define H5_ATTR_UNUSED          __attribute__((unused))
 
