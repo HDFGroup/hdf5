@@ -1,0 +1,38 @@
+name: i386 alpine
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "6 0 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup alpine
+        uses: jirutka/setup-alpine@v1
+        with:
+          arch: x86
+          packages: >
+            build-base
+            libaec-dev
+            libgit2-dev
+            cmake
+      - name: run script
+        run: |
+          mkdir build
+          cd build
+          cmake \
+          -DBUILDNAME:STRING="r" \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCTEST_DROP_LOCATION_INIT="/submit.php?project=HDF5" \
+          -DCTEST_DROP_SITE_INIT:STRING="my.cdash.org" \
+          -DSITE:STRING=alp.i386 \
+          ..
+          ctest -D Experimental -C Release
+        shell: alpine.sh --root {0}
