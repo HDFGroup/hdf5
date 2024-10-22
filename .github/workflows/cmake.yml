@@ -69,6 +69,10 @@ jobs:
         with:
             build_mode: "Release"
 
+    call-special-par:
+        name: "CMake Parallel Release Workflows"
+        uses: ./.github/workflows/main-cmake-par-spc.yml
+
     call-debug-par:
         name: "CMake Parallel Debug Workflows"
         uses: ./.github/workflows/main-cmake-par.yml
