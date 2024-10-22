@@ -52,7 +52,7 @@ jobs:
         if: ${{ steps.cache-openmpi-4_1_6.outputs.cache-hit != 'true' }}
         run: |
           export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/lib:/usr/local/lib
-          wget https://download.open-mpi.org/release/open-mpi/v5.1/openmpi-5.0.5.tar.gz
+          wget https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.5.tar.gz
           tar zxvf openmpi-5.0.5.tar.gz
           cd openmpi-5.0.5
           ./configure CC=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/bin/clang FC=/home/runner/work/hdf5/hdf5/aocc-compiler-5.0.0/bin/flang --prefix=/home/runner/work/hdf5/hdf5/openmpi-5.0.5-install
