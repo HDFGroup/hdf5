@@ -2760,7 +2760,7 @@ only the
  * decoder is present, the HDF5 library cannot create and write Szip-compressed datasets, but it automatically
  * decompresses Szip-compressed data when data is read.
  *
- * This sample HDF5 program illustrats of the use of Szip compression with HDF5.
+ * This sample HDF5 program illustrates the use of Szip compression with HDF5.
  * \code
  * Example of Szip Usage in HDF5
  * The following sample program illustrates the use of Szip compression in HDF5. This sample program is also
