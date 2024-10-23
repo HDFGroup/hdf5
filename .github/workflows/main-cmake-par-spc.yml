@@ -1,4 +1,4 @@
-name: hdf5 dev parallel CMake CI
+name: hdf5 dev parallel special CMake CI
 
 on:
   workflow_call:
@@ -19,7 +19,7 @@ jobs:
   # A workflow that builds the library
   # Parallel Linux (Ubuntu) w/ gcc + CMake
   #
-  CMake_build_parallel:
+  CMake_build_parallel_werror:
     name: "Parallel GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
@@ -46,17 +46,18 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_WARNINGS_AS_ERRORS=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=ON \
             -DHDF5_ENABLE_SUBFILING_VFD:BOOL=ON \
             -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
-            -DHDF5_BUILD_FORTRAN=ON \
+            -DHDF5_BUILD_FORTRAN=OFF \
             -DHDF5_BUILD_JAVA=OFF \
             -DLIBAEC_USE_LOCALCONTENT=OFF \
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=OFF \
-            -DHDF5_ENABLE_DIRECT_VFD:BOOL=OFF \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=OFF \
-            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_PACK_EXAMPLES:BOOL=OFF \
             $GITHUB_WORKSPACE
 
       # BUILD
