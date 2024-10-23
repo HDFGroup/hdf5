@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -32,8 +32,6 @@
         PerformTests() -- Perform requested testing
         GetTestSummary() -- Retrieve Summary request value
         TestSummary() -- Display test summary
-        GetTestCleanup() -- Retrieve Cleanup request value
-        TestCleanup() -- Clean up files from testing
         GetTestNumErrs() -- Retrieve the number of testing errors
 
  ***************************************************************************/
@@ -57,7 +55,7 @@ main(int argc, char *argv[])
         // caused deliberately and expected.
         Exception::dontPrint();
         /* Initialize testing framework */
-        TestInit(argv[0], NULL, NULL, 0);
+        TestInit(argv[0], NULL, NULL, NULL, NULL, 0);
 
         // testing file creation and opening in tfile.cpp
         AddTest("tfile", test_file, NULL, cleanup_file, NULL, 0, "File I/O Operations");
@@ -111,10 +109,6 @@ main(int argc, char *argv[])
     /* Display test summary, if requested */
     if (GetTestSummary())
         TestSummary(stdout);
-
-    /* Clean up test files, if allowed */
-    if (GetTestCleanup() && !getenv(HDF5_NOCLEANUP))
-        TestCleanup();
 
     /* Release test infrastructure */
     TestShutdown();

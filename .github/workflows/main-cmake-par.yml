@@ -1,4 +1,4 @@
-name: hdf5 dev PAR CMake CI
+name: hdf5 dev parallel CMake CI
 
 on:
   workflow_call:
@@ -17,7 +17,7 @@ jobs:
   # so we catch most issues in daily testing. What we have here is just
   # a compile check to make sure nothing obvious is broken.
   # A workflow that builds the library
-  # Parallel Linux (Ubuntu) w/ gcc + Autotools
+  # Parallel Linux (Ubuntu) w/ gcc + CMake
   #
   CMake_build_parallel:
     name: "Parallel GCC-${{ inputs.build_mode }}"

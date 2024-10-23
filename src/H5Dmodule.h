@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -1612,7 +1612,8 @@ allocated if necessary.
  * care must be taken to assure that all the external files are accessible in the new location.
  *
  * \subsection subsec_dataset_filters Using HDF5 Filters
- * This section describes in detail how to use the n-bit, scale-offset filters and szip filters.
+ * This section describes in detail how to use the n-bit, scale-offset filters and szip filters. For
+ * details on the how filters are used in the read / write of data, see /def subsubsec_dataset_transfer_pipe.
  *
  * \subsubsection subsubsec_dataset_filters_nbit Using the N‐bit Filter
  * N-bit data has n significant bits, where n may not correspond to a precise number of bytes. On

@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -112,7 +112,7 @@ if (HDF5_ENABLE_Z_LIB_SUPPORT)
         # on the target. The target returned is: ZLIB::ZLIB
         get_filename_component (libname ${ZLIB_LIBRARIES} NAME_WLE)
         string (REGEX REPLACE "^lib" "" libname ${libname})
-        set_target_properties (ZLIB::ZLIB PROPERTIES OUTPUT_NAME zlib-static)
+        set_target_properties (ZLIB::ZLIB PROPERTIES OUTPUT_NAME ${libname})
         set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ZLIB::ZLIB)
       endif ()
     else ()

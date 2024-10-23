@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -301,14 +301,14 @@ typedef long long ssize_t;
 typedef uint64_t hsize_t;
 
 /* off_t exists on Windows, but is always a 32-bit long, even on 64-bit Windows,
- * so on Windows we define HDoff_t to be __int64, which is the type of the
- * st_size field of the _stati64 struct.
+ * so on Windows we define HDoff_t to be int64_t, which is equivalent to __int64,
+ * the type of the st_size field of the _stati64 struct.
  */
 #ifdef H5_HAVE_WIN32_API
 /**
  * Platform-independent offset
  */
-typedef __int64 HDoff_t;
+typedef int64_t HDoff_t;
 #else
 /**
  * Platform-independent offset

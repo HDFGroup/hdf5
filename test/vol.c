@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -902,8 +902,8 @@ test_basic_file_operation(const char *driver_name)
      */
     h5_check_file_locking_env_var(&use_locking_env, &ignore_disabled_env);
     if (use_locking_env != FAIL) {
-        hbool_t default_use_locking           = true;
-        hbool_t default_ignore_disabled_locks = true;
+        bool default_use_locking           = true;
+        bool default_ignore_disabled_locks = true;
 
         if (H5Pget_file_locking(H5P_DEFAULT, &default_use_locking, &default_ignore_disabled_locks) < 0)
             TEST_ERROR;

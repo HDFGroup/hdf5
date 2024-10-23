@@ -24,7 +24,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -856,13 +856,13 @@ CONTAINS
        END FUNCTION H5Requal
     END INTERFACE
 
-    c_equal = INT(H5Requal(ref1_ptr, ref2_ptr))
+    c_equal = INT(H5Requal(ref1_ptr, ref2_ptr), C_INT)
 
     hdferr = 0
     equal = .FALSE.
-    IF(c_equal .EQ. 1)THEN
+    IF(c_equal .EQ. 1_C_INT)THEN
        equal = .TRUE.
-    ELSE IF(c_equal .LT. 0)THEN
+    ELSE IF(c_equal .LT. 0_C_INT)THEN
        hdferr = -1
     ENDIF
 

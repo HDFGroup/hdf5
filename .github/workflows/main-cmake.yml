@@ -241,6 +241,7 @@ jobs:
       - name: CMake Run Package
         run: cpack -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
+        if: ${{ inputs.build_mode != 'Debug' }}
 
       - name: List files in the space
         run: |
@@ -253,7 +254,7 @@ jobs:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if:  ${{ (matrix.os == 'windows-latest') && (inputs.thread_safety != 'TS') }}
+        if:  ${{ (matrix.os == 'windows-latest') && (inputs.thread_safety != 'TS') && ( inputs.build_mode != 'Debug') }}
 
       - name: Save published binary (linux)
         uses: actions/upload-artifact@v4
@@ -261,7 +262,7 @@ jobs:
               name: tgz-ubuntu-2204_gcc-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if:  ${{ (matrix.os == 'ubuntu-latest') && (inputs.thread_safety != 'TS') }}
+        if:  ${{ (matrix.os == 'ubuntu-latest') && (inputs.thread_safety != 'TS') && ( inputs.build_mode != 'Debug') }}
 
       - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@v4
@@ -269,12 +270,4 @@ jobs:
               name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}
-
-      - name: Save published dmg binary (Mac_latest)
-        uses: actions/upload-artifact@v4
-        with:
-              name: tgz-macos14_clang-${{ inputs.build_mode }}-dmg-binary
-              path: ${{ runner.workspace }}/build/HDF5-*-Darwin.dmg
-              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}
+        if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') && ( inputs.build_mode != 'Debug') }}

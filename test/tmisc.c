@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -6868,7 +6868,7 @@ test_misc40(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Re-open the file */
-    fid = H5Fopen(MISC25C_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid = H5Fopen(MISC25C_FILE, H5F_ACC_RDWR, fapl);
     CHECK(fid, H5I_INVALID_HID, "H5Fopen");
 
     /* Set the compact/dense value high, to see if we can trick the

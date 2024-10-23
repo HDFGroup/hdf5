@@ -53,6 +53,57 @@ New Features
       #ifdef around the compression function calls. Added including the correct
       header file with the same #ifdef.
 
+    - Renamed remaining HDF5 library CMake options except for CMake BUILD* variables
+    
+      DEFAULT_API_VERSION to HDF5_DEFAULT_API_VERSION
+      DISABLE_PDB_FILES to HDF5_DISABLE_PDB_FILES
+      ONLY_SHARED_LIBS to HDF5_ONLY_SHARED_LIBS
+      ALLOW_UNSUPPORTED to HDF5_ALLOW_UNSUPPORTED
+      TEST_SHELL_SCRIPTS to HDF5_TEST_SHELL_SCRIPTS
+
+      All other HDF5 library CMake options are prefixed with HDF5_
+    - bin/cmakehdf5 has been removed
+
+      This was an unsupported build script that made building HDF5 via CMake
+      work like building HDF5 via the Autotools. It has been unmaintained
+      for a long time, has been marked deprecated, and is being removed.
+
+    - Generated files in src are now checked into version control
+
+      These files are infrequently updated and generating them adds a
+      dependency on Perl. The listed files are now checked in and do
+      not need to be recreated when checking out development branches.
+
+        * H5Edefin.h
+        * H5Einit.h
+        * H5Emajdef.h
+        * H5Emindef.h
+        * H5Epubgen.h
+        * H5Eterm.h
+        * H5overflow.h
+        * H5version.h
+
+    - Dropped some old Solaris Studio work-arounds
+
+      Solaris Studio no longer seems to be maintained and the last version
+      (12.4, circa 2015) doesn't seem to fully support C11. We've removed
+      some hacks that work around things like __attribute__() support.
+
+    - Dropped support for the traditional MSVC preprocessor
+
+      Visual Studio has recently started using a standards-compliant
+      preprocessor (In VS2019+) and this is the default in C11.
+
+      https://learn.microsoft.com/en-us/cpp/preprocessor/preprocessor-experimental-overview?view=msvc-170
+
+      Because of this, we've dropped support for the traditional
+      MSVC preprocessor.
+
+    - The standard for building the library is now C11
+
+      We have updated the build files to set the C standard to C11, though
+      some platforms use gnu11 to get some GNU things to work.
+
     - Added configuration option for internal threading/concurrency support:
 
           CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)
@@ -75,7 +126,7 @@ New Features
       POSIX large-file support (LFS). On Windows, however, off_t is defined
       as a 32-bit type, even on 64-bit Windows.
 
-      HDoff_t has been added to H5public.h and is defined to be __int64 on
+      HDoff_t has been added to H5public.h and is defined to be int64_t on
       Windows and the library has been updated to use HDoff_t in place of
       off_t throughout. The H5Pset_external() offset parameter has also been
       updated to be HDoff_t.
@@ -107,8 +158,19 @@ New Features
 
     Tools:
     ------
-    -
+    - Remove the high-level GIF tools
 
+      The high-level GIF tools, h52gif and gif2h5, have unfixed CVE issues
+      (with no proof-of-concept files). They are not critical tools, are not
+      well maintained, and are an odd fit for building with the library.
+      Because of this, they have been removed. We may move them to a separate
+      repository in the future.
+
+      This also removes the following configure options:
+
+        Autotools:  --(dis|en)able-hlgiftools
+
+        CMake:      HDF5_BUILD_HL_GIF_TOOLS
 
     High-Level APIs:
     ----------------
@@ -127,7 +189,11 @@ New Features
 
     Documentation:
     --------------
-    -
+    - The COPYING file has been renamed to LICENSE
+
+      This is where most people will expect to find license information. The
+      COPYING_LBNL_HDF5 file has also been renamed to LICENSE_LBNL_HDF5.
+      The licenses are unchanged.
 
 
 Support for new platforms, languages and compilers
@@ -138,7 +204,24 @@ Bug Fixes since HDF5-1.16.0 release
 ===================================
     Library
     -------
-    -
+    - Fixed a bug in the H5Oexists and H5Oexists_by_name API routines that
+      would cause those routines to return FAIL instead of FALSE when checking
+      the existence of a non-existent object with a file ID instead of a
+      group ID.
+
+    - Only clear FE_INVALID when that symbol is present on the system
+
+      When we initialize the floating-point types at library startup, it's
+      possible to raise floating-point exceptions when we check which things
+      are supported. Normally, we clear these floating-point exceptions via
+      feclearexcept(FE_INVALID), but FE_INVALID may not be present on all
+      systems. Specifically, this was reported as being a problem when using
+      Emscripten 3.1.68 to compile HDF5 1.14.5 to WebAssembly.
+
+      We've added an #ifdef FE_INVALID block around the exception clearing
+      code to correct this.
+
+      Fixes GitHub issue #4952
 
 
     Java Library
@@ -197,14 +280,6 @@ Bug Fixes since HDF5-1.16.0 release
 
     Testing
     -------
-    - Disabled running of MPI Atomicity tests for OpenMPI major versions < 5
-
-      Support for MPI atomicity operations is not implemented for major
-      versions of OpenMPI less than version 5. This would cause the MPI
-      atomicity tests for parallel HDF5 to sporadically fail when run
-      with OpenMPI. Testphdf5 now checks if OpenMPI is being used and will
-      skip running the atomicity tests if the major version of OpenMPI is
-      < 5.
 
 
 Platforms Tested
@@ -411,7 +486,7 @@ CMake vs. Autotools installations
 While both build systems produce similar results, there are differences.
 Each system produces the same set of folders on Linux (only CMake works
 on standard Windows); bin, include, lib and share. Autotools places the
-COPYING and RELEASE.txt file in the root folder, CMake places them in
+LICENSE and RELEASE.txt file in the root folder, CMake places them in
 the share folder.
 
 The bin folder contains the tools and the build scripts. Additionally, CMake

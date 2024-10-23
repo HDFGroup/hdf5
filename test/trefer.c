@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -578,11 +578,11 @@ test_reference_obj(void)
     /* Check if references are equal */
     htri_t is_equal = H5Requal(&wbuf[0], &wbuf_cp[0]);
     CHECK(is_equal, FAIL, "H5Requal");
-    VERIFY(is_equal, TRUE, "H5Requal");
+    VERIFY(is_equal, true, "H5Requal");
 
     is_equal = H5Requal(&wbuf[0], &wbuf[2]);
     CHECK(is_equal, FAIL, "H5Requal");
-    VERIFY(is_equal, FALSE, "H5Requal");
+    VERIFY(is_equal, false, "H5Requal");
 
     ret = H5Rdestroy(&wbuf_cp[0]);
     CHECK(ret, FAIL, "H5Rdestroy");

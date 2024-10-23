@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -2959,3 +2959,20 @@ H5O_has_chksum(const H5O_t *oh)
 
     FUNC_LEAVE_NOAPI(H5O_SIZEOF_CHKSUM_OH(oh) > 0)
 } /* end H5O_has_chksum() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_get_version_bound
+ *
+ * Purpose:     Retrieve the version for a given bound from object version array
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_get_version_bound(H5F_libver_t bound, uint8_t *version)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    *version = (uint8_t)H5O_obj_ver_bounds[bound];
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_get_version_bound() */

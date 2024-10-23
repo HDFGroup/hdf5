@@ -1,6 +1,7 @@
 name: hdf5 dev daily build
 
-# Triggers the workflow on a schedule or on demand
+# Triggers the workflow on demand or on a call from another workflow
+# NOTE: inputs must be duplicated between triggers
 on:
   workflow_dispatch:
     inputs:
@@ -9,8 +10,13 @@ on:
         type: string
         required: false
         default: check
-  schedule:
-    - cron: "6 0 * * *"
+  workflow_call:
+    inputs:
+      use_ignore:
+        description: 'Ignore has_changes check'
+        type: string
+        required: false
+        default: check
 
 permissions:
   contents: read
@@ -56,6 +62,14 @@ jobs:
   call-workflow-c-script:
     needs: [get-old-names, call-workflow-tarball]
     uses: ./.github/workflows/cmake-script.yml
+    with:
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      use_environ: snapshots
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
+
+  call-workflow-sanitizers:
+    needs: [get-old-names, call-workflow-tarball]
+    uses: ./.github/workflows/cmake-analysis.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_environ: snapshots

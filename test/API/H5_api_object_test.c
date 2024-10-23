@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -5133,11 +5133,11 @@ test_object_visit(void)
         if (dset_dtype != H5I_INVALID_HID)
             H5Tclose(dset_dtype);
 
-        if ((fspace_id = generate_random_dataspace(OBJECT_VISIT_TEST_SPACE_RANK, NULL, NULL, FALSE)) < 0) {
+        if ((fspace_id = generate_random_dataspace(OBJECT_VISIT_TEST_SPACE_RANK, NULL, NULL, false)) < 0) {
             TEST_ERROR;
         }
 
-        if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
+        if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0) {
             TEST_ERROR;
         }
 
@@ -5149,7 +5149,7 @@ test_object_visit(void)
 
     } while (((long unsigned int)num_elems * elem_size) > OBJECT_VISIT_TEST_TOTAL_DATA_SIZE_LIMIT);
 
-    if ((type_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
+    if ((type_id = generate_random_datatype(H5T_NO_CLASS, false)) < 0) {
         H5_FAILED();
         printf("    couldn't create datatype '%s'\n", OBJECT_VISIT_TEST_TYPE_NAME);
         goto error;
