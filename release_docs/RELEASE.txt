@@ -47,6 +47,12 @@ New Features
 
     Configuration:
     -------------
+    - Added support for native zlib-ng compression.
+
+      Changed the zlib-ng CMake logic to prefer the native zlib-ng library. Added
+      #ifdef around the compression function calls. Added including the correct
+      header file with the same #ifdef.
+
     - Renamed remaining HDF5 library CMake options except for CMake BUILD* variables
     
       DEFAULT_API_VERSION to HDF5_DEFAULT_API_VERSION
