@@ -1,0 +1,19 @@
+diff --git a/test/objects.jl b/test/objects.jl
+index d68dd749..0541e91a 100644
+--- a/test/objects.jl
++++ b/test/objects.jl
+@@ -16,7 +16,13 @@ using HDF5.API
+     h5open(fn, "r") do h5f
+         @test API.h5o_exists_by_name(h5f, "data")
+         @test API.h5o_exists_by_name(h5f, "lore")
+-        @test_throws API.H5Error API.h5o_exists_by_name(h5f, "noonian")
++        @static if HDF5.API.h5_get_libversion() <= v"1.14.5"
++            # Buggy behavior in earlier versions of HDF5 returns FAIL (-1)
++            @test_throws API.H5Error API.h5o_exists_by_name(h5f, "noonian")
++        else
++            # The correct behavior is to return false (0)
++            @test API.h5o_exists_by_name(h5f, "noonian") == 0
++        end
+ 
+         loc_id = API.h5o_open(h5f, "data", API.H5P_DEFAULT)
+         try

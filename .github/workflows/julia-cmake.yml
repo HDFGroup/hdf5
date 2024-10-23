@@ -16,8 +16,16 @@ jobs:
     name: "julia ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
-      - name: Get Sources
+      - name: Get HDF5 source
         uses: actions/checkout@v4.1.7
+
+        # Checking out the Julia HDF5 wrappers will clobber the HDF5 checkout
+        # NOTE: Remove this when the Julia wrappers have been patched
+      - name: Save the Julia patch file
+        shell: bash
+        run: |
+          mkdir "${{ runner.workspace }}/julia_patch"
+          cp .github/workflows/julia_ci.patch "${{ runner.workspace }}/julia_patch"
 
       - name: Install Dependencies
         shell: bash
@@ -67,6 +75,11 @@ jobs:
         with:
           repository: JuliaIO/HDF5.jl
           path: .
+
+        # NOTE: Remove this when the Julia wrappers have been patched
+      - name: Patch Julia CI
+        run:  |
+          git apply "${{ runner.workspace }}/julia_patch/julia_ci.patch" -v
 
       - name: Generate LocalPreferences
         run: |
