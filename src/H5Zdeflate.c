@@ -74,8 +74,12 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
 
     if (flags & H5Z_FLAG_REVERSE) {
         /* Input; uncompress */
-        z_stream z_strm;             /* zlib parameters */
-        size_t   nalloc = *buf_size; /* Number of bytes for output (compressed) buffer */
+#if defined(H5_HAVE_ZLIBNG_H)
+        zng_stream z_strm; /* zlib parameters */
+#else
+        z_stream z_strm; /* zlib parameters */
+#endif
+        size_t nalloc = *buf_size; /* Number of bytes for output (compressed) buffer */
 
         /* Allocate space for the compressed buffer */
         if (NULL == (outbuf = H5MM_malloc(nalloc)))
@@ -89,13 +93,22 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
         H5_CHECKED_ASSIGN(z_strm.avail_out, unsigned, nalloc, size_t);
 
         /* Initialize the uncompression routines */
+#if defined(H5_HAVE_ZLIBNG_H)
+        if (Z_OK != zng_inflateInit(&z_strm))
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "inflateInit() failed");
+#else
         if (Z_OK != inflateInit(&z_strm))
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "inflateInit() failed");
+#endif
 
         /* Loop to uncompress the buffer */
         do {
             /* Uncompress some data */
+#if defined(H5_HAVE_ZLIBNG_H)
+            status = zng_inflate(&z_strm, Z_SYNC_FLUSH);
+#else
             status = inflate(&z_strm, Z_SYNC_FLUSH);
+#endif
 
             /* Check if we are done uncompressing data */
             if (Z_STREAM_END == status)
@@ -103,7 +116,11 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
 
             /* Check for error */
             if (Z_OK != status) {
+#if defined(H5_HAVE_ZLIBNG_H)
+                (void)zng_inflateEnd(&z_strm);
+#else
                 (void)inflateEnd(&z_strm);
+#endif
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "inflate() failed");
             }
             else {
@@ -114,7 +131,11 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
                     /* Allocate a buffer twice as big */
                     nalloc *= 2;
                     if (NULL == (new_outbuf = H5MM_realloc(outbuf, nalloc))) {
+#if defined(H5_HAVE_ZLIBNG_H)
+                        (void)zng_inflateEnd(&z_strm);
+#else
                         (void)inflateEnd(&z_strm);
+#endif
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0,
                                     "memory allocation failed for deflate uncompression");
                     } /* end if */
@@ -137,7 +158,11 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
         ret_value = z_strm.total_out;
 
         /* Finish uncompressing the stream */
+#if defined(H5_HAVE_ZLIBNG_H)
+        (void)zng_inflateEnd(&z_strm);
+#else
         (void)inflateEnd(&z_strm);
+#endif
     } /* end if */
     else {
         /*
@@ -147,9 +172,13 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
          */
         const Bytef *z_src = (const Bytef *)(*buf);
         Bytef       *z_dst; /*destination buffer		*/
-        uLongf       z_dst_nbytes = (uLongf)compressBound(nbytes);
-        uLong        z_src_nbytes = (uLong)nbytes;
-        int          aggression; /* Compression aggression setting */
+#if defined(H5_HAVE_ZLIBNG_H)
+        uLongf z_dst_nbytes = (uLongf)zng_compressBound(nbytes);
+#else
+        uLongf z_dst_nbytes = (uLongf)compressBound(nbytes);
+#endif
+        uLong z_src_nbytes = (uLong)nbytes;
+        int   aggression; /* Compression aggression setting */
 
         /* Set the compression aggression level */
         H5_CHECKED_ASSIGN(aggression, int, cd_values[0], unsigned);
@@ -160,7 +189,11 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
         z_dst = (Bytef *)outbuf;
 
         /* Perform compression from the source to the destination buffer */
+#if defined(H5_HAVE_ZLIBNG_H)
+        status = zng_compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+#else
         status = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+#endif
 
         /* Check for various zlib errors */
         if (Z_BUF_ERROR == status)
