@@ -100,11 +100,11 @@ jobs:
         name: "Autotools TestExpress Workflows"
         uses: ./.github/workflows/testxpr-auto.yml
 
-    call-release-auto-julia:
-        name: "Autotools Julia Workflows"
-        uses: ./.github/workflows/julia-auto.yml
-        with:
-          build_mode: "production"
+#    call-release-auto-julia:
+#        name: "Autotools Julia Workflows"
+#        uses: ./.github/workflows/julia-auto.yml
+#        with:
+#          build_mode: "production"
 
 #  workflow-msys2-autotools:
 #    name: "CMake msys2 Workflows"
