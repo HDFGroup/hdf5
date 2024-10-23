@@ -198,6 +198,11 @@ Bug Fixes since HDF5-1.16.0 release
 ===================================
     Library
     -------
+    - Fixed a bug in the H5Oexists and H5Oexists_by_name API routines that
+      would cause those routines to return FAIL instead of FALSE when checking
+      the existence of a non-existent object with a file ID instead of a
+      group ID.
+
     - Only clear FE_INVALID when that symbol is present on the system
 
       When we initialize the floating-point types at library startup, it's

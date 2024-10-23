@@ -890,6 +890,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *vir
 
     if (src_file) {
         H5G_loc_t src_root_loc; /* Object location of source file root group */
+        bool      exists = false;
 
         /* Set up the root group in the destination file */
         if (NULL == (src_root_loc.oloc = H5G_oloc(H5G_rootof(src_file))))
@@ -897,18 +898,18 @@ H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *vir
         if (NULL == (src_root_loc.path = H5G_nameof(H5G_rootof(src_file))))
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to get path for root group");
 
-        /* Try opening the source dataset */
-        source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name,
-                                           vdset->shared->layout.storage.u.virt.source_dapl);
+        /* Check if the source dataset exists */
+        if (H5G_loc_exists(&src_root_loc, source_dset->dset_name, &exists /*out*/) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFIND, FAIL, "can't check object's existence");
 
-        /* Dataset does not exist */
-        if (NULL == source_dset->dset) {
-            /* Reset the error stack */
-            H5E_clear_stack();
+        /* Dataset exists */
+        if (exists) {
+            /* Try opening the source dataset */
+            if (NULL ==
+                (source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name,
+                                                    vdset->shared->layout.storage.u.virt.source_dapl)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset");
 
-            source_dset->dset_exists = false;
-        } /* end if */
-        else {
             /* Dataset exists */
             source_dset->dset_exists = true;
 
@@ -919,7 +920,10 @@ H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *vir
                 virtual_ent->source_space_status = H5O_VIRTUAL_STATUS_CORRECT;
             } /* end if */
         }     /* end else */
-    }         /* end if */
+        else
+            /* Dataset does not exist */
+            source_dset->dset_exists = false;
+    } /* end if */
 
 done:
     /* Release resources */

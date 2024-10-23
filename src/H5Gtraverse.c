@@ -180,7 +180,11 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
     if ((cur_grp = H5VL_wrap_register(H5I_GROUP, grp, false)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL, "unable to register group");
 
-        /* User-defined callback function */
+    /* Pause recording errors, if we are just checking for object's existence */
+    if (target & H5G_TARGET_EXISTS)
+        H5E_pause_stack();
+
+        /* Invoke user-defined callback function */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     /* (Backwardly compatible with v0 H5L_class_t traversal callback) */
     if (link_class->version == H5L_LINK_CLASS_T_VERS_0)
@@ -194,13 +198,14 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
                                         H5CX_get_dxpl());
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
+    /* Resume recording errors, if we were just checking for object's existence */
+    if (target & H5G_TARGET_EXISTS)
+        H5E_resume_stack();
+
     /* Check for failing to locate the object */
     if (cb_return < 0) {
         /* Check if we just needed to know if the object exists */
         if (target & H5G_TARGET_EXISTS) {
-            /* Clear any errors from the stack */
-            H5E_clear_stack();
-
             /* Indicate that the object doesn't exist */
             *obj_exists = false;
 
