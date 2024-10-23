@@ -1732,7 +1732,9 @@ H5T__conv_float__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, c
 {
     /* Suppress warning about non-standard floating-point literal suffix */
     H5_GCC_CLANG_DIAG_OFF("pedantic")
+    H5_GCC_DIAG_OFF("c11-c23-compat")
     H5T_CONV_Ff(FLOAT, FLOAT16, float, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_DIAG_ON("c11-c23-compat")
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
 #endif
@@ -1991,7 +1993,9 @@ H5T__conv_double__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata,
 {
     /* Suppress warning about non-standard floating-point literal suffix */
     H5_GCC_CLANG_DIAG_OFF("pedantic")
+    H5_GCC_DIAG_OFF("c11-c23-compat")
     H5T_CONV_Ff(DOUBLE, FLOAT16, double, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_DIAG_ON("c11-c23-compat")
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
 #endif
@@ -2255,7 +2259,9 @@ H5T__conv_ldouble__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata,
 {
     /* Suppress warning about non-standard floating-point literal suffix */
     H5_GCC_CLANG_DIAG_OFF("pedantic")
+    H5_GCC_DIAG_OFF("c11-c23-compat")
     H5T_CONV_Ff(LDOUBLE, FLOAT16, long double, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_DIAG_ON("c11-c23-compat")
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
 #endif

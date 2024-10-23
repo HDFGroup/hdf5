@@ -27,7 +27,7 @@ jobs:
   # Linux (Ubuntu) w/ gcc + coverage
   #
     name: "Ubuntu GCC Coverage"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - name: Install CMake Dependencies (Linux_coverage)
       run: |
@@ -122,7 +122,7 @@ jobs:
   # Linux (Ubuntu) w/ clang + LeakSanitizer
   #
     name: "Ubuntu Clang LeakSanitizer"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Install CMake Dependencies (Linux_Leak)
         run: |
@@ -222,7 +222,7 @@ jobs:
   # Linux (Ubuntu) w/ clang + AddressSanitizer
   #
     name: "Ubuntu Clang AddressSanitizer"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Install CMake Dependencies (Linux_Address)
         run: |
@@ -322,7 +322,7 @@ jobs:
   # Linux (Ubuntu) w/ clang + UndefinedBehaviorSanitizer
   #
     name: "Ubuntu Clang UndefinedBehaviorSanitizer"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Install CMake Dependencies (Linux_UndefinedBehavior)
         run: |

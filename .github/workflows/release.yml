@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   log-the-inputs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       rel_tag: ${{ steps.get-tag-name.outputs.RELEASE_TAG }}
     steps:

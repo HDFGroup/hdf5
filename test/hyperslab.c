@@ -985,7 +985,7 @@ test_array_fill(size_t lo, size_t hi)
     TESTING(s);
 
     /* Initialize */
-    if (NULL == (dst = (int *)calloc(sizeof(int), ARRAY_FILL_SIZE * hi)))
+    if (NULL == (dst = (int *)calloc((ARRAY_FILL_SIZE * hi), sizeof(int))))
         TEST_ERROR;
 
     /* Setup */
