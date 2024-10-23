@@ -2842,8 +2842,8 @@ allocated if necessary.
  * Software distribution: Starting with Release 1.6.0, HDF5 has been distributed with Szip enabled,
  * making it easier to use Szip compression. The software is distributed as follows:
  * - Pre-compiled HDF5 binaries are provided with the Szip encoder enabled.
- * - Szip source code can be obtained at: <a href="https://github.com/MathisRosenhauer/libaec.git">LIBAEC
-(SZIP) repository</a>
+ * - Szip source code can be obtained at:
+ *  <a href="https://github.com/MathisRosenhauer/libaec.git">LIBAEC(SZIP) repository</a>
  *
  * \subsubsection subsubsec_dataset_filters_dyn Using Dynamically-Loadable Filters
  * see \ref sec_filter_plugins for further information regarding the dynamically-loadable filters.
