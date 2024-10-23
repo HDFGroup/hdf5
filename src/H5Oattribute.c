@@ -201,7 +201,7 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
     htri_t      shared_mesg;         /* Should this message be stored in the Shared Message table? */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     assert(loc);
