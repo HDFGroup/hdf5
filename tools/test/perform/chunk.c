@@ -24,8 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Solaris Studio defines attribute, but for the attributes we need */
-#if !defined(H5_HAVE_ATTRIBUTE) || defined __cplusplus || defined(__SUNPRO_C)
+#if !defined(H5_HAVE_ATTRIBUTE) || defined __cplusplus
 #undef __attribute__
 #define __attribute__(X) /*void*/
 #define H5_ATTR_UNUSED   /*void*/
