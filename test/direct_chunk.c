@@ -12,11 +12,13 @@
 
 #include "h5test.h"
 
+#ifdef H5_HAVE_FILTER_DEFLATE
 #if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER)
 #define H5_ZLIB_HEADER "zlib.h"
 #endif
 #if defined(H5_ZLIB_HEADER)
 #include H5_ZLIB_HEADER /* "zlib.h" */
+#endif
 #endif
 
 #define FILE_NAME "direct_chunk.h5"
@@ -205,7 +207,11 @@ test_direct_chunk_write(hid_t file)
     z_dst  = (Bytef *)outbuf;
 
     /* Perform compression from the source to the destination buffer */
+#if defined(H5_HAVE_ZLIBNG_H)
+    ret = zng_compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+#else
     ret = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+#endif
 
     /* Check for various zlib errors */
     if (Z_BUF_ERROR == ret) {
@@ -284,7 +290,11 @@ test_direct_chunk_write(hid_t file)
     z_dst  = (Bytef *)outbuf;
 
     /* Perform compression from the source to the destination buffer */
+#if defined(H5_HAVE_ZLIBNG_H)
+    ret = zng_compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+#else
     ret = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+#endif
 
     /* Check for various zlib errors */
     if (Z_BUF_ERROR == ret) {
@@ -1522,8 +1532,12 @@ test_direct_chunk_read_no_cache(hid_t file)
             if (filter_mask != 0)
                 goto error;
 
-            /* Perform decompression from the source to the destination buffer */
+                /* Perform decompression from the source to the destination buffer */
+#if defined(H5_HAVE_ZLIBNG_H)
+            ret = zng_uncompress(z_dst, &z_dst_nbytes, z_src, z_src_nbytes);
+#else
             ret = uncompress(z_dst, &z_dst_nbytes, z_src, z_src_nbytes);
+#endif
 
             /* Check for various zlib errors */
             if (Z_BUF_ERROR == ret) {
@@ -1713,8 +1727,12 @@ test_direct_chunk_read_cache(hid_t file, bool flush)
             if (filter_mask != 0)
                 goto error;
 
-            /* Perform decompression from the source to the destination buffer */
+                /* Perform decompression from the source to the destination buffer */
+#if defined(H5_HAVE_ZLIBNG_H)
+            ret = zng_uncompress(z_dst, &z_dst_nbytes, z_src, z_src_nbytes);
+#else
             ret = uncompress(z_dst, &z_dst_nbytes, z_src, z_src_nbytes);
+#endif
 
             /* Check for various zlib errors */
             if (Z_BUF_ERROR == ret) {

@@ -366,6 +366,9 @@
 /* Define to 1 if you have the <zlib.h> header file. */
 #cmakedefine H5_HAVE_ZLIB_H @H5_HAVE_ZLIB_H@
 
+/* Define to 1 if you have the <zlib.h> header file. */
+#cmakedefine H5_HAVE_ZLIBNG_H @H5_HAVE_ZLIBNG_H@
+
 /* Define to 1 if you have the `_getvideoconfig' function. */
 #cmakedefine H5_HAVE__GETVIDEOCONFIG @H5_HAVE__GETVIDEOCONFIG@
 
