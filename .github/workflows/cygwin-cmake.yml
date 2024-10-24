@@ -68,6 +68,7 @@ jobs:
 
       - name: Uncompress source (Cygwin)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+        shell: C:\cygwin\bin\bash.exe -eo pipefail -o igncr '{0}'
 
       - name: Copy script files for the space (Cygwin)
         run: |
