@@ -22,8 +22,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5Eprivate.h"
-#include "H5Tconv.h"
+#include "H5private.h"  /* Generic Functions                    */
+#include "H5Eprivate.h" /* Error handling                       */
+#include "H5Tconv.h"    /* Datatype conversions                 */
 #include "H5Tconv_string.h"
 
 /*-------------------------------------------------------------------------
