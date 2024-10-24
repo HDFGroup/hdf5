@@ -60,6 +60,7 @@ typedef struct H5B_t {
 typedef struct H5B_cache_ud_t {
     H5F_t                    *f;         /* File that B-tree node is within */
     const struct H5B_class_t *type;      /* Type of tree */
+    unsigned                  exp_level; /* Expected level of the current node */
     H5UC_t                   *rc_shared; /* Ref-counted shared info */
 } H5B_cache_ud_t;
 
