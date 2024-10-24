@@ -59,6 +59,15 @@ jobs:
       use_tag: snapshot
       use_environ: snapshots
 
+  call-release-cmake-cygwin:
+    needs: [get-old-names, call-workflow-tarball]
+    name: "CMake Cygwin Workflows"
+    uses: ./.github/workflows/cygwin-cmake.yml
+    with:
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      use_environ: snapshots
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
+
   call-workflow-c-script:
     needs: [get-old-names, call-workflow-tarball]
     uses: ./.github/workflows/cmake-script.yml
