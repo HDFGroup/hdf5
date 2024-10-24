@@ -293,20 +293,20 @@ jobs:
         run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
 
-  build_v1_16:
-    name: "gcc DBG v1.16 default API"
+  build_v2_0:
+    name: "gcc DBG v2.0.0 default API"
     runs-on: ubuntu-latest
     steps:
       # SETUP
       - name: Install Linux Dependencies
         run: |
-           sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
-           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           echo "CC=gcc-12" >> $GITHUB_ENV
-           echo "CXX=g++-12" >> $GITHUB_ENV
-           echo "FC=gfortran-12" >> $GITHUB_ENV
+          sudo apt-get update
+          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+          sudo apt install gcc-12 g++-12 gfortran-12
+          echo "CC=gcc-12" >> $GITHUB_ENV
+          echo "CXX=g++-12" >> $GITHUB_ENV
+          echo "FC=gfortran-12" >> $GITHUB_ENV
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
@@ -333,7 +333,7 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
-            -DHDF5_DEFAULT_API_VERSION:STRING=v116 \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v200 \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -354,13 +354,13 @@ jobs:
       # SETUP
       - name: Install Linux Dependencies
         run: |
-           sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
-           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           echo "CC=gcc-12" >> $GITHUB_ENV
-           echo "CXX=g++-12" >> $GITHUB_ENV
-           echo "FC=gfortran-12" >> $GITHUB_ENV
+          sudo apt-get update
+          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+          sudo apt install gcc-12 g++-12 gfortran-12
+          echo "CC=gcc-12" >> $GITHUB_ENV
+          echo "CXX=g++-12" >> $GITHUB_ENV
+          echo "FC=gfortran-12" >> $GITHUB_ENV
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
