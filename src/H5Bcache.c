@@ -173,8 +173,7 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, bool H5_ATT
     /* Check in case of level is corrupted, if expected level is known */
     if (udata->exp_level != H5B_UNKNOWN_NODELEVEL)
         if (bt->level != udata->exp_level)
-            HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL,
-                    "level is not as expected, possibly corrupted");
+            HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "level is not as expected, possibly corrupted");
 
     /* Entries used */
     if (H5_IS_BUFFER_OVERFLOW(image, 2, p_end))

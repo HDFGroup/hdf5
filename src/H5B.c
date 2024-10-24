@@ -1049,7 +1049,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B__iterate_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr, unsigned exp_level, H5B_operator_t op, void *udata)
+H5B__iterate_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr, unsigned exp_level, H5B_operator_t op,
+                    void *udata)
 {
     H5B_t         *bt = NULL;                /* Pointer to current B-tree node */
     H5UC_t        *rc_shared;                /* Ref-counted shared info */
@@ -1086,7 +1087,7 @@ H5B__iterate_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr, unsigned ex
     /* Iterate over node's children */
     for (u = 0; u < bt->nchildren && ret_value == H5_ITER_CONT; u++) {
         if (bt->level > 0)
-            ret_value = H5B__iterate_helper(f, type, bt->child[u], bt->level-1, op, udata);
+            ret_value = H5B__iterate_helper(f, type, bt->child[u], bt->level - 1, op, udata);
         else
             ret_value = (*op)(f, H5B_NKEY(bt, shared, u), bt->child[u], H5B_NKEY(bt, shared, u + 1), udata);
         if (ret_value < 0)
