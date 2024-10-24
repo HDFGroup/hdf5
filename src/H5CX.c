@@ -532,8 +532,9 @@ herr_t
 H5CX_push(H5CX_node_t *cnode)
 {
     H5CX_node_t **head = NULL; /* Pointer to head of API context list */
+    herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     assert(cnode);
@@ -559,7 +560,8 @@ H5CX_push(H5CX_node_t *cnode)
     cnode->next = *head;
     *head       = cnode;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_push() */
 
 /*-------------------------------------------------------------------------
