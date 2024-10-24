@@ -140,7 +140,7 @@ else ()
   set(C_INCLUDE_QUADMATH_H 0)
 endif ()
 
-if (CYGWIN)
+if (MINGW OR CYGWIN)
   set (CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_GNU_SOURCE")
   add_definitions ("-D_GNU_SOURCE")
 endif ()
