@@ -21,16 +21,11 @@
 /* H5 Headers */
 /**************/
 
-#include "H5private.h"     /* Generic Functions                        */
-#include "H5CXprivate.h"   /* API Contexts                             */
-#include "H5Dprivate.h"    /* Datasets                                 */
-#include "H5Eprivate.h"    /* Error handling                           */
+/* Public header */
 #include "H5FDsubfiling.h" /* Subfiling VFD                            */
-#include "H5FDioc.h"       /* IOC VFD                                  */
-#include "H5Iprivate.h"    /* IDs                                      */
-#include "H5MMprivate.h"   /* Memory management                        */
-#include "H5Pprivate.h"    /* Property lists                           */
 
+/* Private headers */
+#include "H5private.h" /* Generic Functions                        */
 #include "H5subfiling_common.h"
 
 #define DRIVER_INFO_MESSAGE_MAX_INFO   65536

@@ -47,6 +47,18 @@ New Features
 
     Configuration:
     -------------
+    - Added a configuration option for internal threading/concurrency support:
+
+          CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)
+          Autotools:  --enable-threads    (yes/no) (Default: yes)
+
+      This option enables support for threading and concurrency algorithms
+      within the HDF5 library.  It is required for, but separate from, the
+      'threadsafe' configure option, which makes the HDF5 API safe to call from
+      multiple threads.  It is possible to enable the 'threads' option and
+      disable the 'threadsafe' option, but not vice versa.  The 'threads' option
+      must be on to enable the subfiling VFD.
+
     - Added support for native zlib-ng compression.
 
       Changed the zlib-ng CMake logic to prefer the native zlib-ng library. Added
@@ -54,7 +66,7 @@ New Features
       header file with the same #ifdef.
 
     - Renamed remaining HDF5 library CMake options except for CMake BUILD* variables
-    
+
       DEFAULT_API_VERSION to HDF5_DEFAULT_API_VERSION
       DISABLE_PDB_FILES to HDF5_DISABLE_PDB_FILES
       ONLY_SHARED_LIBS to HDF5_ONLY_SHARED_LIBS
@@ -62,6 +74,7 @@ New Features
       TEST_SHELL_SCRIPTS to HDF5_TEST_SHELL_SCRIPTS
 
       All other HDF5 library CMake options are prefixed with HDF5_
+
     - bin/cmakehdf5 has been removed
 
       This was an unsupported build script that made building HDF5 via CMake
@@ -104,21 +117,14 @@ New Features
       We have updated the build files to set the C standard to C11, though
       some platforms use gnu11 to get some GNU things to work.
 
-    - Added configuration option for internal threading/concurrency support:
-
-          CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)
-          Autotools:  --enable-threads    (yes/no) (Default: yes)
-
-      This option enables support for threading and concurrency algorithms
-      within the HDF5 library.  It is required for, but separate from, the
-      'threadsafe' configure option, which makes the HDF5 API safe to call from
-      multiple threads.  It is possible to enable the 'threads' option and
-      disable the 'threadsafe' option, but not vice versa.  The 'threads' option
-      must be on to enable the subfiling VFD.
 
 
     Library:
     --------
+    - Removed H5FDperform_init API routine.  Virtual File Driver (VFD)
+      developers who wish to provide an ID for their driver should create
+      a routine specific to their individual implementation.
+
     - H5Pset_external() now uses HDoff_t, which is always a 64-bit type
 
       The H5Pset_external() call took an off_t parameter in HDF5 1.14.x and

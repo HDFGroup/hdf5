@@ -109,6 +109,7 @@ struct H5S_t;
 struct H5F_t;
 union H5PL_key_t;
 
+H5_DLL herr_t        H5FD_init(void);
 H5_DLL int           H5FD_term_interface(void);
 H5_DLL herr_t        H5FD_locate_signature(H5FD_t *file, haddr_t *sig_addr);
 H5_DLL H5FD_class_t *H5FD_get_class(hid_t id);
@@ -197,7 +198,6 @@ H5_DLL herr_t H5FD_sort_selection_io_req(bool *selection_was_sorted, size_t coun
                                          H5_flexible_const_ptr_t bufs[], hid_t **s_mem_space_ids,
                                          hid_t **s_file_space_ids, haddr_t **s_offsets_ptr,
                                          size_t **s_element_sizes_ptr, H5_flexible_const_ptr_t **s_bufs_ptr);
-H5_DLL herr_t H5FD_init(void);
 
 /* Function prototypes for MPI based VFDs*/
 #ifdef H5_HAVE_PARALLEL

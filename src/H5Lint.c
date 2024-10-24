@@ -174,6 +174,9 @@ static herr_t H5L__get_name_by_idx_cb(H5G_loc_t *grp_loc /*in*/, const char *nam
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -204,6 +207,27 @@ H5L_init(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_init() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5L__init_package
+ *
+ * Purpose:     Initialize information specific to H5L interface.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5L__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
 
     /* Initialize user-defined link classes */
     if (H5L_register_external() < 0)
@@ -211,12 +235,12 @@ H5L_init(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_init() */
+} /* end H5L_init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5L_term_package
  *
- * Purpose:     Terminate any resources allocated in H5L_init.
+ * Purpose:     Terminate any resources allocated in H5L__init_package.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -229,11 +253,17 @@ H5L_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Free the table of link types */
-    if (H5L_table_g) {
-        H5L_table_g      = (H5L_class_t *)H5MM_xfree(H5L_table_g);
-        H5L_table_used_g = H5L_table_alloc_g = 0;
-        n++;
+    if (H5_PKG_INIT_VAR) {
+        /* Free the table of link types */
+        if (H5L_table_g) {
+            H5L_table_g      = (H5L_class_t *)H5MM_xfree(H5L_table_g);
+            H5L_table_used_g = H5L_table_alloc_g = 0;
+            n++;
+        } /* end if */
+
+        /* Mark the interface as uninitialized */
+        if (0 == n)
+            H5_PKG_INIT_VAR = false;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
