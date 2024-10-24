@@ -38,9 +38,7 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      #
       # CMAKE CONFIGURE
-      #
       - name: CMake Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -61,20 +59,16 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
-            -DDEFAULT_API_VERSION:STRING=v16 \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v16 \
             $GITHUB_WORKSPACE
         shell: bash
 
-      #
       # BUILD
-      #
       - name: CMake Build
         run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
-      #
       # RUN TESTS - disable until some tests are fixed
-      #
 #      - name: CMake Run Tests
 #        run: ctest . --parallel 2 -C Debug -V
 #        working-directory: ${{ runner.workspace }}/build
@@ -98,9 +92,7 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      #
       # CMAKE CONFIGURE
-      #
       - name: CMake Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -121,13 +113,11 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
-            -DDEFAULT_API_VERSION:STRING=v18 \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v18 \
             $GITHUB_WORKSPACE
         shell: bash
 
-      #
       # BUILD
-      #
       - name: CMake Build
         run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
@@ -158,9 +148,7 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      #
       # CMAKE CONFIGURE
-      #
       - name: CMake Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -181,13 +169,11 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
-            -DDEFAULT_API_VERSION:STRING=v110 \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v110 \
             $GITHUB_WORKSPACE
         shell: bash
 
-      #
       # BUILD
-      #
       - name: CMake Build
         run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
@@ -218,9 +204,7 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      #
       # CMAKE CONFIGURE
-      #
       - name: CMake Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -241,20 +225,16 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
-            -DDEFAULT_API_VERSION:STRING=v112 \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v112 \
             $GITHUB_WORKSPACE
         shell: bash
 
-      #
       # BUILD
-      #
       - name: CMake Build
         run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
-      #
       # RUN TESTS
-      #
       - name: CMake Run Tests
         run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
@@ -278,9 +258,7 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      #
       # CMAKE CONFIGURE
-      #
       - name: CMake Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -301,20 +279,16 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
-            -DDEFAULT_API_VERSION:STRING=v114 \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v114 \
             $GITHUB_WORKSPACE
         shell: bash
 
-      #
       # BUILD
-      #
       - name: CMake Build
         run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
-      #
       # RUN TESTS
-      #
       - name: CMake Run Tests
         run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
@@ -326,21 +300,19 @@ jobs:
       # SETUP
       - name: Install Linux Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
-          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-          sudo apt install gcc-12 g++-12 gfortran-12
-          echo "CC=gcc-12" >> $GITHUB_ENV
-          echo "CXX=g++-12" >> $GITHUB_ENV
-          echo "FC=gfortran-12" >> $GITHUB_ENV
+           sudo apt-get update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      #
       # CMAKE CONFIGURE
-      #
       - name: CMake Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -361,20 +333,16 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
-            -DDEFAULT_API_VERSION:STRING=v116 \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v116 \
             $GITHUB_WORKSPACE
         shell: bash
 
-      #
       # BUILD
-      #
       - name: CMake Build
         run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
-      #
       # RUN TESTS
-      #
       - name: CMake Run Tests
         run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
@@ -386,21 +354,19 @@ jobs:
       # SETUP
       - name: Install Linux Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
-          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-          sudo apt install gcc-12 g++-12 gfortran-12
-          echo "CC=gcc-12" >> $GITHUB_ENV
-          echo "CXX=g++-12" >> $GITHUB_ENV
-          echo "FC=gfortran-12" >> $GITHUB_ENV
+           sudo apt-get update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      #
       # CMAKE CONFIGURE
-      #
       - name: CMake Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -425,16 +391,110 @@ jobs:
             $GITHUB_WORKSPACE
         shell: bash
 
-      #
       # BUILD
-      #
       - name: CMake Build
         run: cmake --build . --parallel 3 --config Release
         working-directory: ${{ runner.workspace }}/build
 
-      #
       # RUN TESTS
-      #
       - name: CMake Run Tests
         run: ctest . --parallel 2 -C Release -V
+        working-directory: ${{ runner.workspace }}/build
+
+  build_debug_werror:
+    name: "gcc DBG -Werror (build only)"
+    runs-on: ubuntu-latest
+    steps:
+      # SETUP
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt-get update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4.1.7
+
+      # CMAKE CONFIGURE
+      - name: CMake Configure
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -G Ninja \
+            --log-level=VERBOSE \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_WARNINGS_AS_ERRORS=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+            -DHDF5_BUILD_CPP_LIB:BOOL=ON \
+            -DHDF5_BUILD_FORTRAN=OFF \
+            -DHDF5_BUILD_JAVA=ON \
+            -DHDF5_BUILD_DOC=OFF \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
+            $GITHUB_WORKSPACE
+        shell: bash
+
+      # BUILD
+      - name: CMake Build
+        run: cmake --build . --parallel 3 --config Release
+        working-directory: ${{ runner.workspace }}/build
+
+  build_release_werror:
+    name: "gcc REL -Werror (build only)"
+    runs-on: ubuntu-latest
+    steps:
+      # SETUP
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt-get update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4.1.7
+
+      # CMAKE CONFIGURE
+      - name: CMake Configure
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -G Ninja \
+            --log-level=VERBOSE \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_WARNINGS_AS_ERRORS=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+            -DHDF5_BUILD_CPP_LIB:BOOL=ON \
+            -DHDF5_BUILD_FORTRAN=ON \
+            -DHDF5_BUILD_JAVA=ON \
+            -DHDF5_BUILD_DOC=OFF \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
+            $GITHUB_WORKSPACE
+        shell: bash
+
+      # BUILD
+      - name: CMake Build
+        run: cmake --build . --parallel 3 --config Release
         working-directory: ${{ runner.workspace }}/build

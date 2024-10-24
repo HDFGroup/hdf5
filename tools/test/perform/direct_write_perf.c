@@ -18,7 +18,12 @@
 #include "hdf5.h"
 
 #ifdef H5_HAVE_FILTER_DEFLATE
-#include <zlib.h>
+#if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER)
+#define H5_ZLIB_HEADER "zlib.h"
+#endif
+#if defined(H5_ZLIB_HEADER)
+#include H5_ZLIB_HEADER /* "zlib.h" */
+#endif
 
 #if !defined(WIN32) && !defined(__MINGW32__)
 
@@ -242,7 +247,11 @@ create_file(hid_t fapl_id)
         z_dst     = (Bytef *)outbuf[i];
 
         /* Perform compression from the source to the destination buffer */
+#if defined(H5_HAVE_ZLIBNG_H)
+        ret = zng_compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+#else
         ret = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+#endif
 
         data_size[i] = (size_t)z_dst_nbytes;
         total_size += data_size[i];

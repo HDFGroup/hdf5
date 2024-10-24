@@ -47,6 +47,27 @@ New Features
 
     Configuration:
     -------------
+    - Added support for native zlib-ng compression.
+
+      Changed the zlib-ng CMake logic to prefer the native zlib-ng library. Added
+      #ifdef around the compression function calls. Added including the correct
+      header file with the same #ifdef.
+
+    - Renamed remaining HDF5 library CMake options except for CMake BUILD* variables
+    
+      DEFAULT_API_VERSION to HDF5_DEFAULT_API_VERSION
+      DISABLE_PDB_FILES to HDF5_DISABLE_PDB_FILES
+      ONLY_SHARED_LIBS to HDF5_ONLY_SHARED_LIBS
+      ALLOW_UNSUPPORTED to HDF5_ALLOW_UNSUPPORTED
+      TEST_SHELL_SCRIPTS to HDF5_TEST_SHELL_SCRIPTS
+
+      All other HDF5 library CMake options are prefixed with HDF5_
+    - bin/cmakehdf5 has been removed
+
+      This was an unsupported build script that made building HDF5 via CMake
+      work like building HDF5 via the Autotools. It has been unmaintained
+      for a long time, has been marked deprecated, and is being removed.
+
     - Generated files in src are now checked into version control
 
       These files are infrequently updated and generating them adds a
@@ -183,6 +204,11 @@ Bug Fixes since HDF5-1.16.0 release
 ===================================
     Library
     -------
+    - Fixed a bug in the H5Oexists and H5Oexists_by_name API routines that
+      would cause those routines to return FAIL instead of FALSE when checking
+      the existence of a non-existent object with a file ID instead of a
+      group ID.
+
     - Only clear FE_INVALID when that symbol is present on the system
 
       When we initialize the floating-point types at library startup, it's

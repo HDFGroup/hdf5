@@ -650,12 +650,12 @@ main(int argc, char *argv[])
     unsigned i;
     int      ret;
 
-    h5_test_init();
-
     /* Initialize MPI */
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    h5_test_init();
 
     /* Generate random number seed, if rank 0 */
     if (MAINPROCESS)
