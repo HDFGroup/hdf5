@@ -121,6 +121,10 @@ New Features
 
     Library:
     --------
+    - The H5VLstart_lib_state / H5VLfinish_lib_state API routines for pass-
+      through connector authors now require a parameter that can be used to
+      store the library's context.
+
     - Removed H5FDperform_init API routine.  Virtual File Driver (VFD)
       developers who wish to provide an ID for their driver should create
       a routine specific to their individual implementation.

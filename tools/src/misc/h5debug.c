@@ -233,7 +233,8 @@ main(int argc, char *argv[])
     size_t         u;
     H5E_auto2_t    func           = NULL;
     void          *edata          = NULL;
-    bool           api_ctx_pushed = false; /* Whether API context pushed */
+    H5CX_node_t    api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool           api_ctx_pushed = false;       /* Whether API context pushed */
     herr_t         status         = SUCCEED;
     int            exit_value     = 0;
 
@@ -275,7 +276,7 @@ main(int argc, char *argv[])
     } /* end if */
 
     /* Push API context */
-    if (H5CX_push() < 0) {
+    if (H5CX_push(&api_ctx) < 0) {
         fprintf(stderr, "cannot set API context\n");
         exit_value = 1;
         goto done;

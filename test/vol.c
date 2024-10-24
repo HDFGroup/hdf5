@@ -1681,7 +1681,8 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
     int                  fake_obj, fake_arg;
     int                  op_val = -1, op_val2 = -1;
     int                  find_op_val;
-    herr_t               ret = SUCCEED;
+    H5CX_node_t          api_ctx = {{0}, NULL}; /* API context node to push */
+    herr_t               ret     = SUCCEED;
 
     /* Test registering optional operation */
     snprintf(op_name, sizeof(op_name), "%s-op1", subcls_name);
@@ -1724,7 +1725,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
     /* Push a new API context on the stack */
     /* (Necessary for the named datatype construction routines) */
     if (H5VL_SUBCLS_DATATYPE == subcls)
-        H5CX_push();
+        H5CX_push(&api_ctx);
 
     /* Create fake object on fake VOL connector */
     if (H5I_INVALID_HID == (obj_id = H5VL__register_using_vol_id_test(id_type, &fake_obj, fake_vol_id)))
@@ -1779,8 +1780,9 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 
     /* Push a new API context on the stack */
     /* (Necessary for the named datatype construction routines) */
+    memset(&api_ctx, 0, sizeof(api_ctx));
     if (H5VL_SUBCLS_DATATYPE == subcls)
-        H5CX_push();
+        H5CX_push(&api_ctx);
 
     /* Create fake object on reg_opt VOL connector */
     if (H5I_INVALID_HID == (obj_id = H5VL__register_using_vol_id_test(id_type, &fake_obj, reg_opt_vol_id)))

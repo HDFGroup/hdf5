@@ -134,9 +134,9 @@ H5_DLL void              H5VL_obj_reset_data(H5VL_object_t *vol_obj);
 
 /* Library state functions */
 H5_DLL herr_t H5VL_retrieve_lib_state(void **state);
-H5_DLL herr_t H5VL_start_lib_state(void);
+H5_DLL herr_t H5VL_start_lib_state(void **context);
 H5_DLL herr_t H5VL_restore_lib_state(const void *state);
-H5_DLL herr_t H5VL_finish_lib_state(void);
+H5_DLL herr_t H5VL_finish_lib_state(void *context);
 H5_DLL herr_t H5VL_free_lib_state(void *state);
 
 /* ID registration functions */
