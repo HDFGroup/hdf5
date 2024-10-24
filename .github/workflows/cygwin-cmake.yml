@@ -52,6 +52,7 @@ jobs:
             SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: C:\cygwin\bin\bash.exe -eo pipefail -o igncr '{0}'
 
       # Get files created by release script
       - name: Get tgz-tarball (Cygwin)
